@@ -104,7 +104,7 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 						myPatchOutputBundles,
 						theStepExecutionDetails.getInstance().getStartTime(),
 						requestDetails,
-						ProvenanceAgentJson.toIProvenanceAgent(params.getProvenanceAgent(), myFhirContext));
+						ProvenanceAgentJson.toIProvenanceAgents(params.getProvenanceAgents(), myFhirContext));
 			}
 
 			ReplaceReferenceResultsJson result = new ReplaceReferenceResultsJson();

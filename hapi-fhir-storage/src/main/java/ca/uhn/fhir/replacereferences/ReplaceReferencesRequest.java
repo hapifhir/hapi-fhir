@@ -23,9 +23,10 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.util.List;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID;
@@ -50,7 +51,7 @@ public class ReplaceReferencesRequest {
 
 	public final boolean createProvenance;
 
-	public final IProvenanceAgent provenanceAgent;
+	public final List<IProvenanceAgent> provenanceAgents;
 
 	public ReplaceReferencesRequest(
 			@Nonnull IIdType theSourceId,
@@ -58,13 +59,13 @@ public class ReplaceReferencesRequest {
 			int theResourceLimit,
 			RequestPartitionId thePartitionId,
 			boolean theCreateProvenance,
-			@Nullable IProvenanceAgent theProvenanceAgent) {
+			List<IProvenanceAgent> theProvenanceAgents) {
 		sourceId = theSourceId.toUnqualifiedVersionless();
 		targetId = theTargetId.toUnqualifiedVersionless();
 		resourceLimit = theResourceLimit;
 		partitionId = thePartitionId;
 		createProvenance = theCreateProvenance;
-		provenanceAgent = theProvenanceAgent;
+		provenanceAgents = theProvenanceAgents;
 	}
 
 	public void validateOrThrowInvalidParameterException() {

@@ -27,6 +27,9 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nullable;
+
+import java.util.List;
 
 public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId {
 
@@ -49,16 +52,23 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 	private boolean myCreateProvenance;
 
 	/**
-	 * The current version of the source resource, this is used when creating the Provenance resource once the references are replaced.
+	 * The current version of the source resource (before the operation),
+	 * this is used when creating the Provenance resource once the references are replaced.
+	 * This is only used for replace-references operation, not populated for $merge operation.
 	 */
 	@JsonProperty("currentSourceVersion")
 	private String myCurrentSourceVersion;
 
+	/**
+	 * The current version of the source resource (before the operation),
+	 * this is used when creating the Provenance resource once the references are replaced.
+	 * This is only used for replace-references operation, not populated for $merge operation.
+	 */
 	@JsonProperty("currentTargetVersion")
 	private String myCurrentTargetVersion;
 
-	@JsonProperty("provenanceAgent")
-	private ProvenanceAgentJson myProvenanceAgent;
+	@JsonProperty("provenanceAgents")
+	private List<ProvenanceAgentJson> myProvenanceAgents;
 
 	public ReplaceReferencesJobParameters() {}
 
@@ -67,7 +77,7 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 			int theBatchSize,
 			String theCurrentSourceVersion,
 			String theCurrentTargetVersion,
-			ProvenanceAgentJson theProvenanceAgent) {
+			@Nullable List<ProvenanceAgentJson> theProvenanceAgents) {
 
 		mySourceId = new FhirIdJson(theReplaceReferencesRequest.sourceId);
 		myTargetId = new FhirIdJson(theReplaceReferencesRequest.targetId);
@@ -78,7 +88,7 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 		myCreateProvenance = theReplaceReferencesRequest.createProvenance;
 		myCurrentSourceVersion = theCurrentSourceVersion;
 		myCurrentTargetVersion = theCurrentTargetVersion;
-		myProvenanceAgent = theProvenanceAgent;
+		myProvenanceAgents = theProvenanceAgents;
 	}
 
 	public FhirIdJson getSourceId() {
@@ -123,7 +133,7 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 				myBatchSize,
 				myPartitionId,
 				myCreateProvenance,
-				ProvenanceAgentJson.toIProvenanceAgent(myProvenanceAgent, theFhirContext));
+				ProvenanceAgentJson.toIProvenanceAgents(myProvenanceAgents, theFhirContext));
 	}
 
 	public String getCurrentSourceVersion() {
@@ -142,11 +152,11 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 		this.myCurrentTargetVersion = theCurrentTargetVersion;
 	}
 
-	public ProvenanceAgentJson getProvenanceAgent() {
-		return myProvenanceAgent;
+	public List<ProvenanceAgentJson> getProvenanceAgents() {
+		return myProvenanceAgents;
 	}
 
-	public void setProvenanceAgent(ProvenanceAgentJson theAgent) {
-		this.myProvenanceAgent = theAgent;
+	public void setProvenanceAgents(List<ProvenanceAgentJson> theAgents) {
+		this.myProvenanceAgents = theAgents;
 	}
 }

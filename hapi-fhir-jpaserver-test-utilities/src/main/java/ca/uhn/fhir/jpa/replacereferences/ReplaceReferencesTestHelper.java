@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
+import ca.uhn.fhir.jpa.interceptor.ex.ProvenanceAgentTestInterceptor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.model.api.ProvenanceAgent;
@@ -36,6 +37,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.JsonUtil;
@@ -139,7 +141,7 @@ public class ReplaceReferencesTestHelper {
 		myJsonParser = myFhirContext.newJsonParser();
 	}
 
-	public void beforeEach() throws Exception {
+	public void beforeEach() {
 
 		Organization org = new Organization();
 		org.setName("an org");
@@ -211,12 +213,17 @@ public class ReplaceReferencesTestHelper {
 		return resultPatient;
 	}
 
+
 	public Patient readSourcePatient() {
-		return myPatientDao.read(mySourcePatientId, mySrd);
+		return readPatient(mySourcePatientId);
 	}
 
 	public Patient readTargetPatient() {
-		return myPatientDao.read(myTargetPatientId, mySrd);
+		return readPatient(myTargetPatientId);
+	}
+
+	public Patient readPatient(IIdType thePatientId) {
+		return myPatientDao.read(thePatientId, mySrd);
 	}
 
 	public IIdType getTargetPatientId() {
@@ -243,7 +250,7 @@ public class ReplaceReferencesTestHelper {
 	public void assertReplaceReferencesProvenance(
 			String theExpectedSourcePatientVersion,
 			String theExpectedTargetPatientVersion,
-			@Nullable IProvenanceAgent theExpectedProvenanceAgent) {
+			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
 		List<IBaseResource> provenances =
 				searchProvenance(myTargetPatientId.toVersionless().getIdPart());
 		assertThat(provenances).hasSize(1);
@@ -269,12 +276,7 @@ public class ReplaceReferencesTestHelper {
 		Set<String> allActualTargets = extractResourceIdsFromProvenanceTarget(provenance.getTarget());
 		assertThat(allActualTargets).containsAll(getExpectedProvenanceTargetsForPatchedResources());
 
-		if (theExpectedProvenanceAgent != null) {
-			assertThat(provenance.getAgent()).hasSize(1);
-			Provenance.ProvenanceAgentComponent actualAgent =
-					provenance.getAgent().get(0);
-			assertEqualAgents(theExpectedProvenanceAgent, actualAgent);
-		}
+		validateAgents(theExpectedProvenanceAgents, provenance);
 
 		Instant now = Instant.now();
 		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
@@ -299,7 +301,7 @@ public class ReplaceReferencesTestHelper {
 		assertThat(activityCoding.getCode()).isEqualTo("link");
 	}
 
-	public void assertMergeProvenance(boolean theDeleteSource, @Nullable ProvenanceAgent theExpectedProvenanceAgent) {
+	public void assertMergeProvenance(boolean theDeleteSource, @Nullable List<IProvenanceAgent> theExpectedProvenanceAgent) {
 		assertMergeProvenance(
 				theDeleteSource,
 				mySourcePatientId.withVersion("2"),
@@ -310,12 +312,12 @@ public class ReplaceReferencesTestHelper {
 	}
 
 	public void assertMergeProvenance(
-			boolean theDeleteSource,
-			IIdType theSourcePatientIdWithExpectedVersion,
-			IIdType theTargetPatientIdWithExpectedVersion,
-			int theExpectedPatches,
-			Set<String> theExpectedProvenanceTargetsForPatchedResources,
-			ProvenanceAgent theExpectedProvenanceAgent) {
+		boolean theDeleteSource,
+		IIdType theSourcePatientIdWithExpectedVersion,
+		IIdType theTargetPatientIdWithExpectedVersion,
+		int theExpectedPatches,
+		Set<String> theExpectedProvenanceTargetsForPatchedResources,
+		@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
 
 		List<IBaseResource> provenances = searchProvenance(
 				theTargetPatientIdWithExpectedVersion.toVersionless().getIdPart());
@@ -340,12 +342,7 @@ public class ReplaceReferencesTestHelper {
 		Set<String> allActualTargets = extractResourceIdsFromProvenanceTarget(provenance.getTarget());
 		assertThat(allActualTargets).containsAll(theExpectedProvenanceTargetsForPatchedResources);
 
-		if (theExpectedProvenanceAgent != null) {
-			assertThat(provenance.getAgent()).hasSize(1);
-			Provenance.ProvenanceAgentComponent actualAgent =
-					provenance.getAgent().get(0);
-			assertEqualAgents(theExpectedProvenanceAgent, actualAgent);
-		}
+		validateAgents(theExpectedProvenanceAgents, provenance);
 
 		Instant now = Instant.now();
 		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
@@ -647,24 +644,33 @@ public class ReplaceReferencesTestHelper {
 		return expectedIdentifiersOnTargetAfterMerge;
 	}
 
-	public void assertSourcePatientUpdatedOrDeleted(boolean withDelete) {
-		if (withDelete) {
-			assertThrows(ResourceGoneException.class, this::readSourcePatient);
+
+	public void assertSourcePatientUpdatedOrDeleted(IIdType theSourcePatientId, IIdType theTargetPatientId, boolean theDeleteSource) {
+		if (theDeleteSource) {
+			assertThrows(ResourceGoneException.class, () -> readPatient(theSourcePatientId.toUnqualifiedVersionless()));
 		} else {
-			Patient source = readSourcePatient();
+			Patient source = readPatient(theSourcePatientId.toUnqualifiedVersionless());
 			assertThat(source.getLink()).hasSize(1);
 			Patient.PatientLinkComponent link = source.getLink().get(0);
-			assertThat(link.getOther().getReferenceElement()).isEqualTo(getTargetPatientId());
+			assertThat(link.getOther().getReferenceElement()).isEqualTo(theTargetPatientId.toUnqualifiedVersionless());
 			assertThat(link.getType()).isEqualTo(Patient.LinkType.REPLACEDBY);
 		}
 	}
 
+	public void assertSourcePatientUpdatedOrDeleted(boolean theDeleteSource) {
+		assertSourcePatientUpdatedOrDeleted(getSourcePatientId(), getTargetPatientId(), theDeleteSource);
+	}
+
 	public void assertTargetPatientUpdated(boolean withDelete, List<Identifier> theExpectedIdentifiers) {
-		Patient target = readTargetPatient();
+		assertTargetPatientUpdated(getTargetPatientId(), getSourcePatientId(), withDelete, theExpectedIdentifiers);
+	}
+
+	public void assertTargetPatientUpdated(IIdType targetPatientId, IIdType sourcePatientId, boolean withDelete, List<Identifier> theExpectedIdentifiers) {
+		Patient target = myPatientDao.read(targetPatientId.toUnqualifiedVersionless(), mySrd);
 		if (!withDelete) {
 			assertThat(target.getLink()).hasSize(1);
 			Patient.PatientLinkComponent link = target.getLink().get(0);
-			assertThat(link.getOther().getReferenceElement()).isEqualTo(getSourcePatientId());
+			assertThat(link.getOther().getReferenceElement()).isEqualTo(sourcePatientId.toUnqualifiedVersionless());
 			assertThat(link.getType()).isEqualTo(Patient.LinkType.REPLACES);
 		}
 		// assertExpected Identifiers found on the target
@@ -678,6 +684,11 @@ public class ReplaceReferencesTestHelper {
 			Identifier actualIdentifier = theActualIdentifiers.get(i);
 			assertThat(expectedIdentifier.equalsDeep(actualIdentifier)).isTrue();
 		}
+	}
+
+	public static void registerProvenanceAgentInterceptor(RestfulServer theServer, List<IProvenanceAgent> theProvenanceAgents) {
+		ProvenanceAgentTestInterceptor agentInterceptor = new ProvenanceAgentTestInterceptor(theProvenanceAgents);
+		theServer.getInterceptorService().registerInterceptor(agentInterceptor);
 	}
 
 	private static Set<String> extractResourceIdsFromProvenanceTarget(List<Reference> theTargets) {
@@ -701,11 +712,23 @@ public class ReplaceReferencesTestHelper {
 		assertThat(myJsonParser.encodeToString(theRef1)).isEqualTo(myJsonParser.encodeToString(theRef2));
 	}
 
-	private void assertEqualAgents(
+	private void validateAgent(
 			IProvenanceAgent theExpectedAgent, Provenance.ProvenanceAgentComponent theActualAgent) {
 		Reference theActualWho = theActualAgent.hasWho() ? theActualAgent.getWho() : null;
 		Reference theActualOnBehalfOf = theActualAgent.hasOnBehalfOf() ? theActualAgent.getOnBehalfOf() : null;
 		assertEqualReferences(theActualWho, theExpectedAgent.getWho());
 		assertEqualReferences(theActualOnBehalfOf, theExpectedAgent.getOnBehalfOf());
+	}
+
+	private void validateAgents(@Nullable List<IProvenanceAgent> theExpectedAgents, Provenance theProvenance) {
+		if (theExpectedAgents == null) {
+			assertThat(theProvenance.hasAgent()).isFalse();
+			return;
+		}
+		var actualAgents = theProvenance.getAgent();
+		assertThat(actualAgents).hasSameSizeAs(theExpectedAgents);
+		for (int i = 0; i < theExpectedAgents.size(); i++) {
+			validateAgent(theExpectedAgents.get(i), actualAgents.get(i));
+		}
 	}
 }

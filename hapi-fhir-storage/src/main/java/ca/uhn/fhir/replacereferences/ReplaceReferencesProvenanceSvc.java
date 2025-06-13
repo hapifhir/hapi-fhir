@@ -71,7 +71,7 @@ public class ReplaceReferencesProvenanceSvc {
 			@Nullable Reference theSourceReference,
 			List<Reference> theUpdatedReferencingResources,
 			Date theStartTime,
-			@Nullable IProvenanceAgent theProvenanceAgent) {
+			List<IProvenanceAgent> theProvenanceAgents) {
 		Provenance provenance = new Provenance();
 
 		Date now = new Date();
@@ -80,10 +80,7 @@ public class ReplaceReferencesProvenanceSvc {
 				.setEnd(now, TemporalPrecisionEnum.MILLI));
 		provenance.setRecorded(now);
 
-		if (theProvenanceAgent != null) {
-			Provenance.ProvenanceAgentComponent agent = createR4ProvenanceAgent(theProvenanceAgent);
-			provenance.addAgent(agent);
-		}
+		addAgents(theProvenanceAgents, provenance);
 
 		CodeableConcept activityCodeableConcept = getActivityCodeableConcept();
 		if (activityCodeableConcept != null) {
@@ -121,7 +118,7 @@ public class ReplaceReferencesProvenanceSvc {
 			List<Bundle> thePatchResultBundles,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
-			@Nullable IProvenanceAgent theProvenanceAgent) {
+			List<IProvenanceAgent> theProvenanceAgents) {
 		Reference targetReference = new Reference(theTargetId);
 		Reference sourceReference = null;
 		if (theSourceId != null) {
@@ -129,7 +126,7 @@ public class ReplaceReferencesProvenanceSvc {
 		}
 		List<Reference> references = extractUpdatedResourceReferences(thePatchResultBundles);
 		Provenance provenance =
-				createProvenanceObject(targetReference, sourceReference, references, theStartTime, theProvenanceAgent);
+				createProvenanceObject(targetReference, sourceReference, references, theStartTime, theProvenanceAgents);
 		myProvenanceDao.create(provenance, theRequestDetails);
 	}
 
@@ -138,9 +135,6 @@ public class ReplaceReferencesProvenanceSvc {
 		thePatchBundles.forEach(outputBundle -> {
 			outputBundle.getEntry().forEach(entry -> {
 				if (entry.getResponse() != null && entry.getResponse().hasLocation()) {
-					// FIXME KHS: should we check here the patch result wasn't a no-op patch, and
-					// not include it if it was a no-op? It could be no-op patch because some other concurrent request
-					// updated the reference to the same reference that replace-references was supposed to update to.
 					Reference reference = new Reference(entry.getResponse().getLocation());
 					patchedResourceReferences.add(reference);
 				}
@@ -156,6 +150,15 @@ public class ReplaceReferencesProvenanceSvc {
 		Reference onBehalfOfRef = convertToR4Reference(theProvenanceAgent.getOnBehalfOf());
 		agent.setOnBehalfOf(onBehalfOfRef);
 		return agent;
+	}
+
+	private void addAgents(List<IProvenanceAgent> theProvenanceAgents, Provenance theProvenance) {
+		if (theProvenanceAgents != null) {
+			for (IProvenanceAgent agent : theProvenanceAgents) {
+				Provenance.ProvenanceAgentComponent r4Agent = createR4ProvenanceAgent(agent);
+				theProvenance.addAgent(r4Agent);
+			}
+		}
 	}
 
 	private Reference convertToR4Reference(IBaseReference sourceRef) {

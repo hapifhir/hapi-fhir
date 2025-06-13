@@ -127,7 +127,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 				myStorageSettings.getDefaultTransactionEntriesForWrite(),
 				theSourceResource.getIdElement().getVersionIdPart(),
 				theTargetResource.getIdElement().getVersionIdPart(),
-				ProvenanceAgentJson.from(theReplaceReferencesRequest.provenanceAgent, myFhirContext));
+				ProvenanceAgentJson.from(theReplaceReferencesRequest.provenanceAgents, myFhirContext));
 
 		Task task = myBatch2TaskHelper.startJobAndCreateAssociatedTask(
 				myDaoRegistry.getResourceDao(Task.class),
@@ -181,7 +181,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 					List.of(result),
 					startTime,
 					theRequestDetails,
-					theReplaceReferencesRequest.provenanceAgent);
+					theReplaceReferencesRequest.provenanceAgents);
 		}
 
 		Parameters retval = new Parameters();

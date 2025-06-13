@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.interceptor.api;
 
-import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -3172,15 +3171,19 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Provenance Agent Hook:</b>
-	 * The return value of this hook is used to populate the agent field for Provenance resources that need to be created
+	 * This pointcut is called to retrieve the data for populating the agent element of a Provenance resource that need to be created
 	 * as a result of a request, such as $merge and $hapi.fhir.replace-references operations.
-	 * Parameters:
+	 * <p> Hooks should accept the following parameter:</p>
 	 * <ul>
-	 *     <li>ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that could create a Provenance resource.</li>
+	 *     <li>ca.uhn.fhir.jpa.model.ProvenanceAgentPointcutParameters - an object containing the parameters for the hook. It contains:</li>
+	 *     <ul>
+	 *         <li>ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed.</li>
+	 *         <li>List of ca.uhn.fhir.model.api.IProvenanceAgent - A list of provenance agents. The interceptor should add the agent information to this list</li>
+	 *     </ul>
 	 * </ul>
-	 * <p> Hooks should return an {@link ca.uhn.fhir.model.api.IProvenanceAgent}.
+	 * Hooks should return <code>void</code>, and use the parameter object to add the agent information.
 	 */
-	PROVENANCE_AGENT(IProvenanceAgent.class, "ca.uhn.fhir.rest.api.server.RequestDetails"),
+	PROVENANCE_AGENTS(void.class, "ca.uhn.fhir.jpa.model.IProvenanceAgentsPointcutParameter"),
 
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or

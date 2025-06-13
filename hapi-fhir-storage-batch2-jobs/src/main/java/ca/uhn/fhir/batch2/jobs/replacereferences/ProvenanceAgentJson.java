@@ -25,8 +25,11 @@ import ca.uhn.fhir.model.api.ProvenanceAgent;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TerserUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseReference;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 public class ProvenanceAgentJson {
 	@JsonProperty("who")
@@ -66,8 +69,18 @@ public class ProvenanceAgentJson {
 		return retVal;
 	}
 
+	public static List<ProvenanceAgentJson> from(
+			@Nullable List<IProvenanceAgent> theProvenanceAgents, FhirContext theFhirContext) {
+		if (theProvenanceAgents == null) {
+			return null;
+		}
+		return theProvenanceAgents.stream()
+				.map(agent -> from(agent, theFhirContext))
+				.collect(Collectors.toList());
+	}
+
 	public static IProvenanceAgent toIProvenanceAgent(
-			@Nullable ProvenanceAgentJson theProvenanceAgentJson, FhirContext theFhirContext) {
+			ProvenanceAgentJson theProvenanceAgentJson, FhirContext theFhirContext) {
 		if (theProvenanceAgentJson == null) {
 			return null;
 		}
@@ -84,5 +97,15 @@ public class ProvenanceAgentJson {
 			provAgent.setOnBehalfOf(onBehalfOf);
 		}
 		return provAgent;
+	}
+
+	public static List<IProvenanceAgent> toIProvenanceAgents(
+			List<ProvenanceAgentJson> theProvenanceAgentJsons, FhirContext theFhirContext) {
+		if (theProvenanceAgentJsons == null) {
+			return null;
+		}
+		return theProvenanceAgentJsons.stream()
+				.map(agentJson -> toIProvenanceAgent(agentJson, theFhirContext))
+				.collect(Collectors.toList());
 	}
 }

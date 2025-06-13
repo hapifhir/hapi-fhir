@@ -1,15 +1,15 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.interceptor.ex.ProvenanceAgentTestInterceptor;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
-import ca.uhn.fhir.model.api.ProvenanceAgent;
+import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -36,10 +36,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
@@ -256,26 +255,22 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 
 
-	private void registerProvenanceAgentInterceptor(ProvenanceAgent theProvenanceAgent) {
-		// this interceptor will be unregistered in @AfterEach of the base class, which unregisters all interceptors
-		ProvenanceAgentTestInterceptor agentInterceptor = new ProvenanceAgentTestInterceptor(theProvenanceAgent);
-		myServer.getRestfulServer().getInterceptorService().registerInterceptor(agentInterceptor);
-	}
-
-	@ParameterizedTest(name = "{index}: isAsync={0}, theAgentInterceptorReturnsNull={1}")
+	@ParameterizedTest(name = "{index}: isAsync={0}, theAgentInterceptorReturnsMultipleAgents={1}")
 	@CsvSource (value = {
 		"false, false",
 		"false, true",
 		"true, false",
 		"true, true",
 	})
-	void testMerge_withProvenanceAgent(boolean theIsAsync, boolean theAgentInterceptorReturnsNull) {
+	void testMerge_withProvenanceAgentInterceptor_Success(boolean theIsAsync, boolean theAgentInterceptorReturnsMultipleAgents) {
 
-		ProvenanceAgent provenanceAgent = null;
-		if (!theAgentInterceptorReturnsNull) {
-			provenanceAgent = myTestHelper.createTestProvenanceAgent();
+		List<IProvenanceAgent> agents = new ArrayList<>();
+		agents.add(myTestHelper.createTestProvenanceAgent());
+		if (theAgentInterceptorReturnsMultipleAgents) {
+			agents.add(myTestHelper.createTestProvenanceAgent());
 		}
-		registerProvenanceAgentInterceptor(provenanceAgent);
+		// this interceptor will be unregistered in @AfterEach of the base class, which unregisters all interceptors
+		ReplaceReferencesTestHelper.registerProvenanceAgentInterceptor(myServer.getRestfulServer(), agents);
 
 		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
 		myTestHelper.setSourceAndTarget(inParams);
@@ -293,9 +288,33 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			validateSyncOutcome(outParams);
 		}
 
-		myTestHelper.assertMergeProvenance(false, provenanceAgent);
-
+		myTestHelper.assertMergeProvenance(false, agents);
 	}
+
+	@ParameterizedTest(name = "{index}: isAsync={0}")
+	@CsvSource (value = {
+		"false",
+		"true"
+	})
+	void testMerge_withProvenanceAgentInterceptor_InterceptorReturnsNoAgent_ReturnsInternalError(boolean theIsAsync) {
+
+		// this interceptor will be unregistered in @AfterEach of the base class, which unregisters all interceptors
+		ReplaceReferencesTestHelper.registerProvenanceAgentInterceptor(myServer.getRestfulServer(), Collections.emptyList());
+
+		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
+		myTestHelper.setSourceAndTarget(inParams);
+
+		Parameters inParameters = inParams.asParametersResource();
+
+		assertThatThrownBy(() -> callMergeOperation(inParameters, theIsAsync)
+		).isInstanceOf(InternalErrorException.class)
+			.hasMessageContaining("HAPI-2723: No Provenance Agent was provided by any interceptor for Pointcut.PROVENANCE_AGENTS")
+			.extracting(InternalErrorException.class::cast)
+			.extracting(BaseServerResponseException::getStatusCode)
+			.isEqualTo(500);
+	}
+
+
 
 	@Test
 	void testMerge_smallResourceLimit() {
@@ -321,7 +340,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	void testMerge_sourceResourceWithoutAnyReference(boolean theDeleteSource, boolean theAsync) {
 
 		Patient sourcePatient = new Patient();
-		sourcePatient = (Patient)myPatientDao.create(sourcePatient, mySrd).getResource();
+		sourcePatient = (Patient) myPatientDao.create(sourcePatient, mySrd).getResource();
 
 		Patient targetPatient = new Patient();
 		targetPatient = (Patient) myPatientDao.create(targetPatient, mySrd).getResource();
@@ -341,10 +360,21 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		IIdType theExpectedTargetIdWithVersion = targetPatient.getIdElement().withVersion("2");
 		if (theDeleteSource) {
-			// when the source resource is being deleted and since there is no identifiers to copy over to the target
-			// in this test, the target is not actually updated, so its version will remain the same
+			// the source resource is being deleted and there is no identifiers to copy over to the target,
+			// so, in this version of the test, the target is not actually updated. Its version will remain the same.
 			theExpectedTargetIdWithVersion = targetPatient.getIdElement().withVersion("1");
 		}
+
+		myTestHelper.assertTargetPatientUpdated(
+			targetPatient.getIdElement(),
+			sourcePatient.getIdElement(),
+			theDeleteSource,
+			Collections.emptyList()
+		);
+
+		myTestHelper.assertSourcePatientUpdatedOrDeleted(sourcePatient.getIdElement(),
+			targetPatient.getIdElement(),
+			theDeleteSource);
 
 		myTestHelper.assertMergeProvenance(theDeleteSource,
 			sourcePatient.getIdElement().withVersion("2"),
@@ -436,7 +466,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	void test_MissingRequiredParameters_Returns400BadRequest() {
-		assertThatThrownBy(() -> callMergeOperation(new Parameters())
+		Parameters params = new Parameters();
+		assertThatThrownBy(() -> callMergeOperation(params)
 		).isInstanceOf(InvalidRequestException.class)
 			.extracting(InvalidRequestException.class::cast)
 			.extracting(BaseServerResponseException::getStatusCode)

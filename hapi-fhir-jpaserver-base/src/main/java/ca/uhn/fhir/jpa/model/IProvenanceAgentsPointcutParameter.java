@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server Test Utilities
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -17,27 +17,21 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.interceptor.ex;
+package ca.uhn.fhir.jpa.model;
 
-import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.model.IProvenanceAgentsPointcutParameter;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 import java.util.List;
 
-/**
- * A test interceptor that allows you return ProvenanceAgents you provide
- */
-public class ProvenanceAgentTestInterceptor {
-	private final List<IProvenanceAgent> myAgents;
+public interface IProvenanceAgentsPointcutParameter {
+	List<IProvenanceAgent> getProvenanceAgents();
 
-	public ProvenanceAgentTestInterceptor(List<IProvenanceAgent> theAgents) {
-		myAgents = theAgents;
-	}
+	IProvenanceAgentsPointcutParameter setProvenanceAgents(List<IProvenanceAgent> theProvenanceAgents);
 
-	@Hook(Pointcut.PROVENANCE_AGENTS)
-	public void getProvenanceAgent(IProvenanceAgentsPointcutParameter params) {
-		myAgents.forEach(params::addProvenanceAgent);
-	}
+	void addProvenanceAgent(IProvenanceAgent theProvenanceAgent);
+
+	RequestDetails getRequestDetails();
+
+	IProvenanceAgentsPointcutParameter setRequestDetails(RequestDetails myRequestDetails);
 }

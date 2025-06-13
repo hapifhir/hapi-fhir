@@ -88,7 +88,7 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 				mergeJobParameters.getDeleteSource(),
 				requestDetails,
 				startTime,
-				ProvenanceAgentJson.toIProvenanceAgent(mergeJobParameters.getProvenanceAgent(), myFhirContext));
+				ProvenanceAgentJson.toIProvenanceAgents(mergeJobParameters.getProvenanceAgents(), myFhirContext));
 
 		// Setting createProvenance to false. Because the provenance resource for merge has been created in the helper
 		// method above. The reason is that the merge operation updates the target and source resources, unlike replace

@@ -46,7 +46,7 @@ public abstract class BaseMergeOperationInputParameters {
 	private boolean myDeleteSource;
 	private IBaseResource myResultResource;
 	private final int myResourceLimit;
-	private IProvenanceAgent myProvenanceAgent;
+	private List<IProvenanceAgent> myProvenanceAgents;
 
 	protected BaseMergeOperationInputParameters(int theResourceLimit) {
 		myResourceLimit = theResourceLimit;
@@ -145,17 +145,15 @@ public abstract class BaseMergeOperationInputParameters {
 		retval.setSourceId(new FhirIdJson(theSourceResource.getIdElement().toVersionless()));
 		retval.setTargetId(new FhirIdJson(theTargetResource.getIdElement().toVersionless()));
 		retval.setPartitionId(thePartitionId);
-		if (myProvenanceAgent != null) {
-			retval.setProvenanceAgent(ProvenanceAgentJson.from(myProvenanceAgent, theFhirContext));
-		}
+		retval.setProvenanceAgents(ProvenanceAgentJson.from(myProvenanceAgents, theFhirContext));
 		return retval;
 	}
 
-	public IProvenanceAgent getProvenanceAgent() {
-		return myProvenanceAgent;
+	public List<IProvenanceAgent> getProvenanceAgents() {
+		return myProvenanceAgents;
 	}
 
-	public void setProvenanceAgent(IProvenanceAgent theProvenanceAgent) {
-		this.myProvenanceAgent = theProvenanceAgent;
+	public void setProvenanceAgents(List<IProvenanceAgent> theProvenanceAgents) {
+		this.myProvenanceAgents = theProvenanceAgents;
 	}
 }

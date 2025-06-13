@@ -2,10 +2,11 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.interceptor.ex.ProvenanceAgentTestInterceptor;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
-import ca.uhn.fhir.model.api.ProvenanceAgent;
+import ca.uhn.fhir.model.api.IProvenanceAgent;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -29,6 +30,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -96,33 +99,52 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 		myTestHelper.assertReplaceReferencesProvenance("2", "1", null);
 	}
 
-	@ParameterizedTest(name = "{index}: isAsync={0}, theAgentInterceptorReturnsNull={1}")
+	@ParameterizedTest(name = "{index}: isAsync={0}, theAgentInterceptorReturnsMultipleAgents={1}")
 	@CsvSource (value = {
 		"false, false",
 		"false, true",
 		"true, false",
 		"true, true",
 	})
-	void testReplaceReferences_WithProvenanceAgentInterceptor(boolean theIsAsync, boolean theAgentInterceptorReturnsNull) {
+	void testReplaceReferences_WithProvenanceAgentInterceptor_Success(boolean theIsAsync, boolean theAgentInterceptorReturnsMultipleAgents) {
 
-		ProvenanceAgent provenanceAgent = null;
-		if (!theAgentInterceptorReturnsNull) {
-			provenanceAgent = myTestHelper.createTestProvenanceAgent();
+		List<IProvenanceAgent> agents = new ArrayList<>();
+		agents.add(myTestHelper.createTestProvenanceAgent());
+		if (theAgentInterceptorReturnsMultipleAgents) {
+			agents.add(myTestHelper.createTestProvenanceAgent());
 		}
 		// this interceptor will be unregistered in @AfterEach of the base class, which unregisters all interceptors
-		ProvenanceAgentTestInterceptor agentInterceptor = new ProvenanceAgentTestInterceptor(provenanceAgent);
-		myServer.getRestfulServer().getInterceptorService().registerInterceptor(agentInterceptor);
+		ReplaceReferencesTestHelper.registerProvenanceAgentInterceptor(myServer.getRestfulServer(), agents);
 
 		Bundle patchResultBundle = executeReplaceReferences(theIsAsync);
 
 		// validate
 		ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle,
-			ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES, List.of(
+			TOTAL_EXPECTED_PATCHES, List.of(
 				"Observation", "Encounter", "CarePlan"));
 
 		// Check that the linked resources were updated
 		myTestHelper.assertAllReferencesUpdated();
-		myTestHelper.assertReplaceReferencesProvenance("1", "1", provenanceAgent);
+		myTestHelper.assertReplaceReferencesProvenance("1", "1", agents);
+	}
+
+
+	@ParameterizedTest(name = "{index}: isAsync={0}")
+	@CsvSource (value = {
+		"false",
+		"true"
+	})
+	void testReplaceReferences_withProvenanceAgentInterceptor_InterceptorReturnsNoAgent_ReturnsInternalError(boolean theIsAsync) {
+
+		// this interceptor will be unregistered in @AfterEach of the base class, which unregisters all interceptors
+		ReplaceReferencesTestHelper.registerProvenanceAgentInterceptor(myServer.getRestfulServer(), Collections.emptyList());
+
+		assertThatThrownBy(() -> executeReplaceReferences(theIsAsync)
+		).isInstanceOf(InternalErrorException.class)
+			.hasMessageContaining("HAPI-2723: No Provenance Agent was provided by any interceptor for Pointcut.PROVENANCE_AGENTS")
+			.extracting(InternalErrorException.class::cast)
+			.extracting(BaseServerResponseException::getStatusCode)
+			.isEqualTo(500);
 	}
 
 

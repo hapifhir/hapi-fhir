@@ -7,6 +7,8 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ProvenanceAgentJsonTest {
@@ -38,11 +40,22 @@ class ProvenanceAgentJsonTest {
 	@Test
 	void testToIProvenanceAgent_NullInput() {
 		assertThat(ProvenanceAgentJson.toIProvenanceAgent(null, fhirContext)).isNull();
+		assertThat(ProvenanceAgentJson.toIProvenanceAgents(null, fhirContext)).isNull();
+	}
+
+	@Test
+	void testToIProvenanceAgents_NullInput() {
+		assertThat(ProvenanceAgentJson.toIProvenanceAgents(null, fhirContext)).isNull();
 	}
 
 	@Test
 	void testFrom_NullInput() {
-		assertThat(ProvenanceAgentJson.from(null, fhirContext)).isNull();
+		assertThat(ProvenanceAgentJson.from((IProvenanceAgent) null, fhirContext)).isNull();
+	}
+
+	@Test
+	void testFromList_NullInput() {
+		assertThat(ProvenanceAgentJson.from((List<IProvenanceAgent>) null, fhirContext)).isNull();
 	}
 
 	@Test

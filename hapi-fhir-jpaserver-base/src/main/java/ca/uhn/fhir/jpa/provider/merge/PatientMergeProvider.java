@@ -22,18 +22,15 @@ package ca.uhn.fhir.jpa.provider.merge;
 import ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.interceptor.ProvenanceAgentsPointcutUtil;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.CanonicalIdentifier;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -104,10 +101,9 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 
 		try {
 			int resourceLimit = MergeResourceHelper.setResourceLimitFromParameter(myStorageSettings, theResourceLimit);
-			IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
-					myInterceptorBroadcaster, theRequestDetails);
-			IProvenanceAgent provenanceAgent = (IProvenanceAgent) compositeBroadcaster.ifHasCallHooksAndReturnObject(
-					Pointcut.PROVENANCE_AGENT, () -> new HookParams().add(RequestDetails.class, theRequestDetails));
+
+			List<IProvenanceAgent> provenanceAgents =
+					ProvenanceAgentsPointcutUtil.ifHasCallTheHooks(theRequestDetails, myInterceptorBroadcaster);
 
 			BaseMergeOperationInputParameters mergeOperationParameters = buildMergeOperationInputParameters(
 					theSourcePatientIdentifier,
@@ -118,7 +114,7 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 					theDeleteSource,
 					theResultPatient,
 					resourceLimit,
-					provenanceAgent);
+					provenanceAgents);
 
 			MergeOperationOutcome mergeOutcome =
 					myResourceMergeService.merge(mergeOperationParameters, theRequestDetails);
@@ -170,7 +166,7 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 			IPrimitiveType<Boolean> theDeleteSource,
 			IBaseResource theResultPatient,
 			int theResourceLimit,
-			IProvenanceAgent theProvenanceAgent) {
+			List<IProvenanceAgent> theProvenanceAgents) {
 		BaseMergeOperationInputParameters mergeOperationParameters =
 				new PatientMergeOperationInputParameters(theResourceLimit);
 		if (theSourcePatientIdentifier != null) {
@@ -196,7 +192,7 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 			mergeOperationParameters.setResultResource(((Patient) theResultPatient).copy());
 		}
 
-		mergeOperationParameters.setProvenanceAgent(theProvenanceAgent);
+		mergeOperationParameters.setProvenanceAgents(theProvenanceAgents);
 		return mergeOperationParameters;
 	}
 }

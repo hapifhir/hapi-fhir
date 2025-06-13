@@ -252,7 +252,7 @@ public class ResourceMergeService {
 				theMergeOperationParameters.getDeleteSource(),
 				theRequestDetails,
 				startTime,
-				theMergeOperationParameters.getProvenanceAgent());
+				theMergeOperationParameters.getProvenanceAgents());
 
 		theMergeOutcome.setUpdatedTargetResource(updatedTarget);
 

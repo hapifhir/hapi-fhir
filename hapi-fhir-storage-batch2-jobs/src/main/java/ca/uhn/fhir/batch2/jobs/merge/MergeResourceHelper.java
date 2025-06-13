@@ -76,7 +76,7 @@ public class MergeResourceHelper {
 			boolean theDeleteSource,
 			RequestDetails theRequestDetails,
 			Date theStartTime,
-			@Nullable IProvenanceAgent theProvenanceAgent) {
+			List<IProvenanceAgent> theProvenanceAgents) {
 		Patient sourceResource = myPatientDao.read(theSourceResourceId, theRequestDetails);
 		Patient targetResource = myPatientDao.read(theTargetResourceId, theRequestDetails);
 
@@ -89,7 +89,7 @@ public class MergeResourceHelper {
 				theDeleteSource,
 				theRequestDetails,
 				theStartTime,
-				theProvenanceAgent);
+				theProvenanceAgents);
 	}
 
 	public Patient updateMergedResourcesAndCreateProvenance(
@@ -101,7 +101,7 @@ public class MergeResourceHelper {
 			boolean theDeleteSource,
 			RequestDetails theRequestDetails,
 			Date theStartTime,
-			@Nullable IProvenanceAgent theProvenanceAgent) {
+			List<IProvenanceAgent> theProvenanceAgents) {
 
 		AtomicReference<Patient> targetPatientAfterUpdate = new AtomicReference<>();
 		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
@@ -123,7 +123,7 @@ public class MergeResourceHelper {
 					thePatchResultBundles,
 					theStartTime,
 					theRequestDetails,
-					theProvenanceAgent);
+					theProvenanceAgents);
 		});
 
 		return targetPatientAfterUpdate.get();
