@@ -325,10 +325,12 @@ public class FhirPatchDiffR4Test {
 
 	@Test
 	public void testModifyNarrative() {
+		// Patient.text.div=123
 		Patient oldValue = new Patient();
 		oldValue.getText().getDiv().setValue("<div>123</div>");
 		oldValue.addName().setFamily("Family");
 
+		// Patient.text.div=456
 		Patient newValue = new Patient();
 		newValue.getText().getDiv().setValue("<div>456</div>");
 		newValue.addName().setFamily("Family");
