@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
@@ -17,31 +17,34 @@
  * limitations under the License.
  * #L%
  */
-package org.hl7.fhir.instance.model.api;
+package ca.uhn.fhir.model.api;
 
-public interface IBaseReference extends ICompositeType {
+import org.hl7.fhir.instance.model.api.IBaseReference;
 
-	IBaseResource getResource();
+public class ProvenanceAgent implements IProvenanceAgent {
 
-	IBaseReference setResource(IBaseResource theResource);
+	private static final long serialVersionUID = 1L;
 
-	IIdType getReferenceElement();
+	IBaseReference myWho;
+	IBaseReference myOnBehalfOf;
 
-	IBaseReference setReference(String theReference);
-
-	IBase setDisplay(String theValue);
-
-	IPrimitiveType<String> getDisplayElement();
-
-	default boolean hasIdentifier() {
-		return false;
+	@Override
+	public IBaseReference getWho() {
+		return myWho;
 	}
 
-	default IBaseReference setIdentifier(ICompositeType theIdentifier) {
-		throw new UnsupportedOperationException("This reference does not support identifiers");
+	public IProvenanceAgent setWho(IBaseReference theWho) {
+		myWho = theWho;
+		return this;
 	}
 
-	default ICompositeType getIdentifier() {
-		return null;
+	@Override
+	public IBaseReference getOnBehalfOf() {
+		return myOnBehalfOf;
+	}
+
+	public IProvenanceAgent setOnBehalfOf(IBaseReference theOnBehalfOf) {
+		myOnBehalfOf = theOnBehalfOf;
+		return this;
 	}
 }

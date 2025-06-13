@@ -187,6 +187,7 @@ import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -999,7 +1000,8 @@ public class JpaConfig {
 			IJobCoordinator theJobCoordinator,
 			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundle,
 			Batch2TaskHelper theBatch2TaskHelper,
-			JpaStorageSettings theStorageSettings) {
+			JpaStorageSettings theStorageSettings,
+			ReplaceReferencesProvenanceSvc theProvenanceSvc) {
 		return new ReplaceReferencesSvcImpl(
 				theDaoRegistry,
 				theHapiTransactionService,
@@ -1007,7 +1009,13 @@ public class JpaConfig {
 				theJobCoordinator,
 				theReplaceReferencesPatchBundle,
 				theBatch2TaskHelper,
-				theStorageSettings);
+				theStorageSettings,
+				theProvenanceSvc);
+	}
+
+	@Bean
+	public ReplaceReferencesProvenanceSvc replaceReferencesProvenanceSvc(DaoRegistry theDaoRegistry) {
+		return new ReplaceReferencesProvenanceSvc(theDaoRegistry);
 	}
 
 	@Bean
