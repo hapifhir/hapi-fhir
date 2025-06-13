@@ -26,6 +26,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.util.FhirPathUtils;
+import ca.uhn.fhir.model.api.BasePrimitive;
+import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.parser.path.EncodeContextPath;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.IModelVisitor2;
@@ -35,9 +37,11 @@ import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -343,8 +347,33 @@ public class FhirPatch {
 			if (theTargetChildDefinition.getBase() instanceof IPrimitiveType<?> target
 					&& theReplacementValue instanceof IPrimitiveType<?> source) {
 				if (target.fhirType().equalsIgnoreCase(source.fhirType())) {
-					// same primitive type; or possibly replacing a string - just replace
-					target.setValueAsString(source.getValueAsString());
+					if (theTargetChildDefinition.getParent().getBase().fhirType().equalsIgnoreCase("narrative") && theTargetChildDefinition.getFhirPath().equalsIgnoreCase("div")) {
+						/*
+						 * Special case handling for Narrative elements
+						 * because xhtml is a primitive type, but it's fhirtype is recorded as "string"
+						 * (which means we cannot actually assign it as a primitive type).
+						 *
+						 * Instead, we have to get the parent's type and set it's child as a new
+						 * XHTML child.
+						 */
+						FhirPathChildDefinition narrativeDefinition = theTargetChildDefinition.getParent();
+						BaseRuntimeElementDefinition<?> narrativeElement = narrativeDefinition.getElementDefinition();
+
+						BaseRuntimeElementDefinition<?> newXhtmlEl = myContext.getElementDefinition("xhtml");
+
+						IPrimitiveType<?> xhtmlType;
+						if (theTargetChildDefinition.getBaseRuntimeDefinition().getInstanceConstructorArguments() != null) {
+							xhtmlType = (IPrimitiveType<?>) newXhtmlEl.newInstance(theTargetChildDefinition.getBaseRuntimeDefinition().getInstanceConstructorArguments());
+						} else {
+							xhtmlType = (IPrimitiveType<?>) newXhtmlEl.newInstance();
+						}
+
+						xhtmlType.setValueAsString(source.getValueAsString());
+						narrativeElement.getChildByName(theTargetChildDefinition.getFhirPath())
+							.getMutator().setValue(narrativeDefinition.getBase(), xhtmlType);
+					} else {
+						target.setValueAsString(source.getValueAsString());
+					}
 				} else if (theTargetChildDefinition.getChild() != null) {
 					// there's subchildren (possibly we're setting an 'extension' value
 					FhirPathChildDefinition ct =
