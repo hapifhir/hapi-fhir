@@ -48,7 +48,6 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 	@JsonProperty("partitionId")
 	private RequestPartitionId myPartitionId;
 
-
 	/**
 	 * If true, a Provenance resource will be created at the end of the job.
 	 */
@@ -137,7 +136,6 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 				myCreateProvenance,
 				ProvenanceAgentJson.toIProvenanceAgents(myProvenanceAgents, theFhirContext));
 	}
-
 
 	public boolean getCreateProvenance() {
 		return myCreateProvenance;

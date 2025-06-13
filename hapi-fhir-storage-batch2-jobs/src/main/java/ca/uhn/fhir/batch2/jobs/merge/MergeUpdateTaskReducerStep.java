@@ -51,7 +51,6 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 		myMergeResourceHelper = theMergeResourceHelper;
 		myMergeProvenanceSvc = theMergeProvenanceSvc;
 		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);
-
 	}
 
 	@Override
@@ -80,24 +79,27 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 			resultResource = null;
 		}
 
-		return myHapiTransactionService
-			.withRequest(requestDetails)
-			.execute(() -> {
+		return myHapiTransactionService.withRequest(requestDetails).execute(() -> {
+			Patient sourceResource =
+					myPatientDao.read(mergeJobParameters.getSourceId().asIdDt(), requestDetails);
+			Patient targetResource =
+					myPatientDao.read(mergeJobParameters.getTargetId().asIdDt(), requestDetails);
 
-					Patient sourceResource = myPatientDao.read(mergeJobParameters.getSourceId().asIdDt(), requestDetails);
-					Patient targetResource = myPatientDao.read(mergeJobParameters.getTargetId().asIdDt(), requestDetails);
+			Patient updatedTarget = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
+					sourceResource,
+					targetResource,
+					resultResource,
+					mergeJobParameters.getDeleteSource(),
+					requestDetails);
 
-					Patient updatedTarget = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
-						sourceResource, targetResource, resultResource, mergeJobParameters.getDeleteSource(), requestDetails
-					);
+			if (!mergeJobParameters.getDeleteSource()) {
+				mergeJobParameters.setCurrentSourceVersion(
+						sourceResource.getIdElement().getVersionIdPart());
+			}
+			mergeJobParameters.setCurrentTargetVersion(
+					updatedTarget.getIdElement().getVersionIdPart());
 
-					if (!mergeJobParameters.getDeleteSource()) {
-						mergeJobParameters.setCurrentSourceVersion(sourceResource.getIdElement().getVersionIdPart());
-					}
-					mergeJobParameters.setCurrentTargetVersion(updatedTarget.getIdElement().getVersionIdPart());
-
-
-					return super.run(theStepExecutionDetails, theDataSink);
-			});
+			return super.run(theStepExecutionDetails, theDataSink);
+		});
 	}
 }

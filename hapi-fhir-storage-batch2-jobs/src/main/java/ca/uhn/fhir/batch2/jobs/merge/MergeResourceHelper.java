@@ -65,14 +65,14 @@ public class MergeResourceHelper {
 	}
 
 	public Patient updateMergedResourcesAfterReferencesReplaced(
-		Patient theSourceResource,
-		Patient theTargetResource,
-		@Nullable Patient theResultResource,
-		boolean theDeleteSource,
-		RequestDetails theRequestDetails) {
+			Patient theSourceResource,
+			Patient theTargetResource,
+			@Nullable Patient theResultResource,
+			boolean theDeleteSource,
+			RequestDetails theRequestDetails) {
 
-		Patient targetToUpdate = prepareTargetPatientForUpdate(
-			theTargetResource, theSourceResource, theResultResource, theDeleteSource);
+		Patient targetToUpdate =
+				prepareTargetPatientForUpdate(theTargetResource, theSourceResource, theResultResource, theDeleteSource);
 
 		myPatientDao.update(targetToUpdate, theRequestDetails);
 		if (theDeleteSource) {
@@ -95,14 +95,12 @@ public class MergeResourceHelper {
 			List<IProvenanceAgent> theProvenanceAgents) {
 
 		myProvenanceSvc.createProvenance(
-			theTargetResource.getIdElement(),
-			theDeleteSource ? null : theSourceResource.getIdElement(),
-			thePatchResultBundles,
-			theStartTime,
-			theRequestDetails,
-			theProvenanceAgents);
-
-
+				theTargetResource.getIdElement(),
+				theDeleteSource ? null : theSourceResource.getIdElement(),
+				thePatchResultBundles,
+				theStartTime,
+				theRequestDetails,
+				theProvenanceAgents);
 	}
 
 	public Patient prepareTargetPatientForUpdate(

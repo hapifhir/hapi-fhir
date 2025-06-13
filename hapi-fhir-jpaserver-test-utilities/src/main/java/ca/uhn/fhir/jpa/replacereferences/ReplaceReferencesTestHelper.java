@@ -213,7 +213,6 @@ public class ReplaceReferencesTestHelper {
 		return resultPatient;
 	}
 
-
 	public Patient readSourcePatient() {
 		return readPatient(mySourcePatientId);
 	}
@@ -301,7 +300,8 @@ public class ReplaceReferencesTestHelper {
 		assertThat(activityCoding.getCode()).isEqualTo("link");
 	}
 
-	public void assertMergeProvenance(boolean theDeleteSource, @Nullable List<IProvenanceAgent> theExpectedProvenanceAgent) {
+	public void assertMergeProvenance(
+			boolean theDeleteSource, @Nullable List<IProvenanceAgent> theExpectedProvenanceAgent) {
 		assertMergeProvenance(
 				theDeleteSource,
 				mySourcePatientId.withVersion("2"),
@@ -312,12 +312,12 @@ public class ReplaceReferencesTestHelper {
 	}
 
 	public void assertMergeProvenance(
-		boolean theDeleteSource,
-		IIdType theSourcePatientIdWithExpectedVersion,
-		IIdType theTargetPatientIdWithExpectedVersion,
-		int theExpectedPatches,
-		Set<String> theExpectedProvenanceTargetsForPatchedResources,
-		@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
+			boolean theDeleteSource,
+			IIdType theSourcePatientIdWithExpectedVersion,
+			IIdType theTargetPatientIdWithExpectedVersion,
+			int theExpectedPatches,
+			Set<String> theExpectedProvenanceTargetsForPatchedResources,
+			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
 
 		List<IBaseResource> provenances = searchProvenance(
 				theTargetPatientIdWithExpectedVersion.toVersionless().getIdPart());
@@ -644,8 +644,8 @@ public class ReplaceReferencesTestHelper {
 		return expectedIdentifiersOnTargetAfterMerge;
 	}
 
-
-	public void assertSourcePatientUpdatedOrDeleted(IIdType theSourcePatientId, IIdType theTargetPatientId, boolean theDeleteSource) {
+	public void assertSourcePatientUpdatedOrDeleted(
+			IIdType theSourcePatientId, IIdType theTargetPatientId, boolean theDeleteSource) {
 		if (theDeleteSource) {
 			assertThrows(ResourceGoneException.class, () -> readPatient(theSourcePatientId.toUnqualifiedVersionless()));
 		} else {
@@ -665,7 +665,11 @@ public class ReplaceReferencesTestHelper {
 		assertTargetPatientUpdated(getTargetPatientId(), getSourcePatientId(), withDelete, theExpectedIdentifiers);
 	}
 
-	public void assertTargetPatientUpdated(IIdType targetPatientId, IIdType sourcePatientId, boolean withDelete, List<Identifier> theExpectedIdentifiers) {
+	public void assertTargetPatientUpdated(
+			IIdType targetPatientId,
+			IIdType sourcePatientId,
+			boolean withDelete,
+			List<Identifier> theExpectedIdentifiers) {
 		Patient target = myPatientDao.read(targetPatientId.toUnqualifiedVersionless(), mySrd);
 		if (!withDelete) {
 			assertThat(target.getLink()).hasSize(1);
@@ -686,7 +690,8 @@ public class ReplaceReferencesTestHelper {
 		}
 	}
 
-	public static void registerProvenanceAgentInterceptor(RestfulServer theServer, List<IProvenanceAgent> theProvenanceAgents) {
+	public static void registerProvenanceAgentInterceptor(
+			RestfulServer theServer, List<IProvenanceAgent> theProvenanceAgents) {
 		ProvenanceAgentTestInterceptor agentInterceptor = new ProvenanceAgentTestInterceptor(theProvenanceAgents);
 		theServer.getInterceptorService().registerInterceptor(agentInterceptor);
 	}
@@ -712,8 +717,7 @@ public class ReplaceReferencesTestHelper {
 		assertThat(myJsonParser.encodeToString(theRef1)).isEqualTo(myJsonParser.encodeToString(theRef2));
 	}
 
-	private void validateAgent(
-			IProvenanceAgent theExpectedAgent, Provenance.ProvenanceAgentComponent theActualAgent) {
+	private void validateAgent(IProvenanceAgent theExpectedAgent, Provenance.ProvenanceAgentComponent theActualAgent) {
 		Reference theActualWho = theActualAgent.hasWho() ? theActualAgent.getWho() : null;
 		Reference theActualOnBehalfOf = theActualAgent.hasOnBehalfOf() ? theActualAgent.getOnBehalfOf() : null;
 		assertEqualReferences(theActualWho, theExpectedAgent.getWho());

@@ -92,7 +92,9 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 			if (params.getCreateProvenance()) {
 				myProvenanceSvc.createProvenance(
 						params.getTargetId().asIdDt().withVersion(params.getCurrentTargetVersion()),
-						params.getCurrentSourceVersion() == null ?  null : params.getSourceId().asIdDt().withVersion(params.getCurrentSourceVersion()),
+						params.getCurrentSourceVersion() == null
+								? null
+								: params.getSourceId().asIdDt().withVersion(params.getCurrentSourceVersion()),
 						myPatchOutputBundles,
 						theStepExecutionDetails.getInstance().getStartTime(),
 						requestDetails,
