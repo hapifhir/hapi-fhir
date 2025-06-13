@@ -1831,7 +1831,8 @@ public class FhirTerser {
 
 		public boolean referenceMatchesAContainedResource(IIdType theRefId) {
 			String expectedResourceId = theRefId.getIdPart().substring(1);
-			return this.getContainedResources().stream().anyMatch(res -> res.getIdElement().getIdPart().equals(expectedResourceId));
+			return this.getContainedResources().stream()
+					.anyMatch(res -> res.getIdElement().getIdPart().equals(expectedResourceId));
 		}
 
 		public IIdType addContained(IBaseResource theResource) {
@@ -1849,6 +1850,8 @@ public class FhirTerser {
 			IIdType newId = theResource.getIdElement();
 			if (isBlank(newId.getValue())) {
 				newId.setValue(UUID.randomUUID().toString());
+			} else if (newId.getValue().startsWith("#")) {
+				newId.setValue(newId.getValueAsString().substring(1));
 			}
 
 			getResourceToIdMap().put(theResource, newId);
