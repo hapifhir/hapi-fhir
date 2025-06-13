@@ -89,7 +89,6 @@ import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.util.TerserUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;

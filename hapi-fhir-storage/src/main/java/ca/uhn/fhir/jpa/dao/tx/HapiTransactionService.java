@@ -342,8 +342,10 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 				} catch (Exception e) {
 					if (!isRetriable(e)) {
-						// FIXME REVIEW QUESTION: Can we delete this branch, and delegate to the interceptor to decide the number of retries?
-						// Since we now unconditionally rollback on the retriable branch, but not on this one, this feels like a sharp edge.
+						// FIXME REVIEW QUESTION: Can we delete this branch, and delegate to the interceptor to decide
+						// the number of retries?
+						// Since we now unconditionally rollback on the retriable branch, but not on this one, this
+						// feels like a sharp edge.
 						ourLog.debug("Unexpected transaction exception. Will not be retried.", e);
 						throw e;
 					} else {
@@ -372,8 +374,8 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 							if (maxRetries > 0) {
 								// log if we tried to retry, but failed
-								String msg =
-									"Max retries (" + maxRetries + ") exceeded for version conflict: " + e.getMessage();
+								String msg = "Max retries (" + maxRetries + ") exceeded for version conflict: "
+										+ e.getMessage();
 								ourLog.info(msg, maxRetries);
 								throw new ResourceVersionConflictException(Msg.code(549) + msg);
 							}
@@ -389,7 +391,6 @@ public class HapiTransactionService implements IHapiTransactionService {
 			}
 		}
 	}
-
 
 	public void setTransactionPropagationWhenChangingPartitions(
 			Propagation theTransactionPropagationWhenChangingPartitions) {
@@ -540,15 +541,11 @@ public class HapiTransactionService implements IHapiTransactionService {
 			}
 
 			if (myTransactionDetails != null) {
-				myTransactionDetails
-					.getRollbackUndoActions()
-					.forEach(Runnable::run);
+				myTransactionDetails.getRollbackUndoActions().forEach(Runnable::run);
 				myTransactionDetails.clearRollbackUndoActions();
 				myTransactionDetails.clearResolvedItems();
-				myTransactionDetails.clearUserData(
-					XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
-				myTransactionDetails.clearUserData(
-					XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
+				myTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
+				myTransactionDetails.clearUserData(XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
 			}
 		}
 
@@ -567,18 +564,15 @@ public class HapiTransactionService implements IHapiTransactionService {
 			}
 
 			if (maxRetries == 0) {
-				IInterceptorBroadcaster compositeBroadcaster =
-						CompositeInterceptorBroadcaster.newCompositeBroadcaster(
-								theHapiTransactionService.myInterceptorBroadcaster, myRequestDetails);
+				IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+						theHapiTransactionService.myInterceptorBroadcaster, myRequestDetails);
 				if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_VERSION_CONFLICT)) {
 					HookParams params = new HookParams()
 							.add(RequestDetails.class, myRequestDetails)
-							.addIfMatchesType(
-									ServletRequestDetails.class, myRequestDetails);
+							.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
 					ResourceVersionConflictResolutionStrategy conflictResolutionStrategy =
-							(ResourceVersionConflictResolutionStrategy)
-									compositeBroadcaster.callHooksAndReturnObject(
-											Pointcut.STORAGE_VERSION_CONFLICT, params);
+							(ResourceVersionConflictResolutionStrategy) compositeBroadcaster.callHooksAndReturnObject(
+									Pointcut.STORAGE_VERSION_CONFLICT, params);
 					if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
 						maxRetries = conflictResolutionStrategy.getMaxRetries();
 					}
