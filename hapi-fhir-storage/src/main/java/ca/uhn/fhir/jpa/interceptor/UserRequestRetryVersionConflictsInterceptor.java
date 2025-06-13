@@ -55,6 +55,7 @@ public class UserRequestRetryVersionConflictsInterceptor {
 	public ResourceVersionConflictResolutionStrategy check(RequestDetails theRequestDetails) {
 		ResourceVersionConflictResolutionStrategy retVal = new ResourceVersionConflictResolutionStrategy();
 		boolean shouldSetRetries = theRequestDetails != null && theRequestDetails.isRetry();
+		// FIXME REVIEW QUESTION: Shouldn't this be in HapiTransactionService directly?
 		if (shouldSetRetries) {
 			retVal.setRetry(true);
 			int maxRetries = Math.min(100, theRequestDetails.getMaxRetries());
