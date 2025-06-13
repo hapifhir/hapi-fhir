@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+// Created by Claude 3.7 Sonnet
 public class RequestHeaderPartitionInterceptorTest {
 
     private static final Integer DEFAULT_PARTITION_ID = 100;
