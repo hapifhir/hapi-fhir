@@ -82,14 +82,6 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 			@Nonnull StepExecutionDetails<PT, ReplaceReferencePatchOutcomeJson> theStepExecutionDetails,
 			@Nonnull IJobDataSink<ReplaceReferenceResultsJson> theDataSink)
 			throws JobExecutionFailedException {
-		return run(theStepExecutionDetails, theDataSink, true);
-	}
-
-	protected RunOutcome run(
-			@Nonnull StepExecutionDetails<PT, ReplaceReferencePatchOutcomeJson> theStepExecutionDetails,
-			@Nonnull IJobDataSink<ReplaceReferenceResultsJson> theDataSink,
-			boolean theCreateProvenance)
-			throws JobExecutionFailedException {
 
 		try {
 			ReplaceReferencesJobParameters params = theStepExecutionDetails.getParameters();
@@ -97,10 +89,10 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 
 			updateTask(params.getTaskId(), requestDetails);
 
-			if (theCreateProvenance) {
+			if (params.getCreateProvenance()) {
 				myProvenanceSvc.createProvenance(
 						params.getTargetId().asIdDt().withVersion(params.getCurrentTargetVersion()),
-						params.getSourceId().asIdDt().withVersion(params.getCurrentSourceVersion()),
+						params.getCurrentSourceVersion() == null ?  null : params.getSourceId().asIdDt().withVersion(params.getCurrentSourceVersion()),
 						myPatchOutputBundles,
 						theStepExecutionDetails.getInstance().getStartTime(),
 						requestDetails,

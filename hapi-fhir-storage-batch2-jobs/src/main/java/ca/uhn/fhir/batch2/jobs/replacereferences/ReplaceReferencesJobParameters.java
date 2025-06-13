@@ -48,24 +48,26 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 	@JsonProperty("partitionId")
 	private RequestPartitionId myPartitionId;
 
+
+	/**
+	 * If true, a Provenance resource will be created at the end of the job.
+	 */
 	@JsonProperty(value = "createProvenance", defaultValue = "true", required = false)
 	private boolean myCreateProvenance;
 
 	/**
-	 * The current version of the source resource (before the operation),
-	 * this is used when creating the Provenance resource once the references are replaced.
-	 * This is only used for replace-references operation, not populated for $merge operation.
+	 * The version of the source resource that should be used in the Provenance resource.
+	 * The $merge operation populates this after the source resource is updated as a result of the merge.
 	 */
-	@JsonProperty("currentSourceVersion")
-	private String myCurrentSourceVersion;
+	@JsonProperty("sourceVersionForProvenance")
+	private String mySourceVersionForProvenance;
 
 	/**
-	 * The current version of the source resource (before the operation),
-	 * this is used when creating the Provenance resource once the references are replaced.
-	 * This is only used for replace-references operation, not populated for $merge operation.
+	 * The version of the target resource that should be used in the Provenance resource.
+	 * The $merge operation populates this after the target resource is updated as a result of the merge.
 	 */
-	@JsonProperty("currentTargetVersion")
-	private String myCurrentTargetVersion;
+	@JsonProperty("targetVersionForProvenance")
+	private String myTargetVersionForProvenance;
 
 	@JsonProperty("provenanceAgents")
 	private List<ProvenanceAgentJson> myProvenanceAgents;
@@ -75,8 +77,8 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 	public ReplaceReferencesJobParameters(
 			ReplaceReferencesRequest theReplaceReferencesRequest,
 			int theBatchSize,
-			String theCurrentSourceVersion,
-			String theCurrentTargetVersion,
+			String theSourceVersionForProvenance,
+			String theTargetVersionForProvenance,
 			@Nullable List<ProvenanceAgentJson> theProvenanceAgents) {
 
 		mySourceId = new FhirIdJson(theReplaceReferencesRequest.sourceId);
@@ -86,8 +88,8 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 		myBatchSize = theBatchSize;
 		myPartitionId = theReplaceReferencesRequest.partitionId;
 		myCreateProvenance = theReplaceReferencesRequest.createProvenance;
-		myCurrentSourceVersion = theCurrentSourceVersion;
-		myCurrentTargetVersion = theCurrentTargetVersion;
+		mySourceVersionForProvenance = theSourceVersionForProvenance;
+		myTargetVersionForProvenance = theTargetVersionForProvenance;
 		myProvenanceAgents = theProvenanceAgents;
 	}
 
@@ -136,20 +138,29 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 				ProvenanceAgentJson.toIProvenanceAgents(myProvenanceAgents, theFhirContext));
 	}
 
+
+	public boolean getCreateProvenance() {
+		return myCreateProvenance;
+	}
+
+	public void setCreateProvenance(boolean theCreateProvenance) {
+		this.myCreateProvenance = theCreateProvenance;
+	}
+
 	public String getCurrentSourceVersion() {
-		return myCurrentSourceVersion;
+		return mySourceVersionForProvenance;
 	}
 
 	public void setCurrentSourceVersion(String theCurrentSourceVersion) {
-		this.myCurrentSourceVersion = theCurrentSourceVersion;
+		this.mySourceVersionForProvenance = theCurrentSourceVersion;
 	}
 
 	public String getCurrentTargetVersion() {
-		return myCurrentTargetVersion;
+		return myTargetVersionForProvenance;
 	}
 
 	public void setCurrentTargetVersion(String theCurrentTargetVersion) {
-		this.myCurrentTargetVersion = theCurrentTargetVersion;
+		this.myTargetVersionForProvenance = theCurrentTargetVersion;
 	}
 
 	public List<ProvenanceAgentJson> getProvenanceAgents() {

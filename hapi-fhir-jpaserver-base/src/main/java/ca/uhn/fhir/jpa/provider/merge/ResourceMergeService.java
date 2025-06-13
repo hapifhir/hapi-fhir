@@ -243,18 +243,26 @@ public class ResourceMergeService {
 						myFhirContext, outParams, OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME)
 				.orElseThrow();
 
-		Patient updatedTarget = myMergeResourceHelper.updateMergedResourcesAndCreateProvenance(
-				myHapiTransactionService,
-				theSourceResource,
-				theTargetResource,
-				List.of(patchResultBundle),
-				(Patient) theMergeOperationParameters.getResultResource(),
-				theMergeOperationParameters.getDeleteSource(),
-				theRequestDetails,
-				startTime,
-				theMergeOperationParameters.getProvenanceAgents());
 
-		theMergeOutcome.setUpdatedTargetResource(updatedTarget);
+		myHapiTransactionService
+			.withRequest(theRequestDetails)
+			.execute(() -> {
+
+				Patient updatedTarget = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(theSourceResource, theTargetResource, (Patient) theMergeOperationParameters.getResultResource(), theMergeOperationParameters.getDeleteSource(), theRequestDetails
+				);
+
+				myMergeResourceHelper.createProvenance(
+					theSourceResource,
+					updatedTarget,
+					List.of(patchResultBundle),
+					theMergeOperationParameters.getDeleteSource(),
+					theRequestDetails,
+					startTime,
+					theMergeOperationParameters.getProvenanceAgents()
+				);
+				theMergeOutcome.setUpdatedTargetResource(updatedTarget);
+		});
+
 
 		String detailsText = "Merge operation completed successfully.";
 		addInfoToOperationOutcome(theMergeOutcome.getOperationOutcome(), null, detailsText);

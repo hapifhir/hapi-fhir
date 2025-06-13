@@ -64,6 +64,7 @@ public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
 		jobParams.setCurrentSourceVersion("1");
 		jobParams.setCurrentTargetVersion("2");
 		jobParams.setTaskId(taskId);
+		jobParams.setCreateProvenance(true);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest(JOB_REPLACE_REFERENCES, jobParams);
 		Batch2JobStartResponse jobStartResponse = myJobCoordinator.startInstance(mySrd, request);

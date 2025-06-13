@@ -47,6 +47,7 @@ public abstract class BaseMergeOperationInputParameters {
 	private IBaseResource myResultResource;
 	private final int myResourceLimit;
 	private List<IProvenanceAgent> myProvenanceAgents;
+	private boolean myCreateProvenance = true;
 
 	protected BaseMergeOperationInputParameters(int theResourceLimit) {
 		myResourceLimit = theResourceLimit;
@@ -146,6 +147,7 @@ public abstract class BaseMergeOperationInputParameters {
 		retval.setTargetId(new FhirIdJson(theTargetResource.getIdElement().toVersionless()));
 		retval.setPartitionId(thePartitionId);
 		retval.setProvenanceAgents(ProvenanceAgentJson.from(myProvenanceAgents, theFhirContext));
+		retval.setCreateProvenance(myCreateProvenance);
 		return retval;
 	}
 

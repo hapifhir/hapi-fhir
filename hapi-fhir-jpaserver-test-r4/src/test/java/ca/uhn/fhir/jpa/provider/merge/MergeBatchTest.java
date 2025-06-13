@@ -74,6 +74,7 @@ public class MergeBatchTest extends BaseJpaR4Test {
 			String encodedResultPatient = myFhirContext.newJsonParser().encodeResourceToString(myTestHelper.createResultPatient(theDeleteSource));
 			jobParams.setResultResource(encodedResultPatient);
 		}
+		jobParams.setCreateProvenance(true);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest(JOB_MERGE, jobParams);
 		Batch2JobStartResponse jobStartResponse = myJobCoordinator.startInstance(mySrd, request);

@@ -22,14 +22,12 @@ package ca.uhn.fhir.batch2.jobs.merge;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import jakarta.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Identifier;
@@ -38,7 +36,6 @@ import org.hl7.fhir.r4.model.Reference;
 
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
@@ -67,66 +64,45 @@ public class MergeResourceHelper {
 		return retval;
 	}
 
-	public void updateMergedResourcesAndCreateProvenance(
-			IHapiTransactionService myHapiTransactionService,
-			IdDt theSourceResourceId,
-			IdDt theTargetResourceId,
-			List<Bundle> thePatchResultBundles,
-			@Nullable Patient theResultResource,
-			boolean theDeleteSource,
-			RequestDetails theRequestDetails,
-			Date theStartTime,
-			List<IProvenanceAgent> theProvenanceAgents) {
-		Patient sourceResource = myPatientDao.read(theSourceResourceId, theRequestDetails);
-		Patient targetResource = myPatientDao.read(theTargetResourceId, theRequestDetails);
+	public Patient updateMergedResourcesAfterReferencesReplaced(
+		Patient theSourceResource,
+		Patient theTargetResource,
+		@Nullable Patient theResultResource,
+		boolean theDeleteSource,
+		RequestDetails theRequestDetails) {
 
-		updateMergedResourcesAndCreateProvenance(
-				myHapiTransactionService,
-				sourceResource,
-				targetResource,
-				thePatchResultBundles,
-				theResultResource,
-				theDeleteSource,
-				theRequestDetails,
-				theStartTime,
-				theProvenanceAgents);
+		Patient targetToUpdate = prepareTargetPatientForUpdate(
+			theTargetResource, theSourceResource, theResultResource, theDeleteSource);
+
+		myPatientDao.update(targetToUpdate, theRequestDetails);
+		if (theDeleteSource) {
+			deleteResource(theSourceResource, theRequestDetails);
+		} else {
+			prepareSourcePatientForUpdate(theSourceResource, theTargetResource);
+			myPatientDao.update(theSourceResource, theRequestDetails);
+		}
+
+		return targetToUpdate;
 	}
 
-	public Patient updateMergedResourcesAndCreateProvenance(
-			IHapiTransactionService myHapiTransactionService,
-			Patient theSourceResource,
-			Patient theTargetResource,
+	public void createProvenance(
+			IBaseResource theSourceResource,
+			IBaseResource theTargetResource,
 			List<Bundle> thePatchResultBundles,
-			@Nullable Patient theResultResource,
 			boolean theDeleteSource,
 			RequestDetails theRequestDetails,
 			Date theStartTime,
 			List<IProvenanceAgent> theProvenanceAgents) {
 
-		AtomicReference<Patient> targetPatientAfterUpdate = new AtomicReference<>();
-		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
-			Patient patientToUpdate = prepareTargetPatientForUpdate(
-					theTargetResource, theSourceResource, theResultResource, theDeleteSource);
+		myProvenanceSvc.createProvenance(
+			theTargetResource.getIdElement(),
+			theDeleteSource ? null : theSourceResource.getIdElement(),
+			thePatchResultBundles,
+			theStartTime,
+			theRequestDetails,
+			theProvenanceAgents);
 
-			targetPatientAfterUpdate.set(updateResource(patientToUpdate, theRequestDetails));
-			Patient sourcePatientAfterUpdate = null;
-			if (theDeleteSource) {
-				deleteResource(theSourceResource, theRequestDetails);
-			} else {
-				prepareSourcePatientForUpdate(theSourceResource, theTargetResource);
-				sourcePatientAfterUpdate = updateResource(theSourceResource, theRequestDetails);
-			}
 
-			myProvenanceSvc.createProvenance(
-					targetPatientAfterUpdate.get().getIdElement(),
-					theDeleteSource ? null : sourcePatientAfterUpdate.getIdElement(),
-					thePatchResultBundles,
-					theStartTime,
-					theRequestDetails,
-					theProvenanceAgents);
-		});
-
-		return targetPatientAfterUpdate.get();
 	}
 
 	public Patient prepareTargetPatientForUpdate(
@@ -198,11 +174,6 @@ public class MergeResourceHelper {
 			}
 		}
 		return false;
-	}
-
-	private Patient updateResource(Patient theResource, RequestDetails theRequestDetails) {
-		DaoMethodOutcome outcome = myPatientDao.update(theResource, theRequestDetails);
-		return (Patient) outcome.getResource();
 	}
 
 	private void deleteResource(Patient theResource, RequestDetails theRequestDetails) {

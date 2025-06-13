@@ -24,23 +24,22 @@ import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.jobs.replacereferences.ProvenanceAgentJson;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencePatchOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceResultsJson;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceUpdateTaskReducerStep;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Patient;
 
-import java.util.Date;
-
 public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReducerStep<MergeJobParameters> {
 	private final IHapiTransactionService myHapiTransactionService;
 	private final MergeResourceHelper myMergeResourceHelper;
 	private final MergeProvenanceSvc myMergeProvenanceSvc;
+	private final IFhirResourceDao<Patient> myPatientDao;
 
 	public MergeUpdateTaskReducerStep(
 			DaoRegistry theDaoRegistry,
@@ -51,6 +50,8 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 		this.myHapiTransactionService = theHapiTransactionService;
 		myMergeResourceHelper = theMergeResourceHelper;
 		myMergeProvenanceSvc = theMergeProvenanceSvc;
+		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);
+
 	}
 
 	@Override
@@ -67,33 +68,36 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 			@Nonnull IJobDataSink<ReplaceReferenceResultsJson> theDataSink)
 			throws JobExecutionFailedException {
 
-		Date startTime = theStepExecutionDetails.getInstance().getStartTime();
-
 		MergeJobParameters mergeJobParameters = theStepExecutionDetails.getParameters();
 		SystemRequestDetails requestDetails =
 				SystemRequestDetails.forRequestPartitionId(mergeJobParameters.getPartitionId());
 
-		Patient resultResource = null;
+		Patient resultResource;
 		if (mergeJobParameters.getResultResource() != null) {
 			resultResource =
 					myFhirContext.newJsonParser().parseResource(Patient.class, mergeJobParameters.getResultResource());
+		} else {
+			resultResource = null;
 		}
 
-		myMergeResourceHelper.updateMergedResourcesAndCreateProvenance(
-				myHapiTransactionService,
-				mergeJobParameters.getSourceId().asIdDt(),
-				mergeJobParameters.getTargetId().asIdDt(),
-				getPatchOutputBundles(),
-				resultResource,
-				mergeJobParameters.getDeleteSource(),
-				requestDetails,
-				startTime,
-				ProvenanceAgentJson.toIProvenanceAgents(mergeJobParameters.getProvenanceAgents(), myFhirContext));
+		return myHapiTransactionService
+			.withRequest(requestDetails)
+			.execute(() -> {
 
-		// Setting createProvenance to false. Because the provenance resource for merge has been created in the helper
-		// method above. The reason is that the merge operation updates the target and source resources, unlike replace
-		// references, and we would like the merge provenance to reference the target and source versions after the
-		// update.
-		return super.run(theStepExecutionDetails, theDataSink, false);
+					Patient sourceResource = myPatientDao.read(mergeJobParameters.getSourceId().asIdDt(), requestDetails);
+					Patient targetResource = myPatientDao.read(mergeJobParameters.getTargetId().asIdDt(), requestDetails);
+
+					Patient updatedTarget = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
+						sourceResource, targetResource, resultResource, mergeJobParameters.getDeleteSource(), requestDetails
+					);
+
+					if (!mergeJobParameters.getDeleteSource()) {
+						mergeJobParameters.setCurrentSourceVersion(sourceResource.getIdElement().getVersionIdPart());
+					}
+					mergeJobParameters.setCurrentTargetVersion(updatedTarget.getIdElement().getVersionIdPart());
+
+
+					return super.run(theStepExecutionDetails, theDataSink);
+			});
 	}
 }
