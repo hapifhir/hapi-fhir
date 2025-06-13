@@ -209,7 +209,7 @@ public class HistoryBuilder {
 		} else {
 
 			if (!thePartitionId.isAllPartitions()) {
-				if (thePartitionId.isDefaultPartition(defaultPartitionId)) {
+				if (thePartitionId.isPartition(defaultPartitionId)) {
 					predicates.add(theCriteriaBuilder.isNull(theFrom.get("myPartitionIdValue")));
 				} else if (thePartitionId.hasDefaultPartitionId(defaultPartitionId)) {
 					predicates.add(theCriteriaBuilder.or(

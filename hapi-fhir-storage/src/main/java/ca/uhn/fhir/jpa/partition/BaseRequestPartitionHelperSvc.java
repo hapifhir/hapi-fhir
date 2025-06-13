@@ -248,7 +248,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		RequestPartitionId requestPartitionId;
 		requestPartitionId = getSystemRequestPartitionId(theRequest);
 		if (theNonPartitionableResource
-				&& !requestPartitionId.isDefaultPartition(myPartitionSettings.getDefaultPartitionId())) {
+				&& !requestPartitionId.isPartition(myPartitionSettings.getDefaultPartitionId())) {
 			throw new InternalErrorException(Msg.code(1315)
 					+ "System call is attempting to write a non-partitionable resource to a partition! This is a bug!");
 		}

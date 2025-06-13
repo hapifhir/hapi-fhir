@@ -14,7 +14,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.ALL_PARTITIONS_TENANT_NAME;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.DEFAULT_PARTITION_NAME;
@@ -45,7 +44,7 @@ class RequestPartitionHeaderUtilTest {
         assertNotNull(result);
         assertEquals(1, result.getPartitionIds().size());
         assertEquals(DEFAULT_PARTITION_ID, result.getFirstPartitionIdOrNull());
-        assertTrue(result.isDefaultPartition(DEFAULT_PARTITION_ID));
+        assertTrue(result.isPartition(DEFAULT_PARTITION_ID));
 		assertTrue(ourPartitionSettings.isDefaultPartition(result));
     }
 

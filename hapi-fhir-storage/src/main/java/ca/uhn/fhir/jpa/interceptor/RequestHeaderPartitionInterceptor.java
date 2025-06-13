@@ -72,7 +72,8 @@ public class RequestHeaderPartitionInterceptor {
 
 	/**
 	 * Core logic to identify a request's storage partition. It retrieves the partition header,
-	 * and if the header is blank for a system request, it returns the default partition.
+	 * and if the header is blank for a system request, it uses the partition id in the system request if present or
+	 * returns the default partition.
 	 * Otherwise, it uses the provided parsing function to interpret the header.
 	 */
 	private RequestPartitionId identifyPartitionOrThrowException(
@@ -81,8 +82,12 @@ public class RequestHeaderPartitionInterceptor {
 		String partitionHeader = theRequestDetails.getHeader(Constants.HEADER_X_REQUEST_PARTITION_IDS);
 
 		if (isBlank(partitionHeader)) {
-			if (theRequestDetails instanceof SystemRequestDetails) {
-				return myDefaultPartitionSettings.getDefaultRequestPartitionId();
+			if (theRequestDetails instanceof SystemRequestDetails systemRequestDetails) {
+				if (systemRequestDetails.getRequestPartitionId() != null) {
+					return systemRequestDetails.getRequestPartitionId();
+				} else {
+					return myDefaultPartitionSettings.getDefaultRequestPartitionId();
+				}
 			}
 			throw new InvalidRequestException(Msg.code(2642)
 					+ String.format(
