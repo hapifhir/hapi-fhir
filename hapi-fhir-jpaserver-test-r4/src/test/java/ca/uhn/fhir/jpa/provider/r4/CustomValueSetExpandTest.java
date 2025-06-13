@@ -31,36 +31,33 @@ public class CustomValueSetExpandTest extends BaseResourceProviderR4Test {
 
   @Test
   public void testExpandAndPrint() throws Exception {
-    // 1. 使用低階 API 直接載入 ICD-10-CM CodeSystem (改為2023版本)
+    // 1. Use low-level API to directly load ICD-10-CM CodeSystem (changed to 2023 version)
     TermLoaderSvcImpl termLoaderSvc = new TermLoaderSvcImpl(myTerminologyDeferredStorageSvc, myTermCodeSystemStorageSvc);
     
-    // 載入2023版本的ICD-10-CM檔案
-    String filename = "icd10cm-tabular-2023.xml";  // 使用你的2023版本檔案
+    // Load 2023 version of ICD-10-CM file
+    String filename = "icd10cm-tabular-2023.xml";  // Use your 2023 version file
     
     String resource = ClasspathUtil.loadResource(filename);
     List<ITermLoaderSvc.FileDescriptor> descriptors = new ArrayList<>();
     descriptors.add(new ITermLoaderSvc.ByteArrayFileDescriptor(filename, resource.getBytes(StandardCharsets.UTF_8)));
     
-    // 載入ICD-10-CM
+    // Load ICD-10-CM
     termLoaderSvc.loadIcd10cm(descriptors, new SystemRequestDetails());
     myTerminologyDeferredStorageSvc.saveAllDeferred();
     
-    // 驗證載入成功
+    // Verify loading success
     runInTransaction(() -> {
       TermCodeSystem codeSystem = myTermCodeSystemDao.findByCodeSystemUri(ITermLoaderSvc.ICD10CM_URI);
-      System.out.println("載入的 ICD-10-CM 版本: " + codeSystem.getCurrentVersion().getCodeSystemVersionId());
-      System.out.println("載入的概念數量: " + myTermConceptDao.count());
+      System.out.println("Loaded ICD-10-CM Version: " + codeSystem.getCurrentVersion().getCodeSystemVersionId());
+      System.out.println("Loaded concept count: " + myTermConceptDao.count());
     });
 
-    // 等待CodeSystem處理完成 - 大型術語系統需要時間索引
-    // System.out.println("等待CodeSystem處理完成...");
-    // Thread.sleep(10000); // 等待10秒讓系統處理上傳的數據
 
-    // 2. 讀入並建立 ValueSet
+    // 2. Read and create ValueSet
     String vsJson = ClasspathUtil.loadResource("/my-valueset.json");
     ValueSet vs = myFhirCtx.newJsonParser().parseResource(ValueSet.class, vsJson);
 
-    // 檢查 ValueSet 的構成
+    // Check ValueSet composition
     System.out.println("ValueSet URL: " + vs.getUrl());
     System.out.println("ValueSet compose includes:");
     vs.getCompose().getInclude().forEach(include -> {
@@ -77,7 +74,7 @@ public class CustomValueSetExpandTest extends BaseResourceProviderR4Test {
 
     myClient.create().resource(vs).execute();
 
-    // 3. 組裝輸入的 Parameters 並呼叫 $expand
+    // 3. Assemble input Parameters and call $expand
     Parameters inParams = new Parameters();
     inParams.addParameter().setName("url").setValue(vs.getUrlElement());
 
@@ -87,7 +84,7 @@ public class CustomValueSetExpandTest extends BaseResourceProviderR4Test {
     
     while (expanded == null && currentRetry < maxRetries) {
       try {
-        System.out.println("嘗試第 " + (currentRetry + 1) + " 次展開ValueSet...");
+        System.out.println("Attempting to expand ValueSet (attempt " + (currentRetry + 1) + ")...");
         expanded = myClient
             .operation()
             .onType(ValueSet.class)
@@ -95,21 +92,21 @@ public class CustomValueSetExpandTest extends BaseResourceProviderR4Test {
             .withParameters(inParams)
             .returnResourceType(ValueSet.class)
             .execute();
-        System.out.println("ValueSet展開成功！");
+        System.out.println("ValueSet expansion successful!");
       } catch (Exception e) {
         currentRetry++;
-        System.out.println("展開失敗 (第 " + currentRetry + " 次嘗試): " + e.getMessage());
+        System.out.println("Expansion failed (attempt " + currentRetry + "): " + e.getMessage());
         if (currentRetry < maxRetries) {
-          System.out.println("等待5秒後重試...");
+          System.out.println("Waiting 5 seconds before retry...");
           Thread.sleep(5000);
         } else {
-          System.out.println("所有重試都失敗，拋出異常");
+          System.out.println("All retries failed, throwing exception");
           throw e;
         }
       }
     }
 
-    // 4. 印出所有 contains
+    // 4. Print all contains
     expanded.getExpansion().getContains().forEach(c -> {
       System.out.println(
           "system=" + c.getSystem() +
