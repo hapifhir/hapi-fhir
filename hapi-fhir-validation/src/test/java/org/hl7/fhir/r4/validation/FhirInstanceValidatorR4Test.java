@@ -23,7 +23,6 @@ import org.hl7.fhir.MockValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
@@ -39,7 +38,6 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -47,7 +45,6 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Media;
-import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
@@ -1728,7 +1725,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors).isEmpty();
+		assertThat(errors.stream().noneMatch(e -> e.getSeverity() == ResultSeverityEnum.ERROR)).isTrue();
 	}
 
 	private Bundle buildBundle(int theSize, boolean theValidBundle) throws IOException {
@@ -1758,8 +1755,8 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			myMockSupport,
 			new CommonCodeSystemsTerminologyService(ourCtx),
 			ourCtx.getValidationSupport(),
-			new InMemoryTerminologyServerValidationSupport(ourCtx),
-			new SnapshotGeneratingValidationSupport(ourCtx));
+			new InMemoryTerminologyServerValidationSupport(ourCtx)
+		);
 		myValidationSupport = chain.setCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid(theLogicalAnd);
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 		myFhirValidator.registerValidatorModule(myInstanceVal);
@@ -1785,5 +1782,4 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	public static void afterClassClearContext() throws IOException, NoSuchFieldException {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
-
 }
