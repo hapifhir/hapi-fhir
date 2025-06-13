@@ -32,6 +32,7 @@ import ca.uhn.fhir.util.IModelVisitor2;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -386,6 +387,12 @@ public class FhirPatch {
 							findChildDefinitionAtEndOfPath(theTargetChildDefinition, theReplacementValue);
 					replaceSingleValue(theFhirPath, theParsedFhirPath, ct, theReplacementValue);
 				} else {
+					if (theTargetChildDefinition.getBaseRuntimeDefinition() != null && !theTargetChildDefinition.getBaseRuntimeDefinition().isMultipleCardinality()) {
+						// basic primitive type assignment
+						target.setValueAsString(source.getValueAsString());
+						return;
+					}
+
 					// the primitive can have multiple value types
 					BaseRuntimeElementDefinition<?> parentEl =
 							theTargetChildDefinition.getParent().getElementDefinition();
@@ -659,6 +666,8 @@ public class FhirPatch {
 
 			if (newPath.getHead() instanceof ParsedFhirPath.FhirPathFunction fn && fn.hasContainedExp()) {
 				newPath = fn.getContainedExp();
+
+				childFilteringPath = newPath.getRawPath();
 			}
 
 			// get all direct children
