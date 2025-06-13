@@ -183,6 +183,19 @@ public abstract class BaseParser implements IParser {
 				});
 	}
 
+	/**
+	 * We add the reference to the input resources to ensure it doesn't get
+	 * overwritten if it wasn't there.
+	 * The resource is being mutated anyways, so this is fine.
+	 *
+	 * We need to maintain the reference as an internal reference (ie,
+	 * preceded by an #) because otherwise later transactions cannot
+	 * process the resource (since the reference will not be set).
+	 */
+	private void setReference(IBaseReference theReference, String theText) {
+		theReference.setReference(theText);
+	}
+
 	private String determineReferenceText(
 			IBaseReference theRef,
 			CompositeChildElement theCompositeChildElement,
@@ -200,10 +213,12 @@ public abstract class BaseParser implements IParser {
 						reference = containedId.getValue();
 					} else {
 						reference = "#" + containedId.getValue();
+						setReference(theRef, reference);
 					}
 				} else if (previouslyContainedId != null) {
 					reference = "#" + previouslyContainedId.getValue();
 					theContext.getContainedResources().addContained(previouslyContainedId, theRef.getResource());
+					setReference(theRef, reference);
 				} else {
 					IIdType refId = theRef.getResource().getIdElement();
 					if (refId != null) {
@@ -227,6 +242,12 @@ public abstract class BaseParser implements IParser {
 				}
 			}
 			return reference;
+		} else {
+			if (ref.isLocal() && !theContext.getContainedResources().referenceMatchesAContainedResource(ref)) {
+				throw new DataFormatException(
+						"There is a reference that begins with #, but no resource with this ID is contained. [reference="
+								+ ref.getIdPart() + "]");
+			}
 		}
 		if (!ref.hasResourceType() && !ref.isLocal() && theRef.getResource() != null) {
 			ref = ref.withResourceType(
@@ -839,6 +860,7 @@ public abstract class BaseParser implements IParser {
 							myContext.getElementDefinition(nextRef.getClass()).newInstance();
 					myContext.newTerser().cloneInto(nextRef, newRef, true);
 					newRef.setReference(refText);
+
 					retVal.set(i, newRef);
 				}
 			}
