@@ -12,13 +12,9 @@ import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.util.VersionEnum;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -48,19 +44,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-/**
- * @deprecated This test starts all databases simultaneously which causes resource issues.
- * Use the individual database-specific test classes instead:
- * - {@link HapiSchemaMigrationH2Test}
- * - {@link HapiSchemaMigrationPostgresTest}
- * - {@link HapiSchemaMigrationMsSqlTest}
- * - {@link HapiSchemaMigrationOracleTest}
- */
 @RequiresDocker
-@Deprecated(since = "7.8.0", forRemoval = true)
-public class HapiSchemaMigrationTest {
+public abstract class BaseHapiSchemaMigrationTest {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(HapiSchemaMigrationTest.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiSchemaMigrationTest.class);
 	public static final String TEST_SCHEMA_NAME = "test";
 
 	private static final String METADATA_COLUMN_NAME = "COLUMN_NAME";
@@ -87,13 +74,13 @@ public class HapiSchemaMigrationTest {
 		HapiSystemProperties.enableUnitTestMode();
 	}
 
-	@RegisterExtension
-	static HapiEmbeddedDatabasesExtension myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtension();
+	protected abstract HapiEmbeddedDatabasesExtension getEmbeddedDatabasesExtension();
+	protected abstract DriverTypeEnum getDriverType();
 
 	@AfterEach
 	public void afterEach() {
 		try {
-			myEmbeddedServersExtension.clearDatabases();
+			getEmbeddedDatabasesExtension().clearDatabases();
 			// The stack trace for this failure does not appear in CI logs.  Catching and rethrowing to log the error.
 		} catch (Exception e) {
 			ourLog.error("Failed to clear databases", e);
@@ -101,11 +88,13 @@ public class HapiSchemaMigrationTest {
 		}
 	}
 
-	@ParameterizedTest
-	@ArgumentsSource(HapiEmbeddedDatabasesExtension.DatabaseVendorProvider.class)
-	public void testMigration(DriverTypeEnum theDriverType) throws SQLException {
+	@Test
+	public void testMigration() throws SQLException {
 		// ensure all migrations are run
 		HapiSystemProperties.disableUnitTestMode();
+
+		DriverTypeEnum theDriverType = getDriverType();
+		HapiEmbeddedDatabasesExtension myEmbeddedServersExtension = getEmbeddedDatabasesExtension();
 
 		ourLog.info("Running hapi fhir migration tasks for {}", theDriverType);
 
@@ -347,7 +336,7 @@ public class HapiSchemaMigrationTest {
 	@Test
 	public void testCreateMigrationTableIfRequired() throws SQLException {
 		// Setup
-		BasicDataSource dataSource = new BasicDataSource();
+		org.apache.commons.dbcp2.BasicDataSource dataSource = new org.apache.commons.dbcp2.BasicDataSource();
 		dataSource.setUrl("jdbc:h2:mem:no-tables");
 		dataSource.setUsername("SA");
 		dataSource.setPassword("SA");
