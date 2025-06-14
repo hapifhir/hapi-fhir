@@ -381,7 +381,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 			// log if we tried to retry, but still failed
 			String msg = "Max retries (" + theMaxRetries + ") exceeded for version conflict: " + theCause.getMessage();
 			ourLog.info(msg);
-			throw new ResourceVersionConflictException(Msg.code(549) + msg);
+			throw new ResourceVersionConflictException(Msg.code(549) + msg, theCause, oo);
 		}
 
 		throw new ResourceVersionConflictException(Msg.code(550) + theCause.getMessage(), theCause, oo);
