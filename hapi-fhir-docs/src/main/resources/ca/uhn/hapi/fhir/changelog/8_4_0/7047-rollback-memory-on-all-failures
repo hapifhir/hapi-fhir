@@ -1,4 +1,4 @@
 ---
 type: change
 issue: 7047
-title: "The HapiTransactionService now runs the rollback hooks on all retriable failures, even when not retrying."
+title: "The HapiTransactionService now runs the rollback hooks on all exceptions, even when not retrying."
