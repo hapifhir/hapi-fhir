@@ -388,7 +388,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 	}
 
 	/**
-	 * Sleep a bit more each time, with 0 sleep on first retry.
+	 * Sleep a bit more each time, with 0 sleep on first retry and some random dither.
 	 * @param theAttemptIndex 0-index for the first attempt, 1 for second, etc.
 	 */
 	private void sleepForRetry(int theAttemptIndex) {
