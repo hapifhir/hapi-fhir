@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.interceptor.TransactionConcurrencySemaphoreInterceptor;
 import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -619,7 +620,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	@Test
 	public void testNoRetryRequest() {
 		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
-		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.emptyList());
+		when(mySrd.getHeaders(eq(Constants.HEADER_RETRY_ON_VERSION_CONFLICT))).thenReturn(Collections.emptyList());
 
 		List<Future<?>> futures = new ArrayList<>();
 		for (int i = 0; i < 5; i++) {
@@ -695,7 +696,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	@Test
 	public void testNoRequestDetails() {
 		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
-		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.emptyList());
+		when(mySrd.getHeaders(eq(Constants.HEADER_RETRY_ON_VERSION_CONFLICT))).thenReturn(Collections.emptyList());
 
 		List<Future<?>> futures = new ArrayList<>();
 		for (int i = 0; i < 5; i++) {
