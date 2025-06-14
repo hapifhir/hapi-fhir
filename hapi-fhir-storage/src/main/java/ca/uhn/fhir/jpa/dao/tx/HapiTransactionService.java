@@ -183,11 +183,11 @@ public class HapiTransactionService implements IHapiTransactionService {
 		return execute(theRequestDetails, theTransactionDetails, theCallback, theOnRollback, null, null);
 	}
 
-	@SuppressWarnings("ConstantConditions")
 	/**
 	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
 	 */
 	@Deprecated
+	@SuppressWarnings("ConstantConditions")
 	public <T> T execute(
 			@Nullable RequestDetails theRequestDetails,
 			@Nullable TransactionDetails theTransactionDetails,
@@ -335,53 +335,45 @@ public class HapiTransactionService implements IHapiTransactionService {
 			RequestPartitionId previousRequestPartitionId) {
 		ourLog.trace("doExecuteInTransaction");
 		try {
+			// retry loop
 			for (int i = 0; ; i++) {
 				try {
 
 					return doExecuteCallback(theExecutionBuilder, theCallback);
 
 				} catch (Exception e) {
+					// we roll back on all exceptions.
+					theExecutionBuilder.rollbackTransactionProcessingChanges();
+
 					if (!isRetriable(e)) {
-						// FIXME REVIEW QUESTION: Can we delete this branch, and delegate to the interceptor to decide
-						// the number of retries?
-						// Since we now unconditionally rollback on the retriable branch, but not on this one, this
-						// feels like a sharp edge.
 						ourLog.debug("Unexpected transaction exception. Will not be retried.", e);
 						throw e;
 					} else {
-
+						// We have several exceptions that we consider retriable, call all of them "version conflicts"
 						ourLog.debug("Version conflict detected", e);
 
-						theExecutionBuilder.rollbackTransactionProcessingChanges();
-
 						// should we retry?
-						int maxRetries = theExecutionBuilder.calculateMaxRetries(e, this);
-						if (i < maxRetries) {
-							double sleepAmount = (250.0d * i) * Math.random();
-							long sleepAmountLong = (long) sleepAmount;
-							mySleepUtil.sleepAtLeast(sleepAmountLong, false);
-
-							ourLog.info(
-									"About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.",
-									sleepAmountLong);
-							continue;
-						} else {
-							// if we do not retry, or we have exceeded the maxRetries, failure path.
+						int maxRetries = calculateMaxRetries(theExecutionBuilder.myRequestDetails, e);
+						if (i >= maxRetries) {
+							// No retry path
 							IBaseOperationOutcome oo = null;
 							if (e instanceof ResourceVersionConflictException) {
 								oo = ((ResourceVersionConflictException) e).getOperationOutcome();
 							}
 
-							if (maxRetries > 0) {
-								// log if we tried to retry, but failed
+							if (i > 0) {
+								// log if we tried to retry, but still failed
 								String msg = "Max retries (" + maxRetries + ") exceeded for version conflict: "
 										+ e.getMessage();
-								ourLog.info(msg, maxRetries);
+								ourLog.info(msg);
 								throw new ResourceVersionConflictException(Msg.code(549) + msg);
 							}
 
 							throw new ResourceVersionConflictException(Msg.code(550) + e.getMessage(), e, oo);
 						}
+
+						// We are retrying.
+						sleepForRetry(i);
 					}
 				}
 			}
@@ -390,6 +382,20 @@ public class HapiTransactionService implements IHapiTransactionService {
 				ourRequestPartitionThreadLocal.set(previousRequestPartitionId);
 			}
 		}
+	}
+
+	/**
+	 * Sleep a bit more each time, with 0 sleep on first retry.
+	 * @param theAttemptIndex 0-index for the first attempt, 1 for second, etc.
+	 */
+	private void sleepForRetry(int theAttemptIndex) {
+		double sleepAmount = (250.0d * theAttemptIndex) * Math.random();
+		long sleepAmountLong = (long) sleepAmount;
+		mySleepUtil.sleepAtLeast(sleepAmountLong, false);
+
+		ourLog.info(
+				"About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.",
+				sleepAmountLong);
 	}
 
 	public void setTransactionPropagationWhenChangingPartitions(
@@ -425,6 +431,41 @@ public class HapiTransactionService implements IHapiTransactionService {
 				throw new InternalErrorException(Msg.code(551) + e);
 			}
 		}
+	}
+
+	private int calculateMaxRetries(RequestDetails theRequestDetails, Exception e) {
+		int maxRetries = 0;
+
+		/*
+		 * If two client threads both concurrently try to add the same tag that isn't
+		 * known to the system already, they'll both try to create a row in HFJ_TAG_DEF,
+		 * which is the tag definition table. In that case, a constraint error will be
+		 * thrown by one of the client threads, so we auto-retry in order to avoid
+		 * annoying spurious failures for the client.
+		 */
+		if (DaoFailureUtil.isTagStorageFailure(e)) {
+			maxRetries = 3;
+		}
+
+		// Our default policy is no-retry.
+		// But we often register UserRequestRetryVersionConflictsInterceptor, which supports a retry header
+		// and retry settings on RequestDetails.
+		if (maxRetries == 0) {
+			IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+					this.myInterceptorBroadcaster, theRequestDetails);
+			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_VERSION_CONFLICT)) {
+				HookParams params = new HookParams()
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+				ResourceVersionConflictResolutionStrategy conflictResolutionStrategy =
+						(ResourceVersionConflictResolutionStrategy) compositeBroadcaster.callHooksAndReturnObject(
+								Pointcut.STORAGE_VERSION_CONFLICT, params);
+				if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
+					maxRetries = conflictResolutionStrategy.getMaxRetries();
+				}
+			}
+		}
+		return maxRetries;
 	}
 
 	protected class ExecutionBuilder implements IExecutionBuilder, TransactionOperations, Cloneable {
@@ -547,38 +588,6 @@ public class HapiTransactionService implements IHapiTransactionService {
 				myTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
 				myTransactionDetails.clearUserData(XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
 			}
-		}
-
-		private int calculateMaxRetries(Exception e, HapiTransactionService theHapiTransactionService) {
-			int maxRetries = 0;
-
-			/*
-			 * If two client threads both concurrently try to add the same tag that isn't
-			 * known to the system already, they'll both try to create a row in HFJ_TAG_DEF,
-			 * which is the tag definition table. In that case, a constraint error will be
-			 * thrown by one of the client threads, so we auto-retry in order to avoid
-			 * annoying spurious failures for the client.
-			 */
-			if (DaoFailureUtil.isTagStorageFailure(e)) {
-				maxRetries = 3;
-			}
-
-			if (maxRetries == 0) {
-				IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
-						theHapiTransactionService.myInterceptorBroadcaster, myRequestDetails);
-				if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_VERSION_CONFLICT)) {
-					HookParams params = new HookParams()
-							.add(RequestDetails.class, myRequestDetails)
-							.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
-					ResourceVersionConflictResolutionStrategy conflictResolutionStrategy =
-							(ResourceVersionConflictResolutionStrategy) compositeBroadcaster.callHooksAndReturnObject(
-									Pointcut.STORAGE_VERSION_CONFLICT, params);
-					if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
-						maxRetries = conflictResolutionStrategy.getMaxRetries();
-					}
-				}
-			}
-			return maxRetries;
 		}
 	}
 
