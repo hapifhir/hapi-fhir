@@ -15,7 +15,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 
+import java.text.DecimalFormatSymbols;
 import java.time.Duration;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -69,7 +71,12 @@ class TimeoutManagerTest {
 
 	@Test
 	public void checkTimeout_warningThreadholdHit_warningLogged() {
+
 		// setup
+		Locale locale = Locale.getDefault();
+		DecimalFormatSymbols symbols = new DecimalFormatSymbols(locale);
+		char decimalSeparator = symbols.getDecimalSeparator();
+
 		mySvc.addTimeForUnitTest(Duration.ofDays(2));
 		// execute
 		assertTrue(mySvc.checkTimeout());
@@ -77,7 +84,8 @@ class TimeoutManagerTest {
 		verify(myAppender, times(1)).doAppend(myLoggingEvent.capture());
 		ILoggingEvent event = myLoggingEvent.getValue();
 		assertEquals(Level.WARN, event.getLevel());
-		assertEquals(TEST_SERVICE_NAME + " has run for 2.0 days", event.getFormattedMessage());
+
+		assertEquals(TEST_SERVICE_NAME + " has run for 2" + decimalSeparator + "0 days", event.getFormattedMessage());
 	}
 
 	@Test
