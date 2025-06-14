@@ -354,12 +354,12 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 						// should we retry?
 						int maxRetries = calculateMaxRetries(theExecutionBuilder.myRequestDetails, e);
-						if (i >= maxRetries) {
+						if (i < maxRetries) {
+							// We are retrying.
+							sleepForRetry(i);
+						} else {
 							throwResourceVersionConflictException(i, maxRetries, e);
 						}
-
-						// We are retrying.
-						sleepForRetry(i);
 					}
 				}
 			}
