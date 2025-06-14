@@ -355,21 +355,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 						// should we retry?
 						int maxRetries = calculateMaxRetries(theExecutionBuilder.myRequestDetails, e);
 						if (i >= maxRetries) {
-							// No retry path
-							IBaseOperationOutcome oo = null;
-							if (e instanceof ResourceVersionConflictException) {
-								oo = ((ResourceVersionConflictException) e).getOperationOutcome();
-							}
-
-							if (i > 0) {
-								// log if we tried to retry, but still failed
-								String msg = "Max retries (" + maxRetries + ") exceeded for version conflict: "
-										+ e.getMessage();
-								ourLog.info(msg);
-								throw new ResourceVersionConflictException(Msg.code(549) + msg);
-							}
-
-							throw new ResourceVersionConflictException(Msg.code(550) + e.getMessage(), e, oo);
+							throwResourceVersionConflictException(i, maxRetries, e);
 						}
 
 						// We are retrying.
@@ -382,6 +368,23 @@ public class HapiTransactionService implements IHapiTransactionService {
 				ourRequestPartitionThreadLocal.set(previousRequestPartitionId);
 			}
 		}
+	}
+
+	private static void throwResourceVersionConflictException(
+			int theAttemptIndex, int theMaxRetries, Exception theCause) {
+		IBaseOperationOutcome oo = null;
+		if (theCause instanceof ResourceVersionConflictException) {
+			oo = ((ResourceVersionConflictException) theCause).getOperationOutcome();
+		}
+
+		if (theAttemptIndex > 0) {
+			// log if we tried to retry, but still failed
+			String msg = "Max retries (" + theMaxRetries + ") exceeded for version conflict: " + theCause.getMessage();
+			ourLog.info(msg);
+			throw new ResourceVersionConflictException(Msg.code(549) + msg);
+		}
+
+		throw new ResourceVersionConflictException(Msg.code(550) + theCause.getMessage(), theCause, oo);
 	}
 
 	/**
