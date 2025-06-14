@@ -43,11 +43,22 @@ public class PostgresEmbeddedDatabase extends JpaContainerDatabase {
 
 	public PostgresEmbeddedDatabase(PostgreSQLContainer<?> theContainer) {
 		super(theContainer);
+		// Don't initialize here - defer until first access
+	}
+
+	@Override
+	protected void doInitialize() {
+		startContainer();
 		super.initialize(
 				DriverTypeEnum.POSTGRES_9_4,
 				myContainer.getJdbcUrl(),
 				myContainer.getUsername(),
 				myContainer.getPassword());
+	}
+
+	@Override
+	public DriverTypeEnum getDriverType() {
+		return DriverTypeEnum.POSTGRES_9_4;
 	}
 
 	@Override

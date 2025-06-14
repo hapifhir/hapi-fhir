@@ -47,16 +47,18 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiEmbeddedDatabasesExtension.class);
 
 	private final Set<JpaEmbeddedDatabase> myEmbeddedDatabases = new HashSet<>();
+	private final Set<DriverTypeEnum> myRequestedDatabases = new HashSet<>();
 
 	private final DatabaseInitializerHelper myDatabaseInitializerHelper = new DatabaseInitializerHelper();
 
 	public HapiEmbeddedDatabasesExtension() {
+		// Create all databases for backward compatibility
 		if (DockerRequiredCondition.isDockerAvailable()) {
-			myEmbeddedDatabases.add(new H2EmbeddedDatabase());
-			myEmbeddedDatabases.add(new PostgresEmbeddedDatabase());
-			myEmbeddedDatabases.add(new MsSqlEmbeddedDatabase());
+			myRequestedDatabases.add(DriverTypeEnum.H2_EMBEDDED);
+			myRequestedDatabases.add(DriverTypeEnum.POSTGRES_9_4);
+			myRequestedDatabases.add(DriverTypeEnum.MSSQL_2012);
 			if (DatabaseSupportUtil.canUseOracle()) {
-				myEmbeddedDatabases.add(new OracleEmbeddedDatabase());
+				myRequestedDatabases.add(DriverTypeEnum.ORACLE_12C);
 			} else {
 				String message =
 						"Cannot add OracleEmbeddedDatabase. If you are using a Mac you must configure the TestContainers API to run using Colima (https://www.testcontainers.org/supported_docker_environment#using-colima)";
@@ -67,6 +69,22 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 		}
 	}
 
+	private HapiEmbeddedDatabasesExtension(Set<DriverTypeEnum> requestedDatabases) {
+		myRequestedDatabases.addAll(requestedDatabases);
+	}
+
+	public static HapiEmbeddedDatabasesExtension forDatabase(DriverTypeEnum databaseType) {
+		return new HapiEmbeddedDatabasesExtension(Set.of(databaseType));
+	}
+
+	public static HapiEmbeddedDatabasesExtension forDatabases(DriverTypeEnum... databaseTypes) {
+		return new HapiEmbeddedDatabasesExtension(Set.of(databaseTypes));
+	}
+
+	public static HapiEmbeddedDatabasesExtension forAllDatabases() {
+		return new HapiEmbeddedDatabasesExtension();
+	}
+
 	@Override
 	public void afterAll(ExtensionContext theExtensionContext) {
 		for (JpaEmbeddedDatabase database : getAllEmbeddedDatabases()) {
@@ -75,10 +93,40 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 	}
 
 	public JpaEmbeddedDatabase getEmbeddedDatabase(DriverTypeEnum theDriverType) {
+		// Ensure the database type is allowed
+		if (!myRequestedDatabases.contains(theDriverType)) {
+			throw new IllegalArgumentException(
+					"Database type " + theDriverType + " was not requested for this extension");
+		}
+
 		return getAllEmbeddedDatabases().stream()
 				.filter(db -> theDriverType.equals(db.getDriverType()))
 				.findFirst()
-				.orElseThrow();
+				.orElseGet(() -> createDatabase(theDriverType));
+	}
+
+	private JpaEmbeddedDatabase createDatabase(DriverTypeEnum theDriverType) {
+		if (!DockerRequiredCondition.isDockerAvailable() && theDriverType != DriverTypeEnum.H2_EMBEDDED) {
+			throw new IllegalStateException("Docker is not available! Cannot create database: " + theDriverType);
+		}
+
+		JpaEmbeddedDatabase database =
+				switch (theDriverType) {
+					case H2_EMBEDDED -> new H2EmbeddedDatabase();
+					case POSTGRES_9_4 -> new PostgresEmbeddedDatabase();
+					case MSSQL_2012 -> new MsSqlEmbeddedDatabase();
+					case ORACLE_12C -> {
+						if (!DatabaseSupportUtil.canUseOracle()) {
+							throw new IllegalStateException(
+									"Cannot create OracleEmbeddedDatabase. If you are using a Mac you must configure the TestContainers API to run using Colima");
+						}
+						yield new OracleEmbeddedDatabase();
+					}
+					default -> throw new IllegalArgumentException("Unsupported database type: " + theDriverType);
+				};
+
+		myEmbeddedDatabases.add(database);
+		return database;
 	}
 
 	public void clearDatabases() {

@@ -36,9 +36,14 @@ import java.util.Map;
  */
 public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
 
-	private final OracleContainer myContainer;
+	private OracleContainer myContainer;
 
 	public OracleEmbeddedDatabase() {
+		// Don't start container here - defer until first access
+	}
+
+	@Override
+	protected void doInitialize() {
 		myContainer = new OracleContainer("gvenzl/oracle-xe:21-slim-faststart").withPrivilegedMode(true);
 		myContainer.start();
 		super.initialize(
@@ -49,8 +54,15 @@ public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
 	}
 
 	@Override
+	public DriverTypeEnum getDriverType() {
+		return DriverTypeEnum.ORACLE_12C;
+	}
+
+	@Override
 	public void stop() {
-		myContainer.stop();
+		if (myContainer != null) {
+			myContainer.stop();
+		}
 	}
 
 	@Override

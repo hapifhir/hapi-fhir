@@ -52,6 +52,7 @@ public abstract class JpaEmbeddedDatabase {
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
 	private JdbcTemplate myJdbcTemplate;
 	private Connection myConnection;
+	private boolean myInitialized = false;
 
 	@PreDestroy
 	public abstract void stop();
@@ -61,6 +62,15 @@ public abstract class JpaEmbeddedDatabase {
 	public abstract void enableConstraints();
 
 	public abstract void clearDatabase();
+
+	protected abstract void doInitialize();
+
+	private void ensureInitialized() {
+		if (!myInitialized) {
+			doInitialize();
+			myInitialized = true;
+		}
+	}
 
 	public void initialize(DriverTypeEnum theDriverType, String theUrl, String theUsername, String thePassword) {
 		myDriverType = theDriverType;
@@ -93,14 +103,17 @@ public abstract class JpaEmbeddedDatabase {
 	}
 
 	public JdbcTemplate getJdbcTemplate() {
+		ensureInitialized();
 		return myJdbcTemplate;
 	}
 
 	public DataSource getDataSource() {
+		ensureInitialized();
 		return myConnectionProperties.getDataSource();
 	}
 
 	public void insertTestData(String theSql) {
+		ensureInitialized();
 		disableConstraints();
 		executeSqlAsBatch(theSql);
 		enableConstraints();
@@ -112,6 +125,7 @@ public abstract class JpaEmbeddedDatabase {
 	}
 
 	public void executeSqlAsBatch(List<String> theStatements) {
+		ensureInitialized();
 		try (final Statement statement = myConnection.createStatement()) {
 			for (String sql : theStatements) {
 				if (!StringUtils.isBlank(sql)) {

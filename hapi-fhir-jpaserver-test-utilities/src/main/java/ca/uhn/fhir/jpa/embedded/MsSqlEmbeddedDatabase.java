@@ -41,10 +41,14 @@ import java.util.Map;
 public class MsSqlEmbeddedDatabase extends JpaEmbeddedDatabase {
 	private static final Logger ourLog = LoggerFactory.getLogger(MsSqlEmbeddedDatabase.class);
 
-	private final MSSQLServerContainer myContainer;
+	private MSSQLServerContainer myContainer;
 
 	public MsSqlEmbeddedDatabase() {
+		// Don't start container here - defer until first access
+	}
 
+	@Override
+	protected void doInitialize() {
 		// azure-sql-edge docker image does not support kernel 6.7+
 		// as a result, mssql container fails to start most of the time
 		// mssql/server:2019 image support kernel 6.7+, so use it for amd64 architecture
@@ -66,8 +70,15 @@ public class MsSqlEmbeddedDatabase extends JpaEmbeddedDatabase {
 	}
 
 	@Override
+	public DriverTypeEnum getDriverType() {
+		return DriverTypeEnum.MSSQL_2012;
+	}
+
+	@Override
 	public void stop() {
-		myContainer.stop();
+		if (myContainer != null) {
+			myContainer.stop();
+		}
 	}
 
 	@Override
