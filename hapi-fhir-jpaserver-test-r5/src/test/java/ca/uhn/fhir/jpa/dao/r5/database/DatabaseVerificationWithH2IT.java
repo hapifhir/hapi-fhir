@@ -1,20 +1,20 @@
 package ca.uhn.fhir.jpa.dao.r5.database;
 
-import ca.uhn.fhir.jpa.embedded.PostgresEmbeddedDatabase;
+import ca.uhn.fhir.jpa.embedded.H2EmbeddedDatabase;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect;
+import org.hibernate.dialect.H2Dialect;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = {
-	DatabaseVerificationWithPostgresIT.TestConfig.class
+	DatabaseVerificationWithH2IT.TestConfig.class
 })
-public class DatabaseVerificationWithPostgresIT extends BaseDatabaseVerificationIT {
+public class DatabaseVerificationWithH2IT extends BaseDatabaseVerificationIT {
 
 	@Override
 	protected DriverTypeEnum getDriverType() {
-		return DriverTypeEnum.POSTGRES_9_4;
+		return DriverTypeEnum.H2_EMBEDDED;
 	}
 
 	@Configuration
@@ -22,8 +22,8 @@ public class DatabaseVerificationWithPostgresIT extends BaseDatabaseVerification
 		@Bean
 		public JpaDatabaseContextConfigParamObject jpaDatabaseParamObject() {
 			return new JpaDatabaseContextConfigParamObject(
-				new PostgresEmbeddedDatabase(),
-				HapiFhirPostgresDialect.class.getName()
+				new H2EmbeddedDatabase(),
+				H2Dialect.class.getName()
 			);
 		}
 	}
