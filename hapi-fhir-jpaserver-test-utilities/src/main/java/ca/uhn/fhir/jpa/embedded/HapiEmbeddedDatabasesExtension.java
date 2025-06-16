@@ -96,7 +96,8 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 		if (myRequestedDatabases.size() == 1) {
 			return getEmbeddedDatabase(myRequestedDatabases.iterator().next());
 		} else {
-			throw new RuntimeException("Found more or less than one embedded database in the extension! [databaseCount=" + myEmbeddedDatabases.size() + "]");
+			throw new RuntimeException("Found more or less than one embedded database in the extension! [databaseCount="
+					+ myEmbeddedDatabases.size() + "]");
 		}
 	}
 
