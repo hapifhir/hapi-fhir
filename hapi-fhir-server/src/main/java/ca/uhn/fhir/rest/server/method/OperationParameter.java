@@ -49,6 +49,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ReflectionUtil;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -154,6 +155,16 @@ public class OperationParameter implements IParameter {
 			return mySearchParameterBinding.getParamType().getCode();
 		}
 		return null;
+	}
+
+	@VisibleForTesting
+	public Class<? extends Collection> getInnerCollectionType() {
+		return myInnerCollectionType;
+	}
+
+	@VisibleForTesting
+	public String getOperationName() {
+		return myOperationName;
 	}
 
 	@SuppressWarnings("unchecked")
