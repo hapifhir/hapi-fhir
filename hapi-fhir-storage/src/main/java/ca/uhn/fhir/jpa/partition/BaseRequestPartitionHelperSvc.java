@@ -128,7 +128,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			logSystemRequestDetailsResolution((SystemRequestDetails) requestDetails);
 
 		} else if ((requestDetails instanceof SystemRequestDetails) && nonPartitionableResource) {
-			requestPartitionId = RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
+			requestPartitionId = myPartitionSettings.getDefaultRequestPartitionId();
 			logSystemRequestDetailsResolution((SystemRequestDetails) requestDetails);
 			logNonPartitionableType(resourceType);
 		} else {
@@ -248,7 +248,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		RequestPartitionId requestPartitionId;
 		requestPartitionId = getSystemRequestPartitionId(theRequest);
 		if (theNonPartitionableResource
-				&& !requestPartitionId.isDefaultPartition(myPartitionSettings.getDefaultPartitionId())) {
+				&& !requestPartitionId.isPartition(myPartitionSettings.getDefaultPartitionId())) {
 			throw new InternalErrorException(Msg.code(1315)
 					+ "System call is attempting to write a non-partitionable resource to a partition! This is a bug!");
 		}
@@ -323,7 +323,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		// to DEFAULT
 		if (nonPartitionableResource && requestPartitionId == null) {
 			logNonPartitionableType(theResourceType);
-			requestPartitionId = RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
+			requestPartitionId = myPartitionSettings.getDefaultRequestPartitionId();
 		}
 
 		validateRequestPartitionNotNull(

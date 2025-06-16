@@ -34,7 +34,8 @@ public class RawStringMessage extends GenericMessage<String> implements IMessage
 		super(thePayload);
 	}
 
-	public RawStringMessage(String thePayload, Map<String, Object> theHeaders) {
-		super(thePayload, theHeaders);
+	public RawStringMessage(String thePayload, Map<String, ?> theHeaders) {
+		//noinspection unchecked
+		super(thePayload, (Map<String, Object>) theHeaders);
 	}
 }

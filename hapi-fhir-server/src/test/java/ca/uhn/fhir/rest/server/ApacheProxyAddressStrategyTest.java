@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import ca.uhn.fhir.rest.api.Constants;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 
@@ -21,7 +22,7 @@ public class ApacheProxyAddressStrategyTest {
 		ApacheProxyAddressStrategy addressStrategy = new ApacheProxyAddressStrategy(
 				true);
 		MockHttpServletRequest request = prepareRequest();
-		request.addHeader("X-Forwarded-Host", "my.example.host");
+		request.addHeader(Constants.HEADER_X_FORWARDED_HOST, "my.example.host");
 		String serverBase = addressStrategy.determineServerBase(null, request);
 		assertEquals("https://my.example.host/imagingstudy/fhir", serverBase);
 	}
@@ -31,7 +32,7 @@ public class ApacheProxyAddressStrategyTest {
 		ApacheProxyAddressStrategy addressStrategy = new ApacheProxyAddressStrategy(
 				false);
 		MockHttpServletRequest request = prepareRequest();
-		request.addHeader("X-Forwarded-Host", "my.example.host");
+		request.addHeader(Constants.HEADER_X_FORWARDED_HOST, "my.example.host");
 		String serverBase = addressStrategy.determineServerBase(null, request);
 		assertEquals("http://my.example.host/imagingstudy/fhir", serverBase);
 	}
@@ -41,9 +42,9 @@ public class ApacheProxyAddressStrategyTest {
 		ApacheProxyAddressStrategy addressStrategy = new ApacheProxyAddressStrategy(
 				true);
 		MockHttpServletRequest request = prepareRequest();
-		request.addHeader("X-Forwarded-Host", "my.example.host");
-		request.addHeader("X-Forwarded-Proto", "https");
-		request.addHeader("X-Forwarded-Prefix", "server-prefix/fhir");
+		request.addHeader(Constants.HEADER_X_FORWARDED_HOST, "my.example.host");
+		request.addHeader(Constants.HEADER_X_FORWARDED_PROTO, "https");
+		request.addHeader(Constants.HEADER_X_FORWARDED_PREFIX, "server-prefix/fhir");
 		String serverBase = addressStrategy.determineServerBase(null, request);
 		assertEquals("https://my.example.host/server-prefix/fhir", serverBase);
 	}
@@ -55,9 +56,9 @@ public class ApacheProxyAddressStrategyTest {
 		MockHttpServletRequest request = prepareRequest();
 		request.addHeader("host", "localhost");
 
-		request.addHeader("X-Forwarded-Host", "my.example.host");
-		request.addHeader("X-Forwarded-Proto", "https");
-		request.addHeader("X-Forwarded-Prefix", "/server-prefix/fhir");
+		request.addHeader(Constants.HEADER_X_FORWARDED_HOST, "my.example.host");
+		request.addHeader(Constants.HEADER_X_FORWARDED_PROTO, "https");
+		request.addHeader(Constants.HEADER_X_FORWARDED_PREFIX, "/server-prefix/fhir");
 		String serverBase = addressStrategy.determineServerBase(null, request);
 		assertEquals("https://my.example.host/server-prefix/fhir", serverBase);
 	}
@@ -68,8 +69,8 @@ public class ApacheProxyAddressStrategyTest {
 				true);
 		MockHttpServletRequest request = prepareRequest();
 
-		request.addHeader("X-Forwarded-Host", "my.example.host");
-		request.addHeader("X-Forwarded-Proto", "https");
+		request.addHeader(Constants.HEADER_X_FORWARDED_HOST, "my.example.host");
+		request.addHeader(Constants.HEADER_X_FORWARDED_PROTO, "https");
 		String serverBase = addressStrategy.determineServerBase(null, request);
 		assertEquals("https://my.example.host/imagingstudy/fhir", serverBase);
 	}
@@ -80,7 +81,7 @@ public class ApacheProxyAddressStrategyTest {
 				true);
 		MockHttpServletRequest request = prepareRequest();
 
-		request.addHeader("X-Forwarded-Host", "my.example.host");
+		request.addHeader(Constants.HEADER_X_FORWARDED_HOST, "my.example.host");
 		request.addHeader("X-Forwarded-Port", "345");
 		String serverBase = addressStrategy.determineServerBase(null, request);
 		assertEquals("https://my.example.host:345/imagingstudy/fhir", serverBase);
@@ -92,7 +93,7 @@ public class ApacheProxyAddressStrategyTest {
 				true);
 		MockHttpServletRequest request = prepareRequest();
 
-		request.addHeader("X-Forwarded-Host", "my.example.host");
+		request.addHeader(Constants.HEADER_X_FORWARDED_HOST, "my.example.host");
 		request.addHeader("X-Forwarded-Port", "-1");
 		String serverBase = addressStrategy.determineServerBase(null, request);
 		assertEquals("https://my.example.host/imagingstudy/fhir", serverBase);

@@ -217,7 +217,7 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 
 		RequestPartitionId normalizedRequestPartitionId = mySvc.validateAndNormalizePartitionNames(requestPartitionId);
 
-		assertThat(normalizedRequestPartitionId.isDefaultPartition(theDefaultPartitionId)).isTrue();
+		assertThat(normalizedRequestPartitionId.isPartition(theDefaultPartitionId)).isTrue();
 
 	}
 

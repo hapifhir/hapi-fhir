@@ -52,14 +52,14 @@ public class RequestPartitionIdTest {
 	}
 
 	@Test
-	public void testIsDefaultPartition_withDefaultPartitionAsParameter() {
+	public void testIsDefaultPartition_withPartitionAsParameter() {
 
-		assertThat(defaultPartition().isDefaultPartition(null)).isTrue();
-		assertThat(fromPartitionIds(ourDefaultPartitionId).isDefaultPartition(ourDefaultPartitionId)).isTrue();
+		assertThat(defaultPartition().isPartition(null)).isTrue();
+		assertThat(fromPartitionIds(ourDefaultPartitionId).isPartition(ourDefaultPartitionId)).isTrue();
 
-		assertThat(defaultPartition().isDefaultPartition(ourDefaultPartitionId)).isFalse();
-		assertThat(allPartitions().isDefaultPartition(ourDefaultPartitionId)).isFalse();
-		assertThat(fromPartitionIds(ourDefaultPartitionId, 2).isDefaultPartition(ourDefaultPartitionId)).isFalse();
+		assertThat(defaultPartition().isPartition(ourDefaultPartitionId)).isFalse();
+		assertThat(allPartitions().isPartition(ourDefaultPartitionId)).isFalse();
+		assertThat(fromPartitionIds(ourDefaultPartitionId, 2).isPartition(ourDefaultPartitionId)).isFalse();
 	}
 
 	@Test
