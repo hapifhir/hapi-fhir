@@ -56,7 +56,10 @@ public class UserRequestRetryVersionConflictsInterceptor {
 	public ResourceVersionConflictResolutionStrategy check(RequestDetails theRequestDetails) {
 		ResourceVersionConflictResolutionStrategy retVal = new ResourceVersionConflictResolutionStrategy();
 		boolean shouldSetRetries = theRequestDetails != null && theRequestDetails.isRetry();
-		// FIXME REVIEW QUESTION: Shouldn't this be in HapiTransactionService directly?
+		// This can be in HapiTransactionService directly but HapiTransactionService
+		// tackles database logic and doesn't deal with HTTP/client layer. The RequestDetails
+		// is only used here for interceptor broadcasting. Keeping this here is good separation
+		// of concerns.
 		if (shouldSetRetries) {
 			retVal.setRetry(true);
 			int maxRetries = Math.min(100, theRequestDetails.getMaxRetries());
