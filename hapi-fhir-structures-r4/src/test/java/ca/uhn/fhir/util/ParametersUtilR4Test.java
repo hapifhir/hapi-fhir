@@ -3,6 +3,7 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -109,5 +110,15 @@ public class ParametersUtilR4Test {
 
 		Optional<IBaseResource> barResource = ParametersUtil.getNamedParameterResource(ourFhirContext,p, "bar");
 		assertThat(barResource).isEmpty();
+	}
+
+	@Test
+	public void testGetNamedParameterReferences() {
+		Parameters p = new Parameters();
+		ParametersUtil.addParameterToParametersReference(ourFhirContext, p, "patients",  "Patient/1/_history/3");
+		ParametersUtil.addParameterToParametersReference(ourFhirContext, p, "patients",  "Patient/2");
+
+		List<IBaseReference> values = ParametersUtil.getNamedParameterReferences(ourFhirContext, p, "patients");
+		assertThat(values).extracting("reference").contains("Patient/1/_history/3", "Patient/2");
 	}
 }

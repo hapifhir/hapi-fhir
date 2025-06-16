@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.messaging.json;
 
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class ResourceOperationJsonMessage extends BaseJsonMessage<ResourceOperationMessage> {
@@ -50,6 +51,7 @@ public class ResourceOperationJsonMessage extends BaseJsonMessage<ResourceOperat
 	}
 
 	@Override
+	@Nonnull
 	public ResourceOperationMessage getPayload() {
 		return myPayload;
 	}

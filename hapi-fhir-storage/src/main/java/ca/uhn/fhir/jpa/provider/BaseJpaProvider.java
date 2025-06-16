@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -140,7 +141,7 @@ public abstract class BaseJpaProvider {
 			ourLog.debug("Request headers: {}", headerNames);
 		}
 
-		Enumeration<String> forwardedFors = theRequest.getHeaders("x-forwarded-for");
+		Enumeration<String> forwardedFors = theRequest.getHeaders(Constants.HEADER_X_FORWARDED_FOR);
 		StringBuilder b = new StringBuilder();
 		for (; forwardedFors != null && forwardedFors.hasMoreElements(); ) {
 			if (b.length() > 0) {

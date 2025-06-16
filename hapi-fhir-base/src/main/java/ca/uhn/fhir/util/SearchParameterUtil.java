@@ -20,6 +20,8 @@
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -28,6 +30,7 @@ import ca.uhn.fhir.i18n.Msg;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -39,6 +42,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SearchParameterUtil {
 
@@ -68,7 +73,7 @@ public class SearchParameterUtil {
 	 * 3.3 If that returns >1 result, throw an error
 	 * 3.4 If that returns 1 result, return it
 	 * 3.5 Find the search parameters by patient compartment using the R4 FHIR path, and return it if there is 1 result,
-	 *     otherwise, fall to 3.3
+	 * otherwise, fall to 3.3
 	 */
 	public static Optional<RuntimeSearchParam> getOnlyPatientSearchParamForResourceType(
 			FhirContext theFhirContext, String theResourceType) {
@@ -257,5 +262,145 @@ public class SearchParameterUtil {
 			retval = theSearchParam.substring(0, colonIndex);
 		}
 		return retval;
+	}
+
+	/**
+	 * Many SearchParameters combine a series of potential expressions into a single concatenated
+	 * expression. For example, in FHIR R5 the "encounter" search parameter has an expression like:
+	 * <code>AuditEvent.encounter | CarePlan.encounter | ChargeItem.encounter | ......</code>.
+	 * This method takes such a FHIRPath expression and splits it into a series of separate
+	 * expressions. To achieve this, we iteratively splits a string on any <code> or </code> or <code>|</code> that
+	 * is <b>not</b> contained inside a set of parentheses. e.g.
+	 * <p>
+	 * "Patient.select(a or b)" -->  ["Patient.select(a or b)"]
+	 * "Patient.select(a or b) or Patient.select(c or d )" --> ["Patient.select(a or b)", "Patient.select(c or d)"]
+	 * "Patient.select(a|b) or Patient.select(c or d )" --> ["Patient.select(a|b)", "Patient.select(c or d)"]
+	 * "Patient.select(b) | Patient.select(c)" -->  ["Patient.select(b)", "Patient.select(c)"]
+	 *
+	 * @param thePaths The FHIRPath expression to split
+	 * @return The split strings
+	 */
+	public static String[] splitSearchParameterExpressions(String thePaths) {
+		if (!StringUtils.containsAny(thePaths, " or ", " |")) {
+			return new String[] {thePaths};
+		}
+		List<String> topLevelOrExpressions = splitOutOfParensToken(thePaths, " or ");
+		return topLevelOrExpressions.stream()
+				.flatMap(s -> splitOutOfParensToken(s, " |").stream())
+				.toArray(String[]::new);
+	}
+
+	private static List<String> splitOutOfParensToken(String thePath, String theToken) {
+		int tokenLength = theToken.length();
+		int index = thePath.indexOf(theToken);
+		int rightIndex = 0;
+		List<String> retVal = new ArrayList<>();
+		while (index > -1) {
+			String left = thePath.substring(rightIndex, index);
+			if (allParensHaveBeenClosed(left)) {
+				retVal.add(left.trim());
+				rightIndex = index + tokenLength;
+			}
+			index = thePath.indexOf(theToken, index + tokenLength);
+		}
+		String pathTrimmed = thePath.substring(rightIndex).trim();
+		if (!pathTrimmed.isEmpty()) {
+			retVal.add(pathTrimmed);
+		}
+		return retVal;
+	}
+
+	private static boolean allParensHaveBeenClosed(String thePaths) {
+		int open = StringUtils.countMatches(thePaths, "(");
+		int close = StringUtils.countMatches(thePaths, ")");
+		return open == close;
+	}
+
+	/**
+	 * Given a FHIRPath expression which presumably addresses a FHIR reference or
+	 * canonical reference element (i.e. a FHIRPath expression used in a "reference"
+	 * SearchParameter), tries to determine whether the path could potentially resolve
+	 * to a canonical reference.
+	 * <p>
+	 * Just because a SearchParameter is a Reference SP, doesn't necessarily mean that it
+	 * can reference a canonical. So first we try to rule out the SP based on the path it
+	 * contains. This matters because a SearchParameter of type Reference can point to
+	 * a canonical element (in which case we need to _include any canonical targets). Or it
+	 * can point to a Reference element (in which case we only need to _include actual
+	 * references by ID).
+	 * </p>
+	 * <p>
+	 * This isn't perfect because there's really no definitive and comprehensive
+	 * way of determining the datatype that a SearchParameter or a FHIRPath point to. But
+	 * we do our best if the path is simple enough to just manually check the type it
+	 * points to, or if it ends in an explicit type declaration.
+	 * </p>
+	 * <p>
+	 * Because it is not possible to deterministically determine the datatype for a
+	 * FHIRPath expression in all cases, this method is cautious: it will return
+	 * {@literal true} if it isn't sure.
+	 * </p>
+	 *
+	 * @return Returns {@literal true} if the path could return a {@literal canonical} or {@literal CanonicalReference}, or returns {@literal false} if the path could only return a {@literal Reference}.
+	 */
+	public static boolean referencePathCouldPotentiallyReferenceCanonicalElement(
+			FhirContext theContext, String theResourceType, String thePath, boolean theReverse) {
+
+		// If this path explicitly wants a reference and not a canonical, we can ignore it since we're
+		// only looking for canonicals here
+		if (thePath.endsWith(".ofType(Reference)")) {
+			return false;
+		}
+
+		BaseRuntimeElementCompositeDefinition<?> currentDef = theContext.getResourceDefinition(theResourceType);
+
+		String remainingPath = thePath;
+		boolean firstSegment = true;
+		while (remainingPath != null) {
+
+			int dotIdx = remainingPath.indexOf(".");
+			String currentSegment;
+			if (dotIdx == -1) {
+				currentSegment = remainingPath;
+				remainingPath = null;
+			} else {
+				currentSegment = remainingPath.substring(0, dotIdx);
+				remainingPath = remainingPath.substring(dotIdx + 1);
+			}
+
+			if (isBlank(currentSegment)) {
+				return true;
+			}
+
+			if (firstSegment) {
+				firstSegment = false;
+				if (Character.isUpperCase(currentSegment.charAt(0))) {
+					// This is just the resource name
+					if (!theReverse && !theResourceType.equals(currentSegment)) {
+						return false;
+					}
+					continue;
+				}
+			}
+
+			BaseRuntimeChildDefinition child = currentDef.getChildByName(currentSegment);
+			if (child == null) {
+				return true;
+			}
+			BaseRuntimeElementDefinition<?> def = child.getChildByName(currentSegment);
+			if (def == null) {
+				return true;
+			}
+			if (def.getName().equals("Reference")) {
+				return false;
+			}
+			if (!(def instanceof BaseRuntimeElementCompositeDefinition)) {
+				return true;
+			}
+
+			currentDef = (BaseRuntimeElementCompositeDefinition<?>) def;
+		}
+
+		return true;
 	}
 }

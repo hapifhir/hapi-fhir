@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.jpa.model.config;
 
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 
 /**
  * @since 5.0.0
  */
-public class PartitionSettings {
+public class PartitionSettings implements IDefaultPartitionSettings {
 
 	private boolean myPartitioningEnabled = false;
 	private CrossPartitionReferenceMode myAllowReferencesAcrossPartitions = CrossPartitionReferenceMode.NOT_ALLOWED;
@@ -59,8 +60,9 @@ public class PartitionSettings {
 	 *
 	 * @since 8.0.0
 	 */
-	public void setDatabasePartitionMode(boolean theDatabasePartitionMode) {
+	public PartitionSettings setDatabasePartitionMode(boolean theDatabasePartitionMode) {
 		myDatabasePartitionMode = theDatabasePartitionMode;
+		return this;
 	}
 
 	/**
@@ -77,9 +79,10 @@ public class PartitionSettings {
 	 *
 	 * @since 6.6.0
 	 */
-	public void setAlwaysOpenNewTransactionForDifferentPartition(
+	public PartitionSettings setAlwaysOpenNewTransactionForDifferentPartition(
 			boolean theAlwaysOpenNewTransactionForDifferentPartition) {
 		myAlwaysOpenNewTransactionForDifferentPartition = theAlwaysOpenNewTransactionForDifferentPartition;
+		return this;
 	}
 
 	/**
@@ -129,8 +132,9 @@ public class PartitionSettings {
 	 *
 	 * @since 5.0.0
 	 */
-	public void setPartitioningEnabled(boolean theMultiTenancyEnabled) {
+	public PartitionSettings setPartitioningEnabled(boolean theMultiTenancyEnabled) {
 		myPartitioningEnabled = theMultiTenancyEnabled;
+		return this;
 	}
 
 	/**
@@ -147,8 +151,10 @@ public class PartitionSettings {
 	 *
 	 * @since 5.0.0
 	 */
-	public void setAllowReferencesAcrossPartitions(CrossPartitionReferenceMode theAllowReferencesAcrossPartitions) {
+	public PartitionSettings setAllowReferencesAcrossPartitions(
+			CrossPartitionReferenceMode theAllowReferencesAcrossPartitions) {
 		myAllowReferencesAcrossPartitions = theAllowReferencesAcrossPartitions;
+		return this;
 	}
 
 	/**
@@ -167,8 +173,9 @@ public class PartitionSettings {
 	 *
 	 * @since 5.5.0
 	 */
-	public void setUnnamedPartitionMode(boolean theUnnamedPartitionMode) {
+	public PartitionSettings setUnnamedPartitionMode(boolean theUnnamedPartitionMode) {
 		myUnnamedPartitionMode = theUnnamedPartitionMode;
+		return this;
 	}
 
 	/**
@@ -178,6 +185,7 @@ public class PartitionSettings {
 	 *
 	 * @since 5.5.0
 	 */
+	@Override
 	public Integer getDefaultPartitionId() {
 		return myDefaultPartitionId;
 	}
@@ -189,8 +197,9 @@ public class PartitionSettings {
 	 *
 	 * @since 5.5.0
 	 */
-	public void setDefaultPartitionId(Integer theDefaultPartitionId) {
+	public PartitionSettings setDefaultPartitionId(Integer theDefaultPartitionId) {
 		myDefaultPartitionId = theDefaultPartitionId;
+		return this;
 	}
 
 	/**
@@ -225,9 +234,10 @@ public class PartitionSettings {
 	 * partitions. If this setting is {@literal true}, duplicates will not be
 	 * prevented if they appear on different partitions.
 	 */
-	public void setConditionalCreateDuplicateIdentifiersEnabled(
+	public PartitionSettings setConditionalCreateDuplicateIdentifiersEnabled(
 			boolean theConditionalCreateDuplicateIdentifiersEnabled) {
 		myConditionalCreateDuplicateIdentifiersEnabled = theConditionalCreateDuplicateIdentifiersEnabled;
+		return this;
 	}
 
 	public enum CrossPartitionReferenceMode {
