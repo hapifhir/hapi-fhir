@@ -22,6 +22,7 @@ package ca.uhn.fhir.batch2.jobs.merge;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -74,15 +75,16 @@ public class MergeResourceHelper {
 		Patient targetToUpdate =
 				prepareTargetPatientForUpdate(theTargetResource, theSourceResource, theResultResource, theDeleteSource);
 
+		Patient updatedTarget = updateResource(targetToUpdate, theRequestDetails);
 		myPatientDao.update(targetToUpdate, theRequestDetails);
 		if (theDeleteSource) {
 			deleteResource(theSourceResource, theRequestDetails);
 		} else {
 			prepareSourcePatientForUpdate(theSourceResource, theTargetResource);
-			myPatientDao.update(theSourceResource, theRequestDetails);
+			updateResource(theSourceResource, theRequestDetails);
 		}
 
-		return targetToUpdate;
+		return updatedTarget;
 	}
 
 	public void createProvenance(
@@ -172,6 +174,11 @@ public class MergeResourceHelper {
 			}
 		}
 		return false;
+	}
+
+	private Patient updateResource(Patient theResource, RequestDetails theRequestDetails) {
+		DaoMethodOutcome outcome = myPatientDao.update(theResource, theRequestDetails);
+		return (Patient) outcome.getResource();
 	}
 
 	private void deleteResource(Patient theResource, RequestDetails theRequestDetails) {
