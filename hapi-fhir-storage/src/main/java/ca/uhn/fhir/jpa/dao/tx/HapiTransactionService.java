@@ -394,11 +394,10 @@ public class HapiTransactionService implements IHapiTransactionService {
 	private void sleepForRetry(int theAttemptIndex) {
 		double sleepAmount = (250.0d * theAttemptIndex) * Math.random();
 		long sleepAmountLong = (long) sleepAmount;
-		mySleepUtil.sleepAtLeast(sleepAmountLong, false);
-
 		ourLog.info(
-				"About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.",
-				sleepAmountLong);
+			"About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.",
+			sleepAmountLong);
+		mySleepUtil.sleepAtLeast(sleepAmountLong, false);
 	}
 
 	public void setTransactionPropagationWhenChangingPartitions(
