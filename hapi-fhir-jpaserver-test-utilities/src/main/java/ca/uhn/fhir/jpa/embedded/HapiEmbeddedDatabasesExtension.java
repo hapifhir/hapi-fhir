@@ -92,6 +92,14 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 		}
 	}
 
+	public JpaEmbeddedDatabase getOnlyDatabase() {
+		if (myRequestedDatabases.size() == 1) {
+			return getEmbeddedDatabase(myRequestedDatabases.iterator().next());
+		} else {
+			throw new RuntimeException("Found more or less than one embedded database in the extension! [databaseCount=" + myEmbeddedDatabases.size() + "]");
+		}
+	}
+
 	public JpaEmbeddedDatabase getEmbeddedDatabase(DriverTypeEnum theDriverType) {
 		// Ensure the database type is allowed
 		if (!myRequestedDatabases.contains(theDriverType)) {

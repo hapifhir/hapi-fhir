@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
+import ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension;
 import ca.uhn.fhir.jpa.embedded.JpaEmbeddedDatabase;
 import ca.uhn.fhir.jpa.embedded.HapiForeignKeyIndexHelper;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
@@ -39,7 +40,11 @@ import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Practitioner;
 import org.hl7.fhir.r5.model.PractitionerRole;
 import org.hl7.fhir.r5.model.Reference;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -89,6 +94,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(SpringExtension.class)
 @EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
 @ContextConfiguration(classes = {BaseDatabaseVerificationIT.TestConfig.class, TestDaoSearch.Config.class})
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements ITestDataBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseDatabaseVerificationIT.class);
 	private static final String MIGRATION_TABLENAME = "MIGRATIONS";
@@ -142,11 +148,8 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 
 	SystemRequestDetails myRequestDetails = new SystemRequestDetails();
 
-	// Abstract method to get the database driver type for schema migration tests
-	protected abstract DriverTypeEnum getDriverType();
-
 	@RegisterExtension
-	protected RestfulServerExtension myServer = new RestfulServerExtension(FhirContext.forR5Cached());
+	protected static RestfulServerExtension myServer = new RestfulServerExtension(FhirContext.forR5Cached());
 
 	@RegisterExtension
 	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(() -> myServer)
@@ -160,6 +163,7 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 
 	@ParameterizedTest
 	@ValueSource(ints = {10, 100000})
+	@Order(100)
 	public void testCreateRead(int theSize) {
 		String name = StringUtils.leftPad("", theSize, "a");
 
@@ -174,6 +178,7 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 
 
 	@Test
+	@Order(200)
 	public void testDelete() {
 		Patient patient = new Patient();
 		patient.setActive(true);
@@ -186,6 +191,7 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 
 
 	@Test
+	@Order(300)
 	public void testEverything() {
         Set<String> expectedIds = new HashSet<>();
         expectedIds.add(createPatient(withId("A"), withActiveTrue()).toUnqualifiedVersionless().getValue());
@@ -216,6 +222,7 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	 */
 
 	@Test
+	@Order(400)
 	public void testSearchWithInclude() {
 		// Setup
 		IGenericClient client = myServer.getFhirClient();
@@ -244,55 +251,11 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 
 	@ParameterizedTest
 	@MethodSource("ca.uhn.fhir.jpa.test.QueryTestCases#get")
+	@Order(500)
 	void testSyntaxForVariousQueries(QueryTestCases theQueryTestCase) {
 		assertDoesNotThrow(() -> myTestDaoSearch.searchForBundleProvider(theQueryTestCase.getQuery()), theQueryTestCase.getName());
 	}
 
-	@Test
-	public void testSchemaMigration() throws SQLException {
-		// ensure all migrations are run
-		ca.uhn.fhir.system.HapiSystemProperties.disableUnitTestMode();
-
-		DriverTypeEnum theDriverType = getDriverType();
-		JpaEmbeddedDatabase database = myJpaEmbeddedDatabase;
-
-		ourLog.info("Running hapi fhir migration tasks for {}", theDriverType);
-
-		// Clear the database first since it may already have schema from the application context
-		database.clearDatabase();
-		
-		// Initialize persistence schema and test data
-		initializePersistenceSchema(database, theDriverType);
-		insertPersistenceTestData(database, theDriverType, ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION);
-
-		DataSource dataSource = database.getDataSource();
-		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(dataSource, theDriverType, HAPI_FHIR_MIGRATION_TABLENAME);
-		HapiMigrationStorageSvc hapiMigrationStorageSvc = new HapiMigrationStorageSvc(hapiMigrationDao);
-
-		for (VersionEnum aVersion : VersionEnum.values()) {
-			ourLog.info("Applying migrations for {}", aVersion);
-			migrate(theDriverType, dataSource, hapiMigrationStorageSvc, aVersion);
-
-			if (aVersion.isNewerThan(ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION)) {
-				maybeInsertPersistenceTestData(database, theDriverType, aVersion);
-			}
-		}
-
-		if (theDriverType == DriverTypeEnum.POSTGRES_9_4) {
-			// we only run this for postgres because:
-			// 1 we only really need to check one db
-			// 2 H2 automatically adds indexes to foreign keys automatically (and so cannot be used)
-			// 3 Oracle doesn't run on everyone's machine (and is difficult to do so)
-			// 4 Postgres is generally the fastest/least terrible relational db supported
-			new HapiForeignKeyIndexHelper()
-				.ensureAllForeignKeysAreIndexed(dataSource);
-		}
-
-		verifyForcedIdMigration(dataSource);
-		verifyHfjResSearchUrlMigration(database, theDriverType);
-		verifyTrm_Concept_Desig(database, theDriverType);
-		verifyHfjResourceFhirIdCollation(database, theDriverType);
-	}
 
 	// Schema migration helper methods
 	private void initializePersistenceSchema(JpaEmbeddedDatabase theDatabase, DriverTypeEnum theDriverType) {
@@ -491,6 +454,54 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 				assertThat(actualColumnResults).contains(addExpectedColumnMetadata(COLUMN_VAL_VC, getExpectedSqlTypeForValVc(theDriverType), METADATA_IS_NULLABLE_YES, null));
 			}
 		}
+	}
+
+	@Test
+	@Order(9999)
+	public void testSchemaMigration() throws SQLException {
+		// ensure all migrations are run
+		ca.uhn.fhir.system.HapiSystemProperties.disableUnitTestMode();
+
+		DriverTypeEnum theDriverType = myJpaEmbeddedDatabase.getDriverType();
+		JpaEmbeddedDatabase database = myJpaEmbeddedDatabase;
+
+		ourLog.info("Running hapi fhir migration tasks for {}", theDriverType);
+
+		// Clear the database first since it may already have schema from the application context
+		database.clearDatabase();
+
+		// Initialize persistence schema and test data
+		initializePersistenceSchema(database, theDriverType);
+		insertPersistenceTestData(database, theDriverType, ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION);
+
+		DataSource dataSource = database.getDataSource();
+		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(dataSource, theDriverType, HAPI_FHIR_MIGRATION_TABLENAME);
+		HapiMigrationStorageSvc hapiMigrationStorageSvc = new HapiMigrationStorageSvc(hapiMigrationDao);
+
+		for (VersionEnum aVersion : VersionEnum.values()) {
+			ourLog.info("Applying migrations for {}", aVersion);
+			migrate(theDriverType, dataSource, hapiMigrationStorageSvc, aVersion);
+
+			if (aVersion.isNewerThan(ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION)) {
+				maybeInsertPersistenceTestData(database, theDriverType, aVersion);
+			}
+		}
+
+		if (theDriverType == DriverTypeEnum.POSTGRES_9_4) {
+			// we only run this for postgres because:
+			// 1 we only really need to check one db
+			// 2 H2 automatically adds indexes to foreign keys automatically (and so cannot be used)
+			// 3 Oracle doesn't run on everyone's machine (and is difficult to do so)
+			// 4 Postgres is generally the fastest/least terrible relational db supported
+			new HapiForeignKeyIndexHelper()
+				.ensureAllForeignKeysAreIndexed(dataSource);
+		}
+
+		verifyForcedIdMigration(dataSource);
+		verifyHfjResSearchUrlMigration(database, theDriverType);
+		verifyTrm_Concept_Desig(database, theDriverType);
+		verifyHfjResourceFhirIdCollation(database, theDriverType);
+		ca.uhn.fhir.system.HapiSystemProperties.enableUnitTestMode();
 	}
 
 	private void verifyHfjResourceFhirIdCollation(JpaEmbeddedDatabase database, DriverTypeEnum theDriverType) throws SQLException {

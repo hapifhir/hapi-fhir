@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r5.database;
 
+import ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension;
 import ca.uhn.fhir.jpa.embedded.MsSqlEmbeddedDatabase;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirSQLServerDialect;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -12,17 +14,16 @@ import org.springframework.test.context.ContextConfiguration;
 })
 public class DatabaseVerificationWithMsSqlIT extends BaseDatabaseVerificationIT {
 
-	@Override
-	protected DriverTypeEnum getDriverType() {
-		return DriverTypeEnum.MSSQL_2012;
-	}
+
+	@RegisterExtension
+	private static HapiEmbeddedDatabasesExtension myExtension = HapiEmbeddedDatabasesExtension.forDatabase(DriverTypeEnum.MSSQL_2012);
 
 	@Configuration
 	public static class TestConfig {
 		@Bean
 		public JpaDatabaseContextConfigParamObject jpaDatabaseParamObject() {
 			return new JpaDatabaseContextConfigParamObject(
-				new MsSqlEmbeddedDatabase(),
+				myExtension.getOnlyDatabase(),
 				HapiFhirSQLServerDialect.class.getName()
 			);
 		}
