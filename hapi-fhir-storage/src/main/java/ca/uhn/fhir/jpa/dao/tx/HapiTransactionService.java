@@ -395,8 +395,8 @@ public class HapiTransactionService implements IHapiTransactionService {
 		double sleepAmount = (250.0d * theAttemptIndex) * Math.random();
 		long sleepAmountLong = (long) sleepAmount;
 		ourLog.info(
-			"About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.",
-			sleepAmountLong);
+				"About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.",
+				sleepAmountLong);
 		mySleepUtil.sleepAtLeast(sleepAmountLong, false);
 	}
 
