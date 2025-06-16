@@ -98,6 +98,8 @@ public class Constants {
 	public static final String HEADER_X_FORWARDED_PROTO = "X-Forwarded-Proto";
 	public static final String HEADER_X_FORWARDED_PREFIX = "X-Forwarded-Prefix";
 	public static final String HEADER_X_FORWARDED_FOR = "X-Forwarded-For";
+	// This is used by clinical-reasoning to pass the timezone of the client
+	public static final String HEADER_CLIENT_TIMEZONE = "Timezone";
 
 	// ==============================================================
 	// Proprietary HAPI HTTP headers
