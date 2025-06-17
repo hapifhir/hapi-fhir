@@ -1963,8 +1963,6 @@ public abstract class BaseTransactionProcessor {
 			if (!nextId.hasIdPart()) {
 				if (resourceReference.getResource() != null) {
 					IIdType targetId = resourceReference.getResource().getIdElement();
-					boolean isContained =
-						ObjectUtils.defaultIfNull((Boolean)resourceReference.getResource().getUserData("IS_CONTAINED"), false);
 					if (targetId.getValue() == null) {
 						// This means it's a contained resource
 						continue;
