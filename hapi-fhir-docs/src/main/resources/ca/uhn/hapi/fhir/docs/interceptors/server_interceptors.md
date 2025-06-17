@@ -8,7 +8,7 @@ In the case of a JPA Server, HAPI FHIR itself performs both roles. This means th
 
 # Registering Interceptors
 
-How to register an interceptor differs depending on the type of pointcut it registers. 
+How to register an interceptor differs depending on the type of pointcut it registers. For example, an interceptor hooking into a **STORAGE_xxx** will not be triggered if it is registered on the RestfulServer. 
 
 ### **SERVER_xxx**
 
@@ -25,8 +25,8 @@ How to register an interceptor differs depending on the type of pointcut it regi
 | REST            | ✅            | ✅                 |
 | DAO             | 🔴            | ✅                 |
 
-✅: Triggered
-🔴: Not triggered
+✅: Intercepted
+🔴: Not intercepted
 
 Note that you should not register any interceptor on both the `RestfulServer` and `IInterceptorService`. If you do so, it will be triggered twice.
 
