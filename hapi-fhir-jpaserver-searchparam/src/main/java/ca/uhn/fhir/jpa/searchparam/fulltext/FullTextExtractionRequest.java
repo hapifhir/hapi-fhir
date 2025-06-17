@@ -71,7 +71,6 @@ public class FullTextExtractionRequest {
 	/**
 	 * @return Returns the ID of the resource being indexed. This may be <code>null</code> if a new resource is being created, and a type isn't assigned yet
 	 */
-	// FIXME: can this actually be null?
 	@Nullable
 	public IIdType getResourceId() {
 		return myResourceId;
