@@ -20,5 +20,34 @@
 package ca.uhn.fhir.mdm.batch2.submit;
 
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nonnull;
+import jakarta.validation.constraints.Pattern;
+import org.apache.commons.lang3.Validate;
 
-public class MdmSubmitJobParameters extends PartitionedUrlJobParameters {}
+import java.util.ArrayList;
+import java.util.List;
+
+public class MdmSubmitJobParameters extends PartitionedUrlJobParameters {
+	@JsonProperty("resourceType")
+	@Nonnull
+	private List<@Pattern(regexp = "^[A-Z][A-Za-z]+$", message = "If populated, must be a valid resource type'") String>
+		myResourceNames;
+
+	public List<String> getResourceNames() {
+		if (myResourceNames == null) {
+			myResourceNames = new ArrayList<>();
+		}
+		return myResourceNames;
+	}
+
+	public MdmSubmitJobParameters addResourceType(@Nonnull String theResourceName) {
+		Validate.notNull(theResourceName);
+		getResourceNames().add(theResourceName);
+		return this;
+	}
+
+	public void setResourceNames(@Nonnull List<String> theResourceNames) {
+		myResourceNames = theResourceNames;
+	}
+}
