@@ -95,6 +95,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.ThreadUtils;
@@ -1962,9 +1963,9 @@ public abstract class BaseTransactionProcessor {
 			if (!nextId.hasIdPart()) {
 				if (resourceReference.getResource() != null) {
 					IIdType targetId = resourceReference.getResource().getIdElement();
-					Boolean isContained =
-							(Boolean) resourceReference.getResource().getUserData("IS_CONTAINED");
-					if (targetId.getValue() == null || isContained) {
+					boolean isContained =
+						ObjectUtils.defaultIfNull((Boolean)resourceReference.getResource().getUserData("IS_CONTAINED"), false);
+					if (targetId.getValue() == null) {
 						// This means it's a contained resource
 						continue;
 					} else if (theIdSubstitutions.containsTarget(targetId)) {
