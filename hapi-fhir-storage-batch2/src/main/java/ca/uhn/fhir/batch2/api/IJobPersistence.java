@@ -128,13 +128,12 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart);
 
 	/**
-	 * Fetches all job instances based on the JobFetchRequest
+	 * Fetches job instances based on the JobFetchRequest
 	 *
 	 * @param theRequest - the job fetch request
 	 * @return - a page of job instances
 	 */
-	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
-	Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest);
+	Page<JobInstance> fetchFilteredJobInstances(JobInstanceFetchRequest theRequest);
 
 	/**
 	 * Returns set of all distinct states for the specified job instance id

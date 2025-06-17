@@ -37,8 +37,10 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.HashMap;
 import java.util.List;
@@ -142,9 +144,24 @@ public class InlineJobCoordinator<T extends IModelJson> implements IJobCoordinat
     }
 
     @Override
-    public Page<JobInstance> fetchAllJobInstances(JobInstanceFetchRequest jobInstanceFetchRequest) {
-        return new PageImpl<>(myJobInstanceMap.values().stream().toList());
-    }
+	public Page<JobInstance> fetchFilteredJobInstances(JobInstanceFetchRequest theRequest) {
+		PageRequest pageRequest =
+			PageRequest.of(theRequest.getPageStart(), theRequest.getBatchSize(), theRequest.getSort());
+
+		List<JobInstance> list = myJobInstanceMap.values()
+			.stream()
+			.filter(job -> StringUtils.equals(theRequest.getJobStatus(), job.getStatus().name()))
+			.filter(job -> StringUtils.equals(theRequest.getJobDefinitionId(), job.getJobDefinitionId()))
+			.filter(job -> StringUtils.equals(theRequest.getJobId(), job.getInstanceId()))
+			.toList();
+
+		if (theRequest.getJobCreateTimeFrom() != null && theRequest.getJobCreateTimeTo() != null) {
+			list = list.stream()
+				.filter(job -> theRequest.getJobCreateTimeFrom().before(job.getCreateTime()))
+				.filter(job -> theRequest.getJobCreateTimeTo().after(job.getCreateTime())).toList();
+		}
+		return new PageImpl<>(list, pageRequest, list.size());
+	}
 
     @Override
     public List<JobInstance> getJobInstancesByJobDefinitionIdAndStatuses(String theJobDefinitionId, Set<StatusEnum> theStatuses, int theCount, int theStart) {

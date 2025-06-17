@@ -68,8 +68,8 @@ class JobQuerySvc {
 				.collect(Collectors.toList());
 	}
 
-	public Page<JobInstance> fetchAllInstances(JobInstanceFetchRequest theFetchRequest) {
-		return myJobPersistence.fetchJobInstances(theFetchRequest);
+	public Page<JobInstance> fetchFilteredInstances(JobInstanceFetchRequest theFetchRequest) {
+		return myJobPersistence.fetchFilteredJobInstances(theFetchRequest);
 	}
 
 	public List<JobInstance> fetchRecentInstances(int theCount, int theStart) {
