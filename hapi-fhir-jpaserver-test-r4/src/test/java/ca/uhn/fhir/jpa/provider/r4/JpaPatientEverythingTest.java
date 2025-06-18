@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -10,6 +8,8 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -91,19 +91,28 @@ import org.hl7.fhir.r4.model.Specimen;
 import org.hl7.fhir.r4.model.SupplyDelivery;
 import org.hl7.fhir.r4.model.SupplyRequest;
 import org.hl7.fhir.r4.model.VisionPrescription;
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
@@ -120,6 +129,84 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         referenceToPatient.setReference(patientId);
         return referenceToPatient;
     }
+
+	@Test
+	public void patientInstanceEverything_patientInGroupWithOtherPatients_cleansesGroupOfUnrelatedPatients() {
+		// setup
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+
+		// patient ids
+		String p1Id = "e783bb6f-e36b-8928-30ea-b5b9b63198cd";
+		String p2Id = "73443843-5ac0-49ef-4f64-3f3e79f51c3a";
+
+
+		Group group;
+		group = new Group();
+		group.setId("Group/my-group");
+		group.setType(Group.GroupType.PERSON);
+		group.setActive(true);
+		group.setName("Dr Hibert's Clinic");
+
+
+		// create the patients
+		for (String id : new String[]{p1Id, p2Id}) {
+			String given;
+			if (id.equals(p1Id)) {
+				given = "homer";
+			} else {
+				given = "marge";
+			}
+			Patient patient = new Patient();
+			patient.setActive(true);
+			patient.setId("Patient/" + id);
+			patient.addName()
+				.setFamily("Simpson")
+				.addGiven(given);
+
+			myPatientDao.update(patient, requestDetails);
+
+			// add them to the group as full objects, not references
+			Reference r = new Reference();
+			r.setResource(patient);
+			group.addMember()
+				.setEntity(r);
+		}
+
+		// create the group
+		myGroupDao.update(group, requestDetails);
+
+		await().atMost(10, TimeUnit.SECONDS)
+			.until(() -> {
+				try {
+					Group g = myGroupDao.read(new IdType("Group/my-group"), requestDetails);
+					return true;
+				} catch (ResourceNotFoundException ex) {
+					// not created yet
+				}
+				return false;
+			});
+
+		// test
+		Bundle response = myClient.operation()
+			.onInstance(String.format("Patient/%s", p1Id))
+			.named(JpaConstants.OPERATION_EVERYTHING)
+			.withNoParameters(Parameters.class)
+			.returnResourceType(Bundle.class)
+			.execute();
+		assertNotNull(response);
+
+		assertEquals(2, response.getEntry().size());
+		assertTrue(response.getEntry().stream()
+			.anyMatch(e -> e.getResource() instanceof Patient));
+		Optional<Bundle.BundleEntryComponent> groupOp = response.getEntry().stream().filter(e -> e.getResource() instanceof Group)
+			.findFirst();
+		assertTrue(groupOp.isPresent());
+		Group retGroup = (Group) groupOp.get().getResource();
+
+		// TODO - should we be removing the non-patient being asked for from the group?
+		// other members are only provided as references
+		assertEquals(1, retGroup.getMember().size());
+	}
 
     @Test
     public void testLargeEverythingFetchReturnsAllPossibleResources() throws IOException {

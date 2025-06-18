@@ -61,6 +61,7 @@ import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.SearchConstants;
+import ca.uhn.fhir.jpa.search.builder.models.DoLoadPidsParams;
 import ca.uhn.fhir.jpa.search.builder.models.ResolvedSearchQueryExecutor;
 import ca.uhn.fhir.jpa.search.builder.models.SearchQueryProperties;
 import ca.uhn.fhir.jpa.search.builder.sql.GeneratedSql;
@@ -1205,12 +1206,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
-	private void doLoadPids(
-			Collection<JpaPid> thePids,
-			Collection<JpaPid> theIncludedPids,
-			List<IBaseResource> theResourceListToPopulate,
-			boolean theForHistoryOperation,
-			Map<Long, Integer> thePosition) {
+	private void doLoadPids(DoLoadPidsParams theParams, List<IBaseResource> theResourceListToPopulate) {
+		Collection<JpaPid> thePids = theParams.getPids();
+		boolean theForHistoryOperation = theParams.isForHistoryOperation();
+		Map<Long, Integer> thePosition = theParams.getPosition();
+		Collection<JpaPid> theIncludedPids = theParams.getIncludedPids();
 
 		Map<JpaPid, Long> resourcePidToVersion = null;
 		for (JpaPid next : thePids) {
@@ -1426,14 +1426,22 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			} catch (ResourceNotFoundInIndexException theE) {
 				// some resources were not found in index, so we will inform this and resort to JPA search
 				ourLog.warn(
-						"Some resources were not found in index. Make sure all resources were indexed. Resorting to database search.");
+					"Some resources were not found in index. Make sure all resources were indexed. Resorting to database search.");
 			}
 		}
 
 		// We only chunk because some jdbc drivers can't handle long param lists.
+		DoLoadPidsParams params = new DoLoadPidsParams();
+		params.setParameterMap(myParams)
+			.setIncludedPids(theIncludedPids)
+			.setForHistoryOperation(theForHistoryOperation)
+			.setPosition(position);
 		QueryChunker.chunk(
-				thePids,
-				t -> doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
+			thePids,
+			t -> {
+				params.setPids(t);
+				doLoadPids(params, theResourceListToPopulate);
+			});
 	}
 
 	/**
