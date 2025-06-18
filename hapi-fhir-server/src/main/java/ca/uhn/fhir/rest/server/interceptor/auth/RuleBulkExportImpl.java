@@ -71,7 +71,7 @@ public class RuleBulkExportImpl extends BaseRule {
 		}
 
 		BulkExportJobParameters inboundBulkExportRequestOptions = (BulkExportJobParameters)
-				theRequestDetails.getAttribute(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS);
+				theRequestDetails.getUserData().get(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS);
 		// if style doesn't match - abstain
 		if (!myWantAnyStyle && inboundBulkExportRequestOptions.getExportStyle() != myWantExportStyle) {
 			return null;
