@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7055
+title: "New filters have been added to allow users to filter jobs in the Batch2 search by job status, job type, job ID, 
+and job creation date."
