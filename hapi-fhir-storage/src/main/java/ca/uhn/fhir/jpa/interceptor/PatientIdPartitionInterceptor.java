@@ -112,8 +112,9 @@ public class PatientIdPartitionInterceptor {
 				return provideCompartmentMemberInstanceResponse(theRequestDetails, oCompartmentIdentity.get());
 			} else {
 				return getPartitionViaPartiallyProcessedReference(theResource)
-						// or give up and fail
-						.orElseGet(() -> throwNonCompartmentMemberInstanceFailureResponse(theResource));
+						// Put into the default partition
+						.orElseGet(
+								() -> RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId()));
 			}
 		}
 	}
