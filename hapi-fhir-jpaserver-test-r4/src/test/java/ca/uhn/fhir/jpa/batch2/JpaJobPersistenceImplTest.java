@@ -329,68 +329,99 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	@Test
 	void testFetchFilteredInstances_noFilter_allJobsFound() {
+		// Setup
 		createTwoJobsDifferentStatus();
 		JobInstanceFetchRequest request = createFetchRequest();
 
-		// Test
+		// Execute
 		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
+
+		// Verify
 		assertEquals(2L, foundInstances.getTotalElements());
 	}
 
 	@Test
-	void testFetchFilteredInstanceByStatus() {
+	void testFetchFilteredInstancesByStatus() {
+		// Setup
 		createTwoJobsDifferentStatus();
 		JobInstanceFetchRequest request = createFetchRequest();
+		request.setJobStatus(StatusEnum.COMPLETED.name());
 
-		// Test
-		request.setJobStatus("COMPLETED");
+		// Execute
 		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
+
+		// Verify
 		assertEquals(1L, foundInstances.getTotalElements());
 	}
 
 	@Test
-	void testFetchFilteredInstanceByJobType() {
+	void testFetchFilteredInstancesByJobType() {
+		// Setup
 		createTwoJobsDifferentStatus();
 		JobInstanceFetchRequest request = createFetchRequest();
-
-		// Test
 		request.setJobDefinitionId(JOB_DEFINITION_ID);
+
+		// Execute
 		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
+
+		// Verify
+		assertEquals(1L, foundInstances.getTotalElements());
+	}
+
+	@Test
+	void testFetchFilteredInstancesByJobStatusAndJobType() {
+		// Setup
+		createTwoJobsDifferentStatus();
+		JobInstanceFetchRequest request = createFetchRequest();
+		request.setJobStatus(StatusEnum.QUEUED.name());
+		request.setJobDefinitionId(JOB_DEFINITION_ID);
+
+		// Execute
+		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
+
+		// Verify
 		assertEquals(1L, foundInstances.getTotalElements());
 	}
 
 	@Test
 	void testFetchFilteredInstanceByJobId() {
+		// Setup
 		createTwoJobsDifferentStatus();
 		JobInstanceFetchRequest request = createFetchRequest();
 
 		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
 		assertEquals(2L, foundInstances.getTotalElements());
-
 		String jobId = foundInstances.getContent().get(0).getInstanceId();
 		request.setJobId(jobId);
 
+		// Execute
 		foundInstances = mySvc.fetchFilteredJobInstances(request);
+
+		// Verify
 		assertEquals(1L, foundInstances.getTotalElements());
 	}
 
 	@Test
-	void testFetchFilteredInstanceByCreateTime_dateOutOfRange_noJobFound() {
+	void testFetchFilteredInstancesByCreateTime_jobsNotInDateRange_findNothing() {
+		// Setup
 		createTwoJobsDifferentStatus();
 		JobInstanceFetchRequest request = createFetchRequest();
 
-		// Test
 		ZonedDateTime startDt = ZonedDateTime.now().minusDays(1).with(LocalTime.MIN);
 		ZonedDateTime endDt = ZonedDateTime.now().minusDays(1).with(LocalTime.MAX);
 		request.setJobCreateTimeFrom(Date.from(startDt.toInstant()));
 		request.setJobCreateTimeTo(Date.from(endDt.toInstant()));
 
+		// Execute
 		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
+
+		// Verify
 		assertEquals(0L, foundInstances.getTotalElements());
 	}
 
 	@Test
-	void testFetchFilteredInstanceByCreateTime_dateInRange_jobsFound() {
+	void testFetchFilteredInstancesByCreateTime_jobsInDateRange_findAll() {
+		// Setup
 		createTwoJobsDifferentStatus();
 		JobInstanceFetchRequest request = createFetchRequest();
 
@@ -399,7 +430,10 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		request.setJobCreateTimeFrom(Date.from(startDt.toInstant()));
 		request.setJobCreateTimeTo(Date.from(endDt.toInstant()));
 
+		// Execute
 		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
+
+		// Verify
 		assertEquals(2L, foundInstances.getTotalElements());
 	}
 
