@@ -104,6 +104,9 @@ public class PatientIdPartitionInterceptor {
 								+ "Patient resource IDs must be client-assigned in patient compartment mode, or server id strategy must be UUID");
 			}
 			return provideCompartmentMemberInstanceResponse(theRequestDetails, idElement.getIdPart());
+		}
+		if (resourceDef.getName().equals("Group")) {
+			return RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
 		} else {
 			Optional<String> oCompartmentIdentity = ResourceCompartmentUtil.getResourceCompartment(
 					"Patient", theResource, compartmentSps, mySearchParamExtractor);
@@ -112,9 +115,8 @@ public class PatientIdPartitionInterceptor {
 				return provideCompartmentMemberInstanceResponse(theRequestDetails, oCompartmentIdentity.get());
 			} else {
 				return getPartitionViaPartiallyProcessedReference(theResource)
-						// Put into the default partition
-						.orElseGet(
-								() -> RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId()));
+						// or give up and fail
+						.orElseGet(() -> throwNonCompartmentMemberInstanceFailureResponse(theResource));
 			}
 		}
 	}
