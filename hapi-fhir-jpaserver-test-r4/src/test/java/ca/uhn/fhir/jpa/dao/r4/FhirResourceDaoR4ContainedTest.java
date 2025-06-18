@@ -187,6 +187,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 	public static Stream<Arguments> generateTestCases2() {
 		String uuid = UUID.randomUUID().toString();
+		// id, should encode first, should set reference by id, should add to contained list, expected exception
 		return Stream.of(
 			Arguments.of(uuid, true, true, true, null),
 			Arguments.of(uuid, true, true, false, "There is a reference that begins with #, but no resource with this ID is contained"),
