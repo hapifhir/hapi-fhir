@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7065
+title: "Previously, if partitioning mode was enabled and a resource in the patient compartment didn't have a value (e.g. Group.member.entity),
+the PatientIdPartitionInterceptor would throw an error, unable to handle that case. This has been fixed and the resource in the CREATE/PUT request will be placed in the default partition."
