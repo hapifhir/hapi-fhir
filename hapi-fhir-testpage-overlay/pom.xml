@@ -244,10 +244,10 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<groupId>org.sonatype.central</groupId>
+				<artifactId>central-publishing-maven-plugin</artifactId>
 				<configuration>
-					<skipNexusStagingDeployMojo>false</skipNexusStagingDeployMojo>
+					<skipPublishing>false</skipPublishing>
 				</configuration>
 			</plugin>
 			<plugin>
