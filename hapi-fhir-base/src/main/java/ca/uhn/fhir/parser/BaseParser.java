@@ -243,9 +243,10 @@ public abstract class BaseParser implements IParser {
 			}
 			return reference;
 		} else {
-			if (ref.isLocal() && !theContext.getContainedResources().referenceMatchesAContainedResource(ref)) {
+			if (!isValidInternalReference(theContext, ref)) {
 				throw new DataFormatException(
-						"There is a reference that begins with #, but no resource with this ID is contained. [reference="
+					Msg.code(2724)
+						+ "There is a reference that begins with #, but no resource with this ID is contained. [reference="
 								+ ref.getIdPart() + "]");
 			}
 		}
@@ -263,6 +264,11 @@ public abstract class BaseParser implements IParser {
 			return ref.toVersionless().getValue();
 		}
 		return ref.getValue();
+	}
+
+	private boolean isValidInternalReference(EncodeContext theContext, IIdType ref) {
+		// a # is a reference to the container resource.
+		return !ref.isLocal() || ref.getValue().equals("#") || theContext.getContainedResources().referenceMatchesAContainedResource(ref);
 	}
 
 	protected abstract void doEncodeResourceToWriter(

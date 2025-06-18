@@ -3,9 +3,12 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.BundleBuilder;
 import com.apicatalog.jsonld.StringUtils;
@@ -15,11 +18,14 @@ import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Address.AddressUse;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Encounter.EncounterParticipantComponent;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -28,6 +34,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.ServiceRequest.ServiceRequestIntent;
 import org.hl7.fhir.r4.model.ServiceRequest.ServiceRequestStatus;
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +48,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -125,12 +135,56 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id));
+	}
 
+	@Test
+	public void containedResource_withInternalReferenceToContainer_works() {
+		// setup
+		SystemRequestDetails rd = new SystemRequestDetails();
+
+		Organization org = new Organization();
+//		Location location = new Location();
+//		location.setManagingOrganization(new Reference("#"));
+//		org.addContained(location);
+		org.addIdentifier()
+			.setSystem("http://example.com")
+			.setValue("123456");
+		org.setActive(true);
+		Endpoint endpoint = new Endpoint();
+		endpoint.setStatus(Endpoint.EndpointStatus.ACTIVE);
+		endpoint.addPayloadType().addCoding()
+				.setSystem("http://endpoint.com")
+					.setCode("code");
+		endpoint.setAddress("http://endpoint.com/home");
+		Coding connectionType = new Coding();
+		connectionType.setSystem("http://connectiontype.com");
+		connectionType.setCode("abc");
+		endpoint.setConnectionType(connectionType);
+		endpoint.setManagingOrganization(new Reference("#"));
+		org.setEndpoint(List.of(new Reference(endpoint)));
+
+		Bundle bundleBuilder = new BundleBuilder(myFhirContext)
+			.addTransactionCreateEntry(org).andThen().getBundleTyped();
+
+		// test
+		mySystemDao.transaction(new SystemRequestDetails(), bundleBuilder);
+
+		// validate
+		SearchParameterMap spm = new SearchParameterMap();
+		spm.setLoadSynchronous(true);
+		spm.add("identifier", new TokenParam("http://example.com", "123456"));
+		IBundleProvider results = myOrganizationDao.search(spm, rd);
+		assertFalse(results.getAllResources().isEmpty());
+
+		Organization retOrg = (Organization) results.getAllResources().get(0);
+		assertEquals(1, retOrg.getEndpoint().size());
+		Reference containedEndpointRef = retOrg.getEndpoint().get(0);
+		assertNotNull(containedEndpointRef.getResource());
+		// TODO - is this correct?
+		Endpoint retEndpoint = (Endpoint) containedEndpointRef.getResource();
+		assertEquals("#", retEndpoint.getManagingOrganization().getReference());
 	}
-	public static Stream<Arguments> generateTestCases() {
-		List<Boolean> bools = List.of(true, false);
-		return bools.stream().flatMap(shouldEncodeFirst -> bools.stream().flatMap(shouldSetById -> bools.stream().map(shouldAddToContainedList -> Arguments.of("37249829-08f1-47a6-a946-d74aa9134440", shouldEncodeFirst, shouldSetById, shouldAddToContainedList))));
-	}
+
 	public static Stream<Arguments> generateTestCases2() {
 		String uuid = UUID.randomUUID().toString();
 		return Stream.of(
@@ -270,7 +324,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactlyInAnyOrder(toValues(id));
 	}
-	
+
 	@Test
 	public void testCreateComplexContainedResourceIndex() {
 
@@ -354,7 +408,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		assertThat(toUnqualifiedVersionlessIdValues(myEncounterDao.search(map))).containsExactlyInAnyOrder(toValues(id));
 	}
-	
+
 	@Test
 	public void testSearchWithNotSupportedSearchParameter() {
 
