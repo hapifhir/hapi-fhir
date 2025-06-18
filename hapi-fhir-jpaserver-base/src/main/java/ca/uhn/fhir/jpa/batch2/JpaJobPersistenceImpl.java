@@ -240,16 +240,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		PageRequest pageRequest =
 				PageRequest.of(theRequest.getPageStart(), theRequest.getBatchSize(), theRequest.getSort());
 
-		Page<Batch2JobInstanceEntity> pageOfEntities =
-				myJobInstanceRepository.findByStatusAndDefinitionIdAndIdAndCreateTime(
+		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> myJobInstanceRepository
+				.findByStatusAndDefinitionIdAndIdAndCreateTime(
 						theRequest.getJobStatus() != null ? StatusEnum.valueOf(theRequest.getJobStatus()) : null,
 						theRequest.getJobDefinitionId(),
 						theRequest.getJobId(),
 						theRequest.getJobCreateTimeFrom(),
 						theRequest.getJobCreateTimeTo(),
-						pageRequest);
-
-		return pageOfEntities.map(this::toInstance);
+						pageRequest)
+				.map(this::toInstance));
 	}
 
 	private List<JobInstance> toInstanceList(List<Batch2JobInstanceEntity> theInstancesByJobDefinitionId) {
