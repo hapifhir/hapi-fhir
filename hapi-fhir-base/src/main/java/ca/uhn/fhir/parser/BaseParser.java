@@ -245,9 +245,9 @@ public abstract class BaseParser implements IParser {
 		} else {
 			if (!isValidInternalReference(theContext, ref)) {
 				myErrorHandler.invalidInternalReference(
-					ParseLocation.fromElementName(theCompositeChildElement.getDef().getElementName()),
-					ref.getValue()
-				);
+						ParseLocation.fromElementName(
+								theCompositeChildElement.getDef().getElementName()),
+						ref.getValue());
 			}
 		}
 		if (!ref.hasResourceType() && !ref.isLocal() && theRef.getResource() != null) {
@@ -268,7 +268,9 @@ public abstract class BaseParser implements IParser {
 
 	private boolean isValidInternalReference(EncodeContext theContext, IIdType ref) {
 		// a # is a reference to the container resource.
-		return !ref.isLocal() || ref.getValue().equals("#") || theContext.getContainedResources().referenceMatchesAContainedResource(ref);
+		return !ref.isLocal()
+				|| ref.getValue().equals("#")
+				|| theContext.getContainedResources().referenceMatchesAContainedResource(ref);
 	}
 
 	protected abstract void doEncodeResourceToWriter(

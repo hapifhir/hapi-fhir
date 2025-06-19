@@ -98,8 +98,7 @@ public class StrictErrorHandler extends ParseErrorHandler implements IParserErro
 
 	@Override
 	public void invalidInternalReference(IParseLocation theLocation, String theReference) {
-		throw new DataFormatException(
-			Msg.code(2724)
+		throw new DataFormatException(Msg.code(2724)
 				+ describeLocation(theLocation)
 				+ "There is a reference that begins with #, but no resource with this ID is contained. [reference="
 				+ theReference + "]");

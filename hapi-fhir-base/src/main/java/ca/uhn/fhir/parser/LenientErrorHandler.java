@@ -213,8 +213,10 @@ public class LenientErrorHandler extends ParseErrorHandler implements IParserErr
 	@Override
 	public void invalidInternalReference(IParseLocation theLocation, String theReference) {
 		if (myLogErrors) {
-			ourLog.warn("{}Resource has a reference that begins with '#', but no resource with this ID is contained. [Reference=\"{}\"]",
-				describeLocation(theLocation), theReference);
+			ourLog.warn(
+					"{}Resource has a reference that begins with '#', but no resource with this ID is contained. [Reference=\"{}\"]",
+					describeLocation(theLocation),
+					theReference);
 		}
 	}
 
