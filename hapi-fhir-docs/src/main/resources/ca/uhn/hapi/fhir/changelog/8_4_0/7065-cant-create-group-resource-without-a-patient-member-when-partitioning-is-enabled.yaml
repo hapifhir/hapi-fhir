@@ -1,5 +1,4 @@
 ---
 type: fix
 issue: 7065
-title: "Previously, if partitioning mode was enabled and a Group resource didn't have a Patient member,
-the PatientIdPartitionInterceptor would throw an error during a CREATE/PUT, leading to an unsuccessful group creation or update. This has been fixed and the Group resource in the request will be placed in the default partition."
+title: "In Patient Id partitioning (PatientIdPartitionInterceptor), Group resources are now treated as if they are not part of the Patient compartment and will be created in the default partition in all cases.  This avoids problems errors creating Groups in no Patient compartment, or many."

@@ -92,7 +92,7 @@ public class PatientIdPartitionInterceptor {
 		List<RuntimeSearchParam> compartmentSps =
 				ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
 
-		if (compartmentSps.isEmpty()) {
+		if (compartmentSps.isEmpty() || resourceDef.getName().equals("Group")) {
 			return provideNonCompartmentMemberTypeResponse(theResource);
 		}
 
@@ -104,9 +104,6 @@ public class PatientIdPartitionInterceptor {
 								+ "Patient resource IDs must be client-assigned in patient compartment mode, or server id strategy must be UUID");
 			}
 			return provideCompartmentMemberInstanceResponse(theRequestDetails, idElement.getIdPart());
-		}
-		if (resourceDef.getName().equals("Group")) {
-			return RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
 		} else {
 			Optional<String> oCompartmentIdentity = ResourceCompartmentUtil.getResourceCompartment(
 					"Patient", theResource, compartmentSps, mySearchParamExtractor);
