@@ -24,7 +24,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.ExtensionUtil;
@@ -37,12 +36,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_RESOURCE_PLACEHOLDER;
 
@@ -157,7 +153,8 @@ public class RepositoryValidatingInterceptor {
 
 	protected void handleFailure(IRepositoryValidatingRule.RuleEvaluation theOutcome) {
 		if (theOutcome.getOperationOutcome() != null) {
-			List<String> allIssues = OperationOutcomeUtil.getAllIssueDiagnostics(myFhirContext, theOutcome.getOperationOutcome());
+			List<String> allIssues =
+					OperationOutcomeUtil.getAllIssueDiagnostics(myFhirContext, theOutcome.getOperationOutcome());
 			String concatenatedIssues = String.join("\n", allIssues);
 			throw new PreconditionFailedException(Msg.code(574) + concatenatedIssues, theOutcome.getOperationOutcome());
 		}
