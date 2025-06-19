@@ -155,11 +155,6 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	@Override
-	public void setSilent(boolean silent) {
-		myPackageLoaderSvc.setSilent(silent);
-	}
-
-	@Override
 	public String getPackageUrl(String theS) throws IOException {
 		return myPackageLoaderSvc.getPackageUrl(theS);
 	}
