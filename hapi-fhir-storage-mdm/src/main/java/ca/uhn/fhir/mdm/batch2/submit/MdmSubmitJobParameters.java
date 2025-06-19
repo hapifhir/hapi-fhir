@@ -32,7 +32,7 @@ public class MdmSubmitJobParameters extends PartitionedUrlJobParameters {
 	@JsonProperty("resourceType")
 	@Nonnull
 	private List<@Pattern(regexp = "^[A-Z][A-Za-z]+$", message = "If populated, must be a valid resource type'") String>
-		myResourceNames;
+			myResourceNames;
 
 	public List<String> getResourceNames() {
 		if (myResourceNames == null) {
