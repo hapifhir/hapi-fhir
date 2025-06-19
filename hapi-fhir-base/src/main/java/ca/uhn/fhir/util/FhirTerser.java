@@ -1783,6 +1783,17 @@ public class FhirTerser {
 	}
 
 	/**
+	 * Checks if the field exists on the resource
+	 *
+	 * @param theFieldName   Name of the field to check
+	 * @param theResource    Resource instance to check
+	 * @return Returns true if resource definition has a child with the specified name and false otherwise
+	 */
+	public boolean fieldExists(String theFieldName, IBaseResource theResource) {
+		return myContext.getResourceDefinition(theResource).getChildByName(theFieldName) != null;
+	}
+
+	/**
 	 * Clones a resource object, copying all data elements from theSource into a new copy of the same type.
 	 * <p>
 	 * Note that:
