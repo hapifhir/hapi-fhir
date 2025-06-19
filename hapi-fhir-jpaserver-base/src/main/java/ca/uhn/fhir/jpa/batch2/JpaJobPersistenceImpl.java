@@ -57,6 +57,7 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
@@ -241,9 +242,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				PageRequest.of(theRequest.getPageStart(), theRequest.getBatchSize(), theRequest.getSort());
 
 		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> myJobInstanceRepository
-				.findByStatusAndDefinitionIdAndIdAndCreateTime(
-						theRequest.getJobStatus() != null ? StatusEnum.valueOf(theRequest.getJobStatus()) : null,
+				.findByJobDefinitionIdOrStatusOrIdOrCreateTime(
 						theRequest.getJobDefinitionId(),
+						StringUtils.isNotEmpty(theRequest.getJobStatus())
+								? StatusEnum.valueOf(theRequest.getJobStatus())
+								: null,
 						theRequest.getJobId(),
 						theRequest.getJobCreateTimeFrom(),
 						theRequest.getJobCreateTimeTo(),

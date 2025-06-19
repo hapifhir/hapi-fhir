@@ -70,13 +70,13 @@ public interface IBatch2JobInstanceRepository
 			@Param("defId") String theDefinitionId, @Param("params") String theParams, Pageable thePageable);
 
 	@Query("SELECT b from Batch2JobInstanceEntity b "
-			+ "WHERE (:status IS NULL OR b.myStatus = :status) "
-			+ "AND (:jobType IS NULL OR b.myDefinitionId = :jobType) "
+			+ "WHERE (:definitionId IS NULL OR b.myDefinitionId = :definitionId) "
+			+ "AND (:status IS NULL OR b.myStatus = :status) "
 			+ "AND (:jobId IS NULL OR b.myId = :jobId) "
 			+ "AND (:from IS NULL OR :to IS NULL OR (b.myCreateTime >= :from AND b.myCreateTime <= :to))")
-	Page<Batch2JobInstanceEntity> findByStatusAndDefinitionIdAndIdAndCreateTime(
+	Page<Batch2JobInstanceEntity> findByJobDefinitionIdOrStatusOrIdOrCreateTime(
+			@Param("definitionId") String theDefinitionId,
 			@Param("status") StatusEnum theStatus,
-			@Param("jobType") String theJobType,
 			@Param("jobId") String theJobId,
 			@Param("from") Date theFrom,
 			@Param("to") Date theTo,
