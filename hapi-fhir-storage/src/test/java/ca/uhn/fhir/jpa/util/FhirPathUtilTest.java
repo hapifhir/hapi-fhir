@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.util;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -13,7 +12,8 @@ public class FhirPathUtilTest {
 	@ParameterizedTest
 	@ValueSource(strings = {
 		"Appointment.participant.actor.reference.where(startsWith('Patient')",
-		"Appointment.participant.actor.reference.where((startsWith('Patient'))"
+		"Appointment.participant.actor.reference.where((startsWith('Patient'))",
+		"Appointment.participant.actor.reference.where((contains('('))"
 	})
 	public void cleansePath_errorCases_throws(String theStr) {
 		try {

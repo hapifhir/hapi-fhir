@@ -224,14 +224,24 @@ public class FhirPatch {
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
 
-		// error case
-		if (!FhirPathUtils.hasBalancedBraces(path)) {
-			throw new IllegalArgumentException(Msg.code(2725) + String.format("%s is not a valid fhir path", path));
-		}
-
-		ParsedFhirPath parsedFhirPath = ParsedFhirPath.parse(path);
+		// TODO
+		/*
+		 * We should replace this with
+		 * IParsedExpression to expose the parsed parts of the
+		 * path (including functional nodes).
+		 *
+		 * Alternatively, could make an Antir parser using
+		 * the exposed grammar (http://hl7.org/fhirpath/N1/grammar.html)
+		 *
+		 * Might be required for more complex handling.
+		 */
 		IFhirPath fhirPath = myContext.newFhirPath();
-
+		try {
+			IFhirPath.IParsedExpression exp = fhirPath.parse(path);
+		} catch (Exception theE) {
+			throw new IllegalArgumentException(Msg.code(2726) + String.format(" %s is not a valid fhir path", path), theE);
+		}
+		ParsedFhirPath parsedFhirPath = ParsedFhirPath.parse(path);
 		FhirPathChildDefinition parentDef = new FhirPathChildDefinition();
 
 		List<ParsedFhirPath.FhirPathNode> pathNodes = new ArrayList<>();

@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -318,11 +319,16 @@ public class FhirPatchTest {
 		}
 	}
 
-	@Test
-	public void patch_invalidPath_throws() {
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"Appointment.participant.actor.reference.where(startsWith('Patient')",
+		"Appointment.participant.actor.reference.where(contains(')')"
+	})
+	public void patch_invalidPaths_throw(String thePath) {
 		// setup
 		Appointment appointment;
 		{
+			@Language("JSON")
 			String apStr = """
 				{
 				      "participant": [
@@ -342,6 +348,7 @@ public class FhirPatchTest {
 
 		Parameters patch;
 		{
+			@Language("JSON")
 			String patchStr = """
 					{
 				     "resourceType":"Parameters",
@@ -355,7 +362,7 @@ public class FhirPatchTest {
 				           },
 				           {
 				             "name":"path",
-				             "valueString":"Appointment.participant.actor.reference.where(startsWith('Patient')"
+				             "valueString": "FINDME"
 				           },
 				           {
 				             "name":"value",
@@ -365,7 +372,7 @@ public class FhirPatchTest {
 				       }
 				     ]
 				   }
-				""";
+				""".replace("FINDME", thePath);
 			patch = myParser.parseResource(Parameters.class, patchStr);
 		}
 

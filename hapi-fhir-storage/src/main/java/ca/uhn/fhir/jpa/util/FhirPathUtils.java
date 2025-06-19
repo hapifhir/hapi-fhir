@@ -28,7 +28,7 @@ public class FhirPathUtils {
 		// balance brackets
 		if (!hasBalancedBraces(thePath)) {
 			throw new IllegalArgumentException(
-					Msg.code(2726) + String.format("Cannot cleanse path - %s is not a valid fhir path", thePath));
+					Msg.code(2725) + String.format("Cannot cleanse path - %s is not a valid fhir path", thePath));
 		}
 
 		int openBrace = path.indexOf("(");
@@ -36,6 +36,11 @@ public class FhirPathUtils {
 		int endingIndex = openBrace == -1 ? path.length() : 0;
 		while (openBrace != -1) {
 			int closing = RandomTextUtils.findMatchingClosingBrace(openBrace, remainder);
+			if (closing == -1) {
+				// this means the path is not valid;
+				// we'll let later code catch the break
+				break;
+			}
 			endingIndex += closing + 1; // +1 because substring ending is exclusive
 			remainder = remainder.substring(closing + 1);
 			openBrace = remainder.indexOf("(");
