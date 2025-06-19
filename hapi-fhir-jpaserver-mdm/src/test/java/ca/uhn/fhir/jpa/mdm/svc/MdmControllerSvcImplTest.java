@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
@@ -14,6 +15,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearStep;
+import ca.uhn.fhir.mdm.batch2.submit.MdmSubmitJobParameters;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
@@ -21,6 +23,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.DecimalType;
@@ -224,4 +227,23 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 		}
 	}
 
+	@Test
+	public void testSubmitMdmSubmitJobUsesResourceNameFromRequestDetails() throws Exception {
+		assertLinkCount(1);
+
+		List<String> urls = List.of("Patient?");
+		IPrimitiveType<BigDecimal> batchSize = new DecimalType(new BigDecimal(50));
+		ServletRequestDetails details = new ServletRequestDetails();
+		details.setResourceName("Patient");
+
+		IBaseParameters result = myMdmControllerSvc.submitMdmSubmitJob(urls, batchSize, details);
+		String jobId = ((StringType) ((Parameters) result).getParameterValue("jobId")).getValueAsString();
+
+		JobInstance instance = myBatch2JobHelper.awaitJobCompletion(jobId);
+
+		ObjectMapper mapper = new ObjectMapper();
+		MdmSubmitJobParameters submitParams = mapper.readValue(instance.getParameters(), MdmSubmitJobParameters.class);
+
+		assertThat(submitParams.getResourceNames()).containsExactly("Patient");
+	}
 }
