@@ -198,7 +198,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	@Override
-	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, List<String> types) throws FHIRException {
+	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, Set<String> types) throws FHIRException {
 		throw new UnsupportedOperationException(Msg.code(653));
 	}
 

@@ -174,7 +174,7 @@ class SubscriptionTriggerMatcherTest {
 
 		// verify
 		assertFalse(result.matched());
-		assertEquals("Error @1, 2: Premature ExpressionNode termination at unexpected token \"text\"", result.getUnsupportedReason());
+		assertEquals("Error @1, 12: Premature ExpressionNode termination at unexpected token \"text\"", result.getUnsupportedReason());
 	}
 
 	@Test
@@ -300,7 +300,7 @@ class SubscriptionTriggerMatcherTest {
 
 		// verify
 		assertFalse(result.matched());
-		assertEquals("Error @1, 2: Premature ExpressionNode termination at unexpected token \"text\"", result.getUnsupportedReason());
+		assertEquals("Error @1, 12: Premature ExpressionNode termination at unexpected token \"text\"", result.getUnsupportedReason());
 	}
 
 	@Test

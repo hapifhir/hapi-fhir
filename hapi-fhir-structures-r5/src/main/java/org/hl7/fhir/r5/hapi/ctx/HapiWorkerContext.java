@@ -536,7 +536,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, List<String> types)
+	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, Set<String> types)
 			throws FileNotFoundException, IOException, FHIRException {
 		throw new UnsupportedOperationException(Msg.code(2328));
 	}
