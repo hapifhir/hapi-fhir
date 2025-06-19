@@ -283,20 +283,6 @@ public abstract class RequestDetails {
 	}
 
 	/**
-	 * Returns the attribute map for this request. Attributes are a place for user-supplied
-	 * objects of any type to be attached to an individual request. They can be used to pass information
-	 * between interceptor methods.
-	 */
-	public abstract Object getAttribute(String theAttributeName);
-
-	/**
-	 * Returns the attribute map for this request. Attributes are a place for user-supplied
-	 * objects of any type to be attached to an individual request. They can be used to pass information
-	 * between interceptor methods.
-	 */
-	public abstract void setAttribute(String theAttributeName, Object theAttributeValue);
-
-	/**
 	 * Retrieves the body of the request as binary data. Either this method or {@link #getReader} may be called to read
 	 * the body, not both.
 	 *
@@ -487,6 +473,11 @@ public abstract class RequestDetails {
 	 * on the {@link ca.uhn.fhir.interceptor.api.Pointcut#SERVER_INCOMING_REQUEST_POST_PROCESSED}
 	 * to a later hook method on the {@link ca.uhn.fhir.interceptor.api.Pointcut#SERVER_OUTGOING_RESPONSE}
 	 * pointcut.
+	 * </p>
+	 * <p>
+	 * This method should be used to pass information between interceptor methods. For servlet-specific
+	 * request attributes used to communicate between servlet filters, use the getAttribute/setAttribute
+	 * methods available on implementations that support them.
 	 * </p>
 	 */
 	public Map<Object, Object> getUserData() {
