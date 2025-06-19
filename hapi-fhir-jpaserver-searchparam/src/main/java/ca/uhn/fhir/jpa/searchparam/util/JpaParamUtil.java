@@ -146,13 +146,7 @@ public enum JpaParamUtil {
 
 	public static List<RuntimeSearchParam> resolveComponentParameters(
 			ISearchParamRegistry theSearchParamRegistry, RuntimeSearchParam theParamDef) {
-		List<RuntimeSearchParam> compositeList =
-				resolveCompositeComponentsDeclaredOrder(theSearchParamRegistry, theParamDef);
-
-		// todo mb why is this sorted?  Is the param order flipped too during query-time?
-		compositeList.sort((Comparator.comparing(RuntimeSearchParam::getName)));
-
-		return compositeList;
+		return resolveCompositeComponentsDeclaredOrder(theSearchParamRegistry, theParamDef);
 	}
 
 	@Nonnull
