@@ -39,6 +39,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class MetaUtil {
@@ -101,9 +102,13 @@ public class MetaUtil {
 
 	public static <R extends IBaseResource> void populateResourceSource(
 			FhirContext theFhirContext, String theProvenanceSourceUri, String theProvenanceRequestId, R theRetVal) {
-		String sourceString = cleanProvenanceSourceUriOrEmpty(theProvenanceSourceUri);
-		if (isNotBlank(theProvenanceRequestId)) {
-			sourceString = sourceString + "#" + theProvenanceRequestId;
+		String provenanceString = cleanProvenanceSourceUriOrEmpty(theProvenanceSourceUri);
+		String sourceString = "";
+
+		if (isBlank(provenanceString)) {
+			sourceString = theProvenanceRequestId;
+		} else {
+			sourceString = provenanceString + "#" + theProvenanceRequestId;
 		}
 
 		if (isNotBlank(sourceString)) {
