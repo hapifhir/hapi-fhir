@@ -226,9 +226,7 @@ public class FhirPatch {
 
 		// error case
 		if (!FhirPathUtils.hasBalancedBraces(path)) {
-			throw new IllegalArgumentException(Msg.code(2725)
-				+ String.format("%s is not a valid fhir path", path)
-			);
+			throw new IllegalArgumentException(Msg.code(2725) + String.format("%s is not a valid fhir path", path));
 		}
 
 		ParsedFhirPath parsedFhirPath = ParsedFhirPath.parse(path);

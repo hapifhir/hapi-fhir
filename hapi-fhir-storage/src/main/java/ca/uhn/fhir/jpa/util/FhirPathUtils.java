@@ -28,9 +28,7 @@ public class FhirPathUtils {
 		// balance brackets
 		if (!hasBalancedBraces(thePath)) {
 			throw new IllegalArgumentException(
-				Msg.code(2726)
-				+ String.format("Cannot cleanse path - %s is not a valid fhir path", thePath)
-			);
+					Msg.code(2726) + String.format("Cannot cleanse path - %s is not a valid fhir path", thePath));
 		}
 
 		int openBrace = path.indexOf("(");
