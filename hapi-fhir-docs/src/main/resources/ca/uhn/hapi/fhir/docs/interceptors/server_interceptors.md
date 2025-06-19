@@ -17,18 +17,18 @@ For example, a call through a DAO will not trigger an interceptor registered on 
 |                 | Registered on |                     |
 | --------------- | ------------- | ------------------- |
 | **Call source** | RestfulServer | IInterceptorService |
-| REST            | ✅            | 🔴                 |
-| DAO             | 🔴            | 🔴                 |
+| REST            | ✅            | ❌                  |
+| DAO             | ❌             | ❌                   |
 
 ### **STORAGE_xxx**
 |                 | Registered on |                     |
 | --------------- | ------------- | ------------------- |
 | **Call source** | RestfulServer | IInterceptorService |
 | REST            | ✅            | ✅                 |
-| DAO             | 🔴            | ✅                 |
+| DAO             | ❌             | ✅                 |
 
 ✅: Triggered
-🔴: Not triggered
+❌: Not triggered
 
 Note that you should not register any interceptor on both the `RestfulServer` and `IInterceptorService`. If you do so, it will be triggered twice.
 
