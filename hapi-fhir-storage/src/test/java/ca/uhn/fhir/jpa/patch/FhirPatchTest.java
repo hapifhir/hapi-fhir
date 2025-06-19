@@ -21,6 +21,7 @@ import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirPatchTest {
 	org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirPatchTest.class);
@@ -314,6 +315,67 @@ public class FhirPatchTest {
 			myPatch.apply(appointment, parameters);
 		} catch (InvalidRequestException ex) {
 			assertTrue(ex.getMessage().contains("List contains more than a single element"));
+		}
+	}
+
+	@Test
+	public void patch_invalidPath_throws() {
+		// setup
+		Appointment appointment;
+		{
+			String apStr = """
+				{
+				      "participant": [
+				          {
+				              "actor": {
+				                  "reference": "Patient/1"
+				              },
+				              "required": "required",
+				              "status": "accepted"
+				          }
+				      ],
+				      "resourceType": "Appointment"
+				}
+				""";
+			appointment = myParser.parseResource(Appointment.class, apStr);
+		}
+
+		Parameters patch;
+		{
+			String patchStr = """
+					{
+				     "resourceType":"Parameters",
+				     "parameter":[
+				       {
+				         "name":"operation",
+				         "part":[
+				           {
+				             "name":"type",
+				             "valueCode":"replace"
+				           },
+				           {
+				             "name":"path",
+				             "valueString":"Appointment.participant.actor.reference.where(startsWith('Patient')"
+				           },
+				           {
+				             "name":"value",
+				             "valueString":"Patient/2"
+				           }
+				         ]
+				       }
+				     ]
+				   }
+				""";
+			patch = myParser.parseResource(Parameters.class, patchStr);
+		}
+
+		// test
+		try {
+			myPatch.apply(appointment, patch);
+			fail();
+		} catch (IllegalArgumentException ex) {
+			assertTrue(ex.getLocalizedMessage()
+				.contains("is not a valid fhir path"));
 		}
 	}
 }

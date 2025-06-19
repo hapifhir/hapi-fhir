@@ -1,6 +1,10 @@
 package ca.uhn.fhir.jpa.util;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.patch.ParsedFhirPath;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class FhirPathUtils {
 	/**
@@ -22,6 +26,13 @@ public class FhirPathUtils {
 		}
 
 		// balance brackets
+		if (!hasBalancedBraces(thePath)) {
+			throw new IllegalArgumentException(
+				Msg.code(2726)
+				+ String.format("Cannot cleanse path - %s is not a valid fhir path", thePath)
+			);
+		}
+
 		int openBrace = path.indexOf("(");
 		String remainder = path;
 		int endingIndex = openBrace == -1 ? path.length() : 0;
@@ -34,6 +45,35 @@ public class FhirPathUtils {
 		path = path.substring(0, endingIndex);
 
 		return path;
+	}
+
+	private static Map<Character, Integer> parenthesesBalance(String theStr, char theOpening, char theClosing) {
+		Map<Character, Integer> map = new HashMap<>();
+		map.put(theOpening, 0);
+		map.put(theClosing, 0);
+
+		int openingCount = 0;
+		int closingCount = 0;
+		int len = theStr.length();
+		for (int i = 0; i < len; i++) {
+			if (theStr.charAt(i) == theOpening) {
+				openingCount++;
+			} else if (theStr.charAt(i) == theClosing) {
+				closingCount++;
+			}
+		}
+		map.put(theOpening, openingCount);
+		map.put(theClosing, closingCount);
+		return map;
+	}
+
+	public static boolean hasBalancedBraces(String theStr) {
+		char opening = '(';
+		char closing = ')';
+
+		Map<Character, Integer> matching = parenthesesBalance(theStr, opening, closing);
+
+		return matching.get(opening).intValue() == matching.get(closing).intValue();
 	}
 
 	/**

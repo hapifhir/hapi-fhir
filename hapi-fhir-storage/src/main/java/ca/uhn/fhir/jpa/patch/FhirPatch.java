@@ -224,6 +224,13 @@ public class FhirPatch {
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
 
+		// error case
+		if (!FhirPathUtils.hasBalancedBraces(path)) {
+			throw new IllegalArgumentException(Msg.code(2725)
+				+ String.format("%s is not a valid fhir path", path)
+			);
+		}
+
 		ParsedFhirPath parsedFhirPath = ParsedFhirPath.parse(path);
 		IFhirPath fhirPath = myContext.newFhirPath();
 
