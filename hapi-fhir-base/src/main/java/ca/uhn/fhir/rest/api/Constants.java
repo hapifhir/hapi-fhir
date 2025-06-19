@@ -400,7 +400,7 @@ public class Constants {
 		ctsNdjson.add(CT_FHIR_NDJSON);
 		ctsNdjson.add(CT_APP_NDJSON);
 		ctsNdjson.add(CT_NDJSON);
-		ctsNdjson.add(CT_APP_XNDJSON);
+		ctsNdjson.add(CT_APP_X_NDJSON);
 		CTS_NDJSON = Collections.unmodifiableSet(ctsNdjson);
 
 		HashMap<Integer, String> statusNames = new HashMap<>();
