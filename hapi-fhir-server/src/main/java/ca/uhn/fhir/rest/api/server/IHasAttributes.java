@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.rest.api.server;
 
-// Created by Claude Sonnet 4
+// FIXME KHS change to IHasServletRequestAttributes
 public interface IHasAttributes {
 
 	/**
