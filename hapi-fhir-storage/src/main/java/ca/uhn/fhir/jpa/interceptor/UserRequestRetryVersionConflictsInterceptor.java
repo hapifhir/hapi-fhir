@@ -23,6 +23,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.apache.commons.lang3.Validate;
@@ -41,7 +42,7 @@ public class UserRequestRetryVersionConflictsInterceptor {
 
 	/** Deprecated and moved to {@link ca.uhn.fhir.rest.api.Constants#HEADER_RETRY_ON_VERSION_CONFLICT} */
 	@Deprecated
-	public static final String HEADER_NAME = "X-Retry-On-Version-Conflict";
+	public static final String HEADER_NAME = Constants.HEADER_RETRY_ON_VERSION_CONFLICT;
 
 	/** Deprecated and moved to {@link ca.uhn.fhir.rest.api.Constants#HEADER_MAX_RETRIES} */
 	@Deprecated
@@ -55,6 +56,10 @@ public class UserRequestRetryVersionConflictsInterceptor {
 	public ResourceVersionConflictResolutionStrategy check(RequestDetails theRequestDetails) {
 		ResourceVersionConflictResolutionStrategy retVal = new ResourceVersionConflictResolutionStrategy();
 		boolean shouldSetRetries = theRequestDetails != null && theRequestDetails.isRetry();
+		// This can be in HapiTransactionService directly but HapiTransactionService
+		// tackles database logic and doesn't deal with HTTP/client layer. The RequestDetails
+		// is only used here for interceptor broadcasting. Keeping this here is good separation
+		// of concerns.
 		if (shouldSetRetries) {
 			retVal.setRetry(true);
 			int maxRetries = Math.min(100, theRequestDetails.getMaxRetries());
