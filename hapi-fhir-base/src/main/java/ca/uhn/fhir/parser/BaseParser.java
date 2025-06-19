@@ -244,10 +244,10 @@ public abstract class BaseParser implements IParser {
 			return reference;
 		} else {
 			if (!isValidInternalReference(theContext, ref)) {
-				throw new DataFormatException(
-					Msg.code(2724)
-						+ "There is a reference that begins with #, but no resource with this ID is contained. [reference="
-								+ ref.getIdPart() + "]");
+				myErrorHandler.invalidInternalReference(
+					ParseLocation.fromElementName(theCompositeChildElement.getDef().getElementName()),
+					ref.getValue()
+				);
 			}
 		}
 		if (!ref.hasResourceType() && !ref.isLocal() && theRef.getResource() != null) {
