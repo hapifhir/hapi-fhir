@@ -102,13 +102,13 @@ public class MetaUtil {
 
 	public static <R extends IBaseResource> void populateResourceSource(
 			FhirContext theFhirContext, String theProvenanceSourceUri, String theProvenanceRequestId, R theRetVal) {
-		String provenanceString = cleanProvenanceSourceUriOrEmpty(theProvenanceSourceUri);
+		String cleanedProvenanceSourceUri = cleanProvenanceSourceUriOrEmpty(theProvenanceSourceUri);
 		String sourceString = "";
 
-		if (isBlank(provenanceString)) {
+		if (isBlank(cleanedProvenanceSourceUri)) {
 			sourceString = theProvenanceRequestId;
 		} else {
-			sourceString = provenanceString + "#" + theProvenanceRequestId;
+			sourceString = cleanedProvenanceSourceUri + "#" + theProvenanceRequestId;
 		}
 
 		if (isNotBlank(sourceString)) {
