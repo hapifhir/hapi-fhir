@@ -36,6 +36,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -112,6 +113,18 @@ public class OperationOutcomeUtil {
 
 	public static String getFirstIssueDiagnostics(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
 		return getIssueStringPart(theCtx, theOutcome, "diagnostics", 0);
+	}
+
+	public static List<String> getAllIssueDiagnostics(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
+		int nIssues = OperationOutcomeUtil.getIssueCount(theCtx, theOutcome);
+
+		List<String> issueStrings = new ArrayList<>();
+		for (int i = 0; i < nIssues; i++) {
+			String diag = OperationOutcomeUtil.getIssueDiagnostics(theCtx, theOutcome, i);
+			issueStrings.add(diag);
+		}
+
+		return issueStrings;
 	}
 
 	public static String getIssueDiagnostics(FhirContext theCtx, IBaseOperationOutcome theOutcome, int theIndex) {
