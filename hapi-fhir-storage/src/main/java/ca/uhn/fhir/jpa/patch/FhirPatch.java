@@ -239,7 +239,8 @@ public class FhirPatch {
 		try {
 			IFhirPath.IParsedExpression exp = fhirPath.parse(path);
 		} catch (Exception theE) {
-			throw new IllegalArgumentException(Msg.code(2726) + String.format(" %s is not a valid fhir path", path), theE);
+			throw new IllegalArgumentException(
+					Msg.code(2726) + String.format(" %s is not a valid fhir path", path), theE);
 		}
 		ParsedFhirPath parsedFhirPath = ParsedFhirPath.parse(path);
 		FhirPathChildDefinition parentDef = new FhirPathChildDefinition();
