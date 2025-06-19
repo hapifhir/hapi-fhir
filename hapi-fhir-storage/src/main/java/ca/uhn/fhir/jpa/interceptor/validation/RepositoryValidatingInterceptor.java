@@ -157,7 +157,7 @@ public class RepositoryValidatingInterceptor {
 
 	protected void handleFailure(IRepositoryValidatingRule.RuleEvaluation theOutcome) {
 		if (theOutcome.getOperationOutcome() != null) {
-			List<String> allIssues = OperationOutcomeUtil.getAllIssueDiagnostics(myFhirContext, theOutcome.getOperationOutcome())
+			List<String> allIssues = OperationOutcomeUtil.getAllIssueDiagnostics(myFhirContext, theOutcome.getOperationOutcome());
 			String concatenatedIssues = String.join("\n", allIssues);
 			throw new PreconditionFailedException(Msg.code(574) + concatenatedIssues, theOutcome.getOperationOutcome());
 		}
