@@ -169,6 +169,9 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	 * Provides the {@link IValidationSupport} module that backs this adapter.
 	 */
 	public void setValidationSupport(IValidationSupport theValidationSupport) {
+		if (myValidationSupport == theValidationSupport) {
+			return;
+		}
 		Validate.isTrue(
 				myValidationSupport == null, "Can not set the validation support after it has already been set");
 		myValidationSupport = theValidationSupport;
