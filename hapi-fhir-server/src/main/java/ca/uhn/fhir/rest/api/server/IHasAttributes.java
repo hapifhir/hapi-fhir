@@ -19,7 +19,8 @@
  */
 package ca.uhn.fhir.rest.api.server;
 
-// FIXME KHS change to IHasServletRequestAttributes
+// FIXME KHS change to IHasServletRequestAttributes and change methods
+// FIXME KHS restore method in parent with warning log and deprecation
 public interface IHasAttributes {
 
 	/**
