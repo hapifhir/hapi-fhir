@@ -231,7 +231,7 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 	public void testSubmitMdmSubmitJobUsesResourceNameFromRequestDetails() throws Exception {
 		assertLinkCount(1);
 
-		List<String> urls = List.of("Patient?");
+		List<String> urls = List.of("Patient?_id=*");
 		IPrimitiveType<BigDecimal> batchSize = new DecimalType(new BigDecimal(50));
 		ServletRequestDetails details = new ServletRequestDetails();
 		details.setResourceName("Patient");
