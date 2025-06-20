@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7071
+title: "FhirPatch will now handle some error cases when the provided
+      FhirPath is invalid (unmatching brackets, for instance).
+"
