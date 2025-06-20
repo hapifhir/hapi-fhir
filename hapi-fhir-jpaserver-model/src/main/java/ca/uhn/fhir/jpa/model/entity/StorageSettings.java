@@ -97,6 +97,14 @@ public class StorageSettings {
 	private Integer myBundleBatchMaxPoolSize = DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE;
 	private boolean myMassIngestionMode;
 	private Integer myMaximumTransactionBundleSize = DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE;
+	/**
+	 * Activates hibernate search indexing of fulltext data from resources, which
+	 * is used to support the {@literal _text} and {@literal _content} Search Parameters.
+	 *
+	 * @since 8.0.0
+	 */
+	private boolean myHibernateSearchIndexFullText = false;
+
 	private boolean myNormalizeTerminologyForBulkExportJobs = false;
 	/**
 	 * Update setter javadoc if default changes.
@@ -255,6 +263,27 @@ public class StorageSettings {
 	 */
 	public IndexEnabledEnum getIndexMissingFields() {
 		return myIndexMissingFieldsEnabled;
+	}
+
+	/**
+	 * Is hibernate search indexing of fulltext data from resources enabled?
+	 * This setting activates hibernate search indexing of fulltext data from resources, which
+	 * is used to support the {@literal _text} and {@literal _content} Search Parameters.
+	 *
+	 * @since 8.0.0
+	 */
+	public boolean isHibernateSearchIndexFullText() {
+		return myHibernateSearchIndexFullText;
+	}
+
+	/**
+	 * Activates hibernate search indexing of fulltext data from resources, which
+	 * is used to support the {@literal _text} and {@literal _content} Search Parameters.
+	 *
+	 * @since 8.0.0
+	 */
+	public void setHibernateSearchIndexFullText(boolean theHibernateSearchIndexFullText) {
+		myHibernateSearchIndexFullText = theHibernateSearchIndexFullText;
 	}
 
 	/**

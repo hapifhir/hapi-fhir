@@ -24,46 +24,69 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionRequest;
 import ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionResponse;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.Observation;
 
-import java.util.Set;
-
-// FIXME: finish and document
 // START SNIPPET: interceptor
+/**
+ * This interceptor demonstrates how to customize full-text indexing. It
+ * implements a fairly contrived set of rules, intended to demonstrate
+ * possibilities:
+ * <ul>
+ * <li>
+ *     Observations with an <code>Observation.category</code> code of
+ *     "vital-signs" will not be full-text indexed.
+ * </li>
+ * <li>
+ *     Observations with an <code>Observation.value</code> type of
+ *     "string" will only have the string value indexed, and no other
+ *     strings in the resource will be indexed.
+ * </li>
+ * <li>
+ *     All other resource types are indexed normally.
+ * </li>
+ * </ul>
+ */
 @Interceptor
 public class FullTextSelectiveIndexingInterceptor {
 
 	/**
-	 * These types will be indexed for structured data content (supporting
-	 * the <code>_content</code> Search Parameter)
+	 * Override the default behaviour for the <code>_content</code>
+	 * SearchParameter indexing.
 	 */
-	private static final Set<String> INDEX_CONTENT_TYPES = Set.of("Patient");
-
-	/**
-	 * These types will be indexed for narrative (supporting
-	 * the <code>_text</code> Search Parameter)
-	 */
-	private static final Set<String> INDEX_TEXT_TYPES = Set.of("DiagnosticReport", "Observation");
-
-	/**
-	 * This method is called twice for each resource being stored, to cover
-	 * the two FullText search parameters.
-	 */
-	@Hook(Pointcut.JPA_INDEX_EXTRACT_FULLTEXT)
+	@Hook(Pointcut.JPA_INDEX_EXTRACT_FULLTEXT_CONTENT)
 	public FullTextExtractionResponse indexPayload(FullTextExtractionRequest theRequest) {
+		IBaseResource resource = theRequest.getResource();
+		if (resource instanceof Observation observation) {
 
-		if (theRequest.getIndexType() == FullTextExtractionRequest.IndexTypeEnum.CONTENT) {
-			if (!INDEX_CONTENT_TYPES.contains(theRequest.getResourceType())) {
+			// Do not full-text index vital signs
+			if (isVitalSignsObservation(observation)) {
 				return FullTextExtractionResponse.doNotIndex();
 			}
-		}
 
-		if (theRequest.getIndexType() == FullTextExtractionRequest.IndexTypeEnum.TEXT) {
-			if (!INDEX_TEXT_TYPES.contains(theRequest.getResourceType())) {
-				return FullTextExtractionResponse.doNotIndex();
+			if (observation.hasValueStringType()) {
+				String stringValue = observation.getValueStringType().getValue();
+				return FullTextExtractionResponse.indexPayload(stringValue);
 			}
 		}
 
 		return FullTextExtractionResponse.indexNormally();
+	}
+
+	/**
+	 * Returns {@literal true} if the Observation has the vital-signs category
+	 */
+	private boolean isVitalSignsObservation(Observation theObservation) {
+		for (var category : theObservation.getCategory()) {
+			for (var coding : category.getCoding()) {
+				if ("http://hl7.org/fhir/codesystem/Observation-category".equals(coding.getSystem())) {
+					if ("vital-signs".equals(coding.getCode())) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 }
 // END SNIPPET: interceptor

@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class DefaultProfileValidationSupportR5Test extends BaseValidationTestWithInlineMocks {
 
@@ -25,6 +27,16 @@ public class DefaultProfileValidationSupportR5Test extends BaseValidationTestWit
 				.filter(t->t.getUrl().equals("http://hl7.org/fhir/StructureDefinition/language"))
 				.collect(Collectors.toList());
 		assertThat(allSds).hasSize(1);
+	}
+
+	@Test
+	public void testFetchAllSearchParams() {
+		// Test
+		List<IBaseResource> allSps = mySvc.fetchAllSearchParameters();
+
+		// Verify
+		assertNotNull(allSps);
+		assertEquals(1263, allSps.size());
 	}
 
 }

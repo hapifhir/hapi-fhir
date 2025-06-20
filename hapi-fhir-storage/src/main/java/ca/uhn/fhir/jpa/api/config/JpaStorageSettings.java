@@ -298,14 +298,6 @@ public class JpaStorageSettings extends StorageSettings {
 	private boolean myHibernateSearchIndexSearchParams = false;
 
 	/**
-	 * Activates hibernate search indexing of fulltext data from resources, which
-	 * is used to support the {@literal _text} and {@literal _content} Search Parameters.
-	 *
-	 * @since 8.0.0
-	 */
-	private boolean myHibernateSearchIndexFullText = false;
-
-	/**
 	 * @since 5.7.0
 	 */
 	private boolean myStoreResourceInHSearchIndex;
@@ -2292,27 +2284,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public void setHibernateSearchIndexSearchParams(boolean theAdvancedHSearchIndexing) {
 		this.myHibernateSearchIndexSearchParams = theAdvancedHSearchIndexing;
-	}
-
-	/**
-	 * Is hibernate search indexing of fulltext data from resources enabled?
-	 * This setting activates hibernate search indexing of fulltext data from resources, which
-	 * is used to support the {@literal _text} and {@literal _content} Search Parameters.
-	 *
-	 * @since 8.0.0
-	 */
-	public boolean isHibernateSearchIndexFullText() {
-		return myHibernateSearchIndexFullText;
-	}
-
-	/**
-	 * Activates hibernate search indexing of fulltext data from resources, which
-	 * is used to support the {@literal _text} and {@literal _content} Search Parameters.
-	 *
-	 * @since 8.0.0
-	 */
-	public void setHibernateSearchIndexFullText(boolean theHibernateSearchIndexFullText) {
-		myHibernateSearchIndexFullText = theHibernateSearchIndexFullText;
 	}
 
 	/**

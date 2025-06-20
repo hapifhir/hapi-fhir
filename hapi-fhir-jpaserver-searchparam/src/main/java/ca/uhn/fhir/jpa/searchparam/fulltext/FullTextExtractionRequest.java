@@ -41,20 +41,20 @@ public class FullTextExtractionRequest {
 	@Nullable
 	private final IBaseResource myResource;
 
+	@Nonnull
 	private final String myResourceType;
-	private final IndexTypeEnum myIndexType;
+
+	@Nonnull
 	private final Supplier<String> myDefaultSupplier;
 
 	/**
 	 * Constructor
 	 */
 	public FullTextExtractionRequest(
-			IndexTypeEnum theIndexType,
 			@Nullable IIdType theResourceId,
 			@Nullable IBaseResource theResource,
-			String theResourceType,
-			Supplier<String> theDefaultSupplier) {
-		myIndexType = theIndexType;
+			@Nonnull String theResourceType,
+			@Nonnull Supplier<String> theDefaultSupplier) {
 		myResourceId = theResourceId;
 		myResource = theResource;
 		myResourceType = theResourceType;
@@ -93,30 +93,9 @@ public class FullTextExtractionRequest {
 	}
 
 	/**
-	 * @return Returns the type of index being generated. For any resource being stored, registered intercepors will be invoked once for each index type.
-	 */
-	@Nonnull
-	public IndexTypeEnum getIndexType() {
-		return myIndexType;
-	}
-
-	/**
 	 * @return Returns the extracted content/text string that is automatically extracted from the resource
 	 */
 	public String getDefaultString() {
 		return myDefaultSupplier.get();
-	}
-
-	public enum IndexTypeEnum {
-
-		/**
-		 * This is a request to index the resource content (i.e. the <code>_content</code> SearchParameter)
-		 */
-		CONTENT,
-
-		/**
-		 * This is a request to index the resource narrative (i.e. the <code>_text</code> SearchParameter)
-		 */
-		TEXT
 	}
 }

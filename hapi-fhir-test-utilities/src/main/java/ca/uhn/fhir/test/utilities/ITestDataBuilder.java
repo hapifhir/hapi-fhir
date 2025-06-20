@@ -423,6 +423,18 @@ public interface ITestDataBuilder {
 		return withCodingAt("code.coding", theSystem, theCode, theDisplay);
 	}
 
+	default ICreationArgument withObservationCategory(@Nullable String theSystem, @Nullable String theCode, @Nullable String theDisplay) {
+		return withCodingAt("category.coding", theSystem, theCode, theDisplay);
+	}
+
+	default ICreationArgument withObservationValueString(@Nullable String theValue) {
+		return t -> {
+			IBase value = getFhirContext().getElementDefinition("string").newInstance(theValue);
+			BaseRuntimeElementDefinition<?> resourceDef = getFhirContext().getElementDefinition(t.getClass());
+			resourceDef.getChildByName("value[x]").getMutator().addValue(t, value);
+		};
+	}
+
 	default <T extends IBase> ICreationArgument withCodingAt(String thePath, @Nullable String theSystem, @Nullable String theValue) {
 		return withCodingAt(thePath, theSystem, theValue, null);
 	}
