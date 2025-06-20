@@ -372,7 +372,6 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		request.setPageStart(index);
 		request.setBatchSize(size);
 		request.setSort(Sort.unsorted());
-		request.setJobStatus("");
 
 		Page<JobInstance> page;
 		Iterator<JobInstance> iterator;
@@ -381,7 +380,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		do {
 			// create / update our request
 			request.setPageStart(pageIndex);
-			page = myJobCoordinator.fetchAllJobInstances(request);
+			page = myJobCoordinator.fetchFilteredJobInstances(request);
 			iterator = page.iterator();
 
 			while (iterator.hasNext()) {

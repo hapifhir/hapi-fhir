@@ -87,11 +87,11 @@ public interface IJobCoordinator {
 			String theJobDefinitionId, @Nullable Boolean theEnded, int theCount, int theStart);
 
 	/**
-	 * Fetches all job instances tht meet the FetchRequest criteria
+	 * Fetches job instances that meet the FetchRequest criteria
 	 * @param theFetchRequest - fetch request
 	 * @return - page of job instances
 	 */
-	Page<JobInstance> fetchAllJobInstances(JobInstanceFetchRequest theFetchRequest);
+	Page<JobInstance> fetchFilteredJobInstances(JobInstanceFetchRequest theFetchRequest);
 
 	/**
 	 * Fetches all job instances by job definition id and statuses
