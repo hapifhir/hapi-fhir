@@ -63,15 +63,109 @@ Using `:contains` on the `_text` or `_content` modifies the search engine to per
 By default, HAPI FHIR JPA will index the two FullText parameters using the following algorithm. 
 
 * For all resources, the `_content` parameter is indexed by extracting all of the **string** content (i.e. the values of all string datatypes within the resource) and aggregating them into a single document which is passed to the indexer.
-* For all domain resources (all resources with a narrative), the `_text` parameter is indxed by aggregating all non-tag text in the resource narrative into a document which is passed to the indexer.
+* For all domain resources (all resources with a narrative), the `_text` parameter is indexed by aggregating all non-tag text in the resource narrative into a document which is passed to the indexer.
 
-Using an interceptor with the [JPA_INDEX_EXTRACT_FULLTEXT](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#JPA_INDEX_EXTRACT_FULLTEXT) pointcut, it is possible to customize the indexed documents, or to selectively disable indexing entirely.
 
-This pointcut uses an object of type [FullTextExtractionRequest](/hapi-fhir/apidocs/hapi-fhir-jpaserver-searchparam/ca/uhn/fhir/jpa/searchparam/fulltext/FullTextExtractionRequest.html) as input, and an object of type [FullTextExtractionResponse](/hapi-fhir/apidocs/hapi-fhir-jpaserver-searchparam/ca/uhn/fhir/jpa/searchparam/fulltext/FullTextExtractionResponse.html) as output.
+<a name="selective-enabling"/>
+
+# Selectively Enabling Content and Text Indexing
+
+You can selectively enable indexing and allowing the `_content` and/or `_text` parameters at the resource level by manually uploading a SearchParameter which explicitly specifies the resources which should be indexed.
+
+Note that for this approach to work correctly:
+
+* The canonical URL (SearchParameter.url) value must match the examples below exactly.
+* The status (SearchParameter.status) value must be set to `active`.
+
+
+<a name="ex_selective_content_indexing"/>
+
+## Example: Selective Content Indexing
+
+The following example shows a SearchParameter which limits the `_content` SearchParameter to indexing only specific resource types: 
+
+```json
+{
+  "resourceType": "SearchParameter",
+  "id": "Resource-content",
+  "url": "http://hl7.org/fhir/SearchParameter/Resource-content",
+  "name": "_content",
+  "status": "active",
+  "code": "_content",
+  "base": [ "Observation", "Patient" ],
+  "type": "string",
+  "processingMode": "normal"
+}
+```
+
+
+<a name="ex_selective_text_indexing"/>
+
+## Example: Selective Text Indexing
+
+The following example shows a SearchParameter which limits the `_text` SearchParameter to indexing only specific resource types:
+
+```json
+{
+  "resourceType": "SearchParameter",
+  "id": "Resource-text",
+  "url": "http://hl7.org/fhir/SearchParameter/DomainResource-text",
+  "name": "_text",
+  "status": "active",
+  "code": "_text",
+  "base": [ "Observation", "Patient" ],
+  "type": "string",
+  "processingMode": "normal"
+}
+```
+
+<a name="ex_completely_disable_individual"/>
+
+## Example: Completely Disable Parameter
+
+If you want to completely disable Content indexing (i.e. indexing the `_content` Search Parameter), you can set the status to `retired`:
+
+```json
+{
+  "resourceType": "SearchParameter",
+  "id": "Resource-text",
+  "url": "http://hl7.org/fhir/SearchParameter/DomainResource-text",
+  "name": "_text",
+  "status": "retired",
+  "code": "_text",
+  "base": [ "Resource" ],
+  "type": "string",
+  "processingMode": "normal"
+}
+```
+
+If you want to completely disable Text indexing (i.e. indexing the `_text` Search Parameter) you can set the status to `retired`:
+
+```json
+{
+  "resourceType": "SearchParameter",
+  "id": "Resource-content",
+  "url": "http://hl7.org/fhir/SearchParameter/Resource-content",
+  "name": "_content",
+  "status": "retired",
+  "code": "_content",
+  "base": [ "Resource" ],
+  "type": "string",
+  "processingMode": "normal"
+}
+```
+
+<a name="fulltext-interceptor"/>
+
+# Customizing Content and Text Indexing by Interceptor
+
+Using an interceptor with the [JPA_INDEX_EXTRACT_FULLTEXT_CONTENT](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#JPA_INDEX_EXTRACT_FULLTEXT_CONTENT) and/or [JPA_INDEX_EXTRACT_FULLTEXT_TEXT](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#JPA_INDEX_EXTRACT_FULLTEXT_TEXT) pointcuts, it is possible to customize the indexed documents, or to selectively disable indexing entirely.
+
+These pointcuts use an object of type [FullTextExtractionRequest](/hapi-fhir/apidocs/hapi-fhir-jpaserver-searchparam/ca/uhn/fhir/jpa/searchparam/fulltext/FullTextExtractionRequest.html) as input, and an object of type [FullTextExtractionResponse](/hapi-fhir/apidocs/hapi-fhir-jpaserver-searchparam/ca/uhn/fhir/jpa/searchparam/fulltext/FullTextExtractionResponse.html) as output. The _JPA_INDEX_EXTRACT_FULLTEXT_CONTENT_ pointcut customizes indexing for the `_content` SearchParameter, and the _JPA_INDEX_EXTRACT_FULLTEXT_TEXT_ pointcut customizes indexing for the `_text` SearchParameter.
 
 ## Example
 
-The following example shows an interceptor which enables fulltext indexing only for specific resource types:
+The following example shows an interceptor which enables fulltext indexing only for specific resources, and controls which parts of resources are indexed:
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/interceptor/FullTextSelectiveIndexingInterceptor.java|interceptor}}

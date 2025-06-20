@@ -1016,7 +1016,7 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	 * has not yet been assigned).
 	 */
 	public IIdType getIdType(FhirContext theContext) {
-		return createAndPopulateIdOrReturnNull(()->theContext.getVersion().newIdType());
+		return createAndPopulateIdOrReturnNull(() -> theContext.getVersion().newIdType());
 	}
 
 	private <T extends IIdType> T createAndPopulateIdOrReturnNull(Supplier<T> theFactory) {

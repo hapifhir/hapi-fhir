@@ -164,7 +164,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			return false;
 		}
 
-		return myStorageSettings.isAdvancedHSearchIndexing()
+		return myStorageSettings.isHibernateSearchIndexSearchParams()
 				&& myAdvancedIndexQueryBuilder.canUseHibernateSearch(theResourceType, myParams, mySearchParamRegistry);
 	}
 
@@ -266,18 +266,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			SearchParameterMap theParams,
 			IResourcePersistentId theReferencingPid) {
 
-		if (theParams.containsKey(Constants.PARAM_TEXT) || theParams.containsKey(Constants.PARAM_CONTENT)) {
-			if (!myStorageSettings.isHibernateSearchIndexFullText()) {
-				String params = theParams.keySet().stream()
-						.filter(t -> t.equals(Constants.PARAM_TEXT) || t.equals(Constants.PARAM_CONTENT))
-						.sorted()
-						.collect(Collectors.joining(", "));
-				String msg = myFhirContext
-						.getLocalizer()
-						.getMessage(FulltextSearchSvcImpl.class, "fullTextSearchingNotPossible", params);
-				throw new InvalidRequestException(Msg.code(2566) + msg);
-			}
-		}
+		verifyContentAndTextParamsAreSupportedIfUsed(theResourceType, theParams);
 
 		return f.bool(b -> {
 			ExtendedHSearchClauseBuilder builder =
@@ -314,7 +303,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			/*
 			 * Handle other supported parameters
 			 */
-			if (myStorageSettings.isAdvancedHSearchIndexing() && theParams.getEverythingMode() == null) {
+			if (myStorageSettings.isHibernateSearchIndexSearchParams() && theParams.getEverythingMode() == null) {
 				ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams params =
 						new ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams();
 				params.setSearchParamRegistry(mySearchParamRegistry)
@@ -324,6 +313,48 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			}
 			// DROP EARLY HERE IF BOOL IS EMPTY?
 		});
+	}
+
+	private void verifyContentAndTextParamsAreSupportedIfUsed(String theResourceType, SearchParameterMap theParams) {
+		boolean haveParamText = theParams.containsKey(Constants.PARAM_TEXT);
+		boolean haveParamContent = theParams.containsKey(Constants.PARAM_CONTENT);
+		if (haveParamText || haveParamContent) {
+			if (!myStorageSettings.isHibernateSearchIndexFullText()) {
+				String failingParams = theParams.keySet().stream()
+						.filter(t -> t.equals(Constants.PARAM_TEXT) || t.equals(Constants.PARAM_CONTENT))
+						.sorted()
+						.collect(Collectors.joining(", "));
+				String msg = myFhirContext
+						.getLocalizer()
+						.getMessage(FulltextSearchSvcImpl.class, "fullTextSearchingNotPossible", failingParams);
+				throw new InvalidRequestException(Msg.code(2566) + msg);
+			} else {
+				String failingParams = null;
+				if (haveParamContent
+						&& !mySearchParamRegistry.hasActiveSearchParam(
+								theResourceType,
+								Constants.PARAM_CONTENT,
+								ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)) {
+					failingParams = Constants.PARAM_CONTENT;
+				} else if (haveParamText
+						&& !mySearchParamRegistry.hasActiveSearchParam(
+								theResourceType,
+								Constants.PARAM_TEXT,
+								ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)) {
+					failingParams = Constants.PARAM_TEXT;
+				}
+				if (failingParams != null) {
+					String msg = myFhirContext
+							.getLocalizer()
+							.getMessage(
+									FulltextSearchSvcImpl.class,
+									"fullTextSearchingNotPossibleForResourceType",
+									theResourceType,
+									failingParams);
+					throw new InvalidRequestException(Msg.code(2727) + msg);
+				}
+			}
+		}
 	}
 
 	@Nonnull
