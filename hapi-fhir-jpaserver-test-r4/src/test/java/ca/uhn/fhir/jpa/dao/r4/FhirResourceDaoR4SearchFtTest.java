@@ -7,27 +7,39 @@ import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.CompositeAndListParam;
+import ca.uhn.fhir.rest.param.CompositeOrListParam;
+import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
+import org.checkerframework.checker.units.qual.C;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UsageContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -198,6 +210,59 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		map.add(Constants.PARAM_TEXT, new StringParam("DIVBBB"));
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactly(toValues(pId1));
 
+	}
+
+	@Test
+	public void testContextTypeValueSearch() {
+		assertThat(myStorageSettings.isAutoSupportDefaultSearchParams()).isTrue();
+		Library library = new Library();
+		library.getType()
+			.setCoding(Collections.singletonList(
+				new Coding()
+					.setSystem("http://terminology.hl7.org/CodeSystem/library-type")
+					.setCode("asset-collection")));
+		library.setUseContext(Collections.singletonList(
+			new UsageContext()
+				.setCode(new Coding()
+					.setSystem("http://aphl.org/fhir/vsm/CodeSystem/usage-context-type")
+					.setCode("specification-category"))));
+		library.getUseContext()
+			.get(0)
+			.getValueCodeableConcept()
+			.addCoding()
+					.setCode("tes-release")
+					.setSystem("http://aphl.org/fhir/vsm/CodeSystem/usage-context-type");
+		myLibraryDao.create(library, mockSrd());
+
+		// Build context-type search
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Library.SP_CONTEXT_TYPE, new TokenAndListParam()
+			.addAnd(new TokenParam(null, "specification-category")) // The first element MUST be null!!!!!!
+		);
+
+		//assertThat(toUnqualifiedVersionlessIdValues(myLibraryDao.search(map, mockSrd()))).isNotEmpty();
+		IBundleProvider bundleProvider = myLibraryDao.search(map, mockSrd());
+		assertThat(bundleProvider.getAllResourceIds()).hasSize(1);
+
+		// Build context-value search map
+		map.clean();
+		map.add(Library.SP_CONTEXT, new TokenAndListParam()
+			.addAnd(new TokenParam(null, "tes-release")));
+		bundleProvider = myLibraryDao.search(map, mockSrd());
+		assertThat(bundleProvider.getAllResourceIds()).hasSize(1);
+
+		// Build context-type-value map
+		map.clean();
+		map.add(Library.SP_CONTEXT_TYPE_VALUE, new CompositeAndListParam<>(TokenParam.class, TokenParam.class)
+			.addAnd(new CompositeOrListParam<>(TokenParam.class, TokenParam.class)
+				.addOr(new CompositeParam<>(
+					new TokenParam("specification-category"),
+					new TokenParam("http://aphl.org/fhir/vsm/CodeSystem/usage-context-type", "tes-release")
+				))));
+		myCaptureQueriesListener.clear();
+		bundleProvider = myLibraryDao.search(map, mockSrd());
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(bundleProvider.getAllResourceIds()).hasSize(1);
 	}
 
 	@Test
@@ -420,6 +485,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		map.add(Constants.PARAM_TEXT, new StringParam("DIVAAA"));
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactly(pidTypeArray);
 
+		IBundleProvider provider =  myPatientDao.search(new SearchParameterMap(), mockSrd());
 		/*
 		 * Update but don't reindex
 		 */
