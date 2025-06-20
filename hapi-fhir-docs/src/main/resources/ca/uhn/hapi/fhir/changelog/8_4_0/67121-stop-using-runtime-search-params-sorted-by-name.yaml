@@ -1,5 +1,4 @@
 type: fix
 issue: 67121
-title: "Context-value-type searches were using search-param lists sorted alphabetically. 
-They now use positional sorting"
+title: "context-value-type searches were returning empty bundles, even when there were hits. This has been fixed."
 
