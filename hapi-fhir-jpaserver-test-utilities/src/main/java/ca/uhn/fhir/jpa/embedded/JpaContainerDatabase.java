@@ -25,15 +25,23 @@ import org.testcontainers.containers.JdbcDatabaseContainer;
  * Wrapper to support JPA tests.
  */
 public abstract class JpaContainerDatabase extends JpaEmbeddedDatabase {
-	protected final JdbcDatabaseContainer<?> myContainer;
+	protected JdbcDatabaseContainer<?> myContainer;
 
 	protected JpaContainerDatabase(JdbcDatabaseContainer<?> theContainer) {
 		myContainer = theContainer;
-		myContainer.start();
+		// Don't start container here - defer until first access
+	}
+
+	protected void startContainer() {
+		if (myContainer != null && !myContainer.isRunning()) {
+			myContainer.start();
+		}
 	}
 
 	@Override
 	public void stop() {
-		myContainer.stop();
+		if (myContainer != null) {
+			myContainer.stop();
+		}
 	}
 }

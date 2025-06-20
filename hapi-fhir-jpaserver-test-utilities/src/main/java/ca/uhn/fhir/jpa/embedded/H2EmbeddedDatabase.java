@@ -43,10 +43,20 @@ public class H2EmbeddedDatabase extends JpaEmbeddedDatabase {
 	private String myUrl;
 
 	public H2EmbeddedDatabase() {
+		// Don't initialize here - defer until first access
+	}
+
+	@Override
+	protected void doInitialize() {
 		deleteDatabaseDirectoryIfExists();
 		String databasePath = DATABASE_DIRECTORY + SCHEMA_NAME;
 		myUrl = "jdbc:h2:" + new File(databasePath).getAbsolutePath();
 		super.initialize(DriverTypeEnum.H2_EMBEDDED, myUrl, USERNAME, PASSWORD);
+	}
+
+	@Override
+	public DriverTypeEnum getDriverType() {
+		return DriverTypeEnum.H2_EMBEDDED;
 	}
 
 	@Override
