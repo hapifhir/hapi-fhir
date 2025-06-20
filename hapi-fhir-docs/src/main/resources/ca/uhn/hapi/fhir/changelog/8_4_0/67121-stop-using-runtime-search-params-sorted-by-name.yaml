@@ -1,0 +1,5 @@
+type: fix
+issue: 67121
+title: "Context-value-type searches were using search-param lists sorted alphabetically. 
+They now use positional sorting"
+
