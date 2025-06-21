@@ -46,6 +46,11 @@ public class MergeBatchTest extends BaseJpaR4Test {
 
 		myTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
 		myTestHelper.beforeEach();
+		// keep the version on Provenance.target fields to verify that Provenance resources were saved
+		// with versioned target references
+		myFhirContext.getParserOptions()
+			.setDontStripVersionsFromReferencesAtPaths("Provenance.target");
+
 
 		mySrd.setRequestPartitionId(RequestPartitionId.allPartitions());
 	}
@@ -69,6 +74,7 @@ public class MergeBatchTest extends BaseJpaR4Test {
 			String encodedResultPatient = myFhirContext.newJsonParser().encodeResourceToString(myTestHelper.createResultPatient(theDeleteSource));
 			jobParams.setResultResource(encodedResultPatient);
 		}
+		jobParams.setCreateProvenance(true);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest(JOB_MERGE, jobParams);
 		Batch2JobStartResponse jobStartResponse = myJobCoordinator.startInstance(mySrd, request);
@@ -81,9 +87,11 @@ public class MergeBatchTest extends BaseJpaR4Test {
 
 
 		myTestHelper.assertAllReferencesUpdated();
-		myTestHelper.assertSourcePatientUpdatedOrDeleted(theDeleteSource);
-		myTestHelper.assertTargetPatientUpdated(theDeleteSource,
+		myTestHelper.assertSourcePatientUpdatedOrDeletedAfterMerge(theDeleteSource);
+		myTestHelper.assertTargetPatientUpdatedAfterMerge(theDeleteSource,
 			myTestHelper.getExpectedIdentifiersForTargetAfterMerge(theWithResultResource));
+
+		myTestHelper.assertMergeProvenance(theDeleteSource, null);
 	}
 
 	@Test

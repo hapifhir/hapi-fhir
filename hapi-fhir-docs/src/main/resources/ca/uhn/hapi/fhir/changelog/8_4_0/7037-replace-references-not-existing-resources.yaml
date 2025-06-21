@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7037
+title: "The $hapi.fhir.replace-references operation now returns a 404 ResourceNotFound response when the 
+`source-reference-id` or `target-reference-id` parameter refers to a non-existent resource. 
+Previously, it returned a success response with an empty Bundle in these cases."
