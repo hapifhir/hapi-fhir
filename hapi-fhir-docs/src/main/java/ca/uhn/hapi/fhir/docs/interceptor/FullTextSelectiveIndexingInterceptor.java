@@ -64,12 +64,15 @@ public class FullTextSelectiveIndexingInterceptor {
 				return FullTextExtractionResponse.doNotIndex();
 			}
 
+			// If Observation.value[x] has a string datatype, we'll index only
+			// the value of that string and ignore any other text in the resource
 			if (observation.hasValueStringType()) {
 				String stringValue = observation.getValueStringType().getValue();
 				return FullTextExtractionResponse.indexPayload(stringValue);
 			}
 		}
 
+		// For all other resources, index normally
 		return FullTextExtractionResponse.indexNormally();
 	}
 
