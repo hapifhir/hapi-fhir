@@ -34,15 +34,15 @@ public class AutoCreatePlaceholderReferenceEnabledByTypeInterceptor {
 	 * reference target resource.
 	 */
 	@Hook(Pointcut.STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE)
-	public AutoCreatePlaceholderReferenceTargetResponse autoCreatePlaceholderReferenceTarget(AutoCreatePlaceholderReferenceTargetRequest theRequest) {
+	public AutoCreatePlaceholderReferenceTargetResponse autoCreatePlaceholderReferenceTarget(
+			AutoCreatePlaceholderReferenceTargetRequest theRequest) {
 
-		String resourceType = theRequest.getTargetResourceToCreate().getIdElement().getResourceType();
+		String resourceType =
+				theRequest.getTargetResourceToCreate().getIdElement().getResourceType();
 		if (!myResourceTypesToAllow.contains(resourceType)) {
 			return AutoCreatePlaceholderReferenceTargetResponse.doNotCreateTarget();
 		}
 
 		return AutoCreatePlaceholderReferenceTargetResponse.proceed();
 	}
-
-
 }

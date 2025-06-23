@@ -318,14 +318,18 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 			}
 
 			// Interceptor: STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE
-			IInterceptorBroadcaster interceptorBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+			IInterceptorBroadcaster interceptorBroadcaster =
+					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
 			if (interceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE)) {
-				AutoCreatePlaceholderReferenceTargetRequest request = new AutoCreatePlaceholderReferenceTargetRequest(newResource);
+				AutoCreatePlaceholderReferenceTargetRequest request =
+						new AutoCreatePlaceholderReferenceTargetRequest(newResource);
 				HookParams params = new HookParams()
-					.add(AutoCreatePlaceholderReferenceTargetRequest.class, request)
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest);
-				AutoCreatePlaceholderReferenceTargetResponse response = (AutoCreatePlaceholderReferenceTargetResponse) interceptorBroadcaster.callHooksAndReturnObject(Pointcut.STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE, params);
+						.add(AutoCreatePlaceholderReferenceTargetRequest.class, request)
+						.add(RequestDetails.class, theRequest)
+						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				AutoCreatePlaceholderReferenceTargetResponse response =
+						(AutoCreatePlaceholderReferenceTargetResponse) interceptorBroadcaster.callHooksAndReturnObject(
+								Pointcut.STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE, params);
 				if (response != null) {
 					if (response.isDoNotCreateTarget()) {
 						return Optional.empty();
@@ -334,9 +338,14 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 
 				// Sanity check: Make sure that interceptors haven't changed the ID
 				if (theIdToAssignToPlaceholder != null) {
-					Validate.isTrue(theIdToAssignToPlaceholder.equals(newResource.getIdElement().getIdPart()), "Interceptors must not modify the ID of auto-created placeholder reference targets");
+					Validate.isTrue(
+							theIdToAssignToPlaceholder.equals(
+									newResource.getIdElement().getIdPart()),
+							"Interceptors must not modify the ID of auto-created placeholder reference targets");
 				} else {
-					Validate.isTrue(isBlank(newResource.getIdElement().getIdPart()), "Interceptors must not modify the ID of auto-created placeholder reference targets");
+					Validate.isTrue(
+							isBlank(newResource.getIdElement().getIdPart()),
+							"Interceptors must not modify the ID of auto-created placeholder reference targets");
 				}
 			}
 

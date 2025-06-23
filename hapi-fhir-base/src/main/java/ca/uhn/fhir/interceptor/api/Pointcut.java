@@ -1118,10 +1118,10 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE(
-		"ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetResponse",
-		"ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetRequest",
-		"ca.uhn.fhir.rest.api.server.RequestDetails",
-		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+			"ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetResponse",
+			"ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetRequest",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
 
 	/**
 	 * <b>Storage Hook:</b>
