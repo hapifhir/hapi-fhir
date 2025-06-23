@@ -18,6 +18,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceEnabledByTypeInterceptor;
 import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetRequest;
 import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetResponse;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -56,6 +57,7 @@ import static ca.uhn.fhir.util.HapiExtensions.EXT_RESOURCE_PLACEHOLDER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -679,22 +681,26 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testInterceptor_CreateTarget() {
+		//Setup
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		registerInterceptor(new AutoCreatePlaceholderReferenceEnabledByTypeInterceptor("Patient"));
+
+		// Test
+		Observation obs = new Observation();
+		obs.setStatus(ObservationStatus.AMENDED);
+		obs.setSubject(new Reference("Patient/ABC"));
+		myObservationDao.create(obs, mySrd);
+
+		// Verify
+		assertDoesNotThrow(()->myPatientDao.read(new IdType(obs.getSubject().getReference()), mySrd));
+	}
+
+	@Test
 	public void testInterceptor_DoNotCreateTarget() {
 		//Setup
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
-		Object interceptor = new Object() {
-			@Hook(Pointcut.STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE)
-			public AutoCreatePlaceholderReferenceTargetResponse autoCreatePlaceholderReferenceTarget(AutoCreatePlaceholderReferenceTargetRequest theRequest) {
-
-				// Verify
-				Patient target = (Patient) theRequest.getTargetResourceToCreate();
-				assertEquals("Patient/ABC", target.getIdElement().getValue());
-				assertEquals("true", target.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER).getValueAsPrimitive().getValueAsString());
-
-				return AutoCreatePlaceholderReferenceTargetResponse.doNotCreateTarget();
-			}
-		};
-		registerInterceptor(interceptor);
+		registerInterceptor(new AutoCreatePlaceholderReferenceEnabledByTypeInterceptor("Observation"));
 
 		// Test
 		Observation obs = new Observation();
@@ -713,6 +719,10 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 			@Hook(Pointcut.STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE)
 			public AutoCreatePlaceholderReferenceTargetResponse autoCreatePlaceholderReferenceTarget(AutoCreatePlaceholderReferenceTargetRequest theRequest) {
 				Patient target = (Patient) theRequest.getTargetResourceToCreate();
+
+				assertEquals("Patient/ABC", target.getIdElement().getValue());
+				assertEquals("true", target.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER).getValueAsPrimitive().getValueAsString());
+
 				target.setActive(false);
 				return AutoCreatePlaceholderReferenceTargetResponse.proceed();
 			}
