@@ -83,6 +83,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -315,45 +316,58 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		});
 	}
 
+	/**
+	 * If either (or both) of the <code>_content</code> or <code>_text</code> Search Parameters
+	 * are present in the request, verify the given parameter(s) are actually supported by the
+	 * current configuration and throw a {@link InvalidRequestException} if not.
+	 */
 	private void verifyContentAndTextParamsAreSupportedIfUsed(String theResourceType, SearchParameterMap theParams) {
 		boolean haveParamText = theParams.containsKey(Constants.PARAM_TEXT);
 		boolean haveParamContent = theParams.containsKey(Constants.PARAM_CONTENT);
-		if (haveParamText || haveParamContent) {
-			if (!myStorageSettings.isHibernateSearchIndexFullText()) {
-				String failingParams = theParams.keySet().stream()
-						.filter(t -> t.equals(Constants.PARAM_TEXT) || t.equals(Constants.PARAM_CONTENT))
-						.sorted()
-						.collect(Collectors.joining(", "));
-				String msg = myFhirContext
-						.getLocalizer()
-						.getMessage(FulltextSearchSvcImpl.class, "fullTextSearchingNotPossible", failingParams);
-				throw new InvalidRequestException(Msg.code(2566) + msg);
-			} else {
-				String failingParams = null;
-				if (haveParamContent
-						&& !mySearchParamRegistry.hasActiveSearchParam(
-								theResourceType,
-								Constants.PARAM_CONTENT,
-								ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)) {
-					failingParams = Constants.PARAM_CONTENT;
-				} else if (haveParamText
-						&& !mySearchParamRegistry.hasActiveSearchParam(
-								theResourceType,
-								Constants.PARAM_TEXT,
-								ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)) {
-					failingParams = Constants.PARAM_TEXT;
-				}
-				if (failingParams != null) {
-					String msg = myFhirContext
-							.getLocalizer()
-							.getMessage(
-									FulltextSearchSvcImpl.class,
-									"fullTextSearchingNotPossibleForResourceType",
-									theResourceType,
-									failingParams);
-					throw new InvalidRequestException(Msg.code(2727) + msg);
-				}
-			}
+		if (!haveParamText && !haveParamContent) {
+			return;
+		}
+
+		// Can't use _content or _text if FullText indexing is disabled
+		if (!myStorageSettings.isHibernateSearchIndexFullText()) {
+			String failingParams = theParams.keySet().stream()
+					.filter(t -> t.equals(Constants.PARAM_TEXT) || t.equals(Constants.PARAM_CONTENT))
+					.sorted()
+					.collect(Collectors.joining(", "));
+			String msg = myFhirContext
+					.getLocalizer()
+					.getMessage(FulltextSearchSvcImpl.class, "fullTextSearchingNotPossible", failingParams);
+			throw new InvalidRequestException(Msg.code(2566) + msg);
+		}
+
+		List<String> failingParams = null;
+		if (haveParamContent
+				&& !mySearchParamRegistry.hasActiveSearchParam(
+						theResourceType,
+						Constants.PARAM_CONTENT,
+						ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)) {
+			failingParams = new ArrayList<>(2);
+			failingParams.add(Constants.PARAM_CONTENT);
+		}
+
+		if (haveParamText
+				&& !mySearchParamRegistry.hasActiveSearchParam(
+						theResourceType,
+						Constants.PARAM_TEXT,
+						ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)) {
+			failingParams = Objects.requireNonNullElseGet(failingParams, () -> new ArrayList<>(2));
+			failingParams.add(Constants.PARAM_TEXT);
+		}
+
+		if (failingParams != null) {
+			String msg = myFhirContext
+					.getLocalizer()
+					.getMessage(
+							FulltextSearchSvcImpl.class,
+							"fullTextSearchingNotPossibleForResourceType",
+							theResourceType,
+							String.join(",", failingParams));
+			throw new InvalidRequestException(Msg.code(2727) + msg);
 		}
 	}
 

@@ -2605,7 +2605,7 @@ public enum Pointcut implements IPointcut {
 	 * <b>JPA Hook:</b>
 	 * This hook is invoked during resource indexing and can be used to influence the
 	 * text extracted from a given resource for FullText indexing in support of the
-	 * <code>_content</code> Search Parameter. By default,
+	 * <code>_content</code> Search Parameter.
 	 * By default, when FullText indexing is enabled HAPI FHIR extracts all string
 	 * content from resources for indexing in order to support the <code>_content</code>
 	 * Search Parameter. This means looking for all <code>string</code> datatypes
@@ -2647,7 +2647,7 @@ public enum Pointcut implements IPointcut {
 	 * <b>JPA Hook:</b>
 	 * This hook is invoked during resource indexing and can be used to influence the
 	 * text extracted from a given resource for FullText indexing in support of the
-	 * <code>_text</code> Search Parameter. By default,
+	 * <code>_text</code> Search Parameter.
 	 * HAPI FHIR extracts all text in the narrative
 	 * (<code>Resource.text.div</code>) for indexing in order to support the <code>_text</code>
 	 * Search Parameter.

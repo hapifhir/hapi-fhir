@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionRequest;
 import ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionResponse;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -314,8 +315,14 @@ public class FhirResourceDaoR5SearchFtSelectiveEnablingTest extends BaseJpaR5Tes
 
 		IIdType patientId = createPatient(withFamily("Simpson"), withNarrative("<div>Simpson</div>"));
 
-		String param = isText ? PARAM_TEXT : PARAM_CONTENT;
-		SearchParameterMap searchMap = SearchParameterMap.newSynchronous(param, new StringParam("simpson"));
+		SearchParameterMap searchMap = SearchParameterMap.newSynchronous();
+		if ("BOTH".equals(theParam) || PARAM_TEXT.equals(theParam)) {
+			searchMap.add(PARAM_TEXT, new StringParam("simpson"));
+		}
+		if ("BOTH".equals(theParam) || PARAM_CONTENT.equals(theParam)) {
+			searchMap.add(PARAM_CONTENT, new StringParam("simpson"));
+		}
+
 		if (theExpectMatch) {
 			List<String> actual = toUnqualifiedVersionlessIdValues(myPatientDao.search(searchMap, mySrd));
 			assertThat(actual).containsExactly(patientId.getValue());
