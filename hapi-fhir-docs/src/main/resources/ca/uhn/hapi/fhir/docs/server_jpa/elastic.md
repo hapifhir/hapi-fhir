@@ -1,6 +1,6 @@
 # HAPI FHIR JPA Lucene/Elasticsearch Indexing
 
-HAPI FHIR supports additional indexing when an appropriate indexer is configured. There are two FullText indexers supported: Lucene, and ElasticSearch. These systems to not replace a relational database (RDBMS), which is always required in order to use HAPI FHIR JPA. Instead, they augment the relational database by enabling additional search functionality.
+HAPI FHIR supports additional indexing when an appropriate indexer is configured. There are two FullText indexers supported: Lucene, and ElasticSearch. These systems do not replace a relational database (RDBMS), which is always required in order to use HAPI FHIR JPA. Instead, they augment the relational database by enabling additional search functionality.
 
 With FullText Indexing enabled, the following Search Parameters may be used:
 
@@ -128,11 +128,11 @@ If you want to completely disable Content indexing (i.e. indexing the `_content`
 ```json
 {
   "resourceType": "SearchParameter",
-  "id": "Resource-text",
-  "url": "http://hl7.org/fhir/SearchParameter/DomainResource-text",
-  "name": "_text",
+  "id": "Resource-content",
+  "url": "http://hl7.org/fhir/SearchParameter/Resource-content",
+  "name": "_content",
   "status": "retired",
-  "code": "_text",
+  "code": "_content",
   "base": [ "Resource" ],
   "type": "string",
   "processingMode": "normal"
@@ -143,15 +143,15 @@ If you want to completely disable Text indexing (i.e. indexing the `_text` Searc
 
 ```json
 {
-  "resourceType": "SearchParameter",
-  "id": "Resource-content",
-  "url": "http://hl7.org/fhir/SearchParameter/Resource-content",
-  "name": "_content",
-  "status": "retired",
-  "code": "_content",
-  "base": [ "Resource" ],
-  "type": "string",
-  "processingMode": "normal"
+    "resourceType": "SearchParameter",
+    "id": "Resource-text",
+    "url": "http://hl7.org/fhir/SearchParameter/DomainResource-text",
+    "name": "_text",
+    "status": "retired",
+    "code": "_text",
+    "base": [ "Resource" ],
+    "type": "string",
+    "processingMode": "normal"
 }
 ```
 

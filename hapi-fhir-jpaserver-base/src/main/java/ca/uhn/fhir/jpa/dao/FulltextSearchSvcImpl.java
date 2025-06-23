@@ -341,22 +341,26 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		}
 
 		List<String> failingParams = null;
-		if (haveParamContent
-				&& !mySearchParamRegistry.hasActiveSearchParam(
-						theResourceType,
-						Constants.PARAM_CONTENT,
-						ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)) {
-			failingParams = new ArrayList<>(2);
-			failingParams.add(Constants.PARAM_CONTENT);
-		}
 
-		if (haveParamText
+		// theResourceType is null for $everything queries
+		if (theResourceType != null) {
+			if (haveParamContent
 				&& !mySearchParamRegistry.hasActiveSearchParam(
-						theResourceType,
-						Constants.PARAM_TEXT,
-						ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)) {
-			failingParams = Objects.requireNonNullElseGet(failingParams, () -> new ArrayList<>(2));
-			failingParams.add(Constants.PARAM_TEXT);
+				theResourceType,
+				Constants.PARAM_CONTENT,
+				ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)) {
+				failingParams = new ArrayList<>(2);
+				failingParams.add(Constants.PARAM_CONTENT);
+			}
+
+			if (haveParamText
+				&& !mySearchParamRegistry.hasActiveSearchParam(
+				theResourceType,
+				Constants.PARAM_TEXT,
+				ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)) {
+				failingParams = Objects.requireNonNullElseGet(failingParams, () -> new ArrayList<>(2));
+				failingParams.add(Constants.PARAM_TEXT);
+			}
 		}
 
 		if (failingParams != null) {
