@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -279,6 +280,11 @@ public class StorageSettings {
 	/**
 	 * Activates hibernate search indexing of fulltext data from resources, which
 	 * is used to support the {@literal _text} and {@literal _content} Search Parameters.
+	 * <p>
+	 * Note that if you enable this setting at runtime (i.e. on an already running server), you
+	 * may need to also invoke {@link ISearchParamRegistry#forceRefresh()} in order to ensure
+	 * that the implicit search parameters needed for this feature get inserted into the registry.
+	 * </p>
 	 *
 	 * @since 8.0.0
 	 */

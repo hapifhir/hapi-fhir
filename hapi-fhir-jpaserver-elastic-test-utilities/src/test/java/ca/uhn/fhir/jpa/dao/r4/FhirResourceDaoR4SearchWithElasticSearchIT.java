@@ -276,6 +276,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		myStorageSettings.setAllowContainsSearches(true);
 		myStorageSettings.setHibernateSearchIndexFullText(true);
 		myStorageSettings.setHibernateSearchIndexSearchParams(true);
+		mySearchParamRegistry.forceRefresh();
 	}
 
 
