@@ -139,6 +139,10 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 				structureDefinitionResources.add("/org/hl7/fhir/r4b/model/extension/extension-definitions.xml");
 				searchParameterResources.add("/org/hl7/fhir/r4b/model/sp/search-parameters.xml");
 				break;
+				/*
+				 * Note: No versions after R4B are needed here, as R5+ uses
+				 * DefaultProfileValidationSupportNpmStrategy instead of this class
+				 */
 		}
 
 		myTerminologyResources = terminologyResources;
