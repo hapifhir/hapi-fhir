@@ -36,7 +36,6 @@ import java.util.List;
 public class ValidateMethodBindingDstu2Plus extends OperationMethodBinding {
 
 	public ValidateMethodBindingDstu2Plus(
-			Class<?> theReturnResourceType,
 			Class<? extends IBaseResource> theReturnTypeFromRp,
 			Method theMethod,
 			FhirContext theContext,
@@ -53,7 +52,7 @@ public class ValidateMethodBindingDstu2Plus extends OperationMethodBinding {
 				theAnnotation.type(),
 				BundleTypeEnum.COLLECTION);
 
-		List<IParameter> newParams = new ArrayList<IParameter>();
+		List<IParameter> newParams = new ArrayList<>();
 		int idx = 0;
 		for (IParameter next : getParameters()) {
 			if (next instanceof ResourceParameter) {
@@ -86,8 +85,7 @@ public class ValidateMethodBindingDstu2Plus extends OperationMethodBinding {
 		String resourceName = theContext.getResourceType(theResource);
 		String resourceId = theResource.getIdElement().getIdPart();
 
-		BaseHttpClientInvocation retVal = createOperationInvocation(
+		return createOperationInvocation(
 				theContext, resourceName, resourceId, null, Constants.EXTOP_VALIDATE, parameters, false);
-		return retVal;
 	}
 }

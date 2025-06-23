@@ -318,8 +318,11 @@ public class Constants {
 	public static final String CACHE_CONTROL_PRIVATE = "private";
 	public static final String CT_FHIR_NDJSON = "application/fhir+ndjson";
 	public static final String CT_APP_NDJSON = "application/ndjson";
+	public static final String CT_APP_X_NDJSON = "application/x-ndjson";
 	public static final String CT_NDJSON = "ndjson";
 	public static final Set<String> CTS_NDJSON;
+	public static final Set<String> CTS_JSON =
+			Set.of(CT_FHIR_JSON, CT_FHIR_JSON_NEW, CT_JSON, FORMAT_JSON, FORMATS_HTML_JSON);
 	public static final String HEADER_PREFER_RESPOND_ASYNC = "respond-async";
 	public static final int STATUS_HTTP_412_PAYLOAD_TOO_LARGE = 413;
 	public static final String OPERATION_NAME_GRAPHQL = "$graphql";
@@ -402,6 +405,7 @@ public class Constants {
 		ctsNdjson.add(CT_FHIR_NDJSON);
 		ctsNdjson.add(CT_APP_NDJSON);
 		ctsNdjson.add(CT_NDJSON);
+		ctsNdjson.add(CT_APP_X_NDJSON);
 		CTS_NDJSON = Collections.unmodifiableSet(ctsNdjson);
 
 		HashMap<Integer, String> statusNames = new HashMap<>();
