@@ -2537,11 +2537,6 @@
 					<version>3.8.1</version>
 				</plugin>
 				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-deploy-plugin</artifactId>
-					<version>3.1.3</version>
-				</plugin>
-				<plugin>
 					<groupId>org.sonatype.central</groupId>
 					<artifactId>central-publishing-maven-plugin</artifactId>
 					<version>0.8.0</version>
@@ -3206,11 +3201,11 @@
 		</profile>
 
 		<profile>
-			<id>ossrh-repo</id>
+			<id>central-repo</id>
 			<activation>
 				<activeByDefault>false</activeByDefault>
 				<property>
-					<name>deployToSonatype</name>
+					<name>deployToCentral</name>
 				</property>
 			</activation>
 			<build>
