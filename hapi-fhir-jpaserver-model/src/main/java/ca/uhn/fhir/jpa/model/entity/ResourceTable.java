@@ -31,6 +31,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
@@ -1019,7 +1020,11 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 		return createAndPopulateIdOrReturnNull(() -> theContext.getVersion().newIdType());
 	}
 
-	private <T extends IIdType> T createAndPopulateIdOrReturnNull(Supplier<T> theFactory) {
+	/**
+	 * @param theNewIdInstanceSupplier Creates a new instance of the appropriate ID type
+	 */
+	@Nullable
+	private <T extends IIdType> T createAndPopulateIdOrReturnNull(Supplier<T> theNewIdInstanceSupplier) {
 		String resourceId;
 		if (myFhirId != null && !myFhirId.isEmpty()) {
 			resourceId = myFhirId;
@@ -1030,7 +1035,7 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 			}
 			resourceId = Long.toString(id);
 		}
-		T retVal = theFactory.get();
+		T retVal = theNewIdInstanceSupplier.get();
 		retVal.setValue(getResourceType() + '/' + resourceId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		return retVal;
 	}

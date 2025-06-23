@@ -377,6 +377,14 @@ public class SearchParamRegistryImpl
 		return retval;
 	}
 
+	/**
+	 * For the given SearchParameter which was fetched from the database, look for any
+	 * existing search parameters in the cache that should be replaced by the SP (i.e.
+	 * because they represent the same parameter)
+	 *
+	 * @param theSearchParams The cache to populate
+	 * @param theSearchParameter The SearchParameter to insert into the cache and potentially replace existing params
+	 */
 	private long overrideSearchParam(RuntimeSearchParamCache theSearchParams, IBaseResource theSearchParameter) {
 		if (theSearchParameter == null) {
 			return 0;
@@ -386,10 +394,23 @@ public class SearchParamRegistryImpl
 		if (runtimeSp == null) {
 			return 0;
 		}
+
+		/*
+		 * This check means that we basically ignore SPs from the database if they have a status
+		 * of "draft". I don't know that this makes sense, but it has worked this way for a long
+		 * time and changing it could potentially screw with people who didn't realize they
+		 * were depending on this behaviour? I don't know.. Honestly this is probably being
+		 * overly cautious. -JA
+		 */
 		if (runtimeSp.getStatus() == RuntimeSearchParam.RuntimeSearchParamStatusEnum.DRAFT) {
 			return 0;
 		}
 
+		/*
+		 * If an SP in the cache has the same URL as the one we are inserting, first remove
+		 * the old SP from anywhere it is registered. This helps us override SPs like _content
+		 * and _text.
+		 */
 		String url = runtimeSp.getUri();
 		RuntimeSearchParam existingParam = theSearchParams.getByUrl(url);
 		if (existingParam != null) {
