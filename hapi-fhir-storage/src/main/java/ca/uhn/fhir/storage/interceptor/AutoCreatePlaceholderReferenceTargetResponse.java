@@ -1,11 +1,20 @@
 package ca.uhn.fhir.storage.interceptor;
 
+/**
+ * This object is used as a return type for interceptor hook methods implementing the
+ * {@link ca.uhn.fhir.interceptor.api.Pointcut#STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE}
+ * pointcut.
+ *
+ * @since 8.4.0
+ * @see #doNotCreateTarget()
+ * @see #proceed()
+ */
 public class AutoCreatePlaceholderReferenceTargetResponse {
 
 	private boolean myDoNotCreateTarget;
 
 	/**
-	 * Use static factory methods to create this object
+	 * Use the static factory methods to create this object
 	 */
 	private AutoCreatePlaceholderReferenceTargetResponse(boolean theDoNotCreateTarget) {
 		myDoNotCreateTarget = theDoNotCreateTarget;

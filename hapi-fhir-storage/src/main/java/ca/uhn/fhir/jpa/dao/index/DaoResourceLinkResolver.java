@@ -57,6 +57,7 @@ import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.TerserUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -72,6 +73,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> implements IResourceLinkResolver {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DaoResourceLinkResolver.class);
@@ -329,6 +332,12 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 					}
 				}
 
+				// Sanity check: Make sure that interceptors haven't changed the ID
+				if (theIdToAssignToPlaceholder != null) {
+					Validate.isTrue(theIdToAssignToPlaceholder.equals(newResource.getIdElement().getIdPart()), "Interceptors must not modify the ID of auto-created placeholder reference targets");
+				} else {
+					Validate.isTrue(isBlank(newResource.getIdElement().getIdPart()), "Interceptors must not modify the ID of auto-created placeholder reference targets");
+				}
 			}
 
 			if (theIdToAssignToPlaceholder != null) {
