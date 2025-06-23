@@ -368,7 +368,7 @@ public class MethodUtil {
 									}
 								});
 					} else if (nextAnnotation instanceof Validate.Profile) {
-						if (parameterType.equals(String.class) == false) {
+						if (!parameterType.equals(String.class)) {
 							throw new ConfigurationException(Msg.code(407) + "Parameter annotated with @"
 									+ Validate.class.getSimpleName() + "." + Validate.Profile.class.getSimpleName()
 									+ " must be of type " + String.class.getName());

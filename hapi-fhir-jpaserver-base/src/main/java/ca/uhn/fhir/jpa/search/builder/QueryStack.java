@@ -583,7 +583,7 @@ public class QueryStack {
 			CompositeParam<?, ?> cp = (CompositeParam<?, ?>) next;
 
 			List<RuntimeSearchParam> componentParams =
-					JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, theParamDef);
+					JpaParamUtil.resolveCompositeComponentsDeclaredOrder(mySearchParamRegistry, theParamDef);
 			RuntimeSearchParam left = componentParams.get(0);
 			IQueryParameterType leftValue = cp.getLeftValue();
 			Condition leftPredicate = createPredicateCompositePart(
