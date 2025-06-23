@@ -2207,6 +2207,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testEmptySearch() {
 		myStorageSettings.setHibernateSearchIndexFullText(true);
+		mySearchParamRegistry.forceRefresh();
 
 		Bundle responseBundle;
 
@@ -2311,6 +2312,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testFullTextSearch() throws Exception {
 		myStorageSettings.setHibernateSearchIndexFullText(true);
+		mySearchParamRegistry.forceRefresh();
 
 		IParser parser = myFhirContext.newJsonParser();
 
@@ -2346,6 +2348,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testFulltextSearchWithIdAndContent() throws IOException {
 		myStorageSettings.setHibernateSearchIndexFullText(true);
+		mySearchParamRegistry.forceRefresh();
 
 		Patient p = new Patient();
 		p.setId("FOO");

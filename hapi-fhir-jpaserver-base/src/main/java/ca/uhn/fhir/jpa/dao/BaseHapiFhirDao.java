@@ -1670,6 +1670,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		// Standard FullText indexing
 		if (myStorageSettings.isHibernateSearchIndexFullText()) {
+
 			// _content
 			if (mySearchParamRegistry.hasActiveSearchParam(
 					theEntity.getResourceType(),

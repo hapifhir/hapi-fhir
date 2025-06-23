@@ -51,6 +51,8 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test implements IR4SearchIndex
 		super.before();
 		SearchBuilder.setMaxPageSizeForTest(10);
 		myStorageSettings.setHibernateSearchIndexFullText(true);
+
+		mySearchParamRegistry.forceRefresh();
 	}
 
 
