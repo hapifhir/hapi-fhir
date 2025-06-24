@@ -188,6 +188,7 @@ import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
+import ca.uhn.fhir.replacereferences.UndoReplaceReferencesSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -1021,6 +1022,12 @@ public class JpaConfig {
 	@Bean
 	public ReplaceReferencesPatchBundleSvc replaceReferencesPatchBundleSvc(DaoRegistry theDaoRegistry) {
 		return new ReplaceReferencesPatchBundleSvc(theDaoRegistry);
+	}
+
+	@Bean
+	public UndoReplaceReferencesSvc getUndoReplaceReferencesSvc(
+			DaoRegistry theDaoRegistry, HapiTransactionService theHapiTransactionService) {
+		return new UndoReplaceReferencesSvc(theDaoRegistry, theHapiTransactionService);
 	}
 
 	@Bean

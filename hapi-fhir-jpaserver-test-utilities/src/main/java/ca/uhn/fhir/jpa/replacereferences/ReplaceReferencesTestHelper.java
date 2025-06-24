@@ -379,12 +379,12 @@ public class ReplaceReferencesTestHelper {
 		return allExpectedTargets;
 	}
 
-	private Set<IIdType> getTargetEverythingResourceIds() {
+	private Set<IIdType> getEverythingResourceIds(IIdType thePatientId) {
 		PatientEverythingParameters everythingParams = new PatientEverythingParameters();
 		everythingParams.setCount(new IntegerType(100));
 
 		IBundleProvider bundleProvider =
-				myPatientDao.patientInstanceEverything(null, mySrd, everythingParams, myTargetPatientId);
+				myPatientDao.patientInstanceEverything(null, mySrd, everythingParams, thePatientId);
 
 		assertNull(bundleProvider.getNextPageId());
 
@@ -406,6 +406,11 @@ public class ReplaceReferencesTestHelper {
 
 	public Parameters callReplaceReferences(IGenericClient theFhirClient, boolean theIsAsync) {
 		return callReplaceReferencesWithResourceLimit(theFhirClient, theIsAsync, null);
+	}
+
+	public Parameters callReplaceReferences(
+			IGenericClient theFhirClient, String theSourceId, String theTargetId, boolean theIsAsync) {
+		return callReplaceReferencesWithResourceLimit(theFhirClient, theSourceId, theTargetId, theIsAsync, null);
 	}
 
 	public Parameters callReplaceReferencesWithResourceLimit(
@@ -453,7 +458,7 @@ public class ReplaceReferencesTestHelper {
 
 	public void assertAllReferencesUpdated(boolean theWithDelete) {
 
-		Set<IIdType> actual = getTargetEverythingResourceIds();
+		Set<IIdType> actual = getEverythingResourceIds(myTargetPatientId);
 
 		ourLog.info("Found IDs: {}", actual);
 
@@ -470,21 +475,40 @@ public class ReplaceReferencesTestHelper {
 	}
 
 	public void assertNothingChanged() {
-		Set<IIdType> actual = getTargetEverythingResourceIds();
+		assertReferencesToTargetPatientAreAsInitiallyCreated();
+		assertReferencesToSourcePatientAreAsInitiallyCreated();
+	}
 
-		ourLog.info("Found IDs: {}", actual);
+	public void assertReferencesToTargetPatientAreAsInitiallyCreated() {
+		Set<IIdType> actualIds = getEverythingResourceIds(myTargetPatientId);
+		ourLog.info("Found IDs for target $everything : {}", actualIds);
 
-		assertThat(actual).doesNotContain(mySourcePatientId);
-		assertThat(actual).doesNotContain(mySourceEncId1);
-		assertThat(actual).doesNotContain(mySourceEncId2);
-		assertThat(actual).contains(myOrgId);
-		assertThat(actual).doesNotContain(mySourceCarePlanId);
-		assertThat(actual).doesNotContainAnyElementsOf(mySourceObsIds);
-		assertThat(actual).contains(myTargetPatientId);
-		assertThat(actual).contains(myTargetEnc1);
+		// Validate that all expected resources are present and reference the target patient
+		assertThat(actualIds).contains(myTargetPatientId);
+		assertThat(actualIds).contains(myTargetEnc1);
+		assertThat(actualIds).contains(myOrgId);
 
-		// TODO ED should we also assert here that source still has the all references it had before the operation,
-		// that is in addition to the validation that target doesn't contain the references.
+		assertThat(actualIds).doesNotContain(mySourcePatientId);
+		assertThat(actualIds).doesNotContain(mySourceEncId1);
+		assertThat(actualIds).doesNotContain(mySourceEncId2);
+		assertThat(actualIds).doesNotContain(mySourceCarePlanId);
+		assertThat(actualIds).doesNotContainAnyElementsOf(mySourceObsIds);
+	}
+
+	public void assertReferencesToSourcePatientAreAsInitiallyCreated() {
+		Set<IIdType> actualIds = getEverythingResourceIds(mySourcePatientId);
+		ourLog.info("Found IDs for source $everything : {}", actualIds);
+
+		// Validate that all expected resources are present and reference the source patient
+		assertThat(actualIds).contains(mySourcePatientId);
+		assertThat(actualIds).contains(mySourceEncId1);
+		assertThat(actualIds).contains(mySourceEncId2);
+		assertThat(actualIds).contains(myOrgId);
+		assertThat(actualIds).contains(mySourceCarePlanId);
+		assertThat(actualIds).containsAll(mySourceObsIds);
+
+		assertThat(actualIds).doesNotContain(myTargetPatientId);
+		assertThat(actualIds).doesNotContain(myTargetEnc1);
 	}
 
 	public PatientMergeInputParameters buildMultipleTargetMatchParameters(

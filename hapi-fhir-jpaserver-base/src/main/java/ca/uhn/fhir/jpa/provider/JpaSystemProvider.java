@@ -32,6 +32,7 @@ import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
+import ca.uhn.fhir.replacereferences.UndoReplaceReferencesRequest;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Transaction;
@@ -56,6 +57,7 @@ import java.util.TreeMap;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_UNDO_REPLACE_REFERENCES;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static software.amazon.awssdk.utils.StringUtils.isBlank;
@@ -213,6 +215,47 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 			return retval;
 		} finally {
 			endRequest(theServletRequest);
+		}
+	}
+
+	@Operation(name = OPERATION_UNDO_REPLACE_REFERENCES, global = true)
+	@Description(
+			value =
+					"This operation undoes the effects of a previous $hapi.fhir.replace-references operation by restoring references from the target back to the original source.",
+			shortDefinition =
+					"Restores references from target back to source for resources previously updated by $hapi.fhir.replace-references")
+	public IBaseParameters undoReplaceReferences(
+			@OperationParam(
+							name = ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID,
+							min = 1,
+							typeName = "string")
+					IPrimitiveType<String> theSourceId,
+			@OperationParam(
+							name = ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID,
+							min = 1,
+							typeName = "string")
+					IPrimitiveType<String> theTargetId,
+			ServletRequestDetails theRequestDetails) {
+		startRequest(theRequestDetails);
+
+		try {
+
+			validateReplaceReferencesParams(theSourceId, theTargetId);
+
+			IdDt sourceId = new IdDt(theSourceId.getValue());
+			IdDt targetId = new IdDt(theTargetId.getValue());
+
+			RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
+					theRequestDetails, ReadPartitionIdRequestDetails.forRead(targetId));
+
+			int resourceLimit = myStorageSettings.getInternalSynchronousSearchSize();
+
+			UndoReplaceReferencesRequest undoReplaceReferencesRequest =
+					new UndoReplaceReferencesRequest(sourceId, targetId, partitionId, resourceLimit);
+
+			return getUndoReplaceReferencesSvc().undoReplaceReferences(undoReplaceReferencesRequest, theRequestDetails);
+		} finally {
+			endRequest(theRequestDetails);
 		}
 	}
 
