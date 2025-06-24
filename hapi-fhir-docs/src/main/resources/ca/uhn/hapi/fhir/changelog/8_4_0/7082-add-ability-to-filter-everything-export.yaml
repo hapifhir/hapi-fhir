@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7082
+title: "Add an ability to filter resources out of
+        `$everything` and `$export` operations.
+"

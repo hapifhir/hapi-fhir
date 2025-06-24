@@ -199,7 +199,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 		try {
 			mySearchLimiterSvc.addOmittedResourceType(JpaConstants.OPERATION_EVERYTHING, "Group");
 
-			// verify that the non-everything search works
+			// verify that the non-everything search is not affected
 			IBaseBundle rb = myClient.search()
 				.byUrl("Group?member=Patient/" + p1Id)
 				.cacheControl(CacheControlDirective.noCache().setNoStore(true))
