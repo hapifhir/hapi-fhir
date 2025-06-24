@@ -215,7 +215,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		// validate:
 		// the result will contain the input parameters, the outcome,
 		// and in sync and preview modes the resulting patient
-		// or  in async mode the task resource instead of the resulting patient
+		// or in async mode the task resource instead of the resulting patient
 		assertThat(outParams.getParameter()).hasSize(3);
 
 		// Assert input

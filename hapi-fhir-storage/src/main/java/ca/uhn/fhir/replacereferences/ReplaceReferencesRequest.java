@@ -50,11 +50,12 @@ public class ReplaceReferencesRequest {
 	public final RequestPartitionId partitionId;
 
 	/**
-	 * If true, a Provenance resource will be created after the operation.
-	 * This is not exposed as a parameter a FHIR client set when calling the $replace-references operation currently.
-	 * This is rather used internally to not create a Provenance resource when the replace-references operation called
-	 * as part of another operation,
-	 * like $merge, because a provenance resource needs to be created after the calling operation is completed.
+	 * Indicates whether a Provenance resource should be created after the operation.
+	 * This flag is not exposed to FHIR clients invoking the $hapi.fhir.replace-references
+	 * operation; it is used internally. It is used to avoid creating a
+	 * Provenance when the $replace-references is executed as part of another
+	 * operation (such as $merge), and the Provenance needs to be created after
+	 * the outer operation completes.
 	 */
 	public final boolean createProvenance;
 

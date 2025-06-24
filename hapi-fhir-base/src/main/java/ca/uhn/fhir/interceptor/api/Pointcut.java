@@ -3170,18 +3170,18 @@ public enum Pointcut implements IPointcut {
 			IInterceptorFilterHook.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.batch2.model.WorkChunk"),
 
 	/**
-	 * <b>Provenance Agent Hook:</b>
-	 * This pointcut is called to retrieve the data for populating the agent element of a Provenance resource that need to be created
-	 * as a result of a request, such as $merge and $hapi.fhir.replace-references operations.
+	 * <b>Provenance Agents Pointcut:</b>
+	 * This is a pointcut to retrieve data for populating the agent element of a Provenance resource that needs to be created
+	 * as a result of a request, such as a $merge or a $hapi.fhir.replace-references operation.
 	 * <p> Hooks should accept the following parameter:</p>
 	 * <ul>
-	 *     <li>ca.uhn.fhir.jpa.model.ProvenanceAgentPointcutParameters - an object containing the parameters for the hook. It contains:</li>
+	 *     <li>ca.uhn.fhir.jpa.model.ProvenanceAgentPointcutParameters - an object containing the parameters for the hook, including:</li>
 	 *     <ul>
-	 *         <li>ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed.</li>
-	 *         <li>List of ca.uhn.fhir.model.api.IProvenanceAgent - This is an output parameter. The interceptor should add the agent information to this list</li>
+	 *         <li>ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is being processed.</li>
+	 *         <li>List of ca.uhn.fhir.model.api.IProvenanceAgent - This is an output parameter; the hook should add the agent information to this list</li>
 	 *     </ul>
 	 * </ul>
-	 * Hooks should return <code>void</code>, and use the parameter object to add the agent information.
+	 * Hooks should return <code>void</code> and use the parameter object to add the agent information.
 	 */
 	PROVENANCE_AGENTS(void.class, "ca.uhn.fhir.jpa.model.IProvenanceAgentsPointcutParameter"),
 

@@ -69,15 +69,15 @@ public class MergeResourceHelper {
 			Patient theSourceResource,
 			Patient theTargetResource,
 			@Nullable Patient theResultResource,
-			boolean theDeleteSource,
+			boolean theIsDeleteSource,
 			RequestDetails theRequestDetails) {
 
-		Patient targetToUpdate =
-				prepareTargetPatientForUpdate(theTargetResource, theSourceResource, theResultResource, theDeleteSource);
+		Patient targetToUpdate = prepareTargetPatientForUpdate(
+				theTargetResource, theSourceResource, theResultResource, theIsDeleteSource);
 
 		Patient updatedTarget = updateResource(targetToUpdate, theRequestDetails);
 		myPatientDao.update(targetToUpdate, theRequestDetails);
-		if (theDeleteSource) {
+		if (theIsDeleteSource) {
 			deleteResource(theSourceResource, theRequestDetails);
 		} else {
 			prepareSourcePatientForUpdate(theSourceResource, theTargetResource);
@@ -91,14 +91,14 @@ public class MergeResourceHelper {
 			IBaseResource theSourceResource,
 			IBaseResource theTargetResource,
 			List<Bundle> thePatchResultBundles,
-			boolean theDeleteSource,
+			boolean theIsDeleteSource,
 			RequestDetails theRequestDetails,
 			Date theStartTime,
 			List<IProvenanceAgent> theProvenanceAgents) {
 
 		myProvenanceSvc.createProvenance(
 				theTargetResource.getIdElement(),
-				theDeleteSource ? null : theSourceResource.getIdElement(),
+				theIsDeleteSource ? null : theSourceResource.getIdElement(),
 				thePatchResultBundles,
 				theStartTime,
 				theRequestDetails,
@@ -109,7 +109,7 @@ public class MergeResourceHelper {
 			Patient theTargetResource,
 			Patient theSourceResource,
 			@Nullable Patient theResultResource,
-			boolean theDeleteSource) {
+			boolean theIsDeleteSource) {
 
 		// if the client provided a result resource as input then use it to update the target resource
 		if (theResultResource != null) {
@@ -118,7 +118,7 @@ public class MergeResourceHelper {
 
 		// client did not provide a result resource, we should update the target resource,
 		// add the replaces link to the target resource, if the source resource is not to be deleted
-		if (!theDeleteSource) {
+		if (!theIsDeleteSource) {
 			theTargetResource
 					.addLink()
 					.setType(Patient.LinkType.REPLACES)

@@ -30,6 +30,7 @@ import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -90,15 +91,20 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 			updateTask(params.getTaskId(), requestDetails);
 
 			if (params.getCreateProvenance()) {
+
+				IdDt targetIdVersioned =
+						params.getTargetId().asIdDt().withVersion(params.getTargetVersionForProvenance());
+				// this code is shared by the async $merge jobs, in which case the source resource could be
+				// deleted, and if that is the case, we don't include the source version in the provenance as
+				// per the merge spec.
+				IdDt sourceIdVersioned = null;
+				if (params.getSourceVersionForProvenance() != null) {
+					sourceIdVersioned =
+							params.getSourceId().asIdDt().withVersion(params.getSourceVersionForProvenance());
+				}
 				myProvenanceSvc.createProvenance(
-						params.getTargetId().asIdDt().withVersion(params.getTargetVersionForProvenance()),
-						// this code is shared by the async $merge jobs, in which case the source resource could be
-						// deleted and
-						// if that is the case, we don't include the source version in the provenance as per the merge
-						// spec.
-						params.getSourceVersionForProvenance() == null
-								? null
-								: params.getSourceId().asIdDt().withVersion(params.getSourceVersionForProvenance()),
+						targetIdVersioned,
+						sourceIdVersioned,
 						myPatchOutputBundles,
 						theStepExecutionDetails.getInstance().getStartTime(),
 						requestDetails,
