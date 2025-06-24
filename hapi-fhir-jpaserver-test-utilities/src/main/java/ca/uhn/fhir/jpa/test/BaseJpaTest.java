@@ -256,6 +256,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	protected SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
+	protected ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
 	protected SubscriptionLoader mySubscriptionLoader;
 	@Autowired
 	protected IResourceLinkDao myResourceLinkDao;

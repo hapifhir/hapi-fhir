@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -118,9 +119,10 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 		ourLog.info("setup Patients and Observations");
 		myStorageSettings.setLastNEnabled(true);
 		// enabled to also create extended lucene index during creation of test data
-		boolean hsearchSaved = myStorageSettings.isAdvancedHSearchIndexing();
-		myStorageSettings.setAdvancedHSearchIndexing(true);
+		boolean hsearchSaved = myStorageSettings.isHibernateSearchIndexSearchParams();
+		myStorageSettings.setHibernateSearchIndexSearchParams(true);
 		myStorageSettings.setDeleteEnabled(false);
+		mySearchParamRegistry.forceRefresh();
 
 		// Using a static flag to ensure that test data and elasticsearch index is only created once.
 		// Creating this data and the index is time-consuming and as such want to avoid having to repeat for each test.
@@ -143,6 +145,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 		myElasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 		// turn off the setting enabled earlier
 		myStorageSettings.setAdvancedHSearchIndexing(hsearchSaved);
+		mySearchParamRegistry.forceRefresh();
 
 	}
 

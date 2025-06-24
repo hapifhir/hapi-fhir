@@ -295,7 +295,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 	@Test
 	public void testNoOpUpdateDoesNotModifyLastUpdated() throws InterruptedException {
-		myStorageSettings.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setHibernateSearchIndexSearchParams(true);
+		mySearchParamRegistry.forceRefresh();
+
 		Patient patient = new Patient();
 		patient.getNameFirstRep().setFamily("graham").addGiven("gary");
 
@@ -1990,10 +1992,12 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		@BeforeEach
 		public void enableContainsAndLucene() {
 			myStorageSettings.setAllowContainsSearches(true);
-			myStorageSettings.setAdvancedHSearchIndexing(true);
+			myStorageSettings.setHibernateSearchIndexSearchParams(true);
 			myStorageSettings.setStoreResourceInHSearchIndex(true);
 			myStorageSettings.setNormalizedQuantitySearchLevel(
 				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+
+			mySearchParamRegistry.forceRefresh();
 		}
 
 		@AfterEach
@@ -2416,10 +2420,12 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		@BeforeEach
 		public void enableContainsAndLucene() {
 			myStorageSettings.setAllowContainsSearches(true);
-			myStorageSettings.setAdvancedHSearchIndexing(true);
+			myStorageSettings.setHibernateSearchIndexSearchParams(true);
 			myStorageSettings.setStoreResourceInHSearchIndex(true);
 			myStorageSettings.setNormalizedQuantitySearchLevel(
 				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+
+			mySearchParamRegistry.forceRefresh();
 		}
 
 		@AfterEach
@@ -2554,7 +2560,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		@BeforeEach
 		public void setup() {
-			myStorageSettings.setAdvancedHSearchIndexing(true);
+			myStorageSettings.setHibernateSearchIndexSearchParams(true);
+
+			mySearchParamRegistry.forceRefresh();
 		}
 
 		@AfterEach
