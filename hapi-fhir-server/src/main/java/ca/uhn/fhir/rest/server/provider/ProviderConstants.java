@@ -251,6 +251,11 @@ public class ProviderConstants {
 	public static final String OPERATION_REPLACE_REFERENCES = "$hapi.fhir.replace-references";
 
 	/**
+	 * Operation name for the "$hapi.fhir.undo-replace-references" operation
+	 */
+	public static final String OPERATION_UNDO_REPLACE_REFERENCES = "$hapi.fhir.undo-replace-references";
+
+	/**
 	 * Parameter for source reference of the "$hapi.fhir.replace-references" operation
 	 */
 	public static final String OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID = "source-reference-id";
@@ -272,6 +277,9 @@ public class ProviderConstants {
 	public static final String OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK = "task";
 
 	public static final String OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME = "outcome";
+
+	public static final String OPERATION_UNDO_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME =
+			OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
 
 	/**
 	 * Operation name for the Resource "$merge" operation
