@@ -22,9 +22,15 @@ package ca.uhn.fhir.replacereferences;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.util.FhirTerser;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -35,6 +41,8 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,6 +55,7 @@ import java.util.List;
  */
 public class ReplaceReferencesProvenanceSvc {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(ReplaceReferencesProvenanceSvc.class);
 	private static final String ACT_REASON_CODE_SYSTEM = "http://terminology.hl7.org/CodeSystem/v3-ActReason";
 	private static final String ACT_REASON_PATIENT_ADMINISTRATION_CODE = "PATADMIN";
 	protected static final String ACTIVITY_CODE_SYSTEM = "http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle";
@@ -59,7 +68,6 @@ public class ReplaceReferencesProvenanceSvc {
 		myFhirContext = theDaoRegistry.getFhirContext();
 	}
 
-	@Nullable
 	protected CodeableConcept getActivityCodeableConcept() {
 		CodeableConcept retVal = new CodeableConcept();
 		retVal.addCoding().setSystem(ACTIVITY_CODE_SYSTEM).setCode(ACTIVITY_CODE_LINK);
@@ -129,6 +137,103 @@ public class ReplaceReferencesProvenanceSvc {
 		Provenance provenance =
 				createProvenanceObject(targetReference, sourceReference, references, theStartTime, theProvenanceAgents);
 		myProvenanceDao.create(provenance, theRequestDetails);
+	}
+
+	@Nullable
+	public Provenance findProvenance(
+			IIdType theTargetId, IIdType theSourceId, RequestDetails theRequestDetails, String theOperationName) {
+		SearchParameterMap map = new SearchParameterMap();
+		map.add("target", new ReferenceParam(theTargetId));
+		// Add sort by recorded field, in case there are multiple Provenance resources for the same source and target,
+		// we want the most recent one.
+		map.setSort(new SortSpec("recorded", SortOrderEnum.DESC));
+
+		IBundleProvider searchBundle = myProvenanceDao.search(map, theRequestDetails);
+		// 'activity' is not available as a search parameter in r4, was added in r5,
+		// so we need to filter the results manually.
+		List<Provenance> provenances = filterByActivity(searchBundle.getAllResources());
+
+		if (provenances.isEmpty()) {
+			return null;
+		}
+
+		if (provenances.size() > 1) {
+			// If there are multiple Provenance resources, we return the most recent one, but log a warning
+			ourLog.warn(
+					"There are multiple Provenance resources with the given source {} and target {} suitable for {} operation, "
+							+ "using the most recent one. Provenance count: {}",
+					theSourceId,
+					theTargetId,
+					theOperationName,
+					provenances.size());
+		}
+
+		Provenance provenance = provenances.get(0);
+		if (isTargetAndSourceInCorrectOrder(provenance, theTargetId, theSourceId)) {
+			return provenance;
+		} else {
+			return null;
+		}
+	}
+
+	private List<Provenance> filterByActivity(List<IBaseResource> theResources) {
+		List<Provenance> filteredProvenances = new ArrayList<>();
+		for (IBaseResource resource : theResources) {
+			Provenance provenance = (Provenance) resource;
+			if (provenance.hasActivity() && provenance.getActivity().equalsDeep(getActivityCodeableConcept())) {
+				filteredProvenances.add(provenance);
+			}
+		}
+		return filteredProvenances;
+	}
+
+	/**
+	 * Checks if the first 'Provenance.target' reference matches theTargetId and the second matches theSourceId.
+	 * The replace-references operation creates a Provenance resource with in that order.
+	 * @param provenance The Provenance resource to check.
+	 * @param theTargetId The expected target IIdType for the first reference.
+	 * @param theSourceId The expected source IIdType for the second reference.
+	 * @return true if both match, false otherwise.
+	 */
+	public boolean isTargetAndSourceInCorrectOrder(Provenance provenance, IIdType theTargetId, IIdType theSourceId) {
+		if (provenance.getTarget().size() < 2) {
+			ourLog.error(
+					"Provenance resource {} does not have enough targets. Expected at least 2, found {}.",
+					provenance.getIdElement().getValue(),
+					provenance.getTarget().size());
+			return false;
+		}
+		Reference firstTargetRefInProv = provenance.getTarget().get(0);
+		Reference secondTargetRefInProv = provenance.getTarget().get(1);
+
+		boolean firstMatches = isEqualVersionlessId(theTargetId, firstTargetRefInProv);
+		boolean secondMatches = isEqualVersionlessId(theSourceId, secondTargetRefInProv);
+
+		boolean result = firstMatches && secondMatches;
+
+		if (!result) {
+			ourLog.error(
+					"Provenance resource {} doesn't have the expected target and source references or they are in the wrong order. "
+							+ "Expected target: {}, source: {}, but found target: {}, source: {}",
+					provenance.getIdElement().getValue(),
+					theTargetId.getValue(),
+					theSourceId.getValue(),
+					firstTargetRefInProv.getReference(),
+					secondTargetRefInProv.getReference());
+		}
+
+		return result;
+	}
+
+	private boolean isEqualVersionlessId(IIdType theId, Reference theReference) {
+		if (!theReference.hasReference()) {
+			return false;
+		}
+		return theId.toUnqualifiedVersionless()
+				.getValue()
+				.equals(new IdDt(theReference.getReference())
+						.toUnqualifiedVersionless()
+						.getValue());
 	}
 
 	protected List<Reference> extractUpdatedResourceReferences(List<Bundle> thePatchBundles) {

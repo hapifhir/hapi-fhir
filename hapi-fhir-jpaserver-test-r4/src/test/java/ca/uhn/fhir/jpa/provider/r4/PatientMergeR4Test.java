@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
@@ -42,6 +43,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
+import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.RESOURCE_TYPES_EXPECTED_TO_BE_PATCHED;
+import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.TOTAL_EXPECTED_PATCHES;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER_RESPOND_ASYNC;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE;
@@ -68,6 +71,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	
 	ReplaceReferencesTestHelper myTestHelper;
 
+	ReplaceReferencesLargeTestData myLargeTestData;
+
 	@Override
 	@AfterEach
 	public void after() throws Exception {
@@ -88,7 +93,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		// verify that Provenance resources were saved with versioned target references
 		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 		myTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
-		myTestHelper.beforeEach();
+		myLargeTestData = new ReplaceReferencesLargeTestData(myDaoRegistry);
 	}
 
 	private void waitForAsyncTaskCompletion(Parameters theOutParams) {
@@ -124,9 +129,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		Reference outputRef = (Reference) taskOutput.getValue();
 		Bundle patchResultBundle = (Bundle) outputRef.getResource();
 		assertTrue(containedBundle.equalsDeep(patchResultBundle));
-		ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle,
-			ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES,
-			List.of("Observation", "Encounter", "CarePlan"));
+		ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle, TOTAL_EXPECTED_PATCHES, RESOURCE_TYPES_EXPECTED_TO_BE_PATCHED);
 
 
 		OperationOutcome outcome = (OperationOutcome) theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
@@ -154,7 +157,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		// In sync mode, the result patient is returned in the output,
 		// assert what is returned is the same as the one in the db
 		Patient targetPatientInOutput = (Patient) theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_RESULT).getResource();
-		Patient targetPatientReadFromDB = myTestHelper.readTargetPatient();
+		Patient targetPatientReadFromDB = myTestHelper.readPatient(myLargeTestData.getTargetPatientId());
 		IParser parser = myFhirContext.newJsonParser();
 		assertThat(parser.encodeResourceToString(targetPatientInOutput)).isEqualTo(parser.encodeResourceToString(targetPatientReadFromDB));
 	}
@@ -196,12 +199,12 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	})
 	public void testMerge(boolean withDelete, boolean withInputResultPatient, boolean withPreview, boolean isAsync) {
 		// setup
-
+		myLargeTestData.createTestResources();
 		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
-		myTestHelper.setSourceAndTarget(inParams);
+		myTestHelper.setSourceAndTarget(inParams, myLargeTestData.getSourcePatientId(), myLargeTestData.getTargetPatientId());
 		inParams.deleteSource = withDelete;
 		if (withInputResultPatient) {
-			inParams.resultPatient = myTestHelper.createResultPatient(withDelete);
+			inParams.resultPatient = myLargeTestData.createResultPatientInput(withDelete);
 		}
 		if (withPreview) {
 			inParams.preview = true;
@@ -229,12 +232,12 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		assertTrue(input.equalsDeep(inParameters));
 
 		List<Identifier> expectedIdentifiersOnTargetAfterMerge =
-			myTestHelper.getExpectedIdentifiersForTargetAfterMerge(withInputResultPatient);
+			myLargeTestData.getExpectedIdentifiersForTargetAfterMerge(withInputResultPatient);
 
 
 		if (withPreview) {
 			validatePreviewModeOutcome(outParams);
-			myTestHelper.assertNothingChanged();
+			myTestHelper.assertReferencesHaveNotChanged(myLargeTestData);
 			//no more validation is needed in preview mode, so we can return early
 			return;
 		}
@@ -247,10 +250,10 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		}
 
 		// Check that the linked resources were updated
-		myTestHelper.assertAllReferencesUpdated(withDelete);
-		myTestHelper.assertSourcePatientUpdatedOrDeletedAfterMerge(withDelete);
-		myTestHelper.assertTargetPatientUpdatedAfterMerge(withDelete, expectedIdentifiersOnTargetAfterMerge);
-		myTestHelper.assertMergeProvenance(withDelete, null);
+		myTestHelper.assertAllReferencesUpdated(true, withDelete, myLargeTestData);
+		myTestHelper.assertSourcePatientUpdatedOrDeletedAfterMerge(myLargeTestData.getSourcePatientId(), myLargeTestData.getTargetPatientId(), withDelete);
+		myTestHelper.assertTargetPatientUpdatedAfterMerge(myLargeTestData.getTargetPatientId(), myLargeTestData.getSourcePatientId(), withDelete, expectedIdentifiersOnTargetAfterMerge);
+		myTestHelper.assertMergeProvenance(withDelete, myLargeTestData,  null);
 	}
 
 
@@ -263,7 +266,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		"true, true",
 	})
 	void testMerge_withProvenanceAgentInterceptor_Success(boolean theIsAsync, boolean theAgentInterceptorReturnsMultipleAgents) {
-
+		myLargeTestData.createTestResources();
 		List<IProvenanceAgent> agents = new ArrayList<>();
 		agents.add(myTestHelper.createTestProvenanceAgent());
 		if (theAgentInterceptorReturnsMultipleAgents) {
@@ -273,7 +276,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		ReplaceReferencesTestHelper.registerProvenanceAgentInterceptor(myServer.getRestfulServer(), agents);
 
 		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
-		myTestHelper.setSourceAndTarget(inParams);
+		myTestHelper.setSourceAndTarget(inParams, myLargeTestData.getSourcePatientId(), myLargeTestData.getTargetPatientId());
 
 		Parameters inParameters = inParams.asParametersResource();
 
@@ -288,7 +291,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			validateSyncOutcome(outParams);
 		}
 
-		myTestHelper.assertMergeProvenance(false, agents);
+		myTestHelper.assertMergeProvenance(false, myLargeTestData, agents);
 	}
 
 	@ParameterizedTest(name = "{index}: isAsync={0}")
@@ -302,7 +305,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		ReplaceReferencesTestHelper.registerProvenanceAgentInterceptor(myServer.getRestfulServer(), Collections.emptyList());
 
 		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
-		myTestHelper.setSourceAndTarget(inParams);
 
 		Parameters inParameters = inParams.asParametersResource();
 
@@ -318,8 +320,9 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	void testMerge_smallResourceLimit() {
+		myLargeTestData.createTestResources();
 		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
-		myTestHelper.setSourceAndTarget(inParams);
+		myTestHelper.setSourceAndTarget(inParams, myLargeTestData.getSourcePatientId(), myLargeTestData.getTargetPatientId());
 
 		inParams.resourceLimit = 5;
 		Parameters inParameters = inParams.asParametersResource();
@@ -327,7 +330,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		// exec
 		assertThatThrownBy(() -> callMergeOperation(inParameters, false))
 			.isInstanceOf(PreconditionFailedException.class)
-			.satisfies(ex -> assertThat(extractFailureMessage((BaseServerResponseException) ex)).isEqualTo("HAPI-2597: Number of resources with references to "+ myTestHelper.getSourcePatientId() + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'."));
+			.satisfies(ex -> assertThat(extractFailureMessage((BaseServerResponseException) ex)).isEqualTo("HAPI-2597: Number of resources with references to "+ myLargeTestData.getSourcePatientId() + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'."));
 	}
 
 	@ParameterizedTest(name = "{index}: deleteSource={0}, async={1}")
@@ -387,8 +390,9 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	void testMerge_SourceResourceCannotBeDeletedBecauseAnotherResourceReferencingSourceWasAddedWhileJobIsRunning_JobFails() {
+		myLargeTestData.createTestResources();
 		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
-		myTestHelper.setSourceAndTarget(inParams);
+		myTestHelper.setSourceAndTarget(inParams, myLargeTestData.getSourcePatientId(), myLargeTestData.getTargetPatientId());
 		inParams.deleteSource = true;
 		//using a small batch size that would result in multiple chunks to ensure that
 		//the job runs a bit slowly so that we have sometime to add a resource that references the source
@@ -413,7 +417,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		Encounter enc = new Encounter();
 		enc.setStatus(Encounter.EncounterStatus.ARRIVED);
-		enc.getSubject().setReferenceElement(myTestHelper.getSourcePatientId());
+		enc.getSubject().setReferenceElement(myLargeTestData.getSourcePatientId());
 		myEncounterDao.create(enc, mySrd);
 
 		myBatch2JobHelper.awaitJobFailure(jobId);
@@ -436,7 +440,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		"false, false, false",
 	})
 	public void testMultipleTargetMatchesFails(boolean withDelete, boolean withInputResultPatient, boolean withPreview) {
-		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = myTestHelper.buildMultipleTargetMatchParameters(withDelete, withInputResultPatient, withPreview);
+		myLargeTestData.createTestResources();
+		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = myTestHelper.buildMultipleTargetMatchParameters(withDelete, withInputResultPatient, withPreview, myLargeTestData);
 
 		Parameters inParameters = inParams.asParametersResource();
 
@@ -457,7 +462,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		"false, false, false",
 	})
 	public void testMultipleSourceMatchesFails(boolean withDelete, boolean withInputResultPatient, boolean withPreview) {
-		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = myTestHelper.buildMultipleSourceMatchParameters(withDelete, withInputResultPatient, withPreview);
+		myLargeTestData.createTestResources();
+		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = myTestHelper.buildMultipleSourceMatchParameters(withDelete, withInputResultPatient, withPreview, myLargeTestData);
 
 		Parameters inParameters = inParams.asParametersResource();
 
