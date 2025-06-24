@@ -277,13 +277,16 @@ public class OperationParameter implements IParameter {
 
 		OperationMethodBinding method = (OperationMethodBinding) theMethodBinding;
 
-		if (theRequest.getRequestType() == RequestTypeEnum.GET
-				|| method.isManualRequestMode()
-				|| method.isDeleteEnabled()) {
-			translateQueryParametersIntoServerArgumentForGet(theRequest, matchingParamValues);
-		} else {
+		// If the request body is a Parameters resource, check if it has any
+		// values for us
+		if (theRequest.getRequestType() != RequestTypeEnum.GET
+				&& !method.isManualRequestMode()
+				&& !method.isDeleteEnabled()) {
 			translateQueryParametersIntoServerArgumentForPost(theRequest, matchingParamValues);
 		}
+
+		// We always look at the URL to see if any matching parameters were provided there
+		translateQueryParametersIntoServerArgumentForGet(theRequest, matchingParamValues);
 
 		if (matchingParamValues.isEmpty()) {
 			return null;

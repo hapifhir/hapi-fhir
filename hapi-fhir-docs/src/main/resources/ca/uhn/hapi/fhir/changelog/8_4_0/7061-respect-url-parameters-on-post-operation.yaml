@@ -1,0 +1,7 @@
+---
+type: add
+issue: 7061
+title: "When invoking a FHIR extended operation such as `$validate`, where the
+   operation is commonly invoked using an HTTP POST with the resource payload
+   in the POST body (as opposed to being embedded in a Parameters resource),
+   any parameters on the URL were being ignored. This has been corrected."
