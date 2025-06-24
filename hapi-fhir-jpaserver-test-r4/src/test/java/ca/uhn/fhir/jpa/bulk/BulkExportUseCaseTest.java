@@ -25,7 +25,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.svcs.ISearchLimiterSvc;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.JsonUtil;
@@ -103,9 +102,6 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private IBatch2WorkChunkRepository myWorkChunkRepository;
 	@Autowired
 	private IInterceptorService myInterceptorService;
-
-	@Autowired
-	private ISearchLimiterSvc mySearchLimiterSvc;
 
 	@BeforeEach
 	public void beforeEach() {

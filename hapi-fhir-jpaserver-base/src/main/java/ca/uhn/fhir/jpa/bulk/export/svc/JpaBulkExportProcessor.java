@@ -53,7 +53,6 @@ import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.svcs.ISearchLimiterSvc;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.Logs;
@@ -126,9 +125,6 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	private ISearchParamRegistry mySearchParamRegistry;
 
 	private IFhirPath myFhirPath;
-
-	@Autowired
-	private ISearchLimiterSvc mySearchLimiterSvc;
 
 	@Override
 	public Iterator<JpaPid> getResourcePidIterator(ExportPIDIteratorParameters theParams) {
