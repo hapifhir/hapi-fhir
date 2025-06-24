@@ -153,13 +153,10 @@ public class InlineJobCoordinator<T extends IModelJson> implements IJobCoordinat
 			.filter(job -> StringUtils.equals(theRequest.getJobStatus(), job.getStatus().name()))
 			.filter(job -> StringUtils.equals(theRequest.getJobDefinitionId(), job.getJobDefinitionId()))
 			.filter(job -> StringUtils.equals(theRequest.getJobId(), job.getInstanceId()))
+			.filter(job -> theRequest.getJobCreateTimeFrom() != null && theRequest.getJobCreateTimeFrom().before(job.getCreateTime()))
+			.filter(job -> theRequest.getJobCreateTimeTo() != null && theRequest.getJobCreateTimeTo().after(job.getCreateTime()))
 			.toList();
-
-		if (theRequest.getJobCreateTimeFrom() != null && theRequest.getJobCreateTimeTo() != null) {
-			list = list.stream()
-				.filter(job -> theRequest.getJobCreateTimeFrom().before(job.getCreateTime()))
-				.filter(job -> theRequest.getJobCreateTimeTo().after(job.getCreateTime())).toList();
-		}
+		
 		return new PageImpl<>(list, pageRequest, list.size());
 	}
 
