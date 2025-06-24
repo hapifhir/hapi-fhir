@@ -1,0 +1,32 @@
+{
+	"resourceType": "Bundle",
+	"type": "batch",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "Patient",
+				"identifier": [
+					{
+						"system": "http://some-system.com",
+						"value": "some-value"
+					}
+				],
+				"active": true,
+				"name": [
+					{
+						"family": "Gilbert",
+						"given": [
+							"Whitley"
+						]
+					}
+				],
+				"gender": "female",
+				"birthDate": "1988-04-18"
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Patient?identifier=http://some-system.com|some-value"
+			}
+		}
+	]
+}

@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 7065
+title: "In Patient Id partitioning (PatientIdPartitionInterceptor), Group resources are now treated as if they are not part of the Patient compartment and will be created in the default partition in all cases.  This avoids problems errors creating Groups in no Patient compartment, or many."
