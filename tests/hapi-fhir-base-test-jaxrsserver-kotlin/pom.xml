@@ -17,17 +17,6 @@
 
 	<name>HAPI FHIR JAX-RS Server Kotlin test</name>
 
-	<repositories>
-		<repository>
-			<id>oss-snapshots</id>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-		</repository>
-	</repositories>
-<!--	FIXME GGG -->
-
 	<dependencies>
 
 		<!-- This dependency includes the core HAPI-FHIR classes -->

@@ -65,7 +65,7 @@ Generally speaking, it is a good idea to use a stable build. However, FHIR is a 
 
 Snapshot builds of HAPI are pre-release builds which can contain fixes and new features not yet released in a formal release. As of HAPI-FHIR 8.3.11-SNAPSHOT, snapshots are automatically pulled from central. For older versions, you may use the following snippet to use snapshot builds of HAPI which adds a reference to the OSS snapshot repository to your project build file.
 
-Using a snapshot build generally involves appending *-SNAPSHOT* to the version number, e.g. `4.1.0-SNAPSHOT`. In order to automatically download snapshot builds, you may also need to add a snapshot repository to your build file as shown below:
+Using a snapshot build generally involves appending *-SNAPSHOT* to the version number, e.g. `4.1.0-SNAPSHOT`. In order to automatically download snapshot builds. If you are attempting to use 8.3.11-SNAPSHOT or earlier,  you will need to add a snapshot repository to your build file as shown below:
 
 ### Using Maven:
 
@@ -80,8 +80,6 @@ Using a snapshot build generally involves appending *-SNAPSHOT* to the version n
     </repository>
 </repositories>
 ```
-
-[//]: # FIXME GGG Update ()
 
 ### Using Gradle:
 

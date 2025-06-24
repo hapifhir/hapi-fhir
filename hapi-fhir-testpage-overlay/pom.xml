@@ -15,17 +15,6 @@
 
 	<name>HAPI FHIR TestPage Overlay</name>
 
-<!--	<repositories>-->
-<!--		<repository>-->
-<!--			<id>oss-snapshots</id>-->
-<!--			<snapshots>-->
-<!--				<enabled>true</enabled>-->
-<!--			</snapshots>-->
-<!--			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>-->
-<!--		</repository>-->
-<!--	</repositories>-->
-<!--	FIXME GGG-->
-
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
