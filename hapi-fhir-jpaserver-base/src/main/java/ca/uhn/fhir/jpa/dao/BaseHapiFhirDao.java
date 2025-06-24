@@ -1001,7 +1001,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 		}
 
-		if (thePerformIndexing && changed != null && changed.isChanged()) {
+		if (changed != null && changed.isChanged()) {
 			populateFullTextFieldsAndSetEntityStatus(theRequest, myContext, theResource, entity, newParams);
 		}
 
