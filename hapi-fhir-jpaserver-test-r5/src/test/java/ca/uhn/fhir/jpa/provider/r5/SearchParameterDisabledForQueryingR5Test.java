@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -16,7 +15,6 @@ import ca.uhn.fhir.jpa.test.util.ComboSearchParameterTestHelper;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
-import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -51,6 +49,43 @@ public class SearchParameterDisabledForQueryingR5Test extends BaseResourceProvid
 	@Autowired(required = false)
 	protected Batch2JobHelper myBatch2JobHelper;
 	private ComboSearchParameterTestHelper myComboSearchParameterTestHelper;
+
+	private static List<Arguments> standardSearchParameters() {
+		return List.of(
+			arguments(named("Custom/EnabledTrue", new TestParameters(createSearchParameterCustom(true), "SIMPSONHOMER", null))),
+			arguments(named("Custom/EnabledFalse", new TestParameters(createSearchParameterCustom(false), "SIMPSONHOMER", 2539))),
+			arguments(named("Custom/EnabledNull", new TestParameters(createSearchParameterCustom(null), "SIMPSONHOMER", null))),
+			arguments(named("BuiltIn/EnabledTrue", new TestParameters(createSearchParameterBuiltIn(true), "SIMPSON", null))),
+			arguments(named("BuiltIn/EnabledFalse", new TestParameters(createSearchParameterBuiltIn(false), "SIMPSON", 2540))),
+			arguments(named("BuiltIn/EnabledNull", new TestParameters(createSearchParameterBuiltIn(null), "SIMPSON", null)))
+		);
+	}
+
+	private static @Nonnull SearchParameter createSearchParameterBuiltIn(Boolean theEnabledForSearching) {
+		SearchParameter retVal = createSearchParameter(theEnabledForSearching, "family", "Patient.name.family");
+		retVal.setId("individual-family");
+		retVal.setUrl("http://hl7.org/fhir/SearchParameter/individual-family");
+		return retVal;
+	}
+
+	private static @Nonnull SearchParameter createSearchParameterCustom(Boolean theEnabledForSearching) {
+		return createSearchParameter(theEnabledForSearching, "names", "Patient.name.family + Patient.name.given");
+	}
+
+	private static SearchParameter createSearchParameter(Boolean theEnabledForSearching, String code, String expression) {
+		SearchParameter sp = new SearchParameter();
+		if (theEnabledForSearching != null) {
+			sp.addExtension(EXT_SEARCHPARAM_ENABLED_FOR_SEARCHING, new BooleanType(theEnabledForSearching));
+		}
+		sp.setId(code);
+		sp.setName(code);
+		sp.setCode(code);
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setExpression(expression);
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
+		return sp;
+	}
 
 	@BeforeEach
 	void beforeEach() {
@@ -118,7 +153,6 @@ public class SearchParameterDisabledForQueryingR5Test extends BaseResourceProvid
 		}
 	}
 
-
 	@ParameterizedTest
 	@MethodSource("standardSearchParameters")
 	void testCapabilityStatement(TestParameters theParameters) {
@@ -139,7 +173,6 @@ public class SearchParameterDisabledForQueryingR5Test extends BaseResourceProvid
 			assertThat(searchParamNames).contains(theParameters.mySearchParameter.getCode());
 		}
 	}
-
 
 	@ParameterizedTest
 	@CsvSource({
@@ -168,7 +201,7 @@ public class SearchParameterDisabledForQueryingR5Test extends BaseResourceProvid
 		SearchParameterMap map = SearchParameterMap
 			.newSynchronous()
 			.add(Patient.SP_FAMILY, new StringParam("simpson"))
-			.add(Patient.SP_GENDER, new TokenParam( "male"));
+			.add(Patient.SP_GENDER, new TokenParam("male"));
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myPatientDao.search(map, mySrd);
 		myCaptureQueriesListener.logSelectQueries();
@@ -187,7 +220,6 @@ public class SearchParameterDisabledForQueryingR5Test extends BaseResourceProvid
 		}
 	}
 
-
 	private void reindexAllPatientsAndWaitForCompletion() {
 		ReindexJobParameters parameters = new ReindexJobParameters();
 		parameters.addUrl("Patient?");
@@ -197,43 +229,6 @@ public class SearchParameterDisabledForQueryingR5Test extends BaseResourceProvid
 		startRequest.setParameters(parameters);
 		Batch2JobStartResponse res = myJobCoordinator.startInstance(mySrd, startRequest);
 		myBatch2JobHelper.awaitJobCompletion(res);
-	}
-
-	private static List<Arguments> standardSearchParameters() {
-		return List.of(
-			arguments(named("Custom/EnabledTrue", new TestParameters(createSearchParameterCustom(true), "SIMPSONHOMER", null))),
-			arguments(named("Custom/EnabledFalse", new TestParameters(createSearchParameterCustom(false), "SIMPSONHOMER", 2539))),
-			arguments(named("Custom/EnabledNull", new TestParameters(createSearchParameterCustom(null), "SIMPSONHOMER", null))),
-			arguments(named("BuiltIn/EnabledTrue", new TestParameters(createSearchParameterBuiltIn(true), "SIMPSON", null))),
-			arguments(named("BuiltIn/EnabledFalse", new TestParameters(createSearchParameterBuiltIn(false), "SIMPSON", 2540))),
-			arguments(named("BuiltIn/EnabledNull", new TestParameters(createSearchParameterBuiltIn(null), "SIMPSON", null)))
-		);
-	}
-
-	private static @Nonnull SearchParameter createSearchParameterBuiltIn(Boolean theEnabledForSearching) {
-		SearchParameter retVal = createSearchParameter(theEnabledForSearching, "family", "Patient.name.family");
-		retVal.setId("individual-family");
-		retVal.setUrl("http://hl7.org/fhir/SearchParameter/individual-family");
-		return retVal;
-	}
-
-	private static @Nonnull SearchParameter createSearchParameterCustom(Boolean theEnabledForSearching) {
-		return createSearchParameter(theEnabledForSearching, "names", "Patient.name.family + Patient.name.given");
-	}
-
-	private static SearchParameter createSearchParameter(Boolean theEnabledForSearching, String code, String expression) {
-		SearchParameter sp = new SearchParameter();
-		if (theEnabledForSearching != null) {
-			sp.addExtension(EXT_SEARCHPARAM_ENABLED_FOR_SEARCHING, new BooleanType(theEnabledForSearching));
-		}
-		sp.setId(code);
-		sp.setName(code);
-		sp.setCode(code);
-		sp.setType(Enumerations.SearchParamType.STRING);
-		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		sp.setExpression(expression);
-		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
-		return sp;
 	}
 
 	private static class TestParameters {
