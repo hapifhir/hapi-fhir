@@ -43,8 +43,6 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -533,12 +531,6 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader) throws FHIRException {
 		throw new UnsupportedOperationException(Msg.code(233));
-	}
-
-	@Override
-	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, Set<String> types)
-			throws FileNotFoundException, IOException, FHIRException {
-		throw new UnsupportedOperationException(Msg.code(2328));
 	}
 
 	@Override
