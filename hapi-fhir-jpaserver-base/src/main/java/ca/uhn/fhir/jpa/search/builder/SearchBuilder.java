@@ -116,9 +116,6 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MultimapBuilder;
 import com.healthmarketscience.sqlbuilder.Condition;
-import com.healthmarketscience.sqlbuilder.InCondition;
-import com.healthmarketscience.sqlbuilder.NotCondition;
-import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
@@ -932,7 +929,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		Set<String> resourcesToOmit =
-			mySearchLimiterSvc.getResourcesToOmitForOperationSearches(JpaConstants.OPERATION_EVERYTHING);
+				mySearchLimiterSvc.getResourcesToOmitForOperationSearches(JpaConstants.OPERATION_EVERYTHING);
 		sqlBuilder.excludeResourceTypesPredicate(resourcesToOmit);
 
 		/*
