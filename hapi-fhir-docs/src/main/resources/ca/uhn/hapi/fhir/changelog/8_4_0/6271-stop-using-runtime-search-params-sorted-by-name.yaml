@@ -1,4 +1,4 @@
 type: fix
-issue: 67121
+issue: 6271
 title: "context-value-type searches were returning empty bundles, even when there were hits. This has been fixed."
 
