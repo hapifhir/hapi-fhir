@@ -1101,10 +1101,7 @@ public enum Pointcut implements IPointcut {
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
 	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
-	 * pulled out of the servlet request. Note that the bean
-	 * properties are not all guaranteed to be populated, depending on how early during processing the
-	 * exception occurred. <b>Note that this parameter may be null in contexts where the request is not
-	 * known, such as while processing searches</b>
+	 * pulled out of the servlet request.
 	 * </li>
 	 * <li>
 	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
@@ -1114,7 +1111,12 @@ public enum Pointcut implements IPointcut {
 	 * </li>
 	 * </ul>
 	 * <p>
-	 * Hooks may return <code>void</code>, an object of type <code>ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetResponse</code>, and can throw exceptions.
+	 * Hooks may return <code>void</code> (in which case the placeholder creation will proceed as normal),
+	 * an object of type
+	 * <code>ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetResponse</code>
+	 * (in which case the response object can approve or reject the creation),
+	 * and can throw exceptions (which will trigger an appropriate error message being returned
+	 * to the client).
 	 * </p>
 	 */
 	STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE(

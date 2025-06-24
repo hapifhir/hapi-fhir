@@ -92,9 +92,6 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 	private DaoRegistry myDaoRegistry;
 
 	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
-
-	@Autowired
 	private IHapiTransactionService myTransactionService;
 
 	@Autowired
@@ -119,11 +116,6 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		String resourceType = targetResourceId.getResourceType();
 		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(resourceType);
 		Class<? extends IBaseResource> type = resourceDef.getImplementingClass();
-
-		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(
-				theSourceResourceName,
-				thePathAndRef.getSearchParamName(),
-				ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 
 		T persistentId = null;
 		if (theTransactionDetails != null) {
@@ -209,10 +201,6 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 			if (theTransactionDetails != null) {
 				theTransactionDetails.addResolvedResourceId(targetResourceId, persistentId);
 			}
-		}
-
-		if (!searchParam.hasTargets() && searchParam.getTargets().contains(resourceType)) {
-			return null;
 		}
 
 		return resolvedResource;

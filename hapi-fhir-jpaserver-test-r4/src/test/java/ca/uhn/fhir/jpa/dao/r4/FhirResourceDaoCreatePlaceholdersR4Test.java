@@ -2,6 +2,9 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -678,6 +681,27 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		Observation createdObs = myObservationDao.read(id, mySrd);
 		assertEquals("Patient/ABC", createdObs.getSubject().getReference());
+	}
+
+	@Test
+	public void testInterceptor_ReturnsNull() {
+		//Setup
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		registerInterceptor(new Object(){
+			@Hook(Pointcut.STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE)
+			public AutoCreatePlaceholderReferenceTargetResponse preCreatePlaceholderReference() {
+				return null;
+			}
+		});
+
+		// Test
+		Observation obs = new Observation();
+		obs.setStatus(ObservationStatus.AMENDED);
+		obs.setSubject(new Reference("Patient/ABC"));
+		myObservationDao.create(obs, mySrd);
+
+		// Verify
+		assertDoesNotThrow(()->myPatientDao.read(new IdType(obs.getSubject().getReference()), mySrd));
 	}
 
 	@Test
