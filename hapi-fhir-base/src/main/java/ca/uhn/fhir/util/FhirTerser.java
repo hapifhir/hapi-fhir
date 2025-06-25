@@ -1830,9 +1830,9 @@ public class FhirTerser {
 		}
 
 		public boolean referenceMatchesAContainedResource(IIdType theRefId) {
-			assert theRefId.getIdPart().startsWith("#");
+			assert theRefId.getValue().startsWith("#");
 
-			String expectedResourceId = theRefId.getIdPart().substring(1);
+			String expectedResourceId = theRefId.getValue().substring(1);
 			return this.getContainedResources().stream()
 					.anyMatch(res -> res.getIdElement().getIdPart().equals(expectedResourceId));
 		}
