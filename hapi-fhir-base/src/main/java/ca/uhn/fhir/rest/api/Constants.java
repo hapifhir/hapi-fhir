@@ -206,6 +206,7 @@ public class Constants {
 	public static final String PARAM_ASYNC = "async"; // Used in messaging
 	public static final String PARAM_AT = "_at";
 	public static final String PARAM_ID = "_id";
+	public static final String PARAM_IN = "_in";
 	public static final String PARAM_ID_URL = "http://hl7.org/fhir/SearchParameter/Resource-id";
 	/**
 	 * Used in paging links

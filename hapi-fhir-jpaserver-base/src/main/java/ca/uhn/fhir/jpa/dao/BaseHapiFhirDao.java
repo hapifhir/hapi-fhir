@@ -1698,9 +1698,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		// Advanced indexing - Index standard search params in the FullText index
 		if (myStorageSettings.isHibernateSearchIndexSearchParams()) {
-			ExtendedHSearchIndexData hSearchIndexData =
-					myFulltextSearchSvc.extractLuceneIndexData(theResource, theEntity, theNewParams);
-			theEntity.setLuceneIndexData(hSearchIndexData);
+			if (theResource != null) {
+				ExtendedHSearchIndexData hSearchIndexData =
+						myFulltextSearchSvc.extractLuceneIndexData(theResource, theEntity, theNewParams);
+				theEntity.setLuceneIndexData(hSearchIndexData);
+			} else {
+				theEntity.setLuceneIndexData(null);
+			}
 			theEntity.setIndexStatus(EntityIndexStatusEnum.INDEXED_ALL);
 		}
 	}

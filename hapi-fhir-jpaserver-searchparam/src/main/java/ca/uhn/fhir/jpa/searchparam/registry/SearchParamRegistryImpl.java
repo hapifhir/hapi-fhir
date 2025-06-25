@@ -257,6 +257,8 @@ public class SearchParamRegistryImpl
 					PARAM_LANGUAGE_DESCRIPTION,
 					PARAM_LANGUAGE_PATH,
 					RestSearchParameterTypeEnum.TOKEN);
+		} else {
+			unregisterImplicitSearchParam(searchParams, Constants.PARAM_LANGUAGE);
 		}
 
 		// Auto-register: _content and _text
@@ -275,6 +277,9 @@ public class SearchParamRegistryImpl
 					PARAM_CONTENT_DESCRIPTION,
 					"Resource",
 					RestSearchParameterTypeEnum.STRING);
+		} else {
+			unregisterImplicitSearchParam(searchParams, Constants.PARAM_CONTENT);
+			unregisterImplicitSearchParam(searchParams, Constants.PARAM_TEXT);
 		}
 
 		removeInactiveSearchParams(searchParams);
@@ -285,6 +290,12 @@ public class SearchParamRegistryImpl
 				myInterceptorBroadcaster, myPhoneticEncoder, myActiveSearchParams);
 		updateSearchParameterIdentityCache();
 		ourLog.debug("Refreshed search parameter cache in {}ms", sw.getMillis());
+	}
+
+	private void unregisterImplicitSearchParam(RuntimeSearchParamCache theSearchParams, String theParamName) {
+		for (String resourceType : theSearchParams.getResourceNameKeys()) {
+			theSearchParams.remove(resourceType, theParamName);
+		}
 	}
 
 	private void registerImplicitSearchParam(
