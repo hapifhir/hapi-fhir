@@ -8,29 +8,32 @@ In the case of a JPA Server, HAPI FHIR itself performs both roles. This means th
 
 # Registering Interceptors
 
-How to register an interceptor differs depending on the type of pointcut it registers. This is especially important if you modify resources through a DAO.
+How to register an interceptor differs depending on the type of pointcut it registers. This is especially important if you modify resources without going through the `RestfulServer`.
 
-For example, a call through a DAO will not trigger an interceptor registered on the RestfulServer, even if this interceptor hooks onto a **STORAGE_xxx** pointcut.
+For example, if you are listening to a message queue, you can have a call:
 
-### **SERVER_xxx**
+`Message Queue -> Event listener -> DAO`
 
-|                 | Registered on |                     |
-| --------------- | ------------- | ------------------- |
-| **Call source** | RestfulServer | IInterceptorService |
-| REST            | ✅            | ❌                  |
-| DAO             | ❌             | ❌                   |
+This will not trigger an interceptor registered on the RestfulServer, even if this interceptor hooks onto a **STORAGE_xxx** pointcut.
 
-### **STORAGE_xxx**
-|                 | Registered on |                     |
-| --------------- | ------------- | ------------------- |
-| **Call source** | RestfulServer | IInterceptorService |
-| REST            | ✅            | ✅                 |
-| DAO             | ❌             | ✅                 |
+### **SERVER_xxx** pointcut
+|                   | Registered on    |                     |
+| ----------------- | --------------- | ------------------- |
+| **Call source**   | RestfulServer   | IInterceptorService |
+| RestfulServer     | ✅              | ❌                  |
+| Other implementation | ❌           | ❌                  |
+
+### **STORAGE_xxx** pointcut
+|                   | Registered on    |                     |
+| ----------------- | --------------- | ------------------- |
+| **Call source**   | RestfulServer   | IInterceptorService |
+| RestfulServer     | ✅              | ✅                  |
+| Other implementation | ❌           | ✅                  |
 
 ✅: Triggered
 ❌: Not triggered
 
-Note that you should not register any interceptor on both the `RestfulServer` and `IInterceptorService`. If you do so, it will be triggered twice.
+Note that you should not register any interceptor with storage pointcuts on both the `RestfulServer` and `IInterceptorService`. If you do so, it will be triggered twice.
 
 # Example: Clearing Tags
 
