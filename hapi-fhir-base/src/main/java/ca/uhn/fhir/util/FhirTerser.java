@@ -1783,7 +1783,7 @@ public class FhirTerser {
 	}
 
 	/**
-	 * Checks if the field exists on the resource by using filed name.
+	 * Checks if the field exists on the resource by using field name.
 	 *
 	 * @param theFieldName   Name of the field to check
 	 * @param theResource    Resource instance to check
