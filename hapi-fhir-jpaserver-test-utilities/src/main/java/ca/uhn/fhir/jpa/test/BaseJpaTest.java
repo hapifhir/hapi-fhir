@@ -135,6 +135,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -1103,4 +1104,10 @@ public abstract class BaseJpaTest extends BaseTest {
 	public static Date fromLocalDate(LocalDate theLocalDate) {
 		return Date.from(theLocalDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
 	}
+
+	@Nonnull
+	public static SystemRequestDetails newSrd() {
+		return new SystemRequestDetails();
+	}
+
 }
