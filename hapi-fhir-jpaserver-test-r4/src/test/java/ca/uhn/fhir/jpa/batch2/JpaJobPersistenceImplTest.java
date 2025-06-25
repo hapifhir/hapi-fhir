@@ -402,7 +402,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testFetchFilteredInstancesByCreateTime_jobsNotInDateRange_findNothing() {
+	void testFetchFilteredInstancesByCreateTime_withDateRangeBeyondAnyJobs_findNothing() {
 		// Setup
 		createTwoJobsDifferentStatus();
 		JobInstanceFetchRequest request = createFetchRequest();
@@ -420,12 +420,12 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testFetchFilteredInstancesByCreateTime_jobsInDateRange_findAll() {
+	void testFetchFilteredInstancesByCreateTime_withValidStartAndEndDate_findAllInRange() {
 		// Setup
 		createTwoJobsDifferentStatus();
 		JobInstanceFetchRequest request = createFetchRequest();
 
-		ZonedDateTime startDt = ZonedDateTime.now().minusDays(1).with(LocalTime.MIN);
+		ZonedDateTime startDt = ZonedDateTime.now().minusDays(1);
 		ZonedDateTime endDt = ZonedDateTime.now().with(LocalTime.MAX);
 		request.setJobCreateTimeFrom(Date.from(startDt.toInstant()));
 		request.setJobCreateTimeTo(Date.from(endDt.toInstant()));
@@ -435,6 +435,70 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		// Verify
 		assertEquals(2L, foundInstances.getTotalElements());
+	}
+
+	@Test
+	void testFetchFilteredInstancesByCreateTime_withStartDateOnly_findJobsAfter() {
+		// Setup
+		createTwoJobsDifferentStatus();
+		JobInstanceFetchRequest request = createFetchRequest();
+
+		ZonedDateTime startDt = ZonedDateTime.now().minusDays(1);
+		request.setJobCreateTimeFrom(Date.from(startDt.toInstant()));
+
+		// Execute
+		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
+
+		// Verify
+		assertEquals(2L, foundInstances.getTotalElements());
+	}
+
+	@Test
+	void testFetchFilteredInstancesByCreateTime_withStartDateBeyond_findNothing() {
+		// Setup
+		createTwoJobsDifferentStatus();
+		JobInstanceFetchRequest request = createFetchRequest();
+
+		ZonedDateTime startDt = ZonedDateTime.now().plusHours(1);
+		request.setJobCreateTimeFrom(Date.from(startDt.toInstant()));
+
+		// Execute
+		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
+
+		// Verify
+		assertEquals(0L, foundInstances.getTotalElements());
+	}
+
+	@Test
+	void testFetchFilteredInstancesByCreateTime_withEndDateOnly_findJobsBefore() {
+		// Setup
+		createTwoJobsDifferentStatus();
+		JobInstanceFetchRequest request = createFetchRequest();
+
+		ZonedDateTime endDt = ZonedDateTime.now().with(LocalTime.MAX);
+		request.setJobCreateTimeTo(Date.from(endDt.toInstant()));
+
+		// Execute
+		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
+
+		// Verify
+		assertEquals(2L, foundInstances.getTotalElements());
+	}
+
+	@Test
+	void testFetchFilteredInstancesByCreateTime_withEndDateBeyond_findNothing() {
+		// Setup
+		createTwoJobsDifferentStatus();
+		JobInstanceFetchRequest request = createFetchRequest();
+
+		ZonedDateTime endDt = ZonedDateTime.now().minusHours(1);
+		request.setJobCreateTimeTo(Date.from(endDt.toInstant()));
+
+		// Execute
+		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
+
+		// Verify
+		assertEquals(0L, foundInstances.getTotalElements());
 	}
 
 	private JobInstanceFetchRequest createFetchRequest() {
