@@ -1542,7 +1542,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 			// See the method javadoc for an explanation of this
 			if (!myExtractResourceLevelParams
-					&& RuntimeSearchParamHelper.isSpeciallyHandledSearchParameter(nextSpDef)) {
+					&& RuntimeSearchParamHelper.isSpeciallyHandledSearchParameter(nextSpDef, myStorageSettings)) {
 				continue;
 			}
 

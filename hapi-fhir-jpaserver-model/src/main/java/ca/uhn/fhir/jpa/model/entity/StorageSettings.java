@@ -27,6 +27,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.HapiExtensions;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -85,6 +86,11 @@ public class StorageSettings {
 	protected static final String DEFAULT_PERIOD_INDEX_END_OF_TIME = "9000-01-01";
 	private static final Integer DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE = null;
 	/**
+	 * @since 5.5.0
+	 */
+	public static final TagStorageModeEnum DEFAULT_TAG_STORAGE_MODE = TagStorageModeEnum.VERSIONED;
+
+	/**
 	 * update setter javadoc if default changes
 	 */
 	private boolean myAllowContainsSearches = false;
@@ -98,6 +104,7 @@ public class StorageSettings {
 	private Integer myBundleBatchMaxPoolSize = DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE;
 	private boolean myMassIngestionMode;
 	private Integer myMaximumTransactionBundleSize = DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE;
+	private TagStorageModeEnum myTagStorageMode = DEFAULT_TAG_STORAGE_MODE;
 	/**
 	 * Activates hibernate search indexing of fulltext data from resources, which
 	 * is used to support the {@literal _text} and {@literal _content} Search Parameters.
@@ -471,6 +478,26 @@ public class StorageSettings {
 	public void setSequenceValueMassagerClass(Class<? extends ISequenceValueMassager> theSequenceValueMassagerClass) {
 		Validate.notNull(theSequenceValueMassagerClass, "theSequenceValueMassagerClass must not be null");
 		mySequenceValueMassagerClass = theSequenceValueMassagerClass;
+	}
+
+	/**
+	 * Sets the tag storage mode for the server. Default is {@link TagStorageModeEnum#VERSIONED}.
+	 *
+	 * @since 5.5.0
+	 */
+	@Nonnull
+	public TagStorageModeEnum getTagStorageMode() {
+		return myTagStorageMode;
+	}
+
+	/**
+	 * Sets the tag storage mode for the server. Default is {@link TagStorageModeEnum#VERSIONED}.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setTagStorageMode(@Nonnull TagStorageModeEnum theTagStorageMode) {
+		Validate.notNull(theTagStorageMode, "theTagStorageMode must not be null");
+		myTagStorageMode = theTagStorageMode;
 	}
 
 	/**
@@ -1240,5 +1267,25 @@ public class StorageSettings {
 	public enum IndexEnabledEnum {
 		ENABLED,
 		DISABLED
+	}
+
+	public enum TagStorageModeEnum {
+
+		/**
+		 * A separate set of tags is stored for each resource version
+		 */
+		VERSIONED,
+
+		/**
+		 * A single set of tags is shared by all resource versions
+		 */
+		NON_VERSIONED,
+
+		/**
+		 * Tags are stored directly in the resource body (in the {@literal ResourceHistoryTable}
+		 * entry for the resource, meaning that they are not indexed separately, and are versioned with the rest
+		 * of the resource.
+		 */
+		INLINE
 	}
 }
