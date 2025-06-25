@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.FhirTerser;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -186,6 +187,7 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 			retVal = new ArrayList<>();
 			for (String searchParameterResource : mySearchParameterResources) {
 				try (InputStream inputStream = ClasspathUtil.loadResourceAsStream(searchParameterResource)) {
+					FhirTerser terser = myCtx.newTerser();
 					EncodingEnum encoding =
 							searchParameterResource.endsWith("json") ? EncodingEnum.JSON : EncodingEnum.XML;
 					List<IBaseResource> resources =

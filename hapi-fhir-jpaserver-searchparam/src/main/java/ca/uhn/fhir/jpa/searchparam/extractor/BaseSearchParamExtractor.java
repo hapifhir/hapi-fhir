@@ -1541,25 +1541,14 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 
 			// See the method javadoc for an explanation of this
-			if (!myExtractResourceLevelParams && RuntimeSearchParamHelper.isResourceLevel(nextSpDef)) {
+			if (!myExtractResourceLevelParams
+					&& RuntimeSearchParamHelper.isSpeciallyHandledSearchParameter(nextSpDef)) {
 				continue;
 			}
 
 			extractSearchParam(nextSpDef, theResource, theExtractor, retVal, theWantLocalReferences);
 		}
 		return retVal;
-	}
-
-	/**
-	 * Helper function to determine if a set of SPs for a resource uses a resolve as part of its fhir path.
-	 */
-	private boolean anySearchParameterUsesResolve(
-			Collection<RuntimeSearchParam> searchParams, RestSearchParameterTypeEnum theSearchParamType) {
-		return searchParams.stream()
-				.filter(param -> param.getParamType() != theSearchParamType)
-				.map(RuntimeSearchParam::getPath)
-				.filter(Objects::nonNull)
-				.anyMatch(path -> path.contains("resolve"));
 	}
 
 	/**
