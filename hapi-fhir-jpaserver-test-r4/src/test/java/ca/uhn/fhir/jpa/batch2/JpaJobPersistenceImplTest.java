@@ -334,7 +334,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		JobInstanceFetchRequest request = createFetchRequest();
 
 		// Execute
-		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
+		Page<JobInstance> foundInstances = mySvc.fetchJobInstances(request);
 
 		// Verify
 		assertEquals(2L, foundInstances.getTotalElements());
@@ -348,7 +348,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		request.setJobStatus(StatusEnum.COMPLETED.name());
 
 		// Execute
-		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
+		Page<JobInstance> foundInstances = mySvc.fetchJobInstances(request);
 
 		// Verify
 		assertEquals(1L, foundInstances.getTotalElements());
@@ -362,7 +362,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		request.setJobDefinitionId(JOB_DEFINITION_ID);
 
 		// Execute
-		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
+		Page<JobInstance> foundInstances = mySvc.fetchJobInstances(request);
 
 		// Verify
 		assertEquals(1L, foundInstances.getTotalElements());
@@ -377,7 +377,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		request.setJobDefinitionId(JOB_DEFINITION_ID);
 
 		// Execute
-		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
+		Page<JobInstance> foundInstances = mySvc.fetchJobInstances(request);
 
 		// Verify
 		assertEquals(1L, foundInstances.getTotalElements());
@@ -389,13 +389,13 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		createTwoJobsDifferentStatus();
 		JobInstanceFetchRequest request = createFetchRequest();
 
-		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
+		Page<JobInstance> foundInstances = mySvc.fetchJobInstances(request);
 		assertEquals(2L, foundInstances.getTotalElements());
 		String jobId = foundInstances.getContent().get(0).getInstanceId();
 		request.setJobId(jobId);
 
 		// Execute
-		foundInstances = mySvc.fetchFilteredJobInstances(request);
+		foundInstances = mySvc.fetchJobInstances(request);
 
 		// Verify
 		assertEquals(1L, foundInstances.getTotalElements());
@@ -413,7 +413,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		request.setJobCreateTimeTo(Date.from(endDt.toInstant()));
 
 		// Execute
-		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
+		Page<JobInstance> foundInstances = mySvc.fetchJobInstances(request);
 
 		// Verify
 		assertEquals(0L, foundInstances.getTotalElements());
@@ -431,7 +431,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		request.setJobCreateTimeTo(Date.from(endDt.toInstant()));
 
 		// Execute
-		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
+		Page<JobInstance> foundInstances = mySvc.fetchJobInstances(request);
 
 		// Verify
 		assertEquals(2L, foundInstances.getTotalElements());
@@ -447,7 +447,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		request.setJobCreateTimeFrom(Date.from(startDt.toInstant()));
 
 		// Execute
-		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
+		Page<JobInstance> foundInstances = mySvc.fetchJobInstances(request);
 
 		// Verify
 		assertEquals(2L, foundInstances.getTotalElements());
@@ -463,7 +463,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		request.setJobCreateTimeFrom(Date.from(startDt.toInstant()));
 
 		// Execute
-		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
+		Page<JobInstance> foundInstances = mySvc.fetchJobInstances(request);
 
 		// Verify
 		assertEquals(0L, foundInstances.getTotalElements());
@@ -479,7 +479,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		request.setJobCreateTimeTo(Date.from(endDt.toInstant()));
 
 		// Execute
-		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
+		Page<JobInstance> foundInstances = mySvc.fetchJobInstances(request);
 
 		// Verify
 		assertEquals(2L, foundInstances.getTotalElements());
@@ -495,7 +495,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		request.setJobCreateTimeTo(Date.from(endDt.toInstant()));
 
 		// Execute
-		Page<JobInstance> foundInstances = mySvc.fetchFilteredJobInstances(request);
+		Page<JobInstance> foundInstances = mySvc.fetchJobInstances(request);
 
 		// Verify
 		assertEquals(0L, foundInstances.getTotalElements());

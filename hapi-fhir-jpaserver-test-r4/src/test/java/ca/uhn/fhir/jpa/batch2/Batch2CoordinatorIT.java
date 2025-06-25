@@ -380,7 +380,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		do {
 			// create / update our request
 			request.setPageStart(pageIndex);
-			page = myJobCoordinator.fetchFilteredJobInstances(request);
+			page = myJobCoordinator.fetchAllJobInstances(request);
 			iterator = page.iterator();
 
 			while (iterator.hasNext()) {

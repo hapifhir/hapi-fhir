@@ -237,7 +237,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public Page<JobInstance> fetchFilteredJobInstances(JobInstanceFetchRequest theRequest) {
+	public Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest) {
 		PageRequest pageRequest =
 				PageRequest.of(theRequest.getPageStart(), theRequest.getBatchSize(), theRequest.getSort());
 

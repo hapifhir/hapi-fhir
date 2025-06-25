@@ -186,8 +186,8 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	}
 
 	@Override
-	public Page<JobInstance> fetchFilteredJobInstances(JobInstanceFetchRequest theFetchRequest) {
-		return myJobQuerySvc.fetchFilteredInstances(theFetchRequest);
+	public Page<JobInstance> fetchAllJobInstances(JobInstanceFetchRequest theFetchRequest) {
+		return myJobQuerySvc.fetchAllInstances(theFetchRequest);
 	}
 
 	// wipmb For 6.8 - Clarify this interface. We currently return a JobOperationResultJson, and don't throw

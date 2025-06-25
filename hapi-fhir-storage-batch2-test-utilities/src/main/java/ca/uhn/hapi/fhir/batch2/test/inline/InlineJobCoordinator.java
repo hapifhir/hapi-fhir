@@ -144,7 +144,7 @@ public class InlineJobCoordinator<T extends IModelJson> implements IJobCoordinat
     }
 
     @Override
-	public Page<JobInstance> fetchFilteredJobInstances(JobInstanceFetchRequest theRequest) {
+	public Page<JobInstance> fetchAllJobInstances(JobInstanceFetchRequest theRequest) {
 		PageRequest pageRequest =
 			PageRequest.of(theRequest.getPageStart(), theRequest.getBatchSize(), theRequest.getSort());
 

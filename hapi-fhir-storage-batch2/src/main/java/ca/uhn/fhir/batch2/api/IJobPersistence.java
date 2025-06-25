@@ -133,7 +133,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @param theRequest - the job fetch request
 	 * @return - a page of job instances
 	 */
-	Page<JobInstance> fetchFilteredJobInstances(JobInstanceFetchRequest theRequest);
+	Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest);
 
 	/**
 	 * Returns set of all distinct states for the specified job instance id
