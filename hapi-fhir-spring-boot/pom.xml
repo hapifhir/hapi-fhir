@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>8.3.11-SNAPSHOT</version>
+		<version>8.3.12-SNAPSHOT</version>
 
 		<relativePath>../pom.xml</relativePath>
 	</parent>
@@ -34,10 +34,10 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<groupId>org.sonatype.central</groupId>
+				<artifactId>central-publishing-maven-plugin</artifactId>
 				<configuration>
-					<skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+					<skipPublishing>true</skipPublishing>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -49,7 +49,7 @@
 			<activation>
 				<activeByDefault>false</activeByDefault>
 				<property>
-					<name>deployToSonatype</name>
+					<name>deployToCentral</name>
 				</property>
 			</activation>
 			<build>
