@@ -65,18 +65,22 @@ Generally speaking, it is a good idea to use a stable build. However, FHIR is a 
 
 Snapshot builds of HAPI are pre-release builds which can contain fixes and new features not yet released in a formal release. As of HAPI-FHIR 8.3.11-SNAPSHOT, snapshots are automatically pulled from central. For older versions, you may use the following snippet to use snapshot builds of HAPI which adds a reference to the OSS snapshot repository to your project build file.
 
-Using a snapshot build generally involves appending *-SNAPSHOT* to the version number, e.g. `4.1.0-SNAPSHOT`. In order to automatically download snapshot builds. If you are attempting to use 8.3.11-SNAPSHOT or earlier,  you will need to add a snapshot repository to your build file as shown below:
+Using a snapshot build generally involves appending *-SNAPSHOT* to the version number, e.g. `8.3.12-SNAPSHOT`. In order to automatically download snapshot builds. If you are attempting to use 8.3.11-SNAPSHOT or later, you will need to add a snapshot repository to your build file as shown below:
 
 ### Using Maven:
 
 ```xml
 <repositories>
     <repository>
-        <id>oss-snapshots</id>
+        <name>Central Portal Snapshots</name>
+        <id>central-portal-snapshots</id>
+        <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+        <releases>
+            <enabled>false</enabled>
+        </releases>
         <snapshots>
             <enabled>true</enabled>
         </snapshots>
-        <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
     </repository>
 </repositories>
 ```
@@ -85,12 +89,15 @@ Using a snapshot build generally involves appending *-SNAPSHOT* to the version n
 
 ```groovy
 repositories {
-	mavenCentral()
-	maven {
-		url "https://oss.sonatype.org/content/repositories/snapshots"
-	}
+    maven {
+        name = 'Central Portal Snapshots'
+        url = 'https://central.sonatype.com/repository/maven-snapshots/'
+    }
+    mavenCentral()
 }
 ```
+
+Given that OSS Sonatype has been sunsetted, older snapshots are no longer available, and must be built manually from source if you require them.
 
 # Dependencies
 
