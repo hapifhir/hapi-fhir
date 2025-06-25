@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirPatchTest {
 	org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirPatchTest.class);
@@ -314,6 +316,73 @@ public class FhirPatchTest {
 			myPatch.apply(appointment, parameters);
 		} catch (InvalidRequestException ex) {
 			assertTrue(ex.getMessage().contains("List contains more than a single element"));
+		}
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"Appointment.participant.actor.reference.where(startsWith('Patient')",
+		"Appointment.participant.actor.reference.where(contains(')')"
+	})
+	public void patch_invalidPaths_throw(String thePath) {
+		// setup
+		Appointment appointment;
+		{
+			@Language("JSON")
+			String apStr = """
+				{
+				      "participant": [
+				          {
+				              "actor": {
+				                  "reference": "Patient/1"
+				              },
+				              "required": "required",
+				              "status": "accepted"
+				          }
+				      ],
+				      "resourceType": "Appointment"
+				}
+				""";
+			appointment = myParser.parseResource(Appointment.class, apStr);
+		}
+
+		Parameters patch;
+		{
+			@Language("JSON")
+			String patchStr = """
+					{
+				     "resourceType":"Parameters",
+				     "parameter":[
+				       {
+				         "name":"operation",
+				         "part":[
+				           {
+				             "name":"type",
+				             "valueCode":"replace"
+				           },
+				           {
+				             "name":"path",
+				             "valueString": "FINDME"
+				           },
+				           {
+				             "name":"value",
+				             "valueString":"Patient/2"
+				           }
+				         ]
+				       }
+				     ]
+				   }
+				""".replace("FINDME", thePath);
+			patch = myParser.parseResource(Parameters.class, patchStr);
+		}
+
+		// test
+		try {
+			myPatch.apply(appointment, patch);
+			fail();
+		} catch (IllegalArgumentException ex) {
+			assertTrue(ex.getLocalizedMessage()
+				.contains("is not a valid fhir path"));
 		}
 	}
 }
