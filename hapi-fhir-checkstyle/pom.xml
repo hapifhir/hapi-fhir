@@ -67,7 +67,7 @@
 			<activation>
 				<activeByDefault>false</activeByDefault>
 				<property>
-					<name>deployToSonatype</name>
+					<name>deployToCentral</name>
 				</property>
 			</activation>
 			<build>

@@ -507,10 +507,10 @@
 				</dependencies>
 			</plugin>
 			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<groupId>org.sonatype.central</groupId>
+				<artifactId>central-publishing-maven-plugin</artifactId>
 				<configuration>
-					<skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+					<skipPublishing>true</skipPublishing>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -548,7 +548,7 @@
 			<activation>
 				<activeByDefault>false</activeByDefault>
 				<property>
-					<name>deployToSonatype</name>
+					<name>deployToCentral</name>
 				</property>
 			</activation>
 			<build>
