@@ -1087,6 +1087,46 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
+	 * Invoked when we are about to <a href="https://smilecdr.com/docs/fhir_repository/creating_data.html#auto-create-placeholder-reference-targets">Auto-Create a Placeholder Reference</a>.
+	 * Hooks may modify/enhance the placeholder reference target that is about to be created, or
+	 * reject the creation of the resource, which generally means that the transaction will be
+	 * rejected instead (because of the invalid reference).
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetRequest - Contains details about the placeholder that is about to be created, including the source resource whose reference is being fulfilled, as well as the candidate placeholder resource that will be created.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks may return <code>void</code> (in which case the placeholder creation will proceed as normal),
+	 * an object of type
+	 * <code>ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetResponse</code>
+	 * (in which case the response object can approve or reject the creation),
+	 * and can throw exceptions (which will trigger an appropriate error message being returned
+	 * to the client).
+	 * </p>
+	 */
+	STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE(
+			"ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetResponse",
+			"ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetRequest",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+
+	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked when a Bulk Export job is being kicked off, but before any permission checks
 	 * have been done.
 	 * This hook can be used to modify or update parameters as need be before

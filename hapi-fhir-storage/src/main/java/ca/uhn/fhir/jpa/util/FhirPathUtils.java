@@ -11,6 +11,10 @@ public class FhirPathUtils {
 	public static String cleansePath(String thePath) {
 		String path = thePath;
 
+		if (path.startsWith("()")) {
+			path = path.substring(2);
+		}
+
 		// remove trailing .
 		while (path.endsWith(".")) {
 			path = path.substring(0, path.length() - 1);
@@ -20,18 +24,6 @@ public class FhirPathUtils {
 		while (path.startsWith(".")) {
 			path = path.substring(1);
 		}
-
-		// balance brackets
-		int openBrace = path.indexOf("(");
-		String remainder = path;
-		int endingIndex = openBrace == -1 ? path.length() : 0;
-		while (openBrace != -1) {
-			int closing = RandomTextUtils.findMatchingClosingBrace(openBrace, remainder);
-			endingIndex += closing + 1; // +1 because substring ending is exclusive
-			remainder = remainder.substring(closing + 1);
-			openBrace = remainder.indexOf("(");
-		}
-		path = path.substring(0, endingIndex);
 
 		return path;
 	}
