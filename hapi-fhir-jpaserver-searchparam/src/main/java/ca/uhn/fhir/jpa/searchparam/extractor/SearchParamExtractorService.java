@@ -250,7 +250,7 @@ public class SearchParamExtractorService {
 			if (nextParam.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
 				continue;
 			}
-			if (RuntimeSearchParamHelper.isSpeciallyHandledSearchParameter(nextParam)) {
+			if (RuntimeSearchParamHelper.isSpeciallyHandledSearchParameter(nextParam, myStorageSettings)) {
 				continue;
 			}
 

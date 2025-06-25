@@ -20,14 +20,17 @@
 package ca.uhn.fhir.jpa.searchparam.util;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import jakarta.annotation.Nonnull;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_CONTENT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_IN;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_LANGUAGE;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_LASTUPDATED;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_PROFILE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_SECURITY;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TEXT;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -52,13 +55,17 @@ public class RuntimeSearchParamHelper {
 	 * looking up the value using the FHIRPath expression and indexing it.
 	 */
 	@SuppressWarnings("DuplicateBranchesInSwitch")
-	public static boolean isSpeciallyHandledSearchParameter(@Nonnull RuntimeSearchParam theSearchParameter) {
+	public static boolean isSpeciallyHandledSearchParameter(
+			@Nonnull RuntimeSearchParam theSearchParameter, StorageSettings theStorageSettings) {
 		return switch (defaultString(theSearchParameter.getName())) {
 			case PARAM_ID -> true;
 			case PARAM_IN -> true;
+			case PARAM_SOURCE -> true;
 			case PARAM_CONTENT -> true;
+			case PARAM_LASTUPDATED -> true;
 			case PARAM_TEXT -> true;
-			case PARAM_PROFILE, PARAM_TAG, PARAM_SECURITY -> true;
+			case PARAM_PROFILE, PARAM_TAG, PARAM_SECURITY -> theStorageSettings.getTagStorageMode()
+					!= StorageSettings.TagStorageModeEnum.INLINE;
 			case PARAM_LANGUAGE -> false;
 			default -> false;
 		};
