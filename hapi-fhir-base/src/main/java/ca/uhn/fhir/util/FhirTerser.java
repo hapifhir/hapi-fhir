@@ -23,8 +23,6 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
-
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
