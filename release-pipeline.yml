@@ -153,7 +153,7 @@ jobs:
           inputs:
              dockerVersion: 17.09.0-ce
              releaseType: stable
-        - task: Maven@3
+        - task: Maven@4
           env:
              JAVA_HOME_11_X64: /opt/java/openjdk
           displayName: Checkstyle Build
@@ -166,7 +166,7 @@ jobs:
           inputs:
              targetType: 'inline'
              script: mkdir -p $(MAVEN_CACHE_FOLDER); pwd; ls -al $(MAVEN_CACHE_FOLDER)
-        - task: Maven@3
+        - task: Maven@4
           env:
              JAVA_HOME_11_X64: /opt/java/openjdk
           inputs:

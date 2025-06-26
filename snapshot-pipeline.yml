@@ -22,7 +22,7 @@ pool:
 # running any steps.
 variables:
 - group: GPG_VARIABLE_GROUP
-- group: SONATYPE_VARIABLE_GROUP
+- group: CENTRAL_VARIABLE_GROUP
 
 container:
     image: smilecdr/hapi-build:latest
@@ -67,9 +67,9 @@ steps:
                                     https://maven.apache.org/xsd/settings-1.0.0.xsd">
         <servers>
           <server>
-            <id>ossrh</id>
-            <username>$(SONATYPE_USERNAME)</username>
-            <password>$(SONATYPE_PASSWORD)</password>
+            <id>central</id>
+            <username>$(CENTRAL_USERNAME)</username>
+            <password>$(CENTRAL_PASSWORD)</password>
           </server>
         </servers>
         <profiles>
@@ -91,12 +91,12 @@ steps:
   # the HAPI SNAPSHOT build.
 
   # 5. Deploy SNAPSHOT build to sonatype
-  - task: Maven@3
+  - task: Maven@4
     env:
       JAVA_HOME_11_X64: /opt/java/openjdk
-    displayName: 'Deploy to Sonatype staging'
+    displayName: 'Deploy to Maven Central staging'
     inputs:
       mavenPomFile: '$(System.DefaultWorkingDirectory)/pom.xml'
       goals: deploy
-      options: '--settings $(System.DefaultWorkingDirectory)/settings.xml -P DIST -DskipTests'
+      options: '--settings $(System.DefaultWorkingDirectory)/settings.xml -P DIST -DskipTests -DdeployToCentral'
       publishJUnitResults: false

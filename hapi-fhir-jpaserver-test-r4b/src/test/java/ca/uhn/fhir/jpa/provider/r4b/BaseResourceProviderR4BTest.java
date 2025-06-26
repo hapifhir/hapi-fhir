@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
@@ -64,18 +65,18 @@ public abstract class BaseResourceProviderR4BTest extends BaseJpaR4BTest {
 		// Register a CORS filter
 		CorsConfiguration config = new CorsConfiguration();
 		CorsInterceptor corsInterceptor = new CorsInterceptor(config);
-		config.addAllowedHeader("Accept");
-		config.addAllowedHeader("Access-Control-Request-Headers");
-		config.addAllowedHeader("Access-Control-Request-Method");
+		config.addAllowedHeader(Constants.HEADER_ACCEPT);
+		config.addAllowedHeader(Constants.HEADER_CORS_REQUEST_HEADERS);
+		config.addAllowedHeader(Constants.HEADER_CORS_REQUEST_METHOD);
 		config.addAllowedHeader("Cache-Control");
-		config.addAllowedHeader("Content-Type");
-		config.addAllowedHeader("Origin");
+		config.addAllowedHeader(Constants.HEADER_CONTENT_TYPE);
+		config.addAllowedHeader(Constants.HEADER_CORS_ORIGIN);
 		config.addAllowedHeader("Prefer");
-		config.addAllowedHeader("x-fhir-starter");
-		config.addAllowedHeader("X-Requested-With");
+		config.addAllowedHeader(Constants.HEADER_X_FHIR_STARTER);
+		config.addAllowedHeader(Constants.HEADER_X_REQUESTED_WITH);
 		config.addAllowedOrigin("*");
-		config.addExposedHeader("Location");
-		config.addExposedHeader("Content-Location");
+		config.addExposedHeader(Constants.HEADER_LOCATION);
+		config.addExposedHeader(Constants.HEADER_CONTENT_LOCATION);
 		config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		s.registerInterceptor(corsInterceptor);
 

@@ -1608,7 +1608,6 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
 		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
 
-		StopWatch sw = new StopWatch();
 		ca.uhn.fhir.model.dstu2.resource.Bundle response = myClient
 			.operation()
 			.onInstance(new IdDt(pid))

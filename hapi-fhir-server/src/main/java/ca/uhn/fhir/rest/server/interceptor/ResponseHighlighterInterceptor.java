@@ -357,7 +357,7 @@ public class ResponseHighlighterInterceptor {
 		/*
 		 * It's an AJAX request, so no HTML
 		 */
-		String requestedWith = theServletRequest.getHeader("X-Requested-With");
+		String requestedWith = theServletRequest.getHeader(Constants.HEADER_X_REQUESTED_WITH);
 		if (requestedWith != null) {
 			return true;
 		}
@@ -563,13 +563,13 @@ public class ResponseHighlighterInterceptor {
 		/*
 		 * It's an AJAX request, so no HTML
 		 */
-		if (!force && isNotBlank(theServletRequest.getHeader("X-Requested-With"))) {
+		if (!force && isNotBlank(theServletRequest.getHeader(Constants.HEADER_X_REQUESTED_WITH))) {
 			return true;
 		}
 		/*
 		 * If the request has an Origin header, it is probably an AJAX request
 		 */
-		if (!force && isNotBlank(theServletRequest.getHeader(Constants.HEADER_ORIGIN))) {
+		if (!force && isNotBlank(theServletRequest.getHeader(Constants.HEADER_CORS_ORIGIN))) {
 			return true;
 		}
 

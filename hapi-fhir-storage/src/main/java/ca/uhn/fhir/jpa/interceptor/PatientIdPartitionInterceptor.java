@@ -92,7 +92,7 @@ public class PatientIdPartitionInterceptor {
 		List<RuntimeSearchParam> compartmentSps =
 				ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
 
-		if (compartmentSps.isEmpty()) {
+		if (compartmentSps.isEmpty() || resourceDef.getName().equals("Group")) {
 			return provideNonCompartmentMemberTypeResponse(theResource);
 		}
 
@@ -287,6 +287,6 @@ public class PatientIdPartitionInterceptor {
 	@SuppressWarnings("unused")
 	@Nonnull
 	protected RequestPartitionId provideNonCompartmentMemberTypeResponse(IBaseResource theResource) {
-		return RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
+		return myPartitionSettings.getDefaultRequestPartitionId();
 	}
 }
