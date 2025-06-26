@@ -210,15 +210,15 @@ The following snippet shows how to define a patch method on a server:
 
 ## Patch with History Rewrite
 
-If you wish to patch a historical version of a resource without creating a new version, this can now be done with the
-Patch operation. While this operation is not supported by the FHIR specification, it's an enhancement added to
+If you wish to patch a historical version of a resource without creating a new version, this can now be done in the
+`Patch` operation. While this operation is not supported by the FHIR specification, it's an enhancement added to
 specifically to HAPI-FHIR.
 
-In order to use this new functionality, you must set the `setUpdateWithHistoryRewriteEnabled` setting in the `StorageSettings`
+In order to use this new functionality, you must set the `myUpdateWithHistoryRewriteEnabled` setting in the `StorageSettings`
 to true.
 
 The request must include the header `X-Rewrite-History`, and should be set to true. The body of the request must include
-the desired FHIR Patch or JSONPatch. Note that transaction bundles are not yet supported.
+the desired FHIR Patch or JSON Patch. Note that transaction bundles are not yet supported.
 
 The following API request shows an example of executing a FHIR Patch that updates a Patient's birthday without incrementing
 the resource version:

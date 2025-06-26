@@ -2616,6 +2616,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * @param theResource           to be saved
 	 * @param theRequest            details of the request
 	 * @param theTransactionDetails details of the transaction
+	 * @param theRequestPartitionId the partition on which to perform the request
+	 * @param theRestOperationType  the rest operation type (update or patch)
 	 * @return the outcome of the operation
 	 */
 	DaoMethodOutcome doUpdateWithHistoryRewrite(

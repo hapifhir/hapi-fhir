@@ -116,11 +116,14 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		p.addName().setFamily(TEST_FAMILY_NAME_MODIFIED).setGiven(List.of(new StringType(TEST_GIVEN_NAME_MODIFIED)));
 		p.setId("Patient/" + id.getIdPart() + "/_history/3");
 
-		String versionBeforeUpdate = myPatientDao.read(id.toUnqualifiedVersionless()).getIdElement().getVersionIdPart();
+		Patient patientBeforeUpdate = myPatientDao.read(id.toUnqualifiedVersionless());
+		String versionBeforeUpdate = patientBeforeUpdate.getIdElement().getVersionIdPart();
+		Date lastUpdatedTimeBeforeUpdate = patientBeforeUpdate.getMeta().getLastUpdated();
 		myPatientDao.update(p, mySrd);
 
 		assertPatientNameWasModified(id.toVersionless(), "3");
 		assertResourceVersionHasNotIncremented(id, versionBeforeUpdate, resourceVersionsSizeInit);
+		assertLastUpdatedWasModifiedOnVersion(id, lastUpdatedTimeBeforeUpdate);
 	}
 
 	@Test

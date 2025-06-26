@@ -118,13 +118,13 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 				&& theRequestDetails != null
 				&& theRequestDetails.isRewriteHistory();
 
-		RequestPartitionId theRequestPartitionId = getRequestPartitionHelperService()
-				.determineReadPartitionForRequestForSearchType(theRequestDetails, getResourceName());
-
 		if (isHistoryRewrite && !theId.hasVersionIdPart()) {
 			throw new InvalidRequestException(
 					Msg.code(2717) + "Invalid resource ID for rewrite history: ID must contain a history version");
 		}
+
+		RequestPartitionId theRequestPartitionId = getRequestPartitionHelperService()
+				.determineReadPartitionForRequestForSearchType(theRequestDetails, getResourceName());
 
 		IBasePersistedResource entityToUpdate;
 		IIdType resourceId;

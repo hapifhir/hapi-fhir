@@ -1781,7 +1781,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 					throw new InvalidRequestException(Msg.code(2716)
 							+ "Invalid resource ID for rewrite history: ID must contain a history version");
 				}
-				invocation = MethodUtil.createPatchInvocation(myContext, myId.getValue(), myPatchType, myPatchBody);
+				invocation = MethodUtil.createPatchInvocation(myContext, myId, myPatchType, myPatchBody);
 				invocation.addHeader(Constants.HEADER_REWRITE_HISTORY, "true");
 			} else if (isNotBlank(mySearchUrl)) {
 				invocation = MethodUtil.createPatchInvocation(myContext, mySearchUrl, myPatchType, myPatchBody);
