@@ -91,7 +91,7 @@ steps:
   # the HAPI SNAPSHOT build.
 
   # 5. Deploy SNAPSHOT build to sonatype
-  - task: Maven@3
+  - task: Maven@4
     env:
       JAVA_HOME_11_X64: /opt/java/openjdk
     displayName: 'Deploy to Maven Central staging'
