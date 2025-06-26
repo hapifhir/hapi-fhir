@@ -227,6 +227,10 @@ public abstract class BaseParser implements IParser {
 				}
 			}
 			return reference;
+		} else {
+			if(ref.isLocal() && !theContext.getContainedResources().referenceMatchesAContainedResource(ref)) {
+				throw new DataFormatException("There is a reference that begins with #, but no resource with this ID is contained. [reference=" + ref.getIdPart() + "]");
+			}
 		}
 		if (!ref.hasResourceType() && !ref.isLocal() && theRef.getResource() != null) {
 			ref = ref.withResourceType(
