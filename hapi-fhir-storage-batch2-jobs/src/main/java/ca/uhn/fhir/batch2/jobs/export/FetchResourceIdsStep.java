@@ -33,6 +33,8 @@ import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.svcs.ISearchLimiterSvc;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
@@ -53,6 +55,9 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
+
+	@Autowired
+	private ISearchLimiterSvc mySearchLimiterSvc;
 
 	@Nonnull
 	@Override
@@ -82,7 +87,12 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		 * when we recursively fetch resource types for a given patient/group
 		 * we don't recurse for types that they did not request
 		 */
-		providerParams.setRequestedResourceTypes(params.getResourceTypes());
+		Set<String> omitted =
+				mySearchLimiterSvc.getResourcesToOmitForOperationSearches(ProviderConstants.OPERATION_EXPORT);
+		List<String> resourceTypesToFetch = params.getResourceTypes().stream()
+				.filter(r -> !omitted.contains(r))
+				.toList();
+		providerParams.setRequestedResourceTypes(resourceTypesToFetch);
 
 		int submissionCount = 0;
 		try {
@@ -91,7 +101,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 			/*
 			 * We will fetch ids for each resource type in the ResourceTypes (_type filter).
 			 */
-			for (String resourceType : params.getResourceTypes()) {
+			for (String resourceType : resourceTypesToFetch) {
 				providerParams.setResourceType(resourceType);
 
 				// filters are the filters for searching

@@ -59,8 +59,10 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.SearchConstants;
+import ca.uhn.fhir.jpa.search.builder.models.DoLoadPidsParams;
 import ca.uhn.fhir.jpa.search.builder.models.ResolvedSearchQueryExecutor;
 import ca.uhn.fhir.jpa.search.builder.models.SearchQueryProperties;
 import ca.uhn.fhir.jpa.search.builder.sql.GeneratedSql;
@@ -103,6 +105,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.svcs.ISearchLimiterSvc;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -234,6 +237,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	private IFulltextSearchSvc myFulltextSearchSvc;
 
+	private final ISearchLimiterSvc mySearchLimiterSvc;
+
 	@Autowired(required = false)
 	public void setFullTextSearch(IFulltextSearchSvc theFulltextSearchSvc) {
 		myFulltextSearchSvc = theFulltextSearchSvc;
@@ -267,10 +272,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			IIdHelperService theIdHelperService,
 			IResourceHistoryTableDao theResourceHistoryTagDao,
 			IJpaStorageResourceParser theIJpaStorageResourceParser,
+			ISearchLimiterSvc theSearchLimiterSvc,
 			Class<? extends IBaseResource> theResourceType) {
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
 		myStorageSettings = theStorageSettings;
+		mySearchLimiterSvc = theSearchLimiterSvc;
 
 		myEntityManagerFactory = theEntityManagerFactory;
 		mySqlBuilderFactory = theSqlBuilderFactory;
@@ -844,6 +851,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			List<JpaPid> thePidList,
 			List<ISearchQueryExecutor> theSearchQueryExecutors) {
 
+		// EVERYTHING
 		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(
 				myContext,
 				myStorageSettings,
@@ -893,7 +901,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
 
 			List<JpaPid> output =
-					jdbcTemplate.query(sql, args, new JpaPidRowMapper(myPartitionSettings.isPartitioningEnabled()));
+					jdbcTemplate.query(sql, new JpaPidRowMapper(myPartitionSettings.isPartitioningEnabled()), args);
 
 			// we add a search executor to fetch unlinked patients first
 			theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(output));
@@ -919,6 +927,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			queryStack3.addOrdering();
 			queryStack3.setUseAggregate(true);
 		}
+
+		Set<String> resourcesToOmit =
+				mySearchLimiterSvc.getResourcesToOmitForOperationSearches(JpaConstants.OPERATION_EVERYTHING);
+		sqlBuilder.excludeResourceTypesPredicate(resourcesToOmit);
 
 		/*
 		 * Now perform the search
@@ -1205,12 +1217,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
-	private void doLoadPids(
-			Collection<JpaPid> thePids,
-			Collection<JpaPid> theIncludedPids,
-			List<IBaseResource> theResourceListToPopulate,
-			boolean theForHistoryOperation,
-			Map<Long, Integer> thePosition) {
+	private void doLoadPids(DoLoadPidsParams theParams, List<IBaseResource> theResourceListToPopulate) {
+		Collection<JpaPid> thePids = theParams.getPids();
+		boolean theForHistoryOperation = theParams.isForHistoryOperation();
+		Map<Long, Integer> thePosition = theParams.getPosition();
+		Collection<JpaPid> theIncludedPids = theParams.getIncludedPids();
 
 		Map<JpaPid, Long> resourcePidToVersion = null;
 		for (JpaPid next : thePids) {
@@ -1431,9 +1442,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		// We only chunk because some jdbc drivers can't handle long param lists.
-		QueryChunker.chunk(
-				thePids,
-				t -> doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
+		DoLoadPidsParams params = new DoLoadPidsParams();
+		params.setParameterMap(myParams)
+				.setIncludedPids(theIncludedPids)
+				.setForHistoryOperation(theForHistoryOperation)
+				.setPosition(position);
+		QueryChunker.chunk(thePids, t -> {
+			params.setPids(t);
+			doLoadPids(params, theResourceListToPopulate);
+		});
 	}
 
 	/**
