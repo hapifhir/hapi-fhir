@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6945
+title: "Added index for `ResourceHistoryTable.sourceUri`, lost when moving the source column from HFJ_RES_VER_PROV to HFJ_RES_VER."
+
