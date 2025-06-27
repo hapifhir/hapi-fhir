@@ -186,7 +186,10 @@ import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
+import ca.uhn.fhir.replacereferences.PreviousResourceVersionRestorer;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
+import ca.uhn.fhir.replacereferences.UndoReplaceReferencesSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -999,7 +1002,8 @@ public class JpaConfig {
 			IJobCoordinator theJobCoordinator,
 			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundle,
 			Batch2TaskHelper theBatch2TaskHelper,
-			JpaStorageSettings theStorageSettings) {
+			JpaStorageSettings theStorageSettings,
+			ReplaceReferencesProvenanceSvc theProvenanceSvc) {
 		return new ReplaceReferencesSvcImpl(
 				theDaoRegistry,
 				theHapiTransactionService,
@@ -1007,12 +1011,32 @@ public class JpaConfig {
 				theJobCoordinator,
 				theReplaceReferencesPatchBundle,
 				theBatch2TaskHelper,
-				theStorageSettings);
+				theStorageSettings,
+				theProvenanceSvc);
+	}
+
+	@Bean
+	public ReplaceReferencesProvenanceSvc replaceReferencesProvenanceSvc(DaoRegistry theDaoRegistry) {
+		return new ReplaceReferencesProvenanceSvc(theDaoRegistry);
 	}
 
 	@Bean
 	public ReplaceReferencesPatchBundleSvc replaceReferencesPatchBundleSvc(DaoRegistry theDaoRegistry) {
 		return new ReplaceReferencesPatchBundleSvc(theDaoRegistry);
+	}
+
+	@Bean
+	public PreviousResourceVersionRestorer resourceVersionRestorer(
+			DaoRegistry theDaoRegistry, HapiTransactionService theHapiTransactionService) {
+		return new PreviousResourceVersionRestorer(theDaoRegistry, theHapiTransactionService);
+	}
+
+	@Bean
+	public UndoReplaceReferencesSvc getUndoReplaceReferencesSvc(
+			DaoRegistry theDaoRegistry,
+			ReplaceReferencesProvenanceSvc theProvenanceSvc,
+			PreviousResourceVersionRestorer theResourceVersionRestorer) {
+		return new UndoReplaceReferencesSvc(theDaoRegistry, theProvenanceSvc, theResourceVersionRestorer);
 	}
 
 	@Bean
