@@ -48,7 +48,7 @@ public class RuleImplUpdateHistoryRewrite extends BaseRule {
 		if (myAllRequests) {
 			if (theRequestDetails.getId() != null
 					&& theRequestDetails.getId().hasVersionIdPart()
-					&& theOperation == RestOperationTypeEnum.UPDATE) {
+					&& (theOperation == RestOperationTypeEnum.UPDATE || theOperation == RestOperationTypeEnum.PATCH)) {
 				return newVerdict(
 						theOperation,
 						theRequestDetails,
