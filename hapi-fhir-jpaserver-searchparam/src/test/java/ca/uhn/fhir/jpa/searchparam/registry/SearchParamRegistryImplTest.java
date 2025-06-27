@@ -30,6 +30,9 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -42,6 +45,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,6 +94,9 @@ public class SearchParamRegistryImplTest {
 		ourResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(ourEntities);
 		ourBuiltinPatientSearchParamCount = ReadOnlySearchParamCache.fromFhirContext(ourFhirContext, new SearchParameterCanonicalizer(ourFhirContext)).getSearchParamMap("Patient").size();
 	}
+
+	@RegisterExtension
+	private LogbackTestExtension myLogbackExtension = new LogbackTestExtension(SearchParamRegistryImpl.class);
 
 	@Autowired
 	SearchParamRegistryImpl mySearchParamRegistry;
@@ -393,6 +400,37 @@ public class SearchParamRegistryImplTest {
 		// Verify
 		assertNotNull(textSp);
 		assertEquals("foo", textSp.getName());
+	}
+
+	@Test
+	public void testManualSearchParameterWithIncorrectUrlDoesntReplaceExisting() {
+		// Setup
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/Individual-address");
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/individual-address");
+		sp.setName("foo");
+		sp.setCode("foo");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase("Resource");
+		sp.setExpression("Encounter.extension('http://foo')");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(sp));
+
+		// Test
+		myLogbackExtension.clearEvents();
+		mySearchParamRegistry.forceRefresh();
+		RuntimeSearchParam fooSp = mySearchParamRegistry.getActiveSearchParam("Patient", "foo", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+		RuntimeSearchParam addressSp = mySearchParamRegistry.getActiveSearchParam("Patient", "address", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+
+		// Verify
+		assertNotNull(fooSp);
+		assertNotNull(addressSp);
+		assertEquals("foo", fooSp.getName());
+		assertEquals("address", addressSp.getName());
+
+		ILoggingEvent warning = myLogbackExtension.getLogEvents(t->t.getFormattedMessage().startsWith("Existing SearchParameter with URL")).get(0);
+		assertEquals("Existing SearchParameter with URL[http://hl7.org/fhir/SearchParameter/individual-address] and name[address] doesn't match name[foo] found on SearchParameter: SearchParameter/Individual-address", warning.getFormattedMessage());
+		assertEquals(Level.WARN, warning.getLevel());
 	}
 
 	@ParameterizedTest

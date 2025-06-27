@@ -4,8 +4,8 @@ HAPI FHIR supports additional indexing when an appropriate indexer is configured
 
 With FullText Indexing enabled, the following Search Parameters may be used:
 
-* `_content` &ndash; Supports FullText searching across the textual components in a FHIR resource (i.e. the values of any **String** datatypes found within the resource).
-* `_text` &ndash; Supports FullText searching across the HTML narrative of the results.
+* `_content` &ndash; Supports Full-Text searching across the textual components in a FHIR resource (i.e. the values of any **String** datatypes found within the resource).
+* `_text` &ndash; Supports Full-Text searching across the HTML narrative of the results.
 
 # Performing Fulltext Search in Lucene/Elasticsearch
 
@@ -165,7 +165,7 @@ These pointcuts use an object of type [FullTextExtractionRequest](/hapi-fhir/api
 
 ## Example
 
-The following example shows an interceptor which enables fulltext indexing only for specific resources, and controls which parts of resources are indexed:
+The following example shows an interceptor which enables full-text indexing only for specific resources, and controls which parts of resources are indexed:
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/interceptor/FullTextSelectiveIndexingInterceptor.java|interceptor}}

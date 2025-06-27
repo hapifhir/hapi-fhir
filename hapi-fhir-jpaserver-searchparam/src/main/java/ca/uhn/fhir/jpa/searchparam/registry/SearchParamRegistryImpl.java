@@ -71,6 +71,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.isAllowedForContext;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchParamRegistryImpl
 		implements ISearchParamRegistry, IResourceChangeListener, ISearchParamRegistryController {
@@ -425,9 +426,13 @@ public class SearchParamRegistryImpl
 		String url = runtimeSp.getUri();
 		RuntimeSearchParam existingParam = theSearchParams.getByUrl(url);
 		if (existingParam != null) {
-			Set<String> expandedBases = expandBaseList(existingParam.getBase());
-			for (String base : expandedBases) {
-				theSearchParams.remove(base, existingParam.getName());
+			if (isNotBlank(existingParam.getName()) && !existingParam.getName().equals(runtimeSp.getName())) {
+				ourLog.warn("Existing SearchParameter with URL[{}] and name[{}] doesn't match name[{}] found on SearchParameter: {}", url, existingParam.getName(), runtimeSp.getName(), runtimeSp.getId());
+			} else {
+				Set<String> expandedBases = expandBaseList(existingParam.getBase());
+				for (String base : expandedBases) {
+					theSearchParams.remove(base, existingParam.getName());
+				}
 			}
 		}
 
