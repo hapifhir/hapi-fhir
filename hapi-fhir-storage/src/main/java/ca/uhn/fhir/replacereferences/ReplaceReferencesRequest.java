@@ -21,9 +21,12 @@ package ca.uhn.fhir.replacereferences;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.util.List;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID;
@@ -46,15 +49,34 @@ public class ReplaceReferencesRequest {
 
 	public final RequestPartitionId partitionId;
 
+	/**
+	 * Indicates whether a Provenance resource should be created after the operation.
+	 * This flag is not exposed to FHIR clients invoking the $hapi.fhir.replace-references
+	 * operation; it is used internally. It is used to avoid creating a
+	 * Provenance when the $replace-references is executed as part of another
+	 * operation (such as $merge), and the Provenance needs to be created after
+	 * the outer operation completes.
+	 */
+	public final boolean createProvenance;
+
+	/**
+	 * The list of agents to be used in the Provenance resource.
+	 */
+	public final List<IProvenanceAgent> provenanceAgents;
+
 	public ReplaceReferencesRequest(
 			@Nonnull IIdType theSourceId,
 			@Nonnull IIdType theTargetId,
 			int theResourceLimit,
-			RequestPartitionId thePartitionId) {
+			RequestPartitionId thePartitionId,
+			boolean theCreateProvenance,
+			List<IProvenanceAgent> theProvenanceAgents) {
 		sourceId = theSourceId.toUnqualifiedVersionless();
 		targetId = theTargetId.toUnqualifiedVersionless();
 		resourceLimit = theResourceLimit;
 		partitionId = thePartitionId;
+		createProvenance = theCreateProvenance;
+		provenanceAgents = theProvenanceAgents;
 	}
 
 	public void validateOrThrowInvalidParameterException() {

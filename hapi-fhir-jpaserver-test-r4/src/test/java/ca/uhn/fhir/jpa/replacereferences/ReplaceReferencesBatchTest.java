@@ -41,11 +41,18 @@ public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
 	public void before() throws Exception {
 		super.before();
 
+		// keep the version on Provenance.target fields to verify that Provenance resources were saved
+		// with versioned target references
+		myFhirContext.getParserOptions()
+			.setDontStripVersionsFromReferencesAtPaths("Provenance.target");
+
 		myTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
 		myTestHelper.beforeEach();
 
 		mySrd.setRequestPartitionId(RequestPartitionId.allPartitions());
 	}
+
+
 
 	@Test
 	public void testHappyPath() {
@@ -54,7 +61,10 @@ public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
 		ReplaceReferencesJobParameters jobParams = new ReplaceReferencesJobParameters();
 		jobParams.setSourceId(new FhirIdJson(myTestHelper.getSourcePatientId()));
 		jobParams.setTargetId(new FhirIdJson(myTestHelper.getTargetPatientId()));
+		jobParams.setSourceVersionForProvenance("1");
+		jobParams.setTargetVersionForProvenance("2");
 		jobParams.setTaskId(taskId);
+		jobParams.setCreateProvenance(true);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest(JOB_REPLACE_REFERENCES, jobParams);
 		Batch2JobStartResponse jobStartResponse = myJobCoordinator.startInstance(mySrd, request);
@@ -65,6 +75,7 @@ public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
 			"Observation", "Encounter", "CarePlan"));
 
 		myTestHelper.assertAllReferencesUpdated();
+		myTestHelper.assertReplaceReferencesProvenance("1", "2", null);
 	}
 
 

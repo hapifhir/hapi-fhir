@@ -3208,6 +3208,23 @@ public enum Pointcut implements IPointcut {
 	 */
 	BATCH2_CHUNK_PROCESS_FILTER(
 			IInterceptorFilterHook.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.batch2.model.WorkChunk"),
+
+	/**
+	 * <b>Provenance Agents Pointcut:</b>
+	 * This is a pointcut to retrieve data for populating the agent element of a Provenance resource that needs to be created
+	 * as a result of a request, such as a $merge or a $hapi.fhir.replace-references operation.
+	 * <p> Hooks should accept the following parameter:</p>
+	 * <ul>
+	 *     <li>ca.uhn.fhir.jpa.model.ProvenanceAgentPointcutParameters - an object containing the parameters for the hook, including:</li>
+	 *     <ul>
+	 *         <li>ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is being processed.</li>
+	 *         <li>List of ca.uhn.fhir.model.api.IProvenanceAgent - This is an output parameter; the hook should add the agent information to this list</li>
+	 *     </ul>
+	 * </ul>
+	 * Hooks should return <code>void</code> and use the parameter object to add the agent information.
+	 */
+	PROVENANCE_AGENTS(void.class, "ca.uhn.fhir.jpa.model.IProvenanceAgentsPointcutParameter"),
+
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
 	 * removed at any time.

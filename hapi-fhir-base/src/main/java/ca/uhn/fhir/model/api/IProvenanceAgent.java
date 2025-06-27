@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
@@ -17,31 +17,14 @@
  * limitations under the License.
  * #L%
  */
-package org.hl7.fhir.instance.model.api;
+package ca.uhn.fhir.model.api;
 
-public interface IBaseReference extends ICompositeType {
+import org.hl7.fhir.instance.model.api.IBaseReference;
 
-	IBaseResource getResource();
+import java.io.Serializable;
 
-	IBaseReference setResource(IBaseResource theResource);
+public interface IProvenanceAgent extends Serializable {
+	IBaseReference getWho();
 
-	IIdType getReferenceElement();
-
-	IBaseReference setReference(String theReference);
-
-	IBase setDisplay(String theValue);
-
-	IPrimitiveType<String> getDisplayElement();
-
-	default boolean hasIdentifier() {
-		return false;
-	}
-
-	default IBaseReference setIdentifier(ICompositeType theIdentifier) {
-		throw new UnsupportedOperationException("This reference does not support identifiers");
-	}
-
-	default ICompositeType getIdentifier() {
-		return null;
-	}
+	IBaseReference getOnBehalfOf();
 }
