@@ -703,14 +703,14 @@ public class SearchNarrowingInterceptor {
 		List<AllowedCodeInValueSet> retVal = getPostFilteringListOrNull(theRequestDetails);
 		if (retVal == null) {
 			retVal = new ArrayList<>();
-			theRequestDetails.setAttribute(POST_FILTERING_LIST_ATTRIBUTE_NAME, retVal);
+			theRequestDetails.getUserData().put(POST_FILTERING_LIST_ATTRIBUTE_NAME, retVal);
 		}
 		return retVal;
 	}
 
 	@SuppressWarnings("unchecked")
 	static List<AllowedCodeInValueSet> getPostFilteringListOrNull(RequestDetails theRequestDetails) {
-		return (List<AllowedCodeInValueSet>) theRequestDetails.getAttribute(POST_FILTERING_LIST_ATTRIBUTE_NAME);
+		return (List<AllowedCodeInValueSet>) theRequestDetails.getUserData().get(POST_FILTERING_LIST_ATTRIBUTE_NAME);
 	}
 
 	private class BundleEntryUrlProcessor implements Consumer<ModifiableBundleEntry> {
