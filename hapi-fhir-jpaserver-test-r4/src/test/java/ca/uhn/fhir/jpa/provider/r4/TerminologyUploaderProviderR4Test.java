@@ -363,6 +363,8 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		myStorageSettings.setHibernateSearchIndexSearchParams(true);
 		myStorageSettings.setStoreResourceInHSearchIndex(true);
 
+		mySearchParamRegistry.forceRefresh();
+
 		//Given: We have a non-existent code system
 		CodeSystem codeSystem = new CodeSystem();
 		myClient.create().resource(codeSystem).execute();

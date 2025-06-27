@@ -237,12 +237,13 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		int count = 10;
 
 		boolean presetFilterParameterEnabled = myStorageSettings.isFilterParameterEnabled();
-		boolean presetAdvancedHSearchIndexing = myStorageSettings.isAdvancedHSearchIndexing();
+		boolean presetAdvancedHSearchIndexing = myStorageSettings.isHibernateSearchIndexSearchParams();
 
 		try {
 			// fullTextSearch means Advanced Hibernate Search
 			myStorageSettings.setFilterParameterEnabled(true);
-			myStorageSettings.setAdvancedHSearchIndexing(true);
+			myStorageSettings.setHibernateSearchIndexSearchParams(true);
+			mySearchParamRegistry.forceRefresh();
 
 			// create custom search parameters - the _filter and _include are needed
 			{
@@ -401,7 +402,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		} finally {
 			// reset values
 			myStorageSettings.setFilterParameterEnabled(presetFilterParameterEnabled);
-			myStorageSettings.setAdvancedHSearchIndexing(presetAdvancedHSearchIndexing);
+			myStorageSettings.setHibernateSearchIndexSearchParams(presetAdvancedHSearchIndexing);
 		}
 	}
 

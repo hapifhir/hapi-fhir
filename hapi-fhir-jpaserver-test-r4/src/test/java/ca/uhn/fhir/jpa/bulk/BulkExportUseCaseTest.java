@@ -882,7 +882,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			// Enable Lucene indexing
 			myStorageSettings.setAllowContainsSearches(true);
-			myStorageSettings.setAdvancedHSearchIndexing(true);
+			myStorageSettings.setHibernateSearchIndexSearchParams(true);
+			mySearchParamRegistry.forceRefresh();
 
 			Patient patient = new Patient();
 			patient.setId("A1");

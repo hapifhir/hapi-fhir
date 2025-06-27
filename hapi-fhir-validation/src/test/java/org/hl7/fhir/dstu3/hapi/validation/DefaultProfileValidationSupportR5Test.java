@@ -11,11 +11,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class DefaultProfileValidationSupportR5Test extends BaseValidationTestWithInlineMocks {
 
-	private static FhirContext ourCtx = FhirContext.forR5Cached();
-	private DefaultProfileValidationSupport mySvc = new DefaultProfileValidationSupport(ourCtx);
+	private final FhirContext myCtx = FhirContext.forR5Cached();
+	private final DefaultProfileValidationSupport mySvc = new DefaultProfileValidationSupport(myCtx);
 
 	@Test
 	public void testNoDuplicates() {
@@ -25,6 +27,16 @@ public class DefaultProfileValidationSupportR5Test extends BaseValidationTestWit
 				.filter(t->t.getUrl().equals("http://hl7.org/fhir/StructureDefinition/language"))
 				.collect(Collectors.toList());
 		assertThat(allSds).hasSize(1);
+	}
+
+	@Test
+	public void testFetchAllSearchParams() {
+		// Test
+		List<IBaseResource> allSps = mySvc.fetchAllSearchParameters();
+
+		// Verify
+		assertNotNull(allSps);
+		assertEquals(1243, allSps.size());
 	}
 
 }

@@ -90,8 +90,9 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 		assertTrue((cache instanceof ResourceChangeListenerCache));
 
 		// set the HSearchIndexing
-		boolean useAdvancedHSearch = myStorageSettings.isAdvancedHSearchIndexing();
-		myStorageSettings.setAdvancedHSearchIndexing(true);
+		boolean useAdvancedHSearch = myStorageSettings.isHibernateSearchIndexSearchParams();
+		myStorageSettings.setHibernateSearchIndexSearchParams(true);
+		mySearchParamRegistry.forceRefresh();
 
 		// so they will be forced to be refreshed
 		mySearchParamRegistry.setActiveSearchParams(null);

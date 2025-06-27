@@ -61,6 +61,8 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		myStorageSettings.setAllowContainsSearches(true);
 		myStorageSettings.setHibernateSearchIndexFullText(true);
 		myStorageSettings.setHibernateSearchIndexSearchParams(false);
+
+		mySearchParamRegistry.forceRefresh();
 	}
 
 	/**

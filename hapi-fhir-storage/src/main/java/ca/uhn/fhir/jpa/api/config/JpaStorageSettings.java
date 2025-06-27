@@ -91,10 +91,6 @@ public class JpaStorageSettings extends StorageSettings {
 	public static final boolean DEFAULT_ENABLE_TASKS = true;
 
 	public static final int DEFAULT_MAXIMUM_INCLUDES_TO_LOAD_PER_PAGE = 1000;
-	/**
-	 * @since 5.5.0
-	 */
-	public static final TagStorageModeEnum DEFAULT_TAG_STORAGE_MODE = TagStorageModeEnum.VERSIONED;
 
 	public static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
 	public static final int DEFAULT_BUNDLE_BATCH_QUEUE_CAPACITY = 200;
@@ -174,7 +170,6 @@ public class JpaStorageSettings extends StorageSettings {
 	private boolean myEnforceReferentialIntegrityOnWrite = true;
 	private SearchTotalModeEnum myDefaultTotalMode = null;
 	private int myEverythingIncludesFetchPageSize = 50;
-	private TagStorageModeEnum myTagStorageMode = DEFAULT_TAG_STORAGE_MODE;
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -296,14 +291,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 * @since 5.6.0
 	 */
 	private boolean myHibernateSearchIndexSearchParams = false;
-
-	/**
-	 * Activates hibernate search indexing of fulltext data from resources, which
-	 * is used to support the {@literal _text} and {@literal _content} Search Parameters.
-	 *
-	 * @since 8.0.0
-	 */
-	private boolean myHibernateSearchIndexFullText = false;
 
 	/**
 	 * @since 5.7.0
@@ -504,26 +491,6 @@ public class JpaStorageSettings extends StorageSettings {
 	@Deprecated
 	public void setInlineResourceTextBelowSize(int theInlineResourceTextBelowSize) {
 		// ignored
-	}
-
-	/**
-	 * Sets the tag storage mode for the server. Default is {@link TagStorageModeEnum#VERSIONED}.
-	 *
-	 * @since 5.5.0
-	 */
-	@Nonnull
-	public TagStorageModeEnum getTagStorageMode() {
-		return myTagStorageMode;
-	}
-
-	/**
-	 * Sets the tag storage mode for the server. Default is {@link TagStorageModeEnum#VERSIONED}.
-	 *
-	 * @since 5.5.0
-	 */
-	public void setTagStorageMode(@Nonnull TagStorageModeEnum theTagStorageMode) {
-		Validate.notNull(theTagStorageMode, "theTagStorageMode must not be null");
-		myTagStorageMode = theTagStorageMode;
 	}
 
 	/**
@@ -2295,27 +2262,6 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
-	 * Is hibernate search indexing of fulltext data from resources enabled?
-	 * This setting activates hibernate search indexing of fulltext data from resources, which
-	 * is used to support the {@literal _text} and {@literal _content} Search Parameters.
-	 *
-	 * @since 8.0.0
-	 */
-	public boolean isHibernateSearchIndexFullText() {
-		return myHibernateSearchIndexFullText;
-	}
-
-	/**
-	 * Activates hibernate search indexing of fulltext data from resources, which
-	 * is used to support the {@literal _text} and {@literal _content} Search Parameters.
-	 *
-	 * @since 8.0.0
-	 */
-	public void setHibernateSearchIndexFullText(boolean theHibernateSearchIndexFullText) {
-		myHibernateSearchIndexFullText = theHibernateSearchIndexFullText;
-	}
-
-	/**
 	 * Is storing of Resource in HSearch index enabled?
 	 *
 	 * @since 5.7.0
@@ -2825,25 +2771,5 @@ public class JpaStorageSettings extends StorageSettings {
 		 * </p>
 		 */
 		ANY
-	}
-
-	public enum TagStorageModeEnum {
-
-		/**
-		 * A separate set of tags is stored for each resource version
-		 */
-		VERSIONED,
-
-		/**
-		 * A single set of tags is shared by all resource versions
-		 */
-		NON_VERSIONED,
-
-		/**
-		 * Tags are stored directly in the resource body (in the {@literal ResourceHistoryTable}
-		 * entry for the resource, meaning that they are not indexed separately, and are versioned with the rest
-		 * of the resource.
-		 */
-		INLINE
 	}
 }

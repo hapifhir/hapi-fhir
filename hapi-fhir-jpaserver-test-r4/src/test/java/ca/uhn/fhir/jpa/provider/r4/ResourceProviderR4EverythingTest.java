@@ -203,6 +203,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 	@Test
 	public void testEverythingInstanceWithContentFilter() {
 		myStorageSettings.setHibernateSearchIndexFullText(true);
+		mySearchParamRegistry.forceRefresh();
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("Everything").addGiven("Arthur");
@@ -982,6 +983,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 	@Test
 	public void testFulltextEverythingWithIdAndContent() throws IOException {
 		myStorageSettings.setHibernateSearchIndexFullText(true);
+		mySearchParamRegistry.forceRefresh();
 
 		Patient p = new Patient();
 		p.setId("FOO");

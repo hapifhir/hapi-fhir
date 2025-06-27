@@ -41,6 +41,8 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 
 		myStorageSettings.setHibernateSearchIndexFullText(true);
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
+
+		mySearchParamRegistry.forceRefresh();
 	}
 
 	@Test

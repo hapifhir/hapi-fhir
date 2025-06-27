@@ -37,6 +37,8 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		super.before();
 
 		myStorageSettings.setHibernateSearchIndexFullText(true);
+
+		mySearchParamRegistry.forceRefresh();
 	}
 
 	@Test

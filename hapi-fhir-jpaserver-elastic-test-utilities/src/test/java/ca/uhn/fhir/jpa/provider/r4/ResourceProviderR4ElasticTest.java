@@ -54,8 +54,10 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 	@BeforeEach
 	public void beforeEach() {
 		myStorageSettings.setLastNEnabled(true);
-		myStorageSettings.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setHibernateSearchIndexSearchParams(true);
 		myStorageSettings.setStoreResourceInHSearchIndex(true);
+
+		mySearchParamRegistry.forceRefresh();
 	}
 
 	@AfterEach

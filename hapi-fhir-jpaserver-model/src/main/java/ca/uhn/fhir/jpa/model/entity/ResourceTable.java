@@ -31,6 +31,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
@@ -85,6 +86,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
@@ -999,28 +1001,43 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 		return getId();
 	}
 
+	/**
+	 * Returns a newly created IdDt containing the resource ID, or <code>null</code> if
+	 * the ID is not yet known (e.g. if this entity will have a server-assigned ID which
+	 * has not yet been assigned).
+	 */
 	@Override
 	public IdDt getIdDt() {
-		IdDt retVal = new IdDt();
-		populateId(retVal);
-		return retVal;
+		return createAndPopulateIdOrReturnNull(IdDt::new);
 	}
 
+	/**
+	 * Returns a newly created IdType containing the resource ID, or <code>null</code> if
+	 * the ID is not yet known (e.g. if this entity will have a server-assigned ID which
+	 * has not yet been assigned).
+	 */
 	public IIdType getIdType(FhirContext theContext) {
-		IIdType retVal = theContext.getVersion().newIdType();
-		populateId(retVal);
-		return retVal;
+		return createAndPopulateIdOrReturnNull(() -> theContext.getVersion().newIdType());
 	}
 
-	private void populateId(IIdType retVal) {
+	/**
+	 * @param theNewIdInstanceSupplier Creates a new instance of the appropriate ID type
+	 */
+	@Nullable
+	private <T extends IIdType> T createAndPopulateIdOrReturnNull(Supplier<T> theNewIdInstanceSupplier) {
 		String resourceId;
 		if (myFhirId != null && !myFhirId.isEmpty()) {
 			resourceId = myFhirId;
 		} else {
 			Long id = getResourceId().getId();
+			if (id == null) {
+				return null;
+			}
 			resourceId = Long.toString(id);
 		}
+		T retVal = theNewIdInstanceSupplier.get();
 		retVal.setValue(getResourceType() + '/' + resourceId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		return retVal;
 	}
 
 	public String getCreatedByMatchUrl() {

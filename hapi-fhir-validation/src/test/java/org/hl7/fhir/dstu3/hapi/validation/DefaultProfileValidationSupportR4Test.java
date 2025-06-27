@@ -12,15 +12,18 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DefaultProfileValidationSupportR4Test extends BaseValidationTestWithInlineMocks {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DefaultProfileValidationSupportR4Test.class);
-	private static FhirContext ourCtx = FhirContext.forR4Cached();
-	private DefaultProfileValidationSupport mySvc = new DefaultProfileValidationSupport(ourCtx);
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+	private final DefaultProfileValidationSupport mySvc = new DefaultProfileValidationSupport(ourCtx);
 
 	@Test
 	public void testGetStructureDefinitionsWithRelativeUrls() {
@@ -58,8 +61,17 @@ public class DefaultProfileValidationSupportR4Test extends BaseValidationTestWit
 
 		ValidationResult result = val.validateWithResult(address);
 		ourLog.info("Validation: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
-		assertEquals(true, result.isSuccessful());
+		assertTrue(result.isSuccessful());
 	}
 
+	@Test
+	public void testFetchAllSearchParams() {
+		// Test
+		List<IBaseResource> allSps = mySvc.fetchAllSearchParameters();
+
+		// Verify
+		assertNotNull(allSps);
+		assertEquals(1375, allSps.size());
+	}
 
 }

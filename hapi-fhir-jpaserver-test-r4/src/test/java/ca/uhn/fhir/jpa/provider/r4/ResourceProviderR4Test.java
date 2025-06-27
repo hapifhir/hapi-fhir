@@ -1282,12 +1282,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String nowStr = dt.getValueAsString();
 
 		boolean storeResourceInHSearch = myStorageSettings.isStoreResourceInHSearchIndex();
-		boolean advancedHSearch = myStorageSettings.isAdvancedHSearchIndexing();
+		boolean advancedHSearch = myStorageSettings.isHibernateSearchIndexSearchParams();
 
 		try {
 			// use full text search
 			myStorageSettings.setStoreResourceInHSearchIndex(true);
-			myStorageSettings.setAdvancedHSearchIndexing(true);
+			myStorageSettings.setHibernateSearchIndexSearchParams(true);
+			mySearchParamRegistry.forceRefresh();
 
 			// test
 			Bundle b = myClient.search()
@@ -2207,6 +2208,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testEmptySearch() {
 		myStorageSettings.setHibernateSearchIndexFullText(true);
+		mySearchParamRegistry.forceRefresh();
 
 		Bundle responseBundle;
 
@@ -2311,6 +2313,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testFullTextSearch() throws Exception {
 		myStorageSettings.setHibernateSearchIndexFullText(true);
+		mySearchParamRegistry.forceRefresh();
 
 		IParser parser = myFhirContext.newJsonParser();
 
@@ -2327,7 +2330,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 		obs2.setId(id2);
 
-		myStorageSettings.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setHibernateSearchIndexSearchParams(true);
+		mySearchParamRegistry.forceRefresh();
 
 		HttpGet get = new HttpGet(myServerBase + "/Observation?_content=systolic&_pretty=true");
 		get.addHeader("Content-Type", "application/json");
@@ -2346,6 +2350,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testFulltextSearchWithIdAndContent() throws IOException {
 		myStorageSettings.setHibernateSearchIndexFullText(true);
+		mySearchParamRegistry.forceRefresh();
 
 		Patient p = new Patient();
 		p.setId("FOO");
@@ -5907,7 +5912,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testCreateResourcesWithAdvancedHSearchIndexingAndIndexMissingFieldsEnableSucceeds() {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
-		myStorageSettings.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setHibernateSearchIndexSearchParams(true);
+		mySearchParamRegistry.forceRefresh();
+
 		String identifierValue = "someValue";
 		String searchPatientURIWithMissingBirthdate = "Patient?birthdate:missing=true";
 		String searchObsURIWithMissingValueQuantity = "Observation?value-quantity:missing=true";

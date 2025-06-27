@@ -43,7 +43,9 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.searchparam.util.RuntimeSearchParamHelper;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -110,7 +112,7 @@ public class SearchParamExtractorService {
 	}
 
 	/**
-	 * This method is responsible for scanning a resource for all of the search parameter instances.
+	 * This method is responsible for scanning a resource for all the search parameter instances.
 	 * I.e. for all search parameters defined for
 	 * a given resource type, it extracts the associated indexes and populates
 	 * {@literal theParams}.
@@ -244,7 +246,17 @@ public class SearchParamExtractorService {
 
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(
 				entity.getResourceType(), ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
-		activeSearchParams.getReferenceSearchParamNames().forEach(key -> retval.putIfAbsent(key, Boolean.FALSE));
+		for (RuntimeSearchParam nextParam : activeSearchParams.values()) {
+			if (nextParam.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
+				continue;
+			}
+			if (RuntimeSearchParamHelper.isSpeciallyHandledSearchParameter(nextParam, myStorageSettings)) {
+				continue;
+			}
+
+			retval.putIfAbsent(nextParam.getName(), Boolean.FALSE);
+		}
+
 		return retval;
 	}
 

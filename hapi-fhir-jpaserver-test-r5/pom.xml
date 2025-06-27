@@ -59,6 +59,18 @@
 			<artifactId>jsqlparser</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-docs</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>org.hl7.fhir.dstu2016may</artifactId>
+			<version>6.5.18</version>
+			<scope>compile</scope>
+		</dependency>
 
 	</dependencies>
 

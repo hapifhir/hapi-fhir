@@ -34,12 +34,15 @@ public class ResourceProviderLanguageParamR5Test extends BaseResourceProviderR5T
 		List<String> foundResources;
 		Bundle result;
 
+		logAllTokenIndexes();
+		myCaptureQueriesListener.clear();
 		result = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(new TokenClientParam(Constants.PARAM_LANGUAGE).exactly().code("en"))
 			.returnBundle(Bundle.class)
 			.execute();
+		myCaptureQueriesListener.logSelectQueries();
 
 		foundResources = toUnqualifiedVersionlessIdValues(result);
 		assertThat(foundResources).contains(patId.getValue());
