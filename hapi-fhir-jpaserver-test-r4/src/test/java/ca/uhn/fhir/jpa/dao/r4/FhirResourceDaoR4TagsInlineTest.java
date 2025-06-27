@@ -161,7 +161,7 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 
 	private void validatePatientSearchResultsForInlineTags(Bundle outcome) {
 		Patient patient;
-		patient = (Patient) outcome.getEntry().get(9).getResource();
+		patient = (Patient) outcome.getEntry().get(0).getResource();
 		assertThat(toProfiles(patient)).as(toProfiles(patient).toString()).containsExactly("http://profile1");
 		assertThat(toTags(patient)).as(toTags(patient).toString()).containsExactly("http://tag1|vtag1|dtag1");
 		assertThat(toSecurityLabels(patient)).as(toSecurityLabels(patient).toString()).containsExactly("http://sec1|vsec1|dsec1");
