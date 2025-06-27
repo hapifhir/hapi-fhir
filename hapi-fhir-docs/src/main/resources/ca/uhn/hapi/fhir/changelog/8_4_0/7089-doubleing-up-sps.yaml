@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 7089
+title: "A regression was introduced where Resource Providers would add duplicates copies of the `_tag`, `_profile`, and `_security` search parameters to the resulting search. While the data returned was still correct, this was a performance regression, and has been corrected."
