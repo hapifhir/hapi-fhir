@@ -543,18 +543,18 @@ public class SearchQueryBuilder {
 			sql = sql.substring(0, idx - 1) + "?" + sql.substring(endIdx + 1);
 		}
 
-		Integer maxResultsToFetch = theMaxResultsToFetch;
-		Integer offset = theOffset;
-		if (offset != null && offset == 0) {
-			offset = null;
-		}
-		if (maxResultsToFetch != null || offset != null) {
-
-			maxResultsToFetch = defaultIfNull(maxResultsToFetch, 10000);
-			String selectedResourceIdColumn = mySelectedResourceIdColumn.getColumnNameSQL();
-
-			sql = applyLimitToSql(myDialect, offset, maxResultsToFetch, sql, selectedResourceIdColumn, bindVariables);
-		}
+//		Integer maxResultsToFetch = theMaxResultsToFetch;
+//		Integer offset = theOffset;
+//		if (offset != null && offset == 0) {
+//			offset = null;
+//		}
+//		if (maxResultsToFetch != null || offset != null) {
+//
+//			maxResultsToFetch = defaultIfNull(maxResultsToFetch, 10000);
+//			String selectedResourceIdColumn = mySelectedResourceIdColumn.getColumnNameSQL();
+//
+//			sql = applyLimitToSql(myDialect, offset, maxResultsToFetch, sql, selectedResourceIdColumn, bindVariables);
+//		}
 
 		return new GeneratedSql(myMatchNothing, sql, bindVariables);
 	}

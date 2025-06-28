@@ -266,6 +266,7 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 		int times = org.apache.commons.lang3.StringUtils.countMatches(sql, "HFJ_SPIDX_TOKEN");
 		assertEquals(3, times);
 
+		assertThat(sql).doesNotContainIgnoringCase("fetch");
 	}
 
 
