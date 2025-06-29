@@ -43,7 +43,6 @@ import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
@@ -177,6 +176,8 @@ public class ExpandResourceAndWriteBinaryStep
 		ArrayListMultimap<String, TypedPidJson> typeToIds = ArrayListMultimap.create();
 		theIds.getIds().forEach(t -> typeToIds.put(t.getResourceType(), t));
 
+		final int maxResourcesPerBatches = myStorageSettings.getBulkExportFileMaximumCapacity();
+
 		for (String resourceType : typeToIds.keySet()) {
 
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
@@ -185,7 +186,7 @@ public class ExpandResourceAndWriteBinaryStep
 
 				// Load in batches in order to avoid having too many PIDs go into a
 				// single SQ statement at once
-				int batchSize = Math.min(500, allIds.size());
+				int batchSize = Math.min(maxResourcesPerBatches, allIds.size());
 
 				Set<IResourcePersistentId> nextBatchOfPids = allIds.subList(0, batchSize).stream()
 						.map(t -> myIdHelperService.newPidFromStringIdAndResourceName(
