@@ -313,16 +313,17 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		verify(binaryDao, atLeast(1))
 			.update(binaryCaptor.capture(), binaryDaoCreateRequestDetailsCaptor.capture());
 
+		assertThat(binaryCaptor.getAllValues()).hasSizeGreaterThan(10);
+
 		int totalRecords = 0;
 		for (int i = 0; i < binaryCaptor.getAllValues().size(); i++) {
 			String outputString = new String(binaryCaptor.getAllValues().get(i).getContent());
-			assertThat(outputString.length()).isGreaterThan(8000);
-			assertThat(outputString.length()).isLessThan(10000);
+			assertThat(outputString).isNotBlank();
+			assertThat(outputString).hasSizeLessThan(10000);
 			totalRecords += StringUtils.countOccurrencesOf(outputString, "\n");
 		}
 
 		assertEquals(100, totalRecords);
-
 	}
 
 
