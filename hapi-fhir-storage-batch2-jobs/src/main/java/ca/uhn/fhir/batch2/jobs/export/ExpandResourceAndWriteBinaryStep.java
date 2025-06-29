@@ -63,6 +63,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -76,6 +77,7 @@ import org.springframework.context.ApplicationContext;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -85,6 +87,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.batch2.jobs.imprt.BulkImportAppCtx.PARAM_MAXIMUM_BATCH_SIZE_DEFAULT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -182,32 +185,38 @@ public class ExpandResourceAndWriteBinaryStep
 
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
 			List<TypedPidJson> allIds = typeToIds.get(resourceType);
-			while (!allIds.isEmpty()) {
+			List<List<TypedPidJson>> batches = ListUtils.partition(allIds, maxResourcesPerBatches);
+			for (List<TypedPidJson> batch : batches) {
 
-				// Load in batches in order to avoid having too many PIDs go into a
-				// single SQ statement at once
-				int batchSize = Math.min(maxResourcesPerBatches, allIds.size());
+				List<IBaseResource> batchResources = new ArrayList<>(maxResourcesPerBatches);
 
-				Set<IResourcePersistentId> nextBatchOfPids = allIds.subList(0, batchSize).stream()
-						.map(t -> myIdHelperService.newPidFromStringIdAndResourceName(
-								t.getPartitionId(), t.getPid(), resourceType))
-						.collect(Collectors.toSet());
-				allIds = allIds.subList(batchSize, allIds.size());
+				// Break each batch up into sub-batches in order to make sure we don't exceed the
+				// limit of 800 variables per SQL statement
+				for (List<TypedPidJson> subBatch : ListUtils.partition(batch, PARAM_MAXIMUM_BATCH_SIZE_DEFAULT)) {
 
-				PersistentIdToForcedIdMap nextBatchOfResourceIds = myTransactionService
-						.withSystemRequestOnPartition(theRequestPartitionId)
-						.execute(() -> myIdHelperService.translatePidsToForcedIds(nextBatchOfPids));
+					Set<IResourcePersistentId> subBatchPids = subBatch.stream()
+							.map(t -> myIdHelperService.newPidFromStringIdAndResourceName(
+									t.getPartitionId(), t.getPid(), resourceType))
+							.collect(Collectors.toSet());
 
-				TokenOrListParam idListParam = new TokenOrListParam();
-				for (IResourcePersistentId nextPid : nextBatchOfPids) {
-					Optional<String> resourceId = nextBatchOfResourceIds.get(nextPid);
-					idListParam.add(resourceId.orElse(nextPid.getId().toString()));
+					PersistentIdToForcedIdMap nextBatchOfResourceIds = myTransactionService
+							.withSystemRequestOnPartition(theRequestPartitionId)
+							.execute(() -> myIdHelperService.translatePidsToForcedIds(subBatchPids));
+
+					TokenOrListParam idListParam = new TokenOrListParam();
+					for (IResourcePersistentId nextPid : subBatchPids) {
+						Optional<String> resourceId = nextBatchOfResourceIds.get(nextPid);
+						idListParam.add(resourceId.orElse(nextPid.getId().toString()));
+					}
+
+					SearchParameterMap spMap =
+							SearchParameterMap.newSynchronous().add(PARAM_ID, idListParam);
+					IBundleProvider outcome =
+							dao.search(spMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId));
+					batchResources.addAll(outcome.getAllResources());
 				}
 
-				SearchParameterMap spMap = SearchParameterMap.newSynchronous().add(PARAM_ID, idListParam);
-				IBundleProvider outcome =
-						dao.search(spMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId));
-				theResourceListConsumer.accept(outcome.getAllResources());
+				theResourceListConsumer.accept(batchResources);
 			}
 		}
 	}
