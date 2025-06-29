@@ -310,7 +310,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		// verify
 		assertEquals(new RunOutcome(resources.size()).getRecordsProcessed(), outcome.getRecordsProcessed());
 
-		verify(binaryDao, atLeast(1))
+		verify(binaryDao, atLeast(2))
 			.update(binaryCaptor.capture(), binaryDaoCreateRequestDetailsCaptor.capture());
 
 		assertThat(binaryCaptor.getAllValues()).hasSizeGreaterThan(10);
@@ -318,7 +318,14 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		int totalRecords = 0;
 		for (int i = 0; i < binaryCaptor.getAllValues().size(); i++) {
 			String outputString = new String(binaryCaptor.getAllValues().get(i).getContent());
-			assertThat(outputString).isNotBlank();
+			if (i < binaryCaptor.getAllValues().size() - 1) {
+				// Most files should be close to the maximum size
+				assertThat(outputString).hasSizeGreaterThan(8000);
+			} else {
+				// The very last file might not be since it might not have enough
+				// files to reach the max size
+				assertThat(outputString).isNotBlank();
+			}
 			assertThat(outputString).hasSizeLessThan(10000);
 			totalRecords += StringUtils.countOccurrencesOf(outputString, "\n");
 		}
