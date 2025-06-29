@@ -174,10 +174,10 @@ public class ExpandResourcesStep
 			long currentFileSize = 0;
 			for (String nextResourceType : resources.keySet()) {
 
-				List<String> stringnifiedResources = resources.get(nextResourceType);
+				List<String> stringifiedResources = resources.get(nextResourceType);
 				List<String> currentFileStringifiedResources = new ArrayList<>();
 
-				for (String nextStringifiedResource : stringnifiedResources) {
+				for (String nextStringifiedResource : stringifiedResources) {
 
 					if (currentFileSize + nextStringifiedResource.length() > maxFileSize
 							&& !currentFileStringifiedResources.isEmpty()) {
