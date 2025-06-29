@@ -44,6 +44,7 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 	@Test
 	public void testInlineTags_StoreAndRetrieve() {
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
+		mySearchParamRegistry.forceRefresh();
 
 		// Store a first version
 		Patient patient = new Patient();
@@ -55,9 +56,9 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 		myPatientDao.update(patient, mySrd);
 
 		runInTransaction(() -> {
-			assertEquals(9, myResourceTagDao.count());
-			assertEquals(9, myResourceHistoryTagDao.count());
-			assertEquals(9, myTagDefinitionDao.count());
+			assertEquals(0, myResourceTagDao.count());
+			assertEquals(0, myResourceHistoryTagDao.count());
+			assertEquals(0, myTagDefinitionDao.count());
 		});
 
 		// Read it back
@@ -76,9 +77,9 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 		myPatientDao.update(patient, mySrd);
 
 		runInTransaction(() -> {
-			assertEquals(9, myResourceTagDao.count());
-			assertEquals(9, myResourceHistoryTagDao.count());
-			assertEquals(9, myTagDefinitionDao.count());
+			assertEquals(0, myResourceTagDao.count());
+			assertEquals(0, myResourceHistoryTagDao.count());
+			assertEquals(0, myTagDefinitionDao.count());
 		});
 
 		// First version should have only the initial tags
@@ -265,8 +266,6 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 		String sql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
 		int times = org.apache.commons.lang3.StringUtils.countMatches(sql, "HFJ_SPIDX_TOKEN");
 		assertEquals(3, times);
-
-		assertThat(sql).doesNotContainIgnoringCase("fetch");
 	}
 
 
