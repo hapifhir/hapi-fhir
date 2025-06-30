@@ -51,6 +51,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -78,7 +79,7 @@ public abstract class RequestDetails {
 	private String mySecondaryOperation;
 	private boolean mySubRequest;
 	private Map<String, List<String>> myUnqualifiedToQualifiedNames;
-	private Map<Object, Object> myUserData;
+	private final Map<Object, Object> myUserData = new ConcurrentHashMap<>();
 	private IBaseResource myResource;
 	private String myRequestId;
 	private String myTransactionGuid;
@@ -118,7 +119,7 @@ public abstract class RequestDetails {
 		mySecondaryOperation = theRequestDetails.getSecondaryOperation();
 		mySubRequest = theRequestDetails.isSubRequest();
 		myUnqualifiedToQualifiedNames = theRequestDetails.getUnqualifiedToQualifiedNames();
-		myUserData = theRequestDetails.getUserData();
+		myUserData.putAll(theRequestDetails.getUserData());
 		myResource = theRequestDetails.getResource();
 		myRequestId = theRequestDetails.getRequestId();
 		myTransactionGuid = theRequestDetails.getTransactionGuid();
@@ -500,9 +501,6 @@ public abstract class RequestDetails {
 	 * </p>
 	 */
 	public Map<Object, Object> getUserData() {
-		if (myUserData == null) {
-			myUserData = new HashMap<>();
-		}
 		return myUserData;
 	}
 
