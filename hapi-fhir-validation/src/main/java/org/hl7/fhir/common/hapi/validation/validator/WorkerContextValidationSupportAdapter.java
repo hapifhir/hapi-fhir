@@ -1151,6 +1151,6 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 
 	@Override
 	public OperationOutcome validateTxResource(ValidationOptions options, Resource resource) {
-		throw new UnsupportedOperationException(Msg.code(2734));
+		throw new UnsupportedOperationException(Msg.code(2735));
 	}
 }

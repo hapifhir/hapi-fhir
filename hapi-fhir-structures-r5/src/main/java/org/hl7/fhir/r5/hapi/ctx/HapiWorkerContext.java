@@ -660,6 +660,6 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public OperationOutcome validateTxResource(ValidationOptions options, Resource resource) {
-		throw new UnsupportedOperationException(Msg.code(2733));
+		throw new UnsupportedOperationException(Msg.code(2734));
 	}
 }
