@@ -55,9 +55,9 @@ public class ${className}ResourceProvider extends
 
 			@Description(shortDefinition="Search the contents of the resource's narrative using a fulltext search")
 			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_TEXT)
-			StringAndListParam theFtText, 
+			StringAndListParam theFtText,
 
-/*
+#if ( $version == 'dstu2' )
 			@Description(shortDefinition="Search for resources which have the given tag")
 			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_TAG)
 			TokenAndListParam theSearchForTag, 
@@ -69,7 +69,7 @@ public class ${className}ResourceProvider extends
 			@Description(shortDefinition="Search for resources which have the given profile")
 			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_PROFILE)
 			UriAndListParam theSearchForProfile,
-*/
+#end
 
 			@Description(shortDefinition="Search the contents of the resource's data using a list")
 			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_LIST)
