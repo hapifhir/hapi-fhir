@@ -27,7 +27,7 @@ import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.server.IHasAttributes;
+import ca.uhn.fhir.rest.api.server.IHasServletAttributes;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -51,7 +51,7 @@ import java.util.Map;
  *
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
-public class JaxRsRequest extends RequestDetails implements IHasAttributes {
+public class JaxRsRequest extends RequestDetails implements IHasServletAttributes {
 
 	private HttpHeaders myHeaders;
 	private String myResourceString;

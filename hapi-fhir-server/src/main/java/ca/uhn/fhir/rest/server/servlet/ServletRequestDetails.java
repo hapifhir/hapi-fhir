@@ -24,7 +24,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferHeader;
-import ca.uhn.fhir.rest.api.server.IHasAttributes;
+import ca.uhn.fhir.rest.api.server.IHasServletAttributes;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -55,7 +55,7 @@ import java.util.zip.GZIPInputStream;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ServletRequestDetails extends RequestDetails implements IHasAttributes {
+public class ServletRequestDetails extends RequestDetails implements IHasServletAttributes {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServletRequestDetails.class);
 

@@ -287,12 +287,12 @@ public abstract class RequestDetails {
 
 	/**
 	 * @deprecated
-	 * Use {@link #getUserData()}. If servlet attributes are truly required, then use {@link IHasAttributes#getServletAttribute(String)}.
+	 * Use {@link #getUserData()}. If servlet attributes are truly required, then use {@link IHasServletAttributes#getServletAttribute(String)}.
 	 */
 	@Deprecated
 	public Object getAttribute(String theAttributeName) {
-		if (this instanceof IHasAttributes) {
-			return ((IHasAttributes)this).getServletAttribute(theAttributeName);
+		if (this instanceof IHasServletAttributes) {
+			return ((IHasServletAttributes)this).getServletAttribute(theAttributeName);
 		} else {
 			ourLog.error("{} is not a servlet request. Unable to get attribute {}", getClass().getName(), theAttributeName);
 			return null;
@@ -301,12 +301,12 @@ public abstract class RequestDetails {
 
 	/**
 	 * @deprecated
-	 * Use {@link #getUserData()}. If servlet attributes are truly required, then use {@link IHasAttributes#setServletAttribute(String, Object)}.
+	 * Use {@link #getUserData()}. If servlet attributes are truly required, then use {@link IHasServletAttributes#setServletAttribute(String, Object)}.
 	 */
 	@Deprecated
 	public void setAttribute(String theAttributeName, Object theAttributeValue) {
-		if (this instanceof IHasAttributes) {
-			((IHasAttributes)this).setServletAttribute(theAttributeName, theAttributeValue);
+		if (this instanceof IHasServletAttributes) {
+			((IHasServletAttributes)this).setServletAttribute(theAttributeName, theAttributeValue);
 		} else {
 			ourLog.error("{} is not a servlet request. Unable to set attribute {}", getClass().getName(), theAttributeName);
 		}
@@ -506,7 +506,7 @@ public abstract class RequestDetails {
 	 * </p>
 	 * <p>
 	 * This method should be used to pass information between interceptor methods. For servlet-specific
-	 * request attributes used to communicate between servlet filters, use the getAttribute/setAttribute
+	 * request attributes used to communicate between servlet filters, use {@link IHasServletAttributes}
 	 * methods available on implementations that support them.
 	 * </p>
 	 */

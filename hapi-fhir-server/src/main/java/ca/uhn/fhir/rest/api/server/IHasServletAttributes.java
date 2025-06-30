@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.rest.api.server;
 
-public interface IHasAttributes {
+public interface IHasServletAttributes {
 
 	/**
 	 * Gets an attribute from the servlet request. Attributes are used for interacting with servlet request
