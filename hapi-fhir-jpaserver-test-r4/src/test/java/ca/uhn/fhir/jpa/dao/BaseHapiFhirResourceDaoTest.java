@@ -19,6 +19,7 @@ import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.svc.MockHapiTransactionService;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -63,6 +65,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -75,6 +78,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -89,6 +94,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BaseHapiFhirResourceDaoTest {
+	public static final String RESOURCE_TYPE = "Patient";
+	public static final String RESOURCE_ID = "123";
 
 	@Mock
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
@@ -245,6 +252,62 @@ class BaseHapiFhirResourceDaoTest {
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(960) + "failedToCreateWithClientAssignedNumericId", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testValidatePartitionIdMatch_validOnMatchedResourceTypeAndIdAndPartitionMatch() {
+		// set up
+		IIdType requestId = new IdDt(RESOURCE_TYPE, RESOURCE_ID);
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
+
+		ResourceTable entity = new ResourceTable();
+		entity.setPartitionId(new PartitionablePartitionId(1, LocalDate.now()));
+		entity.setResourceType(RESOURCE_TYPE);
+		entity.setFhirId(RESOURCE_ID);
+
+		// Execute
+		mySvc.validatePartitionIdMatch(requestId, requestPartitionId, entity);
+
+		// Verify
+		assertTrue(true, "No exception should be thrown when resource type, Id and partition all match");
+
+	}
+	@Test
+	public void testValidatePartitionIdMatch_doNothingOnAllPartitions() {
+		// set up
+		IIdType requestId = new IdDt(RESOURCE_TYPE, RESOURCE_ID);
+		RequestPartitionId requestPartitionId = RequestPartitionId.allPartitions();
+		ResourceTable entity = new ResourceTable();
+
+		// Execute
+		mySvc.validatePartitionIdMatch(requestId, requestPartitionId, entity);
+
+		// Verify
+		assertTrue(true, "No exception should be thrown when partition ID is all partitions");
+	}
+
+	@Test
+	public void testCreateValidatePartitionIdMatch_throwsExceptionOnPartitionMismatch() {
+		// set up
+		ResourceTable entity = new ResourceTable();
+		entity.setPartitionId(new PartitionablePartitionId(1, LocalDate.now()));
+		entity.setResourceType(RESOURCE_TYPE);
+		entity.setFhirId(RESOURCE_ID);
+
+		IIdType requestId = new IdDt(RESOURCE_TYPE, RESOURCE_ID);
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionIdAndName(2, "partition2");
+
+		// Execute
+		InvalidRequestException exception = assertThrows(
+			InvalidRequestException.class,
+			() -> mySvc.validatePartitionIdMatch(requestId, requestPartitionId, entity)
+		);
+
+		// Verify
+		assertThat(exception.getMessage()).isEqualTo(
+			"HAPI-2733: Failed to create resource %s/%s in partition %s because the same resource type and ID exist in another partition"
+				.formatted(RESOURCE_TYPE, RESOURCE_ID, requestPartitionId.getFirstPartitionNameOrNull()
+			));
 	}
 
 	@Test

@@ -132,6 +132,7 @@ import jakarta.persistence.LockModeType;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.function.TriFunction;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -2508,6 +2509,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					try {
 						entity = readEntityLatestVersion(
 								theRequest, resourceId, theRequestPartitionId, theTransactionDetails);
+						if (myPartitionSettings.isPartitioningEnabled()) {
+							validatePartitionIdMatch(theResource.getIdElement(), theRequestPartitionId, entity);
+						}
 					} catch (ResourceNotFoundException e) {
 						create = true;
 					}
@@ -2831,6 +2835,45 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 							Msg.code(998) + "Resource has no ID - ID must be populated for a FHIR update");
 				}
 			}
+		}
+	}
+
+	/**
+	 * Validates that the partition ID of the request resource matches the partition ID of the entity.
+	 * <p>
+	 * If the request is for all partitions, this method does nothing. Otherwise, it checks that the resource type
+	 * and FHIR ID of the entity match those of the provided resource ID type, and that the partition IDs are equal.
+	 * If there is a mismatch, an {@link InvalidRequestException} is thrown.
+	 *
+	 * @param theResourceIdType      The resource ID type being processed
+	 * @param theRequestPartitionId  The partition ID from the request
+	 * @param theEntity              The entity being updated
+	 * @throws InvalidRequestException if the partition IDs do not match for the same resource type and FHIR ID
+	 */
+	protected void validatePartitionIdMatch(
+			@Nonnull IIdType theResourceIdType,
+			@Nonnull RequestPartitionId theRequestPartitionId,
+			@Nonnull ResourceTable theEntity) {
+		if (theRequestPartitionId.isAllPartitions()) {
+			return;
+		}
+
+		boolean sameResType = StringUtils.equals(theEntity.getResourceType(), theResourceIdType.getResourceType());
+		boolean sameFhirId = StringUtils.equals(theResourceIdType.getIdPart(), theEntity.getFhirId());
+		boolean differentPartition = !Objects.equals(
+				theRequestPartitionId.getFirstPartitionIdOrNull(),
+				theEntity.getPartitionId().getPartitionId());
+
+		if (sameResType && sameFhirId && differentPartition) {
+			String msg = getContext()
+					.getLocalizer()
+					.getMessageSanitized(
+							BaseStorageDao.class,
+							"resourceTypeAndFhirIdConflictAcrossPartitions",
+							theEntity.getResourceType(),
+							theResourceIdType.getIdPart(),
+							theRequestPartitionId.getFirstPartitionNameOrNull());
+			throw new InvalidRequestException(Msg.code(2733) + msg);
 		}
 	}
 }
