@@ -156,6 +156,24 @@ public class JaxRsRequest extends RequestDetails implements IHasServletAttribute
 		myAttributes.put(theAttributeName, theAttributeValue);
 	}
 
+	/**
+	 * @deprecated Use {@link #getUserData()}. If servlet attributes are truly required, then use {@link IHasServletAttributes#getServletAttribute(String)}.
+	 */
+	@Deprecated
+	@Override
+	public Object getAttribute(String theAttributeName) {
+		return getServletAttribute(theAttributeName);
+	}
+
+	/**
+	 * @deprecated Use {@link #getUserData()}. If servlet attributes are truly required, then use {@link IHasServletAttributes#setServletAttribute(String, Object)}.
+	 */
+	@Deprecated
+	@Override
+	public void setAttribute(String theAttributeName, Object theAttributeValue) {
+		setServletAttribute(theAttributeName, theAttributeValue);
+	}
+
 	@Override
 	public InputStream getInputStream() {
 		// not yet implemented

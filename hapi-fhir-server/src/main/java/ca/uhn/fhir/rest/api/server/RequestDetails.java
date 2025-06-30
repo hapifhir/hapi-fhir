@@ -58,7 +58,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public abstract class RequestDetails {
 	private static final Logger ourLog = LoggerFactory.getLogger(RequestDetails.class);
 	public static final byte[] BAD_STREAM_PLACEHOLDER =
-			(Msg.code(2543) + "PLACEHOLDER WHEN READING FROM BAD STREAM").getBytes(StandardCharsets.UTF_8);
+		(Msg.code(2543) + "PLACEHOLDER WHEN READING FROM BAD STREAM").getBytes(StandardCharsets.UTF_8);
 	private final StopWatch myRequestStopwatch;
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	private String myTenantId;
@@ -261,7 +261,7 @@ public abstract class RequestDetails {
 	/**
 	 * Adds a new header
 	 *
-	 * @param theName The header name
+	 * @param theName  The header name
 	 * @param theValue The header value
 	 * @since 7.2.0
 	 */
@@ -270,7 +270,7 @@ public abstract class RequestDetails {
 	/**
 	 * Replaces any existing header(s) with the given name using a List of new header values
 	 *
-	 * @param theName The header name
+	 * @param theName  The header name
 	 * @param theValue The header value
 	 * @since 7.2.0
 	 */
@@ -284,32 +284,21 @@ public abstract class RequestDetails {
 		myId = theId;
 	}
 
-
 	/**
-	 * @deprecated
-	 * Use {@link #getUserData()}. If servlet attributes are truly required, then use {@link IHasServletAttributes#getServletAttribute(String)}.
+	 * @deprecated Use {@link #getUserData()}. If servlet attributes are truly required, then use {@link IHasServletAttributes#getServletAttribute(String)}.
 	 */
 	@Deprecated
 	public Object getAttribute(String theAttributeName) {
-		if (this instanceof IHasServletAttributes) {
-			return ((IHasServletAttributes)this).getServletAttribute(theAttributeName);
-		} else {
-			ourLog.error("{} is not a servlet request. Unable to get attribute {}", getClass().getName(), theAttributeName);
-			return null;
-		}
+		ourLog.error("{} is not a servlet request. Unable to get attribute {}", getClass().getName(), theAttributeName);
+		return null;
 	}
 
 	/**
-	 * @deprecated
-	 * Use {@link #getUserData()}. If servlet attributes are truly required, then use {@link IHasServletAttributes#setServletAttribute(String, Object)}.
+	 * @deprecated Use {@link #getUserData()}. If servlet attributes are truly required, then use {@link IHasServletAttributes#setServletAttribute(String, Object)}.
 	 */
 	@Deprecated
 	public void setAttribute(String theAttributeName, Object theAttributeValue) {
-		if (this instanceof IHasServletAttributes) {
-			((IHasServletAttributes)this).setServletAttribute(theAttributeName, theAttributeValue);
-		} else {
-			ourLog.error("{} is not a servlet request. Unable to set attribute {}", getClass().getName(), theAttributeName);
-		}
+		ourLog.error("{} is not a servlet request. Unable to set attribute {}", getClass().getName(), theAttributeName);
 	}
 
 	/**
@@ -351,9 +340,9 @@ public abstract class RequestDetails {
 		}
 		if (needsSanitization) {
 			myParameters = myParameters.entrySet().stream()
-					.collect(
-							Collectors.toMap(t -> UrlUtil.sanitizeUrlPart((String) ((Map.Entry<?, ?>) t).getKey()), t ->
-									(String[]) ((Map.Entry<?, ?>) t).getValue()));
+				.collect(
+					Collectors.toMap(t -> UrlUtil.sanitizeUrlPart((String) ((Map.Entry<?, ?>) t).getKey()), t ->
+						(String[]) ((Map.Entry<?, ?>) t).getValue()));
 		}
 	}
 
@@ -477,7 +466,7 @@ public abstract class RequestDetails {
 						}
 						String unqualified = next.substring(0, i);
 						List<String> list =
-								myUnqualifiedToQualifiedNames.computeIfAbsent(unqualified, k -> new ArrayList<>(4));
+							myUnqualifiedToQualifiedNames.computeIfAbsent(unqualified, k -> new ArrayList<>(4));
 						list.add(next);
 						break;
 					}
