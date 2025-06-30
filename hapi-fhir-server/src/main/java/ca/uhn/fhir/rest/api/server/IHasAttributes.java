@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.rest.api.server;
 
-// FIXME KHS change to IHasServletRequestAttributes and change methods
-// FIXME KHS restore method in parent with warning log and deprecation
 public interface IHasAttributes {
 
 	/**
@@ -32,7 +30,7 @@ public interface IHasAttributes {
 	 * @param theAttributeName The attribute name
 	 * @return The attribute value, or null if the attribute is not set
 	 */
-	Object getAttribute(String theAttributeName);
+	Object getServletAttribute(String theAttributeName);
 
 	/**
 	 * Sets an attribute on the servlet request. Attributes are used for interacting with servlet request
@@ -43,5 +41,5 @@ public interface IHasAttributes {
 	 * @param theAttributeName The attribute name
 	 * @param theAttributeValue The attribute value
 	 */
-	void setAttribute(String theAttributeName, Object theAttributeValue);
+	void setServletAttribute(String theAttributeName, Object theAttributeValue);
 }

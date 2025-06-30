@@ -37,6 +37,8 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,7 +56,7 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class RequestDetails {
-
+	private static final Logger ourLog = LoggerFactory.getLogger(RequestDetails.class);
 	public static final byte[] BAD_STREAM_PLACEHOLDER =
 			(Msg.code(2543) + "PLACEHOLDER WHEN READING FROM BAD STREAM").getBytes(StandardCharsets.UTF_8);
 	private final StopWatch myRequestStopwatch;
@@ -280,6 +282,34 @@ public abstract class RequestDetails {
 
 	public void setId(IIdType theId) {
 		myId = theId;
+	}
+
+
+	/**
+	 * @deprecated
+	 * Use {@link #getUserData()}. If servlet attributes are truly required, then use {@link IHasAttributes#getServletAttribute(String)}.
+	 */
+	@Deprecated
+	public Object getAttribute(String theAttributeName) {
+		if (this instanceof IHasAttributes) {
+			return ((IHasAttributes)this).getServletAttribute(theAttributeName);
+		} else {
+			ourLog.error("{} is not a servlet request. Unable to get attribute {}", getClass().getName(), theAttributeName);
+			return null;
+		}
+	}
+
+	/**
+	 * @deprecated
+	 * Use {@link #getUserData()}. If servlet attributes are truly required, then use {@link IHasAttributes#setServletAttribute(String, Object)}.
+	 */
+	@Deprecated
+	public void setAttribute(String theAttributeName, Object theAttributeValue) {
+		if (this instanceof IHasAttributes) {
+			((IHasAttributes)this).setServletAttribute(theAttributeName, theAttributeValue);
+		} else {
+			ourLog.error("{} is not a servlet request. Unable to set attribute {}", getClass().getName(), theAttributeName);
+		}
 	}
 
 	/**

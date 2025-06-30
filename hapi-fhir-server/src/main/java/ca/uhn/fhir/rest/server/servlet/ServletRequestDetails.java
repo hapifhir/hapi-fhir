@@ -200,7 +200,7 @@ public class ServletRequestDetails extends RequestDetails implements IHasAttribu
 	 * @return The attribute value, or null if the attribute is not set
 	 */
 	@Override
-	public Object getAttribute(String theAttributeName) {
+	public Object getServletAttribute(String theAttributeName) {
 		Validate.notBlank(theAttributeName, "theAttributeName must not be null or blank");
 		return getServletRequest().getAttribute(theAttributeName);
 	}
@@ -215,7 +215,7 @@ public class ServletRequestDetails extends RequestDetails implements IHasAttribu
 	 * @param theAttributeValue The attribute value
 	 */
 	@Override
-	public void setAttribute(String theAttributeName, Object theAttributeValue) {
+	public void setServletAttribute(String theAttributeName, Object theAttributeValue) {
 		Validate.notBlank(theAttributeName, "theAttributeName must not be null or blank");
 		getServletRequest().setAttribute(theAttributeName, theAttributeValue);
 	}

@@ -138,7 +138,7 @@ public class JaxRsRequest extends RequestDetails implements IHasAttributes {
 	 * @return The attribute value, or null if the attribute is not set
 	 */
 	@Override
-	public Object getAttribute(String theAttributeName) {
+	public Object getServletAttribute(String theAttributeName) {
 		return myAttributes.get(theAttributeName);
 	}
 
@@ -152,7 +152,7 @@ public class JaxRsRequest extends RequestDetails implements IHasAttributes {
 	 * @param theAttributeValue The attribute value
 	 */
 	@Override
-	public void setAttribute(String theAttributeName, Object theAttributeValue) {
+	public void setServletAttribute(String theAttributeName, Object theAttributeValue) {
 		myAttributes.put(theAttributeName, theAttributeValue);
 	}
 
