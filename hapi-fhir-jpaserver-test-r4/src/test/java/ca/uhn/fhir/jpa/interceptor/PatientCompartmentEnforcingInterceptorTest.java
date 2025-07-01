@@ -10,11 +10,14 @@ import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,13 +77,16 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 
 		Observation obs = new Observation();
 		obs.getSubject().setReference("Patient/A");
-		myObservationDao.create(obs, new SystemRequestDetails());
+		String obsId = myObservationDao.create(obs, new SystemRequestDetails()).getId().getIdPart();
 
 		// try updating observation's patient, which would cross partition boundaries
 		obs.getSubject().setReference("Patient/B");
 
-		InternalErrorException thrown = assertThrows(InternalErrorException.class, () -> myObservationDao.update(obs, new SystemRequestDetails()));
-		assertEquals("HAPI-2476: Resource compartment changed. Was a referenced Patient changed?", thrown.getMessage());
+		InvalidRequestException thrown = assertThrows(InvalidRequestException.class, () -> myObservationDao.update(obs, new SystemRequestDetails()));
+		assertEquals("HAPI-2733: Failed to create/update resource \"Observation/" + obsId +
+				"\" in partition B because the same resource type and ID exist in another partition",
+			thrown.getMessage()
+		);
 	}
 
 	@ParameterizedTest

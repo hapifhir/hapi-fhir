@@ -255,7 +255,7 @@ class BaseHapiFhirResourceDaoTest {
 	}
 
 	@Test
-	public void testValidatePartitionIdMatch_validOnMatchedResourceTypeAndIdAndPartitionMatch() {
+	public void testValidatePartitionIdMatch_validOnMatchedResourceTypeAndIdAndPartition() {
 		// set up
 		IIdType requestId = new IdDt(RESOURCE_TYPE, RESOURCE_ID);
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
@@ -287,7 +287,7 @@ class BaseHapiFhirResourceDaoTest {
 	}
 
 	@Test
-	public void testCreateValidatePartitionIdMatch_throwsExceptionOnPartitionMismatch() {
+	public void testValidatePartitionIdMatch_throwExceptionOnPartitionMismatch() {
 		// set up
 		ResourceTable entity = new ResourceTable();
 		entity.setPartitionId(new PartitionablePartitionId(1, LocalDate.now()));
@@ -305,7 +305,7 @@ class BaseHapiFhirResourceDaoTest {
 
 		// Verify
 		assertThat(exception.getMessage()).isEqualTo(
-			"HAPI-2733: Failed to create resource %s/%s in partition %s because the same resource type and ID exist in another partition"
+			"HAPI-2733: Failed to create/update resource \"%s/%s\" in partition %s because the same resource type and ID exist in another partition"
 				.formatted(RESOURCE_TYPE, RESOURCE_ID, requestPartitionId.getFirstPartitionNameOrNull()
 			));
 	}

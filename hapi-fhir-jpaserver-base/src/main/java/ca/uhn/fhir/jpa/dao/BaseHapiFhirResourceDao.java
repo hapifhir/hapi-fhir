@@ -2845,9 +2845,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * and FHIR ID of the entity match those of the provided resource ID type, and that the partition IDs are equal.
 	 * If there is a mismatch, an {@link InvalidRequestException} is thrown.
 	 *
-	 * @param theResourceIdType      The resource ID type being processed
-	 * @param theRequestPartitionId  The partition ID from the request
-	 * @param theEntity              The entity being updated
+	 * @param theResourceIdType     The resource ID type being processed
+	 * @param theRequestPartitionId The partition ID from the request
+	 * @param theEntity             The entity being updated
 	 * @throws InvalidRequestException if the partition IDs do not match for the same resource type and FHIR ID
 	 */
 	protected void validatePartitionIdMatch(
@@ -2868,7 +2868,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			String msg = getContext()
 					.getLocalizer()
 					.getMessageSanitized(
-							BaseStorageDao.class,
+							BaseHapiFhirDao.class,
 							"resourceTypeAndFhirIdConflictAcrossPartitions",
 							theEntity.getResourceType(),
 							theResourceIdType.getIdPart(),
