@@ -112,6 +112,15 @@ public interface IParserErrorHandler {
 	void unknownReference(IParseLocation theLocation, String theReference);
 
 	/**
+	 * Contained resource has an invalid internal reference.
+	 * A contained reference starts with an octothrope (#) but there
+	 * are no contained resources with this given id.
+	 * @param theLocation  The location in the document. Note that this may be <code>null</code> as the ParseLocation feature is experimental. Use with caution, as the API may change.
+	 * @param theReference The string reference ('#123')
+	 */
+	void invalidInternalReference(IParseLocation theLocation, String theReference);
+
+	/**
 	 * An extension contains both a value and at least one nested extension
 	 *
 	 * @param theLoc The location in the document. Note that this may be <code>null</code> as the ParseLocation feature is experimental. Use with caution, as the API may change.
