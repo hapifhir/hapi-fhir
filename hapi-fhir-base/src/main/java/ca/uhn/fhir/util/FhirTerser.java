@@ -1829,6 +1829,14 @@ public class FhirTerser {
 			return myExistingIdToContainedResourceMap;
 		}
 
+		public boolean referenceMatchesAContainedResource(IIdType theRefId) {
+			assert theRefId.getValue().startsWith("#");
+
+			String expectedResourceId = theRefId.getValue().substring(1);
+			return this.getContainedResources().stream()
+					.anyMatch(res -> res.getIdElement().getIdPart().equals(expectedResourceId));
+		}
+
 		public IIdType addContained(IBaseResource theResource) {
 			if (this.getResourceId(theResource) != null) {
 				// Prevent infinite recursion if there are circular loops in the contained resources
@@ -1843,6 +1851,8 @@ public class FhirTerser {
 			IIdType newId = theResource.getIdElement();
 			if (isBlank(newId.getValue())) {
 				newId.setValue(UUID.randomUUID().toString());
+			} else if (newId.getValue().startsWith("#")) {
+				newId.setValue(newId.getValueAsString().substring(1));
 			}
 
 			getResourceToIdMap().put(theResource, newId);

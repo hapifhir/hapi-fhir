@@ -22,6 +22,7 @@ import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent;
 import org.hl7.fhir.r5.model.NamingSystem;
+import org.hl7.fhir.r5.model.OperationOutcome;
 import org.hl7.fhir.r5.model.PackageInformation;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Resource;
@@ -43,8 +44,6 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -536,12 +535,6 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, Set<String> types)
-			throws FileNotFoundException, IOException, FHIRException {
-		throw new UnsupportedOperationException(Msg.code(2328));
-	}
-
-	@Override
 	public int loadFromPackageAndDependencies(NpmPackage pi, IContextResourceLoader loader, BasePackageCacheManager pcm)
 			throws FHIRException {
 		throw new UnsupportedOperationException(Msg.code(235));
@@ -663,5 +656,10 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public boolean isServerSideSystem(String url) {
 		return false;
+	}
+
+	@Override
+	public OperationOutcome validateTxResource(ValidationOptions options, Resource resource) {
+		throw new UnsupportedOperationException(Msg.code(2734));
 	}
 }
