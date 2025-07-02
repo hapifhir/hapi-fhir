@@ -2,6 +2,7 @@ package ca.uhn.fhir.svcs;
 
 import jakarta.annotation.Nonnull;
 
+import java.util.Collection;
 import java.util.Set;
 
 public interface ISearchLimiterSvc {
@@ -16,12 +17,18 @@ public interface ISearchLimiterSvc {
 	/**
 	 * Get all omitted resources for the named operation.
 	 */
-	Set<String> getResourcesToOmitForOperationSearches(@Nonnull String theOperationName);
+	Collection<String> getResourcesToOmitForOperationSearches(@Nonnull String theOperationName);
 
 	/**
 	 * Remove the resource type from the omission criteria.
 	 * @param theOperationName the operation name
-	 * @param theResourceType the resource type; if null, will remove all resources from omission list
+	 * @param theResourceType the resource type to remove
 	 */
-	void removeOmittedResourceType(@Nonnull String theOperationName, String theResourceType);
+	void removeOmittedResourceType(@Nonnull String theOperationName, @Nonnull String theResourceType);
+
+	/**
+	 * Remove all omitted resource types for the operation.
+	 * @param theOperationName the operation name
+	 */
+	void removeAllResourcesForOperation(String theOperationName);
 }

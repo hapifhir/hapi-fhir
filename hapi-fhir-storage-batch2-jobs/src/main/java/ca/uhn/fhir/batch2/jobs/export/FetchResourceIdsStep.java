@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -87,7 +88,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		 * when we recursively fetch resource types for a given patient/group
 		 * we don't recurse for types that they did not request
 		 */
-		Set<String> omitted =
+		Collection<String> omitted =
 				mySearchLimiterSvc.getResourcesToOmitForOperationSearches(ProviderConstants.OPERATION_EXPORT);
 		List<String> resourceTypesToFetch = params.getResourceTypes().stream()
 				.filter(r -> !omitted.contains(r))

@@ -96,7 +96,6 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -364,6 +363,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		try {
 			// setup for test
 			mySearchLimiterSvc.addOmittedResourceType(ProviderConstants.OPERATION_EXPORT, "Group");
+			// set enabled because bulk export requires it:
+			// error: "HAPI-0797: You attempted to start a Patient Bulk Export, but the system has `Index Missing Fields` disabled. It must be enabled for Patient Bulk Export"
 			myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
 
 			// set the export options
@@ -382,12 +383,12 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 			Map<String, List<String>> outputMap = response.getResourceTypeToBinaryIds();
 			ourLog.info("Resource Types returned: " + String.join(", ", outputMap.keySet()));
-			assertTrue(outputMap.containsKey("Observation"));
-			assertTrue(outputMap.containsKey("Patient"));
-			assertFalse(outputMap.containsKey("Group"));
+
+			assertThat(outputMap).containsKeys("Observation", "Patient")
+				.doesNotContainKey("Group");
 		} finally {
 			// reset
-			mySearchLimiterSvc.removeOmittedResourceType(ProviderConstants.OPERATION_EXPORT, null);
+			mySearchLimiterSvc.removeAllResourcesForOperation(ProviderConstants.OPERATION_EXPORT);
 			myStorageSettings.setIndexMissingFields(currentIndexSetting);
 		}
 	}

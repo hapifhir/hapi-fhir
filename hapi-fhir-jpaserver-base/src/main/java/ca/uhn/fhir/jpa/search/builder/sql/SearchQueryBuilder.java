@@ -840,7 +840,7 @@ public class SearchQueryBuilder {
 		addPredicate(predicate);
 	}
 
-	public void excludeResourceTypesPredicate(Set<String> theOmitted) {
+	public void excludeResourceTypesPredicate(Collection<String> theOmitted) {
 		if (theOmitted == null || theOmitted.isEmpty()) {
 			return;
 		}
