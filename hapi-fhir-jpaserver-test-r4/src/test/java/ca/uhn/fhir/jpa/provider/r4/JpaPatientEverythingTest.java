@@ -214,7 +214,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 			assertFalse(response.getEntry().stream()
 				.anyMatch(e -> e.getResource() instanceof Group));
 		} finally {
-			mySearchLimiterSvc.removeOmittedResourceType(JpaConstants.OPERATION_EVERYTHING, null);
+			mySearchLimiterSvc.removeAllResourcesForOperation(JpaConstants.OPERATION_EVERYTHING);
 		}
 	}
 
