@@ -53,6 +53,9 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.FhirTerser;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
@@ -538,181 +541,162 @@ public class SearchParamExtractorService {
 	}
 
 	private void extractResourceLinks(
-			RequestPartitionId theRequestPartitionId,
-			ResourceIndexedSearchParams theExistingParams,
-			ResourceIndexedSearchParams theNewParams,
-			ResourceTable theEntity,
-			IBaseResource theResource,
-			TransactionDetails theTransactionDetails,
-			boolean theFailOnInvalidReference,
-			RequestDetails theRequest,
-			ISearchParamExtractor.SearchParamSet<PathAndRef> theIndexedReferences) {
+		RequestPartitionId theRequestPartitionId,
+		ResourceIndexedSearchParams theExistingParams,
+		ResourceIndexedSearchParams theNewParams,
+		ResourceTable theEntity,
+		IBaseResource theResource,
+		TransactionDetails theTransactionDetails,
+		boolean theFailOnInvalidReference,
+		RequestDetails theRequest,
+		ISearchParamExtractor.SearchParamSet<PathAndRef> theIndexedReferences) {
 		String sourceResourceName = myContext.getResourceType(theResource);
+		int batchSize = 500;
 
-		for (PathAndRef nextPathAndRef : theIndexedReferences) {
-			if (nextPathAndRef.getRef() != null) {
-				if (nextPathAndRef.getRef().getReferenceElement().isLocal()) {
-					continue;
-				}
+		Iterables.partition(theIndexedReferences, batchSize).forEach(batch -> {
+			ISearchParamExtractor.SearchParamSet<PathAndRef> batchSet = new ISearchParamExtractor.SearchParamSet<>();
+			batchSet.addAll(batch);
 
-				RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(
-						sourceResourceName,
-						nextPathAndRef.getSearchParamName(),
-						ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
-				extractResourceLinks(
-						theRequestPartitionId,
-						theExistingParams,
-						theNewParams,
-						theEntity,
-						theTransactionDetails,
-						sourceResourceName,
-						searchParam,
-						nextPathAndRef,
-						theFailOnInvalidReference,
-						theRequest);
-			}
-		}
+			extractResourceLinksBatched(
+				theRequestPartitionId,
+				theExistingParams,
+				theNewParams,
+				theEntity,
+				theTransactionDetails,
+				sourceResourceName,
+				batchSet,
+				theFailOnInvalidReference,
+				theRequest);
+		});
 
-		theEntity.setHasLinks(!theNewParams.myLinks.isEmpty());
+		theEntity.setHasLinks(theNewParams.myLinks.size() > 0);
 	}
 
-	private void extractResourceLinks(
-			@Nonnull RequestPartitionId theRequestPartitionId,
-			ResourceIndexedSearchParams theExistingParams,
-			ResourceIndexedSearchParams theNewParams,
-			ResourceTable theEntity,
-			TransactionDetails theTransactionDetails,
-			String theSourceResourceName,
-			RuntimeSearchParam theRuntimeSearchParam,
-			PathAndRef thePathAndRef,
-			boolean theFailOnInvalidReference,
-			RequestDetails theRequest) {
-		IBaseReference nextReference = thePathAndRef.getRef();
-		IIdType nextId = nextReference.getReferenceElement();
-		String path = thePathAndRef.getPath();
+	private void extractResourceLinksBatched(
+		@javax.annotation.Nonnull RequestPartitionId theRequestPartitionId,
+		ResourceIndexedSearchParams theExistingParams,
+		ResourceIndexedSearchParams theNewParams,
+		ResourceTable theEntity,
+		TransactionDetails theTransactionDetails,
+		String theSourceResourceName,
+		ISearchParamExtractor.SearchParamSet<PathAndRef> thePathAndRefs,
+		boolean theFailOnInvalidReference,
+		RequestDetails theRequest) {
 		Date transactionDate = theTransactionDetails.getTransactionDate();
+		Set<String> populatedSearchParamNames = new HashSet<>();
+		Set<PathAndRef> unresolvedReferences = new HashSet<>();
+		Multimap<PathAndRef, IIdType> futureResolvedReferences = ArrayListMultimap.create();
 
-		/*
-		 * This can only really happen if the DAO is being called
-		 * programmatically with a Bundle (not through the FHIR REST API)
-		 * but Smile does this
-		 */
-		if (nextId.isEmpty() && nextReference.getResource() != null) {
-			nextId = nextReference.getResource().getIdElement();
-		}
-
-		if (myContext.getParserOptions().isStripVersionsFromReferences()
-				&& !myContext
-						.getParserOptions()
-						.getDontStripVersionsFromReferencesAtPaths()
-						.contains(thePathAndRef.getPath())
-				&& nextId.hasVersionIdPart()) {
-			nextId = nextId.toVersionless();
-		}
-
-		theNewParams.myPopulatedResourceLinkParameters.add(thePathAndRef.getSearchParamName());
-
-		boolean canonical = thePathAndRef.isCanonical();
-		if (LogicalReferenceHelper.isLogicalReference(myStorageSettings, nextId) || canonical) {
-			String value = nextId.getValue();
-			ResourceLink resourceLink =
-					ResourceLink.forLogicalReference(thePathAndRef.getPath(), theEntity, value, transactionDate);
-			if (theNewParams.myLinks.add(resourceLink)) {
-				ourLog.debug("Indexing remote resource reference URL: {}", nextId);
+		for (PathAndRef pathAndRef : thePathAndRefs) {
+			if (pathAndRef.getRef() == null
+				|| pathAndRef.getRef().getReferenceElement().isLocal()) {
+				continue;
 			}
-			return;
-		}
 
-		String baseUrl = nextId.getBaseUrl();
+			RuntimeSearchParam theRuntimeSearchParam =
+				mySearchParamRegistry.getActiveSearchParam(theSourceResourceName,
+					pathAndRef.getSearchParamName(),
+					ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+			IBaseReference nextReference = pathAndRef.getRef();
+			IIdType nextId = nextReference.getReferenceElement();
+			String path = pathAndRef.getPath();
 
-		// If this is a conditional URL, the part after the question mark
-		// can include URLs (e.g. token system URLs) and these really confuse
-		// the IdType parser because a conditional URL isn't actually a valid
-		// FHIR ID. So in order to truly determine whether we're dealing with
-		// an absolute reference, we strip the query part and reparse
-		// the reference.
-		int questionMarkIndex = nextId.getValue().indexOf('?');
-		if (questionMarkIndex != -1) {
-			IdType preQueryId = new IdType(nextId.getValue().substring(0, questionMarkIndex - 1));
-			baseUrl = preQueryId.getBaseUrl();
-		}
-
-		String typeString = nextId.getResourceType();
-		if (isBlank(typeString)) {
-			String msg = "Invalid resource reference found at path[" + path + "] - Does not contain resource type - "
-					+ nextId.getValue();
-			if (theFailOnInvalidReference) {
-				throw new InvalidRequestException(Msg.code(505) + msg);
-			} else {
-				ourLog.debug(msg);
-				return;
+			if (nextId.isEmpty() && nextReference.getResource() != null) {
+				nextId = nextReference.getResource().getIdElement();
 			}
-		}
-		RuntimeResourceDefinition resourceDefinition;
-		try {
-			resourceDefinition = myContext.getResourceDefinition(typeString);
-		} catch (DataFormatException e) {
-			String msg = "Invalid resource reference found at path[" + path
-					+ "] - Resource type is unknown or not supported on this server - " + nextId.getValue();
-			if (theFailOnInvalidReference) {
-				throw new InvalidRequestException(Msg.code(506) + msg);
-			} else {
-				ourLog.debug(msg);
-				return;
-			}
-		}
 
-		if (theRuntimeSearchParam.hasTargets()) {
-			if (!theRuntimeSearchParam.getTargets().contains(typeString)) {
-				return;
-			}
-		}
+			nextId = stripVersionIfNecessary(path, nextId);
 
-		if (isNotBlank(baseUrl)) {
-			if (!myStorageSettings.getTreatBaseUrlsAsLocal().contains(baseUrl)
-					&& !myStorageSettings.isAllowExternalReferences()) {
-				String msg = myContext
-						.getLocalizer()
-						.getMessage(BaseSearchParamExtractor.class, "externalReferenceNotAllowed", nextId.getValue());
-				throw new InvalidRequestException(Msg.code(507) + msg);
-			} else {
-				ResourceLink resourceLink =
-						ResourceLink.forAbsoluteReference(thePathAndRef.getPath(), theEntity, nextId, transactionDate);
+			populatedSearchParamNames.add(pathAndRef.getSearchParamName());
+
+			boolean canonical = pathAndRef.isCanonical();
+			if (LogicalReferenceHelper.isLogicalReference(myStorageSettings, nextId) || canonical) {
+				String value = nextId.getValue();
+				ResourceLink resourceLink = ResourceLink.forLogicalReference(path, theEntity, value, transactionDate);
 				if (theNewParams.myLinks.add(resourceLink)) {
 					ourLog.debug("Indexing remote resource reference URL: {}", nextId);
 				}
-				return;
+				continue;
 			}
-		}
 
-		Class<? extends IBaseResource> type = resourceDefinition.getImplementingClass();
-		String targetId = nextId.getIdPart();
-		if (StringUtils.isBlank(targetId)) {
-			String msg = "Invalid resource reference found at path[" + path + "] - Does not contain resource ID - "
+			String baseUrl = nextId.getBaseUrl();
+
+			// If this is a conditional URL, the part after the question mark
+			// can include URLs (e.g. token system URLs) and these really confuse
+			// the IdType parser because a conditional URL isn't actually a valid
+			// FHIR ID. So in order to truly determine whether we're dealing with
+			// an absolute reference, we strip the query part and reparse
+			// the reference.
+			int questionMarkIndex = nextId.getValue().indexOf('?');
+			if (questionMarkIndex != -1) {
+				IdType preQueryId = new IdType(nextId.getValue().substring(0, questionMarkIndex - 1));
+				baseUrl = preQueryId.getBaseUrl();
+			}
+			String typeString = nextId.getResourceType();
+			if (isBlank(typeString)) {
+				String msg = "Invalid resource reference found at path[" + path
+					+ "] - Does not contain resource type - " + nextId.getValue();
+				handleInvalidReference(theFailOnInvalidReference, msg);
+				continue;
+			}
+
+			RuntimeResourceDefinition resourceDefinition = null;
+			try {
+				resourceDefinition = myContext.getResourceDefinition(typeString);
+			} catch (DataFormatException e) {
+				String msg = "Invalid resource reference found at path[" + path
+					+ "] - Resource type is unknown or not supported on this server - " + nextId.getValue();
+				handleInvalidReference(theFailOnInvalidReference, msg);
+				continue;
+			}
+
+			if (theRuntimeSearchParam.hasTargets()
+				&& !theRuntimeSearchParam.getTargets().contains(typeString)) {
+				continue;
+			}
+
+			if (isNotBlank(baseUrl)) {
+				if (!myStorageSettings.getTreatBaseUrlsAsLocal().contains(baseUrl)
+					&& !myStorageSettings.isAllowExternalReferences()) {
+					String msg = myContext
+						.getLocalizer()
+						.getMessage(
+							BaseSearchParamExtractor.class, "externalReferenceNotAllowed", nextId.getValue());
+					throw new InvalidRequestException(Msg.code(507) + msg);
+				} else {
+					ResourceLink resourceLink =
+						ResourceLink.forAbsoluteReference(path, theEntity, nextId, transactionDate);
+					if (theNewParams.myLinks.add(resourceLink)) {
+						ourLog.debug("Indexing remote resource reference URL: {}", nextId);
+					}
+					continue;
+				}
+			}
+
+			Class<? extends IBaseResource> type = resourceDefinition.getImplementingClass();
+			String targetId = nextId.getIdPart();
+			if (isBlank(targetId)) {
+				String msg = "Invalid resource reference found at path[" + path + "] - Does not contain resource ID - "
 					+ nextId.getValue();
-			if (theFailOnInvalidReference) {
-				throw new InvalidRequestException(Msg.code(508) + msg);
-			} else {
-				ourLog.debug(msg);
-				return;
+				handleInvalidReference(theFailOnInvalidReference, msg);
+				continue;
 			}
-		}
 
-		IIdType referenceElement = thePathAndRef.getRef().getReferenceElement();
-		JpaPid resolvedTargetId = (JpaPid) theTransactionDetails.getResolvedResourceId(referenceElement);
-		ResourceLink resourceLink;
+			IIdType referenceElement = pathAndRef.getRef().getReferenceElement();
+			JpaPid resolvedTargetId = (JpaPid) theTransactionDetails.getResolvedResourceId(referenceElement);
+			ResourceLink resourceLink;
 
-		Long targetVersionId = nextId.getVersionIdPartAsLong();
-		if (resolvedTargetId != null) {
+			Long targetVersionId = nextId.getVersionIdPartAsLong();
 
-			/*
-			 * If we have already resolved the given reference within this transaction, we don't
-			 * need to resolve it again
-			 */
-			myResourceLinkResolver.validateTypeOrThrowException(type);
+			if (resolvedTargetId != null || futureResolvedReferences.containsValue(referenceElement)) {
+				if (futureResolvedReferences.containsValue(referenceElement)) {
+					futureResolvedReferences.put(pathAndRef, referenceElement);
+					continue;
+				}
+				myResourceLinkResolver.validateTypeOrThrowException(type);
 
-			ResourceLinkForLocalReferenceParams params = ResourceLinkForLocalReferenceParams.instance()
-					.setSourcePath(thePathAndRef.getPath())
+				ResourceLinkForLocalReferenceParams params = ResourceLinkForLocalReferenceParams.instance()
+					.setSourcePath(pathAndRef.getPath())
 					.setSourceResource(theEntity)
 					.setTargetResourceType(typeString)
 					.setTargetResourcePid(resolvedTargetId.getId())
@@ -721,69 +705,108 @@ public class SearchParamExtractorService {
 					.setTargetResourceVersion(targetVersionId)
 					.setTargetResourcePartitionablePartitionId(resolvedTargetId.getPartitionablePartitionId());
 
-			resourceLink = forLocalReference(params);
+				resourceLink = forLocalReference(params);
+				theNewParams.myLinks.add(resourceLink);
+			} else if (theFailOnInvalidReference) {
+				myResourceLinkResolver.validateTypeOrThrowException(type);
+				Optional<ResourceLink> optionalResourceLink =
+					findMatchingResourceLink(pathAndRef, theExistingParams.getResourceLinks());
 
-		} else if (theFailOnInvalidReference) {
-
-			/*
-			 * The reference points to another resource, so let's look it up. We need to do this
-			 * since the target may be a forced ID, but also so that we can throw an exception
-			 * if the reference is invalid
-			 */
-			myResourceLinkResolver.validateTypeOrThrowException(type);
-
-			/*
-			 * We need to obtain a resourceLink out of the provided {@literal thePathAndRef}.  In the case
-			 * where we are updating a resource that already has resourceLinks (stored in {@literal theExistingParams.getResourceLinks()}),
-			 * let's try to match thePathAndRef to an already existing resourceLink to avoid the
-			 * very expensive operation of creating a resourceLink that would end up being exactly the same
-			 * one we already have.
-			 */
-			Optional<ResourceLink> optionalResourceLink =
-					findMatchingResourceLink(thePathAndRef, theExistingParams.getResourceLinks());
-			if (optionalResourceLink.isPresent()) {
-				resourceLink = optionalResourceLink.get();
+				if (optionalResourceLink.isPresent()) {
+					resourceLink = optionalResourceLink.get();
+					// Cache the outcome in the current transaction in case there are more references
+					JpaPid persistentId = JpaPid.fromId(resourceLink.getTargetResourcePid());
+					theTransactionDetails.addResolvedResourceId(referenceElement, persistentId);
+					theNewParams.myLinks.add(resourceLink);
+				} else {
+					unresolvedReferences.add(pathAndRef);
+					futureResolvedReferences.put(pathAndRef, referenceElement);
+				}
 			} else {
-				resourceLink = resolveTargetAndCreateResourceLinkOrReturnNull(
-						theRequestPartitionId,
-						theSourceResourceName,
-						thePathAndRef,
-						theEntity,
-						transactionDate,
-						nextId,
-						theRequest,
-						theTransactionDetails);
-			}
-
-			if (resourceLink == null) {
-				return;
-			} else {
-				// Cache the outcome in the current transaction in case there are more references
-				JpaPid persistentId =
-						JpaPid.fromId(resourceLink.getTargetResourcePid(), resourceLink.getTargetResourcePartitionId());
-				persistentId.setPartitionablePartitionId(PartitionablePartitionId.with(
-						resourceLink.getTargetResourcePartitionId(), resourceLink.getTargetResourcePartitionDate()));
-				theTransactionDetails.addResolvedResourceId(referenceElement, persistentId);
-			}
-
-		} else {
-
-			/*
-			 * Just assume the reference is valid. This is used for in-memory matching since there
-			 * is no expectation of a database in this situation
-			 */
-			ResourceLinkForLocalReferenceParams params = ResourceLinkForLocalReferenceParams.instance()
-					.setSourcePath(thePathAndRef.getPath())
+				/*
+				 * Just assume the reference is valid. This is used for in-memory matching since there
+				 * is no expectation of a database in this situation
+				 */
+				ResourceLinkForLocalReferenceParams params = ResourceLinkForLocalReferenceParams.instance()
+					.setSourcePath(pathAndRef.getPath())
 					.setSourceResource(theEntity)
 					.setTargetResourceType(typeString)
 					.setTargetResourceId(targetId)
 					.setUpdated(transactionDate)
 					.setTargetResourceVersion(targetVersionId);
 
-			resourceLink = forLocalReference(params);
+				resourceLink = forLocalReference(params);
+				theNewParams.myLinks.add(resourceLink);
+			}
 		}
 
-		theNewParams.myLinks.add(resourceLink);
+		if (!unresolvedReferences.isEmpty()) {
+			Map<PathAndRef, ResourceLink> resourceLinks = resolveAndCreateResourceLinksInBatch(
+				theRequestPartitionId,
+				theSourceResourceName,
+				unresolvedReferences,
+				theEntity,
+				transactionDate,
+				theRequest,
+				theTransactionDetails);
+
+			theNewParams.myLinks.addAll(resourceLinks.values());
+			// Cache the outcome in the current transaction in case there are more references
+			resourceLinks.forEach((pathAndRef, resourceLink) -> {
+				JpaPid resolvedTargetId = JpaPid.fromId(resourceLink.getTargetResourcePid());
+				theTransactionDetails.addResolvedResourceId(
+					pathAndRef.getRef().getReferenceElement(), resolvedTargetId);
+			});
+
+			handleFutureResolvedReferences(
+				futureResolvedReferences, theTransactionDetails, theNewParams, theEntity, unresolvedReferences);
+		}
+
+		theNewParams.myPopulatedResourceLinkParameters.addAll(populatedSearchParamNames);
+	}
+
+	private void handleFutureResolvedReferences(
+		Multimap<PathAndRef, IIdType> theFutureResolvedReferences,
+		TransactionDetails theTransactionDetails,
+		ResourceIndexedSearchParams theNewParams,
+		ResourceTable theEntity,
+		Set<PathAndRef> unresolvedReferences) {
+		Date transactionDate = theTransactionDetails.getTransactionDate();
+		for (PathAndRef pathAndRef : theFutureResolvedReferences.keySet()) {
+			if (unresolvedReferences.contains(pathAndRef)) {
+				continue;
+			}
+			IIdType nextId = pathAndRef.getRef().getReferenceElement();
+			nextId = stripVersionIfNecessary(pathAndRef.getPath(), nextId);
+			String type = nextId.getResourceType();
+			RuntimeResourceDefinition resourceDefinition;
+			try {
+				resourceDefinition = myContext.getResourceDefinition(type);
+			} catch (DataFormatException e) {
+				String msg =
+					"Invalid resource reference found - Resource type is unknown or not supported on this server - "
+						+ nextId.getValue();
+				throw new InvalidRequestException(msg);
+			}
+
+			Class<? extends IBaseResource> resourceType = resourceDefinition.getImplementingClass();
+			myResourceLinkResolver.validateTypeOrThrowException(resourceType);
+
+			JpaPid resolvedTargetId = (JpaPid) theTransactionDetails.getResolvedResourceId(nextId);
+			if (resolvedTargetId != null) {
+				ResourceLinkForLocalReferenceParams params = ResourceLinkForLocalReferenceParams.instance()
+					.setSourcePath(pathAndRef.getPath())
+					.setSourceResource(theEntity)
+					.setTargetResourceType(type)
+					.setTargetResourcePid(resolvedTargetId.getId())
+					.setTargetResourceId(nextId.getIdPart())
+					.setUpdated(transactionDate)
+					.setTargetResourceVersion(nextId.getVersionIdPartAsLong())
+					.setTargetResourcePartitionablePartitionId(resolvedTargetId.getPartitionablePartitionId());
+				ResourceLink resourceLink = forLocalReference(params);
+				theNewParams.myLinks.add(resourceLink);
+			}
+		}
 	}
 
 	private Optional<ResourceLink> findMatchingResourceLink(
@@ -920,26 +943,29 @@ public class SearchParamExtractorService {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private ResourceLink resolveTargetAndCreateResourceLinkOrReturnNull(
-			@Nonnull RequestPartitionId theRequestPartitionId,
-			String theSourceResourceName,
-			PathAndRef thePathAndRef,
-			ResourceTable theEntity,
-			Date theUpdateTime,
-			IIdType theNextId,
-			RequestDetails theRequest,
-			TransactionDetails theTransactionDetails) {
-		JpaPid resolvedResourceId = (JpaPid) theTransactionDetails.getResolvedResourceId(theNextId);
+	private Map<PathAndRef, ResourceLink> resolveAndCreateResourceLinksInBatch(
+		@javax.annotation.Nonnull RequestPartitionId theRequestPartitionId,
+		String theSourceResourceName,
+		Set<PathAndRef> thePathAndRefs,
+		ResourceTable theEntity,
+		Date theUpdateTime,
+		RequestDetails theRequest,
+		TransactionDetails theTransactionDetails) {
+		Map<PathAndRef, ResourceLink> resolvedResourceLinks = new HashMap<>();
+		Map<PathAndRef, IIdType> unresolvedPathAndRefs = new HashMap<>();
+		for (PathAndRef nextPathAndRef : thePathAndRefs) {
+			IIdType nextId = nextPathAndRef.getRef().getReferenceElement();
+			String path = nextPathAndRef.getPath();
+			nextId = stripVersionIfNecessary(path, nextId);
+			JpaPid resolvedResourceId = (JpaPid) theTransactionDetails.getResolvedResourceId(nextId);
 
-		if (resolvedResourceId != null) {
-			String targetResourceType = theNextId.getResourceType();
-			Long targetResourcePid = resolvedResourceId.getId();
-			String targetResourceIdPart = theNextId.getIdPart();
-			Long targetVersion = theNextId.getVersionIdPartAsLong();
-
-			ResourceLinkForLocalReferenceParams params = ResourceLinkForLocalReferenceParams.instance()
-					.setSourcePath(thePathAndRef.getPath())
+			if (resolvedResourceId != null) {
+				String targetResourceType = nextId.getResourceType();
+				Long targetResourcePid = resolvedResourceId.getId();
+				String targetResourceIdPart = nextId.getIdPart();
+				Long targetVersion = nextId.getVersionIdPartAsLong();
+				ResourceLinkForLocalReferenceParams params = ResourceLinkForLocalReferenceParams.instance()
+					.setSourcePath(path)
 					.setSourceResource(theEntity)
 					.setTargetResourceType(targetResourceType)
 					.setTargetResourcePid(targetResourcePid)
@@ -948,7 +974,11 @@ public class SearchParamExtractorService {
 					.setTargetResourceVersion(targetVersion)
 					.setTargetResourcePartitionablePartitionId(resolvedResourceId.getPartitionablePartitionId());
 
-			return ResourceLink.forLocalReference(params);
+				ResourceLink resourceLink = ResourceLink.forLocalReference(params);
+				resolvedResourceLinks.put(nextPathAndRef, resourceLink);
+			} else {
+				unresolvedPathAndRefs.put(nextPathAndRef, nextId);
+			}
 		}
 
 		/*
@@ -958,61 +988,78 @@ public class SearchParamExtractorService {
 		 * target any more times than we have to.
 		 */
 
-		IResourceLookup<JpaPid> targetResource;
+		Map<PathAndRef, IResourceLookup> targetResources = new HashMap<>();
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			if (myPartitionSettings.getAllowReferencesAcrossPartitions() == ALLOWED_UNQUALIFIED) {
-
+			if (myPartitionSettings.getAllowReferencesAcrossPartitions()
+				== PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED) {
 				// Interceptor: Pointcut.JPA_CROSS_PARTITION_REFERENCE_DETECTED
 				IInterceptorBroadcaster compositeBroadcaster =
-						CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
 				if (compositeBroadcaster.hasHooks(Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE)) {
-					CrossPartitionReferenceDetails referenceDetails = new CrossPartitionReferenceDetails(
+					for (PathAndRef pathAndRef : unresolvedPathAndRefs.keySet()) {
+						CrossPartitionReferenceDetails referenceDetails = new CrossPartitionReferenceDetails(
 							theRequestPartitionId,
 							theSourceResourceName,
-							thePathAndRef,
+							pathAndRef,
 							theRequest,
 							theTransactionDetails);
-					HookParams params = new HookParams(referenceDetails);
-					targetResource = (IResourceLookup<JpaPid>) compositeBroadcaster.callHooksAndReturnObject(
+						HookParams params = new HookParams(referenceDetails);
+						IResourceLookup<JpaPid> targetResource = (IResourceLookup<JpaPid>) compositeBroadcaster.callHooksAndReturnObject(
 							Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE, params);
+						targetResources.put(pathAndRef, targetResource);
+					}
 				} else {
-					targetResource = myResourceLinkResolver.findTargetResource(
-							RequestPartitionId.allPartitions(),
-							theSourceResourceName,
-							thePathAndRef,
-							theRequest,
-							theTransactionDetails);
+					targetResources = myResourceLinkResolver.findTargetResource(
+						RequestPartitionId.allPartitions(),
+						theSourceResourceName,
+						unresolvedPathAndRefs.keySet(),
+						theRequest,
+						theTransactionDetails);
 				}
-
 			} else {
-				targetResource = myResourceLinkResolver.findTargetResource(
-						theRequestPartitionId, theSourceResourceName, thePathAndRef, theRequest, theTransactionDetails);
+				targetResources = myResourceLinkResolver.findTargetResource(
+					theRequestPartitionId,
+					theSourceResourceName,
+					unresolvedPathAndRefs.keySet(),
+					theRequest,
+					theTransactionDetails);
 			}
 		} else {
-			targetResource = myResourceLinkResolver.findTargetResource(
-					theRequestPartitionId, theSourceResourceName, thePathAndRef, theRequest, theTransactionDetails);
+			targetResources = myResourceLinkResolver.findTargetResource(
+				theRequestPartitionId,
+				theSourceResourceName,
+				unresolvedPathAndRefs.keySet(),
+				theRequest,
+				theTransactionDetails);
 		}
 
-		if (targetResource == null) {
-			return null;
+		if (targetResources != null) {
+			for (Map.Entry<PathAndRef, IResourceLookup> entry : targetResources.entrySet()) {
+				PathAndRef nextPathAndRef = entry.getKey();
+				IIdType nextId = unresolvedPathAndRefs.get(nextPathAndRef);
+				IResourceLookup<JpaPid> targetResource = (IResourceLookup<JpaPid>) entry.getValue();
+
+				String targetResourceType = targetResource.getResourceType();
+				Long targetResourcePid = targetResource.getPersistentId().getId();
+				String targetResourceIdPart = nextId.getIdPart();
+				Long targetVersion = nextId.getVersionIdPartAsLong();
+
+				ResourceLinkForLocalReferenceParams params = ResourceLinkForLocalReferenceParams.instance()
+					.setSourcePath(entry.getKey().getPath())
+					.setSourceResource(theEntity)
+					.setTargetResourceType(targetResourceType)
+					.setTargetResourcePid(targetResourcePid)
+					.setTargetResourceId(targetResourceIdPart)
+					.setUpdated(theUpdateTime)
+					.setTargetResourceVersion(targetVersion)
+					.setTargetResourcePartitionablePartitionId(targetResource.getPartitionId());
+
+				ResourceLink resourceLink = ResourceLink.forLocalReference(params);
+				resolvedResourceLinks.put(entry.getKey(), resourceLink);
+			}
 		}
 
-		String targetResourceType = targetResource.getResourceType();
-		Long targetResourcePid = targetResource.getPersistentId().getId();
-		String targetResourceIdPart = theNextId.getIdPart();
-		Long targetVersion = theNextId.getVersionIdPartAsLong();
-
-		ResourceLinkForLocalReferenceParams params = ResourceLinkForLocalReferenceParams.instance()
-				.setSourcePath(thePathAndRef.getPath())
-				.setSourceResource(theEntity)
-				.setTargetResourceType(targetResourceType)
-				.setTargetResourcePid(targetResourcePid)
-				.setTargetResourceId(targetResourceIdPart)
-				.setUpdated(theUpdateTime)
-				.setTargetResourceVersion(targetVersion)
-				.setTargetResourcePartitionablePartitionId(targetResource.getPartitionId());
-
-		return forLocalReference(params);
+		return resolvedResourceLinks;
 	}
 
 	private RequestPartitionId determineResolverPartitionId(@Nonnull RequestPartitionId theRequestPartitionId) {
@@ -1120,5 +1167,27 @@ public class SearchParamExtractorService {
 				compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_WARNING, params);
 			}
 		}
+	}
+
+	private void handleInvalidReference(boolean theFailOnInvalidReference, String theMessage) {
+		if (theFailOnInvalidReference) {
+			throw new InvalidRequestException(Msg.code(508) + theMessage);
+		} else {
+			ourLog.debug(theMessage);
+		}
+	}
+
+	private IIdType stripVersionIfNecessary(String path, IIdType nextId) {
+		if (shouldStripVersion( path, nextId)) {
+			nextId = nextId.toVersionless();
+		}
+
+		return nextId;
+	}
+
+	private boolean shouldStripVersion(String path, IIdType nextId) {
+		return myContext.getParserOptions().isStripVersionsFromReferences()
+			&& !myContext.getParserOptions().getDontStripVersionsFromReferencesAtPaths().contains(path)
+			&& nextId.hasVersionIdPart();
 	}
 }
