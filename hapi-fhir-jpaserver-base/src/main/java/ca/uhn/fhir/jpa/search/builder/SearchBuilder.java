@@ -1215,11 +1215,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
-	private void doLoadPids(Collection<JpaPid> thePids,
-							Collection<JpaPid> theIncludedPids,
-							List<IBaseResource> theResourceListToPopulate,
-							boolean theForHistoryOperation,
-							Map<Long, Integer> thePosition) {
+	private void doLoadPids(
+			Collection<JpaPid> thePids,
+			Collection<JpaPid> theIncludedPids,
+			List<IBaseResource> theResourceListToPopulate,
+			boolean theForHistoryOperation,
+			Map<Long, Integer> thePosition) {
 		Map<JpaPid, Long> resourcePidToVersion = null;
 		for (JpaPid next : thePids) {
 			if (next.getVersion() != null && myStorageSettings.isRespectVersionsForSearchIncludes()) {
