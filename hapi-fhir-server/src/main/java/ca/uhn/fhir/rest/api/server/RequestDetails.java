@@ -51,7 +51,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -59,7 +58,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public abstract class RequestDetails {
 	private static final Logger ourLog = LoggerFactory.getLogger(RequestDetails.class);
 	public static final byte[] BAD_STREAM_PLACEHOLDER =
-		(Msg.code(2543) + "PLACEHOLDER WHEN READING FROM BAD STREAM").getBytes(StandardCharsets.UTF_8);
+			(Msg.code(2543) + "PLACEHOLDER WHEN READING FROM BAD STREAM").getBytes(StandardCharsets.UTF_8);
 	private final StopWatch myRequestStopwatch;
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	private String myTenantId;
@@ -79,7 +78,7 @@ public abstract class RequestDetails {
 	private String mySecondaryOperation;
 	private boolean mySubRequest;
 	private Map<String, List<String>> myUnqualifiedToQualifiedNames;
-	private final Map<Object, Object> myUserData = new ConcurrentHashMap<>();
+	private final Map<Object, Object> myUserData = new UserDataMap();
 	private IBaseResource myResource;
 	private String myRequestId;
 	private String myTransactionGuid;
@@ -290,7 +289,10 @@ public abstract class RequestDetails {
 	 */
 	@Deprecated
 	public Object getAttribute(String theAttributeName) {
-		ourLog.error("{} is not a servlet request. Unable to get attribute {}", getClass().getName(), theAttributeName);
+		ourLog.error(
+				"{} is not a servlet request. Unable to get attribute {}",
+				getClass().getName(),
+				theAttributeName);
 		return null;
 	}
 
@@ -299,7 +301,10 @@ public abstract class RequestDetails {
 	 */
 	@Deprecated
 	public void setAttribute(String theAttributeName, Object theAttributeValue) {
-		ourLog.error("{} is not a servlet request. Unable to set attribute {}", getClass().getName(), theAttributeName);
+		ourLog.error(
+				"{} is not a servlet request. Unable to set attribute {}",
+				getClass().getName(),
+				theAttributeName);
 	}
 
 	/**
@@ -341,9 +346,9 @@ public abstract class RequestDetails {
 		}
 		if (needsSanitization) {
 			myParameters = myParameters.entrySet().stream()
-				.collect(
-					Collectors.toMap(t -> UrlUtil.sanitizeUrlPart((String) ((Map.Entry<?, ?>) t).getKey()), t ->
-						(String[]) ((Map.Entry<?, ?>) t).getValue()));
+					.collect(
+							Collectors.toMap(t -> UrlUtil.sanitizeUrlPart((String) ((Map.Entry<?, ?>) t).getKey()), t ->
+									(String[]) ((Map.Entry<?, ?>) t).getValue()));
 		}
 	}
 
@@ -467,7 +472,7 @@ public abstract class RequestDetails {
 						}
 						String unqualified = next.substring(0, i);
 						List<String> list =
-							myUnqualifiedToQualifiedNames.computeIfAbsent(unqualified, k -> new ArrayList<>(4));
+								myUnqualifiedToQualifiedNames.computeIfAbsent(unqualified, k -> new ArrayList<>(4));
 						list.add(next);
 						break;
 					}
