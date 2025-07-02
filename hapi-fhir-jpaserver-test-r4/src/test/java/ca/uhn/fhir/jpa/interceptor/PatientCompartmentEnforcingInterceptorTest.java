@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.interceptor;
 
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,15 +7,12 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
