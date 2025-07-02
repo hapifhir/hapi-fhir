@@ -69,6 +69,11 @@ public class ErrorHandlerAdapter implements IParserErrorHandler {
 	}
 
 	@Override
+	public void invalidInternalReference(IParseLocation theLocation, String theReference) {
+		// NOP
+	}
+
+	@Override
 	public void invalidValue(IParseLocation theLocation, String theValue, String theError) {
 		// NOP
 	}
