@@ -1,8 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -17,6 +15,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProviderR4Test {
@@ -77,9 +76,12 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 		// try updating observation's patient, which would cross partition boundaries
 		obs.getSubject().setReference("Patient/B");
 
-		InvalidRequestException thrown = assertThrows(InvalidRequestException.class, () -> myObservationDao.update(obs, new SystemRequestDetails()));
-		assertEquals("HAPI-2733: Failed to create/update resource \"Observation/" + obsId +
-				"\" in partition B because the same resource type and ID exist in another partition",
+		InvalidRequestException thrown = assertThrows(
+			InvalidRequestException.class,
+			() -> myObservationDao.update(obs, new SystemRequestDetails())
+		);
+		assertEquals("HAPI-2733: Failed to create/update resource [Observation/" + obsId + "] " +
+				"in partition B because a resource of the same type and ID is found in another partition",
 			thrown.getMessage()
 		);
 	}

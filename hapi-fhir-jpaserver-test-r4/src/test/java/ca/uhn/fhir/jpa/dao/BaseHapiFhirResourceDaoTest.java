@@ -305,7 +305,8 @@ class BaseHapiFhirResourceDaoTest {
 
 		// Verify
 		assertThat(exception.getMessage()).isEqualTo(
-			"HAPI-2733: Failed to create/update resource \"%s/%s\" in partition %s because the same resource type and ID exist in another partition"
+			("HAPI-2733: Failed to create/update resource [%s/%s] in partition %s because a resource of " +
+				"the same type and ID is found in another partition")
 				.formatted(RESOURCE_TYPE, RESOURCE_ID, requestPartitionId.getFirstPartitionNameOrNull()
 			));
 	}
