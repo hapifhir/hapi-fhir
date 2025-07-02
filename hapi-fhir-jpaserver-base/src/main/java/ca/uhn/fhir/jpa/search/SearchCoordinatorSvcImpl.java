@@ -78,6 +78,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -490,18 +491,14 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	 * part of an {@literal assert} statement to catch errors in tests.
 	 */
 	private boolean checkNoDuplicateParameters(SearchParameterMap theParams) {
+		HashSet<List<IQueryParameterType>> lists = new HashSet<>();
 		for (List<List<IQueryParameterType>> andList : theParams.values()) {
+
+			lists.clear();
 			for (int i = 0; i < andList.size(); i++) {
-				for (int j = 0; j < andList.size(); j++) {
-					if (i != j) {
-						List<IQueryParameterType> orListI = andList.get(i);
-						List<IQueryParameterType> orListJ = andList.get(j);
-						if (orListI.size() == orListJ.size() && !orListI.isEmpty()) {
-							if (orListI.equals(orListJ)) {
-								return false;
-							}
-						}
-					}
+				List<IQueryParameterType> orListI = andList.get(i);
+				if (!orListI.isEmpty() && !lists.add(orListI)) {
+					return false;
 				}
 			}
 		}
