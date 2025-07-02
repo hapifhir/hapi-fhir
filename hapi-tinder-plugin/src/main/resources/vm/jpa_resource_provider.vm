@@ -57,6 +57,8 @@ public class ${className}ResourceProvider extends
 			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_TEXT)
 			StringAndListParam theFtText, 
 
+## The _tag, _security and _profile parameters are added to the "${searchParams}"
+## list on DSTU3+, so we don't need to manually add them here
 #if ( $version == 'dstu2' )
 			@Description(shortDefinition="Search for resources which have the given tag")
 			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_TAG)
