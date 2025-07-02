@@ -176,7 +176,8 @@ public enum VersionEnum {
 	V8_0_0,
 	V8_0_1,
 	V8_1_0,
-	V8_2_0;
+	V8_2_0,
+	V8_2_1;
 
 	public static VersionEnum latestVersion() {
 		VersionEnum[] values = VersionEnum.values();
