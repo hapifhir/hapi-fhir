@@ -23,6 +23,7 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -128,7 +129,12 @@ public class JpaR4Config {
 
 	@Bean
 	public PatientMergeProvider patientMergeProvider(
-			FhirContext theFhirContext, DaoRegistry theDaoRegistry, ResourceMergeService theResourceMergeService) {
-		return new PatientMergeProvider(theFhirContext, theDaoRegistry, theResourceMergeService);
+			FhirContext theFhirContext,
+			DaoRegistry theDaoRegistry,
+			ResourceMergeService theResourceMergeService,
+			IInterceptorBroadcaster theInterceptorBroadcaster) {
+
+		return new PatientMergeProvider(
+				theFhirContext, theDaoRegistry, theResourceMergeService, theInterceptorBroadcaster);
 	}
 }

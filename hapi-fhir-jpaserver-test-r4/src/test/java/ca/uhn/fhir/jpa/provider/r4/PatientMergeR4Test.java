@@ -4,14 +4,18 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.model.api.IProvenanceAgent;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletResponse;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Encounter;
@@ -32,6 +36,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -78,12 +84,96 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 		myStorageSettings.setAllowMultipleDelete(true);
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
-
+		// we need to keep the version on Provenance.target fields to
+		// verify that Provenance resources were saved with versioned target references
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 		myTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
 		myTestHelper.beforeEach();
 	}
 
-	@ParameterizedTest
+	private void waitForAsyncTaskCompletion(Parameters theOutParams) {
+		assertThat(getLastHttpStatusCode()).isEqualTo(HttpServletResponse.SC_ACCEPTED);
+		Task task = (Task) theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
+		assertNull(task.getIdElement().getVersionIdPart());
+		ourLog.info("Got task {}", task.getId());
+		String jobId = myTestHelper.getJobIdFromTask(task);
+		myBatch2JobHelper.awaitJobCompletion(jobId);
+	}
+
+	private void validateTaskOutput(Parameters theOutParams) {
+		Task task = (Task) theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
+		Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
+		assertThat(taskWithOutput.getStatus()).isEqualTo(Task.TaskStatus.COMPLETED);
+		ourLog.info("Complete Task: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
+
+		Task.TaskOutputComponent taskOutput = taskWithOutput.getOutputFirstRep();
+
+		// Assert on the output type
+		Coding taskType = taskOutput.getType().getCodingFirstRep();
+		assertEquals(RESOURCE_TYPES_SYSTEM, taskType.getSystem());
+		assertEquals("Bundle", taskType.getCode());
+
+		List<Resource> containedResources = taskWithOutput.getContained();
+		assertThat(containedResources)
+			.hasSize(1)
+			.element(0)
+			.isInstanceOf(Bundle.class);
+
+		Bundle containedBundle = (Bundle) containedResources.get(0);
+
+		Reference outputRef = (Reference) taskOutput.getValue();
+		Bundle patchResultBundle = (Bundle) outputRef.getResource();
+		assertTrue(containedBundle.equalsDeep(patchResultBundle));
+		ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle,
+			ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES,
+			List.of("Observation", "Encounter", "CarePlan"));
+
+
+		OperationOutcome outcome = (OperationOutcome) theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
+		assertThat(outcome.getIssue())
+			.hasSize(1)
+			.element(0)
+			.satisfies(issue -> {
+				assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+				assertThat(issue.getDetails().getText()).isEqualTo("Merge request is accepted, and will be " +
+					"processed asynchronously. See task resource returned in this response for details.");
+			});
+	}
+
+	private void validateSyncOutcome(Parameters theOutParams) {
+		// Assert outcome
+		OperationOutcome outcome = (OperationOutcome) theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
+		assertThat(outcome.getIssue())
+			.hasSize(1)
+			.element(0)
+			.satisfies(issue -> {
+				assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+				assertThat(issue.getDetails().getText()).isEqualTo("Merge operation completed successfully.");
+			});
+
+		// In sync mode, the result patient is returned in the output,
+		// assert what is returned is the same as the one in the db
+		Patient targetPatientInOutput = (Patient) theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_RESULT).getResource();
+		Patient targetPatientReadFromDB = myTestHelper.readTargetPatient();
+		IParser parser = myFhirContext.newJsonParser();
+		assertThat(parser.encodeResourceToString(targetPatientInOutput)).isEqualTo(parser.encodeResourceToString(targetPatientReadFromDB));
+	}
+
+
+	private void validatePreviewModeOutcome(Parameters theOutParams) {
+		OperationOutcome outcome = (OperationOutcome) theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
+		assertThat(outcome.getIssue())
+			.hasSize(1)
+			.element(0)
+			.satisfies(issue -> {
+				assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+				assertThat(issue.getDetails().getText()).isEqualTo("Preview only merge operation - no issues detected");
+				assertThat(issue.getDiagnostics()).isEqualTo("Merge would update 25 resources");
+			});
+	}
+
+
+	@ParameterizedTest(name = "{index}: deleteSource={0}, resultPatient={1}, preview={2}, async={3}")
 	@CsvSource({
 		// withDelete, withInputResultPatient, withPreview, isAsync
 		"true, true, true, false",
@@ -122,9 +212,11 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		// exec
 		Parameters outParams = callMergeOperation(inParameters, isAsync);
 
-		// validate
-		// in async mode, there will be an additional task resource in the output params
-		assertThat(outParams.getParameter()).hasSizeBetween(3, 4);
+		// validate:
+		// the result will contain the input parameters, the outcome,
+		// and in sync and preview modes the resulting patient
+		// or in async mode the task resource instead of the resulting patient
+		assertThat(outParams.getParameter()).hasSize(3);
 
 		// Assert input
 		Parameters input = (Parameters) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_INPUT).getResource();
@@ -136,97 +228,93 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		}
 		assertTrue(input.equalsDeep(inParameters));
 
-
 		List<Identifier> expectedIdentifiersOnTargetAfterMerge =
 			myTestHelper.getExpectedIdentifiersForTargetAfterMerge(withInputResultPatient);
 
-		// Assert Task inAsync mode, unless it is preview in which case we don't return a task
-		if (isAsync && !withPreview) {
-			assertThat(getLastHttpStatusCode()).isEqualTo(HttpServletResponse.SC_ACCEPTED);
 
-			Task task = (Task) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
-			assertNull(task.getIdElement().getVersionIdPart());
-			ourLog.info("Got task {}", task.getId());
-			String jobId = myTestHelper.getJobIdFromTask(task);
-			myBatch2JobHelper.awaitJobCompletion(jobId);
+		if (withPreview) {
+			validatePreviewModeOutcome(outParams);
+			myTestHelper.assertNothingChanged();
+			//no more validation is needed in preview mode, so we can return early
+			return;
+		}
 
-			Task taskWithOutput = myTaskDao.read(task.getIdElement(), mySrd);
-			assertThat(taskWithOutput.getStatus()).isEqualTo(Task.TaskStatus.COMPLETED);
-			ourLog.info("Complete Task: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(taskWithOutput));
-
-			Task.TaskOutputComponent taskOutput = taskWithOutput.getOutputFirstRep();
-
-			// Assert on the output type
-			Coding taskType = taskOutput.getType().getCodingFirstRep();
-			assertEquals(RESOURCE_TYPES_SYSTEM, taskType.getSystem());
-			assertEquals("Bundle", taskType.getCode());
-
-			List<Resource> containedResources = taskWithOutput.getContained();
-			assertThat(containedResources)
-				.hasSize(1)
-				.element(0)
-				.isInstanceOf(Bundle.class);
-
-			Bundle containedBundle = (Bundle) containedResources.get(0);
-
-			Reference outputRef = (Reference) taskOutput.getValue();
-			Bundle patchResultBundle = (Bundle) outputRef.getResource();
-			assertTrue(containedBundle.equalsDeep(patchResultBundle));
-			ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle,
-				ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES,
-				List.of("Observation", "Encounter", "CarePlan"));
-
-			OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
-			assertThat(outcome.getIssue())
-				.hasSize(1)
-				.element(0)
-				.satisfies(issue -> {
-					assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
-					assertThat(issue.getDetails().getText()).isEqualTo("Merge request is accepted, and will be " +
-						"processed asynchronously. See task resource returned in this response for details.");
-				});
-
+		if (isAsync) {
+			waitForAsyncTaskCompletion(outParams);
+			validateTaskOutput(outParams);
 		} else { // Synchronous case
-			// Assert outcome
-			OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
-
-			if (withPreview) {
-				assertThat(outcome.getIssue())
-					.hasSize(1)
-					.element(0)
-					.satisfies(issue -> {
-						assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
-						assertThat(issue.getDetails().getText()).isEqualTo("Preview only merge operation - no issues detected");
-						assertThat(issue.getDiagnostics()).isEqualTo("Merge would update 25 resources");
-					});
-			} else {
-				assertThat(outcome.getIssue())
-					.hasSize(1)
-					.element(0)
-					.satisfies(issue -> {
-						assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
-						assertThat(issue.getDetails().getText()).isEqualTo("Merge operation completed successfully.");
-					});
-			}
-
-			// Assert Merged Patient
-			Patient mergedPatient = (Patient) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_RESULT).getResource();
-			List<Identifier> identifiers = mergedPatient.getIdentifier();
-
-			// TODO ED We can also validate that result patient returned here has the same id as the target patient.
-			// And maybe in not preview case, we should also read the target patient from the db and assert it equals to the result returned.
-			myTestHelper.assertIdentifiers(identifiers, expectedIdentifiersOnTargetAfterMerge);
+			validateSyncOutcome(outParams);
 		}
 
 		// Check that the linked resources were updated
-		if (withPreview) {
-			myTestHelper.assertNothingChanged();
-		} else {
-			myTestHelper.assertAllReferencesUpdated(withDelete);
-			myTestHelper.assertSourcePatientUpdatedOrDeleted(withDelete);
-			myTestHelper.assertTargetPatientUpdated(withDelete, expectedIdentifiersOnTargetAfterMerge);
-		}
+		myTestHelper.assertAllReferencesUpdated(withDelete);
+		myTestHelper.assertSourcePatientUpdatedOrDeletedAfterMerge(withDelete);
+		myTestHelper.assertTargetPatientUpdatedAfterMerge(withDelete, expectedIdentifiersOnTargetAfterMerge);
+		myTestHelper.assertMergeProvenance(withDelete, null);
 	}
+
+
+
+	@ParameterizedTest(name = "{index}: isAsync={0}, theAgentInterceptorReturnsMultipleAgents={1}")
+	@CsvSource (value = {
+		"false, false",
+		"false, true",
+		"true, false",
+		"true, true",
+	})
+	void testMerge_withProvenanceAgentInterceptor_Success(boolean theIsAsync, boolean theAgentInterceptorReturnsMultipleAgents) {
+
+		List<IProvenanceAgent> agents = new ArrayList<>();
+		agents.add(myTestHelper.createTestProvenanceAgent());
+		if (theAgentInterceptorReturnsMultipleAgents) {
+			agents.add(myTestHelper.createTestProvenanceAgent());
+		}
+		// this interceptor will be unregistered in @AfterEach of the base class, which unregisters all interceptors
+		ReplaceReferencesTestHelper.registerProvenanceAgentInterceptor(myServer.getRestfulServer(), agents);
+
+		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
+		myTestHelper.setSourceAndTarget(inParams);
+
+		Parameters inParameters = inParams.asParametersResource();
+
+		// exec
+		Parameters outParams = callMergeOperation(inParameters, theIsAsync);
+
+		if (theIsAsync) {
+			waitForAsyncTaskCompletion(outParams);
+			validateTaskOutput(outParams);
+		}
+		else { // Synchronous case
+			validateSyncOutcome(outParams);
+		}
+
+		myTestHelper.assertMergeProvenance(false, agents);
+	}
+
+	@ParameterizedTest(name = "{index}: isAsync={0}")
+	@CsvSource (value = {
+		"false",
+		"true"
+	})
+	void testMerge_withProvenanceAgentInterceptor_InterceptorReturnsNoAgent_ReturnsInternalError(boolean theIsAsync) {
+
+		// this interceptor will be unregistered in @AfterEach of the base class, which unregisters all interceptors
+		ReplaceReferencesTestHelper.registerProvenanceAgentInterceptor(myServer.getRestfulServer(), Collections.emptyList());
+
+		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
+		myTestHelper.setSourceAndTarget(inParams);
+
+		Parameters inParameters = inParams.asParametersResource();
+
+		assertThatThrownBy(() -> callMergeOperation(inParameters, theIsAsync)
+		).isInstanceOf(InternalErrorException.class)
+			.hasMessageContaining("HAPI-2723: No Provenance Agent was provided by any interceptor for Pointcut.PROVENANCE_AGENTS")
+			.extracting(InternalErrorException.class::cast)
+			.extracting(BaseServerResponseException::getStatusCode)
+			.isEqualTo(500);
+	}
+
+
 
 	@Test
 	void testMerge_smallResourceLimit() {
@@ -241,6 +329,61 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			.isInstanceOf(PreconditionFailedException.class)
 			.satisfies(ex -> assertThat(extractFailureMessage((BaseServerResponseException) ex)).isEqualTo("HAPI-2597: Number of resources with references to "+ myTestHelper.getSourcePatientId() + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'."));
 	}
+
+	@ParameterizedTest(name = "{index}: deleteSource={0}, async={1}")
+	@CsvSource({
+		"true, false",
+		"false, false",
+		"true, true",
+		"false, true",
+	})
+	void testMerge_sourceResourceWithoutAnyReference(boolean theDeleteSource, boolean theAsync) {
+
+		Patient sourcePatient = new Patient();
+		sourcePatient = (Patient) myPatientDao.create(sourcePatient, mySrd).getResource();
+
+		Patient targetPatient = new Patient();
+		targetPatient = (Patient) myPatientDao.create(targetPatient, mySrd).getResource();
+
+		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
+		inParams.sourcePatient = new Reference(sourcePatient.getIdElement().toVersionless());
+		inParams.targetPatient = new Reference(targetPatient.getIdElement().toVersionless());
+		if (theDeleteSource) {
+			inParams.deleteSource = true;
+		}
+
+		Parameters outParams = callMergeOperation(inParams.asParametersResource(), theAsync);
+
+		if (theAsync) {
+			waitForAsyncTaskCompletion(outParams);
+		}
+
+		IIdType theExpectedTargetIdWithVersion = targetPatient.getIdElement().withVersion("2");
+		if (theDeleteSource) {
+			// the source resource is being deleted and there is no identifiers to copy over to the target,
+			// so, in this version of the test, the target is not actually updated. Its version will remain the same.
+			theExpectedTargetIdWithVersion = targetPatient.getIdElement().withVersion("1");
+		}
+
+		myTestHelper.assertTargetPatientUpdatedAfterMerge(
+			targetPatient.getIdElement(),
+			sourcePatient.getIdElement(),
+			theDeleteSource,
+			Collections.emptyList()
+		);
+
+		myTestHelper.assertSourcePatientUpdatedOrDeletedAfterMerge(sourcePatient.getIdElement(),
+			targetPatient.getIdElement(),
+			theDeleteSource);
+
+		myTestHelper.assertMergeProvenance(theDeleteSource,
+			sourcePatient.getIdElement().withVersion("2"),
+			theExpectedTargetIdWithVersion,
+			0,
+			Collections.EMPTY_SET,
+			null);
+	}
+
 
 	@Test
 	void testMerge_SourceResourceCannotBeDeletedBecauseAnotherResourceReferencingSourceWasAddedWhileJobIsRunning_JobFails() {
@@ -280,7 +423,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		assertThat(taskAfterJobFailure.getStatus()).isEqualTo(Task.TaskStatus.FAILED);
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name = "{index}: deleteSource={0}, resultPatient={1}, preview={2}")
 	@CsvSource({
 		// withDelete, withInputResultPatient, withPreview
 		"true, true, true",
@@ -301,7 +444,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	}
 
 
-	@ParameterizedTest
+	@ParameterizedTest(name = "{index}: deleteSource={0}, resultPatient={1}, preview={2}")
 	@CsvSource({
 		// withDelete, withInputResultPatient, withPreview
 		"true, true, true",
@@ -323,7 +466,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	void test_MissingRequiredParameters_Returns400BadRequest() {
-		assertThatThrownBy(() -> callMergeOperation(new Parameters())
+		Parameters params = new Parameters();
+		assertThatThrownBy(() -> callMergeOperation(params)
 		).isInstanceOf(InvalidRequestException.class)
 			.extracting(InvalidRequestException.class::cast)
 			.extracting(BaseServerResponseException::getStatusCode)
@@ -361,8 +505,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	class MyExceptionHandler implements TestExecutionExceptionHandler {
 		@Override
 		public void handleTestExecutionException(ExtensionContext theExtensionContext, Throwable theThrowable) throws Throwable {
-			if (theThrowable instanceof BaseServerResponseException) {
-				BaseServerResponseException ex = (BaseServerResponseException) theThrowable;
+			if (theThrowable instanceof BaseServerResponseException ex) {
 				String message = extractFailureMessage(ex);
 				throw ex.getClass().getDeclaredConstructor(String.class, Throwable.class).newInstance(message, ex);
 			}
