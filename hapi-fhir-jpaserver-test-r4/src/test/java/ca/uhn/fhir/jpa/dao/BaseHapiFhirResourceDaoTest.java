@@ -76,10 +76,10 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -265,13 +265,10 @@ class BaseHapiFhirResourceDaoTest {
 		entity.setResourceType(RESOURCE_TYPE);
 		entity.setFhirId(RESOURCE_ID);
 
-		// Execute
-		mySvc.validatePartitionIdMatch(requestId, requestPartitionId, entity);
-
-		// Verify
-		assertTrue(true, "No exception should be thrown when resource type, Id and partition all match");
-
+		// Execute/Verify
+		assertDoesNotThrow(() -> mySvc.validatePartitionIdMatch(requestId, requestPartitionId, entity));
 	}
+
 	@Test
 	public void testValidatePartitionIdMatch_doNothingOnAllPartitions() {
 		// set up
@@ -280,10 +277,7 @@ class BaseHapiFhirResourceDaoTest {
 		ResourceTable entity = new ResourceTable();
 
 		// Execute
-		mySvc.validatePartitionIdMatch(requestId, requestPartitionId, entity);
-
-		// Verify
-		assertTrue(true, "No exception should be thrown when partition ID is all partitions");
+		assertDoesNotThrow(() -> mySvc.validatePartitionIdMatch(requestId, requestPartitionId, entity));
 	}
 
 	@Test

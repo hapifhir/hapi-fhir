@@ -2850,6 +2850,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * @param theEntity             The entity being updated
 	 * @throws InvalidRequestException if the partition IDs do not match for the same resource type and FHIR ID
 	 */
+	@VisibleForTesting
 	protected void validatePartitionIdMatch(
 			@Nonnull IIdType theResourceIdType,
 			@Nonnull RequestPartitionId theRequestPartitionId,
@@ -2860,9 +2861,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		boolean sameResType = StringUtils.equals(theEntity.getResourceType(), theResourceIdType.getResourceType());
 		boolean sameFhirId = StringUtils.equals(theResourceIdType.getIdPart(), theEntity.getFhirId());
-		boolean differentPartition = !Objects.equals(
-				theRequestPartitionId.getFirstPartitionIdOrNull(),
-				theEntity.getPartitionId().getPartitionId());
+		boolean differentPartition =
+				!theRequestPartitionId.isPartition(theEntity.getPartitionId().getPartitionId());
 
 		if (sameResType && sameFhirId && differentPartition) {
 			String msg = getContext()
