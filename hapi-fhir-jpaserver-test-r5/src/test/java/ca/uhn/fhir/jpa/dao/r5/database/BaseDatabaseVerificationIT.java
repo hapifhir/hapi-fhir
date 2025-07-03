@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
-import ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension;
 import ca.uhn.fhir.jpa.embedded.JpaEmbeddedDatabase;
 import ca.uhn.fhir.jpa.embedded.HapiForeignKeyIndexHelper;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
@@ -40,7 +39,6 @@ import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Practitioner;
 import org.hl7.fhir.r5.model.PractitionerRole;
 import org.hl7.fhir.r5.model.Reference;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -459,49 +457,51 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	@Test
 	@Order(9999)
 	public void testSchemaMigration() throws SQLException {
-		// ensure all migrations are run
-		ca.uhn.fhir.system.HapiSystemProperties.disableUnitTestMode();
+		try {
+			ca.uhn.fhir.system.HapiSystemProperties.disableUnitTestMode();
+			DriverTypeEnum theDriverType = myJpaEmbeddedDatabase.getDriverType();
+			JpaEmbeddedDatabase database = myJpaEmbeddedDatabase;
 
-		DriverTypeEnum theDriverType = myJpaEmbeddedDatabase.getDriverType();
-		JpaEmbeddedDatabase database = myJpaEmbeddedDatabase;
+			ourLog.info("Running hapi fhir migration tasks for {}", theDriverType);
 
-		ourLog.info("Running hapi fhir migration tasks for {}", theDriverType);
+			// Clear the database first since it may already have schema from the application context
+			database.clearDatabase();
 
-		// Clear the database first since it may already have schema from the application context
-		database.clearDatabase();
+			// Initialize persistence schema and test data
+			initializePersistenceSchema(database, theDriverType);
+			insertPersistenceTestData(database, theDriverType, ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION);
 
-		// Initialize persistence schema and test data
-		initializePersistenceSchema(database, theDriverType);
-		insertPersistenceTestData(database, theDriverType, ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION);
+			DataSource dataSource = database.getDataSource();
+			HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(dataSource, theDriverType, HAPI_FHIR_MIGRATION_TABLENAME);
+			HapiMigrationStorageSvc hapiMigrationStorageSvc = new HapiMigrationStorageSvc(hapiMigrationDao);
 
-		DataSource dataSource = database.getDataSource();
-		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(dataSource, theDriverType, HAPI_FHIR_MIGRATION_TABLENAME);
-		HapiMigrationStorageSvc hapiMigrationStorageSvc = new HapiMigrationStorageSvc(hapiMigrationDao);
+			for (VersionEnum aVersion : VersionEnum.values()) {
+				ourLog.info("Applying migrations for {}", aVersion);
+				migrate(theDriverType, dataSource, hapiMigrationStorageSvc, aVersion);
 
-		for (VersionEnum aVersion : VersionEnum.values()) {
-			ourLog.info("Applying migrations for {}", aVersion);
-			migrate(theDriverType, dataSource, hapiMigrationStorageSvc, aVersion);
-
-			if (aVersion.isNewerThan(ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION)) {
-				maybeInsertPersistenceTestData(database, theDriverType, aVersion);
+				if (aVersion.isNewerThan(ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION)) {
+					maybeInsertPersistenceTestData(database, theDriverType, aVersion);
+				}
 			}
-		}
 
-		if (theDriverType == DriverTypeEnum.POSTGRES_9_4) {
-			// we only run this for postgres because:
-			// 1 we only really need to check one db
-			// 2 H2 automatically adds indexes to foreign keys automatically (and so cannot be used)
-			// 3 Oracle doesn't run on everyone's machine (and is difficult to do so)
-			// 4 Postgres is generally the fastest/least terrible relational db supported
-			new HapiForeignKeyIndexHelper()
-				.ensureAllForeignKeysAreIndexed(dataSource);
-		}
+			if (theDriverType == DriverTypeEnum.POSTGRES_9_4) {
+				// we only run this for postgres because:
+				// 1 we only really need to check one db
+				// 2 H2 automatically adds indexes to foreign keys automatically (and so cannot be used)
+				// 3 Oracle doesn't run on everyone's machine (and is difficult to do so)
+				// 4 Postgres is generally the fastest/least terrible relational db supported
+				new HapiForeignKeyIndexHelper()
+					.ensureAllForeignKeysAreIndexed(dataSource);
+			}
 
-		verifyForcedIdMigration(dataSource);
-		verifyHfjResSearchUrlMigration(database, theDriverType);
-		verifyTrm_Concept_Desig(database, theDriverType);
-		verifyHfjResourceFhirIdCollation(database, theDriverType);
-		ca.uhn.fhir.system.HapiSystemProperties.enableUnitTestMode();
+			verifyForcedIdMigration(dataSource);
+			verifyHfjResSearchUrlMigration(database, theDriverType);
+			verifyTrm_Concept_Desig(database, theDriverType);
+			verifyHfjResourceFhirIdCollation(database, theDriverType);
+
+		} finally {
+			ca.uhn.fhir.system.HapiSystemProperties.enableUnitTestMode();
+		}
 	}
 
 	private void verifyHfjResourceFhirIdCollation(JpaEmbeddedDatabase database, DriverTypeEnum theDriverType) throws SQLException {
@@ -513,7 +513,7 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 					WHERE name = 'master'
 				""";
 
-				final Map<String, Object> databaseCollationRow = querySingleRow(connection, databaseCollationSql);
+				final Map<String, Object> databaseCollationRow = queryFirstRow(connection, databaseCollationSql);
 				assertThat(databaseCollationRow.get("collation_name")).isEqualTo(COLLATION_CASE_INSENSITIVE);
 
 				final String tableColumnSql = """
@@ -528,7 +528,7 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 					AND c.name = 'FHIR_ID';
 				""";
 
-				final Map<String, Object> tableColumnCollationRow = querySingleRow(connection, tableColumnSql);
+				final Map<String, Object> tableColumnCollationRow = queryFirstRow(connection, tableColumnSql);
 				assertThat(tableColumnCollationRow.get("collation_name")).isEqualTo(COLLATION_CASE_SENSITIVE);
 
 				// We have not changed the database collation, so we can reference the table and column names with the wrong
@@ -539,7 +539,7 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 					WHERE fhir_id = '2029'
 				""";
 
-				final Map<String, Object> fhirIdRow = querySingleRow(connection, fhirIdSql);
+				final Map<String, Object> fhirIdRow = queryFirstRow(connection, fhirIdSql);
 				assertThat(fhirIdRow.get("fhir_id")).isEqualTo("2029");
 			}
 		}
@@ -592,7 +592,7 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 			.orElse(NULL_PLACEHOLDER));
 	}
 
-	private Map<String,Object> querySingleRow(Connection connection, String theSql) throws SQLException {
+	private Map<String,Object> queryFirstRow(Connection connection, String theSql) throws SQLException {
 		final Map<String, Object> row = new HashMap<>();
 		try (final PreparedStatement preparedStatement = connection.prepareStatement(theSql)) {
 			try (final ResultSet resultSet = preparedStatement.executeQuery()) {
