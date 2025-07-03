@@ -57,7 +57,7 @@ public class ReplaceReferenceUpdateStep<PT extends ReplaceReferencesJobParameter
 			throws JobExecutionFailedException {
 
 		ReplaceReferencesJobParameters params = theStepExecutionDetails.getParameters();
-		ReplaceReferencesRequest replaceReferencesRequest = params.asReplaceReferencesRequest();
+		ReplaceReferencesRequest replaceReferencesRequest = params.asReplaceReferencesRequest(myFhirContext);
 		List<IdDt> fhirIds = theStepExecutionDetails.getData().getFhirIds().stream()
 				.map(FhirIdJson::asIdDt)
 				.collect(Collectors.toList());

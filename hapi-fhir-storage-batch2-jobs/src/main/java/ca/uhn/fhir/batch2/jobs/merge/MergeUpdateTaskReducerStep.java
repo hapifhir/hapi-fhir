@@ -30,22 +30,34 @@ import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceUpdateTaskReduc
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Patient;
 
 public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReducerStep<MergeJobParameters> {
 	private final IHapiTransactionService myHapiTransactionService;
+	private final MergeResourceHelper myMergeResourceHelper;
+	private final MergeProvenanceSvc myMergeProvenanceSvc;
+	private final IFhirResourceDao<Patient> myPatientDao;
 
-	public MergeUpdateTaskReducerStep(DaoRegistry theDaoRegistry, IHapiTransactionService theHapiTransactionService) {
-		super(theDaoRegistry);
+	public MergeUpdateTaskReducerStep(
+			DaoRegistry theDaoRegistry,
+			IHapiTransactionService theHapiTransactionService,
+			MergeResourceHelper theMergeResourceHelper,
+			MergeProvenanceSvc theMergeProvenanceSvc) {
+		super(theDaoRegistry, theMergeProvenanceSvc);
 		this.myHapiTransactionService = theHapiTransactionService;
+		myMergeResourceHelper = theMergeResourceHelper;
+		myMergeProvenanceSvc = theMergeProvenanceSvc;
+		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);
 	}
 
 	@Override
 	public IReductionStepWorker<MergeJobParameters, ReplaceReferencePatchOutcomeJson, ReplaceReferenceResultsJson>
 			newInstance() {
-		return new MergeUpdateTaskReducerStep(myDaoRegistry, myHapiTransactionService);
+		return new MergeUpdateTaskReducerStep(
+				myDaoRegistry, myHapiTransactionService, myMergeResourceHelper, myMergeProvenanceSvc);
 	}
 
 	@Nonnull
@@ -59,24 +71,37 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 		SystemRequestDetails requestDetails =
 				SystemRequestDetails.forRequestPartitionId(mergeJobParameters.getPartitionId());
 
-		Patient resultResource = null;
+		Patient resultResource;
 		if (mergeJobParameters.getResultResource() != null) {
 			resultResource =
 					myFhirContext.newJsonParser().parseResource(Patient.class, mergeJobParameters.getResultResource());
+		} else {
+			resultResource = null;
 		}
 
-		IFhirResourceDao<Patient> patientDao = myDaoRegistry.getResourceDao(Patient.class);
+		return myHapiTransactionService.withRequest(requestDetails).execute(() -> {
+			Patient sourceResource =
+					myPatientDao.read(mergeJobParameters.getSourceId().asIdDt(), requestDetails);
+			Patient targetResource =
+					myPatientDao.read(mergeJobParameters.getTargetId().asIdDt(), requestDetails);
 
-		MergeResourceHelper helper = new MergeResourceHelper(patientDao);
+			Patient updatedTarget = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
+					sourceResource,
+					targetResource,
+					resultResource,
+					mergeJobParameters.getDeleteSource(),
+					requestDetails);
 
-		helper.updateMergedResourcesAfterReferencesReplaced(
-				myHapiTransactionService,
-				mergeJobParameters.getSourceId().asIdDt(),
-				mergeJobParameters.getTargetId().asIdDt(),
-				resultResource,
-				mergeJobParameters.getDeleteSource(),
-				requestDetails);
+			if (!mergeJobParameters.getDeleteSource()) {
+				// if the source resource is deleted, don't include the source resource in the provenance as per the
+				// merge spec.
+				mergeJobParameters.setSourceVersionForProvenance(
+						sourceResource.getIdElement().getVersionIdPart());
+			}
+			mergeJobParameters.setTargetVersionForProvenance(
+					updatedTarget.getIdElement().getVersionIdPart());
 
-		return super.run(theStepExecutionDetails, theDataSink);
+			return super.run(theStepExecutionDetails, theDataSink);
+		});
 	}
 }

@@ -25,10 +25,14 @@ import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Bundle;
@@ -46,13 +50,16 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 	protected final FhirContext myFhirContext;
 	protected final DaoRegistry myDaoRegistry;
 	private final IFhirResourceDao<Task> myTaskDao;
+	private final ReplaceReferencesProvenanceSvc myProvenanceSvc;
 
 	private List<Bundle> myPatchOutputBundles = new ArrayList<>();
 
-	public ReplaceReferenceUpdateTaskReducerStep(DaoRegistry theDaoRegistry) {
+	public ReplaceReferenceUpdateTaskReducerStep(
+			DaoRegistry theDaoRegistry, ReplaceReferencesProvenanceSvc theProvenanceSvc) {
 		myDaoRegistry = theDaoRegistry;
 		myTaskDao = myDaoRegistry.getResourceDao(Task.class);
 		myFhirContext = theDaoRegistry.getFhirContext();
+		myProvenanceSvc = theProvenanceSvc;
 	}
 
 	@Nonnull
@@ -67,7 +74,7 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 
 	@Override
 	public IReductionStepWorker<PT, ReplaceReferencePatchOutcomeJson, ReplaceReferenceResultsJson> newInstance() {
-		return new ReplaceReferenceUpdateTaskReducerStep<>(myDaoRegistry);
+		return new ReplaceReferenceUpdateTaskReducerStep<>(myDaoRegistry, myProvenanceSvc);
 	}
 
 	@Nonnull
@@ -80,24 +87,29 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 		try {
 			ReplaceReferencesJobParameters params = theStepExecutionDetails.getParameters();
 			SystemRequestDetails requestDetails = SystemRequestDetails.forRequestPartitionId(params.getPartitionId());
-			Task task = myTaskDao.read(params.getTaskId().asIdDt(), requestDetails);
 
-			task.setStatus(Task.TaskStatus.COMPLETED);
-			// TODO KHS this Task will probably be too large for large jobs. Revisit this model once we support
-			// Provenance
-			// resources.
-			myPatchOutputBundles.forEach(outputBundle -> {
-				Task.TaskOutputComponent output = task.addOutput();
-				Coding coding = output.getType().getCodingFirstRep();
-				coding.setSystem(RESOURCE_TYPES_SYSTEM);
-				coding.setCode("Bundle");
-				Reference outputBundleReference =
-						new Reference("#" + outputBundle.getIdElement().getIdPart());
-				output.setValue(outputBundleReference);
-				task.addContained(outputBundle);
-			});
+			updateTask(params.getTaskId(), requestDetails);
 
-			myTaskDao.update(task, requestDetails);
+			if (params.getCreateProvenance()) {
+
+				IdDt targetIdVersioned =
+						params.getTargetId().asIdDt().withVersion(params.getTargetVersionForProvenance());
+				// this code is shared by the async $merge jobs, in which case the source resource could be
+				// deleted, and if that is the case, we don't include the source version in the provenance as
+				// per the merge spec.
+				IdDt sourceIdVersioned = null;
+				if (params.getSourceVersionForProvenance() != null) {
+					sourceIdVersioned =
+							params.getSourceId().asIdDt().withVersion(params.getSourceVersionForProvenance());
+				}
+				myProvenanceSvc.createProvenance(
+						targetIdVersioned,
+						sourceIdVersioned,
+						myPatchOutputBundles,
+						theStepExecutionDetails.getInstance().getStartTime(),
+						requestDetails,
+						ProvenanceAgentJson.toIProvenanceAgents(params.getProvenanceAgents(), myFhirContext));
+			}
 
 			ReplaceReferenceResultsJson result = new ReplaceReferenceResultsJson();
 			result.setTaskId(params.getTaskId());
@@ -111,5 +123,29 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 			// this finally block out
 			myPatchOutputBundles.clear();
 		}
+	}
+
+	protected void updateTask(FhirIdJson theTaskId, RequestDetails theRequestDetails) {
+		Task task = myTaskDao.read(theTaskId.asIdDt(), theRequestDetails);
+		task.setStatus(Task.TaskStatus.COMPLETED);
+
+		// TODO KHS this Task will probably be too large for large jobs. Revisit this model once we support
+		// Provenance resources.
+		myPatchOutputBundles.forEach(outputBundle -> {
+			Task.TaskOutputComponent output = task.addOutput();
+			Coding coding = output.getType().getCodingFirstRep();
+			coding.setSystem(RESOURCE_TYPES_SYSTEM);
+			coding.setCode("Bundle");
+			Reference outputBundleReference =
+					new Reference("#" + outputBundle.getIdElement().getIdPart());
+			output.setValue(outputBundleReference);
+			task.addContained(outputBundle);
+		});
+
+		myTaskDao.update(task, theRequestDetails);
+	}
+
+	protected List<Bundle> getPatchOutputBundles() {
+		return myPatchOutputBundles;
 	}
 }

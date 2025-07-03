@@ -478,12 +478,6 @@ public class MyEpisodeOfCareFHIR extends EpisodeOfCare {
 
 	@Override
 	@Deprecated
-	public List getAccountTarget() {
-		throw new UnsupportedOperationException("Deprecated method");
-	}
-
-	@Override
-	@Deprecated
 	public List getDiagnosis() {
 		throw new UnsupportedOperationException("Deprecated method");
 	}
@@ -500,11 +494,6 @@ public class MyEpisodeOfCareFHIR extends EpisodeOfCare {
 		throw new UnsupportedOperationException("Deprecated method");
 	}
 
-	@Override
-	@Deprecated
-	public List getReferralRequestTarget() {
-		throw new UnsupportedOperationException("Deprecated method");
-	}
 
 	@Override
 	@Deprecated
@@ -518,21 +507,10 @@ public class MyEpisodeOfCareFHIR extends EpisodeOfCare {
 		throw new UnsupportedOperationException("Deprecated method");
 	}
 
-	@Override
-	@Deprecated
-	public List getTeamTarget() {
-		throw new UnsupportedOperationException("Deprecated method");
-	}
 
 	@Override
 	@Deprecated
 	public List getType() {
-		throw new UnsupportedOperationException("Deprecated method");
-	}
-
-	@Override
-	@Deprecated
-	public Account addAccountTarget() {
 		throw new UnsupportedOperationException("Deprecated method");
 	}
 
@@ -563,12 +541,6 @@ public class MyEpisodeOfCareFHIR extends EpisodeOfCare {
 	@Override
 	@Deprecated
 	public Base[] getProperty(int p0, String p1, boolean p2) {
-		throw new UnsupportedOperationException("Deprecated method");
-	}
-
-	@Override
-	@Deprecated
-	public CareTeam addTeamTarget() {
 		throw new UnsupportedOperationException("Deprecated method");
 	}
 
@@ -845,12 +817,6 @@ public class MyEpisodeOfCareFHIR extends EpisodeOfCare {
 	@Override
 	@Deprecated
 	public Reference getTeamFirstRep() {
-		throw new UnsupportedOperationException("Deprecated method");
-	}
-
-	@Override
-	@Deprecated
-	public ReferralRequest addReferralRequestTarget() {
 		throw new UnsupportedOperationException("Deprecated method");
 	}
 
