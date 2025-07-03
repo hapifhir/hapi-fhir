@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import org.hl7.fhir.r4.model.Task;
 import org.springframework.context.annotation.Bean;
@@ -86,9 +87,25 @@ public class MergeAppCtx {
 	}
 
 	@Bean
+	public MergeProvenanceSvc mergeProvenanceSvc(DaoRegistry theDaoRegistry) {
+		return new MergeProvenanceSvc(theDaoRegistry);
+	}
+
+	@Bean
+	public MergeResourceHelper mergeResourceHelper(
+			DaoRegistry theDaoRegistry, MergeProvenanceSvc theMergeProvenanceSvc) {
+
+		return new MergeResourceHelper(theDaoRegistry, theMergeProvenanceSvc);
+	}
+
+	@Bean
 	public MergeUpdateTaskReducerStep mergeUpdateTaskStep(
-			DaoRegistry theDaoRegistry, IHapiTransactionService theHapiTransactionService) {
-		return new MergeUpdateTaskReducerStep(theDaoRegistry, theHapiTransactionService);
+			DaoRegistry theDaoRegistry,
+			IHapiTransactionService theHapiTransactionService,
+			MergeResourceHelper theMergeResourceHelper,
+			MergeProvenanceSvc theMergeProvenanceSvc) {
+		return new MergeUpdateTaskReducerStep(
+				theDaoRegistry, theHapiTransactionService, theMergeResourceHelper, theMergeProvenanceSvc);
 	}
 
 	@Bean
