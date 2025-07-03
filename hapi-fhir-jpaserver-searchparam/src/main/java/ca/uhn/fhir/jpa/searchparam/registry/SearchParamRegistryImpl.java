@@ -427,7 +427,12 @@ public class SearchParamRegistryImpl
 		RuntimeSearchParam existingParam = theSearchParams.getByUrl(url);
 		if (existingParam != null) {
 			if (isNotBlank(existingParam.getName()) && !existingParam.getName().equals(runtimeSp.getName())) {
-				ourLog.warn("Existing SearchParameter with URL[{}] and name[{}] doesn't match name[{}] found on SearchParameter: {}", url, existingParam.getName(), runtimeSp.getName(), runtimeSp.getId());
+				ourLog.warn(
+						"Existing SearchParameter with URL[{}] and name[{}] doesn't match name[{}] found on SearchParameter: {}",
+						url,
+						existingParam.getName(),
+						runtimeSp.getName(),
+						runtimeSp.getId());
 			} else {
 				Set<String> expandedBases = expandBaseList(existingParam.getBase());
 				for (String base : expandedBases) {
