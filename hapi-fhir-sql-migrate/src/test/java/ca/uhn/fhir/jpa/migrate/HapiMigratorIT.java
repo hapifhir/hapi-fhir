@@ -78,7 +78,8 @@ class HapiMigratorIT {
 		System.clearProperty(HapiMigrationLock.CLEAR_LOCK_TABLE_WITH_DESCRIPTION);
 	}
 
-	@ParameterizedTest
+/** We test initialization in two cases: an empty database, and one that has been manually filled by running the schema sql to verify initialization doesn't try to re-install on top and detects that it is still "initializing". */
+		@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testInitializeSchema(boolean thePreCreateSchema) {
 		if (thePreCreateSchema) {
