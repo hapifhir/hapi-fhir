@@ -1,6 +1,0 @@
----
-type: fix
-issue: 7088
-backport: 8.2.1
-title: "A regression in HAPI FHIR 8.0.0 meant that the configured maximum export file sizes were not
-   respected. This has been corrected."
