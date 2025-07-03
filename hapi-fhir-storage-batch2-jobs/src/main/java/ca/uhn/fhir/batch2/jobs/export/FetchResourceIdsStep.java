@@ -90,10 +90,11 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		 */
 		List<String> resourceTypesToFetch;
 		if (theStepExecutionDetails.getParameters().getExportStyle() == BulkExportJobParameters.ExportStyle.PATIENT) {
-			Collection<String> omitted = mySearchLimiterSvc.getResourcesToOmitForOperationSearches(ProviderConstants.OPERATION_EXPORT);
+			Collection<String> omitted =
+					mySearchLimiterSvc.getResourcesToOmitForOperationSearches(ProviderConstants.OPERATION_EXPORT);
 			resourceTypesToFetch = params.getResourceTypes().stream()
-				.filter(r -> !omitted.contains(r))
-				.toList();
+					.filter(r -> !omitted.contains(r))
+					.toList();
 		} else {
 			resourceTypesToFetch = params.getResourceTypes().stream().toList();
 		}

@@ -123,7 +123,6 @@ public class ServerOperations {
 	}
 	// END SNIPPET: serverOperation
 
-
 	private ISearchLimiterSvc mySearchLimiterSvc;
 
 	// START SNIPPET: resourceTypeFiltering
