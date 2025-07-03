@@ -551,6 +551,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		patient.getManagingOrganization().setReference(orgId);
 		IIdType patId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
+		map = SearchParameterMap.newSynchronous();
 		map.add("_id", new StringParam(orgId.getIdPart()));
 		map.addRevInclude(new Include("*"));
 		found = toUnqualifiedVersionlessIds(myOrganizationDao.search(map));

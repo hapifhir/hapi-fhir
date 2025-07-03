@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -55,6 +57,16 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
         myStorageSettings.setLanguageSearchParameterEnabled(defaults.isLanguageSearchParameterEnabled());
         mySearchParamRegistry.forceRefresh();
     }
+
+	@Test
+	public void testSearchWithDuplicateIdenticalParametersRejected() {
+		SearchParameterMap params = new SearchParameterMap();
+		params.add("name", new StringOrListParam().addOr(new StringParam("homer")).addOr(new StringParam("bart")));
+		params.add("name", new StringOrListParam().addOr(new StringParam("homer")).addOr(new StringParam("bart")));
+
+		assertThatThrownBy(()->myPatientDao.search(params, mySrd)).hasMessageContaining("Duplicate parameters found in query: ?name=");
+	}
+
 
     @Test
     public void testHasWithTargetReference() {
