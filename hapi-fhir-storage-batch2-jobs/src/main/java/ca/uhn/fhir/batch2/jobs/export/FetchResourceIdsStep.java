@@ -88,11 +88,15 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		 * when we recursively fetch resource types for a given patient/group
 		 * we don't recurse for types that they did not request
 		 */
-		Collection<String> omitted =
-				mySearchLimiterSvc.getResourcesToOmitForOperationSearches(ProviderConstants.OPERATION_EXPORT);
-		List<String> resourceTypesToFetch = params.getResourceTypes().stream()
+		List<String> resourceTypesToFetch;
+		if (theStepExecutionDetails.getParameters().getExportStyle() == BulkExportJobParameters.ExportStyle.PATIENT) {
+			Collection<String> omitted = mySearchLimiterSvc.getResourcesToOmitForOperationSearches(ProviderConstants.OPERATION_EXPORT);
+			resourceTypesToFetch = params.getResourceTypes().stream()
 				.filter(r -> !omitted.contains(r))
 				.toList();
+		} else {
+			resourceTypesToFetch = params.getResourceTypes().stream().toList();
+		}
 		providerParams.setRequestedResourceTypes(resourceTypesToFetch);
 
 		int submissionCount = 0;

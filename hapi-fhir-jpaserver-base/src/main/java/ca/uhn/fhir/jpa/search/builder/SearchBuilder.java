@@ -926,9 +926,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			queryStack3.setUseAggregate(true);
 		}
 
-		Collection<String> resourcesToOmit =
+		if (myParams.getEverythingMode().isPatient()) {
+			Collection<String> resourcesToOmit =
 				mySearchLimiterSvc.getResourcesToOmitForOperationSearches(JpaConstants.OPERATION_EVERYTHING);
-		sqlBuilder.excludeResourceTypesPredicate(resourcesToOmit);
+			sqlBuilder.excludeResourceTypesPredicate(resourcesToOmit);
+		}
 
 		/*
 		 * Now perform the search
