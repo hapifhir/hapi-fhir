@@ -2,6 +2,7 @@ package ca.uhn.fhir.repository;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.repository.matcher.IResourceMatcher;
 import ca.uhn.fhir.repository.matcher.MultiVersionResourceMatcher;
 import ca.uhn.fhir.rest.api.Constants;
@@ -11,6 +12,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
@@ -19,20 +21,16 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.opencds.cqf.fhir.utility.BundleHelper;
-import org.opencds.cqf.fhir.utility.Canonicals;
-import org.opencds.cqf.fhir.utility.Ids;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.model.api.StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND;
-import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 
 /**
  * An in-memory implementation of the FHIR repository interface.
@@ -86,6 +84,10 @@ public class InMemoryFhirRepository implements IRepository {
 		boolean isPresent() {
 			return resources.containsKey(id);
 		}
+
+		public <T extends IBaseResource> void put(T theResource) {
+			resources.put(id, theResource);
+		}
 	}
 
 	ResourceLookup lookupResource(Class<? extends IBaseResource> theResourceType, IIdType theId) {
@@ -93,14 +95,19 @@ public class InMemoryFhirRepository implements IRepository {
 		Validate.notNull(theId, "Id must not be null");
 
 		String resourceTypeName = fhirContext().getResourceType(theResourceType);
-		Map<IIdType, IBaseResource> resources = getResourceMapForType(resourceTypeName);
 
-		return new ResourceLookup(resources, theId.toUnqualifiedVersionless());
-	}
+		IIdType unqualifiedVersionless = theId.toUnqualifiedVersionless();
+		String idResourceType = unqualifiedVersionless.getResourceType();
+		if (idResourceType == null) {
+			unqualifiedVersionless = unqualifiedVersionless.withResourceType(resourceTypeName);
+		} else if (!idResourceType.equals(resourceTypeName)) {
+			throw new IllegalArgumentException(
+					"Resource type mismatch: resource is " + resourceTypeName + " but id type is " + idResourceType);
+		}
 
-	@Nonnull
-	private Map<IIdType, IBaseResource> getResourceMapForType(String resourceTypeName) {
-		return resourceMap.computeIfAbsent(resourceTypeName, x -> new HashMap<>());
+		Map<IIdType, IBaseResource> resources = getResourceMapForType(unqualifiedVersionless.getResourceType());
+
+		return new ResourceLookup(resources, new IdDt(unqualifiedVersionless));
 	}
 
 	@Override
@@ -120,7 +127,7 @@ public class InMemoryFhirRepository implements IRepository {
 
 		IIdType theId;
 		do {
-			theId = Ids.newRandomId(context, resource.fhirType());
+			theId = new IdDt(resource.fhirType(), UUID.randomUUID().toString());
 		} while (resources.containsKey(theId));
 		resource.setId(theId);
 
@@ -137,16 +144,17 @@ public class InMemoryFhirRepository implements IRepository {
 
 	@Override
 	public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
-		var resources = getResourceMapForType(resource.fhirType());
-		var theId = resource.getIdElement().toUnqualifiedVersionless();
-		var outcome = new MethodOutcome(theId, false);
-		if (!resources.containsKey(theId)) {
+		var lookup = lookupResource(resource.getClass(), resource.getIdElement());
+
+		var outcome = new MethodOutcome(lookup.id, false);
+		if (!lookup.isPresent()) {
 			outcome.setCreated(true);
 		}
 		if (resource.fhirType().equals("SearchParameter")) {
-			this.resourceMatcher.addCustomParameter(BundleHelper.resourceToRuntimeSearchParam(resource));
+			// fixme support adding SearchParameters
+			// this.resourceMatcher.addCustomParameter(BundleHelper.resourceToRuntimeSearchParam(resource));
 		}
-		resources.put(theId, resource);
+		lookup.put(resource);
 
 		return outcome;
 	}
@@ -250,43 +258,44 @@ public class InMemoryFhirRepository implements IRepository {
 	public <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
 		var version = transaction.getStructureFhirVersionEnum();
 
-		@SuppressWarnings("unchecked")
-		var returnBundle = (B) newBundle(version);
-		BundleHelper.getEntry(transaction).forEach(e -> {
-			if (BundleHelper.isEntryRequestPut(version, e)) {
-				var outcome = this.update(BundleHelper.getEntryResource(version, e));
-				var location = outcome.getId().getValue();
-				BundleHelper.addEntry(
-						returnBundle,
-						BundleHelper.newEntryWithResponse(
-								version, BundleHelper.newResponseWithLocation(version, location)));
-			} else if (BundleHelper.isEntryRequestPost(version, e)) {
-				var outcome = this.create(BundleHelper.getEntryResource(version, e));
-				var location = outcome.getId().getValue();
-				BundleHelper.addEntry(
-						returnBundle,
-						BundleHelper.newEntryWithResponse(
-								version, BundleHelper.newResponseWithLocation(version, location)));
-			} else if (BundleHelper.isEntryRequestDelete(version, e)) {
-				if (BundleHelper.getEntryRequestId(version, e).isPresent()) {
-					var resourceType = Canonicals.getResourceType(
-							((BundleEntryComponent) e).getRequest().getUrl());
-					var resourceClass =
-							this.context.getResourceDefinition(resourceType).getImplementingClass();
-					var res = this.delete(
-							resourceClass,
-							BundleHelper.getEntryRequestId(version, e).get().withResourceType(resourceType));
-					BundleHelper.addEntry(returnBundle, BundleHelper.newEntryWithResource(res.getResource()));
-				} else {
-					throw new ResourceNotFoundException("Trying to delete an entry without id");
-				}
-
-			} else {
-				throw new NotImplementedOperationException("Transaction stub only supports PUT, POST or DELETE");
-			}
-		});
-
-		return returnBundle;
+		// @SuppressWarnings("unchecked")
+		//		var returnBundle = (B) newBundle(version);
+		//		BundleHelper.getEntry(transaction).forEach(e -> {
+		//			if (BundleHelper.isEntryRequestPut(version, e)) {
+		//				var outcome = this.update(BundleHelper.getEntryResource(version, e));
+		//				var location = outcome.getId().getValue();
+		//				BundleHelper.addEntry(
+		//						returnBundle,
+		//						BundleHelper.newEntryWithResponse(
+		//								version, BundleHelper.newResponseWithLocation(version, location)));
+		//			} else if (BundleHelper.isEntryRequestPost(version, e)) {
+		//				var outcome = this.create(BundleHelper.getEntryResource(version, e));
+		//				var location = outcome.getId().getValue();
+		//				BundleHelper.addEntry(
+		//						returnBundle,
+		//						BundleHelper.newEntryWithResponse(
+		//								version, BundleHelper.newResponseWithLocation(version, location)));
+		//			} else if (BundleHelper.isEntryRequestDelete(version, e)) {
+		//				if (BundleHelper.getEntryRequestId(version, e).isPresent()) {
+		//					var resourceType = Canonicals.getResourceType(
+		//							((BundleEntryComponent) e).getRequest().getUrl());
+		//					var resourceClass =
+		//							this.context.getResourceDefinition(resourceType).getImplementingClass();
+		//					var res = this.delete(
+		//							resourceClass,
+		//							BundleHelper.getEntryRequestId(version, e).get().withResourceType(resourceType));
+		//					BundleHelper.addEntry(returnBundle, BundleHelper.newEntryWithResource(res.getResource()));
+		//				} else {
+		//					throw new ResourceNotFoundException("Trying to delete an entry without id");
+		//				}
+		//
+		//			} else {
+		//				throw new NotImplementedOperationException("Transaction stub only supports PUT, POST or DELETE");
+		//			}
+		//		});
+		//
+		//		return returnBundle;
+		return null;
 	}
 
 	@Override
@@ -322,5 +331,11 @@ public class InMemoryFhirRepository implements IRepository {
 	@Override
 	public @Nonnull FhirContext fhirContext() {
 		return this.context;
+	}
+
+	@VisibleForTesting
+	@Nonnull
+	public Map<IIdType, IBaseResource> getResourceMapForType(String resourceTypeName) {
+		return resourceMap.computeIfAbsent(resourceTypeName, x -> new HashMap<>());
 	}
 }

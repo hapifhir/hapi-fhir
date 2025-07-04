@@ -80,7 +80,7 @@ public interface IRepositoryTest {
 		// update with different birthdate
 		var updatedPatient = b.buildPatient(b.withId(patientId), b.withBirthdate(updatedBirthdate));
 		var updateOutcome = repository.update(updatedPatient);
-		assertThat(updateOutcome.getId().toVersionless()).isEqualTo(patientId);
+		assertThat(updateOutcome.getId().toVersionless().getValueAsString()).isEqualTo(patientId.getValueAsString());
 		assertThat(updateOutcome.getCreated()).isFalse();
 
 		// read

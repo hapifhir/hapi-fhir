@@ -6,9 +6,7 @@ import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.FhirTerser;
-import org.apache.commons.lang3.NotImplementedException;
-import org.hl7.fhir.dstu3.model.Period;
-import org.hl7.fhir.dstu3.model.Timing;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -17,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.Nonnull;
 
 public class MultiVersionResourceMatcher implements IResourceMatcher {
 	private static final Map<FhirContext, IFhirPath> ourFhirPathCache = new ConcurrentHashMap<>();
@@ -57,14 +54,15 @@ public class MultiVersionResourceMatcher implements IResourceMatcher {
 
 	@Override
 	public DateRangeParam getDateRange(ICompositeType type) {
-		if (type instanceof Period) {
-			return new DateRangeParam(((Period) type).getStart(), ((Period) type).getEnd());
-		} else if (type instanceof Timing) {
-			throw new NotImplementedException("Timing resolution has not yet been implemented");
-		} else {
-			throw new UnsupportedOperationException("Expected element of type Period or Timing, found "
-					+ type.getClass().getSimpleName());
-		}
+		// fixme implement
+		//		if (type instanceof Period) {
+		//			return new DateRangeParam(((Period) type).getStart(), ((Period) type).getEnd());
+		//		} else if (type instanceof Timing) {
+		//			throw new NotImplementedException("Timing resolution has not yet been implemented");
+		//		} else {
+		throw new UnsupportedOperationException("Expected element of type Period or Timing, found "
+				+ type.getClass().getSimpleName());
+		//		}
 	}
 
 	@Override
