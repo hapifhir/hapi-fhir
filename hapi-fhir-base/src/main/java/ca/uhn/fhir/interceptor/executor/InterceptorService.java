@@ -84,7 +84,7 @@ public class InterceptorService extends BaseInterceptorService<Pointcut>
 		@Override
 		public Object invoke(HookParams theParams) {
 			myHook.invoke(myPointcut, theParams);
-			return true;
+			return null;
 		}
 	}
 }

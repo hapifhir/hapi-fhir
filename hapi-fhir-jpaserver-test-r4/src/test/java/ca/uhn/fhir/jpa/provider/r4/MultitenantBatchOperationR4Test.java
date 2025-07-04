@@ -58,7 +58,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 	@BeforeEach
 	public void disableAdvanceIndexing() {
 		// advanced indexing doesn't support partitions
-		myStorageSettings.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setHibernateSearchIndexSearchParams(false);
 	}
 
 

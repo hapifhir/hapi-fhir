@@ -34,7 +34,7 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
  * <a href="./package-summary.html">Package Summary</a>.
  * </p>
  *
- * @see UnprocessableEntityException Which should be used for business level validation failures
+ * @see UnprocessableEntityException UnprocessableEntityException should be used for business level validation failures
  */
 @CoverageIgnore
 public class InvalidRequestException extends BaseServerResponseException {

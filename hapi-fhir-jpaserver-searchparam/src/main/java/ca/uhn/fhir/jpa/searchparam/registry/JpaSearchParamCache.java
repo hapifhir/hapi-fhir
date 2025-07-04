@@ -213,7 +213,7 @@ public class JpaSearchParamCache {
 			}
 		}
 
-		ourLog.info("Have {} unique search params", activeParamNamesToComboSearchParams.size());
+		ourLog.debug("Have {} unique search params", activeParamNamesToComboSearchParams.size());
 
 		myActiveComboSearchParams = resourceNameToComboSearchParams;
 		myActiveParamNamesToComboSearchParams = activeParamNamesToComboSearchParams;

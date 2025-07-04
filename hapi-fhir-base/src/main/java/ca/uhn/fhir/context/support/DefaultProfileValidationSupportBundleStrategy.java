@@ -26,8 +26,10 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.FhirTerser;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -37,6 +39,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -58,8 +61,10 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 	private Map<String, IBaseResource> myCodeSystems;
 	private Map<String, IBaseResource> myStructureDefinitions;
 	private Map<String, IBaseResource> myValueSets;
+	private List<IBaseResource> mySearchParameters;
 	private List<String> myTerminologyResources;
 	private List<String> myStructureDefinitionResources;
+	private List<String> mySearchParameterResources;
 
 	/**
 	 * Constructor
@@ -78,6 +83,7 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 
 		List<String> terminologyResources = new ArrayList<>();
 		List<String> structureDefinitionResources = new ArrayList<>();
+		List<String> searchParameterResources = new ArrayList<>();
 		switch (getFhirContext().getVersion().getVersion()) {
 			case DSTU2:
 			case DSTU2_HL7ORG:
@@ -120,6 +126,7 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 				structureDefinitionResources.add("/org/hl7/fhir/r4/model/profile/profiles-types.xml");
 				structureDefinitionResources.add("/org/hl7/fhir/r4/model/profile/profiles-others.xml");
 				structureDefinitionResources.add("/org/hl7/fhir/r4/model/extension/extension-definitions.xml");
+				searchParameterResources.add("/org/hl7/fhir/r4/model/sp/search-parameters.json");
 				break;
 			case R4B:
 				terminologyResources.add("/org/hl7/fhir/r4b/model/valueset/valuesets.xml");
@@ -131,20 +138,17 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 				structureDefinitionResources.add("/org/hl7/fhir/r4b/model/profile/profiles-types.xml");
 				structureDefinitionResources.add("/org/hl7/fhir/r4b/model/profile/profiles-others.xml");
 				structureDefinitionResources.add("/org/hl7/fhir/r4b/model/extension/extension-definitions.xml");
+				searchParameterResources.add("/org/hl7/fhir/r4b/model/sp/search-parameters.xml");
 				break;
-			case R5:
-				structureDefinitionResources.add("/org/hl7/fhir/r5/model/profile/profiles-resources.xml");
-				structureDefinitionResources.add("/org/hl7/fhir/r5/model/profile/profiles-types.xml");
-				structureDefinitionResources.add("/org/hl7/fhir/r5/model/profile/profiles-others.xml");
-				structureDefinitionResources.add("/org/hl7/fhir/r5/model/extension/extension-definitions.xml");
-				terminologyResources.add("/org/hl7/fhir/r5/model/valueset/valuesets.xml");
-				terminologyResources.add("/org/hl7/fhir/r5/model/valueset/v2-tables.xml");
-				terminologyResources.add("/org/hl7/fhir/r5/model/valueset/v3-codesystems.xml");
-				break;
+				/*
+				 * Note: No versions after R4B are needed here, as R5+ uses
+				 * DefaultProfileValidationSupportNpmStrategy instead of this class
+				 */
 		}
 
 		myTerminologyResources = terminologyResources;
 		myStructureDefinitionResources = structureDefinitionResources;
+		mySearchParameterResources = searchParameterResources;
 	}
 
 	@Override
@@ -171,6 +175,38 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 	@Override
 	public <T extends IBaseResource> List<T> fetchAllNonBaseStructureDefinitions() {
 		return null;
+	}
+
+	@SuppressWarnings({"unchecked"})
+	@Nullable
+	@Override
+	public <T extends IBaseResource> List<T> fetchAllSearchParameters() {
+		List<IBaseResource> retVal = mySearchParameters;
+		if (retVal == null) {
+			initializeResourceLists();
+			retVal = new ArrayList<>();
+			for (String searchParameterResource : mySearchParameterResources) {
+				try (InputStream inputStream = ClasspathUtil.loadResourceAsStream(searchParameterResource)) {
+					FhirTerser terser = myCtx.newTerser();
+					EncodingEnum encoding =
+							searchParameterResource.endsWith("json") ? EncodingEnum.JSON : EncodingEnum.XML;
+					List<IBaseResource> resources =
+							parseBundle(new InputStreamReader(inputStream, StandardCharsets.UTF_8), encoding);
+					retVal.addAll(resources);
+				} catch (IOException e) {
+					ourLog.warn("Failure closing stream", e);
+				}
+			}
+
+			retVal = List.copyOf(retVal);
+			mySearchParameters = retVal;
+		}
+
+		if (retVal.isEmpty()) {
+			return null;
+		}
+
+		return (List<T>) retVal;
 	}
 
 	@Override
@@ -304,7 +340,7 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 		if (inputStream != null) {
 			try {
 				reader = new InputStreamReader(inputStream, Constants.CHARSET_UTF8);
-				List<IBaseResource> resources = parseBundle(reader);
+				List<IBaseResource> resources = parseBundle(reader, EncodingEnum.XML);
 				for (IBaseResource next : resources) {
 
 					RuntimeResourceDefinition nextDef = getFhirContext().getResourceDefinition(next);
@@ -389,7 +425,7 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 			if (valueSetText != null) {
 				try (InputStreamReader reader = new InputStreamReader(valueSetText, Constants.CHARSET_UTF8)) {
 
-					List<IBaseResource> resources = parseBundle(reader);
+					List<IBaseResource> resources = parseBundle(reader, EncodingEnum.XML);
 					for (IBaseResource next : resources) {
 
 						String nextType = getFhirContext().getResourceType(next);
@@ -420,8 +456,8 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 		return DefaultProfileValidationSupport.getConformanceResourceUrl(getFhirContext(), theResource);
 	}
 
-	private List<IBaseResource> parseBundle(InputStreamReader theReader) {
-		IBaseResource parsedObject = getFhirContext().newXmlParser().parseResource(theReader);
+	private List<IBaseResource> parseBundle(InputStreamReader theReader, EncodingEnum theEncoding) {
+		IBaseResource parsedObject = theEncoding.newParser(getFhirContext()).parseResource(theReader);
 		if (parsedObject instanceof IBaseBundle) {
 			IBaseBundle bundle = (IBaseBundle) parsedObject;
 			return BundleUtil.toListOfResources(getFhirContext(), bundle);

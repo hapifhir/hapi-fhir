@@ -61,6 +61,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +71,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.isAllowedForContext;
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchParamRegistryImpl
 		implements ISearchParamRegistry, IResourceChangeListener, ISearchParamRegistryController {
@@ -82,6 +83,11 @@ public class SearchParamRegistryImpl
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamRegistryImpl.class);
 	public static final int MAX_MANAGED_PARAM_COUNT = 10000;
 	private static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
+	public static final String PARAM_LANGUAGE_ID = "SearchParameter/Resource-language";
+	public static final String PARAM_LANGUAGE_DESCRIPTION = "Language of the resource content";
+	public static final String PARAM_LANGUAGE_PATH = "language";
+	public static final String PARAM_TEXT_DESCRIPTION = "Text search against the narrative";
+	public static final String PARAM_CONTENT_DESCRIPTION = "Search on the entire content of the resource";
 
 	private JpaSearchParamCache myJpaSearchParamCache;
 
@@ -242,23 +248,72 @@ public class SearchParamRegistryImpl
 				RuntimeSearchParamCache.fromReadOnlySearchParamCache(builtInSearchParams);
 		long overriddenCount = overrideBuiltinSearchParamsWithActiveJpaSearchParams(searchParams, theJpaSearchParams);
 		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
+
+		// Auto-register: _language
+		if (myStorageSettings.isLanguageSearchParameterEnabled()) {
+			registerImplicitSearchParam(
+					searchParams,
+					Constants.PARAM_LANGUAGE_URL,
+					Constants.PARAM_LANGUAGE,
+					PARAM_LANGUAGE_DESCRIPTION,
+					PARAM_LANGUAGE_PATH,
+					RestSearchParameterTypeEnum.TOKEN);
+		} else {
+			unregisterImplicitSearchParam(searchParams, Constants.PARAM_LANGUAGE);
+		}
+
+		// Auto-register: _content and _text
+		if (myStorageSettings.isHibernateSearchIndexFullText()) {
+			registerImplicitSearchParam(
+					searchParams,
+					Constants.PARAM_TEXT_URL,
+					Constants.PARAM_TEXT,
+					PARAM_TEXT_DESCRIPTION,
+					"Resource",
+					RestSearchParameterTypeEnum.STRING);
+			registerImplicitSearchParam(
+					searchParams,
+					Constants.PARAM_CONTENT_URL,
+					Constants.PARAM_CONTENT,
+					PARAM_CONTENT_DESCRIPTION,
+					"Resource",
+					RestSearchParameterTypeEnum.STRING);
+		} else {
+			unregisterImplicitSearchParam(searchParams, Constants.PARAM_CONTENT);
+			unregisterImplicitSearchParam(searchParams, Constants.PARAM_TEXT);
+		}
+
 		removeInactiveSearchParams(searchParams);
 
-		/*
-		 * The _language SearchParameter is a weird exception - It is actually just a normal
-		 * token SP, but we explcitly ban SPs from registering themselves with a prefix
-		 * of "_" since that's system reserved so we put this one behind a settings toggle
-		 */
-		if (myStorageSettings.isLanguageSearchParameterEnabled()) {
-			IIdType id = myFhirContext.getVersion().newIdType();
-			id.setValue("SearchParameter/Resource-language");
+		setActiveSearchParams(searchParams);
+
+		myJpaSearchParamCache.populateActiveSearchParams(
+				myInterceptorBroadcaster, myPhoneticEncoder, myActiveSearchParams);
+		updateSearchParameterIdentityCache();
+		ourLog.debug("Refreshed search parameter cache in {}ms", sw.getMillis());
+	}
+
+	private void unregisterImplicitSearchParam(RuntimeSearchParamCache theSearchParams, String theParamName) {
+		for (String resourceType : theSearchParams.getResourceNameKeys()) {
+			theSearchParams.remove(resourceType, theParamName);
+		}
+	}
+
+	private void registerImplicitSearchParam(
+			RuntimeSearchParamCache searchParams,
+			String url,
+			String code,
+			String description,
+			String path,
+			RestSearchParameterTypeEnum type) {
+		if (searchParams.getByUrl(url) == null) {
 			RuntimeSearchParam sp = new RuntimeSearchParam(
-					id,
-					"http://hl7.org/fhir/SearchParameter/Resource-language",
-					Constants.PARAM_LANGUAGE,
-					"Language of the resource content",
-					"language",
-					RestSearchParameterTypeEnum.TOKEN,
+					myFhirContext.getVersion().newIdType(PARAM_LANGUAGE_ID),
+					url,
+					code,
+					description,
+					path,
+					type,
 					Collections.emptySet(),
 					Collections.emptySet(),
 					RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE,
@@ -267,13 +322,6 @@ public class SearchParamRegistryImpl
 				searchParams.add(baseResourceType, sp.getName(), sp);
 			}
 		}
-
-		setActiveSearchParams(searchParams);
-
-		myJpaSearchParamCache.populateActiveSearchParams(
-				myInterceptorBroadcaster, myPhoneticEncoder, myActiveSearchParams);
-		updateSearchParameterIdentityCache();
-		ourLog.debug("Refreshed search parameter cache in {}ms", sw.getMillis());
 	}
 
 	private void updateSearchParameterIdentityCache() {
@@ -341,6 +389,14 @@ public class SearchParamRegistryImpl
 		return retval;
 	}
 
+	/**
+	 * For the given SearchParameter which was fetched from the database, look for any
+	 * existing search parameters in the cache that should be replaced by the SP (i.e.
+	 * because they represent the same parameter)
+	 *
+	 * @param theSearchParams The cache to populate
+	 * @param theSearchParameter The SearchParameter to insert into the cache and potentially replace existing params
+	 */
 	private long overrideSearchParam(RuntimeSearchParamCache theSearchParams, IBaseResource theSearchParameter) {
 		if (theSearchParameter == null) {
 			return 0;
@@ -350,18 +406,45 @@ public class SearchParamRegistryImpl
 		if (runtimeSp == null) {
 			return 0;
 		}
+
+		/*
+		 * This check means that we basically ignore SPs from the database if they have a status
+		 * of "draft". I don't know that this makes sense, but it has worked this way for a long
+		 * time and changing it could potentially screw with people who didn't realize they
+		 * were depending on this behaviour? I don't know.. Honestly this is probably being
+		 * overly cautious. -JA
+		 */
 		if (runtimeSp.getStatus() == RuntimeSearchParam.RuntimeSearchParamStatusEnum.DRAFT) {
 			return 0;
 		}
 
-		long retval = 0;
-		for (String nextBaseName : SearchParameterUtil.getBaseAsStrings(myFhirContext, theSearchParameter)) {
-			if (isBlank(nextBaseName)) {
-				continue;
+		/*
+		 * If an SP in the cache has the same URL as the one we are inserting, first remove
+		 * the old SP from anywhere it is registered. This helps us override SPs like _content
+		 * and _text.
+		 */
+		String url = runtimeSp.getUri();
+		RuntimeSearchParam existingParam = theSearchParams.getByUrl(url);
+		if (existingParam != null) {
+			if (isNotBlank(existingParam.getName()) && !existingParam.getName().equals(runtimeSp.getName())) {
+				ourLog.warn(
+						"Existing SearchParameter with URL[{}] and name[{}] doesn't match name[{}] found on SearchParameter: {}",
+						url,
+						existingParam.getName(),
+						runtimeSp.getName(),
+						runtimeSp.getId());
+			} else {
+				Set<String> expandedBases = expandBaseList(existingParam.getBase());
+				for (String base : expandedBases) {
+					theSearchParams.remove(base, existingParam.getName());
+				}
 			}
+		}
 
+		long retval = 0;
+		for (String nextBaseName :
+				expandBaseList(SearchParameterUtil.getBaseAsStrings(myFhirContext, theSearchParameter))) {
 			String name = runtimeSp.getName();
-
 			theSearchParams.add(nextBaseName, name, runtimeSp);
 			ourLog.debug(
 					"Adding search parameter {}.{} to SearchParamRegistry",
@@ -370,6 +453,19 @@ public class SearchParamRegistryImpl
 			retval++;
 		}
 		return retval;
+	}
+
+	private @Nonnull Set<String> expandBaseList(Collection<String> nextBase) {
+		Set<String> expandedBases = new HashSet<>();
+		for (String base : nextBase) {
+			if ("Resource".equals(base) || "DomainResource".equals(base)) {
+				expandedBases.addAll(myFhirContext.getResourceTypes());
+				break;
+			} else {
+				expandedBases.add(base);
+			}
+		}
+		return expandedBases;
 	}
 
 	@Override

@@ -125,6 +125,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		runInTransaction(()->{
 			logAllTokenIndexes();
 			logAllStringIndexes();
+			logAllUriIndexes();
 			assertEquals(0, myResourceIndexedSearchParamStringDao.count());
 			assertEquals(0, myResourceIndexedSearchParamTokenDao.count());
 			assertEquals(0, myResourceIndexedSearchParamUriDao.count());
