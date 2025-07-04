@@ -2385,8 +2385,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (myStorageSettings.isUpdateWithHistoryRewriteEnabled()
 				&& theRequest != null
 				&& theRequest.isRewriteHistory()) {
-			updateCallback = () ->
-					doUpdateWithHistoryRewrite(theResource, theRequest, theTransactionDetails, requestPartitionId);
+			updateCallback = () -> doUpdateWithHistoryRewrite(
+					theResource, theRequest, theTransactionDetails, requestPartitionId, RestOperationTypeEnum.UPDATE);
 		} else {
 			updateCallback = () -> doUpdate(
 					theResource,
@@ -2620,13 +2620,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * @param theResource           to be saved
 	 * @param theRequest            details of the request
 	 * @param theTransactionDetails details of the transaction
+	 * @param theRequestPartitionId the partition on which to perform the request
+	 * @param theRestOperationType  the rest operation type (update or patch)
 	 * @return the outcome of the operation
 	 */
-	private DaoMethodOutcome doUpdateWithHistoryRewrite(
+	DaoMethodOutcome doUpdateWithHistoryRewrite(
 			T theResource,
 			RequestDetails theRequest,
 			TransactionDetails theTransactionDetails,
-			RequestPartitionId theRequestPartitionId) {
+			RequestPartitionId theRequestPartitionId,
+			RestOperationTypeEnum theRestOperationType) {
 		StopWatch w = new StopWatch();
 
 		// No need for indexing as this will update a non-current version of the resource which will not be searchable
@@ -2669,11 +2672,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				&& Long.parseLong(resourceId.getVersionIdPart()) == currentEntity.getVersion();
 		IBasePersistedResource<?> savedEntity = updateHistoryEntity(
 				theRequest, theResource, currentEntity, entity, resourceId, theTransactionDetails, isUpdatingCurrent);
-		DaoMethodOutcome outcome = toMethodOutcome(
-						theRequest, savedEntity, theResource, null, RestOperationTypeEnum.UPDATE)
+		DaoMethodOutcome outcome = toMethodOutcome(theRequest, savedEntity, theResource, null, theRestOperationType)
 				.setCreated(wasDeleted);
 
-		populateOperationOutcomeForUpdate(w, outcome, null, RestOperationTypeEnum.UPDATE, theTransactionDetails);
+		populateOperationOutcomeForUpdate(w, outcome, null, theRestOperationType, theTransactionDetails);
 
 		return outcome;
 	}
