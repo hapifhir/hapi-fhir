@@ -236,16 +236,23 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 				flags.add(HapiFhirJpaMigrationTasks.FlagEnum.DB_PARTITION_MODE.getCommandLineValue());
 			}
 
-			MigrationTaskList tasks = new HapiFhirJpaMigrationTasks(flags).getAllTasks(VersionEnum.values());
+			// Check if we should skip migration (sequential mode where migration already happened)
+			boolean skipMigration = Boolean.parseBoolean(System.getProperty("hapi.test.skip-migration", "false"));
+			
+			if (!skipMigration) {
+				MigrationTaskList tasks = new HapiFhirJpaMigrationTasks(flags).getAllTasks(VersionEnum.values());
 
-			SchemaMigrator schemaMigrator = new SchemaMigrator(
-				"HAPI FHIR", MIGRATION_TABLENAME, dataSource, new Properties(), tasks, hapiMigrationStorageSvc);
-			schemaMigrator.setDriverType(myJpaDatabaseContextConfigParamObject.getJpaEmbeddedDatabase().getDriverType());
+				SchemaMigrator schemaMigrator = new SchemaMigrator(
+					"HAPI FHIR", MIGRATION_TABLENAME, dataSource, new Properties(), tasks, hapiMigrationStorageSvc);
+				schemaMigrator.setDriverType(myJpaDatabaseContextConfigParamObject.getJpaEmbeddedDatabase().getDriverType());
 
-			ourLog.info("About to run migration...");
-			schemaMigrator.createMigrationTableIfRequired();
-			schemaMigrator.migrate();
-			ourLog.info("Migration complete");
+				ourLog.info("About to run migration...");
+				schemaMigrator.createMigrationTableIfRequired();
+				schemaMigrator.migrate();
+				ourLog.info("Migration complete");
+			} else {
+				ourLog.info("Skipping migration in sequential mode - database already migrated");
+			}
 
 
 			return dataSource;

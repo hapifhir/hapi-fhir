@@ -16,6 +16,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -52,6 +53,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class HapiSchemaMigrationTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiSchemaMigrationTest.class);
+	private boolean sequentialMode = false;
+	private ExtensionContext extensionContext;
 	public static final String TEST_SCHEMA_NAME = "test";
 
 	private static final String METADATA_COLUMN_NAME = "COLUMN_NAME";
@@ -81,10 +84,23 @@ public class HapiSchemaMigrationTest {
 	@RegisterExtension
 	static HapiEmbeddedDatabasesExtension myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtension();
 
+	public void setSequentialMode(boolean sequentialMode) {
+		this.sequentialMode = sequentialMode;
+	}
+
+	public void setExtensionContext(ExtensionContext context) {
+		this.extensionContext = context;
+	}
+
 	@AfterEach
 	public void afterEach() {
 		try {
-			myEmbeddedServersExtension.clearDatabases();
+			if (sequentialMode) {
+				// In sequential mode, we don't clear the database between tests
+				// as the verification tests need the migrated schema
+			} else {
+				myEmbeddedServersExtension.clearDatabases();
+			}
 			// The stack trace for this failure does not appear in CI logs.  Catching and rethrowing to log the error.
 		} catch (Exception e) {
 			ourLog.error("Failed to clear databases", e);
@@ -100,11 +116,27 @@ public class HapiSchemaMigrationTest {
 
 		ourLog.info("Running hapi fhir migration tasks for {}", theDriverType);
 
-		myEmbeddedServersExtension.initializePersistenceSchema(theDriverType);
-		myEmbeddedServersExtension.insertPersistenceTestData(theDriverType, FIRST_TESTED_VERSION);
+		if (sequentialMode) {
+			// In sequential mode, the database is already created by the test runner
+			JpaEmbeddedDatabase database = HapiSequentialDatabaseTestExtension.getCurrentDatabase(extensionContext, theDriverType);
+			DatabaseInitializerHelper helper = new DatabaseInitializerHelper();
+			helper.initializePersistenceSchema(database);
+			helper.insertPersistenceTestData(database, FIRST_TESTED_VERSION);
+		} else {
+			// Normal mode - use the embedded servers extension
+			myEmbeddedServersExtension.initializePersistenceSchema(theDriverType);
+			myEmbeddedServersExtension.insertPersistenceTestData(theDriverType, FIRST_TESTED_VERSION);
+		}
 
-		JpaEmbeddedDatabase database = myEmbeddedServersExtension.getEmbeddedDatabase(theDriverType);
-		DataSource dataSource = database.getDataSource();
+		JpaEmbeddedDatabase database;
+		DataSource dataSource;
+		if (sequentialMode) {
+			database = HapiSequentialDatabaseTestExtension.getCurrentDatabase(extensionContext, theDriverType);
+			dataSource = database.getDataSource();
+		} else {
+			database = myEmbeddedServersExtension.getEmbeddedDatabase(theDriverType);
+			dataSource = database.getDataSource();
+		}
 		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(dataSource, theDriverType, HAPI_FHIR_MIGRATION_TABLENAME);
 		HapiMigrationStorageSvc hapiMigrationStorageSvc = new HapiMigrationStorageSvc(hapiMigrationDao);
 
@@ -113,7 +145,23 @@ public class HapiSchemaMigrationTest {
 			migrate(theDriverType, dataSource, hapiMigrationStorageSvc, aVersion);
 
 			if (aVersion.isNewerThan(FIRST_TESTED_VERSION)) {
-				myEmbeddedServersExtension.maybeInsertPersistenceTestData(theDriverType, aVersion);
+				if (sequentialMode) {
+					DatabaseInitializerHelper helper = new DatabaseInitializerHelper();
+					try {
+						helper.insertPersistenceTestData(database, aVersion);
+					} catch (Exception theE) {
+						if (theE.getMessage().contains("Error loading file: migration/releases/")) {
+							ourLog.info(
+								"Could not insert persistence test data most likely because we don't have any for version {} and driver {}",
+								aVersion,
+								theDriverType);
+						} else {
+							throw theE;
+						}
+					}
+				} else {
+					myEmbeddedServersExtension.maybeInsertPersistenceTestData(theDriverType, aVersion);
+				}
 			}
 		}
 

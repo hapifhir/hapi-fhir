@@ -67,6 +67,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<!-- Exclude individual database verification tests when running sequential suite -->
+						<exclude>**/DatabaseVerificationWith*IT.java</exclude>
+					</excludes>
+				</configuration>
 				<executions>
 					<execution>
 						<goals>
