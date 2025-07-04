@@ -109,6 +109,7 @@ public abstract class BaseStorageDao {
 	/** @deprecated moved to {@link OperationOutcomeUtil#OO_SEVERITY_WARN}  */
 	@Deprecated(forRemoval = true, since = "8.4.0")
 	public static final String OO_SEVERITY_WARN = OperationOutcomeUtil.OO_SEVERITY_WARN;
+
 	private static final String PROCESSING_SUB_REQUEST = "BaseStorageDao.processingSubRequest";
 
 	protected static final String MESSAGE_KEY_DELETE_RESOURCE_NOT_EXISTING = "deleteResourceNotExisting";

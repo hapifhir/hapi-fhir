@@ -314,7 +314,6 @@ public interface IRepository {
 
 	/**
 	 * Reads a Bundle from a link on this repository
-	 *
 	 * This is typically used for paging during searches
 	 *
 	 * @see <a href="https://www.hl7.org/fhir/bundle-definitions.html#Bundle.link">FHIR Bundle
@@ -330,7 +329,6 @@ public interface IRepository {
 
 	/**
 	 * Reads a Bundle from a link on this repository
-	 *
 	 * This is typically used for paging during searches
 	 *
 	 * @see <a href="https://www.hl7.org/fhir/bundle-definitions.html#Bundle.link">FHIR Bundle

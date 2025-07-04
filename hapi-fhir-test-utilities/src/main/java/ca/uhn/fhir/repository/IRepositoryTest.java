@@ -104,7 +104,7 @@ public interface IRepositoryTest {
 		IIdType patientId = createOutcome.getId().toVersionless();
 
 		// when deleted
-		var outcome = repository.delete(patient.getClass(), patientId);
+		repository.delete(patient.getClass(), patientId);
 
 		// then - read should throw ResourceNotFoundException or ResourceGoneException
 		// Repositories with history should probably throw ResourceGoneException

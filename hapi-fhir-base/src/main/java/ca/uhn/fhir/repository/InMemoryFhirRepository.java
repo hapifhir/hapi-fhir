@@ -186,6 +186,7 @@ public class InMemoryFhirRepository implements IRepository {
 		if (searchParameters == null || searchParameters.isEmpty()) {
 			resourceIdMap.values().forEach(builder::addCollectionEntry);
 			builder.setType("searchset");
+			//noinspection unchecked
 			return (B) builder.getBundle();
 		}
 
@@ -231,6 +232,7 @@ public class InMemoryFhirRepository implements IRepository {
 		//        }
 
 		builder.setType("searchset");
+		//noinspection unchecked
 		return (B) builder.getBundle();
 	}
 
