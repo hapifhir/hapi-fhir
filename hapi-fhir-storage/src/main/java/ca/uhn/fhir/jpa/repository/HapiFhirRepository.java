@@ -42,6 +42,7 @@ import ca.uhn.fhir.rest.server.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.server.method.PageMethodBinding;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Multimap;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -152,7 +153,7 @@ public class HapiFhirRepository implements IRepository {
 	}
 
 	private <B extends IBaseBundle> B createBundle(
-			RequestDetails theRequestDetails, IBundleProvider theBundleProvider, String thePagingAction) {
+			RequestDetails theRequestDetails, @Nonnull IBundleProvider theBundleProvider, String thePagingAction) {
 		Integer count = RestfulServerUtils.extractCountParameter(theRequestDetails);
 		String linkSelf = RestfulServerUtils.createLinkSelf(theRequestDetails.getFhirServerBase(), theRequestDetails);
 
@@ -173,7 +174,7 @@ public class HapiFhirRepository implements IRepository {
 			start = Math.max(0, Math.min(offset, theBundleProvider.size()));
 		}
 
-		BundleTypeEnum bundleType = null;
+		BundleTypeEnum bundleType;
 		String[] bundleTypeValues = theRequestDetails.getParameters().get(Constants.PARAM_BUNDLETYPE);
 		if (bundleTypeValues != null) {
 			bundleType = BundleTypeEnum.VALUESET_BINDER.fromCodeString(bundleTypeValues[0]);
@@ -386,7 +387,7 @@ public class HapiFhirRepository implements IRepository {
 	}
 
 	@Override
-	public FhirContext fhirContext() {
+	public @Nonnull FhirContext fhirContext() {
 		return myDaoRegistry.getFhirContext();
 	}
 

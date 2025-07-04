@@ -4,7 +4,6 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.repository.HapiFhirRepository;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.repository.IRepositoryTest;
 import org.junit.jupiter.api.AfterEach;
 

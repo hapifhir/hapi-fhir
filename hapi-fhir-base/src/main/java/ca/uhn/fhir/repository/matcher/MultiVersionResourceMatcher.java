@@ -13,16 +13,16 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.Nonnull;
 
 public class MultiVersionResourceMatcher implements IResourceMatcher {
 	private static final Map<FhirContext, IFhirPath> ourFhirPathCache = new ConcurrentHashMap<>();
-	private Map<SPPathKey, IFhirPath.IParsedExpression> myPathCache = new HashMap<>();
-	private Map<String, RuntimeSearchParam> myCustomSearchParams = new HashMap<>();
+	private final Map<SPPathKey, IFhirPath.IParsedExpression> myExpressionCache = new HashMap<>();
+	private final Map<String, RuntimeSearchParam> myCustomSearchParams = new HashMap<>();
 
 	private final FhirContext myFhirContext;
 
@@ -41,8 +41,8 @@ public class MultiVersionResourceMatcher implements IResourceMatcher {
 	}
 
 	@Override
-	public Map<SPPathKey, IFhirPath.IParsedExpression> getPathCache() {
-		return myPathCache;
+	public Map<SPPathKey, IFhirPath.IParsedExpression> getExpressionCache() {
+		return myExpressionCache;
 	}
 
 	@Override
@@ -63,13 +63,14 @@ public class MultiVersionResourceMatcher implements IResourceMatcher {
 			throw new NotImplementedException("Timing resolution has not yet been implemented");
 		} else {
 			throw new UnsupportedOperationException("Expected element of type Period or Timing, found "
-				+ type.getClass().getSimpleName());
+					+ type.getClass().getSimpleName());
 		}
 	}
 
 	@Override
 	public List<TokenParam> getCodes(IBase theCodeElement) {
-		String elementTypeName = myFhirContext.getElementDefinition(theCodeElement.getClass()).getName();
+		String elementTypeName =
+				myFhirContext.getElementDefinition(theCodeElement.getClass()).getName();
 		switch (elementTypeName) {
 			case "Coding" -> {
 				var terser = myFhirContext.newTerser();
@@ -80,15 +81,16 @@ public class MultiVersionResourceMatcher implements IResourceMatcher {
 				String codeValue = ((IPrimitiveType<?>) theCodeElement).getValueAsString();
 				return List.of(new TokenParam(codeValue));
 			}
-			case "CodeableConcept"-> {
+			case "CodeableConcept" -> {
 				var terser = myFhirContext.newTerser();
-				return terser.getValues(theCodeElement, "codeing").stream().map(coding ->
-					codingToTokenParam(terser, coding)).toList();
+				return terser.getValues(theCodeElement, "codeing").stream()
+						.map(coding -> codingToTokenParam(terser, coding))
+						.toList();
 			}
-			default ->
-				throw new UnsupportedOperationException("Expected element of type Coding, CodeType, or CodeableConcept, found " + elementTypeName);
-			}
+			default -> throw new UnsupportedOperationException(
+					"Expected element of type Coding, CodeType, or CodeableConcept, found " + elementTypeName);
 		}
+	}
 
 	@Nonnull
 	private static TokenParam codingToTokenParam(FhirTerser theTerser, IBase theCodeElement) {
@@ -97,5 +99,4 @@ public class MultiVersionResourceMatcher implements IResourceMatcher {
 
 		return new TokenParam(system, code);
 	}
-
 }

@@ -1,32 +1,34 @@
 package ca.uhn.fhir.repository;
 
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.RepositoryTestDataBuilder;
 import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /** Generic test of repository functionality */
-@SuppressWarnings({
-	"java:S5960" // this is a test jar
+@SuppressWarnings({"java:S5960" // this is a test jar
 })
 public interface IRepositoryTest {
 	Logger ourLog = LoggerFactory.getLogger(IRepositoryTest.class);
 
 	@Test
 	default void testCreate_readById_contentsPersisted() {
-	    // given
+		// given
 		var b = getTestDataBuilder();
 		var patient = b.buildPatient(b.withBirthdate("1970-02-14"));
 		IRepository repository = getRepository();
@@ -34,14 +36,15 @@ public interface IRepositoryTest {
 		// when
 		MethodOutcome methodOutcome = repository.create(patient);
 		ourLog.info("Created resource with id: {} created:{}", methodOutcome.getId(), methodOutcome.getCreated());
-		IBaseResource read = repository.read(patient.getClass(), methodOutcome.getId().toVersionless());
+		IBaseResource read =
+				repository.read(patient.getClass(), methodOutcome.getId().toVersionless());
 
 		// then
-	    assertThat(read)
-			.isNotNull()
-			.extracting(p-> getTerser().getSinglePrimitiveValueOrNull(p, "birthDate"))
-			.as("resource body read matches persisted value")
-			.isEqualTo("1970-02-14");
+		assertThat(read)
+				.isNotNull()
+				.extracting(p -> getTerser().getSinglePrimitiveValueOrNull(p, "birthDate"))
+				.as("resource body read matches persisted value")
+				.isEqualTo("1970-02-14");
 	}
 
 	@Test
@@ -85,14 +88,14 @@ public interface IRepositoryTest {
 
 		// then
 		assertThat(read)
-			.isNotNull()
-			.extracting(p -> getTerser().getSinglePrimitiveValueOrNull(p, "birthDate"))
-			.as("resource body read matches updated value")
-			.isEqualTo(updatedBirthdate);
+				.isNotNull()
+				.extracting(p -> getTerser().getSinglePrimitiveValueOrNull(p, "birthDate"))
+				.as("resource body read matches updated value")
+				.isEqualTo(updatedBirthdate);
 	}
 
 	@Test
-	default void testCreate_delete_readById_throwsNotFound() {
+	default void testCreate_delete_readById_throwsException() {
 		// given a patient resource
 		var b = getTestDataBuilder();
 		var patient = b.buildPatient(b.withBirthdate("1970-02-14"));
@@ -101,27 +104,58 @@ public interface IRepositoryTest {
 		IIdType patientId = createOutcome.getId().toVersionless();
 
 		// when deleted
-		repository.delete(patient.getClass(), patientId);
+		var outcome = repository.delete(patient.getClass(), patientId);
 
-		// then - read should throw ResourceNotFoundException
-		assertThrows(ResourceNotFoundException.class, () -> {
-			repository.read(patient.getClass(), patientId);
-		});
+		// then - read should throw ResourceNotFoundException or ResourceGoneException
+		// Repositories with history should probably throw ResourceGoneException
+		// But repositories without history can't tell the difference and will throw ResourceNotFoundException
+		var exception =
+				assertThrows(BaseServerResponseException.class, () -> repository.read(patient.getClass(), patientId));
+		assertThat(exception).isInstanceOfAny(ResourceNotFoundException.class, ResourceGoneException.class);
 	}
 
-	private FhirTerser getTerser() {
-		return getRepository().fhirContext().newTerser();
+	@Test
+	default void testDelete_noCreate_returnsOutcome() {
+		// given
+		IRepository repository = getRepository();
+		var patientClass = getTestDataBuilder().buildPatient().getClass();
+
+		// when
+		var outcome = repository.delete(patientClass, new IdDt("Patient/123"));
+
+		// then
+		assertThat(outcome).isNotNull();
 	}
 
+	/** Implementors of this test template must provide a RepositoryTestSupport instance */
 	RepositoryTestSupport getRepositoryTestSupport();
 
-	default ITestDataBuilder getTestDataBuilder() {
-		return RepositoryTestDataBuilder.forRepository(getRepository());
+	record RepositoryTestSupport(IRepository repository) {
+		@Nonnull
+		public FhirTerser getFhirTerser() {
+			return getFhirContext().newTerser();
+		}
+
+		@Nonnull
+		public FhirContext getFhirContext() {
+			return repository().fhirContext();
+		}
+
+		@Nonnull
+		private RepositoryTestDataBuilder getRepositoryTestDataBuilder() {
+			return RepositoryTestDataBuilder.forRepository(repository());
+		}
 	}
 
 	private IRepository getRepository() {
 		return getRepositoryTestSupport().repository();
 	}
 
-	record RepositoryTestSupport(IRepository repository) { }
+	private ITestDataBuilder getTestDataBuilder() {
+		return getRepositoryTestSupport().getRepositoryTestDataBuilder();
+	}
+
+	private FhirTerser getTerser() {
+		return getRepositoryTestSupport().getFhirTerser();
+	}
 }

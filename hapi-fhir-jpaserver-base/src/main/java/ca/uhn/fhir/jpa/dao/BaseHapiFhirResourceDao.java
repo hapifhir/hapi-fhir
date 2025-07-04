@@ -1025,8 +1025,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			String msg = getContext()
 					.getLocalizer()
 					.getMessageSanitized(BaseStorageDao.class, "unableToDeleteNotFound", theUrl);
-			oo = createOperationOutcome(
-					OO_SEVERITY_WARN, msg, "not-found", StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND);
+			oo = createWarnOperationOutcome(msg, "not-found", StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND);
 		} else {
 			String msg = getContext()
 					.getLocalizer()
