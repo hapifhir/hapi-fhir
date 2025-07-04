@@ -326,6 +326,13 @@ If the JPA server has [partitioning](/docs/server_jpa_partitioning/partitioning.
 
 The UserRequestRetryVersionConflictsInterceptor allows clients to request that the server avoid version conflicts (HTTP 409) when two concurrent client requests attempt to modify the same resource. See [Version Conflicts](/docs/server_jpa/configuration.html#retry-on-version-conflict) for more information. 
 
+# JPA Server: Selective Auto-Create Placeholder Reference Targets
+
+The `AutoCreatePlaceholderReferenceEnabledByTypeInterceptor` can be used in combination with [Auto-Create Placeholder Reference Targets](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#setAutoCreatePlaceholderReferenceTargets(boolean)) in order to specify that only reference targets with specific resource types should be created.
+
+* [AutoCreatePlaceholderReferenceEnabledByTypeInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-storage/src/main/java/ca/uhn/fhir/storage/interceptor/AutoCreatePlaceholderReferenceEnabledByTypeInterceptor.java)
+
+
 # JPA Server: Validate Data Being Stored
 
 The RepositoryValidatingInterceptor can be used to enforce validation rules on data stored in a HAPI FHIR JPA Repository. See [Repository Validating Interceptor](/docs/validation/repository_validating_interceptor.html) for more information. 

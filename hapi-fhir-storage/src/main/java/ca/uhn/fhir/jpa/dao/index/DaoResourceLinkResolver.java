@@ -24,8 +24,10 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -44,12 +46,16 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetRequest;
+import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetResponse;
 import ca.uhn.fhir.util.CanonicalIdentifier;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.TerserUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -65,6 +71,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> implements IResourceLinkResolver {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DaoResourceLinkResolver.class);
@@ -82,10 +90,10 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 	private DaoRegistry myDaoRegistry;
 
 	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
+	private IHapiTransactionService myTransactionService;
 
 	@Autowired
-	private IHapiTransactionService myTransactionService;
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Override
 	public IResourceLookup findTargetResource(
@@ -106,11 +114,6 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		String resourceType = targetResourceId.getResourceType();
 		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(resourceType);
 		Class<? extends IBaseResource> type = resourceDef.getImplementingClass();
-
-		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(
-				theSourceResourceName,
-				thePathAndRef.getSearchParamName(),
-				ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 
 		T persistentId = null;
 		if (theTransactionDetails != null) {
@@ -196,10 +199,6 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 			if (theTransactionDetails != null) {
 				theTransactionDetails.addResolvedResourceId(targetResourceId, persistentId);
 			}
-		}
-
-		if (!searchParam.hasTargets() && searchParam.getTargets().contains(resourceType)) {
-			return null;
 		}
 
 		return resolvedResource;
@@ -302,6 +301,41 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 					theTransactionDetails.addRollbackUndoAction(() -> newResource.setId(existingId));
 				}
 				newResource.setId(resName + "/" + theIdToAssignToPlaceholder);
+			}
+
+			// Interceptor: STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE
+			IInterceptorBroadcaster interceptorBroadcaster =
+					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+			if (interceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE)) {
+				AutoCreatePlaceholderReferenceTargetRequest request =
+						new AutoCreatePlaceholderReferenceTargetRequest(newResource);
+				HookParams params = new HookParams()
+						.add(AutoCreatePlaceholderReferenceTargetRequest.class, request)
+						.add(RequestDetails.class, theRequest)
+						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				AutoCreatePlaceholderReferenceTargetResponse response =
+						(AutoCreatePlaceholderReferenceTargetResponse) interceptorBroadcaster.callHooksAndReturnObject(
+								Pointcut.STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE, params);
+				if (response != null) {
+					if (response.isDoNotCreateTarget()) {
+						return Optional.empty();
+					}
+				}
+
+				// Sanity check: Make sure that interceptors haven't changed the ID
+				if (theIdToAssignToPlaceholder != null) {
+					Validate.isTrue(
+							theIdToAssignToPlaceholder.equals(
+									newResource.getIdElement().getIdPart()),
+							"Interceptors must not modify the ID of auto-created placeholder reference targets");
+				} else {
+					Validate.isTrue(
+							isBlank(newResource.getIdElement().getIdPart()),
+							"Interceptors must not modify the ID of auto-created placeholder reference targets");
+				}
+			}
+
+			if (theIdToAssignToPlaceholder != null) {
 				valueOf = placeholderResourceDao
 						.update(newResource, null, true, false, theRequest, theTransactionDetails)
 						.getEntity();

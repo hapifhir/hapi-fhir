@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -174,6 +175,24 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 		assertThat(actual.getSnapshot().getElementFirstRep().getId()).isEqualTo("FOO");
 		PackageInformation sourcePackage = actual.getSourcePackage();
 		assertThat(sourcePackage.getId()).isEqualTo("hl7.fhir.r999.core");
+	}
+
+	@Test
+	public void testSettingDifferentValidationSupportFails() {
+		WorkerContextValidationSupportAdapter adapter = new WorkerContextValidationSupportAdapter();
+		IValidationSupport mockValidationSupport = mockValidationSupport();
+		adapter.setValidationSupport(mockValidationSupport);
+		IValidationSupport differentMockValidationSupport = mockValidationSupport();
+		assertThrows(IllegalArgumentException.class, () ->
+		adapter.setValidationSupport(differentMockValidationSupport));
+	}
+
+	@Test
+	public void testSettingSameValidationSupportDoesntFail() {
+		WorkerContextValidationSupportAdapter adapter = new WorkerContextValidationSupportAdapter();
+		IValidationSupport mockValidationSupport = mockValidationSupport();
+		adapter.setValidationSupport(mockValidationSupport);
+		adapter.setValidationSupport(mockValidationSupport);
 	}
 
 	private List<StructureDefinition> createPrimitiveStructureDefinitions() {

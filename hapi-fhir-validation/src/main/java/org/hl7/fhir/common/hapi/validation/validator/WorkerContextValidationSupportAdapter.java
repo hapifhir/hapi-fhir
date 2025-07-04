@@ -169,6 +169,9 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	 * Provides the {@link IValidationSupport} module that backs this adapter.
 	 */
 	public void setValidationSupport(IValidationSupport theValidationSupport) {
+		if (myValidationSupport == theValidationSupport) {
+			return;
+		}
 		Validate.isTrue(
 				myValidationSupport == null, "Can not set the validation support after it has already been set");
 		myValidationSupport = theValidationSupport;
@@ -195,11 +198,6 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	@Override
 	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader) throws FHIRException {
 		throw new UnsupportedOperationException(Msg.code(652));
-	}
-
-	@Override
-	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, Set<String> types) throws FHIRException {
-		throw new UnsupportedOperationException(Msg.code(653));
 	}
 
 	@Override
@@ -1149,5 +1147,10 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	public static WorkerContextValidationSupportAdapter newVersionSpecificWorkerContextWrapper(
 			IValidationSupport theValidationSupport) {
 		return new WorkerContextValidationSupportAdapter(theValidationSupport);
+	}
+
+	@Override
+	public OperationOutcome validateTxResource(ValidationOptions options, Resource resource) {
+		throw new UnsupportedOperationException(Msg.code(2735));
 	}
 }
