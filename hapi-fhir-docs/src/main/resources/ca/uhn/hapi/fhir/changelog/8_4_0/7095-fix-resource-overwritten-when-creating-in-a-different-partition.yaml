@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7095
+title: "When database partition mode was enabled and the cross-partition reference mode was set to ALLOWED_UNQUALIFIED, 
+creating a resource with a forced ID that already existed for the same resource type in a different partition would 
+overwrite the existing resource. This issue has now been fixed."
