@@ -140,7 +140,7 @@ public class HapiFhirRepository implements IRepository {
 		SearchConverter converter = new SearchConverter();
 		converter.convertParameters(theSearchParameters, fhirContext());
 		details.setParameters(converter.myResultParameters);
-		details.setResourceName(myRestfulServer.getFhirContext().getResourceType(theResourceType));
+		details.setResourceName(myDaoRegistry.getFhirContext().getResourceType(theResourceType));
 		IBundleProvider bundleProvider =
 				myDaoRegistry.getResourceDao(theResourceType).search(converter.mySearchParameterMap, details);
 
@@ -387,7 +387,7 @@ public class HapiFhirRepository implements IRepository {
 
 	@Override
 	public FhirContext fhirContext() {
-		return myRestfulServer.getFhirContext();
+		return myDaoRegistry.getFhirContext();
 	}
 
 	protected <R> R invoke(RequestDetails theDetails) {
