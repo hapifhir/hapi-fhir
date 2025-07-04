@@ -52,7 +52,7 @@ MS SQL Server
 - Supports different HAPI FHIR versions for data insertion
 
 **Current Lifecycle**:
-1. `@ExtendWith(HapiEmbeddedDatabasesExtension.class)` boots all 4 containers
+1. `@RegisterExtension HapiEmbeddedDatabasesExtension.class` boots all 4 containers
 2. Parameterized tests iterate over all databases
 3. Extension cleans up after all tests complete
 
@@ -80,7 +80,7 @@ MS SQL Server
 **Requirements**:
 - **CRITICAL**: Needs fully migrated database with complete schema
 - Spring-based test with full application context
-- Uses `DataSource dataSource()` bean with automatic migration
+- Uses `DataSource dataSource()` bean for automatic migration
 - Tests full FHIR R5 operations (CRUD, search, includes, $everything)
 
 **Key Test Methods** (MUST NOT CHANGE):
@@ -93,7 +93,7 @@ MS SQL Server
 **Child Classes**:
 - All inherit from `BaseDatabaseVerificationIT`
 - Use same database infrastructure
-- Must continue to work without modification
+- Inheritance is allowed to be changed if it accomplishes the above goals.
 
 ## Critical Conflict Resolution
 
@@ -232,21 +232,16 @@ Create shared test context configuration:
 - **Official Docs**: https://java.testcontainers.org/
 - **Singleton Pattern**: https://www.testcontainers.org/test_framework_integration/manual_lifecycle_control/
 
-### Spring Test Context Management
-- Use `@DirtiesContext` strategically to control context lifecycle
-- Leverage `TestExecutionListener` for custom test phase management
-- Consider `@TestMethodOrder` for deterministic execution
-
-### Database-Specific Considerations
-- **Oracle**: May require special licensing/container setup
-- **PostgreSQL**: Foreign key index validation requirements
-- **MS SQL Server**: Collation settings verification
-- **H2**: Different behavior in embedded vs server mode
 
 ## Questions for Clarification
 
 1. **Test Execution Environment**: Are tests run in parallel Maven modules, or sequentially?
+Answer: The IT is run sequentially, but HapiFhirSchemaMigrationTest is run by surefire, which means it can run in parallel. But it doesnt have to, you can make it go sequentially if you want. 
 2. **Container Registry**: Are there specific Docker registry requirements for database images?
+Answer: Nope, what is there is fine. 
 3. **Memory Constraints**: What are the specific memory limits in CI environment?
+Answer: Unclear, but don't worry about it. 
 4. **Database Versions**: Are there specific database version requirements for each vendor?
+Answer: Use what is already in place 
 5. **Test Isolation**: Are there any cross-test dependencies that need to be preserved?
+Answer: No there are not
