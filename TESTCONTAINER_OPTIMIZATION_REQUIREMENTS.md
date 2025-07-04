@@ -18,21 +18,21 @@ Current: [H2, PostgreSQL, MSSQL, Oracle] x [SchemaTest, VerificationTest] = 8 co
 To:
 ```
 Target: H2 → [SchemaTest, VerificationTest] → shutdown
-        PostgreSQL → [SchemaTest, VerificationTest] → shutdown  
+        PostgreSQL → [SchemaTest, VerificationTest] → shutdown
         MSSQL → [SchemaTest, VerificationTest] → shutdown
         Oracle → [SchemaTest, VerificationTest] → shutdown
 ```
 
 Expected output format:
 ```
-Oracle 
+Oracle
  | ---- Schema Migration
  | ---- Database Verification
 Postgres
  | ---- Schema Migration
  | ---- Database Verification
 H2
- | ---- Schema Migration  
+ | ---- Schema Migration
  | ---- Database Verification
 MS SQL Server
  | ---- Schema Migration
@@ -219,7 +219,7 @@ Create shared test context configuration:
 
 ## Success Criteria
 
-1. **Performance**: Total test execution time reduced by 50%+ 
+1. **Performance**: Total test execution time reduced by 50%+
 2. **Memory**: CI memory usage reduced to sustainable levels
 3. **Reliability**: All existing tests pass without modification
 4. **Maintainability**: Clear separation of concerns between test phases
@@ -236,12 +236,12 @@ Create shared test context configuration:
 ## Questions for Clarification
 
 1. **Test Execution Environment**: Are tests run in parallel Maven modules, or sequentially?
-Answer: The IT is run sequentially, but HapiFhirSchemaMigrationTest is run by surefire, which means it can run in parallel. But it doesnt have to, you can make it go sequentially if you want. 
+Answer: The IT is run sequentially, but HapiFhirSchemaMigrationTest is run by surefire, which means it can run in parallel. But it doesnt have to, you can make it go sequentially if you want.
 2. **Container Registry**: Are there specific Docker registry requirements for database images?
-Answer: Nope, what is there is fine. 
+Answer: Nope, what is there is fine.
 3. **Memory Constraints**: What are the specific memory limits in CI environment?
-Answer: Unclear, but don't worry about it. 
+Answer: Unclear, but don't worry about it.
 4. **Database Versions**: Are there specific database version requirements for each vendor?
-Answer: Use what is already in place 
+Answer: Use what is already in place
 5. **Test Isolation**: Are there any cross-test dependencies that need to be preserved?
 Answer: No there are not
