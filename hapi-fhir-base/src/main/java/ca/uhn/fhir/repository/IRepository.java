@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import com.google.common.annotations.Beta;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -313,7 +314,6 @@ public interface IRepository {
 
 	/**
 	 * Reads a Bundle from a link on this repository
-	 *
 	 * This is typically used for paging during searches
 	 *
 	 * @see <a href="https://www.hl7.org/fhir/bundle-definitions.html#Bundle.link">FHIR Bundle
@@ -329,7 +329,6 @@ public interface IRepository {
 
 	/**
 	 * Reads a Bundle from a link on this repository
-	 *
 	 * This is typically used for paging during searches
 	 *
 	 * @see <a href="https://www.hl7.org/fhir/bundle-definitions.html#Bundle.link">FHIR Bundle
@@ -721,7 +720,7 @@ public interface IRepository {
 
 	/**
 	 * Returns the {@link FhirContext} used by the repository
-	 *
+	 * <p>
 	 * Practically, implementing FHIR functionality with the HAPI toolset requires a FhirContext. In
 	 * particular for things like version independent code. Ideally, a user could which FHIR version a
 	 * repository was configured for using things like the CapabilityStatement. In practice, that's
@@ -730,6 +729,7 @@ public interface IRepository {
 	 *
 	 * @return a FhirContext
 	 */
+	@Nonnull
 	FhirContext fhirContext();
 
 	private static <T> T throwNotImplementedOperationException(String theMessage) {
