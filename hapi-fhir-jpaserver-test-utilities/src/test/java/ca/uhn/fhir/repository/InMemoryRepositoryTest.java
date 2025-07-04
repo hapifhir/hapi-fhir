@@ -10,4 +10,10 @@ public class InMemoryRepositoryTest implements IRepositoryTest {
 	public RepositoryTestSupport getRepositoryTestSupport() {
 		return new RepositoryTestSupport(myRepository);
 	}
+
+	@Override
+	public boolean isPatchSupported() {
+		return false;
+	}
+
 }

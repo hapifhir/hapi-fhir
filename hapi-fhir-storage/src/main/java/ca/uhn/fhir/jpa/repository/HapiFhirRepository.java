@@ -28,6 +28,7 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -101,10 +102,10 @@ public class HapiFhirRepository implements IRepository {
 				.setAction(RestOperationTypeEnum.PATCH)
 				.addHeaders(theHeaders)
 				.create();
-		// TODO update FHIR patchType once FHIRPATCH bug has been fixed
+
 		return myDaoRegistry
 				.getResourceDao(theId.getResourceType())
-				.patch(theId, null, null, null, thePatchParameters, details);
+				.patch(theId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, thePatchParameters, details);
 	}
 
 	@Override

@@ -9,14 +9,21 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.RepositoryTestDataBuilder;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.ParametersUtil;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.DateType;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 
+import static ca.uhn.fhir.util.ParametersUtil.addParameterToParameters;
+import static ca.uhn.fhir.util.ParametersUtil.addPart;
+import static ca.uhn.fhir.util.ParametersUtil.addPartCode;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -25,12 +32,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 })
 public interface IRepositoryTest {
 	Logger ourLog = LoggerFactory.getLogger(IRepositoryTest.class);
+	String BIRTHDATE1 = "1970-02-14";
+	String BIRTHDATE2 = "1975-01-01";
 
 	@Test
 	default void testCreate_readById_contentsPersisted() {
 		// given
 		var b = getTestDataBuilder();
-		var patient = b.buildPatient(b.withBirthdate("1970-02-14"));
+		var patient = b.buildPatient(b.withBirthdate(BIRTHDATE1));
 		IRepository repository = getRepository();
 
 		// when
@@ -44,14 +53,14 @@ public interface IRepositoryTest {
 				.isNotNull()
 				.extracting(p -> getTerser().getSinglePrimitiveValueOrNull(p, "birthDate"))
 				.as("resource body read matches persisted value")
-				.isEqualTo("1970-02-14");
+				.isEqualTo(BIRTHDATE1);
 	}
 
 	@Test
 	default void testCreateClientAssignedId_readBySameId_findsResource() {
 		// given
 		var b = getTestDataBuilder();
-		var patient = b.buildPatient(b.withId("pat123"), b.withBirthdate("1970-02-14"));
+		var patient = b.buildPatient(b.withId("pat123"), b.withBirthdate(BIRTHDATE1));
 		IRepository repository = getRepository();
 
 		// when
@@ -60,17 +69,15 @@ public interface IRepositoryTest {
 
 		// then
 		assertThat(read).isNotNull();
-		assertThat(getTerser().getSinglePrimitiveValueOrNull(read, "birthDate")).isEqualTo("1970-02-14");
+		assertThat(getTerser().getSinglePrimitiveValueOrNull(read, "birthDate")).isEqualTo(BIRTHDATE1);
 		assertThat(read.getIdElement().getIdPart()).isEqualTo("pat123");
 	}
 
 	@Test
 	default void testCreate_update_readById_verifyUpdatedContents() {
 		// given
-		String initialBirthdate = "1970-02-14";
-		String updatedBirthdate = "1980-03-15";
 		var b = getTestDataBuilder();
-		var patient = b.buildPatient(b.withBirthdate(initialBirthdate));
+		var patient = b.buildPatient(b.withBirthdate(BIRTHDATE1));
 		IRepository repository = getRepository();
 
 		// when - create
@@ -78,7 +85,7 @@ public interface IRepositoryTest {
 		IIdType patientId = createOutcome.getId().toVersionless();
 
 		// update with different birthdate
-		var updatedPatient = b.buildPatient(b.withId(patientId), b.withBirthdate(updatedBirthdate));
+		var updatedPatient = b.buildPatient(b.withId(patientId), b.withBirthdate(BIRTHDATE2));
 		var updateOutcome = repository.update(updatedPatient);
 		assertThat(updateOutcome.getId().toVersionless().getValueAsString()).isEqualTo(patientId.getValueAsString());
 		assertThat(updateOutcome.getCreated()).isFalse();
@@ -91,14 +98,14 @@ public interface IRepositoryTest {
 				.isNotNull()
 				.extracting(p -> getTerser().getSinglePrimitiveValueOrNull(p, "birthDate"))
 				.as("resource body read matches updated value")
-				.isEqualTo(updatedBirthdate);
+				.isEqualTo(BIRTHDATE2);
 	}
 
 	@Test
 	default void testCreate_delete_readById_throwsException() {
 		// given a patient resource
 		var b = getTestDataBuilder();
-		var patient = b.buildPatient(b.withBirthdate("1970-02-14"));
+		var patient = b.buildPatient(b.withBirthdate(BIRTHDATE1));
 		IRepository repository = getRepository();
 		MethodOutcome createOutcome = repository.create(patient);
 		IIdType patientId = createOutcome.getId().toVersionless();
@@ -125,6 +132,40 @@ public interface IRepositoryTest {
 
 		// then
 		assertThat(outcome).isNotNull();
+	}
+
+	default boolean isPatchSupported() {
+		// todo this should really come from the repository capabilities
+		return true;
+	}
+
+	@Test
+	@EnabledIf("isPatchSupported")
+	default void testPatch_changesValue() {
+	    // given
+		var repository = getRepository();
+		var fhirContext = getRepository().fhirContext();
+		IBaseParameters parameters = ParametersUtil.newInstance(fhirContext);
+		var operation = addParameterToParameters(fhirContext, parameters, "operation");
+		addPartCode(fhirContext, operation, "type", "replace");
+		addPartCode(fhirContext, operation, "path", "Patient.birthDate");
+		addPart(fhirContext, operation, "value", new DateType(BIRTHDATE2));
+
+		var b = getTestDataBuilder();
+		var patient = b.buildPatient(b.withBirthdate(BIRTHDATE1));
+		MethodOutcome createOutcome = repository.create(patient);
+		IIdType patientId = createOutcome.getId().toVersionless();
+
+		// when
+		repository.patch(patientId, parameters);
+
+	    // then
+		IBaseResource read = repository.read(patient.getClass(), patientId);
+		assertThat(read)
+			.isNotNull()
+			.extracting(p -> getTerser().getSinglePrimitiveValueOrNull(p, "birthDate"))
+			.as("resource body read matches updated value")
+			.isEqualTo(BIRTHDATE2);
 	}
 
 	/** Implementors of this test template must provide a RepositoryTestSupport instance */

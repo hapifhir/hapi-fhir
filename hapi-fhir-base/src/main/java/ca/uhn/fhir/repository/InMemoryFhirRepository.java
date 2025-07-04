@@ -90,6 +90,15 @@ public class InMemoryFhirRepository implements IRepository {
 		}
 	}
 
+	ResourceLookup lookupResource(IIdType theId) {
+		Validate.notNull(theId, "Id must not be null");
+		Validate.notNull(theId.getResourceType(), "Resource type must not be null");
+
+		Map<IIdType, IBaseResource> resources = getResourceMapForType(theId.getResourceType());
+
+		return new ResourceLookup(resources, new IdDt(theId));
+	}
+
 	ResourceLookup lookupResource(Class<? extends IBaseResource> theResourceType, IIdType theId) {
 		Validate.notNull(theResourceType, "Resource type must not be null");
 		Validate.notNull(theId, "Id must not be null");
@@ -105,9 +114,7 @@ public class InMemoryFhirRepository implements IRepository {
 					"Resource type mismatch: resource is " + resourceTypeName + " but id type is " + idResourceType);
 		}
 
-		Map<IIdType, IBaseResource> resources = getResourceMapForType(unqualifiedVersionless.getResourceType());
-
-		return new ResourceLookup(resources, new IdDt(unqualifiedVersionless));
+		return lookupResource(unqualifiedVersionless);
 	}
 
 	@Override
