@@ -34,44 +34,36 @@ import java.util.Map;
  * For testing purposes.
  * <br/><br/>
  * Embedded database that uses a {@link ca.uhn.fhir.jpa.migrate.DriverTypeEnum#MSSQL_2012} driver
- * and a dockerized Testcontainer.
+ * and a dockerized Testcontainer with lazy initialization.
  *
  * @see <a href="https://www.testcontainers.org/modules/databases/mssqlserver/">MS SQL Server TestContainer</a>
  */
-public class MsSqlEmbeddedDatabase extends JpaEmbeddedDatabase {
+public class MsSqlEmbeddedDatabase extends LazyJpaContainerDatabase {
 	private static final Logger ourLog = LoggerFactory.getLogger(MsSqlEmbeddedDatabase.class);
 
-	private final MSSQLServerContainer myContainer;
-
 	public MsSqlEmbeddedDatabase() {
-
-		// azure-sql-edge docker image does not support kernel 6.7+
-		// as a result, mssql container fails to start most of the time
-		// mssql/server:2019 image support kernel 6.7+, so use it for amd64 architecture
-		// See: https://github.com/microsoft/mssql-docker/issues/868
-		if (DatabaseSupportUtil.canUseMsSql2019()) {
-			myContainer = new MSSQLServerContainer("mcr.microsoft.com/mssql/server:2019-latest").acceptLicense();
-		} else {
-			DockerImageName msSqlImage = DockerImageName.parse("mcr.microsoft.com/azure-sql-edge:latest")
-					.asCompatibleSubstituteFor("mcr.microsoft.com/mssql/server");
-			myContainer = new MSSQLServerContainer(msSqlImage).acceptLicense();
-		}
-
-		myContainer.start();
-		super.initialize(
-				DriverTypeEnum.MSSQL_2012,
-				myContainer.getJdbcUrl(),
-				myContainer.getUsername(),
-				myContainer.getPassword());
+		super(() -> {
+			// azure-sql-edge docker image does not support kernel 6.7+
+			// as a result, mssql container fails to start most of the time
+			// mssql/server:2019 image support kernel 6.7+, so use it for amd64 architecture
+			// See: https://github.com/microsoft/mssql-docker/issues/868
+			if (DatabaseSupportUtil.canUseMsSql2019()) {
+				return new MSSQLServerContainer("mcr.microsoft.com/mssql/server:2019-latest").acceptLicense();
+			} else {
+				DockerImageName msSqlImage = DockerImageName.parse("mcr.microsoft.com/azure-sql-edge:latest")
+						.asCompatibleSubstituteFor("mcr.microsoft.com/mssql/server");
+				return new MSSQLServerContainer(msSqlImage).acceptLicense();
+			}
+		});
 	}
 
 	@Override
-	public void stop() {
-		myContainer.stop();
+	public DriverTypeEnum getDriverType() {
+		return DriverTypeEnum.MSSQL_2012;
 	}
 
 	@Override
-	public void disableConstraints() {
+	protected void doDisableConstraints() {
 		List<String> sql = new ArrayList<>();
 		for (String tableName : getAllTableNames()) {
 			sql.add(String.format("ALTER TABLE \"%s\" NOCHECK CONSTRAINT ALL;", tableName));
@@ -80,7 +72,7 @@ public class MsSqlEmbeddedDatabase extends JpaEmbeddedDatabase {
 	}
 
 	@Override
-	public void enableConstraints() {
+	protected void doEnableConstraints() {
 		List<String> sql = new ArrayList<>();
 		for (String tableName : getAllTableNames()) {
 			sql.add(String.format("ALTER TABLE \"%s\" WITH CHECK CHECK CONSTRAINT ALL;", tableName));
@@ -89,7 +81,7 @@ public class MsSqlEmbeddedDatabase extends JpaEmbeddedDatabase {
 	}
 
 	@Override
-	public void clearDatabase() {
+	protected void doClearDatabase() {
 		dropForeignKeys();
 		dropRemainingConstraints();
 		dropTables();

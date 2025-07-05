@@ -31,27 +31,23 @@ import java.util.Map;
  * For testing purposes.
  * <br/><br/>
  * Embedded database that uses a {@link ca.uhn.fhir.jpa.migrate.DriverTypeEnum#POSTGRES_9_4} driver
- * and a dockerized Testcontainer.
+ * and a dockerized Testcontainer with lazy initialization.
  *
  * @see <a href="https://www.testcontainers.org/modules/databases/postgres/">Postgres TestContainer</a>
  */
-public class PostgresEmbeddedDatabase extends JpaContainerDatabase {
+public class PostgresEmbeddedDatabase extends LazyJpaContainerDatabase {
 
 	public PostgresEmbeddedDatabase() {
-		this(new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest")));
-	}
-
-	public PostgresEmbeddedDatabase(PostgreSQLContainer<?> theContainer) {
-		super(theContainer);
-		super.initialize(
-				DriverTypeEnum.POSTGRES_9_4,
-				myContainer.getJdbcUrl(),
-				myContainer.getUsername(),
-				myContainer.getPassword());
+		super(() -> new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest")));
 	}
 
 	@Override
-	public void disableConstraints() {
+	public DriverTypeEnum getDriverType() {
+		return DriverTypeEnum.POSTGRES_9_4;
+	}
+
+	@Override
+	protected void doDisableConstraints() {
 		List<String> sql = new ArrayList<>();
 		for (String tableName : getAllTableNames()) {
 			sql.add(String.format("ALTER TABLE \"%s\" DISABLE TRIGGER ALL", tableName));
@@ -88,8 +84,7 @@ public class PostgresEmbeddedDatabase extends JpaContainerDatabase {
 	}
 
 	@Override
-	public void enableConstraints() {
-
+	protected void doEnableConstraints() {
 		List<String> sql = new ArrayList<>();
 		for (String tableName : getAllTableNames()) {
 			sql.add(String.format("ALTER TABLE \"%s\" ENABLE TRIGGER ALL", tableName));
@@ -99,7 +94,7 @@ public class PostgresEmbeddedDatabase extends JpaContainerDatabase {
 	}
 
 	@Override
-	public void clearDatabase() {
+	protected void doClearDatabase() {
 		dropTables();
 		dropSequences();
 	}
