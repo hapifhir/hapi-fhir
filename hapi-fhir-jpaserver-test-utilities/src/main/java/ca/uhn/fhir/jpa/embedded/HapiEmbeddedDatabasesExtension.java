@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.util.DatabaseSupportUtil;
 import ca.uhn.fhir.test.utilities.docker.DockerRequiredCondition;
 import ca.uhn.fhir.util.VersionEnum;
 import org.junit.jupiter.api.extension.AfterAllCallback;
+import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
@@ -40,7 +41,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
 
-public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
+public class HapiEmbeddedDatabasesExtension implements AfterAllCallback, AfterEachCallback {
 
 	public static final VersionEnum FIRST_TESTED_VERSION = VersionEnum.V5_1_0;
 
@@ -64,6 +65,20 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 			}
 		} else {
 			ourLog.warn("Docker is not available! Not going to start any embedded databases.");
+		}
+	}
+
+	@Override
+	public void afterEach(ExtensionContext theExtensionContext) {
+		// Stop all started containers after each test to ensure one-container-at-a-time behavior
+		for (JpaEmbeddedDatabase database : getAllEmbeddedDatabases()) {
+			if (database instanceof LazyJpaContainerDatabase) {
+				LazyJpaContainerDatabase containerDb = (LazyJpaContainerDatabase) database;
+				if (containerDb.isStarted()) {
+					ourLog.info("Stopping container after test: {}", containerDb.getDriverType());
+					containerDb.stop();
+				}
+			}
 		}
 	}
 

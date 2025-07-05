@@ -30,31 +30,23 @@ import java.util.Map;
  * For testing purposes.
  * <br/><br/>
  * Embedded database that uses a {@link DriverTypeEnum#ORACLE_12C} driver
- * and a dockerized Testcontainer.
+ * and a dockerized Testcontainer with lazy initialization.
  *
  * @see <a href="https://www.testcontainers.org/modules/databases/oraclexe/">Oracle TestContainer</a>
  */
-public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
-
-	private final OracleContainer myContainer;
+public class OracleEmbeddedDatabase extends LazyJpaContainerDatabase {
 
 	public OracleEmbeddedDatabase() {
-		myContainer = new OracleContainer("gvenzl/oracle-xe:21-slim-faststart").withPrivilegedMode(true);
-		myContainer.start();
-		super.initialize(
-				DriverTypeEnum.ORACLE_12C,
-				myContainer.getJdbcUrl(),
-				myContainer.getUsername(),
-				myContainer.getPassword());
+		super(() -> new OracleContainer("gvenzl/oracle-xe:21-slim-faststart").withPrivilegedMode(true));
 	}
 
 	@Override
-	public void stop() {
-		myContainer.stop();
+	public DriverTypeEnum getDriverType() {
+		return DriverTypeEnum.ORACLE_12C;
 	}
 
 	@Override
-	public void disableConstraints() {
+	protected void doDisableConstraints() {
 		purgeRecycleBin();
 		List<String> sql = new ArrayList<>();
 		List<Map<String, Object>> queryResults =
@@ -68,7 +60,7 @@ public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
 	}
 
 	@Override
-	public void enableConstraints() {
+	protected void doEnableConstraints() {
 		purgeRecycleBin();
 		List<String> sql = new ArrayList<>();
 		List<Map<String, Object>> queryResults =
@@ -82,7 +74,7 @@ public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
 	}
 
 	@Override
-	public void clearDatabase() {
+	protected void doClearDatabase() {
 		dropTables();
 		dropSequences();
 		purgeRecycleBin();
