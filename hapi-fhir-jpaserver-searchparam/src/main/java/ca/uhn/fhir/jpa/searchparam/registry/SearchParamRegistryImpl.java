@@ -37,12 +37,14 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.IndexedSearchParam;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.TaskChunker;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
@@ -68,6 +70,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.isAllowedForContext;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -82,6 +85,7 @@ public class SearchParamRegistryImpl
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamRegistryImpl.class);
 	public static final int MAX_MANAGED_PARAM_COUNT = 10000;
 	private static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
+	private static final int QUERY_CHUNK_SIZE = 800; // Max number of bind params
 
 	private JpaSearchParamCache myJpaSearchParamCache;
 
@@ -485,15 +489,23 @@ public class SearchParamRegistryImpl
 
 	@Override
 	public void handleInit(Collection<IIdType> theResourceIds) {
+		StopWatch sw = new StopWatch();
 		List<IBaseResource> searchParams = new ArrayList<>();
-		for (IIdType id : theResourceIds) {
-			try {
-				IBaseResource searchParam = mySearchParamProvider.read(id);
-				searchParams.add(searchParam);
-			} catch (ResourceNotFoundException e) {
-				ourLog.warn("SearchParameter {} not found.  Excluding from list of active search params.", id);
-			}
-		}
+
+		Stream<ReferenceParam> paramStream = theResourceIds.stream().map(ReferenceParam::new);
+
+		TaskChunker.chunk(paramStream, QUERY_CHUNK_SIZE)
+				.map(nextReferenceChunk -> {
+					ReferenceOrListParam accumulator = new ReferenceOrListParam();
+					nextReferenceChunk.forEach(accumulator::addOr);
+					SearchParameterMap params =
+							SearchParameterMap.newSynchronous().add("_id", accumulator);
+					return mySearchParamProvider.search(params).getAllResources();
+				})
+				.forEach(searchParams::addAll);
+
+		ourLog.debug("Read {} SearchParameters from database in {}ms", theResourceIds.size(), sw.getMillis());
+
 		initializeActiveSearchParams(searchParams);
 	}
 

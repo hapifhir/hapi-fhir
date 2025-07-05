@@ -1,0 +1,4 @@
+---
+type: perf
+issue: 6757
+title: "Speed up SearchParameter loading on server startup."
