@@ -47,3 +47,29 @@ The following example shows an exception handling interceptor which overrides th
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RequestExceptionInterceptor.java|interceptor}}
 ```
 
+## Working with RequestDetails in Interceptors
+
+Many interceptor hook methods receive a [RequestDetails](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/api/server/RequestDetails.html) parameter which provides access to request context information. When working with RequestDetails in interceptors:
+
+* **Use `getUserData()`** to pass information between different interceptor methods and hook points. This is the recommended approach for most interceptor use cases.
+
+* **For servlet attributes** (used for communication between servlet filters), use the `getServletAttribute()` and `setServletAttribute()` methods available on servlet-based RequestDetails implementations.
+
+```java
+@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
+public void preHandle(RequestDetails theRequestDetails) {
+    // Store data for use in later interceptor methods
+    theRequestDetails.getUserData().put("START_TIME", System.currentTimeMillis());
+}
+
+@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
+public void postHandle(RequestDetails theRequestDetails) {
+    // Retrieve data stored in earlier interceptor method
+    Long startTime = (Long) theRequestDetails.getUserData().get("START_TIME");
+    if (startTime != null) {
+        long duration = System.currentTimeMillis() - startTime;
+        // Log or process the duration...
+    }
+}
+```
+

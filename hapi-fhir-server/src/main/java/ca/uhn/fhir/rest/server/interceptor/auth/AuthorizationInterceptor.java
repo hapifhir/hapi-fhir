@@ -459,7 +459,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		RestOperationTypeEnum restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
 
 		if (theRequestDetails != null) {
-			theRequestDetails.setAttribute(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, theBulkExportOptions);
+			theRequestDetails.getUserData().put(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, theBulkExportOptions);
 		}
 		applyRulesAndFailIfDeny(restOperationType, theRequestDetails, null, null, null, thePointcut);
 	}

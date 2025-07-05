@@ -27,6 +27,7 @@ import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.IHasServletAttributes;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -50,7 +51,7 @@ import java.util.Map;
  *
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
-public class JaxRsRequest extends RequestDetails {
+public class JaxRsRequest extends RequestDetails implements IHasServletAttributes {
 
 	private HttpHeaders myHeaders;
 	private String myResourceString;
@@ -127,14 +128,50 @@ public class JaxRsRequest extends RequestDetails {
 		throw new UnsupportedOperationException(Msg.code(2500) + "Headers can not be modified in JAX-RS");
 	}
 
+	/**
+	 * Gets an attribute from the servlet request. Attributes are used for interacting with servlet request
+	 * attributes to communicate between servlet filters. These methods should not be used to pass information
+	 * between interceptor methods. Use {@link #getUserData()} instead to pass information
+	 * between interceptor methods.
+	 *
+	 * @param theAttributeName The attribute name
+	 * @return The attribute value, or null if the attribute is not set
+	 */
 	@Override
-	public Object getAttribute(String theAttributeName) {
+	public Object getServletAttribute(String theAttributeName) {
 		return myAttributes.get(theAttributeName);
 	}
 
+	/**
+	 * Sets an attribute on the servlet request. Attributes are used for interacting with servlet request
+	 * attributes to communicate between servlet filters. These methods should not be used to pass information
+	 * between interceptor methods. Use {@link #getUserData()} instead to pass information
+	 * between interceptor methods.
+	 *
+	 * @param theAttributeName The attribute name
+	 * @param theAttributeValue The attribute value
+	 */
+	@Override
+	public void setServletAttribute(String theAttributeName, Object theAttributeValue) {
+		myAttributes.put(theAttributeName, theAttributeValue);
+	}
+
+	/**
+	 * @deprecated Use {@link #getUserData()}. If servlet attributes are truly required, then use {@link IHasServletAttributes#getServletAttribute(String)}.
+	 */
+	@Deprecated
+	@Override
+	public Object getAttribute(String theAttributeName) {
+		return getServletAttribute(theAttributeName);
+	}
+
+	/**
+	 * @deprecated Use {@link #getUserData()}. If servlet attributes are truly required, then use {@link IHasServletAttributes#setServletAttribute(String, Object)}.
+	 */
+	@Deprecated
 	@Override
 	public void setAttribute(String theAttributeName, Object theAttributeValue) {
-		myAttributes.put(theAttributeName, theAttributeValue);
+		setServletAttribute(theAttributeName, theAttributeValue);
 	}
 
 	@Override
