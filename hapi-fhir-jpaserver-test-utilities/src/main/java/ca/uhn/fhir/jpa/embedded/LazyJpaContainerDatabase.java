@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import javax.sql.DataSource;
 
@@ -72,6 +74,48 @@ public abstract class LazyJpaContainerDatabase extends JpaEmbeddedDatabase {
 	public JdbcTemplate getJdbcTemplate() {
 		ensureStarted();
 		return super.getJdbcTemplate();
+	}
+
+	@Override
+	public void executeSqlAsBatch(String theSql) {
+		ensureStarted();
+		super.executeSqlAsBatch(theSql);
+	}
+
+	@Override
+	public void executeSqlAsBatch(List<String> theStatements) {
+		ensureStarted();
+		super.executeSqlAsBatch(theStatements);
+	}
+
+	@Override
+	public String getUrl() {
+		ensureStarted();
+		return super.getUrl();
+	}
+
+	@Override
+	public String getUsername() {
+		ensureStarted();
+		return super.getUsername();
+	}
+
+	@Override
+	public String getPassword() {
+		ensureStarted();
+		return super.getPassword();
+	}
+
+	@Override
+	public List<Map<String, Object>> query(String theSql) {
+		ensureStarted();
+		return super.query(theSql);
+	}
+
+	@Override
+	public void insertTestData(String theSql) {
+		ensureStarted();
+		super.insertTestData(theSql);
 	}
 
 	@Override
