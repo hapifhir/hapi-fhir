@@ -56,11 +56,12 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 
 		String url = "jdbc:h2:" + location.getAbsolutePath();
 		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "SA", "SA");
+		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(connectionProperties.getDataSource(), connectionProperties.getDriverType(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME);
 
 		String initSql = "/persistence_create_h2_340.sql";
 		executeSqlStatements(connectionProperties, initSql);
-
 		seedDatabase340(connectionProperties);
+		seedDatabaseMigration340(hapiMigrationDao);
 
 		ourLog.info("**********************************************");
 		ourLog.info("Done Setup, Starting Migration...");
@@ -135,7 +136,6 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 
 		String initSql = "/persistence_create_h2_340.sql";
 		executeSqlStatements(connectionProperties, initSql);
-
 		seedDatabase340(connectionProperties);
 		seedDatabaseMigration340(hapiMigrationDao);
 
@@ -268,7 +268,7 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		return new File(myDbDirectory + "/" + theDatabaseName);
 	}
 
-	private void seedDatabase340(DriverTypeEnum.ConnectionProperties theConnectionProperties) {
+	private static void seedDatabase340(DriverTypeEnum.ConnectionProperties theConnectionProperties) {
 		theConnectionProperties.getTxTemplate().execute(t -> {
 			JdbcTemplate jdbcTemplate = theConnectionProperties.newJdbcTemplate();
 
@@ -380,7 +380,7 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 
 	}
 
-	private void executeSqlStatements(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theInitSql) throws
+	private static void executeSqlStatements(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theInitSql) throws
 		IOException {
 		String script = IOUtils.toString(HapiFlywayMigrateDatabaseCommandTest.class.getResourceAsStream(theInitSql), Charsets.UTF_8);
 		List<String> scriptStatements = new ArrayList<>(Arrays.asList(script.split("\n")));
@@ -408,11 +408,11 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 
 	}
 
-	private void seedDatabaseMigration340(HapiMigrationDao theHapiMigrationDao) {
+	private static void seedDatabaseMigration340(HapiMigrationDao theHapiMigrationDao) {
 		theHapiMigrationDao.createMigrationTableIfRequired();
 		HapiMigrationEntity hapiMigrationEntity = new HapiMigrationEntity();
 		hapiMigrationEntity.setPid(1);
-		hapiMigrationEntity.setVersion("3.4.0.20180401.1");
+		hapiMigrationEntity.setVersion("3.3.0.20180115.0");
 		hapiMigrationEntity.setDescription("some sql statement");
 		hapiMigrationEntity.setExecutionTime(25);
 		hapiMigrationEntity.setSuccess(true);

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7098
+title: "If the JPA schema migrator is run against a database that has already manually been
+  initialized with the correct schema, the migrator incorrectly then tried to run all of the
+  individual schema initialization tasks. This has been corrected."

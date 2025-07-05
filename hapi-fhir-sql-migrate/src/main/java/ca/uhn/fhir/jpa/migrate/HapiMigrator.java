@@ -163,10 +163,13 @@ public class HapiMigrator {
 				}
 
 				boolean initializedSchema = false;
+				int skippedTasksDueToSchemaMigration = 0;
 				for (BaseTask next : newTaskList) {
 					if (initializedSchema && !next.hasFlag(TaskFlagEnum.RUN_DURING_SCHEMA_INITIALIZATION)) {
-						ourLog.info("Skipping task {} because schema is being initialized", next.getMigrationVersion());
+						ourLog.debug(
+								"Skipping task {} because schema is being initialized", next.getMigrationVersion());
 						recordTaskAsCompletedIfNotDryRun(next, 0L, true);
+						skippedTasksDueToSchemaMigration++;
 						continue;
 					}
 
@@ -178,6 +181,12 @@ public class HapiMigrator {
 					executeTask(next, retval);
 
 					initializedSchema |= next.initializedSchema();
+				}
+
+				if (skippedTasksDueToSchemaMigration > 0) {
+					ourLog.info(
+							"Skipped {} migration tasks because schema is being initialized",
+							skippedTasksDueToSchemaMigration);
 				}
 			}
 		} catch (Exception e) {
