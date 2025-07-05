@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6408
+title: "Fixes an issue so that ID clashes between IG's stops existing resources from being overwritten. Thanks to Jens Villadsen (@jkiddo) for the contribution!"
