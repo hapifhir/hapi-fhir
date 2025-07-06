@@ -209,6 +209,67 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	}
 
 	@Test
+	public void testExpandInline_IncludeCodeSystem_FilterOnCode_Equal() throws Exception {
+		loadAndPersistCodeSystemWithDesignations(HttpVerb.PUT);
+
+		ValueSet input = new ValueSet();
+		input.getCompose()
+			.addInclude()
+			.setSystem("http://acme.org")
+			.addFilter()
+			.setProperty("code")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("8450-9");
+
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(new ValueSetExpansionOptions(), input);
+		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+
+		assertEquals(1, expandedValueSet.getExpansion().getTotal());
+		assertThat(expandedValueSet.getExpansion().getContains().stream().map(t -> t.getCode()).collect(Collectors.toList())).containsExactlyInAnyOrder("8450-9");
+	}
+
+	@Test
+	public void testExpandInline_IncludeCodeSystem_FilterOnCustomProperty_Equal() throws Exception {
+		// Create CodeSystem with custom properties
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://example.com/cs");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		
+		// Add concepts with custom properties
+		CodeSystem.ConceptDefinitionComponent concept1 = cs.addConcept()
+			.setCode("code1")
+			.setDisplay("Display 1");
+		concept1.addProperty()
+			.setCode("status")
+			.setValue(new StringType("active"));
+		
+		CodeSystem.ConceptDefinitionComponent concept2 = cs.addConcept()
+			.setCode("code2") 
+			.setDisplay("Display 2");
+		concept2.addProperty()
+			.setCode("status")
+			.setValue(new StringType("inactive"));
+		
+		myCodeSystemDao.create(cs);
+		
+		// Create ValueSet with EQUAL filter on custom property
+		ValueSet input = new ValueSet();
+		input.getCompose()
+			.addInclude()
+			.setSystem("http://example.com/cs")
+			.addFilter()
+			.setProperty("status")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("active");
+		
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(new ValueSetExpansionOptions(), input);
+		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		
+		assertEquals(1, expandedValueSet.getExpansion().getTotal());
+		assertThat(expandedValueSet.getExpansion().getContains().stream().map(t -> t.getCode()).collect(Collectors.toList())).containsExactlyInAnyOrder("code1");
+	}
+
+	@Test
 	public void testExpandInline_IncludePreExpandedValueSetByUri_FilterOnDisplay_LeftMatch_SelectAll() {
 		myStorageSettings.setPreExpandValueSets(true);
 		create100ConceptsCodeSystemAndValueSet();

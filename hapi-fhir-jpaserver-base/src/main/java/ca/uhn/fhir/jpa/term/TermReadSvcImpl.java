@@ -1648,25 +1648,35 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			SearchPredicateFactory f,
 			BooleanPredicateClausesStep<?> b,
 			ValueSet.ConceptSetFilterComponent theFilter) {
-		TermConcept code = findCodeForFilterCriteriaCodeOrConcept(theSystem, theFilter);
 
-		if (theFilter.getOp() == ValueSet.FilterOperator.ISA) {
-			ourLog.debug(
-					" * Filtering on specific code and codes with a parent of {}/{}/{}",
-					code.getId(),
-					code.getCode(),
-					code.getDisplay());
-
-			b.must(f.bool()
-					.should(f.match().field("myParentPids").matching("" + code.getId()))
-					.should(f.match().field("myId").matching(code.getPid())));
-		} else if (theFilter.getOp() == ValueSet.FilterOperator.DESCENDENTOF) {
-			ourLog.debug(
-					" * Filtering on codes with a parent of {}/{}/{}", code.getId(), code.getCode(), code.getDisplay());
-
-			b.must(f.match().field("myParentPids").matching("" + code.getId()));
+		if (theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
+			// For EQUAL filters on code/concept property, match the exact code value
+			b.must(f.match().field("myCode").matching(theFilter.getValue()));
 		} else {
-			throwInvalidFilter(theFilter, "");
+			// For other operators (ISA, DESCENDENTOF), we need to find the actual TermConcept
+			TermConcept code = findCodeForFilterCriteriaCodeOrConcept(theSystem, theFilter);
+
+			if (theFilter.getOp() == ValueSet.FilterOperator.ISA) {
+				ourLog.debug(
+						" * Filtering on specific code and codes with a parent of {}/{}/{}",
+						code.getId(),
+						code.getCode(),
+						code.getDisplay());
+
+				b.must(f.bool()
+						.should(f.match().field("myParentPids").matching("" + code.getId()))
+						.should(f.match().field("myId").matching(code.getPid())));
+			} else if (theFilter.getOp() == ValueSet.FilterOperator.DESCENDENTOF) {
+				ourLog.debug(
+						" * Filtering on codes with a parent of {}/{}/{}",
+						code.getId(),
+						code.getCode(),
+						code.getDisplay());
+
+				b.must(f.match().field("myParentPids").matching("" + code.getId()));
+			} else {
+				throwInvalidFilter(theFilter, "");
+			}
 		}
 	}
 
@@ -1931,6 +1941,25 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 						TermConcept code = findCodeForFilterCriteriaCodeOrConcept(theSystem, nextFilter);
 						addConceptAndChildren(
 								theValueSetCodeAccumulator, theAddedCodes, theInclude, theSystem, theAdd, code);
+						handled = true;
+					} else if (nextFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
+						// Handle EQUAL filter on code/concept property
+						String filterValue = nextFilter.getValue();
+						Optional<TermConcept> optionalConcept = findCode(theSystem, filterValue);
+						if (optionalConcept.isPresent()) {
+							TermConcept concept = optionalConcept.get();
+							addCodeIfNotAlreadyAdded(
+									theValueSetCodeAccumulator,
+									theAddedCodes,
+									theAdd,
+									theSystem,
+									theInclude.getVersion(),
+									concept.getCode(),
+									concept.getDisplay(),
+									concept.getId(),
+									concept.getParentPidsAsString(),
+									concept.getDesignations());
+						}
 						handled = true;
 					}
 					break;
