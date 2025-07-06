@@ -34,10 +34,20 @@ import java.util.Map;
  *
  * @see <a href="https://www.testcontainers.org/modules/databases/oraclexe/">Oracle TestContainer</a>
  */
-public class OracleEmbeddedDatabase extends LazyJpaContainerDatabase {
+public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
 
 	public OracleEmbeddedDatabase() {
-		super(() -> new OracleContainer("gvenzl/oracle-xe:21-slim-faststart").withPrivilegedMode(true));
+		super(() -> {
+			OracleContainer container =
+					new OracleContainer("gvenzl/oracle-xe:21-slim-faststart").withPrivilegedMode(true);
+			container.start();
+			return new InitializationData(
+					DriverTypeEnum.ORACLE_12C,
+					container.getJdbcUrl(),
+					container.getUsername(),
+					container.getPassword(),
+					container);
+		});
 	}
 
 	@Override
@@ -46,7 +56,15 @@ public class OracleEmbeddedDatabase extends LazyJpaContainerDatabase {
 	}
 
 	@Override
-	protected void doDisableConstraints() {
+	public void stop() {
+		OracleContainer container = (OracleContainer) getContainerReference();
+		if (container != null && container.isRunning()) {
+			container.stop();
+		}
+	}
+
+	@Override
+	public void disableConstraints() {
 		purgeRecycleBin();
 		List<String> sql = new ArrayList<>();
 		List<Map<String, Object>> queryResults =
@@ -60,7 +78,7 @@ public class OracleEmbeddedDatabase extends LazyJpaContainerDatabase {
 	}
 
 	@Override
-	protected void doEnableConstraints() {
+	public void enableConstraints() {
 		purgeRecycleBin();
 		List<String> sql = new ArrayList<>();
 		List<Map<String, Object>> queryResults =
@@ -74,7 +92,7 @@ public class OracleEmbeddedDatabase extends LazyJpaContainerDatabase {
 	}
 
 	@Override
-	protected void doClearDatabase() {
+	public void clearDatabase() {
 		dropTables();
 		dropSequences();
 		purgeRecycleBin();

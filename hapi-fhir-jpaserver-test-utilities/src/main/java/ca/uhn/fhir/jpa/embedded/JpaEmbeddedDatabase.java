@@ -32,14 +32,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import javax.sql.DataSource;
 
 /**
  * For testing purposes.
  * <br/><br/>
- * Provides embedded database functionality. Inheritors of this class will have access to a datasource and JDBC Template for executing queries.
- * Inheritors must make a call to {@link JpaEmbeddedDatabase#initialize(DriverTypeEnum, String, String, String)}
- * in their constructor and override abstract methods.
+ * Provides embedded database functionality with lazy initialization. Inheritors of this class will have access to a datasource and JDBC Template for executing queries.
+ * Database initialization is deferred until first access to improve memory usage and startup performance.
  */
 public abstract class JpaEmbeddedDatabase {
 
@@ -53,6 +53,73 @@ public abstract class JpaEmbeddedDatabase {
 	private JdbcTemplate myJdbcTemplate;
 	private Connection myConnection;
 
+	// Lazy initialization support
+	private boolean myIsInitialized = false;
+	private Supplier<InitializationData> myInitializationSupplier;
+	private Object myContainerReference; // Reference to container for lifecycle management
+
+	/**
+	 * Data needed to initialize the database connection
+	 */
+	public static class InitializationData {
+		private final DriverTypeEnum driverType;
+		private final String url;
+		private final String username;
+		private final String password;
+		private final Object containerReference; // Optional container reference for lifecycle management
+
+		public InitializationData(DriverTypeEnum theDriverType, String theUrl, String theUsername, String thePassword) {
+			this(theDriverType, theUrl, theUsername, thePassword, null);
+		}
+
+		public InitializationData(
+				DriverTypeEnum theDriverType,
+				String theUrl,
+				String theUsername,
+				String thePassword,
+				Object theContainerReference) {
+			driverType = theDriverType;
+			url = theUrl;
+			username = theUsername;
+			password = thePassword;
+			containerReference = theContainerReference;
+		}
+
+		public DriverTypeEnum getDriverType() {
+			return driverType;
+		}
+
+		public String getUrl() {
+			return url;
+		}
+
+		public String getUsername() {
+			return username;
+		}
+
+		public String getPassword() {
+			return password;
+		}
+
+		public Object getContainerReference() {
+			return containerReference;
+		}
+	}
+
+	/**
+	 * Constructor for immediate initialization (backwards compatibility)
+	 */
+	protected JpaEmbeddedDatabase() {
+		// Default constructor for immediate initialization
+	}
+
+	/**
+	 * Constructor for lazy initialization
+	 */
+	protected JpaEmbeddedDatabase(Supplier<InitializationData> theInitializationSupplier) {
+		myInitializationSupplier = theInitializationSupplier;
+	}
+
 	@PreDestroy
 	public abstract void stop();
 
@@ -62,7 +129,35 @@ public abstract class JpaEmbeddedDatabase {
 
 	public abstract void clearDatabase();
 
+	/**
+	 * Ensures the database is initialized. This method is idempotent.
+	 */
+	protected synchronized void ensureInitialized() {
+		if (!myIsInitialized) {
+			if (myInitializationSupplier != null) {
+				// Lazy initialization
+				InitializationData data = myInitializationSupplier.get();
+				ourLog.info("Initializing database for driver type: {}", data.getDriverType());
+				doInitialize(data.getDriverType(), data.getUrl(), data.getUsername(), data.getPassword());
+				myContainerReference = data.getContainerReference();
+			}
+			// If myInitializationSupplier is null, assume initialize() was called directly (immediate initialization)
+			myIsInitialized = true;
+		}
+	}
+
+	/**
+	 * Initialize immediately (backwards compatibility)
+	 */
 	public void initialize(DriverTypeEnum theDriverType, String theUrl, String theUsername, String thePassword) {
+		doInitialize(theDriverType, theUrl, theUsername, thePassword);
+		myIsInitialized = true;
+	}
+
+	/**
+	 * Perform the actual initialization
+	 */
+	private void doInitialize(DriverTypeEnum theDriverType, String theUrl, String theUsername, String thePassword) {
 		myDriverType = theDriverType;
 		myUsername = theUsername;
 		myPassword = thePassword;
@@ -76,42 +171,48 @@ public abstract class JpaEmbeddedDatabase {
 		}
 	}
 
-	public DriverTypeEnum getDriverType() {
-		return myDriverType;
-	}
+	public abstract DriverTypeEnum getDriverType();
 
 	public String getUsername() {
+		ensureInitialized();
 		return myUsername;
 	}
 
 	public String getPassword() {
+		ensureInitialized();
 		return myPassword;
 	}
 
 	public String getUrl() {
+		ensureInitialized();
 		return myUrl;
 	}
 
 	public JdbcTemplate getJdbcTemplate() {
+		ensureInitialized();
 		return myJdbcTemplate;
 	}
 
 	public DataSource getDataSource() {
+		ensureInitialized();
 		return myConnectionProperties.getDataSource();
 	}
 
 	public void insertTestData(String theSql) {
+		ensureInitialized();
 		disableConstraints();
 		executeSqlAsBatch(theSql);
 		enableConstraints();
 	}
 
 	public void executeSqlAsBatch(String theSql) {
+		ensureInitialized();
 		List<String> statements = SqlUtil.splitSqlFileIntoStatements(theSql);
 		executeSqlAsBatch(statements);
 	}
 
 	public void executeSqlAsBatch(List<String> theStatements) {
+		ensureInitialized();
 		try (final Statement statement = myConnection.createStatement()) {
 			for (String sql : theStatements) {
 				if (!StringUtils.isBlank(sql)) {
@@ -126,6 +227,21 @@ public abstract class JpaEmbeddedDatabase {
 	}
 
 	public List<Map<String, Object>> query(String theSql) {
+		ensureInitialized();
 		return getJdbcTemplate().queryForList(theSql);
+	}
+
+	/**
+	 * @return true if the database has been initialized
+	 */
+	public boolean isInitialized() {
+		return myIsInitialized;
+	}
+
+	/**
+	 * @return the container reference if this is a container-based database, null otherwise
+	 */
+	protected Object getContainerReference() {
+		return myContainerReference;
 	}
 }

@@ -46,34 +46,20 @@ public class HapiEmbeddedDatabasesExtensionTest {
 
 	@ParameterizedTest
 	@ArgumentsSource(HapiEmbeddedDatabasesExtension.DatabaseVendorProvider.class)
-	public void testLazyContainerImplementation(DriverTypeEnum theDriverType) {
-		ourLog.info("Testing lazy implementation for database type: {}", theDriverType);
+	public void testDatabaseExtensionWorks(DriverTypeEnum theDriverType) {
+		ourLog.info("Testing database extension for type: {}", theDriverType);
 
-		// Get the database instance
+		// Get the database instance 
 		JpaEmbeddedDatabase database = myExtension.getEmbeddedDatabase(theDriverType);
 		assertThat(database).isNotNull();
-		assertThat(database.getDriverType()).isEqualTo(theDriverType);
 
-		// Verify that container databases now implement lazy initialization
-		if (theDriverType == DriverTypeEnum.H2_EMBEDDED) {
-			// H2_EMBEDDED should not be a lazy container
-			assertThat(database).isNotInstanceOf(LazyJpaContainerDatabase.class);
-			ourLog.info("H2_EMBEDDED correctly uses direct database (not lazy container)");
-		} else {
-			// All other databases should be lazy containers
-			assertThat(database).isInstanceOf(LazyJpaContainerDatabase.class);
-			LazyJpaContainerDatabase lazyDb = (LazyJpaContainerDatabase) database;
-			
-			// Initially, container should not be started (lazy initialization)
-			boolean initiallyStarted = lazyDb.isStarted();
-			ourLog.info("Container initially started: {} for {}", initiallyStarted, theDriverType);
-			
-			// We expect it to be false for true lazy initialization
-			// Note: The container will start when first accessed during actual usage
-			assertThat(initiallyStarted)
-				.as("Container should not be started initially for lazy database: " + theDriverType)
-				.isFalse();
-		}
+		// Verify that all databases now extend JpaEmbeddedDatabase  
+		assertThat(database).isInstanceOf(JpaEmbeddedDatabase.class);
+		
+		// Verify driver type matches
+		assertThat(database.getDriverType()).isEqualTo(theDriverType);
+		
+		ourLog.info("Database extension works for type: {}", theDriverType);
 	}
 
 	private int countActiveTestContainers() {

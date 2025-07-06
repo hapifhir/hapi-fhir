@@ -35,10 +35,26 @@ import java.util.Map;
  *
  * @see <a href="https://www.testcontainers.org/modules/databases/postgres/">Postgres TestContainer</a>
  */
-public class PostgresEmbeddedDatabase extends LazyJpaContainerDatabase {
+public class PostgresEmbeddedDatabase extends JpaEmbeddedDatabase {
 
 	public PostgresEmbeddedDatabase() {
-		super(() -> new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest")));
+		super(() -> {
+			// This will be called during lazy initialization
+			PostgreSQLContainer<?> container = new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
+			container.start();
+			return new InitializationData(
+					DriverTypeEnum.POSTGRES_9_4,
+					container.getJdbcUrl(),
+					container.getUsername(),
+					container.getPassword(),
+					container // Store container reference for lifecycle management
+					);
+		});
+	}
+
+	private PostgreSQLContainer<?> getContainer() {
+		ensureInitialized();
+		return (PostgreSQLContainer<?>) getContainerReference();
 	}
 
 	@Override
@@ -47,7 +63,15 @@ public class PostgresEmbeddedDatabase extends LazyJpaContainerDatabase {
 	}
 
 	@Override
-	protected void doDisableConstraints() {
+	public void stop() {
+		PostgreSQLContainer<?> container = (PostgreSQLContainer<?>) getContainerReference();
+		if (container != null && container.isRunning()) {
+			container.stop();
+		}
+	}
+
+	@Override
+	public void disableConstraints() {
 		List<String> sql = new ArrayList<>();
 		for (String tableName : getAllTableNames()) {
 			sql.add(String.format("ALTER TABLE \"%s\" DISABLE TRIGGER ALL", tableName));
@@ -84,7 +108,7 @@ public class PostgresEmbeddedDatabase extends LazyJpaContainerDatabase {
 	}
 
 	@Override
-	protected void doEnableConstraints() {
+	public void enableConstraints() {
 		List<String> sql = new ArrayList<>();
 		for (String tableName : getAllTableNames()) {
 			sql.add(String.format("ALTER TABLE \"%s\" ENABLE TRIGGER ALL", tableName));
@@ -94,7 +118,7 @@ public class PostgresEmbeddedDatabase extends LazyJpaContainerDatabase {
 	}
 
 	@Override
-	protected void doClearDatabase() {
+	public void clearDatabase() {
 		dropTables();
 		dropSequences();
 	}

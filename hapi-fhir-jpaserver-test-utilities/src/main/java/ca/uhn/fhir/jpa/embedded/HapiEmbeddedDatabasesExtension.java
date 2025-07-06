@@ -70,14 +70,13 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback, AfterEa
 
 	@Override
 	public void afterEach(ExtensionContext theExtensionContext) {
-		// Stop all started containers after each test to ensure one-container-at-a-time behavior
+		// Stop all started container databases after each test to ensure one-container-at-a-time behavior
+		// Note: We stop containers AFTER the test's afterEach method runs, which needs containers running to clear data
 		for (JpaEmbeddedDatabase database : getAllEmbeddedDatabases()) {
-			if (database instanceof LazyJpaContainerDatabase) {
-				LazyJpaContainerDatabase containerDb = (LazyJpaContainerDatabase) database;
-				if (containerDb.isStarted()) {
-					ourLog.info("Stopping container after test: {}", containerDb.getDriverType());
-					containerDb.stop();
-				}
+			// Only stop container databases that are actually initialized
+			if (database.getDriverType() != DriverTypeEnum.H2_EMBEDDED && database.isInitialized()) {
+				ourLog.info("Stopping container after test: {}", database.getDriverType());
+				database.stop();
 			}
 		}
 	}
@@ -98,7 +97,13 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback, AfterEa
 
 	public void clearDatabases() {
 		for (JpaEmbeddedDatabase database : getAllEmbeddedDatabases()) {
-			database.clearDatabase();
+			// Only clear databases that are actually initialized
+			if (database.isInitialized()) {
+				ourLog.debug("Clearing database: {}", database.getDriverType());
+				database.clearDatabase();
+			} else {
+				ourLog.debug("Skipping clear for uninitialized database: {}", database.getDriverType());
+			}
 		}
 	}
 
