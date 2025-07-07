@@ -200,8 +200,8 @@ public interface ISearchParamRegistry extends IResourceRepositoryCache {
 	 * @since 8.4.0
 	 */
 	default boolean hasActiveSearchParam(
-			String theResourceType, String theParamContent, SearchParamLookupContextEnum theContext) {
-		return getActiveSearchParam(theResourceType, theParamContent, theContext) != null;
+			String theResourceType, String theParamName, SearchParamLookupContextEnum theContext) {
+		return getActiveSearchParam(theResourceType, theParamName, theContext) != null;
 	}
 
 	/**

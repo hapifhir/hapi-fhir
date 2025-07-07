@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import jakarta.annotation.Nonnull;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_CONTENT;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_IN;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_LANGUAGE;
@@ -58,15 +59,16 @@ public class RuntimeSearchParamHelper {
 	public static boolean isSpeciallyHandledSearchParameter(
 			@Nonnull RuntimeSearchParam theSearchParameter, StorageSettings theStorageSettings) {
 		return switch (defaultString(theSearchParameter.getName())) {
+			case PARAM_CONTENT -> true;
+			case PARAM_HAS -> true;
 			case PARAM_ID -> true;
 			case PARAM_IN -> true;
-			case PARAM_SOURCE -> true;
-			case PARAM_CONTENT -> true;
 			case PARAM_LASTUPDATED -> true;
+			case PARAM_LANGUAGE -> false;
+			case PARAM_SOURCE -> true;
 			case PARAM_TEXT -> true;
 			case PARAM_PROFILE, PARAM_TAG, PARAM_SECURITY -> theStorageSettings.getTagStorageMode()
 					!= StorageSettings.TagStorageModeEnum.INLINE;
-			case PARAM_LANGUAGE -> false;
 			default -> false;
 		};
 	}
