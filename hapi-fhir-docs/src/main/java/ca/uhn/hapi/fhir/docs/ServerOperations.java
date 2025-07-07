@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.svcs.ISearchLimiterSvc;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
@@ -122,4 +123,13 @@ public class ServerOperations {
 	}
 	// END SNIPPET: serverOperation
 
+	private ISearchLimiterSvc mySearchLimiterSvc;
+
+	// START SNIPPET: resourceTypeFiltering
+	private void filterPatientEverythingOperation() {
+		// filter out Group and List
+		mySearchLimiterSvc.addOmittedResourceType("$everything", "Group");
+		mySearchLimiterSvc.addOmittedResourceType("$everything", "List");
+	}
+	// END SNIPPET: resourceTypeFiltering
 }
