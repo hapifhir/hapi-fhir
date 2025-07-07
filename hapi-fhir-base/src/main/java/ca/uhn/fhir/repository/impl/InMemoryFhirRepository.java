@@ -1,10 +1,9 @@
-package ca.uhn.fhir.repository;
+package ca.uhn.fhir.repository.impl;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.repository.matcher.IResourceMatcher;
-import ca.uhn.fhir.repository.matcher.MultiVersionResourceMatcher;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
@@ -40,9 +39,10 @@ import static ca.uhn.fhir.model.api.StorageResponseCodeEnum.SUCCESSFUL_DELETE_NO
  */
 public class InMemoryFhirRepository implements IRepository {
 
+	// fixme add search with tests
+	// fixme add sketch of extended operations
 	private final Map<String, Map<IIdType, IBaseResource>> resourceMap;
 	private final FhirContext context;
-	private final IResourceMatcher resourceMatcher;
 
 	public static InMemoryFhirRepository emptyRepository(@Nonnull FhirContext theFhirContext) {
 		return new InMemoryFhirRepository(theFhirContext, new HashMap<>());
@@ -63,59 +63,13 @@ public class InMemoryFhirRepository implements IRepository {
 			@Nonnull FhirContext theContext, @Nonnull Map<String, Map<IIdType, IBaseResource>> theContents) {
 		context = theContext;
 		resourceMap = theContents;
-		resourceMatcher = new MultiVersionResourceMatcher(context);
 	}
 
-	record ResourceLookup(Map<IIdType, IBaseResource> resources, IIdType id) {
-		@Nonnull
-		IBaseResource getResourceOrThrow404() {
-			var resource = resources.get(id);
-
-			if (resource == null) {
-				throw new ResourceNotFoundException("Resource not found with id " + id);
-			}
-			return resource;
-		}
-
-		void remove() {
-			resources.remove(id);
-		}
-
-		boolean isPresent() {
-			return resources.containsKey(id);
-		}
-
-		public <T extends IBaseResource> void put(T theResource) {
-			resources.put(id, theResource);
-		}
+	@Override
+	public @Nonnull FhirContext fhirContext() {
+		return this.context;
 	}
 
-	ResourceLookup lookupResource(IIdType theId) {
-		Validate.notNull(theId, "Id must not be null");
-		Validate.notNull(theId.getResourceType(), "Resource type must not be null");
-
-		Map<IIdType, IBaseResource> resources = getResourceMapForType(theId.getResourceType());
-
-		return new ResourceLookup(resources, new IdDt(theId));
-	}
-
-	ResourceLookup lookupResource(Class<? extends IBaseResource> theResourceType, IIdType theId) {
-		Validate.notNull(theResourceType, "Resource type must not be null");
-		Validate.notNull(theId, "Id must not be null");
-
-		String resourceTypeName = fhirContext().getResourceType(theResourceType);
-
-		IIdType unqualifiedVersionless = theId.toUnqualifiedVersionless();
-		String idResourceType = unqualifiedVersionless.getResourceType();
-		if (idResourceType == null) {
-			unqualifiedVersionless = unqualifiedVersionless.withResourceType(resourceTypeName);
-		} else if (!idResourceType.equals(resourceTypeName)) {
-			throw new IllegalArgumentException(
-					"Resource type mismatch: resource is " + resourceTypeName + " but id type is " + idResourceType);
-		}
-
-		return lookupResource(unqualifiedVersionless);
-	}
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -252,16 +206,6 @@ public class InMemoryFhirRepository implements IRepository {
 	}
 
 	@Override
-	public <B extends IBaseBundle> B link(Class<B> bundleType, String url, Map<String, String> headers) {
-		throw new NotImplementedOperationException("Paging is not currently supported");
-	}
-
-	@Override
-	public <C extends IBaseConformance> C capabilities(Class<C> resourceType, Map<String, String> headers) {
-		throw new NotImplementedOperationException("The capabilities interaction is not currently supported");
-	}
-
-	@Override
 	public <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
 		var version = transaction.getStructureFhirVersionEnum();
 
@@ -305,44 +249,71 @@ public class InMemoryFhirRepository implements IRepository {
 		return null;
 	}
 
-	@Override
-	public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
-			Class<T> resourceType, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-		return null;
-	}
-
-	@Override
-	public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
-			I id, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-		return null;
-	}
-
-	@Override
-	public <B extends IBaseBundle, P extends IBaseParameters> B history(
-			P parameters, Class<B> returnType, Map<String, String> headers) {
-		throw new NotImplementedOperationException("The history interaction is not currently supported");
-	}
-
-	@Override
-	public <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
-			Class<T> resourceType, P parameters, Class<B> returnType, Map<String, String> headers) {
-		throw new NotImplementedOperationException("The history interaction is not currently supported");
-	}
-
-	@Override
-	public <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(
-			I id, P parameters, Class<B> returnType, Map<String, String> headers) {
-		throw new NotImplementedOperationException("The history interaction is not currently supported");
-	}
-
-	@Override
-	public @Nonnull FhirContext fhirContext() {
-		return this.context;
-	}
-
+	/**
+	 * The map of resources for each resource type.
+	 */
 	@VisibleForTesting
 	@Nonnull
 	public Map<IIdType, IBaseResource> getResourceMapForType(String resourceTypeName) {
 		return resourceMap.computeIfAbsent(resourceTypeName, x -> new HashMap<>());
 	}
+
+	/**
+	 * Abstract "pointer" to a resource id in the repository.
+	 * @param resources the map of resources for a specific type
+	 * @param id the id of the resource to look up
+	 */
+	private record ResourceLookup(Map<IIdType, IBaseResource> resources, IIdType id) {
+		@Nonnull
+		IBaseResource getResourceOrThrow404() {
+			var resource = resources.get(id);
+
+			if (resource == null) {
+				throw new ResourceNotFoundException("Resource not found with id " + id);
+			}
+			return resource;
+		}
+
+		void remove() {
+			resources.remove(id);
+		}
+
+		boolean isPresent() {
+			return resources.containsKey(id);
+		}
+
+		public <T extends IBaseResource> void put(T theResource) {
+			resources.put(id, theResource);
+		}
+	}
+
+
+	private ResourceLookup lookupResource(IIdType theId) {
+		Validate.notNull(theId, "Id must not be null");
+		Validate.notNull(theId.getResourceType(), "Resource type must not be null");
+
+		Map<IIdType, IBaseResource> resources = getResourceMapForType(theId.getResourceType());
+
+		return new ResourceLookup(resources, new IdDt(theId));
+	}
+
+	private ResourceLookup lookupResource(Class<? extends IBaseResource> theResourceType, IIdType theId) {
+		Validate.notNull(theResourceType, "Resource type must not be null");
+		Validate.notNull(theId, "Id must not be null");
+
+		String resourceTypeName = fhirContext().getResourceType(theResourceType);
+
+		IIdType unqualifiedVersionless = theId.toUnqualifiedVersionless();
+		String idResourceType = unqualifiedVersionless.getResourceType();
+		if (idResourceType == null) {
+			unqualifiedVersionless = unqualifiedVersionless.withResourceType(resourceTypeName);
+		} else if (!idResourceType.equals(resourceTypeName)) {
+			throw new IllegalArgumentException(
+				"Resource type mismatch: resource is " + resourceTypeName + " but id type is " + idResourceType);
+		}
+
+		return lookupResource(unqualifiedVersionless);
+	}
+
+
 }

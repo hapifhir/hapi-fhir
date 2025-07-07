@@ -501,8 +501,10 @@ public interface IRepository {
 	 * @param returnType the class of the Resource the operation returns
 	 * @return the results of the operation
 	 */
-	<R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
-			Class<T> resourceType, String name, P parameters, Class<R> returnType, Map<String, String> headers);
+	default <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
+			Class<T> resourceType, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
+		return throwNotImplementedOperationException("type-level invoke is not supported by this repository");
+	}
 
 	/**
 	 * Invokes a type-level operation on this repository
@@ -573,8 +575,10 @@ public interface IRepository {
 	 * @param headers headers for this request, typically key-value pairs of HTTP headers
 	 * @return the results of the operation
 	 */
-	<R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
-			I id, String name, P parameters, Class<R> returnType, Map<String, String> headers);
+	default <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
+			I id, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
+		return throwNotImplementedOperationException("instance-level invoke is not supported by this repository");
+	}
 
 	/**
 	 * Invokes an instance-level operation on this repository
