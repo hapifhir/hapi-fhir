@@ -7,13 +7,12 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.IHistoryTyped;
+import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Multimap;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Multimaps;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -21,204 +20,201 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Adaptor from IGenericClient to IRepository.
+ * Based on the clinical reasoning org.opencds.cqf.fhir.utility.repository.RestRepository.
+ */
 public class GenericClientRepository implements IRepository {
 
-    public GenericClientRepository(IGenericClient client) {
-        this.client = client;
+    public GenericClientRepository(IGenericClient theGenericClient) {
+        this.myGenericClient = theGenericClient;
     }
 
-    private IGenericClient client;
+    private final IGenericClient myGenericClient;
 
     protected IGenericClient getClient() {
-        return this.client;
+        return this.myGenericClient;
     }
 
     @Override
     public <T extends IBaseResource, I extends IIdType> T read(
-            Class<T> resourceType, I id, Map<String, String> headers) {
-        var op = this.client.read().resource(resourceType).withId(id);
-        return this.addHeaders(op, headers).execute();
+            Class<T> theResourceType, I theId, Map<String, String> theHeaders) {
+        var op = this.myGenericClient.read().resource(theResourceType).withId(theId);
+        return this.addHeaders(op, theHeaders).execute();
     }
 
     @Override
-    public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
-        var op = this.client.create().resource(resource);
-        return this.addHeaders(op, headers).execute();
+    public <T extends IBaseResource> MethodOutcome create(T theResource, Map<String, String> theHeaders) {
+        var op = this.myGenericClient.create().resource(theResource);
+        return this.addHeaders(op, theHeaders).execute();
     }
 
     @Override
     public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
-            I id, P patchParameters, Map<String, String> headers) {
-        var op = this.client.patch().withFhirPatch(patchParameters).withId(id);
-        return this.addHeaders(op, headers).execute();
+            I theId, P thePatchparameters, Map<String, String> theHeaders) {
+        var op = this.myGenericClient.patch().withFhirPatch(thePatchparameters).withId(theId);
+        return this.addHeaders(op, theHeaders).execute();
     }
 
     @Override
-    public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
-        var op = this.client.update().resource(resource).withId(resource.getIdElement());
-        return this.addHeaders(op, headers).execute();
+    public <T extends IBaseResource> MethodOutcome update(T theResource, Map<String, String> theHeaders) {
+        var op = this.myGenericClient.update().resource(theResource).withId(theResource.getIdElement());
+        return this.addHeaders(op, theHeaders).execute();
     }
 
     @Override
     public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
-            Class<T> resourceType, I id, Map<String, String> headers) {
-        var op = this.client.delete().resourceById(id);
-        return this.addHeaders(op, headers).execute();
+            Class<T> theResourcetype, I theId, Map<String, String> theHeaders) {
+        var op = this.myGenericClient.delete().resourceById(theId);
+        return this.addHeaders(op, theHeaders).execute();
     }
 
     @Override
     public <B extends IBaseBundle, T extends IBaseResource> B search(
-            Class<B> bundleType,
-            Class<T> resourceType,
-            Multimap<String, List<IQueryParameterType>> searchParameters,
-            Map<String, String> headers) {
-        var params = new HashMap<String, List<IQueryParameterType>>();
-        if (searchParameters != null) {
-            for (var key : searchParameters.keySet()) {
-                var flattenLists =
-                        searchParameters.get(key).stream().flatMap(List::stream).toList();
+            Class<B> theBundleType,
+            Class<T> theSearchResourceType,
+            Multimap<String, List<IQueryParameterType>> theSearchParameters,
+            Map<String, String> theHeaders) {
+		IUntypedQuery<IBaseBundle> search = this.myGenericClient.search();
+		IQuery<IBaseBundle> iBaseBundleIQuery = search.forResource(theSearchResourceType);
+		var op = iBaseBundleIQuery.returnBundle(theBundleType);
+		if (theSearchParameters != null) {
+			theSearchParameters.entries().forEach(e->
+				op.where(Map.of(e.getKey(), e.getValue())));
+		}
 
-                params.put(key, flattenLists);
-            }
-            searchParameters.entries().forEach(p -> params.put(p.getKey(), p.getValue()));
-        }
-        return search(bundleType, resourceType, params, Collections.emptyMap());
+		return this.addHeaders(op, theHeaders).execute();
+
     }
 
     @Override
     public <B extends IBaseBundle, T extends IBaseResource> B search(
-            Class<B> bundleType,
-            Class<T> resourceType,
-            Map<String, List<IQueryParameterType>> searchParameters,
-            Map<String, String> headers) {
-        var op = this.client.search().forResource(resourceType).returnBundle(bundleType);
-        if (searchParameters != null) {
-            op = op.where(searchParameters);
-        }
-
-        if (headers != null) {
-            for (var entry : headers.entrySet()) {
-                op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-            }
-        }
-
-        return this.addHeaders(op, headers).execute();
+            Class<B> theBundleType,
+            Class<T> theResourceType,
+            Map<String, List<IQueryParameterType>> theSearchParameters,
+            Map<String, String> theHeaders) {
+		return search(theBundleType, theResourceType, Multimaps.forMap(theSearchParameters), theHeaders);
     }
 
     @Override
-    public <C extends IBaseConformance> C capabilities(Class<C> resourceType, Map<String, String> headers) {
-        var op = this.client.capabilities().ofType(resourceType);
-        return this.addHeaders(op, headers).execute();
+    public <C extends IBaseConformance> C capabilities(Class<C> theResourceType, Map<String, String> theHeaders) {
+        var op = this.myGenericClient.capabilities().ofType(theResourceType);
+        return this.addHeaders(op, theHeaders).execute();
     }
 
     @Override
-    public <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
-        var op = this.client.transaction().withBundle(transaction);
-        return this.addHeaders(op, headers).execute();
+    public <B extends IBaseBundle> B transaction(B theBundle, Map<String, String> theHeaders) {
+        var op = this.myGenericClient.transaction().withBundle(theBundle);
+        return this.addHeaders(op, theHeaders).execute();
     }
 
     @Override
-    public <B extends IBaseBundle> B link(Class<B> bundleType, String url, Map<String, String> headers) {
-        var op = this.client.loadPage().byUrl(url).andReturnBundle(bundleType);
-        return this.addHeaders(op, headers).execute();
+    public <B extends IBaseBundle> B link(Class<B> theBundleType, String url, Map<String, String> theHeaders) {
+        var op = this.myGenericClient.loadPage().byUrl(url).andReturnBundle(theBundleType);
+        return this.addHeaders(op, theHeaders).execute();
     }
 
     @Override
     public <R extends IBaseResource, P extends IBaseParameters> R invoke(
-            String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        var op = this.client
+            String theOperationName, P theParameters, Class<R> theReturnType, Map<String, String> theHeaders) {
+        var op = this.myGenericClient
                 .operation()
                 .onServer()
-                .named(name)
-                .withParameters(parameters)
-                .returnResourceType(returnType);
-        return this.addHeaders(op, headers).execute();
+                .named(theOperationName)
+                .withParameters(theParameters)
+                .returnResourceType(theReturnType);
+        return this.addHeaders(op, theHeaders).execute();
     }
 
     @Override
-    public <P extends IBaseParameters> MethodOutcome invoke(String name, P parameters, Map<String, String> headers) {
-        var op = this.client
+    public <P extends IBaseParameters> MethodOutcome invoke(String theOperationName, P theParameters, Map<String, String> theHeaders) {
+        var op = this.myGenericClient
                 .operation()
                 .onServer()
-                .named(name)
-                .withParameters(parameters)
+                .named(theOperationName)
+                .withParameters(theParameters)
                 .returnMethodOutcome();
-        return this.addHeaders(op, headers).execute();
+        return this.addHeaders(op, theHeaders).execute();
     }
 
     @Override
     public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
-            Class<T> resourceType, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        var op = this.client
+            Class<T> theResourceType, String theOperationName, P theParameters, Class<R> theReturnType, Map<String, String> theHeaders) {
+        var op = this.myGenericClient
                 .operation()
-                .onType(resourceType)
-                .named(name)
-                .withParameters(parameters)
-                .returnResourceType(returnType);
-        return this.addHeaders(op, headers).execute();
+                .onType(theResourceType)
+                .named(theOperationName)
+                .withParameters(theParameters)
+                .returnResourceType(theReturnType);
+        return this.addHeaders(op, theHeaders).execute();
     }
 
     @Override
     public <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(
-            Class<T> resourceType, String name, P parameters, Map<String, String> headers) {
-        var op = this.client
+            Class<T> theResourceType, String theOperationName, P parameters, Map<String, String> theHeaders) {
+        var op = this.myGenericClient
                 .operation()
-                .onType(resourceType)
-                .named(name)
+                .onType(theResourceType)
+                .named(theOperationName)
                 .withParameters(parameters)
                 .returnMethodOutcome();
-        return this.addHeaders(op, headers).execute();
+        return this.addHeaders(op, theHeaders).execute();
     }
 
     @Override
     public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
-            I id, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        var op = this.client
+            I theId, String theOperationName, P theParameters, Class<R> theReturnType, Map<String, String> theHeaders) {
+        var op = this.myGenericClient
                 .operation()
-                .onInstance(id)
-                .named(name)
-                .withParameters(parameters)
-                .returnResourceType(returnType);
-        return this.addHeaders(op, headers).execute();
+                .onInstance(theId)
+                .named(theOperationName)
+                .withParameters(theParameters)
+                .returnResourceType(theReturnType);
+        return this.addHeaders(op, theHeaders).execute();
     }
 
     @Override
     public <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(
-            I id, String name, P parameters, Map<String, String> headers) {
-        var op = this.client
+            I theResourceId, String theOperationName, P theParameters, Map<String, String> theHeaders) {
+        var op = this.myGenericClient
                 .operation()
-                .onInstance(id)
-                .named(name)
-                .withParameters(parameters)
+                .onInstance(theResourceId)
+                .named(theOperationName)
+                .withParameters(theParameters)
                 .returnMethodOutcome();
-        return this.addHeaders(op, headers).execute();
+        return this.addHeaders(op, theHeaders).execute();
     }
 
     @Override
     public <B extends IBaseBundle, P extends IBaseParameters> B history(
-            P parameters, Class<B> returnType, Map<String, String> headers) {
-        var op = this.client.history().onServer().returnBundle(returnType);
-        this.addHistoryParams(null, parameters);
-        return this.addHeaders(op, headers).execute();
+            P theParameters, Class<B> theReturnType, Map<String, String> theHeaders) {
+        var op = this.myGenericClient.history().onServer().returnBundle(theReturnType);
+        this.addHistoryParams(null, theParameters);
+        return this.addHeaders(op, theHeaders).execute();
     }
 
     @Override
     public <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
-            Class<T> resourceType, P parameters, Class<B> returnType, Map<String, String> headers) {
-        var op = this.client.history().onType(resourceType).returnBundle(returnType);
-        this.addHistoryParams(null, parameters);
-        return this.addHeaders(op, headers).execute();
+            Class<T> theResourceType, P theParameters, Class<B> theReturnType, Map<String, String> theHeaders) {
+        var op = this.myGenericClient.history().onType(theResourceType).returnBundle(theReturnType);
+        this.addHistoryParams(op, theParameters);
+        return this.addHeaders(op, theHeaders).execute();
     }
 
     @Override
     public <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(
-            I id, P parameters, Class<B> returnType, Map<String, String> headers) {
-        var op = this.client.history().onInstance(id).returnBundle(returnType);
-        this.addHistoryParams(null, parameters);
-        return this.addHeaders(op, headers).execute();
+            I theResourceId, P theParameters, Class<B> theReturnType, Map<String, String> theHeaders) {
+        var op = this.myGenericClient.history().onInstance(theResourceId).returnBundle(theReturnType);
+        this.addHistoryParams(null, theParameters);
+        return this.addHeaders(op, theHeaders).execute();
     }
 
-    @Override
+    @Nonnull
+	@Override
     public FhirContext fhirContext() {
         return this.getClient().getFhirContext();
     }
@@ -227,7 +223,7 @@ public class GenericClientRepository implements IRepository {
     protected <B extends IBaseBundle, P extends IBaseParameters> void addHistoryParams(
             IHistoryTyped<B> operation, P parameters) {
 
-        var ctx = this.client.getFhirContext();
+        var ctx = this.myGenericClient.getFhirContext();
         var count = ParametersUtil.getNamedParameterValuesAsInteger(ctx, parameters, "_count");
         if (count != null && !count.isEmpty()) {
             operation.count(count.get(0));
