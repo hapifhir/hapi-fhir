@@ -142,7 +142,7 @@ public interface IRepositoryTest {
 	@Test
 	@EnabledIf("isPatchSupported")
 	default void testPatch_changesValue() {
-	    // given
+		// given
 		var repository = getRepository();
 		var fhirContext = getRepository().fhirContext();
 		IBaseParameters parameters = ParametersUtil.newInstance(fhirContext);
@@ -159,13 +159,13 @@ public interface IRepositoryTest {
 		// when
 		repository.patch(patientId, parameters);
 
-	    // then
+		// then
 		IBaseResource read = repository.read(patient.getClass(), patientId);
 		assertThat(read)
-			.isNotNull()
-			.extracting(p -> getTerser().getSinglePrimitiveValueOrNull(p, "birthDate"))
-			.as("resource body read matches updated value")
-			.isEqualTo(BIRTHDATE2);
+				.isNotNull()
+				.extracting(p -> getTerser().getSinglePrimitiveValueOrNull(p, "birthDate"))
+				.as("resource body read matches updated value")
+				.isEqualTo(BIRTHDATE2);
 	}
 
 	/** Implementors of this test template must provide a RepositoryTestSupport instance */
