@@ -16,7 +16,6 @@ import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -69,7 +68,6 @@ public class InMemoryFhirRepository implements IRepository {
 	public @Nonnull FhirContext fhirContext() {
 		return this.context;
 	}
-
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -287,7 +285,6 @@ public class InMemoryFhirRepository implements IRepository {
 		}
 	}
 
-
 	private ResourceLookup lookupResource(IIdType theId) {
 		Validate.notNull(theId, "Id must not be null");
 		Validate.notNull(theId.getResourceType(), "Resource type must not be null");
@@ -309,11 +306,9 @@ public class InMemoryFhirRepository implements IRepository {
 			unqualifiedVersionless = unqualifiedVersionless.withResourceType(resourceTypeName);
 		} else if (!idResourceType.equals(resourceTypeName)) {
 			throw new IllegalArgumentException(
-				"Resource type mismatch: resource is " + resourceTypeName + " but id type is " + idResourceType);
+					"Resource type mismatch: resource is " + resourceTypeName + " but id type is " + idResourceType);
 		}
 
 		return lookupResource(unqualifiedVersionless);
 	}
-
-
 }

@@ -7,5 +7,4 @@ public class Repositories {
 	IRepository emptyInMemoryRepository(FhirContext theFhirContext) {
 		return InMemoryFhirRepository.emptyRepository(theFhirContext);
 	}
-
 }
