@@ -28,8 +28,8 @@ import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import com.google.common.annotations.Beta;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -305,9 +305,7 @@ public interface IRepository {
 			Class<T> resourceType,
 			Map<String, List<IQueryParameterType>> searchParameters,
 			Map<String, String> headers) {
-		ArrayListMultimap<String, List<IQueryParameterType>> multimap = ArrayListMultimap.create();
-		searchParameters.forEach(multimap::put);
-		return this.search(bundleType, resourceType, multimap, headers);
+		return this.search(bundleType, resourceType, Multimaps.forMap(searchParameters), headers);
 	}
 
 	// Paging starts here
