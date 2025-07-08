@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.embedded;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -16,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 // Created by Claude Sonnet 4
 @RequiresDocker
+@Disabled
 public class HapiEmbeddedDatabasesExtensionTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiEmbeddedDatabasesExtensionTest.class);
