@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -17,44 +17,38 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.provider.merge;
+package ca.uhn.fhir.merge;
 
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_DELETE_SOURCE;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_RESULT_PATIENT;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_PATIENT;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_TARGET_PATIENT;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER;
 
-/**
- * See <a href="https://build.fhir.org/patient-operation-merge.html">Patient $merge spec</a>
- */
-public class PatientMergeOperationInputParameters extends BaseMergeOperationInputParameters {
-	public PatientMergeOperationInputParameters(int theResourceLimit) {
-		super(theResourceLimit);
-	}
+public class MergeOperationInputParameterNames {
 
-	@Override
 	public String getSourceResourceParameterName() {
 		return OPERATION_MERGE_PARAM_SOURCE_PATIENT;
 	}
 
-	@Override
 	public String getTargetResourceParameterName() {
 		return OPERATION_MERGE_PARAM_TARGET_PATIENT;
 	}
 
-	@Override
 	public String getSourceIdentifiersParameterName() {
 		return OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER;
 	}
 
-	@Override
 	public String getTargetIdentifiersParameterName() {
 		return OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER;
 	}
 
-	@Override
 	public String getResultResourceParameterName() {
 		return OPERATION_MERGE_PARAM_RESULT_PATIENT;
+	}
+
+	public String getDeleteSourceParameterName() {
+		return OPERATION_MERGE_PARAM_DELETE_SOURCE;
 	}
 }

@@ -47,6 +47,7 @@ import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
@@ -182,7 +183,8 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 					List.of(result),
 					startTime,
 					theRequestDetails,
-					theReplaceReferencesRequest.provenanceAgents);
+					theReplaceReferencesRequest.provenanceAgents,
+					Collections.emptyList());
 		}
 
 		Parameters retval = new Parameters();

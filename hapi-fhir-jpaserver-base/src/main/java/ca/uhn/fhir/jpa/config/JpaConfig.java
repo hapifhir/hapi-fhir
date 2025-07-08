@@ -1015,6 +1015,7 @@ public class JpaConfig {
 				theProvenanceSvc);
 	}
 
+	@Primary
 	@Bean
 	public ReplaceReferencesProvenanceSvc replaceReferencesProvenanceSvc(DaoRegistry theDaoRegistry) {
 		return new ReplaceReferencesProvenanceSvc(theDaoRegistry);

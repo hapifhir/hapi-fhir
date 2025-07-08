@@ -43,6 +43,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +84,8 @@ public class ReplaceReferencesProvenanceSvc {
 			@Nullable Reference theSourceReference,
 			List<Reference> theUpdatedReferencingResources,
 			Date theStartTime,
-			List<IProvenanceAgent> theProvenanceAgents) {
+			List<IProvenanceAgent> theProvenanceAgents,
+			List<IBaseResource> theContainedResources) {
 		Provenance provenance = new Provenance();
 
 		Date now = new Date();
@@ -107,11 +109,10 @@ public class ReplaceReferencesProvenanceSvc {
 		provenance.addReason(activityReasonCodeableConcept);
 
 		provenance.addTarget(theTargetReference);
-		if (theSourceReference != null) {
-			provenance.addTarget(theSourceReference);
-		}
+		provenance.addTarget(theSourceReference);
 
 		theUpdatedReferencingResources.forEach(provenance::addTarget);
+		theContainedResources.forEach(c -> provenance.addContained((Resource) c));
 		return provenance;
 	}
 
@@ -119,7 +120,7 @@ public class ReplaceReferencesProvenanceSvc {
 	 * Creates a Provenance resource for the $replace-references and $merge operations.
 	 *
 	 * @param theTargetId           the versioned id of the target resource of the operation.
-	 * @param theSourceId           the versioned id of the source resource of the operation. Can be null if the operation is $merge and the source resource is deleted.
+	 * @param theSourceId           the versioned id of the source resource of the operation.
 	 * @param thePatchResultBundles the list of patch result bundles that contain the updated resources.
 	 * @param theStartTime          the start time of the operation.
 	 * @param theRequestDetails     the request details
@@ -127,11 +128,12 @@ public class ReplaceReferencesProvenanceSvc {
 	 */
 	public void createProvenance(
 			IIdType theTargetId,
-			@Nullable IIdType theSourceId,
+			IIdType theSourceId,
 			List<Bundle> thePatchResultBundles,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
-			List<IProvenanceAgent> theProvenanceAgents) {
+			List<IProvenanceAgent> theProvenanceAgents,
+			List<IBaseResource> theContainedResources) {
 		createProvenance(
 				theTargetId,
 				theSourceId,
@@ -139,28 +141,32 @@ public class ReplaceReferencesProvenanceSvc {
 				theStartTime,
 				theRequestDetails,
 				theProvenanceAgents,
-				// if no referencing resource were update, we don't need to create a Provenance resource, because
+				theContainedResources,
+				// if no referencing resource were updated, we don't need to create a Provenance resource, because
 				// replace-references doesn't update the src and target resources, unlike the $merge operation
 				false);
 	}
 
 	protected void createProvenance(
 			IIdType theTargetId,
-			@Nullable IIdType theSourceId,
+			IIdType theSourceId,
 			List<Bundle> thePatchResultBundles,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
 			List<IProvenanceAgent> theProvenanceAgents,
+			List<IBaseResource> theContainedResources,
 			boolean theCreateEvenWhenNoReferencesWereUpdated) {
 		Reference targetReference = new Reference(theTargetId);
-		Reference sourceReference = null;
-		if (theSourceId != null) {
-			sourceReference = new Reference(theSourceId);
-		}
+		Reference sourceReference = new Reference(theSourceId);
 		List<Reference> patchedReferences = extractUpdatedResourceReferences(thePatchResultBundles);
 		if (!patchedReferences.isEmpty() || theCreateEvenWhenNoReferencesWereUpdated) {
 			Provenance provenance = createProvenanceObject(
-					targetReference, sourceReference, patchedReferences, theStartTime, theProvenanceAgents);
+					targetReference,
+					sourceReference,
+					patchedReferences,
+					theStartTime,
+					theProvenanceAgents,
+					theContainedResources);
 			myProvenanceDao.create(provenance, theRequestDetails);
 		}
 	}
@@ -178,16 +184,9 @@ public class ReplaceReferencesProvenanceSvc {
 	@Nullable
 	public Provenance findProvenance(
 			IIdType theTargetId, IIdType theSourceId, RequestDetails theRequestDetails, String theOperationName) {
-		SearchParameterMap map = new SearchParameterMap();
-		map.add("target", new ReferenceParam(theTargetId));
-		// Add sort by recorded field, in case there are multiple Provenance resources for the same source and target,
-		// we want the most recent one.
-		map.setSort(new SortSpec("recorded", SortOrderEnum.DESC));
 
-		IBundleProvider searchBundle = myProvenanceDao.search(map, theRequestDetails);
-		// 'activity' is not available as a search parameter in r4, was added in r5,
-		// so we need to filter the results manually.
-		List<Provenance> provenances = filterByActivity(searchBundle.getAllResources());
+		List<Provenance> provenances =
+				getProvenancesOfTargetsFilteredByActivity(List.of(theTargetId, theSourceId), theRequestDetails);
 
 		if (provenances.isEmpty()) {
 			return null;
@@ -210,6 +209,22 @@ public class ReplaceReferencesProvenanceSvc {
 		} else {
 			return null;
 		}
+	}
+
+	protected List<Provenance> getProvenancesOfTargetsFilteredByActivity(
+			List<IIdType> theTargetIds, RequestDetails theRequestDetails) {
+		SearchParameterMap map = new SearchParameterMap();
+
+		theTargetIds.forEach(tId -> map.add("target", new ReferenceParam(tId)));
+
+		// Add sort by recorded field, in case there are multiple Provenance resources for the same source and target,
+		// we want the most recent one.
+		map.setSort(new SortSpec("recorded", SortOrderEnum.DESC));
+
+		IBundleProvider searchBundle = myProvenanceDao.search(map, theRequestDetails);
+		// 'activity' is not available as a search parameter in r4, was added in r5,
+		// so we need to filter the results manually.
+		return filterByActivity(searchBundle.getAllResources());
 	}
 
 	private List<Provenance> filterByActivity(List<IBaseResource> theResources) {
