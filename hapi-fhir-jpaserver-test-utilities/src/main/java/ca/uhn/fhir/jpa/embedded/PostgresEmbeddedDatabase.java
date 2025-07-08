@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.embedded;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -36,20 +37,24 @@ import java.util.Map;
  * @see <a href="https://www.testcontainers.org/modules/databases/postgres/">Postgres TestContainer</a>
  */
 public class PostgresEmbeddedDatabase extends JpaEmbeddedDatabase {
+		private JdbcDatabaseContainer<?> myContainer;
 
-	public PostgresEmbeddedDatabase() {
-		super(() -> {
+	public PostgresEmbeddedDatabase(JdbcDatabaseContainer<?> theContainer) {
+		myContainer = theContainer;
+		this.setInitializionSupplier(() -> {
 			// This will be called during lazy initialization
-			PostgreSQLContainer<?> container = new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
-			container.start();
+			myContainer.start();
 			return new InitializationData(
-					DriverTypeEnum.POSTGRES_9_4,
-					container.getJdbcUrl(),
-					container.getUsername(),
-					container.getPassword(),
-					container // Store container reference for lifecycle management
-					);
+				DriverTypeEnum.POSTGRES_9_4,
+				myContainer.getJdbcUrl(),
+				myContainer.getUsername(),
+				myContainer.getPassword(),
+				myContainer // Store container reference for lifecycle management
+			);
 		});
+	}
+	public PostgresEmbeddedDatabase() {
+		this(new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest")));
 	}
 
 	private PostgreSQLContainer<?> getContainer() {

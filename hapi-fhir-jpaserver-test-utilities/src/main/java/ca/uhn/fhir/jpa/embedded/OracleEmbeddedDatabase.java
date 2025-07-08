@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.embedded;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.OracleContainer;
 
 import java.util.ArrayList;
@@ -35,19 +36,23 @@ import java.util.Map;
  * @see <a href="https://www.testcontainers.org/modules/databases/oraclexe/">Oracle TestContainer</a>
  */
 public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
+		private JdbcDatabaseContainer<?> myContainer;
 
 	public OracleEmbeddedDatabase() {
-		super(() -> {
-			OracleContainer container =
-					new OracleContainer("gvenzl/oracle-xe:21-slim-faststart").withPrivilegedMode(true);
-			container.start();
-			return new InitializationData(
+		this(new OracleContainer("gvenzl/oracle-xe:21-slim-faststart").withPrivilegedMode(true));
+	}
+	public OracleEmbeddedDatabase(JdbcDatabaseContainer<?> theContainer) {
+		myContainer = theContainer;
+		this.setInitializionSupplier(() -> {
+				myContainer.start();
+				return new InitializationData(
 					DriverTypeEnum.ORACLE_12C,
-					container.getJdbcUrl(),
-					container.getUsername(),
-					container.getPassword(),
-					container);
-		});
+					myContainer.getJdbcUrl(),
+					myContainer.getUsername(),
+					myContainer.getPassword(),
+					myContainer);
+			}
+		);
 	}
 
 	@Override
