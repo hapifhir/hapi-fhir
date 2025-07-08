@@ -119,6 +119,7 @@ public abstract class JpaEmbeddedDatabase {
 	protected JpaEmbeddedDatabase(Supplier<InitializationData> theInitializationSupplier) {
 		myInitializationSupplier = theInitializationSupplier;
 	}
+
 	protected void setInitializionSupplier(Supplier<InitializationData> theInitializationSupplier) {
 		myInitializationSupplier = theInitializationSupplier;
 	}

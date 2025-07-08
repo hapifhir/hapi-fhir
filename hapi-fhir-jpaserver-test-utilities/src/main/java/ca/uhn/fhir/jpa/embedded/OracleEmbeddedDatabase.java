@@ -36,23 +36,23 @@ import java.util.Map;
  * @see <a href="https://www.testcontainers.org/modules/databases/oraclexe/">Oracle TestContainer</a>
  */
 public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
-		private JdbcDatabaseContainer<?> myContainer;
+	private JdbcDatabaseContainer<?> myContainer;
 
 	public OracleEmbeddedDatabase() {
 		this(new OracleContainer("gvenzl/oracle-xe:21-slim-faststart").withPrivilegedMode(true));
 	}
+
 	public OracleEmbeddedDatabase(JdbcDatabaseContainer<?> theContainer) {
 		myContainer = theContainer;
 		this.setInitializionSupplier(() -> {
-				myContainer.start();
-				return new InitializationData(
+			myContainer.start();
+			return new InitializationData(
 					DriverTypeEnum.ORACLE_12C,
 					myContainer.getJdbcUrl(),
 					myContainer.getUsername(),
 					myContainer.getPassword(),
 					myContainer);
-			}
-		);
+		});
 	}
 
 	@Override

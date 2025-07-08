@@ -37,7 +37,7 @@ import java.util.Map;
  * @see <a href="https://www.testcontainers.org/modules/databases/postgres/">Postgres TestContainer</a>
  */
 public class PostgresEmbeddedDatabase extends JpaEmbeddedDatabase {
-		private JdbcDatabaseContainer<?> myContainer;
+	private JdbcDatabaseContainer<?> myContainer;
 
 	public PostgresEmbeddedDatabase(JdbcDatabaseContainer<?> theContainer) {
 		myContainer = theContainer;
@@ -45,14 +45,15 @@ public class PostgresEmbeddedDatabase extends JpaEmbeddedDatabase {
 			// This will be called during lazy initialization
 			myContainer.start();
 			return new InitializationData(
-				DriverTypeEnum.POSTGRES_9_4,
-				myContainer.getJdbcUrl(),
-				myContainer.getUsername(),
-				myContainer.getPassword(),
-				myContainer // Store container reference for lifecycle management
-			);
+					DriverTypeEnum.POSTGRES_9_4,
+					myContainer.getJdbcUrl(),
+					myContainer.getUsername(),
+					myContainer.getPassword(),
+					myContainer // Store container reference for lifecycle management
+					);
 		});
 	}
+
 	public PostgresEmbeddedDatabase() {
 		this(new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest")));
 	}

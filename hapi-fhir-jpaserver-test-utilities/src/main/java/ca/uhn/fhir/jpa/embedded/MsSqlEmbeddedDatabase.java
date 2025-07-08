@@ -50,7 +50,6 @@ public class MsSqlEmbeddedDatabase extends JpaEmbeddedDatabase {
 		this.setInitializionSupplier(() -> {
 			ourLog.info("Starting MS SQL Server container initialization...");
 
-
 			// Set startup timeout to 5 minutes for MS SQL (it can be slow)
 			myContainer.withStartupTimeout(Duration.ofMinutes(5));
 
@@ -61,13 +60,14 @@ public class MsSqlEmbeddedDatabase extends JpaEmbeddedDatabase {
 			ourLog.info("MS SQL Server container started successfully in {} ms", (endTime - startTime));
 
 			return new InitializationData(
-				DriverTypeEnum.MSSQL_2012,
-				myContainer.getJdbcUrl(),
-				myContainer.getUsername(),
-				myContainer.getPassword(),
-				myContainer);
+					DriverTypeEnum.MSSQL_2012,
+					myContainer.getJdbcUrl(),
+					myContainer.getUsername(),
+					myContainer.getPassword(),
+					myContainer);
 		});
 	}
+
 	public MsSqlEmbeddedDatabase() {
 		this(determineMsSqlContainerToUse());
 	}
@@ -83,7 +83,7 @@ public class MsSqlEmbeddedDatabase extends JpaEmbeddedDatabase {
 		} else {
 			ourLog.info("Using Azure SQL Edge image");
 			DockerImageName msSqlImage = DockerImageName.parse("mcr.microsoft.com/azure-sql-edge:latest")
-				.asCompatibleSubstituteFor("mcr.microsoft.com/mssql/server");
+					.asCompatibleSubstituteFor("mcr.microsoft.com/mssql/server");
 			return new MSSQLServerContainer(msSqlImage).acceptLicense();
 		}
 	}
