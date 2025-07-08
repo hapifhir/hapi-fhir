@@ -36,6 +36,8 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
@@ -86,6 +88,7 @@ import java.util.Map;
  */
 @Beta
 public interface IRepository {
+	Logger ourLog = LoggerFactory.getLogger(IRepository.class.getPackageName());
 
 	// CRUD starts here
 
