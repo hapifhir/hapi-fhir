@@ -19,29 +19,8 @@
  */
 package ca.uhn.fhir.jpa.provider.merge;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
- * See <a href="https://build.fhir.org/patient-operation-merge.html">Patient $merge spec</a>
+ * Undo operation has only the common input parameters so nothing extra for now.
  */
-public class MergeOperationOutcome extends OperationOutcomeWithStatusCode {
-
-	private IBaseResource myUpdatedTargetResource;
-	private IBaseResource myTask;
-
-	public IBaseResource getUpdatedTargetResource() {
-		return myUpdatedTargetResource;
-	}
-
-	public void setUpdatedTargetResource(IBaseResource theUpdatedTargetResource) {
-		this.myUpdatedTargetResource = theUpdatedTargetResource;
-	}
-
-	public IBaseResource getTask() {
-		return myTask;
-	}
-
-	public void setTask(IBaseResource theTask) {
-		this.myTask = theTask;
-	}
-}
+public class UndoMergeOperationInputParameters extends MergeOperationsCommonInputParameters { }

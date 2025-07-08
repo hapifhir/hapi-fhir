@@ -23,7 +23,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import jakarta.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -51,12 +51,13 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 
 	@Override
 	public void createProvenance(
-			IIdType theTargetId,
-			@Nullable IIdType theSourceId,
-			List<Bundle> thePatchResultBundles,
-			Date theStartTime,
-			RequestDetails theRequestDetails,
-			List<IProvenanceAgent> theProvenanceAgents) {
+		IIdType theTargetId,
+		IIdType theSourceId,
+		List<Bundle> thePatchResultBundles,
+		Date theStartTime,
+		RequestDetails theRequestDetails,
+		List<IProvenanceAgent> theProvenanceAgents,
+		List<IBaseResource> theContainedResources) {
 
 		super.createProvenance(
 				theTargetId,
@@ -65,6 +66,7 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 				theStartTime,
 				theRequestDetails,
 				theProvenanceAgents,
+				theContainedResources,
 				// we need to create a Provenance resource even when there were no referencing resources,
 				// because src and target resources are always updated in $merge operation
 				true);

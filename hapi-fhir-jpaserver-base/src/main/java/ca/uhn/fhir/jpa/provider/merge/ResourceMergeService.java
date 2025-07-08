@@ -29,6 +29,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
@@ -38,7 +39,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ParametersUtil;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.Bundle;
@@ -51,6 +51,7 @@ import java.util.Date;
 import java.util.List;
 
 import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
+import static ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper.addInfoToOperationOutcome;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_200_OK;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_202_ACCEPTED;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_500_INTERNAL_ERROR;
@@ -82,7 +83,9 @@ public class ResourceMergeService {
 			IHapiTransactionService theHapiTransactionService,
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
 			IJobCoordinator theJobCoordinator,
-			Batch2TaskHelper theBatch2TaskHelper) {
+			Batch2TaskHelper theBatch2TaskHelper,
+			MergeValidationService theMergeValidationService,
+			MergeProvenanceSvc theMergeProvenanceSvc) {
 		myStorageSettings = theStorageSettings;
 
 		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);
@@ -93,9 +96,9 @@ public class ResourceMergeService {
 		myBatch2TaskHelper = theBatch2TaskHelper;
 		myFhirContext = myPatientDao.getContext();
 		myHapiTransactionService = theHapiTransactionService;
-		myMergeProvenanceSvc = new MergeProvenanceSvc(theDaoRegistry);
+		myMergeProvenanceSvc = theMergeProvenanceSvc;
 		myMergeResourceHelper = new MergeResourceHelper(theDaoRegistry, myMergeProvenanceSvc);
-		myMergeValidationService = new MergeValidationService(myFhirContext, theDaoRegistry);
+		myMergeValidationService = theMergeValidationService;
 	}
 
 	/**
@@ -112,7 +115,7 @@ public class ResourceMergeService {
 	 * @return the merge outcome containing OperationOutcome and HTTP status code
 	 */
 	public MergeOperationOutcome merge(
-			BaseMergeOperationInputParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
+		MergeOperationInputParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
 
 		MergeOperationOutcome mergeOutcome = new MergeOperationOutcome();
 		IBaseOperationOutcome operationOutcome = OperationOutcomeUtil.newInstance(myFhirContext);
@@ -134,7 +137,7 @@ public class ResourceMergeService {
 	}
 
 	private void validateAndMerge(
-			BaseMergeOperationInputParameters theMergeOperationParameters,
+			MergeOperationInputParameters theMergeOperationParameters,
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome) {
 
@@ -169,7 +172,7 @@ public class ResourceMergeService {
 	private void handlePreview(
 			Patient theSourceResource,
 			Patient theTargetResource,
-			BaseMergeOperationInputParameters theMergeOperationParameters,
+			MergeOperationInputParameters theMergeOperationParameters,
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome) {
 
@@ -185,11 +188,11 @@ public class ResourceMergeService {
 		// adding +2 because the source and the target resources would be updated as well
 		String diagnosticsMsg = String.format("Merge would update %d resources", referencingResourceCount + 2);
 		String detailsText = "Preview only merge operation - no issues detected";
-		addInfoToOperationOutcome(theMergeOutcome.getOperationOutcome(), diagnosticsMsg, detailsText);
+		addInfoToOperationOutcome(myFhirContext, theMergeOutcome.getOperationOutcome(), diagnosticsMsg, detailsText);
 	}
 
 	private void doMerge(
-			BaseMergeOperationInputParameters theMergeOperationParameters,
+			MergeOperationInputParameters theMergeOperationParameters,
 			Patient theSourceResource,
 			Patient theTargetResource,
 			RequestDetails theRequestDetails,
@@ -218,7 +221,7 @@ public class ResourceMergeService {
 	}
 
 	private void doMergeSync(
-			BaseMergeOperationInputParameters theMergeOperationParameters,
+			MergeOperationInputParameters theMergeOperationParameters,
 			Patient theSourceResource,
 			Patient theTargetResource,
 			RequestDetails theRequestDetails,
@@ -261,16 +264,29 @@ public class ResourceMergeService {
 						theMergeOperationParameters.getDeleteSource(),
 						theRequestDetails,
 						startTime,
-						theMergeOperationParameters.getProvenanceAgents());
+						theMergeOperationParameters.getProvenanceAgents(),
+						List.of(theMergeOperationParameters.getOriginalInputParameters()));
+			}
+
+			if (theMergeOperationParameters.getDeleteSource()) {
+				// using an id with versionId on purpose, so that the delete fails if the resource was updated since we
+				// last read it
+				DaoMethodOutcome deleteOutcome =
+						myPatientDao.delete(theSourceResource.getIdElement(), theRequestDetails);
+
+				/*
+				IBundleProvider bundle = myPatientDao.history(theSourceResource.getIdElement().toUnqualifiedVersionless(), new HistorySearchDateRangeParam(), theRequestDetails);
+				bundle.getAllResources();
+				 */
 			}
 		});
 
 		String detailsText = "Merge operation completed successfully.";
-		addInfoToOperationOutcome(theMergeOutcome.getOperationOutcome(), null, detailsText);
+		addInfoToOperationOutcome(myFhirContext, theMergeOutcome.getOperationOutcome(), null, detailsText);
 	}
 
 	private void doMergeAsync(
-			BaseMergeOperationInputParameters theMergeOperationParameters,
+			MergeOperationInputParameters theMergeOperationParameters,
 			Patient theSourceResource,
 			Patient theTargetResource,
 			RequestDetails theRequestDetails,
@@ -290,13 +306,6 @@ public class ResourceMergeService {
 
 		String detailsText = "Merge request is accepted, and will be processed asynchronously. See"
 				+ " task resource returned in this response for details.";
-		addInfoToOperationOutcome(theMergeOutcome.getOperationOutcome(), null, detailsText);
-	}
-
-	private void addInfoToOperationOutcome(
-			IBaseOperationOutcome theOutcome, String theDiagnosticMsg, String theDetailsText) {
-		IBase issue =
-				OperationOutcomeUtil.addIssue(myFhirContext, theOutcome, "information", theDiagnosticMsg, null, null);
-		OperationOutcomeUtil.addDetailsToIssue(myFhirContext, issue, null, null, theDetailsText);
+		addInfoToOperationOutcome(myFhirContext, theMergeOutcome.getOperationOutcome(), null, detailsText);
 	}
 }

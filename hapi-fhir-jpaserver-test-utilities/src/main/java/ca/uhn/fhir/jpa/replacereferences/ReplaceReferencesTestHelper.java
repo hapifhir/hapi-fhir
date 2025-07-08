@@ -35,6 +35,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -76,6 +77,7 @@ import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_S
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER_RESPOND_ASYNC;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.HAPI_BATCH_JOB_ID_SYSTEM;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -222,18 +224,16 @@ public class ReplaceReferencesTestHelper {
 
 		// assert targets
 		int expectedNumberOfProvenanceTargets = theExpectedPatches;
-		// target patient and source patient if not deleted
-		expectedNumberOfProvenanceTargets += theDeleteSource ? 1 : 2;
+		// target patient and source patient
+		expectedNumberOfProvenanceTargets += 2;
 		assertThat(provenance.getTarget()).hasSize(expectedNumberOfProvenanceTargets);
 		// the first target reference should be the target patient
 		String targetPatientReferenceInProvenance =
 				provenance.getTarget().get(0).getReference();
 		assertThat(targetPatientReferenceInProvenance).isEqualTo(theTargetPatientIdWithExpectedVersion.toString());
-		if (!theDeleteSource) {
-			// the second target reference should be the source patient, if it wasn't deleted
-			String sourcePatientReference = provenance.getTarget().get(1).getReference();
-			assertThat(sourcePatientReference).isEqualTo(theSourcePatientIdWithExpectedVersion.toString());
-		}
+		// the second target reference should be the source patient
+		String sourcePatientReference = provenance.getTarget().get(1).getReference();
+		assertThat(sourcePatientReference).isEqualTo(theSourcePatientIdWithExpectedVersion.toString());
 
 		Set<String> allActualTargets = extractResourceIdsFromProvenanceTarget(provenance.getTarget());
 		assertThat(allActualTargets).containsAll(theExpectedProvenanceTargetsForPatchedResources);
@@ -471,6 +471,27 @@ public class ReplaceReferencesTestHelper {
 		return inParams;
 	}
 
+	public Parameters callMergeOperation(IGenericClient theClient, Parameters inParameters, boolean isAsync) {
+		IOperationUntypedWithInput<Parameters> request =
+				theClient.operation().onType("Patient").named(OPERATION_MERGE).withParameters(inParameters);
+
+		if (isAsync) {
+			request.withAdditionalHeader(HEADER_PREFER, HEADER_PREFER_RESPOND_ASYNC);
+		}
+
+		return request.returnResourceType(Parameters.class).execute();
+	}
+
+	public Parameters callUndoMergeOperation(IGenericClient theClient, Parameters inParameters) {
+		IOperationUntypedWithInput<Parameters> request = theClient
+				.operation()
+				.onType("Patient")
+				.named("$hapi.fhir.undo-merge")
+				.withParameters(inParameters);
+
+		return request.returnResourceType(Parameters.class).execute();
+	}
+
 	public static class PatientMergeInputParameters {
 		public Type sourcePatient;
 		public Type sourcePatientIdentifier;
@@ -481,7 +502,7 @@ public class ReplaceReferencesTestHelper {
 		public Boolean deleteSource;
 		public Integer resourceLimit;
 
-		public Parameters asParametersResource() {
+		private Parameters asCommonParameters() {
 			Parameters inParams = new Parameters();
 			if (sourcePatient != null) {
 				inParams.addParameter().setName("source-patient").setValue(sourcePatient);
@@ -495,6 +516,11 @@ public class ReplaceReferencesTestHelper {
 			if (targetPatientIdentifier != null) {
 				inParams.addParameter().setName("target-patient-identifier").setValue(targetPatientIdentifier);
 			}
+			return inParams;
+		}
+
+		public Parameters asParametersResource() {
+			Parameters inParams = asCommonParameters();
 			if (resultPatient != null) {
 				inParams.addParameter().setName("result-patient").setResource(resultPatient);
 			}
@@ -508,6 +534,10 @@ public class ReplaceReferencesTestHelper {
 				inParams.addParameter().setName("batch-size").setValue(new IntegerType(resourceLimit));
 			}
 			return inParams;
+		}
+
+		public Parameters asUndoParametersResource() {
+			return asCommonParameters();
 		}
 	}
 

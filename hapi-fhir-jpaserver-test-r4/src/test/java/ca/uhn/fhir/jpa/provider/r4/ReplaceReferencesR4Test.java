@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
@@ -424,7 +425,6 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 		);
 	}
 
-
 	@ParameterizedTest
 	@CsvSource (value = {
 		"false",
@@ -449,6 +449,33 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 		List<IBaseResource> provenances = myTestHelper.searchProvenance(targetPatientId.toString());
 		assertThat(provenances).isEmpty();
 	}
+
+	@Test
+	void testReplaceReferences_CallMultipleTimesInSuccessionWithTheSameInput() {
+		//create 2 practitioners
+		IIdType practitionerId1 = myClient.create().resource(new Practitioner()).execute().getId().toUnqualifiedVersionless();
+		IIdType practitionerId2 = myClient.create().resource(new Practitioner()).execute().getId().toUnqualifiedVersionless();
+
+		//create an observation with a performer reference to practitionerId1
+		IIdType observationId = createObservationWithPerformers(practitionerId1).toUnqualifiedVersionless();
+		// Call $replace-references operation to replace practitionerId1 with practitionerId2
+		Parameters outParams = myTestHelper.callReplaceReferences(myClient,
+			practitionerId1.toString(),
+			practitionerId2.toString(),
+			false,
+			null);
+
+		// call again with the same parameters
+		Parameters outParams2 = myTestHelper.callReplaceReferences(myClient,
+			practitionerId1.toString(),
+			practitionerId2.toString(),
+			false,
+			null);
+
+		System.out.println("eee");
+
+	}
+
 
 	@Override
 	protected boolean verboseClientLogging() {

@@ -26,12 +26,14 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Reference;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * This is a class to restore resources to their previous versions based on the provided versioned resource references.
@@ -63,14 +65,18 @@ public class PreviousResourceVersionRestorer {
 	 * @throws ResourceVersionConflictException if the current version of the resource does not match the version specified in the reference.
 	 */
 	public void restoreToPreviousVersionsInTrx(
-			List<Reference> theReferences, RequestDetails theRequestDetails, RequestPartitionId thePartitionId) {
+			List<Reference> theReferences,
+			Set<Reference> theReferencesToUndelete,
+			RequestDetails theRequestDetails,
+			RequestPartitionId thePartitionId) {
 		myHapiTransactionService
 				.withRequest(theRequestDetails)
 				.withRequestPartitionId(thePartitionId)
-				.execute(() -> restoreToPreviousVersions(theReferences, theRequestDetails));
+				.execute(() -> restoreToPreviousVersions(theReferences, theReferencesToUndelete, theRequestDetails));
 	}
 
-	private void restoreToPreviousVersions(List<Reference> theReferences, RequestDetails theRequestDetails) {
+	private void restoreToPreviousVersions(
+			List<Reference> theReferences, Set<Reference> theReferencesToUndelete, RequestDetails theRequestDetails) {
 		for (Reference reference : theReferences) {
 			String referenceStr = reference.getReference();
 			IIdType referenceId = new IdDt(referenceStr);
@@ -90,15 +96,24 @@ public class PreviousResourceVersionRestorer {
 
 			// Read the current resource
 			IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(referenceId.getResourceType());
-			IBaseResource currentResource = dao.read(referenceId.toUnqualifiedVersionless(), theRequestDetails);
+			IBaseResource currentResource = null;
+			try {
+				currentResource = dao.read(referenceId.toUnqualifiedVersionless(), theRequestDetails);
+			} catch (ResourceGoneException e) {
+				if (!theReferencesToUndelete.contains(reference)) {
+					throw e;
+				}
+			}
 
-			// Check current version
-			Long currentVersion = currentResource.getIdElement().getVersionIdPartAsLong();
-			if (!currentVersion.equals(referenceVersion)) {
-				String msg = String.format(
-						"The resource cannot be restored because the current version of resource %s (%s) does not match the expected version (%s)",
-						referenceStr, currentVersion, referenceVersion);
-				throw new ResourceVersionConflictException(Msg.code(2732) + msg);
+			// Check current version, if current resource version exists, the resource wasn't deleted
+			if (currentResource != null) {
+				Long currentVersion = currentResource.getIdElement().getVersionIdPartAsLong();
+				if (!currentVersion.equals(referenceVersion)) {
+					String msg = String.format(
+							"The resource cannot be restored because the current version of resource %s (%s) does not match the expected version (%s)",
+							referenceStr, currentVersion, referenceVersion);
+					throw new ResourceVersionConflictException(Msg.code(2732) + msg);
+				}
 			}
 
 			IIdType previousId = referenceId.withVersion(Long.toString(previousVersion));
