@@ -35,6 +35,7 @@ import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import jakarta.annotation.Nonnull;
+import net.sourceforge.plantuml.Run;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Reference;
@@ -77,6 +78,36 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 		return new ReplaceReferenceUpdateTaskReducerStep<>(myDaoRegistry, myProvenanceSvc);
 	}
 
+	protected void createProvenance(StepExecutionDetails<PT, ReplaceReferencePatchOutcomeJson> theStepExecutionDetails,
+									RequestDetails theRequestDetails) {
+
+		ReplaceReferencesJobParameters params = theStepExecutionDetails.getParameters();
+		if (params.getCreateProvenance()) {
+
+			IdDt targetIdVersioned =
+				params.getTargetId().asIdDt().withVersion(params.getTargetVersionForProvenance());
+
+			IdDt sourceIdVersioned =
+				params.getSourceId().asIdDt().withVersion(params.getSourceVersionForProvenance());
+
+			myProvenanceSvc.createProvenance(
+				targetIdVersioned,
+				sourceIdVersioned,
+				myPatchOutputBundles,
+				theStepExecutionDetails.getInstance().getStartTime(),
+				theRequestDetails,
+				ProvenanceAgentJson.toIProvenanceAgents(params.getProvenanceAgents(), myFhirContext));
+		}
+	}
+
+
+	protected void runJobSpecificOperations(StepExecutionDetails<PT, ReplaceReferencePatchOutcomeJson> theStepExecutionDetails,
+											RequestDetails theRequestDetails){
+			createProvenance(theStepExecutionDetails, theRequestDetails);
+	}
+
+
+
 	@Nonnull
 	@Override
 	public RunOutcome run(
@@ -90,26 +121,7 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 
 			updateTask(params.getTaskId(), requestDetails);
 
-			if (params.getCreateProvenance()) {
-
-				IdDt targetIdVersioned =
-						params.getTargetId().asIdDt().withVersion(params.getTargetVersionForProvenance());
-				// this code is shared by the async $merge jobs, in which case the source resource could be
-				// deleted, and if that is the case, we don't include the source version in the provenance as
-				// per the merge spec.
-				IdDt sourceIdVersioned = null;
-				if (params.getSourceVersionForProvenance() != null) {
-					sourceIdVersioned =
-							params.getSourceId().asIdDt().withVersion(params.getSourceVersionForProvenance());
-				}
-				myProvenanceSvc.createProvenance(
-						targetIdVersioned,
-						sourceIdVersioned,
-						myPatchOutputBundles,
-						theStepExecutionDetails.getInstance().getStartTime(),
-						requestDetails,
-						ProvenanceAgentJson.toIProvenanceAgents(params.getProvenanceAgents(), myFhirContext));
-			}
+			runJobSpecificOperations(theStepExecutionDetails, requestDetails);
 
 			ReplaceReferenceResultsJson result = new ReplaceReferenceResultsJson();
 			result.setTaskId(params.getTaskId());
@@ -144,6 +156,7 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 
 		myTaskDao.update(task, theRequestDetails);
 	}
+
 
 	protected List<Bundle> getPatchOutputBundles() {
 		return myPatchOutputBundles;

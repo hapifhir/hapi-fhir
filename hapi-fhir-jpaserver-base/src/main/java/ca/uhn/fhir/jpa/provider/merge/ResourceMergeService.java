@@ -29,12 +29,15 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -263,6 +266,17 @@ public class ResourceMergeService {
 						startTime,
 						theMergeOperationParameters.getProvenanceAgents());
 			}
+
+
+			if (theMergeOperationParameters.getDeleteSource()) {
+				DaoMethodOutcome deleteOutcome = myPatientDao.delete(theSourceResource.getIdElement().toUnqualifiedVersionless(), theRequestDetails);
+
+				/*
+				IBundleProvider bundle = myPatientDao.history(theSourceResource.getIdElement().toUnqualifiedVersionless(), new HistorySearchDateRangeParam(), theRequestDetails);
+				bundle.getAllResources();
+				 */
+			}
+
 		});
 
 		String detailsText = "Merge operation completed successfully.";

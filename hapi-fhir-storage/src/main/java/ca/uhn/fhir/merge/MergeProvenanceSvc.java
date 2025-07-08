@@ -52,7 +52,7 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 	@Override
 	public void createProvenance(
 			IIdType theTargetId,
-			@Nullable IIdType theSourceId,
+			IIdType theSourceId,
 			List<Bundle> thePatchResultBundles,
 			Date theStartTime,
 			RequestDetails theRequestDetails,

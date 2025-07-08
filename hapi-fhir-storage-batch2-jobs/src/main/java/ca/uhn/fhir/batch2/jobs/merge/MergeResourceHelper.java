@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Identifier;
@@ -77,9 +78,7 @@ public class MergeResourceHelper {
 
 		Patient updatedTarget = updateResource(targetToUpdate, theRequestDetails);
 		myPatientDao.update(targetToUpdate, theRequestDetails);
-		if (theIsDeleteSource) {
-			deleteResource(theSourceResource, theRequestDetails);
-		} else {
+		if (!theIsDeleteSource) {
 			prepareSourcePatientForUpdate(theSourceResource, theTargetResource);
 			updateResource(theSourceResource, theRequestDetails);
 		}
@@ -96,9 +95,16 @@ public class MergeResourceHelper {
 			Date theStartTime,
 			List<IProvenanceAgent> theProvenanceAgents) {
 
+
+		IIdType sourceIdForProvenance = theSourceResource.getIdElement();
+		if (theIsDeleteSource) {
+			// if the source resource is to be deleted, increment the version id of the source resource to be put in the provenance
+			// since the resource will be deleted after the provenance is created, its version will be incremented by the delete operation
+			sourceIdForProvenance = theSourceResource.getIdElement().withVersion(Long.toString(sourceIdForProvenance.getVersionIdPartAsLong() + 1));
+		}
 		myProvenanceSvc.createProvenance(
 				theTargetResource.getIdElement(),
-				theIsDeleteSource ? null : theSourceResource.getIdElement(),
+				sourceIdForProvenance,
 				thePatchResultBundles,
 				theStartTime,
 				theRequestDetails,

@@ -222,18 +222,16 @@ public class ReplaceReferencesTestHelper {
 
 		// assert targets
 		int expectedNumberOfProvenanceTargets = theExpectedPatches;
-		// target patient and source patient if not deleted
-		expectedNumberOfProvenanceTargets += theDeleteSource ? 1 : 2;
+		// target patient and source patient
+		expectedNumberOfProvenanceTargets += 2;
 		assertThat(provenance.getTarget()).hasSize(expectedNumberOfProvenanceTargets);
 		// the first target reference should be the target patient
 		String targetPatientReferenceInProvenance =
 				provenance.getTarget().get(0).getReference();
 		assertThat(targetPatientReferenceInProvenance).isEqualTo(theTargetPatientIdWithExpectedVersion.toString());
-		if (!theDeleteSource) {
-			// the second target reference should be the source patient, if it wasn't deleted
-			String sourcePatientReference = provenance.getTarget().get(1).getReference();
-			assertThat(sourcePatientReference).isEqualTo(theSourcePatientIdWithExpectedVersion.toString());
-		}
+		// the second target reference should be the source patient
+		String sourcePatientReference = provenance.getTarget().get(1).getReference();
+		assertThat(sourcePatientReference).isEqualTo(theSourcePatientIdWithExpectedVersion.toString());
 
 		Set<String> allActualTargets = extractResourceIdsFromProvenanceTarget(provenance.getTarget());
 		assertThat(allActualTargets).containsAll(theExpectedProvenanceTargetsForPatchedResources);

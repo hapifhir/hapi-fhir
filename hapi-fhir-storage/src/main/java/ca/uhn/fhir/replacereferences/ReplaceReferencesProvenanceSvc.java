@@ -119,7 +119,7 @@ public class ReplaceReferencesProvenanceSvc {
 	 * Creates a Provenance resource for the $replace-references and $merge operations.
 	 *
 	 * @param theTargetId           the versioned id of the target resource of the operation.
-	 * @param theSourceId           the versioned id of the source resource of the operation. Can be null if the operation is $merge and the source resource is deleted.
+	 * @param theSourceId           the versioned id of the source resource of the operation.
 	 * @param thePatchResultBundles the list of patch result bundles that contain the updated resources.
 	 * @param theStartTime          the start time of the operation.
 	 * @param theRequestDetails     the request details
@@ -127,7 +127,7 @@ public class ReplaceReferencesProvenanceSvc {
 	 */
 	public void createProvenance(
 			IIdType theTargetId,
-			@Nullable IIdType theSourceId,
+			IIdType theSourceId,
 			List<Bundle> thePatchResultBundles,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
@@ -139,24 +139,21 @@ public class ReplaceReferencesProvenanceSvc {
 				theStartTime,
 				theRequestDetails,
 				theProvenanceAgents,
-				// if no referencing resource were update, we don't need to create a Provenance resource, because
+				// if no referencing resource were updated, we don't need to create a Provenance resource, because
 				// replace-references doesn't update the src and target resources, unlike the $merge operation
 				false);
 	}
 
 	protected void createProvenance(
 			IIdType theTargetId,
-			@Nullable IIdType theSourceId,
+			IIdType theSourceId,
 			List<Bundle> thePatchResultBundles,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
 			List<IProvenanceAgent> theProvenanceAgents,
 			boolean theCreateEvenWhenNoReferencesWereUpdated) {
 		Reference targetReference = new Reference(theTargetId);
-		Reference sourceReference = null;
-		if (theSourceId != null) {
-			sourceReference = new Reference(theSourceId);
-		}
+		Reference sourceReference = new Reference(theSourceId);
 		List<Reference> patchedReferences = extractUpdatedResourceReferences(thePatchResultBundles);
 		if (!patchedReferences.isEmpty() || theCreateEvenWhenNoReferencesWereUpdated) {
 			Provenance provenance = createProvenanceObject(

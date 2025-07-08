@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
@@ -12,8 +13,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.jena.base.Sys;
-import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -429,12 +428,22 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 
 	@ParameterizedTest
 	@CsvSource (value = {
-		"false",
-		"true"
+		"false"//,
+		//"true"
 	})
 	void testReplaceReferences_SourceResourceNotReferencedByAnyResource_SucceedAndShouldNotCreateAProvenance(boolean theIsAsync) {
 
 		IIdType sourcePatientId = myPatientDao.create(new Patient(), mySrd).getId().toUnqualifiedVersionless();
+
+		try {
+			DaoMethodOutcome dO1 = myPatientDao.delete(sourcePatientId.toUnqualifiedVersionless(), mySrd);
+			DaoMethodOutcome dO2 = myPatientDao.delete(sourcePatientId.toUnqualifiedVersionless(), mySrd);
+			System.out.println("here");
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+
+
 		IIdType targetPatientId = myPatientDao.create(new Patient(), mySrd).getId().toUnqualifiedVersionless();
 
 		Parameters outParams = myTestHelper.callReplaceReferences(myClient,

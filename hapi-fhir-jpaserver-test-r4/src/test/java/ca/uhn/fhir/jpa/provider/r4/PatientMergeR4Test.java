@@ -257,7 +257,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	}
 
 
-
 	@ParameterizedTest(name = "{index}: isAsync={0}, theAgentInterceptorReturnsMultipleAgents={1}")
 	@CsvSource (value = {
 		"false, false",
