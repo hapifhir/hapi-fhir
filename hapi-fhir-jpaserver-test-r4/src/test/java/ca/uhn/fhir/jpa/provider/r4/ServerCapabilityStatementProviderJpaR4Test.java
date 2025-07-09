@@ -44,6 +44,9 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 
 	@Test
 	public void testBuiltInSearchParameters() {
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+		mySearchParamRegistry.forceRefresh();
+
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
 		CapabilityStatement.CapabilityStatementRestResourceComponent resource = cs.getRest().get(0).getResource().get(0);
 		List<String> definitions = resource.getSearchParam()

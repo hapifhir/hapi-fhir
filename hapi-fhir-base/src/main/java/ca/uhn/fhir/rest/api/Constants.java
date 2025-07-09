@@ -206,6 +206,8 @@ public class Constants {
 	public static final String PARAM_ASYNC = "async"; // Used in messaging
 	public static final String PARAM_AT = "_at";
 	public static final String PARAM_ID = "_id";
+	public static final String PARAM_IN = "_in";
+	public static final String PARAM_ID_URL = "http://hl7.org/fhir/SearchParameter/Resource-id";
 	/**
 	 * Used in paging links
 	 */
@@ -215,6 +217,7 @@ public class Constants {
 	public static final String PARAM_CONTAINED = "_contained";
 	public static final String PARAM_CONTAINED_TYPE = "_containedType";
 	public static final String PARAM_CONTENT = "_content";
+	public static final String PARAM_CONTENT_URL = "http://hl7.org/fhir/SearchParameter/Resource-content";
 	public static final String PARAM_COUNT = "_count";
 	public static final String PARAM_OFFSET = "_offset";
 	public static final String PARAM_DELETE = "_delete";
@@ -228,6 +231,8 @@ public class Constants {
 	 * @since 7.0.0
 	 */
 	public static final String PARAM_LANGUAGE = "_language";
+
+	public static final String PARAM_LANGUAGE_URL = "http://hl7.org/fhir/SearchParameter/Resource-language";
 
 	public static final String PARAM_INCLUDE_QUALIFIER_RECURSE = ":recurse";
 	public static final String PARAM_INCLUDE_RECURSE = "_include" + PARAM_INCLUDE_QUALIFIER_RECURSE;
@@ -260,6 +265,7 @@ public class Constants {
 	public static final String PARAM_LIST = "_list";
 	public static final String PARAM_TAGS = "_tags";
 	public static final String PARAM_TEXT = "_text";
+	public static final String PARAM_TEXT_URL = "http://hl7.org/fhir/SearchParameter/DomainResource-text";
 	public static final String PARAM_VALIDATE = "_validate";
 	public static final String PARAM_MDM = "_mdm";
 

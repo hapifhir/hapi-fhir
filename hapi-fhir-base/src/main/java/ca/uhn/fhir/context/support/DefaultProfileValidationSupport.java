@@ -157,6 +157,14 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		return retVal;
 	}
 
+	@Nullable
+	@Override
+	public <T extends IBaseResource> List<T> fetchAllSearchParameters() {
+		List<T> retVal = myDelegate.fetchAllSearchParameters();
+		addPackageInformation(retVal);
+		return retVal;
+	}
+
 	public void flush() {
 		myFlush.run();
 	}
