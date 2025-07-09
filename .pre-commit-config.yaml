@@ -12,7 +12,6 @@ repos:
        entry: mvn
        args: ['spotless:apply']
        language: system
-       stages: ['pre-push']
        verbose: false
        always_run: true
        pass_filenames: false
