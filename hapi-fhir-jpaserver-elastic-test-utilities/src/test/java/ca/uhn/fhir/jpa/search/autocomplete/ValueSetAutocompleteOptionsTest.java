@@ -37,7 +37,7 @@ class ValueSetAutocompleteOptionsTest {
 	final private JpaStorageSettings myStorageSettings = new JpaStorageSettings();
 
 	{
-		myStorageSettings.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setHibernateSearchIndexSearchParams(true);
 	}
 
 	@Test
@@ -168,7 +168,7 @@ class ValueSetAutocompleteOptionsTest {
 		@Test
 		public void whenAdvancedIndexingOff() {
 		    // given
-			myStorageSettings.setAdvancedHSearchIndexing(false);
+			myStorageSettings.setHibernateSearchIndexSearchParams(false);
 
 			assertParseThrowsInvalidRequestWithErrorCode(ERROR_REQUIRES_EXTENDED_INDEXING);
 		}
