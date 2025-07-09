@@ -146,7 +146,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// forcedId.dropIndex("20240402.4", "IDX_FORCEID_FID");
 		// --------------------------------------------------------------------------------------
 
-
 		// Migration from LOB
 		{
 			Builder.BuilderWithTableName binaryStorageBlobTable = version.onTable("HFJ_BINARY_STORAGE_BLOB");
