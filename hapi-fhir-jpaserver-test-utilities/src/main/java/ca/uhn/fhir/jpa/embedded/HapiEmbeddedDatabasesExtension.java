@@ -24,7 +24,6 @@ import ca.uhn.fhir.jpa.util.DatabaseSupportUtil;
 import ca.uhn.fhir.test.utilities.docker.DockerRequiredCondition;
 import ca.uhn.fhir.util.VersionEnum;
 import org.junit.jupiter.api.extension.AfterAllCallback;
-import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
