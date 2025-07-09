@@ -1,17 +1,20 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
+import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -32,7 +35,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.TOTAL_EXPECTED_PATCHES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * This test class tests the $hapi.fhir.undo-replace-references operation for R4.
@@ -57,7 +59,23 @@ public class UndoReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 		myLargeTestData = new ReplaceReferencesLargeTestData(myDaoRegistry);
 	}
 
+	private void print(IBaseResource res) {
+		System.out.println(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(res));
+	}
 
+	@Test
+	void test() {
+
+		SystemRequestDetails srd = new SystemRequestDetails();
+		DaoMethodOutcome createOutcome = myPatientDao.create(new Patient(), srd);
+		Patient testPatient = (Patient) createOutcome.getResource();
+		DaoMethodOutcome updateOutcome = myPatientDao.update(testPatient.setActive(true), srd);
+		DaoMethodOutcome deleteOutcome = myPatientDao.delete(testPatient.getIdElement().withVersion("2"));
+		print(deleteOutcome.getOperationOutcome());
+		//print(deleteOutcome.getResource());
+		var list = myPatientDao.history(testPatient.getIdElement().toUnqualifiedVersionless(), new HistorySearchDateRangeParam(), srd).getAllResources();
+		list.forEach(this::print);
+	}
 
 	@Test
 	public void testUndoReplaceReferences_OneReferencingResource_Success() {

@@ -26,7 +26,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
-import ca.uhn.fhir.util.CanonicalIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
@@ -36,12 +35,8 @@ import java.util.List;
 /**
  * See <a href="https://build.fhir.org/patient-operation-merge.html">Patient $merge spec</a>
  */
-public abstract class BaseMergeOperationInputParameters {
+public abstract class BaseMergeOperationInputParameters extends BaseMergeOperationsCommonInputParameters {
 
-	private List<CanonicalIdentifier> mySourceResourceIdentifiers;
-	private List<CanonicalIdentifier> myTargetResourceIdentifiers;
-	private IBaseReference mySourceResource;
-	private IBaseReference myTargetResource;
 	private boolean myPreview;
 	private boolean myDeleteSource;
 	private IBaseResource myResultResource;
@@ -49,44 +44,11 @@ public abstract class BaseMergeOperationInputParameters {
 	private List<IProvenanceAgent> myProvenanceAgents;
 	private boolean myCreateProvenance = true;
 
+	public abstract String getResultResourceParameterName();
+
 	protected BaseMergeOperationInputParameters(int theResourceLimit) {
 		myResourceLimit = theResourceLimit;
 	}
-
-	public abstract String getSourceResourceParameterName();
-
-	public abstract String getTargetResourceParameterName();
-
-	public abstract String getSourceIdentifiersParameterName();
-
-	public abstract String getTargetIdentifiersParameterName();
-
-	public abstract String getResultResourceParameterName();
-
-	public List<CanonicalIdentifier> getSourceIdentifiers() {
-		return mySourceResourceIdentifiers;
-	}
-
-	public boolean hasAtLeastOneSourceIdentifier() {
-		return mySourceResourceIdentifiers != null && !mySourceResourceIdentifiers.isEmpty();
-	}
-
-	public void setSourceResourceIdentifiers(List<CanonicalIdentifier> theSourceIdentifiers) {
-		this.mySourceResourceIdentifiers = theSourceIdentifiers;
-	}
-
-	public List<CanonicalIdentifier> getTargetIdentifiers() {
-		return myTargetResourceIdentifiers;
-	}
-
-	public boolean hasAtLeastOneTargetIdentifier() {
-		return myTargetResourceIdentifiers != null && !myTargetResourceIdentifiers.isEmpty();
-	}
-
-	public void setTargetResourceIdentifiers(List<CanonicalIdentifier> theTargetIdentifiers) {
-		this.myTargetResourceIdentifiers = theTargetIdentifiers;
-	}
-
 	public boolean getPreview() {
 		return myPreview;
 	}
@@ -109,22 +71,6 @@ public abstract class BaseMergeOperationInputParameters {
 
 	public void setResultResource(IBaseResource theResultResource) {
 		this.myResultResource = theResultResource;
-	}
-
-	public IBaseReference getSourceResource() {
-		return mySourceResource;
-	}
-
-	public void setSourceResource(IBaseReference theSourceResource) {
-		this.mySourceResource = theSourceResource;
-	}
-
-	public IBaseReference getTargetResource() {
-		return myTargetResource;
-	}
-
-	public void setTargetResource(IBaseReference theTargetResource) {
-		this.myTargetResource = theTargetResource;
 	}
 
 	public int getResourceLimit() {

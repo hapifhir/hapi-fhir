@@ -51,17 +51,20 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 
 	private final FhirContext myFhirContext;
 	private final ResourceMergeService myResourceMergeService;
+	private final ResourceUndoMergeService myResourceUndoMergeService;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public PatientMergeProvider(
-			FhirContext theFhirContext,
-			DaoRegistry theDaoRegistry,
-			ResourceMergeService theResourceMergeService,
-			IInterceptorBroadcaster theInterceptorBroadcaster) {
+		FhirContext theFhirContext,
+		DaoRegistry theDaoRegistry,
+		ResourceMergeService theResourceMergeService,
+		ResourceUndoMergeService theResourceUndoMergeService,
+		IInterceptorBroadcaster theInterceptorBroadcaster) {
 		super(theDaoRegistry.getResourceDao("Patient"));
 		myFhirContext = theFhirContext;
 		assert myFhirContext.getVersion().getVersion() == FhirVersionEnum.R4;
 		myResourceMergeService = theResourceMergeService;
+		myResourceUndoMergeService = theResourceUndoMergeService;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 	}
 
@@ -126,6 +129,47 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 		}
 	}
 
+	/**
+	 * /Patient/$merge
+	 */
+	@Operation(
+		name = ProviderConstants.OPERATION_UNDO_MERGE,
+		canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-merge")
+	public IBaseParameters patientUndoMerge(
+		HttpServletRequest theServletRequest,
+		HttpServletResponse theServletResponse,
+		ServletRequestDetails theRequestDetails,
+		@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER)
+		List<Identifier> theSourcePatientIdentifier,
+		@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER)
+		List<Identifier> theTargetPatientIdentifier,
+		@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_PATIENT, max = 1)
+		IBaseReference theSourcePatient,
+		@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_TARGET_PATIENT, max = 1)
+		IBaseReference theTargetPatient
+	) {
+
+		startRequest(theServletRequest);
+
+		try {
+			//create input parameters
+			PatientUndoMergeOperationInputParameters inputParameters =
+				buildUndoMergeOperationInputParameters(
+					theSourcePatientIdentifier,
+					theTargetPatientIdentifier,
+					theSourcePatient,
+					theTargetPatient);
+
+
+			//now call the undo service with parameters
+			OperationOutcomeWithStatusCode undomergeOutcome = myResourceUndoMergeService.undoMerge(inputParameters, theRequestDetails);
+			theServletResponse.setStatus(undomergeOutcome.getHttpStatusCode());
+
+		} finally {
+			endRequest(theServletRequest);
+		}
+	}
+
 	private IBaseParameters buildMergeOperationOutputParameters(
 			FhirContext theFhirContext, MergeOperationOutcome theMergeOutcome, IBaseResource theInputParameters) {
 
@@ -157,6 +201,49 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 		return retVal;
 	}
 
+
+	private PatientUndoMergeOperationInputParameters buildUndoMergeOperationInputParameters(
+			List<Identifier> theSourcePatientIdentifier,
+			List<Identifier> theTargetPatientIdentifier,
+			IBaseReference theSourcePatient,
+			IBaseReference theTargetPatient) {
+
+		PatientUndoMergeOperationInputParameters undoMergeOperationParameters =
+				new PatientUndoMergeOperationInputParameters();
+
+		setCommonMergeOperationInputParameters(undoMergeOperationParameters,
+				theSourcePatientIdentifier,
+				theTargetPatientIdentifier,
+				theSourcePatient,
+				theTargetPatient);
+
+		return undoMergeOperationParameters;
+	}
+
+	private void setCommonMergeOperationInputParameters(
+			BaseMergeOperationsCommonInputParameters theMergeOperationParameters,
+			List<Identifier> theSourcePatientIdentifier,
+			List<Identifier> theTargetPatientIdentifier,
+			IBaseReference theSourcePatient,
+			IBaseReference theTargetPatient) {
+		if (theSourcePatientIdentifier != null) {
+			List<CanonicalIdentifier> sourceResourceIdentifiers = theSourcePatientIdentifier.stream()
+				.map(CanonicalIdentifier::fromIdentifier)
+				.collect(Collectors.toList());
+			theMergeOperationParameters.setSourceResourceIdentifiers(sourceResourceIdentifiers);
+		}
+		if (theTargetPatientIdentifier != null) {
+			List<CanonicalIdentifier> targetResourceIdentifiers = theTargetPatientIdentifier.stream()
+				.map(CanonicalIdentifier::fromIdentifier)
+				.collect(Collectors.toList());
+			theMergeOperationParameters.setTargetResourceIdentifiers(targetResourceIdentifiers);
+		}
+		theMergeOperationParameters.setSourceResource(theSourcePatient);
+		theMergeOperationParameters.setTargetResource(theTargetPatient);
+		theMergeOperationParameters.setSourceResource(theSourcePatient);
+		theMergeOperationParameters.setTargetResource(theTargetPatient);
+	}
+
 	private BaseMergeOperationInputParameters buildMergeOperationInputParameters(
 			List<Identifier> theSourcePatientIdentifier,
 			List<Identifier> theTargetPatientIdentifier,
@@ -167,22 +254,16 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 			IBaseResource theResultPatient,
 			int theResourceLimit,
 			List<IProvenanceAgent> theProvenanceAgents) {
+
 		BaseMergeOperationInputParameters mergeOperationParameters =
 				new PatientMergeOperationInputParameters(theResourceLimit);
-		if (theSourcePatientIdentifier != null) {
-			List<CanonicalIdentifier> sourceResourceIdentifiers = theSourcePatientIdentifier.stream()
-					.map(CanonicalIdentifier::fromIdentifier)
-					.collect(Collectors.toList());
-			mergeOperationParameters.setSourceResourceIdentifiers(sourceResourceIdentifiers);
-		}
-		if (theTargetPatientIdentifier != null) {
-			List<CanonicalIdentifier> targetResourceIdentifiers = theTargetPatientIdentifier.stream()
-					.map(CanonicalIdentifier::fromIdentifier)
-					.collect(Collectors.toList());
-			mergeOperationParameters.setTargetResourceIdentifiers(targetResourceIdentifiers);
-		}
-		mergeOperationParameters.setSourceResource(theSourcePatient);
-		mergeOperationParameters.setTargetResource(theTargetPatient);
+
+		setCommonMergeOperationInputParameters(mergeOperationParameters
+				theSourcePatientIdentifier,
+				theTargetPatientIdentifier,
+				theSourcePatient,
+				theTargetPatient);
+
 		mergeOperationParameters.setPreview(thePreview != null && thePreview.getValue());
 		mergeOperationParameters.setDeleteSource(theDeleteSource != null && theDeleteSource.getValue());
 

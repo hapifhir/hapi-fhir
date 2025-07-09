@@ -122,6 +122,8 @@ public class ResourceMergeServiceTest {
 	@Mock
 	private JpaStorageSettings myStorageSettingsMock;
 
+	private MergeValidationService myMergeValidationService;
+
 	private ResourceMergeService myResourceMergeService;
 
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
@@ -136,6 +138,7 @@ public class ResourceMergeServiceTest {
 		when(myDaoRegistryMock.getResourceDao(eq(Task.class))).thenReturn(myTaskDaoMock);
 		when(myDaoRegistryMock.getResourceDao(eq("Provenance"))).thenReturn(myProvenanceDaoMock);
 		when(myPatientDaoMock.getContext()).thenReturn(myFhirContext);
+		myMergeValidationService = new MergeValidationService(myFhirContext, myDaoRegistryMock);
 		myResourceMergeService = new ResourceMergeService(
 			myStorageSettingsMock,
 			myDaoRegistryMock,
@@ -143,7 +146,8 @@ public class ResourceMergeServiceTest {
 			myTransactionServiceMock,
 			myRequestPartitionHelperSvcMock,
 			myJobCoordinatorMock,
-			myBatch2TaskHelperMock);
+			myBatch2TaskHelperMock,
+			myMergeValidationService);
 	}
 
 	// SUCCESS CASES
@@ -183,7 +187,7 @@ public class ResourceMergeServiceTest {
 			new Identifier().setSystem("sysSource").setValue("valS1").setUse(Identifier.IdentifierUse.OLD),
 			new Identifier().setSystem("sysSource").setValue("valS2").setUse(Identifier.IdentifierUse.OLD));
 		verifyUpdatedTargetPatient(true, expectedIdentifiers);
-		verifyProvenanceCreated(false);
+		verifyProvenanceCreated();
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -212,7 +216,7 @@ public class ResourceMergeServiceTest {
 		verifySuccessfulOutcomeForSync(mergeOutcome, patientReturnedFromDaoAfterTargetUpdate);
 		verifyUpdatedSourcePatient();
 		verifyUpdatedTargetPatient(true, Collections.emptyList());
-		verifyProvenanceCreated(false);
+		verifyProvenanceCreated();
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -247,7 +251,7 @@ public class ResourceMergeServiceTest {
 		verifySuccessfulOutcomeForSync(mergeOutcome, patientToBeReturnedFromDaoAfterTargetUpdate);
 		verifyUpdatedSourcePatient();
 		verifyUpdatedTargetPatient(true, Collections.emptyList());
-		verifyProvenanceCreated(false);
+		verifyProvenanceCreated();
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -290,7 +294,7 @@ public class ResourceMergeServiceTest {
 			new Identifier().setSystem("sys").setValue("val2")
 		);
 		verifyUpdatedTargetPatient(true, expectedIdentifiers);
-		verifyProvenanceCreated(false);
+		verifyProvenanceCreated();
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -319,7 +323,7 @@ public class ResourceMergeServiceTest {
 		// Then
 		verifySuccessfulOutcomeForSync(mergeOutcome, patientToBeReturnedFromDaoAfterTargetUpdate);
 		verifyUpdatedTargetPatient(false, Collections.emptyList());
-		verifyProvenanceCreated(true);
+		verifyProvenanceCreated();
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -351,7 +355,7 @@ public class ResourceMergeServiceTest {
 		// Then
 		verifySuccessfulOutcomeForSync(mergeOutcome, patientToBeReturnedFromDaoAfterTargetUpdate);
 		verifyUpdatedTargetPatient(false, Collections.emptyList());
-		verifyProvenanceCreated(true);
+		verifyProvenanceCreated();
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -409,7 +413,7 @@ public class ResourceMergeServiceTest {
 		verifySuccessfulOutcomeForSync(mergeOutcome, patientToBeReturnedFromDaoAfterTargetUpdate);
 		verifyUpdatedSourcePatient();
 		verifyUpdatedTargetPatient(true, Collections.emptyList());
-		verifyProvenanceCreated(false);
+		verifyProvenanceCreated();
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -1431,22 +1435,21 @@ public class ResourceMergeServiceTest {
 
 	}
 
-	private void verifyProvenanceCreated(boolean theDeleteSource) {
+	private void verifyProvenanceCreated() {
 
 		ArgumentCaptor<Provenance> captor = ArgumentCaptor.forClass(Provenance.class);
 		verify(myProvenanceDaoMock).create(captor.capture(), eq(myRequestDetailsMock));
 
 		Provenance provenance = captor.getValue();
 		//assert targets
-		assertThat(provenance.getTarget()).hasSize(theDeleteSource ? 1 : 2);
+		assertThat(provenance.getTarget()).hasSize(2);
 		// the first target reference should be the target patient
 		String targetPatientReference = provenance.getTarget().get(0).getReference();
 		assertThat(targetPatientReference).isEqualTo(TARGET_PATIENT_TEST_ID_WITH_VERSION_2);
-		if (!theDeleteSource) {
-			// the second target reference should be the source patient, if it wasn't deleted
-			String sourcePatientReference = provenance.getTarget().get(1).getReference();
-			assertThat(sourcePatientReference).isEqualTo(SOURCE_PATIENT_TEST_ID_WITH_VERSION_2);
-		}
+
+		// the second target reference should be the source patient
+		String sourcePatientReference = provenance.getTarget().get(1).getReference();
+		assertThat(sourcePatientReference).isEqualTo(SOURCE_PATIENT_TEST_ID_WITH_VERSION_2);
 
 		Instant now = Instant.now();
 		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);

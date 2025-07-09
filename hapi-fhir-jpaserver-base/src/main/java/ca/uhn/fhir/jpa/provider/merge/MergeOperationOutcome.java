@@ -25,27 +25,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 /**
  * See <a href="https://build.fhir.org/patient-operation-merge.html">Patient $merge spec</a>
  */
-public class MergeOperationOutcome {
-	private IBaseOperationOutcome myOperationOutcome;
-	private int myHttpStatusCode;
+public class MergeOperationOutcome extends OperationOutcomeWithStatusCode {
+
 	private IBaseResource myUpdatedTargetResource;
 	private IBaseResource myTask;
 
-	public IBaseOperationOutcome getOperationOutcome() {
-		return myOperationOutcome;
-	}
 
-	public void setOperationOutcome(IBaseOperationOutcome theOperationOutcome) {
-		this.myOperationOutcome = theOperationOutcome;
-	}
-
-	public int getHttpStatusCode() {
-		return myHttpStatusCode;
-	}
-
-	public void setHttpStatusCode(int theHttpStatusCode) {
-		this.myHttpStatusCode = theHttpStatusCode;
-	}
 
 	public IBaseResource getUpdatedTargetResource() {
 		return myUpdatedTargetResource;

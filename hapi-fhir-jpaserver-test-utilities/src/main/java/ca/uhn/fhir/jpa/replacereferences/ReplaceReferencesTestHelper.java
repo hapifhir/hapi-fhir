@@ -35,6 +35,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -76,6 +77,7 @@ import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_S
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER_RESPOND_ASYNC;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.HAPI_BATCH_JOB_ID_SYSTEM;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -469,6 +471,21 @@ public class ReplaceReferencesTestHelper {
 		return inParams;
 	}
 
+	public Parameters callMergeOperation(IGenericClient theClient, Parameters inParameters, boolean isAsync) {
+		IOperationUntypedWithInput<Parameters> request = theClient.operation()
+			.onType("Patient")
+			.named(OPERATION_MERGE)
+			.withParameters(inParameters);
+
+		if (isAsync) {
+			request.withAdditionalHeader(HEADER_PREFER, HEADER_PREFER_RESPOND_ASYNC);
+		}
+
+		return request
+			.returnResourceType(Parameters.class)
+			.execute();
+	}
+
 	public static class PatientMergeInputParameters {
 		public Type sourcePatient;
 		public Type sourcePatientIdentifier;
@@ -479,7 +496,7 @@ public class ReplaceReferencesTestHelper {
 		public Boolean deleteSource;
 		public Integer resourceLimit;
 
-		public Parameters asParametersResource() {
+		private Parameters asCommonParameters() {
 			Parameters inParams = new Parameters();
 			if (sourcePatient != null) {
 				inParams.addParameter().setName("source-patient").setValue(sourcePatient);
@@ -493,6 +510,11 @@ public class ReplaceReferencesTestHelper {
 			if (targetPatientIdentifier != null) {
 				inParams.addParameter().setName("target-patient-identifier").setValue(targetPatientIdentifier);
 			}
+			return inParams;
+		}
+
+		public Parameters asParametersResource() {
+			Parameters inParams = asCommonParameters();
 			if (resultPatient != null) {
 				inParams.addParameter().setName("result-patient").setResource(resultPatient);
 			}
@@ -507,7 +529,15 @@ public class ReplaceReferencesTestHelper {
 			}
 			return inParams;
 		}
+
+		public Parameters asUndoParametersResource() {
+			return asCommonParameters();
+		}
+
 	}
+
+
+
 
 	public static void validatePatchResultBundle(
 			Bundle patchResultBundle, int theTotalExpectedPatches, List<String> theExpectedResourceTypes) {

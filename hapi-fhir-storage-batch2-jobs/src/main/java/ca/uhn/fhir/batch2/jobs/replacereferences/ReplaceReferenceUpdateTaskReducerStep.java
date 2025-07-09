@@ -35,7 +35,6 @@ import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import jakarta.annotation.Nonnull;
-import net.sourceforge.plantuml.Run;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Reference;
@@ -101,8 +100,8 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 	}
 
 
-	protected void runJobSpecificOperations(StepExecutionDetails<PT, ReplaceReferencePatchOutcomeJson> theStepExecutionDetails,
-											RequestDetails theRequestDetails){
+	protected void performOperationSpecificActions(StepExecutionDetails<PT, ReplaceReferencePatchOutcomeJson> theStepExecutionDetails,
+												   RequestDetails theRequestDetails){
 			createProvenance(theStepExecutionDetails, theRequestDetails);
 	}
 
@@ -121,7 +120,7 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 
 			updateTask(params.getTaskId(), requestDetails);
 
-			runJobSpecificOperations(theStepExecutionDetails, requestDetails);
+			performOperationSpecificActions(theStepExecutionDetails, requestDetails);
 
 			ReplaceReferenceResultsJson result = new ReplaceReferenceResultsJson();
 			result.setTaskId(params.getTaskId());

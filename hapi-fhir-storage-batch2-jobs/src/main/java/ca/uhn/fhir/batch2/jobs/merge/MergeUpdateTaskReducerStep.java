@@ -62,8 +62,8 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 	}
 
 	@Override
-	protected void runJobSpecificOperations(StepExecutionDetails<MergeJobParameters, ReplaceReferencePatchOutcomeJson> theStepExecutionDetails,
-											RequestDetails theRequestDetails) {
+	protected void performOperationSpecificActions(StepExecutionDetails<MergeJobParameters, ReplaceReferencePatchOutcomeJson> theStepExecutionDetails,
+												   RequestDetails theRequestDetails) {
 		MergeJobParameters mergeJobParameters = theStepExecutionDetails.getParameters();
 		Patient resultResource;
 		if (mergeJobParameters.getResultResource() != null) {
@@ -100,7 +100,7 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 			createProvenance(theStepExecutionDetails, theRequestDetails);
 
 			if (mergeJobParameters.getDeleteSource()) {
-				myPatientDao.delete(sourceResource.getIdElement().toUnqualifiedVersionless(), theRequestDetails);
+				myPatientDao.delete(sourceResource.getIdElement(), theRequestDetails);
 			}
 
 		});

@@ -493,18 +493,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	private Parameters callMergeOperation(Parameters inParameters, boolean isAsync) {
-		IOperationUntypedWithInput<Parameters> request = myClient.operation()
-			.onType("Patient")
-			.named(OPERATION_MERGE)
-			.withParameters(inParameters);
-
-		if (isAsync) {
-			request.withAdditionalHeader(HEADER_PREFER, HEADER_PREFER_RESPOND_ASYNC);
-		}
-
-		return request
-			.returnResourceType(Parameters.class)
-			.execute();
+		return myTestHelper.callMergeOperation(myClient, inParameters, isAsync);
 	}
 
 	class MyExceptionHandler implements TestExecutionExceptionHandler {

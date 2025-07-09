@@ -85,7 +85,8 @@ public class ResourceMergeService {
 			IHapiTransactionService theHapiTransactionService,
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
 			IJobCoordinator theJobCoordinator,
-			Batch2TaskHelper theBatch2TaskHelper) {
+			Batch2TaskHelper theBatch2TaskHelper,
+			MergeValidationService theMergeValidationService) {
 		myStorageSettings = theStorageSettings;
 
 		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);
@@ -98,7 +99,7 @@ public class ResourceMergeService {
 		myHapiTransactionService = theHapiTransactionService;
 		myMergeProvenanceSvc = new MergeProvenanceSvc(theDaoRegistry);
 		myMergeResourceHelper = new MergeResourceHelper(theDaoRegistry, myMergeProvenanceSvc);
-		myMergeValidationService = new MergeValidationService(myFhirContext, theDaoRegistry);
+		myMergeValidationService = theMergeValidationService;
 	}
 
 	/**
@@ -269,7 +270,8 @@ public class ResourceMergeService {
 
 
 			if (theMergeOperationParameters.getDeleteSource()) {
-				DaoMethodOutcome deleteOutcome = myPatientDao.delete(theSourceResource.getIdElement().toUnqualifiedVersionless(), theRequestDetails);
+				// using an id with versionId on purpose, so that the delete fails if the resource was updated since we last read it
+				DaoMethodOutcome deleteOutcome = myPatientDao.delete(theSourceResource.getIdElement(), theRequestDetails);
 
 				/*
 				IBundleProvider bundle = myPatientDao.history(theSourceResource.getIdElement().toUnqualifiedVersionless(), new HistorySearchDateRangeParam(), theRequestDetails);

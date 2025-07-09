@@ -53,8 +53,11 @@ public class PatientMergeOperationInputParameters extends BaseMergeOperationInpu
 		return OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER;
 	}
 
+
 	@Override
 	public String getResultResourceParameterName() {
 		return OPERATION_MERGE_PARAM_RESULT_PATIENT;
 	}
+
+
 }
