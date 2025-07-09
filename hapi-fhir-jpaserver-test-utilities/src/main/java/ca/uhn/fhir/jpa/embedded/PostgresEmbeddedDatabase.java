@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.embedded;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -31,23 +32,48 @@ import java.util.Map;
  * For testing purposes.
  * <br/><br/>
  * Embedded database that uses a {@link ca.uhn.fhir.jpa.migrate.DriverTypeEnum#POSTGRES_9_4} driver
- * and a dockerized Testcontainer.
+ * and a dockerized Testcontainer with lazy initialization.
  *
  * @see <a href="https://www.testcontainers.org/modules/databases/postgres/">Postgres TestContainer</a>
  */
-public class PostgresEmbeddedDatabase extends JpaContainerDatabase {
+public class PostgresEmbeddedDatabase extends JpaEmbeddedDatabase {
+	private JdbcDatabaseContainer<?> myContainer;
+
+	public PostgresEmbeddedDatabase(JdbcDatabaseContainer<?> theContainer) {
+		myContainer = theContainer;
+		this.setInitializionSupplier(() -> {
+			// This will be called during lazy initialization
+			myContainer.start();
+			return new InitializationData(
+					DriverTypeEnum.POSTGRES_9_4,
+					myContainer.getJdbcUrl(),
+					myContainer.getUsername(),
+					myContainer.getPassword(),
+					myContainer // Store container reference for lifecycle management
+					);
+		});
+	}
 
 	public PostgresEmbeddedDatabase() {
 		this(new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest")));
 	}
 
-	public PostgresEmbeddedDatabase(PostgreSQLContainer<?> theContainer) {
-		super(theContainer);
-		super.initialize(
-				DriverTypeEnum.POSTGRES_9_4,
-				myContainer.getJdbcUrl(),
-				myContainer.getUsername(),
-				myContainer.getPassword());
+	private PostgreSQLContainer<?> getContainer() {
+		ensureInitialized();
+		return (PostgreSQLContainer<?>) getContainerReference();
+	}
+
+	@Override
+	public DriverTypeEnum getDriverType() {
+		return DriverTypeEnum.POSTGRES_9_4;
+	}
+
+	@Override
+	public void stop() {
+		PostgreSQLContainer<?> container = (PostgreSQLContainer<?>) getContainerReference();
+		if (container != null && container.isRunning()) {
+			container.stop();
+		}
 	}
 
 	@Override
@@ -89,7 +115,6 @@ public class PostgresEmbeddedDatabase extends JpaContainerDatabase {
 
 	@Override
 	public void enableConstraints() {
-
 		List<String> sql = new ArrayList<>();
 		for (String tableName : getAllTableNames()) {
 			sql.add(String.format("ALTER TABLE \"%s\" ENABLE TRIGGER ALL", tableName));
