@@ -50,6 +50,11 @@ public class H2EmbeddedDatabase extends JpaEmbeddedDatabase {
 	}
 
 	@Override
+	public DriverTypeEnum getDriverType() {
+		return DriverTypeEnum.H2_EMBEDDED;
+	}
+
+	@Override
 	public void stop() {
 		deleteDatabaseDirectoryIfExists();
 	}
