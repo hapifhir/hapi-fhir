@@ -195,6 +195,16 @@ public interface ISearchParamRegistry extends IResourceRepositoryCache {
 	}
 
 	/**
+	 * Is there an active search param with the given name for the given resource type
+	 *
+	 * @since 8.4.0
+	 */
+	default boolean hasActiveSearchParam(
+			String theResourceType, String theParamName, SearchParamLookupContextEnum theContext) {
+		return getActiveSearchParam(theResourceType, theParamName, theContext) != null;
+	}
+
+	/**
 	 * Describes the context for looking up individual search parameters or lists of search parameters.
 	 * These can be thought of as filter criteria - Most search parameters generally apply to all
 	 * context, but some may be explicitly defined to only work for some.

@@ -138,6 +138,7 @@ class SearchBuilderTest {
 			myStorageSettings.setStoreResourceInHSearchIndex(true);
 			myStorageSettings.setHibernateSearchIndexSearchParams(true);
 			myStorageSettings.setHibernateSearchIndexFullText(true);
+			mySearchParamRegistry.forceRefresh();
 		}
 
 		// when

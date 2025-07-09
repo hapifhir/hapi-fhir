@@ -413,7 +413,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 					for (String nextBuiltInSpName : serverConfigurationActiveSearchParams.getSearchParamNames()) {
 						if (nextBuiltInSpName.startsWith("_")
 								&& !searchParams.containsParamName(nextBuiltInSpName)
-								&& searchParamEnabled(nextBuiltInSpName)) {
+								&& searchParamEnabled(resourceName, nextBuiltInSpName)) {
 							searchParams.put(
 									nextBuiltInSpName, serverConfigurationActiveSearchParams.get(nextBuiltInSpName));
 						}
@@ -569,7 +569,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	 * @param theSearchParam
 	 * @return true if theSearchParam is enabled on this server
 	 */
-	protected boolean searchParamEnabled(String theSearchParam) {
+	protected boolean searchParamEnabled(String theResourceName, String theSearchParam) {
 		return true;
 	}
 

@@ -2585,7 +2585,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testStringParamWhichIsTooLong() {
-		myStorageSettings.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setHibernateSearchIndexSearchParams(false);
 
 		Organization org = new Organization();
 		String str = "testStringParamLong__" + RandomStringUtils.randomAlphabetic(ResourceIndexedSearchParamString.MAX_LENGTH);

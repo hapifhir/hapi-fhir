@@ -84,7 +84,8 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 	@BeforeEach
 	public void beforePurgeDatabase() {
 		BaseJpaTest.purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
-		myStorageSettings.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setHibernateSearchIndexSearchParams(true);
+		mySearchParamRegistry.forceRefresh();
 	}
 
 	@AfterEach

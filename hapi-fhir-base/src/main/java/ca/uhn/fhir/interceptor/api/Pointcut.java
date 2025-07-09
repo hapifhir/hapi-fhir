@@ -2603,6 +2603,89 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>JPA Hook:</b>
+	 * This hook is invoked during resource indexing and can be used to influence the
+	 * text extracted from a given resource for FullText indexing in support of the
+	 * <code>_content</code> Search Parameter.
+	 * By default, when FullText indexing is enabled HAPI FHIR extracts all string
+	 * content from resources for indexing in order to support the <code>_content</code>
+	 * Search Parameter. This means looking for all <code>string</code> datatypes
+	 * found within a given resource instance, and combining the strings.
+	 * <p>
+	 * Hooks may choose to replace the automatically extracted index text.
+	 * They may also declare that a given resource should not be indexed.
+	 * </p>
+	 * <p>
+	 * Note on selectively disabling indexing: If you return
+	 * <code>FullTextExtractionResponse.doNotIndex()</code> for both invocations of this
+	 * Pointcut for a given resource, this will flag to the indexing
+	 * service that no data should be written to the index for the resource. This is useful
+	 * if you want to selectively enable FullText indexing only for specific resource types,
+	 * or by some other property. Be careful of resource deletes in this scenario! If you
+	 * allow indexing for a given resource, but then invoke <code>doNotIndex()</code>
+	 * when the resource is being deleted then the existing FullText index record will
+	 * be left in place. This can lead to inefficient use of space, and potentially cause
+	 * slow/inefficient searches.
+	 * </p>
+	 * Hooks should accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionRequest</li>
+	 * </ul>
+	 * <p>
+	 * Hooks may return either <code>null</code> (to indicate that the default indexing should
+	 * be used) or an instance of <code>ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionResponse</code>
+	 * if you wish to override the default indexing behaviour.
+	 * </p>
+	 *
+	 * @since 8.4.0
+	 * @see #JPA_INDEX_EXTRACT_FULLTEXT_TEXT
+	 */
+	JPA_INDEX_EXTRACT_FULLTEXT_CONTENT(
+			"ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionResponse",
+			"ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionRequest"),
+
+	/**
+	 * <b>JPA Hook:</b>
+	 * This hook is invoked during resource indexing and can be used to influence the
+	 * text extracted from a given resource for FullText indexing in support of the
+	 * <code>_text</code> Search Parameter.
+	 * HAPI FHIR extracts all text in the narrative
+	 * (<code>Resource.text.div</code>) for indexing in order to support the <code>_text</code>
+	 * Search Parameter.
+	 * <p>
+	 * Hooks may choose to replace the automatically extracted index text.
+	 * They may also declare that a given resource should not be indexed.
+	 * </p>
+	 * <p>
+	 * Note on selectively disabling indexing: If you return
+	 * <code>FullTextExtractionResponse.doNotIndex()</code> for both invocations of this
+	 * Pointcut for a given resource, this will flag to the indexing
+	 * service that no data should be written to the index for the resource. This is useful
+	 * if you want to selectively enable FullText indexing only for specific resource types,
+	 * or by some other property. Be careful of resource deletes in this scenario! If you
+	 * allow indexing for a given resource, but then invoke <code>doNotIndex()</code>
+	 * when the resource is being deleted then the existing FullText index record will
+	 * be left in place. This can lead to inefficient use of space, and potentially cause
+	 * slow/inefficient searches.
+	 * </p>
+	 * Hooks should accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionRequest</li>
+	 * </ul>
+	 * <p>
+	 * Hooks may return either <code>null</code> (to indicate that the default indexing should
+	 * be used) or an instance of <code>ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionResponse</code>
+	 * if you wish to override the default indexing behaviour.
+	 * </p>
+	 *
+	 * @since 8.4.0
+	 * @see #JPA_INDEX_EXTRACT_FULLTEXT_CONTENT
+	 */
+	JPA_INDEX_EXTRACT_FULLTEXT_TEXT(
+			"ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionResponse",
+			"ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionRequest"),
+
+	/**
+	 * <b>JPA Hook:</b>
 	 * This hook is invoked when a cross-partition reference is about to be
 	 * stored in the database.
 	 * <p>
