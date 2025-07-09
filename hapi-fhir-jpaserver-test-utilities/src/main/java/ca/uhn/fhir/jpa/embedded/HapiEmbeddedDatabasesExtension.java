@@ -41,7 +41,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
 
-public class HapiEmbeddedDatabasesExtension implements AfterAllCallback, AfterEachCallback {
+public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 
 	public static final VersionEnum FIRST_TESTED_VERSION = VersionEnum.V5_1_0;
 
@@ -65,19 +65,6 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback, AfterEa
 			}
 		} else {
 			ourLog.warn("Docker is not available! Not going to start any embedded databases.");
-		}
-	}
-
-	@Override
-	public void afterEach(ExtensionContext theExtensionContext) {
-		// Stop all started container databases after each test to ensure one-container-at-a-time behavior
-		// Note: We stop containers AFTER the test's afterEach method runs, which needs containers running to clear data
-		for (JpaEmbeddedDatabase database : getAllEmbeddedDatabases()) {
-			// Only stop container databases that are actually initialized
-			if (database.getDriverType() != DriverTypeEnum.H2_EMBEDDED && database.isInitialized()) {
-				ourLog.info("Stopping container after test: {}", database.getDriverType());
-				database.stop();
-			}
 		}
 	}
 
