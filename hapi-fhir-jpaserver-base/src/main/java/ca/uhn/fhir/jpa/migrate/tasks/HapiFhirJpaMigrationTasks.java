@@ -553,11 +553,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.withType(ColumnTypeEnum.STRING, 500);
 
 		// Stop writing to hfj_forced_id https://github.com/hapifhir/hapi-fhir/pull/5817
-		Builder.BuilderWithTableName forcedId = version.onTable("HFJ_FORCED_ID");
-		forcedId.dropForeignKey("20240402.1", "FK_FORCEDID_RESOURCE", "HFJ_RESOURCE");
-		forcedId.dropIndex("20240402.2", "IDX_FORCEDID_RESID");
-		forcedId.dropIndex("20240402.3", "IDX_FORCEDID_TYPE_FID");
-		forcedId.dropIndex("20240402.4", "IDX_FORCEID_FID");
+
+		// --------------------------------------------------------------------------------------
+		// Removing these indexes before 7.6 breaks zero-downtime upgrades because performance of
+		// versions previous to 7.2 will degrade significantly without them. The code below will be
+		// commented out only in the 7.2 and 7.4 release branches. Do **not** add these changes to
+		// the master branch.
+		// Builder.BuilderWithTableName forcedId = version.onTable("HFJ_FORCED_ID");
+		// forcedId.dropForeignKey("20240402.1", "FK_FORCEDID_RESOURCE", "HFJ_RESOURCE");
+		// forcedId.dropIndex("20240402.2", "IDX_FORCEDID_RESID");
+		// forcedId.dropIndex("20240402.3", "IDX_FORCEDID_TYPE_FID");
+		// forcedId.dropIndex("20240402.4", "IDX_FORCEID_FID");
+		// --------------------------------------------------------------------------------------
 
 		// Migration from LOB
 		{

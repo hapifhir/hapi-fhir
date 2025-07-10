@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7111
+title: "Previously, zero-downtime upgrades would negatively affect performance while the system is being upgraded.
+        This has been fixed."
