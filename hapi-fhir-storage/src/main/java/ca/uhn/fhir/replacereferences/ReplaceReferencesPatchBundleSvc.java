@@ -85,8 +85,12 @@ public class ReplaceReferencesPatchBundleSvc {
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(referencingResourceId.getResourceType());
 			IBaseResource resource = dao.read(referencingResourceId, theRequestDetails);
 			Parameters patchParams = buildPatchParams(theReplaceReferencesRequest, resource);
-			IIdType resourceId = resource.getIdElement();
-			bundleBuilder.addTransactionFhirPatchEntry(resourceId, patchParams);
+			// the patchParams could be empty if the resource contains only versioned references to the source,
+			// no need to add patch entry in that case
+			if (patchParams.hasParameter()) {
+				IIdType resourceId = resource.getIdElement();
+				bundleBuilder.addTransactionFhirPatchEntry(resourceId, patchParams);
+			}
 		});
 		return bundleBuilder.getBundleTyped();
 	}

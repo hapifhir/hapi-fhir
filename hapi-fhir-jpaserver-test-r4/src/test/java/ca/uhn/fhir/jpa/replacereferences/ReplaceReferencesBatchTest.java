@@ -21,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 import static ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesAppCtx.JOB_REPLACE_REFERENCES;
+import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.RESOURCE_TYPES_EXPECTED_TO_BE_PATCHED;
+import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.TOTAL_EXPECTED_PATCHES;
 import static org.awaitility.Awaitility.await;
 
 public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
@@ -35,6 +37,7 @@ public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
 	SystemRequestDetails mySrd = new SystemRequestDetails();
 
 	private ReplaceReferencesTestHelper myTestHelper;
+	private ReplaceReferencesLargeTestData myTestData;
 
 	@Override
 	@BeforeEach
@@ -47,7 +50,8 @@ public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
 			.setDontStripVersionsFromReferencesAtPaths("Provenance.target");
 
 		myTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
-		myTestHelper.beforeEach();
+		myTestData = new ReplaceReferencesLargeTestData(myDaoRegistry);
+		myTestData.createTestResources();
 
 		mySrd.setRequestPartitionId(RequestPartitionId.allPartitions());
 	}
@@ -59,8 +63,8 @@ public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
 		IIdType taskId = createReplaceReferencesTask();
 
 		ReplaceReferencesJobParameters jobParams = new ReplaceReferencesJobParameters();
-		jobParams.setSourceId(new FhirIdJson(myTestHelper.getSourcePatientId()));
-		jobParams.setTargetId(new FhirIdJson(myTestHelper.getTargetPatientId()));
+		jobParams.setSourceId(new FhirIdJson(myTestData.getSourcePatientId()));
+		jobParams.setTargetId(new FhirIdJson(myTestData.getTargetPatientId()));
 		jobParams.setSourceVersionForProvenance("1");
 		jobParams.setTargetVersionForProvenance("2");
 		jobParams.setTaskId(taskId);
@@ -71,20 +75,20 @@ public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
 		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(jobStartResponse);
 
 		Bundle patchResultBundle = myTestHelper.validateCompletedTask(jobInstance, taskId);
-		ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle, ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES, List.of(
-			"Observation", "Encounter", "CarePlan"));
+		ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle, TOTAL_EXPECTED_PATCHES, RESOURCE_TYPES_EXPECTED_TO_BE_PATCHED);
 
-		myTestHelper.assertAllReferencesUpdated();
-		myTestHelper.assertReplaceReferencesProvenance("1", "2", null);
+		myTestHelper.assertAllReferencesUpdated(myTestData);
+		myTestHelper.assertReplaceReferencesProvenance("1", "2", myTestData, null);
 	}
 
 
 	@Test
 	void testReplaceReferencesJob_JobFails_ErrorHandlerSetsAssociatedTaskStatusToFailed() {
+		myTestData.createTestResources();
 		IIdType taskId = createReplaceReferencesTask();
 
 		ReplaceReferencesJobParameters jobParams = new ReplaceReferencesJobParameters();
-		jobParams.setSourceId(new FhirIdJson(myTestHelper.getSourcePatientId()));
+		jobParams.setSourceId(new FhirIdJson(myTestData.getSourcePatientId()));
 		//use a target that does not exist to force the job to fail
 		jobParams.setTargetId(new FhirIdJson("Patient", "doesnotexist"));
 		jobParams.setTaskId(taskId);
