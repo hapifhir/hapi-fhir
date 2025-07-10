@@ -1,0 +1,16 @@
+---
+type: fix
+issue: 7040
+backport: 8.2.1
+title: "Due to a fix in Release 8.2, contained resources
+      will no longer have their ids prepended with a '#'.
+      This caused a regression where contained resources were
+      referenced, not by an Id Reference, but by the actual
+      full embedded resource, would no longer be able to
+      be processed in a transaction.
+      To fix this, the parser/serializer (which is responsible
+      for creating these contained reference ids) will also
+      create a contained resource id reference, which does
+      contain the prepended '#', thereby allowing these
+      transactions to work as before.
+"
