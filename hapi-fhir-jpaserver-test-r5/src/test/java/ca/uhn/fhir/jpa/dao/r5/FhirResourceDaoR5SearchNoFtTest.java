@@ -58,11 +58,17 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
         mySearchParamRegistry.forceRefresh();
     }
 
+	/**
+	 * N.B. GGG this test tests that we arent doubling up on join clause params, which is a regression which caused a large outage.
+	 * While the production code wont ever fail, this code will fail when called when the jvm has `-ea` enabled, to ensure asserts.
+	 * This is a bit of an odd test, but we dont want to explode in production
+	 */
 	@Test
 	public void testSearchWithDuplicateIdenticalParametersRejected() {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringOrListParam().addOr(new StringParam("homer")).addOr(new StringParam("bart")));
 		params.add("name", new StringOrListParam().addOr(new StringParam("homer")).addOr(new StringParam("bart")));
+
 
 		assertThatThrownBy(()->myPatientDao.search(params, mySrd)).hasMessageContaining("Duplicate parameters found in query: ?name=");
 	}
