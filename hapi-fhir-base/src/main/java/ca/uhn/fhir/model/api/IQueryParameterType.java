@@ -41,7 +41,7 @@ public interface IQueryParameterType extends Serializable {
 	 *            The actual parameter value. For example, if the complete query was
 	 *            <code>http://foo?name:exact=John</code>, the value would be "John"
 	 */
-	public void setValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue);
+	void setValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue);
 
 	/**
 	 * Returns a representation of this parameter's value as it will be represented "over the wire". In other
@@ -56,12 +56,12 @@ public interface IQueryParameterType extends Serializable {
 	 * @return Returns a representation of this parameter's value as it will be represented "over the wire". In other
 	 * words, how it will be presented in a URL (although not URL escaped)
 	 */
-	public String getValueAsQueryToken(FhirContext theContext);
+	String getValueAsQueryToken(FhirContext theContext);
 
 	/**
 	 * This method will return any qualifier that should be appended to the parameter name (e.g ":exact").  Returns null if none are present.
 	 */
-	public String getQueryParameterQualifier();
+	String getQueryParameterQualifier();
 
 	/**
 	 * If set to non-null value, indicates that this parameter has been populated with a "[name]:missing=true" or "[name]:missing=false" vale

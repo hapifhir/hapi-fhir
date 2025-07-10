@@ -106,4 +106,15 @@ public abstract class BaseParam implements IQueryParameterType {
 			doSetValueAsQueryToken(theContext, theParamName, theQualifier, theValue);
 		}
 	}
+
+	/**
+	 * Returns {@literal true} if this parameter has a {@literal null} or empty {@link #get}
+	 *
+	 * @since 8.4.0
+	 */
+	public boolean isEmpty() {
+
+	}
+
+
 }
