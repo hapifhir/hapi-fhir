@@ -58,7 +58,7 @@ public class SpecialParam extends BaseParam /*implements IQueryParameterType*/ {
 	 * {@inheritDoc}
 	 */
 	@Override
-	String doGetValueAsQueryToken(FhirContext theContext) {
+	String doGetValueAsQueryToken() {
 		return ParameterUtil.escape(getValue());
 	}
 

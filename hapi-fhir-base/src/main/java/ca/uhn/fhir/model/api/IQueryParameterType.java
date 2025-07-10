@@ -44,6 +44,14 @@ public interface IQueryParameterType extends Serializable {
 	void setValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue);
 
 	/**
+	 * @deprecated Use {@link #getValueAsQueryToken()} instead
+	 */
+	@Deprecated(since = "8.4.0", forRemoval = true)
+	default String getValueAsQueryToken(FhirContext theContext) {
+		return getValueAsQueryToken();
+	}
+
+	/**
 	 * Returns a representation of this parameter's value as it will be represented "over the wire". In other
 	 * words, how it will be presented in a URL (although not URL escaped)
 	 *
@@ -51,12 +59,11 @@ public interface IQueryParameterType extends Serializable {
 	 * See FHIR specification <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search
 	 * SearchParameter Types</a> for information on the <b>token</b> format
 	 * </p>
-	 * @param theContext TODO
 	 *
 	 * @return Returns a representation of this parameter's value as it will be represented "over the wire". In other
 	 * words, how it will be presented in a URL (although not URL escaped)
 	 */
-	String getValueAsQueryToken(FhirContext theContext);
+	String getValueAsQueryToken();
 
 	/**
 	 * This method will return any qualifier that should be appended to the parameter name (e.g ":exact").  Returns null if none are present.

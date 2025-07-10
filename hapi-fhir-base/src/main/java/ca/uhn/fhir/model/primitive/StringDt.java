@@ -91,7 +91,7 @@ public class StringDt extends BasePrimitive<String> implements IQueryParameterTy
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String getValueAsQueryToken(FhirContext theContext) {
+	public String getValueAsQueryToken() {
 		return getValue();
 	}
 

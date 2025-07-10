@@ -70,14 +70,14 @@ public class CompositeParam<A extends IQueryParameterType, B extends IQueryParam
 	}
 
 	@Override
-	String doGetValueAsQueryToken(FhirContext theContext) {
+	String doGetValueAsQueryToken() {
 		StringBuilder b = new StringBuilder();
 		if (myLeftType != null) {
-			b.append(myLeftType.getValueAsQueryToken(theContext));
+			b.append(myLeftType.getValueAsQueryToken());
 		}
 		b.append('$');
 		if (myRightType != null) {
-			b.append(myRightType.getValueAsQueryToken(theContext));
+			b.append(myRightType.getValueAsQueryToken());
 		}
 		return b.toString();
 	}
