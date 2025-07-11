@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.bulk;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.jobs.export.BulkDataExportSupport;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -14,9 +16,7 @@ import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.JpaJobPersistenceImpl;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -26,7 +26,6 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.svcs.ISearchLimiterSvc;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
@@ -92,11 +91,8 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsInlineTest.createSearchParameterForInlineSecurity;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.awaitility.Awaitility.await;
 
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -110,11 +106,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	@Autowired
 	private IJobPersistence myJobPersistence;
 	private JpaJobPersistenceImpl myJobPersistenceImpl;
-	@Autowired
-	private ISearchLimiterSvc mySearchLimiterSvc;
-	@Autowired
-	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-
 
 	@AfterEach
 	void afterEach() {
@@ -329,69 +320,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		verifyBulkExportResults(options, Collections.singletonList("Patient/PM"), Collections.singletonList("Patient/PF"));
 	}
 
-	@Test
-	public void bulkExport_withOmittedResourcesInPatientCompartment_works() {
-		// setup
-		RequestDetails rd = new SystemRequestDetails();
-
-		Patient patient = new Patient();
-		patient.setId("pat-1");
-		myPatientDao.update(patient, rd);
-
-		Reference patientRef = new Reference("Patient/pat-1");
-
-		Observation obs = new Observation();
-		obs.setId("obs-included");
-		obs.setSubject(patientRef);
-		myObservationDao.update(obs, rd);
-
-		Group group = new Group();
-		group.setId("my-group");
-		group.setType(Group.GroupType.PERSON);
-		group.addMember()
-			.setEntity(patientRef);
-		myGroupDao.update(group, rd);
-
-		BulkDataExportSupport support = new BulkDataExportSupport(
-			myFhirContext,
-			myDaoRegistry,
-			myRequestPartitionHelperSvc
-		);
-
-		// test
-		StorageSettings.IndexEnabledEnum currentIndexSetting = myStorageSettings.getIndexMissingFields();
-		try {
-			// setup for test
-			mySearchLimiterSvc.addOmittedResourceType(ProviderConstants.OPERATION_EXPORT, "Group");
-			// set enabled because bulk export requires it:
-			// error: "HAPI-0797: You attempted to start a Patient Bulk Export, but the system has `Index Missing Fields` disabled. It must be enabled for Patient Bulk Export"
-			myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
-
-			// set the export options
-			BulkExportJobParameters options = new BulkExportJobParameters();
-			options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
-			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-			options.setPatientIds(Set.of(patientRef.getReference()));
-
-			options.setResourceTypes(support.getPatientCompartmentResources());
-			Batch2JobStartResponse results = startNewJob(options);
-
-			// verify
-			awaitExportComplete(results.getInstanceId());
-
-			BulkExportJobResults response = getBulkExportJobResults(results.getInstanceId());
-
-			Map<String, List<String>> outputMap = response.getResourceTypeToBinaryIds();
-			ourLog.info("Resource Types returned: " + String.join(", ", outputMap.keySet()));
-
-			assertThat(outputMap).containsKeys("Observation", "Patient")
-				.doesNotContainKey("Group");
-		} finally {
-			// reset
-			mySearchLimiterSvc.removeAllResourcesForOperation(ProviderConstants.OPERATION_EXPORT);
-			myStorageSettings.setIndexMissingFields(currentIndexSetting);
-		}
-	}
 
 	@Test
 	public void testGroupBulkExportNotInGroup_DoesNotShowUp() {
@@ -1173,11 +1101,19 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		assertFalse(startResponse.isUsesCachedResult());
 
 		// Run a scheduled pass to build the export
-		String instanceId = startResponse.getInstanceId();
-		JobInstance jobInstance = awaitExportComplete(instanceId);
+		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId(), 120);
+
+		await()
+			.atMost(200, TimeUnit.SECONDS)
+			.until(() -> myJobCoordinator.getInstance(startResponse.getInstanceId()).getStatus() == StatusEnum.COMPLETED);
+
+		await()
+			.atMost(200, TimeUnit.SECONDS)
+			.until(() -> myJobCoordinator.getInstance(startResponse.getInstanceId()).getReport() != null);
 
 		// Iterate over the files
-		BulkExportJobResults results = getBulkExportJobResults(instanceId);
+		String report = myJobCoordinator.getInstance(startResponse.getInstanceId()).getReport();
+		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 
 		Set<String> foundIds = new HashSet<>();
 		for (Map.Entry<String, List<String>> file : results.getResourceTypeToBinaryIds().entrySet()) {
@@ -1219,25 +1155,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		if(!theExcludedList.isEmpty()) {
 			assertThat(foundIds).doesNotContainAnyElementsOf(theExcludedList);
 		}
-		return jobInstance;
-	}
-
-	private BulkExportJobResults getBulkExportJobResults(String theInstanceId) {
-		String report = myJobCoordinator.getInstance(theInstanceId).getReport();
-		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
-		return results;
-	}
-
-	private JobInstance awaitExportComplete(String theInstanceId) {
-		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(theInstanceId, 120);
-
-		await()
-			.atMost(200, TimeUnit.SECONDS)
-			.until(() -> myJobCoordinator.getInstance(theInstanceId).getStatus() == StatusEnum.COMPLETED);
-
-		await()
-			.atMost(200, TimeUnit.SECONDS)
-			.until(() -> myJobCoordinator.getInstance(theInstanceId).getReport() != null);
 		return jobInstance;
 	}
 
