@@ -73,6 +73,7 @@ public class BundleUtil {
 
 	public static final String DIFFERENT_LINK_ERROR_MSG =
 			"Mismatching 'previous' and 'prev' links exist. 'previous' " + "is: '$PREVIOUS' and 'prev' is: '$PREV'.";
+	public static final String BUNDLE_TYPE_TRANSACTION_RESPONSE = "transaction-response";
 	private static final Logger ourLog = LoggerFactory.getLogger(BundleUtil.class);
 
 	private static final String PREVIOUS = LINK_PREV;
@@ -723,7 +724,7 @@ public class BundleUtil {
 				}
 			}
 		}
-		return new BundleEntryParts(fullUrl, requestType, url, resource, conditionalUrl);
+		return new BundleEntryParts(fullUrl, requestType, url, resource, conditionalUrl, requestType);
 	}
 
 	/**
