@@ -132,7 +132,7 @@ public class PartitionedStrictTransactionR4Test extends BasePartitioningR4Test {
 			.setValue(new StringType("Patient.active"));
 		operation
 			.addPart()
-			.setName("name")
+			.setName("value")
 			.setValue(new CodeType("false"));
 
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
@@ -204,7 +204,7 @@ public class PartitionedStrictTransactionR4Test extends BasePartitioningR4Test {
 					return RequestPartitionId.fromPartitionId(myPartitionId2);
 				case "SearchParameter":
 				case "Organization":
-					return RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
+					return myPartitionSettings.getDefaultRequestPartitionId();
 				default:
 					throw new InternalErrorException("Don't know how to handle resource type: " + theResourceType);
 			}

@@ -567,8 +567,8 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		String input = ClasspathUtil.loadResource("/r4/diagnosticreport-example-gingival-mass.json");
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> messages = logResultsAndReturnAll(output);
-		assertThat(messages).hasSize(1);
-		assertEquals("Base64 encoded values SHOULD not contain any whitespace (per RFC 4648). Note that non-validating readers are encouraged to accept whitespace anyway", messages.get(0).getMessage());
+		assertThat(messages).hasSize(2);
+		assertEquals("Base64 encoded values SHOULD not contain any whitespace (per RFC 4648). Note that non-validating readers are encouraged to accept whitespace anyway", messages.get(1).getMessage());
 	}
 
 	@Test
@@ -819,6 +819,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		assertEquals("Unrecognized property 'foo'", operationOutcome.getIssue().get(0).getDiagnostics());
 		assertEquals("Patient", operationOutcome.getIssue().get(0).getLocation().get(0).getValue());
 		assertEquals("Line[5] Col[23]", operationOutcome.getIssue().get(0).getLocation().get(1).getValue());
+		assertEquals("Patient", operationOutcome.getIssue().get(0).getExpression().get(0).getValue());
 	}
 
 	@Test
@@ -942,19 +943,26 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 	@Test
 	public void testValidateRawXmlResourceWithEmptyPrimitive() {
-		String input = "<Patient xmlns=\"http://hl7.org/fhir\">" +
-			"  <text>\n" +
-			"    <status value=\"generated\"/>\n" +
-			"    <div xmlns=\"http://www.w3.org/1999/xhtml\">AAA</div>\n" +
-			"  </text>" +
-			"<name><given/></name>" +
-			"</Patient>";
+		String input = """
+			<Patient xmlns="http://hl7.org/fhir">\
+			  <text>
+			    <status value="generated"/>
+			    <div xmlns="http://www.w3.org/1999/xhtml">AAA</div>
+			  </text>\
+			<name><given/></name>\
+			</Patient>""";
 
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> messages = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(messages.size()).as(output.toString()).isEqualTo(3);
 		assertThat(messages.get(0).getMessage()).contains("Element must have some content");
 		assertThat(messages.get(2).getMessage()).contains("Primitive types must have a value or must have child extensions");
+
+		OperationOutcome oo = (OperationOutcome) output.toOperationOutcome();
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+
+		assertEquals(1, oo.getIssue().get(2).getExpression().size());
+		assertEquals("Patient.name[0].given[0]", oo.getIssue().get(2).getExpression().get(0).getValue());
 	}
 
 	@Test

@@ -36,6 +36,7 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.util.ReflectionUtil;
 import jakarta.annotation.Nonnull;
@@ -487,8 +488,22 @@ class ModelScanner {
 		}
 	}
 
+	/**
+	 * The model classes don't include SearchParameter URLs in them, so
+	 * we do our best to guess them using the pattern they generally
+	 * use (<code>http://hl7.org/fhir/SearchParameter/ResourceType-ParamName</code>).
+	 */
+	@SuppressWarnings("JavadocLinkAsPlainText")
 	private String toCanonicalSearchParameterUri(RuntimeResourceDefinition theResourceDef, String theName) {
-		return "http://hl7.org/fhir/SearchParameter/" + theResourceDef.getName() + "-" + theName;
+		return switch (theName) {
+				// Hard-code a few URLs that we know don't follow the
+				// usual pattern
+			case Constants.PARAM_LANGUAGE -> Constants.PARAM_LANGUAGE_URL;
+			case Constants.PARAM_TEXT -> Constants.PARAM_TEXT_URL;
+			case Constants.PARAM_CONTENT -> Constants.PARAM_CONTENT_URL;
+			case Constants.PARAM_ID -> Constants.PARAM_ID_URL;
+			default -> "http://hl7.org/fhir/SearchParameter/" + theResourceDef.getName() + "-" + theName;
+		};
 	}
 
 	private Set<String> toTargetList(Class<? extends IBaseResource>[] theTarget) {

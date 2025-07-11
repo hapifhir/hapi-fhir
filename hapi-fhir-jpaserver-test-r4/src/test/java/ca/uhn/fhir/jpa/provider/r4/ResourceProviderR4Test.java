@@ -170,6 +170,7 @@ import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -1185,55 +1186,57 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testCreateAndReadBackResourceWithContainedReferenceToContainer() {
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
+		@Language("JSON")
 		String input = """
-{
-  "resourceType": "Organization",
-  "id": "1",
-  "meta": {
-    "tag": [
-      {
-        "system": "https://blah.org/deployment",
-        "code": "e69414dd-b5c2-462d-bcfd-9d04d6b16596",
-        "display": "DEPLOYMENT"
-      },
-      {
-        "system": "https://blah.org/region",
-        "code": "b47d7a5b-b159-4bed-a8f8-3258e6603adb",
-        "display": "REGION"
-      },
-      {
-        "system": "https://blah.org/provider",
-        "code": "28c30004-0333-40cf-9e7f-3f9e080930bd",
-        "display": "PROVIDER"
-      }
-    ]
-  },
-  "contained": [
-    {
-      "resourceType": "Location",
-      "id": "2",
-      "position": {
-        "longitude": 51.443238301454289,
-        "latitude": 7.34196905697293
-      },
-      "managingOrganization": {
-        "reference": "#"
-      }
-    }
-  ],
-  "type": [
-    {
-      "coding": [
-        {
-          "system": "https://blah.org/fmc/OrganizationType",
-          "code": "CLINIC",
-          "display": "Clinic"
-        }
-      ]
-    }
-  ],
-  "name": "testOrg"
-}""";
+			{
+			  "resourceType": "Organization",
+			  "id": "1",
+			  "meta": {
+				"tag": [
+				  {
+					"system": "https://blah.org/deployment",
+					"code": "e69414dd-b5c2-462d-bcfd-9d04d6b16596",
+					"display": "DEPLOYMENT"
+				  },
+				  {
+					"system": "https://blah.org/region",
+					"code": "b47d7a5b-b159-4bed-a8f8-3258e6603adb",
+					"display": "REGION"
+				  },
+				  {
+					"system": "https://blah.org/provider",
+					"code": "28c30004-0333-40cf-9e7f-3f9e080930bd",
+					"display": "PROVIDER"
+				  }
+				]
+			  },
+			  "contained": [
+				{
+				  "resourceType": "Location",
+				  "id": "2",
+				  "position": {
+					"longitude": 51.443238301454289,
+					"latitude": 7.34196905697293
+				  },
+				  "managingOrganization": {
+					"reference": "1"
+				  }
+				}
+			  ],
+			  "type": [
+				{
+				  "coding": [
+					{
+					  "system": "https://blah.org/fmc/OrganizationType",
+					  "code": "CLINIC",
+					  "display": "Clinic"
+					}
+				  ]
+				}
+			  ],
+			  "name": "testOrg"
+			}
+		""";
 
 		Organization org = myFhirContext.newJsonParser().parseResource(Organization.class, input);
 		IIdType id = myOrganizationDao.create(org, mySrd).getId();
@@ -1243,7 +1246,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ourLog.info(output);
 
 		Location loc = (Location) org.getContained().get(0);
-		assertEquals("#", loc.getManagingOrganization().getReference());
+		assertEquals("1", loc.getManagingOrganization().getReference());
 	}
 
 	@Test
@@ -1279,12 +1282,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String nowStr = dt.getValueAsString();
 
 		boolean storeResourceInHSearch = myStorageSettings.isStoreResourceInHSearchIndex();
-		boolean advancedHSearch = myStorageSettings.isAdvancedHSearchIndexing();
+		boolean advancedHSearch = myStorageSettings.isHibernateSearchIndexSearchParams();
 
 		try {
 			// use full text search
 			myStorageSettings.setStoreResourceInHSearchIndex(true);
-			myStorageSettings.setAdvancedHSearchIndexing(true);
+			myStorageSettings.setHibernateSearchIndexSearchParams(true);
+			mySearchParamRegistry.forceRefresh();
 
 			// test
 			Bundle b = myClient.search()
@@ -2204,6 +2208,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testEmptySearch() {
 		myStorageSettings.setHibernateSearchIndexFullText(true);
+		mySearchParamRegistry.forceRefresh();
 
 		Bundle responseBundle;
 
@@ -2308,6 +2313,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testFullTextSearch() throws Exception {
 		myStorageSettings.setHibernateSearchIndexFullText(true);
+		mySearchParamRegistry.forceRefresh();
 
 		IParser parser = myFhirContext.newJsonParser();
 
@@ -2324,7 +2330,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 		obs2.setId(id2);
 
-		myStorageSettings.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setHibernateSearchIndexSearchParams(true);
+		mySearchParamRegistry.forceRefresh();
 
 		HttpGet get = new HttpGet(myServerBase + "/Observation?_content=systolic&_pretty=true");
 		get.addHeader("Content-Type", "application/json");
@@ -2343,6 +2350,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testFulltextSearchWithIdAndContent() throws IOException {
 		myStorageSettings.setHibernateSearchIndexFullText(true);
+		mySearchParamRegistry.forceRefresh();
 
 		Patient p = new Patient();
 		p.setId("FOO");
@@ -5904,7 +5912,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testCreateResourcesWithAdvancedHSearchIndexingAndIndexMissingFieldsEnableSucceeds() {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
-		myStorageSettings.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setHibernateSearchIndexSearchParams(true);
+		mySearchParamRegistry.forceRefresh();
+
 		String identifierValue = "someValue";
 		String searchPatientURIWithMissingBirthdate = "Patient?birthdate:missing=true";
 		String searchObsURIWithMissingValueQuantity = "Observation?value-quantity:missing=true";

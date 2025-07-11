@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7080
+jira: SMILE-10460
+title: "A new pointcut has been added which can be used to selectively enable or modify automatically
+   created placeholder reference targets."

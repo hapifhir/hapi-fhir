@@ -85,6 +85,11 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 				RuntimeResourceDefinition theRuntimeResourceDefinition) {
 				// do nothing
 			}
+
+			@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY)
+			public RequestPartitionId partitionIdentify() {
+				return RequestPartitionId.allPartitions();
+			}
 		};
 		myInterceptorRegistry.registerInterceptor(interceptor);
 
@@ -101,7 +106,12 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 			// no location for initial create
 			Encounter enc = encounterDao
 				.read(encounterCreate.getId().toUnqualifiedVersionless(), requestDetails);
-			assertTrue(enc.getLocation().isEmpty());
+			{
+				assertEquals(1, enc.getLocation().size());
+				Encounter.EncounterLocationComponent loc = enc.getLocation().get(0);
+				assertNotNull(loc.getLocation());
+				assertEquals("http://example.com", loc.getLocation().getIdentifier().getSystem());
+			}
 
 			// test
 			Bundle result = mySystemDao.transaction(requestDetails, bundle);
@@ -112,18 +122,24 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 				.getResponse()
 				.getStatus());
 
-			// verify we've now got a location object
+			// verify we've updated the location object
 			Encounter updated = encounterDao
 				.read(encounterCreate.getId().toUnqualifiedVersionless(), requestDetails);
 			assertNotNull(updated);
-			assertEquals(1, updated.getLocation().size());
+			{
+				Location referencedLocation = myLocationDao.read(new IdType(location.getId()), new SystemRequestDetails());
+				assertEquals(1, updated.getLocation().size());
+				Encounter.EncounterLocationComponent loc = updated.getLocation().get(0);
+				assertNotNull(loc.getLocation());
+				assertEquals(referencedLocation.getIdElement().toUnqualifiedVersionless().getValue(), loc.getLocation().getReference());
+			}
 		} finally {
 			// cleanup
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
 	}
 
-	private static Bundle createPatchEncounterBundle(IParser jsonParser) {
+	private Bundle createPatchEncounterBundle(IParser jsonParser) {
 		Bundle bundle;
 		{
 			String bundleStr = """
@@ -143,7 +159,7 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 												"valueCode": "replace"
 											},
 											{
-												"valueString": "Encounter.location",
+												"valueString": "Encounter.location.first()",
 												"name": "path"
 											},
 											{
@@ -175,7 +191,7 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 		return bundle;
 	}
 
-	private static Location createLocation(IParser jsonParser) {
+	private Location createLocation(IParser jsonParser) {
 		Location location;
 		{
 			@Language("JSON")
@@ -195,7 +211,7 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 		return location;
 	}
 
-	private static Encounter createEncounter(IParser jsonParser) {
+	private Encounter createEncounter(IParser jsonParser) {
 		Encounter encounter;
 		{
 			@Language("JSON")
@@ -208,6 +224,14 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 							"value": "3209505"
 						}
 					],
+					"location": [{
+						"location": {
+							"identifier": [{
+								"system": "http://example.com",
+								"value": "123"
+							}]
+						}
+					}],
 					"status": "in-progress"
 				}
 				""";

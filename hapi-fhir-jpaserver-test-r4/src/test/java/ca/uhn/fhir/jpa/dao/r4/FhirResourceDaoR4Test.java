@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
@@ -10,6 +12,7 @@ import ca.uhn.fhir.jpa.api.pid.StreamTemplate;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
+import ca.uhn.fhir.jpa.dao.r4.suites.IPatchTests;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
@@ -59,10 +62,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import com.google.common.collect.Lists;
-
-import java.util.Objects;
-import java.util.stream.Stream;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -144,6 +143,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -153,6 +153,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
@@ -169,12 +170,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 
 @SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
-public class FhirResourceDaoR4Test extends BaseJpaR4Test {
+public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4Test.class);
 
 	@AfterEach
-	public final void after() {
+	public void after() {
 		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 		myStorageSettings.setTreatReferencesAsLogical(new JpaStorageSettings().getTreatReferencesAsLogical());
 		myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
@@ -191,6 +192,21 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	public void beforeEach() {
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 		myStorageSettings.setWriteToSearchParamIdentityTable(true);
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myFhirContext;
+	}
+
+	@Override
+	public DaoRegistry getDaoRegistry() {
+		return myDaoRegistry;
+	}
+
+	@Override
+	public JpaStorageSettings getStorageSettings() {
+		return myStorageSettings;
 	}
 
 	private List<String> extractNames(IBundleProvider theSearch) {
@@ -307,7 +323,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			assertThat(tokenIndexes).asList().containsExactly("true");
 		});
 	}
-
 
 	@Test
 	public void testUpdateResource_whenTokenPropertyAssignedTooLargeValue_willTruncateLargeValueOnUpdate(){
@@ -2682,7 +2697,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			found = toList(myPatientDao.search(new SearchParameterMap(Patient.SP_BIRTHDATE + "AAAA", new DateParam(ParamPrefixEnum.GREATERTHAN, "2000-01-01")).setLoadSynchronous(true)));
 			assertThat(found).isEmpty();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1223) + "Unknown search parameter \"birthdateAAAA\" for resource type \"Patient\". Valid search parameters for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertEquals(Msg.code(1223) + "Unknown search parameter \"birthdateAAAA\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, _profile, _security, _source, _tag, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
 	}
 
@@ -3447,7 +3462,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			myObservationDao.search(pm);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1194) + "Unknown _sort parameter value \"hello\" for resource type \"Observation\" (Note: sort parameters values must use a valid Search Parameter). Valid values for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, based-on, category, code, code-value-concept, code-value-date, code-value-quantity, code-value-string, combo-code, combo-code-value-concept, combo-code-value-quantity, combo-data-absent-reason, combo-value-concept, combo-value-quantity, component-code, component-code-value-concept, component-code-value-quantity, component-data-absent-reason, component-value-concept, component-value-quantity, data-absent-reason, date, derived-from, device, encounter, focus, has-member, identifier, method, part-of, patient, performer, specimen, status, subject, value-concept, value-date, value-quantity, value-string]", e.getMessage());
+			assertEquals(Msg.code(1194) + "Unknown _sort parameter value \"hello\" for resource type \"Observation\" (Note: sort parameters values must use a valid Search Parameter). Valid values for this search are: [_id, _lastUpdated, _profile, _security, _source, _tag, based-on, category, code, code-value-concept, code-value-date, code-value-quantity, code-value-string, combo-code, combo-code-value-concept, combo-code-value-quantity, combo-data-absent-reason, combo-value-concept, combo-value-quantity, component-code, component-code-value-concept, component-code-value-quantity, component-data-absent-reason, component-value-concept, component-value-quantity, data-absent-reason, date, derived-from, device, encounter, focus, has-member, identifier, method, part-of, patient, performer, specimen, status, subject, value-concept, value-date, value-quantity, value-string]", e.getMessage());
 		}
 	}
 

@@ -53,7 +53,7 @@ public class SubscriptionDeliveryValidator implements ISubscriptionDeliveryValid
 		IBaseResource resource;
 		try {
 			SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
-			systemRequestDetails.setRequestPartitionId(theResourceDeliveryMessage.getRequestPartitionId());
+			systemRequestDetails.setRequestPartitionId(theResourceDeliveryMessage.getPartitionId());
 			resource = myDaoRegistry.getSubscriptionDao().read(theSubscriptionId, systemRequestDetails);
 		} catch (ResourceNotFoundException e) {
 			throw new SubscriptionInactiveException(

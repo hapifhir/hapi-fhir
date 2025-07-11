@@ -127,3 +127,22 @@ The following example shows an operation that parses the request and generates a
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ServerOperations.java|manualInputAndOutput}}
 ``` 
+
+# Search Limiter Service
+
+HAPI FHIR conforms to the specification for operations like `$everything`.
+
+But sometimes this can expose more resource types than desired.
+
+As such, an ISearchLimiterSvc is provided that allows filtering out specific resource types
+for specific operations.
+
+To remove a resource type from being included in an `$everything` patient instance or type operations,
+the service can be configured as follows:
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/ServerOperations.java|resourceTypeFiltering}}
+``` 
+
+Currently, the only supported operations for filtering are `$export` and `$everything` on
+Patient instance or type.

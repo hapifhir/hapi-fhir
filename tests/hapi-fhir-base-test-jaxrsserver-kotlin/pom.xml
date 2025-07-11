@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>8.3.9-SNAPSHOT</version>
+		<version>8.3.15-SNAPSHOT</version>
 
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
@@ -16,16 +16,6 @@
 	<packaging>jar</packaging>
 
 	<name>HAPI FHIR JAX-RS Server Kotlin test</name>
-
-	<repositories>
-		<repository>
-			<id>oss-snapshots</id>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-		</repository>
-	</repositories>
 
 	<dependencies>
 
@@ -99,10 +89,10 @@
 		<!-- This is to run the integration tests -->
 		<plugins>
 			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<groupId>org.sonatype.central</groupId>
+				<artifactId>central-publishing-maven-plugin</artifactId>
 				<configuration>
-					<skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+					<skipPublishing>true</skipPublishing>
 				</configuration>
 			</plugin>
 			<plugin>

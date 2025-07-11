@@ -25,6 +25,7 @@ import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliveryListener;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
@@ -50,13 +51,16 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 
 	private final IBrokerClient myBrokerClient;
 	private IChannelProducer<ResourceModifiedMessage> myChannelProducer;
+	private final IDefaultPartitionSettings myDefaultPartitionSettings;
 
 	/**
 	 * Constructor
 	 */
-	public SubscriptionDeliveringMessageListener(IBrokerClient theBrokerClient) {
+	public SubscriptionDeliveringMessageListener(
+			IBrokerClient theBrokerClient, IDefaultPartitionSettings theDefaultPartitionSettings) {
 		super();
 		myBrokerClient = theBrokerClient;
+		myDefaultPartitionSettings = theDefaultPartitionSettings;
 	}
 
 	public Class<ResourceDeliveryMessage> getPayloadType() {
@@ -91,11 +95,14 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 
 	private ResourceModifiedJsonMessage convertDeliveryMessageToResourceModifiedJsonMessage(
 			ResourceDeliveryMessage theMsg, IBaseResource thePayloadResource) {
-		ResourceModifiedMessage payload =
-				new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType());
+		ResourceModifiedMessage payload = new ResourceModifiedMessage(
+				myFhirContext,
+				thePayloadResource,
+				theMsg.getOperationType(),
+				myDefaultPartitionSettings.getDefaultRequestPartitionId());
 		payload.setPayloadMessageKey(theMsg.getPayloadMessageKey());
 		payload.setTransactionId(theMsg.getTransactionId());
-		payload.setPartitionId(theMsg.getRequestPartitionId());
+		payload.setPartitionId(theMsg.getPartitionId());
 		return new ResourceModifiedJsonMessage(payload);
 	}
 

@@ -43,7 +43,9 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.searchparam.util.RuntimeSearchParamHelper;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -110,7 +112,7 @@ public class SearchParamExtractorService {
 	}
 
 	/**
-	 * This method is responsible for scanning a resource for all of the search parameter instances.
+	 * This method is responsible for scanning a resource for all the search parameter instances.
 	 * I.e. for all search parameters defined for
 	 * a given resource type, it extracts the associated indexes and populates
 	 * {@literal theParams}.
@@ -244,7 +246,17 @@ public class SearchParamExtractorService {
 
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(
 				entity.getResourceType(), ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
-		activeSearchParams.getReferenceSearchParamNames().forEach(key -> retval.putIfAbsent(key, Boolean.FALSE));
+		for (RuntimeSearchParam nextParam : activeSearchParams.values()) {
+			if (nextParam.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
+				continue;
+			}
+			if (RuntimeSearchParamHelper.isSpeciallyHandledSearchParameter(nextParam, myStorageSettings)) {
+				continue;
+			}
+
+			retval.putIfAbsent(nextParam.getName(), Boolean.FALSE);
+		}
+
 		return retval;
 	}
 
@@ -476,7 +488,7 @@ public class SearchParamExtractorService {
 	private IBaseResource findContainedResource(Collection<IBaseResource> resources, IBaseReference reference) {
 		for (IBaseResource resource : resources) {
 			String referenceString = reference.getReferenceElement().getValue();
-			if (referenceString.length() > 1) {
+			if (referenceString != null && referenceString.length() > 1) {
 				referenceString = referenceString.substring(1);
 				if (resource.getIdElement().getValue().equals(referenceString)) {
 					return resource;
@@ -699,6 +711,12 @@ public class SearchParamExtractorService {
 		}
 
 		IIdType referenceElement = thePathAndRef.getRef().getReferenceElement();
+		if (isBlank(referenceElement.getValue())) {
+			// it's an embedded element maybe;
+			// we need a valid referenceElement, becuase we
+			// resolve the resource by this value (and if we use "null", we can't resolve multiple values)
+			referenceElement = thePathAndRef.getRef().getResource().getIdElement();
+		}
 		JpaPid resolvedTargetId = (JpaPid) theTransactionDetails.getResolvedResourceId(referenceElement);
 		ResourceLink resourceLink;
 

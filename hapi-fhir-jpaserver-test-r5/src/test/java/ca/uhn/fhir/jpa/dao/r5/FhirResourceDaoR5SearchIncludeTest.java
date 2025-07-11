@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.r4;
+package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
@@ -8,28 +8,31 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.BodyStructure;
-import org.hl7.fhir.r4.model.CarePlan;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.EpisodeOfCare;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Procedure;
-import org.hl7.fhir.r4.model.Questionnaire;
-import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r5.model.BodyStructure;
+import org.hl7.fhir.r5.model.CarePlan;
+import org.hl7.fhir.r5.model.Encounter;
+import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.EpisodeOfCare;
+import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.Organization;
+import org.hl7.fhir.r5.model.Patient;
+import org.hl7.fhir.r5.model.Procedure;
+import org.hl7.fhir.r5.model.Questionnaire;
+import org.hl7.fhir.r5.model.QuestionnaireResponse;
+import org.hl7.fhir.r5.model.Reference;
+import org.hl7.fhir.r5.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -57,7 +60,7 @@ import static org.mockito.Mockito.verify;
 
 
 @SuppressWarnings({"Duplicates"})
-public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
+public class FhirResourceDaoR5SearchIncludeTest extends BaseJpaR5Test {
 
 	@Mock
 	private IAnonymousInterceptor myAnonymousInterceptor;
@@ -177,20 +180,53 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		}
 
 		if (!theReverse && theMatchAll) {
+			myCaptureQueriesListener.logSelectQueries();
 			SqlQuery searchForCanonicalReferencesQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2);
 			// Make sure we have the right query - If this ever fails, maybe we have optimized the queries
-			// (or somehow made things worse) and the search for the canonical target is no longer the 4th
+			// (or somehow made things worse) and the search for the canonical target is no longer the 3rd
 			// SQL query
-			assertThat(searchForCanonicalReferencesQuery.getSql(true, false)).contains("rispu1_0.HASH_IDENTITY in ('-600769180185160063')");
+			assertThat(searchForCanonicalReferencesQuery.getSql(true, false)).matches(".*rispu1_0\\.HASH_IDENTITY in \\([^)]*'-600769180185160063'[^)]*\\).*");
 			assertTrue(
 				searchForCanonicalReferencesQuery.getSql(true, false).contains("rispu1_0.SP_URI in ('http://foo')")
-				|| searchForCanonicalReferencesQuery.getSql(true, false).contains("rispu1_0.SP_URI in ('http://foo','http://foo|1.0')"),
+					|| searchForCanonicalReferencesQuery.getSql(true, false).contains("rispu1_0.SP_URI in ('http://foo','http://foo|1.0')"),
 				searchForCanonicalReferencesQuery.getSql(true, false)
 			);
 		}
 
 	}
 
+
+	/**
+	 * The "encounter" search parameter is used by a number of resource types other than just
+	 * QuestionnaireResponse, but when we _include it, we should only add the hash_identity
+	 * relevant to QuestionnaireResponse to the select statement.
+	 */
+	@Test
+	public void testIncludeMultiTypeSearchParameter() {
+		// Setup
+		Encounter enc = new Encounter();
+		enc.setId("Encounter/enc");
+		myEncounterDao.update(enc, mySrd);
+
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.setId("qr");
+		qr.setEncounter(new Reference("Encounter/enc"));
+		myQuestionnaireResponseDao.update(qr, mySrd);
+
+		// Test
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = SearchParameterMap
+			.newSynchronous()
+			.addInclude(QuestionnaireResponse.INCLUDE_ENCOUNTER);
+		IBundleProvider outcome = myQuestionnaireResponseDao.search(map, mySrd);
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactly("QuestionnaireResponse/qr", "Encounter/enc");
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		SqlQuery searchForCanonicalReferencesQuery = myCaptureQueriesListener.getSelectQueries().get(1);
+		assertThat(searchForCanonicalReferencesQuery.getSql(true, false)).contains("r.target_resource_type = 'Encounter'");
+		assertThat(searchForCanonicalReferencesQuery.getSql(true, false)).doesNotContainIgnoringCase("union");
+	}
 
 
 	@Test
@@ -274,12 +310,12 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 	@Test
 	public void testRevIncludeOnIncludedResource() {
 		SearchParameter sp = new SearchParameter();
-		sp.addBase("Procedure");
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PROCEDURE);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.setCode("focalAccess");
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.setExpression("Procedure.extension('http://fkcfhir.org/fhir/cs/CS1MachNumber')");
-		sp.addTarget("BodyStructure");
+		sp.addTarget(Enumerations.VersionIndependentResourceTypesAll.BODYSTRUCTURE);
 		mySearchParameterDao.create(sp, mySrd);
 		mySearchParamRegistry.forceRefresh();
 
@@ -290,13 +326,13 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 
 		Procedure p = new Procedure();
 		p.setId("PRA8780542726");
-		p.setStatus(org.hl7.fhir.r4.model.Procedure.ProcedureStatus.COMPLETED);
+		p.setStatus(Enumerations.EventStatus.COMPLETED);
 		myProcedureDao.update(p, mySrd);
 
 		p = new Procedure();
 		p.setId("PRA8780542785");
 		p.addPartOf().setReference("Procedure/PRA8780542726");
-		p.setStatus(org.hl7.fhir.r4.model.Procedure.ProcedureStatus.COMPLETED);
+		p.setStatus(Enumerations.EventStatus.COMPLETED);
 		p.addExtension("http://fkcfhir.org/fhir/cs/CS1MachNumber", new Reference("BodyStructure/B51936689"));
 		myProcedureDao.update(p, mySrd);
 
@@ -356,9 +392,6 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(ids).as(ids.toString()).containsExactlyInAnyOrder("EpisodeOfCare/EOC-0", "EpisodeOfCare/EOC-1", "EpisodeOfCare/EOC-2", "EpisodeOfCare/EOC-3", "EpisodeOfCare/EOC-4", "EpisodeOfCare/EOC-5", "EpisodeOfCare/EOC-6", "EpisodeOfCare/EOC-7", "EpisodeOfCare/EOC-8", "EpisodeOfCare/EOC-9", "Organization/ORG-0");
-
-
-
 	}
 
 	private void createOrganizationWithReferencingEpisodesOfCare(int theEocCount) {
@@ -383,7 +416,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 
 	@SuppressWarnings("SameParameterValue")
 	private void createPatientWithReferencingCarePlan(int theCount) {
-		org.hl7.fhir.r4.model.Patient patient = new Patient();
+		org.hl7.fhir.r5.model.Patient patient = new Patient();
 		patient.setId("Patient/PAT-1");
 		myPatientDao.update(patient, mySrd);
 
@@ -401,7 +434,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void testLastUpdatedDoesNotApplyToForwardOrRevIncludes() {
-	    // given
+		// given
 		Instant now = Instant.now();
 		IIdType org = createOrganization();
 		IIdType patId = createPatient(withReference("managingOrganization", org));
@@ -409,7 +442,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		IIdType careTeam = createResource("CareTeam", withSubject(patId));
 
 		// backdate the Group and CareTeam
-		int updatedCount = new TransactionTemplate(myTxManager).execute((status)->
+		int updatedCount = new TransactionTemplate(myTxManager).execute((status) ->
 			myEntityManager
 				.createQuery("update ResourceTable set myUpdated = :new_updated where myPid.myId in (:target_ids)")
 				.setParameter("new_updated", Date.from(now.minus(1, ChronoUnit.HOURS)))

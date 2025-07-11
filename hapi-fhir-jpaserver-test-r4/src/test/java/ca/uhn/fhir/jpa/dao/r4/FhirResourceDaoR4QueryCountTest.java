@@ -20,6 +20,7 @@ import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
@@ -83,6 +84,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
@@ -993,6 +995,42 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		runInTransaction(() -> assertEquals(0, myResourceTableDao.count()));
 	}
 
+	@Test
+	public void testEverythingPaging() {
+		Patient p = new Patient();
+		p.setActive(true);
+		IIdType pid = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		for (int i = 0; i < 20; i++) {
+			Observation o = new Observation();
+			o.getSubject().setReference(pid.getValue());
+			o.addIdentifier().setSystem("foo").setValue(Integer.toString(i));
+			myObservationDao.create(o, mySrd);
+		}
+
+		// Page 1
+		myCaptureQueriesListener.clear();
+		PatientEverythingParameters params = new PatientEverythingParameters();
+		params.setCount(new IntegerType(10));
+		IBundleProvider outcome = myPatientDao.patientInstanceEverything(null, mySrd, params, pid);
+		assertEquals(10, outcome.getResources(0, 10).size());
+		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(17, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(3, myCaptureQueriesListener.countCommits());
+
+		// Page 2
+		myCaptureQueriesListener.clear();
+		outcome = myPagingProvider.retrieveResultList(new SystemRequestDetails(), outcome.getUuid());
+		assertEquals(10, outcome.getResources(0, 10).size());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(4, myCaptureQueriesListener.countCommits());
+
+	}
+
 
 	/**
 	 * See the class javadoc before changing the counts in this test!
@@ -1239,6 +1277,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		// validate
 		assertEquals(4, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
