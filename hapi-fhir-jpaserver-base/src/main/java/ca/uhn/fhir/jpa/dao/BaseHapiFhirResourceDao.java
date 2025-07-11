@@ -645,6 +645,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		DaoMethodOutcome outcome = toMethodOutcome(theRequest, entity, theResource, theMatchUrl, theOperationType)
 				.setCreated(true);
+		outcome.setResponseStatusCode(Constants.STATUS_HTTP_201_CREATED);
 
 		if (!thePerformIndexing) {
 			outcome.setId(theResource.getIdElement());

@@ -10,6 +10,11 @@ import java.util.Optional;
 /**
  * Service provider interface for loading repositories based on a URL.
  * Unstable API. Subject to change in future releases.
+ * <p>
+ * Implementors will receive the url parsed into IRepositoryRequest,
+ * and dispatch of the <code>subScheme</code> property.
+ * E.g. The InMemoryFhirRepositoryLoader will handle URLs
+ * that start with <code>fhir-repository:memory:</code>.
  */
 @Beta()
 public interface IRepositoryLoader {
@@ -28,14 +33,28 @@ public interface IRepositoryLoader {
 	 * @return a repository instance
 	 */
 	@Nonnull
-	IRepository loadRepository(IRepositoryRequest theRepositoryRequest);
+	IRepository loadRepository(@Nonnull IRepositoryRequest theRepositoryRequest);
 
 	interface IRepositoryRequest {
+		/**
+		 * Get the full URL of the repository provided by the user.
+		 * @return the URL
+		 */
 		String getUrl();
+
+		/**
+		 * Get the sub-scheme of the URL, e.g. "memory" for "fhir-repository:memory:details".
+		 * @return the sub-scheme
+		 */
 		String getSubScheme();
+
+		/**
+		 * Get any additional details provided by the user in the URL.
+		 * This may be a url,  a unique identifier for the repository, or configuration details.
+		 * @return the details
+		 */
 		String getDetails();
+
 		Optional<FhirContext> getFhirContext();
 	}
-
-
 }

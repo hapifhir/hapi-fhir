@@ -20,12 +20,13 @@ public class UrlRepositoryFactory {
 	static final Pattern ourUrlPattern = Pattern.compile("^fhir-repository:([A-Za-z]+):(.*)");
 
 	public static boolean isRepositoryUrl(String theBaseUrl) {
-		return theBaseUrl != null &&
-			theBaseUrl.startsWith(FHIR_REPOSITORY_URL_SCHEME) &&
-			ourUrlPattern.matcher(theBaseUrl).matches();
+		return theBaseUrl != null
+				&& theBaseUrl.startsWith(FHIR_REPOSITORY_URL_SCHEME)
+				&& ourUrlPattern.matcher(theBaseUrl).matches();
 	}
 
-	protected record RepositoryRequest(String url, String subScheme, String details, FhirContext fhirContext) implements IRepositoryLoader.IRepositoryRequest {
+	protected record RepositoryRequest(String url, String subScheme, String details, FhirContext fhirContext)
+			implements IRepositoryLoader.IRepositoryRequest {
 		@Override
 		public String getUrl() {
 			return url;
@@ -54,7 +55,8 @@ public class UrlRepositoryFactory {
 
 		if (!isRepositoryUrl(theBaseUrl)) {
 			// fixme hapi-code
-			throw new IllegalArgumentException(Msg.code(99997) + "Base URL is not a valid repository URL: " + theBaseUrl);
+			throw new IllegalArgumentException(
+					Msg.code(99997) + "Base URL is not a valid repository URL: " + theBaseUrl);
 		}
 
 		ServiceLoader<IRepositoryLoader> load = ServiceLoader.load(IRepositoryLoader.class);
@@ -65,8 +67,9 @@ public class UrlRepositoryFactory {
 				return nextLoader.loadRepository(request);
 			}
 		}
-	// fixme hapi-code
-		throw new IllegalArgumentException(Msg.code(99999) + "Unable to find a repository loader for URL: " + theBaseUrl);
+		// fixme hapi-code
+		throw new IllegalArgumentException(
+				Msg.code(99999) + "Unable to find a repository loader for URL: " + theBaseUrl);
 	}
 
 	@Nonnull

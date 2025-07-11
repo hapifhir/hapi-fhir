@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.ElementUtil;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -110,12 +111,17 @@ public record BundleResponseEntryParts(
 	 * @return an extractor function on IBase objects that returns a BundleResponseEntryParts object
 	 */
 	public static Function<IBase, BundleResponseEntryParts> buildPartsExtractor(FhirContext theFhirContext) {
-		Metadata m = new Metadata(theFhirContext);
+		PartsConverter<BundleResponseEntryParts> m = getConverter(theFhirContext);
 		return m::fromElement;
 	}
 
+	@Nonnull
+	public static PartsConverter<BundleResponseEntryParts> getConverter(FhirContext theFhirContext) {
+		return new Metadata(theFhirContext);
+	}
+
 	public static Function<BundleResponseEntryParts, IBase> builder(FhirContext theFhirContext) {
-		Metadata m = new Metadata(theFhirContext);
+		PartsConverter<BundleResponseEntryParts> m = getConverter(theFhirContext);
 
 		return m::toElement;
 	}

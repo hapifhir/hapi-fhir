@@ -2,18 +2,24 @@ package ca.uhn.fhir.repository;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.RepositoryTestDataBuilder;
+import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.bundle.BundleResponseEntryParts;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.DateType;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
 import org.slf4j.Logger;
@@ -21,6 +27,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 
+import java.util.List;
+
+import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_201_CREATED;
 import static ca.uhn.fhir.util.ParametersUtil.addParameterToParameters;
 import static ca.uhn.fhir.util.ParametersUtil.addPart;
 import static ca.uhn.fhir.util.ParametersUtil.addPartCode;
@@ -28,7 +37,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /** Generic test of repository functionality */
-@SuppressWarnings({"java:S5960" // this is a test jar
+@SuppressWarnings({
+	"java:S5960" // this is a test jar
+	,
+	"java:S1199" // this is a test jar
 })
 public interface IRepositoryTest {
 	Logger ourLog = LoggerFactory.getLogger(IRepositoryTest.class);
@@ -83,12 +95,16 @@ public interface IRepositoryTest {
 		// when - create
 		MethodOutcome createOutcome = repository.create(patient);
 		IIdType patientId = createOutcome.getId().toVersionless();
+		assertThat(createOutcome.getCreated()).isTrue();
+		assertThat(createOutcome.getResponseStatusCode()).isEqualTo(STATUS_HTTP_201_CREATED);
+		assertThat(createOutcome.getResource()).isNotNull();
 
 		// update with different birthdate
 		var updatedPatient = b.buildPatient(b.withId(patientId), b.withBirthdate(BIRTHDATE2));
 		var updateOutcome = repository.update(updatedPatient);
 		assertThat(updateOutcome.getId().toVersionless().getValueAsString()).isEqualTo(patientId.getValueAsString());
 		assertThat(updateOutcome.getCreated()).isFalse();
+		assertThat(updateOutcome.getResponseStatusCode()).isEqualTo(Constants.STATUS_HTTP_200_OK);
 
 		// read
 		IBaseResource read = repository.read(patient.getClass(), patientId);
@@ -99,6 +115,23 @@ public interface IRepositoryTest {
 				.extracting(p -> getTerser().getSinglePrimitiveValueOrNull(p, "birthDate"))
 				.as("resource body read matches updated value")
 				.isEqualTo(BIRTHDATE2);
+	}
+
+	@Test
+	default void testCreate_clientAssignedId_outcome() {
+		// given
+		var b = getTestDataBuilder();
+		var patient = b.buildPatient(b.withId("pat123"), b.withBirthdate(BIRTHDATE1));
+		IRepository repository = getRepository();
+
+		// when
+		var updateOutcome = repository.update(patient);
+
+		// then
+		assertThat(updateOutcome.getId().toUnqualifiedVersionless().getValueAsString())
+				.isEqualTo("Patient/pat123");
+		assertThat(updateOutcome.getCreated()).isTrue();
+		assertThat(updateOutcome.getResponseStatusCode()).isEqualTo(STATUS_HTTP_201_CREATED);
 	}
 
 	@Test
@@ -135,7 +168,7 @@ public interface IRepositoryTest {
 	}
 
 	default boolean isPatchSupported() {
-		// todo this should really come from the repository capabilities
+		// SOMEDAY: ideally this would come from the repository capabilities
 		return true;
 	}
 
@@ -167,6 +200,53 @@ public interface IRepositoryTest {
 				.as("resource body read matches updated value")
 				.isEqualTo(BIRTHDATE2);
 	}
+
+	@Test
+	default void testSimpleTxBundle() {
+		// given
+		var repository = getRepository();
+		var fhirContext = getRepository().fhirContext();
+		var b = getTestDataBuilder();
+		var patient = b.buildPatient();
+		var patientWithId = b.buildPatient(b.withId("abc"));
+		BundleBuilder bundleBuilder = new BundleBuilder(fhirContext);
+
+		bundleBuilder.addTransactionCreateEntry(patient, "urn:uuid:0198234701923");
+		bundleBuilder.addTransactionUpdateEntry(patientWithId);
+		IBaseBundle bundle = bundleBuilder.getBundle();
+
+		// when
+		IBaseBundle resultBundle = repository.transaction(bundle);
+
+		// then
+		assertThat(resultBundle).isNotNull();
+		assertThat(BundleUtil.getBundleType(fhirContext, resultBundle))
+				.isEqualTo(BundleUtil.BUNDLE_TYPE_TRANSACTION_RESPONSE);
+
+		List<BundleResponseEntryParts> bundleResponseEntryParts = BundleUtil.toListOfEntries(
+				fhirContext, resultBundle, BundleResponseEntryParts.getConverter(fhirContext));
+		assertThat(bundleResponseEntryParts).hasSize(2);
+		{
+			BundleResponseEntryParts createResponseEntry = bundleResponseEntryParts.get(0);
+
+			assertThat(createResponseEntry.fullUrl())
+					.satisfiesAnyOf(Assertions::assertNull, fullUrl -> assertThat(fullUrl)
+							.isEqualTo("urn:uuid:0198234701923"));
+			assertThat(createResponseEntry.responseStatus()).startsWith("" + STATUS_HTTP_201_CREATED);
+			assertThat(createResponseEntry.responseLocation()).isNotBlank();
+		}
+		{
+			BundleResponseEntryParts updateResponseEntry = bundleResponseEntryParts.get(1);
+
+			assertThat(updateResponseEntry.fullUrl())
+					.satisfiesAnyOf(Assertions::assertNull, fullUrl -> assertThat(fullUrl)
+							.contains("Patient/abc"));
+			assertThat(updateResponseEntry.responseStatus()).startsWith("" + STATUS_HTTP_201_CREATED);
+			assertThat(updateResponseEntry.responseLocation()).isNotBlank();
+		}
+	}
+
+	// fixme add test for search all of type.
 
 	/** Implementors of this test template must provide a RepositoryTestSupport instance */
 	RepositoryTestSupport getRepositoryTestSupport();

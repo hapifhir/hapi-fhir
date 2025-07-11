@@ -11,16 +11,21 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
+import ca.uhn.fhir.util.bundle.BundleEntryParts;
+import ca.uhn.fhir.util.bundle.BundleResponseEntryParts;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +45,7 @@ public class InMemoryFhirRepository implements IRepository {
 
 	// fixme add search with tests
 	// fixme add sketch of extended operations
+	private String myBaseUrl;
 	private final Map<String, Map<IIdType, IBaseResource>> resourceMap;
 	private final FhirContext context;
 
@@ -71,7 +77,7 @@ public class InMemoryFhirRepository implements IRepository {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T extends IBaseResource, I extends IIdType> T read(
+	public synchronized <T extends IBaseResource, I extends IIdType> T read(
 			Class<T> resourceType, I id, Map<String, String> headers) {
 		var lookup = lookupResource(resourceType, id);
 
@@ -81,7 +87,7 @@ public class InMemoryFhirRepository implements IRepository {
 	}
 
 	@Override
-	public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
+	public synchronized <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
 		var resources = getResourceMapForType(resource.fhirType());
 
 		IIdType theId;
@@ -92,34 +98,40 @@ public class InMemoryFhirRepository implements IRepository {
 
 		resources.put(theId.toUnqualifiedVersionless(), resource);
 
-		return new MethodOutcome(theId, true);
+		MethodOutcome methodOutcome = new MethodOutcome(theId, true);
+		methodOutcome.setResource(resource);
+		methodOutcome.setResponseStatusCode(Constants.STATUS_HTTP_201_CREATED);
+		return methodOutcome;
 	}
 
 	@Override
-	public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
+	public synchronized <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
 			I id, P patchParameters, Map<String, String> headers) {
 		throw new NotImplementedOperationException("The PATCH operation is not currently supported");
 	}
 
 	@Override
-	public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
+	public synchronized <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
 		var lookup = lookupResource(resource.getClass(), resource.getIdElement());
 
-		var outcome = new MethodOutcome(lookup.id, false);
-		if (!lookup.isPresent()) {
-			outcome.setCreated(true);
-		}
-		if (resource.fhirType().equals("SearchParameter")) {
-			// fixme support adding SearchParameters
-			// this.resourceMatcher.addCustomParameter(BundleHelper.resourceToRuntimeSearchParam(resource));
-		}
+		boolean isCreate = !lookup.isPresent();
+//		if (resource.fhirType().equals("SearchParameter")) {
+//			// todo support adding SearchParameters
+//			// this.resourceMatcher.addCustomParameter(BundleHelper.resourceToRuntimeSearchParam(resource));
+//		}
 		lookup.put(resource);
+		var outcome = new MethodOutcome(lookup.id, isCreate);
+		if (isCreate) {
+			outcome.setResponseStatusCode(Constants.STATUS_HTTP_201_CREATED);
+		} else {
+			outcome.setResponseStatusCode(Constants.STATUS_HTTP_200_OK);
+		}
 
 		return outcome;
 	}
 
 	@Override
-	public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
+	public synchronized <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
 			Class<T> resourceType, I id, Map<String, String> headers) {
 		var lookup = lookupResource(resourceType, id);
 
@@ -142,13 +154,13 @@ public class InMemoryFhirRepository implements IRepository {
 	}
 
 	@Override
-	public <B extends IBaseBundle, T extends IBaseResource> B search(
+	public synchronized <B extends IBaseBundle, T extends IBaseResource> B search(
 			Class<B> bundleType,
 			Class<T> resourceType,
 			Multimap<String, List<IQueryParameterType>> searchParameters,
 			Map<String, String> headers) {
 		BundleBuilder builder = new BundleBuilder(this.context);
-		var resourceIdMap = resourceMap.computeIfAbsent(resourceType.getSimpleName(), r -> new HashMap<>());
+		var resourceIdMap = getResourceMapForType(resourceType.getTypeName());
 
 		if (searchParameters == null || searchParameters.isEmpty()) {
 			resourceIdMap.values().forEach(builder::addCollectionEntry);
@@ -204,47 +216,96 @@ public class InMemoryFhirRepository implements IRepository {
 	}
 
 	@Override
-	public <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
-		var version = transaction.getStructureFhirVersionEnum();
+	public synchronized <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
+		BundleBuilder bundleBuilder = new BundleBuilder(this.context);
 
-		// @SuppressWarnings("unchecked")
-		//		var returnBundle = (B) newBundle(version);
-		//		BundleHelper.getEntry(transaction).forEach(e -> {
-		//			if (BundleHelper.isEntryRequestPut(version, e)) {
-		//				var outcome = this.update(BundleHelper.getEntryResource(version, e));
-		//				var location = outcome.getId().getValue();
-		//				BundleHelper.addEntry(
-		//						returnBundle,
-		//						BundleHelper.newEntryWithResponse(
-		//								version, BundleHelper.newResponseWithLocation(version, location)));
-		//			} else if (BundleHelper.isEntryRequestPost(version, e)) {
-		//				var outcome = this.create(BundleHelper.getEntryResource(version, e));
-		//				var location = outcome.getId().getValue();
-		//				BundleHelper.addEntry(
-		//						returnBundle,
-		//						BundleHelper.newEntryWithResponse(
-		//								version, BundleHelper.newResponseWithLocation(version, location)));
-		//			} else if (BundleHelper.isEntryRequestDelete(version, e)) {
-		//				if (BundleHelper.getEntryRequestId(version, e).isPresent()) {
-		//					var resourceType = Canonicals.getResourceType(
-		//							((BundleEntryComponent) e).getRequest().getUrl());
-		//					var resourceClass =
-		//							this.context.getResourceDefinition(resourceType).getImplementingClass();
-		//					var res = this.delete(
-		//							resourceClass,
-		//							BundleHelper.getEntryRequestId(version, e).get().withResourceType(resourceType));
-		//					BundleHelper.addEntry(returnBundle, BundleHelper.newEntryWithResource(res.getResource()));
-		//				} else {
-		//					throw new ResourceNotFoundException("Trying to delete an entry without id");
-		//				}
-		//
-		//			} else {
-		//				throw new NotImplementedOperationException("Transaction stub only supports PUT, POST or DELETE");
-		//			}
-		//		});
-		//
-		//		return returnBundle;
-		return null;
+		bundleBuilder.setType(BundleUtil.BUNDLE_TYPE_TRANSACTION_RESPONSE);
+		// var version = transaction.getStructureFhirVersionEnum();
+
+		Function<BundleResponseEntryParts, IBase> responseEntryBuilder =
+				BundleResponseEntryParts.builder(fhirContext());
+
+		IPrimitiveType<Date> now = (IPrimitiveType<Date>)
+				fhirContext().getElementDefinition("Instant").newInstance();
+
+		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(fhirContext(), transaction);
+		for (BundleEntryParts e : entries) {
+			switch (e.getMethod()) {
+				case PUT -> {
+					MethodOutcome methodOutcome = this.update(e.getResource());
+					String location = null;
+					if (methodOutcome.getResponseStatusCode() == Constants.STATUS_HTTP_201_CREATED) {
+						location = methodOutcome.getId().getValue();
+					}
+
+					BundleResponseEntryParts response = new BundleResponseEntryParts(
+							e.getFullUrl(),
+							methodOutcome.getResource(),
+							statusCodeToStatusLine(methodOutcome.getResponseStatusCode()),
+							location,
+							null,
+							now,
+							methodOutcome.getOperationOutcome());
+					bundleBuilder.addEntry(responseEntryBuilder.apply(response));
+				}
+				case POST -> {
+					var responseOutcome = this.create(e.getResource());
+					var location = responseOutcome.getId().getValue();
+
+					BundleResponseEntryParts response = new BundleResponseEntryParts(
+							e.getFullUrl(),
+							responseOutcome.getResource(),
+							statusCodeToStatusLine(responseOutcome.getResponseStatusCode()),
+							location,
+							null,
+							now,
+							responseOutcome.getOperationOutcome());
+					bundleBuilder.addEntry(responseEntryBuilder.apply(response));
+
+				}
+				case DELETE -> {
+					// Valid methods for transaction entries
+				}
+				case GET -> {}
+				default -> throw new NotImplementedOperationException(
+						"Transaction stub only supports GET, PUT, POST or DELETE");
+				// fixme finish
+			}
+			//			} else if (BundleHelper.isEntryRequestDelete(version, e)) {
+			//				if (BundleHelper.getEntryRequestId(version, e).isPresent()) {
+			//					var resourceType = Canonicals.getResourceType(
+			//							((BundleEntryComponent) e).getRequest().getUrl());
+			//					var resourceClass =
+			//							this.context.getResourceDefinition(resourceType).getImplementingClass();
+			//					var res = this.delete(
+			//							resourceClass,
+			//							BundleHelper.getEntryRequestId(version, e).get().withResourceType(resourceType));
+			//					BundleHelper.addEntry(returnBundle, BundleHelper.newEntryWithResource(res.getResource()));
+			//				} else {
+			//					throw new ResourceNotFoundException("Trying to delete an entry without id");
+			//				}
+			//
+			//			} else {
+			//				throw new NotImplementedOperationException("Transaction stub only supports PUT, POST or DELETE");
+			//			}
+			//		});
+			//
+			//		return returnBundle;
+		}
+
+		return bundleBuilder.getBundleTyped();
+	}
+
+	// fixme find a home for this
+	public static String statusCodeToStatusLine(int theResponseStatusCode) {
+		return switch (theResponseStatusCode) {
+			case Constants.STATUS_HTTP_200_OK -> "200 OK";
+			case Constants.STATUS_HTTP_201_CREATED -> "201 Created";
+			case Constants.STATUS_HTTP_409_CONFLICT -> "409 Conflict";
+			case Constants.STATUS_HTTP_204_NO_CONTENT -> "204 No Content";
+			case Constants.STATUS_HTTP_404_NOT_FOUND -> "404 Not Found";
+			default -> throw new IllegalArgumentException("Unsupported response status code: " + theResponseStatusCode);
+		};
 	}
 
 	/**
@@ -254,6 +315,14 @@ public class InMemoryFhirRepository implements IRepository {
 	@Nonnull
 	public Map<IIdType, IBaseResource> getResourceMapForType(String resourceTypeName) {
 		return resourceMap.computeIfAbsent(resourceTypeName, x -> new HashMap<>());
+	}
+
+	public String getBaseUrl() {
+		return myBaseUrl;
+	}
+
+	public void setBaseUrl(String theBaseUrl) {
+		myBaseUrl = theBaseUrl;
 	}
 
 	/**

@@ -495,8 +495,13 @@ public class BundleBuilder {
 	 */
 	public IBase addEntry() {
 		IBase entry = myEntryDef.newInstance();
-		myEntryChild.getMutator().addValue(myBundle, entry);
+		addEntry(entry);
 		return entry;
+	}
+
+	public IBase addEntry(IBase theEntry) {
+		myEntryChild.getMutator().addValue(myBundle, theEntry);
+		return theEntry;
 	}
 
 	/**

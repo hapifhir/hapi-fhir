@@ -35,7 +35,7 @@ public class GenericClientRepository implements IRepository {
 		myGenericClient = theGenericClient;
 	}
 
-	protected IGenericClient getClient() {
+	public IGenericClient getClient() {
 		return myGenericClient;
 	}
 
@@ -218,7 +218,7 @@ public class GenericClientRepository implements IRepository {
 
 		var ctx = myGenericClient.getFhirContext();
 		var count = ParametersUtil.getNamedParameterValuesAsInteger(ctx, parameters, "_count");
-		if (count != null && !count.isEmpty()) {
+		if (!count.isEmpty()) {
 			operation.count(count.get(0));
 		}
 

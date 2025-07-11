@@ -2,7 +2,6 @@ package ca.uhn.fhir.repository;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.impl.GenericClientRepository;
-import ca.uhn.fhir.repository.impl.InMemoryFhirRepository;
 import ca.uhn.fhir.repository.impl.UrlRepositoryFactory;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import jakarta.annotation.Nonnull;
@@ -12,14 +11,6 @@ import jakarta.annotation.Nullable;
  * Static factory methods for creating instances of {@link IRepository}.
  */
 public class Repositories {
-	public static IRepository emptyInMemoryRepository(FhirContext theFhirContext) {
-		return InMemoryFhirRepository.emptyRepository(theFhirContext);
-	}
-
-	public static IRepository restClientRepository(IGenericClient theGenericClient) {
-		return new GenericClientRepository(theGenericClient);
-	}
-
 	/**
 	 * Private constructor to prevent instantiation.
 	 */
@@ -44,4 +35,9 @@ public class Repositories {
 	public static IRepository repositoryForUrl(@Nonnull String theBaseUrl, @Nullable FhirContext theFhirContext) {
 		return UrlRepositoryFactory.buildRepository(theBaseUrl, theFhirContext);
 	}
+
+	public static IRepository restClientRepository(IGenericClient theGenericClient) {
+		return new GenericClientRepository(theGenericClient);
+	}
+
 }

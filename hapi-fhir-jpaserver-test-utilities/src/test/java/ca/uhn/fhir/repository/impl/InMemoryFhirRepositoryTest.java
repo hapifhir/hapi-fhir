@@ -3,7 +3,7 @@ package ca.uhn.fhir.repository.impl;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepositoryTest;
 
-public class InMemoryRepositoryTest implements IRepositoryTest {
+public class InMemoryFhirRepositoryTest implements IRepositoryTest {
 	FhirContext myFhirContext = FhirContext.forR4();
 	InMemoryFhirRepository myRepository = InMemoryFhirRepository.emptyRepository(myFhirContext);
 
