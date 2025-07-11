@@ -254,7 +254,6 @@ public class TransactionDetails {
 	 */
 	public void addResolvedResourceId(IIdType theResourceId, @Nullable IResourcePersistentId thePersistentId) {
 		assert theResourceId != null;
-		assert theResourceId.getValue() != null;
 
 		if (myResolvedResourceIds.isEmpty()) {
 			myResolvedResourceIds = new HashMap<>();
