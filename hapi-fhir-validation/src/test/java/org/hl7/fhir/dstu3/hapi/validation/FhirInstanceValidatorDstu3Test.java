@@ -700,10 +700,14 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 					} else if (t.getMessage().equals("The nominated WG 'rcrim' is unknown")) {
 						//The rcrim workgroup is now brr http://www.hl7.org/Special/committees/rcrim/index.cfm
 						return false;
+					} else if (t.getMessage().contains("which is experimental, but this structure is not labeled as experimental")
+						//DSTU3 resources will not pass validation with this new business rule (2024-09-17) https://github.com/hapifhir/org.hl7.fhir.core/commit/7d05d38509895ddf8614b35ffb51b1f5363f394c
+					) {
+						return false;
 					} else if (t.getSeverity() == ResultSeverityEnum.WARNING
-						&& ( t.getMessageId().equals("VALIDATION_HL7_PUBLISHER_MISMATCH")
-						|| t.getMessageId().equals("VALIDATION_HL7_PUBLISHER_MISMATCH2")
-						|| t.getMessageId().equals("VALIDATION_HL7_WG_URL")
+						&& ( "VALIDATION_HL7_PUBLISHER_MISMATCH".equals(t.getMessageId())
+						|| "VALIDATION_HL7_PUBLISHER_MISMATCH2".equals(t.getMessageId())
+						|| "VALIDATION_HL7_WG_URL".equals(t.getMessageId())
 					)) {
 						// Workgroups have been updated and have slightly different naming conventions and URLs.
 						return false;
