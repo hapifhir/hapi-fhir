@@ -76,10 +76,10 @@ class NaiveSearching {
 		}
 
 		// apply the rest of the search parameters
-		candidates =
+		List<IBaseResource> results =
 				candidates.stream().filter(matchPredicate(searchParameters)).toList();
 
-		return buildResultBundle(candidates);
+		return buildResultBundle(results);
 	}
 
 	@Nonnull
@@ -135,11 +135,11 @@ class NaiveSearching {
 		}
 	}
 
-	<B extends IBaseBundle> B buildResultBundle(Collection<IBaseResource> candidates) {
+	<B extends IBaseBundle> B buildResultBundle(Collection<IBaseResource> theMatchResults) {
 		// build the result
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
-		candidates.forEach(builder::addSearchMatchEntry);
+		theMatchResults.forEach(builder::addSearchMatchEntry);
 
 		//noinspection unchecked
 		return (B) builder.getBundle();

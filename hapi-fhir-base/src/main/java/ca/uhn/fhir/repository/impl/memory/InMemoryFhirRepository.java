@@ -46,6 +46,7 @@ public class InMemoryFhirRepository implements IRepository {
 	private final FhirContext context;
 	private final ResourceStorage myResourceStorage;
 
+	// Factory methods and constuctors
 	public static InMemoryFhirRepository emptyRepository(@Nonnull FhirContext theFhirContext) {
 		return new InMemoryFhirRepository(theFhirContext, new HashMap<>());
 	}
@@ -67,6 +68,7 @@ public class InMemoryFhirRepository implements IRepository {
 		myResourceStorage = new ResourceStorage(theContents);
 	}
 
+	// interface methods
 	@Override
 	public @Nonnull FhirContext fhirContext() {
 		return this.context;
@@ -75,8 +77,8 @@ public class InMemoryFhirRepository implements IRepository {
 	@Override
 	@SuppressWarnings("unchecked")
 	public synchronized <T extends IBaseResource, I extends IIdType> T read(
-			Class<T> resourceType, I id, Map<String, String> headers) {
-		var lookup = myResourceStorage.lookupResource(getResourceTypeName(resourceType), id);
+			Class<T> theResourceType, I theId, Map<String, String> theUnusedHeaders) {
+		var lookup = myResourceStorage.lookupResource(getResourceTypeName(theResourceType), theId);
 
 		var resource = lookup.getResourceOrThrow404();
 
@@ -84,8 +86,9 @@ public class InMemoryFhirRepository implements IRepository {
 	}
 
 	@Override
-	public synchronized <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
-		ResourceLookup created = myResourceStorage.createResource(resource);
+	public synchronized <T extends IBaseResource> MethodOutcome create(
+			T theResource, Map<String, String> theUnusedHeaders) {
+		ResourceLookup created = myResourceStorage.createResource(theResource);
 
 		MethodOutcome methodOutcome = new MethodOutcome(created.id(), true);
 		methodOutcome.setResource(created.getResourceOrThrow404());
@@ -95,12 +98,13 @@ public class InMemoryFhirRepository implements IRepository {
 
 	@Override
 	public synchronized <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
-			I id, P patchParameters, Map<String, String> headers) {
+			I theId, P thePatchParameters, Map<String, String> theHeaders) {
 		throw new NotImplementedOperationException("The PATCH operation is not currently supported");
 	}
 
 	@Override
-	public synchronized <T extends IBaseResource> MethodOutcome update(T theResource, Map<String, String> headers) {
+	public synchronized <T extends IBaseResource> MethodOutcome update(
+			T theResource, Map<String, String> theUnusedHeaders) {
 		ResourceLookup lookup = myResourceStorage.lookupResource(
 				getResourceTypeName(theResource.getClass()), theResource.getIdElement());
 
@@ -118,7 +122,7 @@ public class InMemoryFhirRepository implements IRepository {
 
 	@Override
 	public synchronized <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
-			Class<T> theResourceType, I theId, Map<String, String> headers) {
+			Class<T> theResourceType, I theId, Map<String, String> theUnusedHeaders) {
 		ResourceLookup lookup = myResourceStorage.lookupResource(getResourceTypeName(theResourceType), theId);
 
 		MethodOutcome methodOutcome = new MethodOutcome(theId, false);
@@ -140,16 +144,16 @@ public class InMemoryFhirRepository implements IRepository {
 
 	@Override
 	public synchronized <B extends IBaseBundle, T extends IBaseResource> B search(
-			Class<B> bundleType,
-			Class<T> resourceType,
+			Class<B> theBundleType,
+			Class<T> theResourceType,
 			Multimap<String, List<IQueryParameterType>> theSearchParameters,
-			Map<String, String> headers) {
+			Map<String, String> theUnusedHeaders) {
 
 		NaiveSearching search = new NaiveSearching(
 				fhirContext(),
-				context.getResourceType(resourceType),
+				context.getResourceType(theResourceType),
 				id -> this.myResourceStorage.lookupResource(id).getResource().stream(),
-				() -> myResourceStorage.getAllOfType(context.getResourceType(resourceType)));
+				() -> myResourceStorage.getAllOfType(context.getResourceType(theResourceType)));
 
 		return search.search(theSearchParameters);
 	}
@@ -161,6 +165,7 @@ public class InMemoryFhirRepository implements IRepository {
 		return transactionProcessor.processTransaction(theTransactionBundle);
 	}
 
+	// implementation details
 	public String getBaseUrl() {
 		return myBaseUrl;
 	}

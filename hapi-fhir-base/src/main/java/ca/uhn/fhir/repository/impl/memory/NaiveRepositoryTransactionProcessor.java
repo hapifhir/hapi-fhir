@@ -39,7 +39,7 @@ class NaiveRepositoryTransactionProcessor {
 				requireNonNull(myRepository.fhirContext().getElementDefinition("Instant"));
 	}
 
-	<B extends IBaseBundle> B processTransaction(B transaction) {
+	<B extends IBaseBundle> B processTransaction(B theTransactionBundle) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myRepository.fhirContext());
 
 		bundleBuilder.setType(BundleUtil.BUNDLE_TYPE_TRANSACTION_RESPONSE);
@@ -51,7 +51,7 @@ class NaiveRepositoryTransactionProcessor {
 
 		// SOMEDAY: sort the entries by method and dependency order to match the spec
 		// SOMEDAY: validate there aren't any unsupported entries before we start to avoid partial-evaluation
-		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(myRepository.fhirContext(), transaction);
+		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(myRepository.fhirContext(), theTransactionBundle);
 		for (BundleEntryParts e : entries) {
 			BundleResponseEntryParts responseEntry =
 					switch (e.getMethod()) {
@@ -68,54 +68,56 @@ class NaiveRepositoryTransactionProcessor {
 	}
 
 	@Nonnull
-	private BundleResponseEntryParts processPost(BundleEntryParts e, IPrimitiveType<Date> now) {
+	private BundleResponseEntryParts processPost(
+			BundleEntryParts theBundleEntryParts, IPrimitiveType<Date> theInstant) {
 		// we assume POST is always "create", not an operation invocation
-		var responseOutcome = myRepository.create(e.getResource());
+		var responseOutcome = myRepository.create(theBundleEntryParts.getResource());
 		var location = responseOutcome.getId().getValue();
 
 		return new BundleResponseEntryParts(
-				e.getFullUrl(),
+				theBundleEntryParts.getFullUrl(),
 				responseOutcome.getResource(),
 				statusCodeToStatusLine(responseOutcome.getResponseStatusCode()),
 				location,
 				null,
-				now,
+				theInstant,
 				responseOutcome.getOperationOutcome());
 	}
 
 	@Nonnull
-	private BundleResponseEntryParts processPut(BundleEntryParts e, IPrimitiveType<Date> now) {
-		MethodOutcome methodOutcome = myRepository.update(e.getResource());
+	private BundleResponseEntryParts processPut(BundleEntryParts theBundleEntryParts, IPrimitiveType<Date> theInstant) {
+		MethodOutcome methodOutcome = myRepository.update(theBundleEntryParts.getResource());
 		String location = null;
 		if (methodOutcome.getResponseStatusCode() == Constants.STATUS_HTTP_201_CREATED) {
 			location = methodOutcome.getId().getValue();
 		}
 
 		return new BundleResponseEntryParts(
-				e.getFullUrl(),
+				theBundleEntryParts.getFullUrl(),
 				methodOutcome.getResource(),
 				statusCodeToStatusLine(methodOutcome.getResponseStatusCode()),
 				location,
 				null,
-				now,
+				theInstant,
 				methodOutcome.getOperationOutcome());
 	}
 
 	@Nonnull
-	private BundleResponseEntryParts processDelete(BundleEntryParts e, IPrimitiveType<Date> now) {
-		IdDt idDt = new IdDt(e.getUrl());
+	private BundleResponseEntryParts processDelete(
+			BundleEntryParts theBundleEntryParts, IPrimitiveType<Date> theInstant) {
+		IdDt idDt = new IdDt(theBundleEntryParts.getUrl());
 		String resourceType = idDt.getResourceType();
-		Validate.notBlank(resourceType, "Missing resource type for deletion %s", e.getUrl());
+		Validate.notBlank(resourceType, "Missing resource type for deletion %s", theBundleEntryParts.getUrl());
 
 		MethodOutcome responseOutcome = myRepository.delete(
 				myRepository.fhirContext().getResourceDefinition(resourceType).getImplementingClass(), idDt);
 		return new BundleResponseEntryParts(
-				e.getFullUrl(),
+				theBundleEntryParts.getFullUrl(),
 				null,
 				statusCodeToStatusLine(responseOutcome.getResponseStatusCode()),
 				null,
 				null,
-				now,
+				theInstant,
 				responseOutcome.getOperationOutcome());
 	}
 
