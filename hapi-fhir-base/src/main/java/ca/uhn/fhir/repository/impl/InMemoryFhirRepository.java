@@ -32,14 +32,20 @@ import static ca.uhn.fhir.model.api.StorageResponseCodeEnum.SUCCESSFUL_DELETE_NO
 
 /**
  * An in-memory implementation of the FHIR repository interface.
- * Based on org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository.
  * This repository stores resources in memory
  * and provides basic CRUD operations, search, and transaction support.
- * SOMEDAY add support for extended operations and custom search parameters.
+ * Limitations:
+ * <ul>
+ *     <li>Does not support versioning of resources.</li>
+ *     <li>Does not search beyond all-of-type - no SearchParameters are supported.</li>
+ *     <li>Does not support extended operations.</li>
+ *     <li>Does not support conditional update or create.</li>
+ *     <li>Does not support PATCH operations.</li>
+ * </ul>
  */
 public class InMemoryFhirRepository implements IRepository {
+	// Based on org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository.
 
-	// fixme add sketch of extended operations
 	private String myBaseUrl;
 	private final Map<String, Map<IIdType, IBaseResource>> resourceMap;
 	private final FhirContext context;

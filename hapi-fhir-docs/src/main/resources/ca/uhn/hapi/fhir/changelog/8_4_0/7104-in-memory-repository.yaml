@@ -4,4 +4,5 @@ issue: 7104
 title: "The new Repositories builder supports creating instances of IRepository by urls.
   We include a limited in-memory implementation of IRepository useful for unit-testing
   that can be created with Repositories.repositoryForUrl(\"fhir-repository:memory:test-repo\", fhirContext).
-  New implementations can be registered with a ServiceLoader.  See IRepositoryLoader and
+  New implementations can be registered with a ServiceLoader.
+  See IRepositoryLoader and InMemoryFhirRepositoryLoader for examples."

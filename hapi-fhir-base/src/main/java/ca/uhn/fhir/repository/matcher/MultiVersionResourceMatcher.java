@@ -3,6 +3,7 @@ package ca.uhn.fhir.repository.matcher;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.FhirTerser;
@@ -54,15 +55,7 @@ public class MultiVersionResourceMatcher implements IResourceMatcher {
 
 	@Override
 	public DateRangeParam getDateRange(ICompositeType type) {
-		// fixme implement
-		//		if (type instanceof Period) {
-		//			return new DateRangeParam(((Period) type).getStart(), ((Period) type).getEnd());
-		//		} else if (type instanceof Timing) {
-		//			throw new NotImplementedException("Timing resolution has not yet been implemented");
-		//		} else {
-		throw new UnsupportedOperationException("Expected element of type Period or Timing, found "
-				+ type.getClass().getSimpleName());
-		//		}
+		throw new UnsupportedOperationException(Msg.code(2738) + "Date range extraction is not supported for type");
 	}
 
 	@Override
