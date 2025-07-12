@@ -124,8 +124,15 @@ class NaiveSearching {
 	}
 
 	Predicate<IBaseResource> matchPredicate(Multimap<String, List<IQueryParameterType>> theSearchParameters) {
-		// SOMEDAY Apply the rest of the params with a matcher
-		return Predicates.alwaysTrue();
+		if (theSearchParameters.isEmpty()) {
+			// no search parameters, so return all candidates
+			return Predicates.alwaysTrue();
+		} else {
+			// SOMEDAY Apply the rest of the params with a matcher
+			throw new UnsupportedOperationException(
+					"NaiveSearching does not support search parameters other than _id. Received: "
+							+ theSearchParameters.keys());
+		}
 	}
 
 	<B extends IBaseBundle> B buildResultBundle(Collection<IBaseResource> candidates) {
