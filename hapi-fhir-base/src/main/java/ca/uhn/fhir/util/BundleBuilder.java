@@ -495,8 +495,13 @@ public class BundleBuilder {
 	 */
 	public IBase addEntry() {
 		IBase entry = myEntryDef.newInstance();
-		myEntryChild.getMutator().addValue(myBundle, entry);
+		addEntry(entry);
 		return entry;
+	}
+
+	public IBase addEntry(IBase theEntry) {
+		myEntryChild.getMutator().addValue(myBundle, theEntry);
+		return theEntry;
 	}
 
 	/**
@@ -676,6 +681,19 @@ public class BundleBuilder {
 	public void addProfile(String theProfile) {
 		FhirTerser terser = myContext.newTerser();
 		terser.addElement(myBundle, "Bundle.meta.profile", theProfile);
+	}
+
+	public IBase addSearchMatchEntry(IBaseResource theResource) {
+		setType("searchset");
+
+		IBase entry = addEntry();
+		// Bundle.entry.resource
+		myEntryResourceChild.getMutator().setValue(entry, theResource);
+		// Bundle.entry.search
+		IBase search = addSearch(entry);
+		setSearchField(search, "mode", "match");
+
+		return entry;
 	}
 
 	public class DeleteBuilder extends BaseOperationBuilder {

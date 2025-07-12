@@ -201,6 +201,11 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	@Override
+	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, Set<String> types) throws FHIRException {
+		throw new UnsupportedOperationException(Msg.code(653));
+	}
+
+	@Override
 	public int loadFromPackageAndDependencies(NpmPackage pi, IContextResourceLoader loader, BasePackageCacheManager pcm)
 			throws FHIRException {
 		throw new UnsupportedOperationException(Msg.code(654));
@@ -1147,10 +1152,5 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	public static WorkerContextValidationSupportAdapter newVersionSpecificWorkerContextWrapper(
 			IValidationSupport theValidationSupport) {
 		return new WorkerContextValidationSupportAdapter(theValidationSupport);
-	}
-
-	@Override
-	public OperationOutcome validateTxResource(ValidationOptions options, Resource resource) {
-		throw new UnsupportedOperationException(Msg.code(2735));
 	}
 }

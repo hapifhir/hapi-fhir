@@ -19,15 +19,29 @@
  */
 package ca.uhn.fhir.util;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IElement;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 
 public class ElementUtil {
+
+	public static final Function<IBase, String> CONVERT_PRIMITIVE_TO_STRING =
+			e -> ((IPrimitiveType<?>) e).getValueAsString();
+	public static final Function<IBase, IBaseResource> CAST_BASE_TO_RESOURCE = e -> (IBaseResource) e;
+
+	@SuppressWarnings("unchecked")
+	public static final Function<IBase, IPrimitiveType<Date>> CAST_TO_PRIMITIVE_DATE = e -> ((IPrimitiveType<Date>) e);
 
 	@SuppressWarnings("unchecked")
 	public static boolean isEmpty(Object... theElements) {
@@ -100,7 +114,7 @@ public class ElementUtil {
 	 * Note that this method does not work on HL7.org structures
 	 */
 	public static <T extends IElement> List<T> allPopulatedChildElements(Class<T> theType, Object... theElements) {
-		ArrayList<T> retVal = new ArrayList<T>();
+		ArrayList<T> retVal = new ArrayList<>();
 		for (Object next : theElements) {
 			if (next == null) {
 				continue;
@@ -131,5 +145,30 @@ public class ElementUtil {
 			// TODO: Use of a deprecated method should be resolved.
 			retVal.addAll(iCompositeElement.getAllPopulatedChildElementsOfType(theType));
 		}
+	}
+
+	public static IBase setValue(IBase theTarget, BaseRuntimeChildDefinition theChildDef, Object theValue) {
+		BaseRuntimeElementDefinition<?> elementDefinition = theChildDef.getChildByName(theChildDef.getElementName());
+		IBase value;
+		if (theValue == null || elementDefinition.getImplementingClass().isInstance(theValue)) {
+			value = (IBase) theValue;
+		} else {
+			value = elementDefinition.newInstance(theValue);
+		}
+		theChildDef.getMutator().setValue(theTarget, value);
+		return value;
+	}
+
+	@Nullable
+	public static <T> T getSingleValueOrNull(
+			IBase theParentElement, BaseRuntimeChildDefinition theChildDefinition, Function<IBase, T> theConverter) {
+		if (theParentElement == null) {
+			return null;
+		}
+		return theChildDefinition
+				.getAccessor()
+				.getFirstValueOrNull(theParentElement)
+				.map(theConverter)
+				.orElse(null);
 	}
 }
