@@ -44,7 +44,7 @@ public class InMemoryFhirRepository implements IRepository {
 
 	private String myBaseUrl;
 	private final FhirContext context;
-	public final ResourceStorage myResourceStorage;
+	private final ResourceStorage myResourceStorage;
 
 	public static InMemoryFhirRepository emptyRepository(@Nonnull FhirContext theFhirContext) {
 		return new InMemoryFhirRepository(theFhirContext, new HashMap<>());
