@@ -3,6 +3,8 @@ package ca.uhn.fhir.repository.impl;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.repository.Repositories;
+import ca.uhn.fhir.repository.impl.memory.InMemoryFhirRepository;
+import ca.uhn.fhir.repository.impl.memory.InMemoryFhirRepositoryLoader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;

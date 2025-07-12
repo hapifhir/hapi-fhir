@@ -1,7 +1,8 @@
-package ca.uhn.fhir.repository.impl;
+package ca.uhn.fhir.repository.impl.memory;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -23,7 +24,7 @@ public class ResourceStorage {
 		resourceMap = theResourceMap;
 	}
 
-	public ResourceLookup lookupResource(IIdType theId) {
+	ResourceLookup lookupResource(IIdType theId) {
 		Validate.notNull(theId, "Id must not be null");
 		Validate.notNull(theId.getResourceType(), "Resource type must not be null");
 
@@ -32,7 +33,7 @@ public class ResourceStorage {
 		return new ResourceLookup(resources, new IdDt(theId));
 	}
 
-	public ResourceLookup lookupResource(String resourceTypeName, IIdType theId) {
+	ResourceLookup lookupResource(String resourceTypeName, IIdType theId) {
 		Validate.notBlank(resourceTypeName, "Resource type must not be blank");
 		Validate.notNull(theId, "Id must not be null");
 
@@ -41,7 +42,8 @@ public class ResourceStorage {
 		return lookupResource(unqualifiedVersionless);
 	}
 
-	public @Nonnull ResourceLookup createResource(IBaseResource resource) {
+	@Nonnull
+	ResourceLookup createResource(IBaseResource resource) {
 		Map<IIdType, IBaseResource> resources = getResourceMapForType(resource.fhirType());
 
 		IIdType theId;
@@ -55,6 +57,7 @@ public class ResourceStorage {
 		return lookupResource(theId);
 	}
 
+	@VisibleForTesting
 	public @Nonnull Collection<IBaseResource> getAllOfType(String theResourceType) {
 		return getResourceMapForType(theResourceType).values();
 	}
@@ -70,7 +73,7 @@ public class ResourceStorage {
 	 * @param resources the map of resources for a specific type
 	 * @param id        the id of the resource to look up
 	 */
-	public record ResourceLookup(Map<IIdType, IBaseResource> resources, IIdType id) {
+	record ResourceLookup(Map<IIdType, IBaseResource> resources, IIdType id) {
 
 		private static IIdType normalizeIdForLookup(IIdType theId, String resourceTypeName) {
 			IIdType unqualifiedVersionless = theId.toUnqualifiedVersionless();
@@ -93,19 +96,19 @@ public class ResourceStorage {
 		}
 
 		@Nonnull
-		public IBaseResource getResourceOrThrow404() {
+		IBaseResource getResourceOrThrow404() {
 			return getResource().orElseThrow(() -> new ResourceNotFoundException("Resource not found with id " + id));
 		}
 
-		public void remove() {
+		void remove() {
 			resources.remove(id);
 		}
 
-		public boolean isPresent() {
+		boolean isPresent() {
 			return resources.containsKey(id);
 		}
 
-		public <T extends IBaseResource> void put(T theResource) {
+		<T extends IBaseResource> void put(T theResource) {
 			resources.put(id, theResource);
 		}
 	}

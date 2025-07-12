@@ -1,9 +1,9 @@
-package ca.uhn.fhir.repository.impl;
+package ca.uhn.fhir.repository.impl.memory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.repository.impl.ResourceStorage.ResourceLookup;
+import ca.uhn.fhir.repository.impl.memory.ResourceStorage.ResourceLookup;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;

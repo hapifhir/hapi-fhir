@@ -1,4 +1,4 @@
-package ca.uhn.fhir.repository.impl;
+package ca.uhn.fhir.repository.impl.memory;
 
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.model.primitive.IdDt;

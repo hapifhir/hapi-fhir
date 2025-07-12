@@ -1,4 +1,4 @@
-package ca.uhn.fhir.repository.impl;
+package ca.uhn.fhir.repository.impl.memory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -45,7 +45,7 @@ class NaiveSearching {
 	/** a supplier of all resources of this type, with empty ok. */
 	private final Supplier<Collection<IBaseResource>> myAllResourcesSupplier;
 
-	public NaiveSearching(
+	NaiveSearching(
 			FhirContext theFhirContext,
 			String theResourceType,
 			Function<IdDt, Stream<IBaseResource>> theSafeRead,
@@ -57,7 +57,7 @@ class NaiveSearching {
 	}
 
 	@Nonnull
-	public <B extends IBaseBundle> B search(Multimap<String, List<IQueryParameterType>> theSearchParameters) {
+	<B extends IBaseBundle> B search(Multimap<String, List<IQueryParameterType>> theSearchParameters) {
 		// our refining list of possible results
 		Collection<IBaseResource> candidates;
 

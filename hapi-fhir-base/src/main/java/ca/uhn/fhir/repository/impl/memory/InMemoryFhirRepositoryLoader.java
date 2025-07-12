@@ -1,8 +1,10 @@
-package ca.uhn.fhir.repository.impl;
+package ca.uhn.fhir.repository.impl.memory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.repository.impl.IRepositoryLoader;
+import ca.uhn.fhir.repository.impl.SchemeBasedFhirRepositoryLoader;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.collections4.map.ReferenceMap;
 
