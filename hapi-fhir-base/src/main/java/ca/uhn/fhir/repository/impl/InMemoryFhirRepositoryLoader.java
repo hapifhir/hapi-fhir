@@ -20,8 +20,8 @@ public class InMemoryFhirRepositoryLoader extends SchemeBasedFhirRepositoryLoade
 	public IRepository loadRepository(@Nonnull IRepositoryRequest theRepositoryRequest) {
 		FhirContext context = theRepositoryRequest
 				.getFhirContext()
-				.orElseThrow(
-						() -> new IllegalArgumentException(Msg.code(2736) + "The :memory: FHIR repository requires a FhirContext."));
+				.orElseThrow(() -> new IllegalArgumentException(
+						Msg.code(2736) + "The :memory: FHIR repository requires a FhirContext."));
 
 		String memoryKey = theRepositoryRequest.getDetails();
 		return ourRepositories.computeIfAbsent(memoryKey, k -> {
