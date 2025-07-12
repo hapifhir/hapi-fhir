@@ -39,16 +39,12 @@ public class UrlRepositoryFactory {
 					Msg.code(2737) + "Base URL is not a valid repository URL: " + theBaseUrl);
 		}
 
-		ServiceLoader<IRepositoryLoader> load = ServiceLoader.load(IRepositoryLoader.class);
-		IRepositoryLoader.IRepositoryRequest request = buildRequest(theBaseUrl, theFhirContext);
-		for (IRepositoryLoader nextLoader : load) {
-			ourLog.debug("Checking repository loader {}", nextLoader.getClass().getName());
-			if (nextLoader.canLoad(request)) {
-				return nextLoader.loadRepository(request);
-			}
-		}
-		throw new IllegalArgumentException(
-				Msg.code(2738) + "Unable to find a repository loader for URL: " + theBaseUrl);
+		RepositoryRequest request = buildRequest(theBaseUrl, theFhirContext);
+
+		ServiceLoader<IRepositoryLoader> serviceLoader = ServiceLoader.load(IRepositoryLoader.class);
+		return request.load(serviceLoader)
+				.orElseThrow(() -> new IllegalArgumentException(
+						Msg.code(2738) + "Unable to find a repository loader for URL: " + theBaseUrl));
 	}
 
 	@Nonnull
@@ -62,10 +58,10 @@ public class UrlRepositoryFactory {
 			details = matcher.group(2);
 		}
 
-		return new RepositoryRequest(theBaseUrl, subScheme, details, theFhirContext);
+		return new RepositoryRequest(theBaseUrl, subScheme, details, Optional.ofNullable(theFhirContext));
 	}
 
-	record RepositoryRequest(String url, String subScheme, String details, FhirContext fhirContext)
+	record RepositoryRequest(String url, String subScheme, String details, Optional<FhirContext> fhirContext)
 			implements IRepositoryLoader.IRepositoryRequest {
 		@Override
 		public String getUrl() {
@@ -84,7 +80,30 @@ public class UrlRepositoryFactory {
 
 		@Override
 		public Optional<FhirContext> getFhirContext() {
-			return Optional.ofNullable(fhirContext);
+			return fhirContext;
+		}
+
+		private boolean canLoad(IRepositoryLoader nextLoader) {
+			ourLog.debug("Checking repository loader {}", nextLoader.getClass().getName());
+			return nextLoader.canLoad(this);
+		}
+
+		@Nonnull
+		private IRepository loadRepository(IRepositoryLoader nextLoader) {
+			ourLog.debug(
+					"Building repository using loader {} with request url {}",
+					nextLoader.getClass().getName(),
+					url);
+			return nextLoader.loadRepository(this);
+		}
+
+		@Nonnull
+		Optional<IRepository> load(ServiceLoader<IRepositoryLoader> theServiceLoader) {
+			return theServiceLoader.stream()
+					.map(ServiceLoader.Provider::get)
+					.filter(this::canLoad)
+					.map(this::loadRepository)
+					.findFirst();
 		}
 	}
 }

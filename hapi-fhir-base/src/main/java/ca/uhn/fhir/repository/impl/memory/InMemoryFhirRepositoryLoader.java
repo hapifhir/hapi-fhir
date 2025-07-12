@@ -8,6 +8,9 @@ import ca.uhn.fhir.repository.impl.SchemeBasedFhirRepositoryLoader;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.collections4.map.ReferenceMap;
 
+/**
+ * ServiceLoader provider for {@link IRepositoryLoader} that loads an InMemoryFhirRepository.
+ */
 public class InMemoryFhirRepositoryLoader extends SchemeBasedFhirRepositoryLoader implements IRepositoryLoader {
 
 	public static final String URL_SUB_SCHEME = "memory";
