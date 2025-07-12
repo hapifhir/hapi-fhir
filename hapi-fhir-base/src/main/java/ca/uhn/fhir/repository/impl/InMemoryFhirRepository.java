@@ -8,7 +8,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -20,10 +19,10 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -37,7 +36,8 @@ import static ca.uhn.fhir.model.api.StorageResponseCodeEnum.SUCCESSFUL_DELETE_NO
  * Limitations:
  * <ul>
  *     <li>Does not support versioning of resources.</li>
- *     <li>Does not search beyond all-of-type - no SearchParameters are supported.</li>
+ *     <li>Does not support search beyond all-of-type and _id - no SearchParameters are supported.</li>
+ *     <li>Does not support search paging.</li>
  *     <li>Does not support extended operations.</li>
  *     <li>Does not support conditional update or create.</li>
  *     <li>Does not support PATCH operations.</li>
@@ -156,64 +156,17 @@ public class InMemoryFhirRepository implements IRepository {
 	public synchronized <B extends IBaseBundle, T extends IBaseResource> B search(
 			Class<B> bundleType,
 			Class<T> resourceType,
-			Multimap<String, List<IQueryParameterType>> searchParameters,
+			Multimap<String, List<IQueryParameterType>> theSearchParameters,
 			Map<String, String> headers) {
-		BundleBuilder builder = new BundleBuilder(this.context);
 
-		String searchType = context.getResourceType(resourceType);
-		var resourceIdMap = getResourceMapForType(searchType);
+		NaiveSearching search = new NaiveSearching(
+				fhirContext(),
+				context.getResourceType(resourceType),
+				id -> this.lookupResource(id).getResource().stream(),
+				() -> this.getResourceMapForType(context.getResourceType(resourceType))
+						.values());
 
-		if (searchParameters == null || searchParameters.isEmpty()) {
-			resourceIdMap.values().forEach(builder::addCollectionEntry);
-			builder.setType("searchset");
-			//noinspection unchecked
-			return (B) builder.getBundle();
-		}
-
-		Collection<IBaseResource> candidates = resourceIdMap.values();
-		// todo implement more search parameters
-		//        if (searchParameters.containsKey("_id")) {
-		//            // We are consuming the _id parameter in this if statement
-		//            var idQueries = searchParameters.get("_id");
-		//            searchParameters.remove("_id");
-		//
-		//            // The _id param can be a list of ids
-		//            var idResources = new ArrayList<IBaseResource>(idQueries.size());
-		//            for (var idQuery : idQueries) {
-		//                var idToken = (TokenParam) idQuery;
-		//                // Need to construct the equivalent "UnqualifiedVersionless" id that the map is
-		//                // indexed by. If an id has a version it won't match. Need apples-to-apples Ids types
-		//                var id = Ids.newId(context, resourceType.getSimpleName(), idToken.getValue());
-		//                var r = resourceIdMap.get(id);
-		//                if (r != null) {
-		//                    idResources.add(r);
-		//                }
-		//            }
-		//
-		//            candidates = idResources;
-		//        } else {
-		//            candidates = resourceIdMap.values();
-		//        }
-
-		// Apply the rest of the filters
-		//        for (var resource : candidates) {
-		//            boolean include = true;
-		//            for (var nextEntry : searchParameters.entrySet()) {
-		//                var paramName = nextEntry.getKey();
-		//                if (!this.resourceMatcher.matches(paramName, nextEntry.getValue(), resource)) {
-		//                    include = false;
-		//                    break;
-		//                }
-		//            }
-		//
-		//            if (include) {
-		//                builder.addCollectionEntry(resource);
-		//            }
-		//        }
-
-		builder.setType("searchset");
-		//noinspection unchecked
-		return (B) builder.getBundle();
+		return search.search(theSearchParameters);
 	}
 
 	@Override
@@ -257,14 +210,27 @@ public class InMemoryFhirRepository implements IRepository {
 	 * @param id the id of the resource to look up
 	 */
 	private record ResourceLookup(Map<IIdType, IBaseResource> resources, IIdType id) {
+
+		private static IIdType normalizeIdForLookup(IIdType theId, String resourceTypeName) {
+			IIdType unqualifiedVersionless = theId.toUnqualifiedVersionless();
+			String idResourceType = unqualifiedVersionless.getResourceType();
+			if (idResourceType == null) {
+				unqualifiedVersionless = unqualifiedVersionless.withResourceType(resourceTypeName);
+			} else if (!idResourceType.equals(resourceTypeName)) {
+				throw new IllegalArgumentException(
+						"Resource type mismatch: resource is " + resourceTypeName + " but id type is " + idResourceType);
+			}
+			return unqualifiedVersionless;
+		}
+
+		@Nonnull
+		Optional<IBaseResource> getResource() {
+			return Optional.ofNullable(resources.get(id));
+		}
+
 		@Nonnull
 		IBaseResource getResourceOrThrow404() {
-			var resource = resources.get(id);
-
-			if (resource == null) {
-				throw new ResourceNotFoundException("Resource not found with id " + id);
-			}
-			return resource;
+			return getResource().orElseThrow(() -> new ResourceNotFoundException("Resource not found with id " + id));
 		}
 
 		void remove() {
@@ -295,15 +261,9 @@ public class InMemoryFhirRepository implements IRepository {
 
 		String resourceTypeName = fhirContext().getResourceType(theResourceType);
 
-		IIdType unqualifiedVersionless = theId.toUnqualifiedVersionless();
-		String idResourceType = unqualifiedVersionless.getResourceType();
-		if (idResourceType == null) {
-			unqualifiedVersionless = unqualifiedVersionless.withResourceType(resourceTypeName);
-		} else if (!idResourceType.equals(resourceTypeName)) {
-			throw new IllegalArgumentException(
-					"Resource type mismatch: resource is " + resourceTypeName + " but id type is " + idResourceType);
-		}
+		IIdType unqualifiedVersionless = ResourceLookup.normalizeIdForLookup(theId, resourceTypeName);
 
 		return lookupResource(unqualifiedVersionless);
 	}
+
 }

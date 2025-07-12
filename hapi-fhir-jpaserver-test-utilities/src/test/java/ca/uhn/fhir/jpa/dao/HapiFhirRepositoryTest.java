@@ -25,6 +25,7 @@ class HapiFhirRepositoryTest extends BaseJpaR4Test implements IRepositoryTest {
 		return new RepositoryTestSupport(new HapiFhirRepository(myDaoRegistry, mySrd, null));
 	}
 
+	// FIXME need a restful server so we can implement paging.
 	@Override
 	public boolean isSearchSupported() {
 		return false;

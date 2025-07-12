@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -283,6 +284,32 @@ public interface IRepositoryTest {
 		// then
 		List<SearchBundleEntryParts> entries = BundleUtil.getSearchBundleEntryParts(context, searchResult);
 		assertThat(entries).hasSize(2);
+	}
+
+	@EnabledIf("isSearchSupported")
+	@Test
+	default void testSearchById() {
+		// given
+		FhirContext context = getRepository().fhirContext();
+		var repository = getRepository();
+		var b = getTestDataBuilder();
+		var patientClass = getTestDataBuilder().buildPatient().getClass();
+		b.createPatient(b.withId("abc"));
+		b.createPatient(b.withId("def"));
+		IBaseBundle bundle = new BundleBuilder(context).getBundle();
+
+		// when
+		IBaseBundle searchResult = repository.search(
+				bundle.getClass(),
+				patientClass,
+				Map.of("_id", List.of(new ReferenceParam("abc"), new ReferenceParam("ghi"))));
+
+		// then
+		List<SearchBundleEntryParts> entries = BundleUtil.getSearchBundleEntryParts(context, searchResult);
+		assertThat(entries).hasSize(1);
+		SearchBundleEntryParts entry = entries.get(0);
+		assertThat(entry.getResource()).isNotNull();
+		assertThat(entry.getResource()).isInstanceOf(patientClass);
 	}
 
 	/** Implementors of this test template must provide a RepositoryTestSupport instance */

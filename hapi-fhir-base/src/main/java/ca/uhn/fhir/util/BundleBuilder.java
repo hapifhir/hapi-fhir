@@ -683,6 +683,19 @@ public class BundleBuilder {
 		terser.addElement(myBundle, "Bundle.meta.profile", theProfile);
 	}
 
+	public IBase addSearchMatchEntry(IBaseResource theResource) {
+		setType("searchset");
+
+		IBase entry = addEntry();
+		// Bundle.entry.resource
+		myEntryResourceChild.getMutator().setValue(entry, theResource);
+		// Bundle.entry.search
+		IBase search = addSearch(entry);
+		setSearchField(search, "mode", "match");
+
+		return entry;
+	}
+
 	public class DeleteBuilder extends BaseOperationBuilder {
 
 		// nothing yet
