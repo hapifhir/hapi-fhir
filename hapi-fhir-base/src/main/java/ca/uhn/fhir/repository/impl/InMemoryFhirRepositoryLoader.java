@@ -1,6 +1,7 @@
 package ca.uhn.fhir.repository.impl;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.repository.IRepository;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.collections4.map.ReferenceMap;
@@ -19,9 +20,8 @@ public class InMemoryFhirRepositoryLoader extends SchemeBasedFhirRepositoryLoade
 	public IRepository loadRepository(@Nonnull IRepositoryRequest theRepositoryRequest) {
 		FhirContext context = theRepositoryRequest
 				.getFhirContext()
-				// fixme hapi-code
 				.orElseThrow(
-						() -> new IllegalArgumentException("The :memory: FHIR repository requires a FhirContext."));
+						() -> new IllegalArgumentException(Msg.code(2736) + "The :memory: FHIR repository requires a FhirContext."));
 
 		String memoryKey = theRepositoryRequest.getDetails();
 		return ourRepositories.computeIfAbsent(memoryKey, k -> {

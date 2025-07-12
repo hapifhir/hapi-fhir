@@ -13,6 +13,10 @@ import java.util.ServiceLoader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Use ServiceLoader to load {@link IRepositoryLoader} implementations
+ * and provide chain-of-responsibility style matching by url to build IRepository instances.
+ */
 public class UrlRepositoryFactory {
 	private static final Logger ourLog = IRepository.ourLog;
 
@@ -25,7 +29,43 @@ public class UrlRepositoryFactory {
 				&& ourUrlPattern.matcher(theBaseUrl).matches();
 	}
 
-	protected record RepositoryRequest(String url, String subScheme, String details, FhirContext fhirContext)
+	@Nonnull
+	public static IRepository buildRepository(@Nonnull String theBaseUrl, @Nullable FhirContext theFhirContext) {
+		ourLog.debug("Loading repository for url: {}", theBaseUrl);
+		Objects.requireNonNull(theBaseUrl);
+
+		if (!isRepositoryUrl(theBaseUrl)) {
+			throw new IllegalArgumentException(
+					Msg.code(2737) + "Base URL is not a valid repository URL: " + theBaseUrl);
+		}
+
+		ServiceLoader<IRepositoryLoader> load = ServiceLoader.load(IRepositoryLoader.class);
+		IRepositoryLoader.IRepositoryRequest request = buildRequest(theBaseUrl, theFhirContext);
+		for (IRepositoryLoader nextLoader : load) {
+			ourLog.debug("Checking repository loader {}", nextLoader.getClass().getName());
+			if (nextLoader.canLoad(request)) {
+				return nextLoader.loadRepository(request);
+			}
+		}
+		throw new IllegalArgumentException(
+				Msg.code(2738) + "Unable to find a repository loader for URL: " + theBaseUrl);
+	}
+
+	@Nonnull
+	static RepositoryRequest buildRequest(@Nonnull String theBaseUrl, @Nullable FhirContext theFhirContext) {
+		Matcher matcher = ourUrlPattern.matcher(theBaseUrl);
+		String subScheme = null;
+		String details = null;
+		boolean found = matcher.matches();
+		if (found) {
+			subScheme = matcher.group(1);
+			details = matcher.group(2);
+		}
+
+		return new RepositoryRequest(theBaseUrl, subScheme, details, theFhirContext);
+	}
+
+	record RepositoryRequest(String url, String subScheme, String details, FhirContext fhirContext)
 			implements IRepositoryLoader.IRepositoryRequest {
 		@Override
 		public String getUrl() {
@@ -46,43 +86,5 @@ public class UrlRepositoryFactory {
 		public Optional<FhirContext> getFhirContext() {
 			return Optional.ofNullable(fhirContext);
 		}
-	}
-
-	@Nonnull
-	public static IRepository buildRepository(@Nonnull String theBaseUrl, @Nullable FhirContext theFhirContext) {
-		ourLog.debug("Loading repository for url: {}", theBaseUrl);
-		Objects.requireNonNull(theBaseUrl);
-
-		if (!isRepositoryUrl(theBaseUrl)) {
-			// fixme hapi-code
-			throw new IllegalArgumentException(
-					Msg.code(99997) + "Base URL is not a valid repository URL: " + theBaseUrl);
-		}
-
-		ServiceLoader<IRepositoryLoader> load = ServiceLoader.load(IRepositoryLoader.class);
-		IRepositoryLoader.IRepositoryRequest request = buildRequest(theBaseUrl, theFhirContext);
-		for (IRepositoryLoader nextLoader : load) {
-			ourLog.debug("Checking repository loader {}", nextLoader.getClass().getName());
-			if (nextLoader.canLoad(request)) {
-				return nextLoader.loadRepository(request);
-			}
-		}
-		// fixme hapi-code
-		throw new IllegalArgumentException(
-				Msg.code(99999) + "Unable to find a repository loader for URL: " + theBaseUrl);
-	}
-
-	@Nonnull
-	protected static RepositoryRequest buildRequest(@Nonnull String theBaseUrl, @Nullable FhirContext theFhirContext) {
-		Matcher matcher = ourUrlPattern.matcher(theBaseUrl);
-		String subScheme = null;
-		String details = null;
-		boolean found = matcher.matches();
-		if (found) {
-			subScheme = matcher.group(1);
-			details = matcher.group(2);
-		}
-
-		return new RepositoryRequest(theBaseUrl, subScheme, details, theFhirContext);
 	}
 }
