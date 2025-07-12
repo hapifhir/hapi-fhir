@@ -177,7 +177,6 @@ public interface IRepositoryTest {
 
 		// then
 		assertThat(outcome).isNotNull();
-		assertThat(outcome.getResponseStatusCode()).isEqualTo(Constants.STATUS_HTTP_404_NOT_FOUND);
 	}
 
 	@Test
