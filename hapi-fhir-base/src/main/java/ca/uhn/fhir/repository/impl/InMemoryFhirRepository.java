@@ -217,8 +217,8 @@ public class InMemoryFhirRepository implements IRepository {
 			if (idResourceType == null) {
 				unqualifiedVersionless = unqualifiedVersionless.withResourceType(resourceTypeName);
 			} else if (!idResourceType.equals(resourceTypeName)) {
-				throw new IllegalArgumentException(
-						"Resource type mismatch: resource is " + resourceTypeName + " but id type is " + idResourceType);
+				throw new IllegalArgumentException("Resource type mismatch: resource is " + resourceTypeName
+						+ " but id type is " + idResourceType);
 			}
 			return unqualifiedVersionless;
 		}
@@ -265,5 +265,4 @@ public class InMemoryFhirRepository implements IRepository {
 
 		return lookupResource(unqualifiedVersionless);
 	}
-
 }
