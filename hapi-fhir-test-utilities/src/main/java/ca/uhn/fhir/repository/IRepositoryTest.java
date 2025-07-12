@@ -26,9 +26,9 @@ import org.junit.jupiter.api.condition.EnabledIf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_201_CREATED;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_204_NO_CONTENT;
@@ -180,7 +180,6 @@ public interface IRepositoryTest {
 		assertThat(outcome.getResponseStatusCode()).isEqualTo(Constants.STATUS_HTTP_404_NOT_FOUND);
 	}
 
-
 	@Test
 	@EnabledIf("isPatchSupported")
 	default void testPatch_changesValue() {
@@ -261,8 +260,7 @@ public interface IRepositoryTest {
 		{
 			BundleResponseEntryParts entry = bundleResponseEntryParts.get(2);
 
-			assertThat(entry.fullUrl())
-				.satisfiesAnyOf(Assertions::assertNull, fullUrl -> assertThat(fullUrl)
+			assertThat(entry.fullUrl()).satisfiesAnyOf(Assertions::assertNull, fullUrl -> assertThat(fullUrl)
 					.contains(deletePatientId.getIdPart()));
 			assertThat(entry.responseStatus()).startsWith("" + STATUS_HTTP_204_NO_CONTENT);
 		}
@@ -271,7 +269,7 @@ public interface IRepositoryTest {
 	@EnabledIf("isSearchSupported")
 	@Test
 	default void testSearchAllOfType() {
-	    // given
+		// given
 		FhirContext context = getRepository().fhirContext();
 		var repository = getRepository();
 		var b = getTestDataBuilder();
@@ -283,11 +281,10 @@ public interface IRepositoryTest {
 		// when
 		IBaseBundle searchResult = repository.search(bundle.getClass(), patientClass, Map.of());
 
-	    // then
+		// then
 		List<SearchBundleEntryParts> entries = BundleUtil.getSearchBundleEntryParts(context, searchResult);
 		assertThat(entries).hasSize(2);
 	}
-
 
 	/** Implementors of this test template must provide a RepositoryTestSupport instance */
 	RepositoryTestSupport getRepositoryTestSupport();

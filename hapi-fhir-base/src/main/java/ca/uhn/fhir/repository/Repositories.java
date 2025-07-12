@@ -39,5 +39,4 @@ public class Repositories {
 	public static IRepository restClientRepository(IGenericClient theGenericClient) {
 		return new GenericClientRepository(theGenericClient);
 	}
-
 }

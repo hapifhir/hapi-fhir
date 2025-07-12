@@ -27,6 +27,7 @@ import java.util.function.Function;
 public class NaiveRepositoryTransactionProcessor {
 
 	IRepository myRepository;
+
 	public NaiveRepositoryTransactionProcessor(IRepository theRepository) {
 		myRepository = theRepository;
 	}
@@ -75,26 +76,30 @@ public class NaiveRepositoryTransactionProcessor {
 							now,
 							responseOutcome.getOperationOutcome());
 					bundleBuilder.addEntry(responseEntryBuilder.apply(response));
-
 				}
 				case DELETE -> {
 					IdDt idDt = new IdDt(e.getUrl());
 					String resourceType = idDt.getResourceType();
 					Validate.notBlank(resourceType, "Missing resource type for deletion %s", e.getUrl());
 
-					MethodOutcome responseOutcome = myRepository.delete(myRepository.fhirContext().getResourceDefinition(resourceType).getImplementingClass(), idDt);
+					MethodOutcome responseOutcome = myRepository.delete(
+							myRepository
+									.fhirContext()
+									.getResourceDefinition(resourceType)
+									.getImplementingClass(),
+							idDt);
 					BundleResponseEntryParts response = new BundleResponseEntryParts(
-						e.getFullUrl(),
-						null,
-						InMemoryFhirRepository.statusCodeToStatusLine(responseOutcome.getResponseStatusCode()),
-						null,
-						null,
-						now,
-						responseOutcome.getOperationOutcome());
+							e.getFullUrl(),
+							null,
+							InMemoryFhirRepository.statusCodeToStatusLine(responseOutcome.getResponseStatusCode()),
+							null,
+							null,
+							now,
+							responseOutcome.getOperationOutcome());
 					bundleBuilder.addEntry(responseEntryBuilder.apply(response));
 				}
 				default -> throw new NotImplementedOperationException(
-						"Transaction stub only supports PUT, POST or DELETE");
+						"Transaction stub only supports POST, PUT, or DELETE");
 			}
 		}
 
