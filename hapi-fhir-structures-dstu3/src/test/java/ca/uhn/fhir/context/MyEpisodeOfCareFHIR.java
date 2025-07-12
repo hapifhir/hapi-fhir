@@ -123,37 +123,37 @@ public class MyEpisodeOfCareFHIR extends EpisodeOfCare {
 	protected org.hl7.fhir.dstu3.model.Reference ourCareManager;
 	public static final String FIELD_CAREMANAGER = "careManager";
 	/**
-	 * 
+	 *
 	 */
 	@Child(name = "statusHistory", min = 0, max = 0, order = Child.REPLACE_PARENT)
 	@Deprecated
 	protected ca.uhn.fhir.model.api.IElement ourStatusHistory;
 	/**
-	 * 
+	 *
 	 */
 	@Child(name = "type", min = 0, max = 0, order = Child.REPLACE_PARENT)
 	@Deprecated
 	protected ca.uhn.fhir.model.api.IElement ourType;
 	/**
-	 * 
+	 *
 	 */
 	@Child(name = "diagnosis", min = 0, max = 0, order = Child.REPLACE_PARENT)
 	@Deprecated
 	protected ca.uhn.fhir.model.api.IElement ourDiagnosis;
 	/**
-	 * 
+	 *
 	 */
 	@Child(name = "referralRequest", min = 0, max = 0, order = Child.REPLACE_PARENT)
 	@Deprecated
 	protected ca.uhn.fhir.model.api.IElement ourReferralRequest;
 	/**
-	 * 
+	 *
 	 */
 	@Child(name = "team", min = 0, max = 0, order = Child.REPLACE_PARENT)
 	@Deprecated
 	protected ca.uhn.fhir.model.api.IElement ourTeam;
 	/**
-	 * 
+	 *
 	 */
 	@Child(name = "account", min = 0, max = 0, order = Child.REPLACE_PARENT)
 	@Deprecated
@@ -212,8 +212,8 @@ public class MyEpisodeOfCareFHIR extends EpisodeOfCare {
 		}
 		MyEpisodeOfCareFHIR that = (MyEpisodeOfCareFHIR) other;
 		return compareDeep(ourDischargeTo, that.ourDischargeTo, true) && compareDeep(ourDischargeDisposition, that.ourDischargeDisposition, true) && compareDeep(ourPrevious, that.ourPrevious, true) && compareDeep(ourReferralInformation, that.ourReferralInformation, true)
-				&& compareDeep(ourEventMarker, that.ourEventMarker, true) && compareDeep(ourPayor, that.ourPayor, true) && compareDeep(ourHealthIssue, that.ourHealthIssue, true) && compareDeep(ourIdentifier, that.ourIdentifier, true) && compareDeep(ourStatus, that.ourStatus, true)
-				&& compareDeep(ourPatient, that.ourPatient, true) && compareDeep(ourManagingOrganization, that.ourManagingOrganization, true) && compareDeep(ourPeriod, that.ourPeriod, true) && compareDeep(ourCareManager, that.ourCareManager, true);
+			 && compareDeep(ourEventMarker, that.ourEventMarker, true) && compareDeep(ourPayor, that.ourPayor, true) && compareDeep(ourHealthIssue, that.ourHealthIssue, true) && compareDeep(ourIdentifier, that.ourIdentifier, true) && compareDeep(ourStatus, that.ourStatus, true)
+			 && compareDeep(ourPatient, that.ourPatient, true) && compareDeep(ourManagingOrganization, that.ourManagingOrganization, true) && compareDeep(ourPeriod, that.ourPeriod, true) && compareDeep(ourCareManager, that.ourCareManager, true);
 	}
 
 	@Override
@@ -478,12 +478,6 @@ public class MyEpisodeOfCareFHIR extends EpisodeOfCare {
 
 	@Override
 	@Deprecated
-	public List getAccountTarget() {
-		throw new UnsupportedOperationException("Deprecated method");
-	}
-
-	@Override
-	@Deprecated
 	public List getDiagnosis() {
 		throw new UnsupportedOperationException("Deprecated method");
 	}
@@ -500,11 +494,6 @@ public class MyEpisodeOfCareFHIR extends EpisodeOfCare {
 		throw new UnsupportedOperationException("Deprecated method");
 	}
 
-	@Override
-	@Deprecated
-	public List getReferralRequestTarget() {
-		throw new UnsupportedOperationException("Deprecated method");
-	}
 
 	@Override
 	@Deprecated
@@ -518,21 +507,10 @@ public class MyEpisodeOfCareFHIR extends EpisodeOfCare {
 		throw new UnsupportedOperationException("Deprecated method");
 	}
 
-	@Override
-	@Deprecated
-	public List getTeamTarget() {
-		throw new UnsupportedOperationException("Deprecated method");
-	}
 
 	@Override
 	@Deprecated
 	public List getType() {
-		throw new UnsupportedOperationException("Deprecated method");
-	}
-
-	@Override
-	@Deprecated
-	public Account addAccountTarget() {
 		throw new UnsupportedOperationException("Deprecated method");
 	}
 
@@ -563,12 +541,6 @@ public class MyEpisodeOfCareFHIR extends EpisodeOfCare {
 	@Override
 	@Deprecated
 	public Base[] getProperty(int p0, String p1, boolean p2) {
-		throw new UnsupportedOperationException("Deprecated method");
-	}
-
-	@Override
-	@Deprecated
-	public CareTeam addTeamTarget() {
 		throw new UnsupportedOperationException("Deprecated method");
 	}
 
@@ -845,12 +817,6 @@ public class MyEpisodeOfCareFHIR extends EpisodeOfCare {
 	@Override
 	@Deprecated
 	public Reference getTeamFirstRep() {
-		throw new UnsupportedOperationException("Deprecated method");
-	}
-
-	@Override
-	@Deprecated
-	public ReferralRequest addReferralRequestTarget() {
 		throw new UnsupportedOperationException("Deprecated method");
 	}
 

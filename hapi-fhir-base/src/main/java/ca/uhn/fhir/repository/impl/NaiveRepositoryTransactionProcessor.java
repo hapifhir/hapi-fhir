@@ -1,4 +1,4 @@
-package ca.uhn.fhir.repository.impl.memory;
+package ca.uhn.fhir.repository.impl;
 
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -27,19 +27,19 @@ import static java.util.Objects.requireNonNull;
  * SOMEDAY implement GET, PATCH, and other methods as needed.
  * SOMEDAY order entries
  */
-class NaiveRepositoryTransactionProcessor {
+public class NaiveRepositoryTransactionProcessor {
 
 	private final IRepository myRepository;
 	private final BaseRuntimeElementDefinition<IPrimitiveType<Date>> myInstantDefinition;
 
-	NaiveRepositoryTransactionProcessor(IRepository theRepository) {
+	public NaiveRepositoryTransactionProcessor(IRepository theRepository) {
 		myRepository = theRepository;
 		//noinspection unchecked
 		myInstantDefinition = (BaseRuntimeElementDefinition<IPrimitiveType<Date>>)
 				requireNonNull(myRepository.fhirContext().getElementDefinition("Instant"));
 	}
 
-	<B extends IBaseBundle> B processTransaction(B theTransactionBundle) {
+	public <B extends IBaseBundle> B processTransaction(B theTransactionBundle) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myRepository.fhirContext());
 
 		bundleBuilder.setType(BundleUtil.BUNDLE_TYPE_TRANSACTION_RESPONSE);
