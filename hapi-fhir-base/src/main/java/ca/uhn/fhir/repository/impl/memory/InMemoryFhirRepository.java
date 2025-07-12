@@ -101,7 +101,6 @@ public class InMemoryFhirRepository implements IRepository {
 
 	@Override
 	public synchronized <T extends IBaseResource> MethodOutcome update(T theResource, Map<String, String> headers) {
-		theResource.getIdElement();
 		ResourceLookup lookup = myResourceStorage.lookupResource(
 				getResourceTypeName(theResource.getClass()), theResource.getIdElement());
 
@@ -122,12 +121,10 @@ public class InMemoryFhirRepository implements IRepository {
 			Class<T> theResourceType, I theId, Map<String, String> headers) {
 		ResourceLookup lookup = myResourceStorage.lookupResource(getResourceTypeName(theResourceType), theId);
 
+		MethodOutcome methodOutcome = new MethodOutcome(theId, false);
+		methodOutcome.setResponseStatusCode(Constants.STATUS_HTTP_204_NO_CONTENT);
 		if (lookup.isPresent()) {
-			var resource = lookup.getResourceOrThrow404();
 			lookup.remove();
-			MethodOutcome methodOutcome = new MethodOutcome(theId, false).setResource(resource);
-			methodOutcome.setResponseStatusCode(Constants.STATUS_HTTP_204_NO_CONTENT);
-			return methodOutcome;
 		} else {
 			var oo = OperationOutcomeUtil.createOperationOutcome(
 					OperationOutcomeUtil.OO_SEVERITY_WARN,
@@ -136,10 +133,9 @@ public class InMemoryFhirRepository implements IRepository {
 					fhirContext(),
 					SUCCESSFUL_DELETE_NOT_FOUND);
 
-			MethodOutcome methodOutcome = new MethodOutcome(theId, false).setOperationOutcome(oo);
-			methodOutcome.setResponseStatusCode(Constants.STATUS_HTTP_404_NOT_FOUND);
-			return methodOutcome;
+			methodOutcome.setOperationOutcome(oo);
 		}
+		return methodOutcome;
 	}
 
 	@Override
