@@ -22,6 +22,7 @@ class UrlRepositoryFactoryTest {
 		false,  fhir-repository:provider/config
 		false,  fhir-repository:provider
 		true,  fhir-repository:provider:
+		true,  fhir-repository:another-provider:
 		""")
 	void testIsUrl(boolean theExpectedResult, String theUrl) {
 		assertEquals(theExpectedResult, UrlRepositoryFactory.isRepositoryUrl(theUrl));

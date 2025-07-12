@@ -11,21 +11,16 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
-import ca.uhn.fhir.util.bundle.BundleEntryParts;
-import ca.uhn.fhir.util.bundle.BundleResponseEntryParts;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,10 +35,10 @@ import static ca.uhn.fhir.model.api.StorageResponseCodeEnum.SUCCESSFUL_DELETE_NO
  * Based on org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository.
  * This repository stores resources in memory
  * and provides basic CRUD operations, search, and transaction support.
+ * SOMEDAY add support for extended operations and custom search parameters.
  */
 public class InMemoryFhirRepository implements IRepository {
 
-	// fixme add search with tests
 	// fixme add sketch of extended operations
 	private String myBaseUrl;
 	private final Map<String, Map<IIdType, IBaseResource>> resourceMap;
@@ -115,10 +110,6 @@ public class InMemoryFhirRepository implements IRepository {
 		var lookup = lookupResource(resource.getClass(), resource.getIdElement());
 
 		boolean isCreate = !lookup.isPresent();
-//		if (resource.fhirType().equals("SearchParameter")) {
-//			// todo support adding SearchParameters
-//			// this.resourceMatcher.addCustomParameter(BundleHelper.resourceToRuntimeSearchParam(resource));
-//		}
 		lookup.put(resource);
 		var outcome = new MethodOutcome(lookup.id, isCreate);
 		if (isCreate) {
@@ -138,7 +129,9 @@ public class InMemoryFhirRepository implements IRepository {
 		if (lookup.isPresent()) {
 			var resource = lookup.getResourceOrThrow404();
 			lookup.remove();
-			return new MethodOutcome(id, false).setResource(resource);
+			MethodOutcome methodOutcome = new MethodOutcome(id, false).setResource(resource);
+			methodOutcome.setResponseStatusCode(Constants.STATUS_HTTP_204_NO_CONTENT);
+			return methodOutcome;
 		} else {
 			var oo = OperationOutcomeUtil.createOperationOutcome(
 					OperationOutcomeUtil.OO_SEVERITY_WARN,
@@ -160,7 +153,9 @@ public class InMemoryFhirRepository implements IRepository {
 			Multimap<String, List<IQueryParameterType>> searchParameters,
 			Map<String, String> headers) {
 		BundleBuilder builder = new BundleBuilder(this.context);
-		var resourceIdMap = getResourceMapForType(resourceType.getTypeName());
+
+		String searchType = context.getResourceType(resourceType);
+		var resourceIdMap = getResourceMapForType(searchType);
 
 		if (searchParameters == null || searchParameters.isEmpty()) {
 			resourceIdMap.values().forEach(builder::addCollectionEntry);
@@ -170,7 +165,7 @@ public class InMemoryFhirRepository implements IRepository {
 		}
 
 		Collection<IBaseResource> candidates = resourceIdMap.values();
-		// fixme
+		// todo implement more search parameters
 		//        if (searchParameters.containsKey("_id")) {
 		//            // We are consuming the _id parameter in this if statement
 		//            var idQueries = searchParameters.get("_id");
@@ -217,86 +212,11 @@ public class InMemoryFhirRepository implements IRepository {
 
 	@Override
 	public synchronized <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
-		BundleBuilder bundleBuilder = new BundleBuilder(this.context);
-
-		bundleBuilder.setType(BundleUtil.BUNDLE_TYPE_TRANSACTION_RESPONSE);
-		// var version = transaction.getStructureFhirVersionEnum();
-
-		Function<BundleResponseEntryParts, IBase> responseEntryBuilder =
-				BundleResponseEntryParts.builder(fhirContext());
-
-		IPrimitiveType<Date> now = (IPrimitiveType<Date>)
-				fhirContext().getElementDefinition("Instant").newInstance();
-
-		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(fhirContext(), transaction);
-		for (BundleEntryParts e : entries) {
-			switch (e.getMethod()) {
-				case PUT -> {
-					MethodOutcome methodOutcome = this.update(e.getResource());
-					String location = null;
-					if (methodOutcome.getResponseStatusCode() == Constants.STATUS_HTTP_201_CREATED) {
-						location = methodOutcome.getId().getValue();
-					}
-
-					BundleResponseEntryParts response = new BundleResponseEntryParts(
-							e.getFullUrl(),
-							methodOutcome.getResource(),
-							statusCodeToStatusLine(methodOutcome.getResponseStatusCode()),
-							location,
-							null,
-							now,
-							methodOutcome.getOperationOutcome());
-					bundleBuilder.addEntry(responseEntryBuilder.apply(response));
-				}
-				case POST -> {
-					var responseOutcome = this.create(e.getResource());
-					var location = responseOutcome.getId().getValue();
-
-					BundleResponseEntryParts response = new BundleResponseEntryParts(
-							e.getFullUrl(),
-							responseOutcome.getResource(),
-							statusCodeToStatusLine(responseOutcome.getResponseStatusCode()),
-							location,
-							null,
-							now,
-							responseOutcome.getOperationOutcome());
-					bundleBuilder.addEntry(responseEntryBuilder.apply(response));
-
-				}
-				case DELETE -> {
-					// Valid methods for transaction entries
-				}
-				case GET -> {}
-				default -> throw new NotImplementedOperationException(
-						"Transaction stub only supports GET, PUT, POST or DELETE");
-				// fixme finish
-			}
-			//			} else if (BundleHelper.isEntryRequestDelete(version, e)) {
-			//				if (BundleHelper.getEntryRequestId(version, e).isPresent()) {
-			//					var resourceType = Canonicals.getResourceType(
-			//							((BundleEntryComponent) e).getRequest().getUrl());
-			//					var resourceClass =
-			//							this.context.getResourceDefinition(resourceType).getImplementingClass();
-			//					var res = this.delete(
-			//							resourceClass,
-			//							BundleHelper.getEntryRequestId(version, e).get().withResourceType(resourceType));
-			//					BundleHelper.addEntry(returnBundle, BundleHelper.newEntryWithResource(res.getResource()));
-			//				} else {
-			//					throw new ResourceNotFoundException("Trying to delete an entry without id");
-			//				}
-			//
-			//			} else {
-			//				throw new NotImplementedOperationException("Transaction stub only supports PUT, POST or DELETE");
-			//			}
-			//		});
-			//
-			//		return returnBundle;
-		}
-
-		return bundleBuilder.getBundleTyped();
+		NaiveRepositoryTransactionProcessor transactionProcessor = new NaiveRepositoryTransactionProcessor(this);
+		return transactionProcessor.processTransaction(transaction, headers);
 	}
 
-	// fixme find a home for this
+	// SOMEDAY find a home for this
 	public static String statusCodeToStatusLine(int theResponseStatusCode) {
 		return switch (theResponseStatusCode) {
 			case Constants.STATUS_HTTP_200_OK -> "200 OK";

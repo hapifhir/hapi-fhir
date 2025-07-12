@@ -24,4 +24,9 @@ class HapiFhirRepositoryTest extends BaseJpaR4Test implements IRepositoryTest {
 	public RepositoryTestSupport getRepositoryTestSupport() {
 		return new RepositoryTestSupport(new HapiFhirRepository(myDaoRegistry, mySrd, null));
 	}
+
+	@Override
+	public boolean isSearchSupported() {
+		return false;
+	}
 }

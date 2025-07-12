@@ -14,6 +14,7 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.bundle.BundleResponseEntryParts;
+import ca.uhn.fhir.util.bundle.SearchBundleEntryParts;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -26,10 +27,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-
 import java.util.List;
+import java.util.Map;
 
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_201_CREATED;
+import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_204_NO_CONTENT;
 import static ca.uhn.fhir.util.ParametersUtil.addParameterToParameters;
 import static ca.uhn.fhir.util.ParametersUtil.addPart;
 import static ca.uhn.fhir.util.ParametersUtil.addPartCode;
@@ -46,6 +48,16 @@ public interface IRepositoryTest {
 	Logger ourLog = LoggerFactory.getLogger(IRepositoryTest.class);
 	String BIRTHDATE1 = "1970-02-14";
 	String BIRTHDATE2 = "1975-01-01";
+
+	default boolean isPatchSupported() {
+		// SOMEDAY: ideally this would come from the repository capabilities
+		return true;
+	}
+
+	default boolean isSearchSupported() {
+		// SOMEDAY: ideally this would come from the repository capabilities
+		return true;
+	}
 
 	@Test
 	default void testCreate_readById_contentsPersisted() {
@@ -165,12 +177,9 @@ public interface IRepositoryTest {
 
 		// then
 		assertThat(outcome).isNotNull();
+		assertThat(outcome.getResponseStatusCode()).isEqualTo(Constants.STATUS_HTTP_404_NOT_FOUND);
 	}
 
-	default boolean isPatchSupported() {
-		// SOMEDAY: ideally this would come from the repository capabilities
-		return true;
-	}
 
 	@Test
 	@EnabledIf("isPatchSupported")
@@ -209,10 +218,15 @@ public interface IRepositoryTest {
 		var b = getTestDataBuilder();
 		var patient = b.buildPatient();
 		var patientWithId = b.buildPatient(b.withId("abc"));
+		var patientToDelete = b.buildPatient();
+
+		var deletePatientId = repository.create(patientToDelete).getId().toUnqualifiedVersionless();
 		BundleBuilder bundleBuilder = new BundleBuilder(fhirContext);
 
 		bundleBuilder.addTransactionCreateEntry(patient, "urn:uuid:0198234701923");
 		bundleBuilder.addTransactionUpdateEntry(patientWithId);
+		bundleBuilder.addTransactionDeleteEntry(deletePatientId);
+
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// when
@@ -225,7 +239,7 @@ public interface IRepositoryTest {
 
 		List<BundleResponseEntryParts> bundleResponseEntryParts = BundleUtil.toListOfEntries(
 				fhirContext, resultBundle, BundleResponseEntryParts.getConverter(fhirContext));
-		assertThat(bundleResponseEntryParts).hasSize(2);
+		assertThat(bundleResponseEntryParts).hasSize(3);
 		{
 			BundleResponseEntryParts createResponseEntry = bundleResponseEntryParts.get(0);
 
@@ -244,9 +258,36 @@ public interface IRepositoryTest {
 			assertThat(updateResponseEntry.responseStatus()).startsWith("" + STATUS_HTTP_201_CREATED);
 			assertThat(updateResponseEntry.responseLocation()).isNotBlank();
 		}
+		{
+			BundleResponseEntryParts entry = bundleResponseEntryParts.get(2);
+
+			assertThat(entry.fullUrl())
+				.satisfiesAnyOf(Assertions::assertNull, fullUrl -> assertThat(fullUrl)
+					.contains(deletePatientId.getIdPart()));
+			assertThat(entry.responseStatus()).startsWith("" + STATUS_HTTP_204_NO_CONTENT);
+		}
 	}
 
-	// fixme add test for search all of type.
+	@EnabledIf("isSearchSupported")
+	@Test
+	default void testSearchAllOfType() {
+	    // given
+		FhirContext context = getRepository().fhirContext();
+		var repository = getRepository();
+		var b = getTestDataBuilder();
+		var patientClass = getTestDataBuilder().buildPatient().getClass();
+		b.createPatient(b.withId("abc"));
+		b.createPatient(b.withId("def"));
+		IBaseBundle bundle = new BundleBuilder(context).getBundle();
+
+		// when
+		IBaseBundle searchResult = repository.search(bundle.getClass(), patientClass, Map.of());
+
+	    // then
+		List<SearchBundleEntryParts> entries = BundleUtil.getSearchBundleEntryParts(context, searchResult);
+		assertThat(entries).hasSize(2);
+	}
+
 
 	/** Implementors of this test template must provide a RepositoryTestSupport instance */
 	RepositoryTestSupport getRepositoryTestSupport();

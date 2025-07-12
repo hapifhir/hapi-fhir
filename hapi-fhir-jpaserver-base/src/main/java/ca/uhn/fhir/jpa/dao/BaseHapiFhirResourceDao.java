@@ -772,10 +772,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			// if not found, return an outcome anyway.
 			// Because no object actually existed, we'll
 			// just set the id and nothing else
-			return createMethodOutcomeForResourceId(
-					theId.getValue(),
-					MESSAGE_KEY_DELETE_RESOURCE_NOT_EXISTING,
-					StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND);
+			DaoMethodOutcome daoMethodOutcome = createMethodOutcomeForResourceId(
+				theId.getValue(),
+				MESSAGE_KEY_DELETE_RESOURCE_NOT_EXISTING,
+				StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND);
+			daoMethodOutcome.setResponseStatusCode(Constants.STATUS_HTTP_404_NOT_FOUND);
+			return daoMethodOutcome;
 		}
 
 		if (theId.hasVersionIdPart() && Long.parseLong(theId.getVersionIdPart()) != entity.getVersion()) {
@@ -796,6 +798,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			// used to exist, so we'll set the persistent id
 			outcome.setPersistentId(persistentId);
 			outcome.setEntity(entity);
+			outcome.setResponseStatusCode(Constants.STATUS_HTTP_410_GONE);
 
 			return outcome;
 		}

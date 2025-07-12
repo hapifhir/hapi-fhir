@@ -17,7 +17,7 @@ public class UrlRepositoryFactory {
 	private static final Logger ourLog = IRepository.ourLog;
 
 	public static final String FHIR_REPOSITORY_URL_SCHEME = "fhir-repository:";
-	static final Pattern ourUrlPattern = Pattern.compile("^fhir-repository:([A-Za-z]+):(.*)");
+	static final Pattern ourUrlPattern = Pattern.compile("^fhir-repository:([A-Za-z-]+):(.*)");
 
 	public static boolean isRepositoryUrl(String theBaseUrl) {
 		return theBaseUrl != null
