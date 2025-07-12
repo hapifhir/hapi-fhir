@@ -567,8 +567,8 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		String input = ClasspathUtil.loadResource("/r4/diagnosticreport-example-gingival-mass.json");
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> messages = logResultsAndReturnAll(output);
-		assertThat(messages).hasSize(2);
-		assertEquals("Base64 encoded values SHOULD not contain any whitespace (per RFC 4648). Note that non-validating readers are encouraged to accept whitespace anyway", messages.get(1).getMessage());
+		assertThat(messages).hasSize(1);
+		assertEquals("Base64 encoded values SHOULD not contain any whitespace (per RFC 4648). Note that non-validating readers are encouraged to accept whitespace anyway", messages.get(0).getMessage());
 	}
 
 	@Test
