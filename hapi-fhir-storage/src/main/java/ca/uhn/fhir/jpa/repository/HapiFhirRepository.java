@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.repository;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -115,7 +116,14 @@ public class HapiFhirRepository implements IRepository {
 				.addHeaders(theHeaders)
 				.create();
 
-		return myDaoRegistry.getResourceDao(theResource).update(theResource, details);
+		DaoMethodOutcome update = myDaoRegistry.getResourceDao(theResource).update(theResource, details);
+		boolean created = update.getCreated() != null && update.getCreated();
+		if (created) {
+			update.setResponseStatusCode(Constants.STATUS_HTTP_201_CREATED);
+		} else {
+			update.setResponseStatusCode(Constants.STATUS_HTTP_200_OK);
+		}
+		return update;
 	}
 
 	@Override
@@ -171,8 +179,9 @@ public class HapiFhirRepository implements IRepository {
 			offset = 0;
 		}
 		int start = offset;
-		if (theBundleProvider.size() != null) {
-			start = Math.max(0, Math.min(offset, theBundleProvider.size()));
+		Integer size = theBundleProvider.size();
+		if (size != null) {
+			start = Math.max(0, Math.min(offset, size));
 		}
 
 		BundleTypeEnum bundleType;

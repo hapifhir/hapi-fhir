@@ -799,7 +799,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			// used to exist, so we'll set the persistent id
 			outcome.setPersistentId(persistentId);
 			outcome.setEntity(entity);
-			outcome.setResponseStatusCode(Constants.STATUS_HTTP_410_GONE);
 
 			return outcome;
 		}

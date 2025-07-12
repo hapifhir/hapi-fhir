@@ -1471,7 +1471,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		DaoMethodOutcome outcome = toMethodOutcome(
 						theRequestDetails, savedEntity, theResource, theMatchUrl, theOperationType)
 				.setCreated(wasDeleted);
-		outcome.setResponseStatusCode(Constants.STATUS_HTTP_200_OK);
 
 		if (!thePerformIndexing) {
 			IIdType id = getContext().getVersion().newIdType();
