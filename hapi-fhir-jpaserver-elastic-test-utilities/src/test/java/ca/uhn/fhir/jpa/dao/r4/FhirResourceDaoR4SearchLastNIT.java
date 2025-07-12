@@ -38,8 +38,9 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 	@BeforeEach
 	public void enableAdvancedHSearchIndexing() {
 		myStorageSettings.setLastNEnabled(true);
-		myStorageSettings.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setHibernateSearchIndexSearchParams(true);
 		myHSearchEventDispatcher.register(mySearchEventListener);
+		mySearchParamRegistry.forceRefresh();
 		ourLog.info("enableAdvancedHSearchIndexing finished.  lastn {} advancedHSearchIndexing {}", myStorageSettings.isLastNEnabled(), myStorageSettings.isAdvancedHSearchIndexing());
 	}
 

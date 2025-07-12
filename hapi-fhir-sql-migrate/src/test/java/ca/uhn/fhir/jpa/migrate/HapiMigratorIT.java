@@ -8,6 +8,8 @@ import ca.uhn.fhir.jpa.migrate.taskdef.NopTask;
 import ca.uhn.fhir.jpa.migrate.tasks.SchemaInitializationProvider;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
+import ca.uhn.fhir.jpa.migrate.util.SqlUtil;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
 import jakarta.annotation.Nonnull;
@@ -41,6 +43,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 class HapiMigratorIT {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigratorIT.class);
 	private static final String MIGRATION_TABLENAME = "TEST_MIGRATOR_TABLE";
+	private static final String TABLE_NAME_NON_SCHEMA_INIT = "NON_SCHEMA_INIT";
+	private static final String TABLE_NAME_SCHEMA_INIT = "SCHEMA_INIT";
+	private static final String TABLE_NAME_HFJ_RES_REINDEX_JOB = "HFJ_RES_REINDEX_JOB";
+	private static final String TABLE_NAME_NON_SCHEMA_INIT_2 = "NON_SCHEMA_INIT_2";
+	private static final String TABLE_NAME_SCHEMA_INIT_2 = "SCHEMA_INIT_2";
 
 	private final BasicDataSource myDataSource = BaseMigrationTest.getDataSource();
 	private final JdbcTemplate myJdbcTemplate = new JdbcTemplate(myDataSource);
@@ -61,13 +68,28 @@ class HapiMigratorIT {
 	@AfterEach
 	void after() {
 		myJdbcTemplate.execute("DROP TABLE " + MIGRATION_TABLENAME);
+		myJdbcTemplate.execute("DROP TABLE IF EXISTS " + TABLE_NAME_HFJ_RES_REINDEX_JOB);
+		myJdbcTemplate.execute("DROP TABLE IF EXISTS " + TABLE_NAME_NON_SCHEMA_INIT);
+		myJdbcTemplate.execute("DROP TABLE IF EXISTS " + TABLE_NAME_SCHEMA_INIT);
+		myJdbcTemplate.execute("DROP TABLE IF EXISTS " + TABLE_NAME_NON_SCHEMA_INIT_2);
+		myJdbcTemplate.execute("DROP TABLE IF EXISTS " + TABLE_NAME_SCHEMA_INIT_2);
 		assertEquals(0, myDataSource.getNumActive());
 		HapiMigrationLock.setMaxRetryAttempts(HapiMigrationLock.DEFAULT_MAX_RETRY_ATTEMPTS);
 		System.clearProperty(HapiMigrationLock.CLEAR_LOCK_TABLE_WITH_DESCRIPTION);
 	}
 
-	@Test
-	public void testInitializeSchema() {
+/** We test initialization in two cases: an empty database, and one that has been manually filled by running the schema sql to verify initialization doesn't try to re-install on top and detects that it is still "initializing". */
+		@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testInitializeSchema(boolean thePreCreateSchema) {
+		if (thePreCreateSchema) {
+			String sql = ClasspathUtil.loadResource("/hapi-migrator-it-init-schema/h2.sql");
+			List<String> statements = SqlUtil.splitSqlFileIntoStatements(sql);
+			for (String statement : statements) {
+				myJdbcTemplate.update(statement);
+			}
+		}
+
 		SchemaInitializationProvider schemaInitProvider = new SchemaInitializationProvider(
 			"A schema",
 			"/hapi-migrator-it-init-schema",
@@ -80,10 +102,10 @@ class HapiMigratorIT {
 
 		version.initializeSchema("1", schemaInitProvider);
 
-		Builder.BuilderAddTableByColumns nonSchemaInit = version.addTableByColumns("2", "NON_SCHEMA_INIT", "PID");
+		Builder.BuilderAddTableByColumns nonSchemaInit = version.addTableByColumns("2", TABLE_NAME_NON_SCHEMA_INIT, "PID");
 		nonSchemaInit.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
 
-		Builder.BuilderAddTableByColumns schemaInit = version.addTableByColumns("3", "SCHEMA_INIT", "PID");
+		Builder.BuilderAddTableByColumns schemaInit = version.addTableByColumns("3", TABLE_NAME_SCHEMA_INIT, "PID");
 		schemaInit.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
 		schemaInit.withFlags().runEvenDuringSchemaInitialization();
 
@@ -97,7 +119,11 @@ class HapiMigratorIT {
 		 */
 		migrator = buildMigrator(taskList.toTaskArray());
 		outcome = migrator.migrate();
-		assertThat(toTaskVersionList(outcome)).as(toTaskStatementDescriptions(outcome)).containsExactly("1", "3");
+		if (thePreCreateSchema) {
+			assertThat(toTaskVersionList(outcome)).as(toTaskStatementDescriptions(outcome)).containsExactly("3");
+		} else {
+			assertThat(toTaskVersionList(outcome)).as(toTaskStatementDescriptions(outcome)).containsExactly("1", "3");
+		}
 
 		/*
 		 * Run again - Nothing should happen since we've already finished the migration
@@ -109,10 +135,10 @@ class HapiMigratorIT {
 		/*
 		 * Add another pair of tasks - Both should run
 		 */
-		Builder.BuilderAddTableByColumns nonSchemaInit2 = version.addTableByColumns("4", "NON_SCHEMA_INIT_2", "PID");
+		Builder.BuilderAddTableByColumns nonSchemaInit2 = version.addTableByColumns("4", TABLE_NAME_NON_SCHEMA_INIT_2, "PID");
 		nonSchemaInit2.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
 
-		Builder.BuilderAddTableByColumns schemaInit2 = version.addTableByColumns("5", "SCHEMA_INIT_2", "PID");
+		Builder.BuilderAddTableByColumns schemaInit2 = version.addTableByColumns("5", TABLE_NAME_SCHEMA_INIT_2, "PID");
 		schemaInit2.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
 		schemaInit2.withFlags().runEvenDuringSchemaInitialization();
 

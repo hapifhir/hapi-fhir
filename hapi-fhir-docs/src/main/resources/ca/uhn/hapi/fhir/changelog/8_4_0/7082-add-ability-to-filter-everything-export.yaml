@@ -1,0 +1,13 @@
+---
+type: add
+issue: 7082
+title: "Add an ability to filter resources out of
+        `$everything` and `$export` operations.
+        This can be done via a newly created ISearchLimiterSvc.
+        By default, no filtering is provided. But consumers
+        may inject an ISearchLimiterSvc and specify which
+        resources to filter on which operations.
+        This is to allow consumers to filter out resources
+        (for example, for security reasons),
+        even if those resources are allowed by the spec.
+"
