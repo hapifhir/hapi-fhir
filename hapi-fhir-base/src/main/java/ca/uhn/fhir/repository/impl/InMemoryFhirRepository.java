@@ -2,18 +2,16 @@ package ca.uhn.fhir.repository.impl;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.repository.impl.ResourceStorage.ResourceLookup;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
-import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -22,8 +20,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -47,8 +43,8 @@ public class InMemoryFhirRepository implements IRepository {
 	// Based on org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository.
 
 	private String myBaseUrl;
-	private final Map<String, Map<IIdType, IBaseResource>> resourceMap;
 	private final FhirContext context;
+	public final ResourceStorage myResourceStorage;
 
 	public static InMemoryFhirRepository emptyRepository(@Nonnull FhirContext theFhirContext) {
 		return new InMemoryFhirRepository(theFhirContext, new HashMap<>());
@@ -68,7 +64,7 @@ public class InMemoryFhirRepository implements IRepository {
 	InMemoryFhirRepository(
 			@Nonnull FhirContext theContext, @Nonnull Map<String, Map<IIdType, IBaseResource>> theContents) {
 		context = theContext;
-		resourceMap = theContents;
+		myResourceStorage = new ResourceStorage(theContents);
 	}
 
 	@Override
@@ -80,7 +76,7 @@ public class InMemoryFhirRepository implements IRepository {
 	@SuppressWarnings("unchecked")
 	public synchronized <T extends IBaseResource, I extends IIdType> T read(
 			Class<T> resourceType, I id, Map<String, String> headers) {
-		var lookup = lookupResource(resourceType, id);
+		var lookup = myResourceStorage.lookupResource(getResourceTypeName(resourceType), id);
 
 		var resource = lookup.getResourceOrThrow404();
 
@@ -89,18 +85,10 @@ public class InMemoryFhirRepository implements IRepository {
 
 	@Override
 	public synchronized <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
-		var resources = getResourceMapForType(resource.fhirType());
+		ResourceLookup created = myResourceStorage.createResource(resource);
 
-		IIdType theId;
-		do {
-			theId = new IdDt(resource.fhirType(), UUID.randomUUID().toString());
-		} while (resources.containsKey(theId));
-		resource.setId(theId);
-
-		resources.put(theId.toUnqualifiedVersionless(), resource);
-
-		MethodOutcome methodOutcome = new MethodOutcome(theId, true);
-		methodOutcome.setResource(resource);
+		MethodOutcome methodOutcome = new MethodOutcome(created.id(), true);
+		methodOutcome.setResource(created.getResourceOrThrow404());
 		methodOutcome.setResponseStatusCode(Constants.STATUS_HTTP_201_CREATED);
 		return methodOutcome;
 	}
@@ -112,12 +100,14 @@ public class InMemoryFhirRepository implements IRepository {
 	}
 
 	@Override
-	public synchronized <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
-		var lookup = lookupResource(resource.getClass(), resource.getIdElement());
+	public synchronized <T extends IBaseResource> MethodOutcome update(T theResource, Map<String, String> headers) {
+		theResource.getIdElement();
+		ResourceLookup lookup = myResourceStorage.lookupResource(
+				getResourceTypeName(theResource.getClass()), theResource.getIdElement());
 
 		boolean isCreate = !lookup.isPresent();
-		lookup.put(resource);
-		var outcome = new MethodOutcome(lookup.id, isCreate);
+		lookup.put(theResource);
+		var outcome = new MethodOutcome(lookup.id(), isCreate);
 		if (isCreate) {
 			outcome.setResponseStatusCode(Constants.STATUS_HTTP_201_CREATED);
 		} else {
@@ -129,13 +119,13 @@ public class InMemoryFhirRepository implements IRepository {
 
 	@Override
 	public synchronized <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
-			Class<T> resourceType, I id, Map<String, String> headers) {
-		var lookup = lookupResource(resourceType, id);
+			Class<T> theResourceType, I theId, Map<String, String> headers) {
+		ResourceLookup lookup = myResourceStorage.lookupResource(getResourceTypeName(theResourceType), theId);
 
 		if (lookup.isPresent()) {
 			var resource = lookup.getResourceOrThrow404();
 			lookup.remove();
-			MethodOutcome methodOutcome = new MethodOutcome(id, false).setResource(resource);
+			MethodOutcome methodOutcome = new MethodOutcome(theId, false).setResource(resource);
 			methodOutcome.setResponseStatusCode(Constants.STATUS_HTTP_204_NO_CONTENT);
 			return methodOutcome;
 		} else {
@@ -146,7 +136,7 @@ public class InMemoryFhirRepository implements IRepository {
 					fhirContext(),
 					SUCCESSFUL_DELETE_NOT_FOUND);
 
-			MethodOutcome methodOutcome = new MethodOutcome(id, false).setOperationOutcome(oo);
+			MethodOutcome methodOutcome = new MethodOutcome(theId, false).setOperationOutcome(oo);
 			methodOutcome.setResponseStatusCode(Constants.STATUS_HTTP_404_NOT_FOUND);
 			return methodOutcome;
 		}
@@ -162,38 +152,17 @@ public class InMemoryFhirRepository implements IRepository {
 		NaiveSearching search = new NaiveSearching(
 				fhirContext(),
 				context.getResourceType(resourceType),
-				id -> this.lookupResource(id).getResource().stream(),
-				() -> this.getResourceMapForType(context.getResourceType(resourceType))
-						.values());
+				id -> this.myResourceStorage.lookupResource(id).getResource().stream(),
+				() -> myResourceStorage.getAllOfType(context.getResourceType(resourceType)));
 
 		return search.search(theSearchParameters);
 	}
 
 	@Override
-	public synchronized <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
+	public synchronized <B extends IBaseBundle> B transaction(
+			B theTransactionBundle, Map<String, String> theUnusedHeaders) {
 		NaiveRepositoryTransactionProcessor transactionProcessor = new NaiveRepositoryTransactionProcessor(this);
-		return transactionProcessor.processTransaction(transaction, headers);
-	}
-
-	// SOMEDAY find a home for this
-	public static String statusCodeToStatusLine(int theResponseStatusCode) {
-		return switch (theResponseStatusCode) {
-			case Constants.STATUS_HTTP_200_OK -> "200 OK";
-			case Constants.STATUS_HTTP_201_CREATED -> "201 Created";
-			case Constants.STATUS_HTTP_409_CONFLICT -> "409 Conflict";
-			case Constants.STATUS_HTTP_204_NO_CONTENT -> "204 No Content";
-			case Constants.STATUS_HTTP_404_NOT_FOUND -> "404 Not Found";
-			default -> throw new IllegalArgumentException("Unsupported response status code: " + theResponseStatusCode);
-		};
-	}
-
-	/**
-	 * The map of resources for each resource type.
-	 */
-	@VisibleForTesting
-	@Nonnull
-	public Map<IIdType, IBaseResource> getResourceMapForType(String resourceTypeName) {
-		return resourceMap.computeIfAbsent(resourceTypeName, x -> new HashMap<>());
+		return transactionProcessor.processTransaction(theTransactionBundle);
 	}
 
 	public String getBaseUrl() {
@@ -204,65 +173,12 @@ public class InMemoryFhirRepository implements IRepository {
 		myBaseUrl = theBaseUrl;
 	}
 
-	/**
-	 * Abstract "pointer" to a resource id in the repository.
-	 * @param resources the map of resources for a specific type
-	 * @param id the id of the resource to look up
-	 */
-	private record ResourceLookup(Map<IIdType, IBaseResource> resources, IIdType id) {
-
-		private static IIdType normalizeIdForLookup(IIdType theId, String resourceTypeName) {
-			IIdType unqualifiedVersionless = theId.toUnqualifiedVersionless();
-			String idResourceType = unqualifiedVersionless.getResourceType();
-			if (idResourceType == null) {
-				unqualifiedVersionless = unqualifiedVersionless.withResourceType(resourceTypeName);
-			} else if (!idResourceType.equals(resourceTypeName)) {
-				throw new IllegalArgumentException("Resource type mismatch: resource is " + resourceTypeName
-						+ " but id type is " + idResourceType);
-			}
-			return unqualifiedVersionless;
-		}
-
-		@Nonnull
-		Optional<IBaseResource> getResource() {
-			return Optional.ofNullable(resources.get(id));
-		}
-
-		@Nonnull
-		IBaseResource getResourceOrThrow404() {
-			return getResource().orElseThrow(() -> new ResourceNotFoundException("Resource not found with id " + id));
-		}
-
-		void remove() {
-			resources.remove(id);
-		}
-
-		boolean isPresent() {
-			return resources.containsKey(id);
-		}
-
-		public <T extends IBaseResource> void put(T theResource) {
-			resources.put(id, theResource);
-		}
+	@VisibleForTesting
+	public ResourceStorage getResourceStorage() {
+		return myResourceStorage;
 	}
 
-	private ResourceLookup lookupResource(IIdType theId) {
-		Validate.notNull(theId, "Id must not be null");
-		Validate.notNull(theId.getResourceType(), "Resource type must not be null");
-
-		Map<IIdType, IBaseResource> resources = getResourceMapForType(theId.getResourceType());
-
-		return new ResourceLookup(resources, new IdDt(theId));
-	}
-
-	private ResourceLookup lookupResource(Class<? extends IBaseResource> theResourceType, IIdType theId) {
-		Validate.notNull(theResourceType, "Resource type must not be null");
-		Validate.notNull(theId, "Id must not be null");
-
-		String resourceTypeName = fhirContext().getResourceType(theResourceType);
-
-		IIdType unqualifiedVersionless = ResourceLookup.normalizeIdForLookup(theId, resourceTypeName);
-
-		return lookupResource(unqualifiedVersionless);
+	String getResourceTypeName(Class<? extends IBaseResource> theResourceType) {
+		return fhirContext().getResourceType(theResourceType);
 	}
 }
