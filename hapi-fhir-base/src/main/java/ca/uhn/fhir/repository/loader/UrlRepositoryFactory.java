@@ -19,7 +19,6 @@ import java.util.regex.Pattern;
  * Use ServiceLoader to load {@link IRepositoryLoader} implementations
  * and provide chain-of-responsibility style matching by url to build IRepository instances.
  */
-
 @Beta()
 public class UrlRepositoryFactory {
 	private static final Logger ourLog = IRepository.ourLog;
