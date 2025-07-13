@@ -1,9 +1,9 @@
-package ca.uhn.fhir.repository.impl;
+package ca.uhn.fhir.repository.loader;
 
 /**
  * Simple base class for {@link IRepositoryLoader} implementations that select on the sub-scheme of the URL.
  */
-public abstract class SchemeBasedFhirRepositoryLoader implements IRepositoryLoader {
+public abstract class BaseSchemeBasedFhirRepositoryLoader implements IRepositoryLoader {
 	final String mySubScheme;
 
 	/**
@@ -12,7 +12,7 @@ public abstract class SchemeBasedFhirRepositoryLoader implements IRepositoryLoad
 	 * @param theSubScheme The sub-scheme to match against. For example, if the URL is "fhir-repository:ig-filesystem:...",
 	 *                     then the sub-scheme is "ig-filesystem".
 	 */
-	protected SchemeBasedFhirRepositoryLoader(String theSubScheme) {
+	protected BaseSchemeBasedFhirRepositoryLoader(String theSubScheme) {
 		mySubScheme = theSubScheme;
 	}
 

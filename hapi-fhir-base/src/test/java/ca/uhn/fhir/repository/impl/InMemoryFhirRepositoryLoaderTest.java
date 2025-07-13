@@ -5,13 +5,14 @@ import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.repository.Repositories;
 import ca.uhn.fhir.repository.impl.memory.InMemoryFhirRepository;
 import ca.uhn.fhir.repository.impl.memory.InMemoryFhirRepositoryLoader;
+import ca.uhn.fhir.repository.loader.UrlRepositoryFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 
-import static ca.uhn.fhir.repository.impl.UrlRepositoryFactory.FHIR_REPOSITORY_URL_SCHEME;
+import static ca.uhn.fhir.repository.loader.UrlRepositoryFactory.FHIR_REPOSITORY_URL_SCHEME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 

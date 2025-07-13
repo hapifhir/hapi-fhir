@@ -2,7 +2,7 @@ package ca.uhn.fhir.repository;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.impl.GenericClientRepository;
-import ca.uhn.fhir.repository.impl.UrlRepositoryFactory;
+import ca.uhn.fhir.repository.loader.UrlRepositoryFactory;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;

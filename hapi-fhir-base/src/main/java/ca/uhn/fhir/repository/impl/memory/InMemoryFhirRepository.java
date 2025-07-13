@@ -17,6 +17,8 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -42,9 +44,10 @@ import static ca.uhn.fhir.model.api.StorageResponseCodeEnum.SUCCESSFUL_DELETE_NO
  */
 public class InMemoryFhirRepository implements IRepository {
 	// Based on org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository.
+	private static final Logger ourLog = LoggerFactory.getLogger(InMemoryFhirRepository.class);
 
 	private String myBaseUrl;
-	private final FhirContext context;
+	private final FhirContext myFhirContext;
 	private final ResourceStorage myResourceStorage;
 
 	// Factory methods and constuctors
@@ -65,14 +68,14 @@ public class InMemoryFhirRepository implements IRepository {
 
 	InMemoryFhirRepository(
 			@Nonnull FhirContext theContext, @Nonnull Map<String, Map<IIdType, IBaseResource>> theContents) {
-		context = theContext;
+		myFhirContext = theContext;
 		myResourceStorage = new ResourceStorage(theContents);
 	}
 
 	// interface methods
 	@Override
 	public @Nonnull FhirContext fhirContext() {
-		return this.context;
+		return this.myFhirContext;
 	}
 
 	@Override
@@ -91,10 +94,16 @@ public class InMemoryFhirRepository implements IRepository {
 			T theResource, Map<String, String> theUnusedHeaders) {
 		ResourceLookup created = myResourceStorage.createResource(theResource);
 
-		MethodOutcome methodOutcome = new MethodOutcome(created.id(), true);
-		methodOutcome.setResource(created.getResourceOrThrow404());
-		methodOutcome.setResponseStatusCode(Constants.STATUS_HTTP_201_CREATED);
-		return methodOutcome;
+		MethodOutcome outcome = new MethodOutcome(created.id(), true);
+		outcome.setResource(created.getResourceOrThrow404());
+		outcome.setResponseStatusCode(Constants.STATUS_HTTP_201_CREATED);
+
+		ourLog.debug("Created resource: {}", formatResource(outcome.getResource()));
+		return outcome;
+	}
+
+	private String formatResource(IBaseResource theResource) {
+		return myFhirContext.newJsonParser().encodeResourceToString(theResource);
 	}
 
 	@Override
@@ -111,12 +120,15 @@ public class InMemoryFhirRepository implements IRepository {
 
 		boolean isCreate = !lookup.isPresent();
 		lookup.put(theResource);
-		var outcome = new MethodOutcome(lookup.id(), isCreate);
+		MethodOutcome outcome = new MethodOutcome(lookup.id(), isCreate);
 		if (isCreate) {
 			outcome.setResponseStatusCode(Constants.STATUS_HTTP_201_CREATED);
 		} else {
 			outcome.setResponseStatusCode(Constants.STATUS_HTTP_200_OK);
 		}
+		outcome.setResource(lookup.getResourceOrThrow404());
+
+		ourLog.debug("Updated resource: {}", formatResource(outcome.getResource()));
 
 		return outcome;
 	}
@@ -140,6 +152,8 @@ public class InMemoryFhirRepository implements IRepository {
 
 			methodOutcome.setOperationOutcome(oo);
 		}
+		ourLog.debug("Delete resource: {}", theId.getValueAsString());
+
 		return methodOutcome;
 	}
 
@@ -152,9 +166,9 @@ public class InMemoryFhirRepository implements IRepository {
 
 		NaiveSearching search = new NaiveSearching(
 				fhirContext(),
-				context.getResourceType(theResourceType),
+				myFhirContext.getResourceType(theResourceType),
 				id -> this.myResourceStorage.lookupResource(id).getResource().stream(),
-				() -> myResourceStorage.getAllOfType(context.getResourceType(theResourceType)));
+				() -> myResourceStorage.getAllOfType(myFhirContext.getResourceType(theResourceType)));
 
 		return search.search(theSearchParameters);
 	}
@@ -162,8 +176,14 @@ public class InMemoryFhirRepository implements IRepository {
 	@Override
 	public synchronized <B extends IBaseBundle> B transaction(
 			B theTransactionBundle, Map<String, String> theUnusedHeaders) {
+		ourLog.debug("Transaction request: {}", formatResource(theTransactionBundle));
+
 		NaiveRepositoryTransactionProcessor transactionProcessor = new NaiveRepositoryTransactionProcessor(this);
-		return transactionProcessor.processTransaction(theTransactionBundle);
+		B result = transactionProcessor.processTransaction(theTransactionBundle);
+
+		ourLog.debug("Transaction result: {}", formatResource(result));
+
+		return result;
 	}
 
 	// implementation details

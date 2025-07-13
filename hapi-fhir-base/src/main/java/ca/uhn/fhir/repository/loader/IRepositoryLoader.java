@@ -1,4 +1,4 @@
-package ca.uhn.fhir.repository.impl;
+package ca.uhn.fhir.repository.loader;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;

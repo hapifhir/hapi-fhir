@@ -1,8 +1,10 @@
-package ca.uhn.fhir.repository.impl;
+package ca.uhn.fhir.repository.loader;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.repository.loader.IRepositoryLoader.IRepositoryRequest;
+import com.google.common.annotations.Beta;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
@@ -17,6 +19,8 @@ import java.util.regex.Pattern;
  * Use ServiceLoader to load {@link IRepositoryLoader} implementations
  * and provide chain-of-responsibility style matching by url to build IRepository instances.
  */
+
+@Beta()
 public class UrlRepositoryFactory {
 	private static final Logger ourLog = IRepository.ourLog;
 
@@ -40,7 +44,7 @@ public class UrlRepositoryFactory {
 		}
 
 		ServiceLoader<IRepositoryLoader> load = ServiceLoader.load(IRepositoryLoader.class);
-		IRepositoryLoader.IRepositoryRequest request = buildRequest(theBaseUrl, theFhirContext);
+		IRepositoryRequest request = buildRequest(theBaseUrl, theFhirContext);
 		for (IRepositoryLoader nextLoader : load) {
 			ourLog.debug("Checking repository loader {}", nextLoader.getClass().getName());
 			if (nextLoader.canLoad(request)) {
@@ -52,7 +56,7 @@ public class UrlRepositoryFactory {
 	}
 
 	@Nonnull
-	static RepositoryRequest buildRequest(@Nonnull String theBaseUrl, @Nullable FhirContext theFhirContext) {
+	public static IRepositoryRequest buildRequest(@Nonnull String theBaseUrl, @Nullable FhirContext theFhirContext) {
 		Matcher matcher = ourUrlPattern.matcher(theBaseUrl);
 		String subScheme = null;
 		String details = null;
@@ -66,7 +70,7 @@ public class UrlRepositoryFactory {
 	}
 
 	record RepositoryRequest(String url, String subScheme, String details, FhirContext fhirContext)
-			implements IRepositoryLoader.IRepositoryRequest {
+			implements IRepositoryRequest {
 		@Override
 		public String getUrl() {
 			return url;
