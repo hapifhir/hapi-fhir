@@ -711,6 +711,12 @@ public class SearchParamExtractorService {
 		}
 
 		IIdType referenceElement = thePathAndRef.getRef().getReferenceElement();
+		if (isBlank(referenceElement.getValue())) {
+			// it's an embedded element maybe;
+			// we need a valid referenceElement, becuase we
+			// resolve the resource by this value (and if we use "null", we can't resolve multiple values)
+			referenceElement = thePathAndRef.getRef().getResource().getIdElement();
+		}
 		JpaPid resolvedTargetId = (JpaPid) theTransactionDetails.getResolvedResourceId(referenceElement);
 		ResourceLink resourceLink;
 

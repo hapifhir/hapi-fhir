@@ -54,6 +54,7 @@ import com.healthmarketscience.sqlbuilder.ComboExpression;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.FunctionCall;
 import com.healthmarketscience.sqlbuilder.InCondition;
+import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.OrderObject;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.dbspec.Join;
@@ -852,6 +853,12 @@ public class SearchQueryBuilder {
 		InCondition predicate = new InCondition(resourceIdColumn, generatePlaceholders(excludePids));
 		predicate.setNegate(true);
 		addPredicate(predicate);
+	}
+
+	public void excludeResourceTypesPredicate(List<String> theResourceTypes) {
+		DbColumn resourceTypeCol = getOrCreateResourceTablePredicateBuilder().getResourceTypeColumn();
+		Condition c = new NotCondition(new InCondition(resourceTypeCol, generatePlaceholders(theResourceTypes)));
+		addPredicate(c);
 	}
 
 	public BinaryCondition createConditionForValueWithComparator(

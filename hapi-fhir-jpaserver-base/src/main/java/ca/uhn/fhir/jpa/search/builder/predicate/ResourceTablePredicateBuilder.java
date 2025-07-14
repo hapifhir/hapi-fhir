@@ -84,4 +84,8 @@ public class ResourceTablePredicateBuilder extends BaseJoiningPredicateBuilder {
 	public DbColumn getColumnFhirId() {
 		return myColumnFhirId;
 	}
+
+	public DbColumn getResourceTypeColumn() {
+		return myColumnResType;
+	}
 }

@@ -89,9 +89,24 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 			Set<TypedPidJson> submittedBatchResourceIds = new HashSet<>();
 
 			/*
+			 * NB: patient-compartment limitation
+			 * We know that Group and List are part of patient compartment.
+			 * But allowing export of them seems like a security flaw.
+			 * So we'll exclude them.
+			 */
+			Set<String> resourceTypesToOmit =
+					theStepExecutionDetails.getParameters().getExportStyle()
+									== BulkExportJobParameters.ExportStyle.PATIENT
+							? Set.of("Group", "List")
+							: Set.of();
+
+			/*
 			 * We will fetch ids for each resource type in the ResourceTypes (_type filter).
 			 */
 			for (String resourceType : params.getResourceTypes()) {
+				if (resourceTypesToOmit.contains(resourceType)) {
+					continue;
+				}
 				providerParams.setResourceType(resourceType);
 
 				// filters are the filters for searching

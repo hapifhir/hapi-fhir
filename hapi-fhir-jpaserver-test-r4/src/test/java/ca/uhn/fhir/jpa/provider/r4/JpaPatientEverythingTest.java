@@ -183,7 +183,6 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
     @Test
     public void patientEverything_shouldReturnAccount_whenAccountRefersToPatient() throws Exception {
-
         Reference referenceToPatient = createPatient();
 
         Account account = new Account();
@@ -1065,6 +1064,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
     @Test
     public void patientEverything_shouldReturnGroup_whenGroupRefersToPatient() throws Exception {
 
+		// TODO - update this test with permissions
         Reference referenceToPatient = createPatient();
 
         Group group = new Group();
