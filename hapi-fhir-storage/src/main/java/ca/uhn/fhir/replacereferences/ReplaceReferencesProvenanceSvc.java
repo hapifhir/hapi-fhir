@@ -294,23 +294,24 @@ public class ReplaceReferencesProvenanceSvc {
 	}
 
 	private boolean isNoopPatch(Bundle.BundleEntryResponseComponent theResponse) {
-		if (theResponse.hasOutcome()) {
-			OperationOutcome outcome = (OperationOutcome) theResponse.getOutcome();
-			if (outcome.hasIssue()) {
-				List<OperationOutcome.OperationOutcomeIssueComponent> issues = outcome.getIssue();
-				for (var issue : issues) {
-					if (issue.hasDetails() && issue.getDetails().hasCoding()) {
-						for (var coding : issue.getDetails().getCoding()) {
-							if (StorageResponseCodeEnum.SYSTEM.equals(coding.getSystem())
-									&& SUCCESSFUL_PATCH_NO_CHANGE.getCode().equals(coding.getCode())) {
-								return true;
-							}
-						}
-					}
-				}
-			}
+		if (!theResponse.hasOutcome()) {
+			return false;
 		}
-		return false;
+
+		OperationOutcome outcome = (OperationOutcome) theResponse.getOutcome();
+
+		if (!outcome.hasIssue()) {
+			return false;
+		}
+
+		List<OperationOutcome.OperationOutcomeIssueComponent> issues = outcome.getIssue();
+
+		return issues.stream()
+				.filter(issue -> issue.hasDetails() && issue.getDetails().hasCoding())
+				.map(issue -> issue.getDetails().getCoding())
+				.flatMap(List::stream)
+				.anyMatch(coding -> StorageResponseCodeEnum.SYSTEM.equals(coding.getSystem())
+						&& SUCCESSFUL_PATCH_NO_CHANGE.getCode().equals(coding.getCode()));
 	}
 
 	private Provenance.ProvenanceAgentComponent createR4ProvenanceAgent(IProvenanceAgent theProvenanceAgent) {

@@ -32,7 +32,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.TOTAL_EXPECTED_PATCHES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * This test class tests the $hapi.fhir.undo-replace-references operation for R4.
