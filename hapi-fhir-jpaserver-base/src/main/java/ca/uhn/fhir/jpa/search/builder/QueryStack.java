@@ -1415,6 +1415,7 @@ public class QueryStack {
 		}
 	}
 
+	@Nullable
 	public Condition createPredicateReference(
 			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
@@ -1434,6 +1435,7 @@ public class QueryStack {
 				mySqlBuilder);
 	}
 
+	@Nullable
 	public Condition createPredicateReference(
 			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,

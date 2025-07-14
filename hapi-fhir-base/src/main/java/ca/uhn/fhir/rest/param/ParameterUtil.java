@@ -34,6 +34,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.io.Serial;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -125,7 +126,7 @@ public class ParameterUtil {
 			if (isRi == usesHapiId) {
 				throw new ConfigurationException(Msg.code(1936)
 						+ "Method uses the wrong Id datatype (IdDt / IdType) for the given context FHIR version: "
-						+ theMethod.toString());
+						+ theMethod);
 			}
 		}
 		return index;
@@ -205,8 +206,9 @@ public class ParameterUtil {
 	}
 
 	public static IQueryParameterOr<?> singleton(final IQueryParameterType theParam, final String theParamName) {
-		return new IQueryParameterOr<IQueryParameterType>() {
+		return new IQueryParameterOr<>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -216,16 +218,16 @@ public class ParameterUtil {
 
 			@Override
 			public void setValuesAsQueryTokens(
-					FhirContext theContext, String theParamName, QualifiedParamList theParameters) {
+				FhirContext theContext, String theParamName, QualifiedParamList theParameters) {
 				if (theParameters.isEmpty()) {
 					return;
 				}
 				if (theParameters.size() > 1) {
 					throw new IllegalArgumentException(Msg.code(1937) + "Type "
-							+ theParam.getClass().getCanonicalName() + " does not support multiple values");
+						+ theParam.getClass().getCanonicalName() + " does not support multiple values");
 				}
 				theParam.setValueAsQueryToken(
-						theContext, theParamName, theParameters.getQualifier(), theParameters.get(0));
+					theContext, theParamName, theParameters.getQualifier(), theParameters.get(0));
 			}
 		};
 	}
@@ -244,7 +246,7 @@ public class ParameterUtil {
 						if (prevChar == '\\') {
 							b.append(next);
 						} else {
-							if (b.length() > 0) {
+							if (!b.isEmpty()) {
 								retVal.add(b.toString());
 							} else {
 								retVal.add(null);
@@ -256,15 +258,13 @@ public class ParameterUtil {
 					b.append(next);
 				}
 			}
-			if (b.length() > 0) {
+			if (!b.isEmpty()) {
 				retVal.add(b.toString());
 			}
 		}
 
 		if (theUnescapeComponents) {
-			for (int i = 0; i < retVal.size(); i++) {
-				retVal.set(i, unescape(retVal.get(i)));
-			}
+			retVal.replaceAll(ParameterUtil::unescape);
 		}
 
 		return retVal;
@@ -277,8 +277,7 @@ public class ParameterUtil {
 		if (theArgument instanceof Integer) {
 			return new IntegerDt((Integer) theArgument);
 		}
-		if (theArgument instanceof IPrimitiveType) {
-			IPrimitiveType<?> pt = (IPrimitiveType<?>) theArgument;
+		if (theArgument instanceof IPrimitiveType<?> pt) {
 			return new IntegerDt(pt.getValueAsString());
 		}
 		return null;
@@ -331,5 +330,21 @@ public class ParameterUtil {
 	public static boolean isIncludeIterate(String theQualifier) {
 		return Constants.PARAM_INCLUDE_QUALIFIER_RECURSE.equals(theQualifier)
 				|| Constants.PARAM_INCLUDE_QUALIFIER_ITERATE.equals(theQualifier);
+	}
+
+	/**
+	 * Given a list of query parameters, returns {@literal true} if all parameters in the list
+	 * return {@literal true} from {@link IQueryParameterType#isEmpty()}, or if the list
+	 * does not contain any elements.
+	 *
+	 * @since 8.4.0
+	 */
+	public static boolean areAllParametersEmpty(List<? extends IQueryParameterType> theList) {
+		for (IQueryParameterType next : theList) {
+			if (!next.isEmpty()) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

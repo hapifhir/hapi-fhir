@@ -83,4 +83,12 @@ public interface IQueryParameterType extends Serializable {
 	 * @return Returns a reference to <code>this</code> for easier method chaining
 	 */
 	IQueryParameterType setMissing(Boolean theMissing);
+
+	/**
+	 * Return {@literal true} if this parameter has no value
+	 *
+	 * @since 8.4.0
+	 */
+	boolean isEmpty();
+
 }
