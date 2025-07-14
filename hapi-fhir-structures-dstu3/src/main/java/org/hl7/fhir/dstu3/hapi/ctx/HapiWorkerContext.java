@@ -29,7 +29,6 @@ import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpander;
 import org.hl7.fhir.dstu3.utils.INarrativeGenerator;
-import org.hl7.fhir.dstu3.utils.validation.IResourceValidator;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.FhirPublication;
 import org.hl7.fhir.utilities.i18n.I18nBase;
@@ -165,11 +164,6 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public INarrativeGenerator getNarrativeGenerator(String thePrefix, String theBasePath) {
 		throw new UnsupportedOperationException(Msg.code(616));
-	}
-
-	@Override
-	public IResourceValidator newValidator() throws FHIRException {
-		throw new UnsupportedOperationException(Msg.code(617));
 	}
 
 	@Override

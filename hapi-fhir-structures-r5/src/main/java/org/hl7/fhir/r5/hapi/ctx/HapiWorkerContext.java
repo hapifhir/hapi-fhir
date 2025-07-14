@@ -166,6 +166,16 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public SystemSupportInformation getTxSupportInfo(String system, String version) {
+		return null;
+	}
+
+	@Override
+	public SystemSupportInformation getTxSupportInfo(String system) {
+		return null;
+	}
+
+	@Override
 	public ValidationResult validateCode(ValidationOptions theOptions, CodeableConcept theCode, ValueSet theVs) {
 		for (Coding next : theCode.getCoding()) {
 			ValidationResult retVal = validateCode(theOptions, next, theVs);
@@ -193,15 +203,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public void validateCodeBatch(
-			ValidationOptions options, List<? extends CodingValidationRequest> codes, ValueSet vs) {
-		throw new UnsupportedOperationException(Msg.code(209));
-	}
-
-	@Override
-	public void validateCodeBatchByRef(
-			ValidationOptions validationOptions, List<? extends CodingValidationRequest> list, String s) {
-		throw new UnsupportedOperationException(Msg.code(2430));
-	}
+			ValidationOptions options, List<? extends CodingValidationRequest> codes, ValueSet vs, boolean passVS) {}
 
 	@Override
 	public ValueSetExpansionOutcome expandVS(

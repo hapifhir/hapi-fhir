@@ -747,6 +747,16 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	@Override
+	public SystemSupportInformation getTxSupportInfo(String system, String version) {
+		return null;
+	}
+
+	@Override
+	public SystemSupportInformation getTxSupportInfo(String system) {
+		return null;
+	}
+
+	@Override
 	public ValueSetExpansionOutcome expandVS(
 			ValueSet source, boolean cacheOk, boolean heiarchical, boolean incompleteOk) {
 		return null;
@@ -805,19 +815,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 
 	@Override
 	public void validateCodeBatch(
-			ValidationOptions options, List<? extends CodingValidationRequest> codes, ValueSet vs) {
-		for (CodingValidationRequest next : codes) {
-			ValidationResult outcome = validateCode(options, next.getCoding(), vs);
-			next.setResult(outcome);
-		}
-	}
-
-	@Override
-	public void validateCodeBatchByRef(
-			ValidationOptions validationOptions, List<? extends CodingValidationRequest> list, String s) {
-		ValueSet valueSet = fetchResource(ValueSet.class, s);
-		validateCodeBatch(validationOptions, list, valueSet);
-	}
+			ValidationOptions options, List<? extends CodingValidationRequest> codes, ValueSet vs, boolean passVS) {}
 
 	@Nonnull
 	private ValidationResult doValidation(
