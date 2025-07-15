@@ -253,7 +253,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		myTestHelper.assertAllReferencesUpdated(true, withDelete, myLargeTestData);
 		myTestHelper.assertSourcePatientUpdatedOrDeletedAfterMerge(myLargeTestData.getSourcePatientId(), myLargeTestData.getTargetPatientId(), withDelete);
 		myTestHelper.assertTargetPatientUpdatedAfterMerge(myLargeTestData.getTargetPatientId(), myLargeTestData.getSourcePatientId(), withDelete, expectedIdentifiersOnTargetAfterMerge);
-		myTestHelper.assertMergeProvenance(withDelete, myLargeTestData,  null);
+		myTestHelper.assertMergeProvenance(inParams.asParametersResource(), myLargeTestData,  null);
 	}
 
 
@@ -290,7 +290,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			validateSyncOutcome(outParams);
 		}
 
-		myTestHelper.assertMergeProvenance(false, myLargeTestData, agents);
+		myTestHelper.assertMergeProvenance(inParams.asParametersResource(), myLargeTestData, agents);
 	}
 
 	@ParameterizedTest(name = "{index}: isAsync={0}")
@@ -378,7 +378,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			targetPatient.getIdElement(),
 			theDeleteSource);
 
-		myTestHelper.assertMergeProvenance(theDeleteSource,
+		myTestHelper.assertMergeProvenance(inParams.asParametersResource(),
 			sourcePatient.getIdElement().withVersion("2"),
 			theExpectedTargetIdWithVersion,
 			0,

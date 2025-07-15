@@ -29,9 +29,13 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.List;
 
 public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReducerStep<MergeJobParameters> {
 	private final IHapiTransactionService myHapiTransactionService;
@@ -69,11 +73,13 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 		Patient resultResource;
 		boolean deleteSource;
 
+		List<IBaseResource> containedResourcesForProvenance;
 		Parameters originalInputParameters = null;
 		if (mergeJobParameters.getOriginalInputParameters() != null) {
 			originalInputParameters = myFhirContext.newJsonParser().parseResource(Parameters.class, mergeJobParameters.getOriginalInputParameters());
 			resultResource = getResultResource(originalInputParameters);
 			deleteSource = isDeleteSource(originalInputParameters);
+			containedResourcesForProvenance = List.of(originalInputParameters);
 		}
 		else {
 			// This else part is just for backward compatibility could be removed in the future
@@ -83,6 +89,7 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 				resultResource = null;
 			}
 			deleteSource = mergeJobParameters.getDeleteSource();
+			containedResourcesForProvenance = Collections.emptyList();
 		}
 
 		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
@@ -95,20 +102,19 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 					sourceResource,
 					targetResource,
 					resultResource,
-					mergeJobParameters.getDeleteSource(),
+					deleteSource,
 					theRequestDetails);
 
 			String sourceVersionForProvenance = sourceResource.getIdElement().getVersionIdPart();
-			if (mergeJobParameters.getDeleteSource()) {
+			if (deleteSource) {
 				sourceVersionForProvenance =
 						Long.toString(sourceResource.getIdElement().getVersionIdPartAsLong() + 1);
 			}
 
 			mergeJobParameters.setSourceVersionForProvenance(sourceVersionForProvenance);
-			mergeJobParameters.setTargetVersionForProvenance(
-					updatedTarget.getIdElement().getVersionIdPart());
+			mergeJobParameters.setTargetVersionForProvenance(updatedTarget.getIdElement().getVersionIdPart());
 
-			createProvenance(theStepExecutionDetails, theRequestDetails);
+			createProvenance(theStepExecutionDetails, theRequestDetails, containedResourcesForProvenance);
 
 			if (deleteSource) {
 				myPatientDao.delete(sourceResource.getIdElement(), theRequestDetails);

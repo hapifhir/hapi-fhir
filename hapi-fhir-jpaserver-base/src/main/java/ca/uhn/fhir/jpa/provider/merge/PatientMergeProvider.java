@@ -40,6 +40,7 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 
 import java.util.List;
@@ -118,7 +119,7 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 					theResultPatient,
 					resourceLimit,
 					provenanceAgents,
-					theRequestDetails.getResource());
+					(Parameters) theRequestDetails.getResource());
 
 			MergeOperationOutcome mergeOutcome =
 					myResourceMergeService.merge(mergeOperationParameters, theRequestDetails);
@@ -257,7 +258,7 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 			IBaseResource theResultPatient,
 			int theResourceLimit,
 			List<IProvenanceAgent> theProvenanceAgents,
-			IBaseResource theOriginalInputParameters) {
+			Parameters theOriginalInputParameters) {
 
 		MergeOperationInputParameters mergeOperationParameters =
 				new MergeOperationInputParameters(theResourceLimit);
@@ -279,7 +280,7 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 		}
 
 		mergeOperationParameters.setProvenanceAgents(theProvenanceAgents);
-		mergeOperationParameters.setOriginalInputParameters(theOriginalInputParameters);
+		mergeOperationParameters.setOriginalInputParameters(theOriginalInputParameters.copy());
 		return mergeOperationParameters;
 	}
 }

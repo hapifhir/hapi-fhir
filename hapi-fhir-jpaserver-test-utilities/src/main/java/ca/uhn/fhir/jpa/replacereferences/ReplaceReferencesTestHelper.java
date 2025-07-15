@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.replacereferences;
 
+import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
+import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceResultsJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.FhirContext;
@@ -37,6 +39,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -107,8 +110,12 @@ public class ReplaceReferencesTestHelper {
 	}
 
 	public void setSourceAndTarget(PatientMergeInputParameters inParams, ReplaceReferencesLargeTestData theTestData) {
-		inParams.sourcePatient = new Reference().setReferenceElement(theTestData.getSourcePatientId());
-		inParams.targetPatient = new Reference().setReferenceElement(theTestData.getTargetPatientId());
+		inParams.sourcePatient = idAsReference(theTestData.getSourcePatientId());
+		inParams.targetPatient = idAsReference(theTestData.getTargetPatientId());
+	}
+
+	public Reference idAsReference(IIdType theId) {
+		return new Reference().setReferenceElement(theId);
 	}
 
 	public Patient readPatient(IIdType thePatientId) {
@@ -198,11 +205,11 @@ public class ReplaceReferencesTestHelper {
 	}
 
 	public void assertMergeProvenance(
-			boolean theDeleteSource,
+			Parameters theInputParameters,
 			ReplaceReferencesLargeTestData theTestData,
 			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgent) {
 		assertMergeProvenance(
-				theDeleteSource,
+				theInputParameters,
 				theTestData.getSourcePatientId().withVersion("2"),
 				theTestData.getTargetPatientId().withVersion("2"),
 				ReplaceReferencesLargeTestData.TOTAL_EXPECTED_PATCHES,
@@ -211,7 +218,7 @@ public class ReplaceReferencesTestHelper {
 	}
 
 	public void assertMergeProvenance(
-			boolean theDeleteSource,
+			Parameters theInputParameters,
 			IIdType theSourcePatientIdWithExpectedVersion,
 			IIdType theTargetPatientIdWithExpectedVersion,
 			int theExpectedPatches,
@@ -261,6 +268,14 @@ public class ReplaceReferencesTestHelper {
 		assertThat(activityCoding).isNotNull();
 		assertThat(activityCoding.getSystem()).isEqualTo("http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle");
 		assertThat(activityCoding.getCode()).isEqualTo("merge");
+
+		assertThat(provenance.hasContained()).isTrue();
+		assertThat(provenance.getContained()).hasSize(1);
+		Parameters containedParameters = (Parameters) provenance.getContained().get(0);
+		//there would be an id added to the in the contained input parameters,
+		//other than that it should be equal to the input parameters that was used for the operation
+		containedParameters.setId((String) null);
+		assertThat(containedParameters.equalsDeep(theInputParameters)).isTrue();
 	}
 
 	private Set<IIdType> getEverythingResourceIds(IIdType thePatientId) {
@@ -538,6 +553,14 @@ public class ReplaceReferencesTestHelper {
 
 		public Parameters asUndoParametersResource() {
 			return asCommonParameters();
+		}
+
+		public MergeJobParameters asMergeJobParameters(FhirContext theFhirContext) {
+			MergeJobParameters jobParams = new MergeJobParameters();
+			jobParams.setSourceId(new FhirIdJson(((Reference)sourcePatient).getReferenceElement()));
+			jobParams.setTargetId(new FhirIdJson(((Reference)targetPatient).getReferenceElement()));
+			jobParams.setOriginalInputParameters(theFhirContext.newJsonParser().encodeResourceToString(asParametersResource()));
+			return jobParams;
 		}
 	}
 
