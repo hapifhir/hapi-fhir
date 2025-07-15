@@ -54,7 +54,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class SearchParameterUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParameterUtil.class);
 
-
 	/**
 	 * This is a list of resources that are in the
 	 * <a href="https://build.fhir.org/compartmentdefinition-patient.html">Patient Compartment</a>
@@ -66,7 +65,8 @@ public class SearchParameterUtil {
 	 * Returns true if the named compartment (Patient, Practitioner, etc) should
 	 * include the provided Search Parameter (SP)
 	 */
-	private static boolean shouldCompartmentIncludeSP(String theCompartmentName, SearchParamDefinition theSearchParamDef) {
+	private static boolean shouldCompartmentIncludeSP(
+			String theCompartmentName, SearchParamDefinition theSearchParamDef) {
 		// special cases
 		if (theCompartmentName.equalsIgnoreCase("patient")) {
 			/*
@@ -76,17 +76,21 @@ public class SearchParameterUtil {
 			 * But we will exclude them anyways because they can leak PHI
 			 * and may be a security flaw of the spec itself.
 			 */
-			if (theSearchParamDef.name().equals("member") && theSearchParamDef.path().equals("Group.member.entity")) {
+			if (theSearchParamDef.name().equals("member")
+					&& theSearchParamDef.path().equals("Group.member.entity")) {
 				return false;
-			} else if (theSearchParamDef.name().equals("subject") && theSearchParamDef.path().equals("List.subject")) {
+			} else if (theSearchParamDef.name().equals("subject")
+					&& theSearchParamDef.path().equals("List.subject")) {
 				return false;
-			} else if (theSearchParamDef.name().equals("source") && theSearchParamDef.path().equals("List.source")) {
+			} else if (theSearchParamDef.name().equals("source")
+					&& theSearchParamDef.path().equals("List.source")) {
 				return false;
 			}
 		}
 
 		// default
-		return Arrays.stream(theSearchParamDef.providesMembershipIn()).anyMatch(p -> p.name().equals(theCompartmentName));
+		return Arrays.stream(theSearchParamDef.providesMembershipIn())
+				.anyMatch(p -> p.name().equals(theCompartmentName));
 	}
 
 	/**
@@ -97,12 +101,13 @@ public class SearchParameterUtil {
 	 * @param theSearchParamDefinition the SP definition (from the fields)
 	 * @return a set of valid compartments for the provided search parameter.
 	 */
-	public static Set<String> getMembershipCompartmentsForSearchParameter(Class<? extends IBase> theResourceClazz, SearchParamDefinition theSearchParamDefinition) {
-		RestSearchParameterTypeEnum paramType =
-			RestSearchParameterTypeEnum.forCode(theSearchParamDefinition.type().toLowerCase());
+	public static Set<String> getMembershipCompartmentsForSearchParameter(
+			Class<? extends IBase> theResourceClazz, SearchParamDefinition theSearchParamDefinition) {
+		RestSearchParameterTypeEnum paramType = RestSearchParameterTypeEnum.forCode(
+				theSearchParamDefinition.type().toLowerCase());
 		if (paramType == null) {
 			throw new ConfigurationException(Msg.code(1721) + "Search param " + theSearchParamDefinition.name()
-				+ " has an invalid type: " + theSearchParamDefinition.type());
+					+ " has an invalid type: " + theSearchParamDefinition.type());
 		}
 
 		Set<String> validCompartments = new HashSet<>();
@@ -138,7 +143,8 @@ public class SearchParameterUtil {
 		 * requests.
 		 * See https://github.com/hapifhir/hapi-fhir/issues/6536 for more information.
 		 */
-		if (theSearchParamDefinition.name().equals("patient") && theSearchParamDefinition.path().equals("Device.patient")) {
+		if (theSearchParamDefinition.name().equals("patient")
+				&& theSearchParamDefinition.path().equals("Device.patient")) {
 			validCompartments.add("Patient");
 		}
 
