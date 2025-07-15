@@ -2,7 +2,6 @@ package ca.uhn.fhir.repository.impl.memory;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -18,8 +17,17 @@ import java.util.UUID;
  * In-memory storage for FHIR resources, indexed by resource type and ID.
  */
 public class ResourceStorage {
+	/** Map where the keys are resource type names (e.g., "Patient", "Observation"),
+	 * and the values are maps of unqualified-versionless resource IDs to FHIR resources of that type.
+	 */
 	final Map<String, Map<IIdType, IBaseResource>> resourceMap;
 
+	/**
+	 * Constructs a new {@code ResourceStorage} instance.
+	 *
+	 * @param theResourceMap A map where the keys are resource type names (e.g., "Patient", "Observation"),
+	 *                       and the values are maps of resource IDs to FHIR resources of that type.
+	 */
 	ResourceStorage(Map<String, Map<IIdType, IBaseResource>> theResourceMap) {
 		resourceMap = theResourceMap;
 	}
@@ -30,7 +38,7 @@ public class ResourceStorage {
 
 		Map<IIdType, IBaseResource> resources = getResourceMapForType(theId.getResourceType());
 
-		return new ResourceLookup(resources, new IdDt(theId));
+		return new ResourceLookup(resources, new IdDt(theId).toUnqualifiedVersionless());
 	}
 
 	ResourceLookup lookupResource(String resourceTypeName, IIdType theId) {

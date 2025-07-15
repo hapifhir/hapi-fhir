@@ -74,7 +74,7 @@ public class MultiVersionResourceMatcher implements IResourceMatcher {
 			}
 			case "CodeableConcept" -> {
 				var terser = myFhirContext.newTerser();
-				return terser.getValues(theCodeElement, "codeing").stream()
+				return terser.getValues(theCodeElement, "coding").stream()
 						.map(coding -> codingToTokenParam(terser, coding))
 						.toList();
 			}

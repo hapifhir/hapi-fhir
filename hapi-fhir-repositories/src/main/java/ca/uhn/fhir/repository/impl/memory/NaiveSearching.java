@@ -45,7 +45,16 @@ class NaiveSearching {
 	/** a supplier of all resources of this type, with empty ok. */
 	private final Supplier<Collection<IBaseResource>> myAllResourcesSupplier;
 
-	NaiveSearching(
+	/**
+	 * Constructor for NaiveSearching.
+	 * Initializes the search mechanism for a specific resource type.
+	 *
+	 * @param theFhirContext The FHIR context used for resource operations.
+	 * @param theResourceType The type of resource to search for (e.g., "Patient", "Observation").
+	 * @param theSafeRead A function to safely read resources by their ID, returning a stream of matching resources with empty if not present.
+	 * @param theAllResourcesSupplier A supplier that provides all resources of the specified type.
+	 */
+	private NaiveSearching(
 			FhirContext theFhirContext,
 			String theResourceType,
 			Function<IdDt, Stream<IBaseResource>> theSafeRead,

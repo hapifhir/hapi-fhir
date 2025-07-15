@@ -33,5 +33,4 @@ public class Repositories {
 	public static IRepository repositoryForUrl(@Nonnull String theBaseUrl, @Nullable FhirContext theFhirContext) {
 		return UrlRepositoryFactory.buildRepository(theBaseUrl, theFhirContext);
 	}
-
 }

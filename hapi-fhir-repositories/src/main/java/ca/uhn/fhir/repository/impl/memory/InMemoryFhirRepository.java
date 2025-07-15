@@ -51,10 +51,22 @@ public class InMemoryFhirRepository implements IRepository {
 	private final ResourceStorage myResourceStorage;
 
 	// Factory methods and constructors
+
+	/**
+	 * Creates an empty in-memory FHIR repository.
+	 */
 	public static InMemoryFhirRepository emptyRepository(@Nonnull FhirContext theFhirContext) {
 		return new InMemoryFhirRepository(theFhirContext, new HashMap<>());
 	}
 
+	/**
+	 * Creates an in-memory FHIR repository from the contents of a bundle.
+	 * The bundle's resources are indexed by resource type and ID.
+	 *
+	 * @param theFhirContext the FHIR context
+	 * @param theBundle      the bundle containing resources
+	 * @return a new InMemoryFhirRepository instance
+	 */
 	public static InMemoryFhirRepository fromBundleContents(FhirContext theFhirContext, IBaseBundle theBundle) {
 
 		List<IBaseResource> resources = BundleUtil.toListOfResources(theFhirContext, theBundle);

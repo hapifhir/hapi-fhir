@@ -28,12 +28,15 @@ import static java.util.Objects.requireNonNull;
 public class NaiveRepositoryTransactionProcessor {
 	// SOMEDAY implement GET, PATCH, and other methods as needed.
 	// SOMEDAY order entries
-	// SOMEDAY distinguish batch and transaction processing.  Not really a problem yet since we can't fail any of our operations.
+	// SOMEDAY distinguish batch and transaction processing.  Not really a problem yet since we can't fail any of our
+	// operations.
 
-
-	private final IRepository myRepository;
+	protected final IRepository myRepository;
 	private final BaseRuntimeElementDefinition<IPrimitiveType<Date>> myInstantDefinition;
 
+	/**
+	 * @param theRepository the repository to use for crud operations during transaction processing.
+	 */
 	public NaiveRepositoryTransactionProcessor(IRepository theRepository) {
 		myRepository = theRepository;
 		//noinspection unchecked
@@ -41,6 +44,9 @@ public class NaiveRepositoryTransactionProcessor {
 				requireNonNull(myRepository.fhirContext().getElementDefinition("Instant"));
 	}
 
+	/**
+	 * Processes a transaction bundle by executing the contained entries as create, update, or delete operations against the delegate repository.
+	 */
 	public <B extends IBaseBundle> B processTransaction(B theTransactionBundle) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myRepository.fhirContext());
 
@@ -70,7 +76,7 @@ public class NaiveRepositoryTransactionProcessor {
 	}
 
 	@Nonnull
-	private BundleResponseEntryParts processPost(
+	protected BundleResponseEntryParts processPost(
 			BundleEntryParts theBundleEntryParts, IPrimitiveType<Date> theInstant) {
 		// we assume POST is always "create", not an operation invocation
 		var responseOutcome = myRepository.create(theBundleEntryParts.getResource());
@@ -87,7 +93,8 @@ public class NaiveRepositoryTransactionProcessor {
 	}
 
 	@Nonnull
-	private BundleResponseEntryParts processPut(BundleEntryParts theBundleEntryParts, IPrimitiveType<Date> theInstant) {
+	protected BundleResponseEntryParts processPut(
+			BundleEntryParts theBundleEntryParts, IPrimitiveType<Date> theInstant) {
 		MethodOutcome methodOutcome = myRepository.update(theBundleEntryParts.getResource());
 		String location = null;
 		if (methodOutcome.getResponseStatusCode() == Constants.STATUS_HTTP_201_CREATED) {
@@ -105,7 +112,7 @@ public class NaiveRepositoryTransactionProcessor {
 	}
 
 	@Nonnull
-	private BundleResponseEntryParts processDelete(
+	protected BundleResponseEntryParts processDelete(
 			BundleEntryParts theBundleEntryParts, IPrimitiveType<Date> theInstant) {
 		IdDt idDt = new IdDt(theBundleEntryParts.getUrl());
 		String resourceType = idDt.getResourceType();
@@ -124,12 +131,12 @@ public class NaiveRepositoryTransactionProcessor {
 	}
 
 	@Nonnull
-	private IPrimitiveType<Date> getCurrentInstant() {
+	protected IPrimitiveType<Date> getCurrentInstant() {
 		return myInstantDefinition.newInstance();
 	}
 
 	// SOMEDAY find a home for this.  We must do something similar in RestfulServer
-	private static String statusCodeToStatusLine(int theResponseStatusCode) {
+	protected static String statusCodeToStatusLine(int theResponseStatusCode) {
 		return switch (theResponseStatusCode) {
 			case Constants.STATUS_HTTP_200_OK, 0 -> "200 OK";
 			case Constants.STATUS_HTTP_201_CREATED -> "201 Created";
