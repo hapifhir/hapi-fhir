@@ -1,7 +1,6 @@
-package ca.uhn.fhir.repository.loader;
+package ca.uhn.fhir.repository;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.repository.IRepository;
 import com.google.common.annotations.Beta;
 import jakarta.annotation.Nonnull;
 

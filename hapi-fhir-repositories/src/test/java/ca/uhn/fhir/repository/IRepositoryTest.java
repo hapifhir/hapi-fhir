@@ -157,13 +157,14 @@ public interface IRepositoryTest {
 		IIdType patientId = createOutcome.getId().toVersionless();
 
 		// when deleted
-		repository.delete(patient.getClass(), patientId);
+		Class<? extends IBaseResource> patientClass = patient.getClass();
+		repository.delete(patientClass, patientId);
 
 		// then - read should throw ResourceNotFoundException or ResourceGoneException
 		// Repositories with history should probably throw ResourceGoneException
 		// But repositories without history can't tell the difference and will throw ResourceNotFoundException
 		var exception =
-				assertThrows(BaseServerResponseException.class, () -> repository.read(patient.getClass(), patientId));
+				assertThrows(BaseServerResponseException.class, () -> repository.read(patientClass, patientId));
 		assertThat(exception).isInstanceOfAny(ResourceNotFoundException.class, ResourceGoneException.class);
 	}
 

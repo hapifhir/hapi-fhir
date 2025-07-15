@@ -57,7 +57,6 @@ public class ResourceStorage {
 		return lookupResource(theId);
 	}
 
-	@VisibleForTesting
 	public @Nonnull Collection<IBaseResource> getAllOfType(String theResourceType) {
 		return getResourceMapForType(theResourceType).values();
 	}

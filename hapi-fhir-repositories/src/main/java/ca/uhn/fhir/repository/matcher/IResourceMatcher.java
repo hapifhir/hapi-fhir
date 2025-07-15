@@ -28,6 +28,7 @@ import java.util.Map;
 
 public interface IResourceMatcher {
 
+	// fixme move this?
 	record SPPathKey(@Nonnull String resourceType, @Nonnull String resourcePath) {
 		public String path() {
 			return resourcePath;

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.repository.loader;
 
+import ca.uhn.fhir.repository.IRepositoryLoader;
+
 /**
  * Simple base class for {@link IRepositoryLoader} implementations that select on the sub-scheme of the URL.
  */

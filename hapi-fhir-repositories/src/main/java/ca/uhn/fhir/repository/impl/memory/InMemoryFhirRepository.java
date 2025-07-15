@@ -50,7 +50,7 @@ public class InMemoryFhirRepository implements IRepository {
 	private final FhirContext myFhirContext;
 	private final ResourceStorage myResourceStorage;
 
-	// Factory methods and constuctors
+	// Factory methods and constructors
 	public static InMemoryFhirRepository emptyRepository(@Nonnull FhirContext theFhirContext) {
 		return new InMemoryFhirRepository(theFhirContext, new HashMap<>());
 	}

@@ -8,5 +8,6 @@
  *
  *
  * Use the {@link ca.uhn.fhir.repository.Repositories} class to create instances.
+ * Implementations are in the hapi-fhir-repositories module.
  */
 package ca.uhn.fhir.repository;

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.repository.impl;
 
-import ca.uhn.fhir.repository.loader.UrlRepositoryFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;

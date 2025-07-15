@@ -24,10 +24,12 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * Implements a naive transaction processor for repositories in terms of crud primitives.
- * SOMEDAY implement GET, PATCH, and other methods as needed.
- * SOMEDAY order entries
  */
 public class NaiveRepositoryTransactionProcessor {
+	// SOMEDAY implement GET, PATCH, and other methods as needed.
+	// SOMEDAY order entries
+	// SOMEDAY distinguish batch and transaction processing.  Not really a problem yet since we can't fail any of our operations.
+
 
 	private final IRepository myRepository;
 	private final BaseRuntimeElementDefinition<IPrimitiveType<Date>> myInstantDefinition;
@@ -129,7 +131,7 @@ public class NaiveRepositoryTransactionProcessor {
 	// SOMEDAY find a home for this.  We must do something similar in RestfulServer
 	private static String statusCodeToStatusLine(int theResponseStatusCode) {
 		return switch (theResponseStatusCode) {
-			case Constants.STATUS_HTTP_200_OK -> "200 OK";
+			case Constants.STATUS_HTTP_200_OK, 0 -> "200 OK";
 			case Constants.STATUS_HTTP_201_CREATED -> "201 Created";
 			case Constants.STATUS_HTTP_409_CONFLICT -> "409 Conflict";
 			case Constants.STATUS_HTTP_204_NO_CONTENT -> "204 No Content";

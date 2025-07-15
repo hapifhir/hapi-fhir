@@ -217,7 +217,14 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-repositories</artifactId>
+            <version>8.3.15-SNAPSHOT</version>
+            <scope>test</scope>
+			   <classifier>tests</classifier>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>
