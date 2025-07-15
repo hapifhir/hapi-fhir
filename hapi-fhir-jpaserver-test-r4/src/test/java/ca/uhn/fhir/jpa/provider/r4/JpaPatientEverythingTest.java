@@ -1062,10 +1062,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
     }
 
     @Test
-    public void patientEverything_shouldReturnGroup_whenGroupRefersToPatient() throws Exception {
-
-		// TODO - update this test with permissions
-        Reference referenceToPatient = createPatient();
+    public void patientEverything_shouldNotReturnGroup_whenGroupRefersToPatient() throws Exception {
+		Reference referenceToPatient = createPatient();
 
         Group group = new Group();
         Group.GroupMemberComponent memberComponent = new Group.GroupMemberComponent();
@@ -1075,7 +1073,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 			assertThat(actual).contains(referenceToPatient.getReference());
-			assertThat(actual).contains(groupId);
+			assertThat(actual).doesNotContain(groupId);
     }
 
     @Test
@@ -1178,7 +1176,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
     }
 
     @Test
-    public void patientEverything_shouldReturnList_whenListRefersToPatientAsSource() throws Exception {
+    public void patientEverything_shouldOmitList_whenListRefersToPatientAsSource() throws Exception {
 
         Reference referenceToPatient = createPatient();
 
@@ -1187,8 +1185,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String listResourceId = myClient.create().resource(listResource).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-			assertThat(actual).contains(referenceToPatient.getReference());
-			assertThat(actual).contains(listResourceId);
+		assertThat(actual).contains(referenceToPatient.getReference());
+		assertThat(actual).doesNotContain(listResourceId);
     }
 
     @Test

@@ -920,21 +920,24 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			queryStack3.setUseAggregate(true);
 		}
 
-		// TODO - only apply if caller has Patient/READ_ALL_IN_COMPARTMENT
-		// for specific patients only
 		if (myParams.getEverythingMode().isPatient()) {
 			/*
 			 * NB: patient-compartment limitation
+			 *
 			 * We are manually excluding Group and List resources
-			 * from the patient-compartment for $everything operations.
+			 * from the patient-compartment for $everything operations on Patient type/instance.
+			 *
 			 * We know this is in violation of specifications
 			 * (https://build.fhir.org/compartmentdefinition-patient.html
 			 * and
 			 * https://build.fhir.org/patient-operations.html)
 			 * but it seems like a security flaw to include these resources,
+			 * as the name of the group and the ids of other members could
+			 * be PHI;
 			 * so they are being manually omitted.
+			 *
 			 */
-			sqlBuilder.excludeResourceTypesPredicate(List.of("Group", "List"));
+			sqlBuilder.excludeResourceTypesPredicate(SearchParameterUtil.RESOURCE_TYPES_OMITTED_FROM_PATIENT_COMPARTMENT);
 		}
 
 		/*

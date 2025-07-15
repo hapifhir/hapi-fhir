@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
@@ -44,6 +45,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobParameters, ResourceIdList> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsStep.class);
@@ -97,7 +99,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 			Set<String> resourceTypesToOmit =
 					theStepExecutionDetails.getParameters().getExportStyle()
 									== BulkExportJobParameters.ExportStyle.PATIENT
-							? Set.of("Group", "List")
+							? new HashSet<>(SearchParameterUtil.RESOURCE_TYPES_OMITTED_FROM_PATIENT_COMPARTMENT)
 							: Set.of();
 
 			/*

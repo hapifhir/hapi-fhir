@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 7118
+title: "Despite being in the (patient compartment)[https://build.fhir.org/compartmentdefinition-patient.html]
+        we will be excluding List and Group from the Patient Compartment.
+        They will also no longer be returned for Patient instance/type `$export` and
+        `$everything` operations.
+        This is a breaking change.
+"

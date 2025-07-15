@@ -551,6 +551,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							myAdditionalCompartmentSearchParamMap.getSearchParamNamesForResourceType(
 									ctx.getResourceType(target.resource));
 				}
+
 				if (t.isSourceInCompartmentForTarget(
 						myClassifierCompartmentName, target.resource, next, additionalSearchParamNames)) {
 					foundMatch = true;
