@@ -69,6 +69,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -188,12 +189,14 @@ public class BulkDataExportProviderR4Test {
 		when(myJobCoordinator.startInstance(isNotNull(), any())).thenReturn(createJobStartResponse());
 
 		InstantType now = InstantType.now();
+		InstantType later = InstantType.now();
+		later.add(Calendar.DATE,1);
 
 		Parameters input = new Parameters();
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType(patientResource + ", " + practitionerResource));
 		input.addParameter(JpaConstants.PARAM_EXPORT_SINCE, now);
-		input.addParameter(JpaConstants.PARAM_EXPORT_UNTIL, now);
+		input.addParameter(JpaConstants.PARAM_EXPORT_UNTIL, later);
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType(filter));
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_POST_FETCH_FILTER_URL, new StringType(postFetchFilter));
 
@@ -231,6 +234,7 @@ public class BulkDataExportProviderR4Test {
 		assertThat(params.getResourceTypes()).contains(practitionerResource);
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
 		assertNotNull(params.getSince());
+		assertNotNull(params.getUntil());
 		assertThat(params.getFilters()).contains(filter);
 		assertThat(params.getPostFetchFilterUrls()).containsExactly("Patient?_tag=foo");
 	}
@@ -261,6 +265,8 @@ public class BulkDataExportProviderR4Test {
 		when(myJobCoordinator.startInstance(isNotNull(), any())).thenReturn(createJobStartResponse());
 
 		InstantType now = InstantType.now();
+		InstantType later = InstantType.now();
+		later.add(Calendar.DATE,1);
 
 		String myBaseUrl;
 		if (partitioningEnabled) {
@@ -273,7 +279,7 @@ public class BulkDataExportProviderR4Test {
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Patient, Practitioner")
 			+ "&" + JpaConstants.PARAM_EXPORT_SINCE + "=" + UrlUtil.escapeUrlParam(now.getValueAsString())
-			+ "&" + JpaConstants.PARAM_EXPORT_UNTIL + "=" + UrlUtil.escapeUrlParam(now.getValueAsString())
+			+ "&" + JpaConstants.PARAM_EXPORT_UNTIL + "=" + UrlUtil.escapeUrlParam(later.getValueAsString())
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=" + UrlUtil.escapeUrlParam("Patient?identifier=foo");
 
 		HttpGet get = new HttpGet(url);
@@ -291,6 +297,7 @@ public class BulkDataExportProviderR4Test {
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
 		assertThat(params.getResourceTypes()).containsExactlyInAnyOrder("Patient", "Practitioner");
 		assertNotNull(params.getSince());
+		assertNotNull(params.getUntil());
 		assertThat(params.getFilters()).containsExactlyInAnyOrder("Patient?identifier=foo");
 	}
 
@@ -320,6 +327,7 @@ public class BulkDataExportProviderR4Test {
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
 		assertThat(params.getResourceTypes()).containsExactlyInAnyOrder("Patient", "EpisodeOfCare");
 		assertNull(params.getSince());
+		assertNull(params.getUntil());
 		assertThat(params.getFilters()).containsExactlyInAnyOrder("Patient?_id=P999999990", "EpisodeOfCare?patient=P999999990");
 	}
 
@@ -592,13 +600,15 @@ public class BulkDataExportProviderR4Test {
 			.thenReturn(createJobStartResponse(G_JOB_ID));
 
 		InstantType now = InstantType.now();
+		InstantType later = InstantType.now();
+		later.add(Calendar.DATE,1);
 
 		Parameters input = new Parameters();
 		StringType obsTypeFilter = new StringType("Observation?code=OBSCODE,DiagnosticReport?code=DRCODE");
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Observation, DiagnosticReport"));
 		input.addParameter(JpaConstants.PARAM_EXPORT_SINCE, now);
-		input.addParameter(JpaConstants.PARAM_EXPORT_UNTIL, now);
+		input.addParameter(JpaConstants.PARAM_EXPORT_UNTIL, later);
 		input.addParameter(JpaConstants.PARAM_EXPORT_MDM, true);
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, obsTypeFilter);
 
@@ -622,6 +632,7 @@ public class BulkDataExportProviderR4Test {
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
 		assertThat(bp.getResourceTypes()).containsExactlyInAnyOrder("Observation", "DiagnosticReport");
 		assertNotNull(bp.getSince());
+		assertNotNull(bp.getUntil());
 		assertNotNull(bp.getFilters());
 		assertEquals(GROUP_ID, bp.getGroupId());
 		assertEquals(true, bp.isExpandMdm());
@@ -633,12 +644,14 @@ public class BulkDataExportProviderR4Test {
 		when(myJobCoordinator.startInstance(isNotNull(), any())).thenReturn(createJobStartResponse(G_JOB_ID));
 
 		InstantType now = InstantType.now();
+		InstantType later = InstantType.now();
+		later.add(Calendar.DATE,1);
 
 		String url = myServer.getBaseUrl() + "/" + GROUP_ID + "/" + ProviderConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Patient, Practitioner")
 			+ "&" + JpaConstants.PARAM_EXPORT_SINCE + "=" + UrlUtil.escapeUrlParam(now.getValueAsString())
-			+ "&" + JpaConstants.PARAM_EXPORT_UNTIL + "=" + UrlUtil.escapeUrlParam(now.getValueAsString())
+			+ "&" + JpaConstants.PARAM_EXPORT_UNTIL + "=" + UrlUtil.escapeUrlParam(later.getValueAsString())
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=" + UrlUtil.escapeUrlParam("Patient?identifier=foo|bar")
 			+ "&" + JpaConstants.PARAM_EXPORT_MDM + "=true";
 
@@ -658,6 +671,7 @@ public class BulkDataExportProviderR4Test {
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
 		assertThat(bp.getResourceTypes()).containsExactlyInAnyOrder("Patient", "Practitioner");
 		assertNotNull(bp.getSince());
+		assertNotNull(bp.getUntil());
 		assertNotNull(bp.getFilters());
 		assertEquals(GROUP_ID, bp.getGroupId());
 		assertEquals(true, bp.isExpandMdm());
@@ -669,11 +683,13 @@ public class BulkDataExportProviderR4Test {
 		when(myJobCoordinator.startInstance(isNotNull(), any())).thenReturn(createJobStartResponse(G_JOB_ID));
 
 		InstantType now = InstantType.now();
+		InstantType later = InstantType.now();
+		later.add(Calendar.DATE,1);
 
 		String url = myServer.getBaseUrl() + "/" + GROUP_ID + "/" + ProviderConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
 			+ "&" + JpaConstants.PARAM_EXPORT_SINCE + "=" + UrlUtil.escapeUrlParam(now.getValueAsString())
-			+ "&" + JpaConstants.PARAM_EXPORT_UNTIL + "=" + UrlUtil.escapeUrlParam(now.getValueAsString());
+			+ "&" + JpaConstants.PARAM_EXPORT_UNTIL + "=" + UrlUtil.escapeUrlParam(later.getValueAsString());
 
 		// call
 		HttpGet get = new HttpGet(url);
@@ -691,6 +707,7 @@ public class BulkDataExportProviderR4Test {
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
 		assertThat(bp.getResourceTypes()).as(bp.getResourceTypes().toString()).containsExactlyInAnyOrder("DiagnosticReport", "Group", "Observation", "Device", "Patient", "Encounter");
 		assertNotNull(bp.getSince());
+		assertNotNull(bp.getUntil());
 		assertNotNull(bp.getFilters());
 		assertEquals(GROUP_ID, bp.getGroupId());
 		assertEquals(false, bp.isExpandMdm());
@@ -845,12 +862,14 @@ public class BulkDataExportProviderR4Test {
 			.thenReturn(createJobStartResponse());
 
 		InstantType now = InstantType.now();
+		InstantType later = InstantType.now();
+		later.add(Calendar.DATE,1);
 
 		Parameters input = new Parameters();
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Immunization, Observation"));
 		input.addParameter(JpaConstants.PARAM_EXPORT_SINCE, now);
-		input.addParameter(JpaConstants.PARAM_EXPORT_UNTIL, now);
+		input.addParameter(JpaConstants.PARAM_EXPORT_UNTIL, later);
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType("Immunization?vaccine-code=foo"));
 
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
@@ -871,6 +890,7 @@ public class BulkDataExportProviderR4Test {
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
 		assertThat(bp.getResourceTypes()).containsExactlyInAnyOrder("Immunization", "Observation");
 		assertNotNull(bp.getSince());
+		assertNotNull(bp.getUntil());
 		assertThat(bp.getFilters()).containsExactlyInAnyOrder("Immunization?vaccine-code=foo");
 	}
 
