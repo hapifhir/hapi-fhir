@@ -350,15 +350,15 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 		// Only match on system if it wasn't specified
 		if (token.getSystem() == null || token.getSystem().isEmpty()) {
-			if (valueString.equalsIgnoreCase(tokenValueString)) {
+			if (valueString.equals(tokenValueString)) {
 				retVal = true;
 			}
 		} else if (tokenValueString == null || tokenValueString.isEmpty()) {
-			if (token.getSystem().equalsIgnoreCase(getSystem())) {
+			if (token.getSystem().equals(getSystem())) {
 				retVal = true;
 			}
 		} else {
-			if (token.getSystem().equalsIgnoreCase(getSystem()) && valueString.equalsIgnoreCase(tokenValueString)) {
+			if (token.getSystem().equals(getSystem()) && valueString.equals(tokenValueString)) {
 				retVal = true;
 			}
 		}
