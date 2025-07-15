@@ -864,6 +864,120 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		verifyBulkExportResults(options, List.of("Observation/C", "Group/B"), List.of("Patient/A"));
 	}
 
+	@Test
+	public void testGroupBulkExport_MultipleQualifiedSubResourcesOfUnqualifiedPatientShouldShowUp() throws InterruptedException {
+
+		// Patient with lastUpdated before _since
+		Patient patient = new Patient();
+		patient.setId("P1");
+		myClient.update().resource(patient).execute();
+
+		// Sleep for 1 sec
+		ourLog.info("Patient lastUpdated: " + InstantType.withCurrentTime().getValueAsString());
+		Thread.sleep(1000);
+
+		// LastUpdated since now
+		Date since = InstantType.now().getValue();
+		ourLog.info(since.toString());
+
+		// Group references to Patient/A
+		Group group = new Group();
+		group.setId("G1");
+		group.addMember().getEntity().setReference("Patient/P1");
+		myClient.update().resource(group).execute();
+
+		// Observation references to Patient/A
+		Observation observation = new Observation();
+		observation.setId("O1");
+		observation.setSubject(new Reference("Patient/P1"));
+		myClient.update().resource(observation).execute();
+
+		// Observation references to Patient/A
+		Observation observation2 = new Observation();
+		observation2.setId("O2");
+		observation2.setSubject(new Reference("Patient/P1"));
+		myClient.update().resource(observation2).execute();
+
+		// Observation references to Patient/A
+		Observation observation3 = new Observation();
+		observation3.setId("O3");
+		observation3.setSubject(new Reference("Patient/P1"));
+		myClient.update().resource(observation3).execute();
+
+		// Set the export options
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "Group"));
+		options.setGroupId("Group/G1");
+		options.setFilters(new HashSet<>());
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+		options.setSince(since);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+		// Should get the sub-resource (Observations) even the patient hasn't been updated after the _since param
+		verifyBulkExportResults(options, List.of("Observation/O1", "Group/G1", "Observation/O2", "Observation/O3"), List.of("Patient/P1"));
+	}
+
+	@Test
+	public void testGroupBulkExport_QualifiedSubResourcesOfUnqualifiedPatientShouldShowUp_FiltersOnSinceAndUntil() throws InterruptedException {
+
+		// Patient with lastUpdated before _since
+		Patient patient = new Patient();
+		patient.setId("P1");
+		myClient.update().resource(patient).execute();
+
+		// Sleep for 1 sec
+		ourLog.info("Patient lastUpdated: " + InstantType.withCurrentTime().getValueAsString());
+		Thread.sleep(1000);
+
+		// LastUpdated since now
+		Date since = InstantType.now().getValue();
+		ourLog.info(since.toString());
+
+		// Group references to Patient/P1
+		Group group = new Group();
+		group.setId("G1");
+		group.addMember().getEntity().setReference("Patient/P1");
+		myClient.update().resource(group).execute();
+
+		// Observation references to Patient/P1
+		Observation observation = new Observation();
+		observation.setId("O1");
+		observation.setSubject(new Reference("Patient/P1"));
+		myClient.update().resource(observation).execute();
+
+		// LastUpdated until now
+		Date until = InstantType.now().getValue();
+		ourLog.info(until.toString());
+
+		Thread.sleep(1000);
+
+		// Observation references to Patient/P1
+		Observation observation2 = new Observation();
+		observation2.setId("O2");
+		observation2.setSubject(new Reference("Patient/P1"));
+		myClient.update().resource(observation2).execute();
+
+		// Observation references to Patient/P1
+		Observation observation3 = new Observation();
+		observation3.setId("O3");
+		observation3.setSubject(new Reference("Patient/P1"));
+		myClient.update().resource(observation3).execute();
+
+		// Set the export options
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "Group"));
+		options.setGroupId("Group/G1");
+		options.setFilters(new HashSet<>());
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+		options.setSince(since);
+		options.setUntil(until);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+		// Should get the sub-resource (Observation) even the patient hasn't been updated after the _since param
+		// and excludes Observation/O2 & Observation/O3 which were created after the _until param
+		verifyBulkExportResults(options, List.of("Observation/O1", "Group/G1"), List.of("Patient/P1", "Observation/O2", "Observation/O3"));
+	}
+
 	/**
 	* This interceptor was needed so that similar GET and POST export requests return the same jobID
 	* The test testBulkExportReuse_withGetAndPost_expectSameJobIds() tests this functionality
