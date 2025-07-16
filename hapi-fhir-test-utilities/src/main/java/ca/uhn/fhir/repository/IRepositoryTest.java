@@ -163,8 +163,7 @@ public interface IRepositoryTest {
 		// then - read should throw ResourceNotFoundException or ResourceGoneException
 		// Repositories with history should probably throw ResourceGoneException
 		// But repositories without history can't tell the difference and will throw ResourceNotFoundException
-		var exception =
-				assertThrows(BaseServerResponseException.class, () -> repository.read(patientClass, patientId));
+		var exception = assertThrows(BaseServerResponseException.class, () -> repository.read(patientClass, patientId));
 		assertThat(exception).isInstanceOfAny(ResourceNotFoundException.class, ResourceGoneException.class);
 	}
 

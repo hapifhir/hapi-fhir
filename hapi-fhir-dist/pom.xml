@@ -74,6 +74,27 @@
 					<scope>provided</scope>
 				</dependency>
 
+
+				<dependency>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>hapi-fhir-repositories</artifactId>
+					<version>${project.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>hapi-fhir-repositories</artifactId>
+					<version>${project.version}</version>
+					<classifier>sources</classifier>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>hapi-fhir-repositories</artifactId>
+					<version>${project.version}</version>
+					<classifier>javadoc</classifier>
+					<scope>provided</scope>
+				</dependency>
+
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-server</artifactId>
