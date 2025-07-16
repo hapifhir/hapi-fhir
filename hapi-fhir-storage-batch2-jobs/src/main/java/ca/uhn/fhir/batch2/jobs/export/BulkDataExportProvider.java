@@ -253,6 +253,8 @@ public class BulkDataExportProvider {
 						.map(patient -> {
 							if (patient instanceof StringType patientStringType) {
 								return patientStringType;
+							} else if (patient instanceof IIdType patientIIdType) {
+								return patientIIdType;
 							} else if (patient instanceof IBaseReference patientReference) {
 								return patientReference.getDisplayElement();
 							}
