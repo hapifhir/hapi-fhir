@@ -332,11 +332,10 @@ public class ParametersUtil {
 				Objects.requireNonNull(theContext.getElementDefinition("code")).newInstance(theValue);
 	}
 
-// FIXME KHS test
+	// FIXME KHS test
 	public static IPrimitiveType<?> createInstant(FhirContext theContext, Date theValue) {
-		return (IPrimitiveType<?>)
-			Objects.requireNonNull(theContext.getElementDefinition("instant")).newInstance(theValue);
-
+		return (IPrimitiveType<?>) Objects.requireNonNull(theContext.getElementDefinition("instant"))
+				.newInstance(theValue);
 	}
 
 	public static IBaseParameters newInstance(FhirContext theContext) {
@@ -662,5 +661,4 @@ public class ParametersUtil {
 		}
 		return retVal;
 	}
-
 }
