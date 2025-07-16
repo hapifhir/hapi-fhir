@@ -68,25 +68,25 @@ public class SearchParameterUtil {
 	private static boolean shouldCompartmentIncludeSP(
 			String theCompartmentName, SearchParamDefinition theSearchParamDef) {
 		// special cases
-		if (theCompartmentName.equalsIgnoreCase("patient")) {
-			/*
-			 * SPs that are in the Patient Compartment by the spec:
-			 * https://build.fhir.org/compartmentdefinition-patient.html
-			 *
-			 * But we will exclude them anyways because they can leak PHI
-			 * and may be a security flaw of the spec itself.
-			 */
-			if (theSearchParamDef.name().equals("member")
-					&& theSearchParamDef.path().equals("Group.member.entity")) {
-				return false;
-			} else if (theSearchParamDef.name().equals("subject")
-					&& theSearchParamDef.path().equals("List.subject")) {
-				return false;
-			} else if (theSearchParamDef.name().equals("source")
-					&& theSearchParamDef.path().equals("List.source")) {
-				return false;
-			}
-		}
+//		if (theCompartmentName.equalsIgnoreCase("patient")) {
+//			/*
+//			 * SPs that are in the Patient Compartment by the spec:
+//			 * https://build.fhir.org/compartmentdefinition-patient.html
+//			 *
+//			 * But we will exclude them anyways because they can leak PHI
+//			 * and may be a security flaw of the spec itself.
+//			 */
+//			if (theSearchParamDef.name().equals("member")
+//					&& theSearchParamDef.path().equals("Group.member.entity")) {
+//				return false;
+//			} else if (theSearchParamDef.name().equals("subject")
+//					&& theSearchParamDef.path().equals("List.subject")) {
+//				return false;
+//			} else if (theSearchParamDef.name().equals("source")
+//					&& theSearchParamDef.path().equals("List.source")) {
+//				return false;
+//			}
+//		}
 
 		// default
 		return Arrays.stream(theSearchParamDef.providesMembershipIn())
@@ -123,14 +123,8 @@ public class SearchParameterUtil {
 				continue;
 			}
 
-			String compartmentName = compartment.name();
-
-			// As of 2021-12-28 the R5 structures incorrectly have this prefix
-			if (compartmentName.startsWith("Base FHIR compartment definition for ")) {
-				compartmentName = compartmentName.substring("Base FHIR compartment definition for ".length());
-			}
-
-			if (SearchParameterUtil.shouldCompartmentIncludeSP(compartmentName, theSearchParamDefinition)) {
+			if (SearchParameterUtil.shouldCompartmentIncludeSP(compartment.name(), theSearchParamDefinition)) {
+				String compartmentName = getCleansedCompartmentName(compartment.name());
 				validCompartments.add(compartmentName);
 			}
 		}
@@ -149,6 +143,14 @@ public class SearchParameterUtil {
 		}
 
 		return validCompartments;
+	}
+
+	private static String getCleansedCompartmentName(String theCompartmentName) {
+		// As of 2021-12-28 the R5 structures incorrectly have this prefix
+		if (theCompartmentName.startsWith("Base FHIR compartment definition for ")) {
+			return theCompartmentName.substring("Base FHIR compartment definition for ".length());
+		}
+		return theCompartmentName;
 	}
 
 	public static List<String> getBaseAsStrings(FhirContext theContext, IBaseResource theResource) {
