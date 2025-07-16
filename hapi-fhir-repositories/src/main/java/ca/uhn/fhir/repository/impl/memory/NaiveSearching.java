@@ -54,7 +54,7 @@ class NaiveSearching {
 	 * @param theSafeRead A function to safely read resources by their ID, returning a stream of matching resources with empty if not present.
 	 * @param theAllResourcesSupplier A supplier that provides all resources of the specified type.
 	 */
-	private NaiveSearching(
+	NaiveSearching(
 			FhirContext theFhirContext,
 			String theResourceType,
 			Function<IdDt, Stream<IBaseResource>> theSafeRead,
