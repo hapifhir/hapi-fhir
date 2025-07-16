@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7128
+title: "Patient level Bulk export (`/Patient/$export`) now accepts the `patient` parameter of type reference.
+This is in compliance to the FHIR Bulk Data Access IG, and allows Patient level export to be performed through the FHIR gateway with the patient parameter."
