@@ -218,16 +218,16 @@ public class ParameterUtil {
 
 			@Override
 			public void setValuesAsQueryTokens(
-				FhirContext theContext, String theParamName, QualifiedParamList theParameters) {
+					FhirContext theContext, String theParamName, QualifiedParamList theParameters) {
 				if (theParameters.isEmpty()) {
 					return;
 				}
 				if (theParameters.size() > 1) {
 					throw new IllegalArgumentException(Msg.code(1937) + "Type "
-						+ theParam.getClass().getCanonicalName() + " does not support multiple values");
+							+ theParam.getClass().getCanonicalName() + " does not support multiple values");
 				}
 				theParam.setValueAsQueryToken(
-					theContext, theParamName, theParameters.getQualifier(), theParameters.get(0));
+						theContext, theParamName, theParameters.getQualifier(), theParameters.get(0));
 			}
 		};
 	}

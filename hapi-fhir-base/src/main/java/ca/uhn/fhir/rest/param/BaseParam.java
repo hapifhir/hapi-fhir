@@ -117,6 +117,4 @@ public abstract class BaseParam implements IQueryParameterType {
 	public boolean isEmpty() {
 		return isBlank(getValueAsQueryToken()) && getMissing() == null;
 	}
-
-
 }

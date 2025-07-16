@@ -76,6 +76,7 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.SpecialParam;
@@ -2547,6 +2548,10 @@ public class QueryStack {
 					break;
 				case REFERENCE:
 					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+
+						if (ParameterUtil.areAllParametersEmpty(nextAnd)) {
+							continue;
+						}
 
 						// Handle Search Parameters where the name is a full chain
 						// (e.g. SearchParameter with name=composition.patient.identifier)

@@ -90,5 +90,4 @@ public interface IQueryParameterType extends Serializable {
 	 * @since 8.4.0
 	 */
 	boolean isEmpty();
-
 }

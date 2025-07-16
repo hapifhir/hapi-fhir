@@ -7,8 +7,10 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AuditEvent;
@@ -75,6 +77,12 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 	@Test
 	public void testChainsWithNoValueShouldBeIgnored() {
+		// Setup
+		createPatient(withId("P0"), withGender("male"));
+		createPatient(withId("P1"), withGender("female"));
+		createCoverage(withId("C0"), withReference("beneficiary", "Patient/P0"));
+		createCoverage(withId("C1"), withReference("beneficiary", "Patient/P1"));
+
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add(Coverage.SP_PATIENT, new ReferenceParam("family", ""));
 		map.add(Coverage.SP_PATIENT, new ReferenceParam("given", ""));
@@ -83,12 +91,15 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// Test
 		myCaptureQueriesListener.clear();
-		assertEquals(0, myCoverageDao.search(map, newSrd()).size());
+		IBundleProvider search = myCoverageDao.search(map, newSrd());
 
 		// Verify
+		assertThat(toUnqualifiedVersionlessIdValues(search)).containsExactly("Coverage/C0");
 		myCaptureQueriesListener.logSelectQueries();
-
-
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
+		assertEquals(2, selectQueries.size());
+		String querySql = selectQueries.get(0).getSql(false, false);
+		assertEquals(1, StringUtils.countMatches(querySql, "HFJ_RES_LINK"), querySql);
 	}
 
 	@Test

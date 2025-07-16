@@ -54,7 +54,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
@@ -439,10 +438,6 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			ReferenceParam theReferenceParam,
 			RequestDetails theRequest,
 			RequestPartitionId theRequestPartitionId) {
-
-		if (ParameterUtil.areAllParametersEmpty(theList)) {
-			return null;
-		}
 
 		/*
 		 * Which resource types can the given chained parameter actually link to? This might be a list

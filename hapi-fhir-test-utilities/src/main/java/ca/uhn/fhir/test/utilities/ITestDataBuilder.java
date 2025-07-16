@@ -274,6 +274,10 @@ public interface ITestDataBuilder {
 		return createResource("Patient", theModifiers);
 	}
 
+	default IIdType createCoverage(ICreationArgument... theModifiers) {
+		return createResource("Coverage", theModifiers);
+	}
+
 	default IIdType createOrganization(ICreationArgument... theModifiers) {
 		return createResource("Organization", theModifiers);
 	}
@@ -351,6 +355,11 @@ public interface ITestDataBuilder {
 
 	default ICreationArgument withEncounter(@Nullable IIdType theEncounter) {
 		return withReference("encounter", theEncounter);
+	}
+
+	@Nonnull
+	default ICreationArgument withReference(String theReferenceName, @Nullable String theReferenceValue) {
+		return withReference(theReferenceName, getFhirContext().getVersion().newIdType(theReferenceValue));
 	}
 
 	@Nonnull
