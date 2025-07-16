@@ -35,9 +35,9 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import ca.uhn.fhir.rest.server.interceptor.auth.AdditionalCompartmentSearchParameters;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizedList;
+import ca.uhn.fhir.rest.server.interceptor.auth.CompartmentSearchParametersSpecialCases;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
@@ -249,19 +249,38 @@ public class AuthorizationInterceptors {
 		new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				AdditionalCompartmentSearchParameters additionalSearchParams =
-						new AdditionalCompartmentSearchParameters();
-				additionalSearchParams.addSearchParameters("device:patient", "device:subject");
+				CompartmentSearchParametersSpecialCases additionalSearchParams =
+						new CompartmentSearchParametersSpecialCases();
+				additionalSearchParams.addSPToIncludeInCompartment("Device", "patient");
+				additionalSearchParams.addSPToOmitFromCompartment("Device", "subject");
 				return new RuleBuilder()
 						.allow()
 						.read()
 						.allResources()
-						.inCompartmentWithAdditionalSearchParams(
+						.inCompartmentWithSpecialCaseSSPHandling(
 								"Patient", new IdType("Patient/123"), additionalSearchParams)
 						.build();
 			}
 		};
 		// END SNIPPET: advancedCompartment
+
+		// START SNIPPET: advancedCompartmentOmission
+		new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				CompartmentSearchParametersSpecialCases additionalSearchParams =
+					new CompartmentSearchParametersSpecialCases();
+				additionalSearchParams.addSPToOmitFromCompartment("Group", "member");
+				return new RuleBuilder()
+					.allow()
+					.read()
+					.allResources()
+					.inCompartmentWithSpecialCaseSSPHandling(
+						"Patient", new IdType("Patient/123"), additionalSearchParams)
+					.build();
+			}
+		};
+		// END SNIPPET: advancedCompartmentOmission
 	}
 
 	@SuppressWarnings("InnerClassMayBeStatic")

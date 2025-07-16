@@ -75,6 +75,7 @@ import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
@@ -134,6 +135,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		.registerProvider(new DummyCarePlanResourceProvider())
 		.registerProvider(new DummyDiagnosticReportResourceProvider())
 		.registerProvider(new DummyDeviceResourceProvider())
+		.registerProvider(new DummyGroupResourceProvider())
 		.registerProvider(new DummyServiceRequestResourceProvider())
 		.registerProvider(new DummyConsentResourceProvider())
 		.registerProvider(new PlainProvider())
@@ -354,7 +356,6 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		assertTrue(ourHitMethod);
 	}
 
-
 	/**
 	 * A GET to the base URL isn't valid, but the interceptor should allow it
 	 */
@@ -373,9 +374,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertEquals(400, status.getStatusLine().getStatusCode());
-
 	}
-
 
 	@Test
 	public void testAllowAllForTenant() throws Exception {
@@ -458,7 +457,6 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		assertEquals(200, status.getStatusLine().getStatusCode());
 	}
 
-
 	@Test
 	public void testCustomCompartmentSpsOnMultipleInstances() throws Exception {
 		//Given
@@ -499,18 +497,60 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 	}
 
 	@Test
+	public void rules_withSPLimitations_works() throws IOException {
+		// setup
+		String patientId = "Patient/123";
+		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				CompartmentSearchParametersSpecialCases specialCases = new CompartmentSearchParametersSpecialCases();
+				specialCases.addSPToOmitFromCompartment("group", "member");
+				List<IdType> relatedIds = new ArrayList<>();
+				relatedIds.add(new IdType(patientId));
+				return new RuleBuilder()
+					.allow().read().allResources()
+					.inCompartmentWithSpecialCaseSSPHandling("Patient", relatedIds, specialCases)
+					.andThen().denyAll()
+					.build();
+			}
+		});
+
+		HttpGet get;
+		HttpResponse response;
+
+		Patient patient = new Patient();
+		patient.setId(patientId);
+
+		Group group = new Group();
+		group.addMember()
+			.setEntity(new Reference(patientId));
+
+		ourHitMethod = false;
+		ourReturn = Collections.singletonList(patient);
+
+		get = new HttpGet(ourServer.getBaseUrl() + "/Group?member.entity=" + patientId);
+
+		response = ourClient.execute(get);
+		String responseStr = extractResponseAndClose(response);
+
+		//then
+		assertFalse(ourHitMethod);
+		assertEquals(403, response.getStatusLine().getStatusCode());
+	}
+
+	@Test
 	public void testNonsenseParametersThrowAtRuntime() throws Exception {
 		//Given
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				AdditionalCompartmentSearchParameters additionalCompartmentSearchParameters = new AdditionalCompartmentSearchParameters();
-				additionalCompartmentSearchParameters.addSearchParameters("device:garbage");
+				CompartmentSearchParametersSpecialCases compartmentSearchParametersSpecialCases = new CompartmentSearchParametersSpecialCases();
+				compartmentSearchParametersSpecialCases.addAdditionalSearchParameters("device:garbage");
 				List<IdType> relatedIds = new ArrayList<>();
 				relatedIds.add(new IdType("Patient/123"));
 				return new RuleBuilder()
 					.allow().read().allResources()
-					.inCompartmentWithAdditionalSearchParams("Patient", relatedIds, additionalCompartmentSearchParameters)
+					.inCompartmentWithSpecialCaseSSPHandling("Patient", relatedIds, compartmentSearchParametersSpecialCases)
 					.andThen().denyAll()
 					.build();
 			}
@@ -542,25 +582,26 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 	public void testRuleBuilderAdditionalSearchParamsInvalidValues() {
 		//Too many colons
 		try {
-			AdditionalCompartmentSearchParameters additionalCompartmentSearchParameters = new AdditionalCompartmentSearchParameters();
-			additionalCompartmentSearchParameters.addSearchParameters("too:many:colons");
+			CompartmentSearchParametersSpecialCases compartmentSearchParametersSpecialCases = new CompartmentSearchParametersSpecialCases();
+			compartmentSearchParametersSpecialCases.addAdditionalSearchParameters("too:many:colons");
 			new RuleBuilder()
 				.allow().read().allResources()
-				.inCompartmentWithAdditionalSearchParams("Patient", new IdType("Patient/123"), additionalCompartmentSearchParameters)
+				.inCompartmentWithSpecialCaseSSPHandling("Patient", new IdType("Patient/123"), compartmentSearchParametersSpecialCases)
 				.andThen().denyAll()
 				.build();
-			fail();		} catch (IllegalArgumentException e) {
+			fail();
+		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(342) + "too:many:colons is not a valid search parameter. Search parameters must be in the form resourcetype:parametercode, e.g. 'Device:patient'", e.getMessage());
 		}
 
 
 		//No colons
 		try {
-			AdditionalCompartmentSearchParameters additionalCompartmentSearchParameters = new AdditionalCompartmentSearchParameters();
-			additionalCompartmentSearchParameters.addSearchParameters("no-colons");
+			CompartmentSearchParametersSpecialCases compartmentSearchParametersSpecialCases = new CompartmentSearchParametersSpecialCases();
+			compartmentSearchParametersSpecialCases.addAdditionalSearchParameters("no-colons");
 			new RuleBuilder()
 				.allow().read().allResources()
-				.inCompartmentWithAdditionalSearchParams("Patient", new IdType("Patient/123"), additionalCompartmentSearchParameters)
+				.inCompartmentWithSpecialCaseSSPHandling("Patient", new IdType("Patient/123"), compartmentSearchParametersSpecialCases)
 				.andThen().denyAll()
 				.build();
 			fail();		} catch (IllegalArgumentException e) {
@@ -573,7 +614,10 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				return new RuleBuilder().allow().read().resourcesOfType(CarePlan.class).inCompartment("Patient", new IdType("Patient/123")).andThen().denyAll()
+				return new RuleBuilder().allow()
+					.read().resourcesOfType(CarePlan.class)
+					.inCompartment("Patient", new IdType("Patient/123"))
+					.andThen().denyAll()
 					.build();
 			}
 		});
@@ -4379,6 +4423,32 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		public List<Resource> search(
 			@OptionalParam(name = "subject") ReferenceParam theSubject,
 			@OptionalParam(name = "patient") ReferenceParam thePatient
+		) {
+			markHitMethod();
+			return ourReturn;
+		}
+	}
+
+	public static class DummyGroupResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Group.class;
+		}
+
+
+		@Read(version = true)
+		public Group read(@IdParam IdType theId) {
+			markHitMethod();
+			if (ourReturn.isEmpty()) {
+				throw new ResourceNotFoundException(theId);
+			}
+			return (Group) ourReturn.get(0);
+		}
+
+		@Search()
+		public List<Resource> search(
+			@OptionalParam(name = "member.entity") ReferenceParam thePatientRef
 		) {
 			markHitMethod();
 			return ourReturn;

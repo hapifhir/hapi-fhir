@@ -482,9 +482,12 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				private Collection<? extends IIdType> myInCompartmentOwners;
 				private Collection<IIdType> myAppliesToInstances;
 				private RuleImplOp myRule;
-				private AdditionalCompartmentSearchParameters myAdditionalSearchParamsForCompartmentTypes =
-						new AdditionalCompartmentSearchParameters();
-
+				/**
+				 * Special cases for Search Parameters.
+				 * Possible inclusion of additional SP, or removal of existing ones.
+				 */
+				private CompartmentSearchParametersSpecialCases myAdditionalSearchParamsForCompartmentTypes =
+						new CompartmentSearchParametersSpecialCases();
 				/**
 				 * Constructor
 				 */
@@ -529,15 +532,15 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				@Override
 				public IAuthRuleBuilderRuleOpClassifierFinished inCompartment(
 						String theCompartmentName, Collection<? extends IIdType> theOwners) {
-					return inCompartmentWithAdditionalSearchParams(
-							theCompartmentName, theOwners, new AdditionalCompartmentSearchParameters());
+					return inCompartmentWithSpecialCaseSSPHandling(
+							theCompartmentName, theOwners, new CompartmentSearchParametersSpecialCases());
 				}
 
 				@Override
-				public IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithAdditionalSearchParams(
+				public IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithSpecialCaseSSPHandling(
 						String theCompartmentName,
 						Collection<? extends IIdType> theOwners,
-						AdditionalCompartmentSearchParameters theAdditionalTypeSearchParams) {
+						CompartmentSearchParametersSpecialCases theSPSpecialCases) {
 					Validate.notBlank(theCompartmentName, "theCompartmentName must not be null");
 					Validate.notNull(theOwners, "theOwners must not be null");
 					Validate.noNullElements(theOwners, "theOwners must not contain any null elements");
@@ -546,7 +549,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					}
 					myInCompartmentName = theCompartmentName;
 					myInCompartmentOwners = theOwners;
-					myAdditionalSearchParamsForCompartmentTypes = theAdditionalTypeSearchParams;
+					myAdditionalSearchParamsForCompartmentTypes = theSPSpecialCases;
 					myClassifierType = ClassifierTypeEnum.IN_COMPARTMENT;
 					return finished();
 				}
@@ -554,15 +557,15 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				@Override
 				public IAuthRuleBuilderRuleOpClassifierFinished inCompartment(
 						String theCompartmentName, IIdType theOwner) {
-					return inCompartmentWithAdditionalSearchParams(
-							theCompartmentName, theOwner, new AdditionalCompartmentSearchParameters());
+					return inCompartmentWithSpecialCaseSSPHandling(
+							theCompartmentName, theOwner, new CompartmentSearchParametersSpecialCases());
 				}
 
 				@Override
-				public IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithAdditionalSearchParams(
+				public IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithSpecialCaseSSPHandling(
 						String theCompartmentName,
 						IIdType theOwner,
-						AdditionalCompartmentSearchParameters theAdditionalTypeSearchParamNames) {
+						CompartmentSearchParametersSpecialCases theAdditionalTypeSearchParamNames) {
 					Validate.notBlank(theCompartmentName, "theCompartmentName must not be null");
 					Validate.notNull(theOwner, "theOwner must not be null");
 					validateOwner(theOwner);
@@ -635,7 +638,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					// inlined from inCompartmentWithAdditionalSearchParams()
 					myClassifierType = ClassifierTypeEnum.IN_COMPARTMENT;
 					myInCompartmentName = theCompartmentName;
-					myAdditionalSearchParamsForCompartmentTypes = new AdditionalCompartmentSearchParameters();
+					myAdditionalSearchParamsForCompartmentTypes = new CompartmentSearchParametersSpecialCases();
 					// todo JR/MB this is a quick and dirty fix at the last minute before the release.
 					//  We should revisit approach so that findMatchingRule() takes the filters into account
 					//  and only merges the rules if the filters are compatible

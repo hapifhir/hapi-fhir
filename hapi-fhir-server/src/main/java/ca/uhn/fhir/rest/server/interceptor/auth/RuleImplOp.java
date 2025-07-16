@@ -78,7 +78,10 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	private Collection<IIdType> myAppliesToInstances;
 	private boolean myAppliesToDeleteCascade;
 	private boolean myAppliesToDeleteExpunge;
-	private AdditionalCompartmentSearchParameters myAdditionalCompartmentSearchParamMap;
+	/**
+	 * For SP not part of the compartment that we're including anyways
+	 */
+	private CompartmentSearchParametersSpecialCases myCompartmentSPSpecialCases;
 
 	/**
 	 * Constructor
@@ -546,9 +549,9 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			if (target.resource != null) {
 
 				Set<String> additionalSearchParamNames = null;
-				if (myAdditionalCompartmentSearchParamMap != null) {
+				if (myCompartmentSPSpecialCases != null) {
 					additionalSearchParamNames =
-							myAdditionalCompartmentSearchParamMap.getSearchParamNamesForResourceType(
+							myCompartmentSPSpecialCases.getAdditionalSearchParamNamesForResourceType(
 									ctx.getResourceType(target.resource));
 				}
 
@@ -602,12 +605,21 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							sourceDef.getSearchParamsForCompartmentName(compartmentOwnerResourceType);
 
 					Set<String> additionalParamNames =
-							myAdditionalCompartmentSearchParamMap.getSearchParamNamesForResourceType(
+							myCompartmentSPSpecialCases.getAdditionalSearchParamNamesForResourceType(
 									sourceDef.getName());
+
+					// filter out the omitted SPs
+					Set<String> omittedParams = myCompartmentSPSpecialCases.getOmittedSPNamesForResourceType(sourceDef.getName());
+					params = params.stream()
+						.filter(sp -> !omittedParams.contains(sp.getName()))
+						.collect(Collectors.toList());
+
 					List<RuntimeSearchParam> additionalParams = additionalParamNames.stream()
 							.map(sourceDef::getSearchParam)
 							.filter(Objects::nonNull)
 							.collect(Collectors.toList());
+
+
 					if (params == null || params.isEmpty()) {
 						params = additionalParams;
 					} else {
@@ -1080,7 +1092,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	}
 
 	public void setAdditionalSearchParamsForCompartmentTypes(
-			AdditionalCompartmentSearchParameters theAdditionalParameters) {
-		myAdditionalCompartmentSearchParamMap = theAdditionalParameters;
+			CompartmentSearchParametersSpecialCases theAdditionalParameters) {
+		myCompartmentSPSpecialCases = theAdditionalParameters;
 	}
 }
