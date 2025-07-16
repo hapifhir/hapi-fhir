@@ -23,6 +23,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.util.Date;
+
 public class ModifiableBundleEntry {
 	private final BundleEntryParts myBundleEntryParts;
 	private final BundleEntryMutator myBundleEntryMutator;
@@ -66,6 +68,18 @@ public class ModifiableBundleEntry {
 
 	public String getConditionalUrl() {
 		return myBundleEntryParts.getConditionalUrl();
+	}
+
+	public void setRequestIfNoneMatch(FhirContext theFhirContext, String ifNoneMatch) {
+		myBundleEntryMutator.setRequestIfNoneMatch(theFhirContext, ifNoneMatch);
+	}
+
+	public void setRequestIfModifiedSince(FhirContext theFhirContext, Date theModifiedSince) {
+		myBundleEntryMutator.setRequestIfModifiedSince(theFhirContext, theModifiedSince);
+	}
+
+	public void setRequestIfMatch(FhirContext theFhirContext, String theIfMatch) {
+		myBundleEntryMutator.setRequestIfMatch(theFhirContext, theIfMatch);
 	}
 
 	public void setRequestIfNoneExist(FhirContext theFhirContext, String theIfNoneExist) {

@@ -42,6 +42,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -329,6 +330,13 @@ public class ParametersUtil {
 	public static IPrimitiveType<?> createCode(FhirContext theContext, String theValue) {
 		return (IPrimitiveType<?>)
 				Objects.requireNonNull(theContext.getElementDefinition("code")).newInstance(theValue);
+	}
+
+// FIXME KHS test
+	public static IPrimitiveType<?> createInstant(FhirContext theContext, Date theValue) {
+		return (IPrimitiveType<?>)
+			Objects.requireNonNull(theContext.getElementDefinition("instant")).newInstance(theValue);
+
 	}
 
 	public static IBaseParameters newInstance(FhirContext theContext) {
@@ -654,4 +662,5 @@ public class ParametersUtil {
 		}
 		return retVal;
 	}
+
 }

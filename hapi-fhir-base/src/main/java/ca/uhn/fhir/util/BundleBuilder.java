@@ -225,7 +225,7 @@ public class BundleBuilder {
 
 		IIdType id = getIdTypeForUpdate(theResource);
 
-		String fullUrl = id.getValue();
+		String fullUrl = id.toVersionless().getValue();
 		String verb = "PUT";
 		String requestUrl = StringUtils.isBlank(theRequestUrl)
 				? id.toUnqualifiedVersionless().getValue()
@@ -264,7 +264,7 @@ public class BundleBuilder {
 
 		IIdType id = getIdTypeForUpdate(theResource);
 		String requestUrl = id.toUnqualifiedVersionless().getValue();
-		String fullUrl = id.getValue();
+		String fullUrl = id.toVersionless().getValue();
 		String httpMethod = "PUT";
 
 		addIdOnlyEntry(requestUrl, httpMethod, fullUrl);

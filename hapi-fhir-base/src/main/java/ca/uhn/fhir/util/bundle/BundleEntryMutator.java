@@ -27,6 +27,8 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.util.Date;
+
 public class BundleEntryMutator {
 	private final IBase myEntry;
 	private final BaseRuntimeChildDefinition myRequestChildDef;
@@ -68,6 +70,30 @@ public class BundleEntryMutator {
 	public void setResource(IBaseResource theUpdatedResource) {
 		BaseRuntimeChildDefinition resourceChild = myEntryDefinition.getChildByName("resource");
 		resourceChild.getMutator().setValue(myEntry, theUpdatedResource);
+	}
+
+	public void setRequestIfNoneMatch(FhirContext theFhirContext, String theIfNoneMatch) {
+		BaseRuntimeChildDefinition requestUrlChildDef = myRequestChildContentsDef.getChildByName("ifNoneMatch");
+		IPrimitiveType<?> url = ParametersUtil.createString(theFhirContext, theIfNoneMatch);
+		for (IBase nextRequest : myRequestChildDef.getAccessor().getValues(myEntry)) {
+			requestUrlChildDef.getMutator().addValue(nextRequest, url);
+		}
+	}
+
+	public void setRequestIfModifiedSince(FhirContext theFhirContext, Date theIfModifiedSince) {
+		BaseRuntimeChildDefinition requestUrlChildDef = myRequestChildContentsDef.getChildByName("ifModifiedSince");
+		IPrimitiveType<?> url = ParametersUtil.createInstant(theFhirContext, theIfModifiedSince);
+		for (IBase nextRequest : myRequestChildDef.getAccessor().getValues(myEntry)) {
+			requestUrlChildDef.getMutator().addValue(nextRequest, url);
+		}
+	}
+
+	public void setRequestIfMatch(FhirContext theFhirContext, String theIfMatch) {
+		BaseRuntimeChildDefinition requestUrlChildDef = myRequestChildContentsDef.getChildByName("ifMatch");
+		IPrimitiveType<?> url = ParametersUtil.createString(theFhirContext, theIfMatch);
+		for (IBase nextRequest : myRequestChildDef.getAccessor().getValues(myEntry)) {
+			requestUrlChildDef.getMutator().addValue(nextRequest, url);
+		}
 	}
 
 	public void setRequestIfNoneExist(FhirContext theFhirContext, String theIfNoneExist) {
