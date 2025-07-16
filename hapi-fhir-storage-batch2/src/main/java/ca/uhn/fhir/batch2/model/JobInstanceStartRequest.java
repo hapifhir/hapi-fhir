@@ -74,11 +74,6 @@ public class JobInstanceStartRequest implements IModelJson {
 		myJobDefinitionId = theJobDefinitionId;
 	}
 
-	public JobInstanceStartRequest setJobDefinitionIdAndReturn(String theJobDefinitionId) {
-		myJobDefinitionId = theJobDefinitionId;
-		return this;
-	}
-
 	public String getParameters() {
 		return myParameters;
 	}

@@ -136,7 +136,8 @@ class InlineJobCoordinatorTest {
 
 		// Some sort of batch service would trigger this:
 		final InlineTestJobParams jobParams = new InlineTestJobParams(30);
-		final JobInstanceStartRequest jobInstanceStartRequest = new JobInstanceStartRequest().setParameters(jobParams).setJobDefinitionIdAndReturn(JOB_DEFINITION_ID);
+		final JobInstanceStartRequest jobInstanceStartRequest = new JobInstanceStartRequest().setParameters(jobParams);
+		jobInstanceStartRequest.setJobDefinitionId(JOB_DEFINITION_ID);
 		// This is the contract for the tests to pass their own job instance ID:
 		final SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.addHeader(InlineJobCoordinator.JOB_INSTANCE_ID_FOR_TESTING, JOB_INSTANCE_ID);
