@@ -117,6 +117,8 @@ public class BulkDataExportProvider {
 					IPrimitiveType<String> theType,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant")
 					IPrimitiveType<Date> theSince,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_UNTIL, min = 0, max = 1, typeName = "instant")
+					IPrimitiveType<Date> theUntil,
 			@OperationParam(
 							name = JpaConstants.PARAM_EXPORT_TYPE_FILTER,
 							min = 0,
@@ -139,6 +141,7 @@ public class BulkDataExportProvider {
 				.outputFormat(theOutputFormat)
 				.resourceTypes(theType)
 				.since(theSince)
+				.until(theUntil)
 				.filters(theTypeFilter)
 				.exportIdentifier(theExportId)
 				.exportStyle(ExportStyle.SYSTEM)
@@ -165,6 +168,8 @@ public class BulkDataExportProvider {
 					IPrimitiveType<String> theType,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant")
 					IPrimitiveType<Date> theSince,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_UNTIL, min = 0, max = 1, typeName = "instant")
+					IPrimitiveType<Date> theUntil,
 			@OperationParam(
 							name = JpaConstants.PARAM_EXPORT_TYPE_FILTER,
 							min = 0,
@@ -185,6 +190,7 @@ public class BulkDataExportProvider {
 		ourLog.debug("Received Group Bulk Export Request for Group {}", theIdParam);
 		ourLog.debug("_type={}", theType);
 		ourLog.debug("_since={}", theSince);
+		ourLog.debug("_until{}", theUntil);
 		ourLog.debug("_typeFilter={}", theTypeFilter);
 		ourLog.debug("_mdm={}", theMdm);
 
@@ -197,6 +203,7 @@ public class BulkDataExportProvider {
 				.outputFormat(theOutputFormat)
 				.resourceTypes(theType)
 				.since(theSince)
+				.until(theUntil)
 				.filters(theTypeFilter)
 				.exportIdentifier(theExportIdentifier)
 				.exportStyle(ExportStyle.GROUP)
@@ -230,6 +237,8 @@ public class BulkDataExportProvider {
 					IPrimitiveType<String> theType,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant")
 					IPrimitiveType<Date> theSince,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_UNTIL, min = 0, max = 1, typeName = "instant")
+					IPrimitiveType<Date> theUntil,
 			@OperationParam(
 							name = JpaConstants.PARAM_EXPORT_TYPE_FILTER,
 							min = 0,
@@ -256,6 +265,7 @@ public class BulkDataExportProvider {
 				theOutputFormat,
 				theType,
 				theSince,
+				theUntil,
 				theExportIdentifier,
 				theTypeFilter,
 				theTypePostFetchFilterUrl,
@@ -278,6 +288,8 @@ public class BulkDataExportProvider {
 					IPrimitiveType<String> theType,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant")
 					IPrimitiveType<Date> theSince,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_UNTIL, min = 0, max = 1, typeName = "instant")
+					IPrimitiveType<Date> theUntil,
 			@OperationParam(
 							name = JpaConstants.PARAM_EXPORT_TYPE_FILTER,
 							min = 0,
@@ -299,6 +311,7 @@ public class BulkDataExportProvider {
 				theOutputFormat,
 				theType,
 				theSince,
+				theUntil,
 				theTypeFilter,
 				theTypePostFetchFilterUrl,
 				List.of(theIdParam),
@@ -340,6 +353,7 @@ public class BulkDataExportProvider {
 			IPrimitiveType<String> theOutputFormat,
 			IPrimitiveType<String> theType,
 			IPrimitiveType<Date> theSince,
+			IPrimitiveType<Date> theUntil,
 			IPrimitiveType<String> theExportIdentifier,
 			List<IPrimitiveType<String>> theTypeFilter,
 			List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
@@ -363,6 +377,7 @@ public class BulkDataExportProvider {
 				.outputFormat(theOutputFormat)
 				.resourceTypes(resourceTypes)
 				.since(theSince)
+				.until(theUntil)
 				.filters(theTypeFilter)
 				.exportIdentifier(theExportIdentifier)
 				.exportStyle(ExportStyle.PATIENT)
