@@ -165,6 +165,7 @@ public class JpaStorageSettings extends StorageSettings {
 
 	private boolean myDeleteStaleSearches = true;
 	private boolean myEnforceReferentialIntegrityOnDelete = true;
+	private Set<String> myEnforceReferentialIntegrityOnDeleteDisableForPaths = Collections.emptySet();
 	private boolean myUniqueIndexesEnabled = true;
 	private boolean myUniqueIndexesCheckedBeforeSave = true;
 	private boolean myEnforceReferentialIntegrityOnWrite = true;
@@ -1421,6 +1422,33 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public void setEnforceReferentialIntegrityOnDelete(boolean theEnforceReferentialIntegrityOnDelete) {
 		myEnforceReferentialIntegrityOnDelete = theEnforceReferentialIntegrityOnDelete;
+	}
+
+	/**
+	 * When {@link #setEnforceReferentialIntegrityOnDelete(boolean)} is set to <code>true</code> and this property is
+	 * set to the FHIR paths, the referential integrity checks for the specified FHIR paths will be disabled
+	 * during Delete or Delete Expunge operations.
+	 * <p>
+	 * For example, if the property contains the FHIR path <code>Encounter.subject</code> , deleting a Patient
+	 * referenced by an Encounter's subject is allowed without deleting the Encounter first.
+	 * </p>
+	 */
+	public Set<String> getEnforceReferentialIntegrityOnDeleteDisableForPaths() {
+		return myEnforceReferentialIntegrityOnDeleteDisableForPaths;
+	}
+
+	/**
+	 * When {@link #setEnforceReferentialIntegrityOnDelete(boolean)} is set to <code>true</code> and this property is
+	 * set to the FHIR paths, the referential integrity checks for the specified FHIR paths will be disabled
+	 * during Delete or Delete Expunge operations.
+	 * <p>
+	 * For example, if the property contains the FHIR path <code>Encounter.subject</code> , deleting a Patient
+	 * referenced by an Encounter's subject is allowed without deleting the Encounter first.
+	 * </p>
+	 */
+	public void setEnforceReferentialIntegrityOnDeleteDisableForPaths(
+			Set<String> theEnforceReferentialIntegrityOnDeleteDisableForPaths) {
+		myEnforceReferentialIntegrityOnDeleteDisableForPaths = theEnforceReferentialIntegrityOnDeleteDisableForPaths;
 	}
 
 	/**
