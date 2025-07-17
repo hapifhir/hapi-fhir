@@ -1425,12 +1425,12 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
-	 * When {@link #setEnforceReferentialIntegrityOnDelete(boolean)} is set to <code>true</code> and this property is
-	 * set to the FHIR paths, the referential integrity checks for the specified FHIR paths will be disabled
-	 * during Delete or Delete Expunge operations.
+	 * When {@link #setEnforceReferentialIntegrityOnDelete(boolean)} is set to <code>true</code>, this setting may
+	 * be used to selectively disable the referential integrity checking only for specific paths. It applies to
+	 * both Delete and Delete with Expunge operations.
 	 * <p>
-	 * For example, if the property contains the FHIR path <code>Encounter.subject</code> , deleting a Patient
-	 * referenced by an Encounter's subject is allowed without deleting the Encounter first.
+	 * For example, if the property contains the FHIR path expression <code>Encounter.subject</code> , deleting
+	 * the Patient referenced by an Encounter's subject is allowed without deleting the Encounter first.
 	 * </p>
 	 */
 	public Set<String> getEnforceReferentialIntegrityOnDeleteDisableForPaths() {
@@ -1438,12 +1438,12 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
-	 * When {@link #setEnforceReferentialIntegrityOnDelete(boolean)} is set to <code>true</code> and this property is
-	 * set to the FHIR paths, the referential integrity checks for the specified FHIR paths will be disabled
-	 * during Delete or Delete Expunge operations.
+	 * When {@link #setEnforceReferentialIntegrityOnDelete(boolean)} is set to <code>true</code>, this setting
+	 * allows you to selectively disable integrity checks for specific paths. It applies to both Delete and
+	 * Delete with Expunge operations.
 	 * <p>
-	 * For example, if the property contains the FHIR path <code>Encounter.subject</code> , deleting a Patient
-	 * referenced by an Encounter's subject is allowed without deleting the Encounter first.
+	 * For example, if the property contains the FHIR path expression <code>Encounter.subject</code> , deleting
+	 * the Patient referenced by an Encounter's subject is allowed without deleting the Encounter first.
 	 * </p>
 	 */
 	public void setEnforceReferentialIntegrityOnDeleteDisableForPaths(

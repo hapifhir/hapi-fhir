@@ -2,6 +2,6 @@
 type: fix
 issue: 7139
 jira: SMILE-9692
-title: "This change allows the deletion of resources using the delete expunge operation when the property 
-`enforceReferentialIntegrityOnDeleteDisableForPaths` is set to reference FHIR paths linking other resources 
-to the target resources."
+title: "This change allows resources to be deleted using the Delete with Expunge operation when the property 
+`enforceReferentialIntegrityOnDeleteDisableForPaths` is set to one or more FHIRPath expressions that link other 
+resources to the target resources."
