@@ -33,18 +33,28 @@ public class UrlRepositoryFactory {
 				&& ourUrlPattern.matcher(theBaseUrl).matches();
 	}
 
+	/**
+	 * Find a factory for {@link IRepository} based on the given URL.
+	 * This URL is expected to be in the form of fhir-repository:subscheme:details.
+	 * The subscheme is used to find a matching {@link IRepositoryLoader} implementation.
+	 *
+	 * @param theRepositoryUrl a url of the form fhir-repository:subscheme:details
+	 * @param theFhirContext the FHIR context to use for the repository, if required.
+	 * @return a repository instance
+	 * @throws IllegalArgumentException if the URL is not a valid repository URL, or no loader can be found for the URL.
+	 */
 	@Nonnull
-	public static IRepository buildRepository(@Nonnull String theBaseUrl, @Nullable FhirContext theFhirContext) {
-		ourLog.debug("Loading repository for url: {}", theBaseUrl);
-		Objects.requireNonNull(theBaseUrl);
+	public static IRepository buildRepository(@Nonnull String theRepositoryUrl, @Nullable FhirContext theFhirContext) {
+		ourLog.debug("Loading repository for url: {}", theRepositoryUrl);
+		Objects.requireNonNull(theRepositoryUrl);
 
-		if (!isRepositoryUrl(theBaseUrl)) {
+		if (!isRepositoryUrl(theRepositoryUrl)) {
 			throw new IllegalArgumentException(
-					Msg.code(2737) + "Base URL is not a valid repository URL: " + theBaseUrl);
+					Msg.code(2737) + "Base URL is not a valid repository URL: " + theRepositoryUrl);
 		}
 
 		ServiceLoader<IRepositoryLoader> load = ServiceLoader.load(IRepositoryLoader.class);
-		IRepositoryRequest request = buildRequest(theBaseUrl, theFhirContext);
+		IRepositoryRequest request = buildRequest(theRepositoryUrl, theFhirContext);
 		for (IRepositoryLoader nextLoader : load) {
 			ourLog.debug("Checking repository loader {}", nextLoader.getClass().getName());
 			if (nextLoader.canLoad(request)) {
@@ -52,9 +62,14 @@ public class UrlRepositoryFactory {
 			}
 		}
 		throw new IllegalArgumentException(
-				Msg.code(2738) + "Unable to find a repository loader for URL: " + theBaseUrl);
+				Msg.code(2738) + "Unable to find a repository loader for URL: " + theRepositoryUrl);
 	}
 
+	/**
+	 * Builder for our abstract {@link IRepositoryRequest} interface.
+	 * @param theBaseUrl the fhir-repository URL to parse, e.g. fhir-repository:memory:my-repo
+	 * @param theFhirContext the FHIR context to use for the repository, if required.
+	 */
 	@Nonnull
 	public static IRepositoryRequest buildRequest(@Nonnull String theBaseUrl, @Nullable FhirContext theFhirContext) {
 		Matcher matcher = ourUrlPattern.matcher(theBaseUrl);
@@ -69,6 +84,9 @@ public class UrlRepositoryFactory {
 		return new RepositoryRequest(theBaseUrl, subScheme, details, theFhirContext);
 	}
 
+	/**
+	 * Internal implementation of {@link IRepositoryRequest}.
+	 */
 	record RepositoryRequest(String url, String subScheme, String details, FhirContext fhirContext)
 			implements IRepositoryRequest {
 		@Override
@@ -86,6 +104,7 @@ public class UrlRepositoryFactory {
 			return details;
 		}
 
+		@SuppressWarnings("java:S6211")
 		@Override
 		public Optional<FhirContext> getFhirContext() {
 			return Optional.ofNullable(fhirContext);

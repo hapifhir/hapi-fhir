@@ -94,13 +94,13 @@ class NaiveSearching {
 	@Nonnull
 	static Multimap<String, List<IQueryParameterType>> getMutableCopy(
 			Multimap<String, List<IQueryParameterType>> theSearchParameters) {
-		Multimap<String, List<IQueryParameterType>> searchParameters;
+		Multimap<String, List<IQueryParameterType>> mutableSearchParameterCopy;
 		if (theSearchParameters == null) {
-			searchParameters = ArrayListMultimap.create();
+			mutableSearchParameterCopy = ArrayListMultimap.create();
 		} else {
-			searchParameters = ArrayListMultimap.create(theSearchParameters);
+			mutableSearchParameterCopy = ArrayListMultimap.create(theSearchParameters);
 		}
-		return searchParameters;
+		return mutableSearchParameterCopy;
 	}
 
 	@Nonnull

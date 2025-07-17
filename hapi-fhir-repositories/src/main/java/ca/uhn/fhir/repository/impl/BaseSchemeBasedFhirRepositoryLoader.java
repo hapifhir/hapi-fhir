@@ -1,6 +1,9 @@
-package ca.uhn.fhir.repository.loader;
+package ca.uhn.fhir.repository.impl;
 
 import ca.uhn.fhir.repository.IRepositoryLoader;
+import jakarta.annotation.Nonnull;
+
+import static java.util.Objects.*;
 
 /**
  * Simple base class for {@link IRepositoryLoader} implementations that select on the sub-scheme of the URL.
@@ -18,10 +21,8 @@ public abstract class BaseSchemeBasedFhirRepositoryLoader implements IRepository
 		mySubScheme = theSubScheme;
 	}
 
-	public boolean canLoad(IRepositoryLoader.IRepositoryRequest theRepositoryRequest) {
-		if (theRepositoryRequest == null) {
-			return false;
-		}
+	public boolean canLoad(@Nonnull IRepositoryRequest theRepositoryRequest) {
+		requireNonNull(theRepositoryRequest);
 
 		return mySubScheme.equals(theRepositoryRequest.getSubScheme());
 	}

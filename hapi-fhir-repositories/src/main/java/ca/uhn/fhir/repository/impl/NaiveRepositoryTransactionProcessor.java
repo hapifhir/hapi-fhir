@@ -33,6 +33,7 @@ public class NaiveRepositoryTransactionProcessor {
 
 	protected final IRepository myRepository;
 	private final BaseRuntimeElementDefinition<IPrimitiveType<Date>> myInstantDefinition;
+	private final Function<BundleResponseEntryParts, IBase> myResponseEntryBuilder;
 
 	/**
 	 * @param theRepository the repository to use for crud operations during transaction processing.
@@ -42,6 +43,7 @@ public class NaiveRepositoryTransactionProcessor {
 		//noinspection unchecked
 		myInstantDefinition = (BaseRuntimeElementDefinition<IPrimitiveType<Date>>)
 				requireNonNull(myRepository.fhirContext().getElementDefinition("Instant"));
+		myResponseEntryBuilder = BundleResponseEntryParts.builder(myRepository.fhirContext());
 	}
 
 	/**
@@ -51,9 +53,6 @@ public class NaiveRepositoryTransactionProcessor {
 		BundleBuilder bundleBuilder = new BundleBuilder(myRepository.fhirContext());
 
 		bundleBuilder.setType(BundleUtil.BUNDLE_TYPE_TRANSACTION_RESPONSE);
-
-		Function<BundleResponseEntryParts, IBase> responseEntryBuilder =
-				BundleResponseEntryParts.builder(myRepository.fhirContext());
 
 		IPrimitiveType<Date> now = getCurrentInstant();
 
@@ -69,7 +68,7 @@ public class NaiveRepositoryTransactionProcessor {
 						default -> throw new NotImplementedOperationException(
 								"Transaction stub only supports POST, PUT, or DELETE");
 					};
-			bundleBuilder.addEntry(responseEntryBuilder.apply(responseEntry));
+			bundleBuilder.addEntry(myResponseEntryBuilder.apply(responseEntry));
 		}
 
 		return bundleBuilder.getBundleTyped();

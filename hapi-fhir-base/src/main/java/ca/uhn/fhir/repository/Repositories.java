@@ -25,12 +25,17 @@ public class Repositories {
 	 * <ul>
 	 *     <li>memory - e.g. fhir-repository:memory:my-repo - the last piece (my-repo) identifies the repository</li>
 	 * </ul>
-	 * @param theBaseUrl a url of the form fhir-repository:subscheme:details
+	 *
+	 * The subscheme is used to find a matching {@link IRepositoryLoader} implementation.
+	 *
+	 * @param theRepositoryUrl a url of the form fhir-repository:subscheme:details
 	 * @param theFhirContext the FHIR context to use for the repository, if required.
-	 * @return
+	 * @return a repository instance
+	 * @throws IllegalArgumentException if the URL is not a valid repository URL, or no loader can be found for the URL.
+	 *
 	 */
 	@Nonnull
-	public static IRepository repositoryForUrl(@Nonnull String theBaseUrl, @Nullable FhirContext theFhirContext) {
-		return UrlRepositoryFactory.buildRepository(theBaseUrl, theFhirContext);
+	public static IRepository repositoryForUrl(@Nonnull String theRepositoryUrl, @Nullable FhirContext theFhirContext) {
+		return UrlRepositoryFactory.buildRepository(theRepositoryUrl, theFhirContext);
 	}
 }

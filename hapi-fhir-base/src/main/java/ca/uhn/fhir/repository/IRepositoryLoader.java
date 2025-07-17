@@ -22,7 +22,7 @@ public interface IRepositoryLoader {
 	 * @param theRepositoryRequest containing the URL to check
 	 * @return true if supported
 	 */
-	boolean canLoad(IRepositoryRequest theRepositoryRequest);
+	boolean canLoad(@Nonnull IRepositoryRequest theRepositoryRequest);
 
 	/**
 	 * Construct a version of {@link IRepository} based on the given URL.

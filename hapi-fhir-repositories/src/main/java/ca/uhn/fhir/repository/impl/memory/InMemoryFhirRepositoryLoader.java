@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.repository.IRepositoryLoader;
-import ca.uhn.fhir.repository.loader.BaseSchemeBasedFhirRepositoryLoader;
+import ca.uhn.fhir.repository.impl.BaseSchemeBasedFhirRepositoryLoader;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.collections4.map.ReferenceMap;
 

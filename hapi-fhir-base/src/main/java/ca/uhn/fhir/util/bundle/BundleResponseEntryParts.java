@@ -42,7 +42,7 @@ public record BundleResponseEntryParts(
 		private final BaseRuntimeElementCompositeDefinition<?> myEntryElementDef;
 		private final BaseRuntimeElementCompositeDefinition<?> myResponseChildContentsDef;
 
-		public Metadata(FhirContext theFhirContext) {
+		private Metadata(FhirContext theFhirContext) {
 
 			BaseRuntimeChildDefinition entryChildDef =
 					theFhirContext.getResourceDefinition("Bundle").getChildByName("entry");
