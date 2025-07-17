@@ -37,9 +37,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -85,23 +87,24 @@ public class MergeResourceHelper {
 		OperationOutcomeUtil.addIssue(theFhirContex, theOutcome, "error", theDiagnosticMsg, null, theCode);
 	}
 
-	public Patient updateMergedResourcesAfterReferencesReplaced(
+	public DaoMethodOutcome updateMergedResourcesAfterReferencesReplaced(
 			Patient theSourceResource,
 			Patient theTargetResource,
 			@Nullable Patient theResultResource,
 			boolean theIsDeleteSource,
 			RequestDetails theRequestDetails) {
 
+
 		Patient targetToUpdate = prepareTargetPatientForUpdate(
 				theTargetResource, theSourceResource, theResultResource, theIsDeleteSource);
 
-		Patient updatedTarget = updateResource(targetToUpdate, theRequestDetails);
+		DaoMethodOutcome targetOutcome = myPatientDao.update(targetToUpdate, theRequestDetails);
 		if (!theIsDeleteSource) {
 			prepareSourcePatientForUpdate(theSourceResource, theTargetResource);
-			updateResource(theSourceResource, theRequestDetails);
+			myPatientDao.update(theSourceResource, theRequestDetails);
 		}
 
-		return updatedTarget;
+		return targetOutcome;
 	}
 
 	public void createProvenance(
@@ -204,8 +207,4 @@ public class MergeResourceHelper {
 		return false;
 	}
 
-	private Patient updateResource(Patient theResource, RequestDetails theRequestDetails) {
-		DaoMethodOutcome outcome = myPatientDao.update(theResource, theRequestDetails);
-		return (Patient) outcome.getResource();
-	}
 }

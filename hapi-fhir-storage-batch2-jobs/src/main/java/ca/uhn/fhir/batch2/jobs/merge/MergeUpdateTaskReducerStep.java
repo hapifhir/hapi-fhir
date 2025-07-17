@@ -26,6 +26,7 @@ import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceResultsJson;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceUpdateTaskReducerStep;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.merge.MergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
@@ -35,6 +36,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -74,13 +76,13 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 		Patient resultResource;
 		boolean deleteSource;
 
-		List<IBaseResource> containedResourcesForProvenance;
+		List<IBaseResource> containedResourcesForProvenance = new ArrayList<>();
 		Parameters originalInputParameters = null;
 		if (mergeJobParameters.getOriginalInputParameters() != null) {
 			originalInputParameters = myFhirContext.newJsonParser().parseResource(Parameters.class, mergeJobParameters.getOriginalInputParameters());
 			resultResource = getResultResource(originalInputParameters);
 			deleteSource = isDeleteSource(originalInputParameters);
-			containedResourcesForProvenance = List.of(originalInputParameters);
+			containedResourcesForProvenance.add(originalInputParameters);
 		}
 		else {
 			// This else part is just for backward compatibility could be removed in the future
@@ -90,7 +92,6 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 				resultResource = null;
 			}
 			deleteSource = mergeJobParameters.getDeleteSource();
-			containedResourcesForProvenance = Collections.emptyList();
 		}
 
 		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
@@ -99,12 +100,13 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 			Patient targetResource =
 					myPatientDao.read(mergeJobParameters.getTargetId().asIdDt(), theRequestDetails);
 
-			Patient updatedTarget = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
+			DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
 					sourceResource,
 					targetResource,
 					resultResource,
 					deleteSource,
 					theRequestDetails);
+			Patient updatedTargetResource = (Patient) outcome.getResource();
 
 			String sourceVersionForProvenance = sourceResource.getIdElement().getVersionIdPart();
 			if (deleteSource) {
@@ -113,8 +115,8 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 			}
 
 			mergeJobParameters.setSourceVersionForProvenance(sourceVersionForProvenance);
-			mergeJobParameters.setTargetVersionForProvenance(updatedTarget.getIdElement().getVersionIdPart());
-
+			mergeJobParameters.setTargetVersionForProvenance(updatedTargetResource.getIdElement().getVersionIdPart());
+			containedResourcesForProvenance.add(outcome.getOperationOutcome());
 			createProvenance(theStepExecutionDetails, theRequestDetails, containedResourcesForProvenance);
 
 			if (deleteSource) {

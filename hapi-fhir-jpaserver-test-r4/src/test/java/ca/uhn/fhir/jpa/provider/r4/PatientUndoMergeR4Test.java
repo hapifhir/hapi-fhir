@@ -1,13 +1,12 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -19,12 +18,10 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -39,13 +36,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public class PatientUndoMergeR4Test extends BaseResourceProviderR4Test {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PatientUndoMergeR4Test.class);
 
-	//@RegisterExtension
-	//MyExceptionHandler ourExceptionHandler = new MyExceptionHandler();
-
-
 	ReplaceReferencesTestHelper myTestHelper;
 
 	ReplaceReferencesLargeTestData myLargeTestData;
+
+	Patient mySourcePatientBeforeMerge;
+	Patient myTargetPatientBeforeMerge;
+	Encounter myEncounterInitiallyReferencingSrcBeforeMerge;
 
 	IIdType mySourcePatientId;
 	IIdType myTargetPatientId;
@@ -134,6 +131,7 @@ public class PatientUndoMergeR4Test extends BaseResourceProviderR4Test {
 
 		 Parameters inParametersUndoMerge = inParams.asUndoParametersResource();
 		 Parameters outParams = myTestHelper.callUndoMergeOperation(myClient, inParametersUndoMerge);
+		 // + 2 is for source and target resources
 		 validateSuccessOutcome(outParams, TOTAL_EXPECTED_PATCHES + 2);
 
 
@@ -143,6 +141,45 @@ public class PatientUndoMergeR4Test extends BaseResourceProviderR4Test {
 		assertResourcesAreEqualIgnoringVersionAndLastUpdated(targetBeforeMerge, targetAfterUnmerge);
 
 		myTestHelper.assertReferencesHaveNotChanged(myLargeTestData);
+	}
+
+
+	@Test
+	void testUndoMerge_TargetResourceIsNotUpdatedByMerge_SkipsRestoringTargetResource() {
+		// if deleteSource is true, no resultResource is provided and the src resource doesn't contain any identifiers to copy to the target,
+		// the target resource won't be updated by the merge operation, in that scenario the target resource
+		// should not be restored to a previous version by undo merge
+		createInputPatientsAndEncounter();
+		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
+		inParams.sourcePatient = myTestHelper.idAsReference(mySourcePatientId);
+		inParams.targetPatient = myTestHelper.idAsReference(myTargetPatientId);
+		inParams.deleteSource = true;
+
+		Parameters inParametersMerge = inParams.asParametersResource();
+
+		myTestHelper.callMergeOperation(myClient, inParametersMerge, false);
+
+		Patient targetAfterMerge = myTestHelper.readPatient(myTargetPatientId);
+		assertThat(targetAfterMerge.getIdElement().getVersionIdPartAsLong()).isEqualTo(1);
+
+		Parameters inParametersUndoMerge = inParams.asUndoParametersResource();
+
+
+		Parameters outParams = myTestHelper.callUndoMergeOperation(myClient, inParametersUndoMerge);
+		// in this case, only the source and the encounter should be restored, not the target, so the expected count is 2
+		validateSuccessOutcome(outParams,  2);
+
+		Patient sourceAfterUnmerge = myTestHelper.readPatient(mySourcePatientId);
+		Patient targetAfterUnmerge = myTestHelper.readPatient(myTargetPatientId);
+		Encounter encounterAfterUnmerge = myEncounterDao.read(myEncounterIdInitiallyReferencingSrc, mySrd);
+
+		// target should still be at version 1
+		assertThat(targetAfterUnmerge.getIdElement().getVersionIdPartAsLong()).isEqualTo(1);
+
+		assertThat(sourceAfterUnmerge.getIdElement().getVersionIdPartAsLong()).isEqualTo(3);
+		assertThat(encounterAfterUnmerge.getIdElement().getVersionIdPartAsLong()).isEqualTo(3);
+		assertResourcesAreEqualIgnoringVersionAndLastUpdated(mySourcePatientBeforeMerge, sourceAfterUnmerge);
+		assertResourcesAreEqualIgnoringVersionAndLastUpdated(myEncounterInitiallyReferencingSrcBeforeMerge, encounterAfterUnmerge);
 	}
 
 	@Test
@@ -159,8 +196,7 @@ public class PatientUndoMergeR4Test extends BaseResourceProviderR4Test {
 		// update the source resource after the merge
 		Patient updatedSrcPatient = new Patient().setActive(true);
 		updatedSrcPatient.setId(mySourcePatientId);
-		SystemRequestDetails srd = new SystemRequestDetails();
-		myPatientDao.update(updatedSrcPatient, srd);
+		myPatientDao.update(updatedSrcPatient, mySrd);
 
 		Parameters inParametersUndoMerge = inParams.asUndoParametersResource();
 		callUndoAndAssertExceptionWithMessageInTheOutcome(inParametersUndoMerge, ResourceVersionConflictException.class, "HAPI-2732");
@@ -180,8 +216,7 @@ public class PatientUndoMergeR4Test extends BaseResourceProviderR4Test {
 
 		Patient updatedTargetPatient = new Patient().setActive(true);
 		updatedTargetPatient.setId(myTargetPatientId);
-		SystemRequestDetails srd = new SystemRequestDetails();
-		myPatientDao.update(updatedTargetPatient, srd);
+		myPatientDao.update(updatedTargetPatient, mySrd);
 
 
 		Parameters inParametersUndoMerge = inParams.asUndoParametersResource();
@@ -202,8 +237,7 @@ public class PatientUndoMergeR4Test extends BaseResourceProviderR4Test {
 		Encounter updatedEncounter = new Encounter();
 		updatedEncounter.setId(myEncounterIdInitiallyReferencingSrc);
 		updatedEncounter.addIdentifier().setSystem("sys").setValue("val");
-		SystemRequestDetails srd = new SystemRequestDetails();
-		myEncounterDao.update(updatedEncounter, srd);
+		myEncounterDao.update(updatedEncounter, mySrd);
 
 		Parameters inParametersUndoMerge = inParams.asUndoParametersResource();
 		callUndoAndAssertExceptionWithMessageInTheOutcome(inParametersUndoMerge, ResourceVersionConflictException.class, "HAPI-2732");
@@ -220,8 +254,7 @@ public class PatientUndoMergeR4Test extends BaseResourceProviderR4Test {
 
 		myTestHelper.callMergeOperation(myClient, inParametersMerge, false);
 
-		SystemRequestDetails srd = new SystemRequestDetails();
-		myEncounterDao.delete(myEncounterIdInitiallyReferencingSrc, srd);
+		myEncounterDao.delete(myEncounterIdInitiallyReferencingSrc, mySrd);
 
 		Parameters inParametersUndoMerge = inParams.asUndoParametersResource();
 		//fix msg.code
@@ -256,24 +289,29 @@ public class PatientUndoMergeR4Test extends BaseResourceProviderR4Test {
 
 
 	private void createInputPatientsAndEncounter() {
+		DaoMethodOutcome outcome = myPatientDao.create(new Patient(), mySrd);
+		mySourcePatientBeforeMerge = (Patient) outcome.getResource();
+		mySourcePatientId = outcome.getId().toUnqualifiedVersionless();
 
-		SystemRequestDetails srd = new SystemRequestDetails();
-		mySourcePatientId = myPatientDao.create(new Patient(), srd).getId().toUnqualifiedVersionless();
-		myTargetPatientId = myPatientDao.create(new Patient(), srd).getId().toUnqualifiedVersionless();
+
+		outcome = myPatientDao.create(new Patient(), mySrd);
+		myTargetPatientBeforeMerge = (Patient) outcome.getResource();
+		myTargetPatientId = outcome.getId().toUnqualifiedVersionless();
 
 		Encounter encounter1 = new Encounter();
 		encounter1.setSubject(new Reference(mySourcePatientId));
-		myEncounterIdInitiallyReferencingSrc = myEncounterDao.create(encounter1, srd).getId().toUnqualifiedVersionless();
-
+		outcome =  myEncounterDao.create(encounter1, mySrd);
+		myEncounterInitiallyReferencingSrcBeforeMerge = (Encounter) outcome.getResource();
+		myEncounterIdInitiallyReferencingSrc = outcome.getId().toUnqualifiedVersionless();
 	}
 
-	private void assertResourcesAreEqualIgnoringVersionAndLastUpdated(Patient theBefore, Patient theAfter) {
+	private void assertResourcesAreEqualIgnoringVersionAndLastUpdated(Resource theBefore, Resource theAfter) {
 
 		// the resources should have the same versionless id
 		assertThat(theBefore.getIdElement().toVersionless()).isEqualTo(theAfter.getIdElement().toVersionless());
 
 		//create a copy of the before since we will modify some of its meta data to match the after resource
-		Patient copyOfTheBefore = theBefore.copy();
+		Resource copyOfTheBefore = theBefore.copy();
 
 		copyOfTheBefore.getMeta().setLastUpdated(theAfter.getMeta().getLastUpdated());
 		copyOfTheBefore.getMeta().setVersionId(theAfter.getMeta().getVersionId());
@@ -301,36 +339,12 @@ public class PatientUndoMergeR4Test extends BaseResourceProviderR4Test {
 		assertThatThrownBy(() -> myTestHelper.callUndoMergeOperation(myClient, inParameters))
 			.isInstanceOf(theExceptionClass)
 			.extracting(theExceptionClass::cast)
-			.extracting(this::extractFailureMessage)
+			.extracting(myTestHelper::extractFailureMessageFromOutcomeParameter)
 			.asString()
 			.contains(theExpectedMessage);
 	}
 
-/*	class MyExceptionHandler implements TestExecutionExceptionHandler {
-		@Override
-		public void handleTestExecutionException(ExtensionContext theExtensionContext, Throwable theThrowable) throws Throwable {
-			if (theThrowable instanceof BaseServerResponseException ex) {
-				String message = extractFailureMessage(ex);
-				throw ex.getClass().getDeclaredConstructor(String.class, Throwable.class).newInstance(message, ex);
-			}
-			throw theThrowable;
-		}
-	}*/
 
-	private @Nonnull String extractFailureMessage(BaseServerResponseException ex) {
-		String body = ex.getResponseBody();
-		IParser jsonParser = myFhirContext.newJsonParser();
-		if (body != null) {
-			Parameters outParams = jsonParser.parseResource(Parameters.class, body);
-			OperationOutcome outcome = (OperationOutcome) outParams.getParameter("outcome").getResource();
-			ourLog.info("Extracted OperationOutcome from exception: {}", jsonParser.setPrettyPrint(true).encodeResourceToString(outcome));
-			return outcome.getIssue().stream()
-				.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
-				.collect(Collectors.joining(", "));
-		} else {
-			return "null";
-		}
-	}
 
 	@Override
 	protected boolean verboseClientLogging() {

@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.merge.MergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.replacereferences.PreviousResourceVersionRestorer;
 import ca.uhn.fhir.replacereferences.UndoReplaceReferencesSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -35,9 +36,11 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
+import net.sf.saxon.expr.oper.OperandArray;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Provenance;
@@ -54,6 +57,8 @@ import java.util.Set;
 
 import static ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper.addErrorToOperationOutcome;
 import static ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper.addInfoToOperationOutcome;
+import static ca.uhn.fhir.model.api.StorageResponseCodeEnum.SUCCESSFUL_PATCH_NO_CHANGE;
+import static ca.uhn.fhir.model.api.StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CHANGE;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_200_OK;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_400_BAD_REQUEST;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_404_NOT_FOUND;
@@ -162,29 +167,49 @@ public class ResourceUndoMergeService {
 		Reference sourceReference = provenance.getTarget().get(1);
 		if (wasSourceResourceDeletedByMergeOperation(provenance)) {
 			// If the source resource was deleted by the merge operation, let the version restorer know it can be undeleted.
-			// There could be a case that the source resource wasn't deleted by the merge operation, but was deleted later by the client.
-			// Current behavior in that case is to fail the undo-merge as the source resource might have been updated before it was deleted.
-			// We could check if the latest version of the source resource before it was deleted was the version in the Provenance resource + 1,
-			// so to confirm that it deleted right after the merge, but that would require additional logic, and not implementing that for now.
 			allowedToUndelete.add(sourceReference);
 		}
 
-		myResourceVersionRestorer.restoreToPreviousVersionsInTrx(references, allowedToUndelete, theRequestDetails, partitionId);
+		List<Reference> referencesToRestore = references;
+		if (wasTargetUpdateANoop(provenance)) {
+			// skip restoring the target resource if it was not updated by the merge operation.
+			// This happens when the merge operation deletes the source resource (so the target doesn't have the replaces link added)
+			// and either the source resource don't have any identifiers that were copied over to the target resource, or a resultPatient was provided that didn't change anything in the target.
+			referencesToRestore = references.subList(1, references.size());
+		}
+
+		myResourceVersionRestorer.restoreToPreviousVersionsInTrx(referencesToRestore, allowedToUndelete, theRequestDetails, partitionId);
 
 		String msg = String.format(
 				"Successfully restored %d resources to their previous versions based on the Provenance resource: %s",
-				references.size(), provenance.getIdElement().getValue());
+			referencesToRestore.size(), provenance.getIdElement().getValue());
 		addInfoToOperationOutcome(myFhirContext, opOutcome, null, msg);
 		undoMergeOutcome.setHttpStatusCode(STATUS_HTTP_200_OK);
 
 		return undoMergeOutcome;
 	}
 
-	private boolean wasTargetResourceUpdatedByMergeOperation(Patient target) {
-		// check here if the target has a replaces link to the source resource and any identifiers marked old, if that is the case return true, otherwise return false
+	private boolean wasTargetUpdateANoop(Provenance provenance) {
+		List<Resource> containedResources = provenance.getContained();
+
+		if (containedResources.size() > 1 && containedResources.get(1) instanceof OperationOutcome operationOutcome) {
+
+				List<OperationOutcome.OperationOutcomeIssueComponent> issues = operationOutcome.getIssue();
+
+				return issues.stream()
+					.filter(issue -> issue.hasDetails() && issue.getDetails().hasCoding())
+					.map(issue -> issue.getDetails().getCoding())
+					.flatMap(List::stream)
+					.anyMatch(coding -> StorageResponseCodeEnum.SYSTEM.equals(coding.getSystem())
+						&& SUCCESSFUL_UPDATE_NO_CHANGE.getCode().equals(coding.getCode()));
+			}
 
 
-		return true;
+		//FIXME EMRE: update msg.code
+		throw new InternalErrorException(Msg.code(1234) + "The Provenance resource does not contain an OperationOutcome of the target resource.");
+
+
+
 	}
 
 	private boolean wasSourceResourceDeletedByMergeOperation(Provenance provenance) {

@@ -41,9 +41,11 @@ import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.JsonUtil;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -269,12 +271,14 @@ public class ReplaceReferencesTestHelper {
 		assertThat(activityCoding.getCode()).isEqualTo("merge");
 
 		assertThat(provenance.hasContained()).isTrue();
-		assertThat(provenance.getContained()).hasSize(1);
+		assertThat(provenance.getContained()).hasSize(2);
 		Parameters containedParameters = (Parameters) provenance.getContained().get(0);
 		//there would be an id added to the in the contained input parameters,
 		//other than that it should be equal to the input parameters that was used for the operation
 		containedParameters.setId((String) null);
 		assertThat(containedParameters.equalsDeep(theInputParameters)).isTrue();
+
+		//TODO Emre: Assert the second contained resource
 	}
 
 	private Set<IIdType> getEverythingResourceIds(IIdType thePatientId) {
@@ -723,6 +727,21 @@ public class ReplaceReferencesTestHelper {
 		assertThat(actualAgents).hasSameSizeAs(theExpectedAgents);
 		for (int i = 0; i < theExpectedAgents.size(); i++) {
 			validateAgent(theExpectedAgents.get(i), actualAgents.get(i));
+		}
+	}
+
+	public @Nonnull String extractFailureMessageFromOutcomeParameter(BaseServerResponseException ex) {
+		String body = ex.getResponseBody();
+		IParser jsonParser = myFhirContext.newJsonParser();
+		if (body != null) {
+			Parameters outParams = jsonParser.parseResource(Parameters.class, body);
+			OperationOutcome outcome = (OperationOutcome) outParams.getParameter("outcome").getResource();
+			ourLog.info("Extracted OperationOutcome from exception: {}", jsonParser.setPrettyPrint(true).encodeResourceToString(outcome));
+			return outcome.getIssue().stream()
+				.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
+				.collect(Collectors.joining(", "));
+		} else {
+			return "null";
 		}
 	}
 }

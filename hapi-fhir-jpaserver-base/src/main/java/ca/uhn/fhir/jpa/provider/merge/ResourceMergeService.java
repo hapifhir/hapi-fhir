@@ -247,25 +247,26 @@ public class ResourceMergeService {
 				.orElseThrow();
 
 		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
-			Patient updatedTarget = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
+			 DaoMethodOutcome outcome =  myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
 					theSourceResource,
 					theTargetResource,
 					(Patient) theMergeOperationParameters.getResultResource(),
 					theMergeOperationParameters.getDeleteSource(),
 					theRequestDetails);
 
-			theMergeOutcome.setUpdatedTargetResource(updatedTarget);
+			 Patient updatedTargetResource = (Patient) outcome.getResource();
+			 theMergeOutcome.setUpdatedTargetResource(updatedTargetResource);
 
 			if (theMergeOperationParameters.getCreateProvenance()) {
 				myMergeResourceHelper.createProvenance(
 						theSourceResource,
-						updatedTarget,
+						updatedTargetResource,
 						List.of(patchResultBundle),
 						theMergeOperationParameters.getDeleteSource(),
 						theRequestDetails,
 						startTime,
 						theMergeOperationParameters.getProvenanceAgents(),
-						List.of(theMergeOperationParameters.getOriginalInputParameters()));
+						List.of(theMergeOperationParameters.getOriginalInputParameters(), outcome.getOperationOutcome()));
 			}
 
 			if (theMergeOperationParameters.getDeleteSource()) {

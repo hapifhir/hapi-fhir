@@ -8,13 +8,11 @@ import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -40,14 +38,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.RESOURCE_TYPES_EXPECTED_TO_BE_PATCHED;
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.TOTAL_EXPECTED_PATCHES;
-import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER;
-import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER_RESPOND_ASYNC;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_INPUT;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_OUTCOME;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_RESULT;
@@ -329,7 +323,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		// exec
 		assertThatThrownBy(() -> callMergeOperation(inParameters, false))
 			.isInstanceOf(PreconditionFailedException.class)
-			.satisfies(ex -> assertThat(extractFailureMessage((BaseServerResponseException) ex)).isEqualTo("HAPI-2597: Number of resources with references to "+ myLargeTestData.getSourcePatientId() + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'."));
+			.satisfies(ex -> assertThat(myTestHelper.extractFailureMessageFromOutcomeParameter((BaseServerResponseException) ex)).isEqualTo("HAPI-2597: Number of resources with references to "+ myLargeTestData.getSourcePatientId() + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'."));
 	}
 
 	@ParameterizedTest(name = "{index}: deleteSource={0}, async={1}")
@@ -484,7 +478,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			callMergeOperation(inParameters))
 			.isInstanceOf(UnprocessableEntityException.class)
 			.extracting(UnprocessableEntityException.class::cast)
-			.extracting(this::extractFailureMessage)
+			.extracting(myTestHelper::extractFailureMessageFromOutcomeParameter)
 			.isEqualTo(theExpectedMessage);
 	}
 
@@ -500,25 +494,13 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		@Override
 		public void handleTestExecutionException(ExtensionContext theExtensionContext, Throwable theThrowable) throws Throwable {
 			if (theThrowable instanceof BaseServerResponseException ex) {
-				String message = extractFailureMessage(ex);
+				String message = myTestHelper.extractFailureMessageFromOutcomeParameter(ex);
 				throw ex.getClass().getDeclaredConstructor(String.class, Throwable.class).newInstance(message, ex);
 			}
 			throw theThrowable;
 		}
 	}
 
-	private @Nonnull String extractFailureMessage(BaseServerResponseException ex) {
-		String body = ex.getResponseBody();
-		if (body != null) {
-			Parameters outParams = myFhirContext.newJsonParser().parseResource(Parameters.class, body);
-			OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
-			return outcome.getIssue().stream()
-				.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
-				.collect(Collectors.joining(", "));
-		} else {
-			return "null";
-		}
-	}
 
 	@Override
 	protected boolean verboseClientLogging() {
