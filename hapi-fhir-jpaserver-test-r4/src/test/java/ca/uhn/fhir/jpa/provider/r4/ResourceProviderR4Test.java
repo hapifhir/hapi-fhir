@@ -10,6 +10,9 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.interceptor.validation.IRepositoryValidatingRule;
+import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingInterceptor;
+import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -60,12 +63,15 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.validation.ValidationMessageSuppressingInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -153,6 +159,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -170,6 +177,7 @@ import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.intellij.lang.annotations.Language;
@@ -306,6 +314,79 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).hasWarnMessage("Skipping validation of submitted SearchParameter because " + SearchParamValidatingInterceptor.SKIP_VALIDATION + " flag is true");
 	}
+
+
+	@Autowired
+	private RepositoryValidatingRuleBuilder myRuleBuilder;
+
+	// FIXME: remove
+	@Test
+	public void testSdm() {
+		Location loc = new Location();
+		loc.addIdentifier().setSystem("https://api.loblaw.ca/fhir/NamingSystem/hw-0999").setValue("123");
+		IIdType locId = myLocationDao.create(loc, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
+
+		Practitioner prac = new Practitioner();
+		prac.addIdentifier().setSystem("https://api.loblaw.ca/fhir/NamingSystem/hw-0999").setValue("09870999");
+		IIdType pracId = myPractitionerDao.create(prac, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
+
+		PractitionerRole pracRole = new PractitionerRole();
+		pracRole.addLocation().setReference(locId.getValue());
+		pracRole.getPractitioner().setReference(pracId.getValue());
+		myPractitionerRoleDao.create(pracRole, new SystemRequestDetails());
+
+		RequestValidatingInterceptor interceptor = new RequestValidatingInterceptor();
+		FhirValidator val = myFhirContext.newValidator();
+		val.setInterceptorBroadcaster(myInterceptorRegistry);
+		FhirInstanceValidator validatorModule = new FhirInstanceValidator(myFhirContext);
+		validatorModule.setBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore);
+		val.registerValidatorModule(validatorModule);
+		interceptor.setValidator(val);
+		myServer.registerInterceptor(interceptor);
+
+//		ValidationMessageSuppressingInterceptor suppression = new ValidationMessageSuppressingInterceptor();
+//		suppression.addMessageSuppressionPatterns("The query part of the conditional reference is not a valid query string");
+//		registerInterceptor(suppression);
+
+//		List<IRepositoryValidatingRule> rules = myRuleBuilder.forResourcesOfType("Patient").requireValidationToDeclaredProfiles().build();
+//		myInterceptorRegistry.registerInterceptor(new RepositoryValidatingInterceptor(myFhirContext, rules));
+
+		Patient pat = new Patient();
+		pat.getText().setStatus(NarrativeStatus.ADDITIONAL);
+		pat.getText().setDivAsString("<div>HELLO</div>");
+//		pat.addGeneralPractitioner().setReference("PractitionerRole?practitioner.identifier=https://api.loblaw.ca/fhir/NamingSystem/hw-0999%7C09870999&location.identifier=https://api.loblaw.ca/fhir/NamingSystem/hw-0999%7C123");
+//		IIdType patientId = myClient.create().resource(pat).execute().getId().toUnqualifiedVersionless();
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+
+		PractitionerRole pr = new PractitionerRole();
+		pr.setId(IdType.newRandomUuid());
+		pr.addLocation().setReference("Location?identifier=https://api.loblaw.ca/fhir/NamingSystem/hw-0999|123");
+		pr.getPractitioner().setReference("Practitioner?identifier=https://api.loblaw.ca/fhir/NamingSystem/hw-0999|09870999");
+		bb.addTransactionCreateEntry(pr).conditional("PractitionerRole?practitioner.identifier=https://api.loblaw.ca/fhir/NamingSystem/hw-0999%7C09870999&location.identifier=https://api.loblaw.ca/fhir/NamingSystem/hw-0999%7C123");
+
+		pat.setId(IdType.newRandomUuid());
+		pat.addGeneralPractitioner().setReference(pr.getId());
+//		pat.addGeneralPractitioner().setReference("PractitionerRole?practitioner.identifier=https://api.loblaw.ca/fhir/NamingSystem/hw-0999%7C09870999&location.identifier=https://api.loblaw.ca/fhir/NamingSystem/hw-0999%7C123");
+		bb.addTransactionCreateEntry(pat);
+
+		Bundle bundleTyped = (Bundle) bb.getBundleTyped();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundleTyped));
+
+		Bundle outcome = myClient.transaction().withBundle(bundleTyped).execute();
+		IIdType patientId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
+
+		pat = myPatientDao.read(patientId, new SystemRequestDetails());
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(pat));
+	}
+
+
+
+
+
+
+
+
 
 	@Test
 	public void testParameterWithNoValueThrowsError_InvalidChainOnCustomSearch() throws IOException {
