@@ -183,10 +183,11 @@ public class HapiLocalizer {
 	 * Find all properties files on the class path that match the given base name and locale, and merge them into a single
 	 * properties object.
 	 */
-	public class MultiFileResourceBundleControl extends ResourceBundle.Control {
+	public static class MultiFileResourceBundleControl extends ResourceBundle.Control {
 		@Override
-		public ResourceBundle newBundle(String baseName, Locale locale, String format,
-										ClassLoader loader, boolean reload) throws IOException, IllegalAccessException, InstantiationException {
+		public ResourceBundle newBundle(
+				String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
+				throws IOException, IllegalAccessException, InstantiationException {
 			if ("java.properties".equals(format)) {
 				String bundleName = toBundleName(baseName, locale);
 				String resourceName = toResourceName(bundleName, "properties");
@@ -207,6 +208,7 @@ public class HapiLocalizer {
 			return super.newBundle(baseName, locale, format, loader, reload);
 		}
 	}
+
 	public Locale getLocale() {
 		return myLocale;
 	}
