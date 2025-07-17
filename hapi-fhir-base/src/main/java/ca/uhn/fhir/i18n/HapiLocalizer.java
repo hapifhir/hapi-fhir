@@ -23,6 +23,10 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.VersionUtil;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -31,6 +35,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
+import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -169,10 +175,38 @@ public class HapiLocalizer {
 	protected void init(String[] theBundleNames) {
 		myBundle = new ArrayList<>();
 		for (String nextName : theBundleNames) {
-			myBundle.add(ResourceBundle.getBundle(nextName));
+			myBundle.add(ResourceBundle.getBundle(nextName, new MultiFileResourceBundleControl()));
 		}
 	}
 
+	/**
+	 * Find all properties files on the class path that match the given base name and locale, and merge them into a single
+	 * properties object.
+	 */
+	public class MultiFileResourceBundleControl extends ResourceBundle.Control {
+		@Override
+		public ResourceBundle newBundle(String baseName, Locale locale, String format,
+										ClassLoader loader, boolean reload) throws IOException, IllegalAccessException, InstantiationException {
+			if ("java.properties".equals(format)) {
+				String bundleName = toBundleName(baseName, locale);
+				String resourceName = toResourceName(bundleName, "properties");
+
+				Properties properties = new Properties();
+
+				// Load from all matching resources
+				Enumeration<URL> resources = loader.getResources(resourceName);
+				while (resources.hasMoreElements()) {
+					URL url = resources.nextElement();
+					try (InputStream is = url.openStream()) {
+						properties.load(is);
+					}
+				}
+
+				return new PropertyResourceBundle(new StringReader(properties.toString()));
+			}
+			return super.newBundle(baseName, locale, format, loader, reload);
+		}
+	}
 	public Locale getLocale() {
 		return myLocale;
 	}
