@@ -273,11 +273,11 @@ public class CanonicalBundleEntry {
 	 * @param theBundleEntryComponentClass The target Bundle Entry class
 	 * @return A new Bundle Entry instance
 	 */
-	public <T extends IBase> T toBundleEntry(
-			FhirContext theFhirContext, Class<T> theBundleEntryComponentClass) {
+	public <T extends IBase> T toBundleEntry(FhirContext theFhirContext, Class<T> theBundleEntryComponentClass) {
 		@SuppressWarnings("unchecked")
-		T entry = (T)
-				theFhirContext.getElementDefinition(theBundleEntryComponentClass).newInstance();
+		T entry = (T) theFhirContext
+				.getElementDefinition(theBundleEntryComponentClass)
+				.newInstance();
 
 		// Get the element definition for the Bundle Entry
 		BaseRuntimeElementCompositeDefinition<?> entryDef = (BaseRuntimeElementCompositeDefinition<?>)
@@ -321,8 +321,9 @@ public class CanonicalBundleEntry {
 				if (myRequestMethod != null) {
 					BaseRuntimeChildDefinition methodChild = requestDef.getChildByName("method");
 					if (methodChild != null) {
-						IPrimitiveType<?> methodValue = (IPrimitiveType<?>)
-								methodChild.getChildByName("method").newInstance(methodChild.getInstanceConstructorArguments());
+						IPrimitiveType<?> methodValue = (IPrimitiveType<?>) methodChild
+								.getChildByName("method")
+								.newInstance(methodChild.getInstanceConstructorArguments());
 						methodValue.setValueAsString(myRequestMethod);
 						methodChild.getMutator().setValue(request, methodValue);
 					}
