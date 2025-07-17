@@ -96,7 +96,6 @@ public class MergeResourceHelper {
 				theTargetResource, theSourceResource, theResultResource, theIsDeleteSource);
 
 		Patient updatedTarget = updateResource(targetToUpdate, theRequestDetails);
-		myPatientDao.update(targetToUpdate, theRequestDetails);
 		if (!theIsDeleteSource) {
 			prepareSourcePatientForUpdate(theSourceResource, theTargetResource);
 			updateResource(theSourceResource, theRequestDetails);

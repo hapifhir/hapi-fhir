@@ -20,26 +20,35 @@
 package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.merge.MergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.replacereferences.PreviousResourceVersionRestorer;
 import ca.uhn.fhir.replacereferences.UndoReplaceReferencesSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -61,6 +70,7 @@ public class ResourceUndoMergeService {
 	private final FhirContext myFhirContext;
 	private final DaoRegistry myDaoRegistry;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	private final MergeOperationInputParameterNames myInputParamNames;
 
 	public ResourceUndoMergeService(
 			DaoRegistry theDaoRegistry,
@@ -74,6 +84,7 @@ public class ResourceUndoMergeService {
 		myFhirContext = theDaoRegistry.getFhirContext();
 		myMergeValidationService = theMergeValidationService;
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
+		myInputParamNames = new MergeOperationInputParameterNames();
 	}
 
 	public OperationOutcomeWithStatusCode undoMerge(
@@ -109,30 +120,19 @@ public class ResourceUndoMergeService {
 		}
 
 		Patient targetPatient =
-				(Patient) myMergeValidationService.resolveTargetResource(inputParameters, theRequestDetails, opOutcome);
-
-		Patient sourcePatient = null;
-		try {
-			sourcePatient = (Patient)
-					myMergeValidationService.resolveSourceResource(inputParameters, theRequestDetails, opOutcome);
-		} catch (ResourceGoneException goneException) {
-			// source patient might have been deleted as a result of the merge operation,
-			// we will verify if that is the case from the provenance resource
-		}
+			(Patient) myMergeValidationService.resolveTargetResource(inputParameters, theRequestDetails, opOutcome);
+		IIdType targetId = targetPatient.getIdElement();
 
 		Provenance provenance = null;
 
-		IIdType targetId = targetPatient.getIdElement();
-
-		if (sourcePatient != null || inputParameters.getSourceResource() != null) {
-			// the source resource wasn't deleted or the client provided a source reference,
-			// in each case we know the resource id of the source resource, and we can use it to find the provenance
+		if (inputParameters.getSourceResource() != null) {
+			// the client provided a source id, use it to find the provenance together with the target id
 			IIdType sourceId = inputParameters.getSourceResource().getReferenceElement();
 			provenance =
 					myMergeProvenanceSvc.findProvenance(targetId, sourceId, theRequestDetails, OPERATION_UNDO_MERGE);
 		} else {
-			// the client provided source identifiers, find a provenance using those identifiers and the target
-			// reference
+			// the client provided source identifiers, find a provenance using those identifiers and the target id
+			provenance = myMergeProvenanceSvc.findProvenanceByTargetIdAndSourceIdentifiers(targetId, inputParameters.getSourceIdentifiers(), theRequestDetails);
 		}
 
 		if (provenance == null) {
@@ -144,25 +144,32 @@ public class ResourceUndoMergeService {
 		}
 
 		ourLog.info(
-				"Found Provenance resource with id: {} to be used for $undo-replace-references operation",
+				"Found Provenance resource with id: {} to be used for $undo-merge operation",
 				provenance.getIdElement().getValue());
 
 		List<Reference> references = provenance.getTarget();
+		if (references.size() > inputParameters.getResourceLimit()) {
+			String msg = String.format(
+				"Number of references to update (%d) exceeds the limit (%d)",
+				references.size(), inputParameters.getResourceLimit());
+			//FIXME EMRE: update msg.code
+			throw new InvalidRequestException(Msg.code(1234) + msg);
+		}
 		RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
 				theRequestDetails, ReadPartitionIdRequestDetails.forRead(targetPatient.getIdElement()));
 
-		if (sourcePatient == null) {
-			// here we should check if the source resource was deleted after the merge operation,
-			// if it wasn't but gone then fail the operation (we could check if the last version of it is what is in the
-			// provenance + 1 and
-			// maybe allow it in that case but not implementing that for now)
-
+		Set<Reference> allowedToUndelete = new HashSet<>();
+		Reference sourceReference = provenance.getTarget().get(1);
+		if (wasSourceResourceDeletedByMergeOperation(provenance)) {
+			// If the source resource was deleted by the merge operation, let the version restorer know it can be undeleted.
+			// There could be a case that the source resource wasn't deleted by the merge operation, but was deleted later by the client.
+			// Current behavior in that case is to fail the undo-merge as the source resource might have been updated before it was deleted.
+			// We could check if the latest version of the source resource before it was deleted was the version in the Provenance resource + 1,
+			// so to confirm that it deleted right after the merge, but that would require additional logic, and not implementing that for now.
+			allowedToUndelete.add(sourceReference);
 		}
 
-		Reference sourceReference = provenance.getTarget().get(1);
-		Set<Reference> allowedToUndelete = sourcePatient == null ? Set.of(sourceReference) : Collections.emptySet();
-		myResourceVersionRestorer.restoreToPreviousVersionsInTrx(
-				references, allowedToUndelete, theRequestDetails, partitionId);
+		myResourceVersionRestorer.restoreToPreviousVersionsInTrx(references, allowedToUndelete, theRequestDetails, partitionId);
 
 		String msg = String.format(
 				"Successfully restored %d resources to their previous versions based on the Provenance resource: %s",
@@ -171,5 +178,30 @@ public class ResourceUndoMergeService {
 		undoMergeOutcome.setHttpStatusCode(STATUS_HTTP_200_OK);
 
 		return undoMergeOutcome;
+	}
+
+	private boolean wasTargetResourceUpdatedByMergeOperation(Patient target) {
+		// check here if the target has a replaces link to the source resource and any identifiers marked old, if that is the case return true, otherwise return false
+
+
+		return true;
+	}
+
+	private boolean wasSourceResourceDeletedByMergeOperation(Provenance provenance) {
+		if (provenance.hasContained()) {
+			List<Resource> containedResources =  provenance.getContained();
+			if(!containedResources.isEmpty() && containedResources.get(0) instanceof Parameters parameters) {
+				if (parameters.hasParameter(myInputParamNames.getDeleteSourceParameterName())) {
+					return parameters.getParameterBool(myInputParamNames.getDeleteSourceParameterName());
+				}
+				//by default the source resource is not deleted
+				//TODO EMRE : maybe move this to a constant
+				return false;
+			}
+		}
+
+		//TODO EMRE: add msg.code and fix string
+		throw new InternalErrorException("The provenance resource does not contain inp");
+
 	}
 }

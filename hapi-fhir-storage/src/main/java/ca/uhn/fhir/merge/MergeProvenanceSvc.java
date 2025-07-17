@@ -23,10 +23,16 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.util.CanonicalIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Provenance;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.Type;
 
 import java.util.Date;
 import java.util.List;
@@ -37,9 +43,11 @@ import java.util.List;
 public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 
 	private static final String ACTIVITY_CODE_MERGE = "merge";
+	private final MergeOperationInputParameterNames myInputParamNames;
 
 	public MergeProvenanceSvc(DaoRegistry theDaoRegistry) {
 		super(theDaoRegistry);
+		myInputParamNames = new MergeOperationInputParameterNames();
 	}
 
 	@Override
@@ -71,4 +79,40 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 				// because src and target resources are always updated in $merge operation
 				true);
 	}
+
+	public Provenance findProvenanceByTargetIdAndSourceIdentifiers(IIdType theTargetId, List<CanonicalIdentifier> theSourceIdentifiers, RequestDetails theRequestDetails) {
+		String sourceIdentifierParameterName = myInputParamNames.getSourceIdentifiersParameterName();
+		List<Provenance> provenances = getProvenancesOfTargetsFilteredByActivity(List.of(theTargetId), theRequestDetails);
+		// the input parameters are in a contained resource, find the one that matches the source identifiers
+		for (Provenance provenance : provenances) {
+			for (Resource contained : provenance.getContained()) {
+				if (contained instanceof Parameters parameters && parameters.hasParameter(sourceIdentifierParameterName)) {
+						List<Type> originalInputSrcIdentifiers = parameters.getParameterValues(sourceIdentifierParameterName);
+						if (hasIdentifiers(originalInputSrcIdentifiers, theSourceIdentifiers)) {
+							return provenance;
+						}
+
+					}
+
+			}
+		}
+		return null;
+	}
+
+
+	private boolean hasIdentifiers(List<Type> theIdentifiers, List<CanonicalIdentifier> theIdentifiersToLookFor) {
+		for (CanonicalIdentifier identifier : theIdentifiersToLookFor) {
+			boolean identifierFound = theIdentifiers.stream()
+				.map(i -> (Identifier)i)
+				.anyMatch(i -> i.getSystem()
+					.equals(identifier.getSystemElement().getValueAsString())
+					&& i.getValue().equals(identifier.getValueElement().getValueAsString()));
+
+			if (!identifierFound) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 }

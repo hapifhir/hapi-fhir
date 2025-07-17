@@ -39,13 +39,12 @@ public class MergeOperationInputParameters extends MergeOperationsCommonInputPar
 	private boolean myPreview;
 	private boolean myDeleteSource;
 	private IBaseResource myResultResource;
-	private final int myResourceLimit;
 	private List<IProvenanceAgent> myProvenanceAgents;
 	private boolean myCreateProvenance = true;
 	private IBaseResource myOriginalInputParameters;
 
 	protected MergeOperationInputParameters(int theResourceLimit) {
-		myResourceLimit = theResourceLimit;
+		super(theResourceLimit);
 	}
 
 	public boolean getPreview() {
@@ -70,10 +69,6 @@ public class MergeOperationInputParameters extends MergeOperationsCommonInputPar
 
 	public void setResultResource(IBaseResource theResultResource) {
 		this.myResultResource = theResultResource;
-	}
-
-	public int getResourceLimit() {
-		return myResourceLimit;
 	}
 
 	public boolean getCreateProvenance() {

@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.jpa.provider.merge;
 
-import ca.uhn.fhir.batch2.jobs.merge.MergeOperationInputParameterNames;
+import ca.uhn.fhir.merge.MergeOperationInputParameterNames;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -424,7 +424,7 @@ public class MergeValidationService {
 		return resources.get(0);
 	}
 
-	private IBaseResource resolveResourceByReference(
+	public IBaseResource resolveResourceByReference(
 			IBaseReference theReference,
 			RequestDetails theRequestDetails,
 			IBaseOperationOutcome theOutcome,

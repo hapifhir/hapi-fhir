@@ -1,6 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.merge;
-
-import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+package ca.uhn.fhir.merge;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_DELETE_SOURCE;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_RESULT_PATIENT;

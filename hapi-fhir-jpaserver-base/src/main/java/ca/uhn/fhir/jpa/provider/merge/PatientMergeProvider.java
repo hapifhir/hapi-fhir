@@ -211,8 +211,10 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 			IBaseReference theSourcePatient,
 			IBaseReference theTargetPatient) {
 
+		int resourceLimit = myStorageSettings.getInternalSynchronousSearchSize();
+
 		UndoMergeOperationInputParameters undoMergeOperationParameters =
-				new UndoMergeOperationInputParameters();
+				new UndoMergeOperationInputParameters(resourceLimit);
 
 		setCommonMergeOperationInputParameters(
 				undoMergeOperationParameters,

@@ -39,7 +39,6 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -457,7 +456,7 @@ public class ReplaceReferencesTestHelper {
 			ReplaceReferencesLargeTestData theTestData) {
 		PatientMergeInputParameters inParams = new PatientMergeInputParameters();
 		inParams.sourcePatient = new Reference().setReferenceElement(theTestData.getSourcePatientId());
-		inParams.targetPatientIdentifier = theTestData.getIdentifierCommonToBothResources();
+		inParams.targetPatientIdentifiers = theTestData.getIdentifierCommonToBothResources();
 		inParams.deleteSource = theWithDelete;
 		if (theWithInputResultPatient) {
 			inParams.resultPatient = theTestData.createResultPatientInput(theWithDelete);
@@ -474,7 +473,7 @@ public class ReplaceReferencesTestHelper {
 			boolean theWithPreview,
 			ReplaceReferencesLargeTestData theTestData) {
 		PatientMergeInputParameters inParams = new PatientMergeInputParameters();
-		inParams.sourcePatientIdentifier = theTestData.getIdentifierCommonToBothResources();
+		inParams.sourcePatientIdentifiers = theTestData.getIdentifierCommonToBothResources();
 		inParams.targetPatient = new Reference().setReferenceElement(theTestData.getTargetPatientId());
 		inParams.deleteSource = theWithDelete;
 		if (theWithInputResultPatient) {
@@ -509,9 +508,9 @@ public class ReplaceReferencesTestHelper {
 
 	public static class PatientMergeInputParameters {
 		public Type sourcePatient;
-		public Type sourcePatientIdentifier;
+		public List<? extends  Type> sourcePatientIdentifiers;
 		public Type targetPatient;
-		public Type targetPatientIdentifier;
+		public List<? extends Type> targetPatientIdentifiers;
 		public Patient resultPatient;
 		public Boolean preview;
 		public Boolean deleteSource;
@@ -522,14 +521,16 @@ public class ReplaceReferencesTestHelper {
 			if (sourcePatient != null) {
 				inParams.addParameter().setName("source-patient").setValue(sourcePatient);
 			}
-			if (sourcePatientIdentifier != null) {
-				inParams.addParameter().setName("source-patient-identifier").setValue(sourcePatientIdentifier);
+			if (sourcePatientIdentifiers != null) {
+				sourcePatientIdentifiers.forEach(i -> inParams.addParameter().setName("source-patient-identifier").setValue(i));
+				//inParams.addParameter().setName("source-patient-identifier").setValue(sourcePatientIdentifiers);
 			}
 			if (targetPatient != null) {
 				inParams.addParameter().setName("target-patient").setValue(targetPatient);
 			}
-			if (targetPatientIdentifier != null) {
-				inParams.addParameter().setName("target-patient-identifier").setValue(targetPatientIdentifier);
+			if (targetPatientIdentifiers != null) {
+				targetPatientIdentifiers.forEach(i -> inParams.addParameter().setName("target-patient-identifier").setValue(i));
+				//inParams.addParameter().setName("target-patient-identifier").setValue(targetPatientIdentifiers);
 			}
 			return inParams;
 		}

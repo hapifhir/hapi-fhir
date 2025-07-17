@@ -221,7 +221,16 @@ public class ReplaceReferencesLargeTestData {
 				.collect(Collectors.toSet());
 	}
 
-	public Identifier getIdentifierCommonToBothResources() {
-		return patBothIdentifierC;
+	public List<Identifier> getIdentifierCommonToBothResources() {
+		return List.of(patBothIdentifierC);
 	}
+
+	public List<Identifier> getSourcePatientIdentifiers() {
+		return List.of(pat1IdentifierA, pat1IdentifierB, patBothIdentifierC);
+	}
+
+	public List<Identifier> getTargetPatientIdentifiers() {
+		return List.of(pat2IdentifierA, pat2IdentifierB, patBothIdentifierC);
+	}
+
 }

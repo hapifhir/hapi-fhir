@@ -32,8 +32,15 @@ public class MergeOperationsCommonInputParameters {
 	private List<CanonicalIdentifier> myTargetResourceIdentifiers;
 	private IBaseReference mySourceResource;
 	private IBaseReference myTargetResource;
+	private final int myResourceLimit;
 
+	public int getResourceLimit() {
+		return myResourceLimit;
+	}
 
+	public MergeOperationsCommonInputParameters(int theResourceLimit) {
+		myResourceLimit = theResourceLimit;
+	}
 
 	public List<CanonicalIdentifier> getSourceIdentifiers() {
 		return mySourceResourceIdentifiers;

@@ -179,16 +179,8 @@ public class ReplaceReferencesProvenanceSvc {
 	@Nullable
 	public Provenance findProvenance(
 			IIdType theTargetId, IIdType theSourceId, RequestDetails theRequestDetails, String theOperationName) {
-		SearchParameterMap map = new SearchParameterMap();
-		map.add("target", new ReferenceParam(theTargetId));
-		// Add sort by recorded field, in case there are multiple Provenance resources for the same source and target,
-		// we want the most recent one.
-		map.setSort(new SortSpec("recorded", SortOrderEnum.DESC));
 
-		IBundleProvider searchBundle = myProvenanceDao.search(map, theRequestDetails);
-		// 'activity' is not available as a search parameter in r4, was added in r5,
-		// so we need to filter the results manually.
-		List<Provenance> provenances = filterByActivity(searchBundle.getAllResources());
+		List<Provenance> provenances = getProvenancesOfTargetsFilteredByActivity(List.of(theTargetId, theSourceId), theRequestDetails);
 
 		if (provenances.isEmpty()) {
 			return null;
@@ -213,6 +205,24 @@ public class ReplaceReferencesProvenanceSvc {
 		}
 	}
 
+
+
+
+	 protected List<Provenance> getProvenancesOfTargetsFilteredByActivity(List<IIdType> theTargetIds, RequestDetails theRequestDetails) {
+		SearchParameterMap map = new SearchParameterMap();
+
+		theTargetIds.forEach(tId -> map.add("target", new ReferenceParam(tId)));
+
+		// Add sort by recorded field, in case there are multiple Provenance resources for the same source and target,
+		// we want the most recent one.
+		map.setSort(new SortSpec("recorded", SortOrderEnum.DESC));
+
+		IBundleProvider searchBundle = myProvenanceDao.search(map, theRequestDetails);
+		// 'activity' is not available as a search parameter in r4, was added in r5,
+		// so we need to filter the results manually.
+		return filterByActivity(searchBundle.getAllResources());
+	}
+
 	private List<Provenance> filterByActivity(List<IBaseResource> theResources) {
 		List<Provenance> filteredProvenances = new ArrayList<>();
 		for (IBaseResource resource : theResources) {
@@ -223,6 +233,9 @@ public class ReplaceReferencesProvenanceSvc {
 		}
 		return filteredProvenances;
 	}
+
+
+
 
 	/**
 	 * Checks if the first 'Provenance.target' reference matches theTargetId and the second matches theSourceId.
