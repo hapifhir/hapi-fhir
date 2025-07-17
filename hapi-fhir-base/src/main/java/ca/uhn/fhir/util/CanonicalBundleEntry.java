@@ -169,14 +169,14 @@ public class CanonicalBundleEntry {
 
 	/**
 	 * Factory method to create a CanonicalBundleEntry from a Bundle Entry
-	 * @param theContext The FHIR context
+	 * @param theFhirContext The FHIR context
 	 * @param theEntry The Bundle Entry to convert
 	 * @return A new CanonicalBundleEntry instance
 	 */
-	public static CanonicalBundleEntry fromBundleEntry(FhirContext theContext, IBaseBackboneElement theEntry) {
+	public static CanonicalBundleEntry fromBundleEntry(FhirContext theFhirContext, IBaseBackboneElement theEntry) {
 		CanonicalBundleEntry retVal = new CanonicalBundleEntry();
 
-		FhirTerser terser = theContext.newTerser();
+		FhirTerser terser = theFhirContext.newTerser();
 
 		// Extract fullUrl
 		IPrimitiveType<?> fullUrlElement = terser.getSingleValueOrNull(theEntry, "fullUrl", IPrimitiveType.class);
@@ -269,19 +269,19 @@ public class CanonicalBundleEntry {
 
 	/**
 	 * Convert this CanonicalBundleEntry back to a Bundle Entry of the specified type
-	 * @param theContext The FHIR context
+	 * @param theFhirContext The FHIR context
 	 * @param theBundleEntryComponentClass The target Bundle Entry class
 	 * @return A new Bundle Entry instance
 	 */
-	public <T extends IBaseBackboneElement> T toBundleEntry(
-			FhirContext theContext, Class<T> theBundleEntryComponentClass) {
+	public <T extends IBase> T toBundleEntry(
+			FhirContext theFhirContext, Class<T> theBundleEntryComponentClass) {
 		@SuppressWarnings("unchecked")
 		T entry = (T)
-				theContext.getElementDefinition(theBundleEntryComponentClass).newInstance();
+				theFhirContext.getElementDefinition(theBundleEntryComponentClass).newInstance();
 
 		// Get the element definition for the Bundle Entry
 		BaseRuntimeElementCompositeDefinition<?> entryDef = (BaseRuntimeElementCompositeDefinition<?>)
-				theContext.getElementDefinition(theBundleEntryComponentClass);
+				theFhirContext.getElementDefinition(theBundleEntryComponentClass);
 
 		// Set fullUrl
 		if (myFullUrl != null) {
@@ -322,7 +322,7 @@ public class CanonicalBundleEntry {
 					BaseRuntimeChildDefinition methodChild = requestDef.getChildByName("method");
 					if (methodChild != null) {
 						IPrimitiveType<?> methodValue = (IPrimitiveType<?>)
-								methodChild.getChildByName("method").newInstance();
+								methodChild.getChildByName("method").newInstance(methodChild.getInstanceConstructorArguments());
 						methodValue.setValueAsString(myRequestMethod);
 						methodChild.getMutator().setValue(request, methodValue);
 					}
@@ -469,13 +469,5 @@ public class CanonicalBundleEntry {
 		}
 
 		return entry;
-	}
-
-	/**
-	 * Legacy method for backward compatibility
-	 */
-	public <T extends IBaseBackboneElement> T toBundleEntry(Class<T> theBundleEntryComponentClass) {
-		throw new UnsupportedOperationException(
-				"This method requires a FhirContext. Use toBundleEntry(FhirContext, Class) instead.");
 	}
 }

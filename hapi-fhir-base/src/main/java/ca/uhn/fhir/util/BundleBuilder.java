@@ -494,9 +494,24 @@ public class BundleBuilder {
 	 * @return Returns the new entry.
 	 */
 	public IBase addEntry() {
-		IBase entry = myEntryDef.newInstance();
-		myEntryChild.getMutator().addValue(myBundle, entry);
-		return entry;
+		return addEntry(myEntryDef.newInstance());
+	}
+
+	/**
+	 * Add an entry to the bundle.
+	 *
+	 * @param theEntry the entry to add to the bundle.
+	 * @return theEntry
+	 */
+	public IBase addEntry(IBase theEntry) {
+		myEntryChild.getMutator().addValue(myBundle, theEntry);
+		return theEntry;
+	}
+
+	public IBase addEntry(CanonicalBundleEntry theEntry) {
+		IBase bundleEntry = theEntry.toBundleEntry(myContext, myEntryDef.getImplementingClass());
+		addEntry(bundleEntry);
+		return bundleEntry;
 	}
 
 	/**
