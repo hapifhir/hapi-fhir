@@ -5,7 +5,16 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.JsonUtil;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,6 +30,8 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class BulkDataExportProviderTest {
@@ -84,5 +95,56 @@ class BulkDataExportProviderTest {
 		assertEquals(new BulkExportResponseJson.Output().setType("Patient").setUrl("http://example.com/fhir-endpoint/Binary/1123"), response.getOutput().get(0));
 
 	}
+
+	@Test
+	void parsePatientParamsWhenPatientIsIIdType() {
+		// given
+		IIdType idType = new IdType("Patient/123");
+		List<IBase> input = List.of(idType);
+		// when
+		List<IPrimitiveType<String>> result = BulkDataExportProvider.parsePatientList(input);
+		// then
+		assertEquals(1, result.size());
+		assertSame(idType, result.get(0));
+	}
+
+	@Test
+	void parsePatientListWhenParameterValueIsStringType() {
+		// given
+		StringType stringType = new StringType("abc");
+		Parameters.ParametersParameterComponent param = new Parameters.ParametersParameterComponent();
+		param.setValue(stringType);
+		List<IBase> input = List.of(param);
+		// when
+		List<IPrimitiveType<String>> result = BulkDataExportProvider.parsePatientList(input);
+		// then
+		assertEquals(1, result.size());
+		assertSame(stringType, result.get(0));
+	}
+
+	@Test
+	void parsePatientListWhenParameterValueIsReference() {
+		// given
+		Reference reference = new Reference("Patient/456");
+		Parameters.ParametersParameterComponent param = new Parameters.ParametersParameterComponent();
+		param.setValue(reference);
+		List<IBase> input = List.of(param);
+		// when
+		List<IPrimitiveType<String>> result = BulkDataExportProvider.parsePatientList(input);
+		// then
+		assertEquals(1, result.size());
+		assertEquals(reference.getReference(), result.get(0).getValue());
+	}
+
+	@Test
+	void parsePatientListThrowsExceptionForInvalidParameterType() {
+		// given
+		Parameters.ParametersParameterComponent param = new Parameters.ParametersParameterComponent();
+		param.setValue(new DateType());
+		List<IBase> input = List.of(param);
+		// when/then
+		assertThrows(InvalidRequestException.class, () -> BulkDataExportProvider.parsePatientList(input));
+	}
+
 
 }

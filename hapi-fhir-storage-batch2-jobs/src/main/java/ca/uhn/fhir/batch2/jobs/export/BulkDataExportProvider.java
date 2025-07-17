@@ -56,11 +56,11 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.StringType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -248,20 +248,8 @@ public class BulkDataExportProvider {
 					IPrimitiveType<String> theExportIdentifier,
 			ServletRequestDetails theRequestDetails) {
 
-		List<IPrimitiveType<String>> patientIds = thePatient != null
-				? thePatient.stream()
-						.map(patient -> {
-							if (patient instanceof StringType patientStringType) {
-								return patientStringType;
-							} else if (patient instanceof IIdType patientIIdType) {
-								return patientIIdType;
-							} else if (patient instanceof IBaseReference patientReference) {
-								return patientReference.getDisplayElement();
-							}
-							return new StringType("");
-						})
-						.toList()
-				: new ArrayList<>();
+		final List<IPrimitiveType<String>> patientIds =
+				thePatient != null ? parsePatientList(thePatient) : new ArrayList<>();
 
 		doPatientExport(
 				theRequestDetails,
@@ -316,6 +304,35 @@ public class BulkDataExportProvider {
 				List.of(theIdParam),
 				theExportIdentifier,
 				theRequestDetails);
+	}
+
+	static List<IPrimitiveType<String>> parsePatientList(@Nonnull List<IBase> thePatient) {
+		return thePatient.stream()
+				.map(patient -> {
+					if (patient instanceof IIdType patientIIdType) {
+						return patientIIdType;
+					} else {
+						return getStringPrimitiveFromParametersParameter(patient);
+					}
+				})
+				.toList();
+	}
+
+	private static IPrimitiveType<String> getStringPrimitiveFromParametersParameter(IBase patient) {
+		try {
+			Method getValueMethod = patient.getClass().getMethod("getValue");
+			Object value = getValueMethod.invoke(patient);
+			if (value instanceof IPrimitiveType<?> patientPrimitiveType
+					&& patientPrimitiveType.getValue() instanceof String) {
+				return (IPrimitiveType<String>) patientPrimitiveType;
+			} else if (value instanceof IBaseReference patientReference) {
+				return patientReference.getReferenceElement();
+			} else {
+				throw new InvalidRequestException("Unsupported type.");
+			}
+		} catch (Exception e) {
+			throw new InvalidRequestException("Invalid patient parameter.", e);
+		}
 	}
 
 	private void doPatientExport(

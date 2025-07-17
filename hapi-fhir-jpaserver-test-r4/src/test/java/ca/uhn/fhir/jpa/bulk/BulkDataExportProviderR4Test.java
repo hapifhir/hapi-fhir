@@ -868,6 +868,7 @@ public class BulkDataExportProviderR4Test {
 		assertThat(bp.getResourceTypes()).containsExactlyInAnyOrder("Immunization", "Observation");
 		assertNotNull(bp.getSince());
 		assertThat(bp.getFilters()).containsExactlyInAnyOrder("Immunization?vaccine-code=foo");
+		assertThat(bp.getPatientIds()).containsExactlyInAnyOrder("Patient/123", "Patient/456");
 	}
 
 	@Test
