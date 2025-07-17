@@ -37,11 +37,9 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -94,7 +92,6 @@ public class MergeResourceHelper {
 			boolean theIsDeleteSource,
 			RequestDetails theRequestDetails) {
 
-
 		Patient targetToUpdate = prepareTargetPatientForUpdate(
 				theTargetResource, theSourceResource, theResultResource, theIsDeleteSource);
 
@@ -120,7 +117,8 @@ public class MergeResourceHelper {
 		IIdType sourceIdForProvenance = theSourceResource.getIdElement();
 		if (theIsDeleteSource) {
 			// If the source resource is to be deleted, increment the version id of the source resource to be put in the
-			// provenance. Since the resource will be deleted after the provenance is created, its version will be incremented by
+			// provenance. Since the resource will be deleted after the provenance is created, its version will be
+			// incremented by
 			// the delete operation.
 			sourceIdForProvenance = theSourceResource
 					.getIdElement()
@@ -206,5 +204,4 @@ public class MergeResourceHelper {
 		}
 		return false;
 	}
-
 }

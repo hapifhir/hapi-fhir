@@ -80,12 +80,12 @@ public class ReplaceReferencesProvenanceSvc {
 	}
 
 	protected Provenance createProvenanceObject(
-		Reference theTargetReference,
-		@Nullable Reference theSourceReference,
-		List<Reference> theUpdatedReferencingResources,
-		Date theStartTime,
-		List<IProvenanceAgent> theProvenanceAgents,
-		List<IBaseResource> theContainedResources) {
+			Reference theTargetReference,
+			@Nullable Reference theSourceReference,
+			List<Reference> theUpdatedReferencingResources,
+			Date theStartTime,
+			List<IProvenanceAgent> theProvenanceAgents,
+			List<IBaseResource> theContainedResources) {
 		Provenance provenance = new Provenance();
 
 		Date now = new Date();
@@ -161,7 +161,12 @@ public class ReplaceReferencesProvenanceSvc {
 		List<Reference> patchedReferences = extractUpdatedResourceReferences(thePatchResultBundles);
 		if (!patchedReferences.isEmpty() || theCreateEvenWhenNoReferencesWereUpdated) {
 			Provenance provenance = createProvenanceObject(
-					targetReference, sourceReference, patchedReferences, theStartTime, theProvenanceAgents, theContainedResources);
+					targetReference,
+					sourceReference,
+					patchedReferences,
+					theStartTime,
+					theProvenanceAgents,
+					theContainedResources);
 			myProvenanceDao.create(provenance, theRequestDetails);
 		}
 	}
@@ -180,7 +185,8 @@ public class ReplaceReferencesProvenanceSvc {
 	public Provenance findProvenance(
 			IIdType theTargetId, IIdType theSourceId, RequestDetails theRequestDetails, String theOperationName) {
 
-		List<Provenance> provenances = getProvenancesOfTargetsFilteredByActivity(List.of(theTargetId, theSourceId), theRequestDetails);
+		List<Provenance> provenances =
+				getProvenancesOfTargetsFilteredByActivity(List.of(theTargetId, theSourceId), theRequestDetails);
 
 		if (provenances.isEmpty()) {
 			return null;
@@ -205,10 +211,8 @@ public class ReplaceReferencesProvenanceSvc {
 		}
 	}
 
-
-
-
-	 protected List<Provenance> getProvenancesOfTargetsFilteredByActivity(List<IIdType> theTargetIds, RequestDetails theRequestDetails) {
+	protected List<Provenance> getProvenancesOfTargetsFilteredByActivity(
+			List<IIdType> theTargetIds, RequestDetails theRequestDetails) {
 		SearchParameterMap map = new SearchParameterMap();
 
 		theTargetIds.forEach(tId -> map.add("target", new ReferenceParam(tId)));
@@ -233,9 +237,6 @@ public class ReplaceReferencesProvenanceSvc {
 		}
 		return filteredProvenances;
 	}
-
-
-
 
 	/**
 	 * Checks if the first 'Provenance.target' reference matches theTargetId and the second matches theSourceId.

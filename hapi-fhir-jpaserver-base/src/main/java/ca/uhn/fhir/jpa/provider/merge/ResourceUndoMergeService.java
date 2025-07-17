@@ -34,30 +34,24 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
-import net.sf.saxon.expr.oper.OperandArray;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import static ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper.addErrorToOperationOutcome;
 import static ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper.addInfoToOperationOutcome;
-import static ca.uhn.fhir.model.api.StorageResponseCodeEnum.SUCCESSFUL_PATCH_NO_CHANGE;
 import static ca.uhn.fhir.model.api.StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CHANGE;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_200_OK;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_400_BAD_REQUEST;
@@ -93,7 +87,7 @@ public class ResourceUndoMergeService {
 	}
 
 	public OperationOutcomeWithStatusCode undoMerge(
-		UndoMergeOperationInputParameters inputParameters, RequestDetails theRequestDetails) {
+			UndoMergeOperationInputParameters inputParameters, RequestDetails theRequestDetails) {
 
 		OperationOutcomeWithStatusCode undoMergeOutcome = new OperationOutcomeWithStatusCode();
 		IBaseOperationOutcome opOutcome = OperationOutcomeUtil.newInstance(myFhirContext);
@@ -125,7 +119,7 @@ public class ResourceUndoMergeService {
 		}
 
 		Patient targetPatient =
-			(Patient) myMergeValidationService.resolveTargetResource(inputParameters, theRequestDetails, opOutcome);
+				(Patient) myMergeValidationService.resolveTargetResource(inputParameters, theRequestDetails, opOutcome);
 		IIdType targetId = targetPatient.getIdElement();
 
 		Provenance provenance = null;
@@ -137,7 +131,8 @@ public class ResourceUndoMergeService {
 					myMergeProvenanceSvc.findProvenance(targetId, sourceId, theRequestDetails, OPERATION_UNDO_MERGE);
 		} else {
 			// the client provided source identifiers, find a provenance using those identifiers and the target id
-			provenance = myMergeProvenanceSvc.findProvenanceByTargetIdAndSourceIdentifiers(targetId, inputParameters.getSourceIdentifiers(), theRequestDetails);
+			provenance = myMergeProvenanceSvc.findProvenanceByTargetIdAndSourceIdentifiers(
+					targetId, inputParameters.getSourceIdentifiers(), theRequestDetails);
 		}
 
 		if (provenance == null) {
@@ -155,9 +150,9 @@ public class ResourceUndoMergeService {
 		List<Reference> references = provenance.getTarget();
 		if (references.size() > inputParameters.getResourceLimit()) {
 			String msg = String.format(
-				"Number of references to update (%d) exceeds the limit (%d)",
-				references.size(), inputParameters.getResourceLimit());
-			//FIXME EMRE: update msg.code
+					"Number of references to update (%d) exceeds the limit (%d)",
+					references.size(), inputParameters.getResourceLimit());
+			// FIXME EMRE: update msg.code
 			throw new InvalidRequestException(Msg.code(1234) + msg);
 		}
 		RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
@@ -166,23 +161,27 @@ public class ResourceUndoMergeService {
 		Set<Reference> allowedToUndelete = new HashSet<>();
 		Reference sourceReference = provenance.getTarget().get(1);
 		if (wasSourceResourceDeletedByMergeOperation(provenance)) {
-			// If the source resource was deleted by the merge operation, let the version restorer know it can be undeleted.
+			// If the source resource was deleted by the merge operation, let the version restorer know it can be
+			// undeleted.
 			allowedToUndelete.add(sourceReference);
 		}
 
 		List<Reference> referencesToRestore = references;
 		if (wasTargetUpdateANoop(provenance)) {
 			// skip restoring the target resource if it was not updated by the merge operation.
-			// This happens when the merge operation deletes the source resource (so the target doesn't have the replaces link added)
-			// and either the source resource don't have any identifiers that were copied over to the target resource, or a resultPatient was provided that didn't change anything in the target.
+			// This happens when the merge operation deletes the source resource (so the target doesn't have the
+			// replaces link added)
+			// and either the source resource don't have any identifiers that were copied over to the target resource,
+			// or a resultPatient was provided that didn't change anything in the target.
 			referencesToRestore = references.subList(1, references.size());
 		}
 
-		myResourceVersionRestorer.restoreToPreviousVersionsInTrx(referencesToRestore, allowedToUndelete, theRequestDetails, partitionId);
+		myResourceVersionRestorer.restoreToPreviousVersionsInTrx(
+				referencesToRestore, allowedToUndelete, theRequestDetails, partitionId);
 
 		String msg = String.format(
 				"Successfully restored %d resources to their previous versions based on the Provenance resource: %s",
-			referencesToRestore.size(), provenance.getIdElement().getValue());
+				referencesToRestore.size(), provenance.getIdElement().getValue());
 		addInfoToOperationOutcome(myFhirContext, opOutcome, null, msg);
 		undoMergeOutcome.setHttpStatusCode(STATUS_HTTP_200_OK);
 
@@ -194,39 +193,35 @@ public class ResourceUndoMergeService {
 
 		if (containedResources.size() > 1 && containedResources.get(1) instanceof OperationOutcome operationOutcome) {
 
-				List<OperationOutcome.OperationOutcomeIssueComponent> issues = operationOutcome.getIssue();
+			List<OperationOutcome.OperationOutcomeIssueComponent> issues = operationOutcome.getIssue();
 
-				return issues.stream()
+			return issues.stream()
 					.filter(issue -> issue.hasDetails() && issue.getDetails().hasCoding())
 					.map(issue -> issue.getDetails().getCoding())
 					.flatMap(List::stream)
 					.anyMatch(coding -> StorageResponseCodeEnum.SYSTEM.equals(coding.getSystem())
-						&& SUCCESSFUL_UPDATE_NO_CHANGE.getCode().equals(coding.getCode()));
-			}
+							&& SUCCESSFUL_UPDATE_NO_CHANGE.getCode().equals(coding.getCode()));
+		}
 
-
-		//FIXME EMRE: update msg.code
-		throw new InternalErrorException(Msg.code(1234) + "The Provenance resource does not contain an OperationOutcome of the target resource.");
-
-
-
+		// FIXME EMRE: update msg.code
+		throw new InternalErrorException(Msg.code(1234)
+				+ "The Provenance resource does not contain an OperationOutcome of the target resource.");
 	}
 
 	private boolean wasSourceResourceDeletedByMergeOperation(Provenance provenance) {
 		if (provenance.hasContained()) {
-			List<Resource> containedResources =  provenance.getContained();
-			if(!containedResources.isEmpty() && containedResources.get(0) instanceof Parameters parameters) {
+			List<Resource> containedResources = provenance.getContained();
+			if (!containedResources.isEmpty() && containedResources.get(0) instanceof Parameters parameters) {
 				if (parameters.hasParameter(myInputParamNames.getDeleteSourceParameterName())) {
 					return parameters.getParameterBool(myInputParamNames.getDeleteSourceParameterName());
 				}
-				//by default the source resource is not deleted
-				//TODO EMRE : maybe move this to a constant
+				// by default the source resource is not deleted
+				// TODO EMRE : maybe move this to a constant
 				return false;
 			}
 		}
 
-		//TODO EMRE: add msg.code and fix string
+		// TODO EMRE: add msg.code and fix string
 		throw new InternalErrorException("The provenance resource does not contain inp");
-
 	}
 }

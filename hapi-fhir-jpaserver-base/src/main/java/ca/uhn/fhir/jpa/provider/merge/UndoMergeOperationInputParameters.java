@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.provider.merge;
 
-
 /**
  * Undo operation has only the common input parameters so nothing extra for now.
  */

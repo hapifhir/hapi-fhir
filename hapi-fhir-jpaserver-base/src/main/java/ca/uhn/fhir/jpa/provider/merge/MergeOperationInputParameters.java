@@ -102,12 +102,13 @@ public class MergeOperationInputParameters extends MergeOperationsCommonInputPar
 			Patient theTargetResource,
 			RequestPartitionId thePartitionId) {
 		MergeJobParameters retval = new MergeJobParameters();
-		//TODO Emre: do not set this and deleteSource in MergeJobParameters
+		// TODO Emre: do not set this and deleteSource in MergeJobParameters
 		if (getResultResource() != null) {
 			retval.setResultResource(theFhirContext.newJsonParser().encodeResourceToString(getResultResource()));
 		}
 		retval.setDeleteSource(getDeleteSource());
-		retval.setOriginalInputParameters(theFhirContext.newJsonParser().encodeResourceToString(myOriginalInputParameters));
+		retval.setOriginalInputParameters(
+				theFhirContext.newJsonParser().encodeResourceToString(myOriginalInputParameters));
 		retval.setBatchSize(theStorageSettings.getDefaultTransactionEntriesForWrite());
 		retval.setSourceId(new FhirIdJson(theSourceResource.getIdElement().toVersionless()));
 		retval.setTargetId(new FhirIdJson(theTargetResource.getIdElement().toVersionless()));
@@ -116,6 +117,4 @@ public class MergeOperationInputParameters extends MergeOperationsCommonInputPar
 		retval.setCreateProvenance(myCreateProvenance);
 		return retval;
 	}
-
-
 }

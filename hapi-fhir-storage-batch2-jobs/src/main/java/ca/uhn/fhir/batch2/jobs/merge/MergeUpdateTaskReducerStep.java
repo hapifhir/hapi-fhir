@@ -37,7 +37,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReducerStep<MergeJobParameters> {
@@ -79,15 +78,18 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 		List<IBaseResource> containedResourcesForProvenance = new ArrayList<>();
 		Parameters originalInputParameters = null;
 		if (mergeJobParameters.getOriginalInputParameters() != null) {
-			originalInputParameters = myFhirContext.newJsonParser().parseResource(Parameters.class, mergeJobParameters.getOriginalInputParameters());
+			originalInputParameters = myFhirContext
+					.newJsonParser()
+					.parseResource(Parameters.class, mergeJobParameters.getOriginalInputParameters());
 			resultResource = getResultResource(originalInputParameters);
 			deleteSource = isDeleteSource(originalInputParameters);
 			containedResourcesForProvenance.add(originalInputParameters);
-		}
-		else {
+		} else {
 			// This else part is just for backward compatibility could be removed in the future
 			if (mergeJobParameters.getResultResource() != null) {
-				resultResource = myFhirContext.newJsonParser().parseResource(Patient.class, mergeJobParameters.getResultResource());
+				resultResource = myFhirContext
+						.newJsonParser()
+						.parseResource(Patient.class, mergeJobParameters.getResultResource());
 			} else {
 				resultResource = null;
 			}
@@ -101,11 +103,7 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 					myPatientDao.read(mergeJobParameters.getTargetId().asIdDt(), theRequestDetails);
 
 			DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
-					sourceResource,
-					targetResource,
-					resultResource,
-					deleteSource,
-					theRequestDetails);
+					sourceResource, targetResource, resultResource, deleteSource, theRequestDetails);
 			Patient updatedTargetResource = (Patient) outcome.getResource();
 
 			String sourceVersionForProvenance = sourceResource.getIdElement().getVersionIdPart();
@@ -115,7 +113,8 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 			}
 
 			mergeJobParameters.setSourceVersionForProvenance(sourceVersionForProvenance);
-			mergeJobParameters.setTargetVersionForProvenance(updatedTargetResource.getIdElement().getVersionIdPart());
+			mergeJobParameters.setTargetVersionForProvenance(
+					updatedTargetResource.getIdElement().getVersionIdPart());
 			containedResourcesForProvenance.add(outcome.getOperationOutcome());
 			createProvenance(theStepExecutionDetails, theRequestDetails, containedResourcesForProvenance);
 
@@ -137,8 +136,10 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 	private @Nullable Patient getResultResource(Parameters originalInputParameters) {
 		Patient resultResource = null;
 		String resultResourceParamName = myMergeOperationInputParameterNames.getResultResourceParameterName();
-		if(originalInputParameters.hasParameter(resultResourceParamName)) {
-			resultResource = (Patient) originalInputParameters.getParameter(resultResourceParamName).getResource();
+		if (originalInputParameters.hasParameter(resultResourceParamName)) {
+			resultResource = (Patient) originalInputParameters
+					.getParameter(resultResourceParamName)
+					.getResource();
 		}
 		return resultResource;
 	}

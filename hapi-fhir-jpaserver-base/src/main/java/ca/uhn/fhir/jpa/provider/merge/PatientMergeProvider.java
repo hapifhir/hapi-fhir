@@ -262,8 +262,7 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 			List<IProvenanceAgent> theProvenanceAgents,
 			Parameters theOriginalInputParameters) {
 
-		MergeOperationInputParameters mergeOperationParameters =
-				new MergeOperationInputParameters(theResourceLimit);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(theResourceLimit);
 
 		setCommonMergeOperationInputParameters(
 				mergeOperationParameters,

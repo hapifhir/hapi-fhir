@@ -101,9 +101,11 @@ public class PreviousResourceVersionRestorer {
 				currentResource = dao.read(referenceId.toUnqualifiedVersionless(), theRequestDetails);
 			} catch (ResourceGoneException e) {
 				if (!theReferencesToUndelete.contains(reference)) {
-					//FIXME EMRE: update msg.code
+					// FIXME EMRE: update msg.code
 					// enhance error message to include the reference of the deleted resource that cannot be restored
-					String msg = String.format("The resource '%s' cannot be restored because it was deleted. %s", referenceStr, e.getMessage());
+					String msg = String.format(
+							"The resource '%s' cannot be restored because it was deleted. %s",
+							referenceStr, e.getMessage());
 					throw new ResourceGoneException(Msg.code(1234) + msg);
 				}
 			}

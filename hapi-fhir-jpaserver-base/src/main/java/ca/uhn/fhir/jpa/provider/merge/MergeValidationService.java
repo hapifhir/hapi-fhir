@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.jpa.provider.merge;
 
-import ca.uhn.fhir.merge.MergeOperationInputParameterNames;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.merge.MergeOperationInputParameterNames;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -279,7 +279,7 @@ public class MergeValidationService {
 	 * @return true if the parameters are valid, false otherwise
 	 */
 	boolean validateCommonMergeOperationParameters(
-		MergeOperationsCommonInputParameters theCommonInputParameters, IBaseOperationOutcome theOutcome) {
+			MergeOperationsCommonInputParameters theCommonInputParameters, IBaseOperationOutcome theOutcome) {
 		List<String> errorMessages = new ArrayList<>();
 		if (!theCommonInputParameters.hasAtLeastOneSourceIdentifier()
 				&& theCommonInputParameters.getSourceResource() == null) {

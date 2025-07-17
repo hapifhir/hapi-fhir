@@ -35,7 +35,6 @@ import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -81,9 +80,9 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 	}
 
 	protected void createProvenance(
-		StepExecutionDetails<PT, ReplaceReferencePatchOutcomeJson> theStepExecutionDetails,
-		RequestDetails theRequestDetails,
-		List<IBaseResource> theContainedResources) {
+			StepExecutionDetails<PT, ReplaceReferencePatchOutcomeJson> theStepExecutionDetails,
+			RequestDetails theRequestDetails,
+			List<IBaseResource> theContainedResources) {
 
 		ReplaceReferencesJobParameters params = theStepExecutionDetails.getParameters();
 		if (params.getCreateProvenance()) {

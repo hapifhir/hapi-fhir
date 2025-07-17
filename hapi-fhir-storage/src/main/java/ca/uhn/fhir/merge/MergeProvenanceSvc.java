@@ -59,13 +59,13 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 
 	@Override
 	public void createProvenance(
-		IIdType theTargetId,
-		IIdType theSourceId,
-		List<Bundle> thePatchResultBundles,
-		Date theStartTime,
-		RequestDetails theRequestDetails,
-		List<IProvenanceAgent> theProvenanceAgents,
-		List<IBaseResource> theContainedResources) {
+			IIdType theTargetId,
+			IIdType theSourceId,
+			List<Bundle> thePatchResultBundles,
+			Date theStartTime,
+			RequestDetails theRequestDetails,
+			List<IProvenanceAgent> theProvenanceAgents,
+			List<IBaseResource> theContainedResources) {
 
 		super.createProvenance(
 				theTargetId,
@@ -80,33 +80,34 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 				true);
 	}
 
-	public Provenance findProvenanceByTargetIdAndSourceIdentifiers(IIdType theTargetId, List<CanonicalIdentifier> theSourceIdentifiers, RequestDetails theRequestDetails) {
+	public Provenance findProvenanceByTargetIdAndSourceIdentifiers(
+			IIdType theTargetId, List<CanonicalIdentifier> theSourceIdentifiers, RequestDetails theRequestDetails) {
 		String sourceIdentifierParameterName = myInputParamNames.getSourceIdentifiersParameterName();
-		List<Provenance> provenances = getProvenancesOfTargetsFilteredByActivity(List.of(theTargetId), theRequestDetails);
+		List<Provenance> provenances =
+				getProvenancesOfTargetsFilteredByActivity(List.of(theTargetId), theRequestDetails);
 		// the input parameters are in a contained resource, find the one that matches the source identifiers
 		for (Provenance provenance : provenances) {
 			for (Resource contained : provenance.getContained()) {
-				if (contained instanceof Parameters parameters && parameters.hasParameter(sourceIdentifierParameterName)) {
-						List<Type> originalInputSrcIdentifiers = parameters.getParameterValues(sourceIdentifierParameterName);
-						if (hasIdentifiers(originalInputSrcIdentifiers, theSourceIdentifiers)) {
-							return provenance;
-						}
-
+				if (contained instanceof Parameters parameters
+						&& parameters.hasParameter(sourceIdentifierParameterName)) {
+					List<Type> originalInputSrcIdentifiers =
+							parameters.getParameterValues(sourceIdentifierParameterName);
+					if (hasIdentifiers(originalInputSrcIdentifiers, theSourceIdentifiers)) {
+						return provenance;
 					}
-
+				}
 			}
 		}
 		return null;
 	}
 
-
 	private boolean hasIdentifiers(List<Type> theIdentifiers, List<CanonicalIdentifier> theIdentifiersToLookFor) {
 		for (CanonicalIdentifier identifier : theIdentifiersToLookFor) {
 			boolean identifierFound = theIdentifiers.stream()
-				.map(i -> (Identifier)i)
-				.anyMatch(i -> i.getSystem()
-					.equals(identifier.getSystemElement().getValueAsString())
-					&& i.getValue().equals(identifier.getValueElement().getValueAsString()));
+					.map(i -> (Identifier) i)
+					.anyMatch(i -> i.getSystem()
+									.equals(identifier.getSystemElement().getValueAsString())
+							&& i.getValue().equals(identifier.getValueElement().getValueAsString()));
 
 			if (!identifierFound) {
 				return false;
@@ -114,5 +115,4 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 		}
 		return true;
 	}
-
 }

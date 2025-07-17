@@ -36,7 +36,7 @@ public class MergeJobParameters extends ReplaceReferencesJobParameters {
 	 * @deprecated we have the whole original input parameters object now,
 	 * which contains this as well, look up resultsResource from there
 	 */
-	@Deprecated(since="8.3")
+	@Deprecated(since = "8.3")
 	public void setResultResource(String theResultResource) {
 		myResultResource = theResultResource;
 	}
@@ -45,17 +45,16 @@ public class MergeJobParameters extends ReplaceReferencesJobParameters {
 	 * @deprecated we have the whole original input parameters object now,
 	 * which contains this as well, use getMyOriginalInputParameters and look up resultsResource from there
 	 */
-	@Deprecated(since="8.3")
+	@Deprecated(since = "8.3")
 	public String getResultResource() {
 		return myResultResource;
 	}
-
 
 	/**
 	 * @deprecated we have the whole original input parameters object now,
 	 * which contains this as well, use getMyOriginalInputParameters and look up deleteSource from there
 	 */
-	@Deprecated(since="8.3")
+	@Deprecated(since = "8.3")
 	public boolean getDeleteSource() {
 		return myDeleteSource;
 	}
@@ -63,7 +62,7 @@ public class MergeJobParameters extends ReplaceReferencesJobParameters {
 	/**
 	 * @deprecated we have the whole original input parameters object now, which contains this as well use setMyOriginalInputParameters
 	 */
-	@Deprecated(since="8.3")
+	@Deprecated(since = "8.3")
 	public void setDeleteSource(boolean theDeleteSource) {
 		this.myDeleteSource = theDeleteSource;
 	}

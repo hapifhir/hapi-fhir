@@ -115,7 +115,7 @@ public class ResourceMergeService {
 	 * @return the merge outcome containing OperationOutcome and HTTP status code
 	 */
 	public MergeOperationOutcome merge(
-		MergeOperationInputParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
+			MergeOperationInputParameters theMergeOperationParameters, RequestDetails theRequestDetails) {
 
 		MergeOperationOutcome mergeOutcome = new MergeOperationOutcome();
 		IBaseOperationOutcome operationOutcome = OperationOutcomeUtil.newInstance(myFhirContext);
@@ -247,15 +247,15 @@ public class ResourceMergeService {
 				.orElseThrow();
 
 		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
-			 DaoMethodOutcome outcome =  myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
+			DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
 					theSourceResource,
 					theTargetResource,
 					(Patient) theMergeOperationParameters.getResultResource(),
 					theMergeOperationParameters.getDeleteSource(),
 					theRequestDetails);
 
-			 Patient updatedTargetResource = (Patient) outcome.getResource();
-			 theMergeOutcome.setUpdatedTargetResource(updatedTargetResource);
+			Patient updatedTargetResource = (Patient) outcome.getResource();
+			theMergeOutcome.setUpdatedTargetResource(updatedTargetResource);
 
 			if (theMergeOperationParameters.getCreateProvenance()) {
 				myMergeResourceHelper.createProvenance(
@@ -266,7 +266,9 @@ public class ResourceMergeService {
 						theRequestDetails,
 						startTime,
 						theMergeOperationParameters.getProvenanceAgents(),
-						List.of(theMergeOperationParameters.getOriginalInputParameters(), outcome.getOperationOutcome()));
+						List.of(
+								theMergeOperationParameters.getOriginalInputParameters(),
+								outcome.getOperationOutcome()));
 			}
 
 			if (theMergeOperationParameters.getDeleteSource()) {

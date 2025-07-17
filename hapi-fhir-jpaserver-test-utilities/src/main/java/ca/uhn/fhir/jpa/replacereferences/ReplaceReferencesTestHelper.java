@@ -273,12 +273,12 @@ public class ReplaceReferencesTestHelper {
 		assertThat(provenance.hasContained()).isTrue();
 		assertThat(provenance.getContained()).hasSize(2);
 		Parameters containedParameters = (Parameters) provenance.getContained().get(0);
-		//there would be an id added to the in the contained input parameters,
-		//other than that it should be equal to the input parameters that was used for the operation
+		// there would be an id added to the in the contained input parameters,
+		// other than that it should be equal to the input parameters that was used for the operation
 		containedParameters.setId((String) null);
 		assertThat(containedParameters.equalsDeep(theInputParameters)).isTrue();
 
-		//TODO Emre: Assert the second contained resource
+		// TODO Emre: Assert the second contained resource
 	}
 
 	private Set<IIdType> getEverythingResourceIds(IIdType thePatientId) {
@@ -512,7 +512,7 @@ public class ReplaceReferencesTestHelper {
 
 	public static class PatientMergeInputParameters {
 		public Type sourcePatient;
-		public List<? extends  Type> sourcePatientIdentifiers;
+		public List<? extends Type> sourcePatientIdentifiers;
 		public Type targetPatient;
 		public List<? extends Type> targetPatientIdentifiers;
 		public Patient resultPatient;
@@ -526,15 +526,19 @@ public class ReplaceReferencesTestHelper {
 				inParams.addParameter().setName("source-patient").setValue(sourcePatient);
 			}
 			if (sourcePatientIdentifiers != null) {
-				sourcePatientIdentifiers.forEach(i -> inParams.addParameter().setName("source-patient-identifier").setValue(i));
-				//inParams.addParameter().setName("source-patient-identifier").setValue(sourcePatientIdentifiers);
+				sourcePatientIdentifiers.forEach(i -> inParams.addParameter()
+						.setName("source-patient-identifier")
+						.setValue(i));
+				// inParams.addParameter().setName("source-patient-identifier").setValue(sourcePatientIdentifiers);
 			}
 			if (targetPatient != null) {
 				inParams.addParameter().setName("target-patient").setValue(targetPatient);
 			}
 			if (targetPatientIdentifiers != null) {
-				targetPatientIdentifiers.forEach(i -> inParams.addParameter().setName("target-patient-identifier").setValue(i));
-				//inParams.addParameter().setName("target-patient-identifier").setValue(targetPatientIdentifiers);
+				targetPatientIdentifiers.forEach(i -> inParams.addParameter()
+						.setName("target-patient-identifier")
+						.setValue(i));
+				// inParams.addParameter().setName("target-patient-identifier").setValue(targetPatientIdentifiers);
 			}
 			return inParams;
 		}
@@ -562,9 +566,10 @@ public class ReplaceReferencesTestHelper {
 
 		public MergeJobParameters asMergeJobParameters(FhirContext theFhirContext) {
 			MergeJobParameters jobParams = new MergeJobParameters();
-			jobParams.setSourceId(new FhirIdJson(((Reference)sourcePatient).getReferenceElement()));
-			jobParams.setTargetId(new FhirIdJson(((Reference)targetPatient).getReferenceElement()));
-			jobParams.setOriginalInputParameters(theFhirContext.newJsonParser().encodeResourceToString(asParametersResource()));
+			jobParams.setSourceId(new FhirIdJson(((Reference) sourcePatient).getReferenceElement()));
+			jobParams.setTargetId(new FhirIdJson(((Reference) targetPatient).getReferenceElement()));
+			jobParams.setOriginalInputParameters(
+					theFhirContext.newJsonParser().encodeResourceToString(asParametersResource()));
 			return jobParams;
 		}
 	}
@@ -735,11 +740,14 @@ public class ReplaceReferencesTestHelper {
 		IParser jsonParser = myFhirContext.newJsonParser();
 		if (body != null) {
 			Parameters outParams = jsonParser.parseResource(Parameters.class, body);
-			OperationOutcome outcome = (OperationOutcome) outParams.getParameter("outcome").getResource();
-			ourLog.info("Extracted OperationOutcome from exception: {}", jsonParser.setPrettyPrint(true).encodeResourceToString(outcome));
+			OperationOutcome outcome =
+					(OperationOutcome) outParams.getParameter("outcome").getResource();
+			ourLog.info(
+					"Extracted OperationOutcome from exception: {}",
+					jsonParser.setPrettyPrint(true).encodeResourceToString(outcome));
 			return outcome.getIssue().stream()
-				.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
-				.collect(Collectors.joining(", "));
+					.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
+					.collect(Collectors.joining(", "));
 		} else {
 			return "null";
 		}

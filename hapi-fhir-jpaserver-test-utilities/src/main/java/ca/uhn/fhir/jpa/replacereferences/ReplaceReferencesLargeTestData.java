@@ -232,5 +232,4 @@ public class ReplaceReferencesLargeTestData {
 	public List<Identifier> getTargetPatientIdentifiers() {
 		return List.of(pat2IdentifierA, pat2IdentifierB, patBothIdentifierC);
 	}
-
 }
