@@ -508,6 +508,12 @@ public class BundleBuilder {
 		return theEntry;
 	}
 
+	/**
+	 * Add an entry to the bundle.
+	 *
+	 * @param theEntry the canonical entry to add to the bundle. It will be converted to a FHIR version specific entry before adding.
+	 * @return
+	 */
 	public IBase addEntry(CanonicalBundleEntry theEntry) {
 		IBase bundleEntry = theEntry.toBundleEntry(myContext, myEntryDef.getImplementingClass());
 		addEntry(bundleEntry);
@@ -691,6 +697,19 @@ public class BundleBuilder {
 	public void addProfile(String theProfile) {
 		FhirTerser terser = myContext.newTerser();
 		terser.addElement(myBundle, "Bundle.meta.profile", theProfile);
+	}
+
+	public IBase addSearchMatchEntry(IBaseResource theResource) {
+		setType("searchset");
+
+		IBase entry = addEntry();
+		// Bundle.entry.resource
+		myEntryResourceChild.getMutator().setValue(entry, theResource);
+		// Bundle.entry.search
+		IBase search = addSearch(entry);
+		setSearchField(search, "mode", "match");
+
+		return entry;
 	}
 
 	public class DeleteBuilder extends BaseOperationBuilder {

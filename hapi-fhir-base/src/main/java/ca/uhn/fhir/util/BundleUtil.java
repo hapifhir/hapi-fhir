@@ -35,6 +35,7 @@ import ca.uhn.fhir.util.bundle.BundleEntryMutator;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import ca.uhn.fhir.util.bundle.EntryListAccumulator;
 import ca.uhn.fhir.util.bundle.ModifiableBundleEntry;
+import ca.uhn.fhir.util.bundle.PartsConverter;
 import ca.uhn.fhir.util.bundle.SearchBundleEntryParts;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
@@ -74,6 +75,7 @@ public class BundleUtil {
 
 	public static final String DIFFERENT_LINK_ERROR_MSG =
 			"Mismatching 'previous' and 'prev' links exist. 'previous' " + "is: '$PREVIOUS' and 'prev' is: '$PREV'.";
+	public static final String BUNDLE_TYPE_TRANSACTION_RESPONSE = "transaction-response";
 	private static final Logger ourLog = LoggerFactory.getLogger(BundleUtil.class);
 
 	private static final String PREVIOUS = LINK_PREV;
@@ -300,6 +302,14 @@ public class BundleUtil {
 		EntryListAccumulator entryListAccumulator = new EntryListAccumulator();
 		processEntries(theContext, theBundle, entryListAccumulator);
 		return entryListAccumulator.getList();
+	}
+
+	public static <T> List<T> toListOfEntries(
+			FhirContext theContext, IBaseBundle theBundle, PartsConverter<T> partsConverter) {
+		RuntimeResourceDefinition bundleDef = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChildDef = bundleDef.getChildByName("entry");
+		List<IBase> entries = entryChildDef.getAccessor().getValues(theBundle);
+		return entries.stream().map(partsConverter::fromElement).toList();
 	}
 
 	/**
@@ -724,7 +734,7 @@ public class BundleUtil {
 				}
 			}
 		}
-		return new BundleEntryParts(fullUrl, requestType, url, resource, conditionalUrl);
+		return new BundleEntryParts(fullUrl, requestType, url, resource, conditionalUrl, requestType);
 	}
 
 	/**
