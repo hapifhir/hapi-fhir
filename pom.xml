@@ -104,7 +104,8 @@
 		<module>hapi-fhir-jacoco</module>
 		<module>hapi-fhir-server-cds-hooks</module>
 		<module>hapi-fhir-jpa-hibernate-services</module>
-    </modules>
+		<module>hapi-fhir-repositories</module>
+	</modules>
 
 	<dependencies>
 		<dependency>
