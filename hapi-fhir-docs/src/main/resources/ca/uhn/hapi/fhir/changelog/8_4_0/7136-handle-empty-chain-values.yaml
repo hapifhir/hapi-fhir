@@ -3,5 +3,5 @@ type: add
 issue: 7131
 title: "When performing JPA queries containing empty chained parameters, such as the following
   query `Coverage?patient.family=&patient.given=&patient.gender=male`, the empty parameters
-  resulted in extra SQL JOIN fragments even though they are empty and should be ignored. This has
-  been corrected."
+  resulted in extra SQL JOIN fragments even though they are empty and should be ignored. That query will
+  now be interpreted as `Coverage?patient.gender=male`"
