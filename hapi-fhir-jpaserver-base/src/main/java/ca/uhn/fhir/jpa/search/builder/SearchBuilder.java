@@ -711,7 +711,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				myResourceName,
 				mySqlBuilderFactory,
 				myDialectProvider,
-				theSearchProperties.isDoCountOnlyFlag());
+				theSearchProperties.isDoCountOnlyFlag(),
+			myResourceName == null || myResourceName.isBlank());
 		QueryStack queryStack3 = new QueryStack(
 				theRequest,
 				theParams,
@@ -855,7 +856,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				null,
 				mySqlBuilderFactory,
 				myDialectProvider,
-				theSearchQueryProperties.isDoCountOnlyFlag());
+				theSearchQueryProperties.isDoCountOnlyFlag(),
+				false);
 
 		QueryStack queryStack3 = new QueryStack(
 				theRequest,
@@ -889,7 +891,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					myResourceName,
 					mySqlBuilderFactory,
 					myDialectProvider,
-					theSearchQueryProperties.isDoCountOnlyFlag());
+					theSearchQueryProperties.isDoCountOnlyFlag(),
+					false);
 			GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(
 					theSearchQueryProperties.getOffset(), mySearchProperties.getMaxResultsRequested());
 			String sql = allTargetsSql.getSql();

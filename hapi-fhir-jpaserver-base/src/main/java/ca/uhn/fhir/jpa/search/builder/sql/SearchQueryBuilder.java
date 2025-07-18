@@ -128,7 +128,8 @@ public class SearchQueryBuilder {
 			String theResourceType,
 			SqlObjectFactory theSqlBuilderFactory,
 			HibernatePropertiesProvider theDialectProvider,
-			boolean theCountQuery) {
+			boolean theCountQuery,
+			boolean theSelectResourceType) {
 		this(
 				theFhirContext,
 				theStorageSettings,
@@ -141,7 +142,7 @@ public class SearchQueryBuilder {
 				theCountQuery,
 				new ArrayList<>(),
 				thePartitionSettings.isPartitioningEnabled(),
-				theResourceType == null || theResourceType.isBlank());
+				theSelectResourceType);
 	}
 
 	/**
