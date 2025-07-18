@@ -2549,7 +2549,7 @@ public class QueryStack {
 				case REFERENCE:
 					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
 
-    // omit this param since the or-list is empty.  There is no value generating sql for this.
+						// omit this param since the or-list is empty.  There is no value generating sql for this.
 						if (ParameterUtil.areAllParametersEmpty(nextAnd)) {
 							continue;
 						}

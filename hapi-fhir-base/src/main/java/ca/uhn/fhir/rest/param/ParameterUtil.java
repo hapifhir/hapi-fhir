@@ -246,7 +246,7 @@ public class ParameterUtil {
 						if (prevChar == '\\') {
 							b.append(next);
 						} else {
-							if (!b.isEmpty()) {
+							if (b.length() > 0) {
 								retVal.add(b.toString());
 							} else {
 								retVal.add(null);
@@ -258,7 +258,7 @@ public class ParameterUtil {
 					b.append(next);
 				}
 			}
-			if (!b.isEmpty()) {
+			if (b.length() > 0) {
 				retVal.add(b.toString());
 			}
 		}
