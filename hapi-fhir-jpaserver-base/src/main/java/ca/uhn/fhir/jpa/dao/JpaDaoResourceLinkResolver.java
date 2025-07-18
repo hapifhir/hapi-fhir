@@ -36,6 +36,12 @@ public class JpaDaoResourceLinkResolver extends DaoResourceLinkResolver<JpaPid> 
 			return;
 		}
 
+		/*
+		 * If we're about to create a placeholder resource to satisfy a conditional URL
+		 * with identifiers, add an entry in the HFJ_RES_SEARCH_URL table, which is used
+		 * to prevent multiple concurrent threads creating the same object as a part of
+		 * a conditional create/update.
+		 */
 		String reference = theReference.getReferenceElement().getValue();
 		if (reference.contains("?")) {
 			String resourceType = myFhirContext.getResourceType(theType);
