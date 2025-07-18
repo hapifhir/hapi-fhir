@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MetaUtil;
@@ -185,8 +184,7 @@ public interface ITestDataBuilder {
 	default ICreationArgument withId(@Nonnull String theId) {
 		return t -> {
 			assertThat(theId).matches("[a-zA-Z0-9-]+");
-			IBaseResource resource = (IBaseResource) t;
-			resource.setId(new IdDt(getFhirContext().getResourceType(resource), theId));
+			((IBaseResource)t).setId(theId);
 		};
 	}
 
