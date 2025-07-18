@@ -37,8 +37,8 @@ class InMemoryFhirRepositoryLoaderTest {
 	    // given
 		String url = FHIR_REPOSITORY_URL_SCHEME + "memory:my-repo";
 	    // when
-		IRepository repository1 = Repositories.repositoryForUrl(url, myFhirContext);
-		IRepository repository2 = Repositories.repositoryForUrl(url, myFhirContext);
+		IRepository repository1 = Repositories.repositoryForUrl(myFhirContext, url);
+		IRepository repository2 = Repositories.repositoryForUrl(myFhirContext, url);
 
 	    // then
 	    assertSame(repository1, repository2);
@@ -48,7 +48,7 @@ class InMemoryFhirRepositoryLoaderTest {
 	void testDiscoveryThroughServiceLoaderFacade() {
 	    // when
 		String repositoryUrl = FHIR_REPOSITORY_URL_SCHEME + "memory:my-repo";
-		IRepository repository = Repositories.repositoryForUrl(repositoryUrl, myFhirContext);
+		IRepository repository = Repositories.repositoryForUrl(myFhirContext, repositoryUrl);
 
 	    // then
 	    assertThat(repository).isNotNull()

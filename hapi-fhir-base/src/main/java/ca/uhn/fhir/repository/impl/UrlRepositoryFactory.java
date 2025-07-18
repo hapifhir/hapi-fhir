@@ -39,13 +39,13 @@ public class UrlRepositoryFactory {
 	 * This URL is expected to be in the form of fhir-repository:subscheme:details.
 	 * The subscheme is used to find a matching {@link IRepositoryLoader} implementation.
 	 *
+	 * @param theFhirContext   the FHIR context to use for the repository, if required.
 	 * @param theRepositoryUrl a url of the form fhir-repository:subscheme:details
-	 * @param theFhirContext the FHIR context to use for the repository, if required.
 	 * @return a repository instance
 	 * @throws IllegalArgumentException if the URL is not a valid repository URL, or no loader can be found for the URL.
 	 */
 	@Nonnull
-	public static IRepository buildRepository(@Nonnull String theRepositoryUrl, @Nullable FhirContext theFhirContext) {
+	public static IRepository buildRepository(@Nullable FhirContext theFhirContext, @Nonnull String theRepositoryUrl) {
 		ourLog.debug("Loading repository for url: {}", theRepositoryUrl);
 		Objects.requireNonNull(theRepositoryUrl);
 
