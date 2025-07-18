@@ -1,6 +1,7 @@
 ---
 type: add
 issue: 7002
+jira: SMILE-9203
 title: "Added support for reindexing deleted resources. This can be done by adding the new `_includeDeleted` parameter
 to the Parameters resource upon submitting the `$reindex` job. 
 See <a href=\"https://smilecdr.com/docs/fhir_repository/search_parameter_reindexing.html#reindex-batch-job\">the reindex documentation</a> for more information."
