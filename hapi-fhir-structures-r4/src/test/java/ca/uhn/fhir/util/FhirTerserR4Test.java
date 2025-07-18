@@ -1603,6 +1603,13 @@ public class FhirTerserR4Test {
 		assertEquals(1, parsedCopy.getContained().size());
 	}
 
+	@Test
+	void testFieldExists() {
+		final FhirTerser fhirTerser = myCtx.newTerser();
+		assertThat(fhirTerser.fieldExists("identifier", new Patient())).isTrue();
+		assertThat(fhirTerser.fieldExists("identifier", new Provenance())).isFalse();
+	}
+
 	/**
 	 * See http://stackoverflow.com/questions/182636/how-to-determine-the-class-of-a-generic-type
 	 */

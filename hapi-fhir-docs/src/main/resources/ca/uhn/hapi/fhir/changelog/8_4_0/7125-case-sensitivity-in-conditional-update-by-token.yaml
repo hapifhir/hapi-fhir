@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 7125
+jira: SMILE-10427
+title: "Previously, conditional updates based on tokens were case-insensitive. As a result, a new resource would be 
+created if the token value in the URL used a different case than the one in the request body, leading to incorrect 
+search results when using token-based search parameters. This issue has now been resolved."
