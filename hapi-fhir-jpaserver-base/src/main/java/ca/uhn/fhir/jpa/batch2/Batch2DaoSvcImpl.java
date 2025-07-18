@@ -107,16 +107,6 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	@Override
 	public IResourcePidStream fetchResourceIdStream(
 			Date theStart, Date theEnd, RequestPartitionId theRequestPartitionId, String theUrl) {
-		// fixme:  there is 3 scenarios that needs support for includeDeleted
-		// 1- $reindex (no url)
-		// 2- $reindex/Patient (this include just ? with no params)
-		// 3- $reindex/Patient?[withUrlParam]
-
-		// the third scenario is easy because we will be creating this new url SP called '_includeDeleted'
-		// wich will be parsed into the searchParameterMap (see streamResourceIdsWithUrl).
-		// first and second scenario could/will use the parameter "icludeDeletedResources" as per the ticket
-		// and provided to this method.  then, we take the value and add it to the searchParameterMap.
-		// to be confirmed.
 
 		if (StringUtils.isBlank(theUrl)) {
 			// first scenario

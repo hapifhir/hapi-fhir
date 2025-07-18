@@ -125,11 +125,6 @@ public class MatchUrlService {
 				}
 			}
 
-			// fixme:
-			//  1- handle SP _includeDeleted
-			// 2-  validate that _includeDeleted is not used in conjunction with any other SP other than _id and
-			// _lastUpdated;
-			//
 			if (Constants.PARAM_DELETED.equals(nextParamName)) {
 				validateParamsAreCompatibleForDeleteOrThrow(nameToParamLists.keySet(), hasNoResourceType);
 				paramMap.setSearchIncludeDeletedMode(
@@ -237,6 +232,7 @@ public class MatchUrlService {
 	/**
 	 * The _includeDeleted parameter should only be supported with _lastUpdated, and _id iff resource type is given
 	 * This is because these are the common search parameter values that are still stored on the deleted resource version in DB
+	 * However, since resources are unique by type and id, only _lastUpdated is supported if no resource type is given
 	 * @param theParamsToCheck the list of parameters found in the URL
 	 * @param theHasNoResourceType whether the request is on the base URL (ie `?_param` - without resource type)
 	 */

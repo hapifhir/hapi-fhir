@@ -466,7 +466,7 @@ public class SearchQueryBuilder {
 						mySelect.addColumns(mySelectedResourceIdColumn);
 					}
 
-					if (mySelectResourceType) { // todo jdjd was mySelectResourceType
+					if (mySelectResourceType) {
 						mySelect.addColumns(root.getResourceTypeColumn());
 					}
 				}
