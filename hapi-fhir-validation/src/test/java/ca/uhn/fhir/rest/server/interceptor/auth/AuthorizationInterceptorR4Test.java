@@ -528,12 +528,15 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(patient);
 
-		get = new HttpGet(ourServer.getBaseUrl() + "/Group?member.entity=" + patientId);
+		String urlToTest = ourServer.getBaseUrl() + "/Group?member.entity=" + patientId;
+
+		// test get
+		get = new HttpGet(urlToTest);
 
 		response = ourClient.execute(get);
-		String responseStr = extractResponseAndClose(response);
+		extractResponseAndClose(response);
 
-		//then
+		// validate get
 		assertFalse(ourHitMethod);
 		assertEquals(403, response.getStatusLine().getStatusCode());
 	}
@@ -1361,6 +1364,43 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
 		assertEquals(422, status.getStatusLine().getStatusCode());
+	}
+
+	@Test
+	public void testDeleteInCompartmentWithO() throws IOException {
+		// setup
+		String patientId = "Patient/123";
+		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				CompartmentSearchParametersSpecialCases specialCases = new CompartmentSearchParametersSpecialCases();
+				specialCases.addSPToOmitFromCompartment("group", "member");
+				List<IdType> relatedIds = new ArrayList<>();
+				relatedIds.add(new IdType(patientId));
+				return new RuleBuilder()
+					.allow().delete().allResources()
+					.inCompartmentWithSpecialCaseSSPHandling("Patient", relatedIds, specialCases)
+					.andThen().denyAll()
+					.build();
+			}
+		});
+
+		HttpDelete httpDelete;
+		HttpResponse status;
+
+		createPatient(123);
+		Group group = new Group();
+		group.setId("Group/456");
+		group.addMember()
+			.setEntity(new Reference(patientId));
+		ourDeleted = List.of(group);
+		ourHitMethod = false;
+		httpDelete = new HttpDelete(ourServer.getBaseUrl() + "/Group?member=" + patientId);
+
+		status = ourClient.execute(httpDelete);
+		extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
 	}
 
 	@Test
@@ -4453,6 +4493,29 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			markHitMethod();
 			return ourReturn;
 		}
+
+		@Delete()
+		public MethodOutcome delete(
+			@IdParam IIdType theResource,
+			@ConditionalUrlParam String theConditional,
+			IInterceptorBroadcaster theInterceptorBroadcaster,
+			ServletRequestDetails theServletRequestDetails,
+			RequestDetails theRequestDetails
+		) {
+			if (isNotBlank(theConditional)) {
+				HookParams params = new HookParams();
+				params.add(IBaseResource.class, ourDeleted.get(0));
+				params.add(RequestDetails.class, theRequestDetails);
+				params.addIfMatchesType(ServletRequestDetails.class, theServletRequestDetails);
+				params.add(TransactionDetails.class, new TransactionDetails());
+
+				theInterceptorBroadcaster
+					.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, params);
+			}
+
+			markHitMethod();
+			return new MethodOutcome();
+		}
 	}
 
 	public static class DummyDeviceResourceProvider implements IResourceProvider {
@@ -4825,6 +4888,4 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		}
 
 	}
-
-
 }

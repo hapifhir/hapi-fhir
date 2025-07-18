@@ -874,7 +874,7 @@ public class FhirTerser {
 	 */
 	public boolean isSourceInCompartmentForTarget(
 			String theCompartmentName, IBaseResource theSource, IIdType theTarget) {
-		return isSourceInCompartmentForTarget(theCompartmentName, theSource, theTarget, null);
+		return isSourceInCompartmentForTarget(theCompartmentName, theSource, theTarget, null, null);
 	}
 
 	/**
@@ -892,7 +892,8 @@ public class FhirTerser {
 			String theCompartmentName,
 			IBaseResource theSource,
 			IIdType theTarget,
-			@Nullable Set<String> theAdditionalCompartmentParamNames) {
+			@Nullable Set<String> theAdditionalCompartmentParamNames,
+			@Nullable Set<String> theOmittedSPInCompartment) {
 		Validate.notBlank(theCompartmentName, "theCompartmentName must not be null or blank");
 		Validate.notNull(theSource, "theSource must not be null");
 		Validate.notNull(theTarget, "theTarget must not be null");
@@ -938,7 +939,7 @@ public class FhirTerser {
 		}
 
 		CompartmentOwnerVisitor consumer = new CompartmentOwnerVisitor(wantRef);
-		visitCompartmentOwnersForResource(theCompartmentName, theSource, theAdditionalCompartmentParamNames, consumer);
+		visitCompartmentOwnersForResource(theCompartmentName, theSource, theAdditionalCompartmentParamNames, theOmittedSPInCompartment, consumer);
 		return consumer.isFound();
 	}
 
@@ -951,7 +952,7 @@ public class FhirTerser {
 	 */
 	@Nonnull
 	public List<IIdType> getCompartmentOwnersForResource(
-			String theCompartmentName, IBaseResource theSource, Set<String> theAdditionalCompartmentParamNames) {
+			String theCompartmentName, IBaseResource theSource, Set<String> theAdditionalCompartmentParamNames, Set<String> theOmittedSPInCompartment) {
 		Validate.notBlank(theCompartmentName, "theCompartmentName must not be null or blank");
 		Validate.notNull(theSource, "theSource must not be null");
 
@@ -974,7 +975,7 @@ public class FhirTerser {
 		}
 
 		CompartmentOwnerVisitor consumer = new CompartmentOwnerVisitor();
-		visitCompartmentOwnersForResource(theCompartmentName, theSource, theAdditionalCompartmentParamNames, consumer);
+		visitCompartmentOwnersForResource(theCompartmentName, theSource, theAdditionalCompartmentParamNames, theOmittedSPInCompartment, consumer);
 		return consumer.getOwners();
 	}
 
@@ -982,14 +983,19 @@ public class FhirTerser {
 	public Stream<IBaseReference> getCompartmentReferencesForResource(
 			String theCompartmentName,
 			IBaseResource theSource,
-			@Nullable Set<String> theAdditionalCompartmentParamNames) {
+			@Nullable Set<String> theAdditionalCompartmentParamNames,
+			@Nullable Set<String> theOmittedSPInCompartment) {
 		Validate.notBlank(theCompartmentName, "theCompartmentName must not be null or blank");
 		Validate.notNull(theSource, "theSource must not be null");
 		theAdditionalCompartmentParamNames = Objects.requireNonNullElse(theAdditionalCompartmentParamNames, Set.of());
+		Set<String> omitted = Objects.requireNonNullElse(theOmittedSPInCompartment, Set.of());
 
 		RuntimeResourceDefinition sourceDef = myContext.getResourceDefinition(theSource);
 		List<RuntimeSearchParam> params =
-				new ArrayList<>(sourceDef.getSearchParamsForCompartmentName(theCompartmentName));
+				sourceDef.getSearchParamsForCompartmentName(theCompartmentName)
+					.stream()
+					.filter(p -> !omitted.contains(p.getName()))
+					.collect(Collectors.toList());
 
 		theAdditionalCompartmentParamNames.stream()
 				.map(sourceDef::getSearchParam)
@@ -1044,9 +1050,10 @@ public class FhirTerser {
 			String theCompartmentName,
 			IBaseResource theSource,
 			@Nullable Set<String> theAdditionalCompartmentParamNames,
+			@Nullable Set<String> theOmittedSPInCompartment,
 			ICompartmentOwnerVisitor theConsumer) {
 
-		getCompartmentReferencesForResource(theCompartmentName, theSource, theAdditionalCompartmentParamNames)
+		getCompartmentReferencesForResource(theCompartmentName, theSource, theAdditionalCompartmentParamNames, theOmittedSPInCompartment)
 				.flatMap(nextValue -> {
 					IIdType nextTargetId = nextValue.getReferenceElement().toUnqualifiedVersionless();
 

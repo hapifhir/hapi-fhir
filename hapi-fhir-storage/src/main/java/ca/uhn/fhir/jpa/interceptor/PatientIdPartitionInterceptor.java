@@ -127,7 +127,7 @@ public class PatientIdPartitionInterceptor {
 	private Optional<RequestPartitionId> getPartitionViaPartiallyProcessedReference(IBaseResource theResource) {
 		return myFhirContext
 				.newTerser()
-				.getCompartmentReferencesForResource("Patient", theResource, null)
+				.getCompartmentReferencesForResource("Patient", theResource, null, null)
 				.map(IBaseReference::getResource)
 				.filter(Objects::nonNull)
 				.flatMap(nextResource -> getPartitionIfAssigned(nextResource).stream())

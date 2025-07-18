@@ -56,6 +56,8 @@ public class BalpAuditCaptureInterceptor {
 	private final IBalpAuditContextServices myContextServices;
 	private Set<String> myAdditionalPatientCompartmentParamNames;
 
+	private Set<String> myOmittedSPNamesInPatientCompartment;
+
 	/**
 	 * Constructor
 	 *
@@ -108,6 +110,10 @@ public class BalpAuditCaptureInterceptor {
 
 	public void setAdditionalPatientCompartmentParamNames(Set<String> theAdditionalPatientCompartmentParamNames) {
 		myAdditionalPatientCompartmentParamNames = theAdditionalPatientCompartmentParamNames;
+	}
+
+	public void setOmittedSPNamesInPatientCompartment(Set<String> theOmittedSPNamesInPatientCompartment) {
+		myOmittedSPNamesInPatientCompartment = theOmittedSPNamesInPatientCompartment;
 	}
 
 	/**
@@ -229,7 +235,7 @@ public class BalpAuditCaptureInterceptor {
 					FhirTerser terser = fhirContext.newTerser();
 					terser
 							.getCompartmentOwnersForResource(
-									"Patient", resource, myAdditionalPatientCompartmentParamNames)
+									"Patient", resource, myAdditionalPatientCompartmentParamNames, myOmittedSPNamesInPatientCompartment)
 							.stream()
 							.map(t -> myContextServices.massageResourceIdForStorage(theRequestDetails, resource, t))
 							.forEach(patientIds::add);
