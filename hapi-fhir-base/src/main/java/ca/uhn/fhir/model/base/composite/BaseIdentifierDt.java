@@ -62,7 +62,7 @@ public abstract class BaseIdentifierDt extends BaseIdentifiableElement
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String getValueAsQueryToken(FhirContext theContext) {
+	public String getValueAsQueryToken() {
 		UriDt system = getSystemElement();
 		StringDt value = getValueElement();
 		if (system.getValueAsString() != null) {

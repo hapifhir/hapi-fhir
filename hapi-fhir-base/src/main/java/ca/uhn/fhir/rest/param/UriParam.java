@@ -51,7 +51,7 @@ public class UriParam extends BaseParam implements IQueryParameterType {
 	}
 
 	@Override
-	String doGetValueAsQueryToken(FhirContext theContext) {
+	String doGetValueAsQueryToken() {
 		return ParameterUtil.escape(myValue);
 	}
 
