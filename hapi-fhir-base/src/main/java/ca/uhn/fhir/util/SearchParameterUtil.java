@@ -83,26 +83,6 @@ public class SearchParameterUtil {
 	 */
 	private static boolean shouldCompartmentIncludeSP(
 			String theCompartmentName, SearchParamDefinition theSearchParamDef) {
-		// special cases
-		//		if (theCompartmentName.equalsIgnoreCase("patient")) {
-		//			/*
-		//			 * SPs that are in the Patient Compartment by the spec:
-		//			 * https://build.fhir.org/compartmentdefinition-patient.html
-		//			 *
-		//			 * But we will exclude them anyways because they can leak PHI
-		//			 * and may be a security flaw of the spec itself.
-		//			 */
-		//			if (theSearchParamDef.name().equals("member")
-		//					&& theSearchParamDef.path().equals("Group.member.entity")) {
-		//				return false;
-		//			} else if (theSearchParamDef.name().equals("subject")
-		//					&& theSearchParamDef.path().equals("List.subject")) {
-		//				return false;
-		//			} else if (theSearchParamDef.name().equals("source")
-		//					&& theSearchParamDef.path().equals("List.source")) {
-		//				return false;
-		//			}
-		//		}
 
 		// default
 		return Arrays.stream(theSearchParamDef.providesMembershipIn())
