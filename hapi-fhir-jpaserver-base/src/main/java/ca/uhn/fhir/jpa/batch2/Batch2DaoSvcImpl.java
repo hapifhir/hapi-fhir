@@ -31,11 +31,14 @@ import ca.uhn.fhir.jpa.api.pid.StreamTemplate;
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
 import ca.uhn.fhir.jpa.api.pid.TypedResourceStream;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
+import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -52,8 +55,11 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Date;
+import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	private static final org.slf4j.Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -72,6 +78,8 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 
 	private final PartitionSettings myPartitionSettings;
 
+	private SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
+
 	@Override
 	public boolean isAllResourceTypeSupported() {
 		return true;
@@ -84,7 +92,8 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 			DaoRegistry theDaoRegistry,
 			FhirContext theFhirContext,
 			IHapiTransactionService theTransactionService,
-			PartitionSettings thePartitionSettings) {
+			PartitionSettings thePartitionSettings,
+			SearchBuilderFactory theSearchBuilderFactory) {
 		myResourceTableDao = theResourceTableDao;
 		myResourceLinkDao = theResourceLinkDao;
 		myMatchUrlService = theMatchUrlService;
@@ -92,14 +101,15 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		myFhirContext = theFhirContext;
 		myTransactionService = theTransactionService;
 		myPartitionSettings = thePartitionSettings;
+		mySearchBuilderFactory = theSearchBuilderFactory;
 	}
 
 	@Override
 	public IResourcePidStream fetchResourceIdStream(
 			Date theStart, Date theEnd, RequestPartitionId theRequestPartitionId, String theUrl) {
 		// fixme:  there is 3 scenarios that needs support for includeDeleted
-		// 1- $reindex
-		// 2- $reindex/Patient
+		// 1- $reindex (no url)
+		// 2- $reindex/Patient (this include just ? with no params)
 		// 3- $reindex/Patient?[withUrlParam]
 
 		// the third scenario is easy because we will be creating this new url SP called '_includeDeleted'
@@ -113,7 +123,6 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 			return makeStreamResult(
 					theRequestPartitionId, () -> streamResourceIdsNoUrl(theStart, theEnd, theRequestPartitionId));
 		} else {
-			// second scenario
 			return makeStreamResult(
 					theRequestPartitionId,
 					() -> streamResourceIdsWithUrl(theStart, theEnd, theUrl, theRequestPartitionId));
@@ -129,15 +138,47 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 			Date theStart, Date theEnd, String theUrl, RequestPartitionId theRequestPartitionId) {
 		validateUrl(theUrl);
 
-		SearchParameterMap searchParamMap = parseQuery(theUrl);
+		String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
+
+		// Search in all partitions if no partition is provided
+		ourLog.debug("No partition id detected in request - searching all partitions");
+		RequestPartitionId thePartitionId = defaultIfNull(theRequestPartitionId, RequestPartitionId.allPartitions());
+
+		SearchParameterMap searchParamMap;
+		SystemRequestDetails request = new SystemRequestDetails();
+		request.setRequestPartitionId(thePartitionId);
+
+		if (resourceType.isBlank()) {
+			searchParamMap = parseQuery(theUrl, null);
+		} else {
+			searchParamMap = parseQuery(theUrl);
+		}
+
 		searchParamMap.setLastUpdated(DateRangeUtil.narrowDateRange(searchParamMap.getLastUpdated(), theStart, theEnd));
 
-		String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
+		if (resourceType.isBlank()) {
+			return searchForResourceIdsAndType(thePartitionId, request, searchParamMap);
+		}
+
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
 
-		SystemRequestDetails request = new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId);
-
 		return dao.searchForIdStream(searchParamMap, request, null).map(pid -> new TypedResourcePid(resourceType, pid));
+	}
+
+	/**
+	 * Since the resource type is not specified, query the DB for resources matching the params and return resource ID and type
+	 *
+	 * @param theRequestPartitionId the partition to search on
+	 * @param theRequestDetails the theRequestDetails details
+	 * @param theSearchParams the search params
+	 * @return Stream of typed resource pids
+	 */
+	private Stream<TypedResourcePid> searchForResourceIdsAndType(RequestPartitionId theRequestPartitionId, SystemRequestDetails theRequestDetails, SearchParameterMap theSearchParams) {
+		ISearchBuilder<JpaPid> builder = mySearchBuilderFactory.newSearchBuilder(null, null);
+		return myTransactionService
+			.withRequest(theRequestDetails)
+			.search(() -> builder.createQueryStream(theSearchParams, new SearchRuntimeDetails(theRequestDetails, UUID.randomUUID().toString()), theRequestDetails, theRequestPartitionId))
+			.map(pid -> new TypedResourcePid(pid.getResourceType(), pid));
 	}
 
 	private static TypedResourcePid typedPidFromQueryArray(Object[] thePidTypeDateArray) {
@@ -209,7 +250,12 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
 		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(resourceType);
 
-		SearchParameterMap searchParamMap = myMatchUrlService.translateMatchUrl(theUrl, def);
+		return parseQuery(theUrl, def);
+	}
+
+	@Nonnull
+	private SearchParameterMap parseQuery(String theUrl, @Nullable RuntimeResourceDefinition theRuntimeResourceDefinition) {
+		SearchParameterMap searchParamMap = myMatchUrlService.translateMatchUrl(theUrl, theRuntimeResourceDefinition);
 		// this matches idx_res_type_del_updated
 		searchParamMap.setSort(new SortSpec(Constants.PARAM_LASTUPDATED).setChain(new SortSpec(Constants.PARAM_PID)));
 		// TODO this limits us to 2G resources.

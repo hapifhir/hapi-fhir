@@ -57,11 +57,23 @@ public class ResourceTablePredicateBuilder extends BaseJoiningPredicateBuilder {
 	}
 
 	public Condition createResourceTypeAndNonDeletedPredicates() {
+		BinaryCondition typePredicate = createResourceTypePredicate();
+		return QueryParameterUtils.toAndPredicate(typePredicate, UnaryCondition.isNull(myColumnResDeletedAt));
+	}
+
+	public Condition createResourceTypeAndDeletedPredicates() {
+		BinaryCondition typePredicate = createResourceTypePredicate();
+
+		return QueryParameterUtils.toAndPredicate(typePredicate, UnaryCondition.isNotNull(myColumnResDeletedAt));
+	}
+
+	public BinaryCondition createResourceTypePredicate() {
 		BinaryCondition typePredicate = null;
 		if (getResourceType() != null) {
 			typePredicate = BinaryCondition.equalTo(myColumnResType, generatePlaceholder(getResourceType()));
 		}
-		return QueryParameterUtils.toAndPredicate(typePredicate, UnaryCondition.isNull(myColumnResDeletedAt));
+
+		return typePredicate;
 	}
 
 	public DbColumn getLastUpdatedColumn() {

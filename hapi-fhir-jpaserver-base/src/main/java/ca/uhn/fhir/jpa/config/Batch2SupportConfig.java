@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.batch2.Batch2DaoSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
@@ -43,13 +44,14 @@ public class Batch2SupportConfig {
 
 	@Bean
 	public IBatch2DaoSvc batch2DaoSvc(
-			IResourceTableDao theResourceTableDao,
-			IResourceLinkDao theResourceLinkDao,
-			MatchUrlService theMatchUrlService,
-			DaoRegistry theDaoRegistry,
-			FhirContext theFhirContext,
-			IHapiTransactionService theTransactionService,
-			PartitionSettings thePartitionSettings) {
+		IResourceTableDao theResourceTableDao,
+		IResourceLinkDao theResourceLinkDao,
+		MatchUrlService theMatchUrlService,
+		DaoRegistry theDaoRegistry,
+		FhirContext theFhirContext,
+		IHapiTransactionService theTransactionService,
+		PartitionSettings thePartitionSettings,
+		SearchBuilderFactory theSearchBuilderFactory) {
 		return new Batch2DaoSvcImpl(
 				theResourceTableDao,
 				theResourceLinkDao,
@@ -57,7 +59,8 @@ public class Batch2SupportConfig {
 				theDaoRegistry,
 				theFhirContext,
 				theTransactionService,
-				thePartitionSettings);
+				thePartitionSettings,
+				theSearchBuilderFactory);
 	}
 
 	@Bean

@@ -444,7 +444,7 @@ public interface ITestDataBuilder {
 	IIdType doUpdateResource(IBaseResource theResource);
 
 	default void doDeleteResource(IIdType theIIdType){
-		throw  new NotImplementedException("Not implemented");
+		throw new NotImplementedException("Not implemented");
 	}
 
 	/**

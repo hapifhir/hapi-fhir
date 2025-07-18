@@ -6,9 +6,11 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestDstu3Config;
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Location;
@@ -128,19 +130,21 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 			myMatchUrlService.translateMatchUrl(url, ourCtx.getResourceDefinition("Patient"));
 			fail();
 		} catch (IllegalArgumentException e) {
-			// expected
+			assertThat(e.getMessage()).contains("HAPI-2744: The _includeDeleted parameter is only compatible with the following parameters:");
 		}
 	}
 
 	@Test
 	void testIncludeDeleted_combinedWithWhiteListedSP_isParsed(){
 
-		String url = "Patient?_includeDeleted=both&lastUpdated=gt2020-01-01&_id=123";
+		String url = "Patient?_includeDeleted=both&_lastUpdated=gt2020-01-01&_id=123";
 		var map = myMatchUrlService.translateMatchUrl(url, ourCtx.getResourceDefinition("Patient"));
 
-//		assertThat(map.getIncludeDeleted()).isEqualTo(BOTH);
+		assertThat(map.getSearchIncludeDeletedMode()).isEqualTo(SearchIncludeDeletedEnum.BOTH);
 		assertThat(map.getLastUpdated()).isNotNull();
+		assertThat(map.getLastUpdated().getLowerBound().getValueAsString()).isEqualTo("2020-01-01");
 		assertThat(map.containsKey("_id")).isTrue();
+		assertThat(map.get("_id").get(0).get(0)).isEqualTo(new StringParam("123"));
 	}
 
 	@Override

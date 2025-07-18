@@ -87,14 +87,6 @@ public class ReindexProvider {
 									+ ReindexParameters.OPTIMISTIC_LOCK_DEFAULT + ")")
 					@OperationParam(name = ReindexJobParameters.OPTIMISTIC_LOCK, typeName = "boolean", min = 0, max = 1)
 					IPrimitiveType<Boolean> theOptimisticLock,
-			@Description("Should deleted resources be reindexed (default: "
-							+ ReindexParameters.INCLUDE_DELETED_RESOURCES_DEFAULT + ")")
-					@OperationParam(
-							name = ReindexJobParameters.INCLUDE_DELETED_RESOURCES,
-							typeName = "boolean",
-							min = 0,
-							max = 1)
-					IPrimitiveType<Boolean> theIncludeDeletedResources,
 			RequestDetails theRequestDetails) {
 
 		ReindexJobParameters params = new ReindexJobParameters();
@@ -123,11 +115,6 @@ public class ReindexProvider {
 		}
 		if (theOptimisticLock != null && theOptimisticLock.getValue() != null) {
 			params.setOptimisticLock(theOptimisticLock.getValue());
-		}
-
-		if (theIncludeDeletedResources != null && theIncludeDeletedResources.getValue() != null) {
-			// fixme
-			//			params.setIncludeDeletedResources(theIncludeDeletedResources.getValue());
 		}
 
 		List<String> urls = List.of();

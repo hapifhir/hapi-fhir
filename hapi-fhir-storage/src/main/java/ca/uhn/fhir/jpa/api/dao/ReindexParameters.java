@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.jpa.api.dao;
 
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
+
 public class ReindexParameters {
 	public static final ReindexSearchParametersEnum REINDEX_SEARCH_PARAMETERS_DEFAULT = ReindexSearchParametersEnum.ALL;
 	public static final String REINDEX_SEARCH_PARAMETERS_DEFAULT_STRING = "ALL";
 	public static final boolean OPTIMISTIC_LOCK_DEFAULT = true;
-	public static final boolean INCLUDE_DELETED_RESOURCES_DEFAULT = false;
 	public static final OptimizeStorageModeEnum OPTIMIZE_STORAGE_DEFAULT = OptimizeStorageModeEnum.NONE;
 	public static final String OPTIMIZE_STORAGE_DEFAULT_STRING = "NONE";
 	private ReindexSearchParametersEnum myReindexSearchParameters = REINDEX_SEARCH_PARAMETERS_DEFAULT;

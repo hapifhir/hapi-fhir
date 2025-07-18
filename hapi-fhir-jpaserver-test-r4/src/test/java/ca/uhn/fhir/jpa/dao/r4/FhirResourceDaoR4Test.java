@@ -35,6 +35,7 @@ import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -4480,8 +4481,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		deleteResource(deletedObservationId);
 
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
-		// fixme: make the param name a constant and the value an enum to allow extension beyond (only/yes)
-		searchParameterMap.add("_includeDeleted", new StringParam("yes"));
+		searchParameterMap.setSearchIncludeDeletedMode(SearchIncludeDeletedEnum.TRUE);
 
 		// call within a tx, but carry the tx definition in the StreamTemplate
 		StreamTemplate<IResourcePersistentId<?>> streamTemplate =

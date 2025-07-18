@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -104,6 +105,7 @@ public class SearchQueryBuilder {
 	private final boolean myCountQuery;
 	private final Dialect myDialect;
 	private final boolean mySelectPartitionId;
+	private boolean mySelectResourceType;
 	private boolean myMatchNothing;
 	private ResourceTablePredicateBuilder myResourceTableRoot;
 	private boolean myHaveAtLeastOnePredicate;
@@ -138,7 +140,8 @@ public class SearchQueryBuilder {
 				theDialectProvider.getDialect(),
 				theCountQuery,
 				new ArrayList<>(),
-				thePartitionSettings.isPartitioningEnabled());
+				thePartitionSettings.isPartitioningEnabled(),
+				theResourceType == null || theResourceType.isBlank());
 	}
 
 	/**
@@ -155,7 +158,8 @@ public class SearchQueryBuilder {
 			Dialect theDialect,
 			boolean theCountQuery,
 			ArrayList<Object> theBindVariableValues,
-			boolean theSelectPartitionId) {
+			boolean theSelectPartitionId,
+			boolean theSelectResourceType) {
 		myFhirContext = theFhirContext;
 		myStorageSettings = theStorageSettings;
 		myPartitionSettings = thePartitionSettings;
@@ -178,6 +182,7 @@ public class SearchQueryBuilder {
 		myBindVariableSubstitutionBase = theBindVariableSubstitutionBase;
 		myBindVariableValues = theBindVariableValues;
 		mySelectPartitionId = theSelectPartitionId;
+		mySelectResourceType = theSelectResourceType;
 	}
 
 	public FhirContext getFhirContext() {
@@ -459,6 +464,10 @@ public class SearchQueryBuilder {
 						mySelectedResourceIdColumn = root.getResourceIdColumn();
 						mySelect.addColumns(mySelectedResourceIdColumn);
 					}
+
+					if (mySelectResourceType) {
+						mySelect.addColumns(root.getResourceTypeColumn());
+					}
 				}
 				mySelect.addFromTable(root.getTable());
 				myFirstPredicateBuilder = root;
@@ -711,6 +720,14 @@ public class SearchQueryBuilder {
 		return myFirstPredicateBuilder;
 	}
 
+	public BaseJoiningPredicateBuilder getOrCreateFirstPredicateBuilder(
+		SearchIncludeDeletedEnum theIncludeDeletedFlag) {
+		if (myFirstPredicateBuilder == null) {
+			getOrCreateResourceTablePredicateBuilder(theIncludeDeletedFlag);
+		}
+		return myFirstPredicateBuilder;
+	}
+
 	public ResourceTablePredicateBuilder getOrCreateResourceTablePredicateBuilder() {
 		return getOrCreateResourceTablePredicateBuilder(true);
 	}
@@ -723,6 +740,31 @@ public class SearchQueryBuilder {
 			if (theIncludeResourceTypeAndNonDeletedFlag) {
 				Condition typeAndDeletionPredicate = resourceTable.createResourceTypeAndNonDeletedPredicates();
 				addPredicate(typeAndDeletionPredicate);
+			}
+			myResourceTableRoot = resourceTable;
+		}
+		return myResourceTableRoot;
+	}
+
+	public ResourceTablePredicateBuilder getOrCreateResourceTablePredicateBuilder(
+		SearchIncludeDeletedEnum theDeletedFlag) {
+		if (myResourceTableRoot == null) {
+			ResourceTablePredicateBuilder resourceTable = mySqlBuilderFactory.resourceTable(this);
+			addTable(resourceTable, null);
+
+			switch(theDeletedFlag) {
+				case TRUE:
+					addPredicate(resourceTable.createResourceTypeAndDeletedPredicates());
+					break;
+				case FALSE:
+					addPredicate(resourceTable.createResourceTypeAndNonDeletedPredicates());
+					break;
+				case BOTH:
+					Condition typePredicate = resourceTable.createResourceTypePredicate();
+					if (typePredicate != null) {
+						addPredicate(typePredicate);
+					}
+					break;
 			}
 			myResourceTableRoot = resourceTable;
 		}
@@ -890,7 +932,8 @@ public class SearchQueryBuilder {
 				myDialect,
 				false,
 				myBindVariableValues,
-				theSelectPartitionId);
+				theSelectPartitionId,
+			false);
 	}
 
 	public SelectQuery getSelect() {
