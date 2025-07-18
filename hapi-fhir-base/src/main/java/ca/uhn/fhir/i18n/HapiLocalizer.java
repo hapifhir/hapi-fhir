@@ -22,6 +22,7 @@ package ca.uhn.fhir.i18n;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.VersionUtil;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayInputStream;
@@ -185,12 +186,12 @@ public class HapiLocalizer {
 			// LUKETODO:  this fails because we eventually get: Unknown localization key: moduletype.ADMIN_JSON.shortName
 //			final ResourceBundle bundleOldStyle = ResourceBundle.getBundle(nextName);
 //			myBundle.add(bundleOldStyle);
-			ourLog.info("1234: Loading bundle: {}", nextName);
+//			ourLog.info("1234: Loading bundle: {}", nextName);
 			final ResourceBundle bundleNewStyle = ResourceBundle.getBundle(nextName, new MultiFileResourceBundleControl());
 //			if (! bundleOldStyle.keySet().equals(bundleNewStyle.keySet())) {
 //				ourLog.warn("1234: bundle keys do not match for class: {} {}: old style keys: class: {} {}", bundleOldStyle.getClass(), bundleOldStyle.getKeys(), bundleNewStyle.getClass(), bundleNewStyle.getKeys());
 //			}
-			ourLog.info("1234: bundle keySet: {} contains dqm: {} or cql: {}", bundleNewStyle.keySet(), bundleNewStyle.containsKey("module_config.evaluate_measure.chunksize"), bundleNewStyle.containsKey("module_config.cql.use_embedded_libraries"));
+//			ourLog.info("1234: bundle keySet: {} contains dqm: {} or cql: {}", bundleNewStyle.keySet(), bundleNewStyle.containsKey("module_config.evaluate_measure.chunksize"), bundleNewStyle.containsKey("module_config.cql.use_embedded_libraries"));
 			myBundle.add(bundleNewStyle);
 		}
 	}
@@ -228,7 +229,7 @@ public class HapiLocalizer {
 		public ResourceBundle newBundle(
 				String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
 				throws IOException, IllegalAccessException, InstantiationException {
-			ourLog.info("1234: locale: {}", locale);
+//			ourLog.info("1234: locale: {}", locale);
 			if ("java.properties".equals(format) && (locale == null || locale.toString().isEmpty())) {
 				String bundleName = toBundleName(baseName, locale);
 				String resourceName = toResourceName(bundleName, "properties");
@@ -252,23 +253,22 @@ public class HapiLocalizer {
 
 //				ourLog.info("1234:resourceName:{}, urls: {} properties.toString(): {}", resourceName, urls, properties.toString());
 
-				ourLog.info("1234: bundleName: {}, resourceName: {}, properties size: {} properties contains dqm: {} or cql: {}", bundleName, resourceName,
-				properties.entrySet().size(), properties.get("module_config.evaluate_measure.chunksize"), properties.get("module_config.cql.use_embedded_libraries"));
+//				ourLog.info("1234: bundleName: {}, resourceName: {}, properties size: {} properties contains dqm: {} or cql: {}", bundleName, resourceName,
+//				properties.entrySet().size(), properties.get("module_config.evaluate_measure.chunksize"), properties.get("module_config.cql.use_embedded_libraries"));
 
 
-				// 2. Write the Properties object to an in-memory stream using a UTF-8 Writer
 				ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 				try (Writer writer = new OutputStreamWriter(outStream, StandardCharsets.UTF_8)) {
-					properties.store(writer, "cdr-messages properties");
+					properties.store(writer, "module properties");
 				}
 
-				// 3. Create an input stream from the stored bytes
 				InputStream inStream = new ByteArrayInputStream(outStream.toByteArray());
-
-
-//				final PropertyResourceBundle bundle = new PropertyResourceBundle(new StringReader(properties.toString()));
 				final PropertyResourceBundle bundle = new PropertyResourceBundle(inStream);
-				ourLog.info("1234: bundle keySet: {} contains dqm: {} or cql: {}", bundle.keySet(), bundle.containsKey("module_config.evaluate_measure.chunksize"), bundle.containsKey("module_config.cql.use_embedded_libraries"));
+
+
+
+//				final PropertyResourceBundle bundle = new PropertyResourceBundle(properties.store()));
+//				ourLog.info("1234: bundle keySet: {} contains dqm: {} or cql: {}", bundle.keySet(), bundle.containsKey("module_config.evaluate_measure.chunksize"), bundle.containsKey("module_config.cql.use_embedded_libraries"));
 				return bundle;
 			}
 			return super.newBundle(baseName, locale, format, loader, reload);
@@ -290,5 +290,10 @@ public class HapiLocalizer {
 
 	public static String toKey(Class<?> theType, String theKey) {
 		return theType.getName() + '.' + theKey;
+	}
+
+	@VisibleForTesting
+	List<ResourceBundle> getBundles() {
+		return myBundle;
 	}
 }
