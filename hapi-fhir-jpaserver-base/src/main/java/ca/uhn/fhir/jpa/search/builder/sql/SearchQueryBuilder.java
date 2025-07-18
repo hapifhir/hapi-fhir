@@ -721,7 +721,7 @@ public class SearchQueryBuilder {
 	}
 
 	public BaseJoiningPredicateBuilder getOrCreateFirstPredicateBuilder(
-		SearchIncludeDeletedEnum theIncludeDeletedFlag) {
+			SearchIncludeDeletedEnum theIncludeDeletedFlag) {
 		if (myFirstPredicateBuilder == null) {
 			getOrCreateResourceTablePredicateBuilder(theIncludeDeletedFlag);
 		}
@@ -747,12 +747,12 @@ public class SearchQueryBuilder {
 	}
 
 	public ResourceTablePredicateBuilder getOrCreateResourceTablePredicateBuilder(
-		SearchIncludeDeletedEnum theDeletedFlag) {
+			SearchIncludeDeletedEnum theDeletedFlag) {
 		if (myResourceTableRoot == null) {
 			ResourceTablePredicateBuilder resourceTable = mySqlBuilderFactory.resourceTable(this);
 			addTable(resourceTable, null);
 
-			switch(theDeletedFlag) {
+			switch (theDeletedFlag) {
 				case TRUE:
 					addPredicate(resourceTable.createResourceTypeAndDeletedPredicates());
 					break;
@@ -933,7 +933,7 @@ public class SearchQueryBuilder {
 				false,
 				myBindVariableValues,
 				theSelectPartitionId,
-			false);
+				false);
 	}
 
 	public SelectQuery getSelect() {

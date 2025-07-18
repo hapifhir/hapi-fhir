@@ -999,11 +999,11 @@ public class QueryStack {
 				TokenParam param = new TokenParam();
 				param.setValueAsQueryToken(null, null, null, theFilter.getValue());
 
-				SearchForIdsParams searchForIdsParams = with()
-					.setAndOrParams(Collections.singletonList(Collections.singletonList(param)))
-					.setResourceName(theResourceName)
-					.setOperation(theFilter.getOperation())
-					.setRequestPartitionId(theRequestPartitionId);
+				SearchForIdsParams searchForIdsParams = with().setAndOrParams(
+								Collections.singletonList(Collections.singletonList(param)))
+						.setResourceName(theResourceName)
+						.setOperation(theFilter.getOperation())
+						.setRequestPartitionId(theRequestPartitionId);
 				return theQueryStack3.createPredicateResourceId(searchForIdsParams);
 			}
 			case Constants.PARAM_SOURCE: {

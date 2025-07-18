@@ -44,14 +44,14 @@ public class Batch2SupportConfig {
 
 	@Bean
 	public IBatch2DaoSvc batch2DaoSvc(
-		IResourceTableDao theResourceTableDao,
-		IResourceLinkDao theResourceLinkDao,
-		MatchUrlService theMatchUrlService,
-		DaoRegistry theDaoRegistry,
-		FhirContext theFhirContext,
-		IHapiTransactionService theTransactionService,
-		PartitionSettings thePartitionSettings,
-		SearchBuilderFactory theSearchBuilderFactory) {
+			IResourceTableDao theResourceTableDao,
+			IResourceLinkDao theResourceLinkDao,
+			MatchUrlService theMatchUrlService,
+			DaoRegistry theDaoRegistry,
+			FhirContext theFhirContext,
+			IHapiTransactionService theTransactionService,
+			PartitionSettings thePartitionSettings,
+			SearchBuilderFactory theSearchBuilderFactory) {
 		return new Batch2DaoSvcImpl(
 				theResourceTableDao,
 				theResourceLinkDao,

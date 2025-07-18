@@ -62,8 +62,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 	}
 
 	@Nullable
-	public Condition createPredicateResourceId(
-		QueryStack.SearchForIdsParams theIdParams) {
+	public Condition createPredicateResourceId(QueryStack.SearchForIdsParams theIdParams) {
 
 		@Nullable DbColumn[] theSourceJoinColumn = theIdParams.getSourceJoinColumn();
 		String theResourceName = theIdParams.getResourceName();
@@ -86,7 +85,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 
 				if (isNotBlank(value)) {
 					haveValue = true;
-					if (!value.contains("/") ) {
+					if (!value.contains("/")) {
 						value = theResourceName + "/" + value;
 					}
 					IIdType id = getFhirContext().getVersion().newIdType();
@@ -134,9 +133,9 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 					|| operation == SearchFilterParser.CompareOperation.ne;
 
 			if (theSourceJoinColumn == null) {
-				BaseJoiningPredicateBuilder queryRootTable = theSearchIncludeDeleted == null ?
-					super.getOrCreateQueryRootTable(true):
-					super.getOrCreateQueryRootTable(theSearchIncludeDeleted);
+				BaseJoiningPredicateBuilder queryRootTable = theSearchIncludeDeleted == null
+						? super.getOrCreateQueryRootTable(true)
+						: super.getOrCreateQueryRootTable(theSearchIncludeDeleted);
 				Condition predicate;
 				switch (operation) {
 					default:

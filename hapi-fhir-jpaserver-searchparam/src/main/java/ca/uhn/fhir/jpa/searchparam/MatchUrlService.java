@@ -132,7 +132,8 @@ public class MatchUrlService {
 			//
 			if (Constants.PARAM_DELETED.equals(nextParamName)) {
 				validateParamsAreCompatibleForDeleteOrThrow(nameToParamLists.keySet(), hasNoResourceType);
-				paramMap.setSearchIncludeDeletedMode(SearchIncludeDeletedEnum.fromCode(paramList.get(0).get(0)));
+				paramMap.setSearchIncludeDeletedMode(
+						SearchIncludeDeletedEnum.fromCode(paramList.get(0).get(0)));
 			} else if (Constants.PARAM_LASTUPDATED.equals(nextParamName)) {
 				if (!paramList.isEmpty()) {
 					if (paramList.size() > 2) {
@@ -209,7 +210,8 @@ public class MatchUrlService {
 			} else {
 				if (hasNoResourceType) {
 					// It is a resource specific search parameter being done on the server
-					throw new InvalidRequestException(Msg.code(2743) + "Failed to parse match URL [" + theMatchUrl + "] - Unknown search parameter " + nextParamName + " for operation on server base.");
+					throw new InvalidRequestException(Msg.code(2743) + "Failed to parse match URL [" + theMatchUrl
+							+ "] - Unknown search parameter " + nextParamName + " for operation on server base.");
 				}
 
 				RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(
@@ -238,13 +240,15 @@ public class MatchUrlService {
 	 * @param theParamsToCheck the list of parameters found in the URL
 	 * @param theHasNoResourceType whether the request is on the base URL (ie `?_param` - without resource type)
 	 */
-	private static void validateParamsAreCompatibleForDeleteOrThrow(Set<String> theParamsToCheck, boolean theHasNoResourceType) {
-		Set<String> theCompatibleParams = theHasNoResourceType ?
-			Set.of(Constants.PARAM_DELETED, Constants.PARAM_LASTUPDATED) :
-			Set.of(Constants.PARAM_DELETED, Constants.PARAM_LASTUPDATED, Constants.PARAM_ID);
+	private static void validateParamsAreCompatibleForDeleteOrThrow(
+			Set<String> theParamsToCheck, boolean theHasNoResourceType) {
+		Set<String> theCompatibleParams = theHasNoResourceType
+				? Set.of(Constants.PARAM_DELETED, Constants.PARAM_LASTUPDATED)
+				: Set.of(Constants.PARAM_DELETED, Constants.PARAM_LASTUPDATED, Constants.PARAM_ID);
 
 		if (!theCompatibleParams.containsAll(theParamsToCheck)) {
-			throw new IllegalArgumentException(Msg.code(2744) + "The " + Constants.PARAM_DELETED + " parameter is only compatible with the following parameters: " + theCompatibleParams);
+			throw new IllegalArgumentException(Msg.code(2744) + "The " + Constants.PARAM_DELETED
+					+ " parameter is only compatible with the following parameters: " + theCompatibleParams);
 		}
 	}
 

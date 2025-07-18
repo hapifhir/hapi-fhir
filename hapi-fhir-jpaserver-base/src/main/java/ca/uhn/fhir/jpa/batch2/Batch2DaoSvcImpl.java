@@ -173,12 +173,20 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	 * @param theSearchParams the search params
 	 * @return Stream of typed resource pids
 	 */
-	private Stream<TypedResourcePid> searchForResourceIdsAndType(RequestPartitionId theRequestPartitionId, SystemRequestDetails theRequestDetails, SearchParameterMap theSearchParams) {
+	private Stream<TypedResourcePid> searchForResourceIdsAndType(
+			RequestPartitionId theRequestPartitionId,
+			SystemRequestDetails theRequestDetails,
+			SearchParameterMap theSearchParams) {
 		ISearchBuilder<JpaPid> builder = mySearchBuilderFactory.newSearchBuilder(null, null);
 		return myTransactionService
-			.withRequest(theRequestDetails)
-			.search(() -> builder.createQueryStream(theSearchParams, new SearchRuntimeDetails(theRequestDetails, UUID.randomUUID().toString()), theRequestDetails, theRequestPartitionId))
-			.map(pid -> new TypedResourcePid(pid.getResourceType(), pid));
+				.withRequest(theRequestDetails)
+				.search(() -> builder.createQueryStream(
+						theSearchParams,
+						new SearchRuntimeDetails(
+								theRequestDetails, UUID.randomUUID().toString()),
+						theRequestDetails,
+						theRequestPartitionId))
+				.map(pid -> new TypedResourcePid(pid.getResourceType(), pid));
 	}
 
 	private static TypedResourcePid typedPidFromQueryArray(Object[] thePidTypeDateArray) {
@@ -254,7 +262,8 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	}
 
 	@Nonnull
-	private SearchParameterMap parseQuery(String theUrl, @Nullable RuntimeResourceDefinition theRuntimeResourceDefinition) {
+	private SearchParameterMap parseQuery(
+			String theUrl, @Nullable RuntimeResourceDefinition theRuntimeResourceDefinition) {
 		SearchParameterMap searchParamMap = myMatchUrlService.translateMatchUrl(theUrl, theRuntimeResourceDefinition);
 		// this matches idx_res_type_del_updated
 		searchParamMap.setSort(new SortSpec(Constants.PARAM_LASTUPDATED).setChain(new SortSpec(Constants.PARAM_PID)));

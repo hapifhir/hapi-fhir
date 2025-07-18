@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.jpa.api.dao;
 
-import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
-
 public class ReindexParameters {
 	public static final ReindexSearchParametersEnum REINDEX_SEARCH_PARAMETERS_DEFAULT = ReindexSearchParametersEnum.ALL;
 	public static final String REINDEX_SEARCH_PARAMETERS_DEFAULT_STRING = "ALL";

@@ -787,7 +787,8 @@ public class SearchParameterMap implements Serializable {
 	}
 
 	public void setSearchIncludeDeletedMode(SearchIncludeDeletedEnum theSearchIncludeDeletedMode) {
-		this.mySearchIncludeDeletedMode = Objects.requireNonNullElse(theSearchIncludeDeletedMode, SearchIncludeDeletedEnum.FALSE);
+		this.mySearchIncludeDeletedMode =
+				Objects.requireNonNullElse(theSearchIncludeDeletedMode, SearchIncludeDeletedEnum.FALSE);
 	}
 
 	/**
