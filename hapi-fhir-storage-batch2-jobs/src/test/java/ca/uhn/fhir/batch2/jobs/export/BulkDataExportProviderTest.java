@@ -133,7 +133,7 @@ class BulkDataExportProviderTest {
 		List<IPrimitiveType<String>> result = BulkDataExportProvider.parsePatientList(input);
 		// then
 		assertEquals(1, result.size());
-		assertEquals(reference.getReference(), result.get(0).getValue());
+		assertEquals("Patient/456", result.get(0).getValue());
 	}
 
 	@Test
