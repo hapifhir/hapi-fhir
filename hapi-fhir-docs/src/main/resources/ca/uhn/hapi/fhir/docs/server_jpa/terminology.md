@@ -284,3 +284,66 @@ The following are the main key columns in the TRM_CONCEPTMAP table that are used
 </table>
 
 The TRM_CONCEPTMAP table will have exactly one row for each unique combination of URL and VER.
+
+# ValueSet Expansion Operations
+
+HAPI FHIR supports the `$expand` operation on ValueSet resources to expand the set of concepts that are defined by a ValueSet. This operation can be used to retrieve all concepts that are included in a ValueSet, optionally filtered by various criteria.
+
+## Filtering During Expansion
+
+ValueSet expansion supports filtering using the `filter` parameter in the ValueSet.compose.include elements. The following filter operators are supported:
+
+### EQUAL Filter Operator
+
+The `EQUAL` filter operator can be used to filter concepts based on exact matches for concept properties:
+
+#### Filtering by Code
+When filtering by the `code` property, the expansion will include only concepts whose code exactly matches the filter value:
+
+```json
+{
+  "resourceType": "ValueSet",
+  "compose": {
+    "include": [
+      {
+        "system": "http://example.org/codes",
+        "filter": [
+          {
+            "property": "code",
+            "op": "=",
+            "value": "example-code"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+#### Filtering by Custom Properties
+The `EQUAL` filter can also be used with custom properties defined in the CodeSystem:
+
+```json
+{
+  "resourceType": "ValueSet",
+  "compose": {
+    "include": [
+      {
+        "system": "http://example.org/codes",
+        "filter": [
+          {
+            "property": "status",
+            "op": "=",
+            "value": "active"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Other Supported Filter Operators
+
+- **ISA**: Includes the specified concept and all its descendants
+- **DESCENDENTOF**: Includes all descendant concepts of the specified concept
