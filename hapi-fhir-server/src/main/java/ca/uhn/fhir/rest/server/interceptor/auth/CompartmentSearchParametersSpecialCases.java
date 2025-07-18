@@ -53,8 +53,9 @@ public class CompartmentSearchParametersSpecialCases {
 	 * @param theSPName the name of the search parameter
 	 */
 	public void addSPToOmitFromCompartment(String theResourceType, String theSPName) {
-		myOmittedResourceTypeToParameterCodeMap.computeIfAbsent(theResourceType.toLowerCase(), (key) -> new HashSet<>())
-			.add(theSPName);
+		myOmittedResourceTypeToParameterCodeMap
+				.computeIfAbsent(theResourceType.toLowerCase(), (key) -> new HashSet<>())
+				.add(theSPName);
 	}
 
 	/**
@@ -63,8 +64,9 @@ public class CompartmentSearchParametersSpecialCases {
 	 * @param theSPName the name of the search parameter
 	 */
 	public void addSPToIncludeInCompartment(String theResourceType, String theSPName) {
-		myAdditionalResourceTypeToParameterCodeMap.computeIfAbsent(theResourceType.toLowerCase(), (key) -> new HashSet<>())
-			.add(theSPName);
+		myAdditionalResourceTypeToParameterCodeMap
+				.computeIfAbsent(theResourceType.toLowerCase(), (key) -> new HashSet<>())
+				.add(theSPName);
 	}
 
 	/**
@@ -99,7 +101,6 @@ public class CompartmentSearchParametersSpecialCases {
 
 	public Set<String> getOmittedSPNamesForResourceType(String theResourceType) {
 		return myOmittedResourceTypeToParameterCodeMap.computeIfAbsent(
-			theResourceType.toLowerCase(), (key) -> new HashSet<>()
-		);
+				theResourceType.toLowerCase(), (key) -> new HashSet<>());
 	}
 }

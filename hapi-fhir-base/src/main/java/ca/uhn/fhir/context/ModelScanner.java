@@ -418,7 +418,8 @@ class ModelScanner {
 					throw new ConfigurationException(Msg.code(1721) + "Search param " + searchParam.name()
 							+ " has an invalid type: " + searchParam.type());
 				}
-				Set<String> providesMembershipInCompartments = SearchParameterUtil.getMembershipCompartmentsForSearchParameter(theClass, searchParam);
+				Set<String> providesMembershipInCompartments =
+						SearchParameterUtil.getMembershipCompartmentsForSearchParameter(theClass, searchParam);
 
 				List<RuntimeSearchParam.Component> components = null;
 				if (paramType == RestSearchParameterTypeEnum.COMPOSITE) {

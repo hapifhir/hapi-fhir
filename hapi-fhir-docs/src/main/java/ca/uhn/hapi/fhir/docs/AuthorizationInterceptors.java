@@ -269,15 +269,15 @@ public class AuthorizationInterceptors {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				CompartmentSearchParametersSpecialCases additionalSearchParams =
-					new CompartmentSearchParametersSpecialCases();
+						new CompartmentSearchParametersSpecialCases();
 				additionalSearchParams.addSPToOmitFromCompartment("Group", "member");
 				return new RuleBuilder()
-					.allow()
-					.read()
-					.allResources()
-					.inCompartmentWithSpecialCaseSSPHandling(
-						"Patient", new IdType("Patient/123"), additionalSearchParams)
-					.build();
+						.allow()
+						.read()
+						.allResources()
+						.inCompartmentWithSpecialCaseSSPHandling(
+								"Patient", new IdType("Patient/123"), additionalSearchParams)
+						.build();
 			}
 		};
 		// END SNIPPET: advancedCompartmentOmission

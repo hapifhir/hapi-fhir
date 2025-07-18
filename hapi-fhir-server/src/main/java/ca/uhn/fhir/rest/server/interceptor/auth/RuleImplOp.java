@@ -109,7 +109,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			IRuleApplier theRuleApplier,
 			Set<AuthorizationFlagsEnum> theFlags,
 			Pointcut thePointcut) {
-
+// todo
 		FhirContext ctx = theRequestDetails.getFhirContext();
 
 		RuleTarget target = new RuleTarget();
@@ -117,7 +117,6 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		switch (myOp) {
 			case READ:
 				if (theOutputResource == null) {
-
 					switch (theOperation) {
 						case READ:
 						case VREAD:
@@ -609,16 +608,16 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 									sourceDef.getName());
 
 					// filter out the omitted SPs
-					Set<String> omittedParams = myCompartmentSPSpecialCases.getOmittedSPNamesForResourceType(sourceDef.getName());
+					Set<String> omittedParams =
+							myCompartmentSPSpecialCases.getOmittedSPNamesForResourceType(sourceDef.getName());
 					params = params.stream()
-						.filter(sp -> !omittedParams.contains(sp.getName()))
-						.collect(Collectors.toList());
+							.filter(sp -> !omittedParams.contains(sp.getName()))
+							.collect(Collectors.toList());
 
 					List<RuntimeSearchParam> additionalParams = additionalParamNames.stream()
 							.map(sourceDef::getSearchParam)
 							.filter(Objects::nonNull)
 							.collect(Collectors.toList());
-
 
 					if (params == null || params.isEmpty()) {
 						params = additionalParams;

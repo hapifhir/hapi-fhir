@@ -98,7 +98,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 			Set<String> resourceTypesToOmit =
 					theStepExecutionDetails.getParameters().getExportStyle()
 									== BulkExportJobParameters.ExportStyle.PATIENT
-							? new HashSet<>(SearchParameterUtil.RESOURCE_TYPES_OMITTED_FROM_PATIENT_COMPARTMENT)
+							? new HashSet<>(SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.keySet())
 							: Set.of();
 
 			/*

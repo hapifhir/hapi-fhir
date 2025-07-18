@@ -938,7 +938,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			 *
 			 */
 			sqlBuilder.excludeResourceTypesPredicate(
-					SearchParameterUtil.RESOURCE_TYPES_OMITTED_FROM_PATIENT_COMPARTMENT);
+					SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.keySet());
 		}
 
 		/*

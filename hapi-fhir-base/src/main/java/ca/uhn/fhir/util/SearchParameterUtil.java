@@ -42,9 +42,12 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -59,7 +62,20 @@ public class SearchParameterUtil {
 	 * <a href="https://build.fhir.org/compartmentdefinition-patient.html">Patient Compartment</a>
 	 * but we are omitting anyways for security reasons.
 	 */
-	public static final List<String> RESOURCE_TYPES_OMITTED_FROM_PATIENT_COMPARTMENT = List.of("Group", "List");
+	public static final Map<String, Set<String>> RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT = new HashMap<>();
+
+	static {
+		RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.put("Group", new HashSet<>());
+		RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.put("List", new HashSet<>());
+
+		// group
+		RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.get("Group").add("member");
+
+		// list
+		RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.get("List").add("subject");
+		RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.get("List").add("source");
+		RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.get("List").add("patient");
+	}
 
 	/**
 	 * Returns true if the named compartment (Patient, Practitioner, etc) should
@@ -68,25 +84,25 @@ public class SearchParameterUtil {
 	private static boolean shouldCompartmentIncludeSP(
 			String theCompartmentName, SearchParamDefinition theSearchParamDef) {
 		// special cases
-//		if (theCompartmentName.equalsIgnoreCase("patient")) {
-//			/*
-//			 * SPs that are in the Patient Compartment by the spec:
-//			 * https://build.fhir.org/compartmentdefinition-patient.html
-//			 *
-//			 * But we will exclude them anyways because they can leak PHI
-//			 * and may be a security flaw of the spec itself.
-//			 */
-//			if (theSearchParamDef.name().equals("member")
-//					&& theSearchParamDef.path().equals("Group.member.entity")) {
-//				return false;
-//			} else if (theSearchParamDef.name().equals("subject")
-//					&& theSearchParamDef.path().equals("List.subject")) {
-//				return false;
-//			} else if (theSearchParamDef.name().equals("source")
-//					&& theSearchParamDef.path().equals("List.source")) {
-//				return false;
-//			}
-//		}
+		//		if (theCompartmentName.equalsIgnoreCase("patient")) {
+		//			/*
+		//			 * SPs that are in the Patient Compartment by the spec:
+		//			 * https://build.fhir.org/compartmentdefinition-patient.html
+		//			 *
+		//			 * But we will exclude them anyways because they can leak PHI
+		//			 * and may be a security flaw of the spec itself.
+		//			 */
+		//			if (theSearchParamDef.name().equals("member")
+		//					&& theSearchParamDef.path().equals("Group.member.entity")) {
+		//				return false;
+		//			} else if (theSearchParamDef.name().equals("subject")
+		//					&& theSearchParamDef.path().equals("List.subject")) {
+		//				return false;
+		//			} else if (theSearchParamDef.name().equals("source")
+		//					&& theSearchParamDef.path().equals("List.source")) {
+		//				return false;
+		//			}
+		//		}
 
 		// default
 		return Arrays.stream(theSearchParamDef.providesMembershipIn())

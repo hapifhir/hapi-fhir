@@ -855,7 +855,7 @@ public class SearchQueryBuilder {
 		addPredicate(predicate);
 	}
 
-	public void excludeResourceTypesPredicate(List<String> theResourceTypes) {
+	public void excludeResourceTypesPredicate(Collection<String> theResourceTypes) {
 		DbColumn resourceTypeCol = getOrCreateResourceTablePredicateBuilder().getResourceTypeColumn();
 		Condition c = new NotCondition(new InCondition(resourceTypeCol, generatePlaceholders(theResourceTypes)));
 		addPredicate(c);

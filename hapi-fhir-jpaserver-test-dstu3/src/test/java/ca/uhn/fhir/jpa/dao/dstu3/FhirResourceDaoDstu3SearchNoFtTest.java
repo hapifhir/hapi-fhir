@@ -271,7 +271,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			nextEntry.getRequest().setUrl(parts.getResourceType() + "/" + parts.getResourceId());
 
 			// omit the resources not in the patient compartment
-			if (SearchParameterUtil.RESOURCE_TYPES_OMITTED_FROM_PATIENT_COMPARTMENT.contains(parts.getResourceType())) {
+			if (SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.containsKey(parts.getResourceType())) {
 				continue;
 			}
 			allIds.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
