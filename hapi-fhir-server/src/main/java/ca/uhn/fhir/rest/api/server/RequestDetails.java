@@ -37,6 +37,8 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,7 +56,7 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class RequestDetails {
-
+	private static final Logger ourLog = LoggerFactory.getLogger(RequestDetails.class);
 	public static final byte[] BAD_STREAM_PLACEHOLDER =
 			(Msg.code(2543) + "PLACEHOLDER WHEN READING FROM BAD STREAM").getBytes(StandardCharsets.UTF_8);
 	private final StopWatch myRequestStopwatch;
@@ -76,7 +78,7 @@ public abstract class RequestDetails {
 	private String mySecondaryOperation;
 	private boolean mySubRequest;
 	private Map<String, List<String>> myUnqualifiedToQualifiedNames;
-	private Map<Object, Object> myUserData;
+	private final Map<Object, Object> myUserData = new UserDataMap();
 	private IBaseResource myResource;
 	private String myRequestId;
 	private String myTransactionGuid;
@@ -116,7 +118,7 @@ public abstract class RequestDetails {
 		mySecondaryOperation = theRequestDetails.getSecondaryOperation();
 		mySubRequest = theRequestDetails.isSubRequest();
 		myUnqualifiedToQualifiedNames = theRequestDetails.getUnqualifiedToQualifiedNames();
-		myUserData = theRequestDetails.getUserData();
+		myUserData.putAll(theRequestDetails.getUserData());
 		myResource = theRequestDetails.getResource();
 		myRequestId = theRequestDetails.getRequestId();
 		myTransactionGuid = theRequestDetails.getTransactionGuid();
@@ -259,7 +261,7 @@ public abstract class RequestDetails {
 	/**
 	 * Adds a new header
 	 *
-	 * @param theName The header name
+	 * @param theName  The header name
 	 * @param theValue The header value
 	 * @since 7.2.0
 	 */
@@ -268,7 +270,7 @@ public abstract class RequestDetails {
 	/**
 	 * Replaces any existing header(s) with the given name using a List of new header values
 	 *
-	 * @param theName The header name
+	 * @param theName  The header name
 	 * @param theValue The header value
 	 * @since 7.2.0
 	 */
@@ -283,18 +285,27 @@ public abstract class RequestDetails {
 	}
 
 	/**
-	 * Returns the attribute map for this request. Attributes are a place for user-supplied
-	 * objects of any type to be attached to an individual request. They can be used to pass information
-	 * between interceptor methods.
+	 * @deprecated Use {@link #getUserData()}. If servlet attributes are truly required, then use {@link IHasServletAttributes#getServletAttribute(String)}.
 	 */
-	public abstract Object getAttribute(String theAttributeName);
+	@Deprecated
+	public Object getAttribute(String theAttributeName) {
+		ourLog.error(
+				"{} is not a servlet request. Unable to get attribute {}",
+				getClass().getName(),
+				theAttributeName);
+		return null;
+	}
 
 	/**
-	 * Returns the attribute map for this request. Attributes are a place for user-supplied
-	 * objects of any type to be attached to an individual request. They can be used to pass information
-	 * between interceptor methods.
+	 * @deprecated Use {@link #getUserData()}. If servlet attributes are truly required, then use {@link IHasServletAttributes#setServletAttribute(String, Object)}.
 	 */
-	public abstract void setAttribute(String theAttributeName, Object theAttributeValue);
+	@Deprecated
+	public void setAttribute(String theAttributeName, Object theAttributeValue) {
+		ourLog.error(
+				"{} is not a servlet request. Unable to set attribute {}",
+				getClass().getName(),
+				theAttributeName);
+	}
 
 	/**
 	 * Retrieves the body of the request as binary data. Either this method or {@link #getReader} may be called to read
@@ -488,11 +499,13 @@ public abstract class RequestDetails {
 	 * to a later hook method on the {@link ca.uhn.fhir.interceptor.api.Pointcut#SERVER_OUTGOING_RESPONSE}
 	 * pointcut.
 	 * </p>
+	 * <p>
+	 * This method should be used to pass information between interceptor methods. For servlet-specific
+	 * request attributes used to communicate between servlet filters, use {@link IHasServletAttributes}
+	 * methods available on implementations that support them.
+	 * </p>
 	 */
 	public Map<Object, Object> getUserData() {
-		if (myUserData == null) {
-			myUserData = new HashMap<>();
-		}
 		return myUserData;
 	}
 
