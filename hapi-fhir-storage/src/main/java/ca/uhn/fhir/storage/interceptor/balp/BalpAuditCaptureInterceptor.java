@@ -235,7 +235,10 @@ public class BalpAuditCaptureInterceptor {
 					FhirTerser terser = fhirContext.newTerser();
 					terser
 							.getCompartmentOwnersForResource(
-									"Patient", resource, myAdditionalPatientCompartmentParamNames, myOmittedSPNamesInPatientCompartment)
+									"Patient",
+									resource,
+									myAdditionalPatientCompartmentParamNames,
+									myOmittedSPNamesInPatientCompartment)
 							.stream()
 							.map(t -> myContextServices.massageResourceIdForStorage(theRequestDetails, resource, t))
 							.forEach(patientIds::add);

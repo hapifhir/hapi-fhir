@@ -42,7 +42,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -62,7 +61,8 @@ public class SearchParameterUtil {
 	 * <a href="https://build.fhir.org/compartmentdefinition-patient.html">Patient Compartment</a>
 	 * but we are omitting anyways for security reasons.
 	 */
-	public static final Map<String, Set<String>> RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT = new HashMap<>();
+	public static final Map<String, Set<String>> RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT =
+			new HashMap<>();
 
 	static {
 		RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.put("Group", new HashSet<>());

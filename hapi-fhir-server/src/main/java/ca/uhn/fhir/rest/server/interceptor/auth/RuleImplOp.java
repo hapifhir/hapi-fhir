@@ -51,7 +51,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -110,7 +109,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			IRuleApplier theRuleApplier,
 			Set<AuthorizationFlagsEnum> theFlags,
 			Pointcut thePointcut) {
-// todo
+		// todo
 		FhirContext ctx = theRequestDetails.getFhirContext();
 
 		RuleTarget target = new RuleTarget();
@@ -554,11 +553,16 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					String resourceType = ctx.getResourceType(target.resource);
 					additionalSearchParamNames =
 							myCompartmentSPSpecialCases.getAdditionalSearchParamNamesForResourceType(resourceType);
-					omittedSearchParamNames = myCompartmentSPSpecialCases.getOmittedSPNamesForResourceType(resourceType);
+					omittedSearchParamNames =
+							myCompartmentSPSpecialCases.getOmittedSPNamesForResourceType(resourceType);
 				}
 
 				if (t.isSourceInCompartmentForTarget(
-						myClassifierCompartmentName, target.resource, next, additionalSearchParamNames, omittedSearchParamNames)) {
+						myClassifierCompartmentName,
+						target.resource,
+						next,
+						additionalSearchParamNames,
+						omittedSearchParamNames)) {
 					foundMatch = true;
 					break;
 				}
