@@ -22,8 +22,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
-
 import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.RESOURCE_TYPES_EXPECTED_TO_BE_PATCHED;
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.TOTAL_EXPECTED_PATCHES;
@@ -54,9 +52,7 @@ public class MergeBatchTest extends BaseJpaR4Test {
 		myTestData.createTestResources();
 		// keep the version on Provenance.target fields to verify that Provenance resources were saved
 		// with versioned target references
-		myFhirContext.getParserOptions()
-			.setDontStripVersionsFromReferencesAtPaths("Provenance.target");
-
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 
 		mySrd.setRequestPartitionId(RequestPartitionId.allPartitions());
 	}
@@ -71,15 +67,18 @@ public class MergeBatchTest extends BaseJpaR4Test {
 	public void testHappyPath(boolean theDeleteSource, boolean theWithResultResource) {
 		IIdType taskId = createTask();
 
-		MergeJobParameters jobParams = new MergeJobParameters();
-		jobParams.setSourceId(new FhirIdJson(myTestData.getSourcePatientId()));
-		jobParams.setTargetId(new FhirIdJson(myTestData.getTargetPatientId()));
-		jobParams.setTaskId(taskId);
-		jobParams.setDeleteSource(theDeleteSource);
-		if (theWithResultResource) {
-			String encodedResultPatient = myFhirContext.newJsonParser().encodeResourceToString(myTestData.createResultPatientInput(theDeleteSource));
-			jobParams.setResultResource(encodedResultPatient);
+		ReplaceReferencesTestHelper.PatientMergeInputParameters inputParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
+		inputParams.sourcePatient = myTestHelper.idAsReference(myTestData.getSourcePatientId());
+		inputParams.targetPatient = myTestHelper.idAsReference(myTestData.getTargetPatientId());
+		if (theDeleteSource) {
+			inputParams.deleteSource = theDeleteSource;
 		}
+		if(theWithResultResource) {
+			inputParams.resultPatient= myTestData.createResultPatientInput(theDeleteSource);
+		}
+
+		MergeJobParameters jobParams = inputParams.asMergeJobParameters(myFhirContext);
+		jobParams.setTaskId(taskId);
 		jobParams.setCreateProvenance(true);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest(JOB_MERGE, jobParams);
@@ -98,7 +97,7 @@ public class MergeBatchTest extends BaseJpaR4Test {
 			theDeleteSource,
 			myTestData.getExpectedIdentifiersForTargetAfterMerge(theWithResultResource));
 
-		myTestHelper.assertMergeProvenance(theDeleteSource, myTestData, null);
+		myTestHelper.assertMergeProvenance(inputParams.asParametersResource(), myTestData, null);
 	}
 
 	@Test
