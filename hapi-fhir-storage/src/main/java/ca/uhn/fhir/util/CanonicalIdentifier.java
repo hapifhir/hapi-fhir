@@ -38,6 +38,21 @@ public class CanonicalIdentifier extends BaseIdentifierDt {
 	UriDt mySystem;
 	StringDt myValue;
 
+	/**
+	 * Constructor
+	 */
+	public CanonicalIdentifier() {
+		super();
+	}
+
+	/**
+	 * Constructor
+	 */
+	public CanonicalIdentifier(String theSystem, String theValue) {
+		setSystem(theSystem);
+		setValue(theValue);
+	}
+
 	@Override
 	public UriDt getSystemElement() {
 		return mySystem;

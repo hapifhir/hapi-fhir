@@ -97,6 +97,7 @@ import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
@@ -570,6 +571,16 @@ public abstract class BaseJpaTest extends BaseTest {
 		runInTransaction(() -> {
 			ourLog.info("Package Versions:\n * {}", myPackageVersionDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
+	}
+
+	protected void logAllResourcesOfType(String type) {
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(type);
+		IBundleProvider allResources = dao.search(SearchParameterMap.newSynchronous().setLoadSynchronousUpTo(100), newSrd());
+		List<IBaseResource> resources = allResources.getAllResources();
+		for (int i = 0; i < resources.size(); i++) {
+			IBaseResource next = resources.get(i);
+			ourLog.info("{} #{}:\n{}", type, i, myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(next));
+		}
 	}
 
 	protected int countAllMdmLinks() {
