@@ -28,8 +28,9 @@ import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import com.google.common.annotations.Beta;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -304,16 +305,13 @@ public interface IRepository {
 			Class<T> resourceType,
 			Map<String, List<IQueryParameterType>> searchParameters,
 			Map<String, String> headers) {
-		ArrayListMultimap<String, List<IQueryParameterType>> multimap = ArrayListMultimap.create();
-		searchParameters.forEach(multimap::put);
-		return this.search(bundleType, resourceType, multimap, headers);
+		return this.search(bundleType, resourceType, Multimaps.forMap(searchParameters), headers);
 	}
 
 	// Paging starts here
 
 	/**
 	 * Reads a Bundle from a link on this repository
-	 *
 	 * This is typically used for paging during searches
 	 *
 	 * @see <a href="https://www.hl7.org/fhir/bundle-definitions.html#Bundle.link">FHIR Bundle
@@ -329,7 +327,6 @@ public interface IRepository {
 
 	/**
 	 * Reads a Bundle from a link on this repository
-	 *
 	 * This is typically used for paging during searches
 	 *
 	 * @see <a href="https://www.hl7.org/fhir/bundle-definitions.html#Bundle.link">FHIR Bundle
@@ -502,8 +499,10 @@ public interface IRepository {
 	 * @param returnType the class of the Resource the operation returns
 	 * @return the results of the operation
 	 */
-	<R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
-			Class<T> resourceType, String name, P parameters, Class<R> returnType, Map<String, String> headers);
+	default <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
+			Class<T> resourceType, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
+		return throwNotImplementedOperationException("type-level invoke is not supported by this repository");
+	}
 
 	/**
 	 * Invokes a type-level operation on this repository
@@ -574,8 +573,10 @@ public interface IRepository {
 	 * @param headers headers for this request, typically key-value pairs of HTTP headers
 	 * @return the results of the operation
 	 */
-	<R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
-			I id, String name, P parameters, Class<R> returnType, Map<String, String> headers);
+	default <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
+			I id, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
+		return throwNotImplementedOperationException("instance-level invoke is not supported by this repository");
+	}
 
 	/**
 	 * Invokes an instance-level operation on this repository
@@ -721,7 +722,7 @@ public interface IRepository {
 
 	/**
 	 * Returns the {@link FhirContext} used by the repository
-	 *
+	 * <p>
 	 * Practically, implementing FHIR functionality with the HAPI toolset requires a FhirContext. In
 	 * particular for things like version independent code. Ideally, a user could which FHIR version a
 	 * repository was configured for using things like the CapabilityStatement. In practice, that's
@@ -730,6 +731,7 @@ public interface IRepository {
 	 *
 	 * @return a FhirContext
 	 */
+	@Nonnull
 	FhirContext fhirContext();
 
 	private static <T> T throwNotImplementedOperationException(String theMessage) {
