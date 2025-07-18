@@ -163,10 +163,12 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		return myStandardType;
 	}
 
+	@Nonnull
 	public T newInstance() {
 		return newInstance(null);
 	}
 
+	@Nonnull
 	public T newInstance(Object theArgument) {
 		try {
 			if (theArgument == null) {
