@@ -461,6 +461,16 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testConditionalCreateFailsIfMatchUrlCaseIsDifferent() {
+		Observation obs = new Observation();
+		obs.addIdentifier().setValue("XXX");
+		assertThatThrownBy(() -> myObservationDao.create(obs, "identifier=xxx", newSrd()))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessage(Msg.code(929) +
+				"Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
+	}
+
+	@Test
 	public void testCreateResource_withConditionalCreate_willAddSearchUrlEntity(){
 		// given
 		String identifierCode = "20210427133226.4440+800";

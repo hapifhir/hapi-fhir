@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7101
+title: "A new system level operation, named `$hapi.fhir.undo-replace-references` has been added. This operation
+  restores the resources that were updated by a `$hapi.fhir.replace-references` operation to their previous versions."

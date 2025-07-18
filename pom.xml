@@ -975,6 +975,10 @@
 			<id>xytis</id>
 			<name>Vytis Valentinavičius</name>
 		</developer>
+		<developer>
+			<id>MadsSwensson</id>
+			<name>Mads Swensson</name>
+		</developer>
 	</developers>
 
 	<licenses>
