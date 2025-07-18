@@ -712,7 +712,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				mySqlBuilderFactory,
 				myDialectProvider,
 				theSearchProperties.isDoCountOnlyFlag(),
-			myResourceName == null || myResourceName.isBlank());
+				myResourceName == null || myResourceName.isBlank());
 		QueryStack queryStack3 = new QueryStack(
 				theRequest,
 				theParams,
