@@ -4493,7 +4493,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			stream.map(typedId->typedId.getId().toString())
 				.collect(Collectors.toSet()));
 
-		assertThat(ids).containsExactly(observationId.getIdPart());
+		assertThat(ids).containsExactly(deletedObservationId.getIdPart());
 	}
 
 	@Test

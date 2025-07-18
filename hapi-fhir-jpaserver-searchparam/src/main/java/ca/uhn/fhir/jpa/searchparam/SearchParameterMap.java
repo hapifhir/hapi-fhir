@@ -775,11 +775,7 @@ public class SearchParameterMap implements Serializable {
 	}
 
 	public void setSearchContainedMode(SearchContainedModeEnum theSearchContainedMode) {
-		if (theSearchContainedMode == null) {
-			mySearchContainedMode = SearchContainedModeEnum.FALSE;
-		} else {
-			this.mySearchContainedMode = theSearchContainedMode;
-		}
+		this.mySearchContainedMode = Objects.requireNonNullElse(theSearchContainedMode, SearchContainedModeEnum.FALSE);
 	}
 
 	public SearchIncludeDeletedEnum getSearchIncludeDeletedMode() {
@@ -787,8 +783,7 @@ public class SearchParameterMap implements Serializable {
 	}
 
 	public void setSearchIncludeDeletedMode(SearchIncludeDeletedEnum theSearchIncludeDeletedMode) {
-		this.mySearchIncludeDeletedMode =
-				Objects.requireNonNullElse(theSearchIncludeDeletedMode, SearchIncludeDeletedEnum.FALSE);
+		this.mySearchIncludeDeletedMode = theSearchIncludeDeletedMode;
 	}
 
 	/**

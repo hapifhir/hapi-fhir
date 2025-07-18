@@ -3268,6 +3268,9 @@ public class QueryStack {
 		}
 
 		public SearchIncludeDeletedEnum getIncludeDeleted() {
+			if (myIncludeDeleted == null) {
+				return SearchIncludeDeletedEnum.FALSE;
+			}
 			return myIncludeDeleted;
 		}
 

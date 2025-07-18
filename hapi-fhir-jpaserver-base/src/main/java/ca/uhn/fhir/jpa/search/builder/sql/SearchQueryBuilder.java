@@ -465,7 +465,7 @@ public class SearchQueryBuilder {
 						mySelect.addColumns(mySelectedResourceIdColumn);
 					}
 
-					if (mySelectResourceType) {
+					if (mySelectResourceType) { // todo jdjd was mySelectResourceType
 						mySelect.addColumns(root.getResourceTypeColumn());
 					}
 				}
@@ -752,20 +752,25 @@ public class SearchQueryBuilder {
 			ResourceTablePredicateBuilder resourceTable = mySqlBuilderFactory.resourceTable(this);
 			addTable(resourceTable, null);
 
-			switch (theDeletedFlag) {
-				case TRUE:
-					addPredicate(resourceTable.createResourceTypeAndDeletedPredicates());
-					break;
-				case FALSE:
-					addPredicate(resourceTable.createResourceTypeAndNonDeletedPredicates());
-					break;
-				case BOTH:
-					Condition typePredicate = resourceTable.createResourceTypePredicate();
-					if (typePredicate != null) {
-						addPredicate(typePredicate);
-					}
-					break;
+			if (theDeletedFlag == null) {
+				addPredicate(resourceTable.createResourceTypeAndNonDeletedPredicates());
+			} else {
+				switch (theDeletedFlag) {
+					case TRUE:
+						addPredicate(resourceTable.createResourceTypeAndDeletedPredicates());
+						break;
+					case FALSE:
+						addPredicate(resourceTable.createResourceTypeAndNonDeletedPredicates());
+						break;
+					case BOTH:
+						Condition typePredicate = resourceTable.createResourceTypePredicate();
+						if (typePredicate != null) {
+							addPredicate(typePredicate);
+						}
+						break;
+				}
 			}
+
 			myResourceTableRoot = resourceTable;
 		}
 		return myResourceTableRoot;
