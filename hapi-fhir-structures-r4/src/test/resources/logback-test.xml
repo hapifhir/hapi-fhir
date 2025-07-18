@@ -13,6 +13,9 @@
 	<logger name="org.apache" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />
 	</logger>
+	<logger name="ca.uhn.fhir.context.ModelScanner" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
 	<logger name="org.thymeleaf" additivity="false" level="warn">
 		<appender-ref ref="STDOUT" />
 	</logger>
@@ -23,7 +26,7 @@
 	</logger>
  	-->
  	
-	<root level="info">
+	<root level="debug">
 		<appender-ref ref="STDOUT" />
 	</root>
 
