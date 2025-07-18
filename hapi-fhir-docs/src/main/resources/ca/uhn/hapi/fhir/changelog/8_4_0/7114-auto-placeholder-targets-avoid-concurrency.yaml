@@ -1,0 +1,9 @@
+---
+type: add
+issue: 7114
+title: "When _Auto-Create Placeholder Reference Targets_ is enabled in combination 
+  with _Populate Identifier In Auto Created Placeholder Reference Targets_ 
+  and _Allow Inline Match URLs_, concurrent requests can create duplicate placeholder 
+  resources which match a given conditional URL reference. This is now prevented 
+  through the use of a database constraint like it is for other conditional 
+  create/update operations."
