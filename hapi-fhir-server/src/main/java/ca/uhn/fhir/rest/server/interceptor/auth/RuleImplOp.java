@@ -109,7 +109,6 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			IRuleApplier theRuleApplier,
 			Set<AuthorizationFlagsEnum> theFlags,
 			Pointcut thePointcut) {
-		// todo
 		FhirContext ctx = theRequestDetails.getFhirContext();
 
 		RuleTarget target = new RuleTarget();
