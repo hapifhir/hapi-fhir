@@ -57,10 +57,10 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -74,7 +74,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -242,16 +241,17 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		PageRequest pageRequest =
 				PageRequest.of(theRequest.getPageStart(), theRequest.getBatchSize(), theRequest.getSort());
 
-		String jobStatus = theRequest.getJobStatus();
-		if (Objects.equals(jobStatus, "")) {
-			Page<Batch2JobInstanceEntity> pageOfEntities = myJobInstanceRepository.findAll(pageRequest);
-			return pageOfEntities.map(this::toInstance);
-		}
-
-		StatusEnum status = StatusEnum.valueOf(jobStatus);
-		List<JobInstance> jobs = toInstanceList(myJobInstanceRepository.findInstancesByJobStatus(status, pageRequest));
-		Integer jobsOfStatus = myJobInstanceRepository.findTotalJobsOfStatus(status);
-		return new PageImpl<>(jobs, pageRequest, jobsOfStatus);
+		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> myJobInstanceRepository
+				.findByJobDefinitionIdOrStatusOrIdOrCreateTime(
+						theRequest.getJobDefinitionId(),
+						StringUtils.isNotEmpty(theRequest.getJobStatus())
+								? StatusEnum.valueOf(theRequest.getJobStatus())
+								: null,
+						theRequest.getJobId(),
+						theRequest.getJobCreateTimeFrom(),
+						theRequest.getJobCreateTimeTo(),
+						pageRequest)
+				.map(this::toInstance));
 	}
 
 	private List<JobInstance> toInstanceList(List<Batch2JobInstanceEntity> theInstancesByJobDefinitionId) {

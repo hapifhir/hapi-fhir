@@ -812,7 +812,7 @@ public class SubscriptionCanonicalizer {
 
 		if (nonNull(requestPartitionId)) {
 			isSubscriptionCreatedOnDefaultPartition = myHelperSvc == null
-					? requestPartitionId.isDefaultPartition(getDefaultPartitionId())
+					? requestPartitionId.isPartition(getDefaultPartitionId())
 					: myHelperSvc.isDefaultPartition(requestPartitionId);
 		}
 

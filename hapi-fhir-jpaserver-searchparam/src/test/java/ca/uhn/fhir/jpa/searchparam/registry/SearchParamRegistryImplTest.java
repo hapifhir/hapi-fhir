@@ -22,12 +22,17 @@ import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.IndexedSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -40,6 +45,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -57,6 +65,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -85,6 +94,9 @@ public class SearchParamRegistryImplTest {
 		ourResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(ourEntities);
 		ourBuiltinPatientSearchParamCount = ReadOnlySearchParamCache.fromFhirContext(ourFhirContext, new SearchParameterCanonicalizer(ourFhirContext)).getSearchParamMap("Patient").size();
 	}
+
+	@RegisterExtension
+	private LogbackTestExtension myLogbackExtension = new LogbackTestExtension(SearchParamRegistryImpl.class);
 
 	@Autowired
 	SearchParamRegistryImpl mySearchParamRegistry;
@@ -255,6 +267,31 @@ public class SearchParamRegistryImplTest {
 	}
 
 	@Test
+	public void testBuiltInSearchParameter_Address() {
+		RuntimeSearchParam patientAddress = mySearchParamRegistry.getActiveSearchParam("Patient", "address", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+		assertEquals("address", patientAddress.getName());
+		assertEquals(RestSearchParameterTypeEnum.STRING, patientAddress.getParamType());
+		assertEquals("http://hl7.org/fhir/SearchParameter/individual-address", patientAddress.getUri());
+		assertThat(patientAddress.getBase()).containsExactlyInAnyOrder("Patient", "Person", "Practitioner", "RelatedPerson");
+
+		RuntimeSearchParam personAddress = mySearchParamRegistry.getActiveSearchParam("Person", "address", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+		assertSame(patientAddress, personAddress);
+	}
+
+	@Test
+	public void testBuiltInSearchParameter_Text() {
+		RuntimeSearchParam patientAddress = mySearchParamRegistry.getActiveSearchParam("Patient", Constants.PARAM_TEXT, ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+		assertEquals(Constants.PARAM_TEXT, patientAddress.getName());
+		assertEquals(RestSearchParameterTypeEnum.STRING, patientAddress.getParamType());
+		assertEquals(Constants.PARAM_TEXT_URL, patientAddress.getUri());
+		assertThat(patientAddress.getBase()).containsExactlyInAnyOrder("DomainResource");
+
+		RuntimeSearchParam personAddress = mySearchParamRegistry.getActiveSearchParam("Person", Constants.PARAM_TEXT, ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+		assertSame(patientAddress, personAddress);
+	}
+
+
+	@Test
 	public void testGetActiveUniqueSearchParams_Empty() {
 		assertThat(mySearchParamRegistry.getActiveComboSearchParams("Patient", null)).isEmpty();
 	}
@@ -342,9 +379,112 @@ public class SearchParamRegistryImplTest {
 		assertEquals(Sets.newHashSet("name1", "name2"), canonicalSp.getUpliftRefchainCodes());
 	}
 
+	@Test
+	public void testResourceScopedSearchParam_AppliesToAll() {
+		// Setup
+		SearchParameter sp = new SearchParameter();
+		sp.setId("Resource-text");
+		sp.setUrl("http://foo");
+		sp.setName("foo");
+		sp.setCode("foo");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase("Resource");
+		sp.setExpression("Encounter.extension('http://foo')");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(sp));
+
+		// Test
+		mySearchParamRegistry.forceRefresh();
+		RuntimeSearchParam textSp = mySearchParamRegistry.getActiveSearchParam("Patient", "foo", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+
+		// Verify
+		assertNotNull(textSp);
+		assertEquals("foo", textSp.getName());
+	}
+
+	@Test
+	public void testManualSearchParameterWithIncorrectUrlDoesntReplaceExisting() {
+		// Setup
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/Individual-address");
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/individual-address");
+		sp.setName("foo");
+		sp.setCode("foo");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase("Resource");
+		sp.setExpression("Encounter.extension('http://foo')");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(sp));
+
+		// Test
+		myLogbackExtension.clearEvents();
+		mySearchParamRegistry.forceRefresh();
+		RuntimeSearchParam fooSp = mySearchParamRegistry.getActiveSearchParam("Patient", "foo", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+		RuntimeSearchParam addressSp = mySearchParamRegistry.getActiveSearchParam("Patient", "address", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+
+		// Verify
+		assertNotNull(fooSp);
+		assertNotNull(addressSp);
+		assertEquals("foo", fooSp.getName());
+		assertEquals("address", addressSp.getName());
+
+		ILoggingEvent warning = myLogbackExtension.getLogEvents(t->t.getFormattedMessage().startsWith("Existing SearchParameter with URL")).get(0);
+		assertEquals("Existing SearchParameter with URL[http://hl7.org/fhir/SearchParameter/individual-address] and name[address] doesn't match name[foo] found on SearchParameter: SearchParameter/Individual-address", warning.getFormattedMessage());
+		assertEquals(Level.WARN, warning.getLevel());
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		// ParamName , CreateExplicitSp, SpBase   ,  SpStatus , ExpectAppliesToPatient
+		"_text       , false           ,          ,  active   , true",
+		"_text       , true            , Resource ,  active   , true",
+		"_text       , true            , Patient  ,  active   , true",
+		"_text       , true            , Resource ,  retired  , false",
+		"_text       , true            , Patient  ,  retired  , false",
+		"_text       , true            , Encounter,  active   , false",
+		"_content    , false           ,          ,  active   , true",
+		"_content    , true            , Resource ,  active   , true",
+		"_content    , true            , Patient  ,  active   , true",
+		"_content    , true            , Resource ,  retired  , false",
+		"_content    , true            , Patient  ,  retired  , false",
+		"_content    , true            , Encounter,  active   , false",
+	})
+	public void testContentAndTextSearchParamsCanReplaceBuiltIn(String theParamName, boolean theCreateExplicitSp, String theSpBase, String theSpStatus, boolean theExpectAppliesToPatient) {
+		// Setup
+		boolean isText = Constants.PARAM_TEXT.equals(theParamName);
+		if (theCreateExplicitSp) {
+			SearchParameter sp = new SearchParameter();
+			if (isText) {
+				sp.setId("Resource-text");
+				sp.setUrl("http://hl7.org/fhir/SearchParameter/DomainResource-text");
+			} else {
+				sp.setId("Resource-content");
+				sp.setUrl("http://hl7.org/fhir/SearchParameter/Resource-content");
+			}
+			sp.setName(theParamName);
+			sp.setCode(theParamName);
+			sp.setStatus(Enumerations.PublicationStatus.fromCode(theSpStatus));
+			sp.addBase(theSpBase);
+			sp.setType(Enumerations.SearchParamType.STRING);
+			when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(sp));
+		}
+
+		// Test
+		mySearchParamRegistry.forceRefresh();
+
+		// Verify
+		RuntimeSearchParam textSp = mySearchParamRegistry.getActiveSearchParam("Patient", theParamName, ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+		if (theExpectAppliesToPatient) {
+			assertNotNull(textSp);
+		} else {
+			assertNull(textSp);
+		}
+
+	}
+
 	private List<ResourceTable> resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus theStatus) {
 		// Add a new search parameter entity
-		List<ResourceTable> newEntities = new ArrayList(ourEntities);
+		List<ResourceTable> newEntities = new ArrayList<>(ourEntities);
 		newEntities.add(createEntity(++ourLastId, 1));
 		resetMock(theStatus, newEntities);
 		return newEntities;
@@ -387,6 +527,7 @@ public class SearchParamRegistryImplTest {
 		StorageSettings storageSettings() {
 			StorageSettings storageSettings = new StorageSettings();
 			storageSettings.setDefaultSearchParamsCanBeOverridden(true);
+			storageSettings.setHibernateSearchIndexFullText(true);
 			return storageSettings;
 		}
 

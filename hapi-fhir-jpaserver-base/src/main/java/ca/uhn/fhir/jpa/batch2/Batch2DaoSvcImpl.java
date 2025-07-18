@@ -212,7 +212,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 			ourLog.debug("Search for resources - all partitions");
 			rowStream = myResourceTableDao.streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldest(
 					theStart, theEnd);
-		} else if (theRequestPartitionId.isDefaultPartition(defaultPartitionId)) {
+		} else if (theRequestPartitionId.isPartition(defaultPartitionId)) {
 			ourLog.debug("Search for resources - default partition");
 			rowStream =
 					myResourceTableDao

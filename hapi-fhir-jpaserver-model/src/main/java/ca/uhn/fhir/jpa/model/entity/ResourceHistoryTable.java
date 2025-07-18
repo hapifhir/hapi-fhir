@@ -68,7 +68,8 @@ import java.util.Collection;
 		indexes = {
 			@Index(name = "IDX_RESVER_TYPE_DATE", columnList = "RES_TYPE,RES_UPDATED,RES_ID"),
 			@Index(name = "IDX_RESVER_ID_DATE", columnList = "RES_ID,RES_UPDATED"),
-			@Index(name = "IDX_RESVER_DATE", columnList = "RES_UPDATED,RES_ID")
+			@Index(name = "IDX_RESVER_DATE", columnList = "RES_UPDATED,RES_ID"),
+			@Index(name = "IDX_RESVER_ID_SRC_URI", columnList = "SOURCE_URI,RES_ID,PARTITION_ID")
 		})
 public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk> implements Serializable {
 	public static final String IDX_RESVER_ID_VER = "IDX_RESVER_ID_VER";

@@ -42,7 +42,6 @@ import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
-import ca.uhn.fhir.jpa.interceptor.RequestHeaderPartitionInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -746,7 +745,7 @@ public abstract class BaseTransactionProcessor {
 			IPrimitiveType<?> valueAsPrimitiveType =
 					(IPrimitiveType<?>) partitionIdsExtensionOptional.get().getValue();
 			String value = valueAsPrimitiveType.getValueAsString();
-			theRequestDetails.setHeaders(RequestHeaderPartitionInterceptor.PARTITIONS_HEADER, List.of(value));
+			theRequestDetails.setHeaders(Constants.HEADER_X_REQUEST_PARTITION_IDS, List.of(value));
 		}
 	}
 
@@ -1962,7 +1961,7 @@ public abstract class BaseTransactionProcessor {
 			if (!nextId.hasIdPart()) {
 				if (resourceReference.getResource() != null) {
 					IIdType targetId = resourceReference.getResource().getIdElement();
-					if (targetId.getValue() == null || targetId.getValue().startsWith("#")) {
+					if (targetId.getValue() == null) {
 						// This means it's a contained resource
 						continue;
 					} else if (theIdSubstitutions.containsTarget(targetId)) {

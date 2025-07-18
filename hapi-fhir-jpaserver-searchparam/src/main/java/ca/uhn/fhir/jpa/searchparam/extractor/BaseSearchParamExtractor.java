@@ -56,6 +56,7 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -1540,25 +1541,14 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 
 			// See the method javadoc for an explanation of this
-			if (!myExtractResourceLevelParams && RuntimeSearchParamHelper.isResourceLevel(nextSpDef)) {
+			if (!myExtractResourceLevelParams
+					&& RuntimeSearchParamHelper.isSpeciallyHandledSearchParameter(nextSpDef, myStorageSettings)) {
 				continue;
 			}
 
 			extractSearchParam(nextSpDef, theResource, theExtractor, retVal, theWantLocalReferences);
 		}
 		return retVal;
-	}
-
-	/**
-	 * Helper function to determine if a set of SPs for a resource uses a resolve as part of its fhir path.
-	 */
-	private boolean anySearchParameterUsesResolve(
-			Collection<RuntimeSearchParam> searchParams, RestSearchParameterTypeEnum theSearchParamType) {
-		return searchParams.stream()
-				.filter(param -> param.getParamType() != theSearchParamType)
-				.map(RuntimeSearchParam::getPath)
-				.filter(Objects::nonNull)
-				.anyMatch(path -> path.contains("resolve"));
 	}
 
 	/**
@@ -1697,7 +1687,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@Override
 	public String[] split(String thePaths) {
 		if (shouldAttemptToSplitPath(thePaths)) {
-			return splitOutOfParensOrs(thePaths);
+			return SearchParameterUtil.splitSearchParameterExpressions(thePaths);
 		} else {
 			return new String[] {thePaths};
 		}
@@ -1710,47 +1700,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			// DSTU 3 and below used "or" as well as "|"
 			return thePath.contains("|") || thePath.contains(" or ");
 		}
-	}
-
-	/**
-	 * Iteratively splits a string on any ` or ` or | that is ** not** contained inside a set of parentheses. e.g.
-	 * <p>
-	 * "Patient.select(a or b)" -->  ["Patient.select(a or b)"]
-	 * "Patient.select(a or b) or Patient.select(c or d )" --> ["Patient.select(a or b)", "Patient.select(c or d)"]
-	 * "Patient.select(a|b) or Patient.select(c or d )" --> ["Patient.select(a|b)", "Patient.select(c or d)"]
-	 * "Patient.select(b) | Patient.select(c)" -->  ["Patient.select(b)", "Patient.select(c)"]
-	 *
-	 * @param thePaths The string to split
-	 * @return The split string
-	 */
-	private String[] splitOutOfParensOrs(String thePaths) {
-		List<String> topLevelOrExpressions = splitOutOfParensToken(thePaths, " or ");
-		return topLevelOrExpressions.stream()
-				.flatMap(s -> splitOutOfParensToken(s, " |").stream())
-				.toArray(String[]::new);
-	}
-
-	private List<String> splitOutOfParensToken(String thePath, String theToken) {
-		int tokenLength = theToken.length();
-		int index = thePath.indexOf(theToken);
-		int rightIndex = 0;
-		List<String> retVal = new ArrayList<>();
-		while (index > -1) {
-			String left = thePath.substring(rightIndex, index);
-			if (allParensHaveBeenClosed(left)) {
-				retVal.add(left);
-				rightIndex = index + tokenLength;
-			}
-			index = thePath.indexOf(theToken, index + tokenLength);
-		}
-		retVal.add(thePath.substring(rightIndex));
-		return retVal;
-	}
-
-	private boolean allParensHaveBeenClosed(String thePaths) {
-		int open = StringUtils.countMatches(thePaths, "(");
-		int close = StringUtils.countMatches(thePaths, ")");
-		return open == close;
 	}
 
 	private BigDecimal normalizeQuantityContainingTimeUnitsIntoDaysForNumberParam(

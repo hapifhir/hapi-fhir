@@ -1783,6 +1783,17 @@ public class FhirTerser {
 	}
 
 	/**
+	 * Checks if the field exists on the resource
+	 *
+	 * @param theFieldName   Name of the field to check
+	 * @param theResource    Resource instance to check
+	 * @return Returns true if resource definition has a child with the specified name and false otherwise
+	 */
+	public boolean fieldExists(String theFieldName, IBaseResource theResource) {
+		return myContext.getResourceDefinition(theResource).getChildByName(theFieldName) != null;
+	}
+
+	/**
 	 * Clones a resource object, copying all data elements from theSource into a new copy of the same type.
 	 * <p>
 	 * Note that:
@@ -1829,6 +1840,14 @@ public class FhirTerser {
 			return myExistingIdToContainedResourceMap;
 		}
 
+		public boolean referenceMatchesAContainedResource(IIdType theRefId) {
+			assert theRefId.getValue().startsWith("#");
+
+			String expectedResourceId = theRefId.getValue().substring(1);
+			return this.getContainedResources().stream()
+					.anyMatch(res -> res.getIdElement().getIdPart().equals(expectedResourceId));
+		}
+
 		public IIdType addContained(IBaseResource theResource) {
 			if (this.getResourceId(theResource) != null) {
 				// Prevent infinite recursion if there are circular loops in the contained resources
@@ -1843,6 +1862,8 @@ public class FhirTerser {
 			IIdType newId = theResource.getIdElement();
 			if (isBlank(newId.getValue())) {
 				newId.setValue(UUID.randomUUID().toString());
+			} else if (newId.getValue().startsWith("#")) {
+				newId.setValue(newId.getValueAsString().substring(1));
 			}
 
 			getResourceToIdMap().put(theResource, newId);

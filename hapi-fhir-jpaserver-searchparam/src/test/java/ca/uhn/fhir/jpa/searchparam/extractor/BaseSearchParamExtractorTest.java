@@ -75,7 +75,7 @@ class BaseSearchParamExtractorTest {
 
 		@Test
 		void testWhenNotSet_resourceLevelParamsAreNotExtracted() {
-			when(myRuntimeSearchParam.getPath()).thenReturn("Resource.something");
+			when(myRuntimeSearchParam.getName()).thenReturn("_profile");
 
 			// execute
 			myExtractor.extractSearchParams(myResource, null, mySearchParamType, false, mySearchParamFilter);

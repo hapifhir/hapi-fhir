@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MetaUtil;
 import jakarta.annotation.Nonnull;
@@ -36,6 +37,7 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
@@ -201,6 +203,23 @@ public interface ITestDataBuilder {
 		return t -> {
 			IBaseCoding coding = ((IBaseResource) t).getMeta().addTag().setSystem(theSystem).setCode(theCode);
 			applyElementModifiers(coding, theModifiers);
+		};
+	}
+
+	/**
+	 * Resource.text.div
+	 */
+	default ICreationArgument withNarrative(String theDiv) {
+		return t->{
+			INarrative narrative = (INarrative) getFhirContext().getElementDefinition("Narrative").newInstance();
+			try {
+				narrative.setDivAsString(theDiv);
+			} catch (Exception e) {
+				throw new InternalErrorException(e);
+			}
+
+			BaseRuntimeChildDefinition textChild = getFhirContext().getResourceDefinition((IBaseResource) t).getChildByName("text");
+			textChild.getMutator().setValue(t, narrative);
 		};
 	}
 
@@ -407,6 +426,18 @@ public interface ITestDataBuilder {
 
 	default ICreationArgument withObservationCode(@Nullable String theSystem, @Nullable String theCode, @Nullable String theDisplay) {
 		return withCodingAt("code.coding", theSystem, theCode, theDisplay);
+	}
+
+	default ICreationArgument withObservationCategory(@Nullable String theSystem, @Nullable String theCode, @Nullable String theDisplay) {
+		return withCodingAt("category.coding", theSystem, theCode, theDisplay);
+	}
+
+	default ICreationArgument withObservationValueString(@Nullable String theValue) {
+		return t -> {
+			IBase value = getFhirContext().getElementDefinition("string").newInstance(theValue);
+			BaseRuntimeElementDefinition<?> resourceDef = getFhirContext().getElementDefinition(t.getClass());
+			resourceDef.getChildByName("value[x]").getMutator().addValue(t, value);
+		};
 	}
 
 	default <T extends IBase> ICreationArgument withCodingAt(String thePath, @Nullable String theSystem, @Nullable String theValue) {

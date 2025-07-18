@@ -1,0 +1,5 @@
+--- 
+type: add
+issue: 7038
+title: "$hapi.fhir.replace-references and $merge operations now create a Provenance resource upon successful 
+completion."

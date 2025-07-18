@@ -207,6 +207,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.nullable()
 					.type(ColumnTypeEnum.TEXT);
 		}
+
+		// Add IDX_RESVER_ID_SRC_URI for compatibilty with 2024
+		{
+			version.onTable("HFJ_RES_VER")
+					.addIndex("20250625.01", "IDX_RESVER_ID_SRC_URI")
+					.unique(false)
+					.withColumns("SOURCE_URI, RES_ID, PARTITION_ID")
+					.heavyweightSkipByDefault();
+		}
 	}
 
 	protected void init780() {

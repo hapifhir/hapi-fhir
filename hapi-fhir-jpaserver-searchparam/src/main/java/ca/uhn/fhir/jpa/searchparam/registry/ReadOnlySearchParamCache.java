@@ -20,16 +20,12 @@
 package ca.uhn.fhir.jpa.searchparam.registry;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
-import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.fhir.util.ClasspathUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
@@ -99,29 +95,11 @@ public class ReadOnlySearchParamCache {
 
 		Set<String> resourceNames = theFhirContext.getResourceTypes();
 
-		/*
-		 * For R4/R4B we include a Bundle of SearchParameters from the core spec in
-		 * hapi-fhir-validation-resources-r4/r4b
-		 *
-		 * For R5 we include the NPM core R5 packages in
-		 * hapi-fhir-validation-resources-r5, so we get them from it
-		 */
-		List<IBaseResource> searchParams = null;
-		if (theFhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
-			IBaseBundle allSearchParameterBundle = (IBaseBundle) theFhirContext
-					.newJsonParser()
-					.parseResource(
-							ClasspathUtil.loadResourceAsStream("org/hl7/fhir/r4/model/sp/search-parameters.json"));
-			searchParams = BundleUtil.toListOfResources(theFhirContext, allSearchParameterBundle);
-		} else if (theFhirContext.getVersion().getVersion() == FhirVersionEnum.R4B) {
-			IBaseBundle allSearchParameterBundle = (IBaseBundle) theFhirContext
-					.newXmlParser()
-					.parseResource(
-							ClasspathUtil.loadResourceAsStream("org/hl7/fhir/r4b/model/sp/search-parameters.xml"));
-			searchParams = BundleUtil.toListOfResources(theFhirContext, allSearchParameterBundle);
-		} else if (theFhirContext.getVersion().getVersion() == FhirVersionEnum.R5) {
-			searchParams = FhirContext.forR5Cached().getValidationSupport().fetchAllSearchParameters();
-		}
+		// Pull the list of search parameters out of the cached FhirContext
+		// (which avoids us getting a chain containing other JPA validation support providers)
+		FhirContext cachedCtx =
+				FhirContext.forCached(theFhirContext.getVersion().getVersion());
+		List<IBaseResource> searchParams = cachedCtx.getValidationSupport().fetchAllSearchParameters();
 
 		searchParams = defaultIfNull(searchParams, Collections.emptyList());
 		for (IBaseResource next : searchParams) {

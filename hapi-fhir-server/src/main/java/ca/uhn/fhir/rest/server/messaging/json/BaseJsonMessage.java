@@ -19,14 +19,18 @@
  */
 package ca.uhn.fhir.rest.server.messaging.json;
 
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.messaging.IHasPayloadMessageKey;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.rest.server.messaging.IMessageDeliveryContext;
+import ca.uhn.fhir.rest.server.messaging.RequestPartitionHeaderUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
+
+import java.util.Map;
 
 import static java.util.Objects.isNull;
 
@@ -81,5 +85,16 @@ public abstract class BaseJsonMessage<T> implements IMessage<T>, Message<T>, IMo
 	@Override
 	public int getRetryCount() {
 		return getHapiHeaders().getRetryCount();
+	}
+
+	public T getPayloadWithRequestPartitionIdSetFromHeader(IDefaultPartitionSettings theDefaultPartitionSettings) {
+		RequestPartitionHeaderUtil.setRequestPartitionIdFromHeaderIfNotAlreadySet(this, theDefaultPartitionSettings);
+		return getPayload();
+	}
+
+	public static <P> void addCustomHeaders(IMessage<P> theMessage, Map<String, ?> theCustomHeaders) {
+		if (theMessage instanceof BaseJsonMessage<P> baseJsonMessage) {
+			baseJsonMessage.getHapiHeaders().getCustomHeaders().putAll(theCustomHeaders);
+		}
 	}
 }

@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server Test Utilities
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -17,23 +17,34 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.embedded;
+package ca.uhn.fhir.model.api;
 
-import org.testcontainers.containers.JdbcDatabaseContainer;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 
-/**
- * Wrapper to support JPA tests.
- */
-public abstract class JpaContainerDatabase extends JpaEmbeddedDatabase {
-	protected final JdbcDatabaseContainer<?> myContainer;
+public class ProvenanceAgent implements IProvenanceAgent {
 
-	protected JpaContainerDatabase(JdbcDatabaseContainer<?> theContainer) {
-		myContainer = theContainer;
-		myContainer.start();
+	private static final long serialVersionUID = 1L;
+
+	IBaseReference myWho;
+	IBaseReference myOnBehalfOf;
+
+	@Override
+	public IBaseReference getWho() {
+		return myWho;
+	}
+
+	public IProvenanceAgent setWho(IBaseReference theWho) {
+		myWho = theWho;
+		return this;
 	}
 
 	@Override
-	public void stop() {
-		myContainer.stop();
+	public IBaseReference getOnBehalfOf() {
+		return myOnBehalfOf;
+	}
+
+	public IProvenanceAgent setOnBehalfOf(IBaseReference theOnBehalfOf) {
+		myOnBehalfOf = theOnBehalfOf;
+		return this;
 	}
 }

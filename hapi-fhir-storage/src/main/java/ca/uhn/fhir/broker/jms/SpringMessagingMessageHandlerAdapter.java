@@ -52,7 +52,11 @@ public class SpringMessagingMessageHandlerAdapter<T> implements MessageHandler {
 		if (theMessage instanceof GenericMessage genericMessage) {
 			// When receiving a message from an external queue, it will likely arrive as a GenericMessage
 			Object payload = genericMessage.getPayload();
-			message = new RawStringMessage(genericMessage.getPayload().toString(), genericMessage.getHeaders());
+			if (payload instanceof byte[] bytes) {
+				message = new RawStringMessage(new String(bytes), genericMessage.getHeaders());
+			} else {
+				message = new RawStringMessage(payload.toString(), genericMessage.getHeaders());
+			}
 		} else if (IMessage.class.isAssignableFrom(theMessage.getClass())) {
 			message = (IMessage<T>) theMessage;
 		} else {
