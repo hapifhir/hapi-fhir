@@ -5,6 +5,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.repository.IRepositoryLoader;
 import ca.uhn.fhir.repository.IRepositoryLoader.IRepositoryRequest;
+import ca.uhn.fhir.util.Logs;
 import com.google.common.annotations.Beta;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -22,7 +23,7 @@ import java.util.regex.Pattern;
  */
 @Beta()
 public class UrlRepositoryFactory {
-	private static final Logger ourLog = IRepository.ourLog;
+	private static final Logger ourLog = Logs.getRepositoryTroubleshootingLog();
 
 	public static final String FHIR_REPOSITORY_URL_SCHEME = "fhir-repository:";
 	static final Pattern ourUrlPattern = Pattern.compile("^fhir-repository:([A-Za-z-]+):(.*)");
@@ -56,13 +57,25 @@ public class UrlRepositoryFactory {
 		ServiceLoader<IRepositoryLoader> load = ServiceLoader.load(IRepositoryLoader.class);
 		IRepositoryRequest request = buildRequest(theRepositoryUrl, theFhirContext);
 		for (IRepositoryLoader nextLoader : load) {
-			ourLog.debug("Checking repository loader {}", nextLoader.getClass().getName());
+			logLoaderDetails(nextLoader);
 			if (nextLoader.canLoad(request)) {
+				ourLog.debug(
+						"Loader {} can handle URL: {}.  Instantiating repository.",
+						nextLoader.getClass().getName(),
+						theRepositoryUrl);
 				return nextLoader.loadRepository(request);
 			}
 		}
 		throw new IllegalArgumentException(
 				Msg.code(2738) + "Unable to find a repository loader for URL: " + theRepositoryUrl);
+	}
+
+	private static void logLoaderDetails(IRepositoryLoader nextLoader) {
+		Class<? extends IRepositoryLoader> clazz = nextLoader.getClass();
+		ourLog.debug(
+				"Checking repository loader {} from {}",
+				clazz.getName(),
+				clazz.getProtectionDomain().getCodeSource().getLocation());
 	}
 
 	/**
