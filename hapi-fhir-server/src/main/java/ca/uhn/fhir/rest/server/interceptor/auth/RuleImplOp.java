@@ -78,7 +78,10 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	private Collection<IIdType> myAppliesToInstances;
 	private boolean myAppliesToDeleteCascade;
 	private boolean myAppliesToDeleteExpunge;
-	private AdditionalCompartmentSearchParameters myAdditionalCompartmentSearchParamMap;
+	/**
+	 * For SP not part of the compartment that we're including anyways
+	 */
+	private CompartmentSearchParametersSpecialCases myCompartmentSPSpecialCases;
 
 	/**
 	 * Constructor
@@ -106,7 +109,6 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			IRuleApplier theRuleApplier,
 			Set<AuthorizationFlagsEnum> theFlags,
 			Pointcut thePointcut) {
-
 		FhirContext ctx = theRequestDetails.getFhirContext();
 
 		RuleTarget target = new RuleTarget();
@@ -114,7 +116,6 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		switch (myOp) {
 			case READ:
 				if (theOutputResource == null) {
-
 					switch (theOperation) {
 						case READ:
 						case VREAD:
@@ -546,13 +547,21 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			if (target.resource != null) {
 
 				Set<String> additionalSearchParamNames = null;
-				if (myAdditionalCompartmentSearchParamMap != null) {
+				Set<String> omittedSearchParamNames = null;
+				if (myCompartmentSPSpecialCases != null) {
+					String resourceType = ctx.getResourceType(target.resource);
 					additionalSearchParamNames =
-							myAdditionalCompartmentSearchParamMap.getSearchParamNamesForResourceType(
-									ctx.getResourceType(target.resource));
+							myCompartmentSPSpecialCases.getAdditionalSearchParamNamesForResourceType(resourceType);
+					omittedSearchParamNames =
+							myCompartmentSPSpecialCases.getOmittedSPNamesForResourceType(resourceType);
 				}
+
 				if (t.isSourceInCompartmentForTarget(
-						myClassifierCompartmentName, target.resource, next, additionalSearchParamNames)) {
+						myClassifierCompartmentName,
+						target.resource,
+						next,
+						additionalSearchParamNames,
+						omittedSearchParamNames)) {
 					foundMatch = true;
 					break;
 				}
@@ -601,12 +610,21 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							sourceDef.getSearchParamsForCompartmentName(compartmentOwnerResourceType);
 
 					Set<String> additionalParamNames =
-							myAdditionalCompartmentSearchParamMap.getSearchParamNamesForResourceType(
+							myCompartmentSPSpecialCases.getAdditionalSearchParamNamesForResourceType(
 									sourceDef.getName());
+
+					// filter out the omitted SPs
+					Set<String> omittedParams =
+							myCompartmentSPSpecialCases.getOmittedSPNamesForResourceType(sourceDef.getName());
+					params = params.stream()
+							.filter(sp -> !omittedParams.contains(sp.getName()))
+							.collect(Collectors.toList());
+
 					List<RuntimeSearchParam> additionalParams = additionalParamNames.stream()
 							.map(sourceDef::getSearchParam)
 							.filter(Objects::nonNull)
 							.collect(Collectors.toList());
+
 					if (params == null || params.isEmpty()) {
 						params = additionalParams;
 					} else {
@@ -1079,7 +1097,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	}
 
 	public void setAdditionalSearchParamsForCompartmentTypes(
-			AdditionalCompartmentSearchParameters theAdditionalParameters) {
-		myAdditionalCompartmentSearchParamMap = theAdditionalParameters;
+			CompartmentSearchParametersSpecialCases theAdditionalParameters) {
+		myCompartmentSPSpecialCases = theAdditionalParameters;
 	}
 }

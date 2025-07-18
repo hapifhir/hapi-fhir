@@ -23,3 +23,7 @@ As of `8.3.12-SNAPSHOT`, HAPI-FHIR snapshots are now published on [Maven Central
 
 * FhirPath `PATCH` operations that match multiple elements will no longer replace these values, but throw an exception. This is in line with the <a href="https://www.hl7.org/fhir/R4/fhirpatch.html">spec</a>.
 
+* `Group` and `List` resources will no longer be included in the <a href="https://build.fhir.org/compartmentdefinition-patient.html">patient compartment</a>.
+
+* `$export` and `$everything` operations on Patient (instance or type) will no longer return `List` or `Group` resources.
+

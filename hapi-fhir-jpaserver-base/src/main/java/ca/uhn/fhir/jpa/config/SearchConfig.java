@@ -49,7 +49,6 @@ import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.svcs.ISearchLimiterSvc;
 import jakarta.annotation.PostConstruct;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.BeanFactory;
@@ -136,9 +135,6 @@ public class SearchConfig {
 	@Autowired
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
 
-	@Autowired
-	private ISearchLimiterSvc mySearchLimiterSvc;
-
 	@Bean
 	public ISearchCoordinatorSvc searchCoordinatorSvc() {
 		return new SearchCoordinatorSvcImpl(
@@ -181,7 +177,6 @@ public class SearchConfig {
 				myIdHelperService,
 				myResourceHistoryTableDao,
 				myJpaStorageResourceParser,
-				mySearchLimiterSvc,
 				theResourceType);
 	}
 

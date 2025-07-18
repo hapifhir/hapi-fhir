@@ -14,7 +14,6 @@ import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
-import ca.uhn.fhir.svcs.ISearchLimiterSvc;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -57,9 +56,6 @@ public class FetchResourceIdsStepTest {
 
 	@Mock
 	private IBulkExportProcessor<JpaPid> myBulkExportProcessor;
-
-	@Mock
-	private ISearchLimiterSvc mySearchLimiterSvc;
 
 	@InjectMocks
 	private FetchResourceIdsStep myFirstStep;

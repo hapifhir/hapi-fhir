@@ -93,11 +93,21 @@ AuthorizationInterceptor can be used to provide nuanced control over the kinds o
 
 # Advanced Compartment authorization
 
-AuthorizationInterceptor can be used to provide fine-grained control over compartment reads and writes as well. There is a strict FHIR definition
-of which resources and related search parameters fall into a given compartment. However, sometimes the defaults do not suffice. The following is an example 
+AuthorizationInterceptor can be used to provide fine-grained control over compartment reads and writes as well.
+
+There is a strict FHIR definition of which resources and related search parameters fall into a given compartment.
+
+However, sometimes the defaults do not suffice. The following is an example 
 of an R4 ruleset which allows `device.patient` to be considered in the Patient compartment, on top of all the standard search parameters. 
 
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/AuthorizationInterceptors.java|advancedCompartment}}
+```
+
+Additionally, sometimes the defaults are too inclusive. The following example is of an R4 ruleset
+which omits `group.member` from the Patient compartment, even if it's in the standard set of search parameters.
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/AuthorizationInterceptors.java|advancedCompartmentOmission}}
 ```

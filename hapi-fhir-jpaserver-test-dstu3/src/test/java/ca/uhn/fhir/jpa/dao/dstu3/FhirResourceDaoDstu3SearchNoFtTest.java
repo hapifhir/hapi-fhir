@@ -47,6 +47,7 @@ import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -268,6 +269,11 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			nextEntry.getRequest().setMethod(HTTPVerb.PUT);
 			UrlUtil.UrlParts parts = UrlUtil.parseUrl(nextEntry.getResource().getId());
 			nextEntry.getRequest().setUrl(parts.getResourceType() + "/" + parts.getResourceId());
+
+			// omit the resources not in the patient compartment
+			if (SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.containsKey(parts.getResourceType())) {
+				continue;
+			}
 			allIds.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
 
@@ -281,9 +287,9 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		IBundleProvider everything = myPatientDao.patientInstanceEverything(mySrd.getServletRequest(), mySrd, everythingParams, new IdType("Patient/A161443"));
 
 		TreeSet<String> ids = new TreeSet<>(toUnqualifiedVersionlessIdValues(everything));
-		assertThat(ids).contains("List/A161444");
-		assertThat(ids).contains("List/A161468");
-		assertThat(ids).contains("List/A161500");
+		assertThat(ids).doesNotContain("List/A161444");
+		assertThat(ids).doesNotContain("List/A161468");
+		assertThat(ids).doesNotContain("List/A161500");
 
 		ourLog.info("Expected {} - {}", allIds.size(), allIds);
 		ourLog.info("Actual   {} - {}", ids.size(), ids);
@@ -295,14 +301,10 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 				ids.add(next.getIdElement().toUnqualifiedVersionless().getValue());
 			}
 		}
-		assertThat(ids).contains("List/A161444");
-		assertThat(ids).contains("List/A161468");
-		assertThat(ids).contains("List/A161500");
 
 		ourLog.info("Expected {} - {}", allIds.size(), allIds);
 		ourLog.info("Actual   {} - {}", ids.size(), ids);
 		assertEquals(allIds, ids);
-
 	}
 
 	@Test
