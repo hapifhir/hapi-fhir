@@ -596,8 +596,8 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public SearchBuilderFactory searchBuilderFactory() {
-		return new SearchBuilderFactory();
+	public SearchBuilderFactory<JpaPid> searchBuilderFactory() {
+		return new SearchBuilderFactory<>();
 	}
 
 	@Bean

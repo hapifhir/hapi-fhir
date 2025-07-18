@@ -45,7 +45,7 @@ public abstract class BaseSearchQueryBuilderDialectTest {
 	protected abstract Dialect createDialect();
 
 	protected SearchQueryBuilder createSearchQueryBuilder() {
-		return new SearchQueryBuilder(myFhirContext, new StorageSettings(), new PartitionSettings(), RequestPartitionId.allPartitions(), "Patient", mySqlObjectFactory, myHibernatePropertiesProvider, false);
+		return new SearchQueryBuilder(myFhirContext, new StorageSettings(), new PartitionSettings(), RequestPartitionId.allPartitions(), "Patient", mySqlObjectFactory, myHibernatePropertiesProvider, false, false);
 	}
 
 	protected GeneratedSql buildSqlWithNumericSort(Boolean theAscending, OrderObject.NullOrder theNullOrder) {

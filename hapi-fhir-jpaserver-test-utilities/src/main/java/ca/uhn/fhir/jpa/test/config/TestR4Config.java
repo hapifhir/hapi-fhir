@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.config.PackageLoaderConfig;
 import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
+import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.searchparam.config.NicknameServiceConfig;
@@ -271,6 +272,11 @@ public class TestR4Config {
 	@Bean
 	public IBinaryStorageSvc binaryStorage() {
 		return new MemoryBinaryStorageSvcImpl();
+	}
+
+	@Bean
+	public SearchBuilderFactory searchBuilderFactory() {
+		return new SearchBuilderFactory();
 	}
 
 	public static String crunchifyGenerateThreadDump() {

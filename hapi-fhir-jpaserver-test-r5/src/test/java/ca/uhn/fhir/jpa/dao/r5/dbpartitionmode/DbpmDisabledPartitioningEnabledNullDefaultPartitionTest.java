@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r5.dbpartitionmode;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 /**
  * This is a test verifying that we emit the right SQL when running in

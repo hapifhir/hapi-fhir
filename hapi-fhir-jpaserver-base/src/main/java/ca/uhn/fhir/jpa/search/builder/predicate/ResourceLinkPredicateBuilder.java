@@ -151,7 +151,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		myQueryStack = theQueryStack;
 	}
 
-	private DbColumn getResourceTypeColumn() {
+	@Override
+	public DbColumn getResourceTypeColumn() {
 		if (myReversed) {
 			return myColumnTargetResourceType;
 		} else {

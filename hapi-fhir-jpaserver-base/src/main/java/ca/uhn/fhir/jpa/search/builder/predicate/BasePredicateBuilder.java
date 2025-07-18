@@ -24,6 +24,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
@@ -89,6 +90,10 @@ public abstract class BasePredicateBuilder {
 
 	protected BaseJoiningPredicateBuilder getOrCreateQueryRootTable(boolean theIncludeResourceTypeAndNonDeletedFlag) {
 		return mySearchSqlBuilder.getOrCreateFirstPredicateBuilder(theIncludeResourceTypeAndNonDeletedFlag);
+	}
+
+	protected BaseJoiningPredicateBuilder getOrCreateQueryRootTable(SearchIncludeDeletedEnum theIncludeDeletedFlag) {
+		return mySearchSqlBuilder.getOrCreateFirstPredicateBuilder(theIncludeDeletedFlag);
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn[] theFromColumn, DbColumn[] theToColumn) {
