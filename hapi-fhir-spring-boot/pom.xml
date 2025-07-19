@@ -32,17 +32,7 @@
 		</dependencies>
 	</dependencyManagement>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.sonatype.central</groupId>
-				<artifactId>central-publishing-maven-plugin</artifactId>
-				<configuration>
-					<skipPublishing>true</skipPublishing>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+
 	<profiles>
 		<!-- For releases, we need to generate javadoc and sources JAR -->
 		<profile>
@@ -58,7 +48,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>
-						<version>3.2.1</version>
 						<executions>
 							<execution>
 								<id>attach-sources</id>
@@ -71,7 +60,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>3.4.0</version>
 						<executions>
 							<execution>
 								<id>attach-javadoc</id>

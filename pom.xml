@@ -3199,12 +3199,21 @@
 							<publishingServerId>central</publishingServerId>
 							<autoPublish>true</autoPublish>
 							<waitUntil>published</waitUntil>
+							<excludeArtifacts>
+								<excludeArtifact>hapi-fhir-base-test-jaxrsserver-kotlin</excludeArtifact>
+								<excludeArtifact>hapi-fhir-jpaserver-uhnfhirtest</excludeArtifact>
+								<excludeArtifact>hapi-fhir-base-test-mindeps-client</excludeArtifact>
+								<excludeArtifact>hapi-fhir-dist</excludeArtifact>
+								<excludeArtifact>hapi-tinder-test</excludeArtifact>
+								<excludeArtifact>hapi-fhir-cli-app</excludeArtifact>
+								<excludeArtifact>hapi-fhir-spring-boot</excludeArtifact>
+								<excludeArtifact>hapi-fhir-base-test-mindeps-server</excludeArtifact>
+							</excludeArtifacts>
 						</configuration>
 					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.6</version>
 						<executions>
 							<execution>
 								<id>sign-artifacts</id>
