@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7130
+title: "There is an API backward incompatibility issue with the hapi-fhir-storage-batch-2 library that may break some 
+        client applications.
+        This has been fixed."
