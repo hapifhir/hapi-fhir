@@ -3208,6 +3208,10 @@
 								<excludeArtifact>hapi-fhir-cli-app</excludeArtifact>
 								<excludeArtifact>hapi-fhir-spring-boot</excludeArtifact>
 								<excludeArtifact>hapi-fhir-base-test-mindeps-server</excludeArtifact>
+								<excludeArtifacts>hapi-fhir-spring-boot-sample-server-jersey</excludeArtifacts>
+								<excludeArtifacts>hapi-fhir-spring-boot-sample-client-okhttp</excludeArtifacts>
+								<excludeArtifacts>hapi-fhir-spring-boot-sample-client-apache</excludeArtifacts>
+								<excludeArtifacts>hapi-fhir-spring-boot-samples</excludeArtifacts>
 							</excludeArtifacts>
 						</configuration>
 					</plugin>
