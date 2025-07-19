@@ -9,6 +9,7 @@
 	</parent>
 
 	<artifactId>hapi-fhir-spring-boot-sample-client-apache</artifactId>
+	<name>HAPI-FHIR Spring Boot Sample Client (Apache)</name>
 
 	<packaging>jar</packaging>
 

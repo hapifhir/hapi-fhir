@@ -9,6 +9,7 @@
 
 		<relativePath>../pom.xml</relativePath>
 	</parent>
+	<name>HAPI-FHIR Spring Boot Base Project</name>
 
 	<artifactId>hapi-fhir-spring-boot</artifactId>
 	<packaging>pom</packaging>

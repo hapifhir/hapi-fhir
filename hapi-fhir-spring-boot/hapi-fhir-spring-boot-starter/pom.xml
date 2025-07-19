@@ -11,6 +11,7 @@
    </parent>
 
 	<artifactId>hapi-fhir-spring-boot-starter</artifactId>
+	<name>HAPI-FHIR Spring Boot Starter</name>
 
 	<packaging>jar</packaging>
 
