@@ -457,7 +457,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
-		p.addName().setFamily(TEST_FAMILY_NAME);
+		p.addName().setFamily(TEST_FAMILY_NAME).setGiven(List.of(new StringType(TEST_GIVEN_NAME)));
 		p.setId("Patient/" + id.getIdPart());
 
 		String versionBeforeUpdate = myPatientDao.read(id.toUnqualifiedVersionless()).getIdElement().getVersionIdPart();
@@ -468,6 +468,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
 		p.addName().setFamily(TEST_FAMILY_NAME).setGiven(List.of(new StringType(TEST_GIVEN_NAME)));
+		p.setActive(true);
 		p.setId("Patient/" + id.getIdPart());
 
 		versionBeforeUpdate = myPatientDao.read(id.toUnqualifiedVersionless()).getIdElement().getVersionIdPart();
