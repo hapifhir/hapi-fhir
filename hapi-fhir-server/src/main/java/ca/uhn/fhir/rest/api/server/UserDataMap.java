@@ -8,11 +8,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * RequestDetails.getUserData() used to use a HashMap but that is not thread-safe.  It's not
+ * RequestDetails.getUserData() used a HashMap previously but that is not thread-safe.  It's not
  * possible to simply replace HashMap with ConcurrentHashMap in RequestDetails since null
  * values work differently. This class is a thin wrapper around ConcurrentHashMap that
- * preserves the expected null value behaviour.  We could use Collections.synchronizedMap to achieve
- * the required thread-safety, but ConcurrentHashMap has much better performance characteristics.
+ * preserves the expected null value behaviour on get. Note that contains() and size() do
+ * behave differently. See UserDataMapTest for details.  We could use Collections.synchronizedMap to achieve
+ * the required thread-safety, but ConcurrentHashMap has better performance characteristics.
  */
 public class UserDataMap implements Map<Object, Object> {
 	private final Map<Object, Object> myMap = new ConcurrentHashMap<>();
@@ -65,7 +66,10 @@ public class UserDataMap implements Map<Object, Object> {
 
 	@Override
 	public void putAll(@Nonnull Map<?, ?> m) {
-		myMap.putAll(m);
+		// We can't delegate directly to putAll since null keys would throw an exception
+		for (Entry<?, ?> entry : m.entrySet()) {
+			put(entry.getKey(), entry.getValue());
+		}
 	}
 
 	@Override
