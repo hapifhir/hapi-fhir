@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>hapi-fhir-spring-boot-sample-client-okhttp</artifactId>
-
+	<name>HAPI-FHIR Spring Boot Sample Client (OkHttp)</name>
 	<packaging>jar</packaging>
 
 	<dependencies>

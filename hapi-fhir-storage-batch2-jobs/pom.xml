@@ -10,7 +10,7 @@
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-
+	<name>HAPI-FHIR Storage Batch2 Jobs</name>
 	<artifactId>hapi-fhir-storage-batch2-jobs</artifactId>
 
 	<dependencies>
