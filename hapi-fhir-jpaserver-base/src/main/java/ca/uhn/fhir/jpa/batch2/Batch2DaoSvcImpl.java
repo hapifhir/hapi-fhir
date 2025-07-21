@@ -78,7 +78,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 
 	private final PartitionSettings myPartitionSettings;
 
-	private SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
+	private final SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
 
 	@Override
 	public boolean isAllResourceTypeSupported() {
