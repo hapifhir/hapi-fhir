@@ -747,6 +747,16 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	@Override
+	public SystemSupportInformation getTxSupportInfo(String system, String version) {
+		return null;
+	}
+
+	@Override
+	public SystemSupportInformation getTxSupportInfo(String system) {
+		return null;
+	}
+
+	@Override
 	public ValueSetExpansionOutcome expandVS(
 			ValueSet source, boolean cacheOk, boolean heiarchical, boolean incompleteOk) {
 		return null;
@@ -805,19 +815,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 
 	@Override
 	public void validateCodeBatch(
-			ValidationOptions options, List<? extends CodingValidationRequest> codes, ValueSet vs) {
-		for (CodingValidationRequest next : codes) {
-			ValidationResult outcome = validateCode(options, next.getCoding(), vs);
-			next.setResult(outcome);
-		}
-	}
-
-	@Override
-	public void validateCodeBatchByRef(
-			ValidationOptions validationOptions, List<? extends CodingValidationRequest> list, String s) {
-		ValueSet valueSet = fetchResource(ValueSet.class, s);
-		validateCodeBatch(validationOptions, list, valueSet);
-	}
+			ValidationOptions options, List<? extends CodingValidationRequest> codes, ValueSet vs, boolean passVS) {}
 
 	@Nonnull
 	private ValidationResult doValidation(
@@ -974,6 +972,12 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			return (List<T>) allStructureDefinitions();
 		}
 		throw new UnsupportedOperationException(Msg.code(650) + "Unable to fetch resources of type: " + theClass);
+	}
+
+	@Override
+	public <T extends Resource> List<T> fetchResourceVersionsByTypeAndUrl(Class<T> class_, String url) {
+		throw new UnsupportedOperationException(
+				Msg.code(2753) + "Can't fetch all resources of type : " + class_ + " and url: " + url);
 	}
 
 	@Override

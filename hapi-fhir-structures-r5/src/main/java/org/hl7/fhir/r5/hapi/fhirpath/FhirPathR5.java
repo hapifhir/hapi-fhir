@@ -13,6 +13,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r5.fhirpath.ExpressionNode;
 import org.hl7.fhir.r5.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.r5.fhirpath.FHIRPathUtilityClasses;
+import org.hl7.fhir.r5.fhirpath.IHostApplicationServices;
 import org.hl7.fhir.r5.fhirpath.TypeDetails;
 import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.model.Base;
@@ -91,26 +92,30 @@ public class FhirPathR5 implements IFhirPath {
 
 	@Override
 	public void setEvaluationContext(@Nonnull IFhirPathEvaluationContext theEvaluationContext) {
-		myEngine.setHostServices(new FHIRPathEngine.IEvaluationContext() {
+		myEngine.setHostServices(new IHostApplicationServices() {
 
 			@Override
 			public List<Base> resolveConstant(
-					FHIRPathEngine engine,
-					Object appContext,
-					String name,
-					boolean beforeContext,
-					boolean explicitConstant)
+					FHIRPathEngine engine, Object appContext, String name, FHIRPathConstantEvaluationMode mode)
 					throws PathEngineException {
 
+				IFhirPathEvaluationContext.ConstantEvaluationMode hapiConstantEvaluationMode =
+						switch (mode) {
+							case EXPLICIT -> IFhirPathEvaluationContext.ConstantEvaluationMode.EXPLICIT;
+							case NOVALUE -> IFhirPathEvaluationContext.ConstantEvaluationMode.NOVALUE;
+							case IMPLICIT_BEFORE -> IFhirPathEvaluationContext.ConstantEvaluationMode.IMPLICIT_BEFORE;
+							case IMPLICIT_AFTER -> IFhirPathEvaluationContext.ConstantEvaluationMode.IMPLICIT_AFTER;
+						};
+
 				return Collections.unmodifiableList(
-						theEvaluationContext.resolveConstant(appContext, name, beforeContext).stream()
+						theEvaluationContext.resolveConstant(appContext, name, hapiConstantEvaluationMode).stream()
 								.map(Base.class::cast)
 								.collect(Collectors.toList()));
 			}
 
 			@Override
 			public TypeDetails resolveConstantType(
-					FHIRPathEngine engine, Object appContext, String name, boolean explicitConstant)
+					FHIRPathEngine engine, Object appContext, String name, FHIRPathConstantEvaluationMode mode)
 					throws PathEngineException {
 				return null;
 			}

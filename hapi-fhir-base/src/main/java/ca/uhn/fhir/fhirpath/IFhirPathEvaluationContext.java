@@ -28,6 +28,13 @@ import java.util.List;
 
 public interface IFhirPathEvaluationContext {
 
+	public enum ConstantEvaluationMode {
+		EXPLICIT,
+		NOVALUE,
+		IMPLICIT_BEFORE,
+		IMPLICIT_AFTER
+	}
+
 	/**
 	 * Evaluates the <code>resolve()</code> function and returns the target
 	 * of the resolution.
@@ -36,6 +43,17 @@ public interface IFhirPathEvaluationContext {
 	 * @param theContext The entity containing the reference. Note that this will be <code>null</code> for FHIR versions R4 and below.
 	 */
 	default IBase resolveReference(@Nonnull IIdType theReference, @Nullable IBase theContext) {
+		return null;
+	}
+
+	/**
+	 *
+	 * @param appContext
+	 * @param name The name of the constant(s) to be resolved
+	 * @param mode
+	 * @return
+	 */
+	default List<IBase> resolveConstant(Object appContext, String name, ConstantEvaluationMode mode) {
 		return null;
 	}
 

@@ -42,6 +42,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.dstu3.support.utils.GraphQLEngine;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.utilities.graphql.IGraphQLEngine;
@@ -90,7 +91,7 @@ public class GraphQLProvider {
 						validationSupport, new DefaultProfileValidationSupport(theFhirContext));
 				org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext workerContext =
 						new org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext(theFhirContext, validationSupport);
-				myEngineFactory = () -> new org.hl7.fhir.dstu3.utils.GraphQLEngine(workerContext);
+				myEngineFactory = () -> new GraphQLEngine(workerContext);
 				break;
 			}
 			case R4: {
