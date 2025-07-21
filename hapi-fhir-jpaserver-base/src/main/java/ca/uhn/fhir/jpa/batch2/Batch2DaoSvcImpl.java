@@ -93,7 +93,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 			FhirContext theFhirContext,
 			IHapiTransactionService theTransactionService,
 			PartitionSettings thePartitionSettings,
-			SearchBuilderFactory theSearchBuilderFactory) {
+			SearchBuilderFactory<JpaPid> theSearchBuilderFactory) {
 		myResourceTableDao = theResourceTableDao;
 		myResourceLinkDao = theResourceLinkDao;
 		myMatchUrlService = theMatchUrlService;
