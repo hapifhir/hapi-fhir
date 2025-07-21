@@ -48,6 +48,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -871,6 +872,8 @@ public class BulkDataExportProviderR4Test {
 		input.addParameter(JpaConstants.PARAM_EXPORT_SINCE, now);
 		input.addParameter(JpaConstants.PARAM_EXPORT_UNTIL, later);
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType("Immunization?vaccine-code=foo"));
+		input.addParameter(JpaConstants.PARAM_EXPORT_PATIENT, new Reference("Patient/123"));
+		input.addParameter(JpaConstants.PARAM_EXPORT_PATIENT, new StringType("Patient/456"));
 
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
@@ -892,6 +895,7 @@ public class BulkDataExportProviderR4Test {
 		assertNotNull(bp.getSince());
 		assertNotNull(bp.getUntil());
 		assertThat(bp.getFilters()).containsExactlyInAnyOrder("Immunization?vaccine-code=foo");
+		assertThat(bp.getPatientIds()).containsExactlyInAnyOrder("Patient/123", "Patient/456");
 	}
 
 	@Test
