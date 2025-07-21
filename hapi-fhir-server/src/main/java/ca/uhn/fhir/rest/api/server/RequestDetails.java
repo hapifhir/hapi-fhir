@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.ArrayUtils;
@@ -510,6 +511,7 @@ public abstract class RequestDetails {
 	 * methods available on implementations that support them.
 	 * </p>
 	 */
+	@Nonnull
 	public Map<Object, Object> getUserData() {
 		return myUserData;
 	}
