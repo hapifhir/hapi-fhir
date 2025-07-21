@@ -1172,7 +1172,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 			assertThat(actual).contains(referenceToPatient.getReference());
-			assertThat(actual).contains(listResourceId);
+			assertThat(actual).doesNotContain(listResourceId);
     }
 
     @Test
