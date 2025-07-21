@@ -2672,6 +2672,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		DaoMethodOutcome outcome = toMethodOutcome(
 						theRequest, savedEntity, theResource, null, RestOperationTypeEnum.UPDATE)
 				.setCreated(wasDeleted);
+		// TODO start here - the resource is set to deleted after the update w/ history rewrite
+		// I suspect this increments the ResourceTable version, but not the HistoryTable
 
 		populateOperationOutcomeForUpdate(w, outcome, null, RestOperationTypeEnum.UPDATE, theTransactionDetails);
 
