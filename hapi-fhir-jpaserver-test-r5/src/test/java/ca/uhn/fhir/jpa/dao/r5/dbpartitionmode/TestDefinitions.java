@@ -638,7 +638,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			assertThat(getSelectSql(1)).startsWith("SELECT DISTINCT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK");
 		}
 		if (myIncludePartitionIdsInPks) {
-			assertThat(getSelectSql(1)).contains("WHERE ((t0.TARGET_RES_PARTITION_ID,t0.TARGET_RESOURCE_ID) IN (('1','" + ids.patientPid + "')) )");
+			assertThat(getSelectSql(1)).contains("WHERE (((t0.TARGET_RES_PARTITION_ID,t0.TARGET_RESOURCE_ID) IN (('1','" + ids.patientPid + "')) )");
 			assertThat(getSelectSql(1)).contains("GROUP BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
 			assertThat(getSelectSql(1)).contains("ORDER BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
 			assertThat(getSelectSql(2)).containsAnyOf(
