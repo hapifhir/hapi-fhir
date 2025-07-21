@@ -59,8 +59,11 @@ public abstract class RequestDetails {
 	private static final Logger ourLog = LoggerFactory.getLogger(RequestDetails.class);
 	public static final byte[] BAD_STREAM_PLACEHOLDER =
 			(Msg.code(2543) + "PLACEHOLDER WHEN READING FROM BAD STREAM").getBytes(StandardCharsets.UTF_8);
+
 	private final StopWatch myRequestStopwatch;
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	private final IInterceptorBroadcaster myInterceptorBroadcaster;
+	private final Map<Object, Object> myUserData = new UserDataMap();
+
 	private String myTenantId;
 	private String myCompartmentName;
 	private String myCompleteUrl;
@@ -78,7 +81,6 @@ public abstract class RequestDetails {
 	private String mySecondaryOperation;
 	private boolean mySubRequest;
 	private Map<String, List<String>> myUnqualifiedToQualifiedNames;
-	private final Map<Object, Object> myUserData = new UserDataMap();
 	private IBaseResource myResource;
 	private String myRequestId;
 	private String myTransactionGuid;
@@ -123,6 +125,9 @@ public abstract class RequestDetails {
 		myRequestId = theRequestDetails.getRequestId();
 		myTransactionGuid = theRequestDetails.getTransactionGuid();
 		myFixedConditionalUrl = theRequestDetails.getFixedConditionalUrl();
+		myRewriteHistory = theRequestDetails.isRewriteHistory();
+		myMaxRetries = theRequestDetails.getMaxRetries();
+		myRetry = theRequestDetails.isRetry();
 	}
 
 	public String getFixedConditionalUrl() {
@@ -385,7 +390,7 @@ public abstract class RequestDetails {
 	}
 
 	public void setRequestPath(String theRequestPath) {
-		assert theRequestPath.length() == 0 || theRequestPath.charAt(0) != '/';
+		assert theRequestPath.isEmpty() || theRequestPath.charAt(0) != '/';
 		myRequestPath = theRequestPath;
 	}
 
@@ -558,7 +563,6 @@ public abstract class RequestDetails {
 					myRequestContents = BAD_STREAM_PLACEHOLDER;
 				}
 			}
-			assert myRequestContents != null : "We must not re-read the stream.";
 		}
 		return getRequestContentsIfLoaded();
 	}

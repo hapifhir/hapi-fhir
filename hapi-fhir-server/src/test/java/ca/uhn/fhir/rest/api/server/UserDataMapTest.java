@@ -30,7 +30,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -58,6 +57,7 @@ class UserDataMapTest {
 	@Test
 	void testContainsValueWithNull_shouldNotThrowException() {
 		// Given
+		@SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
 		UserDataMap userDataMap = new UserDataMap();
 		
 		// When/Then - should not throw NPE unlike ConcurrentHashMap
@@ -90,38 +90,41 @@ class UserDataMapTest {
 		UserDataMap userDataMap = new UserDataMap();
 		int numThreads = 10;
 		int operationsPerThread = 1000;
+
 		ExecutorService executor = Executors.newFixedThreadPool(numThreads);
-		CountDownLatch latch = new CountDownLatch(numThreads);
-		AtomicInteger successCount = new AtomicInteger(0);
-		
-		// When - multiple threads perform concurrent operations
-		for (int i = 0; i < numThreads; i++) {
-			final int threadId = i;
-			executor.submit(() -> {
-				try {
-					for (int j = 0; j < operationsPerThread; j++) {
-						String key = "thread-" + threadId + "-key-" + j;
-						String value = "value-" + j;
-						
-						userDataMap.put(key, value);
-						String retrieved = (String) userDataMap.get(key);
-						
-						if (value.equals(retrieved)) {
-							successCount.incrementAndGet();
+		try {
+			CountDownLatch latch = new CountDownLatch(numThreads);
+			AtomicInteger successCount = new AtomicInteger(0);
+
+			// When - multiple threads perform concurrent operations
+			for (int i = 0; i < numThreads; i++) {
+				final int threadId = i;
+				executor.submit(() -> {
+					try {
+						for (int j = 0; j < operationsPerThread; j++) {
+							String key = "thread-" + threadId + "-key-" + j;
+							String value = "value-" + j;
+
+							userDataMap.put(key, value);
+							String retrieved = (String) userDataMap.get(key);
+
+							if (value.equals(retrieved)) {
+								successCount.incrementAndGet();
+							}
 						}
+					} finally {
+						latch.countDown();
 					}
-				} finally {
-					latch.countDown();
-				}
-			});
+				});
+			}
+
+			// Then - all operations should complete without data corruption
+			assertThat(latch.await(30, TimeUnit.SECONDS)).isTrue();
+			assertThat(successCount.get()).isEqualTo(numThreads * operationsPerThread);
+			assertThat(userDataMap.size()).isEqualTo(numThreads * operationsPerThread);
+		} finally {
+			executor.shutdown();
 		}
-		
-		// Then - all operations should complete without data corruption
-		assertThat(latch.await(30, TimeUnit.SECONDS)).isTrue();
-		assertThat(successCount.get()).isEqualTo(numThreads * operationsPerThread);
-		assertThat(userDataMap.size()).isEqualTo(numThreads * operationsPerThread);
-		
-		executor.shutdown();
 	}
 
 	@Test
@@ -134,8 +137,9 @@ class UserDataMapTest {
 		
 		// When/Then - Unlike HashMap, ConcurrentHashMap-based map should not throw ConcurrentModificationException
 		// This should complete without throwing an exception
+		//noinspection Java8MapApi
 		for (Object key : userDataMap.keySet()) {
-			userDataMap.put("newKey", "newValue"); // Modify during iteration
+			userDataMap.put(key, "newValue"); // Modify during iteration
 		}
 		// If we get here, no ConcurrentModificationException was thrown
 		assertThat(userDataMap.size()).isGreaterThan(3); // Should have added at least one new key
@@ -168,31 +172,35 @@ class UserDataMapTest {
 		// Given
 		UserDataMap userDataMap = new UserDataMap();
 		int numThreads = 5;
+
 		ExecutorService executor = Executors.newFixedThreadPool(numThreads);
-		CountDownLatch latch = new CountDownLatch(numThreads);
-		
-		// When - multiple threads put null and check containsKey
-		for (int i = 0; i < numThreads; i++) {
-			final int threadId = i;
-			executor.submit(() -> {
-				try {
-					String key = "nullKey-" + threadId;
-					userDataMap.put(key, "value");
-					assertThat(userDataMap.containsKey(key)).isTrue();
-					
-					userDataMap.put(key, null); // Should remove the key
-					assertThat(userDataMap.containsKey(key)).isFalse(); // Should be false after null put
-				} finally {
-					latch.countDown();
-				}
-			});
+		try {
+			CountDownLatch latch = new CountDownLatch(numThreads);
+
+			// When - multiple threads put null and check containsKey
+			for (int i = 0; i < numThreads; i++) {
+				final int threadId = i;
+				executor.submit(() -> {
+					try {
+						String key = "nullKey-" + threadId;
+						userDataMap.put(key, "value");
+						assertThat(userDataMap.containsKey(key)).isTrue();
+
+						userDataMap.put(key, null); // Should remove the key
+						assertThat(userDataMap.containsKey(key)).isFalse(); // Should be false after null put
+					} finally {
+						latch.countDown();
+					}
+				});
+			}
+
+			// Then
+			assertThat(latch.await(10, TimeUnit.SECONDS)).isTrue();
+			assertThat(userDataMap.size()).isEqualTo(0); // All entries should be removed
+
+		} finally {
+			executor.shutdown();
 		}
-		
-		// Then
-		assertThat(latch.await(10, TimeUnit.SECONDS)).isTrue();
-		assertThat(userDataMap.size()).isEqualTo(0); // All entries should be removed
-		
-		executor.shutdown();
 	}
 
 }

@@ -37,7 +37,6 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
@@ -181,7 +180,7 @@ public class JaxRsRequest extends RequestDetails implements IHasServletAttribute
 	}
 
 	@Override
-	public Reader getReader() throws IOException {
+	public Reader getReader() {
 		// not yet implemented
 		throw new UnsupportedOperationException(Msg.code(600));
 	}
@@ -218,13 +217,14 @@ public class JaxRsRequest extends RequestDetails implements IHasServletAttribute
 	 */
 	public static class Builder {
 		private final String myResourceName;
+		private final RequestTypeEnum myRequestType;
+		private final String myRequestUrl;
+		private final RestOperationTypeEnum myRestOperation;
+		private final AbstractJaxRsProvider myServer;
+
+		private String myResource;
 		private String myCompartment;
 		private String myId;
-		private RequestTypeEnum myRequestType;
-		private String myRequestUrl;
-		private String myResource;
-		private RestOperationTypeEnum myRestOperation;
-		private AbstractJaxRsProvider myServer;
 		private String myVersion;
 
 		/**
@@ -233,7 +233,7 @@ public class JaxRsRequest extends RequestDetails implements IHasServletAttribute
 		 * @param theServer        the server
 		 * @param theRequestType   the request type
 		 * @param theRestOperation the rest operation
-		 * @param theRequestUrl
+		 * @param theRequestUrl    the request url
 		 */
 		public Builder(
 				AbstractJaxRsProvider theServer,

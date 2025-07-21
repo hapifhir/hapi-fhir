@@ -16,14 +16,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class RuleBulkExportImplTest {
-	private RestOperationTypeEnum myOperation = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
-	private Pointcut myPointcut = Pointcut.STORAGE_INITIATE_BULK_EXPORT;
+	private final RestOperationTypeEnum myOperation = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
+	private final Pointcut myPointcut = Pointcut.STORAGE_INITIATE_BULK_EXPORT;
+
 	@Mock
 	private RequestDetails myRequestDetails;
 	@Mock
@@ -561,16 +562,16 @@ public class RuleBulkExportImplTest {
 	}
 
 	private static void assertAbstain(AuthorizationInterceptor.Verdict verdict) {
-		Assertions.assertEquals(null, verdict, "Expect abstain");
+		assertNull(verdict, "Expect abstain");
 	}
 
 	private static void assertAllow(AuthorizationInterceptor.Verdict verdict) {
 		Assertions.assertNotNull(verdict, "Expect ALLOW, got abstain");
-		Assertions.assertEquals(PolicyEnum.ALLOW, verdict.getDecision(), "Expect ALLOW");
+		assertEquals(PolicyEnum.ALLOW, verdict.getDecision(), "Expect ALLOW");
 	}
 
 	private static void assertDeny(AuthorizationInterceptor.Verdict verdict) {
 		Assertions.assertNotNull(verdict, "Expect DENY, got abstain");
-		Assertions.assertEquals(PolicyEnum.DENY, verdict.getDecision(), "Expect DENY");
+		assertEquals(PolicyEnum.DENY, verdict.getDecision(), "Expect DENY");
 	}
 }
