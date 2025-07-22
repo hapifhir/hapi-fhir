@@ -78,7 +78,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 
 	private final PartitionSettings myPartitionSettings;
 
-	private SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
+	private final SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
 
 	@Override
 	public boolean isAllResourceTypeSupported() {
@@ -93,7 +93,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 			FhirContext theFhirContext,
 			IHapiTransactionService theTransactionService,
 			PartitionSettings thePartitionSettings,
-			SearchBuilderFactory theSearchBuilderFactory) {
+			SearchBuilderFactory<JpaPid> theSearchBuilderFactory) {
 		myResourceTableDao = theResourceTableDao;
 		myResourceLinkDao = theResourceLinkDao;
 		myMatchUrlService = theMatchUrlService;
