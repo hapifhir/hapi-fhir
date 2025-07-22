@@ -167,10 +167,10 @@ public class ResourceUndoMergeService {
 				theRequestDetails, ReadPartitionIdRequestDetails.forRead(targetPatient.getIdElement()));
 
 		Set<Reference> allowedToUndelete = new HashSet<>();
-		Reference sourceReference = provenance.getTarget().get(1);
 		if (wasSourceResourceDeletedByMergeOperation(provenance)) {
 			// If the source resource was deleted by the merge operation,
 			// let the version restorer know it can be undeleted.
+			Reference sourceReference = provenance.getTarget().get(1);
 			allowedToUndelete.add(sourceReference);
 		}
 

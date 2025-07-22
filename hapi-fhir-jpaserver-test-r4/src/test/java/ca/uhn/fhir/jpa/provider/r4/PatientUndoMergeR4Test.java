@@ -12,6 +12,12 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -29,13 +35,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.TOTAL_EXPECTED_PATCHES;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_OUTCOME;
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchException;
 
 /**
@@ -399,7 +406,7 @@ public class PatientUndoMergeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	void test_MissingRequiredParameters_400BadRequest() {
+	void testUndoMerge_MissingRequiredParameters_400BadRequest() {
 		Parameters params = new Parameters();
 		callUndoAndAssertExceptionWithMessagesInTheOutcome(params,
 			InvalidRequestException.class,
@@ -410,7 +417,26 @@ public class PatientUndoMergeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	void test_BothSrcParametersProvided_400BadRequest() {
+	void testUndoMerge_NonParameterRequestBody_Returns400BadRequest() throws IOException {
+		HttpClientExtension clientExtension = new HttpClientExtension();
+		clientExtension.initialize();
+		try (CloseableHttpClient client = clientExtension.getClient()) {
+			HttpPost post = new HttpPost(myServer.getBaseUrl() + "/Patient/$hapi.fhir.undo-merge");
+			post.addHeader("Content-Type", "application/fhir+json");
+			post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(new Patient()), StandardCharsets.UTF_8));
+			try (CloseableHttpResponse response = client.execute(post)) {
+				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+				String responseContent = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+				assertThat(responseContent).contains("There are no source resource parameters provided");
+				assertThat(responseContent).contains("There are no target resource parameters provided");
+			}
+		}
+	}
+
+
+
+	@Test
+	void testUndoMerge_BothSrcParametersProvided_400BadRequest() {
 		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
 		inParams.sourcePatient = new Reference("Patient/123");
 		inParams.sourcePatientIdentifiers = List.of(new Identifier().setSystem("sys").setValue("val"));
@@ -423,7 +449,7 @@ public class PatientUndoMergeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	void test_BothTargetParametersProvided_400BadRequest() {
+	void testUndoMerge_BothTargetParametersProvided_400BadRequest() {
 		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
 		inParams.sourcePatient = new Reference("Patient/123");
 		inParams.targetPatient = new Reference("Patient/456");

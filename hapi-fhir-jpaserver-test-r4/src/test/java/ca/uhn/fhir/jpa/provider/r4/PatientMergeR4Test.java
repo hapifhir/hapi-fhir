@@ -13,7 +13,13 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -35,6 +41,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -471,6 +479,24 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			.extracting(InvalidRequestException.class::cast)
 			.extracting(BaseServerResponseException::getStatusCode)
 			.isEqualTo(400);
+	}
+
+
+	@Test
+	void testMerge_NonParameterRequestBody_Returns400BadRequest() throws IOException {
+		HttpClientExtension clientExtension = new HttpClientExtension();
+		clientExtension.initialize();
+		try (CloseableHttpClient client = clientExtension.getClient()) {
+			HttpPost post = new HttpPost(myServer.getBaseUrl() + "/Patient/$merge");
+			post.addHeader("Content-Type", "application/fhir+json");
+			post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(new Patient()), StandardCharsets.UTF_8));
+			try (CloseableHttpResponse response = client.execute(post)) {
+				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+				String responseContent = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+				assertThat(responseContent).contains("There are no source resource parameters provided");
+				assertThat(responseContent).contains("There are no target resource parameters provided");
+			}
+		}
 	}
 
 	private void assertUnprocessibleEntityWithMessage(Parameters inParameters, String theExpectedMessage) {

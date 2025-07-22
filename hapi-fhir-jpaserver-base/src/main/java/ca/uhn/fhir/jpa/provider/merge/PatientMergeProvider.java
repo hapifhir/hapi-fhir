@@ -40,8 +40,8 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Resource;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -119,7 +119,7 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 					theResultPatient,
 					resourceLimit,
 					provenanceAgents,
-					(Parameters) theRequestDetails.getResource());
+					theRequestDetails.getResource());
 
 			MergeOperationOutcome mergeOutcome =
 					myResourceMergeService.merge(mergeOperationParameters, theRequestDetails);
@@ -244,8 +244,6 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 		}
 		theMergeOperationParameters.setSourceResource(theSourcePatient);
 		theMergeOperationParameters.setTargetResource(theTargetPatient);
-		theMergeOperationParameters.setSourceResource(theSourcePatient);
-		theMergeOperationParameters.setTargetResource(theTargetPatient);
 	}
 
 	private MergeOperationInputParameters buildMergeOperationInputParameters(
@@ -258,7 +256,7 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 			IBaseResource theResultPatient,
 			int theResourceLimit,
 			List<IProvenanceAgent> theProvenanceAgents,
-			Parameters theOriginalInputParameters) {
+			IBaseResource theOriginalInputParameters) {
 
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(theResourceLimit);
 
@@ -279,7 +277,7 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 		}
 
 		mergeOperationParameters.setProvenanceAgents(theProvenanceAgents);
-		mergeOperationParameters.setOriginalInputParameters(theOriginalInputParameters.copy());
+		mergeOperationParameters.setOriginalInputParameters(((Resource) theOriginalInputParameters).copy());
 		return mergeOperationParameters;
 	}
 }
