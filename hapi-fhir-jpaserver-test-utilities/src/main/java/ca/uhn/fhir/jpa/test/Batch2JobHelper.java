@@ -51,7 +51,7 @@ public class Batch2JobHelper {
 	private static final Logger ourLog = LoggerFactory.getLogger(Batch2JobHelper.class);
 
 	private static final int BATCH_SIZE = 100;
-	public static final int DEFAULT_WAIT_DEADLINE = 3000; //todo jdjd reset to 30
+	public static final int DEFAULT_WAIT_DEADLINE = 30;
 	public static final Duration DEFAULT_WAIT_DURATION = Duration.of(DEFAULT_WAIT_DEADLINE, ChronoUnit.SECONDS);
 
 	private final IJobMaintenanceService myJobMaintenanceService;

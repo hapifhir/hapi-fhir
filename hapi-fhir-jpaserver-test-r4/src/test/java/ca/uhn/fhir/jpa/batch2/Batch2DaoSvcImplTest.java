@@ -501,13 +501,9 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 
 		doUpdateResource(observationAfterDate);
 
-		DaoMethodOutcome patientNoMatchOutcome = doUpdateResourceAndReturnOutcome(noMatchPatient);
-		IdType idAfterDate = new IdType(patientNoMatchOutcome.getPersistentId().getResourceType(), (Long) patientNoMatchOutcome.getPersistentId().getId());
-
-		DaoMethodOutcome patientNoMatchOutcomeDel = doUpdateResourceAndReturnOutcome(noMatchPatientDeleted);
-		IdType idDeletedAfterDate = new IdType(patientNoMatchOutcomeDel.getPersistentId().getResourceType(), (Long) patientNoMatchOutcomeDel.getPersistentId().getId());
+		doUpdateResourceAndReturnOutcome(noMatchPatient);
+		doUpdateResourceAndReturnOutcome(noMatchPatientDeleted);
 		deleteResource(new IdType("Patient", "p-no-match-del"));
-
 
 		// When
 		String theFullUrl = "Patient?_includeDeleted=" + theIncludeDeleted.getCode() + buildAdditionalSearchParams(theIncludeDeleted, theLastUpdatedParam, theIdParam, date);
