@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.embedded;
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.util.VersionEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,10 @@ import org.slf4j.LoggerFactory;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static ca.uhn.fhir.jpa.migrate.DriverTypeEnum.H2_EMBEDDED;
 
 public class DatabaseInitializerHelper {
 	private static final Logger ourLog = LoggerFactory.getLogger(DatabaseInitializerHelper.class);
@@ -40,9 +45,61 @@ public class DatabaseInitializerHelper {
 
 	public void insertPersistenceTestData(JpaEmbeddedDatabase theDatabase, VersionEnum theVersionEnum) {
 		String fileName =
-				String.format("migration/releases/%s/data/%s.sql", theVersionEnum, theDatabase.getDriverType());
+				String.format("migration/releases/%s/data/%s.sql", theVersionEnum, H2_EMBEDDED);
 		String sql = getSqlFromResourceFile(fileName);
-		theDatabase.insertTestData(sql);
+		String newSql = convertSql(sql, theDatabase.getDriverType());
+		theDatabase.insertTestData(newSql);
+	}
+
+	private String convertSql(String sql, DriverTypeEnum driverType) {
+		switch (driverType) {
+			case MSSQL_2012 -> {
+				String result = sql.replace("true", "'true'").replace("TRUE", "'true'");
+				result = result.replace("false","'false'").replace("FALSE", "'false'");
+
+				// replace BLOB NUMBER with MSSQL BLOB
+				result = convertToBinary(result, "");
+				return result;
+			}
+			case POSTGRES_9_4 -> {
+				// replace BLOB NUMBER with Postgres BLOB
+				return convertToBinary(sql, "'");
+			}
+			case ORACLE_12C -> {
+				// Regular expression to match the date format 'YYYY-MM-DD HH:MI:SS.SSSSS'
+				String blobPattern = "'\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d+'";
+				String result = sql.replace("true", "1").replace("TRUE", "1");
+				result = result.replace("false","0").replace("FALSE", "0");
+
+				// Regular expression to match the date format 'YYYY-MM-DD HH:MI:SS.SSSSS'
+				String datePattern = "'\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d+'";
+
+				// Replace all occurrences of the date format with SYSDATE
+				result = result.replaceAll(datePattern, "SYSDATE");
+
+				// replace BLOB NUMBER with ORACLE BLOB
+				result = convertToBinary(result, "'");
+				return result;
+			}
+		}
+		return sql;
+	}
+
+	private static String convertToBinary(String theSqlScript, String theReplacement) {
+		// find convert_to_binary functions
+		Pattern pattern = Pattern.compile("convert_to_binary\\((\\d+)\\)");
+		Matcher matcher = pattern.matcher(theSqlScript);
+
+		StringBuilder modifiedScript = new StringBuilder();
+
+		// Iterate through all matches and replace them with the number as a string
+		while (matcher.find()) {
+			String number = matcher.group(1);
+			String replacement = theReplacement + number + theReplacement;
+			matcher.appendReplacement(modifiedScript, replacement);
+		}
+		matcher.appendTail(modifiedScript);
+		return modifiedScript.toString();
 	}
 
 	public String getSqlFromResourceFile(String theFileName) {
