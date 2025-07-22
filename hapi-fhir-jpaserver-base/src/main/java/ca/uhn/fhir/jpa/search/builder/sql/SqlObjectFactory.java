@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.search.builder.sql;
 
-import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
@@ -84,7 +83,7 @@ public class SqlObjectFactory {
 	}
 
 	public ResourceTablePredicateBuilder resourceTable(SearchQueryBuilder theSearchSqlBuilder) {
-		return myApplicationContext.getBean(ResourceTablePredicateBuilder.class, theSearchSqlBuilder, SearchIncludeDeletedEnum.FALSE);
+		return myApplicationContext.getBean(ResourceTablePredicateBuilder.class, theSearchSqlBuilder, SearchIncludeDeletedEnum.NEVER);
 	}
 
 	public ResourceTablePredicateBuilder resourceTable(SearchQueryBuilder theSearchSqlBuilder, SearchIncludeDeletedEnum theSearchIncludeDeleted) {

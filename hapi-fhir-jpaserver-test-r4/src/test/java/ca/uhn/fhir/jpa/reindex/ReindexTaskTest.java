@@ -426,7 +426,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 			Patient p = new Patient().setActive(true);
 			p.setId("p1");
 			String patResBody = myFhirContext.newJsonParser().encodeResourceToString(p);
-			JpaPid patientPid = createPatientAndMaybeDeletePatient(p, !theIncludeDeleted.equals(SearchIncludeDeletedEnum.FALSE));
+			JpaPid patientPid = createPatientAndMaybeDeletePatient(p, !theIncludeDeleted.equals(SearchIncludeDeletedEnum.NEVER));
 
 			movePatientResourceBodyToResTextLob(patResBody, 1);
 			moveObservationResourceBodyToResTextLob(obsResBody, 2);
@@ -436,8 +436,8 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 
 			// Then
 			switch (theIncludeDeleted) {
-				case TRUE -> assertCorrectResourcesReindexed(List.of(obsDeletedJpaPid, patientPid), List.of(obsKeptJpaPid), List.of(obsAfterDeleteJpaPid), obsResBody, patResBody);
-				case FALSE -> assertCorrectResourcesReindexed(List.of(obsKeptJpaPid, patientPid), List.of(obsDeletedJpaPid), List.of(obsAfterDeleteJpaPid), obsResBody, patResBody);
+				case EXCLUSIVE -> assertCorrectResourcesReindexed(List.of(obsDeletedJpaPid, patientPid), List.of(obsKeptJpaPid), List.of(obsAfterDeleteJpaPid), obsResBody, patResBody);
+				case NEVER -> assertCorrectResourcesReindexed(List.of(obsKeptJpaPid, patientPid), List.of(obsDeletedJpaPid), List.of(obsAfterDeleteJpaPid), obsResBody, patResBody);
 				case BOTH -> assertCorrectResourcesReindexed(List.of(obsDeletedJpaPid, obsKeptJpaPid, patientPid), List.of(), List.of(obsAfterDeleteJpaPid), obsResBody, patResBody);
 			}
 		}
@@ -486,8 +486,8 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 
 			// Then
 			switch (theIncludeDeleted) {
-				case TRUE -> assertCorrectResourcesReindexed(List.of(obsDeletedJpaPid), List.of(obsKeptJpaPid, obsKeptJpaPid2, obsDeletedJpaPid2), List.of(obsDeletedVersionJpaPid, obsDeletedVersionJpaPid2), obsResBody, "");
-				case FALSE -> assertCorrectResourcesReindexed(List.of(obsKeptJpaPid), List.of(obsDeletedJpaPid, obsKeptJpaPid2, obsDeletedJpaPid2), List.of(obsDeletedVersionJpaPid, obsDeletedVersionJpaPid2), obsResBody, "");
+				case EXCLUSIVE -> assertCorrectResourcesReindexed(List.of(obsDeletedJpaPid), List.of(obsKeptJpaPid, obsKeptJpaPid2, obsDeletedJpaPid2), List.of(obsDeletedVersionJpaPid, obsDeletedVersionJpaPid2), obsResBody, "");
+				case NEVER -> assertCorrectResourcesReindexed(List.of(obsKeptJpaPid), List.of(obsDeletedJpaPid, obsKeptJpaPid2, obsDeletedJpaPid2), List.of(obsDeletedVersionJpaPid, obsDeletedVersionJpaPid2), obsResBody, "");
 				case BOTH -> assertCorrectResourcesReindexed(List.of(obsDeletedJpaPid, obsKeptJpaPid), List.of(obsDeletedJpaPid2, obsKeptJpaPid2), List.of(obsDeletedVersionJpaPid, obsDeletedVersionJpaPid2), obsResBody, "");
 			}
 		}
@@ -497,7 +497,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		public void testServerReindexOptimizeStorage_targetingDeletedResourcesWithUnsupportedParams_failsWithMessage(String theAdditionalParams) {
 			// Given
 			ReindexJobParameters parameters = new ReindexJobParameters();
-			parameters.addUrl("?_includeDeleted=true&" + theAdditionalParams + "=abc");
+			parameters.addUrl("?_includeDeleted=exclusive&" + theAdditionalParams + "=abc");
 			parameters.setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.NONE);
 			parameters.setOptimizeStorage(ALL_VERSIONS);
 
@@ -534,7 +534,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 			Patient p = new Patient().setActive(true);
 			p.setId("p1");
 			String patResBody = myFhirContext.newJsonParser().encodeResourceToString(p);
-			JpaPid patientPid = createPatientAndMaybeDeletePatient(p, !theIncludeDeleted.equals(SearchIncludeDeletedEnum.FALSE));
+			JpaPid patientPid = createPatientAndMaybeDeletePatient(p, !theIncludeDeleted.equals(SearchIncludeDeletedEnum.NEVER));
 
 			movePatientResourceBodyToResTextLob(patResBody, 1);
 			moveObservationResourceBodyToResTextLob(obsResBody, 2);
@@ -544,8 +544,8 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 
 			// Then
 			switch (theIncludeDeleted) {
-				case TRUE -> assertCorrectResourcesReindexed(List.of(obsDeletedJpaPid), List.of(obsKeptJpaPid, patientPid), List.of(obsDeletedVersionJpaPid), obsResBody, patResBody);
-				case FALSE -> assertCorrectResourcesReindexed(List.of(obsKeptJpaPid), List.of(obsDeletedJpaPid, patientPid), List.of(obsDeletedVersionJpaPid), obsResBody, patResBody);
+				case EXCLUSIVE -> assertCorrectResourcesReindexed(List.of(obsDeletedJpaPid), List.of(obsKeptJpaPid, patientPid), List.of(obsDeletedVersionJpaPid), obsResBody, patResBody);
+				case NEVER -> assertCorrectResourcesReindexed(List.of(obsKeptJpaPid), List.of(obsDeletedJpaPid, patientPid), List.of(obsDeletedVersionJpaPid), obsResBody, patResBody);
 				case BOTH -> assertCorrectResourcesReindexed(List.of(obsDeletedJpaPid, obsKeptJpaPid), List.of(patientPid), List.of(obsDeletedVersionJpaPid), obsResBody, patResBody);
 			}
 		}
@@ -567,7 +567,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 			Patient p = new Patient().setActive(true);
 			p.setId("p1");
 			String patResBody = myFhirContext.newJsonParser().encodeResourceToString(p);
-			JpaPid patientPid = createPatientAndMaybeDeletePatient(p, !theIncludeDeleted.equals(SearchIncludeDeletedEnum.FALSE));
+			JpaPid patientPid = createPatientAndMaybeDeletePatient(p, !theIncludeDeleted.equals(SearchIncludeDeletedEnum.NEVER));
 
 			BaseDateTimeDt date = new DateTimeDt().setValue(new Date());
 			sleepAtLeast(1000);
@@ -598,9 +598,9 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 
 			// Then
 			switch (theIncludeDeleted) {
-				case TRUE ->
+				case EXCLUSIVE ->
 					assertCorrectResourcesReindexed(List.of(obsDeletedJpaPid), List.of(obsKeptJpaPid, obsKeptJpaPid2, obsDeletedJpaPid2, patientPid), List.of(deletedObsVersionBeforeDateJpaPid, deletedObsVersionAfterDateJpaPid), obsResBody, patResBody);
-				case FALSE ->
+				case NEVER ->
 					assertCorrectResourcesReindexed(List.of(obsKeptJpaPid), List.of(obsDeletedJpaPid, obsKeptJpaPid2, obsDeletedJpaPid2, patientPid), List.of(deletedObsVersionBeforeDateJpaPid, deletedObsVersionAfterDateJpaPid), obsResBody, patResBody);
 				case BOTH -> {
 					if (theFullUrl.contains(Constants.PARAM_ID)) {
@@ -632,7 +632,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 				theAdditionalSearchUrlParams.append(String.format(theLastUpdatedParam, date.getValueAsString()));
 			}
 			if (theIdParam != null) {
-				String theIdToUse = theIncludeDeleted.equals(SearchIncludeDeletedEnum.FALSE) ? "obs-to-keep" : "obs-to-delete";
+				String theIdToUse = theIncludeDeleted.equals(SearchIncludeDeletedEnum.NEVER) ? "obs-to-keep" : "obs-to-delete";
 				theAdditionalSearchUrlParams.append(String.format(theIdParam, theIdToUse));
 			}
 			return theAdditionalSearchUrlParams.toString();
@@ -643,7 +643,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		public void testResourceTypeReindexOptimizeStorage_targetingDeletedResourcesWithUnsupportedParams_failsWithMessage(String theAdditionalParams) {
 			// Given
 			ReindexJobParameters parameters = new ReindexJobParameters();
-			parameters.addUrl("Patient?_includeDeleted=true&" + theAdditionalParams + "=abc");
+			parameters.addUrl("Patient?_includeDeleted=exclusive&" + theAdditionalParams + "=abc");
 			parameters.setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.NONE);
 			parameters.setOptimizeStorage(ALL_VERSIONS);
 
@@ -695,8 +695,8 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 
 			// When: a reindex job with multiple URLs targeting multiple resource types
 			ReindexJobParameters parameters = new ReindexJobParameters();
-			parameters.addUrl("Observation?_includeDeleted=true&_id=obs1,obs2");
-			parameters.addUrl("Patient?_includeDeleted=true&_id=p1");
+			parameters.addUrl("Observation?_includeDeleted=exclusive&_id=obs1,obs2");
+			parameters.addUrl("Patient?_includeDeleted=exclusive&_id=p1");
 			parameters.setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.NONE);
 			parameters.setOptimizeStorage(ALL_VERSIONS);
 

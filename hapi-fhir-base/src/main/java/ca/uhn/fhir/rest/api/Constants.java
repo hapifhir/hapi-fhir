@@ -220,7 +220,7 @@ public class Constants {
 	public static final String PARAM_CONTENT_URL = "http://hl7.org/fhir/SearchParameter/Resource-content";
 	public static final String PARAM_COUNT = "_count";
 	public static final String PARAM_OFFSET = "_offset";
-	public static final String PARAM_DELETED = "_includeDeleted";
+	public static final String PARAM_INCLUDE_DELETED = "_includeDeleted";
 	public static final String PARAM_ELEMENTS = "_elements";
 	public static final String PARAM_ELEMENTS_EXCLUDE_MODIFIER = ":exclude";
 	public static final String PARAM_FORMAT = "_format";

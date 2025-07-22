@@ -55,8 +55,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class MatchUrlService {
 
-	public static final Set<String> COMPATIBLE_PARAMS_NO_RES_TYPE = Set.of(Constants.PARAM_DELETED, Constants.PARAM_LASTUPDATED);
-	public static final Set<String> COMPATIBLE_PARAMS_GIVEN_RES_TYPE = Set.of(Constants.PARAM_DELETED, Constants.PARAM_LASTUPDATED, Constants.PARAM_ID);
+	public static final Set<String> COMPATIBLE_PARAMS_NO_RES_TYPE = Set.of(Constants.PARAM_INCLUDE_DELETED, Constants.PARAM_LASTUPDATED);
+	public static final Set<String> COMPATIBLE_PARAMS_GIVEN_RES_TYPE = Set.of(Constants.PARAM_INCLUDE_DELETED, Constants.PARAM_LASTUPDATED, Constants.PARAM_ID);
 	@Autowired
 	private FhirContext myFhirContext;
 
@@ -117,7 +117,7 @@ public class MatchUrlService {
 				}
 			}
 
-			if (Constants.PARAM_DELETED.equals(nextParamName)) {
+			if (Constants.PARAM_INCLUDE_DELETED.equals(nextParamName)) {
 				validateParamsAreCompatibleForDeleteOrThrow(nameToParamLists.keySet(), hasNoResourceType);
 				paramMap.setSearchIncludeDeletedMode(
 						SearchIncludeDeletedEnum.fromCode(paramList.get(0).get(0)));
@@ -223,7 +223,7 @@ public class MatchUrlService {
 			return false;
 		}
 		Set<String> acceptableServerParams = new HashSet<>(STRICT_RESOURCE_META_PARAMS);
-		acceptableServerParams.add(Constants.PARAM_DELETED);
+		acceptableServerParams.add(Constants.PARAM_INCLUDE_DELETED);
 		return acceptableServerParams.containsAll(theParamNames);
 	}
 
@@ -243,7 +243,7 @@ public class MatchUrlService {
 		Set<String> compatibleParams = theHasNoResourceType ? COMPATIBLE_PARAMS_NO_RES_TYPE : COMPATIBLE_PARAMS_GIVEN_RES_TYPE;
 
 		if (!compatibleParams.containsAll(theParamsToCheck)) {
-			throw new IllegalArgumentException(Msg.code(2744) + "The " + Constants.PARAM_DELETED
+			throw new IllegalArgumentException(Msg.code(2744) + "The " + Constants.PARAM_INCLUDE_DELETED
 					+ " parameter is only compatible with the following parameters: " + compatibleParams);
 		}
 	}

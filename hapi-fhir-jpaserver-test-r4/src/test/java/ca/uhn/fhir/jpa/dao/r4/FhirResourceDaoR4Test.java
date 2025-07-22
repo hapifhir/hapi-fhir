@@ -4496,7 +4496,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		deleteResource(deletedObservationId);
 
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
-		searchParameterMap.setSearchIncludeDeletedMode(SearchIncludeDeletedEnum.TRUE);
+		searchParameterMap.setSearchIncludeDeletedMode(SearchIncludeDeletedEnum.EXCLUSIVE);
 
 		// call within a tx, but carry the tx definition in the StreamTemplate
 		StreamTemplate<IResourcePersistentId<?>> streamTemplate =

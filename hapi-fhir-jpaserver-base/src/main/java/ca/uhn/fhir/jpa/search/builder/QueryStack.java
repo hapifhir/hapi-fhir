@@ -3269,7 +3269,7 @@ public class QueryStack {
 
 		public SearchIncludeDeletedEnum getIncludeDeleted() {
 			if (myIncludeDeleted == null) {
-				return SearchIncludeDeletedEnum.FALSE;
+				return SearchIncludeDeletedEnum.NEVER;
 			}
 			return myIncludeDeleted;
 		}

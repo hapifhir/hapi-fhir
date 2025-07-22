@@ -31,12 +31,12 @@ public enum SearchIncludeDeletedEnum {
 	/**
 	 * default, search on the non-deleted resources
 	 */
-	FALSE("false"),
+	NEVER("never"),
 
 	/**
 	 * search on the deleted resources only
 	 */
-	TRUE("true"),
+	EXCLUSIVE("exclusive"),
 
 	/**
 	 * Search on the non-deleted resources and deleted resources.

@@ -760,10 +760,10 @@ public class SearchQueryBuilder {
 				addPredicate(resourceTable.createResourceTypeAndNonDeletedPredicates());
 			} else {
 				switch (theDeletedFlag) {
-					case TRUE:
+					case EXCLUSIVE:
 						addPredicate(resourceTable.createResourceTypeAndDeletedPredicates());
 						break;
-					case FALSE:
+					case NEVER:
 						addPredicate(resourceTable.createResourceTypeAndNonDeletedPredicates());
 						break;
 					case BOTH:

@@ -88,7 +88,7 @@ public class ReindexProviderTest {
 
 	@ParameterizedTest
 	@NullSource
-	@ValueSource(strings = {"Observation?status=active", "", "Observation?_includeDeleted=true"})
+	@ValueSource(strings = {"Observation?status=active", "", "Observation?_includeDeleted=exclusive"})
 	public void testReindex_withUrlAndNonDefaultParams(String theUrl) {
 		// setup
 		Parameters input = new Parameters();

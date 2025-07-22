@@ -563,7 +563,7 @@ public class SearchParameterMap implements Serializable {
 
 		if (getSearchIncludeDeletedMode() != null) {
 			addUrlParamSeparator(b);
-			b.append(Constants.PARAM_DELETED);
+			b.append(Constants.PARAM_INCLUDE_DELETED);
 			b.append("=");
 			b.append(getSearchIncludeDeletedMode().getCode());
 		}

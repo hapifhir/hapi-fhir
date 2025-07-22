@@ -402,7 +402,7 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 			theAdditionalSearchUrlParams.append(String.format(theLastUpdatedParam, d.getValueAsString()));
 		}
 
-		String theFullUrl = "?" + Constants.PARAM_DELETED + "=" + theIncludeDeleted.getCode() + theAdditionalSearchUrlParams;
+		String theFullUrl = "?" + Constants.PARAM_INCLUDE_DELETED + "=" + theIncludeDeleted.getCode() + theAdditionalSearchUrlParams;
 		ourLog.info("Reindexing with URL: " + theFullUrl);
 
 		// When
@@ -416,13 +416,13 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 		List<IIdType> expectedMatchIds = new ArrayList<>();
 
 		switch(theIncludeDeleted) {
-			case TRUE -> {
+			case EXCLUSIVE -> {
 				expectedMatchIds.add(idDeletedBeforeDate);
 				if (theLastUpdatedParam == null) {
 					expectedMatchIds.add(idDeletedAfterDate);
 				}
 			}
-			case FALSE -> {
+			case NEVER -> {
 				expectedMatchIds.add(idBeforeDate);
 				if (theLastUpdatedParam == null) {
 					expectedMatchIds.add(idAfterDate);
@@ -516,8 +516,8 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 
 		// Then
 		switch(theIncludeDeleted) {
-			case TRUE -> assertIdsEqual(List.of(idDeletedBeforeDate), actualPatientIds);
-			case FALSE -> assertIdsEqual(List.of(idBeforeDate), actualPatientIds);
+			case EXCLUSIVE -> assertIdsEqual(List.of(idDeletedBeforeDate), actualPatientIds);
+			case NEVER -> assertIdsEqual(List.of(idBeforeDate), actualPatientIds);
 			case BOTH -> {
 				if (theIdParam != null) {
 					assertIdsEqual(List.of(idDeletedBeforeDate), actualPatientIds);
@@ -535,7 +535,7 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 			theAdditionalSearchUrlParams.append(String.format(theLastUpdatedParam, date.getValueAsString()));
 		}
 		if (theIdParam != null) {
-			String theIdToUse = theIncludeDeleted.equals(SearchIncludeDeletedEnum.FALSE) ? "p-match" : "p-match-del";
+			String theIdToUse = theIncludeDeleted.equals(SearchIncludeDeletedEnum.NEVER) ? "p-match" : "p-match-del";
 			theAdditionalSearchUrlParams.append(String.format(theIdParam, theIdToUse));
 		}
 		return theAdditionalSearchUrlParams.toString();
