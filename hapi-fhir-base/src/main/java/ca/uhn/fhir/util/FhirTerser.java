@@ -971,7 +971,6 @@ public class FhirTerser {
 				myContext.getResourceType(theCompartmentName),
 				theAdditionalCompartmentParamNames == null ? Set.of() : theAdditionalCompartmentParamNames)
 			);
-		)
 	}
 
 	/**

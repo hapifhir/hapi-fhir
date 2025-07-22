@@ -927,15 +927,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			 * We are manually excluding Group and List resources
 			 * from the patient-compartment for $everything operations on Patient type/instance.
 			 *
-			 * We know this is in violation of specifications
-			 * (https://build.fhir.org/compartmentdefinition-patient.html
-			 * and
-			 * https://build.fhir.org/patient-operations.html)
-			 * but it seems like a security flaw to include these resources,
-			 * as the name of the group and the ids of other members could
-			 * be PHI;
-			 * so they are being manually omitted.
-			 *
+			 * See issue: https://github.com/hapifhir/hapi-fhir/issues/7118
 			 */
 			sqlBuilder.excludeResourceTypesPredicate(
 					SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.keySet());

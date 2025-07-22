@@ -252,7 +252,7 @@ public class AuthorizationInterceptors {
 				CompartmentSearchParameterModifications additionalSearchParams =
 						new CompartmentSearchParameterModifications();
 				additionalSearchParams.addSPToIncludeInCompartment("Device", "patient");
-				additionalSearchParams.addSPToOmitFromCompartment("Device", "subject");
+				additionalSearchParams.addSPToIncludeInCompartment("Device", "subject");
 				return new RuleBuilder()
 						.allow()
 						.read()

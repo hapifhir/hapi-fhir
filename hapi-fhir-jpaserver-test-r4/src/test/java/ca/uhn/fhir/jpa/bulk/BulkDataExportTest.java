@@ -1107,15 +1107,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		assertFalse(startResponse.isUsesCachedResult());
 
 		// Run a scheduled pass to build the export
-		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId(), 120);
-
-		await()
-			.atMost(200, TimeUnit.SECONDS)
-			.until(() -> myJobCoordinator.getInstance(startResponse.getInstanceId()).getStatus() == StatusEnum.COMPLETED);
-
-		await()
-			.atMost(200, TimeUnit.SECONDS)
-			.until(() -> myJobCoordinator.getInstance(startResponse.getInstanceId()).getReport() != null);
+		JobInstance jobInstance = awaitExportComplete(startResponse.getInstanceId());
 
 		// Iterate over the files
 		String report = myJobCoordinator.getInstance(startResponse.getInstanceId()).getReport();

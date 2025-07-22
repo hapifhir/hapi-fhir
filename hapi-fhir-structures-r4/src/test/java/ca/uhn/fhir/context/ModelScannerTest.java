@@ -1,5 +1,6 @@
 package ca.uhn.fhir.context;
 
+import org.assertj.core.api.Assertions;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Device;
 import org.junit.jupiter.api.Test;
@@ -7,9 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class ModelScannerTest {
 
@@ -27,8 +27,8 @@ public class ModelScannerTest {
 		ModelScanner scanner = new ModelScanner(myFhirContext, myVersionEnum, definitions, resourceTypes);
 
 		// verify
-		assertFalse(scanner.getNameToResourceDefinition()
-			 .get("device").getSearchParamsForCompartmentName("Patient")
-			 .isEmpty());
+		List<RuntimeSearchParam> patientCompartmentSps = scanner.getNameToResourceDefinition()
+			 .get("device").getSearchParamsForCompartmentName("Patient");
+		Assertions.assertThat(patientCompartmentSps).isNotEmpty().hasSize(1);
 	}
 }

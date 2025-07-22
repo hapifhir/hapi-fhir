@@ -60,6 +60,8 @@ public class SearchParameterUtil {
 	 * This is a list of resources that are in the
 	 * <a href="https://build.fhir.org/compartmentdefinition-patient.html">Patient Compartment</a>
 	 * but we are omitting anyways for security reasons.
+	 *
+	 * See <a href="https://github.com/hapifhir/hapi-fhir/issues/7118">this issue</a> for why.
 	 */
 	public static final Map<String, Set<String>> RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT =
 			new HashMap<>();
