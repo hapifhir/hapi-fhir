@@ -19,7 +19,7 @@ import java.util.Map;
 
 /**
  * A patched version of the IgRepository that adds support for transaction bundle processing.
- * The current 3.23 version form cqf-fhir-utility has a nop implementation of transaction().
+ * The current 3.23 version from cqf-fhir-utility has a nop implementation of transaction().
  * TODO Delete this once the cfq implementation adds transaction support
  */
 public class PatchedKalmFileSystemRepository extends IgRepository {
