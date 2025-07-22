@@ -1035,19 +1035,19 @@ public class FhirTerser {
 		Validate.notBlank(theCompartmentName, "theCompartmentName must not be null or blank");
 		Validate.notNull(theSource, "theSource must not be null");
 		Set<String> additionalSPNames;
-		Set<String> omitted;
+		Set<String> omittedSPNames;
 		if (theModifications != null) {
 			String resourceType = myContext.getResourceType(theSource);
 			additionalSPNames = theModifications.getAdditionalSearchParamNamesForResourceType(resourceType);
-			omitted = theModifications.getOmittedSPNamesForResourceType(resourceType);
+			omittedSPNames = theModifications.getOmittedSPNamesForResourceType(resourceType);
 		} else {
 			additionalSPNames = new HashSet<>();
-			omitted = new HashSet<>();
+			omittedSPNames = new HashSet<>();
 		}
 
 		RuntimeResourceDefinition sourceDef = myContext.getResourceDefinition(theSource);
 		List<RuntimeSearchParam> params = sourceDef.getSearchParamsForCompartmentName(theCompartmentName).stream()
-				.filter(p -> !omitted.contains(p.getName()))
+				.filter(p -> !omittedSPNames.contains(p.getName()))
 				.collect(Collectors.toList());
 
 		additionalSPNames.stream()

@@ -62,12 +62,12 @@ public interface IAuthRuleBuilderRuleOpClassifier {
 	 *
 	 * @param theCompartmentName The name of the compartment (must not be null or blank)
 	 * @param theOwner The owner of the compartment. Note that both the resource type and ID must be populated in this ID.
-	 * @param theAdditionalTypeSearchParamNames A list of strings for additional resource types and search parameters which count as being in the compartment, in the form "resourcetype:search-parameter-name".
+	 * @param theModifications A list of strings for additional resource types and search parameters which count as being in the compartment, in the form "resourcetype:search-parameter-name".
 	 */
 	IAuthRuleBuilderRuleOpClassifierFinished inModifiedCompartment(
 			String theCompartmentName,
 			IIdType theOwner,
-			CompartmentSearchParameterModifications theAdditionalTypeSearchParamNames);
+			CompartmentSearchParameterModifications theModifications);
 
 	/**
 	 * Rule applies to resources in the given compartment.
@@ -105,13 +105,13 @@ public interface IAuthRuleBuilderRuleOpClassifier {
 	 *
 	 * @param theCompartmentName The name of the compartment (must not be null or blank)
 	 * @param theOwners The owners of the compartment. Note that both the resource type and ID must be populated in these IDs.
-	 * @param theSPSpecialCases A {@link CompartmentSearchParameterModifications} which allows you to expand (or limit) the search space for what is considered "in" the compartment.
+	 * @param theModifications A {@link CompartmentSearchParameterModifications} which allows you to expand (or limit) the search space for what is considered "in" the compartment.
 	 *
 	 **/
 	IAuthRuleBuilderRuleOpClassifierFinished inModifiedCompartment(
 			String theCompartmentName,
 			Collection<? extends IIdType> theOwners,
-			CompartmentSearchParameterModifications theSPSpecialCases);
+			CompartmentSearchParameterModifications theModifications);
 
 	/**
 	 * Rule applies to any resource instances

@@ -541,7 +541,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				public IAuthRuleBuilderRuleOpClassifierFinished inModifiedCompartment(
 						String theCompartmentName,
 						Collection<? extends IIdType> theOwners,
-						CompartmentSearchParameterModifications theSPSpecialCases) {
+						CompartmentSearchParameterModifications theModifications) {
 					Validate.notBlank(theCompartmentName, "theCompartmentName must not be null");
 					Validate.notNull(theOwners, "theOwners must not be null");
 					Validate.noNullElements(theOwners, "theOwners must not contain any null elements");
@@ -550,7 +550,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					}
 					myInCompartmentName = theCompartmentName;
 					myInCompartmentOwners = theOwners;
-					myAdditionalSearchParamsForCompartmentTypes = theSPSpecialCases;
+					myAdditionalSearchParamsForCompartmentTypes = theModifications;
 					myClassifierType = ClassifierTypeEnum.IN_COMPARTMENT;
 					return finished();
 				}
@@ -566,13 +566,13 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				public IAuthRuleBuilderRuleOpClassifierFinished inModifiedCompartment(
 						String theCompartmentName,
 						IIdType theOwner,
-						CompartmentSearchParameterModifications theAdditionalTypeSearchParamNames) {
+						CompartmentSearchParameterModifications theModifications) {
 					Validate.notBlank(theCompartmentName, "theCompartmentName must not be null");
 					Validate.notNull(theOwner, "theOwner must not be null");
 					validateOwner(theOwner);
 					myClassifierType = ClassifierTypeEnum.IN_COMPARTMENT;
 					myInCompartmentName = theCompartmentName;
-					myAdditionalSearchParamsForCompartmentTypes = theAdditionalTypeSearchParamNames;
+					myAdditionalSearchParamsForCompartmentTypes = theModifications;
 					Optional<RuleImplOp> oRule = findMatchingRule();
 					if (oRule.isPresent()) {
 						RuleImplOp rule = oRule.get();
