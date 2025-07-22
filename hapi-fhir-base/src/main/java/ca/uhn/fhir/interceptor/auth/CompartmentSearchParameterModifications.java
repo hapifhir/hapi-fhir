@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.rest.server.interceptor.auth;
+package ca.uhn.fhir.interceptor.auth;
 
 import ca.uhn.fhir.i18n.Msg;
 import jakarta.annotation.Nonnull;
@@ -36,12 +36,37 @@ import java.util.Set;
  * and apply it to compartment Patient/123, then any device with Patient/123 as its patient would be considered "in"
  * the compartment, despite the fact that device is technically not part of the compartment definition for patient.
  */
-public class CompartmentSearchParametersSpecialCases {
+public class CompartmentSearchParameterModifications {
+
+	/**
+	 * Construct compartment modifications from resource type and sets of SP names to add or omit respectively.
+	 * @param theResourceType the resource type the SPs are based on
+	 * @param theAdditionalSPs the additional SP names
+	 * @param theOmittedSps the omitted SP names
+	 * @return
+	 */
+	public static CompartmentSearchParameterModifications fromAdditionalAndOmittedSPNames(@Nonnull String theResourceType,
+																						  @Nonnull Set<String> theAdditionalSPs,
+																						  @Nonnull Set<String> theOmittedSps) {
+		CompartmentSearchParameterModifications modifications = new CompartmentSearchParameterModifications();
+		theAdditionalSPs.forEach(spName -> {
+			modifications.addSPToIncludeInCompartment(theResourceType, spName);
+		});
+		theOmittedSps.forEach(spName -> {
+			modifications.addSPToOmitFromCompartment(theResourceType, spName);
+		});
+		return modifications;
+	}
+
+	public static CompartmentSearchParameterModifications fromAdditionalCompartmentParamNames(String theResourceType, @Nonnull Set<String> theAdditionalCompartmentParamNames) {
+		return fromAdditionalAndOmittedSPNames(theResourceType, theAdditionalCompartmentParamNames, Set.of());
+	}
+
 	private final Map<String, Set<String>> myAdditionalResourceTypeToParameterCodeMap;
 
 	private final Map<String, Set<String>> myOmittedResourceTypeToParameterCodeMap;
 
-	public CompartmentSearchParametersSpecialCases() {
+	public CompartmentSearchParameterModifications() {
 		myAdditionalResourceTypeToParameterCodeMap = new HashMap<>();
 		myOmittedResourceTypeToParameterCodeMap = new HashMap<>();
 	}

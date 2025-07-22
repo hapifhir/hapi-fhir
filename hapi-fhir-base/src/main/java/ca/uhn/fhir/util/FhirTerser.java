@@ -32,6 +32,7 @@ import ca.uhn.fhir.context.RuntimeExtensionDtDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -874,7 +875,22 @@ public class FhirTerser {
 	 */
 	public boolean isSourceInCompartmentForTarget(
 			String theCompartmentName, IBaseResource theSource, IIdType theTarget) {
-		return isSourceInCompartmentForTarget(theCompartmentName, theSource, theTarget, null, null);
+		return isSourceInCompartmentForTarget(theCompartmentName, theSource, theTarget, new CompartmentSearchParameterModifications());
+	}
+
+	@Deprecated
+	public boolean isSourceInCompartmentForTarget(
+		String theCompartmentName,
+		IBaseResource theSource,
+		IIdType theTarget,
+		@Nullable Set<String> theAdditionalCompartmentParamNames
+	) {
+		return isSourceInCompartmentForTarget(
+			theCompartmentName, theSource, theTarget,
+			CompartmentSearchParameterModifications.fromAdditionalCompartmentParamNames(
+				myContext.getResourceType(theSource),
+				theAdditionalCompartmentParamNames == null ? Set.of() : theAdditionalCompartmentParamNames)
+		);
 	}
 
 	/**
@@ -884,7 +900,7 @@ public class FhirTerser {
 	 * @param theCompartmentName                 The name of the compartment
 	 * @param theSource                          The potential member of the compartment
 	 * @param theTarget                          The owner of the compartment. Note that both the resource type and ID must be filled in on this IIdType or the method will throw an {@link IllegalArgumentException}
-	 * @param theAdditionalCompartmentParamNames If provided, search param names provided here will be considered as included in the given compartment for this comparison.
+	 * @param theModifications If provided, SP modifications to the compartment
 	 * @return <code>true</code> if <code>theSource</code> is in the compartment or one of the additional parameters matched.
 	 * @throws IllegalArgumentException If theTarget does not contain both a resource type and ID
 	 */
@@ -892,8 +908,7 @@ public class FhirTerser {
 			String theCompartmentName,
 			IBaseResource theSource,
 			IIdType theTarget,
-			@Nullable Set<String> theAdditionalCompartmentParamNames,
-			@Nullable Set<String> theOmittedSPInCompartment) {
+			CompartmentSearchParameterModifications theModifications) {
 		Validate.notBlank(theCompartmentName, "theCompartmentName must not be null or blank");
 		Validate.notNull(theSource, "theSource must not be null");
 		Validate.notNull(theTarget, "theTarget must not be null");
@@ -940,8 +955,23 @@ public class FhirTerser {
 
 		CompartmentOwnerVisitor consumer = new CompartmentOwnerVisitor(wantRef);
 		visitCompartmentOwnersForResource(
-				theCompartmentName, theSource, theAdditionalCompartmentParamNames, theOmittedSPInCompartment, consumer);
+				theCompartmentName, theSource, theModifications, consumer);
 		return consumer.isFound();
+	}
+
+	public List<IIdType> getCompartmentOwnersForResource(
+		String theCompartmentName,
+		IBaseResource theSource,
+		@Nullable  Set<String> theAdditionalCompartmentParamNames
+	) {
+		return getCompartmentOwnersForResource(
+			theCompartmentName,
+			theSource,
+			CompartmentSearchParameterModifications.fromAdditionalCompartmentParamNames(
+				myContext.getResourceType(theCompartmentName),
+				theAdditionalCompartmentParamNames == null ? Set.of() : theAdditionalCompartmentParamNames)
+			);
+		)
 	}
 
 	/**
@@ -949,14 +979,13 @@ public class FhirTerser {
 	 *
 	 * @param theCompartmentName                 The name of the compartment
 	 * @param theSource                          The potential member of the compartment
-	 * @param theAdditionalCompartmentParamNames If provided, search param names provided here will be considered as included in the given compartment for this comparison.
+	 * @param theModifications If provided, defines compartment modifications to be considered
 	 */
 	@Nonnull
 	public List<IIdType> getCompartmentOwnersForResource(
 			String theCompartmentName,
 			IBaseResource theSource,
-			Set<String> theAdditionalCompartmentParamNames,
-			Set<String> theOmittedSPInCompartment) {
+			CompartmentSearchParameterModifications theModifications) {
 		Validate.notBlank(theCompartmentName, "theCompartmentName must not be null or blank");
 		Validate.notNull(theSource, "theSource must not be null");
 
@@ -980,27 +1009,49 @@ public class FhirTerser {
 
 		CompartmentOwnerVisitor consumer = new CompartmentOwnerVisitor();
 		visitCompartmentOwnersForResource(
-				theCompartmentName, theSource, theAdditionalCompartmentParamNames, theOmittedSPInCompartment, consumer);
+				theCompartmentName, theSource, theModifications, consumer);
 		return consumer.getOwners();
+	}
+
+	public Stream<IBaseReference> getCompartmentReferencesForResource(
+		String theCompartmentName,
+		IBaseResource theSource,
+		@Nullable Set<String> theAdditionalCompartmentParamNames
+	) {
+		return getCompartmentReferencesForResource(
+			theCompartmentName,
+			theSource,
+			CompartmentSearchParameterModifications.fromAdditionalCompartmentParamNames(
+				myContext.getResourceType(theCompartmentName),
+				theAdditionalCompartmentParamNames == null ? Set.of() : theAdditionalCompartmentParamNames
+			)
+		);
 	}
 
 	@Nonnull
 	public Stream<IBaseReference> getCompartmentReferencesForResource(
 			String theCompartmentName,
 			IBaseResource theSource,
-			@Nullable Set<String> theAdditionalCompartmentParamNames,
-			@Nullable Set<String> theOmittedSPInCompartment) {
+			@Nullable CompartmentSearchParameterModifications theModifications) {
 		Validate.notBlank(theCompartmentName, "theCompartmentName must not be null or blank");
 		Validate.notNull(theSource, "theSource must not be null");
-		theAdditionalCompartmentParamNames = Objects.requireNonNullElse(theAdditionalCompartmentParamNames, Set.of());
-		Set<String> omitted = Objects.requireNonNullElse(theOmittedSPInCompartment, Set.of());
+		Set<String> additionalSPNames;
+		Set<String> omitted;
+		if (theModifications != null) {
+			String resourceType = myContext.getResourceType(theSource);
+			additionalSPNames = theModifications.getAdditionalSearchParamNamesForResourceType(resourceType);
+			omitted = theModifications.getOmittedSPNamesForResourceType(resourceType);
+		} else {
+			additionalSPNames = new HashSet<>();
+			omitted = new HashSet<>();
+		}
 
 		RuntimeResourceDefinition sourceDef = myContext.getResourceDefinition(theSource);
 		List<RuntimeSearchParam> params = sourceDef.getSearchParamsForCompartmentName(theCompartmentName).stream()
 				.filter(p -> !omitted.contains(p.getName()))
 				.collect(Collectors.toList());
 
-		theAdditionalCompartmentParamNames.stream()
+		additionalSPNames.stream()
 				.map(sourceDef::getSearchParam)
 				.filter(Objects::nonNull)
 				.forEach(params::add);
@@ -1052,12 +1103,11 @@ public class FhirTerser {
 	private void visitCompartmentOwnersForResource(
 			String theCompartmentName,
 			IBaseResource theSource,
-			@Nullable Set<String> theAdditionalCompartmentParamNames,
-			@Nullable Set<String> theOmittedSPInCompartment,
+			CompartmentSearchParameterModifications theCompartmentModifications,
 			ICompartmentOwnerVisitor theConsumer) {
 
 		getCompartmentReferencesForResource(
-						theCompartmentName, theSource, theAdditionalCompartmentParamNames, theOmittedSPInCompartment)
+						theCompartmentName, theSource, theCompartmentModifications)
 				.flatMap(nextValue -> {
 					IIdType nextTargetId = nextValue.getReferenceElement().toUnqualifiedVersionless();
 

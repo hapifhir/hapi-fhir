@@ -1532,7 +1532,7 @@ public class FhirTerserR4Test {
 					observation.setSubject(new Reference("Patient/123"));
 					HashSet<String> additionalCompartmentParamNames = new HashSet<>();
 					additionalCompartmentParamNames.add("test");
-					boolean outcome = ctx.newTerser().isSourceInCompartmentForTarget("Patient", observation, new IdType("Patient/123"), additionalCompartmentParamNames, null);
+					boolean outcome = ctx.newTerser().isSourceInCompartmentForTarget("Patient", observation, new IdType("Patient/123"), additionalCompartmentParamNames);
 					assertTrue(outcome);
 
 				};

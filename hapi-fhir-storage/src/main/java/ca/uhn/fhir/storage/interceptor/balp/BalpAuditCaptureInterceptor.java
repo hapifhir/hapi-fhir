@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -237,8 +238,9 @@ public class BalpAuditCaptureInterceptor {
 							.getCompartmentOwnersForResource(
 									"Patient",
 									resource,
-									myAdditionalPatientCompartmentParamNames,
-									myOmittedSPNamesInPatientCompartment)
+									CompartmentSearchParameterModifications.fromAdditionalAndOmittedSPNames(
+											fhirContext.getResourceType(resource), myAdditionalPatientCompartmentParamNames, myOmittedSPNamesInPatientCompartment)
+							)
 							.stream()
 							.map(t -> myContextServices.massageResourceIdForStorage(theRequestDetails, resource, t))
 							.forEach(patientIds::add);

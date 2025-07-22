@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -81,7 +82,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	/**
 	 * For SP not part of the compartment that we're including anyways
 	 */
-	private CompartmentSearchParametersSpecialCases myCompartmentSPSpecialCases;
+	private CompartmentSearchParameterModifications myCompartmentSPSpecialCases;
 
 	/**
 	 * Constructor
@@ -545,23 +546,11 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 		for (IIdType next : myClassifierCompartmentOwners) {
 			if (target.resource != null) {
-
-				Set<String> additionalSearchParamNames = null;
-				Set<String> omittedSearchParamNames = null;
-				if (myCompartmentSPSpecialCases != null) {
-					String resourceType = ctx.getResourceType(target.resource);
-					additionalSearchParamNames =
-							myCompartmentSPSpecialCases.getAdditionalSearchParamNamesForResourceType(resourceType);
-					omittedSearchParamNames =
-							myCompartmentSPSpecialCases.getOmittedSPNamesForResourceType(resourceType);
-				}
-
 				if (t.isSourceInCompartmentForTarget(
 						myClassifierCompartmentName,
 						target.resource,
 						next,
-						additionalSearchParamNames,
-						omittedSearchParamNames)) {
+						myCompartmentSPSpecialCases)) {
 					foundMatch = true;
 					break;
 				}
@@ -1097,7 +1086,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	}
 
 	public void setAdditionalSearchParamsForCompartmentTypes(
-			CompartmentSearchParametersSpecialCases theAdditionalParameters) {
+			CompartmentSearchParameterModifications theAdditionalParameters) {
 		myCompartmentSPSpecialCases = theAdditionalParameters;
 	}
 }

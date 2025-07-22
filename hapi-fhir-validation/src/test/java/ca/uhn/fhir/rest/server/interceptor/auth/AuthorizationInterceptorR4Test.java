@@ -7,6 +7,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
@@ -503,13 +504,13 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				CompartmentSearchParametersSpecialCases specialCases = new CompartmentSearchParametersSpecialCases();
+				CompartmentSearchParameterModifications specialCases = new CompartmentSearchParameterModifications();
 				specialCases.addSPToOmitFromCompartment("group", "member");
 				List<IdType> relatedIds = new ArrayList<>();
 				relatedIds.add(new IdType(patientId));
 				return new RuleBuilder()
 					.allow().read().allResources()
-					.inCompartmentWithSpecialCaseSSPHandling("Patient", relatedIds, specialCases)
+					.inModifiedCompartment("Patient", relatedIds, specialCases)
 					.andThen().denyAll()
 					.build();
 			}
@@ -547,13 +548,13 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				CompartmentSearchParametersSpecialCases compartmentSearchParametersSpecialCases = new CompartmentSearchParametersSpecialCases();
-				compartmentSearchParametersSpecialCases.addAdditionalSearchParameters("device:garbage");
+				CompartmentSearchParameterModifications compartmentSearchParameterModifications = new CompartmentSearchParameterModifications();
+				compartmentSearchParameterModifications.addAdditionalSearchParameters("device:garbage");
 				List<IdType> relatedIds = new ArrayList<>();
 				relatedIds.add(new IdType("Patient/123"));
 				return new RuleBuilder()
 					.allow().read().allResources()
-					.inCompartmentWithSpecialCaseSSPHandling("Patient", relatedIds, compartmentSearchParametersSpecialCases)
+					.inModifiedCompartment("Patient", relatedIds, compartmentSearchParameterModifications)
 					.andThen().denyAll()
 					.build();
 			}
@@ -585,11 +586,11 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 	public void testRuleBuilderAdditionalSearchParamsInvalidValues() {
 		//Too many colons
 		try {
-			CompartmentSearchParametersSpecialCases compartmentSearchParametersSpecialCases = new CompartmentSearchParametersSpecialCases();
-			compartmentSearchParametersSpecialCases.addAdditionalSearchParameters("too:many:colons");
+			CompartmentSearchParameterModifications compartmentSearchParameterModifications = new CompartmentSearchParameterModifications();
+			compartmentSearchParameterModifications.addAdditionalSearchParameters("too:many:colons");
 			new RuleBuilder()
 				.allow().read().allResources()
-				.inCompartmentWithSpecialCaseSSPHandling("Patient", new IdType("Patient/123"), compartmentSearchParametersSpecialCases)
+				.inModifiedCompartment("Patient", new IdType("Patient/123"), compartmentSearchParameterModifications)
 				.andThen().denyAll()
 				.build();
 			fail();
@@ -600,11 +601,11 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 
 		//No colons
 		try {
-			CompartmentSearchParametersSpecialCases compartmentSearchParametersSpecialCases = new CompartmentSearchParametersSpecialCases();
-			compartmentSearchParametersSpecialCases.addAdditionalSearchParameters("no-colons");
+			CompartmentSearchParameterModifications compartmentSearchParameterModifications = new CompartmentSearchParameterModifications();
+			compartmentSearchParameterModifications.addAdditionalSearchParameters("no-colons");
 			new RuleBuilder()
 				.allow().read().allResources()
-				.inCompartmentWithSpecialCaseSSPHandling("Patient", new IdType("Patient/123"), compartmentSearchParametersSpecialCases)
+				.inModifiedCompartment("Patient", new IdType("Patient/123"), compartmentSearchParameterModifications)
 				.andThen().denyAll()
 				.build();
 			fail();		} catch (IllegalArgumentException e) {
@@ -1373,13 +1374,13 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				CompartmentSearchParametersSpecialCases specialCases = new CompartmentSearchParametersSpecialCases();
+				CompartmentSearchParameterModifications specialCases = new CompartmentSearchParameterModifications();
 				specialCases.addSPToOmitFromCompartment("group", "member");
 				List<IdType> relatedIds = new ArrayList<>();
 				relatedIds.add(new IdType(patientId));
 				return new RuleBuilder()
 					.allow().delete().allResources()
-					.inCompartmentWithSpecialCaseSSPHandling("Patient", relatedIds, specialCases)
+					.inModifiedCompartment("Patient", relatedIds, specialCases)
 					.andThen().denyAll()
 					.build();
 			}

@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -63,10 +64,10 @@ public interface IAuthRuleBuilderRuleOpClassifier {
 	 * @param theOwner The owner of the compartment. Note that both the resource type and ID must be populated in this ID.
 	 * @param theAdditionalTypeSearchParamNames A list of strings for additional resource types and search parameters which count as being in the compartment, in the form "resourcetype:search-parameter-name".
 	 */
-	IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithSpecialCaseSSPHandling(
+	IAuthRuleBuilderRuleOpClassifierFinished inModifiedCompartment(
 			String theCompartmentName,
 			IIdType theOwner,
-			CompartmentSearchParametersSpecialCases theAdditionalTypeSearchParamNames);
+			CompartmentSearchParameterModifications theAdditionalTypeSearchParamNames);
 
 	/**
 	 * Rule applies to resources in the given compartment.
@@ -104,13 +105,13 @@ public interface IAuthRuleBuilderRuleOpClassifier {
 	 *
 	 * @param theCompartmentName The name of the compartment (must not be null or blank)
 	 * @param theOwners The owners of the compartment. Note that both the resource type and ID must be populated in these IDs.
-	 * @param theSPSpecialCases A {@link CompartmentSearchParametersSpecialCases} which allows you to expand (or limit) the search space for what is considered "in" the compartment.
+	 * @param theSPSpecialCases A {@link CompartmentSearchParameterModifications} which allows you to expand (or limit) the search space for what is considered "in" the compartment.
 	 *
 	 **/
-	IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithSpecialCaseSSPHandling(
+	IAuthRuleBuilderRuleOpClassifierFinished inModifiedCompartment(
 			String theCompartmentName,
 			Collection<? extends IIdType> theOwners,
-			CompartmentSearchParametersSpecialCases theSPSpecialCases);
+			CompartmentSearchParameterModifications theSPSpecialCases);
 
 	/**
 	 * Rule applies to any resource instances

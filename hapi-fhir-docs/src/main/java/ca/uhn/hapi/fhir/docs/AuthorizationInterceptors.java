@@ -37,7 +37,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizedList;
-import ca.uhn.fhir.rest.server.interceptor.auth.CompartmentSearchParametersSpecialCases;
+import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
@@ -249,15 +249,15 @@ public class AuthorizationInterceptors {
 		new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				CompartmentSearchParametersSpecialCases additionalSearchParams =
-						new CompartmentSearchParametersSpecialCases();
+				CompartmentSearchParameterModifications additionalSearchParams =
+						new CompartmentSearchParameterModifications();
 				additionalSearchParams.addSPToIncludeInCompartment("Device", "patient");
 				additionalSearchParams.addSPToOmitFromCompartment("Device", "subject");
 				return new RuleBuilder()
 						.allow()
 						.read()
 						.allResources()
-						.inCompartmentWithSpecialCaseSSPHandling(
+						.inModifiedCompartment(
 								"Patient", new IdType("Patient/123"), additionalSearchParams)
 						.build();
 			}
@@ -268,14 +268,14 @@ public class AuthorizationInterceptors {
 		new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				CompartmentSearchParametersSpecialCases additionalSearchParams =
-						new CompartmentSearchParametersSpecialCases();
+				CompartmentSearchParameterModifications additionalSearchParams =
+						new CompartmentSearchParameterModifications();
 				additionalSearchParams.addSPToOmitFromCompartment("Group", "member");
 				return new RuleBuilder()
 						.allow()
 						.read()
 						.allResources()
-						.inCompartmentWithSpecialCaseSSPHandling(
+						.inModifiedCompartment(
 								"Patient", new IdType("Patient/123"), additionalSearchParams)
 						.build();
 			}

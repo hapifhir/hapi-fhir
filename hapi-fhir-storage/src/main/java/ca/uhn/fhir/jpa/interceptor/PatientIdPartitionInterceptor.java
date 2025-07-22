@@ -26,6 +26,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -127,7 +128,7 @@ public class PatientIdPartitionInterceptor {
 	private Optional<RequestPartitionId> getPartitionViaPartiallyProcessedReference(IBaseResource theResource) {
 		return myFhirContext
 				.newTerser()
-				.getCompartmentReferencesForResource("Patient", theResource, null, null)
+				.getCompartmentReferencesForResource("Patient", theResource, new CompartmentSearchParameterModifications())
 				.map(IBaseReference::getResource)
 				.filter(Objects::nonNull)
 				.flatMap(nextResource -> getPartitionIfAssigned(nextResource).stream())

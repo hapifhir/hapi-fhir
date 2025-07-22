@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -486,8 +487,8 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				 * Special cases for Search Parameters.
 				 * Possible inclusion of additional SP, or removal of existing ones.
 				 */
-				private CompartmentSearchParametersSpecialCases myAdditionalSearchParamsForCompartmentTypes =
-						new CompartmentSearchParametersSpecialCases();
+				private CompartmentSearchParameterModifications myAdditionalSearchParamsForCompartmentTypes =
+						new CompartmentSearchParameterModifications();
 				/**
 				 * Constructor
 				 */
@@ -532,15 +533,15 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				@Override
 				public IAuthRuleBuilderRuleOpClassifierFinished inCompartment(
 						String theCompartmentName, Collection<? extends IIdType> theOwners) {
-					return inCompartmentWithSpecialCaseSSPHandling(
-							theCompartmentName, theOwners, new CompartmentSearchParametersSpecialCases());
+					return inModifiedCompartment(
+							theCompartmentName, theOwners, new CompartmentSearchParameterModifications());
 				}
 
 				@Override
-				public IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithSpecialCaseSSPHandling(
+				public IAuthRuleBuilderRuleOpClassifierFinished inModifiedCompartment(
 						String theCompartmentName,
 						Collection<? extends IIdType> theOwners,
-						CompartmentSearchParametersSpecialCases theSPSpecialCases) {
+						CompartmentSearchParameterModifications theSPSpecialCases) {
 					Validate.notBlank(theCompartmentName, "theCompartmentName must not be null");
 					Validate.notNull(theOwners, "theOwners must not be null");
 					Validate.noNullElements(theOwners, "theOwners must not contain any null elements");
@@ -557,15 +558,15 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				@Override
 				public IAuthRuleBuilderRuleOpClassifierFinished inCompartment(
 						String theCompartmentName, IIdType theOwner) {
-					return inCompartmentWithSpecialCaseSSPHandling(
-							theCompartmentName, theOwner, new CompartmentSearchParametersSpecialCases());
+					return inModifiedCompartment(
+							theCompartmentName, theOwner, new CompartmentSearchParameterModifications());
 				}
 
 				@Override
-				public IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithSpecialCaseSSPHandling(
+				public IAuthRuleBuilderRuleOpClassifierFinished inModifiedCompartment(
 						String theCompartmentName,
 						IIdType theOwner,
-						CompartmentSearchParametersSpecialCases theAdditionalTypeSearchParamNames) {
+						CompartmentSearchParameterModifications theAdditionalTypeSearchParamNames) {
 					Validate.notBlank(theCompartmentName, "theCompartmentName must not be null");
 					Validate.notNull(theOwner, "theOwner must not be null");
 					validateOwner(theOwner);
@@ -638,7 +639,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					// inlined from inCompartmentWithAdditionalSearchParams()
 					myClassifierType = ClassifierTypeEnum.IN_COMPARTMENT;
 					myInCompartmentName = theCompartmentName;
-					myAdditionalSearchParamsForCompartmentTypes = new CompartmentSearchParametersSpecialCases();
+					myAdditionalSearchParamsForCompartmentTypes = new CompartmentSearchParameterModifications();
 					// todo JR/MB this is a quick and dirty fix at the last minute before the release.
 					//  We should revisit approach so that findMatchingRule() takes the filters into account
 					//  and only merges the rules if the filters are compatible

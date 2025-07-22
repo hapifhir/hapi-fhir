@@ -1,7 +1,6 @@
 ---
 type: add
 issue: 7118
-title: "Added a means by which some Search Parameters can be omitted
-        from certain compartments for security reasons.
+title: "Allow some Search Parameters to be omitted from compartments for security reasons.
         Consult [the documentation](/docs/security/authorization_interceptor.html) for more information.
 "
