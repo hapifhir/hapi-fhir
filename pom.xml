@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>8.3.15-SNAPSHOT</version>
+	<version>8.3.16-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -104,7 +104,8 @@
 		<module>hapi-fhir-jacoco</module>
 		<module>hapi-fhir-server-cds-hooks</module>
 		<module>hapi-fhir-jpa-hibernate-services</module>
-    </modules>
+		<module>hapi-fhir-repositories</module>
+	</modules>
 
 	<dependencies>
 		<dependency>

@@ -100,9 +100,16 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public abstract class BaseStorageDao {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseStorageDao.class);
 
-	public static final String OO_SEVERITY_ERROR = "error";
-	public static final String OO_SEVERITY_INFO = "information";
-	public static final String OO_SEVERITY_WARN = "warning";
+	/** @deprecated moved to {@link OperationOutcomeUtil#OO_SEVERITY_ERROR}  */
+	@Deprecated(forRemoval = true, since = "8.4.0")
+	public static final String OO_SEVERITY_ERROR = OperationOutcomeUtil.OO_SEVERITY_ERROR;
+	/** @deprecated moved to {@link OperationOutcomeUtil#OO_SEVERITY_INFO}  */
+	@Deprecated(forRemoval = true, since = "8.4.0")
+	public static final String OO_SEVERITY_INFO = OperationOutcomeUtil.OO_SEVERITY_INFO;
+	/** @deprecated moved to {@link OperationOutcomeUtil#OO_SEVERITY_WARN}  */
+	@Deprecated(forRemoval = true, since = "8.4.0")
+	public static final String OO_SEVERITY_WARN = OperationOutcomeUtil.OO_SEVERITY_WARN;
+
 	private static final String PROCESSING_SUB_REQUEST = "BaseStorageDao.processingSubRequest";
 
 	protected static final String MESSAGE_KEY_DELETE_RESOURCE_NOT_EXISTING = "deleteResourceNotExisting";
@@ -460,7 +467,7 @@ public abstract class BaseStorageDao {
 	protected abstract IInterceptorBroadcaster getInterceptorBroadcaster();
 
 	public IBaseOperationOutcome createErrorOperationOutcome(String theMessage, String theCode) {
-		return createOperationOutcome(OO_SEVERITY_ERROR, theMessage, theCode);
+		return createOperationOutcome(OperationOutcomeUtil.OO_SEVERITY_ERROR, theMessage, theCode);
 	}
 
 	public IBaseOperationOutcome createInfoOperationOutcome(String theMessage) {
@@ -469,31 +476,23 @@ public abstract class BaseStorageDao {
 
 	public IBaseOperationOutcome createInfoOperationOutcome(
 			String theMessage, @Nullable StorageResponseCodeEnum theStorageResponseCode) {
-		return createOperationOutcome(
-				OO_SEVERITY_INFO, theMessage, OO_ISSUE_CODE_INFORMATIONAL, theStorageResponseCode);
+		return OperationOutcomeUtil.createOperationOutcome(
+				OperationOutcomeUtil.OO_SEVERITY_INFO,
+				theMessage,
+				OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL,
+				getContext(),
+				theStorageResponseCode);
 	}
 
 	private IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode) {
-		return createOperationOutcome(theSeverity, theMessage, theCode, null);
+		return OperationOutcomeUtil.createOperationOutcome(theSeverity, theMessage, theCode, getContext(), null);
 	}
 
-	protected IBaseOperationOutcome createOperationOutcome(
-			String theSeverity,
-			String theMessage,
-			String theCode,
-			@Nullable StorageResponseCodeEnum theStorageResponseCode) {
-		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
-		String detailSystem = null;
-		String detailCode = null;
-		String detailDescription = null;
-		if (theStorageResponseCode != null) {
-			detailSystem = theStorageResponseCode.getSystem();
-			detailCode = theStorageResponseCode.getCode();
-			detailDescription = theStorageResponseCode.getDisplay();
-		}
-		OperationOutcomeUtil.addIssue(
-				getContext(), oo, theSeverity, theMessage, null, theCode, detailSystem, detailCode, detailDescription);
-		return oo;
+	@Nonnull
+	public IBaseOperationOutcome createWarnOperationOutcome(
+			String theMsg, String theCode, StorageResponseCodeEnum theResponseCodeEnum) {
+		return OperationOutcomeUtil.createOperationOutcome(
+				OperationOutcomeUtil.OO_SEVERITY_WARN, theMsg, theCode, getContext(), theResponseCodeEnum);
 	}
 
 	/**
@@ -514,7 +513,8 @@ public abstract class BaseStorageDao {
 		String message = getContext().getLocalizer().getMessage(BaseStorageDao.class, theMessageKey, id);
 		String severity = "information";
 		String code = "informational";
-		IBaseOperationOutcome oo = createOperationOutcome(severity, message, code, theStorageResponseCode);
+		IBaseOperationOutcome oo = OperationOutcomeUtil.createOperationOutcome(
+				severity, message, code, getContext(), theStorageResponseCode);
 		outcome.setOperationOutcome(oo);
 
 		return outcome;
@@ -768,10 +768,10 @@ public abstract class BaseStorageDao {
 		IBase issue = OperationOutcomeUtil.addIssue(
 				theFhirContext,
 				theOperationOutcomeToPopulate,
-				OO_SEVERITY_INFO,
+				OperationOutcomeUtil.OO_SEVERITY_INFO,
 				msg,
 				null,
-				OO_ISSUE_CODE_INFORMATIONAL,
+				OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL,
 				detailSystem,
 				detailCode,
 				detailDescription);
