@@ -27,7 +27,7 @@ import java.util.Optional;
  * ServiceLoader for the fhir-repository: url scheme.
  * Placeholder until this can move to cqf-fhir-utility or hapi-fhir-repositories.
  * @see ca.uhn.fhir.repository.Repositories#repositoryForUrl
- * TODO Either push this down to cqf-utilities or upstream the IgRepository here to hapi-fhir-repositories.
+ * TODO Either push this down to cqf-fhir-utility or upstream the IgRepository here to hapi-fhir-repositories.
  */
 public class KalmFilesystemRepositoryLoader extends BaseSchemeBasedFhirRepositoryLoader implements IRepositoryLoader {
 	public static final String URL_SUB_SCHEME = "exp-kalm-filesystem";
@@ -54,7 +54,8 @@ public class KalmFilesystemRepositoryLoader extends BaseSchemeBasedFhirRepositor
 		File directory = configPath.toFile();
 
 		if (!(directory.exists() && directory.isDirectory())) {
-			throw new IllegalArgumentException(Msg.code(2754) + "The provided path does not exist or is not a directory: " + directory);
+			throw new IllegalArgumentException(
+					Msg.code(2754) + "The provided path does not exist or is not a directory: " + directory);
 		}
 		return configPath;
 	}
