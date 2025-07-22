@@ -105,7 +105,8 @@ public class MatchUrlService {
 			// - Both _text and _content requires the FullTextSearchSvc and can only be performed on DomainResources
 			// - _id since it is part of the unique constraint in the DB (see ResourceTableDao)
 			// - Both _list and _has allows complex chaining with other resource-specific search params
-			throw new IllegalArgumentException(Msg.code(2742) + "theResourceName must not be blank");
+			String errorMsg = myFhirContext.getLocalizer().getMessage(MatchUrlService.class, "noResourceType");
+			throw new IllegalArgumentException(Msg.code(2742) + errorMsg);
 		}
 
 		for (String nextParamName : nameToParamLists.keySet()) {

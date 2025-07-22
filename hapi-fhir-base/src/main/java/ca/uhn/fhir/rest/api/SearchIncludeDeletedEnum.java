@@ -67,7 +67,7 @@ public enum SearchIncludeDeletedEnum {
 		SearchIncludeDeletedEnum retVal = codeToEnum.get(theCode);
 		if (retVal == null) {
 			throw new InvalidRequestException(
-					Msg.code(2741) + "Invalid \"_deleted\" mode: " + UrlUtil.sanitizeUrlPart(theCode));
+					Msg.code(2741) + "Invalid \"" + Constants.PARAM_INCLUDE_DELETED + "\" mode: " + UrlUtil.sanitizeUrlPart(theCode));
 		}
 
 		return retVal;
