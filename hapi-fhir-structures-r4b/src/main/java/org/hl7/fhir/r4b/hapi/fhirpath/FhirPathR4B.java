@@ -100,10 +100,16 @@ public class FhirPathR4B implements IFhirPath {
 					boolean beforeContext,
 					boolean explicitConstant)
 					throws PathEngineException {
-				return Collections.unmodifiableList(
-						theEvaluationContext.resolveConstant(appContext, name, beforeContext).stream()
-								.map(Base.class::cast)
-								.collect(Collectors.toList()));
+				return Collections.unmodifiableList(theEvaluationContext
+						.resolveConstant(
+								appContext,
+								name,
+								beforeContext
+										? IFhirPathEvaluationContext.ConstantEvaluationMode.IMPLICIT_BEFORE
+										: IFhirPathEvaluationContext.ConstantEvaluationMode.IMPLICIT_AFTER)
+						.stream()
+						.map(Base.class::cast)
+						.collect(Collectors.toList()));
 			}
 
 			@Override
