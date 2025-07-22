@@ -137,11 +137,11 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 		return deleteSource;
 	}
 
-	private @Nullable Patient getResultResource(Parameters originalInputParameters) {
+	private @Nullable Patient getResultResource(Parameters theOriginalInputParameters) {
 		Patient resultResource = null;
 		String resultResourceParamName = myMergeOperationInputParameterNames.getResultResourceParameterName();
-		if (originalInputParameters.hasParameter(resultResourceParamName)) {
-			resultResource = (Patient) originalInputParameters
+		if (theOriginalInputParameters.hasParameter(resultResourceParamName)) {
+			resultResource = (Patient) theOriginalInputParameters
 					.getParameter(resultResourceParamName)
 					.getResource();
 		}
