@@ -726,6 +726,8 @@ public class SearchQueryBuilder {
 			SearchIncludeDeletedEnum theIncludeDeletedFlag) {
 		if (myFirstPredicateBuilder == null) {
 			getOrCreateResourceTablePredicateBuilder(theIncludeDeletedFlag);
+		} else if (myFirstPredicateBuilder instanceof ResourceTablePredicateBuilder resourceTablePredicateBuilder) {
+			assert resourceTablePredicateBuilder.getSearchIncludeDeleted().equals(theIncludeDeletedFlag);
 		}
 		return myFirstPredicateBuilder;
 	}
@@ -751,7 +753,7 @@ public class SearchQueryBuilder {
 	public ResourceTablePredicateBuilder getOrCreateResourceTablePredicateBuilder(
 			SearchIncludeDeletedEnum theDeletedFlag) {
 		if (myResourceTableRoot == null) {
-			ResourceTablePredicateBuilder resourceTable = mySqlBuilderFactory.resourceTable(this);
+			ResourceTablePredicateBuilder resourceTable = mySqlBuilderFactory.resourceTable(this, theDeletedFlag);
 			addTable(resourceTable, null);
 
 			if (theDeletedFlag == null) {

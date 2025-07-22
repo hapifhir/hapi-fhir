@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.search.builder.sql;
 
+import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
@@ -37,6 +38,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -82,7 +84,11 @@ public class SqlObjectFactory {
 	}
 
 	public ResourceTablePredicateBuilder resourceTable(SearchQueryBuilder theSearchSqlBuilder) {
-		return myApplicationContext.getBean(ResourceTablePredicateBuilder.class, theSearchSqlBuilder);
+		return myApplicationContext.getBean(ResourceTablePredicateBuilder.class, theSearchSqlBuilder, SearchIncludeDeletedEnum.FALSE);
+	}
+
+	public ResourceTablePredicateBuilder resourceTable(SearchQueryBuilder theSearchSqlBuilder, SearchIncludeDeletedEnum theSearchIncludeDeleted) {
+		return myApplicationContext.getBean(ResourceTablePredicateBuilder.class, theSearchSqlBuilder, theSearchIncludeDeleted);
 	}
 
 	public ResourceIdPredicateBuilder resourceId(SearchQueryBuilder theSearchSqlBuilder) {

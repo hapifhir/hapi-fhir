@@ -48,6 +48,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.DateRangeUtil;
 import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
@@ -128,7 +129,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 			Date theStart, Date theEnd, String theUrl, RequestPartitionId theRequestPartitionId) {
 		validateUrl(theUrl);
 
-		String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
+		String resourceType = UrlUtil.determineResourceTypeInResourceUrl(myFhirContext, theUrl);
 
 		// Search in all partitions if no partition is provided
 		ourLog.debug("No partition id detected in request - searching all partitions");
@@ -138,7 +139,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		SystemRequestDetails request = new SystemRequestDetails();
 		request.setRequestPartitionId(thePartitionId);
 
-		if (resourceType.isBlank()) {
+		if (resourceType == null || resourceType.isBlank()) {
 			searchParamMap = parseQuery(theUrl, null);
 		} else {
 			searchParamMap = parseQuery(theUrl);
@@ -146,7 +147,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 
 		searchParamMap.setLastUpdated(DateRangeUtil.narrowDateRange(searchParamMap.getLastUpdated(), theStart, theEnd));
 
-		if (resourceType.isBlank()) {
+		if (resourceType == null ||resourceType.isBlank()) {
 			return searchForResourceIdsAndType(thePartitionId, request, searchParamMap);
 		}
 

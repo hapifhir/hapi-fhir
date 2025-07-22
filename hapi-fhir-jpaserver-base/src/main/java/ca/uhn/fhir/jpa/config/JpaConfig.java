@@ -190,6 +190,7 @@ import ca.uhn.fhir.replacereferences.PreviousResourceVersionRestorer;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.replacereferences.UndoReplaceReferencesSvc;
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -725,8 +726,8 @@ public class JpaConfig {
 
 	@Bean
 	@Scope("prototype")
-	public ResourceTablePredicateBuilder newResourceTablePredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new ResourceTablePredicateBuilder(theSearchBuilder);
+	public ResourceTablePredicateBuilder newResourceTablePredicateBuilder(SearchQueryBuilder theSearchBuilder, SearchIncludeDeletedEnum theSearchIncludeDeleted) {
+		return new ResourceTablePredicateBuilder(theSearchBuilder, theSearchIncludeDeleted);
 	}
 
 	@Bean

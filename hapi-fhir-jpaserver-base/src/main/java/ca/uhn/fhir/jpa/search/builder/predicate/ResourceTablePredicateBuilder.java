@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
@@ -37,11 +38,12 @@ public class ResourceTablePredicateBuilder extends BaseJoiningPredicateBuilder {
 	private final DbColumn myColumnLastUpdated;
 	private final DbColumn myColumnLanguage;
 	private final DbColumn myColumnFhirId;
+	private final SearchIncludeDeletedEnum mySearchIncludeDeleted;
 
 	/**
 	 * Constructor
 	 */
-	public ResourceTablePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+	public ResourceTablePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, SearchIncludeDeletedEnum theSearchIncludeDeleted) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RESOURCE"));
 		myColumnResId = getTable().addColumn("RES_ID");
 		myColumnResType = getTable().addColumn(ResourceTable.RES_TYPE);
@@ -49,6 +51,8 @@ public class ResourceTablePredicateBuilder extends BaseJoiningPredicateBuilder {
 		myColumnLastUpdated = getTable().addColumn("RES_UPDATED");
 		myColumnLanguage = getTable().addColumn("RES_LANGUAGE");
 		myColumnFhirId = getTable().addColumn(ResourceTable.FHIR_ID);
+
+		mySearchIncludeDeleted = theSearchIncludeDeleted;
 	}
 
 	@Override
@@ -99,5 +103,9 @@ public class ResourceTablePredicateBuilder extends BaseJoiningPredicateBuilder {
 
 	public DbColumn getResourceTypeColumn() {
 		return myColumnResType;
+	}
+
+	public SearchIncludeDeletedEnum getSearchIncludeDeleted() {
+		return mySearchIncludeDeleted;
 	}
 }

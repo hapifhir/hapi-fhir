@@ -55,6 +55,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class MatchUrlService {
 
+	public static final Set<String> COMPATIBLE_PARAMS_NO_RES_TYPE = Set.of(Constants.PARAM_DELETED, Constants.PARAM_LASTUPDATED);
+	public static final Set<String> COMPATIBLE_PARAMS_GIVEN_RES_TYPE = Set.of(Constants.PARAM_DELETED, Constants.PARAM_LASTUPDATED, Constants.PARAM_ID);
 	@Autowired
 	private FhirContext myFhirContext;
 
@@ -63,16 +65,6 @@ public class MatchUrlService {
 
 	public MatchUrlService() {
 		super();
-	}
-
-	private static boolean isSupportedQueryForNoProvidedResourceType(Set<String> theParamNames) {
-		if (theParamNames == null || theParamNames.isEmpty()) {
-			// Query with no resource type in URL (ie. `[server base]?`)
-			return false;
-		}
-		Set<String> acceptableServerParams = new HashSet<>(STRICT_RESOURCE_META_PARAMS);
-		acceptableServerParams.add(Constants.PARAM_DELETED);
-		return acceptableServerParams.containsAll(theParamNames);
 	}
 
 	public SearchParameterMap translateMatchUrl(
@@ -225,6 +217,16 @@ public class MatchUrlService {
 		return paramMap;
 	}
 
+	private static boolean isSupportedQueryForNoProvidedResourceType(Set<String> theParamNames) {
+		if (theParamNames == null || theParamNames.isEmpty()) {
+			// Query with no resource type in URL (ie. `[server base]?`)
+			return false;
+		}
+		Set<String> acceptableServerParams = new HashSet<>(STRICT_RESOURCE_META_PARAMS);
+		acceptableServerParams.add(Constants.PARAM_DELETED);
+		return acceptableServerParams.containsAll(theParamNames);
+	}
+
 	private static boolean hasNoResourceTypeInUrl(String theMatchUrl, RuntimeResourceDefinition theResourceDefinition) {
 		return theResourceDefinition == null && theMatchUrl.indexOf('?') == 0;
 	}
@@ -238,13 +240,11 @@ public class MatchUrlService {
 	 */
 	private static void validateParamsAreCompatibleForDeleteOrThrow(
 			Set<String> theParamsToCheck, boolean theHasNoResourceType) {
-		Set<String> theCompatibleParams = theHasNoResourceType
-				? Set.of(Constants.PARAM_DELETED, Constants.PARAM_LASTUPDATED)
-				: Set.of(Constants.PARAM_DELETED, Constants.PARAM_LASTUPDATED, Constants.PARAM_ID);
+		Set<String> compatibleParams = theHasNoResourceType ? COMPATIBLE_PARAMS_NO_RES_TYPE : COMPATIBLE_PARAMS_GIVEN_RES_TYPE;
 
-		if (!theCompatibleParams.containsAll(theParamsToCheck)) {
+		if (!compatibleParams.containsAll(theParamsToCheck)) {
 			throw new IllegalArgumentException(Msg.code(2744) + "The " + Constants.PARAM_DELETED
-					+ " parameter is only compatible with the following parameters: " + theCompatibleParams);
+					+ " parameter is only compatible with the following parameters: " + compatibleParams);
 		}
 	}
 
