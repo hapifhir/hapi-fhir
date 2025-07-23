@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoStructureDefinition;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSubscription;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
@@ -695,14 +696,28 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
+		return doCreateResourceAndReturnOutcome(theResource).getId().toUnqualifiedVersionless();
+	}
+
+	public DaoMethodOutcome doCreateResourceAndReturnOutcome(IBaseResource theResource) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
-		return dao.create(theResource, mySrd).getId().toUnqualifiedVersionless();
+		return dao.create(theResource, mySrd);
 	}
 
 	@Override
 	public IIdType doUpdateResource(IBaseResource theResource) {
+		return doUpdateResourceAndReturnOutcome(theResource).getId().toUnqualifiedVersionless();
+	}
+
+	public DaoMethodOutcome doUpdateResourceAndReturnOutcome(IBaseResource theResource) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
-		return dao.update(theResource, mySrd).getId().toUnqualifiedVersionless();
+		return dao.update(theResource, mySrd);
+	}
+
+	@Override
+	public void doDeleteResource(IIdType theIIdType){
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theIIdType.getResourceType());
+		dao.delete(theIIdType);
 	}
 
 	protected String encode(IBaseResource theResource) {
