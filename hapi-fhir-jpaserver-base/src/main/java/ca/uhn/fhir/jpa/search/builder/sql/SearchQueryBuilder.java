@@ -730,7 +730,10 @@ public class SearchQueryBuilder {
 			getOrCreateResourceTablePredicateBuilder(theIncludeResourceTypeAndOrDeletedPredicate, theIncludeDeletedFlag);
 		} else if (myFirstPredicateBuilder instanceof ResourceTablePredicateBuilder resourceTablePredicateBuilder) {
 			// We already have myFirstPredicateBuilder - ensure it has the same include deleted flag
-			assert resourceTablePredicateBuilder.getSearchIncludeDeleted().equals(theIncludeDeletedFlag);
+			if (resourceTablePredicateBuilder.getSearchIncludeDeleted() != null && theIncludeDeletedFlag != null) {
+				assert resourceTablePredicateBuilder.getSearchIncludeDeleted().equals(theIncludeDeletedFlag);
+			}
+
 		}
 		return myFirstPredicateBuilder;
 	}
