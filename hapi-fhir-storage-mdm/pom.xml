@@ -10,6 +10,7 @@
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
+	<name>HAPI-FHIR Storage MDM</name>
 
 	<artifactId>hapi-fhir-storage-mdm</artifactId>
 	<dependencies>

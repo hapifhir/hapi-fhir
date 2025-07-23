@@ -48,6 +48,7 @@ import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
@@ -77,6 +78,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -471,8 +473,36 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	}
 
 	private void validateSearch(SearchParameterMap theParams) {
+		assert checkNoDuplicateParameters(theParams)
+				: "Duplicate parameters found in query: " + theParams.toNormalizedQueryString(myContext);
+
 		validateIncludes(theParams.getIncludes(), Constants.PARAM_INCLUDE);
 		validateIncludes(theParams.getRevIncludes(), Constants.PARAM_REVINCLUDE);
+	}
+
+	/**
+	 * This method detects whether we have any duplicate lists of parameters and returns
+	 * {@literal true} if none are found. For example, the following query would result
+	 * in this method returning {@literal false}:
+	 * <code>Patient?name=bart,homer&name=bart,homer</code>
+	 * <p>
+	 * This is not an optimized test, and it's not technically even prohibited to have
+	 * duplicates like these in queries so this method should only be called as a
+	 * part of an {@literal assert} statement to catch errors in tests.
+	 */
+	private boolean checkNoDuplicateParameters(SearchParameterMap theParams) {
+		HashSet<List<IQueryParameterType>> lists = new HashSet<>();
+		for (List<List<IQueryParameterType>> andList : theParams.values()) {
+
+			lists.clear();
+			for (int i = 0; i < andList.size(); i++) {
+				List<IQueryParameterType> orListI = andList.get(i);
+				if (!orListI.isEmpty() && !lists.add(orListI)) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	private void validateIncludes(Set<Include> includes, String name) {

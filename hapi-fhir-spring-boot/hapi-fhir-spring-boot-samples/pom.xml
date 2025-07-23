@@ -11,6 +11,7 @@
 
 	<artifactId>hapi-fhir-spring-boot-samples</artifactId>
 	<packaging>pom</packaging>
+	<name>HAPI-FHIR Spring Boot Samples</name>
 
 	<modules>
 		<module>hapi-fhir-spring-boot-sample-client-apache</module>

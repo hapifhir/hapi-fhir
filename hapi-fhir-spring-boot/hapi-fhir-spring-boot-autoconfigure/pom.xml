@@ -10,8 +10,8 @@
 		<relativePath>../../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
+	<name>HAPI-FHIR Spring boot autoconfiguration</name>
 	<artifactId>hapi-fhir-spring-boot-autoconfigure</artifactId>
-
 	<packaging>jar</packaging>
 
 	<dependencies>
