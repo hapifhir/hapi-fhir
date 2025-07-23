@@ -7929,7 +7929,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void searchResource_withIncludeDeletedParam() {
+	void searchResource_withIncludeDeletedParam() {
 		// Given
 		Patient patient = new Patient();
 		patient.addName(new HumanName().setFamily("TestFamily").addGiven("TestGiven"));
@@ -7950,7 +7950,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void conditionalUpdate_withIncludeDeletedParam() {
+	void conditionalUpdate_withIncludeDeletedParam() {
 		// Given
 		Patient patient = new Patient();
 		patient.addName(new HumanName().setFamily("TestFamily").addGiven("TestGiven"));
