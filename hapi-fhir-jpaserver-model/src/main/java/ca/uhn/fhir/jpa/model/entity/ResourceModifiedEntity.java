@@ -53,9 +53,6 @@ public class ResourceModifiedEntity implements IPersistedResourceModifiedMessage
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myCreatedTime;
 
-	@Column(name = "RESOURCE_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
-	private String myResourceType;
-
 	public PersistedResourceModifiedMessageEntityPK getResourceModifiedEntityPK() {
 		return myResourceModifiedEntityPK;
 	}
@@ -68,11 +65,11 @@ public class ResourceModifiedEntity implements IPersistedResourceModifiedMessage
 
 	@Override
 	public String getResourceType() {
-		return myResourceType;
+		return myResourceModifiedEntityPK.getResourceType();
 	}
 
 	public ResourceModifiedEntity setResourceType(String theResourceType) {
-		myResourceType = theResourceType;
+		myResourceModifiedEntityPK.setResourceType(theResourceType);
 		return this;
 	}
 
