@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>8.3.17-SNAPSHOT</version>
+		<version>8.3.16-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -217,7 +217,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-	</dependencies>
+    </dependencies>
 
 	<build>
 		<plugins>

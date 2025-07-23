@@ -227,7 +227,8 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				if (theRequestDetails.isRewriteHistory()
 						&& theRequestDetails.getId() != null
 						&& theRequestDetails.getId().hasVersionIdPart()
-						&& theOperation == RestOperationTypeEnum.UPDATE) {
+						&& (theOperation == RestOperationTypeEnum.UPDATE
+								|| theOperation == RestOperationTypeEnum.PATCH)) {
 					return null;
 				}
 				switch (theOperation) {

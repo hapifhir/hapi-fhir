@@ -57,7 +57,6 @@ import org.hl7.fhir.r4.model.SampledData;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Task;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -454,6 +453,16 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testConditionalCreateFailsIfMatchUrlCaseIsDifferent() {
+		Observation obs = new Observation();
+		obs.addIdentifier().setValue("XXX");
+		assertThatThrownBy(() -> myObservationDao.create(obs, "identifier=xxx", newSrd()))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessage(Msg.code(929) +
+				"Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
 	}
 
 	@Test

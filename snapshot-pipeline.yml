@@ -92,11 +92,11 @@ steps:
 
   # 5. Deploy SNAPSHOT build to sonatype
   - task: Maven@4
-    env:
-      JAVA_HOME_11_X64: /opt/java/openjdk
     displayName: 'Deploy to Maven Central staging'
+    env:
+      MAVEN_OPTS: "-Xmx2048m -XX:+UseG1GC"
     inputs:
       mavenPomFile: '$(System.DefaultWorkingDirectory)/pom.xml'
       goals: deploy
-      options: '--settings $(System.DefaultWorkingDirectory)/settings.xml -P DIST -DskipTests -DdeployToCentral'
+      options: '--settings $(System.DefaultWorkingDirectory)/settings.xml -P DIST -DskipTests -DdeployToCentral --batch-mode --no-transfer-progress --threads 1C --fail-at-end -Dstyle.color=never '
       publishJUnitResults: false

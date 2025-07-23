@@ -73,8 +73,8 @@ public interface IBatch2JobInstanceRepository
 			+ "WHERE (:definitionId IS NULL OR b.myDefinitionId = :definitionId) "
 			+ "AND (:status IS NULL OR b.myStatus = :status) "
 			+ "AND (:jobId IS NULL OR b.myId = :jobId) "
-			+ "AND (:from IS NULL OR b.myCreateTime >= :from) "
-			+ "AND (:to IS NULL OR b.myCreateTime <= :to)")
+			+ "AND (cast(:from as date) IS NULL OR b.myCreateTime >= :from) "
+			+ "AND (cast(:to as date) IS NULL OR b.myCreateTime <= :to)")
 	Page<Batch2JobInstanceEntity> findByJobDefinitionIdOrStatusOrIdOrCreateTime(
 			@Param("definitionId") String theDefinitionId,
 			@Param("status") StatusEnum theStatus,

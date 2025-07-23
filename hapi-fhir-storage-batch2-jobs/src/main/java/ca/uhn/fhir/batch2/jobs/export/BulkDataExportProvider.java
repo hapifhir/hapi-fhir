@@ -48,7 +48,9 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletResponse;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
@@ -58,6 +60,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -114,6 +117,8 @@ public class BulkDataExportProvider {
 					IPrimitiveType<String> theType,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant")
 					IPrimitiveType<Date> theSince,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_UNTIL, min = 0, max = 1, typeName = "instant")
+					IPrimitiveType<Date> theUntil,
 			@OperationParam(
 							name = JpaConstants.PARAM_EXPORT_TYPE_FILTER,
 							min = 0,
@@ -136,6 +141,7 @@ public class BulkDataExportProvider {
 				.outputFormat(theOutputFormat)
 				.resourceTypes(theType)
 				.since(theSince)
+				.until(theUntil)
 				.filters(theTypeFilter)
 				.exportIdentifier(theExportId)
 				.exportStyle(ExportStyle.SYSTEM)
@@ -162,6 +168,8 @@ public class BulkDataExportProvider {
 					IPrimitiveType<String> theType,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant")
 					IPrimitiveType<Date> theSince,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_UNTIL, min = 0, max = 1, typeName = "instant")
+					IPrimitiveType<Date> theUntil,
 			@OperationParam(
 							name = JpaConstants.PARAM_EXPORT_TYPE_FILTER,
 							min = 0,
@@ -182,6 +190,7 @@ public class BulkDataExportProvider {
 		ourLog.debug("Received Group Bulk Export Request for Group {}", theIdParam);
 		ourLog.debug("_type={}", theType);
 		ourLog.debug("_since={}", theSince);
+		ourLog.debug("_until{}", theUntil);
 		ourLog.debug("_typeFilter={}", theTypeFilter);
 		ourLog.debug("_mdm={}", theMdm);
 
@@ -194,6 +203,7 @@ public class BulkDataExportProvider {
 				.outputFormat(theOutputFormat)
 				.resourceTypes(theType)
 				.since(theSince)
+				.until(theUntil)
 				.filters(theTypeFilter)
 				.exportIdentifier(theExportIdentifier)
 				.exportStyle(ExportStyle.GROUP)
@@ -227,6 +237,8 @@ public class BulkDataExportProvider {
 					IPrimitiveType<String> theType,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant")
 					IPrimitiveType<Date> theSince,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_UNTIL, min = 0, max = 1, typeName = "instant")
+					IPrimitiveType<Date> theUntil,
 			@OperationParam(
 							name = JpaConstants.PARAM_EXPORT_TYPE_FILTER,
 							min = 0,
@@ -239,23 +251,21 @@ public class BulkDataExportProvider {
 							max = OperationParam.MAX_UNLIMITED,
 							typeName = "string")
 					List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
-			@OperationParam(
-							name = JpaConstants.PARAM_EXPORT_PATIENT,
-							min = 0,
-							max = OperationParam.MAX_UNLIMITED,
-							typeName = "string")
-					List<IPrimitiveType<String>> thePatient,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_PATIENT, min = 0, max = OperationParam.MAX_UNLIMITED)
+					List<IBase> thePatient,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
 			ServletRequestDetails theRequestDetails) {
 
-		List<IPrimitiveType<String>> patientIds = thePatient != null ? thePatient : new ArrayList<>();
+		final List<IPrimitiveType<String>> patientIds =
+				thePatient != null ? parsePatientList(thePatient) : new ArrayList<>();
 
 		doPatientExport(
 				theRequestDetails,
 				theOutputFormat,
 				theType,
 				theSince,
+				theUntil,
 				theExportIdentifier,
 				theTypeFilter,
 				theTypePostFetchFilterUrl,
@@ -278,6 +288,8 @@ public class BulkDataExportProvider {
 					IPrimitiveType<String> theType,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant")
 					IPrimitiveType<Date> theSince,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_UNTIL, min = 0, max = 1, typeName = "instant")
+					IPrimitiveType<Date> theUntil,
 			@OperationParam(
 							name = JpaConstants.PARAM_EXPORT_TYPE_FILTER,
 							min = 0,
@@ -299,6 +311,7 @@ public class BulkDataExportProvider {
 				theOutputFormat,
 				theType,
 				theSince,
+				theUntil,
 				theTypeFilter,
 				theTypePostFetchFilterUrl,
 				List.of(theIdParam),
@@ -306,11 +319,41 @@ public class BulkDataExportProvider {
 				theRequestDetails);
 	}
 
+	static List<IPrimitiveType<String>> parsePatientList(@Nonnull List<IBase> thePatient) {
+		return thePatient.stream()
+				.map(patient -> {
+					if (patient instanceof IIdType patientIIdType) {
+						return patientIIdType;
+					} else {
+						return getStringPrimitiveFromParametersParameter(patient);
+					}
+				})
+				.toList();
+	}
+
+	private static IPrimitiveType<String> getStringPrimitiveFromParametersParameter(IBase patient) {
+		try {
+			Method getValueMethod = patient.getClass().getMethod("getValue");
+			Object value = getValueMethod.invoke(patient);
+			if (value instanceof IPrimitiveType<?> patientPrimitiveType
+					&& patientPrimitiveType.getValue() instanceof String) {
+				return (IPrimitiveType<String>) patientPrimitiveType;
+			} else if (value instanceof IBaseReference patientReference) {
+				return patientReference.getReferenceElement();
+			} else {
+				throw new InvalidRequestException("Unsupported type.");
+			}
+		} catch (Exception e) {
+			throw new InvalidRequestException("Invalid patient parameter.", e);
+		}
+	}
+
 	private void doPatientExport(
 			ServletRequestDetails theRequestDetails,
 			IPrimitiveType<String> theOutputFormat,
 			IPrimitiveType<String> theType,
 			IPrimitiveType<Date> theSince,
+			IPrimitiveType<Date> theUntil,
 			IPrimitiveType<String> theExportIdentifier,
 			List<IPrimitiveType<String>> theTypeFilter,
 			List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
@@ -334,6 +377,7 @@ public class BulkDataExportProvider {
 				.outputFormat(theOutputFormat)
 				.resourceTypes(resourceTypes)
 				.since(theSince)
+				.until(theUntil)
 				.filters(theTypeFilter)
 				.exportIdentifier(theExportIdentifier)
 				.exportStyle(ExportStyle.PATIENT)

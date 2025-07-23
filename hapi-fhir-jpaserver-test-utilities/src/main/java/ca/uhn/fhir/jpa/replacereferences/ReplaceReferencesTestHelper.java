@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.replacereferences;
 
+import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
+import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceResultsJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.FhirContext;
@@ -35,27 +37,25 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.JsonUtil;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
@@ -72,8 +72,6 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -83,6 +81,7 @@ import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_S
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER_RESPOND_ASYNC;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.HAPI_BATCH_JOB_ID_SYSTEM;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -93,36 +92,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ReplaceReferencesTestHelper {
 	private static final Logger ourLog = LoggerFactory.getLogger(ReplaceReferencesTestHelper.class);
 
-	static final Identifier pat1IdentifierA =
-			new Identifier().setSystem("SYS1A").setValue("VAL1A");
-	static final Identifier pat1IdentifierB =
-			new Identifier().setSystem("SYS1B").setValue("VAL1B");
-	static final Identifier pat2IdentifierA =
-			new Identifier().setSystem("SYS2A").setValue("VAL2A");
-	static final Identifier pat2IdentifierB =
-			new Identifier().setSystem("SYS2B").setValue("VAL2B");
-	static final Identifier patBothIdentifierC =
-			new Identifier().setSystem("SYSC").setValue("VALC");
-	public static final int TOTAL_EXPECTED_PATCHES = 23;
-	public static final int SMALL_BATCH_SIZE = 5;
-	public static final int EXPECTED_SMALL_BATCHES = (TOTAL_EXPECTED_PATCHES + SMALL_BATCH_SIZE - 1) / SMALL_BATCH_SIZE;
 	private final IFhirResourceDaoPatient<Patient> myPatientDao;
 	private final IFhirResourceDao<Task> myTaskDao;
-	private final IFhirResourceDao<Organization> myOrganizationDao;
-	private final IFhirResourceDao<Encounter> myEncounterDao;
-	private final IFhirResourceDao<CarePlan> myCarePlanDao;
-	private final IFhirResourceDao<Observation> myObservationDao;
 	private final IFhirResourceDao<Provenance> myProvenanceDao;
 	private final IFhirResourceDao<Practitioner> myPractitionerDao;
-
-	private IIdType myOrgId;
-	private IIdType mySourcePatientId;
-	private IIdType mySourceCarePlanId;
-	private IIdType mySourceEncId1;
-	private IIdType mySourceEncId2;
-	private ArrayList<IIdType> mySourceObsIds;
-	private IIdType myTargetPatientId;
-	private IIdType myTargetEnc1;
 
 	private final FhirContext myFhirContext;
 	private final SystemRequestDetails mySrd = new SystemRequestDetails();
@@ -132,101 +105,22 @@ public class ReplaceReferencesTestHelper {
 		myFhirContext = theFhirContext;
 		myPatientDao = (IFhirResourceDaoPatient<Patient>) theDaoRegistry.getResourceDao(Patient.class);
 		myTaskDao = theDaoRegistry.getResourceDao(Task.class);
-		myOrganizationDao = theDaoRegistry.getResourceDao(Organization.class);
-		myEncounterDao = theDaoRegistry.getResourceDao(Encounter.class);
-		myCarePlanDao = theDaoRegistry.getResourceDao(CarePlan.class);
-		myObservationDao = theDaoRegistry.getResourceDao(Observation.class);
 		myProvenanceDao = theDaoRegistry.getResourceDao(Provenance.class);
 		myPractitionerDao = theDaoRegistry.getResourceDao(Practitioner.class);
 		myJsonParser = myFhirContext.newJsonParser();
 	}
 
-	public void beforeEach() {
-
-		Organization org = new Organization();
-		org.setName("an org");
-		myOrgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
-		ourLog.info("OrgId: {}", myOrgId);
-
-		Patient patient1 = new Patient();
-		patient1.getManagingOrganization().setReferenceElement(myOrgId);
-		patient1.addIdentifier(pat1IdentifierA);
-		patient1.addIdentifier(pat1IdentifierB);
-		patient1.addIdentifier(patBothIdentifierC);
-		mySourcePatientId = myPatientDao.create(patient1, mySrd).getId().toUnqualifiedVersionless();
-
-		Patient patient2 = new Patient();
-		patient2.addIdentifier(pat2IdentifierA);
-		patient2.addIdentifier(pat2IdentifierB);
-		patient2.addIdentifier(patBothIdentifierC);
-		patient2.getManagingOrganization().setReferenceElement(myOrgId);
-		myTargetPatientId = myPatientDao.create(patient2, mySrd).getId().toUnqualifiedVersionless();
-
-		Encounter enc1 = new Encounter();
-		enc1.setStatus(Encounter.EncounterStatus.CANCELLED);
-		enc1.getSubject().setReferenceElement(mySourcePatientId);
-		enc1.getServiceProvider().setReferenceElement(myOrgId);
-		mySourceEncId1 = myEncounterDao.create(enc1, mySrd).getId().toUnqualifiedVersionless();
-
-		Encounter enc2 = new Encounter();
-		enc2.setStatus(Encounter.EncounterStatus.ARRIVED);
-		enc2.getSubject().setReferenceElement(mySourcePatientId);
-		enc2.getServiceProvider().setReferenceElement(myOrgId);
-		mySourceEncId2 = myEncounterDao.create(enc2, mySrd).getId().toUnqualifiedVersionless();
-
-		CarePlan carePlan = new CarePlan();
-		carePlan.setStatus(CarePlan.CarePlanStatus.ACTIVE);
-		carePlan.getSubject().setReferenceElement(mySourcePatientId);
-		mySourceCarePlanId = myCarePlanDao.create(carePlan, mySrd).getId().toUnqualifiedVersionless();
-
-		Encounter targetEnc1 = new Encounter();
-		targetEnc1.setStatus(Encounter.EncounterStatus.ARRIVED);
-		targetEnc1.getSubject().setReferenceElement(myTargetPatientId);
-		targetEnc1.getServiceProvider().setReferenceElement(myOrgId);
-		this.myTargetEnc1 = myEncounterDao.create(targetEnc1, mySrd).getId().toUnqualifiedVersionless();
-
-		mySourceObsIds = new ArrayList<>();
-		for (int i = 0; i < 20; i++) {
-			Observation obs = new Observation();
-			obs.getSubject().setReferenceElement(mySourcePatientId);
-			obs.setStatus(Observation.ObservationStatus.FINAL);
-			IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			mySourceObsIds.add(obsId);
-		}
+	public void setSourceAndTarget(PatientMergeInputParameters inParams, ReplaceReferencesLargeTestData theTestData) {
+		inParams.sourcePatient = idAsReference(theTestData.getSourcePatientId());
+		inParams.targetPatient = idAsReference(theTestData.getTargetPatientId());
 	}
 
-	public void setSourceAndTarget(PatientMergeInputParameters inParams) {
-		inParams.sourcePatient = new Reference().setReferenceElement(mySourcePatientId);
-		inParams.targetPatient = new Reference().setReferenceElement(myTargetPatientId);
-	}
-
-	public Patient createResultPatient(boolean theDeleteSource) {
-		Patient resultPatient = new Patient();
-		resultPatient.setIdElement((IdType) myTargetPatientId);
-		resultPatient.addIdentifier(pat1IdentifierA);
-		if (!theDeleteSource) {
-			// add the link only if we are not deleting the source
-			Patient.PatientLinkComponent link = resultPatient.addLink();
-			link.setOther(new Reference(mySourcePatientId));
-			link.setType(Patient.LinkType.REPLACES);
-		}
-		return resultPatient;
-	}
-
-	public Patient readSourcePatient() {
-		return readPatient(mySourcePatientId);
-	}
-
-	public Patient readTargetPatient() {
-		return readPatient(myTargetPatientId);
+	public Reference idAsReference(IIdType theId) {
+		return new Reference().setReferenceElement(theId);
 	}
 
 	public Patient readPatient(IIdType thePatientId) {
 		return myPatientDao.read(thePatientId, mySrd);
-	}
-
-	public IIdType getTargetPatientId() {
-		return myTargetPatientId;
 	}
 
 	public ProvenanceAgent createTestProvenanceAgent() {
@@ -247,33 +141,44 @@ public class ReplaceReferencesTestHelper {
 	}
 
 	public void assertReplaceReferencesProvenance(
-			String theExpectedSourcePatientVersion,
-			String theExpectedTargetPatientVersion,
+			String theExpectedSourceResourceVersion,
+			String theExpectedTargetResourceVersion,
+			ReplaceReferencesLargeTestData theTestData,
 			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
-		List<IBaseResource> provenances =
-				searchProvenance(myTargetPatientId.toVersionless().getIdPart());
+		assertReplaceReferencesProvenance(
+				theTestData.getSourcePatientId().withVersion(theExpectedSourceResourceVersion),
+				theTestData.getTargetPatientId().withVersion(theExpectedTargetResourceVersion),
+				ReplaceReferencesLargeTestData.TOTAL_EXPECTED_PATCHES,
+				theTestData.getExpectedProvenanceTargetsForPatchedResources(),
+				theExpectedProvenanceAgents);
+	}
+
+	public void assertReplaceReferencesProvenance(
+			IIdType theSourceResourceIdWithExpectedVersion,
+			IIdType theTargetResourceIdWithExpectedVersion,
+			int theExpectedNumberOfPatches,
+			Set<String> theExpectedPatchedResourceTargetReferences,
+			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
+
+		List<IBaseResource> provenances = searchProvenance(theTargetResourceIdWithExpectedVersion.getIdPart());
 		assertThat(provenances).hasSize(1);
 		Provenance provenance = (Provenance) provenances.get(0);
 
 		// assert targets
-		int expectedNumberOfProvenanceTargets = TOTAL_EXPECTED_PATCHES + 2;
+		int expectedNumberOfProvenanceTargets = theExpectedNumberOfPatches + 2;
 		assertThat(provenance.getTarget()).hasSize(expectedNumberOfProvenanceTargets);
+
 		// the first target reference should be the target patient
 		String targetPatientReferenceInProvenance =
 				provenance.getTarget().get(0).getReference();
-		assertThat(targetPatientReferenceInProvenance)
-				.isEqualTo(myTargetPatientId
-						.withVersion(theExpectedTargetPatientVersion)
-						.toString());
+		assertThat(targetPatientReferenceInProvenance).isEqualTo(theTargetResourceIdWithExpectedVersion.toString());
+
 		// the second target reference should be the source patient
 		String sourcePatientReference = provenance.getTarget().get(1).getReference();
-		assertThat(sourcePatientReference)
-				.isEqualTo(mySourcePatientId
-						.withVersion(theExpectedSourcePatientVersion)
-						.toString());
+		assertThat(sourcePatientReference).isEqualTo(theSourceResourceIdWithExpectedVersion.toString());
 
 		Set<String> allActualTargets = extractResourceIdsFromProvenanceTarget(provenance.getTarget());
-		assertThat(allActualTargets).containsAll(getExpectedProvenanceTargetsForPatchedResources());
+		assertThat(allActualTargets).containsAll(theExpectedPatchedResourceTargetReferences);
 
 		validateAgents(theExpectedProvenanceAgents, provenance);
 
@@ -301,43 +206,42 @@ public class ReplaceReferencesTestHelper {
 	}
 
 	public void assertMergeProvenance(
-			boolean theDeleteSource, @Nullable List<IProvenanceAgent> theExpectedProvenanceAgent) {
+			Parameters theInputParameters,
+			ReplaceReferencesLargeTestData theTestData,
+			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgent) {
 		assertMergeProvenance(
-				theDeleteSource,
-				mySourcePatientId.withVersion("2"),
-				myTargetPatientId.withVersion("2"),
-				TOTAL_EXPECTED_PATCHES,
-				getExpectedProvenanceTargetsForPatchedResources(),
+				theInputParameters,
+				theTestData.getSourcePatientId().withVersion("2"),
+				theTestData.getTargetPatientId().withVersion("2"),
+				ReplaceReferencesLargeTestData.TOTAL_EXPECTED_PATCHES,
+				theTestData.getExpectedProvenanceTargetsForPatchedResources(),
 				theExpectedProvenanceAgent);
 	}
 
 	public void assertMergeProvenance(
-			boolean theDeleteSource,
+			Parameters theInputParameters,
 			IIdType theSourcePatientIdWithExpectedVersion,
 			IIdType theTargetPatientIdWithExpectedVersion,
 			int theExpectedPatches,
 			Set<String> theExpectedProvenanceTargetsForPatchedResources,
 			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
 
-		List<IBaseResource> provenances = searchProvenance(
-				theTargetPatientIdWithExpectedVersion.toVersionless().getIdPart());
+		List<IBaseResource> provenances = searchProvenance(theTargetPatientIdWithExpectedVersion.getIdPart());
 		assertThat(provenances).hasSize(1);
 		Provenance provenance = (Provenance) provenances.get(0);
 
 		// assert targets
 		int expectedNumberOfProvenanceTargets = theExpectedPatches;
-		// target patient and source patient if not deleted
-		expectedNumberOfProvenanceTargets += theDeleteSource ? 1 : 2;
+		// target patient and source patient
+		expectedNumberOfProvenanceTargets += 2;
 		assertThat(provenance.getTarget()).hasSize(expectedNumberOfProvenanceTargets);
 		// the first target reference should be the target patient
 		String targetPatientReferenceInProvenance =
 				provenance.getTarget().get(0).getReference();
 		assertThat(targetPatientReferenceInProvenance).isEqualTo(theTargetPatientIdWithExpectedVersion.toString());
-		if (!theDeleteSource) {
-			// the second target reference should be the source patient, if it wasn't deleted
-			String sourcePatientReference = provenance.getTarget().get(1).getReference();
-			assertThat(sourcePatientReference).isEqualTo(theSourcePatientIdWithExpectedVersion.toString());
-		}
+		// the second target reference should be the source patient
+		String sourcePatientReference = provenance.getTarget().get(1).getReference();
+		assertThat(sourcePatientReference).isEqualTo(theSourcePatientIdWithExpectedVersion.toString());
 
 		Set<String> allActualTargets = extractResourceIdsFromProvenanceTarget(provenance.getTarget());
 		assertThat(allActualTargets).containsAll(theExpectedProvenanceTargetsForPatchedResources);
@@ -365,26 +269,28 @@ public class ReplaceReferencesTestHelper {
 		assertThat(activityCoding).isNotNull();
 		assertThat(activityCoding.getSystem()).isEqualTo("http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle");
 		assertThat(activityCoding.getCode()).isEqualTo("merge");
+
+		assertThat(provenance.hasContained()).isTrue();
+		assertThat(provenance.getContained()).hasSize(2);
+		Parameters containedParameters = (Parameters) provenance.getContained().get(0);
+		// there would be an id added to the in the contained input parameters,
+		// other than that it should be equal to the input parameters that was used for the operation
+		containedParameters.setId((String) null);
+		assertThat(containedParameters.equalsDeep(theInputParameters)).isTrue();
+
+		// the second contained resource is the OperationOutcome of updating the target resource
+		OperationOutcome outcome = (OperationOutcome) provenance.getContained().get(1);
+		assertThat(outcome.getIssue()).hasSize(1);
+		assertThat(outcome.getIssueFirstRep().getDiagnostics())
+				.contains(theTargetPatientIdWithExpectedVersion.toString());
 	}
 
-	private Set<String> getExpectedProvenanceTargetsForPatchedResources() {
-		Set<String> allExpectedTargets = new HashSet<>();
-
-		allExpectedTargets.add(mySourceEncId1.withVersion("2").toString());
-		allExpectedTargets.add(mySourceEncId2.withVersion("2").toString());
-		allExpectedTargets.add(mySourceCarePlanId.withVersion("2").toString());
-		allExpectedTargets.addAll(mySourceObsIds.stream()
-				.map(obsId -> obsId.withVersion("2").toString())
-				.toList());
-		return allExpectedTargets;
-	}
-
-	private Set<IIdType> getTargetEverythingResourceIds() {
+	private Set<IIdType> getEverythingResourceIds(IIdType thePatientId) {
 		PatientEverythingParameters everythingParams = new PatientEverythingParameters();
 		everythingParams.setCount(new IntegerType(100));
 
 		IBundleProvider bundleProvider =
-				myPatientDao.patientInstanceEverything(null, mySrd, everythingParams, myTargetPatientId);
+				myPatientDao.patientInstanceEverything(null, mySrd, everythingParams, thePatientId);
 
 		assertNull(bundleProvider.getNextPageId());
 
@@ -404,21 +310,22 @@ public class ReplaceReferencesTestHelper {
 		return task.getIdentifierFirstRep().getValue();
 	}
 
-	public Parameters callReplaceReferences(IGenericClient theFhirClient, boolean theIsAsync) {
-		return callReplaceReferencesWithResourceLimit(theFhirClient, theIsAsync, null);
+	public Parameters callReplaceReferences(
+			IGenericClient theFhirClient, IIdType theSourceId, IIdType theTargetId, boolean theIsAsync) {
+		return callReplaceReferences(theFhirClient, theSourceId.toString(), theTargetId.toString(), theIsAsync, null);
 	}
 
-	public Parameters callReplaceReferencesWithResourceLimit(
-			IGenericClient theFhirClient, boolean theIsAsync, Integer theResourceLimit) {
-		return callReplaceReferencesWithResourceLimit(
-				theFhirClient,
-				mySourcePatientId.getValue(),
-				myTargetPatientId.getValue(),
-				theIsAsync,
-				theResourceLimit);
+	public Parameters callReplaceReferences(
+			IGenericClient theFhirClient,
+			IIdType theSourceId,
+			IIdType theTargetId,
+			boolean theIsAsync,
+			Integer theResourceLimit) {
+		return callReplaceReferences(
+				theFhirClient, theSourceId.toString(), theTargetId.toString(), theIsAsync, theResourceLimit);
 	}
 
-	public Parameters callReplaceReferencesWithResourceLimit(
+	public Parameters callReplaceReferences(
 			IGenericClient theFhirClient,
 			String theSourceId,
 			String theTargetId,
@@ -447,54 +354,120 @@ public class ReplaceReferencesTestHelper {
 		return request.returnResourceType(Parameters.class).execute();
 	}
 
-	public void assertAllReferencesUpdated() {
-		assertAllReferencesUpdated(false);
+	public void assertAllReferencesUpdated(ReplaceReferencesLargeTestData theTestData) {
+		assertAllReferencesUpdated(false, false, theTestData);
 	}
 
-	public void assertAllReferencesUpdated(boolean theWithDelete) {
+	public void assertAllReferencesUpdated(
+			boolean theIsMerge, boolean theWithDelete, ReplaceReferencesLargeTestData theTestData) {
 
-		Set<IIdType> actual = getTargetEverythingResourceIds();
+		assertReferencesToTargetAfterOperation(theIsMerge, theWithDelete, theTestData);
+		assertReferencesToSourceAfterOperation(theIsMerge, theWithDelete, theTestData);
+	}
 
-		ourLog.info("Found IDs: {}", actual);
+	private void assertReferencesToTargetAfterOperation(
+			boolean theIsMerge, boolean theWithDelete, ReplaceReferencesLargeTestData theTestData) {
+		Set<IIdType> actualTargetEverythingIds = getEverythingResourceIds(theTestData.getTargetPatientId());
 
-		if (theWithDelete) {
-			assertThat(actual).doesNotContain(mySourcePatientId);
+		ourLog.info("Target Everything Ids: {}", actualTargetEverythingIds);
+
+		// target should now be referenced by all resources that initially referenced source
+		assertThat(actualTargetEverythingIds).containsAll(theTestData.getResourceIdsInitiallyReferencingSource());
+		// everything operation returns the resources that are referenced by target as well,
+		// they should be present in the $everything output
+		assertThat(actualTargetEverythingIds).containsAll(theTestData.getResourceIdsInitiallyReferencedByTarget());
+		// the resources that initially referenced target should still reference it
+		assertThat(actualTargetEverythingIds).containsAll(theTestData.getResourceIdsInitiallyReferencingTarget());
+
+		int expectedTargetEvertghingCount = theTestData
+						.getResourceIdsInitiallyReferencingSource()
+						.size()
+				+ theTestData.getResourceIdsInitiallyReferencedByTarget().size()
+				+ theTestData.getResourceIdsInitiallyReferencingTarget().size()
+				+ 2; // +1 for the target resource itself and +1 for the Provenance resource created after the operation
+
+		if (theIsMerge && !theWithDelete) {
+			// if this is a merge and the source is not deleted,
+			// the source and target will reference each other via REPLACED_BY and REPLACES,
+			// so the source patient ID should be in the target $everything
+			assertThat(actualTargetEverythingIds).contains(theTestData.getSourcePatientId());
+			expectedTargetEvertghingCount++;
+		} else {
+			assertThat(actualTargetEverythingIds).doesNotContain(theTestData.getSourcePatientId());
 		}
-		assertThat(actual).contains(mySourceEncId1);
-		assertThat(actual).contains(mySourceEncId2);
-		assertThat(actual).contains(myOrgId);
-		assertThat(actual).contains(mySourceCarePlanId);
-		assertThat(actual).containsAll(mySourceObsIds);
-		assertThat(actual).contains(myTargetPatientId);
-		assertThat(actual).contains(myTargetEnc1);
+
+		assertThat(actualTargetEverythingIds).hasSize(expectedTargetEvertghingCount);
 	}
 
-	public void assertNothingChanged() {
-		Set<IIdType> actual = getTargetEverythingResourceIds();
+	private void assertReferencesToSourceAfterOperation(
+			boolean theIsMerge, boolean theWithDelete, ReplaceReferencesLargeTestData theTestData) {
+		if (theWithDelete) {
+			// source resource would be deleted, no need to check references
+			return;
+		}
+		Set<IIdType> actualSourceEverythingIds = getEverythingResourceIds(theTestData.getSourcePatientId());
 
-		ourLog.info("Found IDs: {}", actual);
+		ourLog.info("Source Everything Ids: {}", actualSourceEverythingIds);
 
-		assertThat(actual).doesNotContain(mySourcePatientId);
-		assertThat(actual).doesNotContain(mySourceEncId1);
-		assertThat(actual).doesNotContain(mySourceEncId2);
-		assertThat(actual).contains(myOrgId);
-		assertThat(actual).doesNotContain(mySourceCarePlanId);
-		assertThat(actual).doesNotContainAnyElementsOf(mySourceObsIds);
-		assertThat(actual).contains(myTargetPatientId);
-		assertThat(actual).contains(myTargetEnc1);
+		// the resources that initially referenced source should now reference target, so source $everything
+		// should not contain them anymore
+		assertThat(actualSourceEverythingIds)
+				.doesNotContainAnyElementsOf(theTestData.getResourceIdsInitiallyReferencingSource());
+		// $everything returns the resources that are referenced by source as well, they should be unchanged
+		assertThat(actualSourceEverythingIds).containsAll(theTestData.getResourceIdsInitiallyReferencedBySource());
+		int expectedSourceEverythingCount =
+				theTestData.getResourceIdsInitiallyReferencedBySource().size()
+						+ 2; // +1 for the source resource itself and +1 for the Provenance resource created after the
+		// operation
+		if (theIsMerge) {
+			// If this is a merge, the source patient will have reference to the target patient
+			assertThat(actualSourceEverythingIds).contains(theTestData.getTargetPatientId());
+			expectedSourceEverythingCount++;
+		}
+		assertThat(actualSourceEverythingIds).hasSize(expectedSourceEverythingCount);
+	}
 
-		// TODO ED should we also assert here that source still has the all references it had before the operation,
-		// that is in addition to the validation that target doesn't contain the references.
+	public void assertReferencesHaveNotChanged(ReplaceReferencesLargeTestData theTestData) {
+		assertTargetReferencesHaveNotChanged(theTestData);
+		assertSourceReferencesHaveNotChanged(theTestData);
+	}
+
+	public void assertTargetReferencesHaveNotChanged(ReplaceReferencesLargeTestData theTestData) {
+		Set<IIdType> actualTargetEverythingIds = getEverythingResourceIds(theTestData.getTargetPatientId());
+		ourLog.info("Found IDs for target $everything : {}", actualTargetEverythingIds);
+
+		assertThat(actualTargetEverythingIds).containsAll(theTestData.getResourceIdsInitiallyReferencingTarget());
+		assertThat(actualTargetEverythingIds).containsAll(theTestData.getResourceIdsInitiallyReferencedByTarget());
+		assertThat(actualTargetEverythingIds).contains(theTestData.getTargetPatientId());
+
+		assertThat(actualTargetEverythingIds).doesNotContain(theTestData.getSourcePatientId());
+		assertThat(actualTargetEverythingIds)
+				.doesNotContainAnyElementsOf(theTestData.getResourceIdsInitiallyReferencingSource());
+	}
+
+	public void assertSourceReferencesHaveNotChanged(ReplaceReferencesLargeTestData theTestData) {
+		Set<IIdType> actualIds = getEverythingResourceIds(theTestData.getSourcePatientId());
+		ourLog.info("Found IDs for source $everything : {}", actualIds);
+
+		assertThat(actualIds).containsAll(theTestData.getResourceIdsInitiallyReferencingSource());
+		assertThat(actualIds).containsAll(theTestData.getResourceIdsInitiallyReferencedBySource());
+		assertThat(actualIds).contains(theTestData.getSourcePatientId());
+
+		assertThat(actualIds).doesNotContain(theTestData.getTargetPatientId());
+		assertThat(actualIds).doesNotContainAnyElementsOf(theTestData.getResourceIdsInitiallyReferencingTarget());
 	}
 
 	public PatientMergeInputParameters buildMultipleTargetMatchParameters(
-			boolean theWithDelete, boolean theWithInputResultPatient, boolean theWithPreview) {
+			boolean theWithDelete,
+			boolean theWithInputResultPatient,
+			boolean theWithPreview,
+			ReplaceReferencesLargeTestData theTestData) {
 		PatientMergeInputParameters inParams = new PatientMergeInputParameters();
-		inParams.sourcePatient = new Reference().setReferenceElement(mySourcePatientId);
-		inParams.targetPatientIdentifier = patBothIdentifierC;
+		inParams.sourcePatient = new Reference().setReferenceElement(theTestData.getSourcePatientId());
+		inParams.targetPatientIdentifiers = theTestData.getIdentifierCommonToBothResources();
 		inParams.deleteSource = theWithDelete;
 		if (theWithInputResultPatient) {
-			inParams.resultPatient = createResultPatient(theWithDelete);
+			inParams.resultPatient = theTestData.createResultPatientInput(theWithDelete);
 		}
 		if (theWithPreview) {
 			inParams.preview = true;
@@ -503,13 +476,16 @@ public class ReplaceReferencesTestHelper {
 	}
 
 	public PatientMergeInputParameters buildMultipleSourceMatchParameters(
-			boolean theWithDelete, boolean theWithInputResultPatient, boolean theWithPreview) {
+			boolean theWithDelete,
+			boolean theWithInputResultPatient,
+			boolean theWithPreview,
+			ReplaceReferencesLargeTestData theTestData) {
 		PatientMergeInputParameters inParams = new PatientMergeInputParameters();
-		inParams.sourcePatientIdentifier = patBothIdentifierC;
-		inParams.targetPatient = new Reference().setReferenceElement(mySourcePatientId);
+		inParams.sourcePatientIdentifiers = theTestData.getIdentifierCommonToBothResources();
+		inParams.targetPatient = new Reference().setReferenceElement(theTestData.getTargetPatientId());
 		inParams.deleteSource = theWithDelete;
 		if (theWithInputResultPatient) {
-			inParams.resultPatient = createResultPatient(theWithDelete);
+			inParams.resultPatient = theTestData.createResultPatientInput(theWithDelete);
 		}
 		if (theWithPreview) {
 			inParams.preview = true;
@@ -517,34 +493,60 @@ public class ReplaceReferencesTestHelper {
 		return inParams;
 	}
 
-	public IIdType getSourcePatientId() {
-		return mySourcePatientId;
+	public Parameters callMergeOperation(IGenericClient theClient, Parameters inParameters, boolean isAsync) {
+		IOperationUntypedWithInput<Parameters> request =
+				theClient.operation().onType("Patient").named(OPERATION_MERGE).withParameters(inParameters);
+
+		if (isAsync) {
+			request.withAdditionalHeader(HEADER_PREFER, HEADER_PREFER_RESPOND_ASYNC);
+		}
+
+		return request.returnResourceType(Parameters.class).execute();
+	}
+
+	public Parameters callUndoMergeOperation(IGenericClient theClient, Parameters inParameters) {
+		IOperationUntypedWithInput<Parameters> request = theClient
+				.operation()
+				.onType("Patient")
+				.named("$hapi.fhir.undo-merge")
+				.withParameters(inParameters);
+
+		return request.returnResourceType(Parameters.class).execute();
 	}
 
 	public static class PatientMergeInputParameters {
 		public Type sourcePatient;
-		public Type sourcePatientIdentifier;
+		public List<? extends Type> sourcePatientIdentifiers;
 		public Type targetPatient;
-		public Type targetPatientIdentifier;
+		public List<? extends Type> targetPatientIdentifiers;
 		public Patient resultPatient;
 		public Boolean preview;
 		public Boolean deleteSource;
 		public Integer resourceLimit;
 
-		public Parameters asParametersResource() {
+		private Parameters asCommonParameters() {
 			Parameters inParams = new Parameters();
 			if (sourcePatient != null) {
 				inParams.addParameter().setName("source-patient").setValue(sourcePatient);
 			}
-			if (sourcePatientIdentifier != null) {
-				inParams.addParameter().setName("source-patient-identifier").setValue(sourcePatientIdentifier);
+			if (sourcePatientIdentifiers != null) {
+				sourcePatientIdentifiers.forEach(i -> inParams.addParameter()
+						.setName("source-patient-identifier")
+						.setValue(i));
 			}
 			if (targetPatient != null) {
 				inParams.addParameter().setName("target-patient").setValue(targetPatient);
 			}
-			if (targetPatientIdentifier != null) {
-				inParams.addParameter().setName("target-patient-identifier").setValue(targetPatientIdentifier);
+			if (targetPatientIdentifiers != null) {
+				targetPatientIdentifiers.forEach(i -> inParams.addParameter()
+						.setName("target-patient-identifier")
+						.setValue(i));
 			}
+			return inParams;
+		}
+
+		public Parameters asParametersResource() {
+			Parameters inParams = asCommonParameters();
 			if (resultPatient != null) {
 				inParams.addParameter().setName("result-patient").setResource(resultPatient);
 			}
@@ -558,6 +560,19 @@ public class ReplaceReferencesTestHelper {
 				inParams.addParameter().setName("batch-size").setValue(new IntegerType(resourceLimit));
 			}
 			return inParams;
+		}
+
+		public Parameters asUndoParametersResource() {
+			return asCommonParameters();
+		}
+
+		public MergeJobParameters asMergeJobParameters(FhirContext theFhirContext) {
+			MergeJobParameters jobParams = new MergeJobParameters();
+			jobParams.setSourceId(new FhirIdJson(((Reference) sourcePatient).getReferenceElement()));
+			jobParams.setTargetId(new FhirIdJson(((Reference) targetPatient).getReferenceElement()));
+			jobParams.setOriginalInputParameters(
+					theFhirContext.newJsonParser().encodeResourceToString(asParametersResource()));
+			return jobParams;
 		}
 	}
 
@@ -626,24 +641,6 @@ public class ReplaceReferencesTestHelper {
 		assertEquals(theTaskId.getIdPart(), resultTaskId.getIdPart());
 	}
 
-	public List<Identifier> getExpectedIdentifiersForTargetAfterMerge(boolean theWithInputResultPatient) {
-
-		List<Identifier> expectedIdentifiersOnTargetAfterMerge;
-		if (theWithInputResultPatient) {
-			expectedIdentifiersOnTargetAfterMerge =
-					List.of(new Identifier().setSystem("SYS1A").setValue("VAL1A"));
-		} else {
-			// the identifiers copied over from source should be marked as old
-			expectedIdentifiersOnTargetAfterMerge = List.of(
-					new Identifier().setSystem("SYS2A").setValue("VAL2A"),
-					new Identifier().setSystem("SYS2B").setValue("VAL2B"),
-					new Identifier().setSystem("SYSC").setValue("VALC"),
-					new Identifier().setSystem("SYS1A").setValue("VAL1A").copy().setUse(Identifier.IdentifierUse.OLD),
-					new Identifier().setSystem("SYS1B").setValue("VAL1B").copy().setUse(Identifier.IdentifierUse.OLD));
-		}
-		return expectedIdentifiersOnTargetAfterMerge;
-	}
-
 	/**
 	 * Asserts that the source patient with the specified ID has been updated properly or deleted
 	 * after merging with the specified target patient ID.
@@ -659,23 +656,6 @@ public class ReplaceReferencesTestHelper {
 			assertThat(link.getOther().getReferenceElement()).isEqualTo(theTargetPatientId.toUnqualifiedVersionless());
 			assertThat(link.getType()).isEqualTo(Patient.LinkType.REPLACEDBY);
 		}
-	}
-
-	/**
-	 * Asserts that the test source patient which has been created in beforeEach() has been updated properly or deleted
-	 * after a merge operation with the test target patient, which was also created in beforeEach().
-	 */
-	public void assertSourcePatientUpdatedOrDeletedAfterMerge(boolean theDeleteSource) {
-		assertSourcePatientUpdatedOrDeletedAfterMerge(getSourcePatientId(), getTargetPatientId(), theDeleteSource);
-	}
-
-	/**
-	 * Asserts that the test target patient which has been created in beforeEach() has been updated properly
-	 * after a merge operation with the test source patient, which was also created in beforeEach().
-	 */
-	public void assertTargetPatientUpdatedAfterMerge(boolean withDelete, List<Identifier> theExpectedIdentifiers) {
-		assertTargetPatientUpdatedAfterMerge(
-				getTargetPatientId(), getSourcePatientId(), withDelete, theExpectedIdentifiers);
 	}
 
 	/**
@@ -754,6 +734,24 @@ public class ReplaceReferencesTestHelper {
 		assertThat(actualAgents).hasSameSizeAs(theExpectedAgents);
 		for (int i = 0; i < theExpectedAgents.size(); i++) {
 			validateAgent(theExpectedAgents.get(i), actualAgents.get(i));
+		}
+	}
+
+	public @Nonnull String extractFailureMessageFromOutcomeParameter(BaseServerResponseException ex) {
+		String body = ex.getResponseBody();
+		IParser jsonParser = myFhirContext.newJsonParser();
+		if (body != null) {
+			Parameters outParams = jsonParser.parseResource(Parameters.class, body);
+			OperationOutcome outcome =
+					(OperationOutcome) outParams.getParameter("outcome").getResource();
+			ourLog.info(
+					"Extracted OperationOutcome from exception: {}",
+					jsonParser.setPrettyPrint(true).encodeResourceToString(outcome));
+			return outcome.getIssue().stream()
+					.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
+					.collect(Collectors.joining(", "));
+		} else {
+			return "null";
 		}
 	}
 }
