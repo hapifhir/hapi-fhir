@@ -102,6 +102,7 @@ import com.healthmarketscience.sqlbuilder.SetOperationQuery;
 import com.healthmarketscience.sqlbuilder.Subquery;
 import com.healthmarketscience.sqlbuilder.UnionQuery;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
@@ -3267,6 +3268,7 @@ public class QueryStack {
 			return this;
 		}
 
+		@Nonnull
 		public SearchIncludeDeletedEnum getIncludeDeleted() {
 			if (myIncludeDeleted == null) {
 				return SearchIncludeDeletedEnum.NEVER;
