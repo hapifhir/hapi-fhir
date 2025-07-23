@@ -441,8 +441,8 @@ public class SearchQueryBuilderTest {
 
 		@Bean
 		@Scope("prototype")
-		public ResourceTablePredicateBuilder ResourceTablePredicateBuilder(SearchQueryBuilder theSearchQueryBuilder) {
-			return new ResourceTablePredicateBuilder(theSearchQueryBuilder, SearchIncludeDeletedEnum.NEVER);
+		public ResourceTablePredicateBuilder ResourceTablePredicateBuilder(SearchQueryBuilder theSearchQueryBuilder, SearchIncludeDeletedEnum theSearchIncludeDeleted) {
+			return new ResourceTablePredicateBuilder(theSearchQueryBuilder, theSearchIncludeDeleted);
 		}
 
 		@Bean

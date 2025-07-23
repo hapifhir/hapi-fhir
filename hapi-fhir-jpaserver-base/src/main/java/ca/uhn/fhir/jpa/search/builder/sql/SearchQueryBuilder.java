@@ -256,7 +256,7 @@ public class SearchQueryBuilder {
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on the Resource table
 	 */
 	public ResourceTablePredicateBuilder addResourceTablePredicateBuilder(@Nullable DbColumn[] theSourceJoinColumn) {
-		ResourceTablePredicateBuilder retVal = mySqlBuilderFactory.resourceTable(this);
+		ResourceTablePredicateBuilder retVal = mySqlBuilderFactory.resourceTable(this, SearchIncludeDeletedEnum.NEVER);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
@@ -450,7 +450,7 @@ public class SearchQueryBuilder {
 					if (thePredicateBuilder instanceof ResourceTablePredicateBuilder) {
 						root = thePredicateBuilder;
 					} else {
-						root = mySqlBuilderFactory.resourceTable(this);
+						root = mySqlBuilderFactory.resourceTable(this, SearchIncludeDeletedEnum.NEVER);
 					}
 				}
 

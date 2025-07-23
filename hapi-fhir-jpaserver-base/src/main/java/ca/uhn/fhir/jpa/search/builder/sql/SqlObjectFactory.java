@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.search.builder.sql;
 
+import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
@@ -40,6 +41,8 @@ import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+
+import java.util.Objects;
 
 public class SqlObjectFactory {
 
@@ -82,15 +85,10 @@ public class SqlObjectFactory {
 				ResourceLinkPredicateBuilder.class, theQueryStack, theSearchSqlBuilder, theReversed);
 	}
 
-	public ResourceTablePredicateBuilder resourceTable(SearchQueryBuilder theSearchSqlBuilder) {
-		return myApplicationContext.getBean(
-				ResourceTablePredicateBuilder.class, theSearchSqlBuilder, SearchIncludeDeletedEnum.NEVER);
-	}
-
 	public ResourceTablePredicateBuilder resourceTable(
 			SearchQueryBuilder theSearchSqlBuilder, SearchIncludeDeletedEnum theSearchIncludeDeleted) {
-		return myApplicationContext.getBean(
-				ResourceTablePredicateBuilder.class, theSearchSqlBuilder, theSearchIncludeDeleted);
+		// the default is searching non-deleted resources
+		return myApplicationContext.getBean(ResourceTablePredicateBuilder.class, theSearchSqlBuilder, Objects.requireNonNullElse(theSearchIncludeDeleted, SearchIncludeDeletedEnum.NEVER));
 	}
 
 	public ResourceIdPredicateBuilder resourceId(SearchQueryBuilder theSearchSqlBuilder) {
