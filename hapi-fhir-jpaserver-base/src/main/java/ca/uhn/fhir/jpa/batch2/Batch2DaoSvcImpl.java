@@ -156,10 +156,6 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		return dao.searchForIdStream(searchParamMap, request, null).map(pid -> new TypedResourcePid(resourceType, pid));
 	}
 
-	private static boolean isNoResourceTypeProvidedInUrl(String theUrl, String resourceType) {
-		return (resourceType == null || resourceType.isBlank()) && theUrl.indexOf('?') == 0;
-	}
-
 	/**
 	 * Since the resource type is not specified, query the DB for resources matching the params and return resource ID and type
 	 *
@@ -182,12 +178,6 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 						theRequestDetails,
 						theRequestPartitionId))
 				.map(pid -> new TypedResourcePid(pid.getResourceType(), pid));
-	}
-
-	private static TypedResourcePid typedPidFromQueryArray(Object[] thePidTypeDateArray) {
-		JpaPid pid = (JpaPid) thePidTypeDateArray[0];
-		String resourceType = (String) thePidTypeDateArray[1];
-		return new TypedResourcePid(resourceType, pid);
 	}
 
 	@Nonnull
@@ -242,12 +232,6 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		return null;
 	}
 
-	private static void validateUrl(@Nonnull String theUrl) {
-		if (!theUrl.contains("?")) {
-			throw new InternalErrorException(Msg.code(2422) + "this should never happen: URL is missing a '?'");
-		}
-	}
-
 	@Nonnull
 	private SearchParameterMap parseQuery(String theUrl) {
 		String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
@@ -265,5 +249,21 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		// TODO this limits us to 2G resources.
 		searchParamMap.setLoadSynchronousUpTo(Integer.MAX_VALUE);
 		return searchParamMap;
+	}
+
+	private static TypedResourcePid typedPidFromQueryArray(Object[] thePidTypeDateArray) {
+		JpaPid pid = (JpaPid) thePidTypeDateArray[0];
+		String resourceType = (String) thePidTypeDateArray[1];
+		return new TypedResourcePid(resourceType, pid);
+	}
+
+	private static void validateUrl(@Nonnull String theUrl) {
+		if (!theUrl.contains("?")) {
+			throw new InternalErrorException(Msg.code(2422) + "this should never happen: URL is missing a '?'");
+		}
+	}
+
+	private static boolean isNoResourceTypeProvidedInUrl(String theUrl, String resourceType) {
+		return (resourceType == null || resourceType.isBlank()) && theUrl.indexOf('?') == 0;
 	}
 }
