@@ -13,11 +13,13 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4b.fhirpath.ExpressionNode;
 import org.hl7.fhir.r4b.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.r4b.fhirpath.FHIRPathUtilityClasses.FunctionDetails;
+import org.hl7.fhir.r4b.fhirpath.IHostApplicationServices;
 import org.hl7.fhir.r4b.fhirpath.TypeDetails;
 import org.hl7.fhir.r4b.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4b.model.Base;
 import org.hl7.fhir.r4b.model.IdType;
 import org.hl7.fhir.r4b.model.ValueSet;
+import org.hl7.fhir.utilities.fhirpath.FHIRPathConstantEvaluationMode;
 
 import java.util.Collections;
 import java.util.List;
@@ -90,31 +92,29 @@ public class FhirPathR4B implements IFhirPath {
 
 	@Override
 	public void setEvaluationContext(@Nonnull IFhirPathEvaluationContext theEvaluationContext) {
-		myEngine.setHostServices(new FHIRPathEngine.IEvaluationContext() {
+		myEngine.setHostServices(new IHostApplicationServices() {
 
 			@Override
 			public List<Base> resolveConstant(
-					FHIRPathEngine engine,
-					Object appContext,
-					String name,
-					boolean beforeContext,
-					boolean explicitConstant)
+					FHIRPathEngine engine, Object appContext, String name, FHIRPathConstantEvaluationMode mode)
 					throws PathEngineException {
-				return Collections.unmodifiableList(theEvaluationContext
-						.resolveConstant(
-								appContext,
-								name,
-								beforeContext
-										? IFhirPathEvaluationContext.ConstantEvaluationMode.IMPLICIT_BEFORE
-										: IFhirPathEvaluationContext.ConstantEvaluationMode.IMPLICIT_AFTER)
-						.stream()
-						.map(Base.class::cast)
-						.collect(Collectors.toList()));
+				IFhirPathEvaluationContext.ConstantEvaluationMode hapiConstantEvaluationMode =
+						switch (mode) {
+							case EXPLICIT -> IFhirPathEvaluationContext.ConstantEvaluationMode.EXPLICIT;
+							case NOVALUE -> IFhirPathEvaluationContext.ConstantEvaluationMode.NOVALUE;
+							case IMPLICIT_BEFORE -> IFhirPathEvaluationContext.ConstantEvaluationMode.IMPLICIT_BEFORE;
+							case IMPLICIT_AFTER -> IFhirPathEvaluationContext.ConstantEvaluationMode.IMPLICIT_AFTER;
+						};
+
+				return Collections.unmodifiableList(
+						theEvaluationContext.resolveConstant(appContext, name, hapiConstantEvaluationMode).stream()
+								.map(Base.class::cast)
+								.collect(Collectors.toList()));
 			}
 
 			@Override
 			public TypeDetails resolveConstantType(
-					FHIRPathEngine engine, Object appContext, String name, boolean explicitConstant)
+					FHIRPathEngine engine, Object appContext, String name, FHIRPathConstantEvaluationMode mode)
 					throws PathEngineException {
 				return null;
 			}
@@ -165,6 +165,11 @@ public class FhirPathR4B implements IFhirPath {
 			@Override
 			public ValueSet resolveValueSet(FHIRPathEngine engine, Object appContext, String url) {
 				return null;
+			}
+
+			@Override
+			public boolean paramIsType(String name, int index) {
+				return false;
 			}
 		});
 	}

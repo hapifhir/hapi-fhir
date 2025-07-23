@@ -10,13 +10,16 @@ import jakarta.annotation.Nonnull;
 import org.hl7.fhir.dstu3.fhirpath.ExpressionNode;
 import org.hl7.fhir.dstu3.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.dstu3.fhirpath.FHIRPathUtilityClasses.FunctionDetails;
+import org.hl7.fhir.dstu3.fhirpath.IHostApplicationServices;
 import org.hl7.fhir.dstu3.fhirpath.TypeDetails;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.utilities.fhirpath.FHIRPathConstantEvaluationMode;
 
 import java.util.List;
 import java.util.Optional;
@@ -87,15 +90,19 @@ public class FhirPathDstu3 implements IFhirPath {
 
 	@Override
 	public void setEvaluationContext(@Nonnull IFhirPathEvaluationContext theEvaluationContext) {
-		myEngine.setHostServices(new FHIRPathEngine.IEvaluationContext() {
+		myEngine.setHostServices(new IHostApplicationServices() {
 
 			@Override
-			public Base resolveConstant(Object appContext, String name) throws PathEngineException {
+			public List<Base> resolveConstant(
+					FHIRPathEngine engine, Object appContext, String name, FHIRPathConstantEvaluationMode mode)
+					throws PathEngineException {
 				return null;
 			}
 
 			@Override
-			public TypeDetails resolveConstantType(Object appContext, String name) throws PathEngineException {
+			public TypeDetails resolveConstantType(
+					FHIRPathEngine engine, Object appContext, String name, FHIRPathConstantEvaluationMode mode)
+					throws PathEngineException {
 				return null;
 			}
 
@@ -105,24 +112,51 @@ public class FhirPathDstu3 implements IFhirPath {
 			}
 
 			@Override
-			public FunctionDetails resolveFunction(String functionName) {
+			public FunctionDetails resolveFunction(FHIRPathEngine engine, String functionName) {
 				return null;
 			}
 
 			@Override
-			public TypeDetails checkFunction(Object appContext, String functionName, List<TypeDetails> parameters)
+			public TypeDetails checkFunction(
+					FHIRPathEngine engine,
+					Object appContext,
+					String functionName,
+					TypeDetails focus,
+					List<TypeDetails> parameters)
 					throws PathEngineException {
 				return null;
 			}
 
 			@Override
-			public List<Base> executeFunction(Object appContext, String functionName, List<List<Base>> parameters) {
+			public List<Base> executeFunction(
+					FHIRPathEngine engine,
+					Object appContext,
+					List<Base> focus,
+					String functionName,
+					List<List<Base>> parameters) {
 				return null;
 			}
 
 			@Override
-			public Base resolveReference(Object appContext, String theUrl) throws FHIRException {
+			public Base resolveReference(FHIRPathEngine engine, Object appContext, String theUrl, Base refContext)
+					throws FHIRException {
 				return (Base) theEvaluationContext.resolveReference(new IdType(theUrl), null);
+			}
+
+			@Override
+			public boolean conformsToProfile(FHIRPathEngine engine, Object appContext, Base item, String url)
+					throws FHIRException {
+				return false;
+			}
+
+			@Override
+			public ValueSet resolveValueSet(FHIRPathEngine engine, Object appContext, String url) {
+				return null;
+			}
+
+			@Override
+			public boolean paramIsType(String name, int index) {
+				return false;
 			}
 		});
 	}

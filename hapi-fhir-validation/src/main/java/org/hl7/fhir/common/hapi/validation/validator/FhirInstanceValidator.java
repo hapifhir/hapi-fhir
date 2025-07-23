@@ -20,6 +20,7 @@ import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
+import org.hl7.fhir.utilities.fhirpath.FHIRPathConstantEvaluationMode;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 
 import java.util.Arrays;
@@ -326,20 +327,14 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 		@Override
 		public List<Base> resolveConstant(
-				FHIRPathEngine engine,
-				Object appContext,
-				String name,
-				IHostApplicationServices.FHIRPathConstantEvaluationMode mode)
+				FHIRPathEngine engine, Object appContext, String name, FHIRPathConstantEvaluationMode mode)
 				throws PathEngineException {
 			return Collections.emptyList();
 		}
 
 		@Override
 		public TypeDetails resolveConstantType(
-				FHIRPathEngine engine,
-				Object appContext,
-				String name,
-				IHostApplicationServices.FHIRPathConstantEvaluationMode mode)
+				FHIRPathEngine engine, Object appContext, String name, FHIRPathConstantEvaluationMode mode)
 				throws PathEngineException {
 			return null;
 		}

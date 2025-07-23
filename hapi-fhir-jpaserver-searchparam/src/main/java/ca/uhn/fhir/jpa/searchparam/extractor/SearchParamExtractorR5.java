@@ -42,6 +42,7 @@ import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.ResourceType;
 import org.hl7.fhir.r5.model.ValueSet;
+import org.hl7.fhir.utilities.fhirpath.FHIRPathConstantEvaluationMode;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -105,20 +106,14 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 
 		@Override
 		public List<Base> resolveConstant(
-				FHIRPathEngine engine,
-				Object appContext,
-				String name,
-				IHostApplicationServices.FHIRPathConstantEvaluationMode mode)
+				FHIRPathEngine engine, Object appContext, String name, FHIRPathConstantEvaluationMode mode)
 				throws PathEngineException {
 			return Collections.emptyList();
 		}
 
 		@Override
 		public TypeDetails resolveConstantType(
-				FHIRPathEngine engine,
-				Object appContext,
-				String name,
-				IHostApplicationServices.FHIRPathConstantEvaluationMode mode)
+				FHIRPathEngine engine, Object appContext, String name, FHIRPathConstantEvaluationMode mode)
 				throws PathEngineException {
 			return null;
 		}
