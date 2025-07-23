@@ -11,6 +11,7 @@
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
+	<name>HAPI-FHIR Server OpenAPI</name>
 
 	<artifactId>hapi-fhir-server-openapi</artifactId>
 

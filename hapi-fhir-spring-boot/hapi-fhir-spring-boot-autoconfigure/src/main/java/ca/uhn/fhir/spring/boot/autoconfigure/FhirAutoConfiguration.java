@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-spring-boot-autoconfigure
+ * HAPI-FHIR Spring boot autoconfiguration
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
