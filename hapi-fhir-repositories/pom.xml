@@ -48,7 +48,13 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
-
+		<!-- Used to compile the KalmFilesystemRepository. Delete this once KalmFilesystemRepositoryLoader is downstreamed to cqf or the IgRepository upstreamed here -->
+		  <dependency>
+				<groupId>org.opencds.cqf.fhir</groupId>
+				<artifactId>cqf-fhir-utility</artifactId>
+				<version>3.23.0</version>
+				<scope>provided</scope>
+		  </dependency>
 	</dependencies>
 
 	<build>

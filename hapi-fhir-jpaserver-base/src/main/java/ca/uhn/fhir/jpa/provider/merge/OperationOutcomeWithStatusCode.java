@@ -19,29 +19,29 @@
  */
 package ca.uhn.fhir.jpa.provider.merge;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /**
- * See <a href="https://build.fhir.org/patient-operation-merge.html">Patient $merge spec</a>
+ * This class is used to encapsulate an OperationOutcome along with an HTTP status code.
  */
-public class MergeOperationOutcome extends OperationOutcomeWithStatusCode {
+public class OperationOutcomeWithStatusCode {
 
-	private IBaseResource myUpdatedTargetResource;
-	private IBaseResource myTask;
+	private IBaseOperationOutcome myOperationOutcome;
+	private int myHttpStatusCode;
 
-	public IBaseResource getUpdatedTargetResource() {
-		return myUpdatedTargetResource;
+	public IBaseOperationOutcome getOperationOutcome() {
+		return myOperationOutcome;
 	}
 
-	public void setUpdatedTargetResource(IBaseResource theUpdatedTargetResource) {
-		this.myUpdatedTargetResource = theUpdatedTargetResource;
+	public void setOperationOutcome(IBaseOperationOutcome theOperationOutcome) {
+		myOperationOutcome = theOperationOutcome;
 	}
 
-	public IBaseResource getTask() {
-		return myTask;
+	public int getHttpStatusCode() {
+		return myHttpStatusCode;
 	}
 
-	public void setTask(IBaseResource theTask) {
-		this.myTask = theTask;
+	public void setHttpStatusCode(int theHttpStatusCode) {
+		myHttpStatusCode = theHttpStatusCode;
 	}
 }
