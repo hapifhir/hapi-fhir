@@ -112,20 +112,25 @@ public class BulkDataExportSupport {
 			if (!badResourceTypes.isEmpty()) {
 				AtomicBoolean hasOmittedResources = new AtomicBoolean();
 				badResourceTypes = badResourceTypes.stream()
-					.filter(r -> {
-						if (SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.containsKey(r)) {
-							hasOmittedResources.set(true);
-							return false;
-						}
-						return true;
-					})
-					.collect(Collectors.toList());
+						.filter(r -> {
+							if (SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.containsKey(
+									r)) {
+								hasOmittedResources.set(true);
+								return false;
+							}
+							return true;
+						})
+						.collect(Collectors.toList());
 				String msg = String.format(
-					"Resource types [%s] are invalid for this type of export, as they do not contain search parameters that refer to patients.",
-					String.join(",", badResourceTypes));
+						"Resource types [%s] are invalid for this type of export, as they do not contain search parameters that refer to patients.",
+						String.join(",", badResourceTypes));
 				if (hasOmittedResources.get()) {
-					msg += String.format("\nResource types [%s] are omitted from patient level export for security reasons.",
-						String.join(", ", SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.keySet()));
+					msg += String.format(
+							"\nResource types [%s] are omitted from patient level export for security reasons.",
+							String.join(
+									", ",
+									SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT
+											.keySet()));
 				}
 
 				throw new InvalidRequestException(Msg.code(512) + msg);
