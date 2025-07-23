@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.BundleLinks;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
@@ -29,6 +30,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.BundleUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -67,9 +69,11 @@ public class ResponseBundleBuilder {
 	private static IBaseBundle buildBundle(
 			ResponseBundleRequest theResponseBundleRequest, ResponsePage pageResponse, BundleLinks links) {
 		final IRestfulServer<?> server = theResponseBundleRequest.server;
+		FhirContext ctx = server.getFhirContext();
 		final IVersionSpecificBundleFactory bundleFactory =
-				server.getFhirContext().newBundleFactory();
+				ctx.newBundleFactory();
 		final IBundleProvider bundleProvider = theResponseBundleRequest.bundleProvider;
+
 
 		bundleFactory.addRootPropertiesToBundle(
 				bundleProvider.getUuid(), links, bundleProvider.size(), bundleProvider.getPublished());
@@ -80,7 +84,25 @@ public class ResponseBundleBuilder {
 				server.getBundleInclusionRule(),
 				theResponseBundleRequest.includes);
 
-		return (IBaseBundle) bundleFactory.getResourceBundle();
+		IBaseBundle baseBundle = (IBaseBundle) bundleFactory.getResourceBundle();
+
+		// adjustments
+		Integer total = BundleUtil.getTotal(ctx, baseBundle);
+
+		if (total != null) {
+			int nonMatchResources = 0;
+			for (IBaseResource next : pageResponse.getResourceList()) {
+				if (!BundleUtil.isMatchResource(next)) {
+					nonMatchResources++;
+				}
+			}
+			// resources that are OUTCOME or INCLUDE should not be added to the total
+			if (nonMatchResources > 0) {
+				BundleUtil.setTotal(ctx, baseBundle, total.intValue() - nonMatchResources);
+			}
+		}
+
+		return baseBundle;
 	}
 
 	private ResponsePage buildResponsePage(ResponseBundleRequest theResponseBundleRequest) {

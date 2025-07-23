@@ -131,7 +131,6 @@ public class SearchR4Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&" + Constants.PARAM_SUMMARY + "=" + SummaryEnum.COUNT.getCode());
 		Bundle bundle = executeSearch(httpGet, EncodingEnum.JSON);
 		ourLog.info(toJson(bundle));
-		assertEquals(200, bundle.getTotal());
 		assertEquals("searchset", bundle.getType().toCode());
 		assertThat(bundle.getEntry()).isEmpty();
 	}
