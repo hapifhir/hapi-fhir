@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>8.3.15-SNAPSHOT</version>
+		<version>8.3.16-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -48,7 +48,13 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
-
+		<!-- Used to compile the KalmFilesystemRepository. Delete this once KalmFilesystemRepositoryLoader is downstreamed to cqf or the IgRepository upstreamed here -->
+		  <dependency>
+				<groupId>org.opencds.cqf.fhir</groupId>
+				<artifactId>cqf-fhir-utility</artifactId>
+				<version>3.23.0</version>
+				<scope>provided</scope>
+		  </dependency>
 	</dependencies>
 
 	<build>

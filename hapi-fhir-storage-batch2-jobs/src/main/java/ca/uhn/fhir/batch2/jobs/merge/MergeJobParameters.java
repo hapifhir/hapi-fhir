@@ -29,19 +29,49 @@ public class MergeJobParameters extends ReplaceReferencesJobParameters {
 	@JsonProperty("resultResource")
 	private String myResultResource;
 
+	@JsonProperty("originalInputParameters")
+	private String myOriginalInputParameters;
+
+	/**
+	 * @deprecated we have the whole original input parameters object now,
+	 * which contains this as well,  look up resultsResource from there
+	 */
+	@Deprecated(since = "8.4")
 	public void setResultResource(String theResultResource) {
 		myResultResource = theResultResource;
 	}
 
+	/**
+	 * @deprecated we have the whole original input parameters object now,
+	 * which contains this as well. Use getMyOriginalInputParameters and look up resultsResource from there
+	 */
+	@Deprecated(since = "8.4")
 	public String getResultResource() {
 		return myResultResource;
 	}
 
+	/**
+	 * @deprecated we have the whole original input parameters object now,
+	 * which contains this as well. Use getMyOriginalInputParameters and look up deleteSource from there
+	 */
+	@Deprecated(since = "8.4")
 	public boolean getDeleteSource() {
 		return myDeleteSource;
 	}
 
+	/**
+	 * @deprecated we have the whole original input parameters object now, which contains this as well. Use setMyOriginalInputParameters
+	 */
+	@Deprecated(since = "8.4")
 	public void setDeleteSource(boolean theDeleteSource) {
 		this.myDeleteSource = theDeleteSource;
+	}
+
+	public String getOriginalInputParameters() {
+		return myOriginalInputParameters;
+	}
+
+	public void setOriginalInputParameters(String myOriginalInputParameters) {
+		this.myOriginalInputParameters = myOriginalInputParameters;
 	}
 }

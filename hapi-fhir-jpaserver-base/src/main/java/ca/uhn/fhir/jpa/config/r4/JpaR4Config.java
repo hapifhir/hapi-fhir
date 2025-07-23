@@ -38,14 +38,18 @@ import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
+import ca.uhn.fhir.jpa.provider.merge.MergeValidationService;
 import ca.uhn.fhir.jpa.provider.merge.PatientMergeProvider;
 import ca.uhn.fhir.jpa.provider.merge.ResourceMergeService;
+import ca.uhn.fhir.jpa.provider.merge.ResourceUndoMergeService;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR4;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
+import ca.uhn.fhir.merge.MergeProvenanceSvc;
+import ca.uhn.fhir.replacereferences.PreviousResourceVersionRestorer;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Meta;
@@ -108,6 +112,16 @@ public class JpaR4Config {
 	}
 
 	@Bean
+	public MergeValidationService mergeValidationService(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
+		return new MergeValidationService(theFhirContext, theDaoRegistry);
+	}
+
+	@Bean
+	public MergeProvenanceSvc mergeProvenanceSvc(DaoRegistry theDaoRegistry) {
+		return new MergeProvenanceSvc(theDaoRegistry);
+	}
+
+	@Bean
 	public ResourceMergeService resourceMergeService(
 			DaoRegistry theDaoRegistry,
 			IReplaceReferencesSvc theReplaceReferencesSvc,
@@ -115,7 +129,9 @@ public class JpaR4Config {
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
 			IJobCoordinator theJobCoordinator,
 			Batch2TaskHelper theBatch2TaskHelper,
-			JpaStorageSettings theStorageSettings) {
+			JpaStorageSettings theStorageSettings,
+			MergeValidationService theMergeValidationService,
+			MergeProvenanceSvc theMergeProvenanceSvc) {
 
 		return new ResourceMergeService(
 				theStorageSettings,
@@ -124,7 +140,24 @@ public class JpaR4Config {
 				theHapiTransactionService,
 				theRequestPartitionHelperSvc,
 				theJobCoordinator,
-				theBatch2TaskHelper);
+				theBatch2TaskHelper,
+				theMergeValidationService,
+				theMergeProvenanceSvc);
+	}
+
+	@Bean
+	public ResourceUndoMergeService resourceUndoMergeService(
+			DaoRegistry theDaoRegistry,
+			MergeProvenanceSvc theMergeProvenanceSvc,
+			PreviousResourceVersionRestorer theResourceVersionRestorer,
+			MergeValidationService theMergeValidationService,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		return new ResourceUndoMergeService(
+				theDaoRegistry,
+				theMergeProvenanceSvc,
+				theResourceVersionRestorer,
+				theMergeValidationService,
+				theRequestPartitionHelperSvc);
 	}
 
 	@Bean
@@ -132,9 +165,14 @@ public class JpaR4Config {
 			FhirContext theFhirContext,
 			DaoRegistry theDaoRegistry,
 			ResourceMergeService theResourceMergeService,
+			ResourceUndoMergeService theResourceUndoMergeService,
 			IInterceptorBroadcaster theInterceptorBroadcaster) {
 
 		return new PatientMergeProvider(
-				theFhirContext, theDaoRegistry, theResourceMergeService, theInterceptorBroadcaster);
+				theFhirContext,
+				theDaoRegistry,
+				theResourceMergeService,
+				theResourceUndoMergeService,
+				theInterceptorBroadcaster);
 	}
 }

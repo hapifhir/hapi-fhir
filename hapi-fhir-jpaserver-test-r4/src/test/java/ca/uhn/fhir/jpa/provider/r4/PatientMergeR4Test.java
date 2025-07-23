@@ -8,14 +8,18 @@ import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import jakarta.annotation.Nonnull;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -37,17 +41,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.RESOURCE_TYPES_EXPECTED_TO_BE_PATCHED;
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.TOTAL_EXPECTED_PATCHES;
-import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER;
-import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER_RESPOND_ASYNC;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_INPUT;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_OUTCOME;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_RESULT;
@@ -253,9 +255,8 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		myTestHelper.assertAllReferencesUpdated(true, withDelete, myLargeTestData);
 		myTestHelper.assertSourcePatientUpdatedOrDeletedAfterMerge(myLargeTestData.getSourcePatientId(), myLargeTestData.getTargetPatientId(), withDelete);
 		myTestHelper.assertTargetPatientUpdatedAfterMerge(myLargeTestData.getTargetPatientId(), myLargeTestData.getSourcePatientId(), withDelete, expectedIdentifiersOnTargetAfterMerge);
-		myTestHelper.assertMergeProvenance(withDelete, myLargeTestData,  null);
+		myTestHelper.assertMergeProvenance(inParams.asParametersResource(), myLargeTestData,  null);
 	}
-
 
 
 	@ParameterizedTest(name = "{index}: isAsync={0}, theAgentInterceptorReturnsMultipleAgents={1}")
@@ -291,7 +292,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			validateSyncOutcome(outParams);
 		}
 
-		myTestHelper.assertMergeProvenance(false, myLargeTestData, agents);
+		myTestHelper.assertMergeProvenance(inParams.asParametersResource(), myLargeTestData, agents);
 	}
 
 	@ParameterizedTest(name = "{index}: isAsync={0}")
@@ -330,7 +331,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		// exec
 		assertThatThrownBy(() -> callMergeOperation(inParameters, false))
 			.isInstanceOf(PreconditionFailedException.class)
-			.satisfies(ex -> assertThat(extractFailureMessage((BaseServerResponseException) ex)).isEqualTo("HAPI-2597: Number of resources with references to "+ myLargeTestData.getSourcePatientId() + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'."));
+			.satisfies(ex -> assertThat(myTestHelper.extractFailureMessageFromOutcomeParameter((BaseServerResponseException) ex)).isEqualTo("HAPI-2597: Number of resources with references to "+ myLargeTestData.getSourcePatientId() + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'."));
 	}
 
 	@ParameterizedTest(name = "{index}: deleteSource={0}, async={1}")
@@ -379,7 +380,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			targetPatient.getIdElement(),
 			theDeleteSource);
 
-		myTestHelper.assertMergeProvenance(theDeleteSource,
+		myTestHelper.assertMergeProvenance(inParams.asParametersResource(),
 			sourcePatient.getIdElement().withVersion("2"),
 			theExpectedTargetIdWithVersion,
 			0,
@@ -480,12 +481,30 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			.isEqualTo(400);
 	}
 
+
+	@Test
+	void testMerge_NonParameterRequestBody_Returns400BadRequest() throws IOException {
+		HttpClientExtension clientExtension = new HttpClientExtension();
+		clientExtension.initialize();
+		try (CloseableHttpClient client = clientExtension.getClient()) {
+			HttpPost post = new HttpPost(myServer.getBaseUrl() + "/Patient/$merge");
+			post.addHeader("Content-Type", "application/fhir+json");
+			post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(new Patient()), StandardCharsets.UTF_8));
+			try (CloseableHttpResponse response = client.execute(post)) {
+				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+				String responseContent = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+				assertThat(responseContent).contains("There are no source resource parameters provided");
+				assertThat(responseContent).contains("There are no target resource parameters provided");
+			}
+		}
+	}
+
 	private void assertUnprocessibleEntityWithMessage(Parameters inParameters, String theExpectedMessage) {
 		assertThatThrownBy(() ->
 			callMergeOperation(inParameters))
 			.isInstanceOf(UnprocessableEntityException.class)
 			.extracting(UnprocessableEntityException.class::cast)
-			.extracting(this::extractFailureMessage)
+			.extracting(myTestHelper::extractFailureMessageFromOutcomeParameter)
 			.isEqualTo(theExpectedMessage);
 	}
 
@@ -494,43 +513,20 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	private Parameters callMergeOperation(Parameters inParameters, boolean isAsync) {
-		IOperationUntypedWithInput<Parameters> request = myClient.operation()
-			.onType("Patient")
-			.named(OPERATION_MERGE)
-			.withParameters(inParameters);
-
-		if (isAsync) {
-			request.withAdditionalHeader(HEADER_PREFER, HEADER_PREFER_RESPOND_ASYNC);
-		}
-
-		return request
-			.returnResourceType(Parameters.class)
-			.execute();
+		return myTestHelper.callMergeOperation(myClient, inParameters, isAsync);
 	}
 
 	class MyExceptionHandler implements TestExecutionExceptionHandler {
 		@Override
 		public void handleTestExecutionException(ExtensionContext theExtensionContext, Throwable theThrowable) throws Throwable {
 			if (theThrowable instanceof BaseServerResponseException ex) {
-				String message = extractFailureMessage(ex);
+				String message = myTestHelper.extractFailureMessageFromOutcomeParameter(ex);
 				throw ex.getClass().getDeclaredConstructor(String.class, Throwable.class).newInstance(message, ex);
 			}
 			throw theThrowable;
 		}
 	}
 
-	private @Nonnull String extractFailureMessage(BaseServerResponseException ex) {
-		String body = ex.getResponseBody();
-		if (body != null) {
-			Parameters outParams = myFhirContext.newJsonParser().parseResource(Parameters.class, body);
-			OperationOutcome outcome = (OperationOutcome) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
-			return outcome.getIssue().stream()
-				.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
-				.collect(Collectors.joining(", "));
-		} else {
-			return "null";
-		}
-	}
 
 	@Override
 	protected boolean verboseClientLogging() {
