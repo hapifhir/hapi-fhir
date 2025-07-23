@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
@@ -56,7 +57,7 @@ class BulkDataExportProviderTest {
 	@ParameterizedTest
 	@MethodSource("fhirContexts")
 	void checkDeviceIsSupportedInPatientCompartment(FhirContext theFhirContext) {
-		Set<String> resourceNames = new BulkDataExportProvider().getPatientCompartmentResources(theFhirContext);
+		Set<String> resourceNames = new BulkDataExportProvider().getPatientCompartmentResources(theFhirContext, BulkExportJobParameters.ExportStyle.PATIENT);
 		if (theFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R5)) {
 			assertThat(resourceNames).contains("Device");
 		} else {
@@ -67,7 +68,7 @@ class BulkDataExportProviderTest {
 	@ParameterizedTest
 	@MethodSource("fhirContexts")
 	public void getPatientCompartmentResources_doesNotIncludeOmittedResources(FhirContext theFhirContext) {
-		Set<String> resourceNames = new BulkDataExportProvider().getPatientCompartmentResources(theFhirContext);
+		Set<String> resourceNames = new BulkDataExportProvider().getPatientCompartmentResources(theFhirContext, BulkExportJobParameters.ExportStyle.PATIENT);
 		assertThat(resourceNames).doesNotContain(SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.keySet().toArray(new String[0]));
 	}
 

@@ -1316,7 +1316,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 		options.setPatientIds(Set.of(patientRef.getReference()));
 
-		options.setResourceTypes(support.getPatientCompartmentResources());
+		// use Group to get Group and List resources
+		options.setResourceTypes(support.getPatientCompartmentResources(BulkExportJobParameters.ExportStyle.GROUP));
 		Batch2JobStartResponse results = startNewJob(options);
 
 		// verify
