@@ -87,10 +87,12 @@ public class BulkDataExportSupport {
 	public void validateOrDefaultResourceTypesForGroupBulkExport(
 			@Nonnull BulkExportJobParameters theBulkExportJobParameters) {
 		if (CollectionUtils.isNotEmpty(theBulkExportJobParameters.getResourceTypes())) {
-			validateResourceTypesAllContainPatientSearchParams(theBulkExportJobParameters.getResourceTypes(), BulkExportJobParameters.ExportStyle.GROUP);
+			validateResourceTypesAllContainPatientSearchParams(
+					theBulkExportJobParameters.getResourceTypes(), BulkExportJobParameters.ExportStyle.GROUP);
 		} else {
 			// all patient resource types
-			Set<String> groupTypes = new HashSet<>(getPatientCompartmentResources(BulkExportJobParameters.ExportStyle.GROUP));
+			Set<String> groupTypes =
+					new HashSet<>(getPatientCompartmentResources(BulkExportJobParameters.ExportStyle.GROUP));
 
 			// Add the forward reference resource types from the patients, e.g. Practitioner, Organization
 			groupTypes.addAll(BulkDataExportUtil.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES);
@@ -100,13 +102,15 @@ public class BulkDataExportSupport {
 		}
 	}
 
-	public void validateResourceTypesAllContainPatientSearchParams(Collection<String> theResourceTypes, BulkExportJobParameters.ExportStyle theExportStyle) {
+	public void validateResourceTypesAllContainPatientSearchParams(
+			Collection<String> theResourceTypes, BulkExportJobParameters.ExportStyle theExportStyle) {
 		if (theResourceTypes != null) {
 			List<String> badResourceTypes = theResourceTypes.stream()
 					.filter(resourceType ->
 							!BulkDataExportUtil.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(
 									resourceType))
-					.filter(resourceType -> !getPatientCompartmentResources(theExportStyle).contains(resourceType))
+					.filter(resourceType ->
+							!getPatientCompartmentResources(theExportStyle).contains(resourceType))
 					.collect(Collectors.toList());
 
 			if (!badResourceTypes.isEmpty()) {
@@ -142,14 +146,15 @@ public class BulkDataExportSupport {
 		return getPatientCompartmentResources(myFhirContext, theExportStyle);
 	}
 
-	Set<String> getPatientCompartmentResources(FhirContext theFhirContext, BulkExportJobParameters.ExportStyle theExportStyle) {
+	Set<String> getPatientCompartmentResources(
+			FhirContext theFhirContext, BulkExportJobParameters.ExportStyle theExportStyle) {
 		if (myCompartmentResources == null) {
 			myCompartmentResources =
 					SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(theFhirContext).stream()
 							.filter(r -> {
 								if (theExportStyle == BulkExportJobParameters.ExportStyle.PATIENT) {
 									return !SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT
-										.containsKey(r);
+											.containsKey(r);
 								}
 								return true;
 							})
