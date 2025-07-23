@@ -10,6 +10,7 @@
 	</parent>
 
 	<artifactId>hapi-fhir-spring-boot-sample-server-jersey</artifactId>
+	<name>HAPI-FHIR Spring Boot Sample Server (Jersey)</name>
 
 	<packaging>jar</packaging>
 
