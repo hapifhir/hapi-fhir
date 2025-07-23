@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -61,6 +62,13 @@ class BulkDataExportProviderTest {
 		} else {
 			assertThat(resourceNames).doesNotContain("Device");
 		}
+	}
+
+	@ParameterizedTest
+	@MethodSource("fhirContexts")
+	public void getPatientCompartmentResources_doesNotIncludeOmittedResources(FhirContext theFhirContext) {
+		Set<String> resourceNames = new BulkDataExportProvider().getPatientCompartmentResources(theFhirContext);
+		assertThat(resourceNames).doesNotContain(SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.keySet().toArray(new String[0]));
 	}
 
 	@Test

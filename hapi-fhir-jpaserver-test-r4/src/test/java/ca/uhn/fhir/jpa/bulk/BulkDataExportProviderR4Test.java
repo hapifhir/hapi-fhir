@@ -1,8 +1,5 @@
 package ca.uhn.fhir.jpa.bulk;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
@@ -10,7 +7,6 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
@@ -31,6 +27,7 @@ import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.MockInvoker;
@@ -82,6 +79,9 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -133,7 +133,6 @@ public class BulkDataExportProviderR4Test {
 
 		lenient().when(myDaoRegistry.getResourceDao(anyString())).thenReturn(myFhirResourceDao);
 		myProvider.setDaoRegistry(myDaoRegistry);
-
 	}
 
 	public void startWithFixedBaseUrl() {
@@ -675,7 +674,34 @@ public class BulkDataExportProviderR4Test {
 		assertNotNull(bp.getUntil());
 		assertNotNull(bp.getFilters());
 		assertEquals(GROUP_ID, bp.getGroupId());
-		assertEquals(true, bp.isExpandMdm());
+		assertTrue(bp.isExpandMdm());
+	}
+
+	static List<String> getOmittedResourceTypes() {
+		return SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT
+			.keySet().stream().toList();
+	}
+
+	@ParameterizedTest
+	@MethodSource("getOmittedResourceTypes")
+	public void patientExport_withVerbotenResourceTypes_fails(String theResourceType) throws IOException {
+		Parameters input = new Parameters();
+		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
+		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType(theResourceType));
+
+		// call
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/Patient/" + ProviderConstants.OPERATION_EXPORT);
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.setEntity(new ResourceEntity(myCtx, input));
+		ourLog.info("Request: {}", post);
+		try (CloseableHttpResponse response = myClient.execute(post)) {
+			ourLog.info("Response: {}", response.toString());
+			assertEquals(400, response.getStatusLine().getStatusCode());
+
+			String responseStr = new String(response.getEntity().getContent().readAllBytes(), StandardCharsets.UTF_8);
+
+			assertTrue(responseStr.contains("are invalid for this type of export"));
+		}
 	}
 
 	@Test

@@ -124,7 +124,11 @@ public class BulkDataExportSupport {
 	Set<String> getPatientCompartmentResources(FhirContext theFhirContext) {
 		if (myCompartmentResources == null) {
 			myCompartmentResources =
-					new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(theFhirContext));
+					SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(theFhirContext).stream()
+							.filter(r ->
+									!SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT
+											.containsKey(r))
+							.collect(Collectors.toSet());
 		}
 		return myCompartmentResources;
 	}
