@@ -40,6 +40,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import java.util.ArrayList;
@@ -1147,5 +1148,17 @@ public class FhirPatch {
 			return ((IIdType) theOldPrimitive).getIdPart();
 		}
 		return theOldPrimitive.getValueAsString();
+	}
+
+	/**
+	 * Validates a FHIRPatch Parameters document and throws an {@link InvalidRequestException}
+	 * if it is not valid.
+	 *
+	 * @param theParameters The Parameters resource to validate as a FHIRPatch document
+	 * @throws InvalidRequestException if the document is not a valid FHIRPatch document
+	 * @since 8.4.0
+	 */
+	public void validate(IBaseResource theParameters) throws InvalidRequestException{
+		apply(null, theParameters);
 	}
 }

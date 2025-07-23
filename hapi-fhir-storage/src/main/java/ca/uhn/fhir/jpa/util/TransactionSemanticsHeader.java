@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.util;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.text.StringTokenizer;
@@ -126,6 +127,16 @@ public class TransactionSemanticsHeader {
 
 		return b.toString();
 	}
+
+	/**
+	 * Add this header to a RequestDetails object
+	 *
+	 * @since 8.4.0
+	 */
+	public void applyTo(RequestDetails theRequestDetails) {
+		theRequestDetails.addHeader(HEADER_NAME, toHeaderValue());
+	}
+
 
 	/**
 	 * Parses a header value (not including the header name) into a new

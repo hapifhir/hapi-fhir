@@ -17,15 +17,10 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.batch2.jobs.bulkmodify;
+package ca.uhn.fhir.batch2.jobs.bulkmodify.base;
 
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
-import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.annotation.Nullable;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-
-public class BulkModifyJobParameters extends PartitionedUrlJobParameters {
+public abstract class BaseBulkModifyJobParameters extends PartitionedUrlJobParameters {
 
 }

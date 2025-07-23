@@ -43,8 +43,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -136,12 +138,45 @@ public class ParametersUtil {
 				.findFirst();
 	}
 
+	public static Map<String, List<IBase>> getNamedParameters(FhirContext theCtx, IBaseResource theParameters) {
+
+	}
+
 	public static List<IBase> getNamedParameters(
 			FhirContext theCtx, IBaseResource theParameters, String theParameterName) {
 		Validate.notNull(theParameters, "theParameters must not be null");
 		RuntimeResourceDefinition resDef = theCtx.getResourceDefinition(theParameters.getClass());
 		BaseRuntimeChildDefinition parameterChild = resDef.getChildByName("parameter");
 		List<IBase> parameterReps = parameterChild.getAccessor().getValues(theParameters);
+
+		List<IBase> retVal = new ArrayList<>();
+		BiConsumer<String, IBase> consumer = new BiConsumer<String, IBase>() {
+			@Override
+			public void accept(String theParamName, IBase thePart) {
+				if (theParameterName.equals(theParamName)) {
+					retVal.add(thePart);
+				}
+			}
+		};
+
+		for (IBase parameter : parameterReps) {
+
+		}
+
+		parameterReps.stream()
+			.filter(param -> {
+				BaseRuntimeElementCompositeDefinition<?> nextParameterDef =
+					(BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(param.getClass());
+				BaseRuntimeChildDefinition nameChild = nextParameterDef.getChildByName("name");
+				List<IBase> nameValues = nameChild.getAccessor().getValues(param);
+				Optional<? extends IPrimitiveType<?>> nameValue = nameValues.stream()
+					.filter(t -> t instanceof IPrimitiveType<?>)
+					.map(t -> ((IPrimitiveType<?>) t))
+					.findFirst();
+				return nameValue.isPresent()
+					&& theParameterName.equals(nameValue.get().getValueAsString());
+			})
+			.collect(Collectors.toList());
 
 		return parameterReps.stream()
 				.filter(param -> {

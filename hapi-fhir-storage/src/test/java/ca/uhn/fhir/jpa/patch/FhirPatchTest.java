@@ -20,9 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirPatchTest {
 	org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirPatchTest.class);
@@ -377,12 +377,23 @@ public class FhirPatchTest {
 		}
 
 		// test
-		try {
-			myPatch.apply(appointment, patch);
-			fail();
-		} catch (IllegalArgumentException ex) {
-			assertTrue(ex.getLocalizedMessage()
-				.contains("is not a valid fhir path"));
-		}
+		assertThatThrownBy(()->myPatch.apply(appointment, patch))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("is not a valid fhir path");
+
 	}
+
+
+	@Test
+	void testValidate() {
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName("foo");
+
+		assertThatThrownBy(()->myPatch.validate(parameters))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("AAAA");
+	}
+
+
+
 }
