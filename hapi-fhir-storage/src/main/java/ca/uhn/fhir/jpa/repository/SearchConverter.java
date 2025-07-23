@@ -30,10 +30,10 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The IGenericClient API represents searches with OrLists, while the FhirRepository API uses nested
@@ -41,7 +41,7 @@ import java.util.Map;
  */
 public class SearchConverter {
 	// hardcoded list from FHIR specs: https://www.hl7.org/fhir/search.html
-	private final List<String> mySearchResultParameters = Arrays.asList(
+	private static final Set<String> ourSearchResultParameters = Set.of(
 			"_sort",
 			"_count",
 			"_include",
@@ -128,7 +128,7 @@ public class SearchConverter {
 	}
 
 	public boolean isSearchResultParameter(String theParameterName) {
-		return mySearchResultParameters.contains(theParameterName);
+		return ourSearchResultParameters.contains(theParameterName);
 	}
 
 	public <T> boolean isOrList(@Nonnull T theParameterType) {

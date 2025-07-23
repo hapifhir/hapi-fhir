@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.repository.HapiFhirRepository;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.repository.IRepositoryTest;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import org.junit.jupiter.api.AfterEach;
 
 class HapiFhirRepositoryTest extends BaseJpaR4Test implements IRepositoryTest {
@@ -22,11 +23,7 @@ class HapiFhirRepositoryTest extends BaseJpaR4Test implements IRepositoryTest {
 
 	@Override
 	public RepositoryTestSupport getRepositoryTestSupport() {
-		return new RepositoryTestSupport(new HapiFhirRepository(myDaoRegistry, mySrd, null));
-	}
-
-	@Override
-	public boolean isSearchSupported() {
-		return false;
+		RestfulServer restfulServer = new RestfulServer(myDaoRegistry.getFhirContext());
+		return new RepositoryTestSupport(new HapiFhirRepository(myDaoRegistry, mySrd, restfulServer));
 	}
 }

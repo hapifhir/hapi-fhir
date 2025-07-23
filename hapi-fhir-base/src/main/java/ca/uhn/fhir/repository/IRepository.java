@@ -262,7 +262,9 @@ public interface IRepository {
 	 * @param resourceType the class of the Resource type to search
 	 * @param searchParameters the searchParameters for this search
 	 * @return a Bundle with the results of the search
+	 * @deprecated since 8.4 use Multimap instead
 	 */
+	@Deprecated(since = "8.4.0")
 	default <B extends IBaseBundle, T extends IBaseResource> B search(
 			Class<B> bundleType, Class<T> resourceType, Map<String, List<IQueryParameterType>> searchParameters) {
 		return this.search(bundleType, resourceType, searchParameters, Collections.emptyMap());
@@ -299,7 +301,9 @@ public interface IRepository {
 	 * @param searchParameters the searchParameters for this search
 	 * @param headers headers for this request, typically key-value pairs of HTTP headers
 	 * @return a Bundle with the results of the search
+	 * @deprecated since 8.4 use Multimap instead
 	 */
+	@Deprecated(since = "8.4.0")
 	default <B extends IBaseBundle, T extends IBaseResource> B search(
 			Class<B> bundleType,
 			Class<T> resourceType,

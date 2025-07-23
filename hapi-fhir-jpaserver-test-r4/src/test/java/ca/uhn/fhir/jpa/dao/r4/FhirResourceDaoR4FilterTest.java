@@ -1338,4 +1338,14 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 
 		assertThat(actual).hasSize(5);
 	}
+
+	@Test
+	void testFilterChain() {
+	    // given
+
+	    // when
+	    // then
+	    fail();
+	}
+
 }
