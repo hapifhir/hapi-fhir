@@ -1,9 +1,8 @@
 package ca.uhn.fhir.batch2.jobs.bulkmodify.patch;
 
-import ca.uhn.fhir.batch2.jobs.bulkmodify.base.BaseBulkModifyJobAppCtx;
-import ca.uhn.fhir.batch2.jobs.bulkmodify.base.BulkModifyGenerateReportStep;
-import ca.uhn.fhir.batch2.jobs.bulkmodify.base.BaseBulkModifyResourcesStep;
-import ca.uhn.fhir.batch2.jobs.bulkmodify.common.BulkModifyJobAppCtx;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyJobAppCtx;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyGenerateReportStep;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyCommonJobAppCtx;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
 import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -13,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({BulkModifyJobAppCtx.class})
+@Import({BulkModifyCommonJobAppCtx.class})
 public class BulkPatchJobAppCtx extends BaseBulkModifyJobAppCtx<BulkPatchJobParameters> {
 
 	public static final String JOB_ID = "BULK_MODIFY_PATCH";

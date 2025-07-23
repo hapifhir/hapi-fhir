@@ -1,6 +1,6 @@
 package ca.uhn.fhir.batch2.jobs.bulkmodify.patch;
 
-import ca.uhn.fhir.batch2.jobs.bulkmodify.base.BaseBulkModifyJobParameters;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyJobParameters;
 import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRawValue;

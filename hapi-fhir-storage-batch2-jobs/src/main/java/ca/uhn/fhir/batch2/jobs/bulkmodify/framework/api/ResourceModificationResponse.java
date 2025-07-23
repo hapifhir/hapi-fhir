@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.bulkmodify.api;
+package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.api;
 
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;

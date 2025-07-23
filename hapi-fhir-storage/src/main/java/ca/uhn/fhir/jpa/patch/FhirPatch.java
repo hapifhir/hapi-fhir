@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -107,25 +108,33 @@ public class FhirPatch {
 
 	public void apply(IBaseResource theResource, IBaseResource thePatch) {
 
-		List<IBase> opParameters = ParametersUtil.getNamedParameters(myContext, thePatch, PARAMETER_OPERATION);
-		for (IBase nextOperation : opParameters) {
-			String type = ParametersUtil.getParameterPartValueAsString(myContext, nextOperation, PARAMETER_TYPE);
-			type = defaultString(type);
+		Map<String, List<IBase>> namedParameters = ParametersUtil.getNamedParameters(myContext, thePatch);
+		for (Map.Entry<String, List<IBase>> namedParameterEntry : namedParameters.entrySet()) {
+			if (namedParameterEntry.getKey().equals(PARAMETER_OPERATION)) {
+				List<IBase> opParameters = namedParameterEntry.getValue();
+				for (IBase nextOperation : opParameters) {
+					String type = ParametersUtil.getParameterPartValueAsString(myContext, nextOperation, PARAMETER_TYPE);
+					type = defaultString(type);
 
-			if (OPERATION_DELETE.equals(type)) {
-				handleDeleteOperation(theResource, nextOperation);
-			} else if (OPERATION_ADD.equals(type)) {
-				handleAddOperation(theResource, nextOperation);
-			} else if (OPERATION_REPLACE.equals(type)) {
-				handleReplaceOperation(theResource, nextOperation);
-			} else if (OPERATION_INSERT.equals(type)) {
-				handleInsertOperation(theResource, nextOperation);
-			} else if (OPERATION_MOVE.equals(type)) {
-				handleMoveOperation(theResource, nextOperation);
+					if (OPERATION_DELETE.equals(type)) {
+						handleDeleteOperation(theResource, nextOperation);
+					} else if (OPERATION_ADD.equals(type)) {
+						handleAddOperation(theResource, nextOperation);
+					} else if (OPERATION_REPLACE.equals(type)) {
+						handleReplaceOperation(theResource, nextOperation);
+					} else if (OPERATION_INSERT.equals(type)) {
+						handleInsertOperation(theResource, nextOperation);
+					} else if (OPERATION_MOVE.equals(type)) {
+						handleMoveOperation(theResource, nextOperation);
+					} else {
+						throw new InvalidRequestException(Msg.code(1267) + "Unknown patch operation type: " + type);
+					}
+				}
 			} else {
-				throw new InvalidRequestException(Msg.code(1267) + "Unknown patch operation type: " + type);
+				throw new InvalidRequestException(Msg.code(2756) + "Unknown patch parameter name: " + namedParameterEntry.getKey());
 			}
 		}
+
 	}
 
 	private void handleAddOperation(IBaseResource theResource, IBase theParameters) {
@@ -240,7 +249,7 @@ public class FhirPatch {
 		try {
 			IFhirPath.IParsedExpression exp = fhirPath.parse(path);
 		} catch (Exception theE) {
-			throw new IllegalArgumentException(
+			throw new InvalidRequestException(
 					Msg.code(2726) + String.format(" %s is not a valid fhir path", path), theE);
 		}
 		ParsedFhirPath parsedFhirPath = ParsedFhirPath.parse(path);

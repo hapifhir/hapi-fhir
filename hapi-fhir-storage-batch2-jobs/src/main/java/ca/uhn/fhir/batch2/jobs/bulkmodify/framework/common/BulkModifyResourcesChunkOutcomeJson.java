@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.bulkmodify.base;
+package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common;
 
 import ca.uhn.fhir.model.api.IModelJson;
 

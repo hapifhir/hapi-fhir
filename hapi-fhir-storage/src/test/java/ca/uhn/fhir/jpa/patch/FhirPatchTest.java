@@ -391,7 +391,7 @@ public class FhirPatchTest {
 
 		assertThatThrownBy(()->myPatch.validate(parameters))
 			.isInstanceOf(InvalidRequestException.class)
-			.hasMessageContaining("AAAA");
+			.hasMessageContaining("Unknown patch parameter name: foo");
 	}
 
 

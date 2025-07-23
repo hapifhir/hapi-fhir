@@ -1,5 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.bulkmodify.base;
+package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
+import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyGenerateReportStep;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesResultsJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
@@ -50,7 +53,7 @@ public abstract class BaseBulkModifyJobAppCtx<T extends BaseBulkModifyJobParamet
 
 	protected abstract String getJobId();
 
-	public abstract BaseBulkModifyResourcesStep<T> modifyResourcesStep();
+	public abstract <C> BaseBulkModifyResourcesStep<T, C> modifyResourcesStep();
 
 	public abstract GenerateRangeChunksStep<T> generateRangesStep();
 
