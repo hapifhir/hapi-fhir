@@ -139,7 +139,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		SystemRequestDetails request = new SystemRequestDetails();
 		request.setRequestPartitionId(thePartitionId);
 
-		if (resourceType == null || resourceType.isBlank()) {
+		if (isNoResourceTypeProvidedInUrl(theUrl, resourceType)) {
 			searchParamMap = parseQuery(theUrl, null);
 		} else {
 			searchParamMap = parseQuery(theUrl);
@@ -147,13 +147,17 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 
 		searchParamMap.setLastUpdated(DateRangeUtil.narrowDateRange(searchParamMap.getLastUpdated(), theStart, theEnd));
 
-		if (resourceType == null || resourceType.isBlank()) {
+		if (isNoResourceTypeProvidedInUrl(theUrl, resourceType)) {
 			return searchForResourceIdsAndType(thePartitionId, request, searchParamMap);
 		}
 
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
 
 		return dao.searchForIdStream(searchParamMap, request, null).map(pid -> new TypedResourcePid(resourceType, pid));
+	}
+
+	private static boolean isNoResourceTypeProvidedInUrl(String theUrl, String resourceType) {
+		return (resourceType == null || resourceType.isBlank()) && theUrl.indexOf('?') == 0;
 	}
 
 	/**
