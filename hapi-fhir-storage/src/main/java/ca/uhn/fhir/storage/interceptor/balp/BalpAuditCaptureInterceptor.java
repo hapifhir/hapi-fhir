@@ -239,8 +239,9 @@ public class BalpAuditCaptureInterceptor {
 									"Patient",
 									resource,
 									CompartmentSearchParameterModifications.fromAdditionalAndOmittedSPNames(
-											fhirContext.getResourceType(resource), myAdditionalPatientCompartmentParamNames, myOmittedSPNamesInPatientCompartment)
-							)
+											fhirContext.getResourceType(resource),
+											myAdditionalPatientCompartmentParamNames,
+											myOmittedSPNamesInPatientCompartment))
 							.stream()
 							.map(t -> myContextServices.massageResourceIdForStorage(theRequestDetails, resource, t))
 							.forEach(patientIds::add);

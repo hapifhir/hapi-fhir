@@ -45,9 +45,10 @@ public class CompartmentSearchParameterModifications {
 	 * @param theOmittedSps the omitted SP names
 	 * @return
 	 */
-	public static CompartmentSearchParameterModifications fromAdditionalAndOmittedSPNames(@Nonnull String theResourceType,
-																						  @Nonnull Set<String> theAdditionalSPs,
-																						  @Nonnull Set<String> theOmittedSps) {
+	public static CompartmentSearchParameterModifications fromAdditionalAndOmittedSPNames(
+			@Nonnull String theResourceType,
+			@Nonnull Set<String> theAdditionalSPs,
+			@Nonnull Set<String> theOmittedSps) {
 		CompartmentSearchParameterModifications modifications = new CompartmentSearchParameterModifications();
 		theAdditionalSPs.forEach(spName -> {
 			modifications.addSPToIncludeInCompartment(theResourceType, spName);
@@ -58,7 +59,8 @@ public class CompartmentSearchParameterModifications {
 		return modifications;
 	}
 
-	public static CompartmentSearchParameterModifications fromAdditionalCompartmentParamNames(String theResourceType, @Nonnull Set<String> theAdditionalCompartmentParamNames) {
+	public static CompartmentSearchParameterModifications fromAdditionalCompartmentParamNames(
+			String theResourceType, @Nonnull Set<String> theAdditionalCompartmentParamNames) {
 		return fromAdditionalAndOmittedSPNames(theResourceType, theAdditionalCompartmentParamNames, Set.of());
 	}
 

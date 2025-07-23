@@ -25,6 +25,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -37,7 +38,6 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizedList;
-import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
@@ -257,8 +257,7 @@ public class AuthorizationInterceptors {
 						.allow()
 						.read()
 						.allResources()
-						.inModifiedCompartment(
-								"Patient", new IdType("Patient/123"), additionalSearchParams)
+						.inModifiedCompartment("Patient", new IdType("Patient/123"), additionalSearchParams)
 						.build();
 			}
 		};
@@ -275,8 +274,7 @@ public class AuthorizationInterceptors {
 						.allow()
 						.read()
 						.allResources()
-						.inModifiedCompartment(
-								"Patient", new IdType("Patient/123"), additionalSearchParams)
+						.inModifiedCompartment("Patient", new IdType("Patient/123"), additionalSearchParams)
 						.build();
 			}
 		};

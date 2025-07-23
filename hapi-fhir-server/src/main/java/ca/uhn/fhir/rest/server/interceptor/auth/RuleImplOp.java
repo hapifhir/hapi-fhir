@@ -548,10 +548,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		for (IIdType next : myClassifierCompartmentOwners) {
 			if (target.resource != null) {
 				if (t.isSourceInCompartmentForTarget(
-						myClassifierCompartmentName,
-						target.resource,
-						next,
-						myCompartmentSPSpecialCases)) {
+						myClassifierCompartmentName, target.resource, next, myCompartmentSPSpecialCases)) {
 					foundMatch = true;
 					break;
 				}

@@ -65,9 +65,7 @@ public interface IAuthRuleBuilderRuleOpClassifier {
 	 * @param theModifications A list of strings for additional resource types and search parameters which count as being in the compartment, in the form "resourcetype:search-parameter-name".
 	 */
 	IAuthRuleBuilderRuleOpClassifierFinished inModifiedCompartment(
-			String theCompartmentName,
-			IIdType theOwner,
-			CompartmentSearchParameterModifications theModifications);
+			String theCompartmentName, IIdType theOwner, CompartmentSearchParameterModifications theModifications);
 
 	/**
 	 * Rule applies to resources in the given compartment.

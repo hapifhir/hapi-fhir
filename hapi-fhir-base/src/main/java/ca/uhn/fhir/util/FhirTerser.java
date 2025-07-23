@@ -875,22 +875,23 @@ public class FhirTerser {
 	 */
 	public boolean isSourceInCompartmentForTarget(
 			String theCompartmentName, IBaseResource theSource, IIdType theTarget) {
-		return isSourceInCompartmentForTarget(theCompartmentName, theSource, theTarget, new CompartmentSearchParameterModifications());
+		return isSourceInCompartmentForTarget(
+				theCompartmentName, theSource, theTarget, new CompartmentSearchParameterModifications());
 	}
 
 	@Deprecated
 	public boolean isSourceInCompartmentForTarget(
-		String theCompartmentName,
-		IBaseResource theSource,
-		IIdType theTarget,
-		@Nullable Set<String> theAdditionalCompartmentParamNames
-	) {
+			String theCompartmentName,
+			IBaseResource theSource,
+			IIdType theTarget,
+			@Nullable Set<String> theAdditionalCompartmentParamNames) {
 		return isSourceInCompartmentForTarget(
-			theCompartmentName, theSource, theTarget,
-			CompartmentSearchParameterModifications.fromAdditionalCompartmentParamNames(
-				myContext.getResourceType(theSource),
-				theAdditionalCompartmentParamNames == null ? Set.of() : theAdditionalCompartmentParamNames)
-		);
+				theCompartmentName,
+				theSource,
+				theTarget,
+				CompartmentSearchParameterModifications.fromAdditionalCompartmentParamNames(
+						myContext.getResourceType(theSource),
+						theAdditionalCompartmentParamNames == null ? Set.of() : theAdditionalCompartmentParamNames));
 	}
 
 	/**
@@ -954,23 +955,20 @@ public class FhirTerser {
 		}
 
 		CompartmentOwnerVisitor consumer = new CompartmentOwnerVisitor(wantRef);
-		visitCompartmentOwnersForResource(
-				theCompartmentName, theSource, theModifications, consumer);
+		visitCompartmentOwnersForResource(theCompartmentName, theSource, theModifications, consumer);
 		return consumer.isFound();
 	}
 
 	public List<IIdType> getCompartmentOwnersForResource(
-		String theCompartmentName,
-		IBaseResource theSource,
-		@Nullable  Set<String> theAdditionalCompartmentParamNames
-	) {
+			String theCompartmentName,
+			IBaseResource theSource,
+			@Nullable Set<String> theAdditionalCompartmentParamNames) {
 		return getCompartmentOwnersForResource(
-			theCompartmentName,
-			theSource,
-			CompartmentSearchParameterModifications.fromAdditionalCompartmentParamNames(
-				myContext.getResourceType(theCompartmentName),
-				theAdditionalCompartmentParamNames == null ? Set.of() : theAdditionalCompartmentParamNames)
-			);
+				theCompartmentName,
+				theSource,
+				CompartmentSearchParameterModifications.fromAdditionalCompartmentParamNames(
+						myContext.getResourceType(theCompartmentName),
+						theAdditionalCompartmentParamNames == null ? Set.of() : theAdditionalCompartmentParamNames));
 	}
 
 	/**
@@ -1007,24 +1005,20 @@ public class FhirTerser {
 		}
 
 		CompartmentOwnerVisitor consumer = new CompartmentOwnerVisitor();
-		visitCompartmentOwnersForResource(
-				theCompartmentName, theSource, theModifications, consumer);
+		visitCompartmentOwnersForResource(theCompartmentName, theSource, theModifications, consumer);
 		return consumer.getOwners();
 	}
 
 	public Stream<IBaseReference> getCompartmentReferencesForResource(
-		String theCompartmentName,
-		IBaseResource theSource,
-		@Nullable Set<String> theAdditionalCompartmentParamNames
-	) {
+			String theCompartmentName,
+			IBaseResource theSource,
+			@Nullable Set<String> theAdditionalCompartmentParamNames) {
 		return getCompartmentReferencesForResource(
-			theCompartmentName,
-			theSource,
-			CompartmentSearchParameterModifications.fromAdditionalCompartmentParamNames(
-				myContext.getResourceType(theCompartmentName),
-				theAdditionalCompartmentParamNames == null ? Set.of() : theAdditionalCompartmentParamNames
-			)
-		);
+				theCompartmentName,
+				theSource,
+				CompartmentSearchParameterModifications.fromAdditionalCompartmentParamNames(
+						myContext.getResourceType(theCompartmentName),
+						theAdditionalCompartmentParamNames == null ? Set.of() : theAdditionalCompartmentParamNames));
 	}
 
 	@Nonnull
@@ -1105,8 +1099,7 @@ public class FhirTerser {
 			CompartmentSearchParameterModifications theCompartmentModifications,
 			ICompartmentOwnerVisitor theConsumer) {
 
-		getCompartmentReferencesForResource(
-						theCompartmentName, theSource, theCompartmentModifications)
+		getCompartmentReferencesForResource(theCompartmentName, theSource, theCompartmentModifications)
 				.flatMap(nextValue -> {
 					IIdType nextTargetId = nextValue.getReferenceElement().toUnqualifiedVersionless();
 
