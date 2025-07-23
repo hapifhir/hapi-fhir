@@ -79,7 +79,7 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 		IResourcePidStream stream = mySvc.fetchResourceIdStream(PREVIOUS_MILLENNIUM, TOMORROW, null, "?");
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> stream.visitStream(Stream::toList));
 
-		assertEquals("HAPI-2742: theResourceName must not be blank", exception.getMessage());
+		assertEquals("HAPI-2742: Conditional URL does not include a resource type, but includes parameters which require a resource type", exception.getMessage());
 	}
 
 	@Test
@@ -87,7 +87,7 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 		IResourcePidStream stream = mySvc.fetchResourceIdStream(PREVIOUS_MILLENNIUM, TOMORROW, null, "?_id=abc");
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> stream.visitStream(Stream::toList));
 
-		assertEquals("HAPI-2742: theResourceName must not be blank", exception.getMessage());
+		assertEquals("HAPI-2742: Conditional URL does not include a resource type, but includes parameters which require a resource type", exception.getMessage());
 	}
 
 	@Test
@@ -349,7 +349,7 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> resourcePidList.visitStream(s-> s.map(typePid -> new IdDt(typePid.resourceType, (Long) typePid.id.getId())).toList()));
 
 		// Then
-		assertThat(exception.getMessage()).isEqualTo("HAPI-2742: theResourceName must not be blank");
+		assertThat(exception.getMessage()).isEqualTo("HAPI-2742: Conditional URL does not include a resource type, but includes parameters which require a resource type");
 	}
 
 	@ParameterizedTest
