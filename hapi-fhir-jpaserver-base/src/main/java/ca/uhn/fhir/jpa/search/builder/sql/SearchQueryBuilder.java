@@ -725,15 +725,15 @@ public class SearchQueryBuilder {
 	 * @return the base joining predicate builder
 	 */
 	public BaseJoiningPredicateBuilder getOrCreateFirstPredicateBuilder(
-		boolean theIncludeResourceTypeAndOrDeletedPredicate, SearchIncludeDeletedEnum theIncludeDeletedFlag) {
+			boolean theIncludeResourceTypeAndOrDeletedPredicate, SearchIncludeDeletedEnum theIncludeDeletedFlag) {
 		if (myFirstPredicateBuilder == null) {
-			getOrCreateResourceTablePredicateBuilder(theIncludeResourceTypeAndOrDeletedPredicate, theIncludeDeletedFlag);
+			getOrCreateResourceTablePredicateBuilder(
+					theIncludeResourceTypeAndOrDeletedPredicate, theIncludeDeletedFlag);
 		} else if (myFirstPredicateBuilder instanceof ResourceTablePredicateBuilder resourceTablePredicateBuilder) {
 			// We already have myFirstPredicateBuilder - ensure it has the same include deleted flag
 			if (resourceTablePredicateBuilder.getSearchIncludeDeleted() != null && theIncludeDeletedFlag != null) {
 				assert resourceTablePredicateBuilder.getSearchIncludeDeleted().equals(theIncludeDeletedFlag);
 			}
-
 		}
 		return myFirstPredicateBuilder;
 	}
@@ -755,9 +755,11 @@ public class SearchQueryBuilder {
 	 * @return the resource table predicate builder
 	 */
 	public ResourceTablePredicateBuilder getOrCreateResourceTablePredicateBuilder(
-		boolean theIncludeResourceTypeAndOrDeletedPredicate, @Nullable SearchIncludeDeletedEnum theIncludeDeletedFlag) {
+			boolean theIncludeResourceTypeAndOrDeletedPredicate,
+			@Nullable SearchIncludeDeletedEnum theIncludeDeletedFlag) {
 		if (myResourceTableRoot == null) {
-			ResourceTablePredicateBuilder resourceTable = mySqlBuilderFactory.resourceTable(this, theIncludeDeletedFlag);
+			ResourceTablePredicateBuilder resourceTable =
+					mySqlBuilderFactory.resourceTable(this, theIncludeDeletedFlag);
 			addTable(resourceTable, null);
 
 			if (theIncludeResourceTypeAndOrDeletedPredicate) {
@@ -769,7 +771,8 @@ public class SearchQueryBuilder {
 		return myResourceTableRoot;
 	}
 
-	private void addResourceTypeAndOrDeletedPredicate(SearchIncludeDeletedEnum theDeletedFlag, ResourceTablePredicateBuilder theResourceTable) {
+	private void addResourceTypeAndOrDeletedPredicate(
+			SearchIncludeDeletedEnum theDeletedFlag, ResourceTablePredicateBuilder theResourceTable) {
 		if (theDeletedFlag == null) {
 			addPredicate(theResourceTable.createResourceTypeAndNonDeletedPredicates());
 		} else {

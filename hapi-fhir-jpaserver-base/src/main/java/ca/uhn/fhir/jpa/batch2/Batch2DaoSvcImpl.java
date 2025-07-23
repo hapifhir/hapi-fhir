@@ -147,7 +147,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 
 		searchParamMap.setLastUpdated(DateRangeUtil.narrowDateRange(searchParamMap.getLastUpdated(), theStart, theEnd));
 
-		if (resourceType == null ||resourceType.isBlank()) {
+		if (resourceType == null || resourceType.isBlank()) {
 			return searchForResourceIdsAndType(thePartitionId, request, searchParamMap);
 		}
 

@@ -55,8 +55,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class MatchUrlService {
 
-	public static final Set<String> COMPATIBLE_PARAMS_NO_RES_TYPE = Set.of(Constants.PARAM_INCLUDE_DELETED, Constants.PARAM_LASTUPDATED);
-	public static final Set<String> COMPATIBLE_PARAMS_GIVEN_RES_TYPE = Set.of(Constants.PARAM_INCLUDE_DELETED, Constants.PARAM_LASTUPDATED, Constants.PARAM_ID);
+	public static final Set<String> COMPATIBLE_PARAMS_NO_RES_TYPE =
+			Set.of(Constants.PARAM_INCLUDE_DELETED, Constants.PARAM_LASTUPDATED);
+	public static final Set<String> COMPATIBLE_PARAMS_GIVEN_RES_TYPE =
+			Set.of(Constants.PARAM_INCLUDE_DELETED, Constants.PARAM_LASTUPDATED, Constants.PARAM_ID);
+
 	@Autowired
 	private FhirContext myFhirContext;
 
@@ -241,7 +244,8 @@ public class MatchUrlService {
 	 */
 	private static void validateParamsAreCompatibleForDeleteOrThrow(
 			Set<String> theParamsToCheck, boolean theHasNoResourceType) {
-		Set<String> compatibleParams = theHasNoResourceType ? COMPATIBLE_PARAMS_NO_RES_TYPE : COMPATIBLE_PARAMS_GIVEN_RES_TYPE;
+		Set<String> compatibleParams =
+				theHasNoResourceType ? COMPATIBLE_PARAMS_NO_RES_TYPE : COMPATIBLE_PARAMS_GIVEN_RES_TYPE;
 
 		if (!compatibleParams.containsAll(theParamsToCheck)) {
 			throw new IllegalArgumentException(Msg.code(2744) + "The " + Constants.PARAM_INCLUDE_DELETED

@@ -83,11 +83,14 @@ public class SqlObjectFactory {
 	}
 
 	public ResourceTablePredicateBuilder resourceTable(SearchQueryBuilder theSearchSqlBuilder) {
-		return myApplicationContext.getBean(ResourceTablePredicateBuilder.class, theSearchSqlBuilder, SearchIncludeDeletedEnum.NEVER);
+		return myApplicationContext.getBean(
+				ResourceTablePredicateBuilder.class, theSearchSqlBuilder, SearchIncludeDeletedEnum.NEVER);
 	}
 
-	public ResourceTablePredicateBuilder resourceTable(SearchQueryBuilder theSearchSqlBuilder, SearchIncludeDeletedEnum theSearchIncludeDeleted) {
-		return myApplicationContext.getBean(ResourceTablePredicateBuilder.class, theSearchSqlBuilder, theSearchIncludeDeleted);
+	public ResourceTablePredicateBuilder resourceTable(
+			SearchQueryBuilder theSearchSqlBuilder, SearchIncludeDeletedEnum theSearchIncludeDeleted) {
+		return myApplicationContext.getBean(
+				ResourceTablePredicateBuilder.class, theSearchSqlBuilder, theSearchIncludeDeleted);
 	}
 
 	public ResourceIdPredicateBuilder resourceId(SearchQueryBuilder theSearchSqlBuilder) {

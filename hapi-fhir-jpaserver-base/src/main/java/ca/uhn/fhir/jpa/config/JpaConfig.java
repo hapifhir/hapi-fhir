@@ -726,7 +726,8 @@ public class JpaConfig {
 
 	@Bean
 	@Scope("prototype")
-	public ResourceTablePredicateBuilder newResourceTablePredicateBuilder(SearchQueryBuilder theSearchBuilder, SearchIncludeDeletedEnum theSearchIncludeDeleted) {
+	public ResourceTablePredicateBuilder newResourceTablePredicateBuilder(
+			SearchQueryBuilder theSearchBuilder, SearchIncludeDeletedEnum theSearchIncludeDeleted) {
 		return new ResourceTablePredicateBuilder(theSearchBuilder, theSearchIncludeDeleted);
 	}
 
