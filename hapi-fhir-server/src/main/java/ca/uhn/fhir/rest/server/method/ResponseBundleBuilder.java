@@ -70,10 +70,8 @@ public class ResponseBundleBuilder {
 			ResponseBundleRequest theResponseBundleRequest, ResponsePage pageResponse, BundleLinks links) {
 		final IRestfulServer<?> server = theResponseBundleRequest.server;
 		FhirContext ctx = server.getFhirContext();
-		final IVersionSpecificBundleFactory bundleFactory =
-				ctx.newBundleFactory();
+		final IVersionSpecificBundleFactory bundleFactory = ctx.newBundleFactory();
 		final IBundleProvider bundleProvider = theResponseBundleRequest.bundleProvider;
-
 
 		bundleFactory.addRootPropertiesToBundle(
 				bundleProvider.getUuid(), links, bundleProvider.size(), bundleProvider.getPublished());
