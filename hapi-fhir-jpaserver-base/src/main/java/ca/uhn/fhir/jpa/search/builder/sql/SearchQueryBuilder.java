@@ -708,76 +708,83 @@ public class SearchQueryBuilder {
 	 * If at least one predicate builder already exists, return the last one added to the chain. If none has been selected, create a builder on HFJ_RESOURCE, add it and return it.
 	 */
 	public BaseJoiningPredicateBuilder getOrCreateFirstPredicateBuilder() {
-		return getOrCreateFirstPredicateBuilder(true);
+		return getOrCreateFirstPredicateBuilder(true, null);
 	}
 
 	/**
+	 * Create a base joining predicate builder that optionally includes resource type and deleted predicates
 	 * If at least one predicate builder already exists, return the last one added to the chain. If none has been selected, create a builder on HFJ_RESOURCE, add it and return it.
+	 *
+	 * @param theIncludeResourceTypeAndOrDeletedPredicate whether or not to include a resource type predicate, along with an optional deleted predicate based on the next parameter
+	 * @param theIncludeDeletedFlag Four possible values:
+	 *                       - null: only include non-deleted resources
+	 *                       - NEVER: only include non-deleted resources
+	 *                       - EXCLUSIVE: only include deleted resources
+	 *                       - BOTH: include deleted AND non-deleted resources
+	 *
+	 * @return the base joining predicate builder
 	 */
 	public BaseJoiningPredicateBuilder getOrCreateFirstPredicateBuilder(
-			boolean theIncludeResourceTypeAndNonDeletedFlag) {
+		boolean theIncludeResourceTypeAndOrDeletedPredicate, SearchIncludeDeletedEnum theIncludeDeletedFlag) {
 		if (myFirstPredicateBuilder == null) {
-			getOrCreateResourceTablePredicateBuilder(theIncludeResourceTypeAndNonDeletedFlag);
-		}
-		return myFirstPredicateBuilder;
-	}
-
-	public BaseJoiningPredicateBuilder getOrCreateFirstPredicateBuilder(
-			SearchIncludeDeletedEnum theIncludeDeletedFlag) {
-		if (myFirstPredicateBuilder == null) {
-			getOrCreateResourceTablePredicateBuilder(theIncludeDeletedFlag);
+			getOrCreateResourceTablePredicateBuilder(theIncludeResourceTypeAndOrDeletedPredicate, theIncludeDeletedFlag);
 		} else if (myFirstPredicateBuilder instanceof ResourceTablePredicateBuilder resourceTablePredicateBuilder) {
+			// We already have myFirstPredicateBuilder - ensure it has the same include deleted flag
 			assert resourceTablePredicateBuilder.getSearchIncludeDeleted().equals(theIncludeDeletedFlag);
 		}
 		return myFirstPredicateBuilder;
 	}
 
 	public ResourceTablePredicateBuilder getOrCreateResourceTablePredicateBuilder() {
-		return getOrCreateResourceTablePredicateBuilder(true);
+		return getOrCreateResourceTablePredicateBuilder(true, null);
 	}
 
+	/**
+	 * Create a resource table predicate builder that optionally includes resource type and deleted predicates
+	 *
+	 * @param theIncludeResourceTypeAndOrDeletedPredicate whether or not to include a resource type predicate, along with an optional deleted predicate based on the next parameter
+	 * @param theIncludeDeletedFlag Four possible values:
+	 *                       - null: only include non-deleted resources
+	 *                       - NEVER: only include non-deleted resources
+	 *                       - EXCLUSIVE: only include deleted resources
+	 *                       - BOTH: include deleted AND non-deleted resources
+	 *
+	 * @return the resource table predicate builder
+	 */
 	public ResourceTablePredicateBuilder getOrCreateResourceTablePredicateBuilder(
-			boolean theIncludeResourceTypeAndNonDeletedFlag) {
+		boolean theIncludeResourceTypeAndOrDeletedPredicate, @Nullable SearchIncludeDeletedEnum theIncludeDeletedFlag) {
 		if (myResourceTableRoot == null) {
-			ResourceTablePredicateBuilder resourceTable = mySqlBuilderFactory.resourceTable(this);
-			addTable(resourceTable, null);
-			if (theIncludeResourceTypeAndNonDeletedFlag) {
-				Condition typeAndDeletionPredicate = resourceTable.createResourceTypeAndNonDeletedPredicates();
-				addPredicate(typeAndDeletionPredicate);
-			}
-			myResourceTableRoot = resourceTable;
-		}
-		return myResourceTableRoot;
-	}
-
-	public ResourceTablePredicateBuilder getOrCreateResourceTablePredicateBuilder(
-			SearchIncludeDeletedEnum theDeletedFlag) {
-		if (myResourceTableRoot == null) {
-			ResourceTablePredicateBuilder resourceTable = mySqlBuilderFactory.resourceTable(this, theDeletedFlag);
+			ResourceTablePredicateBuilder resourceTable = mySqlBuilderFactory.resourceTable(this, theIncludeDeletedFlag);
 			addTable(resourceTable, null);
 
-			if (theDeletedFlag == null) {
-				addPredicate(resourceTable.createResourceTypeAndNonDeletedPredicates());
-			} else {
-				switch (theDeletedFlag) {
-					case EXCLUSIVE:
-						addPredicate(resourceTable.createResourceTypeAndDeletedPredicates());
-						break;
-					case NEVER:
-						addPredicate(resourceTable.createResourceTypeAndNonDeletedPredicates());
-						break;
-					case BOTH:
-						Condition typePredicate = resourceTable.createResourceTypePredicate();
-						if (typePredicate != null) {
-							addPredicate(typePredicate);
-						}
-						break;
-				}
+			if (theIncludeResourceTypeAndOrDeletedPredicate) {
+				addResourceTypeAndOrDeletedPredicate(theIncludeDeletedFlag, resourceTable);
 			}
 
 			myResourceTableRoot = resourceTable;
 		}
 		return myResourceTableRoot;
+	}
+
+	private void addResourceTypeAndOrDeletedPredicate(SearchIncludeDeletedEnum theDeletedFlag, ResourceTablePredicateBuilder theResourceTable) {
+		if (theDeletedFlag == null) {
+			addPredicate(theResourceTable.createResourceTypeAndNonDeletedPredicates());
+		} else {
+			switch (theDeletedFlag) {
+				case EXCLUSIVE:
+					addPredicate(theResourceTable.createResourceTypeAndDeletedPredicates());
+					break;
+				case NEVER:
+					addPredicate(theResourceTable.createResourceTypeAndNonDeletedPredicates());
+					break;
+				case BOTH:
+					Condition typePredicate = theResourceTable.createResourceTypePredicate();
+					if (typePredicate != null) {
+						addPredicate(typePredicate);
+					}
+					break;
+			}
+		}
 	}
 
 	/**
@@ -830,7 +837,7 @@ public class SearchQueryBuilder {
 	}
 
 	public ComboCondition addPredicateLastUpdated(DateRangeParam theDateRange) {
-		ResourceTablePredicateBuilder resourceTableRoot = getOrCreateResourceTablePredicateBuilder(false);
+		ResourceTablePredicateBuilder resourceTableRoot = getOrCreateResourceTablePredicateBuilder(false, null);
 		return addPredicateLastUpdated(theDateRange, resourceTableRoot);
 	}
 

@@ -772,7 +772,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			if (theParams.getSearchIncludeDeletedMode() != null) {
 				partitionIdPredicate = sqlBuilder
-						.getOrCreateResourceTablePredicateBuilder(theParams.getSearchIncludeDeletedMode())
+						.getOrCreateResourceTablePredicateBuilder(true, theParams.getSearchIncludeDeletedMode())
 						.createPartitionIdPredicate(myRequestPartitionId);
 			} else {
 				partitionIdPredicate = sqlBuilder

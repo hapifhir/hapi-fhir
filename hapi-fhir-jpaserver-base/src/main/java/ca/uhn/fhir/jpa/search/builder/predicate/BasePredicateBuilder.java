@@ -89,11 +89,11 @@ public abstract class BasePredicateBuilder {
 	}
 
 	protected BaseJoiningPredicateBuilder getOrCreateQueryRootTable(boolean theIncludeResourceTypeAndNonDeletedFlag) {
-		return mySearchSqlBuilder.getOrCreateFirstPredicateBuilder(theIncludeResourceTypeAndNonDeletedFlag);
+		return mySearchSqlBuilder.getOrCreateFirstPredicateBuilder(theIncludeResourceTypeAndNonDeletedFlag, null);
 	}
 
 	protected BaseJoiningPredicateBuilder getOrCreateQueryRootTable(SearchIncludeDeletedEnum theIncludeDeletedFlag) {
-		return mySearchSqlBuilder.getOrCreateFirstPredicateBuilder(theIncludeDeletedFlag);
+		return mySearchSqlBuilder.getOrCreateFirstPredicateBuilder(true, theIncludeDeletedFlag);
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn[] theFromColumn, DbColumn[] theToColumn) {

@@ -1593,7 +1593,7 @@ public class QueryStack {
 		if (wantChainedAndNormal) {
 
 			if (theSourceJoinColumn == null) {
-				BaseJoiningPredicateBuilder root = mySqlBuilder.getOrCreateFirstPredicateBuilder(false);
+				BaseJoiningPredicateBuilder root = mySqlBuilder.getOrCreateFirstPredicateBuilder(false, null);
 				DbColumn[] joinColumns = root.getJoinColumns();
 				Object joinColumnObject;
 				if (joinColumns.length == 1) {
