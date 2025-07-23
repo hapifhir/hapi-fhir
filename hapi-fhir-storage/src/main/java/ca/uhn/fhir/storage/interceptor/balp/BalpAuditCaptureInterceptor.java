@@ -38,6 +38,7 @@ import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -115,6 +116,20 @@ public class BalpAuditCaptureInterceptor {
 
 	public void setOmittedSPNamesInPatientCompartment(Set<String> theOmittedSPNamesInPatientCompartment) {
 		myOmittedSPNamesInPatientCompartment = theOmittedSPNamesInPatientCompartment;
+	}
+
+	public Set<String> getAdditionalPatientCompartmentSPNames() {
+		if (myAdditionalPatientCompartmentParamNames == null) {
+			myAdditionalPatientCompartmentParamNames = new HashSet<>();
+		}
+		return myAdditionalPatientCompartmentParamNames;
+	}
+
+	public Set<String> getOmittedPatientCompartmentSPNames() {
+		if (myOmittedSPNamesInPatientCompartment == null) {
+			myOmittedSPNamesInPatientCompartment = new HashSet<>();
+		}
+		return myOmittedSPNamesInPatientCompartment;
 	}
 
 	/**
@@ -240,8 +255,8 @@ public class BalpAuditCaptureInterceptor {
 									resource,
 									CompartmentSearchParameterModifications.fromAdditionalAndOmittedSPNames(
 											fhirContext.getResourceType(resource),
-											myAdditionalPatientCompartmentParamNames,
-											myOmittedSPNamesInPatientCompartment))
+											getAdditionalPatientCompartmentSPNames(),
+											getOmittedPatientCompartmentSPNames()))
 							.stream()
 							.map(t -> myContextServices.massageResourceIdForStorage(theRequestDetails, resource, t))
 							.forEach(patientIds::add);
