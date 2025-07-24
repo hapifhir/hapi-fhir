@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-server-openapi
+ * HAPI-FHIR Server OpenAPI
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%

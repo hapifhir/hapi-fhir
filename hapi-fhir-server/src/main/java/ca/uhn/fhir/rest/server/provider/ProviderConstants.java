@@ -303,6 +303,9 @@ public class ProviderConstants {
 	public static final String OPERATION_MERGE_OUTPUT_PARAM_RESULT = "result";
 	public static final String OPERATION_MERGE_OUTPUT_PARAM_TASK = OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
 
+	public static final String OPERATION_UNDO_MERGE = "$hapi.fhir.undo-merge";
+	public static final String OPERATION_UNDO_MERGE_OUTCOME = "outcome";
+
 	public static final String HAPI_BATCH_JOB_ID_SYSTEM = "http://hapifhir.io/batch/jobId";
 	public static final String OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT_DEFAULT_STRING = "512";
 	public static final Integer OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT_DEFAULT =

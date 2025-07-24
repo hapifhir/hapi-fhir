@@ -24,10 +24,10 @@ import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class IdSubstitutionMap {
@@ -80,8 +80,10 @@ public class IdSubstitutionMap {
 	}
 
 	public void put(IIdType theSource, IIdType theTarget) {
-		myMap.put(new Entry(theSource), new Entry(theTarget));
-		myReverseMap.put(new Entry(theTarget), new Entry(theSource));
+		Entry sourceEntry = new Entry(theSource);
+		Entry targetEntry = new Entry(theTarget);
+		myMap.put(sourceEntry, targetEntry);
+		myReverseMap.put(targetEntry, sourceEntry);
 	}
 
 	public boolean isEmpty() {
@@ -93,15 +95,16 @@ public class IdSubstitutionMap {
 	 * the same ResourceType and IdPart as the target id.
 	 */
 	public void updateTargets(IIdType theNewId) {
-		if (theNewId == null) {
+		if (theNewId == null || theNewId.getValue() == null) {
 			return;
 		}
-		String newUnqualifiedVersionLessId = theNewId.toUnqualifiedVersionless().getValue();
-		entrySet().stream()
-				.map(Pair::getValue)
-				.filter(targetId ->
-						Objects.equals(targetId.toUnqualifiedVersionless().getValue(), newUnqualifiedVersionLessId))
-				.forEach(targetId -> targetId.setValue(theNewId.getValue()));
+
+		Entry newEntry = new Entry(theNewId);
+		Collection<Entry> targets = myReverseMap.removeAll(newEntry);
+		for (Entry nextTarget : targets) {
+			myMap.put(nextTarget, newEntry);
+		}
+		myReverseMap.putAll(newEntry, targets);
 	}
 
 	private static class Entry {
@@ -134,6 +137,11 @@ public class IdSubstitutionMap {
 		@Override
 		public int hashCode() {
 			return myUnversionedId.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return "Entry[" + "myUnversionedId='" + myUnversionedId + "', myId=" + myId + ']';
 		}
 	}
 

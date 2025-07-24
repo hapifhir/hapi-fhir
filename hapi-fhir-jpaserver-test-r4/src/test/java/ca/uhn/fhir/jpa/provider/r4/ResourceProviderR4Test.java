@@ -22,7 +22,6 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
-import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
@@ -40,6 +39,7 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -74,7 +74,6 @@ import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
-import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
@@ -193,7 +192,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import ch. qos. logback. classic.Level;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
@@ -205,6 +203,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -232,6 +231,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
@@ -6858,7 +6858,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String testFamilyNameModified = "Jackson";
 
 		// setup
-		IIdType id = createNewPatientWithHistory();
+		IIdType id = createNewPatientWithHistoryTwoVersions();
 
 		// execute updates
 		Patient p = new Patient();
@@ -6894,7 +6894,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String testFamilyNameModified = "Jackson";
 
 		// setup
-		createNewPatientWithHistory();
+		createNewPatientWithHistoryTwoVersions();
 
 		// execute updates
 		Patient p = new Patient();
@@ -6929,7 +6929,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String testFamilyNameModified = "Jackson";
 
 		// setup
-		createNewPatientWithHistory();
+		createNewPatientWithHistoryTwoVersions();
 
 		// execute updates
 		Patient p = new Patient();
@@ -7460,7 +7460,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Nonnull
-	private IIdType createNewPatientWithHistory() {
+	private IIdType createNewPatientWithHistoryTwoVersions() {
 		String TEST_SYSTEM_NAME = "testHistoryRewrite";
 		String TEST_FAMILY_NAME = "Johnson";
 		Patient p = new Patient();
@@ -7854,4 +7854,48 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.hasMessage("HTTP 400 Bad Request: HAPI-2498: Unsupported search modifier(s): \"[:identifier]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :recurse, :text]");
 		}
 	}
+
+	@Test
+	void searchResource_withIncludeDeletedParam() {
+		// Given
+		Patient patient = new Patient();
+		patient.addName(new HumanName().setFamily("TestFamily").addGiven("TestGiven"));
+		patient.setActive(true);
+
+		IIdType id = myPatientDao.create(patient, mySrd).getId();
+		myPatientDao.delete(id, mySrd);
+
+		// When
+		Bundle results = myClient
+			.search()
+			.byUrl(myServerBase + "/Patient?" + Constants.PARAM_INCLUDE_DELETED + SearchIncludeDeletedEnum.EXCLUSIVE.getCode())
+			.returnBundle(Bundle.class)
+			.execute();
+
+		// Then - returns nothing, _includeDeleted is an unsupported search param (for now)
+		assertThat(results.getEntry()).isEmpty();
+	}
+
+	@Test
+	void conditionalUpdate_withIncludeDeletedParam() {
+		// Given
+		Patient patient = new Patient();
+		patient.addName(new HumanName().setFamily("TestFamily").addGiven("TestGiven"));
+		patient.setActive(true);
+
+		IIdType id = myPatientDao.create(patient, mySrd).getId();
+		myPatientDao.delete(id, mySrd);
+
+		// When/Then
+		InvalidRequestException exception = assertThrows(InvalidRequestException.class, () -> myClient
+			.update()
+			.resource(patient)
+			.conditionalByUrl("Patient?" + Constants.PARAM_INCLUDE_DELETED + SearchIncludeDeletedEnum.EXCLUSIVE.getCode())
+			.execute()
+		);
+
+		// _includeDeleted is an unsupported search param (for now)
+		assertThat(exception.getMessage()).contains("URL has no search parameters");
+	}
+
 }
