@@ -2,5 +2,5 @@
 type: add
 issue: 7118
 title: "Allow some Search Parameters to be omitted from compartments for security reasons.
-        Consult [the documentation](/docs/security/authorization_interceptor.html) for more information.
+        Consult [the documentation](/hapi-fhir/docs/security/authorization_interceptor.html) for more information.
 "
