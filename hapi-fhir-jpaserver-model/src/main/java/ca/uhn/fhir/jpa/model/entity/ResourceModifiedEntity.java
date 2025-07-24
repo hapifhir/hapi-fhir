@@ -65,10 +65,13 @@ public class ResourceModifiedEntity implements IPersistedResourceModifiedMessage
 
 	@Override
 	public String getResourceType() {
-		return myResourceModifiedEntityPK.getResourceType();
+		return myResourceModifiedEntityPK == null ? null : myResourceModifiedEntityPK.getResourceType();
 	}
 
 	public ResourceModifiedEntity setResourceType(String theResourceType) {
+		if (myResourceModifiedEntityPK == null) {
+			myResourceModifiedEntityPK = new PersistedResourceModifiedMessageEntityPK();
+		}
 		myResourceModifiedEntityPK.setResourceType(theResourceType);
 		return this;
 	}

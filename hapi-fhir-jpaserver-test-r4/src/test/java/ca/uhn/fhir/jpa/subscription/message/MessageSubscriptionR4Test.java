@@ -240,6 +240,34 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
+	public void testMethodDeleteByPK_whenEntitiesExistWithRepeatedId_willDeleteTheCorrectEntityAndReturnTrue(){
+		String commonId = "common_id";
+
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+
+		// given
+		TransactionTemplate transactionTemplate = new TransactionTemplate(myTxManager);
+
+		Patient patient = sendPatient(commonId);
+		ResourceModifiedMessage patientResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
+		IPersistedResourceModifiedMessage persistedPatientResourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.persist(patientResourceModifiedMessage);
+
+		Organization org = sendOrganization(commonId);
+		ResourceModifiedMessage orgResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, org, BaseResourceMessage.OperationTypeEnum.CREATE);
+		myResourceModifiedMessagePersistenceSvc.persist(orgResourceModifiedMessage);
+
+		// when
+		boolean wasDeleted = transactionTemplate.execute(tx -> myResourceModifiedMessagePersistenceSvc.deleteByPK(persistedPatientResourceModifiedMessage.getPersistedResourceModifiedMessagePk()));
+
+		// then
+		assertTrue(wasDeleted);
+		Page<IPersistedResourceModifiedMessage> messages = myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime(Pageable.unpaged());
+		assertThat(messages).hasSize(1);
+		assertEquals(ResourceType.Organization.name(), messages.stream().toList().get(0).getResourceType());
+
+	}
+
+	@Test
 	public void testMethodDeleteByPK_whenEntityDoesNotExist_willReturnFalse(){
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 
