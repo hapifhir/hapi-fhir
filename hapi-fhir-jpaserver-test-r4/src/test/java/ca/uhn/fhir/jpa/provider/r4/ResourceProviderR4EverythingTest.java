@@ -1223,7 +1223,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 		List<IIdType> actualResourceIds = toUnqualifiedVersionlessIds(response);
 		// verify - we should not pick up other resources linked by List
-		assertThat(actualResourceIds).containsExactlyInAnyOrder(desiredPid, desiredObservationId, listId);
+		assertThat(actualResourceIds).containsExactlyInAnyOrder(desiredPid, desiredObservationId);
 	}
 
 	@Test
@@ -1246,7 +1246,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 		List<IIdType> actualResourceIds = toUnqualifiedVersionlessIds(response);
 		// verify - we should not pick up other resources linked by Group
-		assertThat(actualResourceIds).containsExactlyInAnyOrder(desiredPid, desiredPractitionerId, groupId);
+		assertThat(actualResourceIds).containsExactlyInAnyOrder(desiredPid, desiredPractitionerId);
 	}
 
 	@Nested
