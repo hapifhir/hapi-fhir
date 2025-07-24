@@ -549,7 +549,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				CompartmentSearchParameterModifications compartmentSearchParameterModifications = new CompartmentSearchParameterModifications();
-				compartmentSearchParameterModifications.addAdditionalSearchParameters("device:garbage");
+				compartmentSearchParameterModifications.addSPToIncludeInCompartment("device", "garbage");
 				List<IdType> relatedIds = new ArrayList<>();
 				relatedIds.add(new IdType("Patient/123"));
 				return new RuleBuilder()
@@ -580,37 +580,6 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		//then
 		assertFalse(ourHitMethod);
 		assertEquals(403, status.getStatusLine().getStatusCode());
-	}
-
-	@Test
-	public void testRuleBuilderAdditionalSearchParamsInvalidValues() {
-		//Too many colons
-		try {
-			CompartmentSearchParameterModifications compartmentSearchParameterModifications = new CompartmentSearchParameterModifications();
-			compartmentSearchParameterModifications.addAdditionalSearchParameters("too:many:colons");
-			new RuleBuilder()
-				.allow().read().allResources()
-				.inModifiedCompartment("Patient", new IdType("Patient/123"), compartmentSearchParameterModifications)
-				.andThen().denyAll()
-				.build();
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(342) + "too:many:colons is not a valid search parameter. Search parameters must be in the form resourcetype:parametercode, e.g. 'Device:patient'", e.getMessage());
-		}
-
-
-		//No colons
-		try {
-			CompartmentSearchParameterModifications compartmentSearchParameterModifications = new CompartmentSearchParameterModifications();
-			compartmentSearchParameterModifications.addAdditionalSearchParameters("no-colons");
-			new RuleBuilder()
-				.allow().read().allResources()
-				.inModifiedCompartment("Patient", new IdType("Patient/123"), compartmentSearchParameterModifications)
-				.andThen().denyAll()
-				.build();
-			fail();		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(341) + "no-colons is not a valid search parameter. Search parameters must be in the form resourcetype:parametercode, e.g. 'Device:patient'", e.getMessage());
-		}
 	}
 
 	@Test

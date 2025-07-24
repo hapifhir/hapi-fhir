@@ -96,31 +96,6 @@ public class CompartmentSearchParameterModifications {
 				.add(theSPName);
 	}
 
-	/**
-	 * add a SP to include into the compartment
-	 * @param theQualifiedSearchParameters - the additional sp. Must be of the format: {resourceType}:{fhirPath}
-	 */
-	@Deprecated
-	public void addAdditionalSearchParameters(@Nonnull String... theQualifiedSearchParameters) {
-		Arrays.stream(theQualifiedSearchParameters).forEach(code -> {
-			if (code == null || !code.contains(":")) {
-				throw new IllegalArgumentException(
-						Msg.code(341) + code
-								+ " is not a valid search parameter. Search parameters must be in the form resourcetype:parametercode, e.g. 'Device:patient'");
-			}
-			String[] split = code.split(":");
-			if (split.length != 2) {
-				throw new IllegalArgumentException(
-						Msg.code(342) + code
-								+ " is not a valid search parameter. Search parameters must be in the form resourcetype:parametercode, e.g. 'Device:patient'");
-			} else {
-				myAdditionalResourceTypeToParameterCodeMap
-						.computeIfAbsent(split[0].toLowerCase(), (key) -> new HashSet<>())
-						.add(split[1].toLowerCase());
-			}
-		});
-	}
-
 	public Set<String> getAdditionalSearchParamNamesForResourceType(@Nonnull String theResourceType) {
 		return myAdditionalResourceTypeToParameterCodeMap.computeIfAbsent(
 				theResourceType.toLowerCase(), (key) -> new HashSet<>());
