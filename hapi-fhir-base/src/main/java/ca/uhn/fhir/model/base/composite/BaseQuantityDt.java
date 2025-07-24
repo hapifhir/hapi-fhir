@@ -106,7 +106,7 @@ public abstract class BaseQuantityDt extends BaseIdentifiableElement
 	public abstract BoundCodeDt<?> getComparatorElement();
 
 	@Override
-	public String getValueAsQueryToken(FhirContext theContext) {
+	public String getValueAsQueryToken() {
 		StringBuilder b = new StringBuilder();
 		if (getComparatorElement() != null) {
 			b.append(getComparatorElement().getValue());
