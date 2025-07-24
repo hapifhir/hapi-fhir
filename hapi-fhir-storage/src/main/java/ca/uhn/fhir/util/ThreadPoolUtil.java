@@ -30,6 +30,20 @@ import java.util.concurrent.RejectedExecutionHandler;
 public final class ThreadPoolUtil {
 	private ThreadPoolUtil() {}
 
+	/**
+	 * Creates a fixed-size thread pool with {@literal thePoolSize} threads
+	 * and an unlimited-length work queue.
+	 *
+	 * @param thePoolSize The number of threads in the pool
+	 * @param theThreadNamePrefix Threads in the pool will be named with this prefix followed by a dash and a number
+	 *
+	 * @since 8.4.0
+	 */
+	@Nonnull
+	public static ThreadPoolTaskExecutor newThreadPool(int thePoolSize, String theThreadNamePrefix) {
+		return newThreadPool(thePoolSize, thePoolSize, theThreadNamePrefix, 0);
+	}
+
 	@Nonnull
 	public static ThreadPoolTaskExecutor newThreadPool(
 			int theCorePoolSize, int theMaxPoolSize, String theThreadNamePrefix) {
@@ -70,13 +84,17 @@ public final class ThreadPoolUtil {
 		Validate.isTrue(
 				theCorePoolSize == theMaxPoolSize || theQueueCapacity == 0,
 				"If the queue capacity is greater than 0, core pool size needs to match max pool size or the system won't grow the queue");
-		Validate.isTrue(theThreadNamePrefix.endsWith("-"), "Thread pool prefix name must end with a hyphen");
+		Validate.notBlank(theThreadNamePrefix, "Thread name prefix must not be blank");
+		String threadNamePrefix = theThreadNamePrefix;
+		if (!threadNamePrefix.endsWith("-")) {
+			threadNamePrefix = threadNamePrefix + "-";
+		}
 		ThreadPoolTaskExecutor asyncTaskExecutor = new ThreadPoolTaskExecutor();
 		asyncTaskExecutor.setCorePoolSize(theCorePoolSize);
 		asyncTaskExecutor.setMaxPoolSize(theMaxPoolSize);
 		asyncTaskExecutor.setQueueCapacity(theQueueCapacity);
 		asyncTaskExecutor.setAllowCoreThreadTimeOut(true);
-		asyncTaskExecutor.setThreadNamePrefix(theThreadNamePrefix);
+		asyncTaskExecutor.setThreadNamePrefix(threadNamePrefix);
 		asyncTaskExecutor.setRejectedExecutionHandler(theRejectedExecutionHandler);
 		asyncTaskExecutor.setTaskDecorator(taskDecorator);
 		asyncTaskExecutor.initialize();

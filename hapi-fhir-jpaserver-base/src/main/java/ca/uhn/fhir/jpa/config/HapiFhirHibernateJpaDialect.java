@@ -107,6 +107,11 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 					throw super.convertHibernateAccessException(theException);
 				}
 			}
+
+			if (theException.getMessage().contains(ResourceSearchUrlEntity.TABLE_NAME)) {
+				throw new ResourceVersionConflictException(
+						Msg.code(2745) + makeErrorMessage(messageToPrepend, "conditionalCreateConstraintFailure"));
+			}
 		}
 
 		/*

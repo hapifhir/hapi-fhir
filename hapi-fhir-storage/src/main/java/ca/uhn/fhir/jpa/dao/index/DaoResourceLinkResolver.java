@@ -34,15 +34,20 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
+import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -53,11 +58,10 @@ import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetRespo
 import ca.uhn.fhir.util.CanonicalIdentifier;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.TerserUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -67,12 +71,14 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> implements IResourceLinkResolver {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DaoResourceLinkResolver.class);
@@ -275,7 +281,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 			@Nullable String theIdToAssignToPlaceholder,
 			RequestDetails theRequest,
 			TransactionDetails theTransactionDetails) {
-		IBasePersistedResource valueOf = null;
+		IBasePersistedResource placeholderEntity = null;
 
 		if (myStorageSettings.isAutoCreatePlaceholderReferenceTargets()) {
 			RuntimeResourceDefinition missingResourceDef = myContext.getResourceDefinition(theType);
@@ -291,8 +297,20 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 					"Automatically creating empty placeholder resource: {}",
 					newResource.getIdElement().getValue());
 
+			boolean urlIdentifiersCopied = false;
 			if (myStorageSettings.isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets()) {
-				tryToCopyIdentifierFromReferenceToTargetResource(theReference, missingResourceDef, newResource);
+				urlIdentifiersCopied =
+						tryToCopyIdentifierFromReferenceToTargetResource(theReference, missingResourceDef, newResource);
+			}
+
+			if (isBlank(theIdToAssignToPlaceholder) && !urlIdentifiersCopied) {
+				String msg = myContext
+						.getLocalizer()
+						.getMessage(
+								BaseStorageDao.class,
+								"invalidMatchUrlCantUseForAutoCreatePlaceholder",
+								theReference.getReferenceElement().getValue());
+				throw new ResourceNotFoundException(Msg.code(2746) + msg);
 			}
 
 			if (theIdToAssignToPlaceholder != null) {
@@ -336,22 +354,34 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 			}
 
 			if (theIdToAssignToPlaceholder != null) {
-				valueOf = placeholderResourceDao
+				placeholderEntity = placeholderResourceDao
 						.update(newResource, null, true, false, theRequest, theTransactionDetails)
 						.getEntity();
 			} else {
-				valueOf = placeholderResourceDao.create(newResource, theRequest).getEntity();
+				placeholderEntity =
+						placeholderResourceDao.create(newResource, theRequest).getEntity();
 			}
 
-			IResourcePersistentId persistentId = valueOf.getPersistentId();
+			verifyPlaceholderCanBeCreated(theType, theIdToAssignToPlaceholder, theReference, placeholderEntity);
+
+			IResourcePersistentId persistentId = placeholderEntity.getPersistentId();
 			persistentId = myIdHelperService.newPid(persistentId.getId());
-			persistentId.setAssociatedResourceId(valueOf.getIdDt());
+			persistentId.setAssociatedResourceId(placeholderEntity.getIdDt());
 			theTransactionDetails.addResolvedResourceId(persistentId.getAssociatedResourceId(), persistentId);
 			theTransactionDetails.addAutoCreatedPlaceholderResource(newResource.getIdElement());
 		}
 
-		return Optional.ofNullable(valueOf);
+		return Optional.ofNullable(placeholderEntity);
 	}
+
+	/**
+	 * Subclasses may override
+	 */
+	protected void verifyPlaceholderCanBeCreated(
+			Class<? extends IBaseResource> theType,
+			String theIdToAssignToPlaceholder,
+			IBaseReference theReference,
+			IBasePersistedResource theStoredEntity) {}
 
 	private <T extends IBaseResource> void tryToAddPlaceholderExtensionToResource(T newResource) {
 		if (newResource instanceof IBaseHasExtensions) {
@@ -361,26 +391,35 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		}
 	}
 
-	private <T extends IBaseResource> void tryToCopyIdentifierFromReferenceToTargetResource(
+	/**
+	 * This method returns false if the reference contained a conditional reference, but
+	 * the reference couldn't be resolved into one or more identifiers (and only one or
+	 * more identifiers) according to the rules in {@link #extractIdentifierFromUrl(String)}.
+	 */
+	private <T extends IBaseResource> boolean tryToCopyIdentifierFromReferenceToTargetResource(
 			IBaseReference theSourceReference, RuntimeResourceDefinition theTargetResourceDef, T theTargetResource) {
-		//		boolean referenceHasIdentifier = theSourceReference.hasIdentifier();
-		CanonicalIdentifier referenceMatchUrlIdentifier = extractIdentifierFromUrl(
-				theSourceReference.getReferenceElement().getValue());
-		CanonicalIdentifier referenceIdentifier = extractIdentifierReference(theSourceReference);
-
-		if (referenceIdentifier == null && referenceMatchUrlIdentifier != null) {
-			addMatchUrlIdentifierToTargetResource(theTargetResourceDef, theTargetResource, referenceMatchUrlIdentifier);
-		} else if (referenceIdentifier != null && referenceMatchUrlIdentifier == null) {
-			addSubjectIdentifierToTargetResource(theSourceReference, theTargetResourceDef, theTargetResource);
-		} else if (referenceIdentifier != null && referenceMatchUrlIdentifier != null) {
-			if (referenceIdentifier.equals(referenceMatchUrlIdentifier)) {
-				addSubjectIdentifierToTargetResource(theSourceReference, theTargetResourceDef, theTargetResource);
-			} else {
-				addSubjectIdentifierToTargetResource(theSourceReference, theTargetResourceDef, theTargetResource);
-				addMatchUrlIdentifierToTargetResource(
-						theTargetResourceDef, theTargetResource, referenceMatchUrlIdentifier);
+		String urlValue = theSourceReference.getReferenceElement().getValue();
+		List<CanonicalIdentifier> referenceMatchUrlIdentifiers;
+		if (urlValue.contains("?")) {
+			referenceMatchUrlIdentifiers = extractIdentifierFromUrl(urlValue);
+			for (CanonicalIdentifier identifier : referenceMatchUrlIdentifiers) {
+				addMatchUrlIdentifierToTargetResource(theTargetResourceDef, theTargetResource, identifier);
 			}
+
+			if (referenceMatchUrlIdentifiers.isEmpty()) {
+				return false;
+			}
+
+		} else {
+			referenceMatchUrlIdentifiers = List.of();
 		}
+
+		CanonicalIdentifier referenceIdentifier = extractIdentifierReference(theSourceReference);
+		if (referenceIdentifier != null && !referenceMatchUrlIdentifiers.contains(referenceIdentifier)) {
+			addSubjectIdentifierToTargetResource(theSourceReference, theTargetResourceDef, theTargetResource);
+		}
+
+		return true;
 	}
 
 	private <T extends IBaseResource> void addSubjectIdentifierToTargetResource(
@@ -450,38 +489,55 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 	}
 
 	/**
-	 * Extracts the first available identifier from the URL part
+	 * Extracts the identifier(s) from a query URL. This method is quite strict, as it is intended only for
+	 * use when creating {@link StorageSettings#isAutoCreatePlaceholderReferenceTargets() auto-created placeholder reference targets}.
+	 * As such, it will:
+	 * <ul>
+	 *     <li>Ignore any <code>_tag:not</code> parameters</li>
+	 *     <li>Add an entry to the returned list for each <code>identifier</code> parameter containing a single valid value</li>
+	 *     <li>Return an empty list if any <code>identifier</code> parameters have modifiers or multiple OR values in a single parameter instance</li>
+	 *     <li>Return an empty list if any other parameters are found</li>
+	 * </ul>
 	 *
 	 * @param theValue Part of the URL to extract identifiers from
-	 * @return Returns the first available identifier in the canonical form or null if URL contains no identifier param
-	 * @throws IllegalArgumentException IllegalArgumentException is thrown in case identifier parameter can not be split using <code>system|value</code> pattern.
 	 */
-	protected CanonicalIdentifier extractIdentifierFromUrl(String theValue) {
-		int identifierIndex = theValue.indexOf("identifier=");
-		if (identifierIndex == -1) {
-			return null;
+	protected List<CanonicalIdentifier> extractIdentifierFromUrl(String theValue) {
+		Map<String, String[]> parsedQuery = UrlUtil.parseQueryString(theValue);
+
+		ArrayList<CanonicalIdentifier> retVal = new ArrayList<>(2);
+
+		for (String paramName : parsedQuery.keySet()) {
+			switch (paramName) {
+				case "identifier" -> {
+					String[] values = parsedQuery.get(paramName);
+					for (String value : values) {
+						QualifiedParamList paramList =
+								QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, value);
+						if (paramList.size() > 1) {
+							return List.of();
+						} else if (!paramList.isEmpty()) {
+							TokenParam tokenParam = new TokenParam();
+							tokenParam.setValueAsQueryToken(myContext, "identifier", null, paramList.get(0));
+							if (isNotBlank(tokenParam.getSystem()) || isNotBlank(tokenParam.getValue())) {
+								CanonicalIdentifier identifier = new CanonicalIdentifier();
+								identifier.setSystem(tokenParam.getSystem());
+								identifier.setValue(tokenParam.getValue());
+								retVal.add(identifier);
+							}
+						}
+					}
+				}
+				case Constants.PARAM_TAG + Constants.PARAMQUALIFIER_TOKEN_NOT -> {
+					// We ignore _tag:not expressions since any auto-created placeholder
+					// won't have tags so they will match this parameter
+				}
+				default -> {
+					return List.of();
+				}
+			}
 		}
 
-		List<NameValuePair> params =
-				URLEncodedUtils.parse(theValue.substring(identifierIndex), StandardCharsets.UTF_8, '&', ';');
-		Optional<NameValuePair> idOptional =
-				params.stream().filter(p -> p.getName().equals("identifier")).findFirst();
-		if (!idOptional.isPresent()) {
-			return null;
-		}
-
-		NameValuePair id = idOptional.get();
-		String identifierString = id.getValue();
-		String[] split = identifierString.split("\\|");
-		if (split.length != 2) {
-			throw new IllegalArgumentException(Msg.code(1097) + "Can't create a placeholder reference with identifier "
-					+ theValue + ". It is not a valid identifier");
-		}
-
-		CanonicalIdentifier identifier = new CanonicalIdentifier();
-		identifier.setSystem(split[0]);
-		identifier.setValue(split[1]);
-		return identifier;
+		return retVal;
 	}
 
 	@Override
