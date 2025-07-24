@@ -378,13 +378,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 
-
-
-
-
-
-
-
 	@Test
 	public void testParameterWithNoValueThrowsError_InvalidChainOnCustomSearch() throws IOException {
 		SearchParameter searchParameter = new SearchParameter();

@@ -30,7 +30,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.util.BundleUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -84,22 +83,6 @@ public class ResponseBundleBuilder {
 
 		IBaseBundle baseBundle = (IBaseBundle) bundleFactory.getResourceBundle();
 
-		// adjustments
-		Integer total = BundleUtil.getTotal(ctx, baseBundle);
-
-		if (total != null) {
-			int nonMatchResources = 0;
-			for (IBaseResource next : pageResponse.getResourceList()) {
-				if (!BundleUtil.isMatchResource(next)) {
-					nonMatchResources++;
-				}
-			}
-			// resources that are OUTCOME or INCLUDE should not be added to the total
-			if (nonMatchResources > 0) {
-				BundleUtil.setTotal(ctx, baseBundle, total.intValue() - nonMatchResources);
-			}
-		}
-
 		return baseBundle;
 	}
 
@@ -124,12 +107,15 @@ public class ResponseBundleBuilder {
 		} else {
 			pageSize = pagingCalculatePageSize(requestedPage, server.getPagingProvider());
 
-			Integer size = bundleProvider.size();
+			Integer size = bundleProvider.containsAllResources() ? (Integer) bundleProvider.getResourceListComplete().size() : bundleProvider.size();
 			if (size == null) {
 				numToReturn = pageSize;
 			} else {
 				numToReturn = Math.min(pageSize, size.intValue() - theResponseBundleRequest.offset);
 			}
+
+			// numToReturn is the number of matched resources to return; there may be included or op-outcomes
+			// to include as well
 
 			resourceList =
 					pagingBuildResourceList(theResponseBundleRequest, bundleProvider, numToReturn, responsePageBuilder);
