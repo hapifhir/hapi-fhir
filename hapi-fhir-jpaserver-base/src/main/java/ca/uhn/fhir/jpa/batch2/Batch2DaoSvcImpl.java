@@ -31,11 +31,14 @@ import ca.uhn.fhir.jpa.api.pid.StreamTemplate;
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
 import ca.uhn.fhir.jpa.api.pid.TypedResourceStream;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
+import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -45,6 +48,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.DateRangeUtil;
 import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
@@ -52,8 +56,11 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Date;
+import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	private static final org.slf4j.Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -72,6 +79,8 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 
 	private final PartitionSettings myPartitionSettings;
 
+	private final SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
+
 	@Override
 	public boolean isAllResourceTypeSupported() {
 		return true;
@@ -84,7 +93,8 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 			DaoRegistry theDaoRegistry,
 			FhirContext theFhirContext,
 			IHapiTransactionService theTransactionService,
-			PartitionSettings thePartitionSettings) {
+			PartitionSettings thePartitionSettings,
+			SearchBuilderFactory<JpaPid> theSearchBuilderFactory) {
 		myResourceTableDao = theResourceTableDao;
 		myResourceLinkDao = theResourceLinkDao;
 		myMatchUrlService = theMatchUrlService;
@@ -92,12 +102,15 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		myFhirContext = theFhirContext;
 		myTransactionService = theTransactionService;
 		myPartitionSettings = thePartitionSettings;
+		mySearchBuilderFactory = theSearchBuilderFactory;
 	}
 
 	@Override
 	public IResourcePidStream fetchResourceIdStream(
 			Date theStart, Date theEnd, RequestPartitionId theRequestPartitionId, String theUrl) {
+
 		if (StringUtils.isBlank(theUrl)) {
+			// first scenario
 			return makeStreamResult(
 					theRequestPartitionId, () -> streamResourceIdsNoUrl(theStart, theEnd, theRequestPartitionId));
 		} else {
@@ -116,21 +129,55 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 			Date theStart, Date theEnd, String theUrl, RequestPartitionId theRequestPartitionId) {
 		validateUrl(theUrl);
 
-		SearchParameterMap searchParamMap = parseQuery(theUrl);
+		String resourceType = UrlUtil.determineResourceTypeInResourceUrl(myFhirContext, theUrl);
+
+		// Search in all partitions if no partition is provided
+		ourLog.debug("No partition id detected in request - searching all partitions");
+		RequestPartitionId thePartitionId = defaultIfNull(theRequestPartitionId, RequestPartitionId.allPartitions());
+
+		SearchParameterMap searchParamMap;
+		SystemRequestDetails request = new SystemRequestDetails();
+		request.setRequestPartitionId(thePartitionId);
+
+		if (isNoResourceTypeProvidedInUrl(theUrl, resourceType)) {
+			searchParamMap = parseQuery(theUrl, null);
+		} else {
+			searchParamMap = parseQuery(theUrl);
+		}
+
 		searchParamMap.setLastUpdated(DateRangeUtil.narrowDateRange(searchParamMap.getLastUpdated(), theStart, theEnd));
 
-		String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
-		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
+		if (isNoResourceTypeProvidedInUrl(theUrl, resourceType)) {
+			return searchForResourceIdsAndType(thePartitionId, request, searchParamMap);
+		}
 
-		SystemRequestDetails request = new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId);
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
 
 		return dao.searchForIdStream(searchParamMap, request, null).map(pid -> new TypedResourcePid(resourceType, pid));
 	}
 
-	private static TypedResourcePid typedPidFromQueryArray(Object[] thePidTypeDateArray) {
-		JpaPid pid = (JpaPid) thePidTypeDateArray[0];
-		String resourceType = (String) thePidTypeDateArray[1];
-		return new TypedResourcePid(resourceType, pid);
+	/**
+	 * Since the resource type is not specified, query the DB for resources matching the params and return resource ID and type
+	 *
+	 * @param theRequestPartitionId the partition to search on
+	 * @param theRequestDetails the theRequestDetails details
+	 * @param theSearchParams the search params
+	 * @return Stream of typed resource pids
+	 */
+	private Stream<TypedResourcePid> searchForResourceIdsAndType(
+			RequestPartitionId theRequestPartitionId,
+			SystemRequestDetails theRequestDetails,
+			SearchParameterMap theSearchParams) {
+		ISearchBuilder<JpaPid> builder = mySearchBuilderFactory.newSearchBuilder(null, null);
+		return myTransactionService
+				.withRequest(theRequestDetails)
+				.search(() -> builder.createQueryStream(
+						theSearchParams,
+						new SearchRuntimeDetails(
+								theRequestDetails, UUID.randomUUID().toString()),
+						theRequestDetails,
+						theRequestPartitionId))
+				.map(pid -> new TypedResourcePid(pid.getResourceType(), pid));
 	}
 
 	@Nonnull
@@ -155,6 +202,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 			Date theStart, Date theEnd, RequestPartitionId theRequestPartitionId) {
 		Integer defaultPartitionId = myPartitionSettings.getDefaultPartitionId();
 		Stream<Object[]> rowStream;
+
 		if (theRequestPartitionId == null || theRequestPartitionId.isAllPartitions()) {
 			ourLog.debug("Search for resources - all partitions");
 			rowStream = myResourceTableDao.streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldest(
@@ -184,22 +232,38 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		return null;
 	}
 
+	@Nonnull
+	private SearchParameterMap parseQuery(String theUrl) {
+		String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
+		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(resourceType);
+
+		return parseQuery(theUrl, def);
+	}
+
+	@Nonnull
+	private SearchParameterMap parseQuery(
+			String theUrl, @Nullable RuntimeResourceDefinition theRuntimeResourceDefinition) {
+		SearchParameterMap searchParamMap = myMatchUrlService.translateMatchUrl(theUrl, theRuntimeResourceDefinition);
+		// this matches idx_res_type_del_updated
+		searchParamMap.setSort(new SortSpec(Constants.PARAM_LASTUPDATED).setChain(new SortSpec(Constants.PARAM_PID)));
+		// TODO this limits us to 2G resources.
+		searchParamMap.setLoadSynchronousUpTo(Integer.MAX_VALUE);
+		return searchParamMap;
+	}
+
+	private static TypedResourcePid typedPidFromQueryArray(Object[] thePidTypeDateArray) {
+		JpaPid pid = (JpaPid) thePidTypeDateArray[0];
+		String resourceType = (String) thePidTypeDateArray[1];
+		return new TypedResourcePid(resourceType, pid);
+	}
+
 	private static void validateUrl(@Nonnull String theUrl) {
 		if (!theUrl.contains("?")) {
 			throw new InternalErrorException(Msg.code(2422) + "this should never happen: URL is missing a '?'");
 		}
 	}
 
-	@Nonnull
-	private SearchParameterMap parseQuery(String theUrl) {
-		String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
-		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(resourceType);
-
-		SearchParameterMap searchParamMap = myMatchUrlService.translateMatchUrl(theUrl, def);
-		// this matches idx_res_type_del_updated
-		searchParamMap.setSort(new SortSpec(Constants.PARAM_LASTUPDATED).setChain(new SortSpec(Constants.PARAM_PID)));
-		// TODO this limits us to 2G resources.
-		searchParamMap.setLoadSynchronousUpTo(Integer.MAX_VALUE);
-		return searchParamMap;
+	private static boolean isNoResourceTypeProvidedInUrl(String theUrl, String resourceType) {
+		return (resourceType == null || resourceType.isBlank()) && theUrl.indexOf('?') == 0;
 	}
 }

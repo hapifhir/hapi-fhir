@@ -52,8 +52,7 @@ public class HttpClientExtension implements BeforeEachCallback, AfterEachCallbac
 		myClient.close();
 	}
 
-	@Override
-	public void beforeEach(ExtensionContext theExtensionContext) throws Exception {
+	public void initialize() {
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		connectionManager.setMaxTotal(99);
 		connectionManager.setDefaultMaxPerRoute(99);
@@ -75,6 +74,11 @@ public class HttpClientExtension implements BeforeEachCallback, AfterEachCallbac
 
 		myClient = builder
 			.build();
+	}
+
+	@Override
+	public void beforeEach(ExtensionContext theExtensionContext) throws Exception {
+		initialize();
 	}
 
 	public CloseableHttpResponse execute(HttpUriRequest theRequest) throws IOException {

@@ -38,6 +38,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.List;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_UNDO_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
@@ -109,7 +110,7 @@ public class UndoReplaceReferencesSvc {
 		}
 
 		myResourceVersionRestorer.restoreToPreviousVersionsInTrx(
-				toRestore, theRequestDetails, theUndoReplaceReferencesRequest.partitionId);
+				toRestore, Collections.emptySet(), theRequestDetails, theUndoReplaceReferencesRequest.partitionId);
 
 		IBaseOperationOutcome opOutcome = OperationOutcomeUtil.newInstance(myFhirContext);
 		String msg = String.format(

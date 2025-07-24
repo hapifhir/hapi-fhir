@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7148
+title: "An operation named `$hapi.fhir.undo-merge` has been added for Patient resources. This operation restores the 
+resources that were updated by a Patient `$merge` operation to their previous versions based on the Provenance resource 
+created by the `$merge` operation."

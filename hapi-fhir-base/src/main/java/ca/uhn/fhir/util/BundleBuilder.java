@@ -225,7 +225,7 @@ public class BundleBuilder {
 
 		IIdType id = getIdTypeForUpdate(theResource);
 
-		String fullUrl = id.getValue();
+		String fullUrl = id.toVersionless().getValue();
 		String verb = "PUT";
 		String requestUrl = StringUtils.isBlank(theRequestUrl)
 				? id.toUnqualifiedVersionless().getValue()
@@ -264,7 +264,7 @@ public class BundleBuilder {
 
 		IIdType id = getIdTypeForUpdate(theResource);
 		String requestUrl = id.toUnqualifiedVersionless().getValue();
-		String fullUrl = id.getValue();
+		String fullUrl = id.toVersionless().getValue();
 		String httpMethod = "PUT";
 
 		addIdOnlyEntry(requestUrl, httpMethod, fullUrl);
@@ -494,9 +494,30 @@ public class BundleBuilder {
 	 * @return Returns the new entry.
 	 */
 	public IBase addEntry() {
-		IBase entry = myEntryDef.newInstance();
-		myEntryChild.getMutator().addValue(myBundle, entry);
-		return entry;
+		return addEntry(myEntryDef.newInstance());
+	}
+
+	/**
+	 * Add an entry to the bundle.
+	 *
+	 * @param theEntry the entry to add to the bundle.
+	 * @return theEntry
+	 */
+	public IBase addEntry(IBase theEntry) {
+		myEntryChild.getMutator().addValue(myBundle, theEntry);
+		return theEntry;
+	}
+
+	/**
+	 * Add an entry to the bundle.
+	 *
+	 * @param theEntry the canonical entry to add to the bundle. It will be converted to a FHIR version specific entry before adding.
+	 * @return
+	 */
+	public IBase addEntry(CanonicalBundleEntry theEntry) {
+		IBase bundleEntry = theEntry.toBundleEntry(myContext, myEntryDef.getImplementingClass());
+		addEntry(bundleEntry);
+		return bundleEntry;
 	}
 
 	/**
@@ -676,6 +697,19 @@ public class BundleBuilder {
 	public void addProfile(String theProfile) {
 		FhirTerser terser = myContext.newTerser();
 		terser.addElement(myBundle, "Bundle.meta.profile", theProfile);
+	}
+
+	public IBase addSearchMatchEntry(IBaseResource theResource) {
+		setType("searchset");
+
+		IBase entry = addEntry();
+		// Bundle.entry.resource
+		myEntryResourceChild.getMutator().setValue(entry, theResource);
+		// Bundle.entry.search
+		IBase search = addSearch(entry);
+		setSearchField(search, "mode", "match");
+
+		return entry;
 	}
 
 	public class DeleteBuilder extends BaseOperationBuilder {
