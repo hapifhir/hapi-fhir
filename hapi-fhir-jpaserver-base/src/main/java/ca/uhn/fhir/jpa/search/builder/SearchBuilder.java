@@ -364,7 +364,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					.setParamName(nextParamName)
 					.setAndOrParams(andOrParams)
 					.setRequest(theRequest)
-					.setRequestPartitionId(myRequestPartitionId));
+					.setRequestPartitionId(myRequestPartitionId)
+					.setIncludeDeleted(myParams.getSearchIncludeDeletedMode()));
 			if (predicate != null) {
 				theSearchSqlBuilder.addPredicate(predicate);
 			}
@@ -724,7 +725,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				myResourceName,
 				mySqlBuilderFactory,
 				myDialectProvider,
-				theSearchProperties.isDoCountOnlyFlag());
+				theSearchProperties.isDoCountOnlyFlag(),
+				myResourceName == null || myResourceName.isBlank());
 		QueryStack queryStack3 = new QueryStack(
 				theRequest,
 				theParams,
@@ -760,14 +762,24 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		// Normal search
+		// we will create a resourceTablePredicate if and only if we have an _id SP.
 		searchForIdsWithAndOr(sqlBuilder, queryStack3, myParams, theRequest);
 
 		// If we haven't added any predicates yet, we're doing a search for all resources. Make sure we add the
 		// partition ID predicate in that case.
 		if (!sqlBuilder.haveAtLeastOnePredicate()) {
-			Condition partitionIdPredicate = sqlBuilder
-					.getOrCreateResourceTablePredicateBuilder()
-					.createPartitionIdPredicate(myRequestPartitionId);
+			Condition partitionIdPredicate;
+
+			if (theParams.getSearchIncludeDeletedMode() != null) {
+				partitionIdPredicate = sqlBuilder
+						.getOrCreateResourceTablePredicateBuilder(true, theParams.getSearchIncludeDeletedMode())
+						.createPartitionIdPredicate(myRequestPartitionId);
+			} else {
+				partitionIdPredicate = sqlBuilder
+						.getOrCreateResourceTablePredicateBuilder()
+						.createPartitionIdPredicate(myRequestPartitionId);
+			}
+
 			if (partitionIdPredicate != null) {
 				sqlBuilder.addPredicate(partitionIdPredicate);
 			}
@@ -858,7 +870,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				null,
 				mySqlBuilderFactory,
 				myDialectProvider,
-				theSearchQueryProperties.isDoCountOnlyFlag());
+				theSearchQueryProperties.isDoCountOnlyFlag(),
+				false);
 
 		QueryStack queryStack3 = new QueryStack(
 				theRequest,
@@ -892,7 +905,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					myResourceName,
 					mySqlBuilderFactory,
 					myDialectProvider,
-					theSearchQueryProperties.isDoCountOnlyFlag());
+					theSearchQueryProperties.isDoCountOnlyFlag(),
+					false);
 			GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(
 					theSearchQueryProperties.getOffset(), mySearchProperties.getMaxResultsRequested());
 			String sql = allTargetsSql.getSql();

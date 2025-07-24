@@ -25,11 +25,13 @@ import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.sql.ColumnTupleObject;
 import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTuples;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -60,12 +62,14 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 	}
 
 	@Nullable
-	public Condition createPredicateResourceId(
-			@Nullable DbColumn[] theSourceJoinColumn,
-			String theResourceName,
-			List<List<IQueryParameterType>> theValues,
-			SearchFilterParser.CompareOperation theOperation,
-			RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateResourceId(QueryStack.SearchForIdsParams theIdParams) {
+
+		@Nullable DbColumn[] theSourceJoinColumn = theIdParams.getSourceJoinColumn();
+		String theResourceName = theIdParams.getResourceName();
+		List<List<IQueryParameterType>> theValues = theIdParams.getAndOrParams();
+		SearchFilterParser.CompareOperation theOperation = theIdParams.getOperation();
+		RequestPartitionId theRequestPartitionId = theIdParams.getRequestPartitionId();
+		SearchIncludeDeletedEnum theSearchIncludeDeleted = theIdParams.getIncludeDeleted();
 
 		Set<JpaPid> allOrPids = null;
 		SearchFilterParser.CompareOperation defaultOperation = SearchFilterParser.CompareOperation.eq;
@@ -129,7 +133,9 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 					|| operation == SearchFilterParser.CompareOperation.ne;
 
 			if (theSourceJoinColumn == null) {
-				BaseJoiningPredicateBuilder queryRootTable = super.getOrCreateQueryRootTable(true);
+				BaseJoiningPredicateBuilder queryRootTable = theSearchIncludeDeleted == null
+						? super.getOrCreateQueryRootTable(true)
+						: super.getOrCreateQueryRootTable(theSearchIncludeDeleted);
 				Condition predicate;
 				switch (operation) {
 					default:

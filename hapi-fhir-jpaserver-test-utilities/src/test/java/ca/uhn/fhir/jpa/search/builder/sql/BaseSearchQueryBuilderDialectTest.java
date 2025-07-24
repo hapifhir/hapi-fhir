@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.OrderObject;
 import jakarta.annotation.Nonnull;
@@ -45,12 +46,12 @@ public abstract class BaseSearchQueryBuilderDialectTest {
 	protected abstract Dialect createDialect();
 
 	protected SearchQueryBuilder createSearchQueryBuilder() {
-		return new SearchQueryBuilder(myFhirContext, new StorageSettings(), new PartitionSettings(), RequestPartitionId.allPartitions(), "Patient", mySqlObjectFactory, myHibernatePropertiesProvider, false);
+		return new SearchQueryBuilder(myFhirContext, new StorageSettings(), new PartitionSettings(), RequestPartitionId.allPartitions(), "Patient", mySqlObjectFactory, myHibernatePropertiesProvider, false, false);
 	}
 
 	protected GeneratedSql buildSqlWithNumericSort(Boolean theAscending, OrderObject.NullOrder theNullOrder) {
 		SearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder();
-		when(mySqlObjectFactory.resourceTable(any())).thenReturn(new ResourceTablePredicateBuilder(searchQueryBuilder));
+		when(mySqlObjectFactory.resourceTable(any(), any())).thenReturn(new ResourceTablePredicateBuilder(searchQueryBuilder, SearchIncludeDeletedEnum.NEVER));
 		DatePredicateBuilder datetimePredicateBuilder = new DatePredicateBuilder(searchQueryBuilder);
 		datetimePredicateBuilder.setSearchParamIdentityCacheSvcForUnitTest(mySearchParamIdentityCacheSvc);
 		when(mySqlObjectFactory.dateIndexTable(any())).thenReturn(datetimePredicateBuilder);
