@@ -19,10 +19,8 @@
  */
 package ca.uhn.fhir.interceptor.auth;
 
-import ca.uhn.fhir.i18n.Msg;
 import jakarta.annotation.Nonnull;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
