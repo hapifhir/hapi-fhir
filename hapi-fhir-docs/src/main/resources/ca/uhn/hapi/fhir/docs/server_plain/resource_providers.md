@@ -72,6 +72,47 @@ In some cases, it may be useful to have access to the underlying HttpServletRequ
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|underlyingReq}}
 ```
 
+## Accessing RequestDetails
+
+Many server methods can accept a parameter of type [RequestDetails](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/api/server/RequestDetails.html), which provides access to request context information including headers, parameters, and user data. RequestDetails is commonly used in multitenancy scenarios, interceptors, and custom server logic.
+
+```java
+@Read()
+public Patient read(@IdParam IdType theId, RequestDetails theRequestDetails) {
+    // Access tenant information
+    String tenantId = theRequestDetails.getTenantId();
+    
+    // Access user data (for passing information between interceptors)
+    Map<Object, Object> userData = theRequestDetails.getUserData();
+    
+    // Access headers
+    String authHeader = theRequestDetails.getHeader("Authorization");
+    
+    // Your implementation here...
+    return patient;
+}
+```
+
+### RequestDetails Best Practices
+
+When working with RequestDetails, it's important to understand the distinction between different types of data storage:
+
+* **User Data** - Use `RequestDetails.getUserData()` to pass information between interceptor methods. This is the recommended approach for most use cases involving interceptors, security, and custom business logic.
+
+* **Servlet Attributes** - For servlet-specific request attributes (used for communication between servlet filters), use the `getServletAttribute()` and `setServletAttribute()` methods available on servlet-based RequestDetails implementations.
+
+```java
+// Recommended: Use getUserData() to pass values between different interceptors
+theRequestDetails.getUserData().put("CUSTOM_KEY_A", someValue);
+theRequestDetails.getUserData().get("CUSTOM_KEY_A");
+
+// To retrieve servlet attributes you can use
+if (theRequestDetails instanceof ServletRequestDetails) {
+    ServletRequestDetails servletDetails = (ServletRequestDetails) theRequestDetails;
+    Object value = servletDetails.getServletAttribute("SERVLET_ATTR");
+}
+```
+
 <a name="exceptions"/>
 
 # REST Exception/Error Handling
