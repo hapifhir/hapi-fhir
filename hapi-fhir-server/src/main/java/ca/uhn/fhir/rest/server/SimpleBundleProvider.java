@@ -90,7 +90,7 @@ public class SimpleBundleProvider implements IBundleProvider {
 		myUuid = theUuid;
 		int size = 0;
 		for (IBaseResource r : theList) {
-			if (BundleUtil.isMatchResource(r)) {
+			if (r != null && BundleUtil.isMatchResource(r)) {
 				size++;
 			}
 		}
