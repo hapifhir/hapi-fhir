@@ -1003,7 +1003,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		}
 	}
 
-	private static String toTypeName(Class<? extends IBaseResource> theType) {
+	private String toTypeName(Class<? extends IBaseResource> theType) {
 		String retVal = ourTypeToName.get(theType);
 		if (retVal == null) {
 			ResourceDef resourceDef = theType.getAnnotation(ResourceDef.class);
