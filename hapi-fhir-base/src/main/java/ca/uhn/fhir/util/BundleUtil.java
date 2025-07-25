@@ -25,7 +25,9 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -204,6 +206,20 @@ public class BundleUtil {
 		}
 
 		return retVal;
+	}
+
+	/**
+	 * Returns true if the resource provided is *not* a BundleEntrySearchModeEnum OUTCOME or INCLUDE
+	 * (ie, if MATCH or null, this will return true)
+	 * @param theResource
+	 * @return
+	 */
+	public static boolean isMatchResource(IBaseResource theResource) {
+		BundleEntrySearchModeEnum matchType = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(theResource);
+		if (matchType == null || matchType == BundleEntrySearchModeEnum.MATCH) {
+			return true;
+		}
+		return false;
 	}
 
 	public static List<Pair<String, IBaseResource>> getBundleEntryUrlsAndResources(

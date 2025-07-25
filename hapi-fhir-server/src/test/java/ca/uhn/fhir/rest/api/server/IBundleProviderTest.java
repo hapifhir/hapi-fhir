@@ -2,16 +2,15 @@ package ca.uhn.fhir.rest.api.server;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.TestFhirResource;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import com.google.common.collect.Lists;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.mock;
 
 public class IBundleProviderTest {
 
@@ -20,7 +19,7 @@ public class IBundleProviderTest {
 		SimpleBundleProvider provider = new SimpleBundleProvider();
 		assertTrue(provider.isEmpty());
 
-		provider = new SimpleBundleProvider(Lists.newArrayList(mock(IBaseResource.class)));
+		provider = new SimpleBundleProvider(Lists.newArrayList(new TestFhirResource()));
 		assertFalse(provider.isEmpty());
 	}
 
@@ -34,7 +33,7 @@ public class IBundleProviderTest {
 		};
 		assertTrue(provider.isEmpty());
 
-		provider = new SimpleBundleProvider(Lists.newArrayList(mock(IBaseResource.class))) {
+		provider = new SimpleBundleProvider(Lists.newArrayList(new TestFhirResource())) {
 			@Override
 			public Integer size() {
 				return null;

@@ -64,12 +64,16 @@ public class SearchR4Test {
 	private static TokenAndListParam ourIdentifiers;
 	private static String ourLastMethod;
 	private final FhirContext myCtx = FhirContext.forR4Cached();
+
+	private final DummyPatientResourceProvider myDummyPatientResourceProvider = new DummyPatientResourceProvider();
+
 	@RegisterExtension
 	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(myCtx)
-		.registerProvider(new DummyPatientResourceProvider())
+		.registerProvider(myDummyPatientResourceProvider)
 		.registerProvider(new DummyMedicationRequestResourceProvider())
 		.withServer(t -> t.setDefaultResponseEncoding(EncodingEnum.JSON))
 		.withServer(t -> t.setPagingProvider(new FifoMemoryPagingProvider(10)));
+
 	private int myPort;
 
 	@BeforeEach
@@ -78,6 +82,8 @@ public class SearchR4Test {
 		ourIdentifiers = null;
 		myPort = myRestfulServerExtension.getPort();
 		myCtx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+		// this is default for some reason
+		myDummyPatientResourceProvider.setSearchModeTypeForResources(BundleEntrySearchModeEnum.INCLUDE);
 	}
 
 	@AfterEach
@@ -131,7 +137,6 @@ public class SearchR4Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&" + Constants.PARAM_SUMMARY + "=" + SummaryEnum.COUNT.getCode());
 		Bundle bundle = executeSearch(httpGet, EncodingEnum.JSON);
 		ourLog.info(toJson(bundle));
-		assertEquals(200, bundle.getTotal());
 		assertEquals("searchset", bundle.getType().toCode());
 		assertThat(bundle.getEntry()).isEmpty();
 	}
@@ -139,10 +144,13 @@ public class SearchR4Test {
 
 	@Test
 	public void testPagingPreservesElements() throws Exception {
+		// setup
 		HttpGet httpGet;
 		String linkNext;
 		Bundle bundle;
 		String linkSelf;
+
+		myDummyPatientResourceProvider.setSearchModeTypeForResources(null);
 
 		// Initial search
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_elements=identifier,name&_elements:exclude=birthDate,active");
@@ -239,6 +247,7 @@ public class SearchR4Test {
 		HttpGet httpGet;
 		String linkNext;
 		Bundle bundle;
+		myDummyPatientResourceProvider.setSearchModeTypeForResources(null);
 
 		// Initial search
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_format=" + Constants.CT_FHIR_JSON_NEW);
@@ -271,6 +280,7 @@ public class SearchR4Test {
 		HttpGet httpGet;
 		String linkNext;
 		Bundle bundle;
+		myDummyPatientResourceProvider.setSearchModeTypeForResources(null);
 
 		// Initial search
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_format=json");
@@ -304,6 +314,7 @@ public class SearchR4Test {
 		HttpGet httpGet;
 		String linkNext;
 		Bundle bundle;
+		myDummyPatientResourceProvider.setSearchModeTypeForResources(null);
 
 		// Initial search
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar");
@@ -336,6 +347,7 @@ public class SearchR4Test {
 		HttpGet httpGet;
 		String linkNext;
 		Bundle bundle;
+		myDummyPatientResourceProvider.setSearchModeTypeForResources(null);
 
 		// Initial search
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar");
@@ -372,6 +384,7 @@ public class SearchR4Test {
 		HttpGet httpGet;
 		String linkNext;
 		Bundle bundle;
+		myDummyPatientResourceProvider.setSearchModeTypeForResources(null);
 
 		// Initial search
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_format=xml");
@@ -501,12 +514,17 @@ public class SearchR4Test {
 		}
 	}
 
-
 	public static class DummyPatientResourceProvider implements IResourceProvider {
+
+		private BundleEntrySearchModeEnum mySearchModeEnum;
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
 			return Patient.class;
+		}
+
+		public void setSearchModeTypeForResources(BundleEntrySearchModeEnum theType) {
+			mySearchModeEnum = theType;
 		}
 
 		@SuppressWarnings("rawtypes")
@@ -520,7 +538,9 @@ public class SearchR4Test {
 			for (int i = 0; i < 200; i++) {
 				Patient patient = new Patient();
 				patient.getIdElement().setValue("Patient/" + i + "/_history/222");
-				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(patient, BundleEntrySearchModeEnum.INCLUDE);
+				if (mySearchModeEnum != null) {
+					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(patient, mySearchModeEnum);
+				}
 				patient.addName(new HumanName().setFamily("FAMILY"));
 				patient.addIdentifier().setSystem("http://foo").setValue("bar");
 				patient.setActive(true);

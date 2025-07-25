@@ -2,6 +2,8 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
@@ -11,6 +13,7 @@ import ca.uhn.fhir.rest.server.BundleProviderWithNamedPages;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.BundleUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -157,22 +160,36 @@ class ResponseBundleBuilderTest {
 		// we want the number of resources returned to be equal to the pagesize
 		List<IBaseResource> list = buildXPatientList(DEFAULT_PAGE_SIZE - includeResources);
 
-		ResponseBundleBuilder svc = new ResponseBundleBuilder(false);
+		// our fake includes
+		for (int i = 0; i < includeResources; i++) {
+			Organization org = new Organization();
+			org.setId("Organization/" + i);
+			ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(org, BundleEntrySearchModeEnum.INCLUDE);
+			list.add(org);
+		}
+		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
 
-		SimpleBundleProvider provider = new SimpleBundleProvider() {
-			@Nonnull
+		SimpleBundleProvider provider = new SimpleBundleProvider(list) {
 			@Override
-			public List<IBaseResource> getResources(int theFrom, int theTo, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
-				List<IBaseResource> retList = new ArrayList<>(list);
-				// our fake includes
-				for (int i = 0; i < includeResources; i++) {
-					retList.add(new Organization().setId("Organization/" + i));
+			public boolean containsAllResources() {
+				return false;
+			}
+
+			@Override
+			public List<IBaseResource> getResources(int theFromIndex, int theToIndex, ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
+				List<IBaseResource> resources = super.getResources(theFromIndex, theToIndex, theResponsePageBuilder);
+				int includeCount = 0;
+				for (IBaseResource r : resources) {
+					if (!BundleUtil.isMatchResource(r)) {
+						// we created this list and know that it only
+						// includes Include or Match resources
+						includeCount++;
+					}
 				}
-				theResponsePageBuilder.setIncludedResourceCount(includeResources);
-				return retList;
+				theResponsePageBuilder.setIncludedResourceCount(includeCount);
+				return resources;
 			}
 		};
-
 		provider.setSize(null);
 
 		// mocking
@@ -209,7 +226,8 @@ class ResponseBundleBuilderTest {
 		Bundle bundle = (Bundle) svc.buildResponseBundle(responseBundleRequest);
 
 		// verify
-		verifyBundle(bundle, RESOURCE_COUNT, DEFAULT_PAGE_SIZE - 1, "A0", "A14");
+		// -1 because nulls are not in the count
+		verifyBundle(bundle, RESOURCE_COUNT - 1, DEFAULT_PAGE_SIZE - 1, "A0", "A14");
 
 		assertThat(bundle.getLink()).hasSize(2);
 		assertSelfLink(bundle);

@@ -1,6 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -26,6 +28,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
@@ -33,13 +36,17 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class PlainProviderR4Test {
@@ -56,6 +63,61 @@ public class PlainProviderR4Test {
 
 	@RegisterExtension
 	private HttpClientExtension ourClient = new HttpClientExtension();
+
+	@Test
+	public void providersThatReturnListOfResources_willNotHaveNonMATCH() throws IOException {
+		// setup
+		HttpResponse response;
+		List<Patient> patients = new ArrayList<>();
+		IResourceProvider testProvider = new IResourceProvider() {
+
+			@Override
+			public Class<? extends IBaseResource> getResourceType() {
+				return Patient.class;
+			}
+
+			@Search
+			public List<IBaseResource> findPatients() {
+				LinkedList<IBaseResource> retVal = new LinkedList<>();
+				OperationOutcome outcome = new OperationOutcome();
+				outcome.addIssue().setCode(OperationOutcome.IssueType.INVALID);
+
+				//This line sets the "search mode" in the response entry
+				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(outcome, BundleEntrySearchModeEnum.OUTCOME);
+
+				for (Patient nextPatient : patients) {
+					retVal.add(nextPatient);
+					retVal.add(outcome);
+				}
+
+				return retVal;
+			}
+		};
+		ourServer.registerProvider(testProvider);
+
+		Patient extraPatient = new Patient();
+		extraPatient.addName()
+			 .setFamily("simpson")
+			 .addGiven("Homer");
+		extraPatient.setId("Patient/extra");
+		patients.add(extraPatient);
+
+		String baseUri = ourServer.getBaseUrl();
+
+		// test
+		HttpGet get = new HttpGet(baseUri + "/Patient");
+		response = ourClient.execute(get);
+
+		// validate
+		String responseContent = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(response.getEntity().getContent());
+		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+		assertNotNull(bundle);
+
+		// we expect 2 resources; but 1 is an OperationOutcome (and is thus not part of the total)
+		assertEquals(2, bundle.getEntry().size());
+		assertEquals(1, bundle.getTotal());
+	}
 
 	@Test
 	public void testGlobalHistory() throws Exception {
@@ -108,7 +170,6 @@ public class PlainProviderR4Test {
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertNull(provider.myLastSince);
 		assertNull(provider.myLastCount);
-		
 	}
 
 	@Test

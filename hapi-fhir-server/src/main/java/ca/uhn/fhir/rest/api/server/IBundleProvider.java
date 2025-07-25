@@ -186,6 +186,17 @@ public interface IBundleProvider {
 	}
 
 	/**
+	 * Returns all resources contained in this provider (outcomes and includes included).
+	 * This may return more than size() resources.
+	 * But if no implementation is provided, it will return what getAllResources() returns
+	 * (which is limited by size())
+	 * @return
+	 */
+	default List<IBaseResource> getResourceListComplete() {
+		return getAllResources();
+	}
+
+	/**
 	 * Returns the UUID associated with this search. Note that this
 	 * does not need to return a non-null value unless it a
 	 * IPagingProvider is being used that requires UUIDs
@@ -223,6 +234,16 @@ public interface IBundleProvider {
 	 */
 	@Nullable
 	Integer size();
+
+	/**
+	 * Whether or not this bundle provider contains all resources specified in the total.
+	 * This can be the case if a provider has all the resources and passes them back directly
+	 * (as is the case for some plain/hybrid providers that return lists of resources.
+	 * @return
+	 */
+	default boolean containsAllResources() {
+		return false;
+	}
 
 	/**
 	 * This method returns <code>false</code> if the bundle provider knows that at least
