@@ -107,7 +107,9 @@ public class ResponseBundleBuilder {
 		} else {
 			pageSize = pagingCalculatePageSize(requestedPage, server.getPagingProvider());
 
-			Integer size = bundleProvider.containsAllResources() ? (Integer) bundleProvider.getResourceListComplete().size() : bundleProvider.size();
+			Integer size = bundleProvider.containsAllResources()
+					? (Integer) bundleProvider.getResourceListComplete().size()
+					: bundleProvider.size();
 			if (size == null) {
 				numToReturn = pageSize;
 			} else {

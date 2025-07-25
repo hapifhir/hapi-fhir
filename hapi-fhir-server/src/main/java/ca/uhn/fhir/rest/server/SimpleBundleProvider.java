@@ -214,8 +214,7 @@ public class SimpleBundleProvider implements IBundleProvider {
 
 	@Override
 	public List<IBaseResource> getResourceListComplete() {
-		return myList.stream().map(r -> (IBaseResource)r)
-			.collect(Collectors.toList());
+		return myList.stream().map(r -> (IBaseResource) r).collect(Collectors.toList());
 	}
 
 	@Override
