@@ -28,6 +28,13 @@ import java.util.List;
 
 public interface IFhirPathEvaluationContext {
 
+	public enum ConstantEvaluationMode {
+		EXPLICIT,
+		NOVALUE,
+		IMPLICIT_BEFORE,
+		IMPLICIT_AFTER
+	}
+
 	/**
 	 * Evaluates the <code>resolve()</code> function and returns the target
 	 * of the resolution.
@@ -43,10 +50,10 @@ public interface IFhirPathEvaluationContext {
 	 *
 	 * @param appContext
 	 * @param name The name of the constant(s) to be resolved
-	 * @param beforeContext
+	 * @param mode
 	 * @return
 	 */
-	default List<IBase> resolveConstant(Object appContext, String name, boolean beforeContext) {
+	default List<IBase> resolveConstant(Object appContext, String name, ConstantEvaluationMode mode) {
 		return null;
 	}
 }

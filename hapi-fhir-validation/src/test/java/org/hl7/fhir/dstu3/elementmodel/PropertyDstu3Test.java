@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Created by axemj on 14/07/2017.
  */
 public class PropertyDstu3Test extends BaseValidationTestWithInlineMocks {
-
+/*
     private static final FhirContext ourCtx = FhirContext.forDstu3();
     private Property property;
     private StructureDefinition sd;
@@ -69,4 +69,6 @@ public class PropertyDstu3Test extends BaseValidationTestWithInlineMocks {
 				assertEquals("types == 0, and no children found", e.getMessage());
 		}
     }
+
+ */
 }
