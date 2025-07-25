@@ -38,6 +38,7 @@ import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -4255,7 +4256,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 	private static List<Date> getEventDatesFromServiceRequestsInSearchResponse(IBundleProvider theDateSearchResponse) {
 		return theDateSearchResponse.getAllResources().stream()
-			.filter(res -> res instanceof ServiceRequest)
+			.filter(ServiceRequest.class::isInstance)
 			.map(resource -> {
 				ServiceRequest serviceRequest = (ServiceRequest) resource;
 				return serviceRequest.getOccurrenceTiming().getEvent().stream().findFirst().orElse(null);
@@ -4461,7 +4462,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		assertThat(actualNameList).containsExactly(namesInAlpha);
 	}
 
-
 	@Test
 	void testSearchForStream_carriesTxContext() {
 		// given
@@ -4483,6 +4483,32 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 				.collect(Collectors.toSet()));
 
 		assertEquals(ids, createdIds);
+	}
+
+	@Test
+	void testSearchForStream_withIncludeDeletedResources_resultIncludesDeletedResources() {
+		// given
+		IIdType deletedObservationId = createObservation();
+		IIdType observationId = createObservation();
+
+		SystemRequestDetails request = new SystemRequestDetails();
+
+		deleteResource(deletedObservationId);
+
+		SearchParameterMap searchParameterMap = new SearchParameterMap();
+		searchParameterMap.setSearchIncludeDeletedMode(SearchIncludeDeletedEnum.EXCLUSIVE);
+
+		// call within a tx, but carry the tx definition in the StreamTemplate
+		StreamTemplate<IResourcePersistentId<?>> streamTemplate =
+			StreamTemplate.fromSupplier(() -> myObservationDao.searchForIdStream(searchParameterMap, request, null))
+				.withTransactionAdvice(newTxTemplate());
+
+		// does the stream work?
+		Set<String> ids = streamTemplate.call(stream->
+			stream.map(typedId->typedId.getId().toString())
+				.collect(Collectors.toSet()));
+
+		assertThat(ids).containsExactly(deletedObservationId.getIdPart());
 	}
 
 	@Test
