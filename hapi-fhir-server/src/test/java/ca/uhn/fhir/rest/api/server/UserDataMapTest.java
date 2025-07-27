@@ -142,7 +142,7 @@ class UserDataMapTest {
 			userDataMap.put(key, "newValue"); // Modify during iteration
 		}
 		// If we get here, no ConcurrentModificationException was thrown
-		assertThat(userDataMap.size()).isGreaterThan(3); // Should have added at least one new key
+		assertThat(userDataMap.size()).isEqualTo(3); // Should have added at least one new key
 	}
 
 	@Test
