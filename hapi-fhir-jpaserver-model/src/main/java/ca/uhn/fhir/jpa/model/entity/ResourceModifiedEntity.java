@@ -68,14 +68,6 @@ public class ResourceModifiedEntity implements IPersistedResourceModifiedMessage
 		return myResourceModifiedEntityPK == null ? null : myResourceModifiedEntityPK.getResourceType();
 	}
 
-	public ResourceModifiedEntity setResourceType(String theResourceType) {
-		if (myResourceModifiedEntityPK == null) {
-			myResourceModifiedEntityPK = new PersistedResourceModifiedMessageEntityPK();
-		}
-		myResourceModifiedEntityPK.setResourceType(theResourceType);
-		return this;
-	}
-
 	@Override
 	public Date getCreatedTime() {
 		return myCreatedTime;

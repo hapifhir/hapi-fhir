@@ -102,8 +102,8 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 		ResourceModifiedEntity entity = new ResourceModifiedEntity();
 		PersistedResourceModifiedMessageEntityPK rpm = new PersistedResourceModifiedMessageEntityPK();
 		rpm.setResourceVersion("1");
+		rpm.setResourceType(resourceType);
 		entity.setResourceModifiedEntityPK(rpm);
-		entity.setResourceType(resourceType);
 
 		// we reuse the same exact msg content to avoid
 		// the slowdown of serializing it over and over
