@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.BundleLinks;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
@@ -67,8 +68,8 @@ public class ResponseBundleBuilder {
 	private static IBaseBundle buildBundle(
 			ResponseBundleRequest theResponseBundleRequest, ResponsePage pageResponse, BundleLinks links) {
 		final IRestfulServer<?> server = theResponseBundleRequest.server;
-		final IVersionSpecificBundleFactory bundleFactory =
-				server.getFhirContext().newBundleFactory();
+		FhirContext ctx = server.getFhirContext();
+		final IVersionSpecificBundleFactory bundleFactory = ctx.newBundleFactory();
 		final IBundleProvider bundleProvider = theResponseBundleRequest.bundleProvider;
 
 		bundleFactory.addRootPropertiesToBundle(
@@ -80,7 +81,9 @@ public class ResponseBundleBuilder {
 				server.getBundleInclusionRule(),
 				theResponseBundleRequest.includes);
 
-		return (IBaseBundle) bundleFactory.getResourceBundle();
+		IBaseBundle baseBundle = (IBaseBundle) bundleFactory.getResourceBundle();
+
+		return baseBundle;
 	}
 
 	private ResponsePage buildResponsePage(ResponseBundleRequest theResponseBundleRequest) {
@@ -104,12 +107,17 @@ public class ResponseBundleBuilder {
 		} else {
 			pageSize = pagingCalculatePageSize(requestedPage, server.getPagingProvider());
 
-			Integer size = bundleProvider.size();
+			Integer size = bundleProvider.containsAllResources()
+					? (Integer) bundleProvider.getResourceListComplete().size()
+					: bundleProvider.size();
 			if (size == null) {
 				numToReturn = pageSize;
 			} else {
 				numToReturn = Math.min(pageSize, size.intValue() - theResponseBundleRequest.offset);
 			}
+
+			// numToReturn is the number of matched resources to return; there may be included or op-outcomes
+			// to include as well
 
 			resourceList =
 					pagingBuildResourceList(theResponseBundleRequest, bundleProvider, numToReturn, responsePageBuilder);

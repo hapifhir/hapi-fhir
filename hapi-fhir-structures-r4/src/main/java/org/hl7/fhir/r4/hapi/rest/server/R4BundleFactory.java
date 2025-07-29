@@ -84,7 +84,6 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
 		}
 
 		for (IBaseResource next : theResult) {
-
 			Set<String> containedIds = new HashSet<>();
 
 			if (next instanceof DomainResource) {

@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -202,6 +203,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -229,6 +231,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
@@ -376,13 +379,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		pat = myPatientDao.read(patientId, new SystemRequestDetails());
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(pat));
 	}
-
-
-
-
-
-
-
 
 
 	@Test
@@ -7924,4 +7920,48 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.hasMessage("HTTP 400 Bad Request: HAPI-2498: Unsupported search modifier(s): \"[:identifier]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :recurse, :text]");
 		}
 	}
+
+	@Test
+	void searchResource_withIncludeDeletedParam() {
+		// Given
+		Patient patient = new Patient();
+		patient.addName(new HumanName().setFamily("TestFamily").addGiven("TestGiven"));
+		patient.setActive(true);
+
+		IIdType id = myPatientDao.create(patient, mySrd).getId();
+		myPatientDao.delete(id, mySrd);
+
+		// When
+		Bundle results = myClient
+			.search()
+			.byUrl(myServerBase + "/Patient?" + Constants.PARAM_INCLUDE_DELETED + SearchIncludeDeletedEnum.EXCLUSIVE.getCode())
+			.returnBundle(Bundle.class)
+			.execute();
+
+		// Then - returns nothing, _includeDeleted is an unsupported search param (for now)
+		assertThat(results.getEntry()).isEmpty();
+	}
+
+	@Test
+	void conditionalUpdate_withIncludeDeletedParam() {
+		// Given
+		Patient patient = new Patient();
+		patient.addName(new HumanName().setFamily("TestFamily").addGiven("TestGiven"));
+		patient.setActive(true);
+
+		IIdType id = myPatientDao.create(patient, mySrd).getId();
+		myPatientDao.delete(id, mySrd);
+
+		// When/Then
+		InvalidRequestException exception = assertThrows(InvalidRequestException.class, () -> myClient
+			.update()
+			.resource(patient)
+			.conditionalByUrl("Patient?" + Constants.PARAM_INCLUDE_DELETED + SearchIncludeDeletedEnum.EXCLUSIVE.getCode())
+			.execute()
+		);
+
+		// _includeDeleted is an unsupported search param (for now)
+		assertThat(exception.getMessage()).contains("URL has no search parameters");
+	}
+
 }
