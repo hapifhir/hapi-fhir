@@ -111,11 +111,15 @@ public class ReplaceReferencesPatchBundleSvc {
 	}
 
 	private static boolean matches(ResourceReferenceInfo refInfo, IIdType theSourceId) {
-		return refInfo.getResourceReference()
-				.getReferenceElement()
-				.toUnqualified()
-				.getValueAsString()
-				.equals(theSourceId.getValueAsString());
+
+		Reference ref = (Reference) refInfo.getResourceReference();
+		if (!ref.hasReferenceElement()) {
+			// the reference doesn't have a reference element, it is probably just a logical reference (using an
+			// identifier).
+			// so this is not a match.
+			return false;
+		}
+		return ref.getReferenceElement().toUnqualified().getValueAsString().equals(theSourceId.getValueAsString());
 	}
 
 	private String getFhirPathForPatch(IBaseResource theReferencingResource, ResourceReferenceInfo theRefInfo) {
