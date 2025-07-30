@@ -20,7 +20,11 @@
 package ca.uhn.fhir.rest.api;
 
 import ca.uhn.fhir.i18n.Msg;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -29,6 +33,7 @@ import java.io.Serializable;
  */
 public class SortSpec implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 2866833099879713467L;
 
 	private SortSpec myChain;
@@ -137,5 +142,46 @@ public class SortSpec implements Serializable {
 	public SortSpec setOrder(SortOrderEnum theOrder) {
 		myOrder = theOrder;
 		return this;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (!(theO instanceof SortSpec sortSpec)) return false;
+
+		return new EqualsBuilder().append(myChain, sortSpec.myChain).append(myParamName, sortSpec.myParamName).append(myOrder, sortSpec.myOrder).isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37).append(myChain).append(myParamName).append(myOrder).toHashCode();
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("myParamName", myParamName)
+			.append("myOrder", myOrder)
+			.append("myChain", myChain)
+			.toString();
+	}
+
+	/**
+	 * Convert strings like "-date" into a SortSpec object.
+	 * Note: this does not account for DSTU2-style sort modifiers like "date:desc" or "date:asc"
+	 * since those are on the parameter name, not the value.
+	 *
+	 * @param theParamValue a string like "-date" or "date"
+	 * @return a parsed SortSpec object
+	 */
+	public static SortSpec fromR3OrLaterParameterValue(String theParamValue) {
+		SortOrderEnum direction = SortOrderEnum.ASC;
+		if (theParamValue.startsWith("-")) {
+			direction = SortOrderEnum.DESC;
+			theParamValue = theParamValue.substring(1);
+		}
+		return new SortSpec(theParamValue, direction);
+
 	}
 }
