@@ -1102,12 +1102,11 @@ public class SearchParamExtractorService {
 		}
 
 		// there are some search parameters using a where clause to index the element for a specific resource type, such
-		// as
-		// "Provenance.target.where(resolve() is Patient)". We insert these in the ResourceLink table as well.
+		// as "Provenance.target.where(resolve() is Patient)". We insert these in the ResourceLink table as well.
 		// Such entries in the ResourceLink table should remain versioned if the element is allowed to be versioned.
 		return pathsAllowedToHaveVersionedRefs.stream()
-				.noneMatch(pathToKeepVersioned ->
-						theSearchParamPath.startsWith(pathToKeepVersioned + ".where(resolve() is"));
+				.noneMatch(pathToKeepVersioned -> theSearchParamPath.matches(
+						pathToKeepVersioned + "\\.where\\(resolve\\(\\) is [A-Z][a-zA-Z]*\\)"));
 	}
 
 	/**
