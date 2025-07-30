@@ -11,27 +11,16 @@ import java.util.Map;
  * The builder will collect all search parameters in a multimap format, which can be used to construct search queries.
  */
 public abstract class DefaultSearchQueryBuilder implements ISearchQueryBuilder {
-	protected MultiMapSearchQueryBuilder getDelegate() {
-		return myDelegate;
-	}
-
-	private final MultiMapSearchQueryBuilder myDelegate = new MultiMapSearchQueryBuilder();
-
 	@Override
 	public ISearchQueryBuilder addAll(Multimap<String, List<IQueryParameterType>> theSearchParameters) {
-		myDelegate.addAll(theSearchParameters);
+		theSearchParameters.entries().forEach(e->this.addOrList(e.getKey(), e.getValue()));
 		return this;
 	}
 
 	@Override
 	public ISearchQueryBuilder addAll(Map<String, List<IQueryParameterType>> theSearchParameters) {
-		myDelegate.addAll(theSearchParameters);
+		theSearchParameters.forEach(this::addOrList);
 		return this;
 	}
 
-	@Override
-	public ISearchQueryBuilder addOrList(String theParamName, List<IQueryParameterType> theParameterValues) {
-		myDelegate.addOrList(theParamName, theParameterValues);
-		return this;
-	}
 }

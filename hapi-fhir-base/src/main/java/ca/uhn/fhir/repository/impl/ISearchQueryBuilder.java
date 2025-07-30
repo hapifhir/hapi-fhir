@@ -23,4 +23,7 @@ public interface ISearchQueryBuilder {
 
 	ISearchQueryBuilder addOrList(String theParamName, List<IQueryParameterType> theParameters);
 
+	interface ISearchQueryContributor {
+		void contributeToQuery(ISearchQueryBuilder theBuilder);
+	}
 }

@@ -7,7 +7,6 @@ import com.google.common.collect.Multimaps;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 public class MultiMapSearchQueryBuilder implements ISearchQueryBuilder {
 	private final Multimap<String, List<IQueryParameterType>> mySearchParameters = ArrayListMultimap.create();
@@ -50,10 +49,9 @@ public class MultiMapSearchQueryBuilder implements ISearchQueryBuilder {
 		return mySearchParameters;
 	}
 
-	public static Multimap<String, List<IQueryParameterType>> builderToMultimap(
-			Consumer<ISearchQueryBuilder> theSearchQueryBuilder) {
+	public static Multimap<String, List<IQueryParameterType>> builderToMultimap(ISearchQueryContributor theSearchQueryBuilder) {
 		MultiMapSearchQueryBuilder sb = new MultiMapSearchQueryBuilder();
-		theSearchQueryBuilder.accept(sb);
+		theSearchQueryBuilder.contributeToQuery(sb);
 		return sb.toMultiMap();
 	}
 }

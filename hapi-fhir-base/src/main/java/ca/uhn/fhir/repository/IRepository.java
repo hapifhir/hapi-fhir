@@ -22,6 +22,8 @@ package ca.uhn.fhir.repository;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.repository.impl.ISearchQueryBuilder.ISearchQueryContributor;
+import ca.uhn.fhir.repository.impl.MultiMapSearchQueryBuilder;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -80,6 +82,15 @@ import java.util.Map;
  * repository will try to invoke operations with "sensible" defaults. For example, by using the
  * standard FHIR search parameters. Discussion is on-going to determine what a "sensible" minimal
  * level of support for interactions should be.
+ * </p>
+ *
+ * <p>
+ *     Note to implementors: this interface exposes several search() methods.
+ *     Several are deprecated and present for source-compatibility with previous versions
+ *     of this interface used by the clinical reasoning project.
+ *     We provide two main apis with different payloads for the query parameters: a Multimap method,
+ *     and an abstract builder callback.  Implementations must implement at least one of these two.
+ *     We provide default implementations of each in terms of the other.
  * </p>
  *
  * @see <a href="https://www.hl7.org/fhir/http.html">FHIR REST API</a>
@@ -277,18 +288,44 @@ public interface IRepository {
 	 *
 	 * @param <B> a Bundle type
 	 * @param <T> a Resource type
-	 * @param bundleType the class of the Bundle type to return
-	 * @param resourceType the class of the Resource type to search
-	 * @param searchParameters the searchParameters for this search
-	 * @param headers headers for this request, typically key-value pairs of HTTP headers
+	 * @param theBundleType the class of the Bundle type to return
+	 * @param theResourceType the class of the Resource type to search
+	 * @param theSearchParameters the searchParameters for this search
+	 * @param theHeaders headers for this request, typically key-value pairs of HTTP headers
 	 * @return a Bundle with the results of the search
 	 */
-	<B extends IBaseBundle, T extends IBaseResource> B search(
-			Class<B> bundleType,
-			Class<T> resourceType,
-			Multimap<String, List<IQueryParameterType>> searchParameters,
-			Map<String, String> headers);
+	default <B extends IBaseBundle, T extends IBaseResource> B search(
+			Class<B> theBundleType,
+			Class<T> theResourceType,
+			Multimap<String, List<IQueryParameterType>> theSearchParameters,
+			Map<String, String> theHeaders) {
+		// we have a cycle of default implementations between this and the search builder version.
+		// Implementors MUST implement one or the other or both.
+		return this.search(theBundleType, theResourceType, sb->sb.addAll(theSearchParameters), theHeaders);
+	}
 
+	/**
+	 * Searches this repository
+	 *
+	 * @see <a href="https://www.hl7.org/fhir/http.html#search">FHIR search</a>
+	 *
+	 * @param <B> a Bundle type
+	 * @param <T> a Resource type
+	 * @param theBundleType the class of the Bundle type to return
+	 * @param theResourceType the class of the Resource type to search
+	 * @param theQueryBuilder the searchParameters for this search
+	 * @param theHeaders headers for this request, typically key-value pairs of HTTP headers
+	 * @return a Bundle with the results of the search
+	 */
+	default <B extends IBaseBundle, T extends IBaseResource> B search(
+		Class<B> theBundleType,
+		Class<T> theResourceType,
+		ISearchQueryContributor theQueryBuilder,
+		Map<String, String> theHeaders) {
+		// we have a cycle of default implementations between this and the multi-map version.
+		// Implementors MUST implement one or the other for now.
+		return this.search(theBundleType, theResourceType, MultiMapSearchQueryBuilder.builderToMultimap(theQueryBuilder), theHeaders);
+	}
 	/**
 	 * Searches this repository
 	 *
