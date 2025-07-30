@@ -181,9 +181,11 @@ public class ExtendedHSearchIndexExtractor {
 					// Case 1: Resource Type and Resource ID is known
 					// Case 2: Resource is unknown and referred by canonical url reference
 					if (!Strings.isNullOrEmpty(nextLink.getTargetResourceId())) {
+						// non-canonical
 						qualifiedTargetResourceId =
 								nextLink.getTargetResourceType() + "/" + nextLink.getTargetResourceId();
 					} else if (!Strings.isNullOrEmpty(nextLink.getTargetResourceUrl())) {
+						// canonical
 						qualifiedTargetResourceId = nextLink.getTargetResourceUrl();
 					}
 					retVal.addResourceLinkIndexData(nextParamName, qualifiedTargetResourceId);

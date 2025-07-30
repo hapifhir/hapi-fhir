@@ -184,7 +184,7 @@ public class InMemoryResourceMatcher {
 		if (theIndexedSearchParams != null) {
 			relevantSearchParams = theIndexedSearchParams;
 		} else if (theResource != null) {
-			// Don't index search params we don't actully need for the given criteria
+			// Don't index search params we don't actually need for the given criteria
 			ISearchParamExtractor.ISearchParamFilter filter = theSearchParams -> theSearchParams.stream()
 					.filter(t -> searchParameterMap.containsKey(t.getName()))
 					.collect(Collectors.toList());

@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import com.google.common.collect.Lists;
+import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -94,6 +95,30 @@ public class ResourceIndexedSearchParamsTest {
 		ReferenceParam retVal = new ReferenceParam();
 		retVal.setValue(theId);
 		return retVal;
+	}
+
+	@Test
+	public void matchResourceLinks() {
+		ResourceTable table = new ResourceTable();
+		table.setResourceType("Questionnaire");
+		ResourceIndexedSearchParams matcher = ResourceIndexedSearchParams
+			.withLists(table);
+		ResourceLink resourceLink = new ResourceLink();
+		resourceLink.setSourcePath("QuestionnaireResponse.questionnaire");
+		resourceLink.setTargetResourceUrl(new IdType("http://localhost:8000/Questionnaire/a1"));
+		resourceLink.setSourceResource(new ResourceTable().setResourceType("QuestionnaireResponse"));
+		matcher.getResourceLinks()
+			.add(resourceLink);
+
+		boolean match = matcher.matchResourceLinks(
+			myStorageSettings,
+			"QuestionnaireResponse",
+			"questionnaire",
+			new ReferenceParam("http://localhost:8000/Questionnaire/fme-discharge-assessment"),
+			"QuestionnaireResponse.questionnaire"
+		);
+
+		assertTrue(match);
 	}
 
 	@Test

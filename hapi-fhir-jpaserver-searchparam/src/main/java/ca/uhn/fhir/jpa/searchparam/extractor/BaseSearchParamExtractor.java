@@ -44,7 +44,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
-import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.RuntimeSearchParamHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -80,6 +79,9 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import javax.measure.quantity.Quantity;
+import javax.measure.unit.NonSI;
+import javax.measure.unit.Unit;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -93,9 +95,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import javax.measure.quantity.Quantity;
-import javax.measure.unit.NonSI;
-import javax.measure.unit.Unit;
 
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.DATE;
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.REFERENCE;
@@ -1704,7 +1703,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	private BigDecimal normalizeQuantityContainingTimeUnitsIntoDaysForNumberParam(
 			String theSystem, String theCode, BigDecimal theValue) {
-		if (SearchParamConstants.UCUM_NS.equals(theSystem)) {
+		if (UcumServiceUtil.UCUM_CODESYSTEM_URL.equals(theSystem)) {
 			if (isNotBlank(theCode)) {
 				Unit<? extends Quantity> unit = Unit.valueOf(theCode);
 				javax.measure.converter.UnitConverter dayConverter = unit.getConverterTo(NonSI.DAY);

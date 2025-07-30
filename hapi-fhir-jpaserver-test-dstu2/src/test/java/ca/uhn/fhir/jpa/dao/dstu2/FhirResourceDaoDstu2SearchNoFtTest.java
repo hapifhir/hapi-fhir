@@ -11,7 +11,8 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
-import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
+import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
+import ca.uhn.fhir.jpa.searchparam.SearchConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.util.TestUtil;
@@ -1058,12 +1059,12 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 	public void testSearchNumberParam() {
 		Encounter e1 = new Encounter();
 		e1.addIdentifier().setSystem("foo").setValue("testSearchNumberParam01");
-		e1.getLength().setSystem(SearchParamConstants.UCUM_NS).setCode("min").setValue(4.0 * 24 * 60);
+		e1.getLength().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("min").setValue(4.0 * 24 * 60);
 		IIdType id1 = myEncounterDao.create(e1, mySrd).getId();
 
 		Encounter e2 = new Encounter();
 		e2.addIdentifier().setSystem("foo").setValue("testSearchNumberParam02");
-		e2.getLength().setSystem(SearchParamConstants.UCUM_NS).setCode("year").setValue(2.0);
+		e2.getLength().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("year").setValue(2.0);
 		IIdType id2 = myEncounterDao.create(e2, mySrd).getId();
 		{
 			IBundleProvider found = myEncounterDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Encounter.SP_LENGTH, new NumberParam(">2")));

@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.InMemorySubscriptionMatcher;
@@ -24,6 +25,7 @@ import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.CoordCalculatorTestUtil;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.CompositeParam;
@@ -64,6 +66,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Range;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -636,6 +640,51 @@ public class InMemorySubscriptionMatcherR4Test {
 		params = new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_SUBJECT, new ReferenceParam("999999999999999"));
 		assertNotMatched(obs01, params);
 		assertNotMatched(obs02, params);
+	}
+
+	@Test
+	public void canonicalSubscriptionMatching() {
+		// setup
+		IParser parser = myFhirContext.newJsonParser();
+		Questionnaire questionnaire;
+		QuestionnaireResponse questionnaireResponse;
+
+		{
+			String questionnaireResponseStr = """
+				{
+				  "resourceType": "QuestionnaireResponse",
+				  "questionnaire":"http://localhost:8000/Questionnaire/fme-da",
+				  "status":"completed"
+				}
+				""";
+			questionnaireResponse = parser.parseResource(QuestionnaireResponse.class, questionnaireResponseStr);
+			String questionaireStr = """
+				{
+				  "resourceType": "Questionnaire",
+				  "id": "a1",
+				  "status": "active"
+				}
+				""";
+			questionnaire = parser.parseResource(Questionnaire.class, questionaireStr);
+		}
+
+		CanonicalSubscription subscription = new CanonicalSubscription();
+		subscription.setCriteriaString("QuestionnaireResponse?questionnaire=http://localhost:8000/Questionnaire/fme-da");
+		subscription.setIdElement(new IdType("Subscription/123"));
+
+		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, questionnaireResponse, ResourceModifiedMessage.OperationTypeEnum.CREATE);
+		msg.setSubscriptionId("123");
+		msg.setId(new IdType("QuestionaireResponse/ABC"));
+
+		InMemoryMatchResult result = myInMemorySubscriptionMatcher.match(subscription, msg);
+
+		assertTrue(result.matched());
+//		myInMemorySubscriptionMatcher.match(
+//			null,
+//			questionnaireResponse,
+//			myFhirContext.getResourceDefinition("QuestionnaireResponse"),
+//			null
+//		);
 	}
 
 	@Test
