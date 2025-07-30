@@ -13,7 +13,7 @@ import java.util.Map;
 public abstract class DefaultSearchQueryBuilder implements ISearchQueryBuilder {
 	@Override
 	public ISearchQueryBuilder addAll(Multimap<String, List<IQueryParameterType>> theSearchParameters) {
-		theSearchParameters.entries().forEach(e->this.addOrList(e.getKey(), e.getValue()));
+		theSearchParameters.entries().forEach(e -> this.addOrList(e.getKey(), e.getValue()));
 		return this;
 	}
 
@@ -22,5 +22,4 @@ public abstract class DefaultSearchQueryBuilder implements ISearchQueryBuilder {
 		theSearchParameters.forEach(this::addOrList);
 		return this;
 	}
-
 }

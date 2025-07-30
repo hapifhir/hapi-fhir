@@ -150,21 +150,29 @@ public class SortSpec implements Serializable {
 
 		if (!(theO instanceof SortSpec sortSpec)) return false;
 
-		return new EqualsBuilder().append(myChain, sortSpec.myChain).append(myParamName, sortSpec.myParamName).append(myOrder, sortSpec.myOrder).isEquals();
+		return new EqualsBuilder()
+				.append(myChain, sortSpec.myChain)
+				.append(myParamName, sortSpec.myParamName)
+				.append(myOrder, sortSpec.myOrder)
+				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37).append(myChain).append(myParamName).append(myOrder).toHashCode();
+		return new HashCodeBuilder(17, 37)
+				.append(myChain)
+				.append(myParamName)
+				.append(myOrder)
+				.toHashCode();
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("myParamName", myParamName)
-			.append("myOrder", myOrder)
-			.append("myChain", myChain)
-			.toString();
+				.append("myParamName", myParamName)
+				.append("myOrder", myOrder)
+				.append("myChain", myChain)
+				.toString();
 	}
 
 	/**
@@ -182,6 +190,5 @@ public class SortSpec implements Serializable {
 			theParamValue = theParamValue.substring(1);
 		}
 		return new SortSpec(theParamValue, direction);
-
 	}
 }

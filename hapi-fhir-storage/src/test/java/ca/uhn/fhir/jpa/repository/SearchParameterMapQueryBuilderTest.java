@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.repository.impl.ISearchQueryBuilder;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -14,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class SearchParameterMapQueryBuilderTest {
 	FhirContext myFhirContext = FhirContext.forR4Cached();
-	SearchParameterMapQueryBuilder myBuilder = new SearchParameterMapQueryBuilder(myFhirContext);
+	SearchParameterMapQueryBuilder myBuilder = new SearchParameterMapQueryBuilder();
 	SearchParameterMap myResult;
 
 	@Test
@@ -23,7 +24,7 @@ class SearchParameterMapQueryBuilderTest {
 		SearchParameterMap spMap = new SearchParameterMap();
 
 		// when
-		SearchParameterMap result = SearchParameterMapQueryBuilder.buildFromQueryContributor(myFhirContext, spMap);
+		SearchParameterMap result = SearchParameterMapQueryBuilder.buildFromQueryContributor(spMap);
 
 	    // then
 	    assertThat(result).isSameAs(spMap);
@@ -36,7 +37,7 @@ class SearchParameterMapQueryBuilderTest {
 			builder -> builder.addNumericParameter("_count", 123);
 
 		// when
-		SearchParameterMap result = SearchParameterMapQueryBuilder.buildFromQueryContributor(myFhirContext, queryContributor);
+		SearchParameterMap result = SearchParameterMapQueryBuilder.buildFromQueryContributor(queryContributor);
 
 		// then
 		assertThat(result.toNormalizedQueryString(myFhirContext)).isEqualTo("?_count=123");
@@ -81,6 +82,23 @@ class SearchParameterMapQueryBuilderTest {
 		myResult = myBuilder.build();
 
 		assertThat(myResult.getOffset()).isEqualTo(900);
+	}
+
+	@Test
+	void testSort() {
+		myBuilder.addOrList("_sort", new TokenParam("-date"));
+
+		myResult = myBuilder.build();
+
+		assertThat(myResult.getSort().getParamName()).isEqualTo("date");
+		assertThat(myResult.getSort().getOrder()).isEqualTo(SortOrderEnum.DESC);
+	}
+
+	@Test
+	void testSortChain() {
+		myBuilder.addOrList("_sort", new TokenParam("-date"), new  TokenParam("_id"));
+
+		assertConvertsTo("?_sort=-date,_id");
 	}
 
 
