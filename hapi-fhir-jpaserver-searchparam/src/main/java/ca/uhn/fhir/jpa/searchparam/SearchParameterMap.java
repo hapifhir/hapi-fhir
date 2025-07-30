@@ -163,11 +163,9 @@ public class SearchParameterMap implements Serializable {
 		if (theAnd == null) {
 			return this;
 		}
-		if (!containsKey(theName)) {
-			put(theName, new ArrayList<>());
-		}
 
-		List<List<IQueryParameterType>> paramList = get(theName);
+		List<List<IQueryParameterType>> paramList =  getOrCreate(theName);
+
 		for (IQueryParameterOr<?> next : theAnd.getValuesAsQueryTokens()) {
 			if (next == null) {
 				continue;
@@ -178,15 +176,25 @@ public class SearchParameterMap implements Serializable {
 		return this;
 	}
 
+	private List<List<IQueryParameterType>> getOrCreate(String theName) {
+		return mySearchParameterMap.computeIfAbsent(theName, k -> new ArrayList<>());
+	}
+
 	public SearchParameterMap add(String theName, IQueryParameterOr<?> theOr) {
 		if (theOr == null) {
 			return this;
 		}
-		if (!containsKey(theName)) {
-			put(theName, new ArrayList<>());
+		return addOrList(theName, (List<IQueryParameterType>) theOr.getValuesAsQueryTokens());
+	}
+
+	@Nonnull
+	public SearchParameterMap addOrList(String theName, @Nonnull List<IQueryParameterType> theOrValues) {
+		if (theOrValues.isEmpty()) {
+			return this;
 		}
 
-		get(theName).add((List<IQueryParameterType>) theOr.getValuesAsQueryTokens());
+		getOrCreate(theName).add(theOrValues);
+
 		return this;
 	}
 
@@ -200,12 +208,9 @@ public class SearchParameterMap implements Serializable {
 		if (theParam == null) {
 			return this;
 		}
-		if (!containsKey(theName)) {
-			put(theName, new ArrayList<>());
-		}
 		ArrayList<IQueryParameterType> list = new ArrayList<>();
 		list.add(theParam);
-		get(theName).add(list);
+		getOrCreate(theName).add(list);
 
 		return this;
 	}
