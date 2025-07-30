@@ -2,12 +2,15 @@ package ca.uhn.fhir.jpa.repository;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.repository.impl.ISearchQueryBuilder;
+import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.junit.jupiter.api.Test;
 
@@ -120,6 +123,36 @@ class SearchParameterMapQueryBuilderTest {
 		myResult = myBuilder.build();
 
 		assertThat(myResult.getSearchTotalMode()).isEqualTo(SearchTotalModeEnum.ACCURATE);
+	}
+
+	@Test
+	void testContained() {
+		// given
+		myBuilder.addOrList("_contained", new TokenParam("true"));
+
+		myResult = myBuilder.build();
+
+		assertThat(myResult.getSearchContainedMode()).isEqualTo(SearchContainedModeEnum.TRUE);
+	}
+
+	@Test
+	void testInclude() {
+		// given
+		myBuilder.addOrList("_include", new StringParam("Patient:general-practitioner"));
+
+		myResult = myBuilder.build();
+
+		assertThat(myResult.getIncludes()).contains(new Include("Patient:general-practitioner"));
+	}
+
+	@Test
+	void testIncludeIterate() {
+		// given
+		myBuilder.addOrList("_include:iterate", new StringParam("Patient:general-practitioner"));
+
+		myResult = myBuilder.build();
+
+		assertThat(myResult.getIncludes()).contains(new Include("Patient:general-practitioner", true));
 	}
 
 	private void assertConvertsTo(String expected) {

@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.repository;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.repository.impl.DefaultSearchQueryBuilder;
 import ca.uhn.fhir.repository.impl.ISearchQueryBuilder;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
@@ -17,6 +18,8 @@ import java.util.function.Function;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_CONTAINED;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_COUNT;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_INCLUDE;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_INCLUDE_ITERATE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_SEARCH_TOTAL_MODE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_SORT;
@@ -27,19 +30,34 @@ public class SearchParameterMapQueryBuilder extends DefaultSearchQueryBuilder {
 	private final SearchParameterMap myResult = new SearchParameterMap();
 
 	static final Set<String> ourUnsupportedSearchParameters = Set.of(
-			"_include",
 			"_revinclude",
 			"_elements", // implemented at the FHIR endpoint.
 			"_containedType" // unsupported by JPA repositories
 			);
 	final Map<String, Consumer<List<IQueryParameterType>>> mySpecialParamHandlers = Map.of(
-			PARAM_COUNT, v -> lastValueWins(v, Integer::parseInt, myResult::setCount),
-			PARAM_OFFSET, v -> lastValueWins(v, Integer::parseInt, myResult::setOffset),
-			PARAM_SORT, this::addSortChain,
-			PARAM_SEARCH_TOTAL_MODE, v -> lastValueWins(v, SearchTotalModeEnum::fromCode, myResult::setSearchTotalMode),
-			PARAM_SUMMARY, v -> lastValueWins(v, SummaryEnum::fromCode, myResult::setSummaryMode),
 			PARAM_CONTAINED,
-					v -> lastValueWins(v, SearchContainedModeEnum::fromCode, myResult::setSearchContainedMode));
+			v -> lastValueWins(v, SearchContainedModeEnum::fromCode, myResult::setSearchContainedMode),
+			PARAM_COUNT,
+			v -> lastValueWins(v, Integer::parseInt, myResult::setCount),
+			PARAM_INCLUDE,
+			v -> addInclude(v, false),
+			PARAM_INCLUDE_ITERATE,
+			v -> addInclude(v, true),
+			PARAM_OFFSET,
+			v -> lastValueWins(v, Integer::parseInt, myResult::setOffset),
+			PARAM_SORT,
+			this::addSortChain,
+			PARAM_SUMMARY,
+			v -> lastValueWins(v, SummaryEnum::fromCode, myResult::setSummaryMode),
+			PARAM_SEARCH_TOTAL_MODE,
+			v -> lastValueWins(v, SearchTotalModeEnum::fromCode, myResult::setSearchTotalMode));
+
+	private void addInclude(List<IQueryParameterType> theValues, boolean theIterationFlag) {
+		theValues.stream()
+				.map(this::paramAsQueryString)
+				.map(s -> new Include(s, theIterationFlag))
+				.forEach(myResult::addInclude);
+	}
 
 	private void addSortChain(List<IQueryParameterType> theSortItems) {
 
