@@ -264,7 +264,8 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 						if (queryCount == null || queryCount > resources.size()) {
 							// No limit, last page or everything was fetched within the limit
 							// NB: total should *not* include included resources
-							bundleProvider.setSize(getTotalCount(queryCount, theParams.getOffset(), resources.size() - includedPidsList.size()));
+							bundleProvider.setSize(getTotalCount(
+									queryCount, theParams.getOffset(), resources.size() - includedPidsList.size()));
 						} else {
 							bundleProvider.setSize(null);
 						}

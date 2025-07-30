@@ -37,8 +37,9 @@ public class OffsetCalculator {
 			offset = 0;
 		}
 
-		Integer resultSize =
-			theBundleProvider.containsAllResources() ? (Integer) theBundleProvider.getResourceListComplete().size() : theBundleProvider.size();
+		Integer resultSize = theBundleProvider.containsAllResources()
+				? (Integer) theBundleProvider.getResourceListComplete().size()
+				: theBundleProvider.size();
 		int retval = offset;
 		if (resultSize != null) {
 			retval = Math.max(0, Math.min(offset, resultSize));
