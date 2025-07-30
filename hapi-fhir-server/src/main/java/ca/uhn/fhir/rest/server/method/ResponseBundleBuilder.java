@@ -98,8 +98,12 @@ public class ResponseBundleBuilder {
 		int numToReturn;
 		String searchId = null;
 
+		Integer bundleSize = bundleProvider.containsAllResources()
+			? (Integer) bundleProvider.getResourceListComplete().size()
+			: bundleProvider.size();
+
 		if (requestedPage.offset != null || !server.canStoreSearchResults()) {
-			pageSize = offsetCalculatePageSize(server, requestedPage, bundleProvider.size());
+			pageSize = offsetCalculatePageSize(server, requestedPage, bundleSize);
 			numToReturn = pageSize;
 
 			resourceList = offsetBuildResourceList(bundleProvider, requestedPage, numToReturn, responsePageBuilder);
@@ -107,13 +111,10 @@ public class ResponseBundleBuilder {
 		} else {
 			pageSize = pagingCalculatePageSize(requestedPage, server.getPagingProvider());
 
-			Integer size = bundleProvider.containsAllResources()
-					? (Integer) bundleProvider.getResourceListComplete().size()
-					: bundleProvider.size();
-			if (size == null) {
+			if (bundleSize == null) {
 				numToReturn = pageSize;
 			} else {
-				numToReturn = Math.min(pageSize, size.intValue() - theResponseBundleRequest.offset);
+				numToReturn = Math.min(pageSize, bundleSize.intValue() - theResponseBundleRequest.offset);
 			}
 
 			// numToReturn is the number of matched resources to return; there may be included or op-outcomes
