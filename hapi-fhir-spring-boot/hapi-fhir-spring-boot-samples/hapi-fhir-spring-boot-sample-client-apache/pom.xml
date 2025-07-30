@@ -5,10 +5,11 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir-spring-boot-samples</artifactId>
-		<version>8.3.15-SNAPSHOT</version>
+		<version>8.3.17-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>hapi-fhir-spring-boot-sample-client-apache</artifactId>
+	<name>HAPI-FHIR Spring Boot Sample Client (Apache)</name>
 
 	<packaging>jar</packaging>
 

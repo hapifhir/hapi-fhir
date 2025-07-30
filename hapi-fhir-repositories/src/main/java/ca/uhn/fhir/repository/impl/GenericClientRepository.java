@@ -75,11 +75,11 @@ public class GenericClientRepository implements IRepository {
 	@Override
 	public <B extends IBaseBundle, T extends IBaseResource> B search(
 			Class<B> theBundleType,
-			Class<T> theResourceType,
+			Class<T> theSearchResourceType,
 			Multimap<String, List<IQueryParameterType>> theSearchParameters,
 			Map<String, String> theHeaders) {
 		IUntypedQuery<IBaseBundle> search = myGenericClient.search();
-		IQuery<IBaseBundle> iBaseBundleIQuery = search.forResource(theResourceType);
+		IQuery<IBaseBundle> iBaseBundleIQuery = search.forResource(theSearchResourceType);
 		var op = iBaseBundleIQuery.returnBundle(theBundleType);
 		if (theSearchParameters != null) {
 			theSearchParameters.entries().forEach(e -> op.where(Map.of(e.getKey(), e.getValue())));

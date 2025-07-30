@@ -1,8 +1,5 @@
 package ca.uhn.fhir.jpa.bulk;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
@@ -10,7 +7,6 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
@@ -48,6 +44,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -72,15 +69,18 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -132,7 +132,6 @@ public class BulkDataExportProviderR4Test {
 
 		lenient().when(myDaoRegistry.getResourceDao(anyString())).thenReturn(myFhirResourceDao);
 		myProvider.setDaoRegistry(myDaoRegistry);
-
 	}
 
 	public void startWithFixedBaseUrl() {
@@ -674,7 +673,34 @@ public class BulkDataExportProviderR4Test {
 		assertNotNull(bp.getUntil());
 		assertNotNull(bp.getFilters());
 		assertEquals(GROUP_ID, bp.getGroupId());
-		assertEquals(true, bp.isExpandMdm());
+		assertTrue(bp.isExpandMdm());
+	}
+
+	static List<String> getOmittedResourceTypes() {
+		return SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT
+			.keySet().stream().toList();
+	}
+
+	@ParameterizedTest
+	@MethodSource("getOmittedResourceTypes")
+	public void patientExport_withVerbotenResourceTypes_fails(String theResourceType) throws IOException {
+		Parameters input = new Parameters();
+		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
+		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType(theResourceType));
+
+		// call
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/Patient/" + ProviderConstants.OPERATION_EXPORT);
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.setEntity(new ResourceEntity(myCtx, input));
+		ourLog.info("Request: {}", post);
+		try (CloseableHttpResponse response = myClient.execute(post)) {
+			ourLog.info("Response: {}", response.toString());
+			assertEquals(400, response.getStatusLine().getStatusCode());
+
+			String responseStr = new String(response.getEntity().getContent().readAllBytes(), StandardCharsets.UTF_8);
+
+			assertTrue(responseStr.contains("are invalid for this type of export"));
+		}
 	}
 
 	@Test
@@ -848,7 +874,8 @@ public class BulkDataExportProviderR4Test {
 		}
 
 		// verify
-		Set<String> expectedResourceTypes = new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myCtx));
+		Set<String> expectedResourceTypes = SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myCtx)
+			.stream().filter(r -> !SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.containsKey(r)).collect(Collectors.toSet());
 		expectedResourceTypes.add("Device");
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
@@ -871,6 +898,8 @@ public class BulkDataExportProviderR4Test {
 		input.addParameter(JpaConstants.PARAM_EXPORT_SINCE, now);
 		input.addParameter(JpaConstants.PARAM_EXPORT_UNTIL, later);
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType("Immunization?vaccine-code=foo"));
+		input.addParameter(JpaConstants.PARAM_EXPORT_PATIENT, new Reference("Patient/123"));
+		input.addParameter(JpaConstants.PARAM_EXPORT_PATIENT, new StringType("Patient/456"));
 
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
@@ -892,6 +921,7 @@ public class BulkDataExportProviderR4Test {
 		assertNotNull(bp.getSince());
 		assertNotNull(bp.getUntil());
 		assertThat(bp.getFilters()).containsExactlyInAnyOrder("Immunization?vaccine-code=foo");
+		assertThat(bp.getPatientIds()).containsExactlyInAnyOrder("Patient/123", "Patient/456");
 	}
 
 	@Test

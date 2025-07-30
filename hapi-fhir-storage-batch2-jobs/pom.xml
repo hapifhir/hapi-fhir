@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>8.3.15-SNAPSHOT</version>
+		<version>8.3.17-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-
+	<name>HAPI-FHIR Storage Batch2 Jobs</name>
 	<artifactId>hapi-fhir-storage-batch2-jobs</artifactId>
 
 	<dependencies>

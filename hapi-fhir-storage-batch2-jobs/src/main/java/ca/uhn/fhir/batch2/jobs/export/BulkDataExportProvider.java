@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI-FHIR Storage Batch2 Jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -48,7 +48,9 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletResponse;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
@@ -58,6 +60,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -214,8 +217,8 @@ public class BulkDataExportProvider {
 	}
 
 	@VisibleForTesting
-	Set<String> getPatientCompartmentResources(FhirContext theFhirContext) {
-		return getBulkDataExportSupport().getPatientCompartmentResources(theFhirContext);
+	Set<String> getPatientCompartmentResources(FhirContext theFhirContext, ExportStyle theExportStyle) {
+		return getBulkDataExportSupport().getPatientCompartmentResources(theFhirContext, theExportStyle);
 	}
 
 	/**
@@ -248,17 +251,14 @@ public class BulkDataExportProvider {
 							max = OperationParam.MAX_UNLIMITED,
 							typeName = "string")
 					List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
-			@OperationParam(
-							name = JpaConstants.PARAM_EXPORT_PATIENT,
-							min = 0,
-							max = OperationParam.MAX_UNLIMITED,
-							typeName = "string")
-					List<IPrimitiveType<String>> thePatient,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_PATIENT, min = 0, max = OperationParam.MAX_UNLIMITED)
+					List<IBase> thePatient,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
 			ServletRequestDetails theRequestDetails) {
 
-		List<IPrimitiveType<String>> patientIds = thePatient != null ? thePatient : new ArrayList<>();
+		final List<IPrimitiveType<String>> patientIds =
+				thePatient != null ? parsePatientList(thePatient) : new ArrayList<>();
 
 		doPatientExport(
 				theRequestDetails,
@@ -319,6 +319,35 @@ public class BulkDataExportProvider {
 				theRequestDetails);
 	}
 
+	static List<IPrimitiveType<String>> parsePatientList(@Nonnull List<IBase> thePatient) {
+		return thePatient.stream()
+				.map(patient -> {
+					if (patient instanceof IIdType patientIIdType) {
+						return patientIIdType;
+					} else {
+						return getStringPrimitiveFromParametersParameter(patient);
+					}
+				})
+				.toList();
+	}
+
+	private static IPrimitiveType<String> getStringPrimitiveFromParametersParameter(IBase patient) {
+		try {
+			Method getValueMethod = patient.getClass().getMethod("getValue");
+			Object value = getValueMethod.invoke(patient);
+			if (value instanceof IPrimitiveType<?> patientPrimitiveType
+					&& patientPrimitiveType.getValue() instanceof String) {
+				return (IPrimitiveType<String>) patientPrimitiveType;
+			} else if (value instanceof IBaseReference patientReference) {
+				return patientReference.getReferenceElement();
+			} else {
+				throw new InvalidRequestException("Unsupported type.");
+			}
+		} catch (Exception e) {
+			throw new InvalidRequestException("Invalid patient parameter.", e);
+		}
+	}
+
 	private void doPatientExport(
 			ServletRequestDetails theRequestDetails,
 			IPrimitiveType<String> theOutputFormat,
@@ -341,7 +370,8 @@ public class BulkDataExportProvider {
 
 		// set resourceTypes to all patient compartment resources if it is null
 		IPrimitiveType<String> resourceTypes = theType == null
-				? new StringDt(String.join(",", getBulkDataExportSupport().getPatientCompartmentResources()))
+				? new StringDt(String.join(
+						",", getBulkDataExportSupport().getPatientCompartmentResources(ExportStyle.PATIENT)))
 				: theType;
 
 		BulkExportJobParameters bulkExportJobParameters = new BulkExportJobParametersBuilder()
@@ -357,7 +387,8 @@ public class BulkDataExportProvider {
 				.build();
 
 		getBulkDataExportSupport()
-				.validateResourceTypesAllContainPatientSearchParams(bulkExportJobParameters.getResourceTypes());
+				.validateResourceTypesAllContainPatientSearchParams(
+						bulkExportJobParameters.getResourceTypes(), ExportStyle.PATIENT);
 
 		getBulkDataExportJobService().startJob(theRequestDetails, bulkExportJobParameters);
 	}

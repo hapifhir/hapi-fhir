@@ -26,7 +26,6 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.svcs.ISearchLimiterSvc;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
@@ -49,6 +48,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.MedicationAdministration;
 import org.hl7.fhir.r4.model.Observation;
@@ -109,12 +109,9 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	private IBatch2WorkChunkRepository myWorkChunkRepository;
 	@Autowired
 	private IJobPersistence myJobPersistence;
-	private JpaJobPersistenceImpl myJobPersistenceImpl;
-	@Autowired
-	private ISearchLimiterSvc mySearchLimiterSvc;
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-
+	private JpaJobPersistenceImpl myJobPersistenceImpl;
 
 	@AfterEach
 	void afterEach() {
@@ -329,69 +326,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		verifyBulkExportResults(options, Collections.singletonList("Patient/PM"), Collections.singletonList("Patient/PF"));
 	}
 
-	@Test
-	public void bulkExport_withOmittedResourcesInPatientCompartment_works() {
-		// setup
-		RequestDetails rd = new SystemRequestDetails();
-
-		Patient patient = new Patient();
-		patient.setId("pat-1");
-		myPatientDao.update(patient, rd);
-
-		Reference patientRef = new Reference("Patient/pat-1");
-
-		Observation obs = new Observation();
-		obs.setId("obs-included");
-		obs.setSubject(patientRef);
-		myObservationDao.update(obs, rd);
-
-		Group group = new Group();
-		group.setId("my-group");
-		group.setType(Group.GroupType.PERSON);
-		group.addMember()
-			.setEntity(patientRef);
-		myGroupDao.update(group, rd);
-
-		BulkDataExportSupport support = new BulkDataExportSupport(
-			myFhirContext,
-			myDaoRegistry,
-			myRequestPartitionHelperSvc
-		);
-
-		// test
-		StorageSettings.IndexEnabledEnum currentIndexSetting = myStorageSettings.getIndexMissingFields();
-		try {
-			// setup for test
-			mySearchLimiterSvc.addOmittedResourceType(ProviderConstants.OPERATION_EXPORT, "Group");
-			// set enabled because bulk export requires it:
-			// error: "HAPI-0797: You attempted to start a Patient Bulk Export, but the system has `Index Missing Fields` disabled. It must be enabled for Patient Bulk Export"
-			myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
-
-			// set the export options
-			BulkExportJobParameters options = new BulkExportJobParameters();
-			options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
-			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-			options.setPatientIds(Set.of(patientRef.getReference()));
-
-			options.setResourceTypes(support.getPatientCompartmentResources());
-			Batch2JobStartResponse results = startNewJob(options);
-
-			// verify
-			awaitExportComplete(results.getInstanceId());
-
-			BulkExportJobResults response = getBulkExportJobResults(results.getInstanceId());
-
-			Map<String, List<String>> outputMap = response.getResourceTypeToBinaryIds();
-			ourLog.info("Resource Types returned: " + String.join(", ", outputMap.keySet()));
-
-			assertThat(outputMap).containsKeys("Observation", "Patient")
-				.doesNotContainKey("Group");
-		} finally {
-			// reset
-			mySearchLimiterSvc.removeAllResourcesForOperation(ProviderConstants.OPERATION_EXPORT);
-			myStorageSettings.setIndexMissingFields(currentIndexSetting);
-		}
-	}
 
 	@Test
 	public void testGroupBulkExportNotInGroup_DoesNotShowUp() {
@@ -1287,11 +1221,11 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		assertFalse(startResponse.isUsesCachedResult());
 
 		// Run a scheduled pass to build the export
-		String instanceId = startResponse.getInstanceId();
-		JobInstance jobInstance = awaitExportComplete(instanceId);
+		JobInstance jobInstance = awaitExportComplete(startResponse.getInstanceId());
 
 		// Iterate over the files
-		BulkExportJobResults results = getBulkExportJobResults(instanceId);
+		String report = myJobCoordinator.getInstance(startResponse.getInstanceId()).getReport();
+		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 
 		Set<String> foundIds = new HashSet<>();
 		for (Map.Entry<String, List<String>> file : results.getResourceTypeToBinaryIds().entrySet()) {
@@ -1336,6 +1270,68 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		return jobInstance;
 	}
 
+	@Test
+	public void bulkExport_withOmittedResourcesInPatientCompartment_works() {
+		// setup
+		RequestDetails rd = new SystemRequestDetails();
+
+		Patient patient = new Patient();
+		patient.setId("pat-1");
+		myPatientDao.update(patient, rd);
+
+		Reference patientRef = new Reference("Patient/pat-1");
+
+		Observation obs = new Observation();
+		obs.setId("obs-included");
+		obs.setSubject(patientRef);
+		myObservationDao.update(obs, rd);
+
+		Group group = new Group();
+		group.setId("my-group");
+		group.setType(Group.GroupType.PERSON);
+		group.addMember()
+			.setEntity(patientRef);
+		myGroupDao.update(group, rd);
+
+		ListResource listResource = new ListResource();
+		listResource.setSubject(patientRef);
+		myListDao.create(listResource, rd);
+
+		BulkDataExportSupport support = new BulkDataExportSupport(
+			myFhirContext,
+			myDaoRegistry,
+			myRequestPartitionHelperSvc
+		);
+
+		// test
+		StorageSettings.IndexEnabledEnum currentIndexSetting = myStorageSettings.getIndexMissingFields();
+
+		// set enabled because bulk export requires it:
+		// error: "HAPI-0797: You attempted to start a Patient Bulk Export, but the system has `Index Missing Fields` disabled. It must be enabled for Patient Bulk Export"
+		myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
+
+		// set the export options
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		options.setPatientIds(Set.of(patientRef.getReference()));
+
+		// use Group to get Group and List resources
+		options.setResourceTypes(support.getPatientCompartmentResources(BulkExportJobParameters.ExportStyle.GROUP));
+		Batch2JobStartResponse results = startNewJob(options);
+
+		// verify
+		awaitExportComplete(results.getInstanceId());
+
+		BulkExportJobResults response = getBulkExportJobResults(results.getInstanceId());
+
+		Map<String, List<String>> outputMap = response.getResourceTypeToBinaryIds();
+		ourLog.info("Resource Types returned: " + String.join(", ", outputMap.keySet()));
+
+		assertThat(outputMap).containsKeys("Observation", "Patient")
+			.doesNotContainKeys("Group", "List");
+	}
+
 	private BulkExportJobResults getBulkExportJobResults(String theInstanceId) {
 		String report = myJobCoordinator.getInstance(theInstanceId).getReport();
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
@@ -1354,7 +1350,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 			.until(() -> myJobCoordinator.getInstance(theInstanceId).getReport() != null);
 		return jobInstance;
 	}
-
 
 	@Test
 	public void testValidateParameters_InvalidPostFetch_NoParams() {

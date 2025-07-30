@@ -174,7 +174,7 @@ public class InMemoryFhirRepository implements IRepository {
 			Class<B> theBundleType,
 			Class<T> theResourceType,
 			Multimap<String, List<IQueryParameterType>> theSearchParameters,
-			Map<String, String> theHeaders) {
+			Map<String, String> theUnusedHeaders) {
 
 		NaiveSearching search = new NaiveSearching(
 				fhirContext(),

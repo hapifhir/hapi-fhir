@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI-FHIR Storage Batch2 Jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -33,8 +33,7 @@ import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.svcs.ISearchLimiterSvc;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
@@ -42,7 +41,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -56,9 +54,6 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
-
-	@Autowired
-	private ISearchLimiterSvc mySearchLimiterSvc;
 
 	@Nonnull
 	@Override
@@ -88,26 +83,32 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		 * when we recursively fetch resource types for a given patient/group
 		 * we don't recurse for types that they did not request
 		 */
-		List<String> resourceTypesToFetch;
-		if (theStepExecutionDetails.getParameters().getExportStyle() == BulkExportJobParameters.ExportStyle.PATIENT) {
-			Collection<String> omitted =
-					mySearchLimiterSvc.getResourcesToOmitForOperationSearches(ProviderConstants.OPERATION_EXPORT);
-			resourceTypesToFetch = params.getResourceTypes().stream()
-					.filter(r -> !omitted.contains(r))
-					.toList();
-		} else {
-			resourceTypesToFetch = params.getResourceTypes().stream().toList();
-		}
-		providerParams.setRequestedResourceTypes(resourceTypesToFetch);
+		providerParams.setRequestedResourceTypes(params.getResourceTypes());
 
 		int submissionCount = 0;
 		try {
 			Set<TypedPidJson> submittedBatchResourceIds = new HashSet<>();
 
 			/*
+			 * NB: patient-compartment limitation
+			 * We know that Group and List are part of patient compartment.
+			 * But allowing export of them seems like a security flaw.
+			 * So we'll exclude them.
+			 */
+			Set<String> resourceTypesToOmit =
+					theStepExecutionDetails.getParameters().getExportStyle()
+									== BulkExportJobParameters.ExportStyle.PATIENT
+							? new HashSet<>(
+									SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.keySet())
+							: Set.of();
+
+			/*
 			 * We will fetch ids for each resource type in the ResourceTypes (_type filter).
 			 */
-			for (String resourceType : resourceTypesToFetch) {
+			for (String resourceType : params.getResourceTypes()) {
+				if (resourceTypesToOmit.contains(resourceType)) {
+					continue;
+				}
 				providerParams.setResourceType(resourceType);
 
 				// filters are the filters for searching

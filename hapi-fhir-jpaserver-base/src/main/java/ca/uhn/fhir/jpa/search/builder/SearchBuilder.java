@@ -59,7 +59,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.SearchConstants;
 import ca.uhn.fhir.jpa.search.builder.models.ResolvedSearchQueryExecutor;
@@ -104,7 +103,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.svcs.ISearchLimiterSvc;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -236,8 +234,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	private IFulltextSearchSvc myFulltextSearchSvc;
 
-	private final ISearchLimiterSvc mySearchLimiterSvc;
-
 	@Autowired(required = false)
 	public void setFullTextSearch(IFulltextSearchSvc theFulltextSearchSvc) {
 		myFulltextSearchSvc = theFulltextSearchSvc;
@@ -271,12 +267,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			IIdHelperService theIdHelperService,
 			IResourceHistoryTableDao theResourceHistoryTagDao,
 			IJpaStorageResourceParser theIJpaStorageResourceParser,
-			ISearchLimiterSvc theSearchLimiterSvc,
 			Class<? extends IBaseResource> theResourceType) {
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
 		myStorageSettings = theStorageSettings;
-		mySearchLimiterSvc = theSearchLimiterSvc;
 
 		myEntityManagerFactory = theEntityManagerFactory;
 		mySqlBuilderFactory = theSqlBuilderFactory;
@@ -364,7 +358,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					.setParamName(nextParamName)
 					.setAndOrParams(andOrParams)
 					.setRequest(theRequest)
-					.setRequestPartitionId(myRequestPartitionId));
+					.setRequestPartitionId(myRequestPartitionId)
+					.setIncludeDeleted(myParams.getSearchIncludeDeletedMode()));
 			if (predicate != null) {
 				theSearchSqlBuilder.addPredicate(predicate);
 			}
@@ -724,7 +719,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				myResourceName,
 				mySqlBuilderFactory,
 				myDialectProvider,
-				theSearchProperties.isDoCountOnlyFlag());
+				theSearchProperties.isDoCountOnlyFlag(),
+				myResourceName == null || myResourceName.isBlank());
 		QueryStack queryStack3 = new QueryStack(
 				theRequest,
 				theParams,
@@ -760,14 +756,24 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		// Normal search
+		// we will create a resourceTablePredicate if and only if we have an _id SP.
 		searchForIdsWithAndOr(sqlBuilder, queryStack3, myParams, theRequest);
 
 		// If we haven't added any predicates yet, we're doing a search for all resources. Make sure we add the
 		// partition ID predicate in that case.
 		if (!sqlBuilder.haveAtLeastOnePredicate()) {
-			Condition partitionIdPredicate = sqlBuilder
-					.getOrCreateResourceTablePredicateBuilder()
-					.createPartitionIdPredicate(myRequestPartitionId);
+			Condition partitionIdPredicate;
+
+			if (theParams.getSearchIncludeDeletedMode() != null) {
+				partitionIdPredicate = sqlBuilder
+						.getOrCreateResourceTablePredicateBuilder(true, theParams.getSearchIncludeDeletedMode())
+						.createPartitionIdPredicate(myRequestPartitionId);
+			} else {
+				partitionIdPredicate = sqlBuilder
+						.getOrCreateResourceTablePredicateBuilder()
+						.createPartitionIdPredicate(myRequestPartitionId);
+			}
+
 			if (partitionIdPredicate != null) {
 				sqlBuilder.addPredicate(partitionIdPredicate);
 			}
@@ -858,7 +864,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				null,
 				mySqlBuilderFactory,
 				myDialectProvider,
-				theSearchQueryProperties.isDoCountOnlyFlag());
+				theSearchQueryProperties.isDoCountOnlyFlag(),
+				false);
 
 		QueryStack queryStack3 = new QueryStack(
 				theRequest,
@@ -892,14 +899,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					myResourceName,
 					mySqlBuilderFactory,
 					myDialectProvider,
-					theSearchQueryProperties.isDoCountOnlyFlag());
+					theSearchQueryProperties.isDoCountOnlyFlag(),
+					false);
 			GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(
 					theSearchQueryProperties.getOffset(), mySearchProperties.getMaxResultsRequested());
 			String sql = allTargetsSql.getSql();
 			Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
 
 			List<JpaPid> output =
-					jdbcTemplate.query(sql, new JpaPidRowMapper(myPartitionSettings.isPartitioningEnabled()), args);
+					jdbcTemplate.query(sql, args, new JpaPidRowMapper(myPartitionSettings.isPartitioningEnabled()));
 
 			// we add a search executor to fetch unlinked patients first
 			theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(output));
@@ -927,9 +935,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		if (myParams.getEverythingMode().isPatient()) {
-			Collection<String> resourcesToOmit =
-					mySearchLimiterSvc.getResourcesToOmitForOperationSearches(JpaConstants.OPERATION_EVERYTHING);
-			sqlBuilder.excludeResourceTypesPredicate(resourcesToOmit);
+			/*
+			 * NB: patient-compartment limitation
+			 *
+			 * We are manually excluding Group and List resources
+			 * from the patient-compartment for $everything operations on Patient type/instance.
+			 *
+			 * See issue: https://github.com/hapifhir/hapi-fhir/issues/7118
+			 */
+			sqlBuilder.excludeResourceTypesPredicate(
+					SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.keySet());
 		}
 
 		/*
@@ -1223,6 +1238,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			List<IBaseResource> theResourceListToPopulate,
 			boolean theForHistoryOperation,
 			Map<Long, Integer> thePosition) {
+
 		Map<JpaPid, Long> resourcePidToVersion = null;
 		for (JpaPid next : thePids) {
 			if (next.getVersion() != null && myStorageSettings.isRespectVersionsForSearchIncludes()) {
@@ -1442,9 +1458,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		// We only chunk because some jdbc drivers can't handle long param lists.
-		QueryChunker.chunk(thePids, t -> {
-			doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position);
-		});
+		QueryChunker.chunk(
+				thePids,
+				t -> doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
 	}
 
 	/**

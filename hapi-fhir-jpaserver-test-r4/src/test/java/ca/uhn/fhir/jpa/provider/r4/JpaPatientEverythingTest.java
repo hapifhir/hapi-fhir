@@ -1,23 +1,20 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
-import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.svcs.ISearchLimiterSvc;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Account;
@@ -96,7 +93,6 @@ import org.hl7.fhir.r4.model.SupplyRequest;
 import org.hl7.fhir.r4.model.VisionPrescription;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -108,21 +104,10 @@ import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
-	@Autowired
-	private ISearchLimiterSvc mySearchLimiterSvc;
-
-	@Autowired
-	private IResourceLinkDao myResourceLinkDao;
-
-
-	@AfterEach
+    @AfterEach
     public void afterEach() {
         JpaStorageSettings defaults = new JpaStorageSettings();
         myStorageSettings.setResourceClientIdStrategy(defaults.getResourceClientIdStrategy());
@@ -135,88 +120,6 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         referenceToPatient.setReference(patientId);
         return referenceToPatient;
     }
-
-	@Test
-	public void patientInstanceEverything_patientInGroupWithOtherPatients_cleansesGroupOfUnrelatedPatients() {
-		// setup
-		SystemRequestDetails requestDetails = new SystemRequestDetails();
-
-		// patient ids
-		String p1Id = "e783bb6f-e36b-8928-30ea-b5b9b63198cd";
-		String p2Id = "73443843-5ac0-49ef-4f64-3f3e79f51c3a";
-
-		{
-			Group group;
-			group = new Group();
-			group.setId("Group/my-group");
-			group.setType(Group.GroupType.PERSON);
-			group.setActive(true);
-			group.setName("Dr Hibert's Clinic");
-
-			// create the patients
-			for (String id : new String[]{p1Id, p2Id}) {
-				String given;
-				if (id.equals(p1Id)) {
-					given = "homer";
-				} else {
-					given = "marge";
-				}
-				Patient patient = new Patient();
-				patient.setActive(true);
-				patient.setId("Patient/" + id);
-				patient.addName()
-					.setFamily("Simpson")
-					.addGiven(given);
-
-				myPatientDao.update(patient, requestDetails);
-
-				// add them to the group as full objects, not references
-				Reference r = new Reference();
-				r.setResource(patient);
-				group.addMember()
-					.setEntity(r);
-			}
-
-			// create the group
-			myGroupDao.update(group, requestDetails);
-		}
-
-		Group g = myGroupDao.read(new IdType("Group/my-group"), requestDetails);
-
-		try {
-			mySearchLimiterSvc.addOmittedResourceType(JpaConstants.OPERATION_EVERYTHING, "Group");
-
-			// verify that the non-everything search is not affected
-			IBaseBundle rb = myClient.search()
-				.byUrl("Group?member=Patient/" + p1Id)
-				.cacheControl(CacheControlDirective.noCache().setNoStore(true))
-				.execute();
-			assertTrue(rb instanceof Bundle);
-			Bundle results = (Bundle)rb;
-
-			assertEquals(1, results.getEntry().size());
-			Group retGroup = (Group) results.getEntry().get(0).getResource();
-			assertTrue(retGroup.getMember()
-				.stream().anyMatch(r -> r.getEntity().getReference().equals("Patient/" + p1Id)));
-
-			// test
-			Bundle response = myClient.operation()
-				.onInstance(String.format("Patient/%s", p1Id))
-				.named(JpaConstants.OPERATION_EVERYTHING)
-				.withNoParameters(Parameters.class)
-				.returnResourceType(Bundle.class)
-				.execute();
-			assertNotNull(response);
-
-			assertEquals(1, response.getEntry().size());
-			assertTrue(response.getEntry().stream()
-				.anyMatch(e -> e.getResource() instanceof Patient));
-			assertFalse(response.getEntry().stream()
-				.anyMatch(e -> e.getResource() instanceof Group));
-		} finally {
-			mySearchLimiterSvc.removeAllResourcesForOperation(JpaConstants.OPERATION_EVERYTHING);
-		}
-	}
 
     @Test
     public void testLargeEverythingFetchReturnsAllPossibleResources() throws IOException {
@@ -280,7 +183,6 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
     @Test
     public void patientEverything_shouldReturnAccount_whenAccountRefersToPatient() throws Exception {
-
         Reference referenceToPatient = createPatient();
 
         Account account = new Account();
@@ -1160,9 +1062,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
     }
 
     @Test
-    public void patientEverything_shouldReturnGroup_whenGroupRefersToPatient() throws Exception {
-
-        Reference referenceToPatient = createPatient();
+    public void patientEverything_shouldNotReturnGroup_whenGroupRefersToPatient() throws Exception {
+		Reference referenceToPatient = createPatient();
 
         Group group = new Group();
         Group.GroupMemberComponent memberComponent = new Group.GroupMemberComponent();
@@ -1172,7 +1073,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 			assertThat(actual).contains(referenceToPatient.getReference());
-			assertThat(actual).contains(groupId);
+			assertThat(actual).doesNotContain(groupId);
     }
 
     @Test
@@ -1271,11 +1172,11 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 			assertThat(actual).contains(referenceToPatient.getReference());
-			assertThat(actual).contains(listResourceId);
+			assertThat(actual).doesNotContain(listResourceId);
     }
 
     @Test
-    public void patientEverything_shouldReturnList_whenListRefersToPatientAsSource() throws Exception {
+    public void patientEverything_shouldOmitList_whenListRefersToPatientAsSource() throws Exception {
 
         Reference referenceToPatient = createPatient();
 
@@ -1284,8 +1185,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         String listResourceId = myClient.create().resource(listResource).execute().getId().toUnqualifiedVersionless().getValue();
 
         Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
-			assertThat(actual).contains(referenceToPatient.getReference());
-			assertThat(actual).contains(listResourceId);
+		assertThat(actual).contains(referenceToPatient.getReference());
+		assertThat(actual).doesNotContain(listResourceId);
     }
 
     @Test
