@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.repository;
+package ca.uhn.fhir.jpa.repository.searchparam;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -153,6 +153,26 @@ class SearchParameterMapQueryBuilderTest {
 		myResult = myBuilder.build();
 
 		assertThat(myResult.getIncludes()).contains(new Include("Patient:general-practitioner", true));
+	}
+
+	@Test
+	void testRevinclude() {
+		// given
+		myBuilder.addOrList("_revinclude", new StringParam("Patient:general-practitioner"));
+
+		myResult = myBuilder.build();
+
+		assertThat(myResult.getRevIncludes()).contains(new Include("Patient:general-practitioner"));
+	}
+
+	@Test
+	void testRevincludeIterate() {
+		// given
+		myBuilder.addOrList("_revinclude:iterate", new StringParam("Patient:general-practitioner"));
+
+		myResult = myBuilder.build();
+
+		assertThat(myResult.getRevIncludes()).contains(new Include("Patient:general-practitioner", true));
 	}
 
 	private void assertConvertsTo(String expected) {

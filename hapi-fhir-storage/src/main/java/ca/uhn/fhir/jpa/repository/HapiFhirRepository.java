@@ -23,10 +23,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.jpa.repository.searchparam.SearchParameterMapQueryBuilder;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.repository.impl.ISearchQueryBuilder.ISearchQueryContributor;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
@@ -43,7 +45,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.server.method.PageMethodBinding;
 import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -53,7 +54,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -141,18 +141,19 @@ public class HapiFhirRepository implements IRepository {
 	public <B extends IBaseBundle, T extends IBaseResource> B search(
 			Class<B> theBundleType,
 			Class<T> theResourceType,
-			Multimap<String, List<IQueryParameterType>> theSearchParameters,
+			ISearchQueryContributor theSearchParameters,
 			Map<String, String> theHeaders) {
 		RequestDetails details = startWith(myRequestDetails)
 				.setAction(RestOperationTypeEnum.SEARCH_TYPE)
 				.addHeaders(theHeaders)
 				.create();
-		SearchConverter converter = new SearchConverter();
-		converter.convertParameters(theSearchParameters, fhirContext());
-		details.setParameters(converter.myResultParameters);
+		SearchParameterMap searchParameterMap =
+				SearchParameterMapQueryBuilder.buildFromQueryContributor(theSearchParameters);
+		// fixme need a SPMap -> Map<String, String[]> converter
+		// details.setParameters(fixme);
 		details.setResourceName(myDaoRegistry.getFhirContext().getResourceType(theResourceType));
 		IBundleProvider bundleProvider =
-				myDaoRegistry.getResourceDao(theResourceType).search(converter.mySearchParameterMap, details);
+				myDaoRegistry.getResourceDao(theResourceType).search(searchParameterMap, details);
 
 		if (bundleProvider == null) {
 			return null;
