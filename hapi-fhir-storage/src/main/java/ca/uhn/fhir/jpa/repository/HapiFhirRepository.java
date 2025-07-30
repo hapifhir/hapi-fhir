@@ -61,7 +61,8 @@ import static ca.uhn.fhir.jpa.repository.RequestDetailsCloner.startWith;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
- * This class leverages DaoRegistry from Hapi-fhir to implement CRUD FHIR API operations constrained to provide only the operations necessary for the cql-evaluator modules to function.
+ * This class leverages DaoRegistry from Hapi-fhir JPA server to implement IRepository.
+ * This does not implement history.
  **/
 @SuppressWarnings("squid:S1135")
 public class HapiFhirRepository implements IRepository {

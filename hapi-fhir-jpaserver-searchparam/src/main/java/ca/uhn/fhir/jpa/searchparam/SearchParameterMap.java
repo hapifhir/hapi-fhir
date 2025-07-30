@@ -24,6 +24,8 @@ import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.repository.impl.ISearchQueryBuilder;
+import ca.uhn.fhir.repository.impl.ISearchQueryBuilder.ISearchQueryContributor;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
@@ -64,7 +66,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class SearchParameterMap implements Serializable {
+public class SearchParameterMap implements Serializable, ISearchQueryContributor {
 	public static final Integer INTEGER_0 = 0;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParameterMap.class);
 	private static final long serialVersionUID = 1L;
@@ -164,7 +166,7 @@ public class SearchParameterMap implements Serializable {
 			return this;
 		}
 
-		List<List<IQueryParameterType>> paramList =  getOrCreate(theName);
+		List<List<IQueryParameterType>> paramList = getOrCreate(theName);
 
 		for (IQueryParameterOr<?> next : theAnd.getValuesAsQueryTokens()) {
 			if (next == null) {
@@ -783,6 +785,17 @@ public class SearchParameterMap implements Serializable {
 	 */
 	public boolean isOffsetQuery() {
 		return getOffset() != null && getCount() != null;
+	}
+
+	/**
+	 * Configure a query with the current settings.
+	 * This is an adaptor method to allow this class to be used in IRepository.search().
+	 * with repository implementations that don't use SearchParameterMap.
+	 * @param theBuilder the builder to configure with our settings
+	 */
+	@Override
+	public void contributeToQuery(ISearchQueryBuilder theBuilder) {
+		// fixme implement this: all entries, plus the specials.
 	}
 
 	public enum EverythingModeEnum {

@@ -301,7 +301,7 @@ public interface IRepository {
 			Map<String, String> theHeaders) {
 		// we have a cycle of default implementations between this and the search builder version.
 		// Implementors MUST implement one or the other or both.
-		return this.search(theBundleType, theResourceType, sb->sb.addAll(theSearchParameters), theHeaders);
+		return this.search(theBundleType, theResourceType, sb -> sb.addAll(theSearchParameters), theHeaders);
 	}
 
 	/**
@@ -318,13 +318,17 @@ public interface IRepository {
 	 * @return a Bundle with the results of the search
 	 */
 	default <B extends IBaseBundle, T extends IBaseResource> B search(
-		Class<B> theBundleType,
-		Class<T> theResourceType,
-		ISearchQueryContributor theQueryBuilder,
-		Map<String, String> theHeaders) {
+			Class<B> theBundleType,
+			Class<T> theResourceType,
+			ISearchQueryContributor theQueryBuilder,
+			Map<String, String> theHeaders) {
 		// we have a cycle of default implementations between this and the multi-map version.
 		// Implementors MUST implement one or the other for now.
-		return this.search(theBundleType, theResourceType, MultiMapSearchQueryBuilder.builderToMultimap(theQueryBuilder), theHeaders);
+		return this.search(
+				theBundleType,
+				theResourceType,
+				MultiMapSearchQueryBuilder.builderToMultimap(theQueryBuilder),
+				theHeaders);
 	}
 	/**
 	 * Searches this repository

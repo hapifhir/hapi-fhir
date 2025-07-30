@@ -30,7 +30,6 @@ public class MultiMapSearchQueryBuilder implements ISearchQueryBuilder {
 		return this;
 	}
 
-
 	private void validateHomogeneousList(String theName, List<IQueryParameterType> theValues) {
 		if (theValues.isEmpty()) {
 			return;
@@ -49,7 +48,8 @@ public class MultiMapSearchQueryBuilder implements ISearchQueryBuilder {
 		return mySearchParameters;
 	}
 
-	public static Multimap<String, List<IQueryParameterType>> builderToMultimap(ISearchQueryContributor theSearchQueryBuilder) {
+	public static Multimap<String, List<IQueryParameterType>> builderToMultimap(
+			ISearchQueryContributor theSearchQueryBuilder) {
 		MultiMapSearchQueryBuilder sb = new MultiMapSearchQueryBuilder();
 		theSearchQueryBuilder.contributeToQuery(sb);
 		return sb.toMultiMap();

@@ -34,5 +34,4 @@ class IncludeParameterProcessor implements ISpecialParameterProcessor {
 	static IncludeParameterProcessor revincludeProcessor(boolean theIterationFlag) {
 		return new IncludeParameterProcessor(theIterationFlag, SearchParameterMap::addRevInclude);
 	}
-
 }

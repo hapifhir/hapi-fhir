@@ -42,7 +42,7 @@ class LastValueWinsParameterProcessor<T> implements ISpecialParameterProcessor {
 	 * @param <T> the type used in the SearchParameterMap setter.
 	 */
 	public static <T> ISpecialParameterProcessor lastValueWins(
-		Function<String, T> theConverter, BiConsumer<SearchParameterMap, T> theSearchParameterMapSetter) {
+			Function<String, T> theConverter, BiConsumer<SearchParameterMap, T> theSearchParameterMapSetter) {
 		return new LastValueWinsParameterProcessor<>(theConverter, theSearchParameterMapSetter);
 	}
 }

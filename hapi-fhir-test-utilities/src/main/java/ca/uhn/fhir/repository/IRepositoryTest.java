@@ -16,6 +16,7 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.bundle.BundleResponseEntryParts;
 import ca.uhn.fhir.util.bundle.SearchBundleEntryParts;
+import com.google.common.collect.Multimaps;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -27,9 +28,9 @@ import org.junit.jupiter.api.condition.EnabledIf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_201_CREATED;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_204_NO_CONTENT;
@@ -279,7 +280,7 @@ public interface IRepositoryTest {
 		IBaseBundle bundle = new BundleBuilder(context).getBundle();
 
 		// when
-		IBaseBundle searchResult = repository.search(bundle.getClass(), patientClass, Map.of());
+		IBaseBundle searchResult = repository.search(bundle.getClass(), patientClass, Multimaps.forMap(Map.of()));
 
 		// then
 		List<SearchBundleEntryParts> entries = BundleUtil.getSearchBundleEntryParts(context, searchResult);
@@ -302,7 +303,7 @@ public interface IRepositoryTest {
 		IBaseBundle searchResult = repository.search(
 				bundle.getClass(),
 				patientClass,
-				Map.of("_id", List.of(new ReferenceParam("abc"), new ReferenceParam("ghi"))));
+				Multimaps.forMap(Map.of("_id", List.of(new ReferenceParam("abc"), new ReferenceParam("ghi")))));
 
 		// then
 		List<SearchBundleEntryParts> entries = BundleUtil.getSearchBundleEntryParts(context, searchResult);
@@ -332,15 +333,15 @@ public interface IRepositoryTest {
 		}
 	}
 
-	private IRepository getRepository() {
+	default IRepository getRepository() {
 		return getRepositoryTestSupport().repository();
 	}
 
-	private ITestDataBuilder getTestDataBuilder() {
+	default ITestDataBuilder getTestDataBuilder() {
 		return getRepositoryTestSupport().getRepositoryTestDataBuilder();
 	}
 
-	private FhirTerser getTerser() {
+	default FhirTerser getTerser() {
 		return getRepositoryTestSupport().getFhirTerser();
 	}
 }

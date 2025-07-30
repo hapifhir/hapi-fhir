@@ -9,7 +9,8 @@ import java.util.function.Consumer;
 
 class SortProcessor implements ISpecialParameterProcessor {
 	@Override
-	public void process(String theKey, List<IQueryParameterType> theSortItems, SearchParameterMap theSearchParameterMap) {
+	public void process(
+			String theKey, List<IQueryParameterType> theSortItems, SearchParameterMap theSearchParameterMap) {
 		List<SortSpec> sortSpecs = theSortItems.stream()
 				.map(ISpecialParameterProcessor::paramAsQueryString)
 				.map(SortSpec::fromR3OrLaterParameterValue)

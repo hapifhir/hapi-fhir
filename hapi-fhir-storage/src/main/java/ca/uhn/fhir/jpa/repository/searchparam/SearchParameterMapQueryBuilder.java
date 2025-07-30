@@ -114,5 +114,4 @@ public class SearchParameterMapQueryBuilder extends DefaultSearchQueryBuilder {
 
 		return Collections.unmodifiableMap(handlers);
 	}
-
 }

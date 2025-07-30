@@ -20,9 +20,9 @@ public interface ISearchQueryBuilder {
 		return addOrList(theCount, new NumberParam(theInteger));
 	}
 
-
 	ISearchQueryBuilder addOrList(String theParamName, List<IQueryParameterType> theParameters);
 
+	@FunctionalInterface
 	interface ISearchQueryContributor {
 		void contributeToQuery(ISearchQueryBuilder theBuilder);
 	}
