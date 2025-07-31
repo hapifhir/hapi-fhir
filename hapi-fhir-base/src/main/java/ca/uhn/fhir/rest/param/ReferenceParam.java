@@ -113,7 +113,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	}
 
 	@Override
-	String doGetValueAsQueryToken(FhirContext theContext) {
+	String doGetValueAsQueryToken() {
 		if (isBlank(getResourceType())) {
 			return myValue; // e.g. urn:asdjd or 123 or cid:wieiuru or #1
 		} else {

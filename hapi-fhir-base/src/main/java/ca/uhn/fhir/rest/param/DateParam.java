@@ -111,7 +111,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam>
 	}
 
 	@Override
-	String doGetValueAsQueryToken(FhirContext theContext) {
+	String doGetValueAsQueryToken() {
 		StringBuilder b = new StringBuilder();
 		if (getPrefix() != null) {
 			b.append(ParameterUtil.escapeWithDefault(getPrefix().getValue()));
