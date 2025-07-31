@@ -241,7 +241,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 	@Test
 	public void testMethodDeleteByPK_whenEntitiesExistWithRepeatedId_willDeleteTheCorrectEntityAndReturnTrue(){
-		String commonId = "common_id";
+		String commonId = "common-id";
 
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 
@@ -265,6 +265,26 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		assertThat(messages).hasSize(1);
 		assertEquals(ResourceType.Organization.name(), messages.stream().toList().get(0).getResourceType());
 
+	}
+
+	@Test
+	public void testMethodPersist_AddEntriesWithSameExternalIdAndVersion_expectSuccess(){
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+
+		// given
+		String commonId = "common-id";
+		Patient patient = sendPatient(commonId);
+		Organization organization = sendOrganization(commonId);
+
+		ResourceModifiedMessage patientResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
+		ResourceModifiedMessage organizationResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, organization, BaseResourceMessage.OperationTypeEnum.CREATE);
+
+		// when
+		myResourceModifiedMessagePersistenceSvc.persist(patientResourceModifiedMessage);
+		myResourceModifiedMessagePersistenceSvc.persist(organizationResourceModifiedMessage);
+
+		// then
+		assertEquals(2,  myResourceModifiedMessagePersistenceSvc.getMessagePersistedCount());
 	}
 
 	@Test

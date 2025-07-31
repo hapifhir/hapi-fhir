@@ -234,13 +234,15 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 			patient.setId(thePatientId);
 		}
 
-		DaoMethodOutcome outcome = myPatientDao.create(patient);
-		patient.setActive(true);
-
+		DaoMethodOutcome outcome;
 		if(Strings.isNullOrEmpty(thePatientId)) {
+			outcome = myPatientDao.create(patient);
 			patient.setId( outcome.getId());
+		} else {
+			myPatientDao.update(patient);
 		}
 
+		patient.setActive(true);
 		return patient;
 	}
 
@@ -255,9 +257,12 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 			org.setId(theOrgId);
 		}
 
-		DaoMethodOutcome outcome = myOrganizationDao.create(org);
+		DaoMethodOutcome outcome;
 		if(Strings.isNullOrEmpty(theOrgId)) {
+			outcome = myOrganizationDao.create(org);
 			org.setId(outcome.getId());
+		} else {
+			myOrganizationDao.update(org);
 		}
 
 		return org;
