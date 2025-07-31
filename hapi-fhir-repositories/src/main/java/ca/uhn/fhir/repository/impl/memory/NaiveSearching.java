@@ -128,8 +128,8 @@ class NaiveSearching {
 		} else if (theIdParam instanceof StringParam stringParam) {
 			return new IdDt(stringParam.getValue());
 		} else {
-			throw new IllegalArgumentException(Msg.code(2773) +
-				"Unsupported _id parameter type: " + theIdParam.getClass().getName());
+			throw new IllegalArgumentException(Msg.code(2773) + "Unsupported _id parameter type: "
+					+ theIdParam.getClass().getName());
 		}
 	}
 
@@ -139,8 +139,8 @@ class NaiveSearching {
 			return Predicates.alwaysTrue();
 		} else {
 			// SOMEDAY Apply the rest of the params with a matcher
-			throw new UnsupportedOperationException(Msg.code(2780) +
-				"NaiveSearching does not support search parameters other than _id. Received: "
+			throw new UnsupportedOperationException(
+					Msg.code(2780) + "NaiveSearching does not support search parameters other than _id. Received: "
 							+ theSearchParameters.keys());
 		}
 	}

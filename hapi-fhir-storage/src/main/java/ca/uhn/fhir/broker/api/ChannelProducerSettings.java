@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.broker.api;
 
-
 import jakarta.annotation.Nonnull;
 
 public class ChannelProducerSettings extends BaseChannelSettings {

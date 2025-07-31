@@ -20,9 +20,8 @@
 package ca.uhn.fhir.replacereferences;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import jakarta.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
  * This class models the parameters for processing a $hapi.fhir.undo-replace-references operation.

@@ -75,7 +75,7 @@ public class ProvenanceAgentJson {
 	}
 
 	public static List<ProvenanceAgentJson> from(
-		@Nonnull List<IProvenanceAgent> theProvenanceAgents, FhirContext theFhirContext) {
+			@Nonnull List<IProvenanceAgent> theProvenanceAgents, FhirContext theFhirContext) {
 		if (theProvenanceAgents == null) {
 			return null;
 		}

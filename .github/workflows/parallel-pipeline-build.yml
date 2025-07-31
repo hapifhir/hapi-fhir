@@ -40,6 +40,11 @@ jobs:
           java-version: '17'
           cache: 'maven'
 
+      - name: Apply code formatting
+        run: |
+          echo "Applying Spotless code formatting to ensure consistent formatting..."
+          mvn spotless:apply --batch-mode --no-transfer-progress
+
       - name: Build checkstyle module
         run: |
           echo "Building hapi-fhir-checkstyle module first as it's required for cross-module validation..."

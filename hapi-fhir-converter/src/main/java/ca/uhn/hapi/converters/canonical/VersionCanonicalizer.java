@@ -566,7 +566,8 @@ public class VersionCanonicalizer {
 			} else if (myDstu2Hl7OrgContext.getVersion().getVersion().equals(version)) {
 				return myDstu2Hl7OrgContext.newJsonParser().encodeResourceToString(theResource);
 			} else {
-				throw new IllegalArgumentException(Msg.code(2777) + "Cannot encode resource with version: %s".formatted(version));
+				throw new IllegalArgumentException(
+						Msg.code(2777) + "Cannot encode resource with version: %s".formatted(version));
 			}
 		}
 	}
