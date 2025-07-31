@@ -19,6 +19,6 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-enum TransactionAppliesToEnum {
+public enum TransactionAppliesToEnum {
 	ANY_OPERATION
 }
