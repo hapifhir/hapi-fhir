@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.api;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import jakarta.annotation.Nonnull;
 
 import java.util.ArrayList;
 import java.util.StringTokenizer;
@@ -70,6 +71,7 @@ public class QualifiedParamList extends ArrayList<String> {
 		return retVal;
 	}
 
+	@Nonnull
 	public static QualifiedParamList splitQueryStringByCommasIgnoreEscape(String theQualifier, String theParams) {
 		QualifiedParamList retVal = new QualifiedParamList();
 		retVal.setQualifier(theQualifier);

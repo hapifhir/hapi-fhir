@@ -52,7 +52,7 @@ import java.util.Optional;
  */
 @Entity
 @Table(
-		name = "HFJ_RES_SEARCH_URL",
+		name = ResourceSearchUrlEntity.TABLE_NAME,
 		indexes = {
 			@Index(name = "IDX_RESSEARCHURL_RES", columnList = "RES_ID"),
 			@Index(name = "IDX_RESSEARCHURL_TIME", columnList = "CREATED_TIME")
@@ -61,6 +61,7 @@ public class ResourceSearchUrlEntity {
 
 	public static final String RES_SEARCH_URL_COLUMN_NAME = "RES_SEARCH_URL";
 	public static final String PARTITION_ID = "PARTITION_ID";
+	public static final String TABLE_NAME = "HFJ_RES_SEARCH_URL";
 
 	@EmbeddedId
 	private ResourceSearchUrlEntityPK myPk;
