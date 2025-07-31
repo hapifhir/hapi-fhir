@@ -17,7 +17,7 @@ public class ResourceLinkUtils {
 	 * returns false otherwise.
 	 */
 	public static boolean isTargetCanonicalUrl(ResourceLink theLink) {
-		return isBlank(theLink.getTargetResourceId()) && theLink.getTargetResourceType().equals(UNKNOWN);
+		return isBlank(theLink.getTargetResourceId())
+				&& theLink.getTargetResourceType().equals(UNKNOWN);
 	}
 }
-
