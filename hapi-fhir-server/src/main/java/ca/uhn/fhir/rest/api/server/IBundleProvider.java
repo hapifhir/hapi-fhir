@@ -173,12 +173,13 @@ public interface IBundleProvider {
 	default List<IBaseResource> getAllResources() {
 		List<IBaseResource> retval = new ArrayList<>();
 
-		Integer size = size();
-		if (size == null) {
+		Integer sizeI = size();
+		if (sizeI == null) {
 			throw new ConfigurationException(
 					Msg.code(464)
 							+ "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.");
 		}
+		int size = containsAllResources() ? getResourceListComplete().size() : sizeI.intValue();
 		if (size > 0) {
 			retval.addAll(getResources(0, size));
 		}
