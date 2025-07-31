@@ -98,26 +98,30 @@ public class ResourceIndexedSearchParamsTest {
 	}
 
 	@Test
-	public void matchResourceLinks() {
+	public void match_withLogicalReference_works() {
 		ResourceTable table = new ResourceTable();
-		table.setResourceType("Questionnaire");
+		table.setResourceType("QuestionnaireResponse");
 		ResourceIndexedSearchParams matcher = ResourceIndexedSearchParams
 			.withLists(table);
-		ResourceLink resourceLink = new ResourceLink();
-		resourceLink.setSourcePath("QuestionnaireResponse.questionnaire");
-		resourceLink.setTargetResourceUrl(new IdType("http://localhost:8000/Questionnaire/a1"));
-		resourceLink.setSourceResource(new ResourceTable().setResourceType("QuestionnaireResponse"));
+		ResourceLink resourceLink = ResourceLink.forLogicalReference(
+			"QuestionnaireResponse.questionnaire",
+			table,
+			"http://localhost:8000/Questionnaire/a1",
+			new Date()
+		);
 		matcher.getResourceLinks()
 			.add(resourceLink);
 
+		// test
 		boolean match = matcher.matchResourceLinks(
 			myStorageSettings,
 			"QuestionnaireResponse",
 			"questionnaire",
-			new ReferenceParam("http://localhost:8000/Questionnaire/fme-discharge-assessment"),
+			new ReferenceParam("http://localhost:8000/Questionnaire/a1"),
 			"QuestionnaireResponse.questionnaire"
 		);
 
+		// validate
 		assertTrue(match);
 	}
 

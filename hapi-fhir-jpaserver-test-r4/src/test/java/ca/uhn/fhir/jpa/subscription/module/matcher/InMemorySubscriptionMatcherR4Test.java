@@ -1,19 +1,14 @@
 package ca.uhn.fhir.jpa.subscription.module.matcher;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.InMemorySubscriptionMatcher;
@@ -94,7 +89,9 @@ import java.util.List;
 import java.util.TimeZone;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -643,10 +640,9 @@ public class InMemorySubscriptionMatcherR4Test {
 	}
 
 	@Test
-	public void canonicalSubscriptionMatching() {
+	public void match_withCanonicalUrlReference_works() {
 		// setup
 		IParser parser = myFhirContext.newJsonParser();
-		Questionnaire questionnaire;
 		QuestionnaireResponse questionnaireResponse;
 
 		{
@@ -658,14 +654,6 @@ public class InMemorySubscriptionMatcherR4Test {
 				}
 				""";
 			questionnaireResponse = parser.parseResource(QuestionnaireResponse.class, questionnaireResponseStr);
-			String questionaireStr = """
-				{
-				  "resourceType": "Questionnaire",
-				  "id": "a1",
-				  "status": "active"
-				}
-				""";
-			questionnaire = parser.parseResource(Questionnaire.class, questionaireStr);
 		}
 
 		CanonicalSubscription subscription = new CanonicalSubscription();
@@ -676,15 +664,11 @@ public class InMemorySubscriptionMatcherR4Test {
 		msg.setSubscriptionId("123");
 		msg.setId(new IdType("QuestionaireResponse/ABC"));
 
+		// test
 		InMemoryMatchResult result = myInMemorySubscriptionMatcher.match(subscription, msg);
 
+		// validate
 		assertTrue(result.matched());
-//		myInMemorySubscriptionMatcher.match(
-//			null,
-//			questionnaireResponse,
-//			myFhirContext.getResourceDefinition("QuestionnaireResponse"),
-//			null
-//		);
 	}
 
 	@Test

@@ -368,7 +368,11 @@ public final class ResourceIndexedSearchParams {
 		// this suggest that we do not expect ot see baseUrl *unless* it's a "treatbaseaslocal"
 		if (isNotBlank(baseUrl)) {
 			// canonical urls are full urls with a base and everything
-			if (!ResourceLinkUtils.isTargetCanonicalUrl(theResourceLink) && !theStorageSettings.getTreatBaseUrlsAsLocal().contains(baseUrl)) {
+			if (ResourceLinkUtils.isTargetCanonicalUrl(theResourceLink)) {
+				// the reference to a canonical url should be that url
+				return theReference.getValue().equals(theResourceLink.getTargetResourceUrl());
+			}
+			if (!theStorageSettings.getTreatBaseUrlsAsLocal().contains(baseUrl)) {
 				return false;
 			}
 		}
