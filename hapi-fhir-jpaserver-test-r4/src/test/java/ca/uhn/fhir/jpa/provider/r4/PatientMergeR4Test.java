@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData;
@@ -49,6 +48,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.DEFAULT_PRESERVE_VERSION_REFS_R4_AND_LATER;
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.RESOURCE_TYPES_EXPECTED_TO_BE_PATCHED;
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.TOTAL_EXPECTED_PATCHES;
@@ -77,8 +77,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 	ReplaceReferencesLargeTestData myLargeTestData;
 
-	private Set<String> originalDontStripVersionPaths;
-
 	@Override
 	@AfterEach
 	public void after() throws Exception {
@@ -86,7 +84,9 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		myStorageSettings.setDefaultTransactionEntriesForWrite(new JpaStorageSettings().getDefaultTransactionEntriesForWrite());
 		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
-		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(originalDontStripVersionPaths);
+		// For some reason, if this value is not restored to its default at the end, it interferes with other suites,
+		// so restore the default value
+		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(DEFAULT_PRESERVE_VERSION_REFS_R4_AND_LATER);
 	}
 
 	@Override
@@ -98,9 +98,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 		// we need to keep the version on Provenance.target fields to verify that Provenance resources were saved
 		// with versioned target references, and delete-source on merge works correctly.
-		// For some reason, if this value is not restored to original at the end, it interferes with other suites,
-		// so keep the original value and restore it at the end
-		originalDontStripVersionPaths = myFhirContext.getParserOptions().getDontStripVersionsFromReferencesAtPaths();
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
 		myTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
 		myLargeTestData = new ReplaceReferencesLargeTestData(myDaoRegistry);
