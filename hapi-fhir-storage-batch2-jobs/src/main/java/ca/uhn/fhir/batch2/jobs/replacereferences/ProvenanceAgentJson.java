@@ -25,11 +25,11 @@ import ca.uhn.fhir.model.api.ProvenanceAgent;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TerserUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 /**
  * ProvenanceAgentJson is a JSON representation of an IProvenanceAgent.
@@ -75,7 +75,7 @@ public class ProvenanceAgentJson {
 	}
 
 	public static List<ProvenanceAgentJson> from(
-			@Nullable List<IProvenanceAgent> theProvenanceAgents, FhirContext theFhirContext) {
+		@Nonnull List<IProvenanceAgent> theProvenanceAgents, FhirContext theFhirContext) {
 		if (theProvenanceAgents == null) {
 			return null;
 		}

@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.config.util.ResourceTypeUtil;
 import ca.uhn.fhir.jpa.dao.data.IResourceTypeDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -119,7 +120,7 @@ public class ResourceTypeCacheSvcImpl implements IResourceTypeCacheSvc {
 						myResourceTypeDao.flush();
 					} catch (DataIntegrityViolationException e) {
 						if (e.getMessage().contains("Value too long for column")) {
-							throw new InternalErrorException("Resource type name is too long: " + theResourceType, e);
+							throw new InternalErrorException(Msg.code(2764) + "Resource type name is too long: " + theResourceType, e);
 						}
 						// This can happen if the resource type already exists in the database
 						ourLog.info("Resource type already exists: {}", theResourceType);

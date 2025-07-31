@@ -1,6 +1,7 @@
 package ca.uhn.fhir.repository.impl.memory;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -127,8 +128,8 @@ class NaiveSearching {
 		} else if (theIdParam instanceof StringParam stringParam) {
 			return new IdDt(stringParam.getValue());
 		} else {
-			throw new IllegalArgumentException(
-					"Unsupported _id parameter type: " + theIdParam.getClass().getName());
+			throw new IllegalArgumentException(Msg.code(2773) +
+				"Unsupported _id parameter type: " + theIdParam.getClass().getName());
 		}
 	}
 
@@ -138,8 +139,8 @@ class NaiveSearching {
 			return Predicates.alwaysTrue();
 		} else {
 			// SOMEDAY Apply the rest of the params with a matcher
-			throw new UnsupportedOperationException(
-					"NaiveSearching does not support search parameters other than _id. Received: "
+			throw new UnsupportedOperationException(Msg.code(2774) +
+				"NaiveSearching does not support search parameters other than _id. Received: "
 							+ theSearchParameters.keys());
 		}
 	}
