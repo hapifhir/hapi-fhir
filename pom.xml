@@ -3032,6 +3032,40 @@
 
 	<profiles>
 		<profile>
+			<id>CHECKSTYLE-ALL</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-checkstyle-plugin</artifactId>
+						<inherited>false</inherited>
+						<configuration>
+							<sourceDirectories>
+								<sourceDirectory>./</sourceDirectory>
+							</sourceDirectories>
+							<includes>**/src/main/java/**/*.java</includes>
+							<excludes>**/osgi/**/*, **/.mvn/**/*, **/.mvn_/**/*, **/target/**/*, **/test/**/*</excludes>
+							<includeTestSourceDirectory>false</includeTestSourceDirectory>
+							<configLocation>checkstyle/hapi-base-checkstyle.xml</configLocation>
+							<suppressionsLocation>checkstyle/hapi-base-checkstyle-suppression.xml</suppressionsLocation>
+							<inputEncoding>UTF-8</inputEncoding>
+							<consoleOutput>true</consoleOutput>
+							<failOnViolation>true</failOnViolation>
+						</configuration>
+						<executions>
+							<execution>
+								<id>checkstyle-all-modules</id>
+								<phase>validate</phase>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
 			<id>ERRORPRONE</id>
 			<build>
 				<plugins>

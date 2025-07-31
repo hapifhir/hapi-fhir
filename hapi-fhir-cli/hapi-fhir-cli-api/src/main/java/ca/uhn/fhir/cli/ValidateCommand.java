@@ -103,7 +103,8 @@ public class ValidateCommand extends BaseCommand {
 			input = IOUtils.toByteArray(new FileInputStream(new File(theFileName)));
 		} catch (IOException e) {
 			throw new ParseException(
-					Msg.code(1615) + "Failed to load file '" + theFileName + "' - Error: " + e.toString());
+//					Msg.code(1615) + "Failed to load file '" + theFileName + "' - Error: " + e.toString());
+					Msg.code(2478) + "Failed to load file '" + theFileName + "' - Error: " + e.toString());
 		}
 		return input;
 	}

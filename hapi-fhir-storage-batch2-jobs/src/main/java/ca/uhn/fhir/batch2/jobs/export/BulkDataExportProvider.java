@@ -344,7 +344,7 @@ public class BulkDataExportProvider {
 				throw new InvalidRequestException(Msg.code(2763) + "Unsupported type.");
 			}
 		} catch (Exception e) {
-			throw new InvalidRequestException(Msg.code(2764) + "Invalid patient parameter.", e);
+			throw new InvalidRequestException(Msg.code(2779) + "Invalid patient parameter.", e);
 		}
 	}
 
