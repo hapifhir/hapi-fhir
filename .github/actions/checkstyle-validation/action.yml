@@ -34,6 +34,24 @@ runs:
         path: "$HOME/.m2/repository/ca/uhn/"
         key: ${{ inputs.hapi-cache-key }}
 
+    - name: Debug cache contents
+      shell: bash
+      run: |
+        echo "Checking Maven repository contents..."
+        ls -la $HOME/.m2/repository/ca/uhn/hapi/fhir/ || echo "HAPI FHIR directory not found"
+        ls -la $HOME/.m2/repository/ca/uhn/hapi/fhir/hapi-fhir-checkstyle/ || echo "hapi-fhir-checkstyle directory not found"
+        find $HOME/.m2/repository -name "*checkstyle*" -type f || echo "No checkstyle artifacts found"
+
+    - name: Build checkstyle module if not cached
+      shell: bash
+      run: |
+        if [ ! -f "$HOME/.m2/repository/ca/uhn/hapi/fhir/hapi-fhir-checkstyle/8.5.0-SNAPSHOT/hapi-fhir-checkstyle-8.5.0-SNAPSHOT.jar" ]; then
+          echo "hapi-fhir-checkstyle not found in cache, building it..."
+          mvn clean install -pl hapi-fhir-checkstyle --batch-mode --no-transfer-progress
+        else
+          echo "hapi-fhir-checkstyle found in cache, skipping build"
+        fi
+
     - name: Apply code formatting
       shell: bash
       run: |
