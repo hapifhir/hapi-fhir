@@ -47,7 +47,7 @@ jobs:
           echo "This step ensures that HAPI FHIR error codes (Msg.code) are unique across all modules."
           echo "If this step fails, it means there are checkstyle violations that must be fixed before the build can proceed."
           echo ""
-          mvn clean validate -P CHECKSTYLE-ALL --batch-mode --no-transfer-progress
+          mvn clean validate -P CHECKSTYLE --batch-mode --no-transfer-progress
 
   run-parallel-build:
     needs: 

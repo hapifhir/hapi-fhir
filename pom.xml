@@ -3032,7 +3032,7 @@
 
 	<profiles>
 		<profile>
-			<id>CHECKSTYLE-ALL</id>
+			<id>CHECKSTYLE</id>
 			<build>
 				<plugins>
 					<plugin>
