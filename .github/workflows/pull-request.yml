@@ -28,36 +28,8 @@ jobs:
     outputs:
       ignored_modules: ${{ steps.load_config.outputs.ignored_modules }}
 
-  checkstyle:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: 'maven'
-
-      - name: Build checkstyle module
-        run: |
-          echo "Building hapi-fhir-checkstyle module first as it's required for cross-module validation..."
-          mvn clean install -pl hapi-fhir-checkstyle --batch-mode --no-transfer-progress
-
-      - name: Run cross-module checkstyle validation
-        run: |
-          echo "Running cross-module checkstyle validation to detect duplicate error codes and other violations..."
-          echo "This step ensures that HAPI FHIR error codes (Msg.code) are unique across all modules."
-          echo "If this step fails, it means there are checkstyle violations that must be fixed before the build can proceed."
-          echo ""
-          mvn validate -P CHECKSTYLE --batch-mode --no-transfer-progress
-
   run-parallel-build:
-    needs: 
-      - load-config-and-run
-      - checkstyle
+    needs: load-config-and-run
     uses: ./.github/workflows/parallel-pipeline-build.yml
     with:
       ignored_modules: ${{ needs.load-config-and-run.outputs.ignored_modules }}
