@@ -59,7 +59,6 @@ import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPolicy;
-import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterAll;
@@ -75,6 +74,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.TreeSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -1230,16 +1230,23 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 		assertThat(all).hasSize(4);
 		// validate first error, in R4B (as opposed to R4) Observation.value.ofType(Quantity) has ValueSet binding,
 		// so first error has `Unknown code for ValueSet` error message
-		assertThat(all.get(1).getMessage()).contains("The Coding provided (http://unitsofmeasure.org#Heck) was not found in the value set 'Vital Signs Units' " +
+		Optional<SingleValidationMessage> notFoundInVitalSignsUnitsMessage = all.stream().filter(m -> m.getMessage().contains("The Coding provided (http://unitsofmeasure.org#Heck) was not found in the value set 'Vital Signs Units' " +
 			"(http://hl7.org/fhir/ValueSet/ucum-vitals-common|4.3.0), and a code should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable). " +
-			" (error message = Unknown code 'http://unitsofmeasure.org#Heck' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/ucum-vitals-common'");
-		assertThat(all.get(1).getLocationString()).contains("Observation.value.ofType(Quantity)");
-		// validate second error
-		assertThat(all.get(2).getMessage()).contains("Error processing unit 'Heck': The unit 'Heck' is unknown' at position 0 (for 'http://unitsofmeasure.org#Heck')");
-		assertThat(all.get(2).getLocationString()).contains("Observation.value.ofType(Quantity).code");
-		// validate third error
-		assertThat(all.get(3).getMessage()).contains("The value provided ('Heck') was not found in the value set 'Body Temperature Units'");
-		assertThat(all.get(3).getLocationString()).contains("Observation.value.ofType(Quantity).code");
+			" (error message = Unknown code 'http://unitsofmeasure.org#Heck' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/ucum-vitals-common'")).findFirst();
+		assertThat(notFoundInVitalSignsUnitsMessage.isPresent()).isTrue();
+		assertThat(notFoundInVitalSignsUnitsMessage.get().getLocationString()).contains("Observation.value.ofType(Quantity)");
+
+		// Ensure there's a 'Heck is unknown' error. Note that there may be multiple of these in validation logic, but all should be rooted at path `Observation.value.ofType(Quantity)`
+		Optional<SingleValidationMessage> heckIsUnknownMessage = all.stream().filter(m ->
+		m.getMessage().contains("Error processing unit 'Heck': The unit 'Heck' is unknown' at position 0 (for 'http://unitsofmeasure.org#Heck')")).findFirst();
+		assertThat(heckIsUnknownMessage.isPresent()).isTrue();
+		assertThat(heckIsUnknownMessage.get().getLocationString()).contains("Observation.value.ofType(Quantity)");
+
+		// Ensure there's a ('Heck') was not found in the value set 'Body Temperature Units' error.
+		Optional<SingleValidationMessage> notFoundInBodyTemperatureUnitsMessage = all.stream().filter(m ->
+			m.getMessage().contains("The value provided ('Heck') was not found in the value set 'Body Temperature Units'")).findFirst();
+		assertThat(notFoundInBodyTemperatureUnitsMessage.isPresent()).isTrue();
+		assertThat(notFoundInBodyTemperatureUnitsMessage.get().getLocationString()).contains("Observation.value.ofType(Quantity).code");
 	}
 
 	@Test
