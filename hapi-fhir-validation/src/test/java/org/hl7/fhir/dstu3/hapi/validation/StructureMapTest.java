@@ -1,13 +1,10 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import jakarta.annotation.Nullable;
-import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
-import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.DecimalType;
 import org.hl7.fhir.dstu3.model.ElementDefinition;
@@ -18,17 +15,11 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.StructureMap;
 import org.hl7.fhir.dstu3.model.UriType;
-//import org.hl7.fhir.dstu3.utils.StructureMapUtilities;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class StructureMapTest extends BaseValidationTestWithInlineMocks {
 
@@ -281,31 +272,6 @@ public class StructureMapTest extends BaseValidationTestWithInlineMocks {
 			this.myCtx = FhirContext.forDstu3();
 		}
 	}
-
-	/**
-	 * See #682
-	 */
-	@Test
-	public void testMappingTransform() throws Exception {
-		Map<String, StructureMap> maps = new HashMap<>(); // Instantiate a hashmap for StructureMaps
-		PrePopulatedValidationSupport prePopulatedValidationSupport = new PrePopulatedValidationSupport(myCtx);
-		this.validationSupport = new ValidationSupportChain(prePopulatedValidationSupport, new DefaultProfileValidationSupport(myCtx));
-
-		StructureDefinition sd1 = this.createTestStructure(); // Calls a method that constructs a comp
-		prePopulatedValidationSupport.addStructureDefinition(sd1); // Add custom structure to validation support.
-		this.hapiContext = new HapiWorkerContext(this.myCtx, this.validationSupport);// Init the Hapi Work
-		StructureMap map = this.createTestStructuremap();
-		maps.put(map.getUrl(), map);
-		/*FIXME
-		StructureMapUtilities scu = new StructureMapUtilities(hapiContext, maps, null, null);
-		List<StructureDefinition> result = scu.analyse(null, map).getProfiles();
-
-		assertThat(result).hasSize(1);
-
-		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.get(0)));
-	*/
-	}
-
 
 	public class TargetParam {
 		private String type;
