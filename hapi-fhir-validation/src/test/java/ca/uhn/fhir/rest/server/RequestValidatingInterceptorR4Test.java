@@ -126,7 +126,6 @@ public class RequestValidatingInterceptorR4Test extends BaseValidationTestWithIn
 		ourLog.info("Response was:\n{}", status);
 
 		assertThat(argumentCaptor.getValue()).isInstanceOf(RequestDetails.class);
-
 	}
 
 	@Test

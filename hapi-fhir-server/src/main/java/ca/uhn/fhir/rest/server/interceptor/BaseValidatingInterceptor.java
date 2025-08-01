@@ -33,6 +33,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
+import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.text.StrLookup;
@@ -121,7 +122,12 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 		myValidator = theValidator;
 	}
 
-	abstract ValidationResult doValidate(FhirValidator theValidator, T theRequest);
+	@Deprecated
+	public ValidationResult doValidate(FhirValidator theValidator, T theRequest) {
+		return doValidate(theValidator, theRequest, ValidationOptions.empty());
+	}
+
+	abstract ValidationResult doValidate(FhirValidator theValidator, T theRequest, ValidationOptions theOptions);
 
 	/**
 	 * Fail the request by throwing an {@link UnprocessableEntityException} as a result of a validation failure.
@@ -345,7 +351,9 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 
 		ValidationResult validationResult;
 		try {
-			validationResult = doValidate(validator, theRequest);
+//			validationResult = doValidate(validator, theRequest);
+			validationResult = doValidate(validator, theRequest,
+				ValidationOptions.empty().setAppContext(theRequestDetails));
 		} catch (Exception e) {
 			if (myIgnoreValidatorExceptions) {
 				ourLog.warn("Validator threw an exception during validation", e);

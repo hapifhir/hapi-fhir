@@ -32,6 +32,11 @@ public class ValidationOptions {
 	private static ValidationOptions ourEmpty;
 	private Set<String> myProfiles;
 
+	/**
+	 * Context for the validation (a RequestDetails object)
+	 */
+	private Object myAppContext;
+
 	public ValidationOptions() {}
 
 	public Set<String> getProfiles() {
@@ -53,6 +58,15 @@ public class ValidationOptions {
 			return addProfile(theProfileUri);
 		}
 		return this;
+	}
+
+	public ValidationOptions setAppContext(Object theContext) {
+		myAppContext = theContext;
+		return this;
+	}
+
+	public Object getAppContext() {
+		return myAppContext;
 	}
 
 	public static ValidationOptions empty() {
