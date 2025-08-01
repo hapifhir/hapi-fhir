@@ -61,7 +61,6 @@ public class ResponseValidatingInterceptor extends BaseValidatingInterceptor<IBa
 		myExcludeOperationTypes.add(theOperationType);
 	}
 
-
 	@Override
 	ValidationResult doValidate(FhirValidator theValidator, IBaseResource theRequest, ValidationOptions theOptions) {
 		return theValidator.validateWithResult(theRequest, theOptions);
