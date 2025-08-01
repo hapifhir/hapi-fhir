@@ -23,6 +23,15 @@ runs:
         java-version: ${{ inputs.java-version }}
         cache: 'maven'
 
+    - name: Create and List Maven Cache Directory
+      shell: bash
+      run: |
+        mkdir -p $HOME/.m2/repository
+        pwd
+        ls -al $HOME/.m2/repository
+      env:
+        MAVEN_CACHE_FOLDER: $HOME/.m2/repository
+
     - name: Restore Maven Cache
       uses: ./.github/actions/caching-handler
       with:
