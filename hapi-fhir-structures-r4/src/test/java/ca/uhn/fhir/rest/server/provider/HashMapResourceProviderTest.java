@@ -14,6 +14,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Order;
@@ -51,6 +52,9 @@ public class HashMapResourceProviderTest {
 	@RegisterExtension
 	@Order(2)
 	private static final HashMapResourceProviderExtension<Observation> myObservationResourceProvider = new HashMapResourceProviderExtension<>(ourRestServer, Observation.class);
+	@RegisterExtension
+	@Order(3)
+	private static final HashMapResourceProviderExtension<Organization> ourOrganizationResourceProvider = new HashMapResourceProviderExtension<>(ourRestServer, Organization.class);
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HashMapResourceProviderTest.class);
 
@@ -219,16 +223,15 @@ public class HashMapResourceProviderTest {
 			.collect(Collectors.toList());
 		ourLog.info("Received IDs: {}", ids);
 		assertThat(ids).containsExactly(id2.toUnqualified().withVersion("2").getValue(), id2.toUnqualified().withVersion("1").getValue(), id1.toUnqualified().withVersion("1").getValue());
-
 	}
 
 	@Test
 	public void testSearchAll() {
 		// Create
+		ourRestServer.getFhirClient().registerInterceptor(new LoggingInterceptor(true));
 		for (int i = 0; i < 100; i++) {
 			Patient p = new Patient();
 			p.addName().setFamily("FAM" + i);
-			ourRestServer.getFhirClient().registerInterceptor(new LoggingInterceptor(true));
 			IIdType id = ourRestServer.getFhirClient().create().resource(p).execute().getId();
 			assertThat(id.getIdPart()).matches("[0-9]+");
 			assertEquals("1", id.getVersionIdPart());
