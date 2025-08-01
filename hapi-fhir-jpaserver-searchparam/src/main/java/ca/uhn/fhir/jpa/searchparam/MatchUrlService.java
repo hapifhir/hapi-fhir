@@ -70,6 +70,11 @@ public class MatchUrlService {
 		super();
 	}
 
+	public MatchUrlService(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRegistry) {
+		myFhirContext = theFhirContext;
+		mySearchParamRegistry = theSearchParamRegistry;
+	}
+
 	public SearchParameterMap translateMatchUrl(
 			String theMatchUrl, RuntimeResourceDefinition theResourceDefinition, Flag... theFlags) {
 		SearchParameterMap paramMap = new SearchParameterMap();

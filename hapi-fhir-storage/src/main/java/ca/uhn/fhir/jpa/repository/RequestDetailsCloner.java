@@ -22,8 +22,10 @@ package ca.uhn.fhir.jpa.repository;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRestfulResponse;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -47,7 +49,11 @@ class RequestDetailsCloner {
 		newDetails.setParameters(new HashMap<>());
 		newDetails.setResourceName(null);
 		newDetails.setCompartmentName(null);
-		newDetails.setResponse(theDetails.getResponse());
+		IRestfulResponse response = theDetails.getResponse();
+		if (response == null) {
+			response = new SystemRestfulResponse(newDetails);
+		}
+		newDetails.setResponse(response);
 
 		return new DetailsBuilder(newDetails);
 	}
@@ -76,8 +82,12 @@ class RequestDetailsCloner {
 
 		DetailsBuilder setParameters(IBaseParameters theParameters) {
 			IParser parser = myDetails.getServer().getFhirContext().newJsonParser();
-			myDetails.setRequestContents(
-					parser.encodeResourceToString(theParameters).getBytes());
+			if (theParameters != null) {
+				myDetails.setRequestContents(
+						parser.encodeResourceToString(theParameters).getBytes());
+			} else {
+				myDetails.setRequestContents(new byte[0]);
+			}
 
 			return this;
 		}
