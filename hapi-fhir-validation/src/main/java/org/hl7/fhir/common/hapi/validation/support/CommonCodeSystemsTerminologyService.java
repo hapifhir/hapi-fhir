@@ -15,6 +15,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
@@ -68,7 +69,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	private static final Map<String, String> ISO_4217_CODES = Collections.unmodifiableMap(buildIso4217Codes());
 	private static final Map<String, String> ISO_3166_CODES = Collections.unmodifiableMap(buildIso3166Codes());
 	private final FhirContext myFhirContext;
-	private final VersionCanonicalizer myVersionCanonicalizer;
+	private VersionCanonicalizer myVersionCanonicalizer;
 	private volatile org.hl7.fhir.r5.model.ValueSet myLanguagesVs;
 	private volatile Map<String, String> myLanguagesLanugageMap;
 	private volatile Map<String, String> myLanguagesRegionMap;
@@ -80,6 +81,11 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		Objects.requireNonNull(theFhirContext);
 		myFhirContext = theFhirContext;
 		myVersionCanonicalizer = new VersionCanonicalizer(theFhirContext);
+	}
+
+	@VisibleForTesting
+	public void setVersionCanonicalizer(VersionCanonicalizer theVersionCanonicalizer) {
+		myVersionCanonicalizer = theVersionCanonicalizer;
 	}
 
 	@Override

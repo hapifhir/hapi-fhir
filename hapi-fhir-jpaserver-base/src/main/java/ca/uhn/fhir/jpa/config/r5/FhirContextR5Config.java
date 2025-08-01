@@ -20,6 +20,8 @@
 package ca.uhn.fhir.jpa.config.r5;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.narrative.INarrativeGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
@@ -28,9 +30,12 @@ import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.configureFhirContext
 public class FhirContextR5Config {
 	@Bean(name = "primaryFhirContext")
 	@Primary
-	public FhirContext fhirContextR5() {
+	public FhirContext fhirContextR5(@Autowired(required = false) INarrativeGenerator theNarrativeGenerator) {
 		FhirContext retVal = FhirContext.forR5();
 
+		if (theNarrativeGenerator != null) {
+			retVal.setNarrativeGenerator(theNarrativeGenerator);
+		}
 		configureFhirContext(retVal);
 
 		return retVal;

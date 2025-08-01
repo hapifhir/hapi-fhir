@@ -40,6 +40,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
@@ -83,6 +84,8 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
 		myPartitionSettings.setDefaultPartitionId(ALTERNATE_DEFAULT_ID);
+
+		initResourceTypeCacheFromConfig();
 	}
 
 	@Override
@@ -186,6 +189,21 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			ResourceTable observation = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
 			assertEquals("Organization", observation.getResourceType());
 			assertEquals(ALTERNATE_DEFAULT_ID, observation.getPartitionId().getPartitionId().intValue());
+		});
+	}
+
+	@Test
+	public void testCreateGroupWithNoPatientReferenceValueIsInTheDefaultPartition() {
+		//Given: A Group resource with no members
+		Group group = new Group();
+		group.setActual(false);
+
+		Long id =  myGroupDao.create(group, mySrd).getId().getIdPartAsLong();
+		//Verify: Group is successfully created and put in the default partition
+		runInTransaction(() -> {
+			ResourceTable table = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
+			assertEquals("Group", table.getResourceType());
+			assertEquals(ALTERNATE_DEFAULT_ID, table.getPartitionId().getPartitionId().intValue());
 		});
 	}
 

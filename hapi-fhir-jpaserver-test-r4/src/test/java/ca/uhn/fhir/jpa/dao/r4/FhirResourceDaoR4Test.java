@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
@@ -10,6 +12,7 @@ import ca.uhn.fhir.jpa.api.pid.StreamTemplate;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
+import ca.uhn.fhir.jpa.dao.r4.suites.IPatchTests;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
@@ -35,6 +38,7 @@ import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -112,6 +116,7 @@ import org.hl7.fhir.r4.model.Quantity.QuantityComparator;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Range;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -125,6 +130,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -137,6 +144,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -146,6 +154,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
@@ -162,12 +171,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 
 @SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
-public class FhirResourceDaoR4Test extends BaseJpaR4Test {
+public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4Test.class);
 
 	@AfterEach
-	public final void after() {
+	public void after() {
 		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 		myStorageSettings.setTreatReferencesAsLogical(new JpaStorageSettings().getTreatReferencesAsLogical());
 		myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
@@ -184,6 +193,21 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	public void beforeEach() {
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 		myStorageSettings.setWriteToSearchParamIdentityTable(true);
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myFhirContext;
+	}
+
+	@Override
+	public DaoRegistry getDaoRegistry() {
+		return myDaoRegistry;
+	}
+
+	@Override
+	public JpaStorageSettings getStorageSettings() {
+		return myStorageSettings;
 	}
 
 	private List<String> extractNames(IBundleProvider theSearch) {
@@ -300,7 +324,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			assertThat(tokenIndexes).asList().containsExactly("true");
 		});
 	}
-
 
 	@Test
 	public void testUpdateResource_whenTokenPropertyAssignedTooLargeValue_willTruncateLargeValueOnUpdate(){
@@ -2675,7 +2698,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			found = toList(myPatientDao.search(new SearchParameterMap(Patient.SP_BIRTHDATE + "AAAA", new DateParam(ParamPrefixEnum.GREATERTHAN, "2000-01-01")).setLoadSynchronous(true)));
 			assertThat(found).isEmpty();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1223) + "Unknown search parameter \"birthdateAAAA\" for resource type \"Patient\". Valid search parameters for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertEquals(Msg.code(1223) + "Unknown search parameter \"birthdateAAAA\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, _profile, _security, _source, _tag, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
 	}
 
@@ -3440,7 +3463,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			myObservationDao.search(pm);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1194) + "Unknown _sort parameter value \"hello\" for resource type \"Observation\" (Note: sort parameters values must use a valid Search Parameter). Valid values for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, based-on, category, code, code-value-concept, code-value-date, code-value-quantity, code-value-string, combo-code, combo-code-value-concept, combo-code-value-quantity, combo-data-absent-reason, combo-value-concept, combo-value-quantity, component-code, component-code-value-concept, component-code-value-quantity, component-data-absent-reason, component-value-concept, component-value-quantity, data-absent-reason, date, derived-from, device, encounter, focus, has-member, identifier, method, part-of, patient, performer, specimen, status, subject, value-concept, value-date, value-quantity, value-string]", e.getMessage());
+			assertEquals(Msg.code(1194) + "Unknown _sort parameter value \"hello\" for resource type \"Observation\" (Note: sort parameters values must use a valid Search Parameter). Valid values for this search are: [_id, _lastUpdated, _profile, _security, _source, _tag, based-on, category, code, code-value-concept, code-value-date, code-value-quantity, code-value-string, combo-code, combo-code-value-concept, combo-code-value-quantity, combo-data-absent-reason, combo-value-concept, combo-value-quantity, component-code, component-code-value-concept, component-code-value-quantity, component-data-absent-reason, component-value-concept, component-value-quantity, data-absent-reason, date, derived-from, device, encounter, focus, has-member, identifier, method, part-of, patient, performer, specimen, status, subject, value-concept, value-date, value-quantity, value-string]", e.getMessage());
 		}
 	}
 
@@ -4188,6 +4211,92 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertThat(toUnqualifiedVersionlessIdValues(myCarePlanDao.search(params))).isEmpty();
 	}
 
+	@ParameterizedTest
+	@MethodSource("timingDateRangeSearchParams")
+	public void testTimingDateRangeSearch_ordinalAndDatetimeSearchesMatch(List<Date> theEventDates, Period thePeriod, List<Date> theExpectedDates) {
+		// Given
+		ServiceRequest sr = new ServiceRequest();
+		sr.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
+		sr.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
+
+		for (Date date : theEventDates) {
+			Timing.TimingRepeatComponent repeat = new Timing.TimingRepeatComponent();
+			repeat.setBounds(thePeriod);
+
+			Timing timing = new Timing();
+			timing.addEvent(date);
+			timing.setRepeat(repeat);
+
+			sr.setOccurrence(timing);
+			myServiceRequestDao.create(sr, mySrd);
+		}
+
+		SearchParameterMap params;
+
+		// When
+		params = new SearchParameterMap();
+		params.add(ServiceRequest.SP_OCCURRENCE, new DateRangeParam("2025-02-08T14:00:00Z", "2025-02-09T14:00:00Z"));
+		IBundleProvider datetimeSearchResponse =  myServiceRequestDao.search(params);
+
+		// Then
+		assertThat(toUnqualifiedVersionlessIdValues(datetimeSearchResponse)).hasSize(theExpectedDates.size());
+		List<Date> eventDatesFromDatetimeSearch = getEventDatesFromServiceRequestsInSearchResponse(datetimeSearchResponse);
+		assertThat(eventDatesFromDatetimeSearch).containsExactlyElementsOf(theExpectedDates);
+
+		// When
+		params = new SearchParameterMap();
+		params.add(ServiceRequest.SP_OCCURRENCE, new DateRangeParam("2025-02-08", "2025-02-09"));
+		IBundleProvider ordinalDateSearchResponse = myServiceRequestDao.search(params);
+
+		// Then
+		assertThat(toUnqualifiedVersionlessIdValues(ordinalDateSearchResponse)).hasSize(theExpectedDates.size());
+		List<Date> eventDatesFromOrdinalSearch = getEventDatesFromServiceRequestsInSearchResponse(ordinalDateSearchResponse);
+		assertThat(eventDatesFromOrdinalSearch).containsExactlyElementsOf(theExpectedDates);
+	}
+
+	private static List<Date> getEventDatesFromServiceRequestsInSearchResponse(IBundleProvider theDateSearchResponse) {
+		return theDateSearchResponse.getAllResources().stream()
+			.filter(ServiceRequest.class::isInstance)
+			.map(resource -> {
+				ServiceRequest serviceRequest = (ServiceRequest) resource;
+				return serviceRequest.getOccurrenceTiming().getEvent().stream().findFirst().orElse(null);
+			}).filter(Objects::nonNull)
+			.map(DateTimeType::getValue)
+			.toList();
+	}
+
+	private static Stream<Arguments> timingDateRangeSearchParams() {
+		Date feb6 = new DateTimeType("2025-02-06T14:00:00Z").setTimeZoneZulu(true).getValue();
+		Date feb7 = new DateTimeType("2025-02-07T14:00:00Z").setTimeZoneZulu(true).getValue();
+		Date feb8 = new DateTimeType("2025-02-08T14:00:00Z").setTimeZoneZulu(true).getValue();
+		Date feb9 = new DateTimeType("2025-02-09T14:00:00Z").setTimeZoneZulu(true).getValue();
+		Date feb10 = new DateTimeType("2025-02-10T14:00:00Z").setTimeZoneZulu(true).getValue();
+		Date feb11 = new DateTimeType("2025-02-11T14:00:00Z").setTimeZoneZulu(true).getValue();
+
+		Period periodNoStart = new Period();
+		periodNoStart.setEnd(feb11);
+
+		Period periodNoEnd = new Period();
+		periodNoEnd.setStart(feb7);
+
+		Period periodStartEnd = new Period();
+		periodStartEnd.setStart(feb7);
+		periodStartEnd.setEnd(feb10);
+
+		return Stream.of(
+			// Timing period with no start
+			Arguments.of(List.of(feb7, feb8, feb9, feb10), periodNoStart, List.of(feb7, feb8, feb9)),
+			// Timing period with no end
+			Arguments.of(List.of(feb8, feb9, feb10, feb11), periodNoEnd, List.of(feb8, feb9, feb10, feb11)),
+			// Timing period with start and end, event falls within date range
+			Arguments.of(List.of(feb7, feb8, feb9, feb10), periodStartEnd, List.of(feb7, feb8, feb9, feb10)),
+			// Timing period with start and end, event falls before date range
+			Arguments.of(List.of(feb6, feb7, feb8, feb9, feb10), periodStartEnd, List.of(feb6, feb7, feb8, feb9, feb10)),
+			// Timing period with start and end, event falls after date range
+			Arguments.of(List.of(feb7, feb8, feb9, feb10, feb11), periodStartEnd, List.of(feb7, feb8, feb9, feb10, feb11))
+		);
+	}
+
 	@Test
 	public void testTokenParamWhichIsTooLong() {
 
@@ -4353,7 +4462,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertThat(actualNameList).containsExactly(namesInAlpha);
 	}
 
-
 	@Test
 	void testSearchForStream_carriesTxContext() {
 		// given
@@ -4375,6 +4483,32 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 				.collect(Collectors.toSet()));
 
 		assertEquals(ids, createdIds);
+	}
+
+	@Test
+	void testSearchForStream_withIncludeDeletedResources_resultIncludesDeletedResources() {
+		// given
+		IIdType deletedObservationId = createObservation();
+		IIdType observationId = createObservation();
+
+		SystemRequestDetails request = new SystemRequestDetails();
+
+		deleteResource(deletedObservationId);
+
+		SearchParameterMap searchParameterMap = new SearchParameterMap();
+		searchParameterMap.setSearchIncludeDeletedMode(SearchIncludeDeletedEnum.EXCLUSIVE);
+
+		// call within a tx, but carry the tx definition in the StreamTemplate
+		StreamTemplate<IResourcePersistentId<?>> streamTemplate =
+			StreamTemplate.fromSupplier(() -> myObservationDao.searchForIdStream(searchParameterMap, request, null))
+				.withTransactionAdvice(newTxTemplate());
+
+		// does the stream work?
+		Set<String> ids = streamTemplate.call(stream->
+			stream.map(typedId->typedId.getId().toString())
+				.collect(Collectors.toSet()));
+
+		assertThat(ids).containsExactly(deletedObservationId.getIdPart());
 	}
 
 	@Test

@@ -93,7 +93,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 			try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 				String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 				ourLog.info(resp);
-				assertEquals(200, response.getStatusLine().getStatusCode());
+				assertEquals(200, response.getStatusLine().getStatusCode(), resp);
 				assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Patient\",");
 				assertThat(resp).doesNotContain("{\"kind\":\"OBJECT\",\"name\":\"Observation\",");
 				assertThat(resp).doesNotContain("\"name\":\"Observation\",\"args\":[{\"name\":\"id\"");
@@ -146,7 +146,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 			try (CloseableHttpResponse response = ourHttpClient.execute(httpPost)) {
 				String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 				ourLog.info("Response has size: {}", FileUtil.formatFileSize(resp.length()));
-				assertEquals(200, response.getStatusLine().getStatusCode());
+				assertEquals(200, response.getStatusLine().getStatusCode(), resp);
 				assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Patient\",");
 				assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Observation\",");
 				assertThat(resp).contains("\"name\":\"Observation\",\"args\":[{\"name\":\"id\"");

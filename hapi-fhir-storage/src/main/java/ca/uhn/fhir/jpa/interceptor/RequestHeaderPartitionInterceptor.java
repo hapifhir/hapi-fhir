@@ -22,17 +22,18 @@ package ca.uhn.fhir.jpa.interceptor;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.messaging.RequestPartitionHeaderUtil;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.function.BiFunction;
 
 import static ca.uhn.fhir.interceptor.api.Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE;
 import static ca.uhn.fhir.interceptor.api.Pointcut.STORAGE_PARTITION_IDENTIFY_READ;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.ALL_PARTITIONS_TENANT_NAME;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.DEFAULT_PARTITION_NAME;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
@@ -40,86 +41,60 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * It reads the value of the X-Request-Partition-IDs header, which is expected to be a comma separated partition ids.
  * For the read operations it uses all the partitions specified in the header.
  * The create operations it uses the first partition ID from the header.
- *
+ * <p>
  * The tests for the functionality of this interceptor can be found in the
  * ca.uhn.fhir.jpa.interceptor.RequestHeaderPartitionTest class.
  */
 @Interceptor
 public class RequestHeaderPartitionInterceptor {
+	private final IDefaultPartitionSettings myDefaultPartitionSettings;
 
-	public static final String PARTITIONS_HEADER = "X-Request-Partition-IDs";
+	public RequestHeaderPartitionInterceptor(IDefaultPartitionSettings theDefaultPartitionSettings) {
+		myDefaultPartitionSettings = theDefaultPartitionSettings;
+	}
 
 	/**
-	 * This method is called to identify the partition ID for create operations.
-	 * It reads the value of the X-Request-Partition-IDs header, and parses and returns the first partition ID
-	 * from the header value.
+	 * Identifies the partition ID for create operations by parsing the first ID from the X-Request-Partition-IDs header.
 	 */
 	@Hook(STORAGE_PARTITION_IDENTIFY_CREATE)
 	public RequestPartitionId identifyPartitionForCreate(RequestDetails theRequestDetails) {
-		String partitionHeader = getPartitionHeaderOrThrowIfBlank(theRequestDetails);
-		return parseRequestPartitionIdsFromCommaSeparatedString(partitionHeader, true);
+		return identifyPartitionOrThrowException(
+				theRequestDetails, RequestPartitionHeaderUtil::fromHeaderFirstPartitionOnly);
 	}
 
 	/**
-	 * This method is called to identify the partition ID for read operations.
-	 * Parses all the partition IDs from the header into a RequestPartitionId object.
+	 * Identifies partition IDs for read operations by parsing all IDs from the X-Request-Partition-IDs header.
 	 */
 	@Hook(STORAGE_PARTITION_IDENTIFY_READ)
 	public RequestPartitionId identifyPartitionForRead(RequestDetails theRequestDetails) {
-		String partitionHeader = getPartitionHeaderOrThrowIfBlank(theRequestDetails);
-		return parseRequestPartitionIdsFromCommaSeparatedString(partitionHeader, false);
+		return identifyPartitionOrThrowException(theRequestDetails, RequestPartitionHeaderUtil::fromHeader);
 	}
 
-	private String getPartitionHeaderOrThrowIfBlank(RequestDetails theRequestDetails) {
-		String partitionHeader = theRequestDetails.getHeader(PARTITIONS_HEADER);
+	/**
+	 * Core logic to identify a request's storage partition. It retrieves the partition header,
+	 * and if the header is blank for a system request, it uses the partition id in the system request if present or
+	 * returns the default partition.
+	 * Otherwise, it uses the provided parsing function to interpret the header.
+	 */
+	private RequestPartitionId identifyPartitionOrThrowException(
+			RequestDetails theRequestDetails,
+			BiFunction<String, IDefaultPartitionSettings, RequestPartitionId> aHeaderParser) {
+		String partitionHeader = theRequestDetails.getHeader(Constants.HEADER_X_REQUEST_PARTITION_IDS);
+
 		if (isBlank(partitionHeader)) {
-			String msg = String.format(
-					"%s header is missing or blank, it is required to identify the storage partition",
-					PARTITIONS_HEADER);
-			throw new InvalidRequestException(Msg.code(2642) + msg);
-		}
-		return partitionHeader;
-	}
-
-	private RequestPartitionId parseRequestPartitionIdsFromCommaSeparatedString(
-			String thePartitionIds, boolean theIncludeOnlyTheFirst) {
-		String[] partitionIdStrings = thePartitionIds.split(",");
-		List<Integer> partitionIds = new ArrayList<>();
-
-		for (String partitionIdString : partitionIdStrings) {
-
-			String trimmedPartitionId = partitionIdString.trim();
-
-			if (trimmedPartitionId.equals(ALL_PARTITIONS_TENANT_NAME)) {
-				return RequestPartitionId.allPartitions();
-			}
-
-			if (trimmedPartitionId.equals(DEFAULT_PARTITION_NAME)) {
-				partitionIds.add(RequestPartitionId.defaultPartition().getFirstPartitionIdOrNull());
-			} else {
-				try {
-					int partitionId = Integer.parseInt(trimmedPartitionId);
-					partitionIds.add(partitionId);
-				} catch (NumberFormatException e) {
-					String msg = String.format(
-							"Invalid partition ID: '%s' provided in header: %s", trimmedPartitionId, PARTITIONS_HEADER);
-					throw new InvalidRequestException(Msg.code(2643) + msg);
+			if (theRequestDetails instanceof SystemRequestDetails systemRequestDetails) {
+				if (systemRequestDetails.getRequestPartitionId() != null) {
+					return systemRequestDetails.getRequestPartitionId();
+				} else {
+					return myDefaultPartitionSettings.getDefaultRequestPartitionId();
 				}
 			}
-
-			// return early if we only need the first partition ID
-			if (theIncludeOnlyTheFirst) {
-				return RequestPartitionId.fromPartitionIds(partitionIds);
-			}
+			throw new InvalidRequestException(Msg.code(2642)
+					+ String.format(
+							"%s header is missing or blank, it is required to identify the storage partition",
+							Constants.HEADER_X_REQUEST_PARTITION_IDS));
 		}
 
-		if (partitionIds.isEmpty()) {
-			// this case happens only when the header contains nothing but commas
-			// since we already checked for blank header before calling this function
-			String msg = String.format("No partition IDs provided in header: %s", PARTITIONS_HEADER);
-			throw new InvalidRequestException(Msg.code(2645) + msg);
-		}
-
-		return RequestPartitionId.fromPartitionIds(partitionIds);
+		return aHeaderParser.apply(partitionHeader, myDefaultPartitionSettings);
 	}
 }

@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -41,6 +42,12 @@ public class RestfulServerUtilsTest {
 	@Mock
 	private RequestDetails myRequestDetails;
 
+	@Mock
+	private RestfulServerUtils.ResponseEncoding myResponseEncoding;
+
+	@Mock
+	private IBaseBinary myBinary;
+
 	@Test
 	public void testParsePreferReturn() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "return=representation");
@@ -71,7 +78,7 @@ public class RestfulServerUtilsTest {
 	}
 
 	@Test
-	public void testParseHandlingLenientAndReturnRepresentation_CommaSeparatd() {
+	public void testParseHandlingLenientAndReturnRepresentation_CommaSeparated() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "handling=lenient, return=representation");
 		assertEquals(PreferReturnEnum.REPRESENTATION, header.getReturn());
 		assertFalse(header.getRespondAsync());
@@ -79,7 +86,7 @@ public class RestfulServerUtilsTest {
 	}
 
 	@Test
-	public void testParseHandlingLenientAndReturnRepresentation_SemicolonSeparatd() {
+	public void testParseHandlingLenientAndReturnRepresentation_SemicolonSeparated() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "handling=lenient; return=representation");
 		assertEquals(PreferReturnEnum.REPRESENTATION, header.getReturn());
 		assertFalse(header.getRespondAsync());
@@ -159,6 +166,61 @@ public class RestfulServerUtilsTest {
 		//Then
 		assertThat(linkSelfWithoutGivenParameters).contains("http://localhost:8000/$my-operation?");
 		assertThat(linkSelfWithoutGivenParameters).contains("_format=json");
+	}
+
+	@Test
+	void testReadBinaryAndRequestFhirJson() {
+		// Given
+		when(myBinary.getContentType()).thenReturn(Constants.CT_FHIR_JSON);
+		when(myBinary.getContent()).thenReturn(new byte[0]);
+		when(myResponseEncoding.getContentType()).thenReturn(Constants.CT_FHIR_JSON);
+
+		// When
+		final var shouldStream = RestfulServerUtils.shouldStreamContents(myResponseEncoding, myBinary);
+
+		// Then
+		assertFalse(shouldStream);
+	}
+
+	@Test
+	void testReadBinaryAndRequestFhirXml() {
+		// Given
+		when(myBinary.getContentType()).thenReturn(Constants.CT_FHIR_JSON);
+		when(myBinary.getContent()).thenReturn(new byte[0]);
+		when(myResponseEncoding.getContentType()).thenReturn(Constants.CT_FHIR_XML);
+
+		// When
+		final var shouldStream = RestfulServerUtils.shouldStreamContents(myResponseEncoding, myBinary);
+
+		// Then
+		assertFalse(shouldStream);
+	}
+
+	@Test
+	void testReadBinaryAndRequestOctetStream() {
+		// Given
+		when(myBinary.getContentType()).thenReturn("");
+		when(myBinary.getContent()).thenReturn(new byte[0]);
+		when(myResponseEncoding.getContentType()).thenReturn(Constants.CT_OCTET_STREAM);
+
+		// When
+		final var shouldStream = RestfulServerUtils.shouldStreamContents(myResponseEncoding, myBinary);
+
+		// Then
+		assertTrue(shouldStream);
+	}
+
+	@Test
+	void testReadBinaryAndRequestNothing() {
+		// Given
+		when(myBinary.getContentType()).thenReturn(Constants.CT_FHIR_JSON);
+		when(myBinary.getContent()).thenReturn(new byte[0]);
+
+		// When
+		final var shouldStream = RestfulServerUtils.shouldStreamContents(null, myBinary);
+
+		// Then
+		assertTrue(shouldStream);
 	}
 
 	@ParameterizedTest

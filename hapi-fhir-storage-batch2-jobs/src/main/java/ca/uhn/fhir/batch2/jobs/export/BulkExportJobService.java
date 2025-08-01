@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI-FHIR Storage Batch2 Jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -44,7 +44,7 @@ import java.util.List;
 
 /**
  * This class is responsible for initiating a bulk export job
- * with appropriate _type parameter & partitionId as well as
+ * with appropriate _type parameter and partitionId as well as
  * generating response for request which includes the polling location.
  * It also calls hooks which can update BulkExportJobParameters and the incoming requests.
  */

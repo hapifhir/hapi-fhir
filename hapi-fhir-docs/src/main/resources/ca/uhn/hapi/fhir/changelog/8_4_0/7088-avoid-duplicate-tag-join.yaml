@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 7088
+backport: 8.2.1
+title: "When performing a JPA query using the `_tag`, `_profile`, and/or `_security` parameters,
+   the search engine could include a redundant SQL JOIN in the emitted SQL statements. These extra
+   JOINs caused a performance degradation in some cases."

@@ -41,7 +41,7 @@ public class FhirPathR4 implements IFhirPath {
 		try {
 			parsed = myEngine.parse(thePath);
 		} catch (FHIRException e) {
-			throw new FhirPathExecutionException(Msg.code(2409) + e);
+			throw new FhirPathExecutionException(Msg.code(2409) + e, e);
 		}
 		return (List<T>) evaluate(theInput, parsed, theReturnType);
 	}

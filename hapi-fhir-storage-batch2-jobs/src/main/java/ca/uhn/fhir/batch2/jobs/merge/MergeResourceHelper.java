@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI-FHIR Storage Batch2 Jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -19,21 +19,29 @@
  */
 package ca.uhn.fhir.batch2.jobs.merge;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.merge.MergeProvenanceSvc;
+import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 import jakarta.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 
+import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
@@ -44,9 +52,11 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 public class MergeResourceHelper {
 
 	private final IFhirResourceDao<Patient> myPatientDao;
+	private final MergeProvenanceSvc myProvenanceSvc;
 
-	public MergeResourceHelper(IFhirResourceDao<Patient> theDao) {
-		myPatientDao = theDao;
+	public MergeResourceHelper(DaoRegistry theDaoRegistry, MergeProvenanceSvc theMergeProvenanceSvc) {
+		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);
+		myProvenanceSvc = theMergeProvenanceSvc;
 	}
 
 	public static int setResourceLimitFromParameter(
@@ -60,56 +70,75 @@ public class MergeResourceHelper {
 		return retval;
 	}
 
-	public void updateMergedResourcesAfterReferencesReplaced(
-			IHapiTransactionService myHapiTransactionService,
-			IIdType theSourceResourceId,
-			IIdType theTargetResourceId,
-			@Nullable Patient theResultResource,
-			boolean theDeleteSource,
-			RequestDetails theRequestDetails) {
-		Patient sourceResource = myPatientDao.read(theSourceResourceId, theRequestDetails);
-		Patient targetResource = myPatientDao.read(theTargetResourceId, theRequestDetails);
-
-		updateMergedResourcesAfterReferencesReplaced(
-				myHapiTransactionService,
-				sourceResource,
-				targetResource,
-				theResultResource,
-				theDeleteSource,
-				theRequestDetails);
+	public static void addInfoToOperationOutcome(
+			FhirContext theFhirContext,
+			IBaseOperationOutcome theOutcome,
+			String theDiagnosticMsg,
+			String theDetailsText) {
+		IBase issue =
+				OperationOutcomeUtil.addIssue(theFhirContext, theOutcome, "information", theDiagnosticMsg, null, null);
+		OperationOutcomeUtil.addDetailsToIssue(theFhirContext, issue, null, null, theDetailsText);
 	}
 
-	public Patient updateMergedResourcesAfterReferencesReplaced(
-			IHapiTransactionService myHapiTransactionService,
+	public static void addErrorToOperationOutcome(
+			FhirContext theFhirContex, IBaseOperationOutcome theOutcome, String theDiagnosticMsg, String theCode) {
+		OperationOutcomeUtil.addIssue(theFhirContex, theOutcome, "error", theDiagnosticMsg, null, theCode);
+	}
+
+	public DaoMethodOutcome updateMergedResourcesAfterReferencesReplaced(
 			Patient theSourceResource,
 			Patient theTargetResource,
 			@Nullable Patient theResultResource,
-			boolean theDeleteSource,
+			boolean theIsDeleteSource,
 			RequestDetails theRequestDetails) {
 
-		AtomicReference<Patient> targetPatientAfterUpdate = new AtomicReference<>();
-		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
-			Patient patientToUpdate = prepareTargetPatientForUpdate(
-					theTargetResource, theSourceResource, theResultResource, theDeleteSource);
+		Patient targetToUpdate = prepareTargetPatientForUpdate(
+				theTargetResource, theSourceResource, theResultResource, theIsDeleteSource);
 
-			targetPatientAfterUpdate.set(updateResource(patientToUpdate, theRequestDetails));
+		DaoMethodOutcome targetOutcome = myPatientDao.update(targetToUpdate, theRequestDetails);
+		if (!theIsDeleteSource) {
+			prepareSourcePatientForUpdate(theSourceResource, theTargetResource);
+			myPatientDao.update(theSourceResource, theRequestDetails);
+		}
 
-			if (theDeleteSource) {
-				deleteResource(theSourceResource, theRequestDetails);
-			} else {
-				prepareSourcePatientForUpdate(theSourceResource, theTargetResource);
-				updateResource(theSourceResource, theRequestDetails);
-			}
-		});
+		return targetOutcome;
+	}
 
-		return targetPatientAfterUpdate.get();
+	public void createProvenance(
+			IBaseResource theSourceResource,
+			IBaseResource theTargetResource,
+			List<Bundle> thePatchResultBundles,
+			boolean theIsDeleteSource,
+			RequestDetails theRequestDetails,
+			Date theStartTime,
+			List<IProvenanceAgent> theProvenanceAgents,
+			List<IBaseResource> theContainedResources) {
+
+		IIdType sourceIdForProvenance = theSourceResource.getIdElement();
+		if (theIsDeleteSource) {
+			// If the source resource is to be deleted, increment the version id of the source resource to be put in the
+			// provenance. Since the resource will be deleted after the provenance is created, its version will be
+			// incremented by
+			// the delete operation.
+			sourceIdForProvenance = theSourceResource
+					.getIdElement()
+					.withVersion(Long.toString(sourceIdForProvenance.getVersionIdPartAsLong() + 1));
+		}
+		myProvenanceSvc.createProvenance(
+				theTargetResource.getIdElement(),
+				sourceIdForProvenance,
+				thePatchResultBundles,
+				theStartTime,
+				theRequestDetails,
+				theProvenanceAgents,
+				theContainedResources);
 	}
 
 	public Patient prepareTargetPatientForUpdate(
 			Patient theTargetResource,
 			Patient theSourceResource,
 			@Nullable Patient theResultResource,
-			boolean theDeleteSource) {
+			boolean theIsDeleteSource) {
 
 		// if the client provided a result resource as input then use it to update the target resource
 		if (theResultResource != null) {
@@ -118,7 +147,7 @@ public class MergeResourceHelper {
 
 		// client did not provide a result resource, we should update the target resource,
 		// add the replaces link to the target resource, if the source resource is not to be deleted
-		if (!theDeleteSource) {
+		if (!theIsDeleteSource) {
 			theTargetResource
 					.addLink()
 					.setType(Patient.LinkType.REPLACES)
@@ -174,14 +203,5 @@ public class MergeResourceHelper {
 			}
 		}
 		return false;
-	}
-
-	private Patient updateResource(Patient theResource, RequestDetails theRequestDetails) {
-		DaoMethodOutcome outcome = myPatientDao.update(theResource, theRequestDetails);
-		return (Patient) outcome.getResource();
-	}
-
-	private void deleteResource(Patient theResource, RequestDetails theRequestDetails) {
-		myPatientDao.delete(theResource.getIdElement(), theRequestDetails);
 	}
 }

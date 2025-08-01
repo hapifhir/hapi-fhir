@@ -59,4 +59,9 @@ public interface IPatchWithBody extends IPatchExecutable {
 	 * The resource ID to patch (must include both a resource type and an ID, e.g. <code>Patient/123</code>)
 	 */
 	IPatchExecutable withId(String theId);
+
+	/**
+	 * Call patch with the history rewrite header
+	 */
+	IPatchWithBody historyRewrite();
 }

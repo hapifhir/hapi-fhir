@@ -125,6 +125,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	@BeforeEach
 	public void beforeEach() {
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
+		initResourceTypeCacheFromConfig();
 	}
 
 	@AfterEach

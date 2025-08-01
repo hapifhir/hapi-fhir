@@ -132,6 +132,7 @@ import jakarta.persistence.LockModeType;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.function.TriFunction;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -433,6 +434,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
+		entity.setResourceTypeId(myResourceTypeCacheSvc.getResourceTypeId(toResourceName(theResource)));
 
 		RequestPartitionId targetWritePartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
 				theRequest, theResource, entity.getResourceType());
@@ -644,6 +646,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		DaoMethodOutcome outcome = toMethodOutcome(theRequest, entity, theResource, theMatchUrl, theOperationType)
 				.setCreated(true);
+		outcome.setResponseStatusCode(Constants.STATUS_HTTP_201_CREATED);
 
 		if (!thePerformIndexing) {
 			outcome.setId(theResource.getIdElement());
@@ -1024,8 +1027,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			String msg = getContext()
 					.getLocalizer()
 					.getMessageSanitized(BaseStorageDao.class, "unableToDeleteNotFound", theUrl);
-			oo = createOperationOutcome(
-					OO_SEVERITY_WARN, msg, "not-found", StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND);
+			oo = createWarnOperationOutcome(msg, "not-found", StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND);
 		} else {
 			String msg = getContext()
 					.getLocalizer()
@@ -2383,8 +2385,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (myStorageSettings.isUpdateWithHistoryRewriteEnabled()
 				&& theRequest != null
 				&& theRequest.isRewriteHistory()) {
-			updateCallback = () ->
-					doUpdateWithHistoryRewrite(theResource, theRequest, theTransactionDetails, requestPartitionId);
+			updateCallback = () -> doUpdateWithHistoryRewrite(
+					theResource, theRequest, theTransactionDetails, requestPartitionId, RestOperationTypeEnum.UPDATE);
 		} else {
 			updateCallback = () -> doUpdate(
 					theResource,
@@ -2507,6 +2509,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					try {
 						entity = readEntityLatestVersion(
 								theRequest, resourceId, theRequestPartitionId, theTransactionDetails);
+						if (myPartitionSettings.isPartitioningEnabled()) {
+							validatePartitionIdMatch(theResource.getIdElement(), theRequestPartitionId, entity);
+						}
 					} catch (ResourceNotFoundException e) {
 						create = true;
 					}
@@ -2615,13 +2620,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * @param theResource           to be saved
 	 * @param theRequest            details of the request
 	 * @param theTransactionDetails details of the transaction
+	 * @param theRequestPartitionId the partition on which to perform the request
+	 * @param theRestOperationType  the rest operation type (update or patch)
 	 * @return the outcome of the operation
 	 */
-	private DaoMethodOutcome doUpdateWithHistoryRewrite(
+	DaoMethodOutcome doUpdateWithHistoryRewrite(
 			T theResource,
 			RequestDetails theRequest,
 			TransactionDetails theTransactionDetails,
-			RequestPartitionId theRequestPartitionId) {
+			RequestPartitionId theRequestPartitionId,
+			RestOperationTypeEnum theRestOperationType) {
 		StopWatch w = new StopWatch();
 
 		// No need for indexing as this will update a non-current version of the resource which will not be searchable
@@ -2664,11 +2672,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				&& Long.parseLong(resourceId.getVersionIdPart()) == currentEntity.getVersion();
 		IBasePersistedResource<?> savedEntity = updateHistoryEntity(
 				theRequest, theResource, currentEntity, entity, resourceId, theTransactionDetails, isUpdatingCurrent);
-		DaoMethodOutcome outcome = toMethodOutcome(
-						theRequest, savedEntity, theResource, null, RestOperationTypeEnum.UPDATE)
+		DaoMethodOutcome outcome = toMethodOutcome(theRequest, savedEntity, theResource, null, theRestOperationType)
 				.setCreated(wasDeleted);
 
-		populateOperationOutcomeForUpdate(w, outcome, null, RestOperationTypeEnum.UPDATE, theTransactionDetails);
+		populateOperationOutcomeForUpdate(w, outcome, null, theRestOperationType, theTransactionDetails);
 
 		return outcome;
 	}
@@ -2830,6 +2837,45 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 							Msg.code(998) + "Resource has no ID - ID must be populated for a FHIR update");
 				}
 			}
+		}
+	}
+
+	/**
+	 * Validates that the partition ID of the request resource matches the partition ID of the entity.
+	 * <p>
+	 * If the request is for all partitions, this method does nothing. Otherwise, it checks that the resource type
+	 * and FHIR ID of the entity match those of the provided resource ID type, and that the partition IDs are equal.
+	 * If there is a mismatch, an {@link InvalidRequestException} is thrown.
+	 *
+	 * @param theResourceIdType     The resource ID type being processed
+	 * @param theRequestPartitionId The partition ID from the request
+	 * @param theEntity             The entity being updated
+	 * @throws InvalidRequestException if the partition IDs do not match for the same resource type and FHIR ID
+	 */
+	@VisibleForTesting
+	protected void validatePartitionIdMatch(
+			@Nonnull IIdType theResourceIdType,
+			@Nonnull RequestPartitionId theRequestPartitionId,
+			@Nonnull ResourceTable theEntity) {
+		if (theRequestPartitionId.isAllPartitions()) {
+			return;
+		}
+
+		boolean sameResType = StringUtils.equals(theEntity.getResourceType(), theResourceIdType.getResourceType());
+		boolean sameFhirId = StringUtils.equals(theResourceIdType.getIdPart(), theEntity.getFhirId());
+		boolean differentPartition =
+				!theRequestPartitionId.isPartition(theEntity.getPartitionId().getPartitionId());
+
+		if (sameResType && sameFhirId && differentPartition) {
+			String msg = getContext()
+					.getLocalizer()
+					.getMessageSanitized(
+							BaseHapiFhirDao.class,
+							"resourceTypeAndFhirIdConflictAcrossPartitions",
+							theEntity.getResourceType(),
+							theResourceIdType.getIdPart(),
+							theRequestPartitionId.getFirstPartitionNameOrNull());
+			throw new InvalidRequestException(Msg.code(2733) + msg);
 		}
 	}
 }

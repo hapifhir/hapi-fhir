@@ -882,7 +882,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			// Enable Lucene indexing
 			myStorageSettings.setAllowContainsSearches(true);
-			myStorageSettings.setAdvancedHSearchIndexing(true);
+			myStorageSettings.setHibernateSearchIndexSearchParams(true);
+			mySearchParamRegistry.forceRefresh();
 
 			Patient patient = new Patient();
 			patient.setId("A1");
@@ -1229,6 +1230,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			coverage.setId("coverage-female");
 			myClient.update().resource(coverage).execute();
 
+			// test
 			HashSet<String> filters = Sets.newHashSet();
 			BulkExportJobResults results = startGroupBulkExportJobAndAwaitCompletion(new HashSet<>(), filters, "G");
 			Map<String, List<IBaseResource>> typeToResource = convertJobResultsToResources(results);

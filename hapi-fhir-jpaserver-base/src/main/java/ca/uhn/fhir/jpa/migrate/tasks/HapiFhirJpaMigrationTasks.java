@@ -129,6 +129,46 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init760();
 		init780();
 		init820();
+		init840();
+	}
+
+	protected void init840() {
+		Builder version = forVersion(VersionEnum.V8_4_0);
+		{
+			// Add HFJ_RESOURCE_TYPE table
+			version.addIdGenerator("20250515.1", "SEQ_RESOURCE_TYPE", 1);
+			Builder.BuilderAddTableByColumns resourceType =
+					version.addTableByColumns("20250515.2", "HFJ_RESOURCE_TYPE", "RES_TYPE_ID");
+
+			resourceType.addColumn("RES_TYPE_ID").nonNullable().type(ColumnTypeEnum.SMALLINT);
+			resourceType.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 100);
+
+			resourceType
+					.addIndex("20250515.3", "IDX_RES_TYPE_NAME")
+					.unique(true)
+					.withColumns("RES_TYPE");
+
+			// Add column RES_TYPE_ID to HFJ_RESOURCE
+			Builder.BuilderWithTableName resource = version.onTable("HFJ_RESOURCE");
+			resource.addColumn("20250515.101", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+
+			// Add column RES_TYPE_ID to HFJ_RES_VER
+			Builder.BuilderWithTableName resVer = version.onTable("HFJ_RES_VER");
+			resVer.addColumn("20250515.201", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+
+			// Add column RES_TYPE_ID to HFJ_RES_TAG
+			Builder.BuilderWithTableName resTag = version.onTable("HFJ_RES_TAG");
+			resTag.addColumn("20250515.301", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+
+			// Add column RES_TYPE_ID to HFJ_HISTORY_TAG
+			Builder.BuilderWithTableName historyTag = version.onTable("HFJ_HISTORY_TAG");
+			historyTag.addColumn("20250515.401", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+
+			// Add columns SRC_RES_TYPE_ID and TARGET_RES_TYPE_ID to HFJ_RES_LINK
+			Builder.BuilderWithTableName resLink = version.onTable("HFJ_RES_LINK");
+			resLink.addColumn("20250515.501", "SRC_RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+			resLink.addColumn("20250515.502", "TARGET_RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+		}
 	}
 
 	protected void init820() {
@@ -166,6 +206,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.addColumn("20250408.1", "USER_DATA_JSON")
 					.nullable()
 					.type(ColumnTypeEnum.TEXT);
+		}
+
+		// Add IDX_RESVER_ID_SRC_URI for compatibilty with 2024
+		{
+			version.onTable("HFJ_RES_VER")
+					.addIndex("20250625.01", "IDX_RESVER_ID_SRC_URI")
+					.unique(false)
+					.withColumns("SOURCE_URI, RES_ID, PARTITION_ID")
+					.heavyweightSkipByDefault();
 		}
 	}
 

@@ -625,6 +625,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		assertThat(actualIds).asList().containsExactlyInAnyOrder(ids.allIdValues().toArray(new String[0]));
 
 		assertEquals(6, myCaptureQueriesListener.countSelectQueries());
+		assertThat(getSelectSql(0)).doesNotContainIgnoringCase("union");
 		if (myIncludePartitionIdsInSql) {
 			assertThat(getSelectSql(0)).endsWith(" where rt1_0.PARTITION_ID='1' and (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='" + ids.patientPid + "')");
 		} else {
@@ -637,7 +638,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			assertThat(getSelectSql(1)).startsWith("SELECT DISTINCT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK");
 		}
 		if (myIncludePartitionIdsInPks) {
-			assertThat(getSelectSql(1)).contains("WHERE ((t0.TARGET_RES_PARTITION_ID,t0.TARGET_RESOURCE_ID) IN (('1','" + ids.patientPid + "')) )");
+			assertThat(getSelectSql(1)).contains("WHERE (((t0.TARGET_RES_PARTITION_ID,t0.TARGET_RESOURCE_ID) IN (('1','" + ids.patientPid + "')) )");
 			assertThat(getSelectSql(1)).contains("GROUP BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
 			assertThat(getSelectSql(1)).contains("ORDER BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
 			assertThat(getSelectSql(2)).containsAnyOf(
@@ -647,7 +648,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			assertThat(getSelectSql(3)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.childOrgPid() + "') ");
 			assertThat(getSelectSql(4)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.parentOrgPid() + "') ");
 		} else {
-			assertThat(getSelectSql(1)).contains("WHERE (t0.TARGET_RESOURCE_ID = '" + ids.patientPid() + "') ");
+			assertThat(getSelectSql(1)).contains("WHERE ((t0.TARGET_RESOURCE_ID = '" + ids.patientPid() + "') ");
 			if (myIncludePartitionIdsInSql) {
 				assertThat(getSelectSql(1)).contains(" GROUP BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
 			} else {
@@ -1333,9 +1334,9 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 		sql = myCaptureQueriesListener.getSelectQueries().get(1).getSql(true, false);
 		if (myIncludePartitionIdsInPks) {
-			assertThat(sql).isEqualTo("select rl1_0.TARGET_RESOURCE_ID,rl1_0.TARGET_RESOURCE_TYPE,rl1_0.TARGET_RESOURCE_URL,rl1_0.TARGET_RES_PARTITION_ID from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.qrId.getIdPart() + "') fetch first '1000' rows only");
+			assertThat(sql).isEqualTo("select rl1_0.TARGET_RESOURCE_ID,rl1_0.TARGET_RESOURCE_TYPE,rl1_0.TARGET_RESOURCE_URL,null,rl1_0.TARGET_RES_PARTITION_ID from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.qrId.getIdPart() + "') fetch first '1000' rows only");
 		} else {
-			assertThat(sql).isEqualTo("select rl1_0.TARGET_RESOURCE_ID,rl1_0.TARGET_RESOURCE_TYPE,rl1_0.TARGET_RESOURCE_URL from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.qrId().getIdPart() + "') fetch first '1000' rows only");
+			assertThat(sql).isEqualTo("select rl1_0.TARGET_RESOURCE_ID,rl1_0.TARGET_RESOURCE_TYPE,rl1_0.TARGET_RESOURCE_URL,null,null from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.qrId().getIdPart() + "') fetch first '1000' rows only");
 		}
 
 		sql = myCaptureQueriesListener.getSelectQueries().get(2).getSql(true, false);
@@ -1380,16 +1381,16 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 		sql = myCaptureQueriesListener.getSelectQueries().get(1).getSql(true, false);
 		if (myIncludePartitionIdsInPks) {
-			assertThat(sql).contains("WHERE r.src_path = 'Organization.partOf' AND r.target_resource_id IS NOT NULL AND r.src_resource_id IN ('" + ids.patientPid + "') AND r.partition_id = '1' AND r.target_resource_type = 'Organization' UNION");
+			assertThat(sql).contains("WHERE r.src_path = 'Organization.partOf' AND r.target_resource_id IS NOT NULL AND r.src_resource_id IN ('" + ids.patientPid + "') AND r.partition_id = '1' AND r.target_resource_type = 'Organization'");
 		} else {
-			assertThat(sql).contains("WHERE r.src_path = 'Organization.partOf' AND r.target_resource_id IS NOT NULL AND r.src_resource_id IN ('" + ids.patientPid + "') AND r.target_resource_type = 'Organization' UNION");
+			assertThat(sql).contains("WHERE r.src_path = 'Organization.partOf' AND r.target_resource_id IS NOT NULL AND r.src_resource_id IN ('" + ids.patientPid + "') AND r.target_resource_type = 'Organization'");
 		}
 
 		sql = myCaptureQueriesListener.getSelectQueries().get(2).getSql(true, false);
 		if (myIncludePartitionIdsInPks) {
-			assertThat(sql).contains("WHERE r.src_path = 'Patient.managingOrganization' AND r.target_resource_id IS NOT NULL AND r.src_resource_id IN ('" + ids.patientPid + "') AND r.partition_id = '1' AND r.target_resource_type = 'Organization' UNION");
+			assertThat(sql).contains("WHERE r.src_path = 'Patient.managingOrganization' AND r.target_resource_id IS NOT NULL AND r.src_resource_id IN ('" + ids.patientPid + "') AND r.partition_id = '1' AND r.target_resource_type = 'Organization'");
 		} else {
-			assertThat(sql).contains("WHERE r.src_path = 'Patient.managingOrganization' AND r.target_resource_id IS NOT NULL AND r.src_resource_id IN ('" + ids.patientPid + "') AND r.target_resource_type = 'Organization' UNION");
+			assertThat(sql).contains("WHERE r.src_path = 'Patient.managingOrganization' AND r.target_resource_id IS NOT NULL AND r.src_resource_id IN ('" + ids.patientPid + "') AND r.target_resource_type = 'Organization'");
 		}
 
 		// Index 3-6 are just more includes loading

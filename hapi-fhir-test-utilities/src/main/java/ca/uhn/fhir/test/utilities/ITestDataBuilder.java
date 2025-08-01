@@ -24,10 +24,12 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MetaUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -35,6 +37,7 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
@@ -203,6 +206,23 @@ public interface ITestDataBuilder {
 		};
 	}
 
+	/**
+	 * Resource.text.div
+	 */
+	default ICreationArgument withNarrative(String theDiv) {
+		return t->{
+			INarrative narrative = (INarrative) getFhirContext().getElementDefinition("Narrative").newInstance();
+			try {
+				narrative.setDivAsString(theDiv);
+			} catch (Exception e) {
+				throw new InternalErrorException(e);
+			}
+
+			BaseRuntimeChildDefinition textChild = getFhirContext().getResourceDefinition((IBaseResource) t).getChildByName("text");
+			textChild.getMutator().setValue(t, narrative);
+		};
+	}
+
 	default ICreationArgument withSecurity(String theSystem, String theCode) {
 		return t -> ((IBaseResource)t).getMeta().addSecurity().setSystem(theSystem).setCode(theCode);
 	}
@@ -261,6 +281,10 @@ public interface ITestDataBuilder {
 
 	default IIdType createPractitioner(ICreationArgument... theModifiers) {
 		return createResource("Practitioner", theModifiers);
+	}
+
+	default void deleteResource(IIdType theIIdType){
+		doDeleteResource(theIIdType);
 	}
 
 	default IIdType createResource(String theResourceType, ICreationArgument... theModifiers) {
@@ -404,6 +428,18 @@ public interface ITestDataBuilder {
 		return withCodingAt("code.coding", theSystem, theCode, theDisplay);
 	}
 
+	default ICreationArgument withObservationCategory(@Nullable String theSystem, @Nullable String theCode, @Nullable String theDisplay) {
+		return withCodingAt("category.coding", theSystem, theCode, theDisplay);
+	}
+
+	default ICreationArgument withObservationValueString(@Nullable String theValue) {
+		return t -> {
+			IBase value = getFhirContext().getElementDefinition("string").newInstance(theValue);
+			BaseRuntimeElementDefinition<?> resourceDef = getFhirContext().getElementDefinition(t.getClass());
+			resourceDef.getChildByName("value[x]").getMutator().addValue(t, value);
+		};
+	}
+
 	default <T extends IBase> ICreationArgument withCodingAt(String thePath, @Nullable String theSystem, @Nullable String theValue) {
 		return withCodingAt(thePath, theSystem, theValue, null);
 	}
@@ -437,6 +473,10 @@ public interface ITestDataBuilder {
 	 * Users of this API must implement this method
 	 */
 	IIdType doUpdateResource(IBaseResource theResource);
+
+	default void doDeleteResource(IIdType theIIdType){
+		throw new NotImplementedException("Not implemented");
+	}
 
 	/**
 	 * Users of this API must implement this method

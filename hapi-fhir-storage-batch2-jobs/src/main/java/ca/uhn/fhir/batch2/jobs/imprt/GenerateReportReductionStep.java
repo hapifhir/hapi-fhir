@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI-FHIR Storage Batch2 Jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -27,6 +27,7 @@ import ca.uhn.fhir.batch2.api.ReductionStepFailureException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.StopWatch;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.InstantType;
@@ -128,7 +129,8 @@ public class GenerateReportReductionStep
 		reportJson.setReportMsg(reportString);
 
 		if (hasErrors) {
-			throw new ReductionStepFailureException("Job completed with at least one failure", reportJson);
+			throw new ReductionStepFailureException(
+					Msg.code(2673) + "Job completed with at least one failure", reportJson);
 		}
 
 		theDataSink.accept(reportJson);

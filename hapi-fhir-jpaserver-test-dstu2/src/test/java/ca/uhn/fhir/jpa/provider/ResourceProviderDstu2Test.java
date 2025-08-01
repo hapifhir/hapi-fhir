@@ -1015,6 +1015,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	@Test
 	public void testEverythingInstanceWithContentFilter() {
 		myStorageSettings.setHibernateSearchIndexFullText(true);
+		mySearchParamRegistry.forceRefresh();
 
 		Patient pt1 = new Patient();
 		pt1.addName().addFamily("Everything").addGiven("Arthur");
@@ -1608,7 +1609,6 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
 		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
 
-		StopWatch sw = new StopWatch();
 		ca.uhn.fhir.model.dstu2.resource.Bundle response = myClient
 			.operation()
 			.onInstance(new IdDt(pid))

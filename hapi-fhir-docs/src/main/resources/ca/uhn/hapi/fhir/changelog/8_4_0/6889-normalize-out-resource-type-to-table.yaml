@@ -1,0 +1,15 @@
+---
+type: add
+issue: 6889
+title: "A new table `HFJ_RESOURCE_TYPE` has been introduced. This table stores all known resource types from all
+releases. It is pre-populated at server start up. New or custom resource types are added to this table on demand.
+A new column `HFJ_RESOURCE_TYPE_ID` has been added to the following tables.
+<ul>
+    <li>HFJ_RESOURCE</li>
+    <li>HFJ_RE_VER</li>
+    <li>HFJ_RES_TAG</li>
+    <li>HFJ_RES_HISTORY_TAG</li>
+    <li>HFJ_RES_VER_LINK</li>
+</ul>
+This column is used to store the resource type ID which references the `HFJ_RESOURCE_TYPE` table."
+

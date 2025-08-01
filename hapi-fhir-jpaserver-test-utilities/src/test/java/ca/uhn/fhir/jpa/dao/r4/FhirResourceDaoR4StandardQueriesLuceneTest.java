@@ -85,6 +85,7 @@ public class FhirResourceDaoR4StandardQueriesLuceneTest extends BaseJpaTest
 	void setUp() {
 		myStorageSettings.setHibernateSearchIndexFullText(true);
 		myStorageSettings.setHibernateSearchIndexSearchParams(true);
+		mySearchParamRegistry.forceRefresh();
 		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
 

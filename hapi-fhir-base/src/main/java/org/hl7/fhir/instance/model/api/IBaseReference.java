@@ -36,4 +36,12 @@ public interface IBaseReference extends ICompositeType {
 	default boolean hasIdentifier() {
 		return false;
 	}
+
+	default IBaseReference setIdentifier(ICompositeType theIdentifier) {
+		throw new UnsupportedOperationException("This reference does not support identifiers");
+	}
+
+	default ICompositeType getIdentifier() {
+		return null;
+	}
 }

@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI-FHIR Storage Batch2 Jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -57,7 +57,7 @@ public class ReplaceReferenceUpdateStep<PT extends ReplaceReferencesJobParameter
 			throws JobExecutionFailedException {
 
 		ReplaceReferencesJobParameters params = theStepExecutionDetails.getParameters();
-		ReplaceReferencesRequest replaceReferencesRequest = params.asReplaceReferencesRequest();
+		ReplaceReferencesRequest replaceReferencesRequest = params.asReplaceReferencesRequest(myFhirContext);
 		List<IdDt> fhirIds = theStepExecutionDetails.getData().getFhirIds().stream()
 				.map(FhirIdJson::asIdDt)
 				.collect(Collectors.toList());

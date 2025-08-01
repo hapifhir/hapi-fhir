@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI-FHIR Storage Batch2 Jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -317,7 +317,7 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 	}
 
 	private static void transmitBuffer(
-			@javax.annotation.Nonnull IJobDataSink<NdJsonFileJson> theDataSink,
+			@Nonnull IJobDataSink<NdJsonFileJson> theDataSink,
 			String nextUrl,
 			int chunkCount,
 			FileBuffer buffer,

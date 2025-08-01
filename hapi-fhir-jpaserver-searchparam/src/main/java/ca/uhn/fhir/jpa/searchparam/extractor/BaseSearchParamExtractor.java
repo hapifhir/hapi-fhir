@@ -56,6 +56,7 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -1296,95 +1297,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 	}
 
-	private void addDate_Period(
-			String theResourceType,
-			Set<ResourceIndexedSearchParamDate> theParams,
-			RuntimeSearchParam theSearchParam,
-			IBase theValue) {
-		Date start = extractValueAsDate(myPeriodStartValueChild, theValue);
-		String startAsString = extractValueAsString(myPeriodStartValueChild, theValue);
-		Date end = extractValueAsDate(myPeriodEndValueChild, theValue);
-		String endAsString = extractValueAsString(myPeriodEndValueChild, theValue);
-
-		if (start != null || end != null) {
-
-			if (start == null) {
-				start = myStorageSettings.getPeriodIndexStartOfTime().getValue();
-				startAsString = myStorageSettings.getPeriodIndexStartOfTime().getValueAsString();
-			}
-			if (end == null) {
-				end = myStorageSettings.getPeriodIndexEndOfTime().getValue();
-				endAsString = myStorageSettings.getPeriodIndexEndOfTime().getValueAsString();
-			}
-
-			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(
-					myPartitionSettings,
-					theResourceType,
-					theSearchParam.getName(),
-					start,
-					startAsString,
-					end,
-					endAsString,
-					startAsString);
-			theParams.add(nextEntity);
-		}
-	}
-
-	private void addDate_Timing(
-			String theResourceType,
-			Set<ResourceIndexedSearchParamDate> theParams,
-			RuntimeSearchParam theSearchParam,
-			IBase theValue) {
-		List<IPrimitiveType<Date>> values = extractValuesAsFhirDates(myTimingEventValueChild, theValue);
-
-		TreeSet<Date> dates = new TreeSet<>();
-		String firstValue = null;
-		String finalValue = null;
-		for (IPrimitiveType<Date> nextEvent : values) {
-			if (nextEvent.getValue() != null) {
-				dates.add(nextEvent.getValue());
-				if (firstValue == null) {
-					firstValue = nextEvent.getValueAsString();
-				}
-				finalValue = nextEvent.getValueAsString();
-			}
-		}
-
-		Optional<IBase> repeat = myTimingRepeatValueChild.getAccessor().getFirstValueOrNull(theValue);
-		if (repeat.isPresent()) {
-			Optional<IBase> bounds =
-					myTimingRepeatBoundsValueChild.getAccessor().getFirstValueOrNull(repeat.get());
-			if (bounds.isPresent()) {
-				String boundsType = toRootTypeName(bounds.get());
-				if ("Period".equals(boundsType)) {
-					Date start = extractValueAsDate(myPeriodStartValueChild, bounds.get());
-					Date end = extractValueAsDate(myPeriodEndValueChild, bounds.get());
-					String endString = extractValueAsString(myPeriodEndValueChild, bounds.get());
-					dates.add(start);
-					dates.add(end);
-					// TODO Check if this logic is valid. Does the start of the first period indicate a lower bound??
-					if (firstValue == null) {
-						firstValue = extractValueAsString(myPeriodStartValueChild, bounds.get());
-					}
-					finalValue = endString;
-				}
-			}
-		}
-
-		if (!dates.isEmpty()) {
-			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(
-					myPartitionSettings,
-					theResourceType,
-					theSearchParam.getName(),
-					dates.first(),
-					firstValue,
-					dates.last(),
-					finalValue,
-					firstValue);
-			theParams.add(nextEntity);
-		}
-	}
-
 	private void addNumber_Duration(
 			String theResourceType,
 			Set<ResourceIndexedSearchParamNumber> theParams,
@@ -1629,25 +1541,14 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 
 			// See the method javadoc for an explanation of this
-			if (!myExtractResourceLevelParams && RuntimeSearchParamHelper.isResourceLevel(nextSpDef)) {
+			if (!myExtractResourceLevelParams
+					&& RuntimeSearchParamHelper.isSpeciallyHandledSearchParameter(nextSpDef, myStorageSettings)) {
 				continue;
 			}
 
 			extractSearchParam(nextSpDef, theResource, theExtractor, retVal, theWantLocalReferences);
 		}
 		return retVal;
-	}
-
-	/**
-	 * Helper function to determine if a set of SPs for a resource uses a resolve as part of its fhir path.
-	 */
-	private boolean anySearchParameterUsesResolve(
-			Collection<RuntimeSearchParam> searchParams, RestSearchParameterTypeEnum theSearchParamType) {
-		return searchParams.stream()
-				.filter(param -> param.getParamType() != theSearchParamType)
-				.map(RuntimeSearchParam::getPath)
-				.filter(Objects::nonNull)
-				.anyMatch(path -> path.contains("resolve"));
 	}
 
 	/**
@@ -1786,7 +1687,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@Override
 	public String[] split(String thePaths) {
 		if (shouldAttemptToSplitPath(thePaths)) {
-			return splitOutOfParensOrs(thePaths);
+			return SearchParameterUtil.splitSearchParameterExpressions(thePaths);
 		} else {
 			return new String[] {thePaths};
 		}
@@ -1799,47 +1700,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			// DSTU 3 and below used "or" as well as "|"
 			return thePath.contains("|") || thePath.contains(" or ");
 		}
-	}
-
-	/**
-	 * Iteratively splits a string on any ` or ` or | that is ** not** contained inside a set of parentheses. e.g.
-	 * <p>
-	 * "Patient.select(a or b)" -->  ["Patient.select(a or b)"]
-	 * "Patient.select(a or b) or Patient.select(c or d )" --> ["Patient.select(a or b)", "Patient.select(c or d)"]
-	 * "Patient.select(a|b) or Patient.select(c or d )" --> ["Patient.select(a|b)", "Patient.select(c or d)"]
-	 * "Patient.select(b) | Patient.select(c)" -->  ["Patient.select(b)", "Patient.select(c)"]
-	 *
-	 * @param thePaths The string to split
-	 * @return The split string
-	 */
-	private String[] splitOutOfParensOrs(String thePaths) {
-		List<String> topLevelOrExpressions = splitOutOfParensToken(thePaths, " or ");
-		return topLevelOrExpressions.stream()
-				.flatMap(s -> splitOutOfParensToken(s, " |").stream())
-				.toArray(String[]::new);
-	}
-
-	private List<String> splitOutOfParensToken(String thePath, String theToken) {
-		int tokenLength = theToken.length();
-		int index = thePath.indexOf(theToken);
-		int rightIndex = 0;
-		List<String> retVal = new ArrayList<>();
-		while (index > -1) {
-			String left = thePath.substring(rightIndex, index);
-			if (allParensHaveBeenClosed(left)) {
-				retVal.add(left);
-				rightIndex = index + tokenLength;
-			}
-			index = thePath.indexOf(theToken, index + tokenLength);
-		}
-		retVal.add(thePath.substring(rightIndex));
-		return retVal;
-	}
-
-	private boolean allParensHaveBeenClosed(String thePaths) {
-		int open = StringUtils.countMatches(thePaths, "(");
-		int close = StringUtils.countMatches(thePaths, ")");
-		return open == close;
 	}
 
 	private BigDecimal normalizeQuantityContainingTimeUnitsIntoDaysForNumberParam(
@@ -2313,6 +2173,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 		}
 
+		/**
+		 * For Timings, we consider all the dates in the structure (eg. Timing.event, Timing.repeat.bounds.boundsPeriod)
+		 * to create an upper and lower bound Indexed Search Param.
+		 */
 		private void addDate_Timing(
 				String theResourceType,
 				Set<ResourceIndexedSearchParamDate> theParams,
@@ -2320,16 +2184,14 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				IBase theValue) {
 			List<IPrimitiveType<Date>> values = extractValuesAsFhirDates(myTimingEventValueChild, theValue);
 
-			TreeSet<Date> dates = new TreeSet<>();
+			TreeSet<DateStringWrapper> dates = new TreeSet<>();
 			String firstValue = null;
-			String finalValue = null;
 			for (IPrimitiveType<Date> nextEvent : values) {
 				if (nextEvent.getValue() != null) {
-					dates.add(nextEvent.getValue());
+					dates.add(new DateStringWrapper(nextEvent.getValue(), nextEvent.getValueAsString()));
 					if (firstValue == null) {
 						firstValue = nextEvent.getValueAsString();
 					}
-					finalValue = nextEvent.getValueAsString();
 				}
 			}
 
@@ -2340,13 +2202,20 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				if (bounds.isPresent()) {
 					String boundsType = toRootTypeName(bounds.get());
 					if ("Period".equals(boundsType)) {
-						Date start = extractValueAsDate(myPeriodStartValueChild, bounds.get());
-						Date end = extractValueAsDate(myPeriodEndValueChild, bounds.get());
+						IPrimitiveType<Date> start =
+								extractValuesAsFhirDates(myPeriodStartValueChild, bounds.get()).stream()
+										.findFirst()
+										.orElse(null);
+						IPrimitiveType<Date> end =
+								extractValuesAsFhirDates(myPeriodEndValueChild, bounds.get()).stream()
+										.findFirst()
+										.orElse(null);
+
 						if (start != null) {
-							dates.add(start);
+							dates.add(new DateStringWrapper(start.getValue(), start.getValueAsString()));
 						}
 						if (end != null) {
-							dates.add(end);
+							dates.add(new DateStringWrapper(end.getValue(), end.getValueAsString()));
 						}
 					}
 				}
@@ -2358,11 +2227,28 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 						theResourceType,
 						theSearchParam.getName(),
 						dates.first(),
-						firstValue,
+						dates.first().getDateValueAsString(),
 						dates.last(),
-						finalValue,
+						dates.last().getDateValueAsString(),
 						firstValue);
 				theParams.add(myIndexedSearchParamDate);
+			}
+		}
+
+		/**
+		 * Wrapper class to store the DateTimeType String representation of the Date
+		 * This allows us to use the Date implementation of Comparable for TreeSet sorting
+		 */
+		private class DateStringWrapper extends Date {
+			String myDateString;
+
+			public DateStringWrapper(Date theDate, String theDateString) {
+				super(theDate.getTime());
+				myDateString = theDateString;
+			}
+
+			public String getDateValueAsString() {
+				return myDateString;
 			}
 		}
 

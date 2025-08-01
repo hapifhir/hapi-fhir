@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI-FHIR Storage Batch2 Jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -19,64 +19,132 @@
  */
 package ca.uhn.fhir.batch2.jobs.merge;
 
-import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
-import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
-import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencePatchOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceResultsJson;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceUpdateTaskReducerStep;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import jakarta.annotation.Nonnull;
+import ca.uhn.fhir.merge.MergeOperationInputParameterNames;
+import ca.uhn.fhir.merge.MergeProvenanceSvc;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReducerStep<MergeJobParameters> {
 	private final IHapiTransactionService myHapiTransactionService;
+	private final MergeResourceHelper myMergeResourceHelper;
+	private final MergeProvenanceSvc myMergeProvenanceSvc;
+	private final IFhirResourceDao<Patient> myPatientDao;
+	private final MergeOperationInputParameterNames myMergeOperationInputParameterNames;
 
-	public MergeUpdateTaskReducerStep(DaoRegistry theDaoRegistry, IHapiTransactionService theHapiTransactionService) {
-		super(theDaoRegistry);
+	public MergeUpdateTaskReducerStep(
+			DaoRegistry theDaoRegistry,
+			IHapiTransactionService theHapiTransactionService,
+			MergeResourceHelper theMergeResourceHelper,
+			MergeProvenanceSvc theMergeProvenanceSvc) {
+		super(theDaoRegistry, theMergeProvenanceSvc);
 		this.myHapiTransactionService = theHapiTransactionService;
+		myMergeResourceHelper = theMergeResourceHelper;
+		myMergeProvenanceSvc = theMergeProvenanceSvc;
+		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);
+		myMergeOperationInputParameterNames = new MergeOperationInputParameterNames();
 	}
 
 	@Override
 	public IReductionStepWorker<MergeJobParameters, ReplaceReferencePatchOutcomeJson, ReplaceReferenceResultsJson>
 			newInstance() {
-		return new MergeUpdateTaskReducerStep(myDaoRegistry, myHapiTransactionService);
+		return new MergeUpdateTaskReducerStep(
+				myDaoRegistry, myHapiTransactionService, myMergeResourceHelper, myMergeProvenanceSvc);
 	}
 
-	@Nonnull
 	@Override
-	public RunOutcome run(
-			@Nonnull StepExecutionDetails<MergeJobParameters, ReplaceReferencePatchOutcomeJson> theStepExecutionDetails,
-			@Nonnull IJobDataSink<ReplaceReferenceResultsJson> theDataSink)
-			throws JobExecutionFailedException {
-
+	protected void performOperationSpecificActions(
+			StepExecutionDetails<MergeJobParameters, ReplaceReferencePatchOutcomeJson> theStepExecutionDetails,
+			RequestDetails theRequestDetails) {
 		MergeJobParameters mergeJobParameters = theStepExecutionDetails.getParameters();
-		SystemRequestDetails requestDetails =
-				SystemRequestDetails.forRequestPartitionId(mergeJobParameters.getPartitionId());
 
-		Patient resultResource = null;
-		if (mergeJobParameters.getResultResource() != null) {
-			resultResource =
-					myFhirContext.newJsonParser().parseResource(Patient.class, mergeJobParameters.getResultResource());
+		Patient resultResource;
+		boolean deleteSource;
+
+		// we store the original input parameters and the operation outcome of updating target as
+		// contained resources in the provenance. undo-merge service uses these to contained resources.
+		List<IBaseResource> containedResourcesForProvenance = new ArrayList<>();
+
+		Parameters originalInputParameters = null;
+		if (mergeJobParameters.getOriginalInputParameters() != null) {
+			originalInputParameters = myFhirContext
+					.newJsonParser()
+					.parseResource(Parameters.class, mergeJobParameters.getOriginalInputParameters());
+			resultResource = getResultResource(originalInputParameters);
+			deleteSource = isDeleteSource(originalInputParameters);
+			containedResourcesForProvenance.add(originalInputParameters);
+		} else {
+			// This else part is just for backward compatibility in case there were jobs in-flight during upgrade
+			// this could be removed in the future
+			if (mergeJobParameters.getResultResource() != null) {
+				resultResource = myFhirContext
+						.newJsonParser()
+						.parseResource(Patient.class, mergeJobParameters.getResultResource());
+			} else {
+				resultResource = null;
+			}
+			deleteSource = mergeJobParameters.getDeleteSource();
 		}
 
-		IFhirResourceDao<Patient> patientDao = myDaoRegistry.getResourceDao(Patient.class);
+		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
+			Patient sourceResource =
+					myPatientDao.read(mergeJobParameters.getSourceId().asIdDt(), theRequestDetails);
+			Patient targetResource =
+					myPatientDao.read(mergeJobParameters.getTargetId().asIdDt(), theRequestDetails);
 
-		MergeResourceHelper helper = new MergeResourceHelper(patientDao);
+			DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
+					sourceResource, targetResource, resultResource, deleteSource, theRequestDetails);
+			Patient updatedTargetResource = (Patient) outcome.getResource();
 
-		helper.updateMergedResourcesAfterReferencesReplaced(
-				myHapiTransactionService,
-				mergeJobParameters.getSourceId().asIdDt(),
-				mergeJobParameters.getTargetId().asIdDt(),
-				resultResource,
-				mergeJobParameters.getDeleteSource(),
-				requestDetails);
+			String sourceVersionForProvenance = sourceResource.getIdElement().getVersionIdPart();
+			if (deleteSource) {
+				sourceVersionForProvenance =
+						Long.toString(sourceResource.getIdElement().getVersionIdPartAsLong() + 1);
+			}
 
-		return super.run(theStepExecutionDetails, theDataSink);
+			mergeJobParameters.setSourceVersionForProvenance(sourceVersionForProvenance);
+			mergeJobParameters.setTargetVersionForProvenance(
+					updatedTargetResource.getIdElement().getVersionIdPart());
+			containedResourcesForProvenance.add(outcome.getOperationOutcome());
+			createProvenance(theStepExecutionDetails, theRequestDetails, containedResourcesForProvenance);
+
+			if (deleteSource) {
+				myPatientDao.delete(sourceResource.getIdElement(), theRequestDetails);
+			}
+		});
+	}
+
+	private boolean isDeleteSource(Parameters originalInputParameters) {
+		boolean deleteSource = false;
+		String deleteSourceParamName = myMergeOperationInputParameterNames.getDeleteSourceParameterName();
+		if (originalInputParameters.hasParameter(deleteSourceParamName)) {
+			deleteSource = originalInputParameters.getParameterBool(deleteSourceParamName);
+		}
+		return deleteSource;
+	}
+
+	private @Nullable Patient getResultResource(Parameters theOriginalInputParameters) {
+		Patient resultResource = null;
+		String resultResourceParamName = myMergeOperationInputParameterNames.getResultResourceParameterName();
+		if (theOriginalInputParameters.hasParameter(resultResourceParamName)) {
+			resultResource = (Patient) theOriginalInputParameters
+					.getParameter(resultResourceParamName)
+					.getResource();
+		}
+		return resultResource;
 	}
 }

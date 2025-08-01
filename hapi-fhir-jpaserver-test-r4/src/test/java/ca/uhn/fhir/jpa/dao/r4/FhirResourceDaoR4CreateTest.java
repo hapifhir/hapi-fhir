@@ -43,6 +43,7 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
@@ -118,11 +119,12 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		obs.getMeta().addProfile("http://blah");
 		obs.getMeta().addProfile("http://blah2");
 		obs.getMeta().setSource("http://foo#bar");
-		myObservationDao.update(obs, new SystemRequestDetails());
+		myObservationDao.update(obs, newSrd());
 
 		runInTransaction(()->{
 			logAllTokenIndexes();
 			logAllStringIndexes();
+			logAllUriIndexes();
 			assertEquals(0, myResourceIndexedSearchParamStringDao.count());
 			assertEquals(0, myResourceIndexedSearchParamTokenDao.count());
 			assertEquals(0, myResourceIndexedSearchParamUriDao.count());
@@ -130,6 +132,49 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	}
 
+	/**
+	 * Observation.subject allows a Group resource as the reference, but we shouldn't index such a reference if
+	 * the Search Parameter doesn't include that type in the target
+	 */
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testCreateWithReferenceDoesntIndexIfTargetDoesntAllowIt(boolean theIncludeCoveringTarget) {
+		// Setup
+		SearchParameter sp = new SearchParameter();
+		sp.setId("Observation-subject");
+		sp.setName("subject");
+		sp.setCode("subject");
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/Observation-subject");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.setExpression("Observation.subject");
+		sp.addBase("Observation");
+		sp.addTarget("Patient");
+		if (theIncludeCoveringTarget) {
+			sp.addTarget("Group");
+		}
+		mySearchParameterDao.update(sp, newSrd());
+		mySearchParamRegistry.forceRefresh();
+
+		Group group = new Group();
+		group.setId("GRP");
+		myGroupDao.update(group, newSrd());
+
+		// Test
+		Observation obs = new Observation();
+		obs.setId("OBS");
+		obs.setSubject(new Reference("Group/GRP"));
+		myObservationDao.update(obs, newSrd());
+
+		// Verify
+		logAllResourceLinks();
+		List<ResourceLink> subjectLinks = runInTransaction(() -> myResourceLinkDao.findAll().stream().filter(t -> t.getSourcePath().equals("Observation.subject")).toList());
+		if (theIncludeCoveringTarget) {
+			assertEquals(1, subjectLinks.size());
+		} else {
+			assertEquals(0, subjectLinks.size());
+		}
+	}
 
 
 	@Test
@@ -358,14 +403,14 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	public void testConditionalCreateWithPlusInUrl() {
 		Observation obs = new Observation();
 		obs.addIdentifier().setValue("20210427133226.444+0800");
-		DaoMethodOutcome outcome = myObservationDao.create(obs, "identifier=20210427133226.444%2B0800", new SystemRequestDetails());
+		DaoMethodOutcome outcome = myObservationDao.create(obs, "identifier=20210427133226.444%2B0800", newSrd());
 		assertTrue(outcome.getCreated());
 
 		logAllTokenIndexes();
 		myCaptureQueriesListener.clear();
 		obs = new Observation();
 		obs.addIdentifier().setValue("20210427133226.444+0800");
-		outcome = myObservationDao.create(obs, "identifier=20210427133226.444%2B0800", new SystemRequestDetails());
+		outcome = myObservationDao.create(obs, "identifier=20210427133226.444%2B0800", newSrd());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertFalse(outcome.getCreated());
 	}
@@ -378,7 +423,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		Observation obs = new Observation();
 		obs.addIdentifier().setValue("A+B");
 		try {
-			myObservationDao.create(obs, "identifier=A%20B", new SystemRequestDetails());
+			myObservationDao.create(obs, "identifier=A%20B", newSrd());
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
@@ -403,11 +448,21 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		bb.addTransactionCreateEntry(obs).conditional("identifier=A%20B");
 
 		try {
-			mySystemDao.transaction(new SystemRequestDetails(), (Bundle) bb.getBundle());
+			mySystemDao.transaction(newSrd(), (Bundle) bb.getBundle());
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testConditionalCreateFailsIfMatchUrlCaseIsDifferent() {
+		Observation obs = new Observation();
+		obs.addIdentifier().setValue("XXX");
+		assertThatThrownBy(() -> myObservationDao.create(obs, "identifier=xxx", newSrd()))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessage(Msg.code(929) +
+				"Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
 	}
 
 	@Test
@@ -418,7 +473,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		Observation obs = new Observation();
 		obs.addIdentifier().setValue(identifierCode);
 		// when
-		DaoMethodOutcome outcome = myObservationDao.create(obs, matchUrl, new SystemRequestDetails());
+		DaoMethodOutcome outcome = myObservationDao.create(obs, matchUrl, newSrd());
 
 		// then
 		Long expectedResId = outcome.getId().getIdPartAsLong();
@@ -1267,7 +1322,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		@ValueSource(booleans = {true, false})
 		public void testConditionalCreateDependsOnPOSTedResource(boolean theHasQuestionMark) {
 			final IFhirResourceDao<Task> taskDao = getTaskDao();
-			taskDao.create(myTask1, new SystemRequestDetails());
+			taskDao.create(myTask1, newSrd());
 
 			final List<Task> allTasksPreBundle = searchAllTasks();
 			assertEquals(1, allTasksPreBundle.size());
@@ -1420,7 +1475,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	private List<Bundle.BundleEntryComponent> sendBundleAndGetResponse(IBaseBundle theRequestBundle, RequestPartitionId thePartitionId) {
 		assertThat(theRequestBundle).isInstanceOf(Bundle.class);
 
-		final SystemRequestDetails requestDetails = new SystemRequestDetails();
+		final SystemRequestDetails requestDetails = newSrd();
 		requestDetails.setRequestPartitionId(thePartitionId);
 		return mySystemDao.transaction(requestDetails, (Bundle)theRequestBundle).getEntry();
 	}
@@ -1428,11 +1483,11 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	private List<Bundle.BundleEntryComponent> sendBundleAndGetResponse(IBaseBundle theRequestBundle) {
 		assertTrue(theRequestBundle instanceof Bundle);
 
-		return mySystemDao.transaction(new SystemRequestDetails(), (Bundle)theRequestBundle).getEntry();
+		return mySystemDao.transaction(newSrd(), (Bundle)theRequestBundle).getEntry();
 	}
 
 	private List<Task> searchAllTasks() {
-		return unsafeCast(getTaskDao().search(SearchParameterMap.newSynchronous(), new SystemRequestDetails()).getAllResources());
+		return unsafeCast(getTaskDao().search(SearchParameterMap.newSynchronous(), newSrd()).getAllResources());
 	}
 
 	private IFhirResourceDao<Task> getTaskDao() {

@@ -2,13 +2,12 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
 			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-
 	<!-- the version info -->
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>8.3.4-SNAPSHOT</version>
+	<version>8.3.17-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -27,14 +26,6 @@
 	</issueManagement>
 
 	<distributionManagement>
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
 		<site>
 			<id>git.server</id>
 			<url>scm:git:git@github.com:hapifhir/hapi-fhir.git</url>
@@ -46,19 +37,6 @@
 		<url>scm:git:git@github.com:hapifhir/hapi-fhir.git</url>
 		<developerConnection>scm:git:git@github.com:hapifhir/hapi-fhir.git</developerConnection>
 	</scm>
-
-	<repositories>
-		<repository>
-			<id>oss-snapshots</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-	</repositories>
 
 	<modules>
 		<module>hapi-fhir-checkstyle</module>
@@ -101,7 +79,6 @@
 		<module>hapi-fhir-storage-batch2</module>
 		<module>hapi-fhir-storage-batch2-test-utilities</module>
 		<module>hapi-fhir-storage-batch2-jobs</module>
-		<module>hapi-fhir-storage-cr</module>
 		<module>hapi-fhir-storage-mdm</module>
 		<module>hapi-fhir-storage-test-utilities</module>
 		<module>hapi-fhir-jpaserver-model</module>
@@ -127,7 +104,8 @@
 		<module>hapi-fhir-jacoco</module>
 		<module>hapi-fhir-server-cds-hooks</module>
 		<module>hapi-fhir-jpa-hibernate-services</module>
-    </modules>
+		<module>hapi-fhir-repositories</module>
+	</modules>
 
 	<dependencies>
 		<dependency>
@@ -990,8 +968,17 @@
 			<organization>TigaHealth</organization>
 		</developer>
 		<developer>
+			<id>qligier</id>
+			<name>Quentin Ligier</name>
+			<organization>ahdis</organization>
+		</developer>
+		<developer>
 			<id>xytis</id>
 			<name>Vytis Valentinavičius</name>
+		</developer>
+		<developer>
+			<id>MadsSwensson</id>
+			<name>Mads Swensson</name>
 		</developer>
 	</developers>
 
@@ -1003,8 +990,9 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.5.18</fhir_core_version>
+		<fhir_core_version>6.5.27</fhir_core_version>
 		<spotless_version>2.41.1</spotless_version>
+		<spotless.exclude.pattern>**/test/**/*.java</spotless.exclude.pattern>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 		<surefire_version>3.5.2</surefire_version>
 
@@ -1096,7 +1084,7 @@
 		<spring_version>6.1.14</spring_version>
 		<spring_data_bom_version>2024.0.5</spring_data_bom_version>
 		<spring_framework_bom_version>6.1.15</spring_framework_bom_version>
-		<spring_boot_version>3.3.5</spring_boot_version>
+		<spring_boot_version>3.3.11</spring_boot_version>
 		<spring_retry_version>2.0.10</spring_retry_version>
 		<json_path_version>2.9.0</json_path_version>
 		<jboss_logging_version>3.6.1.Final</jboss_logging_version>
@@ -1109,9 +1097,6 @@
 		<elastic_apm_version>1.52.0</elastic_apm_version>
 		<elasticsearch_version>8.15.3</elasticsearch_version>
 		<ucum_version>1.0.9</ucum_version>
-
-		<!-- Clinical Reasoning & CQL Support -->
-		<clinical-reasoning.version>3.19.0</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -1246,7 +1231,12 @@
 			<dependency>
 				<groupId>com.graphql-java</groupId>
 				<artifactId>graphql-java</artifactId>
-				<version>22.3</version>
+				<version>23.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>1.18.32</version>
 			</dependency>
 			<!-- mail start -->
 			<dependency>
@@ -2448,7 +2438,7 @@
 					<configuration>
 						<java>
 							<excludes>
-								<exclude>**/test/**/*.java</exclude>
+								<exclude>${spotless.exclude.pattern}</exclude>
 							</excludes>
 							<!--This does the actual code reformatting-->
 							<palantirJavaFormat/>
@@ -2538,14 +2528,9 @@
 					<version>3.8.1</version>
 				</plugin>
 				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-deploy-plugin</artifactId>
-					<version>3.1.3</version>
-				</plugin>
-				<plugin>
-					<groupId>org.sonatype.plugins</groupId>
-					<artifactId>nexus-staging-maven-plugin</artifactId>
-					<version>1.7.0</version>
+					<groupId>org.sonatype.central</groupId>
+					<artifactId>central-publishing-maven-plugin</artifactId>
+					<version>0.8.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -2555,7 +2540,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.6.3</version>
+					<version>3.11.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -2640,7 +2625,7 @@
 					<artifactId>license-maven-plugin</artifactId>
 					<version>${maven-license-plugin-version}</version>
 					<configuration>
-						<verbose>true</verbose>
+						<verbose>false</verbose>
 						<addSvnKeyWords>false</addSvnKeyWords>
 						<encoding>UTF-8</encoding>
 					</configuration>
@@ -2727,13 +2712,12 @@
 						<configuration>
 							<rules>
 								<requireMavenVersion>
-									<version>3.5.4</version>
+									<version>[3.9.0,)</version>
 								</requireMavenVersion>
 								<requireJavaVersion>
 									<version>17</version>
 									<message>
-										HAPI FHIR is targeting JDK 11 for published binaries,
-										but we require JDK 17 to build and test this library.
+										HAPI FHIR is targeting JDK 17 for published binaries
 									</message>
 								</requireJavaVersion>
 							</rules>
@@ -3208,39 +3192,42 @@
 		</profile>
 
 		<profile>
-			<id>ossrh-repo</id>
+			<id>central-repo</id>
 			<activation>
 				<activeByDefault>false</activeByDefault>
 				<property>
-					<name>deployToSonatype</name>
+					<name>deployToCentral</name>
 				</property>
 			</activation>
-			<distributionManagement>
-				<snapshotRepository>
-					<id>ossrh</id>
-					<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-				</snapshotRepository>
-				<repository>
-					<id>ossrh</id>
-					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-				</repository>
-			</distributionManagement>
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>org.sonatype.plugins</groupId>
-						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<groupId>org.sonatype.central</groupId>
+						<artifactId>central-publishing-maven-plugin</artifactId>
 						<extensions>true</extensions>
 						<configuration>
-							<serverId>ossrh</serverId>
-							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-							<autoReleaseAfterClose>true</autoReleaseAfterClose>
+							<publishingServerId>central</publishingServerId>
+							<autoPublish>true</autoPublish>
+							<waitUntil>uploaded</waitUntil>
+							<excludeArtifacts>
+								<excludeArtifact>hapi-fhir-base-test-jaxrsserver-kotlin</excludeArtifact>
+								<excludeArtifact>hapi-fhir-jpaserver-uhnfhirtest</excludeArtifact>
+								<excludeArtifact>hapi-fhir-base-test-mindeps-client</excludeArtifact>
+								<excludeArtifact>hapi-fhir-dist</excludeArtifact>
+								<excludeArtifact>hapi-tinder-test</excludeArtifact>
+								<excludeArtifact>hapi-fhir-cli-app</excludeArtifact>
+								<excludeArtifact>hapi-fhir-spring-boot</excludeArtifact>
+								<excludeArtifact>hapi-fhir-base-test-mindeps-server</excludeArtifact>
+								<excludeArtifacts>hapi-fhir-spring-boot-sample-server-jersey</excludeArtifacts>
+								<excludeArtifacts>hapi-fhir-spring-boot-sample-client-okhttp</excludeArtifacts>
+								<excludeArtifacts>hapi-fhir-spring-boot-sample-client-apache</excludeArtifacts>
+								<excludeArtifacts>hapi-fhir-spring-boot-samples</excludeArtifacts>
+							</excludeArtifacts>
 						</configuration>
 					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.6</version>
 						<executions>
 							<execution>
 								<id>sign-artifacts</id>

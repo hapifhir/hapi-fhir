@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nullable;
@@ -44,6 +45,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Utilities for dealing with OperationOutcome resources across various model versions
  */
 public class OperationOutcomeUtil {
+
+	public static final String OO_SEVERITY_ERROR = "error";
+	public static final String OO_SEVERITY_INFO = "information";
+	public static final String OO_SEVERITY_WARN = "warning";
+	public static final String OO_ISSUE_CODE_INFORMATIONAL = "informational";
 
 	/**
 	 * Add an issue to an OperationOutcome
@@ -264,6 +270,28 @@ public class OperationOutcomeUtil {
 		}
 	}
 
+	/**
+	 * Given an instance of <code>OperationOutcome.issue</code>, adds a new instance of
+	 * <code>OperationOutcome.issue.expression</code> with the given string value.
+	 *
+	 * @param theContext            The FhirContext for the appropriate FHIR version
+	 * @param theIssue              The <code>OperationOutcome.issue</code> to add to
+	 * @param theLocationExpression The string to use as content
+	 */
+	public static void addExpressionToIssue(FhirContext theContext, IBase theIssue, String theLocationExpression) {
+		if (isNotBlank(theLocationExpression)
+				&& theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+			BaseRuntimeElementCompositeDefinition<?> issueElement =
+					(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theIssue.getClass());
+			BaseRuntimeChildDefinition locationChild = issueElement.getChildByName("expression");
+			IPrimitiveType<?> locationElem = (IPrimitiveType<?>) locationChild
+					.getChildByName("expression")
+					.newInstance(locationChild.getInstanceConstructorArguments());
+			locationElem.setValueAsString(theLocationExpression);
+			locationChild.getMutator().addValue(theIssue, locationElem);
+		}
+	}
+
 	public static IBase addIssueWithMessageId(
 			FhirContext myCtx,
 			IBaseOperationOutcome theOperationOutcome,
@@ -357,5 +385,33 @@ public class OperationOutcomeUtil {
 					"string",
 					theMessageId);
 		}
+	}
+
+	public static IBaseOperationOutcome createOperationOutcome(
+			String theSeverity,
+			String theMessage,
+			String theCode,
+			FhirContext theFhirContext,
+			@Nullable StorageResponseCodeEnum theStorageResponseCode) {
+		IBaseOperationOutcome oo = newInstance(theFhirContext);
+		String detailSystem = null;
+		String detailCode = null;
+		String detailDescription = null;
+		if (theStorageResponseCode != null) {
+			detailSystem = theStorageResponseCode.getSystem();
+			detailCode = theStorageResponseCode.getCode();
+			detailDescription = theStorageResponseCode.getDisplay();
+		}
+		addIssue(
+				theFhirContext,
+				oo,
+				theSeverity,
+				theMessage,
+				null,
+				theCode,
+				detailSystem,
+				detailCode,
+				detailDescription);
+		return oo;
 	}
 }

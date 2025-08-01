@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>8.3.4-SNAPSHOT</version>
+		<version>8.3.17-SNAPSHOT</version>
 
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
@@ -16,16 +16,6 @@
 	<packaging>jar</packaging>
 
 	<name>HAPI FHIR JAX-RS Server Kotlin test</name>
-
-	<repositories>
-		<repository>
-			<id>oss-snapshots</id>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-		</repository>
-	</repositories>
 
 	<dependencies>
 
@@ -98,13 +88,6 @@
 		<finalName>hapi-fhir-jaxrsserver-example</finalName>
 		<!-- This is to run the integration tests -->
 		<plugins>
-			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<configuration>
-					<skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>

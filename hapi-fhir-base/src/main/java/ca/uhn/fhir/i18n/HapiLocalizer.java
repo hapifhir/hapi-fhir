@@ -22,6 +22,7 @@ package ca.uhn.fhir.i18n;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.VersionUtil;
+import com.google.common.annotations.VisibleForTesting;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -115,7 +116,7 @@ public class HapiLocalizer {
 	}
 
 	/**
-	 * Create the message and sanitize parameters using {@link }
+	 * Create the message and sanitize parameters using {@link UrlUtil#sanitizeUrlPart(CharSequence)}
 	 */
 	public String getMessageSanitized(Class<?> theType, String theKey, Object... theParameters) {
 		if (theParameters != null) {
@@ -169,7 +170,7 @@ public class HapiLocalizer {
 	protected void init(String[] theBundleNames) {
 		myBundle = new ArrayList<>();
 		for (String nextName : theBundleNames) {
-			myBundle.add(ResourceBundle.getBundle(nextName));
+			myBundle.add(ResourceBundle.getBundle(nextName, new MultiFileResourceBundleControl()));
 		}
 	}
 
@@ -188,5 +189,10 @@ public class HapiLocalizer {
 
 	public static String toKey(Class<?> theType, String theKey) {
 		return theType.getName() + '.' + theKey;
+	}
+
+	@VisibleForTesting
+	List<ResourceBundle> getBundles() {
+		return myBundle;
 	}
 }

@@ -31,14 +31,19 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PostPersist;
@@ -81,6 +86,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
@@ -394,6 +400,19 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	@Column(name = "RES_VER", nullable = false)
 	private long myVersion;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(
+			name = "RES_TYPE_ID",
+			referencedColumnName = "RES_TYPE_ID",
+			foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
+			insertable = false,
+			updatable = false,
+			nullable = true)
+	private ResourceTypeEntity myResourceTypeEntity;
+
+	@Column(name = "RES_TYPE_ID", nullable = true)
+	private Short myResourceTypeId;
+
 	@OneToMany(mappedBy = "myResourceTable", fetch = FetchType.LAZY)
 	private Collection<ResourceHistoryProvenanceEntity> myProvenance;
 
@@ -664,6 +683,19 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	}
 
 	@Override
+	public Short getResourceTypeId() {
+		return myResourceTypeId;
+	}
+
+	public void setResourceTypeId(Short theResourceTypeId) {
+		myResourceTypeId = theResourceTypeId;
+	}
+
+	public ResourceTypeEntity getMyResourceTypeEntity() {
+		return myResourceTypeEntity;
+	}
+
+	@Override
 	public Collection<ResourceTag> getTags() {
 		if (myTags == null) {
 			myTags = new HashSet<>();
@@ -880,6 +912,7 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 
 		retVal.setResourceId(myPid.getId());
 		retVal.setResourceType(myResourceType);
+		retVal.setResourceTypeId(myResourceTypeId);
 		retVal.setTransientForcedId(getFhirId());
 		retVal.setFhirVersion(getFhirVersion());
 		retVal.setResourceTable(this);
@@ -924,6 +957,7 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 		b.append("pid", getId().getId());
 		b.append("fhirId", myFhirId);
 		b.append("resourceType", myResourceType);
+		b.append("resourceTypeId", getResourceTypeId());
 		b.append("version", myVersion);
 		b.append("lastUpdated", getUpdated().getValueAsString());
 		if (getDeleted() != null) {
@@ -967,28 +1001,43 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 		return getId();
 	}
 
+	/**
+	 * Returns a newly created IdDt containing the resource ID, or <code>null</code> if
+	 * the ID is not yet known (e.g. if this entity will have a server-assigned ID which
+	 * has not yet been assigned).
+	 */
 	@Override
 	public IdDt getIdDt() {
-		IdDt retVal = new IdDt();
-		populateId(retVal);
-		return retVal;
+		return createAndPopulateIdOrReturnNull(IdDt::new);
 	}
 
+	/**
+	 * Returns a newly created IdType containing the resource ID, or <code>null</code> if
+	 * the ID is not yet known (e.g. if this entity will have a server-assigned ID which
+	 * has not yet been assigned).
+	 */
 	public IIdType getIdType(FhirContext theContext) {
-		IIdType retVal = theContext.getVersion().newIdType();
-		populateId(retVal);
-		return retVal;
+		return createAndPopulateIdOrReturnNull(() -> theContext.getVersion().newIdType());
 	}
 
-	private void populateId(IIdType retVal) {
+	/**
+	 * @param theNewIdInstanceSupplier Creates a new instance of the appropriate ID type
+	 */
+	@Nullable
+	private <T extends IIdType> T createAndPopulateIdOrReturnNull(Supplier<T> theNewIdInstanceSupplier) {
 		String resourceId;
 		if (myFhirId != null && !myFhirId.isEmpty()) {
 			resourceId = myFhirId;
 		} else {
 			Long id = getResourceId().getId();
+			if (id == null) {
+				return null;
+			}
 			resourceId = Long.toString(id);
 		}
+		T retVal = theNewIdInstanceSupplier.get();
 		retVal.setValue(getResourceType() + '/' + resourceId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		return retVal;
 	}
 
 	public String getCreatedByMatchUrl() {

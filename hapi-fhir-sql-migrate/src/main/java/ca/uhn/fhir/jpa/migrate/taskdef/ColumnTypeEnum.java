@@ -27,6 +27,7 @@ public enum ColumnTypeEnum {
 	BOOLEAN,
 	FLOAT,
 	INT,
+	SMALLINT,
 	TINYINT,
 	BLOB,
 	CLOB,

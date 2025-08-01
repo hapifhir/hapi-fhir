@@ -2,34 +2,49 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
+import ca.uhn.fhir.model.api.IProvenanceAgent;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
-import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper.EXPECTED_SMALL_BATCHES;
-import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES;
+import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.EXPECTED_SMALL_BATCHES;
+import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.RESOURCE_TYPES_EXPECTED_TO_BE_PATCHED;
+import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.SMALL_BATCH_SIZE;
+import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.TOTAL_EXPECTED_PATCHES;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,6 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 	ReplaceReferencesTestHelper myTestHelper;
+	ReplaceReferencesLargeTestData myLargeTestData;
 
 	@Override
 	@AfterEach
@@ -53,16 +69,96 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-
+		// we need to keep the version on Provenance.target fields to
+		// verify that Provenance resources were saved with versioned target references
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 		myTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
-		myTestHelper.beforeEach();
+		myLargeTestData = new ReplaceReferencesLargeTestData(myDaoRegistry);
+	}
+
+
+
+	private void updateSourcePatientToIncrementItsVersion() {
+		//update the source resource for it to have a different version than the target resource.
+		//The reason is to test that when creating the ReplaceReferencesJobParameters object in async mode
+		//we pass the correct versions for target and source.
+		Patient srcPatient = myTestHelper.readPatient(myLargeTestData.getSourcePatientId());
+		srcPatient.setActive(!srcPatient.getActive());
+		String srcResourceVersion = myClient.update().resource(srcPatient).execute().getId().getVersionIdPart();
+		assertThat(srcResourceVersion).isEqualTo("2");
 	}
 
 	@ParameterizedTest
 	@ValueSource(booleans = {false, true})
 	void testReplaceReferences(boolean isAsync) {
+
+		myLargeTestData.createTestResources();
+		updateSourcePatientToIncrementItsVersion();
+
+		Bundle patchResultBundle = executeReplaceReferences(myLargeTestData.getSourcePatientId(), myLargeTestData.getTargetPatientId(), isAsync);
+
+		// validate
+		ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle, ReplaceReferencesLargeTestData.TOTAL_EXPECTED_PATCHES, RESOURCE_TYPES_EXPECTED_TO_BE_PATCHED);
+		// Check that the linked resources were updated
+		myTestHelper.assertAllReferencesUpdated(myLargeTestData);
+		myTestHelper.assertReplaceReferencesProvenance("2", "1", myLargeTestData, null);
+	}
+
+	@ParameterizedTest(name = "{index}: isAsync={0}, theAgentInterceptorReturnsMultipleAgents={1}")
+	@CsvSource (value = {
+		"false, false",
+		"false, true",
+		"true, false",
+		"true, true",
+	})
+	void testReplaceReferences_WithProvenanceAgentInterceptor_Success(boolean theIsAsync, boolean theAgentInterceptorReturnsMultipleAgents) {
+		myLargeTestData.createTestResources();
+		List<IProvenanceAgent> agents = new ArrayList<>();
+		agents.add(myTestHelper.createTestProvenanceAgent());
+		if (theAgentInterceptorReturnsMultipleAgents) {
+			agents.add(myTestHelper.createTestProvenanceAgent());
+		}
+		// this interceptor will be unregistered in @AfterEach of the base class, which unregisters all interceptors
+		ReplaceReferencesTestHelper.registerProvenanceAgentInterceptor(myServer.getRestfulServer(), agents);
+
+		Bundle patchResultBundle = executeReplaceReferences(myLargeTestData.getSourcePatientId(), myLargeTestData.getTargetPatientId(), theIsAsync);
+
+		// validate
+		ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle, ReplaceReferencesLargeTestData.TOTAL_EXPECTED_PATCHES, RESOURCE_TYPES_EXPECTED_TO_BE_PATCHED);
+
+		// Check that the linked resources were updated
+		myTestHelper.assertAllReferencesUpdated(myLargeTestData);
+		myTestHelper.assertReplaceReferencesProvenance("1", "1", myLargeTestData, agents);
+	}
+
+
+	@ParameterizedTest(name = "{index}: isAsync={0}")
+	@CsvSource (value = {
+		"false",
+		"true"
+	})
+	void testReplaceReferences_withProvenanceAgentInterceptor_InterceptorReturnsNoAgent_ReturnsInternalError(boolean theIsAsync) {
+
+		// this interceptor will be unregistered in @AfterEach of the base class, which unregisters all interceptors
+		ReplaceReferencesTestHelper.registerProvenanceAgentInterceptor(myServer.getRestfulServer(), Collections.emptyList());
+		IIdType srcId = myPatientDao.create(new Patient(), mySrd).getId().toUnqualifiedVersionless();
+		IIdType targetId = myPatientDao.create(new Patient(), mySrd).getId().toUnqualifiedVersionless();
+		assertThatThrownBy(() -> executeReplaceReferences(srcId, targetId, theIsAsync)
+		).isInstanceOf(InternalErrorException.class)
+			.hasMessageContaining("HAPI-2723: No Provenance Agent was provided by any interceptor for Pointcut.PROVENANCE_AGENTS")
+			.extracting(InternalErrorException.class::cast)
+			.extracting(BaseServerResponseException::getStatusCode)
+			.isEqualTo(500);
+	}
+
+
+	private Bundle executeReplaceReferences(IIdType theSourceId, IIdType theTargetId, boolean isAsync) {
 		// exec
-		Parameters outParams = myTestHelper.callReplaceReferences(myClient, isAsync);
+		Parameters outParams = myTestHelper.callReplaceReferences(myClient,
+			theSourceId,
+			theTargetId,
+			isAsync,
+			null);
 
 		assertThat(outParams.getParameter()).hasSize(1);
 
@@ -80,16 +176,9 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 		} else {
 			patchResultBundle = (Bundle) outParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME).getResource();
 		}
-
-		// validate
-		ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle,
-			ReplaceReferencesTestHelper.TOTAL_EXPECTED_PATCHES, List.of(
-				"Observation", "Encounter", "CarePlan"));
-
-		// Check that the linked resources were updated
-
-		myTestHelper.assertAllReferencesUpdated();
+		return patchResultBundle;
 	}
+
 
 	private JobInstance awaitJobCompletion(Task task) {
 		String jobId = myTestHelper.getJobIdFromTask(task);
@@ -98,17 +187,27 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	void testReplaceReferencesSmallResourceLimitSync() {
-		assertThatThrownBy(() -> myTestHelper.callReplaceReferencesWithResourceLimit(myClient, false, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE))
+		myLargeTestData.createTestResources();
+		assertThatThrownBy(() -> myTestHelper.callReplaceReferences(myClient,
+			myLargeTestData.getSourcePatientId().toString(),
+			myLargeTestData.getTargetPatientId().toString(),
+			false,
+			SMALL_BATCH_SIZE))
 			.isInstanceOf(PreconditionFailedException.class)
-			.hasMessage("HTTP 412 Precondition Failed: HAPI-2597: Number of resources with references to " + myTestHelper.getSourcePatientId() + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'.");
+			.hasMessage("HTTP 412 Precondition Failed: HAPI-2597: Number of resources with references to " + myLargeTestData.getSourcePatientId() + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'.");
 	}
 
 	@Test
 	void testReplaceReferencesSmallTransactionEntriesSize() {
+		myLargeTestData.createTestResources();
 		myStorageSettings.setDefaultTransactionEntriesForWrite(5);
 
 		// exec
-		Parameters outParams = myTestHelper.callReplaceReferencesWithResourceLimit(myClient, true, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE);
+		Parameters outParams = myTestHelper.callReplaceReferences(myClient,
+			myLargeTestData.getSourcePatientId(),
+			myLargeTestData.getTargetPatientId(),
+			true,
+			SMALL_BATCH_SIZE);
 
 		assertThat(getLastHttpStatusCode()).isEqualTo(HttpServletResponse.SC_ACCEPTED);
 
@@ -154,17 +253,16 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 			int numberOfEntriesInCurrentBundle = patchResultBundle.getEntry().size();
 			// validate
 			totalPatchResultEntriesSeen += numberOfEntriesInCurrentBundle;
-			assertThat(numberOfEntriesInCurrentBundle).isBetween(1, ReplaceReferencesTestHelper.SMALL_BATCH_SIZE);
-			ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle, numberOfEntriesInCurrentBundle, List.of(
-				"Observation",
-				"Encounter", "CarePlan"));
+			assertThat(numberOfEntriesInCurrentBundle).isBetween(1, SMALL_BATCH_SIZE);
+			ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle, numberOfEntriesInCurrentBundle, RESOURCE_TYPES_EXPECTED_TO_BE_PATCHED);
 		}
 
 		assertThat(totalPatchResultEntriesSeen).isEqualTo(TOTAL_EXPECTED_PATCHES);
 
 		// Check that the linked resources were updated
 
-		myTestHelper.assertAllReferencesUpdated();
+		myTestHelper.assertAllReferencesUpdated(myLargeTestData);
+		myTestHelper.assertReplaceReferencesProvenance("1", "1", myLargeTestData, null);
 	}
 
 	@ParameterizedTest
@@ -172,7 +270,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 	@NullSource
 	void testReplaceReferences_MissingSourceId_ThrowsInvalidRequestException(String theSourceId) {
 		InvalidRequestException exception = assertThrows(InvalidRequestException.class, () -> {
-			myTestHelper.callReplaceReferencesWithResourceLimit(myClient, theSourceId, "target-id", false, null);
+			myTestHelper.callReplaceReferences(myClient, theSourceId, "target-id", false, null);
 		});
 		assertThat(exception.getMessage()).contains("HAPI-2583: Parameter 'source-reference-id' is blank");
 	}
@@ -182,9 +280,32 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 	@NullSource
 	void testReplaceReferences_MissingTargetId_ThrowsInvalidRequestException(String theTargetId) {
 		InvalidRequestException exception = assertThrows(InvalidRequestException.class, () -> {
-			myTestHelper.callReplaceReferencesWithResourceLimit(myClient, "source-id", theTargetId, false, null);
+			myTestHelper.callReplaceReferences(myClient, "source-id", theTargetId, false, null);
 		});
 		assertThat(exception.getMessage()).contains("HAPI-2584: Parameter 'target-reference-id' is blank");
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {false, true})
+	void testReplaceReferences_NotExistingSourceId_ThrowsNotFoundException(boolean theIsAsync) {
+		String nonExistingSourceId = "Patient/does-not-exist";
+		String targetId = myPatientDao.create(new Patient(), mySrd).getId().toUnqualifiedVersionless().toString();
+		assertThatThrownBy(() -> {
+			myTestHelper.callReplaceReferences(myClient, nonExistingSourceId, targetId, theIsAsync, null);
+		}).isInstanceOf(ResourceNotFoundException.class)
+			.hasMessageContaining("HAPI-2001: Resource Patient/does-not-exist is not known");
+	}
+
+
+	@ParameterizedTest
+	@ValueSource(booleans = {false, true})
+	void testReplaceReferences_NotExistingTargetId_ThrowsNotFoundException(boolean theIsAsync) {
+		String nonExistingTargetId = "Patient/does-not-exist";
+		String sourceId = myPatientDao.create(new Patient(), mySrd).getId().toUnqualifiedVersionless().toString();
+		assertThatThrownBy(() -> {
+			myTestHelper.callReplaceReferences(myClient, nonExistingTargetId, sourceId, theIsAsync, null);
+		}).isInstanceOf(ResourceNotFoundException.class)
+			.hasMessageContaining("HAPI-2001: Resource Patient/does-not-exist is not known");
 	}
 
 
@@ -200,7 +321,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 		IIdType observationId = createObservationWithPerformers(practitionerId1, practitionerId2).toUnqualifiedVersionless();
 
 		// Call $replace-references operation to replace practitionerId1 with practitionerId3
-		Parameters outParams = myTestHelper.callReplaceReferencesWithResourceLimit(myClient,
+		Parameters outParams = myTestHelper.callReplaceReferences(myClient,
 			practitionerId1.toString(),
 			practitionerId3.toString(),
 			false,
@@ -209,9 +330,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 		// Assert operation outcome
 		Bundle patchResultBundle = (Bundle) outParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME).getResource();
 
-		ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle,
-			1, List.of(
-				"Observation"));
+		ReplaceReferencesTestHelper.validatePatchResultBundle(patchResultBundle, 1, List.of( "Observation"));
 
 		// Fetch and validate updated observation
 		Observation updatedObservation = myClient
@@ -231,22 +350,14 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	void testReplaceReferences_ShouldNotReplaceVersionedReferences() {
-		// this configuration makes preserve versioned references in the Provenance.target
-		// so that we can test that the versioned reference was not replaced
-		// but keep a copy of the original configuration to restore it after the test
-		Set<String> originalNotStrippedPaths =
-			myFhirContext.getParserOptions().getDontStripVersionsFromReferencesAtPaths();
-		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
-		try {
-
 			IIdType practitionerId1 = myClient.create().resource(new Practitioner()).execute().getId().toUnqualified();
 			IIdType practitionerId2 = myClient.create().resource(new Practitioner()).execute().getId().toUnqualified();
 
 			Provenance provenance = new Provenance();
 			provenance.addTarget(new Reference(practitionerId1));
 			IIdType provenanceId = myClient.create().resource(provenance).execute().getId();
-			// Call $replace-references operation to replace practitionerId1 with practitionerId3
-			myTestHelper.callReplaceReferencesWithResourceLimit(myClient,
+			// Call $replace-references operation to replace practitionerId1 with practitionerId2
+			myTestHelper.callReplaceReferences(myClient,
 				practitionerId1.toVersionless().toString(),
 				practitionerId2.toVersionless().toString(),
 				false,
@@ -264,12 +375,8 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 				.map(ref -> ref.getReferenceElement().toString())
 				.toList();
 
-			// Assert that the versioned reference in the Provenance  was not replaced
+			// Assert that the versioned reference in the Provenance was not replaced
 			assertThat(actualTargetIds).containsExactly(practitionerId1.toString());
-
-		} finally {
-			myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(originalNotStrippedPaths);
-		}
 	}
 
 	private IIdType createObservationWithPerformers(IIdType... performerIds) {
@@ -286,8 +393,95 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	@Test
+	void testReplaceReferences_ResourceHasMultipleReferencesToTheSameResource() {
+		IIdType srcPractitionerId = myClient.create().resource(new Practitioner()).execute().getId().toUnqualifiedVersionless();
+		// Create a ServiceRequest where requester and performer refer to the practitioner
+		ServiceRequest serviceRequest = new ServiceRequest();
+		serviceRequest.setRequester(new Reference(srcPractitionerId));
+		serviceRequest.addPerformer(new Reference(srcPractitionerId));
+		IIdType serviceRequestId = myClient.create().resource(serviceRequest).execute().getId().toUnqualified();
+		IIdType targetPractitionerId = myClient.create().resource(new Practitioner()).execute().getId().toUnqualified();
 
+		// Call $replace-references operation to replace practitionerId1 with practitionerId3
+		 myTestHelper.callReplaceReferences(myClient,
+			srcPractitionerId.toVersionless().toString(),
+			targetPractitionerId.toVersionless().toString(),
+			false,
+			null);
 
+		// ensure that both references to the srcPractitionerId were replaced with the targetPractitionerId
+		ServiceRequest updatedServiceReq = myClient.read().resource(ServiceRequest.class).withId(serviceRequestId.toVersionless()).execute();
+		assertThat(updatedServiceReq.getRequester().getReference()).isEqualTo(targetPractitionerId.toVersionless().toString());
+		assertThat(updatedServiceReq.getPerformer().get(0).getReference()).isEqualTo(targetPractitionerId.toVersionless().toString());
+		// the ServiceRequest resource should have been updated only once, so it should have version 2
+		assertThat(updatedServiceReq.getIdElement().getVersionIdPart()).isEqualTo("2");
+
+		myTestHelper.assertReplaceReferencesProvenance(
+			srcPractitionerId.withVersion("1"),
+			targetPractitionerId.withVersion("1"),
+			1,
+			Set.of(serviceRequestId.withVersion("2").toString()),
+			null
+		);
+	}
+
+	@ParameterizedTest
+	@CsvSource (value = {
+		"false",
+		"true"
+	})
+	void testReplaceReferences_SourceResourceNotReferencedByAnyResource_SucceedAndShouldNotCreateAProvenance(boolean theIsAsync) {
+
+		IIdType sourcePatientId = myPatientDao.create(new Patient(), mySrd).getId().toUnqualifiedVersionless();
+		IIdType targetPatientId = myPatientDao.create(new Patient(), mySrd).getId().toUnqualifiedVersionless();
+
+		Parameters outParams = myTestHelper.callReplaceReferences(myClient,
+			sourcePatientId,
+			targetPatientId,
+			theIsAsync,
+			null);
+
+		if (theIsAsync) {
+			Task task = (Task) outParams.getParameter(OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK).getResource();
+			awaitJobCompletion(task);
+		}
+
+		List<IBaseResource> provenances = myTestHelper.searchProvenance(targetPatientId.toString());
+		assertThat(provenances).isEmpty();
+	}
+
+	@ParameterizedTest
+	@CsvSource (value = {
+		"false",
+		"true"
+	})
+	void testReplaceReferences_ReferencingResourceHasAnAdditionalLogicalReference_Succeeds(boolean theIsAsync) {
+
+		IIdType sourcePatientId = myPatientDao.create(new Patient(), mySrd).getId().toUnqualifiedVersionless();
+		IIdType targetPatientId = myPatientDao.create(new Patient(), mySrd).getId().toUnqualifiedVersionless();
+
+		// Create an Observation resource that references the source patient
+		// and has an additional logical reference.
+		Observation observation = new Observation();
+		observation.setSubject(new Reference(sourcePatientId));
+		Reference logicalReference = new Reference();
+		logicalReference.setIdentifier(new Identifier().setSystem("performerSys").setValue("drWho"));
+		observation.addPerformer(logicalReference);
+
+		IIdType obsId = myObservationDao.create(observation, mySrd).getId().toUnqualifiedVersionless();
+
+		executeReplaceReferences(sourcePatientId, targetPatientId, theIsAsync);
+
+		Observation obsAfter = myObservationDao.read(obsId, mySrd);
+		assertThat(obsAfter.getSubject().getReference()).isEqualTo(targetPatientId.toString());
+		// The logical reference should not have been replaced
+		assertThat(obsAfter.getPerformer()).hasSize(1);
+		assertThat(obsAfter.getPerformerFirstRep().getIdentifier().getSystem()).isEqualTo("performerSys");
+		assertThat(obsAfter.getPerformerFirstRep().getIdentifier().getValue()).isEqualTo("drWho");
+
+		myTestHelper.assertReplaceReferencesProvenance(sourcePatientId.withVersion("1"), targetPatientId.withVersion("1"), 1, Set.of(obsId.withVersion("2").toString()), null);
+	}
 
 	@Override
 	protected boolean verboseClientLogging() {

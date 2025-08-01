@@ -487,7 +487,7 @@ public class JobInstance implements IModelJson, IJobInstance {
 	}
 
 	/**
-	 * @return myUserData as an Unmodifiable Map<String, Object>
+	 * @return myUserData as an Unmodifiable Map&lt;String, Object&gt;
 	 */
 	public Map<String, Object> getUserData() {
 		return Collections.unmodifiableMap(getOrInitializeUserData());

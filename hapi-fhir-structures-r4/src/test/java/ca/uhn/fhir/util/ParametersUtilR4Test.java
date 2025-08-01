@@ -3,7 +3,10 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
@@ -11,6 +14,8 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -109,5 +114,44 @@ public class ParametersUtilR4Test {
 
 		Optional<IBaseResource> barResource = ParametersUtil.getNamedParameterResource(ourFhirContext,p, "bar");
 		assertThat(barResource).isEmpty();
+	}
+
+	@Test
+	public void testGetNamedParameterReferences() {
+		Parameters p = new Parameters();
+		ParametersUtil.addParameterToParametersReference(ourFhirContext, p, "patients",  "Patient/1/_history/3");
+		ParametersUtil.addParameterToParametersReference(ourFhirContext, p, "patients",  "Patient/2");
+
+		List<IBaseReference> values = ParametersUtil.getNamedParameterReferences(ourFhirContext, p, "patients");
+		assertThat(values).extracting("reference").contains("Patient/1/_history/3", "Patient/2");
+	}
+
+	@Test
+	void testCreateInstant() {
+		// Test with a specific date
+		Calendar cal = Calendar.getInstance();
+		cal.set(2023, Calendar.JULY, 15, 14, 30, 45);
+		cal.set(Calendar.MILLISECOND, 123);
+		Date testDate = cal.getTime();
+
+		IPrimitiveType<?> result = ParametersUtil.createInstant(ourFhirContext, testDate);
+
+		assertThat(result).isNotNull();
+		assertThat(result).isInstanceOf(InstantType.class);
+		assertThat(result.getValue()).isEqualTo(testDate);
+
+		// Verify it creates a proper instant format string
+		InstantType instantType = (InstantType) result;
+		String instantString = instantType.getValueAsString();
+		assertThat(instantString).matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?([+-]\\d{2}:\\d{2}|Z)");
+	}
+
+	@Test
+	void testCreateInstantWithNullValue() {
+		IPrimitiveType<?> result = ParametersUtil.createInstant(ourFhirContext, null);
+
+		assertThat(result).isNotNull();
+		assertThat(result).isInstanceOf(InstantType.class);
+		assertThat(result.getValue()).isNull();
 	}
 }

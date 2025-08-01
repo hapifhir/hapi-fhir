@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>8.3.4-SNAPSHOT</version>
+		<version>8.3.17-SNAPSHOT</version>
 
 		<relativePath>../pom.xml</relativePath>
 	</parent>
@@ -14,16 +14,6 @@
 	<packaging>war</packaging>
 
 	<name>HAPI FHIR TestPage Overlay</name>
-
-	<repositories>
-		<repository>
-			<id>oss-snapshots</id>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-		</repository>
-	</repositories>
 
 	<dependencies>
 		<dependency>
@@ -244,10 +234,10 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<groupId>org.sonatype.central</groupId>
+				<artifactId>central-publishing-maven-plugin</artifactId>
 				<configuration>
-					<skipNexusStagingDeployMojo>false</skipNexusStagingDeployMojo>
+					<skipPublishing>false</skipPublishing>
 				</configuration>
 			</plugin>
 			<plugin>

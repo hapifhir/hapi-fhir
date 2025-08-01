@@ -61,6 +61,8 @@ public class JobInstanceProcessor {
 	private final String myInstanceId;
 	private final JobDefinitionRegistry myJobDefinitionegistry;
 
+	private long myPurgeThreshold = PURGE_THRESHOLD;
+
 	public JobInstanceProcessor(
 			IJobPersistence theJobPersistence,
 			BatchJobSender theBatchJobSender,
@@ -77,6 +79,10 @@ public class JobInstanceProcessor {
 		myJobInstanceProgressCalculator =
 				new JobInstanceProgressCalculator(theJobPersistence, theProgressAccumulator, theJobDefinitionRegistry);
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
+	}
+
+	public void setPurgeThreshold(long thePurgeThreshold) {
+		myPurgeThreshold = thePurgeThreshold;
 	}
 
 	public void process() {
@@ -185,7 +191,7 @@ public class JobInstanceProcessor {
 
 	private boolean purgeExpiredInstance(JobInstance theInstance) {
 		if (theInstance.getEndTime() != null) {
-			long cutoff = System.currentTimeMillis() - PURGE_THRESHOLD;
+			long cutoff = System.currentTimeMillis() - myPurgeThreshold;
 			if (theInstance.getEndTime().getTime() < cutoff) {
 				ourLog.info("Deleting old job instance {}", theInstance.getInstanceId());
 				myJobPersistence.deleteInstanceAndChunks(theInstance.getInstanceId());

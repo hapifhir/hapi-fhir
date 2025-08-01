@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-test-utilities
+ * HAPI-FHIR Storage Test Utilities
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%

@@ -61,7 +61,6 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	@Autowired
 	PartitionSettings myPartitionSettings;
 
 	protected BaseRequestPartitionHelperSvc() {
@@ -85,6 +84,11 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		myNonPartitionableResourceNames.add("ValueSet");
 		myNonPartitionableResourceNames.add("NamingSystem");
 		myNonPartitionableResourceNames.add("StructureMap");
+	}
+
+	@Autowired
+	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	/**
@@ -124,7 +128,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			logSystemRequestDetailsResolution((SystemRequestDetails) requestDetails);
 
 		} else if ((requestDetails instanceof SystemRequestDetails) && nonPartitionableResource) {
-			requestPartitionId = RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
+			requestPartitionId = myPartitionSettings.getDefaultRequestPartitionId();
 			logSystemRequestDetailsResolution((SystemRequestDetails) requestDetails);
 			logNonPartitionableType(resourceType);
 		} else {
@@ -243,7 +247,8 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			SystemRequestDetails theRequest, boolean theNonPartitionableResource) {
 		RequestPartitionId requestPartitionId;
 		requestPartitionId = getSystemRequestPartitionId(theRequest);
-		if (theNonPartitionableResource && !requestPartitionId.isDefaultPartition()) {
+		if (theNonPartitionableResource
+				&& !requestPartitionId.isPartition(myPartitionSettings.getDefaultPartitionId())) {
 			throw new InternalErrorException(Msg.code(1315)
 					+ "System call is attempting to write a non-partitionable resource to a partition! This is a bug!");
 		}
@@ -318,7 +323,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		// to DEFAULT
 		if (nonPartitionableResource && requestPartitionId == null) {
 			logNonPartitionableType(theResourceType);
-			requestPartitionId = RequestPartitionId.defaultPartition();
+			requestPartitionId = myPartitionSettings.getDefaultRequestPartitionId();
 		}
 
 		validateRequestPartitionNotNull(

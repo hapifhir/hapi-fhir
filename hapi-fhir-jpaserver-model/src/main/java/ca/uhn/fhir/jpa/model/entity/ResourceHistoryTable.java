@@ -28,6 +28,7 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -67,7 +68,8 @@ import java.util.Collection;
 		indexes = {
 			@Index(name = "IDX_RESVER_TYPE_DATE", columnList = "RES_TYPE,RES_UPDATED,RES_ID"),
 			@Index(name = "IDX_RESVER_ID_DATE", columnList = "RES_ID,RES_UPDATED"),
-			@Index(name = "IDX_RESVER_DATE", columnList = "RES_UPDATED,RES_ID")
+			@Index(name = "IDX_RESVER_DATE", columnList = "RES_UPDATED,RES_ID"),
+			@Index(name = "IDX_RESVER_ID_SRC_URI", columnList = "SOURCE_URI,RES_ID,PARTITION_ID")
 		})
 public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk> implements Serializable {
 	public static final String IDX_RESVER_ID_VER = "IDX_RESVER_ID_VER";
@@ -152,6 +154,19 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 	@Column(name = "REQUEST_ID", length = Constants.REQUEST_ID_LENGTH, nullable = true)
 	private String myRequestId;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(
+			name = "RES_TYPE_ID",
+			referencedColumnName = "RES_TYPE_ID",
+			foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
+			insertable = false,
+			updatable = false,
+			nullable = true)
+	private ResourceTypeEntity myResourceTypeEntity;
+
+	@Column(name = "RES_TYPE_ID", nullable = true)
+	private Short myResourceTypeId;
+
 	@Transient
 	private transient ResourceHistoryProvenanceEntity myNewHistoryProvenanceEntity;
 	/**
@@ -191,6 +206,7 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 				.append("resourceId", resourceId.getId())
 				.append("partitionId", resourceId.getPartitionId())
 				.append("resourceType", myResourceType)
+				.append("resourceTypeId", getResourceTypeId())
 				.append("resourceVersion", myResourceVersion)
 				.append("pid", myId)
 				.append("updated", getPublished())
@@ -208,6 +224,7 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 	public void addTag(ResourceTag theTag) {
 		ResourceHistoryTag tag = new ResourceHistoryTag(this, theTag.getTag(), getPartitionId());
 		tag.setResourceType(theTag.getResourceType());
+		tag.setResourceTypeId(theTag.getResourceTypeId());
 		getTags().add(tag);
 	}
 
@@ -297,6 +314,19 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
+	}
+
+	@Override
+	public Short getResourceTypeId() {
+		return myResourceTypeId;
+	}
+
+	public void setResourceTypeId(Short theResourceTypeId) {
+		myResourceTypeId = theResourceTypeId;
+	}
+
+	public ResourceTypeEntity getResourceTypeEntity() {
+		return myResourceTypeEntity;
 	}
 
 	@Override

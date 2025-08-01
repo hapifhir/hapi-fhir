@@ -11,7 +11,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
+import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.elementmodel.Element;
 import org.hl7.fhir.r5.utils.XVerExtensionManager;
@@ -54,7 +54,7 @@ public class ValidatorResourceFetcherTest extends BaseTest {
     doReturn(new SimpleBundleProvider(List.of(
 		ourCtx.newJsonParser().parseResource(resource)
 	))).when(mockResourceDao).search(any(),any());
-    VersionSpecificWorkerContextWrapper wrappedWorkerContext = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(myDefaultValidationSupport);
+    WorkerContextValidationSupportAdapter wrappedWorkerContext = WorkerContextValidationSupportAdapter.newVersionSpecificWorkerContextWrapper(myDefaultValidationSupport);
     InstanceValidator v =
         new InstanceValidator(
             wrappedWorkerContext,

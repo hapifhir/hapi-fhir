@@ -1,0 +1,78 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>ca.uhn.hapi.fhir</groupId>
+		<artifactId>hapi-deployable-pom</artifactId>
+		<version>8.3.17-SNAPSHOT</version>
+		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
+	</parent>
+
+	<artifactId>hapi-fhir-repositories</artifactId>
+	<packaging>jar</packaging>
+
+	<name>HAPI FHIR - Repository implementations and utilities</name>
+	<description>
+		Implementations, loaders, and utilities for the ca.uhn.fhir.repository.IRepository interface.
+		This project has limited dependencies, and can be used without Spring, Hapi Server, or JPA
+	</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-base</artifactId>
+			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+		</dependency>
+
+		<!-- test support -->
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-test-utilities</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-r4</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- Used to compile the KalmFilesystemRepository. Delete this once KalmFilesystemRepositoryLoader is downstreamed to cqf or the IgRepository upstreamed here -->
+		  <dependency>
+				<groupId>org.opencds.cqf.fhir</groupId>
+				<artifactId>cqf-fhir-utility</artifactId>
+				<version>3.23.0</version>
+				<scope>provided</scope>
+		  </dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.3.0</version>
+				<executions>
+					<execution>
+						<id>Test Jar</id>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

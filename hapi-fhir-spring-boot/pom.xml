@@ -5,10 +5,11 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>8.3.4-SNAPSHOT</version>
+		<version>8.3.17-SNAPSHOT</version>
 
 		<relativePath>../pom.xml</relativePath>
 	</parent>
+	<name>HAPI-FHIR Spring Boot Base Project</name>
 
 	<artifactId>hapi-fhir-spring-boot</artifactId>
 	<packaging>pom</packaging>
@@ -31,17 +32,7 @@
 		</dependencies>
 	</dependencyManagement>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<configuration>
-					<skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+
 	<profiles>
 		<!-- For releases, we need to generate javadoc and sources JAR -->
 		<profile>
@@ -49,7 +40,7 @@
 			<activation>
 				<activeByDefault>false</activeByDefault>
 				<property>
-					<name>deployToSonatype</name>
+					<name>deployToCentral</name>
 				</property>
 			</activation>
 			<build>
@@ -57,7 +48,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>
-						<version>3.2.1</version>
 						<executions>
 							<execution>
 								<id>attach-sources</id>
@@ -70,7 +60,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>3.4.0</version>
 						<executions>
 							<execution>
 								<id>attach-javadoc</id>

@@ -39,7 +39,8 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 	@BeforeEach
 	public void enableAdvancedHSearchIndexing() {
 		myStorageSettings.setLastNEnabled(true);
-		myStorageSettings.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setHibernateSearchIndexSearchParams(true);
+		mySearchParamRegistry.forceRefresh();
 	}
 
 	@AfterEach

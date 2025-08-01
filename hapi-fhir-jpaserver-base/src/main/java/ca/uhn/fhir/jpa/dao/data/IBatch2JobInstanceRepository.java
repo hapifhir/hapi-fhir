@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.data;
 import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -68,11 +69,19 @@ public interface IBatch2JobInstanceRepository
 	List<Batch2JobInstanceEntity> findInstancesByJobIdAndParams(
 			@Param("defId") String theDefinitionId, @Param("params") String theParams, Pageable thePageable);
 
-	@Query("SELECT b from Batch2JobInstanceEntity b WHERE b.myStatus = :status")
-	List<Batch2JobInstanceEntity> findInstancesByJobStatus(@Param("status") StatusEnum theState, Pageable thePageable);
-
-	@Query("SELECT count(b) from Batch2JobInstanceEntity b WHERE b.myStatus = :status")
-	Integer findTotalJobsOfStatus(@Param("status") StatusEnum theState);
+	@Query("SELECT b from Batch2JobInstanceEntity b "
+			+ "WHERE (:definitionId IS NULL OR b.myDefinitionId = :definitionId) "
+			+ "AND (:status IS NULL OR b.myStatus = :status) "
+			+ "AND (:jobId IS NULL OR b.myId = :jobId) "
+			+ "AND (cast(:from as date) IS NULL OR b.myCreateTime >= :from) "
+			+ "AND (cast(:to as date) IS NULL OR b.myCreateTime <= :to)")
+	Page<Batch2JobInstanceEntity> findByJobDefinitionIdOrStatusOrIdOrCreateTime(
+			@Param("definitionId") String theDefinitionId,
+			@Param("status") StatusEnum theStatus,
+			@Param("jobId") String theJobId,
+			@Param("from") Date theFrom,
+			@Param("to") Date theTo,
+			Pageable thePageable);
 
 	@Query(
 			"SELECT b from Batch2JobInstanceEntity b WHERE b.myDefinitionId = :defId  AND b.myStatus IN( :stats ) AND b.myEndTime < :cutoff")

@@ -28,7 +28,10 @@ import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.validation.ValidationResult;
+import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -64,6 +67,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport.GENERATING_SNAPSHOT_LOG_MSG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -97,6 +101,9 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	@RegisterExtension
 	public HttpServletExtension myServer = new HttpServletExtension()
 		.withServlet(myFakeNpmServlet);
+
+	@RegisterExtension
+	private LogbackTestExtension myTerminologyTroubleshootingLogCapture = new LogbackTestExtension(Logs.getTerminologyTroubleshootingLog());
 
 	@Override
 	@BeforeEach
@@ -1015,6 +1022,13 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			assertTrue(myPackageVersionDao.findByPackageIdAndVersion("test.circular.snapshot", "0.0.1").isPresent());
 		});
+
+		List<String> snapshotMessages = myTerminologyTroubleshootingLogCapture
+			.getLogEvents(t -> t.getMessage().equals(GENERATING_SNAPSHOT_LOG_MSG))
+			.stream()
+			.map(ILoggingEvent::getFormattedMessage)
+			.toList();
+		assertThat(snapshotMessages).hasSize(5);
 	}
 
 

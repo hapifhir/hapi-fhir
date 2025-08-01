@@ -177,6 +177,8 @@ public enum VersionEnum {
 	V8_0_1,
 	V8_1_0,
 	V8_2_0,
+	V8_2_1,
+	V8_2_2,
 	V8_3_0,
 	V8_4_0;
 

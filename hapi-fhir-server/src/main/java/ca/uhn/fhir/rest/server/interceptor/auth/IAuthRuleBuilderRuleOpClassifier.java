@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -61,12 +62,10 @@ public interface IAuthRuleBuilderRuleOpClassifier {
 	 *
 	 * @param theCompartmentName The name of the compartment (must not be null or blank)
 	 * @param theOwner The owner of the compartment. Note that both the resource type and ID must be populated in this ID.
-	 * @param theAdditionalTypeSearchParamNames A list of strings for additional resource types and search parameters which count as being in the compartment, in the form "resourcetype:search-parameter-name".
+	 * @param theModifications A list of strings for additional resource types and search parameters which count as being in the compartment, in the form "resourcetype:search-parameter-name".
 	 */
-	IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithAdditionalSearchParams(
-			String theCompartmentName,
-			IIdType theOwner,
-			AdditionalCompartmentSearchParameters theAdditionalTypeSearchParamNames);
+	IAuthRuleBuilderRuleOpClassifierFinished inModifiedCompartment(
+			String theCompartmentName, IIdType theOwner, CompartmentSearchParameterModifications theModifications);
 
 	/**
 	 * Rule applies to resources in the given compartment.
@@ -92,9 +91,9 @@ public interface IAuthRuleBuilderRuleOpClassifier {
 	 * belonging to patient "123", you would invoke this with</br>
 	 * <code>inCompartment("Patient", new IdType("Patient", "123"))</code>
 	 *
-	 * This call also allows you to pass additional search parameters that count as being included in the given compartment,
-	 * passed in as a list of `resourceType:search-parameter-name`. For example, if you select a compartment name of "patient",
-	 * you could pass in a singleton list consisting of the string "device:patient", which would cause any devices belonging
+	 * This call also allows you to pass special case handling adding (or omitting) search parameters that count as being included in the given compartment.
+	 * For example, if you select a compartment name of "patient",
+	 * you could pass in a singleton list consisting of the"device" and "patient", which would cause any devices belonging
 	 * to the patient to be permitted by the authorization rule.
 	 *
 	 * </p>
@@ -104,13 +103,13 @@ public interface IAuthRuleBuilderRuleOpClassifier {
 	 *
 	 * @param theCompartmentName The name of the compartment (must not be null or blank)
 	 * @param theOwners The owners of the compartment. Note that both the resource type and ID must be populated in these IDs.
-	 * @param theAdditionalTypeSearchParamNames A {@link AdditionalCompartmentSearchParameters} which allows you to expand the search space for what is considered "in" the compartment.
+	 * @param theModifications A {@link CompartmentSearchParameterModifications} which allows you to expand (or limit) the search space for what is considered "in" the compartment.
 	 *
 	 **/
-	IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithAdditionalSearchParams(
+	IAuthRuleBuilderRuleOpClassifierFinished inModifiedCompartment(
 			String theCompartmentName,
 			Collection<? extends IIdType> theOwners,
-			AdditionalCompartmentSearchParameters theAdditionalTypeSearchParamNames);
+			CompartmentSearchParameterModifications theModifications);
 
 	/**
 	 * Rule applies to any resource instances
