@@ -48,7 +48,7 @@ public class MultiMapSearchQueryBuilder implements ISearchQueryBuilder {
 		return mySearchParameters;
 	}
 
-	public static Multimap<String, List<IQueryParameterType>> builderToMultimap(
+	public static Multimap<String, List<IQueryParameterType>> contributorToMultimap(
 			ISearchQueryContributor theSearchQueryBuilder) {
 		MultiMapSearchQueryBuilder sb = new MultiMapSearchQueryBuilder();
 		theSearchQueryBuilder.contributeToQuery(sb);

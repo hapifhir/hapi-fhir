@@ -16,8 +16,8 @@ public interface ISearchQueryBuilder {
 		return addOrList(theParamName, List.of(theParameterValues));
 	}
 
-	default ISearchQueryBuilder addNumericParameter(String theCount, int theInteger) {
-		return addOrList(theCount, new NumberParam(theInteger));
+	default ISearchQueryBuilder addNumericParameter(String theParamName, int theValue) {
+		return addOrList(theParamName, new NumberParam(theValue));
 	}
 
 	ISearchQueryBuilder addOrList(String theParamName, List<IQueryParameterType> theParameters);

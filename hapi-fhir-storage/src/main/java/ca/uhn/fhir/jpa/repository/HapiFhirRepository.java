@@ -142,14 +142,14 @@ public class HapiFhirRepository implements IRepository {
 	public <B extends IBaseBundle, T extends IBaseResource> B search(
 			Class<B> theBundleType,
 			Class<T> theResourceType,
-			ISearchQueryContributor theSearchParameters,
+			ISearchQueryContributor theQueryContributor,
 			Map<String, String> theHeaders) {
 		RequestDetails details = startWith(myRequestDetails)
 				.setAction(RestOperationTypeEnum.SEARCH_TYPE)
 				.addHeaders(theHeaders)
 				.create();
 		SearchParameterMap searchParameterMap =
-				SearchParameterMapQueryBuilder.buildFromQueryContributor(theSearchParameters);
+				SearchParameterMapQueryBuilder.buildFromQueryContributor(theQueryContributor);
 		// fixme need a SPMap -> Map<String, String[]> converter
 		// details.setParameters(fixme);
 		details.setResourceName(myDaoRegistry.getFhirContext().getResourceType(theResourceType));

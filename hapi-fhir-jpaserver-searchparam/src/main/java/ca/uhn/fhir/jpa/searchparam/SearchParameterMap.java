@@ -61,6 +61,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.api.Constants.PARAM_COUNT;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_INCLUDE;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
@@ -512,7 +514,7 @@ public class SearchParameterMap implements Serializable, ISearchQueryContributor
 		}
 
 		if (hasIncludes()) {
-			addUrlIncludeParams(b, Constants.PARAM_INCLUDE, getIncludes());
+			addUrlIncludeParams(b, PARAM_INCLUDE, getIncludes());
 		}
 		addUrlIncludeParams(b, Constants.PARAM_REVINCLUDE, getRevIncludes());
 
@@ -530,7 +532,7 @@ public class SearchParameterMap implements Serializable, ISearchQueryContributor
 
 		if (getCount() != null) {
 			addUrlParamSeparator(b);
-			b.append(Constants.PARAM_COUNT);
+			b.append(PARAM_COUNT);
 			b.append('=');
 			b.append(getCount());
 		}
@@ -580,6 +582,17 @@ public class SearchParameterMap implements Serializable, ISearchQueryContributor
 		}
 
 		return b.toString();
+	}
+
+	/**
+	 * Configure a query with the current settings.
+	 * This is an adaptor method to allow this class to be used in IRepository.search().
+	 * with repository implementations that don't use SearchParameterMap.
+	 * @param theBuilder the builder to configure with our settings
+	 */
+	@Override
+	public void contributeToQuery(ISearchQueryBuilder theBuilder) {
+		new SearchParameterMapContributor(this, theBuilder).contributeToQuery();
 	}
 
 	private boolean isNotEqualsComparator(DateParam theLowerBound, DateParam theUpperBound) {
@@ -800,17 +813,6 @@ public class SearchParameterMap implements Serializable, ISearchQueryContributor
 	 */
 	public boolean isOffsetQuery() {
 		return getOffset() != null && getCount() != null;
-	}
-
-	/**
-	 * Configure a query with the current settings.
-	 * This is an adaptor method to allow this class to be used in IRepository.search().
-	 * with repository implementations that don't use SearchParameterMap.
-	 * @param theBuilder the builder to configure with our settings
-	 */
-	@Override
-	public void contributeToQuery(ISearchQueryBuilder theBuilder) {
-		// fixme implement this: all entries, plus the specials.
 	}
 
 	public enum EverythingModeEnum {

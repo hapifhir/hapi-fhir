@@ -313,21 +313,21 @@ public interface IRepository {
 	 * @param <T> a Resource type
 	 * @param theBundleType the class of the Bundle type to return
 	 * @param theResourceType the class of the Resource type to search
-	 * @param theQueryBuilder the searchParameters for this search
+	 * @param theQueryContributor the searchParameters for this search
 	 * @param theHeaders headers for this request, typically key-value pairs of HTTP headers
 	 * @return a Bundle with the results of the search
 	 */
 	default <B extends IBaseBundle, T extends IBaseResource> B search(
 			Class<B> theBundleType,
 			Class<T> theResourceType,
-			ISearchQueryContributor theQueryBuilder,
+			ISearchQueryContributor theQueryContributor,
 			Map<String, String> theHeaders) {
 		// we have a cycle of default implementations between this and the multi-map version.
 		// Implementors MUST implement one or the other for now.
 		return this.search(
 				theBundleType,
 				theResourceType,
-				MultiMapSearchQueryBuilder.builderToMultimap(theQueryBuilder),
+				MultiMapSearchQueryBuilder.contributorToMultimap(theQueryContributor),
 				theHeaders);
 	}
 	/**
