@@ -1,6 +1,7 @@
 package ca.uhn.fhir.repository.impl.memory;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.repository.impl.NaiveRepositoryTransactionProcessor;
@@ -121,7 +122,7 @@ public class InMemoryFhirRepository implements IRepository {
 	@Override
 	public synchronized <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
 			I theId, P thePatchParameters, Map<String, String> theHeaders) {
-		throw new NotImplementedOperationException("The PATCH operation is not currently supported");
+		throw new NotImplementedOperationException(Msg.code(2772) + "The PATCH operation is not currently supported");
 	}
 
 	@Override
