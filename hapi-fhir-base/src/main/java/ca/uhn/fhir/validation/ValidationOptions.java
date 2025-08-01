@@ -65,6 +65,10 @@ public class ValidationOptions {
 		return this;
 	}
 
+	/**
+	 * Returns the AppContext (RequestDetails) set to this options object.
+	 * Can be null.
+	 */
 	public Object getAppContext() {
 		return myAppContext;
 	}
