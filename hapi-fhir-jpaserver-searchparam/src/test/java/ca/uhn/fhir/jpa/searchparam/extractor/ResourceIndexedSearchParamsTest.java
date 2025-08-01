@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import com.google.common.collect.Lists;
+import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -94,6 +95,34 @@ public class ResourceIndexedSearchParamsTest {
 		ReferenceParam retVal = new ReferenceParam();
 		retVal.setValue(theId);
 		return retVal;
+	}
+
+	@Test
+	public void match_withLogicalReference_works() {
+		ResourceTable table = new ResourceTable();
+		table.setResourceType("QuestionnaireResponse");
+		ResourceIndexedSearchParams matcher = ResourceIndexedSearchParams
+			.withLists(table);
+		ResourceLink resourceLink = ResourceLink.forLogicalReference(
+			"QuestionnaireResponse.questionnaire",
+			table,
+			"http://localhost:8000/Questionnaire/a1",
+			new Date()
+		);
+		matcher.getResourceLinks()
+			.add(resourceLink);
+
+		// test
+		boolean match = matcher.matchResourceLinks(
+			myStorageSettings,
+			"QuestionnaireResponse",
+			"questionnaire",
+			new ReferenceParam("http://localhost:8000/Questionnaire/a1"),
+			"QuestionnaireResponse.questionnaire"
+		);
+
+		// validate
+		assertTrue(match);
 	}
 
 	@Test
