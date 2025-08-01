@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7152
+jira: SMILE-10226
+title: "Modified resources could potentially be removed from the subscription list of they shared ID and Version with 
+others. This has been fixed."
