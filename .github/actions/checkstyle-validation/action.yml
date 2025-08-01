@@ -42,28 +42,6 @@ runs:
         ls -la $HOME/.m2/repository/ca/uhn/hapi/fhir/hapi-fhir-checkstyle/ || echo "hapi-fhir-checkstyle directory not found"
         find $HOME/.m2/repository -name "*checkstyle*" -type f || echo "No checkstyle artifacts found"
 
-    - name: Build checkstyle module if not cached
-      shell: bash
-      env:
-        MAVEN_CACHE_FOLDER: $HOME/.m2/repository
-      run: |
-        if [ ! -f "$HOME/.m2/repository/ca/uhn/hapi/fhir/hapi-fhir-checkstyle/8.5.0-SNAPSHOT/hapi-fhir-checkstyle-8.5.0-SNAPSHOT.jar" ]; then
-          echo "hapi-fhir-checkstyle not found in cache, building it..."
-          mvn clean install -pl hapi-fhir-checkstyle --batch-mode --no-transfer-progress \
-            -Dmaven.repo.local=$MAVEN_CACHE_FOLDER
-        else
-          echo "hapi-fhir-checkstyle found in cache, skipping build"
-        fi
-
-    - name: Apply code formatting
-      shell: bash
-      env:
-        MAVEN_CACHE_FOLDER: $HOME/.m2/repository
-      run: |
-        echo "Applying Spotless code formatting to ensure consistent formatting..."
-        mvn spotless:apply --batch-mode --no-transfer-progress \
-          -Dmaven.repo.local=$MAVEN_CACHE_FOLDER
-
     - name: Run cross-module checkstyle validation
       shell: bash
       env:
