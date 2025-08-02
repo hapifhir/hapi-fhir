@@ -2,12 +2,13 @@ package ca.uhn.fhir.jpa.repository.searchparam;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.repository.impl.DefaultSearchQueryBuilder;
-import ca.uhn.fhir.repository.impl.ISearchQueryBuilder;
+import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.repository.IRepositoryRestQueryBuilder;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,7 +32,7 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_SEARCH_TOTAL_MODE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_SORT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_SUMMARY;
 
-public class SearchParameterMapQueryBuilder extends DefaultSearchQueryBuilder {
+public class SearchParameterMapRepositoryRestQueryBuilder implements IRepositoryRestQueryBuilder {
 	/** Our unsupported specials */
 	private static final Set<String> ourIgnoredSpecials = Set.of(
 			"_elements", // implemented at the FHIR endpoint - not applicable in the repository
@@ -40,10 +41,12 @@ public class SearchParameterMapQueryBuilder extends DefaultSearchQueryBuilder {
 
 	final SearchParameterMap mySearchParameterMapResult = new SearchParameterMap();
 
-	SearchParameterMapQueryBuilder() {}
+	SearchParameterMapRepositoryRestQueryBuilder() {}
 
 	@Override
-	public ISearchQueryBuilder addOrList(String theParamName, List<IQueryParameterType> theOrList) {
+	public IRepositoryRestQueryBuilder addOrList(String theParamName, List<IQueryParameterType> theOrList) {
+		Validate.notEmpty(theParamName, "theParamName");
+
 		if (ourIgnoredSpecials.contains(theParamName)) {
 			return this;
 		}
@@ -64,7 +67,7 @@ public class SearchParameterMapQueryBuilder extends DefaultSearchQueryBuilder {
 	 * @param theQueryContributor the query callback to convert
 	 * @return a SearchParameterMap for use with JPA repositories
 	 */
-	public static SearchParameterMap buildFromQueryContributor(ISearchQueryContributor theQueryContributor) {
+	public static SearchParameterMap buildFromQueryContributor(IRepository.IRepositoryRestQueryContributor theQueryContributor) {
 		SearchParameterMap searchParameterMap;
 		// If the contributor is already a SearchParameterMap, use it directly.
 		// This allows pass-though of stuff like $everything that isn't part of the main rest-query syntax.
@@ -72,7 +75,7 @@ public class SearchParameterMapQueryBuilder extends DefaultSearchQueryBuilder {
 			searchParameterMap = theSp;
 		} else {
 			// Build a SearchParameterMap from scratch.
-			SearchParameterMapQueryBuilder builder = new SearchParameterMapQueryBuilder();
+			SearchParameterMapRepositoryRestQueryBuilder builder = new SearchParameterMapRepositoryRestQueryBuilder();
 			theQueryContributor.contributeToQuery(builder);
 			searchParameterMap = builder.build();
 		}
@@ -101,6 +104,7 @@ public class SearchParameterMapQueryBuilder extends DefaultSearchQueryBuilder {
 
 		Map<String, ISpecialParameterProcessor> includeProcessors = Map.of(
 				PARAM_INCLUDE, includeProcessor(false),
+				// fixme Include should be a normal IQueryParameterType
 				PARAM_INCLUDE_ITERATE, includeProcessor(true),
 				PARAM_INCLUDE_RECURSE, includeProcessor(true),
 				PARAM_REVINCLUDE, revincludeProcessor(false),

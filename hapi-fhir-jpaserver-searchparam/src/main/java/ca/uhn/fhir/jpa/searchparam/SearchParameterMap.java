@@ -24,8 +24,8 @@ import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.repository.impl.ISearchQueryBuilder;
-import ca.uhn.fhir.repository.impl.ISearchQueryBuilder.ISearchQueryContributor;
+import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.repository.IRepositoryRestQueryBuilder;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
@@ -70,7 +70,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class SearchParameterMap implements Serializable, ISearchQueryContributor {
+public class SearchParameterMap implements Serializable, IRepository.IRepositoryRestQueryContributor {
 	public static final Integer INTEGER_0 = 0;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParameterMap.class);
 	private static final long serialVersionUID = 1L;
@@ -591,7 +591,7 @@ public class SearchParameterMap implements Serializable, ISearchQueryContributor
 	 * @param theBuilder the builder to configure with our settings
 	 */
 	@Override
-	public void contributeToQuery(ISearchQueryBuilder theBuilder) {
+	public void contributeToQuery(IRepositoryRestQueryBuilder theBuilder) {
 		new SearchParameterMapContributor(this, theBuilder).contributeToQuery();
 	}
 

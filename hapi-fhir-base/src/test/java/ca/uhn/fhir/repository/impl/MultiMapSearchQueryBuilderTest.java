@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MultiMapSearchQueryBuilderTest {
-	MultiMapSearchQueryBuilder myMultiMapSearchQueryBuilder = new  MultiMapSearchQueryBuilder();
+	MultiMapRepositoryRestQueryBuilder myMultiMapSearchQueryBuilder = new MultiMapRepositoryRestQueryBuilder();
 
 	@Test
 	void testAddAllMultiMap() {

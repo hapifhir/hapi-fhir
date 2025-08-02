@@ -23,12 +23,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.repository.searchparam.SearchParameterMapQueryBuilder;
+import ca.uhn.fhir.jpa.repository.searchparam.SearchParameterMapRepositoryRestQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.repository.impl.ISearchQueryBuilder.ISearchQueryContributor;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
@@ -142,14 +141,14 @@ public class HapiFhirRepository implements IRepository {
 	public <B extends IBaseBundle, T extends IBaseResource> B search(
 			Class<B> theBundleType,
 			Class<T> theResourceType,
-			ISearchQueryContributor theQueryContributor,
+			IRepositoryRestQueryContributor theQueryContributor,
 			Map<String, String> theHeaders) {
 		RequestDetails details = startWith(myRequestDetails)
 				.setAction(RestOperationTypeEnum.SEARCH_TYPE)
 				.addHeaders(theHeaders)
 				.create();
 		SearchParameterMap searchParameterMap =
-				SearchParameterMapQueryBuilder.buildFromQueryContributor(theQueryContributor);
+				SearchParameterMapRepositoryRestQueryBuilder.buildFromQueryContributor(theQueryContributor);
 		// fixme need a SPMap -> Map<String, String[]> converter
 		// details.setParameters(fixme);
 		details.setResourceName(myDaoRegistry.getFhirContext().getResourceType(theResourceType));

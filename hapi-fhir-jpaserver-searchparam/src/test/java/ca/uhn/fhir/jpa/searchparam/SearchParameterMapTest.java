@@ -13,13 +13,11 @@ import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import jakarta.annotation.Nonnull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
@@ -29,14 +27,11 @@ import java.util.List;
 import java.util.Map;
 
 import static ca.uhn.fhir.jpa.searchparam.SearchParameterMap.compare;
-import static ca.uhn.fhir.repository.impl.MultiMapSearchQueryBuilder.contributorToMultimap;
+import static ca.uhn.fhir.repository.impl.MultiMapRepositoryRestQueryBuilder.contributorToMultimap;
 import static ca.uhn.fhir.rest.param.TokenParamModifier.TEXT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 class SearchParameterMapTest {
 	static FhirContext ourFhirContext = FhirContext.forR4Cached();
@@ -242,6 +237,7 @@ class SearchParameterMapTest {
 		map.add("name", new StringParam("John"));
 		map.setSearchContainedMode(SearchContainedModeEnum.FALSE);
 		map.setCount(5);
+		map.setOffset(52);
 		map.setSort(new SortSpec("name"));
 		map.setSummaryMode(SummaryEnum.COUNT);
 		map.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
@@ -257,6 +253,7 @@ class SearchParameterMapTest {
 			"name", List.of(new StringParam("John")),
 			"_contained", List.of(new TokenParam("false")),
 			"_count", List.of(new NumberParam(5)),
+			"_offset", List.of(new NumberParam(52)),
 			"_sort", List.of(new TokenParam("name")),
 			"_summary", List.of(new TokenParam("count")),
 			"_total", List.of(new TokenParam("accurate")),

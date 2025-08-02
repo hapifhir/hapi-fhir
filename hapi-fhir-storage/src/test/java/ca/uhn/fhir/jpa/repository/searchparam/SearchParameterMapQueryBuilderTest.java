@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.repository.searchparam;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.repository.impl.ISearchQueryBuilder;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class SearchParameterMapQueryBuilderTest {
 	FhirContext myFhirContext = FhirContext.forR4Cached();
-	SearchParameterMapQueryBuilder myBuilder = new SearchParameterMapQueryBuilder();
+	SearchParameterMapRepositoryRestQueryBuilder myBuilder = new SearchParameterMapRepositoryRestQueryBuilder();
 	SearchParameterMap myResult;
 
 	@Test
@@ -27,7 +27,7 @@ class SearchParameterMapQueryBuilderTest {
 		SearchParameterMap spMap = new SearchParameterMap();
 
 		// when
-		SearchParameterMap result = SearchParameterMapQueryBuilder.buildFromQueryContributor(spMap);
+		SearchParameterMap result = SearchParameterMapRepositoryRestQueryBuilder.buildFromQueryContributor(spMap);
 
 	    // then
 	    assertThat(result).isSameAs(spMap);
@@ -36,11 +36,11 @@ class SearchParameterMapQueryBuilderTest {
 	@Test
 	void testBuilder_callbackBuildsSPMap() {
 		// given
-		ISearchQueryBuilder.ISearchQueryContributor queryContributor =
+		IRepository.IRepositoryRestQueryContributor queryContributor =
 			builder -> builder.addNumericParameter("_count", 123);
 
 		// when
-		SearchParameterMap result = SearchParameterMapQueryBuilder.buildFromQueryContributor(queryContributor);
+		SearchParameterMap result = SearchParameterMapRepositoryRestQueryBuilder.buildFromQueryContributor(queryContributor);
 
 		// then
 		assertThat(result.toNormalizedQueryString(myFhirContext)).isEqualTo("?_count=123");
@@ -145,6 +145,8 @@ class SearchParameterMapQueryBuilderTest {
 		assertThat(myResult.getIncludes()).contains(new Include("Patient:general-practitioner"));
 	}
 
+
+	// fixme we normally put modifiers on values, not keys..
 	@Test
 	void testIncludeIterate() {
 		// given

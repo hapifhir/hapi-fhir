@@ -22,8 +22,7 @@ package ca.uhn.fhir.repository;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.repository.impl.ISearchQueryBuilder.ISearchQueryContributor;
-import ca.uhn.fhir.repository.impl.MultiMapSearchQueryBuilder;
+import ca.uhn.fhir.repository.impl.MultiMapRepositoryRestQueryBuilder;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -320,14 +319,14 @@ public interface IRepository {
 	default <B extends IBaseBundle, T extends IBaseResource> B search(
 			Class<B> theBundleType,
 			Class<T> theResourceType,
-			ISearchQueryContributor theQueryContributor,
+			IRepositoryRestQueryContributor theQueryContributor,
 			Map<String, String> theHeaders) {
 		// we have a cycle of default implementations between this and the multi-map version.
 		// Implementors MUST implement one or the other for now.
 		return this.search(
 				theBundleType,
 				theResourceType,
-				MultiMapSearchQueryBuilder.contributorToMultimap(theQueryContributor),
+				MultiMapRepositoryRestQueryBuilder.contributorToMultimap(theQueryContributor),
 				theHeaders);
 	}
 	/**
@@ -781,5 +780,13 @@ public interface IRepository {
 
 	private static <T> T throwNotImplementedOperationException(String theMessage) {
 		throw new NotImplementedOperationException(Msg.code(2542) + theMessage);
+	}
+
+	/**
+	 * Callback interface for search() methods that use a builder to construct the query.
+	 */
+	@FunctionalInterface
+	interface IRepositoryRestQueryContributor {
+		void contributeToQuery(IRepositoryRestQueryBuilder theBuilder);
 	}
 }

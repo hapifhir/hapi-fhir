@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.searchparam;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.repository.impl.ISearchQueryBuilder;
+import ca.uhn.fhir.repository.IRepositoryRestQueryBuilder;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -20,18 +20,20 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_CONTAINED;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_COUNT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_INCLUDE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_INCLUDE_ITERATE;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_REVINCLUDE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_REVINCLUDE_ITERATE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_SEARCH_TOTAL_MODE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_SORT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_SUMMARY;
 
-record SearchParameterMapContributor(SearchParameterMap mySearchParameterMap, ISearchQueryBuilder myBuilder) {
+record SearchParameterMapContributor(SearchParameterMap mySearchParameterMap, IRepositoryRestQueryBuilder myBuilder) {
 
 	public void contributeToQuery() {
 		addSearchParameters();
 		addToken(PARAM_CONTAINED, mySearchParameterMap.getSearchContainedMode(), SearchContainedModeEnum::getCode);
 		addNumeric(PARAM_COUNT, mySearchParameterMap.getCount());
+		addNumeric(PARAM_OFFSET, mySearchParameterMap.getOffset());
 		addSort(mySearchParameterMap.getSort());
 		addToken(PARAM_SUMMARY, mySearchParameterMap.getSummaryMode(), SummaryEnum::getCode);
 		addToken(PARAM_SEARCH_TOTAL_MODE, mySearchParameterMap.getSearchTotalMode(), SearchTotalModeEnum::getCode);
