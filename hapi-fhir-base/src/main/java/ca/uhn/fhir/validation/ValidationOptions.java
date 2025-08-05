@@ -29,7 +29,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ValidationOptions {
 
-	private static ValidationOptions ourEmpty;
 	private Set<String> myProfiles;
 
 	/**
@@ -74,12 +73,8 @@ public class ValidationOptions {
 	}
 
 	public static ValidationOptions empty() {
-		ValidationOptions retVal = ourEmpty;
-		if (retVal == null) {
-			retVal = new ValidationOptions();
-			retVal.myProfiles = Collections.emptySet();
-			ourEmpty = retVal;
-		}
-		return retVal;
+		ValidationOptions retval = new ValidationOptions();
+		retval.myProfiles = Collections.emptySet();
+		return retval;
 	}
 }

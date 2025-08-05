@@ -351,8 +351,10 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 
 		ValidationResult validationResult;
 		try {
+			ValidationOptions options = new ValidationOptions();
+			options.setAppContext(theRequestDetails);
 			validationResult =
-					doValidate(validator, theRequest, ValidationOptions.empty().setAppContext(theRequestDetails));
+					doValidate(validator, theRequest, options);
 		} catch (Exception e) {
 			if (myIgnoreValidatorExceptions) {
 				ourLog.warn("Validator threw an exception during validation", e);
