@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
+import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyGenerateReportStep;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesResultsJson;
@@ -14,7 +15,7 @@ public abstract class BaseBulkModifyJobAppCtx<T extends BaseBulkModifyJobParamet
 
 
 	protected JobDefinition<T> buildJobDefinition() {
-		return JobDefinition.newBuilder()
+		JobDefinition.Builder<T, BulkModifyResourcesResultsJson> jobBuilder = JobDefinition.newBuilder()
 			.setJobDefinitionId(getJobId())
 			.setJobDescription(getJobDescription())
 			.setJobDefinitionVersion(getJobDefinitionVersion())
@@ -39,21 +40,24 @@ public abstract class BaseBulkModifyJobAppCtx<T extends BaseBulkModifyJobParamet
 				"generate-report",
 				"Generate a report outlining the changes made",
 				BulkModifyResourcesResultsJson.class,
-				generateReportStep())
-			.build();
+				generateReportStep());
+
+		jobBuilder.setParametersValidator(getJobParameterValidator());
+
+		return jobBuilder.build();
 	}
+
+	protected abstract IJobParametersValidator<T> getJobParameterValidator();
 
 	protected abstract Class<T> getParametersType();
 
-	protected int getJobDefinitionVersion() {
-		return 1;
-	}
+	protected abstract int getJobDefinitionVersion();
 
 	protected abstract String getJobDescription();
 
 	protected abstract String getJobId();
 
-	public abstract <C> BaseBulkModifyResourcesStep<T, C> modifyResourcesStep();
+	public abstract BaseBulkModifyResourcesStep<T, ?> modifyResourcesStep();
 
 	public abstract GenerateRangeChunksStep<T> generateRangesStep();
 

@@ -4,19 +4,34 @@ import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyJobParame
 import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRawValue;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
+@SuppressWarnings("UnusedReturnValue")
 public class BulkPatchJobParameters extends BaseBulkModifyJobParameters {
 
 	@JsonRawValue
 	@JsonProperty("fhirPatch")
 	private String myFhirPatch;
 
-	public void setFhirPatch(FhirContext theContext, IBaseResource theFhirPatch) {
-		myFhirPatch = theContext.newJsonParser().encodeResourceToString(theFhirPatch);
+	public BulkPatchJobParameters setFhirPatch(@Nonnull FhirContext theContext, @Nullable IBaseResource theFhirPatch) {
+		myFhirPatch = theFhirPatch != null ? theContext.newJsonParser().encodeResourceToString(theFhirPatch) : null;
+		return this;
 	}
 
-	public IBaseResource getFhirPatch(FhirContext theContext) {
+	public BulkPatchJobParameters setFhirPatch(@Nullable String theFhirPatch) {
+		myFhirPatch = theFhirPatch;
+		return this;
+	}
+
+	@Nullable
+	public IBaseResource getFhirPatch(@Nonnull FhirContext theContext) {
+		if (isBlank(myFhirPatch)) {
+			return null;
+		}
 		return theContext.newJsonParser().parseResource(myFhirPatch);
 	}
 

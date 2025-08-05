@@ -50,6 +50,8 @@ public class OperationOutcomeUtil {
 	public static final String OO_SEVERITY_INFO = "information";
 	public static final String OO_SEVERITY_WARN = "warning";
 	public static final String OO_ISSUE_CODE_INFORMATIONAL = "informational";
+	public static final String OO_ISSUE_CODE_SUCCESS = "success";
+	public static final String OO_ISSUE_CODE_PROCESSING = "processing";
 
 	/**
 	 * Add an issue to an OperationOutcome

@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,7 +37,7 @@ class BulkDataExportUtilTest {
 		// Arrange
 		doReturn(thePreferReturnEnum.getHeaderValue()).when(theRequestDetails).getHeader(Constants.HEADER_PREFER);
 		// Act
-		assertThatThrownBy(() -> BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, OPERATION_NAME))
+		assertThatThrownBy(() -> ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, OPERATION_NAME))
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("Must request async processing for " + OPERATION_NAME);
 		// Assert
@@ -48,7 +49,7 @@ class BulkDataExportUtilTest {
 		// Arrange
 		doReturn(Constants.HEADER_PREFER_RESPOND_ASYNC).when(theRequestDetails).getHeader(Constants.HEADER_PREFER);
 		// Act
-		assertThatNoException().isThrownBy(() -> BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, OPERATION_NAME));
+		assertThatNoException().isThrownBy(() -> ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, OPERATION_NAME));
 		// Assert
 		verify(theRequestDetails).getHeader(Constants.HEADER_PREFER);
 	}

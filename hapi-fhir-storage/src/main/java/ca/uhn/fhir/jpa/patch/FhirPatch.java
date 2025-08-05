@@ -40,7 +40,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import java.util.ArrayList;
@@ -107,7 +106,13 @@ public class FhirPatch {
 	}
 
 	public void apply(IBaseResource theResource, IBaseResource thePatch) {
+		doApply(theResource, thePatch);
+	}
 
+	/**
+	 * @param theResource If this is <code>null</code>, the patch is validated but no work is done
+	 */
+	private void doApply(@Nullable IBaseResource theResource, @Nonnull IBaseResource thePatch) {
 		Map<String, List<IBase>> namedParameters = ParametersUtil.getNamedParameters(myContext, thePatch);
 		for (Map.Entry<String, List<IBase>> namedParameterEntry : namedParameters.entrySet()) {
 			if (namedParameterEntry.getKey().equals(PARAMETER_OPERATION)) {
@@ -134,17 +139,22 @@ public class FhirPatch {
 				throw new InvalidRequestException(Msg.code(2756) + "Unknown patch parameter name: " + namedParameterEntry.getKey());
 			}
 		}
-
 	}
 
-	private void handleAddOperation(IBaseResource theResource, IBase theParameters) {
+	private void handleAddOperation(@Nullable IBaseResource theResource, IBase theParameters) {
 
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		String elementName = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_NAME);
 
 		String containingPath = defaultString(path);
+		IFhirPath fhirPath = myContext.newFhirPath();
+		IFhirPath.IParsedExpression parsedExpression = parseFhirPathExpression(fhirPath, containingPath);
 
-		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
+		if (theResource == null) {
+			return;
+		}
+
+		List<IBase> containingElements = fhirPath.evaluate(theResource, parsedExpression, IBase.class);
 		for (IBase nextElement : containingElements) {
 			ChildDefinition childDefinition = findChildDefinition(nextElement, elementName);
 
@@ -154,7 +164,7 @@ public class FhirPatch {
 		}
 	}
 
-	private void handleInsertOperation(IBaseResource theResource, IBase theParameters) {
+	private void handleInsertOperation(@Nullable IBaseResource theResource, IBase theParameters) {
 
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
@@ -164,6 +174,10 @@ public class FhirPatch {
 		String elementName = path.substring(lastDot + 1);
 		Integer insertIndex = ParametersUtil.getParameterPartValueAsInteger(myContext, theParameters, PARAMETER_INDEX)
 				.orElseThrow(() -> new InvalidRequestException("No index supplied for insert operation"));
+
+		if (theResource == null) {
+			return;
+		}
 
 		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
 		for (IBase nextElement : containingElements) {
@@ -189,11 +203,16 @@ public class FhirPatch {
 		}
 	}
 
-	private void handleDeleteOperation(IBaseResource theResource, IBase theParameters) {
+	private void handleDeleteOperation(@Nullable IBaseResource theResource, IBase theParameters) {
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
 
 		ParsedPath parsedPath = ParsedPath.parse(path);
+
+		if (theResource == null) {
+			return;
+		}
+
 		List<IBase> containingElements = myContext
 				.newFhirPath()
 				.evaluate(
@@ -230,7 +249,7 @@ public class FhirPatch {
 		}
 	}
 
-	private void handleReplaceOperation(IBaseResource theResource, IBase theParameters) {
+	private void handleReplaceOperation(@Nullable IBaseResource theResource, @Nullable IBase theParameters) {
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
 
@@ -246,13 +265,13 @@ public class FhirPatch {
 		 * Might be required for more complex handling.
 		 */
 		IFhirPath fhirPath = myContext.newFhirPath();
-		try {
-			IFhirPath.IParsedExpression exp = fhirPath.parse(path);
-		} catch (Exception theE) {
-			throw new InvalidRequestException(
-					Msg.code(2726) + String.format(" %s is not a valid fhir path", path), theE);
-		}
+		parseFhirPathExpression(fhirPath, path);
 		ParsedFhirPath parsedFhirPath = ParsedFhirPath.parse(path);
+
+		if (theResource == null) {
+			return;
+		}
+
 		FhirPathChildDefinition parentDef = new FhirPathChildDefinition();
 
 		List<ParsedFhirPath.FhirPathNode> pathNodes = new ArrayList<>();
@@ -307,7 +326,7 @@ public class FhirPatch {
 						myContext.newTerser().getSingleValue(nextValuePartPart, "value[x]", IBase.class);
 				if (optionalValue.isPresent()) {
 					FhirPathChildDefinition childDefinitionToUse =
-							findChildDefinitionAtEndOfPath(theChildDefinition, nextValuePartPart);
+							findChildDefinitionAtEndOfPath(theChildDefinition);
 
 					BaseRuntimeChildDefinition subChild =
 							childDefinitionToUse.getElementDefinition().getChildByName(name);
@@ -330,20 +349,15 @@ public class FhirPatch {
 			if (isPrimitive) {
 				// primitives will be at the very bottom (ie, no children underneath)
 				return def.getBase() instanceof IPrimitiveType<?>;
-			} else if (def.getBase().fhirType().equalsIgnoreCase(replacementValue.fhirType())) {
-				return true;
-			}
-			return false;
+			} else {return def.getBase().fhirType().equalsIgnoreCase(replacementValue.fhirType());}
 		};
 
 		return findChildDefinition(theChildDefinition, predicate);
 	}
 
 	private FhirPathChildDefinition findChildDefinitionAtEndOfPath(
-			FhirPathChildDefinition theChildDefinition, IBase replacementValue) {
-		return findChildDefinition(theChildDefinition, childDefinition -> {
-			return childDefinition.getChild() == null;
-		});
+			FhirPathChildDefinition theChildDefinition) {
+		return findChildDefinition(theChildDefinition, childDefinition -> childDefinition.getChild() == null);
 	}
 
 	private FhirPathChildDefinition findChildDefinition(
@@ -409,7 +423,7 @@ public class FhirPatch {
 				} else if (theTargetChildDefinition.getChild() != null) {
 					// there's subchildren (possibly we're setting an 'extension' value
 					FhirPathChildDefinition ct =
-							findChildDefinitionAtEndOfPath(theTargetChildDefinition, theReplacementValue);
+							findChildDefinitionAtEndOfPath(theTargetChildDefinition);
 					replaceSingleValue(theFhirPath, theParsedFhirPath, ct, theReplacementValue);
 				} else {
 					if (theTargetChildDefinition.getBaseRuntimeDefinition() != null
@@ -584,7 +598,7 @@ public class FhirPatch {
 		throw new InvalidRequestException(Msg.code(2617) + msg);
 	}
 
-	private void handleMoveOperation(IBaseResource theResource, IBase theParameters) {
+	private void handleMoveOperation(@Nullable IBaseResource theResource, IBase theParameters) {
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
 
@@ -596,6 +610,10 @@ public class FhirPatch {
 				.orElseThrow(() -> new InvalidRequestException("No index supplied for move operation"));
 		Integer removeIndex = ParametersUtil.getParameterPartValueAsInteger(myContext, theParameters, PARAMETER_SOURCE)
 				.orElseThrow(() -> new InvalidRequestException("No index supplied for move operation"));
+
+		if (theResource == null) {
+			return;
+		}
 
 		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
 		for (IBase nextElement : containingElements) {
@@ -636,6 +654,7 @@ public class FhirPatch {
 	private FhirPathChildDefinition childDefinition(
 			FhirPathChildDefinition theParent,
 			List<String> theFhirPathParts,
+			@Nonnull
 			IBase theBase,
 			IFhirPath theFhirPath,
 			ParsedFhirPath theParsedFhirPath,
@@ -1169,5 +1188,16 @@ public class FhirPatch {
 	 */
 	public void validate(IBaseResource theParameters) throws InvalidRequestException{
 		apply(null, theParameters);
+	}
+
+	private static IFhirPath.IParsedExpression parseFhirPathExpression(IFhirPath fhirPath, String containingPath) {
+		IFhirPath.IParsedExpression retVal;
+		try {
+			retVal = fhirPath.parse(containingPath);
+		} catch (Exception theE) {
+			throw new InvalidRequestException(
+				Msg.code(2726) + String.format(" %s is not a valid fhir path", containingPath), theE);
+		}
+		return retVal;
 	}
 }
