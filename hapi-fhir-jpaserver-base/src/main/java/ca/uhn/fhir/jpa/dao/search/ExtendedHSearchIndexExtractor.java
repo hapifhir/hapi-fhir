@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.model.search.CompositeSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.DateSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.QuantitySearchIndexData;
+import ca.uhn.fhir.jpa.model.util.ResourceLinkUtils;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParamComposite;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -182,6 +183,7 @@ public class ExtendedHSearchIndexExtractor {
 					// Case 2: Resource is unknown and referred by canonical url reference
 					if (!Strings.isNullOrEmpty(nextLink.getTargetResourceId())) {
 						// non-canonical
+						assert !ResourceLinkUtils.UNKNOWN.equals(nextLink.getTargetResourceType());
 						qualifiedTargetResourceId =
 								nextLink.getTargetResourceType() + "/" + nextLink.getTargetResourceId();
 					} else if (!Strings.isNullOrEmpty(nextLink.getTargetResourceUrl())) {
