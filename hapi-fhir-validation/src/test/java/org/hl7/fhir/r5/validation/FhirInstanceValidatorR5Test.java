@@ -17,6 +17,7 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r5.model.Base64BinaryType;
 import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.Communication;
 import org.hl7.fhir.r5.model.ContactPoint;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.DocumentReference;
@@ -376,6 +377,21 @@ public class FhirInstanceValidatorR5Test extends BaseTest {
 			"}";
 
 		ValidationResult output = myVal.validateWithResult(input);
+		assertThat(output.getMessages().size()).as(output.toString()).isEqualTo(0);
+	}
+
+	/**
+	 * See #6316
+	 */
+	@Test
+	public void testValidateConditionalReferenceWithChain() {
+
+		Communication resource = new Communication();
+		resource.getText().setDiv(new XhtmlNode().setValue("<div>HELLO</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+		resource.setStatus(Enumerations.EventStatus.COMPLETED);
+		resource.getSender().setReference("PractitionerRole?practitioner.identifier=myValue");
+
+		ValidationResult output = myVal.validateWithResult(resource);
 		assertThat(output.getMessages().size()).as(output.toString()).isEqualTo(0);
 	}
 
