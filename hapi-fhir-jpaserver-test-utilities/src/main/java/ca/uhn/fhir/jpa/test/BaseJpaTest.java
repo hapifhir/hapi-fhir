@@ -105,6 +105,7 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -576,9 +577,10 @@ public abstract class BaseJpaTest extends BaseTest {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(type);
 		IBundleProvider allResources = dao.search(SearchParameterMap.newSynchronous().setLoadSynchronousUpTo(100), newSrd());
 		List<IBaseResource> resources = allResources.getAllResources();
+		IParser parser = myFhirContext.newJsonParser();
 		for (int i = 0; i < resources.size(); i++) {
 			IBaseResource next = resources.get(i);
-			ourLog.info("{} #{}:\n{}", type, i, myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(next));
+			ourLog.info("{} #{}:\n{}", type, i, parser.setPrettyPrint(true).encodeResourceToString(next));
 		}
 	}
 
