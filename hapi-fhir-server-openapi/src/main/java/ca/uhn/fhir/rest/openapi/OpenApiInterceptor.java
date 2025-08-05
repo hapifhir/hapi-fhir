@@ -110,6 +110,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -619,13 +620,22 @@ public class OpenApiInterceptor {
 						getPathItem(paths, "/" + resourceType, PathItem.HttpMethod.GET),
 						ctx,
 						resourceType,
-						nextResource);
+						nextResource,
+					    PathItem.HttpMethod.GET);
 				addSearchOperation(
 						openApi,
 						getPathItem(paths, "/" + resourceType + "/_search", PathItem.HttpMethod.GET),
 						ctx,
 						resourceType,
-						nextResource);
+						nextResource,
+						PathItem.HttpMethod.GET);
+				addSearchOperation(
+					openApi,
+					getPathItem(paths, "/" + resourceType + "/_search", PathItem.HttpMethod.POST),
+					ctx,
+					resourceType,
+					nextResource,
+					PathItem.HttpMethod.POST);
 			}
 
 			// Resource-level Operations
@@ -674,22 +684,42 @@ public class OpenApiInterceptor {
 			final Operation operation,
 			final FhirContext ctx,
 			final String resourceType,
-			final CapabilityStatement.CapabilityStatementRestResourceComponent nextResource) {
+			final CapabilityStatement.CapabilityStatementRestResourceComponent nextResource,
+			final PathItem.HttpMethod httpMethod) {
 		operation.addTagsItem(resourceType);
 		operation.setDescription("This is a search type");
 		operation.setSummary("search-type: Search for " + resourceType + " instances");
 		addFhirResourceResponse(ctx, openApi, operation, null);
 
-		for (final CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent nextSearchParam :
+		if (httpMethod == PathItem.HttpMethod.GET) {
+			for (final CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent nextSearchParam :
 				nextResource.getSearchParam()) {
-			final Parameter parametersItem = new Parameter();
-			operation.addParametersItem(parametersItem);
+				final Parameter parametersItem = new Parameter();
+				operation.addParametersItem(parametersItem);
 
-			parametersItem.setName(nextSearchParam.getName());
-			parametersItem.setRequired(false);
-			parametersItem.setIn("query");
-			parametersItem.setDescription(nextSearchParam.getDocumentation());
-			parametersItem.setSchema(toSchema(nextSearchParam.getType()));
+				parametersItem.setName(nextSearchParam.getName());
+				parametersItem.setRequired(false);
+				parametersItem.setIn("query");
+				parametersItem.setDescription(nextSearchParam.getDocumentation());
+				parametersItem.setSchema(toSchema(nextSearchParam.getType()));
+			}
+		} else {
+			Schema<?> objectSchema = new Schema<>().type("object");
+			for (final CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent nextSearchParam :
+				nextResource.getSearchParam()) {
+				objectSchema.addProperty(
+					nextSearchParam.getName(),
+					toSchema(nextSearchParam.getType())
+						.required(Collections.emptyList())
+						.nullable(true)
+						.description(nextSearchParam.getDocumentation()));
+			}
+			RequestBody requestBody = new RequestBody()
+				.content(new Content()
+					.addMediaType(Constants.CT_X_FORM_URLENCODED, new MediaType().schema(objectSchema)))
+				.required(false);
+
+			operation.setRequestBody(requestBody);
 		}
 	}
 
