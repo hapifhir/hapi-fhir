@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7174
+title: "A bug in the SQL validation logic meant that databases which are configured to
+  use lowercased identifiers incorrectly reported a database partition mode schema when
+  that setting was not in use (HAPI-2563). This has been corected."
