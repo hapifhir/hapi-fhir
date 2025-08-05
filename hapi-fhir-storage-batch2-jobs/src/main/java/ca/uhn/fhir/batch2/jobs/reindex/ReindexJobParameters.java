@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI-FHIR Storage Batch2 Jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -31,6 +31,7 @@ public class ReindexJobParameters extends PartitionedUrlJobParameters {
 	public static final String OPTIMIZE_STORAGE = "optimizeStorage";
 	public static final String REINDEX_SEARCH_PARAMETERS = "reindexSearchParameters";
 	public static final String OPTIMISTIC_LOCK = "optimisticLock";
+	public static final String INCLUDE_DELETED_RESOURCES = "includeDeletedResources";
 
 	@JsonProperty(
 			value = OPTIMIZE_STORAGE,

@@ -208,6 +208,45 @@ The following snippet shows how to define a patch method on a server:
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/PatchExamples.java|patch}}
 ```
 
+## Patch with History Rewrite
+
+If you wish to patch a historical version of a resource without creating a new version, this can now be done in the
+`Patch` operation. While this operation is not supported by the FHIR specification, it's an enhancement added to
+specifically to HAPI-FHIR.
+
+In order to use this new functionality, you must set the `myUpdateWithHistoryRewriteEnabled` setting in the `StorageSettings`
+to true.
+
+The request must include the header `X-Rewrite-History`, and should be set to true. The body of the request must include
+the desired FHIR Patch or JSON Patch. Note that transaction bundles are not yet supported.
+
+The following API request shows an example of executing a FHIR Patch that updates a Patient's birthday without incrementing
+the resource version:
+
+
+```http
+PATCH Patient/123/_history/2
+Content-Type: application/fhir+json
+X-Rewrite-History: true
+
+{
+  "resourceType": "Parameters",
+  "parameter": [ {
+    "name": "operation",
+    "part": [ {
+      "name": "type",
+      "valueCode": "replace"
+    }, {
+      "name": "path",
+      "valueString": "Patient.birthDate"
+    }, {
+      "name": "value",
+      "valueDate": "1930-01-01"
+    } ]
+  } ]
+}
+```
+
 
 <a name="type_create" />
 

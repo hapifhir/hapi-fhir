@@ -985,7 +985,9 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		// verify links created to Patient placeholder from both Observations
 		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous().addRevInclude(IBaseResource.INCLUDE_ALL), mySrd);
-		assertThat(outcome.getAllResources()).hasSize(3);
+		assertEquals(1, outcome.size());
+		assertTrue(outcome.containsAllResources());
+		assertThat(outcome.getResourceListComplete()).hasSize(3);
 	}
 
 	@Test
@@ -1007,7 +1009,9 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		// verify links created to Patient placeholder from both Observations
 		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous().addRevInclude(IBaseResource.INCLUDE_ALL), mySrd);
-		assertThat(outcome.getAllResources()).hasSize(3);
+		assertEquals(1, outcome.size());
+		assertTrue(outcome.containsAllResources());
+		assertThat(outcome.getResourceListComplete()).hasSize(3);
 	}
 
 	/**

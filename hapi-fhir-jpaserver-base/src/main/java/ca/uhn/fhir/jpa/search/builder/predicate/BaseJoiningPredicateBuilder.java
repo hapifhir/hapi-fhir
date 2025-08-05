@@ -40,11 +40,13 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 
 	private final DbTable myTable;
 	private final DbColumn myColumnPartitionId;
+	private final DbColumn myColumnResType;
 
 	BaseJoiningPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, DbTable theTable) {
 		super(theSearchSqlBuilder);
 		myTable = theTable;
 		myColumnPartitionId = theTable.addColumn("PARTITION_ID");
+		myColumnResType = theTable.addColumn("RES_TYPE");
 	}
 
 	public DbTable getTable() {
@@ -55,6 +57,10 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 
 	public DbColumn getPartitionIdColumn() {
 		return myColumnPartitionId;
+	}
+
+	public DbColumn getResourceTypeColumn() {
+		return myColumnResType;
 	}
 
 	public DbColumn[] getJoinColumns() {

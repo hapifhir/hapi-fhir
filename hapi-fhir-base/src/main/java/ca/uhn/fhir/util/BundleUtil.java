@@ -25,7 +25,9 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -35,6 +37,7 @@ import ca.uhn.fhir.util.bundle.BundleEntryMutator;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import ca.uhn.fhir.util.bundle.EntryListAccumulator;
 import ca.uhn.fhir.util.bundle.ModifiableBundleEntry;
+import ca.uhn.fhir.util.bundle.PartsConverter;
 import ca.uhn.fhir.util.bundle.SearchBundleEntryParts;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
@@ -42,6 +45,7 @@ import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -73,6 +77,7 @@ public class BundleUtil {
 
 	public static final String DIFFERENT_LINK_ERROR_MSG =
 			"Mismatching 'previous' and 'prev' links exist. 'previous' " + "is: '$PREVIOUS' and 'prev' is: '$PREV'.";
+	public static final String BUNDLE_TYPE_TRANSACTION_RESPONSE = "transaction-response";
 	private static final Logger ourLog = LoggerFactory.getLogger(BundleUtil.class);
 
 	private static final String PREVIOUS = LINK_PREV;
@@ -203,6 +208,20 @@ public class BundleUtil {
 		return retVal;
 	}
 
+	/**
+	 * Returns true if the resource provided is *not* a BundleEntrySearchModeEnum OUTCOME or INCLUDE
+	 * (ie, if MATCH or null, this will return true)
+	 * @param theResource
+	 * @return
+	 */
+	public static boolean isMatchResource(IBaseResource theResource) {
+		BundleEntrySearchModeEnum matchType = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(theResource);
+		if (matchType == null || matchType == BundleEntrySearchModeEnum.MATCH) {
+			return true;
+		}
+		return false;
+	}
+
 	public static List<Pair<String, IBaseResource>> getBundleEntryUrlsAndResources(
 			FhirContext theContext, IBaseBundle theBundle) {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
@@ -299,6 +318,14 @@ public class BundleUtil {
 		EntryListAccumulator entryListAccumulator = new EntryListAccumulator();
 		processEntries(theContext, theBundle, entryListAccumulator);
 		return entryListAccumulator.getList();
+	}
+
+	public static <T> List<T> toListOfEntries(
+			FhirContext theContext, IBaseBundle theBundle, PartsConverter<T> partsConverter) {
+		RuntimeResourceDefinition bundleDef = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChildDef = bundleDef.getChildByName("entry");
+		List<IBase> entries = entryChildDef.getAccessor().getValues(theBundle);
+		return entries.stream().map(partsConverter::fromElement).toList();
 	}
 
 	/**
@@ -723,7 +750,7 @@ public class BundleUtil {
 				}
 			}
 		}
-		return new BundleEntryParts(fullUrl, requestType, url, resource, conditionalUrl);
+		return new BundleEntryParts(fullUrl, requestType, url, resource, conditionalUrl, requestType);
 	}
 
 	/**
@@ -765,6 +792,24 @@ public class BundleUtil {
 				}
 			}
 		}
+		return retVal;
+	}
+
+	@Nonnull
+	public static List<CanonicalBundleEntry> toListOfCanonicalBundleEntries(
+			FhirContext theContext, IBaseBundle theBundle) {
+		List<CanonicalBundleEntry> retVal = new ArrayList<>();
+
+		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
+		List<IBase> entries = entryChild.getAccessor().getValues(theBundle);
+
+		for (IBase nextEntry : entries) {
+			CanonicalBundleEntry canonicalEntry =
+					CanonicalBundleEntry.fromBundleEntry(theContext, (IBaseBackboneElement) nextEntry);
+			retVal.add(canonicalEntry);
+		}
+
 		return retVal;
 	}
 
