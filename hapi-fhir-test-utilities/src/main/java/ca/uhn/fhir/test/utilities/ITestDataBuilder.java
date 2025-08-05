@@ -29,6 +29,7 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MetaUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -286,6 +287,10 @@ public interface ITestDataBuilder {
 		return createResource("Practitioner", theModifiers);
 	}
 
+	default void deleteResource(IIdType theIIdType){
+		doDeleteResource(theIIdType);
+	}
+
 	default IIdType createResource(String theResourceType, ICreationArgument... theModifiers) {
 		IBaseResource resource = buildResource(theResourceType, theModifiers);
 
@@ -477,6 +482,10 @@ public interface ITestDataBuilder {
 	 * Users of this API must implement this method
 	 */
 	IIdType doUpdateResource(IBaseResource theResource);
+
+	default void doDeleteResource(IIdType theIIdType){
+		throw new NotImplementedException("Not implemented");
+	}
 
 	/**
 	 * Users of this API must implement this method

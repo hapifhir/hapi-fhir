@@ -35,6 +35,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class PatchProviderR4Test extends BaseResourceProviderR4Test {
@@ -403,7 +404,77 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
 		assertEquals("2", newPt.getIdElement().getVersionIdPart());
-		assertEquals(false, newPt.getActive());
+		assertFalse(newPt.getActive());
+	}
+
+	@Test
+	void testPatchWithFhirPatch_historyRewrite() {
+		myStorageSettings.setUpdateWithHistoryRewriteEnabled(true);
+		Patient patient = new Patient();
+		patient.setActive(true);
+		patient.addIdentifier().addExtension("http://foo", new StringType("abc"));
+		patient.addIdentifier().setSystem("sys").setValue("val");
+		IIdType id = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("delete"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Patient.identifier[0]"));
+
+		MethodOutcome outcome = myClient
+			.patch()
+			.withFhirPatch(patch)
+			.historyRewrite()
+			.withId(id.withVersion("1"))
+			.execute();
+
+		Patient resultingResource = (Patient) outcome.getResource();
+		assertThat(resultingResource.getIdentifier()).hasSize(1);
+		assertThat(resultingResource.getIdentifier().get(0).getSystem()).isEqualTo("sys");
+		assertThat(resultingResource.getIdentifier().get(0).getValue()).isEqualTo("val");
+
+		assertThat(resultingResource.getIdentifier()).hasSize(1);
+
+		resultingResource = myClient.read().resource(Patient.class).withId(id).execute();
+		assertThat(resultingResource.getIdentifier()).hasSize(1);
+		assertThat(resultingResource.getIdentifier().get(0).getSystem()).isEqualTo("sys");
+		assertThat(resultingResource.getIdentifier().get(0).getValue()).isEqualTo("val");
+		assertThat(resultingResource.getIdElement().getVersionIdPart()).isEqualTo("1");
+	}
+
+	@Test
+	void testPatchUsingJsonPatch_historyRewrite() throws Exception {
+		myStorageSettings.setUpdateWithHistoryRewriteEnabled(true);
+		String patchedFamilyName = "testPatchUsingJsonPatch";
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		patient.addIdentifier().setSystem("urn:system").setValue("0");
+		patient.addName().setFamily(patchedFamilyName).addGiven("Joe");
+		IIdType pid1 = myPatientDao.create(patient, mySrd).getId();
+
+		HttpPatch patch = new HttpPatch(myServerBase + "/" + pid1.getValue());
+		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
+		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
+		patch.addHeader(Constants.HEADER_REWRITE_HISTORY, "true");
+
+		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertThat(responseString).contains("<OperationOutcome");
+			assertThat(responseString).contains("INFORMATION");
+		}
+
+		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
+		assertEquals("1", newPt.getIdElement().getVersionIdPart());
+		assertFalse(newPt.getActive());
 	}
 
 

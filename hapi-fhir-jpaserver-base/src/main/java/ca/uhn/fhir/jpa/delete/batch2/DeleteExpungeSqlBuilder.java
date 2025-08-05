@@ -132,6 +132,12 @@ public class DeleteExpungeSqlBuilder {
 					break;
 				}
 			}
+		} else {
+			// check if the user has configured any paths to ignore
+			Set<String> pathsToIgnore = myStorageSettings.getEnforceReferentialIntegrityOnDeleteDisableForPaths();
+			if (conflictResourceLinks.stream().anyMatch(link -> pathsToIgnore.contains(link.getSourcePath()))) {
+				return;
+			}
 		}
 
 		ResourceLink firstConflict = conflictResourceLinks.get(0);

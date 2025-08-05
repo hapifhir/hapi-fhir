@@ -47,7 +47,6 @@ public class InterceptorService extends BaseInterceptorService<Pointcut>
 	 *
 	 * @param theName The name for this registry (useful for troubleshooting)
 	 */
-	@Deprecated(since = "8.0.0", forRemoval = true)
 	public InterceptorService(String theName) {
 		super(Pointcut.class);
 	}

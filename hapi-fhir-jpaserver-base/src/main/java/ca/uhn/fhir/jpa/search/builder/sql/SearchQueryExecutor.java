@@ -182,6 +182,9 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 				// - partition_id, res_id, coord-dist
 				// Assume res_id is first Long in row, and is in first two columns
 				if (nextRowAsArray[0] instanceof Long) {
+					if (nextRowAsArray[1] instanceof String) {
+						return JpaPid.fromIdAndResourceType((Long) nextRowAsArray[0], (String) nextRowAsArray[1]);
+					}
 					return JpaPid.fromId((Long) nextRowAsArray[0]);
 				} else {
 					Integer partitionId = (Integer) nextRowAsArray[0];

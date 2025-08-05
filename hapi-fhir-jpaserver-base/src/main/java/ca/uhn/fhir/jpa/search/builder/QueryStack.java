@@ -70,6 +70,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -102,6 +103,7 @@ import com.healthmarketscience.sqlbuilder.SetOperationQuery;
 import com.healthmarketscience.sqlbuilder.Subquery;
 import com.healthmarketscience.sqlbuilder.UnionQuery;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
@@ -998,12 +1000,13 @@ public class QueryStack {
 			case IAnyResource.SP_RES_ID: {
 				TokenParam param = new TokenParam();
 				param.setValueAsQueryToken(null, null, null, theFilter.getValue());
-				return theQueryStack3.createPredicateResourceId(
-						null,
-						Collections.singletonList(Collections.singletonList(param)),
-						theResourceName,
-						theFilter.getOperation(),
-						theRequestPartitionId);
+
+				SearchForIdsParams searchForIdsParams = with().setAndOrParams(
+								Collections.singletonList(Collections.singletonList(param)))
+						.setResourceName(theResourceName)
+						.setOperation(theFilter.getOperation())
+						.setRequestPartitionId(theRequestPartitionId);
+				return theQueryStack3.createPredicateResourceId(searchForIdsParams);
 			}
 			case Constants.PARAM_SOURCE: {
 				TokenParam param = new TokenParam();
@@ -1594,7 +1597,7 @@ public class QueryStack {
 		if (wantChainedAndNormal) {
 
 			if (theSourceJoinColumn == null) {
-				BaseJoiningPredicateBuilder root = mySqlBuilder.getOrCreateFirstPredicateBuilder(false);
+				BaseJoiningPredicateBuilder root = mySqlBuilder.getOrCreateFirstPredicateBuilder(false, null);
 				DbColumn[] joinColumns = root.getJoinColumns();
 				Object joinColumnObject;
 				if (joinColumns.length == 1) {
@@ -1904,15 +1907,9 @@ public class QueryStack {
 	}
 
 	@Nullable
-	public Condition createPredicateResourceId(
-			@Nullable DbColumn[] theSourceJoinColumn,
-			List<List<IQueryParameterType>> theValues,
-			String theResourceName,
-			SearchFilterParser.CompareOperation theOperation,
-			RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateResourceId(SearchForIdsParams theSearchForIdsParams) {
 		ResourceIdPredicateBuilder builder = mySqlBuilder.newResourceIdBuilder();
-		return builder.createPredicateResourceId(
-				theSourceJoinColumn, theResourceName, theValues, theOperation, theRequestPartitionId);
+		return builder.createPredicateResourceId(theSearchForIdsParams);
 	}
 
 	private Condition createPredicateSourceForAndList(
@@ -2382,12 +2379,7 @@ public class QueryStack {
 
 		switch (theSearchForIdsParams.myParamName) {
 			case IAnyResource.SP_RES_ID:
-				return createPredicateResourceId(
-						theSearchForIdsParams.mySourceJoinColumn,
-						theSearchForIdsParams.myAndOrParams,
-						theSearchForIdsParams.myResourceName,
-						null,
-						theSearchForIdsParams.myRequestPartitionId);
+				return createPredicateResourceId(theSearchForIdsParams);
 
 			case Constants.PARAM_PID:
 				return createPredicateResourcePID(
@@ -3223,6 +3215,8 @@ public class QueryStack {
 		List<List<IQueryParameterType>> myAndOrParams;
 		RequestDetails myRequest;
 		RequestPartitionId myRequestPartitionId;
+		SearchIncludeDeletedEnum myIncludeDeleted;
+		SearchFilterParser.CompareOperation myOperation;
 
 		public static SearchForIdsParams with() {
 			return new SearchForIdsParams();
@@ -3231,6 +3225,10 @@ public class QueryStack {
 		public SearchForIdsParams setSourceJoinColumn(DbColumn[] theSourceJoinColumn) {
 			mySourceJoinColumn = theSourceJoinColumn;
 			return this;
+		}
+
+		public DbColumn[] getSourceJoinColumn() {
+			return mySourceJoinColumn;
 		}
 
 		public String getResourceName() {
@@ -3256,6 +3254,10 @@ public class QueryStack {
 			return this;
 		}
 
+		public List<List<IQueryParameterType>> getAndOrParams() {
+			return myAndOrParams;
+		}
+
 		public RequestDetails getRequest() {
 			return myRequest;
 		}
@@ -3271,6 +3273,28 @@ public class QueryStack {
 
 		public SearchForIdsParams setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
 			myRequestPartitionId = theRequestPartitionId;
+			return this;
+		}
+
+		@Nonnull
+		public SearchIncludeDeletedEnum getIncludeDeleted() {
+			if (myIncludeDeleted == null) {
+				return SearchIncludeDeletedEnum.NEVER;
+			}
+			return myIncludeDeleted;
+		}
+
+		public SearchForIdsParams setIncludeDeleted(SearchIncludeDeletedEnum myIncludeDeleted) {
+			this.myIncludeDeleted = myIncludeDeleted;
+			return this;
+		}
+
+		public SearchFilterParser.CompareOperation getOperation() {
+			return myOperation;
+		}
+
+		public SearchForIdsParams setOperation(SearchFilterParser.CompareOperation myOperation) {
+			this.myOperation = myOperation;
 			return this;
 		}
 	}
