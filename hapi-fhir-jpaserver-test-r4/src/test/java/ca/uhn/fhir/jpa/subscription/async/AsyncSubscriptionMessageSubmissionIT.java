@@ -100,9 +100,9 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 		int numberOfResourcesToCreate = factor * AsyncResourceModifiedSubmitterSvc.MAX_LIMIT;
 
 		ResourceModifiedEntity entity = new ResourceModifiedEntity();
-		entity.setResourceType(resourceType);
 		PersistedResourceModifiedMessageEntityPK rpm = new PersistedResourceModifiedMessageEntityPK();
 		rpm.setResourceVersion("1");
+		rpm.setResourceType(resourceType);
 		entity.setResourceModifiedEntityPK(rpm);
 
 		// we reuse the same exact msg content to avoid
