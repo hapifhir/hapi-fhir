@@ -28,7 +28,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.length;
 
 public class ValidateUtil {
-
 	/**
 	 * Throws {@link IllegalArgumentException} if theValue is less than or equal to theMinimum
 	 */
