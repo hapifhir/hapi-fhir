@@ -104,9 +104,9 @@ The following example shows how to enable the GZipContentInterceptor.
 The CapturingInterceptor can be used to capture the details of the last request that was sent by the client, as well as the corresponding response that was received. 
 
 * [CapturingInterceptor JavaDoc](/apidocs/hapi-fhir-client/ca/uhn/fhir/rest/client/interceptor/CapturingInterceptor.html)
-* [CapturingInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/CapturingInterceptor.java)
+* [CapturingInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/CapturingInterceptor.java)
 
 A separate but related interceptor called ThreadLocalCapturingInterceptor also captures request/response pairs but stores these in a Java ThreadLocal so it is suitable for use in multithreaded environments.  
 
 * [ThreadLocalCapturingInterceptor JavaDoc](/apidocs/hapi-fhir-client/ca/uhn/fhir/rest/client/interceptor/ThreadLocalCapturingInterceptor.html)
-* [ThreadLocalCapturingInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/ThreadLocalCapturingInterceptor.java)
+* [ThreadLocalCapturingInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/ThreadLocalCapturingInterceptor.java)
