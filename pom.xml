@@ -994,7 +994,7 @@
 		<spotless_version>2.41.1</spotless_version>
 		<spotless.exclude.pattern>**/test/**/*.java</spotless.exclude.pattern>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
-		<surefire_version>3.5.2</surefire_version>
+		<surefire_version>3.5.3</surefire_version>
 
 
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
@@ -1040,7 +1040,7 @@
 		<jersey_version>3.0.3</jersey_version>
 		<jetty_version>12.0.15</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
-		<junit_version>5.13.4</junit_version>
+		<junit_version>5.12.2</junit_version>
 		<flexmark_version>0.64.8</flexmark_version>
 		<flyway_version>10.20.1</flyway_version>
 		<hibernate_version>6.6.4.Final</hibernate_version>
