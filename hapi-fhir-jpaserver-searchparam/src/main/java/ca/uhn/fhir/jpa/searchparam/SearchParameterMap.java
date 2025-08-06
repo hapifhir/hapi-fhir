@@ -24,6 +24,8 @@ import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.repository.IRepositoryRestQueryBuilder;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
@@ -59,6 +61,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.api.Constants.PARAM_COUNT;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_INCLUDE;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
@@ -66,7 +70,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class SearchParameterMap implements Serializable {
+public class SearchParameterMap implements Serializable, IRepository.IRepositoryRestQueryContributor {
 	public static final Integer INTEGER_0 = 0;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParameterMap.class);
 	private static final long serialVersionUID = 1L;
@@ -167,11 +171,9 @@ public class SearchParameterMap implements Serializable {
 		if (theAnd == null) {
 			return this;
 		}
-		if (!containsKey(theName)) {
-			put(theName, new ArrayList<>());
-		}
 
-		List<List<IQueryParameterType>> paramList = get(theName);
+		List<List<IQueryParameterType>> paramList = getOrCreate(theName);
+
 		for (IQueryParameterOr<?> next : theAnd.getValuesAsQueryTokens()) {
 			if (next == null) {
 				continue;
@@ -182,15 +184,25 @@ public class SearchParameterMap implements Serializable {
 		return this;
 	}
 
+	private List<List<IQueryParameterType>> getOrCreate(String theName) {
+		return mySearchParameterMap.computeIfAbsent(theName, k -> new ArrayList<>());
+	}
+
 	public SearchParameterMap add(String theName, IQueryParameterOr<?> theOr) {
 		if (theOr == null) {
 			return this;
 		}
-		if (!containsKey(theName)) {
-			put(theName, new ArrayList<>());
+		return addOrList(theName, (List<IQueryParameterType>) theOr.getValuesAsQueryTokens());
+	}
+
+	@Nonnull
+	public SearchParameterMap addOrList(String theName, @Nonnull List<IQueryParameterType> theOrValues) {
+		if (theOrValues.isEmpty()) {
+			return this;
 		}
 
-		get(theName).add((List<IQueryParameterType>) theOr.getValuesAsQueryTokens());
+		getOrCreate(theName).add(theOrValues);
+
 		return this;
 	}
 
@@ -204,12 +216,9 @@ public class SearchParameterMap implements Serializable {
 		if (theParam == null) {
 			return this;
 		}
-		if (!containsKey(theName)) {
-			put(theName, new ArrayList<>());
-		}
 		ArrayList<IQueryParameterType> list = new ArrayList<>();
 		list.add(theParam);
-		get(theName).add(list);
+		getOrCreate(theName).add(list);
 
 		return this;
 	}
@@ -505,7 +514,7 @@ public class SearchParameterMap implements Serializable {
 		}
 
 		if (hasIncludes()) {
-			addUrlIncludeParams(b, Constants.PARAM_INCLUDE, getIncludes());
+			addUrlIncludeParams(b, PARAM_INCLUDE, getIncludes());
 		}
 		addUrlIncludeParams(b, Constants.PARAM_REVINCLUDE, getRevIncludes());
 
@@ -523,7 +532,7 @@ public class SearchParameterMap implements Serializable {
 
 		if (getCount() != null) {
 			addUrlParamSeparator(b);
-			b.append(Constants.PARAM_COUNT);
+			b.append(PARAM_COUNT);
 			b.append('=');
 			b.append(getCount());
 		}
@@ -573,6 +582,17 @@ public class SearchParameterMap implements Serializable {
 		}
 
 		return b.toString();
+	}
+
+	/**
+	 * Configure a query with the current settings.
+	 * This is an adaptor method to allow this class to be used in IRepository.search().
+	 * with repository implementations that don't use SearchParameterMap.
+	 * @param theBuilder the builder to configure with our settings
+	 */
+	@Override
+	public void contributeToQuery(IRepositoryRestQueryBuilder theBuilder) {
+		new SearchParameterMapContributor(this, theBuilder).contributeToQuery();
 	}
 
 	private boolean isNotEqualsComparator(DateParam theLowerBound, DateParam theUpperBound) {
