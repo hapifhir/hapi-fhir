@@ -1,1 +1,1 @@
-curl https://api.github.com/repos/jamesagnew/hapi-fhir/releases
+curl https://api.github.com/repos/hapifhir/hapi-fhir/releases

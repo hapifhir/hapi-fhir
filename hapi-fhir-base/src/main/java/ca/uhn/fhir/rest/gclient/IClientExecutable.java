@@ -111,7 +111,7 @@ public interface IClientExecutable<T extends IClientExecutable<?, Y>, Y> {
 	 * is useful for invocations where the response is a Bundle/Parameters containing nested resources,
 	 * and you want to use specific custom structures for those nested resources.
 	 * <p>
-	 * See <a href="https://jamesagnew.github.io/hapi-fhir/doc_extensions.html">Profiles and Extensions</a> for more information on using custom structures
+	 * See <a href="https://hapifhir.io/hapi-fhir/docs/model/profiles_and_extensions.html">Profiles and Extensions</a> for more information on using custom structures
 	 * </p>
 	 */
 	T preferResponseType(Class<? extends IBaseResource> theType);
@@ -122,7 +122,7 @@ public interface IClientExecutable<T extends IClientExecutable<?, Y>, Y> {
 	 * is useful for invocations where the response is a Bundle/Parameters containing nested resources,
 	 * and you want to use specific custom structures for those nested resources.
 	 * <p>
-	 * See <a href="https://jamesagnew.github.io/hapi-fhir/doc_extensions.html">Profiles and Extensions</a> for more information on using custom structures
+	 * See <a href="https://hapifhir.io/hapi-fhir/docs/model/profiles_and_extensions.html">Profiles and Extensions</a> for more information on using custom structures
 	 * </p>
 	 */
 	T preferResponseTypes(List<Class<? extends IBaseResource>> theTypes);
