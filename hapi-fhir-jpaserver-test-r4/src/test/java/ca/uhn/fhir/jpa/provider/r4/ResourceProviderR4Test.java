@@ -236,8 +236,6 @@ import static org.mockito.Mockito.when;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
-	public static final String BACKSLASH_PIPE = "%5C%7C";
-	public static final String BACKSLASH_COMMA = "%5C%2C";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4Test.class);
 	private final CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 	@RegisterExtension
@@ -663,6 +661,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	/**
+	 * See #7177
+	 */
 	@ParameterizedTest
 	@MethodSource("testSearchIdentifierWithEscapedCharactersArguments")
 	public void testSearchIdentifierWithEscapedCharacters(String theUrl, boolean theExpectedMatch) {
@@ -1416,7 +1417,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			myStorageSettings.setStoreResourceInHSearchIndex(storeResourceInHSearch);
 		}
 	}
-
 	@Test
 	public void testCreateConditionalWithPreferRepresentation() {
 		Patient p = new Patient();
@@ -2524,6 +2524,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+
 	@Test
 	public void testGetResourceCountsOperation() throws Exception {
 		String methodName = "testMetaOperations";
@@ -2728,7 +2729,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p.setId("a123");
 		myPatientDao.update(p);
 
-		for (int i = 0; i < 99; i++) {
+		for (int i=0; i < 99; i++) {
 			p.addName().setFamily("John" + i);
 			myPatientDao.update(p, mySrd);
 		}
@@ -2756,7 +2757,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p.setId("a123");
 		myPatientDao.update(p);
 
-		for (int i = 0; i < 99; i++) {
+		for (int i=0; i < 99; i++) {
 			p.addName().setFamily("John" + i);
 			myPatientDao.update(p, mySrd);
 		}
@@ -2776,13 +2777,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			offset += 10;
 			nextLinkExists = response.getLink("next") != null;
 			//Verify: We get to the last page.
-			if (!nextLinkExists) {
+			if (!nextLinkExists){
 				assertNotNull(response.getLink("self"));
 				assertNotNull(response.getLink("previous"));
 				assertNull(response.getLink("next"));
 			}
 		}
 	}
+
 
 	@ParameterizedTest
 	@CsvSource({
@@ -3081,8 +3083,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * See issue #52
-	 */
+     * See issue #52
+     */
 	@Test
 	public void testImagingStudyResources() throws Exception {
 		IGenericClient client = myClient;
@@ -3096,31 +3098,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		assertEquals(1, newSize - initialSize);
 	}
-
-	// private void delete(String theResourceType, String theParamName, String theParamValue) {
-	// Bundle resources;
-	// do {
-	// IQuery<Bundle> forResource = ourClient.search().forResource(theResourceType);
-	// if (theParamName != null) {
-	// forResource = forResource.where(new StringClientParam(theParamName).matches().value(theParamValue));
-	// }
-	// resources = forResource.execute();
-	// for (IResource next : resources.toListOfResources()) {
-	// ourLog.info("Deleting resource: {}", next.getId());
-	// ourClient.delete().resource(next).execute();
-	// }
-	// } while (resources.size() > 0);
-	// }
-	//
-	// private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue)
-	// {
-	// Bundle resources = ourClient.search().forResource(theResourceType).where(new
-	// TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
-	// for (IResource next : resources.toListOfResources()) {
-	// ourLog.info("Deleting resource: {}", next.getId());
-	// ourClient.delete().resource(next).execute();
-	// }
-	// }
 
 	@Test
 	public void testPagingWithIncludesOnEachResource() {
@@ -3187,6 +3164,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		// we should receive all resources and the single organization (repeatedly)
 		assertThat(ids).hasSize(total + 1);
 	}
+
 
 	@ParameterizedTest
 	@CsvSource({
@@ -3270,6 +3248,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(theResourceCount + theOrgCount, count);
 	}
 
+
 	@Test
 	public void testPagingWithIncludesReturnsConsistentValues() {
 		// setup
@@ -3333,9 +3312,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(total + orgs, count);
 	}
 
+
 	/**
-	 * See #793
-	 */
+     * See #793
+     */
 	@Test
 	public void testIncludeCountDoesntIncludeIncludes() {
 		Organization org = new Organization();
@@ -5750,10 +5730,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Object interceptor = new Object() {
 			@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
 			public void storagePreSearchRegistered(
-				ICachedSearchDetails theCachedSearchDetails,
-				RequestDetails theRequestDetails,
-				ServletRequestDetails theServletRequestDetails,
-				SearchParameterMap theSearchParameterMap) {
+					ICachedSearchDetails theCachedSearchDetails,
+					RequestDetails theRequestDetails,
+					ServletRequestDetails theServletRequestDetails,
+					SearchParameterMap theSearchParameterMap) {
 				theSearchParameterMap.add("_security", new TokenParam("http://system", "security1").setModifier(TokenParamModifier.NOT));
 			}
 		};
@@ -7244,7 +7224,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String url = myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates);
 		myCaptureQueriesListener.clear();
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(url);
-		assertThat(resultIds).as(() -> describeVersionsAndUrl(url)).hasSize(1);
+		assertThat(resultIds).as(()->describeVersionsAndUrl(url)).hasSize(1);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
 	}
 
@@ -7255,7 +7235,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String url = myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates);
 		myCaptureQueriesListener.clear();
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(url);
-		assertThat(resultIds).as(() -> describeVersionsAndUrl(url)).hasSize(2);
+		assertThat(resultIds).as(()->describeVersionsAndUrl(url)).hasSize(2);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/1");
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
 	}
@@ -7267,14 +7247,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String url = myServerBase + "/Patient/" + patientId + "/_history?_since=" + toStr(timeBetweenUpdates);
 		myCaptureQueriesListener.clear();
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(url);
-		assertThat(resultIds).as(() -> describeVersionsAndUrl(url)).hasSize(1);
+		assertThat(resultIds).as(()->describeVersionsAndUrl(url)).hasSize(1);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
 	}
 
 	private String describeVersionsAndUrl(String theUrl) {
-		return runInTransaction(() -> {
+		return runInTransaction(()->{
 			return "URL: " + theUrl + "\n\nHistory Entries:\n * " +
-				myResourceHistoryTableDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")) +
+				myResourceHistoryTableDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")) +
 				"\n\nSQL Queries:\n * " +
 				myCaptureQueriesListener.getSelectQueries().stream().map(t -> t.getSql(true, false)).collect(Collectors.joining("\n * "));
 		});
