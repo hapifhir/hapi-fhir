@@ -10,8 +10,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.interceptor.validation.IRepositoryValidatingRule;
-import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
@@ -43,6 +41,7 @@ import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -63,7 +62,6 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.validation.ValidationMessageSuppressingInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -75,8 +73,10 @@ import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
+import ch.qos.logback.classic.Level;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.tuple.Pair;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
@@ -192,19 +192,15 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import ch. qos. logback. classic.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -235,21 +231,22 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
+	public static final String BACKSLASH_PIPE = "%5C%7C";
+	public static final String BACKSLASH_COMMA = "%5C%2C";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4Test.class);
-	private SearchCoordinatorSvcImpl mySearchCoordinatorSvcRaw;
 	private final CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
-	@Autowired
-	private ISearchDao mySearchEntityDao;
-
-	@Autowired
-	private RepositoryValidatingRuleBuilder myRuleBuilder;
-
 	@RegisterExtension
 	public LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(SearchParamValidatingInterceptor.class, Level.WARN);
+	private SearchCoordinatorSvcImpl mySearchCoordinatorSvcRaw;
+	@Autowired
+	private ISearchDao mySearchEntityDao;
+	@Autowired
+	private RepositoryValidatingRuleBuilder myRuleBuilder;
 
 	@Override
 	@AfterEach
@@ -666,6 +663,25 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	@ParameterizedTest
+	@MethodSource("testSearchIdentifierWithEscapedCharactersArguments")
+	public void testSearchIdentifierWithEscapedCharacters(String theUrl, boolean theExpectedMatch) {
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://foo|123,456").setValue("A|B,C|D");
+		String pt1id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Bundle actual = myClient
+			.search()
+			.byUrl(theUrl)
+			.returnBundle(Bundle.class)
+			.execute();
+		List<String> actualIds = toUnqualifiedVersionlessIdValues(actual);
+		if (theExpectedMatch) {
+			assertThat(actualIds).containsExactlyInAnyOrder(pt1id);
+		} else {
+			assertThat(actualIds).isEmpty();
+		}
+	}
 
 	@Test
 	public void testManualPagingLinkOffsetDoesntReturnBeyondEnd() {
@@ -882,34 +898,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			}
 		}
 		return totalNumberOfPatientsCreated;
-	}
-
-	public static Stream<Arguments> createFhirSearchWithChainingAndCountParams() {
-		// 5 resources with 2 refs; 3 resources with 1 ref
-		Map<Integer, Integer> m1 = Map.of(2, 5, 1, 3);
-		// 10 resources with 2 refs; 2 resources with 1 ref
-		Map<Integer, Integer> m2 = Map.of(2, 10, 1, 2);
-		// 251 resources with 2 refs; 2 resources with 1 ref
-		Map<Integer, Integer> m3 = Map.of(2, 251, 1, 2);
-		// 4 resources with 3 refs; 1 resources with 1 ref
-		Map<Integer, Integer> m4 = Map.of(3, 4, 1, 1);
-		// 2 resources with 3 refs; 2 resources with 2 refs, 3 resources with 1 ref
-		Map<Integer, Integer> m5 = Map.of(3, 2, 2, 2,1, 3);
-		Map<Integer, Integer> m6 = Map.of(3, 3, 1,4);
-		Map<Integer, Integer> m7 = Map.of(2, 1, 1,11);
-
-
-		return Stream.of(
-			// Map of ref count to resource count; the max page size; the pre-fetch thresholds to use
-			Arguments.of(m1, null, null),
-			Arguments.of(m2, null, null),
-			Arguments.of(m3, 500, null),
-			Arguments.of(m4, null, null),
-			Arguments.of(m5, null, null),
-			Arguments.of(m1, null, List.of(9, 13, 503, -1)),
-			Arguments.of(m6, null, null),
-			Arguments.of(m7, null, null)
-		);
 	}
 
 	@Test
@@ -1428,6 +1416,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			myStorageSettings.setStoreResourceInHSearchIndex(storeResourceInHSearch);
 		}
 	}
+
 	@Test
 	public void testCreateConditionalWithPreferRepresentation() {
 		Patient p = new Patient();
@@ -2535,7 +2524,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	}
 
-
 	@Test
 	public void testGetResourceCountsOperation() throws Exception {
 		String methodName = "testMetaOperations";
@@ -2740,7 +2728,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p.setId("a123");
 		myPatientDao.update(p);
 
-		for (int i=0; i < 99; i++) {
+		for (int i = 0; i < 99; i++) {
 			p.addName().setFamily("John" + i);
 			myPatientDao.update(p, mySrd);
 		}
@@ -2768,7 +2756,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p.setId("a123");
 		myPatientDao.update(p);
 
-		for (int i=0; i < 99; i++) {
+		for (int i = 0; i < 99; i++) {
 			p.addName().setFamily("John" + i);
 			myPatientDao.update(p, mySrd);
 		}
@@ -2788,14 +2776,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			offset += 10;
 			nextLinkExists = response.getLink("next") != null;
 			//Verify: We get to the last page.
-			if (!nextLinkExists){
+			if (!nextLinkExists) {
 				assertNotNull(response.getLink("self"));
 				assertNotNull(response.getLink("previous"));
 				assertNull(response.getLink("next"));
 			}
 		}
 	}
-
 
 	@ParameterizedTest
 	@CsvSource({
@@ -3048,31 +3035,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
-	// private void delete(String theResourceType, String theParamName, String theParamValue) {
-	// Bundle resources;
-	// do {
-	// IQuery<Bundle> forResource = ourClient.search().forResource(theResourceType);
-	// if (theParamName != null) {
-	// forResource = forResource.where(new StringClientParam(theParamName).matches().value(theParamValue));
-	// }
-	// resources = forResource.execute();
-	// for (IResource next : resources.toListOfResources()) {
-	// ourLog.info("Deleting resource: {}", next.getId());
-	// ourClient.delete().resource(next).execute();
-	// }
-	// } while (resources.size() > 0);
-	// }
-	//
-	// private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue)
-	// {
-	// Bundle resources = ourClient.search().forResource(theResourceType).where(new
-	// TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
-	// for (IResource next : resources.toListOfResources()) {
-	// ourLog.info("Deleting resource: {}", next.getId());
-	// ourClient.delete().resource(next).execute();
-	// }
-	// }
-
 	@Test
 	public void testIdAndVersionInBodyForUpdate() throws IOException {
 		String methodName = "testIdAndVersionInBodyForUpdate";
@@ -3119,8 +3081,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	/**
-     * See issue #52
-     */
+	 * See issue #52
+	 */
 	@Test
 	public void testImagingStudyResources() throws Exception {
 		IGenericClient client = myClient;
@@ -3134,6 +3096,31 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		assertEquals(1, newSize - initialSize);
 	}
+
+	// private void delete(String theResourceType, String theParamName, String theParamValue) {
+	// Bundle resources;
+	// do {
+	// IQuery<Bundle> forResource = ourClient.search().forResource(theResourceType);
+	// if (theParamName != null) {
+	// forResource = forResource.where(new StringClientParam(theParamName).matches().value(theParamValue));
+	// }
+	// resources = forResource.execute();
+	// for (IResource next : resources.toListOfResources()) {
+	// ourLog.info("Deleting resource: {}", next.getId());
+	// ourClient.delete().resource(next).execute();
+	// }
+	// } while (resources.size() > 0);
+	// }
+	//
+	// private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue)
+	// {
+	// Bundle resources = ourClient.search().forResource(theResourceType).where(new
+	// TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
+	// for (IResource next : resources.toListOfResources()) {
+	// ourLog.info("Deleting resource: {}", next.getId());
+	// ourClient.delete().resource(next).execute();
+	// }
+	// }
 
 	@Test
 	public void testPagingWithIncludesOnEachResource() {
@@ -3200,7 +3187,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		// we should receive all resources and the single organization (repeatedly)
 		assertThat(ids).hasSize(total + 1);
 	}
-
 
 	@ParameterizedTest
 	@CsvSource({
@@ -3284,7 +3270,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(theResourceCount + theOrgCount, count);
 	}
 
-
 	@Test
 	public void testPagingWithIncludesReturnsConsistentValues() {
 		// setup
@@ -3348,10 +3333,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(total + orgs, count);
 	}
 
-
 	/**
-     * See #793
-     */
+	 * See #793
+	 */
 	@Test
 	public void testIncludeCountDoesntIncludeIncludes() {
 		Organization org = new Organization();
@@ -5766,10 +5750,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Object interceptor = new Object() {
 			@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
 			public void storagePreSearchRegistered(
-					ICachedSearchDetails theCachedSearchDetails,
-					RequestDetails theRequestDetails,
-					ServletRequestDetails theServletRequestDetails,
-					SearchParameterMap theSearchParameterMap) {
+				ICachedSearchDetails theCachedSearchDetails,
+				RequestDetails theRequestDetails,
+				ServletRequestDetails theServletRequestDetails,
+				SearchParameterMap theSearchParameterMap) {
 				theSearchParameterMap.add("_security", new TokenParam("http://system", "security1").setModifier(TokenParamModifier.NOT));
 			}
 		};
@@ -7260,7 +7244,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String url = myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates);
 		myCaptureQueriesListener.clear();
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(url);
-		assertThat(resultIds).as(()->describeVersionsAndUrl(url)).hasSize(1);
+		assertThat(resultIds).as(() -> describeVersionsAndUrl(url)).hasSize(1);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
 	}
 
@@ -7271,7 +7255,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String url = myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates);
 		myCaptureQueriesListener.clear();
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(url);
-		assertThat(resultIds).as(()->describeVersionsAndUrl(url)).hasSize(2);
+		assertThat(resultIds).as(() -> describeVersionsAndUrl(url)).hasSize(2);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/1");
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
 	}
@@ -7283,16 +7267,16 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String url = myServerBase + "/Patient/" + patientId + "/_history?_since=" + toStr(timeBetweenUpdates);
 		myCaptureQueriesListener.clear();
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(url);
-		assertThat(resultIds).as(()->describeVersionsAndUrl(url)).hasSize(1);
+		assertThat(resultIds).as(() -> describeVersionsAndUrl(url)).hasSize(1);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
 	}
 
 	private String describeVersionsAndUrl(String theUrl) {
-		return runInTransaction(()->{
+		return runInTransaction(() -> {
 			return "URL: " + theUrl + "\n\nHistory Entries:\n * " +
-				myResourceHistoryTableDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")) +
+				myResourceHistoryTableDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")) +
 				"\n\nSQL Queries:\n * " +
-				myCaptureQueriesListener.getSelectQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n * "));
+				myCaptureQueriesListener.getSelectQueries().stream().map(t -> t.getSql(true, false)).collect(Collectors.joining("\n * "));
 		});
 	}
 
@@ -7312,46 +7296,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(resultIds).hasSize(2);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/1");
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
-	}
-
-
-	private static class CreateResourceInput {
-		boolean IsEnforceRefOnWrite;
-		boolean IsEnforceRefOnType;
-		boolean IsAutoCreatePlaceholderReferences;
-
-		public CreateResourceInput(
-			boolean theEnforceRefOnWrite,
-			boolean theEnforceRefOnType,
-			boolean theAutoCreatePlaceholders
-		) {
-			IsEnforceRefOnWrite = theEnforceRefOnWrite;
-			IsEnforceRefOnType = theEnforceRefOnType;
-			IsAutoCreatePlaceholderReferences = theAutoCreatePlaceholders;
-		}
-
-		@Override
-		public String toString() {
-			return "IsEnforceReferentialIntegrityOnWrite : "
-				+ IsEnforceRefOnWrite + "\n"
-				+ "IsEnforceReferenceTargetTypes : "
-				+ IsEnforceRefOnType + "\n"
-				+ "IsAutoCreatePlaceholderReferenceTargets : "
-				+ IsAutoCreatePlaceholderReferences + "\n";
-		}
-	}
-
-	private static List<CreateResourceInput> createResourceParameters() {
-		boolean[] bools = new boolean[]{true, false};
-		List<CreateResourceInput> input = new ArrayList<>();
-		for (boolean bool : bools) {
-			for (boolean bool2 : bools) {
-				for (boolean bool3 : bools) {
-					input.add(new CreateResourceInput(bool, bool2, bool3));
-				}
-			}
-		}
-		return input;
 	}
 
 	@ParameterizedTest
@@ -7594,6 +7538,128 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	private String toStr(Date theDate) {
 		return new InstantDt(theDate).getValueAsString();
+	}
+
+	@Test
+	void searchResource_withIncludeDeletedParam() {
+		// Given
+		Patient patient = new Patient();
+		patient.addName(new HumanName().setFamily("TestFamily").addGiven("TestGiven"));
+		patient.setActive(true);
+
+		IIdType id = myPatientDao.create(patient, mySrd).getId();
+		myPatientDao.delete(id, mySrd);
+
+		// When
+		Bundle results = myClient
+			.search()
+			.byUrl(myServerBase + "/Patient?" + Constants.PARAM_INCLUDE_DELETED + SearchIncludeDeletedEnum.EXCLUSIVE.getCode())
+			.returnBundle(Bundle.class)
+			.execute();
+
+		// Then - returns nothing, _includeDeleted is an unsupported search param (for now)
+		assertThat(results.getEntry()).isEmpty();
+	}
+
+	@Test
+	void conditionalUpdate_withIncludeDeletedParam() {
+		// Given
+		Patient patient = new Patient();
+		patient.addName(new HumanName().setFamily("TestFamily").addGiven("TestGiven"));
+		patient.setActive(true);
+
+		IIdType id = myPatientDao.create(patient, mySrd).getId();
+		myPatientDao.delete(id, mySrd);
+
+		// When/Then
+		InvalidRequestException exception = assertThrows(InvalidRequestException.class, () -> myClient
+			.update()
+			.resource(patient)
+			.conditionalByUrl("Patient?" + Constants.PARAM_INCLUDE_DELETED + SearchIncludeDeletedEnum.EXCLUSIVE.getCode())
+			.execute()
+		);
+
+		// _includeDeleted is an unsupported search param (for now)
+		assertThat(exception.getMessage()).contains("URL has no search parameters");
+	}
+
+	static Stream<Arguments> testSearchIdentifierWithEscapedCharactersArguments() {
+		return Stream.of(
+				Pair.of("A|B,C|D", false),
+				Pair.of("A\\|B\\,C\\|D", true),
+				Pair.of("http://foo|123,456|A|B,C|D", false),
+				Pair.of("http://foo\\|123\\,456|A\\|B\\,C\\|D", true),
+				Pair.of("http://foo|123,456|", false),
+				Pair.of("http://foo\\|123\\,456|", true)
+				)
+			.map(t -> argumentSet(t.getKey(), "Patient?identifier=" + UrlUtil.escapeUrlParam(t.getKey()), t.getValue()));
+	}
+
+	public static Stream<Arguments> createFhirSearchWithChainingAndCountParams() {
+		// 5 resources with 2 refs; 3 resources with 1 ref
+		Map<Integer, Integer> m1 = Map.of(2, 5, 1, 3);
+		// 10 resources with 2 refs; 2 resources with 1 ref
+		Map<Integer, Integer> m2 = Map.of(2, 10, 1, 2);
+		// 251 resources with 2 refs; 2 resources with 1 ref
+		Map<Integer, Integer> m3 = Map.of(2, 251, 1, 2);
+		// 4 resources with 3 refs; 1 resources with 1 ref
+		Map<Integer, Integer> m4 = Map.of(3, 4, 1, 1);
+		// 2 resources with 3 refs; 2 resources with 2 refs, 3 resources with 1 ref
+		Map<Integer, Integer> m5 = Map.of(3, 2, 2, 2, 1, 3);
+		Map<Integer, Integer> m6 = Map.of(3, 3, 1, 4);
+		Map<Integer, Integer> m7 = Map.of(2, 1, 1, 11);
+
+
+		return Stream.of(
+			// Map of ref count to resource count; the max page size; the pre-fetch thresholds to use
+			Arguments.of(m1, null, null),
+			Arguments.of(m2, null, null),
+			Arguments.of(m3, 500, null),
+			Arguments.of(m4, null, null),
+			Arguments.of(m5, null, null),
+			Arguments.of(m1, null, List.of(9, 13, 503, -1)),
+			Arguments.of(m6, null, null),
+			Arguments.of(m7, null, null)
+		);
+	}
+
+	private static List<CreateResourceInput> createResourceParameters() {
+		boolean[] bools = new boolean[]{true, false};
+		List<CreateResourceInput> input = new ArrayList<>();
+		for (boolean bool : bools) {
+			for (boolean bool2 : bools) {
+				for (boolean bool3 : bools) {
+					input.add(new CreateResourceInput(bool, bool2, bool3));
+				}
+			}
+		}
+		return input;
+	}
+
+	private static class CreateResourceInput {
+		boolean IsEnforceRefOnWrite;
+		boolean IsEnforceRefOnType;
+		boolean IsAutoCreatePlaceholderReferences;
+
+		public CreateResourceInput(
+			boolean theEnforceRefOnWrite,
+			boolean theEnforceRefOnType,
+			boolean theAutoCreatePlaceholders
+		) {
+			IsEnforceRefOnWrite = theEnforceRefOnWrite;
+			IsEnforceRefOnType = theEnforceRefOnType;
+			IsAutoCreatePlaceholderReferences = theAutoCreatePlaceholders;
+		}
+
+		@Override
+		public String toString() {
+			return "IsEnforceReferentialIntegrityOnWrite : "
+				+ IsEnforceRefOnWrite + "\n"
+				+ "IsEnforceReferenceTargetTypes : "
+				+ IsEnforceRefOnType + "\n"
+				+ "IsAutoCreatePlaceholderReferenceTargets : "
+				+ IsAutoCreatePlaceholderReferences + "\n";
+		}
 	}
 
 	@Nested
@@ -7861,6 +7927,30 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			Y doTask(X theInput);
 		}
 
+		/**
+		 * The method that generates parameters for tests
+		 */
+		private static Stream<Arguments> provideParameters() {
+			return Stream.of(
+				// 1
+				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.ENABLED, true, true)),
+				// 2
+				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.ENABLED, false, false)),
+				// 3
+				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.ENABLED, false, true)),
+				// 4
+				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.ENABLED, true, false)),
+				// 5
+				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.DISABLED, true, true)),
+				// 6
+				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.DISABLED, false, true)),
+				// 7
+				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.DISABLED, true, false)),
+				// 8
+				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.DISABLED, false, false))
+			);
+		}
+
 		public static class MissingSearchTestParameters {
 			/**
 			 * The setting for IndexMissingFields
@@ -7897,30 +7987,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 					.append("enableMissingFields", myEnableMissingFieldsValue)
 					.toString();
 			}
-		}
-
-		/**
-		 * The method that generates parameters for tests
-		 */
-		private static Stream<Arguments> provideParameters() {
-			return Stream.of(
-				// 1
-				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.ENABLED, true, true)),
-				// 2
-				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.ENABLED, false, false)),
-				// 3
-				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.ENABLED, false, true)),
-				// 4
-				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.ENABLED, true, false)),
-				// 5
-				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.DISABLED, true, true)),
-				// 6
-				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.DISABLED, false, true)),
-				// 7
-				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.DISABLED, true, false)),
-				// 8
-				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.DISABLED, false, false))
-			);
 		}
 	}
 
@@ -7966,49 +8032,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessage("HTTP 400 Bad Request: HAPI-2498: Unsupported search modifier(s): \"[:identifier]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :recurse, :text]");
 		}
-	}
-
-	@Test
-	void searchResource_withIncludeDeletedParam() {
-		// Given
-		Patient patient = new Patient();
-		patient.addName(new HumanName().setFamily("TestFamily").addGiven("TestGiven"));
-		patient.setActive(true);
-
-		IIdType id = myPatientDao.create(patient, mySrd).getId();
-		myPatientDao.delete(id, mySrd);
-
-		// When
-		Bundle results = myClient
-			.search()
-			.byUrl(myServerBase + "/Patient?" + Constants.PARAM_INCLUDE_DELETED + SearchIncludeDeletedEnum.EXCLUSIVE.getCode())
-			.returnBundle(Bundle.class)
-			.execute();
-
-		// Then - returns nothing, _includeDeleted is an unsupported search param (for now)
-		assertThat(results.getEntry()).isEmpty();
-	}
-
-	@Test
-	void conditionalUpdate_withIncludeDeletedParam() {
-		// Given
-		Patient patient = new Patient();
-		patient.addName(new HumanName().setFamily("TestFamily").addGiven("TestGiven"));
-		patient.setActive(true);
-
-		IIdType id = myPatientDao.create(patient, mySrd).getId();
-		myPatientDao.delete(id, mySrd);
-
-		// When/Then
-		InvalidRequestException exception = assertThrows(InvalidRequestException.class, () -> myClient
-			.update()
-			.resource(patient)
-			.conditionalByUrl("Patient?" + Constants.PARAM_INCLUDE_DELETED + SearchIncludeDeletedEnum.EXCLUSIVE.getCode())
-			.execute()
-		);
-
-		// _includeDeleted is an unsupported search param (for now)
-		assertThat(exception.getMessage()).contains("URL has no search parameters");
 	}
 
 }
