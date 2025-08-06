@@ -589,7 +589,7 @@ public class SearchParamExtractorService {
 	}
 
 	private void extractResourceLinks(
-			@Nonnull RequestPartitionId theRequestPartitionId,
+			RequestPartitionId theRequestPartitionId,
 			ResourceIndexedSearchParams theExistingParams,
 			ResourceIndexedSearchParams theNewParams,
 			ResourceTable theEntity,
