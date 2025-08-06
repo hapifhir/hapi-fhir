@@ -126,7 +126,7 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 		switch (myNonExistentCodeSystemSeverity) {
 			case ERROR:
 			case FATAL:
-				return false;
+				return true;
 			case WARNING:
 			case INFORMATION:
 				return true;
