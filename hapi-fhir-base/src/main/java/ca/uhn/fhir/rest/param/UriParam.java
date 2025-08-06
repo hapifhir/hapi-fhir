@@ -23,7 +23,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -82,10 +81,6 @@ public class UriParam extends BaseParam implements IQueryParameterType {
 
 	public String getValueNotNull() {
 		return defaultString(myValue);
-	}
-
-	public boolean isEmpty() {
-		return StringUtils.isEmpty(myValue);
 	}
 
 	/**

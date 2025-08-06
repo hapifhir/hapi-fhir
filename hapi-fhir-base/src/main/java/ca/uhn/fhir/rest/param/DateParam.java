@@ -149,7 +149,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam>
 	 * QualifiedDateParam with only a comparator and no date/time is considered empty.
 	 */
 	public boolean isEmpty() {
-		return myValue.isEmpty();
+		return getMissing() == null && myValue.isEmpty();
 	}
 
 	/**
