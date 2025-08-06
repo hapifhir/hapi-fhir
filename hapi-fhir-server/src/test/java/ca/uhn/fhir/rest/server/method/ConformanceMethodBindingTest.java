@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.TestFhirResource;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -131,7 +132,7 @@ public class ConformanceMethodBindingTest {
 		@Metadata
 		public IBaseConformance getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
 
-			return mock(IBaseConformance.class, RETURNS_DEEP_STUBS);
+			return new TestBaseConformance();
 		}
 	}
 
@@ -141,7 +142,7 @@ public class ConformanceMethodBindingTest {
 		@Metadata(cacheMillis = 10)
 		public IBaseConformance getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
 
-			return mock(IBaseConformance.class, RETURNS_DEEP_STUBS);
+			return new TestBaseConformance();
 		}
 	}
 
@@ -151,7 +152,7 @@ public class ConformanceMethodBindingTest {
 		@Metadata(cacheMillis = 0)
 		public IBaseConformance getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
 
-			return mock(IBaseConformance.class, RETURNS_DEEP_STUBS);
+			return new TestBaseConformance();
 		}
 
 	}
@@ -162,8 +163,12 @@ public class ConformanceMethodBindingTest {
 		// No @Metadata
 		@Override
 		public IBaseConformance getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
-			return mock(IBaseConformance.class, RETURNS_DEEP_STUBS);
+			return new TestBaseConformance();
 		}
+
+	}
+
+	private static class TestBaseConformance extends TestFhirResource implements IBaseConformance {
 
 	}
 

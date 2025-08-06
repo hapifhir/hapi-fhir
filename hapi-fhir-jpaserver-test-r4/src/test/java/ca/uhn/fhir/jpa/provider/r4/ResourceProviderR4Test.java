@@ -66,6 +66,7 @@ import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.validation.ValidationMessageSuppressingInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -244,6 +245,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Autowired
 	private ISearchDao mySearchEntityDao;
 
+	@Autowired
+	private RepositoryValidatingRuleBuilder myRuleBuilder;
+
 	@RegisterExtension
 	public LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(SearchParamValidatingInterceptor.class, Level.WARN);
 
@@ -327,7 +331,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myClient.create().resource(searchParameter).execute();
 		mySearchParamRegistry.forceRefresh();
 
-		HttpGet get = new HttpGet(myServerBase + "/Procedure?focalAccess.a%20ne%20e");
+		HttpGet get = new HttpGet(myServerBase + "/Procedure?focalAccess.a%20ne%20e=aaa");
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(output).contains("Invalid parameter chain: focalAccess.a ne e");
@@ -405,7 +409,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IFhirResourceDao<SearchParameter> searchParameterDao = myDaoRegistry.getResourceDao(SearchParameter.class);
 		searchParameterDao.create(searchParameter, (RequestDetails) null);
 
-		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Organization", "_profile", null);
+		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Organization", "_profile", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 		assertNotNull(sp);
 
 		IFhirResourceDao<Organization> organizationDao = myDaoRegistry.getResourceDao(Organization.class);
@@ -639,6 +643,52 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertNull(nextPageBundle.getLink("next"));
 	}
 
+	/**
+	 * Totals should *not* include Included resources
+	 */
+	@Test
+	public void search_withIncludes_calculatesTotalsCorrectly() {
+		// setup
+		int total = 4;
+		Organization o = new Organization();
+		o.setName("Hibert's Clinic");
+		IIdType oid = myClient.create().resource(o).execute().getId().toUnqualifiedVersionless();
+
+		for (int i = 0; i < total; i++) {
+			Patient p = new Patient();
+			p.setId("Simpson" + i);
+			p.getManagingOrganization().setReference(oid.getValue());
+			myClient.update().resource(p).execute();
+		}
+
+		// test
+		Bundle output = myClient
+			.search()
+			.forResource("Patient")
+			.include(IBaseResource.INCLUDE_ALL)
+			.count(2)
+			.returnBundle(Bundle.class)
+			.execute();
+		assertNotNull(output);
+		assertEquals(3, output.getEntry().size());
+		assertEquals(total, output.getTotal());
+		assertEquals(2, (int) output.getEntry()
+			.stream().filter(e -> e.getResource().fhirType().equalsIgnoreCase("Patient")).count());
+
+		output = myClient.search()
+			.forResource("Patient")
+			.include(IBaseResource.INCLUDE_ALL)
+			.offset(2)
+			.cacheControl(CacheControlDirective.noCache())
+			.returnBundle(Bundle.class)
+			.execute();
+		assertNotNull(output);
+		assertEquals(3, output.getEntry().size());
+		assertEquals(total, output.getTotal());
+		assertEquals(2, (int) output.getEntry()
+			.stream().filter(e -> e.getResource().fhirType().equalsIgnoreCase("Patient")).count());
+	}
+
 	@Test
 	public void testSearchLinksWorkWithIncludes() {
 		for (int i = 0; i < 5; i++) {
@@ -680,7 +730,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	/**
 	 * Test for <a href = https://github.com/hapifhir/hapi-fhir/issues/6849>#6849</a>
-	 *
+	 * <p>
 	 * This is an edge case for chained searches with the _count parameter may not terminate when the search returns
 	 * resources with multiple references.
 	 */
@@ -747,7 +797,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	/**
 	 * @param theRefCountToResourceCount map where the key is the number of references (general-practitioner) the Patient should have, and the value is the number of such Patients to create
-	 * @param theOrganizationRefs the Organizations to use as references
+	 * @param theOrganizationRefs        the Organizations to use as references
 	 * @return total number of patients created
 	 */
 	private int createPatientsWithReferences(Map<Integer, Integer> theRefCountToResourceCount, List<IIdType> theOrganizationRefs) {
