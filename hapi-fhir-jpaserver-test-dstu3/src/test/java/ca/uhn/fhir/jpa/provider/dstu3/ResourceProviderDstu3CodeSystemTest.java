@@ -368,7 +368,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			.map(t -> ((IPrimitiveType<String>) t.getValue()).getValue())
 			.findFirst()
 			.orElseThrow(IllegalArgumentException::new);
-		assertThat(message).contains("Terminology service was unable to provide validation for https://url#1");
+		assertThat(message).contains("CodeSystem is unknown and can't be validated: https://url for 'https://url#1'");
 	}
 
 }

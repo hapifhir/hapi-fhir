@@ -140,8 +140,7 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameterValue("result")).booleanValue());
-		assertThat(respParam.getParameterValue("message").toString()).isEqualTo("Terminology service was unable to provide validation for " + INVALID_CODE_SYSTEM_URI +
-			"#P");
+		assertThat(respParam.getParameterValue("message").toString()).isEqualTo("CodeSystem is unknown and can't be validated: %s for '%s%s'", INVALID_CODE_SYSTEM_URI, INVALID_CODE_SYSTEM_URI, "#P");
 	}
 
 	@Test
@@ -216,6 +215,7 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 	@Test
 	public void validateCodeOperationOnValueSet_byCodingAndUrlWhereValueSetIsUnknown_returnsFalse() {
 		myValueSetProvider.setShouldThrowExceptionForResourceNotFound(false);
+		myCodeSystemProvider.setShouldThrowExceptionForResourceNotFound(false);
 
 		Parameters respParam = myClient
 			.operation()

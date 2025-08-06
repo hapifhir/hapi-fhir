@@ -1241,6 +1241,35 @@ public class ValidationSupportChain implements IValidationSupport {
 		}
 	}
 
+	static class CanGenerateValidationResultForCodeSystemKey extends BaseKey<Boolean> {
+
+		private final String myCodeSystemUrl;
+		private final IValidationSupport myValidationSupport;
+		private final int myHashCode;
+
+		private CanGenerateValidationResultForCodeSystemKey(
+				IValidationSupport theValidationSupport, String theCodeSystemUrl) {
+			myValidationSupport = theValidationSupport;
+			myCodeSystemUrl = theCodeSystemUrl;
+			myHashCode =
+					Objects.hash("CanGenerateValidationResultForCodeSystemKey", theValidationSupport, myCodeSystemUrl);
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO) return true;
+			if (!(theO instanceof CanGenerateValidationResultForCodeSystemKey)) return false;
+			CanGenerateValidationResultForCodeSystemKey that = (CanGenerateValidationResultForCodeSystemKey) theO;
+			return myValidationSupport == that.myValidationSupport
+					&& Objects.equals(myCodeSystemUrl, that.myCodeSystemUrl);
+		}
+
+		@Override
+		public int hashCode() {
+			return myHashCode;
+		}
+	}
+
 	static class LookupCodeKey extends BaseKey<LookupCodeResult> {
 
 		private final LookupCodeRequest myRequest;

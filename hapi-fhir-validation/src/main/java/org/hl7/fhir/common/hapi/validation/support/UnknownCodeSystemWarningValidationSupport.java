@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 
 /**
  * This validation support module may be placed at the end of a {@link ValidationSupportChain}
- * in order to configure the validator to generate a warning if a resource being validated
+ * in order to configure the validator to generate a warning or an error if a resource being validated
  * contains an unknown code system.
  *
  * Note that this module must also be activated by calling {@link #setAllowNonExistentCodeSystem(boolean)}
@@ -52,7 +52,6 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 	@Override
 	public LookupCodeResult lookupCode(
 			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
-		// filters out error/fatal
 		if (canValidateCodeSystem(theValidationSupportContext, theLookupCodeRequest.getSystem())) {
 			return new LookupCodeResult().setFound(true);
 		}
@@ -68,7 +67,6 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 			String theCode,
 			String theDisplay,
 			String theValueSetUrl) {
-		// filters out error/fatal
 		if (!canValidateCodeSystem(theValidationSupportContext, theCodeSystem)) {
 			return null;
 		}
@@ -80,19 +78,11 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 				+ "#" + theCode + "'";
 		result.setMessage(theMessage);
 
-		// For information level, we just strip out the severity+message entirely
-		// so that nothing appears in the validation result
-		if (myNonExistentCodeSystemSeverity == IssueSeverity.INFORMATION) {
-			result.setCode(theCode);
-			result.setSeverity(null);
-			result.setMessage(null);
-		} else {
-			result.addIssue(new CodeValidationIssue(
-					theMessage,
-					myNonExistentCodeSystemSeverity,
-					CodeValidationIssueCode.NOT_FOUND,
-					CodeValidationIssueCoding.NOT_FOUND));
-		}
+		result.addIssue(new CodeValidationIssue(
+				theMessage,
+				myNonExistentCodeSystemSeverity,
+				CodeValidationIssueCode.NOT_FOUND,
+				CodeValidationIssueCoding.NOT_FOUND));
 
 		return result;
 	}
@@ -118,35 +108,9 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 	}
 
 	/**
-	 * Returns true if non existent code systems will still validate.
-	 * False if they will throw errors.
-	 * @return
+	 * If a validation support can fetch the code system, returns false. Otherwise, returns true.
 	 */
-	private boolean allowNonExistentCodeSystems() {
-		switch (myNonExistentCodeSystemSeverity) {
-			case ERROR:
-			case FATAL:
-				return false;
-			case WARNING:
-			case INFORMATION:
-				return true;
-			default:
-				ourLog.info("Unknown issue severity " + myNonExistentCodeSystemSeverity.name()
-						+ ". Treating as INFO/WARNING");
-				return true;
-		}
-	}
-
-	/**
-	 * Determines if the code system can (and should) be validated.
-	 * @param theValidationSupportContext
-	 * @param theCodeSystem
-	 * @return
-	 */
-	private boolean canValidateCodeSystem(ValidationSupportContext theValidationSupportContext, String theCodeSystem) {
-		if (!allowNonExistentCodeSystems()) {
-			return false;
-		}
+	public boolean canValidateCodeSystem(ValidationSupportContext theValidationSupportContext, String theCodeSystem) {
 		if (theCodeSystem == null) {
 			return false;
 		}

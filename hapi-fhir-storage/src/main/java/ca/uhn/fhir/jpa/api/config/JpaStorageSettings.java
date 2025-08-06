@@ -364,6 +364,13 @@ public class JpaStorageSettings extends StorageSettings {
 			IValidationSupport.IssueSeverity.WARNING;
 
 	/**
+	 * @since 8.6.0
+	 */
+	@Nonnull
+	private IValidationSupport.IssueSeverity myIssueSeverityForUnknownCodeSystem =
+			IValidationSupport.IssueSeverity.ERROR;
+
+	/**
 	 * This setting allows preventing a conditional update to invalidate the match criteria.
 	 * <p/>
 	 * By default, this is disabled unless explicitly enabled.
@@ -2613,6 +2620,30 @@ public class JpaStorageSettings extends StorageSettings {
 		Validate.notNull(
 				theIssueSeverityForCodeDisplayMismatch, "theIssueSeverityForCodeDisplayMismatch must not be null");
 		myIssueSeverityForCodeDisplayMismatch = theIssueSeverityForCodeDisplayMismatch;
+	}
+
+	/**
+	 * This setting controls the validation issue severity to report when a code validation
+	 * encounters an unknown CodeSystem. Defaults to {@link IValidationSupport.IssueSeverity#ERROR}.
+	 *
+	 * @since 8.6.0
+	 */
+	@Nonnull
+	public IValidationSupport.IssueSeverity getIssueSeverityForUnknownCodeSystem() {
+		return myIssueSeverityForUnknownCodeSystem;
+	}
+
+	/**
+	 * This setting controls the validation issue severity to report when a code validation
+	 * encounters an unknown CodeSystem. Defaults to {@link IValidationSupport.IssueSeverity#ERROR}.
+	 *
+	 * @param theIssueSeverityForUnknownCodeSystem The severity. Must not be {@literal null}.
+	 * @since 8.6.0
+	 */
+	public void setIssueSeverityForUnknownCodeSystem(
+			@Nonnull IValidationSupport.IssueSeverity theIssueSeverityForUnknownCodeSystem) {
+		Validate.notNull(theIssueSeverityForUnknownCodeSystem, "theIssueSeverityForUnknownCodeSystem must not be null");
+		myIssueSeverityForUnknownCodeSystem = theIssueSeverityForUnknownCodeSystem;
 	}
 
 	/**
