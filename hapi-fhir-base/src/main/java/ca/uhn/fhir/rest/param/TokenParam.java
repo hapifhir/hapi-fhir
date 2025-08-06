@@ -129,7 +129,7 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	 * {@inheritDoc}
 	 */
 	@Override
-	String doGetValueAsQueryToken(FhirContext theContext) {
+	String doGetValueAsQueryToken() {
 		if (getSystem() != null) {
 			if (getValue() != null) {
 				return ParameterUtil.escape(StringUtils.defaultString(getSystem()))
