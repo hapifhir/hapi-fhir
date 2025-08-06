@@ -1,4 +1,7 @@
 ---
 type: fix
 issue: 7177
-title: "Identifier systems containing characters needing FHIR's backslash escaping in the identifier system (e.g. `\"identifier\": [{\"system\":\"http://foo,123\", \"ABC\"}]`) can not be searched for using standard escaping (`Patient?identifier=http://foo\,123|ABC`) due to a bug in the search unescaping logic. This 10-year old bug has been corrected."
+title: "Identifier systems containing characters needing FHIR's backslash escaping in the
+  identifier system (e.g. an identifier with a system value of `http://foo,123`) can 
+  not be searched for using standard escaping (`Patient?identifier=http://foo\\,123|ABC`) due
+  to a bug in the search unescaping logic. This 10-year old bug has been corrected."
