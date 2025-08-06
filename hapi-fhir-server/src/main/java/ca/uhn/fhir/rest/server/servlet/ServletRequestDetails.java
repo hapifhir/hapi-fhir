@@ -24,6 +24,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferHeader;
+import ca.uhn.fhir.rest.api.server.IHasServletAttributes;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -54,7 +55,7 @@ import java.util.zip.GZIPInputStream;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ServletRequestDetails extends RequestDetails {
+public class ServletRequestDetails extends RequestDetails implements IHasServletAttributes {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServletRequestDetails.class);
 
@@ -87,6 +88,9 @@ public class ServletRequestDetails extends RequestDetails {
 		myServer = theRequestDetails.getServer();
 		myServletRequest = theRequestDetails.getServletRequest();
 		myServletResponse = theRequestDetails.getServletResponse();
+		if (myHeaders != null) {
+			myHeaders.putAll(theRequestDetails.myHeaders);
+		}
 	}
 
 	@Override
@@ -189,16 +193,52 @@ public class ServletRequestDetails extends RequestDetails {
 		}
 	}
 
+	/**
+	 * Gets an attribute from the servlet request. Attributes are used for interacting with servlet request
+	 * attributes to communicate between servlet filters. These methods should not be used to pass information
+	 * between interceptor methods. Use {@link #getUserData()} instead to pass information
+	 * between interceptor methods.
+	 *
+	 * @param theAttributeName The attribute name
+	 * @return The attribute value, or null if the attribute is not set
+	 */
 	@Override
-	public Object getAttribute(String theAttributeName) {
+	public Object getServletAttribute(String theAttributeName) {
 		Validate.notBlank(theAttributeName, "theAttributeName must not be null or blank");
 		return getServletRequest().getAttribute(theAttributeName);
 	}
 
+	/**
+	 * Sets an attribute on the servlet request. Attributes are used for interacting with servlet request
+	 * attributes to communicate between servlet filters. These methods should not be used to pass information
+	 * between interceptor methods. Use {@link #getUserData()} instead to pass information
+	 * between interceptor methods.
+	 *
+	 * @param theAttributeName The attribute name
+	 * @param theAttributeValue The attribute value
+	 */
 	@Override
-	public void setAttribute(String theAttributeName, Object theAttributeValue) {
+	public void setServletAttribute(String theAttributeName, Object theAttributeValue) {
 		Validate.notBlank(theAttributeName, "theAttributeName must not be null or blank");
 		getServletRequest().setAttribute(theAttributeName, theAttributeValue);
+	}
+
+	/**
+	 * @deprecated Use {@link #getUserData()}. If servlet attributes are truly required, then use {@link IHasServletAttributes#getServletAttribute(String)}.
+	 */
+	@Deprecated
+	@Override
+	public Object getAttribute(String theAttributeName) {
+		return getServletAttribute(theAttributeName);
+	}
+
+	/**
+	 * @deprecated Use {@link #getUserData()}. If servlet attributes are truly required, then use {@link IHasServletAttributes#setServletAttribute(String, Object)}.
+	 */
+	@Deprecated
+	@Override
+	public void setAttribute(String theAttributeName, Object theAttributeValue) {
+		setServletAttribute(theAttributeName, theAttributeValue);
 	}
 
 	@Override
