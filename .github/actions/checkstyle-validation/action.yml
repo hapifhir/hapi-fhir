@@ -16,13 +16,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Set up JDK
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: ${{ inputs.java-version }}
-        cache: 'maven'
-
     - name: Create and List Maven Cache Directory
       shell: bash
       run: |
@@ -32,16 +25,23 @@ runs:
       env:
         MAVEN_CACHE_FOLDER: $HOME/.m2/repository
 
-    - name: Restore Maven Cache
-      uses: ./.github/actions/caching-handler
-      with:
-        key: ${{ inputs.maven-cache-key }}
-
     - name: Restore HAPI Cache
       uses: ./.github/actions/caching-handler
       with:
         path: "$HOME/.m2/repository/ca/uhn/"
         key: ${{ inputs.hapi-cache-key }}
+
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: ${{ inputs.java-version }}
+        cache: 'maven'
+
+    - name: Restore Maven Cache
+      uses: ./.github/actions/caching-handler
+      with:
+        key: ${{ inputs.maven-cache-key }}
 
     - name: Debug cache contents
       shell: bash
