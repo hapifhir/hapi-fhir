@@ -1,18 +1,19 @@
 package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
+import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyGenerateReportStep;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesResultsJson;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.TypedPidToTypedPidAndNullVersionStep;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
 import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 
 public abstract class BaseBulkModifyJobAppCtx<T extends BaseBulkModifyJobParameters> {
-
-
 
 	protected JobDefinition<T> buildJobDefinition() {
 		JobDefinition.Builder<T, BulkModifyResourcesResultsJson> jobBuilder = JobDefinition.newBuilder()
@@ -32,6 +33,11 @@ public abstract class BaseBulkModifyJobAppCtx<T extends BaseBulkModifyJobParamet
 				ResourceIdListWorkChunkJson.class,
 				loadIdsStep())
 			.addIntermediateStep(
+				"expand-id-versions",
+				"Generate versioned ID batches",
+				TypedPidAndVersionListWorkChunkJson.class,
+				expandIdVersionsStep())
+			.addIntermediateStep(
 				"modify-resources",
 				"Modify resources",
 				BulkModifyResourcesChunkOutcomeJson.class,
@@ -45,6 +51,14 @@ public abstract class BaseBulkModifyJobAppCtx<T extends BaseBulkModifyJobParamet
 		jobBuilder.setParametersValidator(getJobParameterValidator());
 
 		return jobBuilder.build();
+	}
+
+	/**
+	 * This is intended to be overridden by {@link BaseBulkRewriteJobAppCtx}
+	 * for jobs that need versioned PIDs.
+	 */
+	protected IJobStepWorker<T, ResourceIdListWorkChunkJson, TypedPidAndVersionListWorkChunkJson> expandIdVersionsStep() {
+		return new TypedPidToTypedPidAndNullVersionStep<>();
 	}
 
 	protected abstract IJobParametersValidator<T> getJobParameterValidator();

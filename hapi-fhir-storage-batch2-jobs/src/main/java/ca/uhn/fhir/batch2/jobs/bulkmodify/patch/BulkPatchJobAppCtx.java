@@ -7,6 +7,7 @@ import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
 import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,23 +22,26 @@ public class BulkPatchJobAppCtx extends BaseBulkModifyJobAppCtx<BulkPatchJobPara
 	public static final int JOB_VERSION = 1;
 	private final IBatch2DaoSvc myBatch2DaoSvc;
 	private final FhirContext myFhirContext;
+	private final IDaoRegistry myDaoRegistry;
 
 	/**
 	 * Constructor
 	 */
-	public BulkPatchJobAppCtx(IBatch2DaoSvc theBatch2DaoSvc, FhirContext theFhirContext) {
+	public BulkPatchJobAppCtx(IBatch2DaoSvc theBatch2DaoSvc, FhirContext theFhirContext, IDaoRegistry theDaoRegistry) {
 		myBatch2DaoSvc = theBatch2DaoSvc;
 		myFhirContext = theFhirContext;
+		myDaoRegistry = theDaoRegistry;
 	}
 
 	@Bean("bulkModifyJsonPatchJobDefinition")
+	@Lazy
 	public JobDefinition<BulkPatchJobParameters> jobDefinition() {
 		return super.buildJobDefinition();
 	}
 
 	@Override
-	protected BulkPatchJobParametersValidator getJobParameterValidator() {
-		return new BulkPatchJobParametersValidator(myFhirContext);
+	protected BulkPatchJobParametersValidator<BulkPatchJobParameters> getJobParameterValidator() {
+		return new BulkPatchJobParametersValidator<>(myFhirContext, myDaoRegistry);
 	}
 
 	@Override
@@ -61,30 +65,34 @@ public class BulkPatchJobAppCtx extends BaseBulkModifyJobAppCtx<BulkPatchJobPara
 	}
 
 	@Bean("bulkModifyPatchModifyResourcesStep")
+	@Lazy
 	@Override
-	public BulkPatchModificationService modifyResourcesStep() {
-		return new BulkPatchModificationService();
+	public BulkPatchModifyResourcesStep<BulkPatchJobParameters> modifyResourcesStep() {
+		return new BulkPatchModifyResourcesStep<>();
 	}
 
 	@Bean("bulkModifyPatchGenerateRangesStep")
+	@Lazy
 	@Override
 	public GenerateRangeChunksStep<BulkPatchJobParameters> generateRangesStep() {
 		return new GenerateRangeChunksStep<>();
 	}
 
 	@Bean("bulkModifyPatchGenerateReportStep")
+	@Lazy
 	@Override
 	public BulkModifyGenerateReportStep<BulkPatchJobParameters> generateReportStep() {
 		return new BulkModifyGenerateReportStep<>();
 	}
 
 	@Bean("bulkModifyPatchLoadIdsStep")
+	@Lazy
 	@Override
 	public LoadIdsStep<BulkPatchJobParameters> loadIdsStep() {
 		return new LoadIdsStep<>(myBatch2DaoSvc);
 	}
 
-	@Bean
+	@Bean("bulkModifyPatchProvider")
 	@Lazy
 	public BulkPatchProvider bulkPatchProvider() {
 		return new BulkPatchProvider();

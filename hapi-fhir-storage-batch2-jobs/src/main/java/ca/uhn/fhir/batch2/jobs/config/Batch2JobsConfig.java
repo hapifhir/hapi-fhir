@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.jobs.config;
 
 import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchJobAppCtx;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.patchrewrite.BulkPatchRewriteJobAppCtx;
 import ca.uhn.fhir.batch2.jobs.export.BulkExportAppCtx;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeAppCtx;
 import ca.uhn.fhir.batch2.jobs.importpull.BulkImportPullConfig;
@@ -39,6 +40,7 @@ import org.springframework.context.annotation.Import;
 	BulkExportAppCtx.class,
 	TermCodeSystemJobConfig.class,
 	BulkImportPullConfig.class,
-	BulkPatchJobAppCtx.class
+	BulkPatchJobAppCtx.class,
+	BulkPatchRewriteJobAppCtx.class
 })
 public class Batch2JobsConfig {}

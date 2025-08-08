@@ -13,7 +13,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @SuppressWarnings("UnusedReturnValue")
 public class BulkPatchJobParameters extends BaseBulkModifyJobParameters {
 
-	@JsonRawValue
 	@JsonProperty("fhirPatch")
 	private String myFhirPatch;
 

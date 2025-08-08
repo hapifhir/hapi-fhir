@@ -6,12 +6,14 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.eclipse.jetty.http.HttpStatus;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
@@ -26,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -85,6 +88,7 @@ class BulkPatchProviderTest {
 		// Test
 		String url = ourFhirServer.getBaseUrl() + "/" + JpaConstants.OPERATION_BULK_PATCH;
 		HttpPost post = new HttpPost(url);
+		post.setEntity(new ResourceEntity(ourCtx, request));
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 
@@ -99,9 +103,11 @@ class BulkPatchProviderTest {
 		JobInstanceStartRequest startRequest = myStartRequestCaptor.getValue();
 		assertEquals(BulkPatchJobAppCtx.JOB_ID,startRequest.getJobDefinitionId());
 		BulkPatchJobParameters jobParameters = startRequest.getParameters(BulkPatchJobParameters.class);
-		assertNotNull(jobParameters.getFhirPatch(ourCtx));
-		assertEquals(Parameters.class, jobParameters.getFhirPatch(ourCtx).getClass());
-		assertEquals("AA", jobParameters.getFhirPatch(ourCtx).getIdElement().getValue());
+		IBaseResource fhirPatch = jobParameters.getFhirPatch(ourCtx);
+		assertNotNull(fhirPatch);
+		assertEquals(Parameters.class, fhirPatch.getClass());
+		assertEquals("Parameters/PATCH", fhirPatch.getIdElement().getValue());
+		assertThat(jobParameters.getUrls()).containsExactly("Patient?", "Location?");
 	}
 
 }

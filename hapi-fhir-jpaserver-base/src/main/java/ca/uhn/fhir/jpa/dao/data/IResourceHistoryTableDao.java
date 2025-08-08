@@ -31,6 +31,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public interface IResourceHistoryTableDao
 		extends JpaRepository<ResourceHistoryTable, ResourceHistoryTablePk>, IHapiFhirJpaRepository {
@@ -103,4 +104,7 @@ public interface IResourceHistoryTableDao
 			+ "AND t.myVersion = v.myResourceVersion")
 	List<ResourceHistoryTable> findCurrentVersionsByResourcePidsAndFetchResourceTable(
 			@Param("pids") List<JpaPidFk> theVersionlessPids);
+
+	@Query("SELECT new ca.uhn.fhir.jpa.model.dao.JpaPid(v.myPartitionIdValue, v.myResourcePid.myId, v.myResourceVersion) FROM ResourceHistoryTable v WHERE v.myResourcePid IN :resIds")
+	Stream<JpaPid> findAllVersionsForResourcePids(@Param("resIds") List<JpaPidFk> theIds);
 }

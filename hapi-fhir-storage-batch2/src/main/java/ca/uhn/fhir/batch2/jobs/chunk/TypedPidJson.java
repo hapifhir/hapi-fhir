@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.jobs.chunk;
 
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -126,5 +127,10 @@ public class TypedPidJson implements IModelJson, Comparable<TypedPidJson> {
 			retVal = o.myPid.compareTo(myPid);
 		}
 		return retVal;
+	}
+
+	public <T extends IResourcePersistentId<?>> T toPersistentId(IIdHelperService<T> theIdHelperService) {
+		return theIdHelperService.newPidFromStringIdAndResourceName(
+			getPartitionId(), getPid(), getResourceType());
 	}
 }

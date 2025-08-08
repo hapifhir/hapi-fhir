@@ -10,8 +10,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class BulkModifyCommonJobAppCtx {
 
-	public static final String BULK_MODIFY = "BULK_MODIFY";
-
 	private final IBatch2DaoSvc myBatch2DaoSvc;
 
 	/**
@@ -38,7 +36,19 @@ public class BulkModifyCommonJobAppCtx {
 	}
 
 	/**
-	 * Step 4
+	 * Step 3
+	 */
+	@Bean("bulkModifyExpandIdsStep")
+	public TypedPidToTypedPidAndVersionStep<BaseBulkModifyJobParameters> expandIdVersionsStep() {
+		return new TypedPidToTypedPidAndVersionStep<>();
+	}
+
+	/*
+	 * Step 4 is provided by the specific job definition
+	 */
+
+	/**
+	 * Step 5
 	 */
 	@Bean("bulkModifyGenerateReportStep")
 	public BulkModifyGenerateReportStep generateReportStep() {

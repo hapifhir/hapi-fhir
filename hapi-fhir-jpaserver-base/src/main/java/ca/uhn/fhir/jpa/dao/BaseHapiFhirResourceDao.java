@@ -51,6 +51,7 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.interceptor.PatientCompartmentEnforcingInterceptor;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
@@ -1213,6 +1214,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
+	public Stream<IResourcePersistentId> fetchAllVersionsOfResources(RequestDetails theRequestDetails, Collection<IResourcePersistentId> theIds) {
+		HapiTransactionService.requireTransaction();
+
+		List<JpaPidFk> ids = theIds
+			.stream()
+			.map(t -> ((JpaPid) t).toFk())
+			.toList();
+
+		return myResourceHistoryTableDao
+					.findAllVersionsForResourcePids(ids)
+					.map(t->(IResourcePersistentId) t);
+	}
+
+	@Override
 	public ExpungeOutcome forceExpungeInExistingTransaction(
 			IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
@@ -2082,7 +2097,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 								"List",
 								ListResource.SP_ITEM,
 								BaseResource.SP_RES_ID,
-								value.getValueAsQueryToken(null)));
+								value.getValueAsQueryToken()));
 					}
 					hasParamValues.add(orList);
 				}
@@ -2380,6 +2395,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
 				theRequest, theResource, getResourceName());
+
+		if (theRequest.isRewriteHistory() && !myStorageSettings.isUpdateWithHistoryRewriteEnabled()) {
+			String msg = getContext().getLocalizer().getMessage(BaseStorageDao.class, "updateWithHistoryRewriteDisabled");
+			// FIXME: add code, add i18n message, add test
+			throw new InvalidRequestException(Msg.code(0) + msg);
+		}
 
 		Callable<DaoMethodOutcome> updateCallback;
 		if (myStorageSettings.isUpdateWithHistoryRewriteEnabled()

@@ -9,6 +9,8 @@ import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.api.ResourceModificationRequ
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.api.ResourceModificationResponse;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionJson;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -28,6 +30,9 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.IModelVisitor2;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import jakarta.annotation.Nonnull;
@@ -50,10 +55,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
-public abstract class BaseBulkModifyResourcesStep<T extends BaseBulkModifyJobParameters, C> implements IJobStepWorker<T, ResourceIdListWorkChunkJson, BulkModifyResourcesChunkOutcomeJson> {
+public abstract class BaseBulkModifyResourcesStep<T extends BaseBulkModifyJobParameters, C> implements IJobStepWorker<T, TypedPidAndVersionListWorkChunkJson, BulkModifyResourcesChunkOutcomeJson> {
 
 	@Autowired
 	private IHapiTransactionService myTransactionService;
@@ -68,7 +74,7 @@ public abstract class BaseBulkModifyResourcesStep<T extends BaseBulkModifyJobPar
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<T, ResourceIdListWorkChunkJson> theStepExecutionDetails, @Nonnull IJobDataSink<BulkModifyResourcesChunkOutcomeJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(@Nonnull StepExecutionDetails<T, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails, @Nonnull IJobDataSink<BulkModifyResourcesChunkOutcomeJson> theDataSink) throws JobExecutionFailedException {
 		State state = new State();
 
 		myTransactionService
@@ -93,7 +99,7 @@ public abstract class BaseBulkModifyResourcesStep<T extends BaseBulkModifyJobPar
 		return RunOutcome.SUCCESS;
 	}
 
-	private void performBatchInTransaction(StepExecutionDetails<T, ResourceIdListWorkChunkJson> theStepExecutionDetails, State theState) {
+	private void performBatchInTransaction(StepExecutionDetails<T, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails, State theState) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		// Fetch all the resources in the chunk
@@ -118,26 +124,52 @@ public abstract class BaseBulkModifyResourcesStep<T extends BaseBulkModifyJobPar
 		});
 	}
 
-	private @Nonnull List<IBaseResource> fetchResourcesInTransaction(@Nonnull StepExecutionDetails<T, ResourceIdListWorkChunkJson> theStepExecutionDetails) {
+	@Nonnull
+	private List<IBaseResource> fetchResourcesInTransaction(@Nonnull StepExecutionDetails<T, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
-		ResourceIdListWorkChunkJson data = theStepExecutionDetails.getData();
+		TypedPidAndVersionListWorkChunkJson data = theStepExecutionDetails.getData();
 
-		List<IResourcePersistentId<?>> persistentIds = data.getResourcePersistentIds(myIdHelperService);
-		mySystemDao.preFetchResources(persistentIds, true);
+		Multimap<TypedPidJson, TypedPidAndVersionJson> pidsToVersions = MultimapBuilder.hashKeys().arrayListValues().build();
+		for (TypedPidAndVersionJson pidAndVersion : data.getTypedPidAndVersions()) {
+			pidsToVersions.put(pidAndVersion.toTypedPid(), pidAndVersion);
+		}
+		List<TypedPidJson> typedPids = List.copyOf(pidsToVersions.keySet());
+		List<? extends IResourcePersistentId<?>> typedPidsAsPersistentIds = typedPids
+			.stream()
+			.map(t -> t.toPersistentId(myIdHelperService))
+			.toList();
 
-		List<TypedPidJson> typedPids = data.getTypedPids();
-		List<IBaseResource> resources = new ArrayList<>(typedPids.size());
+		mySystemDao.preFetchResources(typedPidsAsPersistentIds, true);
+
+		data.getResourcePersistentIds(myIdHelperService);
+
+		List<IBaseResource> resources = new ArrayList<>(data.getTypedPidAndVersions().size());
 		for (int i = 0; i < typedPids.size(); i++) {
 			TypedPidJson typedPid = typedPids.get(i);
+			IResourcePersistentId<?> persistentId = typedPidsAsPersistentIds.get(i);
+
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(typedPid.getResourceType());
-			IBaseResource resource = dao.readByPid(persistentIds.get(i));
-			resources.add(resource);
+			IBaseResource resource = dao.readByPid(persistentId);
+
+			Collection<TypedPidAndVersionJson> typedVersionedPids = pidsToVersions.get(typedPid);
+			for (TypedPidAndVersionJson typedVersionedPid : typedVersionedPids) {
+				Long nextVersion = typedVersionedPid.getVersionId();
+				if (nextVersion == null || nextVersion.equals(resource.getIdElement().getVersionIdPartAsLong())) {
+					resources.add(resource);
+				} else {
+					IIdType nextVersionedId = resource.getIdElement().withVersion(Long.toString(nextVersion));
+					// FIXME: add test for deleted version for both operations
+					IBaseResource resourceVersion = dao.read(nextVersionedId, new SystemRequestDetails(), true);
+					resources.add(resourceVersion);
+				}
+			}
 		}
+
 		return resources;
 	}
 
-	private void modifyResourcesInTransaction(State theState, StepExecutionDetails<T, ResourceIdListWorkChunkJson> theStepExecutionDetails, List<IBaseResource> resources) {
+	private void modifyResourcesInTransaction(State theState, StepExecutionDetails<T, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails, List<IBaseResource> resources) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		FhirTerser terser = myFhirContext.newTerser();
@@ -152,7 +184,7 @@ public abstract class BaseBulkModifyResourcesStep<T extends BaseBulkModifyJobPar
 			ResourceModificationResponse modificationResponse = modifyResource(theStepExecutionDetails, modificationContext, modificationRequest);
 			IBaseResource updatedResource = modificationResponse.getResource();
 
-			// FIXME: test that updatedResource is not null and is the right resource type and has the right ID
+			// FIXME: test that updatedResource is not null and is the right resource type and has the right ID and version
 
 			HashingModelVisitor postModificationHash = new HashingModelVisitor();
 			terser.visit(updatedResource, postModificationHash);
@@ -170,6 +202,9 @@ public abstract class BaseBulkModifyResourcesStep<T extends BaseBulkModifyJobPar
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		// FIXME: set selectively
+		requestDetails.setRewriteHistory(true);
+
 		TransactionDetails transactionDetails = new TransactionDetails();
 
 		for (IBaseResource resource : theState.getChangedUnsavedResourcesAndClear()) {
@@ -231,7 +266,7 @@ public abstract class BaseBulkModifyResourcesStep<T extends BaseBulkModifyJobPar
 	 * 	won't look at it and doesn't care if it is {@literal null}.
 	 */
 	@Nullable
-	protected C preModifyResources(StepExecutionDetails<T, ResourceIdListWorkChunkJson> theStepExecutionDetails) {
+	protected C preModifyResources(StepExecutionDetails<T, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails) {
 		return null;
 	}
 
@@ -239,7 +274,7 @@ public abstract class BaseBulkModifyResourcesStep<T extends BaseBulkModifyJobPar
 	 * This method is called once for each resource needing modification
 	 */
 	@Nonnull
-	protected abstract ResourceModificationResponse modifyResource(StepExecutionDetails<T, ResourceIdListWorkChunkJson> theStepExecutionDetails, C theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest);
+	protected abstract ResourceModificationResponse modifyResource(StepExecutionDetails<T, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails, C theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest);
 
 
 	/**

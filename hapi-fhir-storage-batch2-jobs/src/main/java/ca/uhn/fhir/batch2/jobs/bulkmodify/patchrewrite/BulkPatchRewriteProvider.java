@@ -1,7 +1,9 @@
-package ca.uhn.fhir.batch2.jobs.bulkmodify.patch;
+package ca.uhn.fhir.batch2.jobs.bulkmodify.patchrewrite;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesResultsJson;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchJobAppCtx;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
@@ -34,7 +36,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 /**
  * @since 8.6.0
  */
-public class BulkPatchProvider {
+public class BulkPatchRewriteProvider {
 
 	@Autowired
 	private FhirContext myContext;
