@@ -111,7 +111,7 @@ jobs:
   final-result:
     if: ${{ always() }}
     runs-on: ubuntu-latest
-    needs: [ assemble-test-reports ]
+    needs: [ assemble-test-reports, checkstyle ]
     steps:
       - run: exit 1
         if: >-
