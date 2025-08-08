@@ -238,7 +238,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		// When: We search Procedure?patient=
 		BaseServerResponseException exception = assertThrows(BaseServerResponseException.class, () -> {myClient
 			.search()
-			.byUrl("Procedure?patient=")
+			.byUrl("Procedure?patient=Patient/")
 			.returnBundle(Bundle.class)
 			.execute();});
 
@@ -251,7 +251,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		// When: We search Procedure?patient=
 		BaseServerResponseException exception = assertThrows(BaseServerResponseException.class, () -> {myClient
 			.search()
-			.byUrl("Procedure?patient=")
+			.byUrl("Procedure?patient=Patient/")
 			.returnBundle(Bundle.class)
 			.execute();});
 

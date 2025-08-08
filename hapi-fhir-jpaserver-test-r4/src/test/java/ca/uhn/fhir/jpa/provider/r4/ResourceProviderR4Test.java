@@ -66,6 +66,7 @@ import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.validation.ValidationMessageSuppressingInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -393,7 +394,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myClient.create().resource(searchParameter).execute();
 		mySearchParamRegistry.forceRefresh();
 
-		HttpGet get = new HttpGet(myServerBase + "/Procedure?focalAccess.a%20ne%20e");
+		HttpGet get = new HttpGet(myServerBase + "/Procedure?focalAccess.a%20ne%20e=aaa");
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(output).contains("Invalid parameter chain: focalAccess.a ne e");
@@ -471,7 +472,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IFhirResourceDao<SearchParameter> searchParameterDao = myDaoRegistry.getResourceDao(SearchParameter.class);
 		searchParameterDao.create(searchParameter, (RequestDetails) null);
 
-		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Organization", "_profile", null);
+		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Organization", "_profile", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 		assertNotNull(sp);
 
 		IFhirResourceDao<Organization> organizationDao = myDaoRegistry.getResourceDao(Organization.class);
