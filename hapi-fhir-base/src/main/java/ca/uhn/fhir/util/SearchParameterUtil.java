@@ -22,11 +22,15 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.annotation.Compartment;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.collections4.CollectionUtils;
@@ -37,8 +41,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -46,6 +54,102 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SearchParameterUtil {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParameterUtil.class);
+
+	/**
+	 * This is a list of resources that are in the
+	 * <a href="https://build.fhir.org/compartmentdefinition-patient.html">Patient Compartment</a>
+	 * but we are omitting anyways for security reasons.
+	 *
+	 * See <a href="https://github.com/hapifhir/hapi-fhir/issues/7118">this issue</a> for why.
+	 */
+	public static final Map<String, Set<String>> RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT =
+			new HashMap<>();
+
+	static {
+		RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.put("Group", new HashSet<>());
+		RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.put("List", new HashSet<>());
+
+		// group
+		RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.get("Group").add("member");
+
+		// list
+		RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.get("List").add("subject");
+		RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.get("List").add("source");
+		RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.get("List").add("patient");
+	}
+
+	/**
+	 * Returns true if the named compartment (Patient, Practitioner, etc) should
+	 * include the provided Search Parameter (SP)
+	 */
+	private static boolean shouldCompartmentIncludeSP(
+			String theCompartmentName, SearchParamDefinition theSearchParamDef) {
+
+		// default
+		return Arrays.stream(theSearchParamDef.providesMembershipIn())
+				.anyMatch(p -> p.name().equals(theCompartmentName));
+	}
+
+	/**
+	 * Retrieves the set of compartments for the provided Resource class and SP definition.
+	 * Includes special case handling
+	 *
+	 * @param theResourceClazz the resource class (ie, Patient.class, Group.class, etc)
+	 * @param theSearchParamDefinition the SP definition (from the fields)
+	 * @return a set of valid compartments for the provided search parameter.
+	 */
+	public static Set<String> getMembershipCompartmentsForSearchParameter(
+			Class<? extends IBase> theResourceClazz, SearchParamDefinition theSearchParamDefinition) {
+		RestSearchParameterTypeEnum paramType = RestSearchParameterTypeEnum.forCode(
+				theSearchParamDefinition.type().toLowerCase());
+		if (paramType == null) {
+			throw new ConfigurationException(Msg.code(1721) + "Search param " + theSearchParamDefinition.name()
+					+ " has an invalid type: " + theSearchParamDefinition.type());
+		}
+
+		Set<String> validCompartments = new HashSet<>();
+		for (Compartment compartment : theSearchParamDefinition.providesMembershipIn()) {
+			if (paramType != RestSearchParameterTypeEnum.REFERENCE) {
+				StringBuilder b = new StringBuilder();
+				b.append("Search param ");
+				b.append(theSearchParamDefinition.name());
+				b.append(" on resource type ");
+				b.append(theResourceClazz.getName());
+				b.append(" provides compartment membership but is not of type 'reference'");
+				ourLog.warn(b.toString());
+				continue;
+			}
+
+			if (SearchParameterUtil.shouldCompartmentIncludeSP(compartment.name(), theSearchParamDefinition)) {
+				String compartmentName = getCleansedCompartmentName(compartment.name());
+				validCompartments.add(compartmentName);
+			}
+		}
+
+		/*
+		 * In the base FHIR R4 specification, the Device resource is not a part of the Patient compartment.
+		 * However, it is a patient-specific resource that most users expect to be, and several derivative
+		 * specifications including g(10) testing expect it to be, and the fact that it is not has led to many
+		 * bug reports in HAPI FHIR. As of HAPI FHIR 8.0.0 it is being manually added in response to those
+		 * requests.
+		 * See https://github.com/hapifhir/hapi-fhir/issues/6536 for more information.
+		 */
+		if (theSearchParamDefinition.name().equals("patient")
+				&& theSearchParamDefinition.path().equals("Device.patient")) {
+			validCompartments.add("Patient");
+		}
+
+		return validCompartments;
+	}
+
+	private static String getCleansedCompartmentName(String theCompartmentName) {
+		// As of 2021-12-28 the R5 structures incorrectly have this prefix
+		if (theCompartmentName.startsWith("Base FHIR compartment definition for ")) {
+			return theCompartmentName.substring("Base FHIR compartment definition for ".length());
+		}
+		return theCompartmentName;
+	}
 
 	public static List<String> getBaseAsStrings(FhirContext theContext, IBaseResource theResource) {
 		Validate.notNull(theContext, "theContext must not be null");

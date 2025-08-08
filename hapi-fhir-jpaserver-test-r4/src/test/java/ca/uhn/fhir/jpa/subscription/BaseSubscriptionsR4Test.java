@@ -21,6 +21,7 @@ import ca.uhn.fhir.test.utilities.server.TransactionCapturingProviderExtension;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.apicatalog.jsonld.StringUtils;
+import com.google.common.base.Strings;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
 import net.ttddyy.dsproxy.QueryCount;
@@ -224,21 +225,45 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	}
 
 	protected Patient sendPatient() {
+		return sendPatient(null);
+	}
+
+	protected Patient sendPatient(String thePatientId) {
 		Patient patient = new Patient();
+		if(!Strings.isNullOrEmpty(thePatientId)) {
+			patient.setId(thePatientId);
+		}
+
+		DaoMethodOutcome outcome;
+		if(Strings.isNullOrEmpty(thePatientId)) {
+			outcome = myPatientDao.create(patient);
+			patient.setId( outcome.getId());
+		} else {
+			myPatientDao.update(patient);
+		}
+
 		patient.setActive(true);
-
-		IIdType id = myPatientDao.create(patient).getId();
-		patient.setId(id);
-
 		return patient;
 	}
 
 	protected Organization sendOrganization() {
-		Organization org = new Organization();
-		org.setName("ORG");
+		return sendOrganization(null);
+	}
 
-		IIdType id = myOrganizationDao.create(org).getId();
-		org.setId(id);
+	protected Organization sendOrganization( String theOrgId) {
+		Organization org = new Organization();
+		org.setName("ORG" + (theOrgId == null ? "" : theOrgId));
+		if(!Strings.isNullOrEmpty(theOrgId)) {
+			org.setId(theOrgId);
+		}
+
+		DaoMethodOutcome outcome;
+		if(Strings.isNullOrEmpty(theOrgId)) {
+			outcome = myOrganizationDao.create(org);
+			org.setId(outcome.getId());
+		} else {
+			myOrganizationDao.update(org);
+		}
 
 		return org;
 	}

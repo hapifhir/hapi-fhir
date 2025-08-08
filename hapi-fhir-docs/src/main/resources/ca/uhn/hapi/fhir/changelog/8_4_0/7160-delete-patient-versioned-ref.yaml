@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7160
+title: "Previously, a Patient resource could not be deleted if a `Provenance.target` has a versioned reference to the 
+Patient. The delete was prevented by the referential integrity check on delete, even though the versioned references 
+are not supposed to prevent deletion. This has now been fixed."

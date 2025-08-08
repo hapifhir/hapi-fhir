@@ -46,7 +46,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
+import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.DEFAULT_PRESERVE_VERSION_REFS_R4_AND_LATER;
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.RESOURCE_TYPES_EXPECTED_TO_BE_PATCHED;
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.TOTAL_EXPECTED_PATCHES;
@@ -82,6 +84,9 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		myStorageSettings.setDefaultTransactionEntriesForWrite(new JpaStorageSettings().getDefaultTransactionEntriesForWrite());
 		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		// For some reason, if this value is not restored to its default at the end, it interferes with other suites,
+		// so restore the default value
+		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(DEFAULT_PRESERVE_VERSION_REFS_R4_AND_LATER);
 	}
 
 	@Override
@@ -91,12 +96,13 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 		myStorageSettings.setAllowMultipleDelete(true);
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
-		// we need to keep the version on Provenance.target fields to
-		// verify that Provenance resources were saved with versioned target references
-		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
+		// we need to keep the version on Provenance.target fields to verify that Provenance resources were saved
+		// with versioned target references, and delete-source on merge works correctly.
+		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
 		myTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
 		myLargeTestData = new ReplaceReferencesLargeTestData(myDaoRegistry);
 	}
+
 
 	private void waitForAsyncTaskCompletion(Parameters theOutParams) {
 		assertThat(getLastHttpStatusCode()).isEqualTo(HttpServletResponse.SC_ACCEPTED);

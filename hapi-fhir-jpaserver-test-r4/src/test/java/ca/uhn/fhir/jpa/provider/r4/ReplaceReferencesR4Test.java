@@ -17,6 +17,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -448,6 +449,38 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 
 		List<IBaseResource> provenances = myTestHelper.searchProvenance(targetPatientId.toString());
 		assertThat(provenances).isEmpty();
+	}
+
+	@ParameterizedTest
+	@CsvSource (value = {
+		"false",
+		"true"
+	})
+	void testReplaceReferences_ReferencingResourceHasAnAdditionalLogicalReference_Succeeds(boolean theIsAsync) {
+
+		IIdType sourcePatientId = myPatientDao.create(new Patient(), mySrd).getId().toUnqualifiedVersionless();
+		IIdType targetPatientId = myPatientDao.create(new Patient(), mySrd).getId().toUnqualifiedVersionless();
+
+		// Create an Observation resource that references the source patient
+		// and has an additional logical reference.
+		Observation observation = new Observation();
+		observation.setSubject(new Reference(sourcePatientId));
+		Reference logicalReference = new Reference();
+		logicalReference.setIdentifier(new Identifier().setSystem("performerSys").setValue("drWho"));
+		observation.addPerformer(logicalReference);
+
+		IIdType obsId = myObservationDao.create(observation, mySrd).getId().toUnqualifiedVersionless();
+
+		executeReplaceReferences(sourcePatientId, targetPatientId, theIsAsync);
+
+		Observation obsAfter = myObservationDao.read(obsId, mySrd);
+		assertThat(obsAfter.getSubject().getReference()).isEqualTo(targetPatientId.toString());
+		// The logical reference should not have been replaced
+		assertThat(obsAfter.getPerformer()).hasSize(1);
+		assertThat(obsAfter.getPerformerFirstRep().getIdentifier().getSystem()).isEqualTo("performerSys");
+		assertThat(obsAfter.getPerformerFirstRep().getIdentifier().getValue()).isEqualTo("drWho");
+
+		myTestHelper.assertReplaceReferencesProvenance(sourcePatientId.withVersion("1"), targetPatientId.withVersion("1"), 1, Set.of(obsId.withVersion("2").toString()), null);
 	}
 
 	@Override

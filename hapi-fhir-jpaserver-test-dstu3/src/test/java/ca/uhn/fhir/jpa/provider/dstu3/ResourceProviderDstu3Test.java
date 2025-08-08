@@ -2004,15 +2004,17 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		assertThat(inputBundle.getEntry()).hasSize(53);
 
-		Set<String> allIds = new TreeSet<String>();
+		Set<String> allIds = new TreeSet<>();
 		for (BundleEntryComponent nextEntry : inputBundle.getEntry()) {
 			nextEntry.getRequest().setMethod(HTTPVerb.PUT);
 			UrlUtil.UrlParts parts = UrlUtil.parseUrl(nextEntry.getResource().getId());
 			nextEntry.getRequest().setUrl(parts.getResourceType() + "/" + parts.getResourceId());
-			allIds.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+			if (!nextEntry.getResource().fhirType().equalsIgnoreCase("list")) {
+				allIds.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+			}
 		}
 
-		assertThat(allIds).hasSize(53);
+		assertThat(allIds).hasSize(50);
 
 		mySystemDao.transaction(mySrd, inputBundle);
 
@@ -2061,9 +2063,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		assertNull(responseBundle.getLink("next"));
 
-		assertThat(idsSet).contains("List/A161444");
-		assertThat(idsSet).contains("List/A161468");
-		assertThat(idsSet).contains("List/A161500");
+		assertThat(idsSet).doesNotContain("List/A161444");
+		assertThat(idsSet).doesNotContain("List/A161468");
+		assertThat(idsSet).doesNotContain("List/A161500");
 
 		ourLog.info("Expected {} - {}", allIds.size(), allIds);
 		ourLog.info("Actual   {} - {}", idsSet.size(), idsSet);

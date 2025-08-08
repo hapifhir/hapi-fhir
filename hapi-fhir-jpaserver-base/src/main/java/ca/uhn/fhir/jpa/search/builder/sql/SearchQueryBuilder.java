@@ -903,18 +903,6 @@ public class SearchQueryBuilder {
 		addPredicate(predicate);
 	}
 
-	public void excludeResourceTypesPredicate(Collection<String> theOmitted) {
-		if (theOmitted == null || theOmitted.isEmpty()) {
-			return;
-		}
-
-		ourLog.trace("exclude resource types = {}", theOmitted);
-
-		DbColumn resourceTypeCol = getOrCreateResourceTablePredicateBuilder().getResourceTypeColumn();
-		Condition c = new NotCondition(new InCondition(resourceTypeCol, generatePlaceholders(theOmitted)));
-		addPredicate(c);
-	}
-
 	public void excludeResourceIdsPredicate(Set<JpaPid> theExistingPidSetToExclude) {
 
 		// Do  nothing if it's empty
@@ -928,6 +916,12 @@ public class SearchQueryBuilder {
 		InCondition predicate = new InCondition(resourceIdColumn, generatePlaceholders(excludePids));
 		predicate.setNegate(true);
 		addPredicate(predicate);
+	}
+
+	public void excludeResourceTypesPredicate(Collection<String> theResourceTypes) {
+		DbColumn resourceTypeCol = getOrCreateResourceTablePredicateBuilder().getResourceTypeColumn();
+		Condition c = new NotCondition(new InCondition(resourceTypeCol, generatePlaceholders(theResourceTypes)));
+		addPredicate(c);
 	}
 
 	public BinaryCondition createConditionForValueWithComparator(

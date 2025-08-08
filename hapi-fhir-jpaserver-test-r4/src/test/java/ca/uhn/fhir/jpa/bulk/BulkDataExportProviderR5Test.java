@@ -75,6 +75,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -852,7 +853,8 @@ public class BulkDataExportProviderR5Test {
 		}
 
 		// verify
-		Set<String> expectedResourceTypes = new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myCtx));
+		Set<String> expectedResourceTypes = SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myCtx)
+			.stream().filter(r -> !SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.containsKey(r)).collect(Collectors.toSet());
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
 		assertThat(bp.getResourceTypes()).containsAll(expectedResourceTypes);

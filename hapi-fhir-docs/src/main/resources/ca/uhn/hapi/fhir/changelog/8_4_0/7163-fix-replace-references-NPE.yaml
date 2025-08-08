@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7163
+title: "Previously, the `$hapi.fhir.replace-references` operation was failing with a NPE when a referencing resource 
+had a logical reference. This has now been fixed."
