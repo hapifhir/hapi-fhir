@@ -99,39 +99,5 @@
 				</plugins>
 			</build>
 		</profile>
-		<profile>
-			<id>CHECKSTYLE</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-checkstyle-plugin</artifactId>
-						<configuration>
-							<excludes>**/osgi/**/*, **/.mvn/**/*, **/.mvn_/**/*</excludes>
-							<includeTestSourceDirectory>true</includeTestSourceDirectory>
-							<!--suppress UnresolvedMavenProperty -->
-							<configLocation>checkstyle/hapi-base-checkstyle.xml</configLocation>
-							<!--suppress UnresolvedMavenProperty -->
-							<suppressionsLocation>checkstyle/hapi-base-checkstyle-suppression.xml</suppressionsLocation>
-							<inputEncoding>UTF-8</inputEncoding>
-							<consoleOutput>true</consoleOutput>
-						</configuration>
-						<executions>
-							<execution>
-								<id>checkstyle-across-all-modules</id>
-								<phase>install</phase>
-								<goals>
-									<goal>check</goal>
-								</goals>
-							</execution>
-							<execution>
-								<id>hapi-single-module-checkstyle</id>
-								<phase>none</phase>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
 	</profiles>
 </project>

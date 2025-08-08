@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -45,7 +46,7 @@ public class AdditionalResourcesParser {
 		try {
 			npmPackage = NpmPackage.fromPackage(new ByteArrayInputStream(packageInstallationSpec.getPackageContents()));
 		} catch (IOException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(2765) + e);
 		}
 		List<IBaseResource> resources = getAdditionalResources(additionalResources, npmPackage, fhirContext);
 
@@ -73,7 +74,7 @@ public class AdditionalResourcesParser {
 						.flatMap(Collection::stream)
 						.collect(Collectors.toList());
 			} catch (IOException e) {
-				throw new InternalErrorException(e.getMessage(), e);
+				throw new InternalErrorException(Msg.code(2766) + e.getMessage(), e);
 			}
 
 			resources.addAll(fileNames.stream()
@@ -81,7 +82,7 @@ public class AdditionalResourcesParser {
 						try {
 							return new String(folder.fetchFile(fileName));
 						} catch (IOException e) {
-							throw new InternalErrorException(e.getMessage(), e);
+							throw new InternalErrorException(Msg.code(2767) + e.getMessage(), e);
 						}
 					})
 					.map(parser::parseResource)

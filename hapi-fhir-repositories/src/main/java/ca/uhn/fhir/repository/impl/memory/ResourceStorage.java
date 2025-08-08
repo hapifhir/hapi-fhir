@@ -1,5 +1,6 @@
 package ca.uhn.fhir.repository.impl.memory;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.annotation.Nonnull;
@@ -90,7 +91,8 @@ public class ResourceStorage {
 			}
 
 			if (!resourceTypeName.equals(unqualifiedVersionless.getResourceType())) {
-				throw new IllegalArgumentException("Resource type mismatch: resource is " + resourceTypeName
+				throw new IllegalArgumentException(Msg.code(2775) + "Resource type mismatch: resource is "
+						+ resourceTypeName
 						+ " but id type is " + unqualifiedVersionless.getResourceType());
 			}
 

@@ -170,6 +170,6 @@ Snap.*
 /database*/
 /activemq-data/
 /.run/
-/CLAUDE.md
+**/CLAUDE.md
 
 **/.claude/settings.local.json
