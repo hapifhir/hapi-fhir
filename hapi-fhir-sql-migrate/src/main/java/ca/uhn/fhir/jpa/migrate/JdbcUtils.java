@@ -91,7 +91,7 @@ public class JdbcUtils {
 							metadata.getPrimaryKeys(connection.getCatalog(), connection.getSchema(), theTableName)) {
 						while (results.next()) {
 							String columnName = results.getString("COLUMN_NAME");
-							retVal.add(columnName);
+							retVal.add(columnName.toUpperCase(Locale.US));
 						}
 					}
 
