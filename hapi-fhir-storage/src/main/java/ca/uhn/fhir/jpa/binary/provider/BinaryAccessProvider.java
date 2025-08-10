@@ -42,6 +42,8 @@ import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -61,8 +63,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Optional;
 
+import static ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor.AUTO_INFLATE_BINARY_CONTENT_KEY;
 import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -74,6 +78,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class BinaryAccessProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BinaryAccessProvider.class);
+
+	private static final HashFunction SHA_256 = Hashing.sha256();
 
 	@Autowired
 	private FhirContext myCtx;
@@ -187,39 +193,37 @@ public class BinaryAccessProvider {
 
 		String path = validateResourceTypeAndPath(theResourceId, thePath);
 		IFhirResourceDao dao = getDaoForRequest(theResourceId);
+		// disable auto-inflation temporarily as binary content will be replaced anyway
+		theRequestDetails.getUserData().put(AUTO_INFLATE_BINARY_CONTENT_KEY, Boolean.FALSE);
 		IBaseResource resource = dao.read(theResourceId, theRequestDetails, false);
+		theRequestDetails.getUserData().remove(AUTO_INFLATE_BINARY_CONTENT_KEY);
 
 		IBinaryTarget target = findAttachmentForRequest(resource, path, theRequestDetails);
 
 		String requestContentType = theServletRequest.getContentType();
-		if (isBlank(requestContentType)) {
-			throw new InvalidRequestException(Msg.code(1333) + "No content-target supplied");
-		}
-		if (EncodingEnum.forContentTypeStrict(requestContentType) != null) {
-			throw new InvalidRequestException(
-					Msg.code(1334) + "This operation is for binary content, got: " + requestContentType);
-		}
+		validateRequestContentType(requestContentType);
 
 		long size = theServletRequest.getContentLength();
 		ourLog.trace("Request specified content length: {}", size);
 
 		String blobId = null;
+		StoredDetails storedDetails = null;
 		byte[] bytes = theRequestDetails.loadRequestContents();
+		String hash = null;
 
 		if (size > 0 && myBinaryStorageSvc != null) {
-			if (bytes == null || bytes.length == 0) {
-				throw new IllegalStateException(
-						Msg.code(2073)
-								+ "Input stream is empty! Ensure that you are uploading data, and if so, ensure that no interceptors are in use that may be consuming the input stream");
-			}
+			validateBinaryContent(bytes);
+
 			if (myBinaryStorageSvc.shouldStoreBinaryContent(size, theResourceId, requestContentType)) {
-				StoredDetails storedDetails = myBinaryStorageSvc.storeBinaryContent(
-						theResourceId, null, requestContentType, new ByteArrayInputStream(bytes), theRequestDetails);
-				size = storedDetails.getBytes();
-				blobId = storedDetails.getBinaryContentId();
-				Validate.notBlank(blobId, "BinaryStorageSvc returned a null blob ID"); // should not happen
-				Validate.isTrue(size == theServletRequest.getContentLength(), "Unexpected stored size"); // Sanity check
+				hash = getBinaryContentHash(bytes);
+				storedDetails = storeBinaryContentIfRequired(
+						theResourceId, theRequestDetails, theServletRequest, target, hash, bytes, requestContentType);
 			}
+		}
+
+		if (storedDetails != null) {
+			size = storedDetails.getBytes();
+			blobId = storedDetails.getBinaryContentId();
 		}
 
 		if (blobId == null) {
@@ -227,6 +231,7 @@ public class BinaryAccessProvider {
 			target.setData(bytes);
 		} else {
 			replaceDataWithExtension(target, blobId);
+			addHashExtension(target, hash);
 		}
 
 		target.setContentType(requestContentType);
@@ -239,20 +244,103 @@ public class BinaryAccessProvider {
 		return outcome.getResource();
 	}
 
+	/**
+	 * This method checks if the given binary content (based on its SHA-256 hash) is already stored in previous
+	 * resource version. If it is, it reuses the existing attachment ID to avoid saving the same content again.
+	 * If it's not found, it stores the new content and returns the newly generated attachment ID.
+	 */
+	private StoredDetails storeBinaryContentIfRequired(
+			IIdType theResourceId,
+			ServletRequestDetails theRequestDetails,
+			HttpServletRequest theServletRequest,
+			IBinaryTarget theTarget,
+			String theBinaryContentHash,
+			byte[] theBinaryContent,
+			String theRequestContentType)
+			throws IOException {
+		StoredDetails storedDetails;
+		String existingHash = theTarget.getHashExtension().orElse(null);
+		String existingAttachmentId = theTarget.getAttachmentId().orElse(null);
+
+		boolean isNoOp = existingAttachmentId != null && theBinaryContentHash.equals(existingHash);
+		if (isNoOp) {
+			// input binary content is the same as existing binary content, reuse existing binaryId
+			storedDetails = new StoredDetails();
+			storedDetails.setHash(theBinaryContentHash);
+			storedDetails.setBinaryContentId(existingAttachmentId);
+			storedDetails.setBytes(theBinaryContent.length);
+		} else {
+			// there is no existing binary content or content is different, store new content in binary storage
+			storedDetails = storeBinaryContent(
+					theResourceId, theRequestDetails, theServletRequest, theRequestContentType, theBinaryContent);
+		}
+		return storedDetails;
+	}
+
+	private void validateBinaryContent(byte[] theBinaryContent) {
+		if (theBinaryContent == null || theBinaryContent.length == 0) {
+			throw new IllegalStateException(
+					Msg.code(2073)
+							+ "Input stream is empty! Ensure that you are uploading data, and if so, ensure that no interceptors are in use that may be consuming the input stream");
+		}
+	}
+
+	private void validateRequestContentType(String theRequestContentType) {
+		if (isBlank(theRequestContentType)) {
+			throw new InvalidRequestException(Msg.code(1333) + "No content-target supplied");
+		}
+		if (EncodingEnum.forContentTypeStrict(theRequestContentType) != null) {
+			throw new InvalidRequestException(
+					Msg.code(1334) + "This operation is for binary content, got: " + theRequestContentType);
+		}
+	}
+
+	private StoredDetails storeBinaryContent(
+			IIdType theResourceId,
+			ServletRequestDetails theRequestDetails,
+			HttpServletRequest theServletRequest,
+			String theRequestContentType,
+			byte[] theBinaryContent)
+			throws IOException {
+		InputStream inputStream = new ByteArrayInputStream(theBinaryContent);
+		StoredDetails storedDetails = myBinaryStorageSvc.storeBinaryContent(
+				theResourceId, null, theRequestContentType, inputStream, theRequestDetails);
+		Validate.notBlank(
+				storedDetails.getBinaryContentId(), "BinaryStorageSvc returned a null blob ID"); // should not happen
+		Validate.isTrue(
+				storedDetails.getBytes() == theServletRequest.getContentLength(),
+				"Unexpected stored size"); // Sanity check
+		return storedDetails;
+	}
+
+	public String getBinaryContentHash(byte[] binaryContent) {
+		return SHA_256.hashBytes(binaryContent).toString();
+	}
+
 	public void replaceDataWithExtension(IBinaryTarget theTarget, String theBlobId) {
-		theTarget
-				.getTarget()
-				.getExtension()
-				.removeIf(t -> HapiExtensions.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()));
+		removeExtensionFromBinaryTarget(theTarget, HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 		theTarget.setData(null);
 
+		addExtensionToBinaryTarget(theTarget, HapiExtensions.EXT_EXTERNALIZED_BINARY_ID, theBlobId);
+	}
+
+	public void addHashExtension(IBinaryTarget theTarget, String theHash) {
+		removeExtensionFromBinaryTarget(theTarget, HapiExtensions.EXT_EXTERNALIZED_BINARY_HASH_SHA_256);
+		addExtensionToBinaryTarget(theTarget, HapiExtensions.EXT_EXTERNALIZED_BINARY_HASH_SHA_256, theHash);
+	}
+
+	private void removeExtensionFromBinaryTarget(IBinaryTarget theTarget, String theExtension) {
+		theTarget.getTarget().getExtension().removeIf(t -> theExtension.equals(t.getUrl()));
+	}
+
+	private void addExtensionToBinaryTarget(IBinaryTarget theTarget, String theExtension, String theValue) {
 		IBaseExtension<?, ?> ext = theTarget.getTarget().addExtension();
-		ext.setUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
+		ext.setUrl(theExtension);
 		ext.setUserData(JpaConstants.EXTENSION_EXT_SYSTEMDEFINED, Boolean.TRUE);
-		IPrimitiveType<String> blobIdString =
+		IPrimitiveType<String> valueString =
 				(IPrimitiveType<String>) myCtx.getElementDefinition("string").newInstance();
-		blobIdString.setValueAsString(theBlobId);
-		ext.setValue(blobIdString);
+		valueString.setValueAsString(theValue);
+		ext.setValue(valueString);
 	}
 
 	@Nonnull

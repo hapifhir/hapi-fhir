@@ -410,8 +410,10 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	}
 
-	@Test
-	public void testUpdate_withSameBinaryContent_isNoOp() {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testUpdate_withSameBinaryContent_isNoOp(boolean theIsAllowAutoInflateBinaries) {
+		myBinaryStorageInterceptor.setAllowAutoInflateBinaries(theIsAllowAutoInflateBinaries);
 		// Create a resource with a big enough docRef
 		DocumentReference docRef = new DocumentReference();
 		addDocumentAttachmentData(docRef, SOME_BYTES);
@@ -436,13 +438,16 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		validateContentExternalized(outcome);
 
 		// Now read it back
+		myBinaryStorageInterceptor.setAllowAutoInflateBinaries(true);
 		DocumentReference output = myDocumentReferenceDao.read(id.withVersion("1"), mySrd);
 		assertEquals("application/octet-stream", output.getContentFirstRep().getAttachment().getContentType());
 		assertThat(output.getContentFirstRep().getAttachment().getData()).containsExactly(SOME_BYTES);
 	}
 
-	@Test
-	public void testUpdate_withSameBinaryContent_reuseBinaryId() {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testUpdate_withSameBinaryContent_reuseBinaryId(boolean theIsAllowAutoInflateBinaries) {
+		myBinaryStorageInterceptor.setAllowAutoInflateBinaries(theIsAllowAutoInflateBinaries);
 		// Create a resource with a big enough docRef
 		DocumentReference docRef = new DocumentReference();
 		addDocumentAttachmentData(docRef, SOME_BYTES);
@@ -472,6 +477,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		assertEquals(contentHash, contentHashV2);
 
 		// Now read it back
+		myBinaryStorageInterceptor.setAllowAutoInflateBinaries(true);
 		DocumentReference output = myDocumentReferenceDao.read(id.withVersion("2"), mySrd);
 		assertEquals("application/octet-stream", output.getContentFirstRep().getAttachment().getContentType());
 		assertThat(output.getContentFirstRep().getAttachment().getData()).containsExactly(SOME_BYTES);
