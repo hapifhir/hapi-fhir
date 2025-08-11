@@ -562,6 +562,8 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		validateContentExternalized(outcome);
 		String binaryId = getExtensionByUrl(docRef, HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 		assertThat(binaryId).isNotBlank();
+		String hash = getExtensionByUrl(docRef, HapiExtensions.EXT_EXTERNALIZED_BINARY_HASH_SHA_256);
+		assertThat(hash).isNotBlank();
 
 		// Now update
 		docRef = new DocumentReference();

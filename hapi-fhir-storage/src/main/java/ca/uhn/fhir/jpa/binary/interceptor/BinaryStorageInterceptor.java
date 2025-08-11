@@ -422,9 +422,10 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
 	public void preShow(IPreResourceShowDetails theDetails, RequestDetails theRequestDetails) throws IOException {
 		boolean isAllowAutoInflateBinaries = isAllowAutoInflateBinaries();
+		// Override isAllowAutoInflateBinaries setting if AUTO_INFLATE_BINARY_CONTENT flag is present in userData
 		if (theRequestDetails.getUserData().containsKey(AUTO_INFLATE_BINARY_CONTENT_KEY)) {
 			isAllowAutoInflateBinaries =
-					(Boolean) theRequestDetails.getUserData().get(AUTO_INFLATE_BINARY_CONTENT_KEY);
+					Boolean.TRUE.equals(theRequestDetails.getUserData().get(AUTO_INFLATE_BINARY_CONTENT_KEY));
 		}
 		if (!isAllowAutoInflateBinaries) {
 			return;
