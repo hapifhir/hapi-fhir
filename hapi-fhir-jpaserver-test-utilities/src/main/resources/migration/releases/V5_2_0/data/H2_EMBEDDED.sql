@@ -17,11 +17,11 @@ INSERT INTO MPI_LINK (
 ) VALUES (
    1,
    '2023-04-05 15:16:26.43',
-   1,
+   true,
    'PATIENT',
    0,
    2,
-   1,
+   true,
    1906,
    1.0,
    1905,
