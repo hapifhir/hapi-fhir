@@ -589,7 +589,7 @@ public class SearchParamExtractorService {
 	}
 
 	private void extractResourceLinks(
-			@Nonnull RequestPartitionId theRequestPartitionId,
+			RequestPartitionId theRequestPartitionId,
 			ResourceIndexedSearchParams theExistingParams,
 			ResourceIndexedSearchParams theNewParams,
 			ResourceTable theEntity,
@@ -940,7 +940,7 @@ public class SearchParamExtractorService {
 
 	@SuppressWarnings("unchecked")
 	private ResourceLink resolveTargetAndCreateResourceLinkOrReturnNull(
-			@Nonnull RequestPartitionId theRequestPartitionId,
+			RequestPartitionId theRequestPartitionId,
 			String theSourceResourceName,
 			PathAndRef thePathAndRef,
 			ResourceTable theEntity,

@@ -97,6 +97,7 @@ import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
@@ -104,6 +105,7 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -569,6 +571,17 @@ public abstract class BaseJpaTest extends BaseTest {
 		runInTransaction(() -> {
 			ourLog.info("Package Versions:\n * {}", myPackageVersionDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
+	}
+
+	protected void logAllResourcesOfType(String type) {
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(type);
+		IBundleProvider allResources = dao.search(SearchParameterMap.newSynchronous().setLoadSynchronousUpTo(100), newSrd());
+		List<IBaseResource> resources = allResources.getAllResources();
+		IParser parser = myFhirContext.newJsonParser();
+		for (int i = 0; i < resources.size(); i++) {
+			IBaseResource next = resources.get(i);
+			ourLog.info("{} #{}:\n{}", type, i, parser.setPrettyPrint(true).encodeResourceToString(next));
+		}
 	}
 
 	protected int countAllMdmLinks() {

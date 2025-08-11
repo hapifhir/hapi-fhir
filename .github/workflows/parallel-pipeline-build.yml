@@ -26,9 +26,26 @@ jobs:
           java-version: '17'
           cache-path: $HOME/.m2/repository
 
+  checkstyle:
+    runs-on: ubuntu-latest
+    needs: build-cache
+    continue-on-error: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Checkstyle Validation
+        uses: ./.github/actions/checkstyle-validation
+        with:
+          java-version: '17'
+          maven-cache-key: ${{ github.ref_name }}-maven-${{ hashFiles('**/pom.xml') }}
+          hapi-cache-key: ${{ github.ref_name }}-hapi-${{ github.run_id }}
+
   generate-module-list:
     name: Generate List of Modules to Build
     runs-on: ubuntu-latest
+    needs: checkstyle
+    if: always()
     outputs:
       modules_list: ${{ steps.format-modules.outputs.modules_list }}
     steps:
@@ -94,7 +111,7 @@ jobs:
   final-result:
     if: ${{ always() }}
     runs-on: ubuntu-latest
-    needs: [ assemble-test-reports ]
+    needs: [ assemble-test-reports, checkstyle ]
     steps:
       - run: exit 1
         if: >-

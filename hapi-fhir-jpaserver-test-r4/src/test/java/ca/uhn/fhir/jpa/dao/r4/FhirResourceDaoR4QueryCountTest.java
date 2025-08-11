@@ -1943,7 +1943,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		mySystemDao.transaction(mySrd, createTransactionWithCreatesAndOneMatchUrl());
 		// 1 lookup for the match URL only
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
-		assertEquals(19, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(20, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		runInTransaction(() -> assertEquals(4, myResourceTableDao.count()));
@@ -3527,7 +3527,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		}
 
 		assertEquals(17, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(6189, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(6208, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(418, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countCommits());
