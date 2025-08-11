@@ -33,12 +33,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-abstract class BaseRule implements IAuthRule {
-	private String myName;
+public abstract class BaseRule implements IAuthRule {
+	private final String myName;
 	private PolicyEnum myMode;
 	private List<IAuthRuleTester> myTesters;
 
-	BaseRule(String theRuleName) {
+	protected BaseRule(String theRuleName) {
 		myName = theRuleName;
 	}
 
