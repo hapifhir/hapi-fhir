@@ -506,7 +506,7 @@ public class FhirPatchApplyR4Test {
 
 		//When: We apply the patch, expect an InvalidRequestException
 		InvalidRequestException ex = assertThrows(InvalidRequestException.class, () -> svc.apply(patient, patch));
-		String expectedMessage = String.format("HAPI-2617: No element matches the specified path: %s", thePath);
+		String expectedMessage = String.format("HAPI-2716: No element matches the specified path: %s", thePath);
 		assertThat(ex.getMessage()).isEqualTo(expectedMessage);
 
 		assertThat(patient.getIdentifier()).hasSize(2);
