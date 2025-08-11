@@ -341,10 +341,10 @@ public class BulkDataExportProvider {
 			} else if (value instanceof IBaseReference patientReference) {
 				return patientReference.getReferenceElement();
 			} else {
-				throw new InvalidRequestException("Unsupported type.");
+				throw new InvalidRequestException(Msg.code(2763) + "Unsupported type.");
 			}
 		} catch (Exception e) {
-			throw new InvalidRequestException("Invalid patient parameter.", e);
+			throw new InvalidRequestException(Msg.code(2779) + "Invalid patient parameter.", e);
 		}
 	}
 
