@@ -772,6 +772,20 @@ public class ValidationSupportChain implements IValidationSupport {
 		return value.getValue();
 	}
 
+	private boolean canValidateCodeSystem(
+			ValidationSupportContext theValidationSupportContext,
+			IValidationSupport theValidationSupport,
+			String theCodeSystemUrl) {
+		IsCanValidateCodeSystemKey key = new IsCanValidateCodeSystemKey(theValidationSupport, theCodeSystemUrl);
+		CacheValue<Boolean> value = getFromCache(key);
+		if (value == null) {
+			value = new CacheValue<>(
+					theValidationSupport.canValidateCodeSystem(theValidationSupportContext, theCodeSystemUrl));
+			putInCache(key, value);
+		}
+		return value.getValue();
+	}
+
 	@Override
 	public CodeValidationResult validateCode(
 			@Nonnull ValidationSupportContext theValidationSupportContext,
@@ -787,7 +801,7 @@ public class ValidationSupportChain implements IValidationSupport {
 			retVal = CacheValue.empty();
 
 			for (IValidationSupport next : myChain) {
-				if ((isBlank(theValueSetUrl) && isCodeSystemSupported(theValidationSupportContext, next, theCodeSystem))
+				if ((isBlank(theValueSetUrl) && canValidateCodeSystem(theValidationSupportContext, next, theCodeSystem))
 						|| (isNotBlank(theValueSetUrl)
 								&& isValueSetSupported(theValidationSupportContext, next, theValueSetUrl))) {
 					CodeValidationResult outcome = next.validateCode(
@@ -1224,6 +1238,33 @@ public class ValidationSupportChain implements IValidationSupport {
 			myValidationSupport = theValidationSupport;
 			myCodeSystemUrl = theCodeSystemUrl;
 			myHashCode = Objects.hash("IsCodeSystemSupported", theValidationSupport, myCodeSystemUrl);
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO) return true;
+			if (!(theO instanceof IsCodeSystemSupportedKey)) return false;
+			IsCodeSystemSupportedKey that = (IsCodeSystemSupportedKey) theO;
+			return myValidationSupport == that.myValidationSupport
+					&& Objects.equals(myCodeSystemUrl, that.myCodeSystemUrl);
+		}
+
+		@Override
+		public int hashCode() {
+			return myHashCode;
+		}
+	}
+
+	static class IsCanValidateCodeSystemKey extends BaseKey<Boolean> {
+
+		private final String myCodeSystemUrl;
+		private final IValidationSupport myValidationSupport;
+		private final int myHashCode;
+
+		private IsCanValidateCodeSystemKey(IValidationSupport theValidationSupport, String theCodeSystemUrl) {
+			myValidationSupport = theValidationSupport;
+			myCodeSystemUrl = theCodeSystemUrl;
+			myHashCode = Objects.hash("IsCanValidateCodeSystemKey", theValidationSupport, myCodeSystemUrl);
 		}
 
 		@Override

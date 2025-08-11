@@ -255,6 +255,10 @@ public interface IValidationSupport {
 		return false;
 	}
 
+	default boolean canValidateCodeSystem(ValidationSupportContext theValidationSupportContext, String theSystem) {
+		return isCodeSystemSupported(theValidationSupportContext, theSystem);
+	}
+
 	/**
 	 * Returns <code>true</code> if a Remote Terminology Service is currently configured
 	 *

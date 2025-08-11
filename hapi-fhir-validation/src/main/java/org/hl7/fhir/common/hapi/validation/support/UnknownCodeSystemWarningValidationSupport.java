@@ -40,23 +40,20 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 
 	@Override
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
-		return true;
+		// return true;
+		return false;
 	}
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
-		return canValidateCodeSystem(theValidationSupportContext, theSystem);
+		// return canValidateCodeSystem(theValidationSupportContext, theSystem);
+		return false;
 	}
 
 	@Nullable
 	@Override
 	public LookupCodeResult lookupCode(
 			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
-		// filters out error/fatal
-		if (canValidateCodeSystem(theValidationSupportContext, theLookupCodeRequest.getSystem())) {
-			return new LookupCodeResult().setFound(true);
-		}
-
 		return null;
 	}
 
@@ -68,7 +65,6 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 			String theCode,
 			String theDisplay,
 			String theValueSetUrl) {
-		// filters out error/fatal
 		if (!canValidateCodeSystem(theValidationSupportContext, theCodeSystem)) {
 			return null;
 		}
@@ -82,17 +78,17 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 
 		// For information level, we just strip out the severity+message entirely
 		// so that nothing appears in the validation result
-		if (myNonExistentCodeSystemSeverity == IssueSeverity.INFORMATION) {
+/*		if (myNonExistentCodeSystemSeverity == IssueSeverity.INFORMATION) {
 			result.setCode(theCode);
 			result.setSeverity(null);
 			result.setMessage(null);
-		} else {
+		} else {*/
 			result.addIssue(new CodeValidationIssue(
 					theMessage,
 					myNonExistentCodeSystemSeverity,
 					CodeValidationIssueCode.NOT_FOUND,
 					CodeValidationIssueCoding.NOT_FOUND));
-		}
+		//}
 
 		return result;
 	}
@@ -106,6 +102,7 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 			String theCode,
 			String theDisplay,
 			@Nonnull IBaseResource theValueSet) {
+		// return null;
 		if (!canValidateCodeSystem(theValidationSupportContext, theCodeSystem)) {
 			return null;
 		}
@@ -143,7 +140,9 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 	 * @param theCodeSystem
 	 * @return
 	 */
-	private boolean canValidateCodeSystem(ValidationSupportContext theValidationSupportContext, String theCodeSystem) {
+	@Override
+	public boolean canValidateCodeSystem(ValidationSupportContext theValidationSupportContext, String theCodeSystem) {
+		// EMRE: with the change code this is always skipped
 		if (!allowNonExistentCodeSystems()) {
 			return false;
 		}
