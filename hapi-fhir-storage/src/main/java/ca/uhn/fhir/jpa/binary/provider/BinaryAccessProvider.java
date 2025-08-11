@@ -194,9 +194,11 @@ public class BinaryAccessProvider {
 		String path = validateResourceTypeAndPath(theResourceId, thePath);
 		IFhirResourceDao dao = getDaoForRequest(theResourceId);
 		// disable auto-inflation temporarily as binary content will be replaced anyway
-		theRequestDetails.getUserData().put(AUTO_INFLATE_BINARY_CONTENT_KEY, Boolean.FALSE);
+		Optional.ofNullable(theRequestDetails)
+				.ifPresent(rd -> rd.getUserData().put(AUTO_INFLATE_BINARY_CONTENT_KEY, Boolean.FALSE));
 		IBaseResource resource = dao.read(theResourceId, theRequestDetails, false);
-		theRequestDetails.getUserData().remove(AUTO_INFLATE_BINARY_CONTENT_KEY);
+		Optional.ofNullable(theRequestDetails)
+				.ifPresent(rd -> theRequestDetails.getUserData().remove(AUTO_INFLATE_BINARY_CONTENT_KEY));
 
 		IBinaryTarget target = findAttachmentForRequest(resource, path, theRequestDetails);
 
