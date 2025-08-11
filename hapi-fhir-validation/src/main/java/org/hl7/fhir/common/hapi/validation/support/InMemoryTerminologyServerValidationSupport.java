@@ -108,7 +108,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		myIssueSeverityForCodeDisplayMismatch = theIssueSeverityForCodeDisplayMismatch;
 	}
 
-
 	/**
 	 * This setting controls the validation issue severity to report when a code validation
 	 * finds that the CodeSystem being validated is not known.
@@ -128,10 +127,8 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	 * @param theIssueSeverityForUnknownCodeSystem The severity. Must not be {@literal null}.
 	 * @since 8.6.0
 	 */
-	public void setIssueSeverityForUnknownCodeSystem(
-			@Nonnull IssueSeverity theIssueSeverityForUnknownCodeSystem) {
-		Validate.notNull(
-			theIssueSeverityForUnknownCodeSystem, "theIssueSeverityForUnknownCodeSystem must not be null");
+	public void setIssueSeverityForUnknownCodeSystem(@Nonnull IssueSeverity theIssueSeverityForUnknownCodeSystem) {
+		Validate.notNull(theIssueSeverityForUnknownCodeSystem, "theIssueSeverityForUnknownCodeSystem must not be null");
 		myIssueSeverityForUnknownCodeSystem = theIssueSeverityForUnknownCodeSystem;
 	}
 
@@ -1025,7 +1022,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 						failureMessage = getFailureMessageForMissingOrUnusableCodeSystem(
 								includeOrExcludeSystemResource, loadedCodeSystemUrl);
 					} else {
-						 failureMessage = new MessageWithSeverity("Unable to expand value set", IssueSeverity.ERROR);
+						failureMessage = new MessageWithSeverity("Unable to expand value set", IssueSeverity.ERROR);
 					}
 				}
 
@@ -1135,7 +1132,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			};
 		}
 	}
-
 
 	// create a record for a String message and an IssueSeverity
 	private record MessageWithSeverity(String message, IssueSeverity severity) {}

@@ -78,17 +78,17 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 
 		// For information level, we just strip out the severity+message entirely
 		// so that nothing appears in the validation result
-/*		if (myNonExistentCodeSystemSeverity == IssueSeverity.INFORMATION) {
+		/*		if (myNonExistentCodeSystemSeverity == IssueSeverity.INFORMATION) {
 			result.setCode(theCode);
 			result.setSeverity(null);
 			result.setMessage(null);
 		} else {*/
-			result.addIssue(new CodeValidationIssue(
-					theMessage,
-					myNonExistentCodeSystemSeverity,
-					CodeValidationIssueCode.NOT_FOUND,
-					CodeValidationIssueCoding.NOT_FOUND));
-		//}
+		result.addIssue(new CodeValidationIssue(
+				theMessage,
+				myNonExistentCodeSystemSeverity,
+				CodeValidationIssueCode.NOT_FOUND,
+				CodeValidationIssueCoding.NOT_FOUND));
+		// }
 
 		return result;
 	}

@@ -906,8 +906,8 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 						result.addIssue(codeValidationIssue);
 					}
 				}
-		/*		if (result.getSeverity() == null || codeSystemResult.getSeverity().ordinal() < result.getSeverity().ordinal()) {
-				    result.setSeverity(codeSystemResult.getSeverity());
+				/*		if (result.getSeverity() == null || codeSystemResult.getSeverity().ordinal() < result.getSeverity().ordinal()) {
+					result.setSeverity(codeSystemResult.getSeverity());
 				}*/
 			}
 		}

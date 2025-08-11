@@ -891,7 +891,8 @@ public class JpaConfig {
 	@Bean
 	public UnknownCodeSystemWarningValidationSupport unknownCodeSystemWarningValidationSupport(
 			FhirContext theFhirContext, JpaStorageSettings theStorageSettings) {
-		UnknownCodeSystemWarningValidationSupport support = new UnknownCodeSystemWarningValidationSupport(theFhirContext);
+		UnknownCodeSystemWarningValidationSupport support =
+				new UnknownCodeSystemWarningValidationSupport(theFhirContext);
 		support.setNonExistentCodeSystemSeverity(theStorageSettings.getIssueSeverityForUnknownCodeSystem());
 		return support;
 	}
