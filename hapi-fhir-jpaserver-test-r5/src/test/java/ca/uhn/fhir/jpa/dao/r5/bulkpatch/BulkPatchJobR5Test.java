@@ -22,12 +22,18 @@ import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.UriType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BulkPatchJobR5Test extends BaseJpaR5Test {
+
+	@AfterEach
+	public void after() {
+		myInterceptorRegistry.unregisterAllAnonymousInterceptors();
+	}
 
 	@Test
 	public void testBulkPatch() {
@@ -105,17 +111,22 @@ public class BulkPatchJobR5Test extends BaseJpaR5Test {
 
 		JobInstance instance = myJobCoordinator.getInstance(jobId);
 		assertEquals(StatusEnum.FAILED, instance.getStatus());
-		assertEquals("Bulk modification failed. See report for details.", instance.getErrorMessage());
+		assertEquals("Bulk Patch had 1 failure(s). See report for details.", instance.getErrorMessage());
 		BulkModifyResourcesResultsJson report = JsonUtil.deserialize(instance.getReport(), BulkModifyResourcesResultsJson.class);
 		ourLog.info("Report: {}", report.getReport());
 
 		assertThat(report.getReport()).containsSubsequence(
-			"Total Resources Changed   : 3 ",
-			"Total Resources Unchanged : 1 ",
-			"Total Failed Changes      : 0 "
+			"Bulk Patch Report",
+			"Total Resources Changed   : 2 ",
+			"Total Resources Unchanged : 0 ",
+			"Total Failed Changes      : 1 ",
+			"ResourceType[Patient]",
+			"Changed   : 2",
+			"Failures  : 1",
+			"Failures:",
+			"Patient/B/_history/1: Simulated validation failed message"
 		);
 	}
-
 
 
 	private String initiateAllPatientJobAndAwaitCompletion(Parameters patchDocument) {
@@ -138,6 +149,7 @@ public class BulkPatchJobR5Test extends BaseJpaR5Test {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(BulkPatchJobAppCtx.JOB_ID);
 		startRequest.setParameters(jobParameters);
+		startRequest.setUseCache(false);
 		String jobId = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest).getInstanceId();
 		return jobId;
 	}

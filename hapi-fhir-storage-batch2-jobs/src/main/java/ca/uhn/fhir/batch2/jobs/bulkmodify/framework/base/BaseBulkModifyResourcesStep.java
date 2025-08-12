@@ -49,18 +49,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobParameters, C> implements IJobStepWorker<PT, TypedPidAndVersionListWorkChunkJson, BulkModifyResourcesChunkOutcomeJson> {
-	// Future: We should make this configurable
+public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobParameters, C>
+		implements IJobStepWorker<PT, TypedPidAndVersionListWorkChunkJson, BulkModifyResourcesChunkOutcomeJson> {
 	public static final int MAX_RETRIES = 2;
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseBulkModifyResourcesStep.class);
+
 	@Autowired
 	private IHapiTransactionService myTransactionService;
+
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
 	@Autowired
 	private IFhirSystemDao mySystemDao;
+
 	@Autowired
 	private IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
+
 	@Autowired
 	private FhirContext myFhirContext;
 
@@ -71,15 +76,18 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		super();
 	}
 
-
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails, @Nonnull IJobDataSink<BulkModifyResourcesChunkOutcomeJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<BulkModifyResourcesChunkOutcomeJson> theDataSink)
+			throws JobExecutionFailedException {
 		State state = new State();
 
 		List<TypedPidAndVersionJson> pids = theStepExecutionDetails.getData().getTypedPidAndVersions();
 		PT jobParameters = theStepExecutionDetails.getParameters();
-		RequestPartitionId requestPartitionId = theStepExecutionDetails.getData().getRequestPartitionId();
+		RequestPartitionId requestPartitionId =
+				theStepExecutionDetails.getData().getRequestPartitionId();
 
 		// Try to update the whole chunk in a single database transaction for fast performance
 		performBatch(jobParameters, state, pids, requestPartitionId, false);
@@ -109,14 +117,21 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		return RunOutcome.SUCCESS;
 	}
 
-	private void performBatch(PT jobParameters, State theState, List<TypedPidAndVersionJson> thePids, RequestPartitionId theRequestPartitionId, boolean theFinalRetry) {
+	private void performBatch(
+			PT jobParameters,
+			State theState,
+			List<TypedPidAndVersionJson> thePids,
+			RequestPartitionId theRequestPartitionId,
+			boolean theFinalRetry) {
 		HapiTransactionService.noTransactionAllowed();
 
+		final TransactionDetails transactionDetails = new TransactionDetails();
 		try {
 
 			myTransactionService
-				.withSystemRequestOnPartition(theRequestPartitionId)
-				.execute(() -> performBatchInTransaction(jobParameters, theState, thePids));
+					.withSystemRequestOnPartition(theRequestPartitionId)
+					.withTransactionDetails(transactionDetails)
+					.execute(() -> performBatchInTransaction(jobParameters, theState, thePids, transactionDetails));
 
 			// Storage transaction succeeded
 			theState.movePendingToSaved();
@@ -136,10 +151,13 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		if (theState.getJobFailure() != null) {
 			throw theState.getJobFailure();
 		}
-
 	}
 
-	private void performBatchInTransaction(PT theJobParameters, State theState, List<TypedPidAndVersionJson> thePids) {
+	private void performBatchInTransaction(
+			PT theJobParameters,
+			State theState,
+			List<TypedPidAndVersionJson> thePids,
+			TransactionDetails theTransactionDetails) {
 		HapiTransactionService.requireTransaction();
 
 		// Fetch all the resources in the chunk
@@ -155,10 +173,11 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		}
 
 		// Store the modified resources to the DB
-		storeResourcesInTransaction(modificationContext, theState);
+		storeResourcesInTransaction(modificationContext, theState, theTransactionDetails);
 	}
 
-	private void performBatchInIndividualTransactions(PT theJobParameters, State theState, RequestPartitionId theRequestPartitionId, boolean theFinalRetry) {
+	private void performBatchInIndividualTransactions(
+			PT theJobParameters, State theState, RequestPartitionId theRequestPartitionId, boolean theFinalRetry) {
 		List<TypedPidAndVersionJson> pids = theState.getPidsToModifyAndClear();
 
 		for (TypedPidAndVersionJson nextPid : pids) {
@@ -170,15 +189,14 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	private List<PidAndResource> fetchResourcesInTransaction(List<TypedPidAndVersionJson> thePids) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
-		Multimap<TypedPidJson, TypedPidAndVersionJson> pidsToVersions = MultimapBuilder.hashKeys().arrayListValues().build();
+		Multimap<TypedPidJson, TypedPidAndVersionJson> pidsToVersions =
+				MultimapBuilder.hashKeys().arrayListValues().build();
 		for (TypedPidAndVersionJson pidAndVersion : thePids) {
 			pidsToVersions.put(pidAndVersion.toTypedPid(), pidAndVersion);
 		}
 		List<TypedPidJson> typedPids = List.copyOf(pidsToVersions.keySet());
-		List<? extends IResourcePersistentId<?>> typedPidsAsPersistentIds = typedPids
-			.stream()
-			.map(t -> t.toPersistentId(myIdHelperService))
-			.toList();
+		List<? extends IResourcePersistentId<?>> typedPidsAsPersistentIds =
+				typedPids.stream().map(t -> t.toPersistentId(myIdHelperService)).toList();
 
 		mySystemDao.preFetchResources(typedPidsAsPersistentIds, true);
 
@@ -193,7 +211,8 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			Collection<TypedPidAndVersionJson> typedVersionedPids = pidsToVersions.get(typedPid);
 			for (TypedPidAndVersionJson typedVersionedPid : typedVersionedPids) {
 				Long nextVersion = typedVersionedPid.getVersionId();
-				if (nextVersion == null || nextVersion.equals(resource.getIdElement().getVersionIdPartAsLong())) {
+				if (nextVersion == null
+						|| nextVersion.equals(resource.getIdElement().getVersionIdPartAsLong())) {
 					resources.add(new PidAndResource(typedVersionedPid, resource));
 				} else {
 					IIdType nextVersionedId = resource.getIdElement().withVersion(Long.toString(nextVersion));
@@ -215,7 +234,8 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	private C modifyResourcesInTransaction(State theState, PT theJobParameters, List<PidAndResource> resources) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
-		List<TypedPidAndVersionJson> pids = resources.stream().map(PidAndResource::pid).toList();
+		List<TypedPidAndVersionJson> pids =
+				resources.stream().map(PidAndResource::pid).toList();
 		C modificationContext = preModifyResources(theJobParameters, pids);
 
 		for (PidAndResource pidAndResource : resources) {
@@ -229,20 +249,26 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			HashingWriter preModificationHash = hashResource(resource);
 
 			ResourceModificationRequest modificationRequest = new ResourceModificationRequest(resource);
-			ResourceModificationResponse modificationResponse = modifyResource(theJobParameters, modificationContext, modificationRequest);
+			ResourceModificationResponse modificationResponse =
+					modifyResource(theJobParameters, modificationContext, modificationRequest);
 			if (modificationResponse == null) {
-				throw new JobExecutionFailedException(Msg.code(2782) + "Null response from Modification for Resource[" + resource.getIdElement() + "]");
+				throw new JobExecutionFailedException(Msg.code(2782) + "Null response from Modification for Resource["
+						+ resource.getIdElement() + "]");
 			}
 
 			IBaseResource updatedResource = modificationResponse.getResource();
 			if (!resourceType.equals(myFhirContext.getResourceType(updatedResource))) {
-				throw new JobExecutionFailedException(Msg.code(2782) + "Modification for Resource[" + resource.getIdElement() + "] returned wrong resource type, expected " + resourceType + " but was " + myFhirContext.getResourceType(updatedResource));
+				throw new JobExecutionFailedException(Msg.code(2782) + "Modification for Resource["
+						+ resource.getIdElement() + "] returned wrong resource type, expected " + resourceType
+						+ " but was " + myFhirContext.getResourceType(updatedResource));
 			}
 			if (!resourceId.equals(updatedResource.getIdElement().getIdPart())) {
-				throw new JobExecutionFailedException(Msg.code(2783) + "Modification for Resource[" + resourceType + "/" + resourceId + "] attempted to change the resource ID");
+				throw new JobExecutionFailedException(Msg.code(2783) + "Modification for Resource[" + resourceType + "/"
+						+ resourceId + "] attempted to change the resource ID");
 			}
 			if (!resourceVersion.equals(updatedResource.getIdElement().getVersionIdPart())) {
-				throw new JobExecutionFailedException(Msg.code(2784) + "Modification for Resource[" + resourceType + "/" + resourceId + "] attempted to change the resource version");
+				throw new JobExecutionFailedException(Msg.code(2784) + "Modification for Resource[" + resourceType + "/"
+						+ resourceId + "] attempted to change the resource version");
 			}
 
 			HashingWriter postModificationHash = hashResource(resource);
@@ -265,10 +291,9 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		}
 	}
 
-	private void storeResourcesInTransaction(C theModificationContext, State theState) {
+	private void storeResourcesInTransaction(
+			C theModificationContext, State theState, TransactionDetails theTransactionDetails) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
-
-		TransactionDetails transactionDetails = new TransactionDetails();
 
 		for (PidAndResource pidAndResource : theState.getChangedUnsavedResourcesAndMoveToPending()) {
 			IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(pidAndResource.resource());
@@ -276,8 +301,12 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			SystemRequestDetails requestDetails = new SystemRequestDetails();
 			requestDetails.setRewriteHistory(isRewriteHistory(theModificationContext, pidAndResource.resource()));
 
-			DaoMethodOutcome outcome = dao.update(pidAndResource.resource(), null, true, false, requestDetails, transactionDetails);
-			ourLog.debug("Storage for PID[{}] resulted in version: {}", pidAndResource.pid, outcome.getId().getVersionIdPart());
+			DaoMethodOutcome outcome =
+					dao.update(pidAndResource.resource(), null, true, false, requestDetails, theTransactionDetails);
+			ourLog.debug(
+					"Storage for PID[{}] resulted in version: {}",
+					pidAndResource.pid,
+					outcome.getId().getVersionIdPart());
 		}
 	}
 
@@ -310,7 +339,8 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	/**
 	 * This method is called once for each resource needing modification
 	 */
-	protected abstract ResourceModificationResponse modifyResource(PT theJobParameters, C theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest);
+	protected abstract ResourceModificationResponse modifyResource(
+			PT theJobParameters, C theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest);
 
 	@Nonnull
 	private static BulkModifyResourcesChunkOutcomeJson generateOutcome(State theState) {
@@ -333,7 +363,6 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 
 	private static class State {
 
-		private static final Logger ourLog = LoggerFactory.getLogger(State.class);
 		private final List<TypedPidAndVersionJson> myPidsToModify = new ArrayList<>();
 		private final Set<PidAndResource> myUnchangedResources = new HashSet<>();
 		private final Set<PidAndResource> myChangedUnsavedResources = new HashSet<>();
@@ -379,7 +408,8 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		public void addChangedSavedResources(Collection<PidAndResource> theResources) {
 			int previousSize = myChangedSavedResources.size();
 			myChangedSavedResources.addAll(theResources);
-			Validate.isTrue(myChangedSavedResources.size() == previousSize + theResources.size(), "Added duplicate resources");
+			Validate.isTrue(
+					myChangedSavedResources.size() == previousSize + theResources.size(), "Added duplicate resources");
 		}
 
 		public void addFailure(PidAndResource theResource, String theMessage) {
@@ -401,20 +431,14 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			Validate.isTrue(added, "%s is already present", theResource);
 		}
 
-		public void addPendingSavedResource(PidAndResource theResource) {
-			myPendingSavedResources.add(theResource);
-		}
-
 		public void movePendingToSaved() {
 			addChangedSavedResources(myPendingSavedResources);
 			myPendingSavedResources.clear();
 		}
 
 		public void movePendingBackToModificationList() {
-			List<TypedPidAndVersionJson> pids = myPendingSavedResources
-				.stream()
-				.map(PidAndResource::pid)
-				.toList();
+			List<TypedPidAndVersionJson> pids =
+					myPendingSavedResources.stream().map(PidAndResource::pid).toList();
 			myPendingSavedResources.clear();
 
 			myPidsToModify.addAll(pids);
@@ -448,14 +472,12 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		}
 	}
 
-	private record PidAndResource(TypedPidAndVersionJson pid, IBaseResource resource) {
-	}
+	private record PidAndResource(TypedPidAndVersionJson pid, IBaseResource resource) {}
 
 	@SuppressWarnings("UnstableApiUsage")
 	private class HashingWriter extends Writer {
 
 		private final Hasher myHasher = Hashing.goodFastHash(128).newHasher();
-
 
 		@Override
 		public void write(@Nonnull char[] cbuf, final int off, final int len) {
@@ -487,6 +509,4 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			return myHasher.hash().equals(thePostModificationHash.myHasher.hash());
 		}
 	}
-
-
 }

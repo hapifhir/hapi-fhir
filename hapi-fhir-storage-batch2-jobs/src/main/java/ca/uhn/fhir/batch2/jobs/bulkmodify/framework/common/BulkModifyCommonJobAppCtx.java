@@ -47,14 +47,8 @@ public class BulkModifyCommonJobAppCtx {
 	 * Step 4 is the actual modification step and is provided by the specific job definition
 	 */
 
-	/**
-	 * Step 5
+	/*
+	 * Step 5 is the report generation step
 	 */
-	@Bean("bulkModifyGenerateReportStep")
-	public BulkModifyGenerateReportStep generateReportStep() {
-		return new BulkModifyGenerateReportStep();
-	}
-
-
 
 }

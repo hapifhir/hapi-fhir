@@ -14,6 +14,6 @@
  * - Ability to save the output as bundles instead of writing directly to the resource tables
  * - a limit option
  * - add the ability for modification to delete resources
+ * - Make retry behaviour in BaseBulkModifyResourcesStep configurable
  */
 package ca.uhn.fhir.batch2.jobs.bulkmodify;
-

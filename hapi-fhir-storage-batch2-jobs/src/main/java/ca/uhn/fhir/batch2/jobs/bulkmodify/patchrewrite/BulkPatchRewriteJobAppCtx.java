@@ -2,8 +2,8 @@ package ca.uhn.fhir.batch2.jobs.bulkmodify.patchrewrite;
 
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyJobAppCtx;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyOrRewriteGenerateReportStep;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyCommonJobAppCtx;
-import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyGenerateReportStep;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.TypedPidToTypedPidAndVersionStep;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchModifyResourcesStep;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
@@ -17,7 +17,6 @@ import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
 
 @Configuration
 @Import({BulkModifyCommonJobAppCtx.class})
@@ -32,7 +31,8 @@ public class BulkPatchRewriteJobAppCtx extends BaseBulkModifyJobAppCtx<BulkPatch
 	/**
 	 * Constructor
 	 */
-	public BulkPatchRewriteJobAppCtx(IBatch2DaoSvc theBatch2DaoSvc, FhirContext theFhirContext, IDaoRegistry theDaoRegistry) {
+	public BulkPatchRewriteJobAppCtx(
+			IBatch2DaoSvc theBatch2DaoSvc, FhirContext theFhirContext, IDaoRegistry theDaoRegistry) {
 		myBatch2DaoSvc = theBatch2DaoSvc;
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
@@ -82,8 +82,8 @@ public class BulkPatchRewriteJobAppCtx extends BaseBulkModifyJobAppCtx<BulkPatch
 
 	@Bean("bulkModifyPatchRewriteGenerateReportStep")
 	@Override
-	public BulkModifyGenerateReportStep<BulkPatchRewriteJobParameters> generateReportStep() {
-		return new BulkModifyGenerateReportStep<>();
+	public BaseBulkModifyOrRewriteGenerateReportStep<BulkPatchRewriteJobParameters> generateReportStep() {
+		return new BulkPatchRewriteGenerateReportStep();
 	}
 
 	@Bean("bulkModifyPatchRewriteLoadIdsStep")
@@ -94,7 +94,9 @@ public class BulkPatchRewriteJobAppCtx extends BaseBulkModifyJobAppCtx<BulkPatch
 
 	@Bean("bulkModifyPatchRewriteExpandIdVersionsStep")
 	@Override
-	public IJobStepWorker<BulkPatchRewriteJobParameters, ResourceIdListWorkChunkJson, TypedPidAndVersionListWorkChunkJson> expandIdVersionsStep() {
+	public IJobStepWorker<
+					BulkPatchRewriteJobParameters, ResourceIdListWorkChunkJson, TypedPidAndVersionListWorkChunkJson>
+			expandIdVersionsStep() {
 		return new TypedPidToTypedPidAndVersionStep<>();
 	}
 
@@ -102,5 +104,4 @@ public class BulkPatchRewriteJobAppCtx extends BaseBulkModifyJobAppCtx<BulkPatch
 	public BulkPatchRewriteProvider bulkPatchRewriteProvider() {
 		return new BulkPatchRewriteProvider();
 	}
-
 }

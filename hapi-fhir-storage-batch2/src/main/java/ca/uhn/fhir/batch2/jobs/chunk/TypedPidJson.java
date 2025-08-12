@@ -130,7 +130,6 @@ public class TypedPidJson implements IModelJson, Comparable<TypedPidJson> {
 	}
 
 	public <T extends IResourcePersistentId<?>> T toPersistentId(IIdHelperService<T> theIdHelperService) {
-		return theIdHelperService.newPidFromStringIdAndResourceName(
-			getPartitionId(), getPid(), getResourceType());
+		return theIdHelperService.newPidFromStringIdAndResourceName(getPartitionId(), getPid(), getResourceType());
 	}
 }

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common;
+package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
 import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
@@ -7,7 +7,8 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.ReductionStepFailureException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyJobParameters;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesResultsJson;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.util.StopWatch;
 import jakarta.annotation.Nonnull;
@@ -24,7 +25,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
-public class BulkModifyGenerateReportStep<T extends BaseBulkModifyJobParameters> implements IReductionStepWorker<T, BulkModifyResourcesChunkOutcomeJson, BulkModifyResourcesResultsJson> {
+public abstract class BaseBulkModifyOrRewriteGenerateReportStep<PT extends BaseBulkModifyJobParameters>
+		implements IReductionStepWorker<PT, BulkModifyResourcesChunkOutcomeJson, BulkModifyResourcesResultsJson> {
 
 	private final Map<String, Integer> myResourceTypeToChangedCount = new HashMap<>();
 	private final Map<String, Integer> myResourceTypeToUnchangedCount = new HashMap<>();
@@ -34,13 +36,13 @@ public class BulkModifyGenerateReportStep<T extends BaseBulkModifyJobParameters>
 	private int myChangedCount = 0;
 	private int myUnchangedCount = 0;
 	private int myFailureCount = 0;
-	private boolean myFailureListForReportTruncated = false;
+	private int myFailureListForReportTruncated = 0;
 	private int myChunkRetryCount;
 	private int myResourceRetryCount;
 
 	@Nonnull
 	@Override
-	public ChunkOutcome consume(ChunkExecutionDetails<T, BulkModifyResourcesChunkOutcomeJson> theChunkDetails) {
+	public ChunkOutcome consume(ChunkExecutionDetails<PT, BulkModifyResourcesChunkOutcomeJson> theChunkDetails) {
 
 		BulkModifyResourcesChunkOutcomeJson data = theChunkDetails.getData();
 
@@ -52,11 +54,12 @@ public class BulkModifyGenerateReportStep<T extends BaseBulkModifyJobParameters>
 		myUnchangedCount += data.getUnchangedIds().size();
 		myFailureCount += data.getFailures().size();
 		myChunkRetryCount += data.getChunkRetryCount();
+		myResourceRetryCount += data.getResourceRetryCount();
 
 		for (Map.Entry<String, String> failure : data.getFailures().entrySet()) {
 			if (myIdToFailure.size() >= 100) {
-				myFailureListForReportTruncated = true;
-				break;
+				myFailureListForReportTruncated++;
+				continue;
 			}
 
 			myIdToFailure.put(failure.getKey(), failure.getValue());
@@ -67,7 +70,10 @@ public class BulkModifyGenerateReportStep<T extends BaseBulkModifyJobParameters>
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<T, BulkModifyResourcesChunkOutcomeJson> theStepExecutionDetails, @NotNull IJobDataSink<BulkModifyResourcesResultsJson> theDataSink) throws JobExecutionFailedException, ReductionStepFailureException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<PT, BulkModifyResourcesChunkOutcomeJson> theStepExecutionDetails,
+			@NotNull IJobDataSink<BulkModifyResourcesResultsJson> theDataSink)
+			throws JobExecutionFailedException, ReductionStepFailureException {
 		Date startTime = theStepExecutionDetails.getInstance().getStartTime();
 		long elapsedMillis = System.currentTimeMillis() - startTime.getTime();
 		long changedPerSecond = (long) StopWatch.getThroughput(myChangedCount, elapsedMillis, TimeUnit.SECONDS);
@@ -75,50 +81,54 @@ public class BulkModifyGenerateReportStep<T extends BaseBulkModifyJobParameters>
 		long failedPerSecond = (long) StopWatch.getThroughput(myFailureCount, elapsedMillis, TimeUnit.SECONDS);
 
 		StringBuilder report = new StringBuilder();
-		report.append("Bulk Modification Report\n");
+		report.append(provideJobName()).append(" Report\n");
 		report.append("-------------------------------------------------\n");
 		report.append("Start Time                : ")
-			.append(new InstantType(startTime).getValue())
-			.append('\n');
+				.append(new InstantType(startTime).getValue())
+				.append('\n');
 		report.append("Duration                  : ")
-			.append(StopWatch.formatMillis(elapsedMillis))
-			.append('\n');
+				.append(StopWatch.formatMillis(elapsedMillis))
+				.append('\n');
 		report.append("Total Resources Changed   : ")
-			.append(myChangedCount)
-			.append(" (")
-			.append(changedPerSecond)
-			.append("/sec)")
-			.append('\n');
+				.append(myChangedCount)
+				.append(" (")
+				.append(changedPerSecond)
+				.append("/sec)")
+				.append('\n');
 		report.append("Total Resources Unchanged : ")
-			.append(myUnchangedCount)
-			.append(" (")
-			.append(unchangedPerSecond)
-			.append("/sec)")
-			.append('\n');
+				.append(myUnchangedCount)
+				.append(" (")
+				.append(unchangedPerSecond)
+				.append("/sec)")
+				.append('\n');
 		report.append("Total Failed Changes      : ")
-			.append(myFailureCount)
-			.append(" (")
-			.append(failedPerSecond)
-			.append("/sec)")
-			.append('\n');
-		report.append("Total Retried Chunks      : ")
-			.append(myChunkRetryCount)
-			.append('\n');
+				.append(myFailureCount)
+				.append(" (")
+				.append(failedPerSecond)
+				.append("/sec)")
+				.append('\n');
+		report.append("Total Retried Chunks      : ").append(myChunkRetryCount).append('\n');
 		report.append("Total Retried Resources   : ")
-			.append(myResourceRetryCount)
-			.append('\n');
+				.append(myResourceRetryCount)
+				.append('\n');
 		report.append("-------------------------------------------------\n");
 
 		for (String resourceType : getAllResourceTypes()) {
 			report.append("ResourceType[").append(resourceType).append("]\n");
 			if (myResourceTypeToChangedCount.containsKey(resourceType)) {
-				report.append("    Changed   : ").append(myResourceTypeToChangedCount.get(resourceType)).append("\n");
+				report.append("    Changed   : ")
+						.append(myResourceTypeToChangedCount.get(resourceType))
+						.append("\n");
 			}
 			if (myResourceTypeToUnchangedCount.containsKey(resourceType)) {
-				report.append("    Unchanged : ").append(myResourceTypeToUnchangedCount.get(resourceType)).append("\n");
+				report.append("    Unchanged : ")
+						.append(myResourceTypeToUnchangedCount.get(resourceType))
+						.append("\n");
 			}
 			if (myResourceTypeToFailureCount.containsKey(resourceType)) {
-				report.append("    Failures  : ").append(myResourceTypeToFailureCount.get(resourceType)).append("\n");
+				report.append("    Failures  : ")
+						.append(myResourceTypeToFailureCount.get(resourceType))
+						.append("\n");
 			}
 		}
 
@@ -126,7 +136,15 @@ public class BulkModifyGenerateReportStep<T extends BaseBulkModifyJobParameters>
 			report.append("-------------------------------------------------\n");
 			report.append("Failures:\n");
 			for (Map.Entry<String, String> failureEntry : myIdToFailure.entrySet()) {
-				report.append(failureEntry.getKey()).append(": ").append(failureEntry.getValue()).append("\n\n");
+				report.append(failureEntry.getKey())
+						.append(": ")
+						.append(failureEntry.getValue())
+						.append("\n\n");
+			}
+			if (myFailureListForReportTruncated > 0) {
+				report.append("...truncated ")
+						.append(myFailureListForReportTruncated)
+						.append(" failures...\n");
 			}
 		}
 
@@ -138,12 +156,16 @@ public class BulkModifyGenerateReportStep<T extends BaseBulkModifyJobParameters>
 		reportJson.setReport(reportString);
 
 		if (!myIdToFailure.isEmpty()) {
-			throw new ReductionStepFailureException("Bulk modification failed. See report for details.", reportJson);
+			throw new ReductionStepFailureException(
+					provideJobName() + " had " + myFailureCount + " failure(s). See report for details.", reportJson);
 		}
 
 		theDataSink.accept(reportJson);
 		return RunOutcome.SUCCESS;
 	}
+
+	@Nonnull
+	protected abstract String provideJobName();
 
 	@Nonnull
 	private Set<String> getAllResourceTypes() {
@@ -154,7 +176,8 @@ public class BulkModifyGenerateReportStep<T extends BaseBulkModifyJobParameters>
 		return resourceTypes;
 	}
 
-	private static void incrementMap(Collection<String> theResourceIds, Map<String, Integer> theResourceIdToCountMapToPopulate) {
+	private static void incrementMap(
+			Collection<String> theResourceIds, Map<String, Integer> theResourceIdToCountMapToPopulate) {
 		for (String changedIdValue : theResourceIds) {
 			IdType changedId = new IdType(changedIdValue);
 			int count = theResourceIdToCountMapToPopulate.getOrDefault(changedId.getResourceType(), 0);

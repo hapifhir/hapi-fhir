@@ -20,20 +20,15 @@
 package ca.uhn.fhir.batch2.jobs.chunk;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.annotation.Nonnull;
 
 import java.util.Objects;
-
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class TypedPidAndVersionJson extends TypedPidJson {
 
 	@JsonProperty("v")
 	private Long myVersionId;
 
-	public TypedPidAndVersionJson() {
-	}
+	public TypedPidAndVersionJson() {}
 
 	public TypedPidAndVersionJson(String theResourceType, Integer thePartitionId, String theId, Long theVersionId) {
 		super(theResourceType, thePartitionId, theId);
@@ -46,7 +41,6 @@ public class TypedPidAndVersionJson extends TypedPidJson {
 		// a resource ID
 		return "[" + getResourceType() + " " + getPid() + " " + myVersionId + "]";
 	}
-
 
 	@Override
 	public boolean equals(Object theO) {

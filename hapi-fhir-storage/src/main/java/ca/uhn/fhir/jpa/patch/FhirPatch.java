@@ -118,7 +118,8 @@ public class FhirPatch {
 			if (namedParameterEntry.getKey().equals(PARAMETER_OPERATION)) {
 				List<IBase> opParameters = namedParameterEntry.getValue();
 				for (IBase nextOperation : opParameters) {
-					String type = ParametersUtil.getParameterPartValueAsString(myContext, nextOperation, PARAMETER_TYPE);
+					String type =
+							ParametersUtil.getParameterPartValueAsString(myContext, nextOperation, PARAMETER_TYPE);
 					type = defaultString(type);
 
 					if (OPERATION_DELETE.equals(type)) {
@@ -136,7 +137,8 @@ public class FhirPatch {
 					}
 				}
 			} else {
-				throw new InvalidRequestException(Msg.code(2756) + "Unknown patch parameter name: " + namedParameterEntry.getKey());
+				throw new InvalidRequestException(
+						Msg.code(2756) + "Unknown patch parameter name: " + namedParameterEntry.getKey());
 			}
 		}
 	}
@@ -325,8 +327,7 @@ public class FhirPatch {
 				Optional<IBase> optionalValue =
 						myContext.newTerser().getSingleValue(nextValuePartPart, "value[x]", IBase.class);
 				if (optionalValue.isPresent()) {
-					FhirPathChildDefinition childDefinitionToUse =
-							findChildDefinitionAtEndOfPath(theChildDefinition);
+					FhirPathChildDefinition childDefinitionToUse = findChildDefinitionAtEndOfPath(theChildDefinition);
 
 					BaseRuntimeChildDefinition subChild =
 							childDefinitionToUse.getElementDefinition().getChildByName(name);
@@ -349,14 +350,15 @@ public class FhirPatch {
 			if (isPrimitive) {
 				// primitives will be at the very bottom (ie, no children underneath)
 				return def.getBase() instanceof IPrimitiveType<?>;
-			} else {return def.getBase().fhirType().equalsIgnoreCase(replacementValue.fhirType());}
+			} else {
+				return def.getBase().fhirType().equalsIgnoreCase(replacementValue.fhirType());
+			}
 		};
 
 		return findChildDefinition(theChildDefinition, predicate);
 	}
 
-	private FhirPathChildDefinition findChildDefinitionAtEndOfPath(
-			FhirPathChildDefinition theChildDefinition) {
+	private FhirPathChildDefinition findChildDefinitionAtEndOfPath(FhirPathChildDefinition theChildDefinition) {
 		return findChildDefinition(theChildDefinition, childDefinition -> childDefinition.getChild() == null);
 	}
 
@@ -422,8 +424,7 @@ public class FhirPatch {
 					}
 				} else if (theTargetChildDefinition.getChild() != null) {
 					// there's subchildren (possibly we're setting an 'extension' value
-					FhirPathChildDefinition ct =
-							findChildDefinitionAtEndOfPath(theTargetChildDefinition);
+					FhirPathChildDefinition ct = findChildDefinitionAtEndOfPath(theTargetChildDefinition);
 					replaceSingleValue(theFhirPath, theParsedFhirPath, ct, theReplacementValue);
 				} else {
 					if (theTargetChildDefinition.getBaseRuntimeDefinition() != null
@@ -654,8 +655,7 @@ public class FhirPatch {
 	private FhirPathChildDefinition childDefinition(
 			FhirPathChildDefinition theParent,
 			List<String> theFhirPathParts,
-			@Nonnull
-			IBase theBase,
+			@Nonnull IBase theBase,
 			IFhirPath theFhirPath,
 			ParsedFhirPath theParsedFhirPath,
 			String theOriginalPath) {
@@ -1186,7 +1186,7 @@ public class FhirPatch {
 	 * @throws InvalidRequestException if the document is not a valid FHIRPatch document
 	 * @since 8.4.0
 	 */
-	public void validate(IBaseResource theParameters) throws InvalidRequestException{
+	public void validate(IBaseResource theParameters) throws InvalidRequestException {
 		apply(null, theParameters);
 	}
 
@@ -1196,7 +1196,7 @@ public class FhirPatch {
 			retVal = fhirPath.parse(containingPath);
 		} catch (Exception theE) {
 			throw new InvalidRequestException(
-				Msg.code(2726) + String.format(" %s is not a valid fhir path", containingPath), theE);
+					Msg.code(2726) + String.format(" %s is not a valid fhir path", containingPath), theE);
 		}
 		return retVal;
 	}

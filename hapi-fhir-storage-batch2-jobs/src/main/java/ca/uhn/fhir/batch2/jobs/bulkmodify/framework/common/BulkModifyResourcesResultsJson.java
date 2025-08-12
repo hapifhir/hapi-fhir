@@ -15,5 +15,4 @@ public class BulkModifyResourcesResultsJson implements IModelJson {
 	public void setReport(String theReport) {
 		myReport = theReport;
 	}
-
 }

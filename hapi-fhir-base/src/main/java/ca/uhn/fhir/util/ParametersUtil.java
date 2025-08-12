@@ -42,15 +42,14 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -178,7 +177,8 @@ public class ParametersUtil {
 		return retVal;
 	}
 
-	private static void getNamedParameters(FhirContext theCtx, IBaseResource theParameters, BiConsumer<String, IBase> theConsumer) {
+	private static void getNamedParameters(
+			FhirContext theCtx, IBaseResource theParameters, BiConsumer<String, IBase> theConsumer) {
 		Validate.notNull(theParameters, "theParameters must not be null");
 
 		FhirTerser terser = theCtx.newTerser();
@@ -188,7 +188,6 @@ public class ParametersUtil {
 			String name = terser.getSinglePrimitiveValueOrNull(parameter, "name");
 			theConsumer.accept(name, parameter);
 		}
-
 	}
 
 	public static Optional<IBase> getParameterPart(FhirContext theCtx, IBase theParameter, String theParameterName) {

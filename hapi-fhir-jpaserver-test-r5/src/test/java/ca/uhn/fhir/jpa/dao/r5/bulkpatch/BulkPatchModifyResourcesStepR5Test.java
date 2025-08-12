@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static ca.uhn.fhir.jpa.dao.r5.bulkpatch.BulkPatchJobR5Test.createPatchWithModifyPatientIdentifierSystem;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.times;
@@ -190,7 +191,13 @@ public class BulkPatchModifyResourcesStepR5Test extends BaseJpaR5Test {
 		BulkModifyResourcesChunkOutcomeJson outcome = myDataCaptor.getValue();
 		assertEquals(2, outcome.getChunkRetryCount());
 		assertEquals(11, outcome.getResourceRetryCount());
-
+		assertThat(outcome.getChangedIds()).contains(succeedingId.withVersion("2").getValue());
+		assertThat(outcome.getUnchangedIds()).isEmpty();
+		if (theErrorCount == 2) {
+			assertThat(outcome.getChangedIds()).contains(failingId.withVersion("2").getValue());
+		} else {
+			assertThat(List.copyOf(outcome.getFailures().keySet())).contains(failingId.withVersion("1").getValue());
+		}
 	}
 
 	private List<IIdType> create10TestPatients(TypedPidAndVersionListWorkChunkJson data) {

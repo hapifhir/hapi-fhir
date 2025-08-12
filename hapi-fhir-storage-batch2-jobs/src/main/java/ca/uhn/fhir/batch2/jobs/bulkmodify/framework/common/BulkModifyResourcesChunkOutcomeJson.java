@@ -13,12 +13,16 @@ public class BulkModifyResourcesChunkOutcomeJson implements IModelJson {
 
 	@JsonProperty("changedIds")
 	private List<String> myChangedIds;
+
 	@JsonProperty("unchangedIds")
 	private List<String> myUnchangedIds;
+
 	@JsonProperty("failures")
 	private Map<String, String> myFailures;
+
 	@JsonProperty("chunkRetryCount")
 	private int myChunkRetryCount;
+
 	@JsonProperty("resourceRetryCount")
 	private int myResourceRetryCount;
 

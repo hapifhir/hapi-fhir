@@ -39,9 +39,12 @@ public enum StorageResponseCodeEnum implements ICodingEnum {
 	SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH(
 			"Conditional update succeeded: an existing resource matched the conditional URL and was updated."),
 	SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE(
-			"Conditional update succeeded: an existing resource matched the conditional URL and was updated, but no changes were detected so no action was taken.", true, true),
+			"Conditional update succeeded: an existing resource matched the conditional URL and was updated, but no changes were detected so no action was taken.",
+			true,
+			true),
 	SUCCESSFUL_DELETE("Delete succeeded."),
-	SUCCESSFUL_DELETE_ALREADY_DELETED("Delete succeeded: Resource was already deleted so no action was taken.", true, true),
+	SUCCESSFUL_DELETE_ALREADY_DELETED(
+			"Delete succeeded: Resource was already deleted so no action was taken.", true, true),
 	SUCCESSFUL_DELETE_NOT_FOUND("Delete succeeded: No existing resource was found so no action was taken."),
 
 	SUCCESSFUL_PATCH("Patch succeeded."),
@@ -93,7 +96,6 @@ public enum StorageResponseCodeEnum implements ICodingEnum {
 	public boolean isSuccessful() {
 		return mySuccessful;
 	}
-
 
 	/**
 	 * Returns <code>true</code> if this code represents a NOOP (an operation which did not

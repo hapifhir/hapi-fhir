@@ -32,5 +32,4 @@ public class ResourceModificationResponse {
 		Validate.notNull(theResource, "theResource must not be null");
 		return new ResourceModificationResponse(theResource);
 	}
-
 }

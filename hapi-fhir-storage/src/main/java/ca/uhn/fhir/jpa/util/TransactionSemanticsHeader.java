@@ -137,7 +137,6 @@ public class TransactionSemanticsHeader {
 		theRequestDetails.addHeader(HEADER_NAME, toHeaderValue());
 	}
 
-
 	/**
 	 * Parses a header value (not including the header name) into a new
 	 * {@link TransactionSemanticsHeader} instance.

@@ -1214,17 +1214,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public Stream<IResourcePersistentId> fetchAllVersionsOfResources(RequestDetails theRequestDetails, Collection<IResourcePersistentId> theIds) {
+	public Stream<IResourcePersistentId> fetchAllVersionsOfResources(
+			RequestDetails theRequestDetails, Collection<IResourcePersistentId> theIds) {
 		HapiTransactionService.requireTransaction();
 
-		List<JpaPidFk> ids = theIds
-			.stream()
-			.map(t -> ((JpaPid) t).toFk())
-			.toList();
+		List<JpaPidFk> ids = theIds.stream().map(t -> ((JpaPid) t).toFk()).toList();
 
-		return myResourceHistoryTableDao
-					.findAllVersionsForResourcePids(ids)
-					.map(t->(IResourcePersistentId) t);
+		return myResourceHistoryTableDao.findAllVersionsForResourcePids(ids).map(t -> (IResourcePersistentId) t);
 	}
 
 	@Override
@@ -2094,10 +2090,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					List<IQueryParameterType> orList = new ArrayList<>();
 					for (IQueryParameterType value : orValues) {
 						orList.add(new HasParam(
-								"List",
-								ListResource.SP_ITEM,
-								BaseResource.SP_RES_ID,
-								value.getValueAsQueryToken()));
+								"List", ListResource.SP_ITEM, BaseResource.SP_RES_ID, value.getValueAsQueryToken()));
 					}
 					hasParamValues.add(orList);
 				}
@@ -2392,12 +2385,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 */
 		String id = theResource.getIdElement().getValue();
 		Runnable onRollback = () -> theResource.getIdElement().setValue(id);
+		theTransactionDetails.addRollbackUndoAction(onRollback);
 
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
 				theRequest, theResource, getResourceName());
 
 		if (theRequest.isRewriteHistory() && !myStorageSettings.isUpdateWithHistoryRewriteEnabled()) {
-			String msg = getContext().getLocalizer().getMessage(BaseStorageDao.class, "updateWithHistoryRewriteDisabled");
+			String msg =
+					getContext().getLocalizer().getMessage(BaseStorageDao.class, "updateWithHistoryRewriteDisabled");
 			throw new InvalidRequestException(Msg.code(2781) + msg);
 		}
 
@@ -2423,7 +2418,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.withRequest(theRequest)
 				.withTransactionDetails(theTransactionDetails)
 				.withRequestPartitionId(requestPartitionId)
-				.onRollback(onRollback)
 				.execute(updateCallback);
 	}
 

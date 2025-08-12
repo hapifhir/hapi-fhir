@@ -23,25 +23,24 @@ public class BulkPatchProvider extends BaseBulkModifyOrRewriteProvider {
 	/**
 	 * Operation: $bulk-patch
 	 */
-	@Operation(
-		name = JpaConstants.OPERATION_BULK_PATCH,
-		manualResponse = true)
+	@Operation(name = JpaConstants.OPERATION_BULK_PATCH, manualResponse = true)
 	public void bulkPatch(
-		ServletRequestDetails theRequestDetails,
-
-		@Description("The FHIRPatch document to apply to resources. Must be a Parameters resource.")
-		@OperationParam(name = JpaConstants.OPERATION_BULK_PATCH_PARAM_PATCH, typeName = "Parameters", min = 1, max = 1)
-		IBaseResource thePatch,
-
-		@Description(
-			"One ore more relative search parameter URLs (e.g. \"Patient?active=true\" or \"Observation?\") that will be reindexed.")
-		@OperationParam(
-			name = JpaConstants.OPERATION_BULK_PATCH_PARAM_URL,
-			typeName = "string",
-			min = 1,
-			max = OperationParam.MAX_UNLIMITED)
-		List<IPrimitiveType<String>> theUrlsToReindex
-	) {
+			ServletRequestDetails theRequestDetails,
+			@Description("The FHIRPatch document to apply to resources. Must be a Parameters resource.")
+					@OperationParam(
+							name = JpaConstants.OPERATION_BULK_PATCH_PARAM_PATCH,
+							typeName = "Parameters",
+							min = 1,
+							max = 1)
+					IBaseResource thePatch,
+			@Description(
+							"One ore more relative search parameter URLs (e.g. \"Patient?active=true\" or \"Observation?\") that will be reindexed.")
+					@OperationParam(
+							name = JpaConstants.OPERATION_BULK_PATCH_PARAM_URL,
+							typeName = "string",
+							min = 1,
+							max = OperationParam.MAX_UNLIMITED)
+					List<IPrimitiveType<String>> theUrlsToReindex) {
 		BulkPatchJobParameters jobParameters = new BulkPatchJobParameters();
 		jobParameters.setFhirPatch(myContext, thePatch);
 
@@ -51,20 +50,21 @@ public class BulkPatchProvider extends BaseBulkModifyOrRewriteProvider {
 	/**
 	 * Operation: $bulk-patch-status
 	 */
-	@Operation(
-		name = JpaConstants.OPERATION_BULK_PATCH_STATUS,
-		idempotent = true,
-		manualResponse = true)
+	@Operation(name = JpaConstants.OPERATION_BULK_PATCH_STATUS, idempotent = true, manualResponse = true)
 	public void bulkPatchStatus(
-		ServletRequestDetails theRequestDetails,
-		// _jobId=
-		@Description("Query the server for the status of a bulk patch operation")
-		@OperationParam(name = JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID, typeName = "string", min = 1, max = 1)
-		IPrimitiveType<String> theJobId) throws IOException {
+			ServletRequestDetails theRequestDetails,
+			// _jobId=
+			@Description("Query the server for the status of a bulk patch operation")
+					@OperationParam(
+							name = JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID,
+							typeName = "string",
+							min = 1,
+							max = 1)
+					IPrimitiveType<String> theJobId)
+			throws IOException {
 
 		pollForJobStatus(theRequestDetails, theJobId);
 	}
-
 
 	@Nonnull
 	@Override
@@ -83,5 +83,4 @@ public class BulkPatchProvider extends BaseBulkModifyOrRewriteProvider {
 	protected String getOperationName() {
 		return JpaConstants.OPERATION_BULK_PATCH;
 	}
-
 }

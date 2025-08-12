@@ -58,6 +58,7 @@ public class OperationOutcomeUtil {
 	 * @since 8.6.0
 	 */
 	public static final String OO_ISSUE_CODE_SUCCESS = "success";
+
 	public static final String OO_ISSUE_CODE_PROCESSING = "processing";
 
 	/**

@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.api.dao;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
@@ -44,7 +43,6 @@ import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletResponse;
@@ -184,7 +182,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * with 2 versions, then the response will include 4 objects, 2 for each input ID.
 	 *
 	 */
-	Stream<IResourcePersistentId> fetchAllVersionsOfResources(RequestDetails theRequestDetails, Collection<IResourcePersistentId> theIds);
+	Stream<IResourcePersistentId> fetchAllVersionsOfResources(
+			RequestDetails theRequestDetails, Collection<IResourcePersistentId> theIds);
 
 	ExpungeOutcome forceExpungeInExistingTransaction(
 			IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest);

@@ -13,7 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-public class BulkPatchModifyResourcesStep<PT extends BulkPatchJobParameters> extends BaseBulkModifyResourcesStep<PT, BulkPatchModificationContext> {
+public class BulkPatchModifyResourcesStep<PT extends BulkPatchJobParameters>
+		extends BaseBulkModifyResourcesStep<PT, BulkPatchModificationContext> {
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -24,17 +25,20 @@ public class BulkPatchModifyResourcesStep<PT extends BulkPatchJobParameters> ext
 		myRewriteHistory = theRewriteHistory;
 	}
 
-
 	@Nullable
 	@Override
-	protected BulkPatchModificationContext preModifyResources(PT theJobParameters, List<TypedPidAndVersionJson> thePids) {
+	protected BulkPatchModificationContext preModifyResources(
+			PT theJobParameters, List<TypedPidAndVersionJson> thePids) {
 		IBaseResource patch = theJobParameters.getFhirPatch(myFhirContext);
 		return new BulkPatchModificationContext(patch);
 	}
 
 	@Nonnull
 	@Override
-	protected ResourceModificationResponse modifyResource(PT theJobParameters, BulkPatchModificationContext theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest) {
+	protected ResourceModificationResponse modifyResource(
+			PT theJobParameters,
+			BulkPatchModificationContext theModificationContext,
+			@Nonnull ResourceModificationRequest theModificationRequest) {
 		IBaseResource resourceToPatch = theModificationRequest.getResource();
 		IBaseResource patchToApply = theModificationContext.getPatch();
 		new FhirPatch(myFhirContext).apply(resourceToPatch, patchToApply);
@@ -45,5 +49,4 @@ public class BulkPatchModifyResourcesStep<PT extends BulkPatchJobParameters> ext
 	protected boolean isRewriteHistory(BulkPatchModificationContext theState, IBaseResource theResource) {
 		return myRewriteHistory;
 	}
-
 }

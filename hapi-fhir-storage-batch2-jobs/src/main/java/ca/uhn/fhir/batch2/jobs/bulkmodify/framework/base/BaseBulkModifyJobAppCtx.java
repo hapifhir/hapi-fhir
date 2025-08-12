@@ -2,7 +2,6 @@ package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
-import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyGenerateReportStep;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesResultsJson;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.TypedPidToTypedPidAndNullVersionStep;
@@ -23,36 +22,30 @@ public abstract class BaseBulkModifyJobAppCtx<T extends BaseBulkModifyJobParamet
 
 	protected JobDefinition<T> buildJobDefinition() {
 		JobDefinition.Builder<T, BulkModifyResourcesResultsJson> jobBuilder = JobDefinition.newBuilder()
-			.setJobDefinitionId(getJobId())
-			.setJobDescription(getJobDescription())
-			.setJobDefinitionVersion(getJobDefinitionVersion())
-			.gatedExecution()
-			.setParametersType(getParametersType())
-			.addFirstStep(
-				"generate-ranges",
-				"Generate data ranges to modify",
-				ChunkRangeJson.class,
-				generateRangesStep())
-			.addIntermediateStep(
-				"load-ids",
-				"Load IDs of resources to modify",
-				ResourceIdListWorkChunkJson.class,
-				loadIdsStep())
-			.addIntermediateStep(
-				"expand-id-versions",
-				"Generate versioned ID batches",
-				TypedPidAndVersionListWorkChunkJson.class,
-				expandIdVersionsStep())
-			.addIntermediateStep(
-				"modify-resources",
-				"Modify resources",
-				BulkModifyResourcesChunkOutcomeJson.class,
-				modifyResourcesStep())
-			.addFinalReducerStep(
-				"generate-report",
-				"Generate a report outlining the changes made",
-				BulkModifyResourcesResultsJson.class,
-				generateReportStep());
+				.setJobDefinitionId(getJobId())
+				.setJobDescription(getJobDescription())
+				.setJobDefinitionVersion(getJobDefinitionVersion())
+				.gatedExecution()
+				.setParametersType(getParametersType())
+				.addFirstStep(
+						"generate-ranges", "Generate data ranges to modify", ChunkRangeJson.class, generateRangesStep())
+				.addIntermediateStep(
+						"load-ids", "Load IDs of resources to modify", ResourceIdListWorkChunkJson.class, loadIdsStep())
+				.addIntermediateStep(
+						"expand-id-versions",
+						"Generate versioned ID batches",
+						TypedPidAndVersionListWorkChunkJson.class,
+						expandIdVersionsStep())
+				.addIntermediateStep(
+						"modify-resources",
+						"Modify resources",
+						BulkModifyResourcesChunkOutcomeJson.class,
+						modifyResourcesStep())
+				.addFinalReducerStep(
+						"generate-report",
+						"Generate a report outlining the changes made",
+						BulkModifyResourcesResultsJson.class,
+						generateReportStep());
 
 		jobBuilder.setParametersValidator(getJobParameterValidator());
 
@@ -63,7 +56,8 @@ public abstract class BaseBulkModifyJobAppCtx<T extends BaseBulkModifyJobParamet
 	 * This is intended to be overridden by {@link BaseBulkRewriteJobAppCtx}
 	 * for jobs that need versioned PIDs.
 	 */
-	protected IJobStepWorker<T, ResourceIdListWorkChunkJson, TypedPidAndVersionListWorkChunkJson> expandIdVersionsStep() {
+	protected IJobStepWorker<T, ResourceIdListWorkChunkJson, TypedPidAndVersionListWorkChunkJson>
+			expandIdVersionsStep() {
 		return new TypedPidToTypedPidAndNullVersionStep<>();
 	}
 
@@ -81,7 +75,7 @@ public abstract class BaseBulkModifyJobAppCtx<T extends BaseBulkModifyJobParamet
 
 	public abstract GenerateRangeChunksStep<T> generateRangesStep();
 
-	public abstract BulkModifyGenerateReportStep<T> generateReportStep();
+	public abstract BaseBulkModifyOrRewriteGenerateReportStep<T> generateReportStep();
 
 	public abstract LoadIdsStep<T> loadIdsStep();
 }

@@ -10,7 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  * This is the base AppCtx for bulk rewrite jobs (jobs that rewrite history across all
  * resources or a selection of resources)
  */
-public abstract class BaseBulkRewriteJobAppCtx<T extends BaseBulkModifyJobParameters> extends BaseBulkModifyJobAppCtx<T> {
+public abstract class BaseBulkRewriteJobAppCtx<T extends BaseBulkModifyJobParameters>
+		extends BaseBulkModifyJobAppCtx<T> {
 
 	@Autowired
 	private TypedPidToTypedPidAndVersionStep<T> myTypedPidToTypedPidAndVersionStep;
@@ -21,8 +22,8 @@ public abstract class BaseBulkRewriteJobAppCtx<T extends BaseBulkModifyJobParame
 	 * collections of {@link ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionJson} objects.
 	 */
 	@Override
-	protected IJobStepWorker<T, ResourceIdListWorkChunkJson, TypedPidAndVersionListWorkChunkJson> expandIdVersionsStep() {
+	protected IJobStepWorker<T, ResourceIdListWorkChunkJson, TypedPidAndVersionListWorkChunkJson>
+			expandIdVersionsStep() {
 		return myTypedPidToTypedPidAndVersionStep;
 	}
-
 }

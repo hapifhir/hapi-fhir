@@ -40,13 +40,17 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 
 	@Autowired
 	protected FhirContext myContext;
+
 	@Autowired
 	protected IJobCoordinator myJobCoordinator;
 
 	/**
 	 * Subclasses should call this method to initiate a new job
 	 */
-	protected void startJobAndReturnResponse(ServletRequestDetails theRequestDetails, List<IPrimitiveType<String>> theUrlsToReindex, BaseBulkModifyJobParameters theJobParameters) {
+	protected void startJobAndReturnResponse(
+			ServletRequestDetails theRequestDetails,
+			List<IPrimitiveType<String>> theUrlsToReindex,
+			BaseBulkModifyJobParameters theJobParameters) {
 		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, getOperationName());
 		if (theUrlsToReindex != null) {
 			for (IPrimitiveType<String> url : theUrlsToReindex) {
@@ -64,9 +68,13 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 
 		String jobInstanceId = outcome.getInstanceId();
 
-		ServletContext servletContext = (ServletContext) theRequestDetails.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE);
+		ServletContext servletContext =
+				(ServletContext) theRequestDetails.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE);
 		HttpServletRequest servletRequest = theRequestDetails.getServletRequest();
-		String baseUrl = theRequestDetails.getServer().getServerAddressStrategy().determineServerBase(servletContext, servletRequest);
+		String baseUrl = theRequestDetails
+				.getServer()
+				.getServerAddressStrategy()
+				.determineServerBase(servletContext, servletRequest);
 
 		StringBuilder pollUrl = new StringBuilder(baseUrl);
 		if (!baseUrl.endsWith("/")) {
@@ -87,10 +95,13 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 	/**
 	 * Subclasses should call this method to poll for job status
 	 */
-	protected void pollForJobStatus(ServletRequestDetails theRequestDetails, IPrimitiveType<String> theJobId) throws IOException {
+	protected void pollForJobStatus(ServletRequestDetails theRequestDetails, IPrimitiveType<String> theJobId)
+			throws IOException {
 		ValidateUtil.isTrueOrThrowInvalidRequest(theJobId != null && theJobId.hasValue(), "Missing job id");
 		JobInstance instance = myJobCoordinator.getInstance(theJobId.getValue());
-		ValidateUtil.isTrueOrThrowInvalidRequest(instance.getJobDefinitionId().equals(BulkPatchJobAppCtx.JOB_ID), "Job ID does not correspond to a Bulk Patch job");
+		ValidateUtil.isTrueOrThrowInvalidRequest(
+				instance.getJobDefinitionId().equals(BulkPatchJobAppCtx.JOB_ID),
+				"Job ID does not correspond to a Bulk Patch job");
 
 		int status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
 		String message = "";
@@ -123,7 +134,8 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 				if (isBlank(reportText)) {
 					message = progressMessage;
 				} else {
-					BulkModifyResourcesResultsJson results = JsonUtil.deserialize(reportText, BulkModifyResourcesResultsJson.class);
+					BulkModifyResourcesResultsJson results =
+							JsonUtil.deserialize(reportText, BulkModifyResourcesResultsJson.class);
 					message = results.getReport();
 				}
 				severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
@@ -146,7 +158,8 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myContext);
 		OperationOutcomeUtil.addIssue(myContext, oo, severity, message, null, code);
 
-		RestfulServerUtils.ResponseEncoding encoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequestDetails);
+		RestfulServerUtils.ResponseEncoding encoding =
+				RestfulServerUtils.determineResponseEncodingWithDefault(theRequestDetails);
 
 		HttpServletResponse servletResponse = theRequestDetails.getServletResponse();
 		servletResponse.setStatus(status);
@@ -181,5 +194,4 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 	public void setJobCoordinatorForUnitTest(IJobCoordinator theJobCoordinator) {
 		myJobCoordinator = theJobCoordinator;
 	}
-
 }

@@ -1,8 +1,8 @@
 package ca.uhn.fhir.batch2.jobs.bulkmodify.patch;
 
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyJobAppCtx;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyOrRewriteGenerateReportStep;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyCommonJobAppCtx;
-import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyGenerateReportStep;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
 import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -12,7 +12,6 @@ import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
 
 @Configuration
 @Import({BulkModifyCommonJobAppCtx.class})
@@ -77,8 +76,8 @@ public class BulkPatchJobAppCtx extends BaseBulkModifyJobAppCtx<BulkPatchJobPara
 
 	@Bean("bulkModifyPatchGenerateReportStep")
 	@Override
-	public BulkModifyGenerateReportStep<BulkPatchJobParameters> generateReportStep() {
-		return new BulkModifyGenerateReportStep<>();
+	public BaseBulkModifyOrRewriteGenerateReportStep<BulkPatchJobParameters> generateReportStep() {
+		return new BulkPatchGenerateReportStep();
 	}
 
 	@Bean("bulkModifyPatchLoadIdsStep")
@@ -91,5 +90,4 @@ public class BulkPatchJobAppCtx extends BaseBulkModifyJobAppCtx<BulkPatchJobPara
 	public BulkPatchProvider bulkPatchProvider() {
 		return new BulkPatchProvider();
 	}
-
 }

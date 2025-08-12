@@ -41,7 +41,8 @@ public class BulkPatchJobParametersValidator<PT extends BulkPatchJobParameters> 
 		for (String nextUrl : urls) {
 			Matcher matcher = URL_PATTERN.matcher(defaultString(nextUrl));
 			if (!matcher.matches()) {
-				return List.of("Invalid/unsupported URL (must use syntax '{resourceType}?[optional params]': " + sanitizeUrlPart(nextUrl));
+				return List.of("Invalid/unsupported URL (must use syntax '{resourceType}?[optional params]': "
+						+ sanitizeUrlPart(nextUrl));
 			}
 			String resourceType = matcher.group(1);
 			if (!myDaoRegistry.isResourceTypeSupported(resourceType)) {
@@ -60,7 +61,8 @@ public class BulkPatchJobParametersValidator<PT extends BulkPatchJobParameters> 
 		}
 
 		if (!"Parameters".equals(myFhirContext.getResourceType(patch))) {
-			return List.of("FHIRPatch document must be a Parameters resource, found: " + myFhirContext.getResourceType(patch));
+			return List.of(
+					"FHIRPatch document must be a Parameters resource, found: " + myFhirContext.getResourceType(patch));
 		}
 
 		try {

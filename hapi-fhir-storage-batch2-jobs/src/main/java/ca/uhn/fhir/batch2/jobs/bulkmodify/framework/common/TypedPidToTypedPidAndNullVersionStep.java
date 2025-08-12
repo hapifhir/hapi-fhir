@@ -14,22 +14,24 @@ import jakarta.annotation.Nonnull;
 
 import java.util.List;
 
-public class TypedPidToTypedPidAndNullVersionStep<PT extends BaseBulkModifyJobParameters> implements IJobStepWorker<PT, ResourceIdListWorkChunkJson, TypedPidAndVersionListWorkChunkJson> {
+public class TypedPidToTypedPidAndNullVersionStep<PT extends BaseBulkModifyJobParameters>
+		implements IJobStepWorker<PT, ResourceIdListWorkChunkJson, TypedPidAndVersionListWorkChunkJson> {
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<PT, ResourceIdListWorkChunkJson> theStepExecutionDetails, @Nonnull IJobDataSink<TypedPidAndVersionListWorkChunkJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<PT, ResourceIdListWorkChunkJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<TypedPidAndVersionListWorkChunkJson> theDataSink)
+			throws JobExecutionFailedException {
 		ResourceIdListWorkChunkJson data = theStepExecutionDetails.getData();
 
 		RequestPartitionId requestPartitionId = data.getRequestPartitionId();
-		List<TypedPidAndVersionJson> pids = data.getTypedPids()
-			.stream()
-			.map(t->new TypedPidAndVersionJson(t.getResourceType(), t.getPartitionId(), t.getPid(), null))
-			.toList();
+		List<TypedPidAndVersionJson> pids = data.getTypedPids().stream()
+				.map(t -> new TypedPidAndVersionJson(t.getResourceType(), t.getPartitionId(), t.getPid(), null))
+				.toList();
 
 		theDataSink.accept(new TypedPidAndVersionListWorkChunkJson(requestPartitionId, pids));
 
 		return RunOutcome.SUCCESS;
 	}
-
 }
