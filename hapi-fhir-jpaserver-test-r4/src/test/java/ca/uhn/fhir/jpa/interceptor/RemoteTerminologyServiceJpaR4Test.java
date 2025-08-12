@@ -309,14 +309,12 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 			"None of the codings provided are in the value set 'IdentifierType'");
 
 		// Verify 1
-		Assertions.assertEquals(5, myCaptureQueriesListener.countGetConnections());
+		Assertions.assertEquals(3, myCaptureQueriesListener.countGetConnections());
 		assertThat(ourValueSetProvider.mySearchUrls).asList().containsExactlyInAnyOrder(
 			"http://hl7.org/fhir/ValueSet/identifier-type",
 			"http://hl7.org/fhir/ValueSet/identifier-type"
 		);
 		assertThat(ourCodeSystemProvider.mySearchUrls).asList().containsExactlyInAnyOrder(
-			"http://terminology.hl7.org/CodeSystem/v2-0203",
-			"http://terminology.hl7.org/CodeSystem/v2-0203",
 			"http://terminology.hl7.org/CodeSystem/v2-0203",
 			"http://terminology.hl7.org/CodeSystem/v2-0203",
 			"http://terminology.hl7.org/CodeSystem/v2-0203"

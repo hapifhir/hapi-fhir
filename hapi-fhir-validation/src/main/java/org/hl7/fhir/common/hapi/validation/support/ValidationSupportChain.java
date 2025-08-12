@@ -776,7 +776,7 @@ public class ValidationSupportChain implements IValidationSupport {
 			ValidationSupportContext theValidationSupportContext,
 			IValidationSupport theValidationSupport,
 			String theCodeSystemUrl) {
-		IsCanValidateCodeSystemKey key = new IsCanValidateCodeSystemKey(theValidationSupport, theCodeSystemUrl);
+		CanValidateCodeSystemKey key = new CanValidateCodeSystemKey(theValidationSupport, theCodeSystemUrl);
 		CacheValue<Boolean> value = getFromCache(key);
 		if (value == null) {
 			value = new CacheValue<>(
@@ -1255,23 +1255,23 @@ public class ValidationSupportChain implements IValidationSupport {
 		}
 	}
 
-	static class IsCanValidateCodeSystemKey extends BaseKey<Boolean> {
+	static class CanValidateCodeSystemKey extends BaseKey<Boolean> {
 
 		private final String myCodeSystemUrl;
 		private final IValidationSupport myValidationSupport;
 		private final int myHashCode;
 
-		private IsCanValidateCodeSystemKey(IValidationSupport theValidationSupport, String theCodeSystemUrl) {
+		private CanValidateCodeSystemKey(IValidationSupport theValidationSupport, String theCodeSystemUrl) {
 			myValidationSupport = theValidationSupport;
 			myCodeSystemUrl = theCodeSystemUrl;
-			myHashCode = Objects.hash("IsCanValidateCodeSystemKey", theValidationSupport, myCodeSystemUrl);
+			myHashCode = Objects.hash("CanValidateCodeSystemKey", theValidationSupport, myCodeSystemUrl);
 		}
 
 		@Override
 		public boolean equals(Object theO) {
 			if (this == theO) return true;
-			if (!(theO instanceof IsCodeSystemSupportedKey)) return false;
-			IsCodeSystemSupportedKey that = (IsCodeSystemSupportedKey) theO;
+			if (!(theO instanceof CanValidateCodeSystemKey)) return false;
+			CanValidateCodeSystemKey that = (CanValidateCodeSystemKey) theO;
 			return myValidationSupport == that.myValidationSupport
 					&& Objects.equals(myCodeSystemUrl, that.myCodeSystemUrl);
 		}
