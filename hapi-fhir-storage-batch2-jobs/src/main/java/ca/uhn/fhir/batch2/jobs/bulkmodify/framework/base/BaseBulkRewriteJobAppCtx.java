@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public abstract class BaseBulkRewriteJobAppCtx<T extends BaseBulkModifyJobParameters> extends BaseBulkModifyJobAppCtx<T> {
 
 	@Autowired
-	private TypedPidToTypedPidAndVersionStep myTypedPidToTypedPidAndVersionStep;
+	private TypedPidToTypedPidAndVersionStep<T> myTypedPidToTypedPidAndVersionStep;
 
 	/**
 	 * This step takes in collections of {@link ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson}

@@ -89,7 +89,7 @@ class BulkPatchJobParametersValidatorTest {
 		params.addPartitionedUrl(new PartitionedUrl());
 
 		List<String> outcome = mySvc.validate(null, params);
-		assertThat(outcome).contains("Invalid/unsupported URL (must use syntax '{resourceType}?[optional params]': null");
+		assertThat(outcome).contains("No URLs were provided");
 	}
 
 	@Test

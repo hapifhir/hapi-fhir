@@ -34,7 +34,6 @@ public class BulkPatchJobAppCtx extends BaseBulkModifyJobAppCtx<BulkPatchJobPara
 	}
 
 	@Bean("bulkModifyJsonPatchJobDefinition")
-	@Lazy
 	public JobDefinition<BulkPatchJobParameters> jobDefinition() {
 		return super.buildJobDefinition();
 	}
@@ -65,35 +64,30 @@ public class BulkPatchJobAppCtx extends BaseBulkModifyJobAppCtx<BulkPatchJobPara
 	}
 
 	@Bean("bulkModifyPatchModifyResourcesStep")
-	@Lazy
 	@Override
 	public BulkPatchModifyResourcesStep<BulkPatchJobParameters> modifyResourcesStep() {
-		return new BulkPatchModifyResourcesStep<>();
+		return new BulkPatchModifyResourcesStep<>(false);
 	}
 
 	@Bean("bulkModifyPatchGenerateRangesStep")
-	@Lazy
 	@Override
 	public GenerateRangeChunksStep<BulkPatchJobParameters> generateRangesStep() {
 		return new GenerateRangeChunksStep<>();
 	}
 
 	@Bean("bulkModifyPatchGenerateReportStep")
-	@Lazy
 	@Override
 	public BulkModifyGenerateReportStep<BulkPatchJobParameters> generateReportStep() {
 		return new BulkModifyGenerateReportStep<>();
 	}
 
 	@Bean("bulkModifyPatchLoadIdsStep")
-	@Lazy
 	@Override
 	public LoadIdsStep<BulkPatchJobParameters> loadIdsStep() {
 		return new LoadIdsStep<>(myBatch2DaoSvc);
 	}
 
 	@Bean("bulkModifyPatchProvider")
-	@Lazy
 	public BulkPatchProvider bulkPatchProvider() {
 		return new BulkPatchProvider();
 	}

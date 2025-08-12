@@ -21,6 +21,9 @@ package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
 
+/**
+ * Base class for bulk modification job parameters objects
+ */
 public abstract class BaseBulkModifyJobParameters extends PartitionedUrlJobParameters {
 
 }

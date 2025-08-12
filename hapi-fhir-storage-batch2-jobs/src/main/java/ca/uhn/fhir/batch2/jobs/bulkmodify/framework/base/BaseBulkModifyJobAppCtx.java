@@ -13,6 +13,12 @@ import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
 import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 
+/**
+ * Bulk modify jobs should create a Spring AppCtx class which extends this class, then
+ * call {@link #buildJobDefinition()} to build a job definition bean.
+ *
+ * @param <T> The job parameters type
+ */
 public abstract class BaseBulkModifyJobAppCtx<T extends BaseBulkModifyJobParameters> {
 
 	protected JobDefinition<T> buildJobDefinition() {

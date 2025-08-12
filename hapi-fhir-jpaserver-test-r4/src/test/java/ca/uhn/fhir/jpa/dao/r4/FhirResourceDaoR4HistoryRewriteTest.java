@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -57,6 +58,23 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		myStorageSettings.setUpdateWithHistoryRewriteEnabled(false);
 		when(mySrd.getHeader(eq(Constants.HEADER_REWRITE_HISTORY))).thenReturn("");
 	}
+
+	@Test
+	void testTryToRewriteWithFeatureDisabled() {
+		// Setup
+		myStorageSettings.setUpdateWithHistoryRewriteEnabled(false);
+		IIdType id = createPatientWithHistoryThreeVersions();
+
+		// Test and Verify
+		when(mySrd.isRewriteHistory()).thenReturn(true);
+		Patient p = new Patient();
+		p.setId(id);
+		assertThatThrownBy(()->myPatientDao.update(p, mySrd))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessage("HAPI-2781: Update with history rewrite is not supported on this server");
+
+	}
+
 
 	@Test
 	void testHistoryRewriteNonCurrentVersion() {

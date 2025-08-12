@@ -2398,8 +2398,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		if (theRequest.isRewriteHistory() && !myStorageSettings.isUpdateWithHistoryRewriteEnabled()) {
 			String msg = getContext().getLocalizer().getMessage(BaseStorageDao.class, "updateWithHistoryRewriteDisabled");
-			// FIXME: add code, add i18n message, add test
-			throw new InvalidRequestException(Msg.code(0) + msg);
+			throw new InvalidRequestException(Msg.code(2781) + msg);
 		}
 
 		Callable<DaoMethodOutcome> updateCallback;

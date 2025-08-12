@@ -17,6 +17,10 @@ public class BulkModifyResourcesChunkOutcomeJson implements IModelJson {
 	private List<String> myUnchangedIds;
 	@JsonProperty("failures")
 	private Map<String, String> myFailures;
+	@JsonProperty("chunkRetryCount")
+	private int myChunkRetryCount;
+	@JsonProperty("resourceRetryCount")
+	private int myResourceRetryCount;
 
 	public void addChangedId(IIdType theIdElement) {
 		getChangedIds().add(theIdElement.toUnqualified().getValue());
@@ -53,5 +57,21 @@ public class BulkModifyResourcesChunkOutcomeJson implements IModelJson {
 			myFailures = new HashMap<>();
 		}
 		return myFailures;
+	}
+
+	public int getChunkRetryCount() {
+		return myChunkRetryCount;
+	}
+
+	public void setChunkRetryCount(int theChunkRetryCount) {
+		myChunkRetryCount = theChunkRetryCount;
+	}
+
+	public int getResourceRetryCount() {
+		return myResourceRetryCount;
+	}
+
+	public void setResourceRetryCount(int theResourceRetryCount) {
+		myResourceRetryCount = theResourceRetryCount;
 	}
 }

@@ -44,7 +44,7 @@ public class BulkModifyCommonJobAppCtx {
 	}
 
 	/*
-	 * Step 4 is provided by the specific job definition
+	 * Step 4 is the actual modification step and is provided by the specific job definition
 	 */
 
 	/**

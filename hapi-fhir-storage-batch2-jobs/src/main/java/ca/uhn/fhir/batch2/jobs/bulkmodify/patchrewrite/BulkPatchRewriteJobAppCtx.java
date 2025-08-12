@@ -6,7 +6,6 @@ import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyCommonJobAp
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyGenerateReportStep;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.TypedPidToTypedPidAndVersionStep;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchModifyResourcesStep;
-import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchProvider;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
@@ -39,8 +38,7 @@ public class BulkPatchRewriteJobAppCtx extends BaseBulkModifyJobAppCtx<BulkPatch
 		myDaoRegistry = theDaoRegistry;
 	}
 
-	@Bean("bulkModifyJsonPatchJobDefinition")
-	@Lazy
+	@Bean("bulkModifyPatchRewriteJobDefinition")
 	public JobDefinition<BulkPatchRewriteJobParameters> jobDefinition() {
 		return super.buildJobDefinition();
 	}
@@ -71,28 +69,24 @@ public class BulkPatchRewriteJobAppCtx extends BaseBulkModifyJobAppCtx<BulkPatch
 	}
 
 	@Bean("bulkModifyPatchRewriteModifyResourcesStep")
-	@Lazy
 	@Override
 	public BulkPatchModifyResourcesStep<BulkPatchRewriteJobParameters> modifyResourcesStep() {
-		return new BulkPatchModifyResourcesStep<>();
+		return new BulkPatchModifyResourcesStep<>(true);
 	}
 
 	@Bean("bulkModifyPatchRewriteGenerateRangesStep")
-	@Lazy
 	@Override
 	public GenerateRangeChunksStep<BulkPatchRewriteJobParameters> generateRangesStep() {
 		return new GenerateRangeChunksStep<>();
 	}
 
 	@Bean("bulkModifyPatchRewriteGenerateReportStep")
-	@Lazy
 	@Override
 	public BulkModifyGenerateReportStep<BulkPatchRewriteJobParameters> generateReportStep() {
 		return new BulkModifyGenerateReportStep<>();
 	}
 
 	@Bean("bulkModifyPatchRewriteLoadIdsStep")
-	@Lazy
 	@Override
 	public LoadIdsStep<BulkPatchRewriteJobParameters> loadIdsStep() {
 		return new LoadIdsStep<>(myBatch2DaoSvc);
@@ -105,7 +99,6 @@ public class BulkPatchRewriteJobAppCtx extends BaseBulkModifyJobAppCtx<BulkPatch
 	}
 
 	@Bean("bulkModifyPatchRewriteProvider")
-	@Lazy
 	public BulkPatchRewriteProvider bulkPatchRewriteProvider() {
 		return new BulkPatchRewriteProvider();
 	}

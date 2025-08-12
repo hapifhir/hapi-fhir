@@ -1,10 +1,10 @@
-package ca.uhn.fhir.batch2.jobs.bulkmodify.patch;
+package ca.uhn.fhir.batch2.jobs.bulkmodify.patchrewrite;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesResultsJson;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchJobAppCtx;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchProviderTest;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -12,7 +12,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import ca.uhn.fhir.util.JsonUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -39,7 +38,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
-import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_BULK_PATCH_STATUS;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_BULK_PATCH_REWRITE_STATUS;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,13 +50,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class BulkPatchProviderTest {
-
+class BulkPatchRewriteProviderTest {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 
-	private static final BulkPatchProvider ourProvider = new BulkPatchProvider();
+	private static final BulkPatchRewriteProvider ourProvider = new BulkPatchRewriteProvider();
 	private static final String MY_INSTANCE_ID = "MY-INSTANCE-ID";
-	private static final Logger ourLog = LoggerFactory.getLogger(BulkPatchProviderTest.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(BulkPatchRewriteProviderTest.class);
 	@RegisterExtension
 	static RestfulServerExtension ourFhirServer = new RestfulServerExtension(ourCtx)
 		.keepAliveBetweenTests()
@@ -97,14 +95,14 @@ public class BulkPatchProviderTest {
 			.setValue(new StringType("Location?"));
 
 		// Test
-		String url = ourFhirServer.getBaseUrl() + "/" + JpaConstants.OPERATION_BULK_PATCH;
+		String url = ourFhirServer.getBaseUrl() + "/" + JpaConstants.OPERATION_BULK_PATCH_REWRITE;
 		HttpPost post = new HttpPost(url);
 		post.setEntity(new ResourceEntity(ourCtx, request));
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 
 			// Verify
-			String expectedUrl = ourFhirServer.getBaseUrl() + "/$bulk-patch-status?_jobId=MY-INSTANCE-ID";
+			String expectedUrl = ourFhirServer.getBaseUrl() + "/$bulk-patch-rewrite-history-status?_jobId=MY-INSTANCE-ID";
 			assertEquals(HttpStatus.Code.NO_CONTENT.getCode(), response.getStatusLine().getStatusCode());
 			assertEquals(expectedUrl, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 
@@ -112,8 +110,8 @@ public class BulkPatchProviderTest {
 
 		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestCaptor.capture());
 		JobInstanceStartRequest startRequest = myStartRequestCaptor.getValue();
-		assertEquals(BulkPatchJobAppCtx.JOB_ID, startRequest.getJobDefinitionId());
-		BulkPatchJobParameters jobParameters = startRequest.getParameters(BulkPatchJobParameters.class);
+		assertEquals(BulkPatchRewriteJobAppCtx.JOB_ID, startRequest.getJobDefinitionId());
+		BulkPatchRewriteJobParameters jobParameters = startRequest.getParameters(BulkPatchRewriteJobParameters.class);
 		IBaseResource fhirPatch = jobParameters.getFhirPatch(ourCtx);
 		assertNotNull(fhirPatch);
 		assertEquals(Parameters.class, fhirPatch.getClass());
@@ -123,17 +121,17 @@ public class BulkPatchProviderTest {
 
 	@ParameterizedTest
 	@MethodSource("testPollForStatusParameters")
-	void testPollForStatus(PollForStatusTest theParams) throws IOException {
+	void testPollForStatus(BulkPatchProviderTest.PollForStatusTest theParams) throws IOException {
 		// Setup
 		JobInstance instance = new JobInstance();
-		instance.setStatus(theParams.jobStatus);
+		instance.setStatus(theParams.jobStatus());
 		instance.setJobDefinitionId(BulkPatchJobAppCtx.JOB_ID);
 		instance.setErrorMessage(theParams.errorMessage());
 		instance.setReport(theParams.reportMessage());
 		when(myJobCoordinator.getInstance(eq("MY-INSTANCE-ID"))).thenReturn(instance);
 
 		// Test
-		String url = ourFhirServer.getBaseUrl() + "/" + OPERATION_BULK_PATCH_STATUS + "?" + OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID + "=MY-INSTANCE-ID";
+		String url = ourFhirServer.getBaseUrl() + "/" + OPERATION_BULK_PATCH_REWRITE_STATUS + "?" + OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID + "=MY-INSTANCE-ID";
 		HttpGet get = new HttpGet(url);
 		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			assertEquals(theParams.expectedStatusCode(), response.getStatusLine().getStatusCode());
@@ -147,29 +145,8 @@ public class BulkPatchProviderTest {
 		}
 	}
 
-	public static Stream<PollForStatusTest> testPollForStatusParameters() {
-		BulkModifyResourcesResultsJson successReportJson = new BulkModifyResourcesResultsJson();
-		successReportJson.setReport("This is the report\nLine 2 or report");
-		String successReport = JsonUtil.serialize(successReportJson);
-
-		return Stream.of(
-			new PollForStatusTest(StatusEnum.QUEUED, HttpStatus.Code.ACCEPTED.getCode(), "Job has not yet started"),
-			new PollForStatusTest(StatusEnum.IN_PROGRESS, HttpStatus.Code.ACCEPTED.getCode(), "Job has started and is in progress"),
-			new PollForStatusTest(StatusEnum.FINALIZE, HttpStatus.Code.ACCEPTED.getCode(), "Job has started and is being finalized"),
-			new PollForStatusTest(StatusEnum.CANCELLED, HttpStatus.Code.OK.getCode(), "Job has been cancelled"),
-			new PollForStatusTest(StatusEnum.FAILED, "This is an error message", null, HttpStatus.Code.INTERNAL_SERVER_ERROR.getCode(), "This is an error message", "This is an error message"),
-			new PollForStatusTest(StatusEnum.COMPLETED, HttpStatus.Code.OK.getCode(), "Job has completed successfully"),
-			new PollForStatusTest(StatusEnum.COMPLETED, null, successReport, HttpStatus.Code.OK.getCode(), successReportJson.getReport(), "Job has completed successfully")
-		);
+	public static Stream<BulkPatchProviderTest.PollForStatusTest> testPollForStatusParameters() {
+		return BulkPatchProviderTest.testPollForStatusParameters();
 	}
-
-	public record PollForStatusTest(StatusEnum jobStatus, String errorMessage, String reportMessage, int expectedStatusCode, String expectedOoMessage, String expectedProgressHeaderValue) {
-
-		PollForStatusTest(StatusEnum jobStatus, int expectedStatusCode, String expectedMessage) {
-			this(jobStatus, null, null, expectedStatusCode, expectedMessage, expectedMessage);
-		}
-
-	}
-
 
 }

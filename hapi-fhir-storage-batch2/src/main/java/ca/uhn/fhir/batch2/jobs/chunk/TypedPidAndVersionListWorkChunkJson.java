@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.annotations.VisibleForTesting;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,27 +51,12 @@ public class TypedPidAndVersionListWorkChunkJson implements IModelJson {
 		myRequestPartitionId = theRequestPartitionId;
 	}
 
-	// FIXME: needed?
-	public <T extends IResourcePersistentId<?>> List<T> getResourcePersistentIds(
-		IIdHelperService<T> theIdHelperService) {
-		if (myTypedPidAndVersions.isEmpty()) {
-			return Collections.emptyList();
-		}
-
-		return myTypedPidAndVersions.stream()
-			.map(t -> {
-				T retval = t.toPersistentId(theIdHelperService);
-				if (t.getVersionId() != null) {
-					retval.setVersion(t.getVersionId());
-				}
-				return retval;
-			})
-			.collect(Collectors.toList());
-	}
-
 	@VisibleForTesting
-	public void addTypedPidWithNullPartitionForUnitTest(String theResourceType, Long thePid) {
-		getTypedPidAndVersions().add(new TypedPidAndVersionJson(theResourceType, null, thePid.toString(), null));
+	public void addTypedPidWithNullPartitionForUnitTest(String theResourceType, Long thePid, Long theVersionId) {
+		if (myTypedPidAndVersions == null) {
+			myTypedPidAndVersions = new ArrayList<>();
+		}
+		myTypedPidAndVersions.add(new TypedPidAndVersionJson(theResourceType, null, thePid.toString(), theVersionId));
 	}
 
 }

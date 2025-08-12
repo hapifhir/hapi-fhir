@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class BulkModifyResourcesResultsJson implements IModelJson {
 
-	@JsonProperty("unchanged")
+	@JsonProperty("report")
 	private String myReport;
 
 	public String getReport() {

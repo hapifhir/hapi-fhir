@@ -35,6 +35,8 @@ public class BulkModifyGenerateReportStep<T extends BaseBulkModifyJobParameters>
 	private int myUnchangedCount = 0;
 	private int myFailureCount = 0;
 	private boolean myFailureListForReportTruncated = false;
+	private int myChunkRetryCount;
+	private int myResourceRetryCount;
 
 	@Nonnull
 	@Override
@@ -49,6 +51,7 @@ public class BulkModifyGenerateReportStep<T extends BaseBulkModifyJobParameters>
 		myChangedCount += data.getChangedIds().size();
 		myUnchangedCount += data.getUnchangedIds().size();
 		myFailureCount += data.getFailures().size();
+		myChunkRetryCount += data.getChunkRetryCount();
 
 		for (Map.Entry<String, String> failure : data.getFailures().entrySet()) {
 			if (myIdToFailure.size() >= 100) {
@@ -87,7 +90,7 @@ public class BulkModifyGenerateReportStep<T extends BaseBulkModifyJobParameters>
 			.append("/sec)")
 			.append('\n');
 		report.append("Total Resources Unchanged : ")
-			.append(myChangedCount)
+			.append(myUnchangedCount)
 			.append(" (")
 			.append(unchangedPerSecond)
 			.append("/sec)")
@@ -98,9 +101,14 @@ public class BulkModifyGenerateReportStep<T extends BaseBulkModifyJobParameters>
 			.append(failedPerSecond)
 			.append("/sec)")
 			.append('\n');
+		report.append("Total Retried Chunks      : ")
+			.append(myChunkRetryCount)
+			.append('\n');
+		report.append("Total Retried Resources   : ")
+			.append(myResourceRetryCount)
+			.append('\n');
 		report.append("-------------------------------------------------\n");
 
-		boolean hasErrors = false;
 		for (String resourceType : getAllResourceTypes()) {
 			report.append("ResourceType[").append(resourceType).append("]\n");
 			if (myResourceTypeToChangedCount.containsKey(resourceType)) {
@@ -129,8 +137,11 @@ public class BulkModifyGenerateReportStep<T extends BaseBulkModifyJobParameters>
 		BulkModifyResourcesResultsJson reportJson = new BulkModifyResourcesResultsJson();
 		reportJson.setReport(reportString);
 
-		theDataSink.accept(reportJson);
+		if (!myIdToFailure.isEmpty()) {
+			throw new ReductionStepFailureException("Bulk modification failed. See report for details.", reportJson);
+		}
 
+		theDataSink.accept(reportJson);
 		return RunOutcome.SUCCESS;
 	}
 

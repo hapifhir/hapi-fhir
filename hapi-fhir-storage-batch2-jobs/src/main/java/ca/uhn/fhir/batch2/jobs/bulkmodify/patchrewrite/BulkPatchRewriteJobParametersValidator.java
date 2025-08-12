@@ -3,6 +3,12 @@ package ca.uhn.fhir.batch2.jobs.bulkmodify.patchrewrite;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchJobParametersValidator;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
+import java.util.List;
 
 public class BulkPatchRewriteJobParametersValidator extends BulkPatchJobParametersValidator<BulkPatchRewriteJobParameters> {
 
@@ -12,7 +18,5 @@ public class BulkPatchRewriteJobParametersValidator extends BulkPatchJobParamete
 	public BulkPatchRewriteJobParametersValidator(FhirContext theFhirContext, IDaoRegistry theDaoRegistry) {
 		super(theFhirContext, theDaoRegistry);
 	}
-
-	// FIXME: verify that rewrite history is enabled
 
 }
