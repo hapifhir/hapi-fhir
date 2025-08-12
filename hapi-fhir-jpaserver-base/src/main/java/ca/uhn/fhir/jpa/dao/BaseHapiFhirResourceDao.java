@@ -2390,16 +2390,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
 				theRequest, theResource, getResourceName());
 
-		if (theRequest.isRewriteHistory() && !myStorageSettings.isUpdateWithHistoryRewriteEnabled()) {
+		boolean rewriteHistory = theRequest != null && theRequest.isRewriteHistory();
+		if (rewriteHistory && !myStorageSettings.isUpdateWithHistoryRewriteEnabled()) {
 			String msg =
 					getContext().getLocalizer().getMessage(BaseStorageDao.class, "updateWithHistoryRewriteDisabled");
 			throw new InvalidRequestException(Msg.code(2781) + msg);
 		}
 
 		Callable<DaoMethodOutcome> updateCallback;
-		if (myStorageSettings.isUpdateWithHistoryRewriteEnabled()
-				&& theRequest != null
-				&& theRequest.isRewriteHistory()) {
+		if (rewriteHistory) {
 			updateCallback = () -> doUpdateWithHistoryRewrite(
 					theResource, theRequest, theTransactionDetails, requestPartitionId, RestOperationTypeEnum.UPDATE);
 		} else {
