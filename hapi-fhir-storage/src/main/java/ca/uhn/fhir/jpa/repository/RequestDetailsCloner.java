@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -40,7 +41,12 @@ class RequestDetailsCloner {
 	private RequestDetailsCloner() {}
 
 	static DetailsBuilder startWith(RequestDetails theDetails) {
-		SystemRequestDetails newDetails = new SystemRequestDetails(theDetails);
+		RequestDetails newDetails;
+		if (theDetails instanceof ServletRequestDetails servletDetails) {
+			newDetails = new ServletRequestDetails(servletDetails);
+		} else {
+			newDetails = new SystemRequestDetails(theDetails);
+		}
 		newDetails.setRequestType(RequestTypeEnum.POST);
 		newDetails.setOperation(null);
 		newDetails.setResource(null);
@@ -53,9 +59,9 @@ class RequestDetailsCloner {
 	}
 
 	static class DetailsBuilder {
-		private final SystemRequestDetails myDetails;
+		private final RequestDetails myDetails;
 
-		DetailsBuilder(SystemRequestDetails theDetails) {
+		DetailsBuilder(RequestDetails theDetails) {
 			myDetails = theDetails;
 		}
 
@@ -112,7 +118,7 @@ class RequestDetailsCloner {
 			return this;
 		}
 
-		SystemRequestDetails create() {
+		RequestDetails create() {
 			return myDetails;
 		}
 	}
