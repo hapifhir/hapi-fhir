@@ -41,7 +41,7 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 	@Override
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
 		return true;
-		//return false;
+		// return false;
 	}
 
 	@Override
@@ -102,7 +102,7 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 			String theCode,
 			String theDisplay,
 			@Nonnull IBaseResource theValueSet) {
-		//return null;
+		// return null;
 		if (!canValidateCodeSystem(theValidationSupportContext, theCodeSystem)) {
 			return null;
 		}
