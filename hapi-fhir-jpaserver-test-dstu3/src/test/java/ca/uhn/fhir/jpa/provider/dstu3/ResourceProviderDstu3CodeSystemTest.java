@@ -359,7 +359,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("code").setValue(new CodeType("1"));
 
 		Parameters outcome = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
-		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		String message = outcome
 			.getParameter()
@@ -368,7 +368,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			.map(t -> ((IPrimitiveType<String>) t.getValue()).getValue())
 			.findFirst()
 			.orElseThrow(IllegalArgumentException::new);
-		assertThat(message).contains("Terminology service was unable to provide validation for https://url#1");
+		assertThat(message).contains("CodeSystem is unknown and can't be validated: https://url for 'https://url#1'");
 	}
 
 }
