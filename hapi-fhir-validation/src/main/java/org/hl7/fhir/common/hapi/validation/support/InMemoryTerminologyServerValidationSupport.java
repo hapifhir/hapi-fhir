@@ -193,7 +193,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			CodeValidationResult codeValidationResult = new CodeValidationResult();
 			if (e.getCodeValidationIssue() != null) {
 				codeValidationResult.setSeverity(e.getCodeValidationIssue().getSeverity());
-				codeValidationResult.setCode(theCode);
+				// codeValidationResult.setCode(theCode);
 			} else {
 				codeValidationResult.setSeverity(IssueSeverity.ERROR);
 			}
