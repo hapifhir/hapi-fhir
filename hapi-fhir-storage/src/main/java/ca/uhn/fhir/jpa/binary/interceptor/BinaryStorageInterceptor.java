@@ -33,7 +33,6 @@ import ca.uhn.fhir.jpa.binary.api.IBinaryTarget;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -45,9 +44,7 @@ import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.IModelVisitor2;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -61,10 +58,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -78,7 +76,19 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BinaryStorageInterceptor.class);
-	public static final String AUTO_INFLATE_BINARY_CONTENT_KEY = "AUTO_INFLATE_BINARY_CONTENT";
+	/**
+	 * UserData key that can be set in {@link RequestDetails#getUserData()} to override
+	 * the {@link #isAllowAutoInflateBinaries()} setting for a single request.
+	 * <p>
+	 * Possible values:
+	 * <ul>
+	 *   <li>{@code Boolean.TRUE}  – force binary inflation even if globally disabled</li>
+	 *   <li>{@code Boolean.FALSE} – skip binary inflation even if globally enabled</li>
+	 *   <li>Absent                – use the global {@code isAllowAutoInflateBinaries()} setting</li>
+	 * </ul>
+	 */
+	public static final String AUTO_INFLATE_BINARY_CONTENT_KEY =
+			BinaryStorageInterceptor.class.getName() + "_AUTO_INFLATE_BINARY_CONTENT";
 
 	@Autowired
 	private IBinaryStorageSvc myBinaryStorageSvc;
@@ -171,49 +181,30 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 	 * may add these extensions to a resource.
 	 */
 	private void blockIllegalExternalExtensions(IBaseResource thePreviousResource, IBaseResource theResource) {
-		Set<String> existingBinaryIds = new HashSet<>();
-		Set<String> existingHashes = new HashSet<>();
-		if (thePreviousResource != null) {
-			myCtx.newTerser().getAllPopulatedChildElementsOfType(thePreviousResource, myBinaryType).stream()
-					.filter(IBaseHasExtensions.class::isInstance)
-					.map(IBaseHasExtensions.class::cast)
-					.flatMap(base -> base.getExtension().stream())
-					.filter(ext -> ext.getUserData(JpaConstants.EXTENSION_EXT_SYSTEMDEFINED) == null)
-					.forEach(ext -> {
-						if (EXT_EXTERNALIZED_BINARY_ID.equals(ext.getUrl())) {
-							extractExtensionValue(ext).ifPresent(existingBinaryIds::add);
-						} else if (EXT_EXTERNALIZED_BINARY_HASH_SHA_256.equals(ext.getUrl())) {
-							extractExtensionValue(ext).ifPresent(existingHashes::add);
-						}
-					});
-		}
+		Map<String, String> existingAttachmentIdToHashMap = buildHashAttachmentIdMap(thePreviousResource, true);
+		Set<String> existingBinaryIds = existingAttachmentIdToHashMap.keySet();
+		Collection<String> existingHashes = existingAttachmentIdToHashMap.values();
 
-		myCtx.newTerser().getAllPopulatedChildElementsOfType(theResource, myBinaryType).stream()
-				.filter(IBaseHasExtensions.class::isInstance)
-				.map(IBaseHasExtensions.class::cast)
-				.flatMap(base -> base.getExtension().stream())
-				.filter(ext -> ext.getUserData(JpaConstants.EXTENSION_EXT_SYSTEMDEFINED) == null)
-				.forEach(ext -> {
-					Optional<String> extensionValue = extractExtensionValue(ext);
-					if (EXT_EXTERNALIZED_BINARY_ID.equals(ext.getUrl())) {
-						extensionValue
-								.filter(v -> !existingBinaryIds.contains(v))
-								.ifPresent(v -> throwIllegalExtension(EXT_EXTERNALIZED_BINARY_ID, v));
-					} else if (EXT_EXTERNALIZED_BINARY_HASH_SHA_256.equals(ext.getUrl())) {
-						extensionValue
-								.filter(v -> !existingHashes.contains(v))
-								.ifPresent(v -> throwIllegalExtension(EXT_EXTERNALIZED_BINARY_HASH_SHA_256, v));
-					}
-				});
-	}
+		recursivelyScanResourceForBinaryData(theResource).forEach(target -> {
+			String id = target.getAttachmentId().orElse(null);
+			String hash = target.getHashExtension().orElse(null);
+			// binaryId check
+			if (id != null && !existingBinaryIds.contains(id)) {
+				throwIllegalExtension(EXT_EXTERNALIZED_BINARY_ID, id);
+			}
+			// hash check
+			if (hash != null && !existingHashes.contains(hash)) {
+				throwIllegalExtension(EXT_EXTERNALIZED_BINARY_HASH_SHA_256, hash);
+			}
 
-	@SuppressWarnings("unchecked")
-	private Optional<String> extractExtensionValue(IBaseExtension<?, ?> theExtension) {
-		if (theExtension.getValue() instanceof IPrimitiveType) {
-			return Optional.ofNullable(((IPrimitiveType<String>) theExtension.getValue()).getValueAsString())
-					.filter(StringUtils::isNotBlank);
-		}
-		return Optional.empty();
+			// binaryId - hash pair consistency check
+			if (id != null && hash != null) {
+				String expected = existingAttachmentIdToHashMap.get(id);
+				if (!Objects.equals(expected, hash)) {
+					throwIllegalExtension(EXT_EXTERNALIZED_BINARY_HASH_SHA_256, hash);
+				}
+			}
+		});
 	}
 
 	private void throwIllegalExtension(String theExtensionUrl, String theValue) {
@@ -240,7 +231,7 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 			resourceId = new IdType(resourceType + "/" + resourceId.getIdPart());
 		}
 
-		Map<String, String> existingHashToAttachmentId = buildHashToAttachmentIdMap(thePreviousResource);
+		Map<String, String> existingHashToAttachmentId = buildHashAttachmentIdMap(thePreviousResource, false);
 		List<IBinaryTarget> attachments = recursivelyScanResourceForBinaryData(theResource);
 		for (IBinaryTarget nextTarget : attachments) {
 			byte[] data = nextTarget.getData();
@@ -295,11 +286,12 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 	 * Builds a map of SHA-256 hashes to corresponding attachment IDs from the given FHIR resource.
 	 * @return A {@link Map} with keys as SHA-256 binary content hashes and values as attachment IDs.
 	 */
-	private Map<String, String> buildHashToAttachmentIdMap(IBaseResource thePreviousResource) {
-		Map<String, String> hashToAttachmentIdMap = new HashMap<>();
+	private Map<String, String> buildHashAttachmentIdMap(
+			IBaseResource thePreviousResource, boolean isAttachmentIdToHash) {
+		Map<String, String> result = new HashMap<>();
 
 		if (thePreviousResource == null) {
-			return hashToAttachmentIdMap;
+			return result;
 		}
 
 		List<IBinaryTarget> previousAttachments = recursivelyScanResourceForBinaryData(thePreviousResource);
@@ -307,11 +299,13 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 			Optional<String> hashOpt = attachment.getHashExtension();
 			Optional<String> idOpt = attachment.getAttachmentId();
 
-			if (hashOpt.isPresent() && idOpt.isPresent()) {
-				hashToAttachmentIdMap.put(hashOpt.get(), idOpt.get());
+			if (isAttachmentIdToHash) {
+				idOpt.ifPresent(id -> result.put(id, hashOpt.orElse(null)));
+			} else {
+				hashOpt.ifPresent(hash -> result.put(hash, idOpt.orElse(null)));
 			}
 		}
-		return hashToAttachmentIdMap;
+		return result;
 	}
 
 	/**

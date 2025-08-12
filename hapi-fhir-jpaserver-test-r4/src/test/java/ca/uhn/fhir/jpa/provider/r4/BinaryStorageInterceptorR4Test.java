@@ -592,6 +592,63 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testUpdateRejectsIncorrectExtension_withSwappedHashes() throws FHIRException {
+		// Create a resource with a big enough docRef
+		DocumentReference docRef = new DocumentReference();
+		addDocumentAttachmentData(docRef, SOME_BYTES);
+		addDocumentAttachmentData(docRef, SOME_BYTES_2);
+		DaoMethodOutcome outcome = myDocumentReferenceDao.create(docRef, mySrd);
+
+		// Make sure it was externalized
+		IIdType id = outcome.getId().toUnqualifiedVersionless();
+		validateContentExternalized(outcome);
+		String binaryId = getExtensionByUrl(docRef, HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
+		assertThat(binaryId).isNotBlank();
+		String hash = getExtensionByUrl(docRef, HapiExtensions.EXT_EXTERNALIZED_BINARY_HASH_SHA_256);
+		assertThat(hash).isNotBlank();
+
+		String binaryId2 = docRef.getContent().get(1).getAttachment().getDataElement()
+			.getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
+		assertThat(binaryId2).isNotBlank();
+		String hash2 = docRef.getContent().get(1).getAttachment().getDataElement()
+			.getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_HASH_SHA_256);
+
+		// Now update with swapped hash
+		docRef = new DocumentReference();
+		docRef.setId(id.toUnqualifiedVersionless());
+		docRef.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
+		DocumentReference.DocumentReferenceContentComponent content = docRef.addContent();
+		content.getAttachment().setContentType("application/octet-stream");
+		content.getAttachment().getDataElement().addExtension(
+			HapiExtensions.EXT_EXTERNALIZED_BINARY_ID,
+			new StringType(binaryId)
+		);
+		content.getAttachment().getDataElement().addExtension(
+			HapiExtensions.EXT_EXTERNALIZED_BINARY_HASH_SHA_256,
+			new StringType(hash2)
+		);
+		DocumentReference.DocumentReferenceContentComponent content2 = docRef.addContent();
+		content2.getAttachment().setContentType("application/octet-stream");
+		content.getAttachment().getDataElement().addExtension(
+			HapiExtensions.EXT_EXTERNALIZED_BINARY_ID,
+			new StringType(binaryId2)
+		);
+		content.getAttachment().getDataElement().addExtension(
+			HapiExtensions.EXT_EXTERNALIZED_BINARY_HASH_SHA_256,
+			new StringType(hash)
+		);
+
+		try {
+			myDocumentReferenceDao.update(docRef, mySrd);
+			fail("Should not be able to update docRef");
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(1329) + "Illegal extension found in request payload - URL \"" +
+				HapiExtensions.EXT_EXTERNALIZED_BINARY_HASH_SHA_256 + "\" and value " +
+				"\"69e464e3be62c4e985ff0c22ab51a4029f49b5b3bec35e7e16a634c613dc70eb\"", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testRetrieveBinaryAboveRetrievalThreshold() {
 		myBinaryStorageInterceptor.setAutoInflateBinariesMaximumSize(5);
 
