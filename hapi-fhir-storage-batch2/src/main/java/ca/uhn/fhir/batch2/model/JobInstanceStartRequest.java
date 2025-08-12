@@ -54,6 +54,7 @@ public class JobInstanceStartRequest implements IModelJson {
 		super();
 		setJobDefinitionId(theJobInstance.getJobDefinitionId());
 		setParameters(theJobInstance.getParameters());
+		setUseCache(theJobInstance.isUseCache());
 	}
 
 	/**
@@ -70,16 +71,18 @@ public class JobInstanceStartRequest implements IModelJson {
 		return myJobDefinitionId;
 	}
 
-	public void setJobDefinitionId(String theJobDefinitionId) {
+	public JobInstanceStartRequest setJobDefinitionId(String theJobDefinitionId) {
 		myJobDefinitionId = theJobDefinitionId;
+		return this;
 	}
 
 	public String getParameters() {
 		return myParameters;
 	}
 
-	public void setParameters(String theParameters) {
+	public JobInstanceStartRequest setParameters(String theParameters) {
 		myParameters = theParameters;
+		return this;
 	}
 
 	/**
@@ -104,8 +107,9 @@ public class JobInstanceStartRequest implements IModelJson {
 		return myUseCache;
 	}
 
-	public void setUseCache(boolean theUseCache) {
+	public JobInstanceStartRequest setUseCache(boolean theUseCache) {
 		myUseCache = theUseCache;
+		return this;
 	}
 
 	@Override
