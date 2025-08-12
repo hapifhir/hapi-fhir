@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 7183
+jira: SMILE-10474
+title: "Previously, updating the binary content of a DocumentReference or Binary resource multiple times with 
+the same data via the $binary-access-write operation or a resource update would cause a new resource version 
+to be created and the binary data to be re-uploaded to external binary storage. This has been fixed."
