@@ -21,9 +21,11 @@ package ca.uhn.fhir.jpa.binary.api;
 
 import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.HapiExtensions;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * Wraps an Attachment datatype or Binary resource, since they both
@@ -44,10 +46,20 @@ public interface IBinaryTarget {
 	IBaseHasExtensions getTarget();
 
 	default Optional<String> getAttachmentId() {
-		return AttachmentUtil.getFirstExtension(getTarget(), HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
+		return AttachmentUtil.getFirstExtension(getTarget(), HapiExtensions.EXT_EXTERNALIZED_BINARY_ID, e -> true);
+	}
+
+	default Optional<String> getAttachmentIdFiltered(Predicate<? super IBaseExtension<?, ?>> theFilter) {
+		return AttachmentUtil.getFirstExtension(getTarget(), HapiExtensions.EXT_EXTERNALIZED_BINARY_ID, theFilter);
 	}
 
 	default Optional<String> getHashExtension() {
-		return AttachmentUtil.getFirstExtension(getTarget(), HapiExtensions.EXT_EXTERNALIZED_BINARY_HASH_SHA_256);
+		return AttachmentUtil.getFirstExtension(
+				getTarget(), HapiExtensions.EXT_EXTERNALIZED_BINARY_HASH_SHA_256, e -> true);
+	}
+
+	default Optional<String> getHashExtensionFiltered(Predicate<? super IBaseExtension<?, ?>> theFilter) {
+		return AttachmentUtil.getFirstExtension(
+				getTarget(), HapiExtensions.EXT_EXTERNALIZED_BINARY_HASH_SHA_256, theFilter);
 	}
 }

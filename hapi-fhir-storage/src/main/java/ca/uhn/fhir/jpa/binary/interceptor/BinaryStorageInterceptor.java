@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.binary.api.IBinaryTarget;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -45,6 +46,7 @@ import ca.uhn.fhir.util.IModelVisitor2;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -66,6 +68,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_EXTERNALIZED_BINARY_HASH_SHA_256;
@@ -89,6 +92,9 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 	 */
 	public static final String AUTO_INFLATE_BINARY_CONTENT_KEY =
 			BinaryStorageInterceptor.class.getName() + "_AUTO_INFLATE_BINARY_CONTENT";
+
+	private static final Predicate<IBaseExtension<?, ?>> EXTENSION_FILTER_PREDICATE =
+			ext -> ext.getUserData(JpaConstants.EXTENSION_EXT_SYSTEMDEFINED) == null;
 
 	@Autowired
 	private IBinaryStorageSvc myBinaryStorageSvc;
@@ -186,8 +192,11 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 		Collection<String> existingHashes = existingAttachmentIdToHashMap.values();
 
 		recursivelyScanResourceForBinaryData(theResource).forEach(target -> {
-			String id = target.getAttachmentId().orElse(null);
-			String hash = target.getHashExtension().orElse(null);
+			String id =
+					target.getAttachmentIdFiltered(EXTENSION_FILTER_PREDICATE).orElse(null);
+			String hash =
+					target.getHashExtensionFiltered(EXTENSION_FILTER_PREDICATE).orElse(null);
+
 			// binaryId check
 			if (id != null && !existingBinaryIds.contains(id)) {
 				throwIllegalExtension(EXT_EXTERNALIZED_BINARY_ID, id);
@@ -296,8 +305,8 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 
 		List<IBinaryTarget> previousAttachments = recursivelyScanResourceForBinaryData(thePreviousResource);
 		for (IBinaryTarget attachment : previousAttachments) {
-			Optional<String> hashOpt = attachment.getHashExtension();
-			Optional<String> idOpt = attachment.getAttachmentId();
+			Optional<String> hashOpt = attachment.getHashExtensionFiltered(EXTENSION_FILTER_PREDICATE);
+			Optional<String> idOpt = attachment.getAttachmentIdFiltered(EXTENSION_FILTER_PREDICATE);
 
 			if (isAttachmentIdToHash) {
 				idOpt.ifPresent(id -> result.put(id, hashOpt.orElse(null)));

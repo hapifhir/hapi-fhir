@@ -27,12 +27,14 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -98,8 +100,10 @@ public class AttachmentUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Optional<String> getFirstExtension(IBaseHasExtensions theAttachment, String theExtension) {
+	public static Optional<String> getFirstExtension(
+			IBaseHasExtensions theAttachment, String theExtension, Predicate<? super IBaseExtension<?, ?>> theFilter) {
 		return theAttachment.getExtension().stream()
+				.filter(theFilter)
 				.filter(t -> theExtension.equals(t.getUrl()))
 				.filter(t -> t.getValue() instanceof IPrimitiveType)
 				.map(t -> (IPrimitiveType<String>) t.getValue())
