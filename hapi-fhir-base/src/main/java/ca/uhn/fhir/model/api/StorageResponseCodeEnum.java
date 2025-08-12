@@ -33,44 +33,33 @@ public enum StorageResponseCodeEnum implements ICodingEnum {
 			"Conditional create succeeded: an existing resource matched the conditional URL so no action was taken."),
 	SUCCESSFUL_UPDATE("Update succeeded."),
 	SUCCESSFUL_UPDATE_AS_CREATE("Update as create succeeded."),
-	SUCCESSFUL_UPDATE_NO_CHANGE("Update succeeded: No changes were detected so no action was taken.", true, true),
+	SUCCESSFUL_UPDATE_NO_CHANGE("Update succeeded: No changes were detected so no action was taken."),
 	SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH(
 			"Conditional update succeeded: no existing resource matched the conditional URL so a new resource was created."),
 	SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH(
 			"Conditional update succeeded: an existing resource matched the conditional URL and was updated."),
 	SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE(
-			"Conditional update succeeded: an existing resource matched the conditional URL and was updated, but no changes were detected so no action was taken.",
-			true,
-			true),
+			"Conditional update succeeded: an existing resource matched the conditional URL and was updated, but no changes were detected so no action was taken."),
 	SUCCESSFUL_DELETE("Delete succeeded."),
-	SUCCESSFUL_DELETE_ALREADY_DELETED(
-			"Delete succeeded: Resource was already deleted so no action was taken.", true, true),
+	SUCCESSFUL_DELETE_ALREADY_DELETED("Delete succeeded: Resource was already deleted so no action was taken."),
 	SUCCESSFUL_DELETE_NOT_FOUND("Delete succeeded: No existing resource was found so no action was taken."),
 
 	SUCCESSFUL_PATCH("Patch succeeded."),
 
-	SUCCESSFUL_PATCH_NO_CHANGE("Patch succeeded: No changes were detected so no action was taken.", true, true),
+	SUCCESSFUL_PATCH_NO_CHANGE("Patch succeeded: No changes were detected so no action was taken."),
 	SUCCESSFUL_CONDITIONAL_PATCH("Conditional patch succeeded."),
 	SUCCESSFUL_CONDITIONAL_PATCH_NO_CHANGE(
-			"Conditional patch succeeded: No changes were detected so no action was taken.", true, true),
+			"Conditional patch succeeded: No changes were detected so no action was taken."),
 	AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE("Automatically created placeholder resource."),
-	FAILURE("Failed to process resource.", false, false),
+	FAILURE("Failed to process resource."),
 	;
 
 	public static final String SYSTEM = "https://hapifhir.io/fhir/CodeSystem/hapi-fhir-storage-response-code";
 
 	private final String myDisplay;
-	private final boolean mySuccessful;
-	private final boolean myNoOp;
 
 	StorageResponseCodeEnum(String theDisplay) {
-		this(theDisplay, true, false);
-	}
-
-	StorageResponseCodeEnum(String theDisplay, boolean theSuccessful, boolean theNoOp) {
 		myDisplay = theDisplay;
-		mySuccessful = theSuccessful;
-		myNoOp = theNoOp;
 	}
 
 	@Override
@@ -86,24 +75,5 @@ public enum StorageResponseCodeEnum implements ICodingEnum {
 	@Override
 	public String getDisplay() {
 		return myDisplay;
-	}
-
-	/**
-	 * Returns <code>true</code> if this code represents a successful outcome
-	 *
-	 * @since 8.6.0
-	 */
-	public boolean isSuccessful() {
-		return mySuccessful;
-	}
-
-	/**
-	 * Returns <code>true</code> if this code represents a NOOP (an operation which did not
-	 * perform any action)
-	 *
-	 * @since 8.6.0
-	 */
-	public boolean isNoOp() {
-		return myNoOp;
 	}
 }
