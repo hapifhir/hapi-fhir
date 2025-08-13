@@ -220,8 +220,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.CHOICE).setOptions(new Reference("http://somevalueset"));
 		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(QUESTIONNAIRE_URL))).thenReturn(q);
 
-		when(myValSupport.canValidateCodeSystem(any(), eq("http://codesystems.com/system"))).thenReturn(true);
-		when(myValSupport.canValidateCodeSystem(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
+		when(myValSupport.canGenerateValidationResultForCodeSystem(any(), eq("http://codesystems.com/system"))).thenReturn(true);
+		when(myValSupport.canGenerateValidationResultForCodeSystem(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
 		when(myValSupport.validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(ValueSet.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 		when(myValSupport.validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(ValueSet.class)))
@@ -1030,8 +1030,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		item.setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.OPENCHOICE).setOptions(new Reference("http://somevalueset"));
 		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(questionnaireRef))).thenReturn(q);
 
-		when(myValSupport.canValidateCodeSystem(any(), eq("http://codesystems.com/system"))).thenReturn(true);
-		when(myValSupport.canValidateCodeSystem(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
+		when(myValSupport.canGenerateValidationResultForCodeSystem(any(), eq("http://codesystems.com/system"))).thenReturn(true);
+		when(myValSupport.canGenerateValidationResultForCodeSystem(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(String.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(String.class)))

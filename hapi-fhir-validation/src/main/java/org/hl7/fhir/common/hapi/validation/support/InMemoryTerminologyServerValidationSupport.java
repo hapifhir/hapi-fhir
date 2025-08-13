@@ -191,9 +191,9 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 					theValidationSupportContext, theValueSet, theCodeSystemUrlAndVersion, theCode);
 		} catch (ExpansionCouldNotBeCompletedInternallyException e) {
 			CodeValidationResult codeValidationResult = new CodeValidationResult();
-			if (e.getCodeValidationIssue() != null) {
+			if (e.getCodeValidationIssue() != null && e.getCodeValidationIssue().getSeverity() != null) {
+				// preserve the severity from the original issue by assigning it to the result
 				codeValidationResult.setSeverity(e.getCodeValidationIssue().getSeverity());
-				// codeValidationResult.setCode(theCode);
 			} else {
 				codeValidationResult.setSeverity(IssueSeverity.ERROR);
 			}
@@ -917,7 +917,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			if (includeOrExcludeSystemResource == null || isIncludeCodeSystemIgnored) {
 
 				if (theWantCode != null) {
-
 					if (theValidationSupportContext
 							.getRootValidationSupport()
 							.isCodeSystemSupported(theValidationSupportContext, includeOrExcludeConceptSystemUrl)) {
@@ -1133,7 +1132,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		}
 	}
 
-	// create a record for a String message and an IssueSeverity
 	private record MessageWithSeverity(String message, IssueSeverity severity) {}
 
 	private MessageWithSeverity getFailureMessageForMissingOrUnusableCodeSystem(

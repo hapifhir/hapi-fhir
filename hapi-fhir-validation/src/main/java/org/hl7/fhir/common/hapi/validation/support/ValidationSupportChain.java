@@ -772,15 +772,16 @@ public class ValidationSupportChain implements IValidationSupport {
 		return value.getValue();
 	}
 
-	private boolean canValidateCodeSystem(
+	private boolean canGenerateValidationResultForCodeSystem(
 			ValidationSupportContext theValidationSupportContext,
 			IValidationSupport theValidationSupport,
 			String theCodeSystemUrl) {
-		CanValidateCodeSystemKey key = new CanValidateCodeSystemKey(theValidationSupport, theCodeSystemUrl);
+		CanGenerateValidationResultForCodeSystemKey key =
+				new CanGenerateValidationResultForCodeSystemKey(theValidationSupport, theCodeSystemUrl);
 		CacheValue<Boolean> value = getFromCache(key);
 		if (value == null) {
-			value = new CacheValue<>(
-					theValidationSupport.canValidateCodeSystem(theValidationSupportContext, theCodeSystemUrl));
+			value = new CacheValue<>(theValidationSupport.canGenerateValidationResultForCodeSystem(
+					theValidationSupportContext, theCodeSystemUrl));
 			putInCache(key, value);
 		}
 		return value.getValue();
@@ -801,7 +802,9 @@ public class ValidationSupportChain implements IValidationSupport {
 			retVal = CacheValue.empty();
 
 			for (IValidationSupport next : myChain) {
-				if ((isBlank(theValueSetUrl) && canValidateCodeSystem(theValidationSupportContext, next, theCodeSystem))
+				if ((isBlank(theValueSetUrl)
+								&& canGenerateValidationResultForCodeSystem(
+										theValidationSupportContext, next, theCodeSystem))
 						|| (isNotBlank(theValueSetUrl)
 								&& isValueSetSupported(theValidationSupportContext, next, theValueSetUrl))) {
 					CodeValidationResult outcome = next.validateCode(
@@ -1255,23 +1258,25 @@ public class ValidationSupportChain implements IValidationSupport {
 		}
 	}
 
-	static class CanValidateCodeSystemKey extends BaseKey<Boolean> {
+	static class CanGenerateValidationResultForCodeSystemKey extends BaseKey<Boolean> {
 
 		private final String myCodeSystemUrl;
 		private final IValidationSupport myValidationSupport;
 		private final int myHashCode;
 
-		private CanValidateCodeSystemKey(IValidationSupport theValidationSupport, String theCodeSystemUrl) {
+		private CanGenerateValidationResultForCodeSystemKey(
+				IValidationSupport theValidationSupport, String theCodeSystemUrl) {
 			myValidationSupport = theValidationSupport;
 			myCodeSystemUrl = theCodeSystemUrl;
-			myHashCode = Objects.hash("CanValidateCodeSystemKey", theValidationSupport, myCodeSystemUrl);
+			myHashCode =
+					Objects.hash("CanGenerateValidationResultForCodeSystemKey", theValidationSupport, myCodeSystemUrl);
 		}
 
 		@Override
 		public boolean equals(Object theO) {
 			if (this == theO) return true;
-			if (!(theO instanceof CanValidateCodeSystemKey)) return false;
-			CanValidateCodeSystemKey that = (CanValidateCodeSystemKey) theO;
+			if (!(theO instanceof CanGenerateValidationResultForCodeSystemKey)) return false;
+			CanGenerateValidationResultForCodeSystemKey that = (CanGenerateValidationResultForCodeSystemKey) theO;
 			return myValidationSupport == that.myValidationSupport
 					&& Objects.equals(myCodeSystemUrl, that.myCodeSystemUrl);
 		}
