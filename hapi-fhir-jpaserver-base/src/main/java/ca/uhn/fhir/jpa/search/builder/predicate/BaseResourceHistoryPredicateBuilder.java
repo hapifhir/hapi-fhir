@@ -112,8 +112,7 @@ public abstract class BaseResourceHistoryPredicateBuilder extends BaseJoiningPre
 			String containsLikeExpression = createLeftAndRightMatchLikeExpression(normalizedString);
 			return BinaryCondition.like(upperFunction, generatePlaceholder(containsLikeExpression));
 		} else {
-			throw new MethodNotAllowedException(
-					Msg.code(getContainsModifierDisabledCode()) + ":contains modifier is disabled on this server");
+			throw new MethodNotAllowedException(Msg.code(2768) + ":contains modifier is disabled on this server");
 		}
 	}
 
