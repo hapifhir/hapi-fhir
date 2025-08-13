@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.XmlUtil;
 import ca.uhn.fhir.validation.IValidationContext;
+import ca.uhn.fhir.validation.ValidationOptions;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -203,7 +204,8 @@ class ValidatorWrapper {
 			}
 
 			Manager.FhirFormat format = Manager.FhirFormat.JSON;
-			v.validate(null, messages, inputStream, format, profiles);
+			ValidationOptions options = theValidationContext.getOptions();
+			v.validate(options.getAppContext(), messages, inputStream, format, profiles);
 		} else {
 			throw new IllegalArgumentException(Msg.code(649) + "Unknown encoding: " + encoding);
 		}

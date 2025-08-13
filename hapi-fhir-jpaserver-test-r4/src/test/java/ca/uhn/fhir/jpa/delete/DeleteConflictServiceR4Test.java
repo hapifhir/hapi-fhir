@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.delete;
 
+import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -19,6 +20,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +36,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -373,6 +376,49 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		}
 
 		assertThat(conflicts).hasSize(1);
+	}
+
+
+	@Test
+	void testDeletePatientReferencedInProvenanceTarget_AllowVersionsInProvenanceTarget_ShouldDeleteWithoutConflict() {
+		//we don't expect this to be called, delete should occur without any conflict
+		myDeleteInterceptor.deleteConflictFunction = x -> null;
+
+		try {
+			myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
+			Patient pat = new Patient();
+			IIdType patId = myPatientDao.create(pat, mySrd).getId();
+
+			Provenance prov = new Provenance();
+			prov.addTarget(new Reference(patId.toUnqualified()));
+			myProvenanceDao.create(prov, mySrd);
+
+			myPatientDao.delete(patId.toUnqualifiedVersionless(), mySrd);
+
+			assertThat(myDeleteInterceptor.myCallCount).isZero();
+		} finally {
+			//revert the parser option config to its default
+			myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(new ParserOptions().getDontStripVersionsFromReferencesAtPaths());
+		}
+	}
+
+	@Test
+	void testDeletePatientReferencedInProvenanceTarget_DontAllowVersionsInProvenanceTarget_ShouldFailWithConflict() {
+		myDeleteInterceptor.deleteConflictFunction = x -> null;
+
+		Patient pat = new Patient();
+		IIdType patId = myPatientDao.create(pat, mySrd).getId();
+
+		Provenance prov = new Provenance();
+		prov.addTarget(new Reference(patId.toUnqualified()));
+		myProvenanceDao.create(prov, mySrd);
+
+		IIdType versionlessPatId = patId.toUnqualifiedVersionless();
+
+		assertThatThrownBy(() -> myPatientDao.delete(versionlessPatId, mySrd))
+			.isInstanceOf(ResourceVersionConflictException.class);
+
+		assertThat(myDeleteInterceptor.myCallCount).isOne();
 	}
 
 	private DeleteConflictOutcome deleteConflicts(DeleteConflictList theList) {
