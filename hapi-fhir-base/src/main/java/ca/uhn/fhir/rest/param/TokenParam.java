@@ -169,7 +169,7 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 		} else {
 			int barIndex = ParameterUtil.nonEscapedIndexOf(theParameter, '|');
 			if (barIndex != -1) {
-				setSystem(theParameter.substring(0, barIndex));
+				setSystem(ParameterUtil.unescape(theParameter.substring(0, barIndex)));
 				setValue(ParameterUtil.unescape(theParameter.substring(barIndex + 1)));
 			} else {
 				setValue(ParameterUtil.unescape(theParameter));
