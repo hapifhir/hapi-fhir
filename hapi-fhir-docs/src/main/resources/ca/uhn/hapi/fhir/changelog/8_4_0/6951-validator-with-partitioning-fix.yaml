@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 6951
+title: "Validators not passing the RequestDetails object through
+        would result in validation being unable to resolve
+        resource references when partitioning is used.
+        This has been resolved.
+"

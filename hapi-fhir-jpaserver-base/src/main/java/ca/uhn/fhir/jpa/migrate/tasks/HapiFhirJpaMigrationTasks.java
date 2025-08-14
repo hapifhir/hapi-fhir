@@ -130,6 +130,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init780();
 		init820();
 		init840();
+		init860();
+	}
+
+	protected void init860() {
+		Builder version = forVersion(VersionEnum.V8_4_0);
+		{
+			version.onTable("HFJ_RESOURCE_MODIFIED").dropPrimaryKey("20250729.1");
+			version.onTable("HFJ_RESOURCE_MODIFIED").addPrimaryKey("20250729.2", "RES_ID", "RES_VER", "RESOURCE_TYPE");
+		}
 	}
 
 	protected void init840() {
