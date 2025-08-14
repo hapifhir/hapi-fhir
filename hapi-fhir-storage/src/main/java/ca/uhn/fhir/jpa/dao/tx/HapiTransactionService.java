@@ -61,6 +61,7 @@ import org.springframework.transaction.support.TransactionOperations;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 
@@ -584,7 +585,12 @@ public class HapiTransactionService implements IHapiTransactionService {
 			}
 
 			if (myTransactionDetails != null) {
-				myTransactionDetails.getRollbackUndoActions().forEach(Runnable::run);
+				// Loop through the rollback undo actions in reverse order so we undo them in the correct order
+				List<Runnable> rollbackUndoActions = myTransactionDetails.getRollbackUndoActions();
+				for (int i = rollbackUndoActions.size() - 1; i > 0; i--) {
+					Runnable rollbackUndoAction = rollbackUndoActions.get(i);
+					rollbackUndoAction.run();
+				}
 				myTransactionDetails.clearRollbackUndoActions();
 				myTransactionDetails.clearResolvedItems();
 				myTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);

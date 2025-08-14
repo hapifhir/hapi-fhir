@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI-FHIR Storage Batch2 Jobs
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.batch2.jobs.bulkmodify.patchrewrite;
 
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -5,6 +24,7 @@ import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyJobAppCtx
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyOrRewriteGenerateReportStep;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyCommonJobAppCtx;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.TypedPidToTypedPidAndVersionStep;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchJobParametersValidator;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchModifyResourcesStep;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionListWorkChunkJson;
@@ -44,8 +64,8 @@ public class BulkPatchRewriteJobAppCtx extends BaseBulkModifyJobAppCtx<BulkPatch
 	}
 
 	@Override
-	protected BulkPatchRewriteJobParametersValidator getJobParameterValidator() {
-		return new BulkPatchRewriteJobParametersValidator(myFhirContext, myDaoRegistry);
+	protected BulkPatchJobParametersValidator<BulkPatchRewriteJobParameters> getJobParameterValidator() {
+		return new BulkPatchJobParametersValidator<>(myFhirContext, myDaoRegistry);
 	}
 
 	@Override

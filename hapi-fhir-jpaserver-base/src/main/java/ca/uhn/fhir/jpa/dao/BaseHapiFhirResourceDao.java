@@ -2417,11 +2417,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.withRequest(theRequest)
 				.withTransactionDetails(theTransactionDetails)
 				.withRequestPartitionId(requestPartitionId)
-				// TODO: This shouldn't be needed since we also added the rollback action to the transaction details
-				// but we clear the rollback items from the TX details before any automatic retries so they don't work
-				// in those cases. See FhirResourceDaoR4ConcurrentWriteTest#testCreateWithClientAssignedId for an
-				// example of a test which fails if this is removed - JA 202508 to fix in a subsequent PR
-				.onRollback(onRollback)
 				.execute(updateCallback);
 	}
 

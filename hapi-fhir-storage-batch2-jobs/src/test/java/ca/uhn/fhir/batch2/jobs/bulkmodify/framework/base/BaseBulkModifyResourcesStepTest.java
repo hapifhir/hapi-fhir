@@ -11,7 +11,6 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -26,14 +25,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -41,14 +38,15 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.util.function.Function;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("unused")
 @ExtendWith(MockitoExtension.class)
 class BaseBulkModifyResourcesStepTest {
 
@@ -58,6 +56,7 @@ class BaseBulkModifyResourcesStepTest {
 	private IHapiTransactionService myTransactionService = new MyMockTxService();
 	@Mock
 	private DaoRegistry myDaoRegistry;
+	@SuppressWarnings("rawtypes")
 	@Mock
 	private IFhirSystemDao mySystemDao;
 	@Mock
@@ -70,6 +69,8 @@ class BaseBulkModifyResourcesStepTest {
 	private MySvc mySvc = new MySvc();
 	@Mock
 	private IFhirResourceDaoPatient<Patient> myResourceDao;
+	@Captor
+	private ArgumentCaptor<BulkModifyResourcesChunkOutcomeJson> myDataCaptor;
 
 	@ParameterizedTest
 	@CsvSource(delimiter = '|', textBlock = """
@@ -101,19 +102,40 @@ class BaseBulkModifyResourcesStepTest {
 		}
 
 		// Test
-		assertThatThrownBy(()->mySvc.run(new StepExecutionDetails<>(params, data, instance, new WorkChunk()), mySink))
+		assertThatThrownBy(() -> mySvc.run(new StepExecutionDetails<>(params, data, instance, new WorkChunk()), mySink))
 			.isInstanceOf(JobExecutionFailedException.class)
 			.hasMessage(theExpectedMessage);
 
 	}
 
+	@Test
+	public void testNoopResponse() {
+		// Setup
+		MyParameters params = new MyParameters();
+		JobInstance instance = new JobInstance();
+		TypedPidAndVersionListWorkChunkJson data = new TypedPidAndVersionListWorkChunkJson();
+		data.addTypedPidWithNullPartitionForUnitTest("Patient", 1L, null);
 
-	private class MySvc extends BaseBulkModifyResourcesStep<MyParameters, Integer> {
-		@Override
-		protected ResourceModificationResponse modifyResource(MyParameters theJobParameters, Integer theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest) {
-			return myFunction.apply(theModificationRequest);
-		}
+		Patient inputPatient = new Patient();
+		inputPatient.setId("Patient/ABC/_history/123");
+		inputPatient.setActive(true);
+
+		when(myDaoRegistry.getResourceDao(eq("Patient"))).thenReturn(myResourceDao);
+		when(myResourceDao.readByPid(any())).thenReturn(inputPatient);
+
+		when(myFunction.apply(any())).thenReturn(ResourceModificationResponse.noChange());
+
+		// Test
+		mySvc.run(new StepExecutionDetails<>(params, data, instance, new WorkChunk()), mySink);
+
+		// Verify
+		verify(mySink, times(1)).accept(myDataCaptor.capture());
+		BulkModifyResourcesChunkOutcomeJson outputData = myDataCaptor.getValue();
+		assertThat(outputData.getUnchangedIds()).contains("Patient/ABC/_history/123");
+		assertThat(outputData.getChangedIds()).isEmpty();
+		assertThat(outputData.getFailures()).isEmpty();
 	}
+
 
 	private static class MyParameters extends BaseBulkModifyJobParameters {
 
@@ -135,6 +157,13 @@ class BaseBulkModifyResourcesStepTest {
 					TransactionSynchronizationManager.setActualTransactionActive(false);
 				}
 			}
+		}
+	}
+
+	private class MySvc extends BaseBulkModifyResourcesStep<MyParameters, Integer> {
+		@Override
+		protected ResourceModificationResponse modifyResource(MyParameters theJobParameters, Integer theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest) {
+			return myFunction.apply(theModificationRequest);
 		}
 	}
 

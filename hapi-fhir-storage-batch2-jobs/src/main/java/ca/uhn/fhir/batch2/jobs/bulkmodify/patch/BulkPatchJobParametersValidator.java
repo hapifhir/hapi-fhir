@@ -1,76 +1,71 @@
+/*-
+ * #%L
+ * HAPI-FHIR Storage Batch2 Jobs
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.batch2.jobs.bulkmodify.patch;
 
-import ca.uhn.fhir.batch2.api.IJobParametersValidator;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyJobParametersValidator;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.patch.FhirPatch;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
-public class BulkPatchJobParametersValidator<PT extends BulkPatchJobParameters> implements IJobParametersValidator<PT> {
+public class BulkPatchJobParametersValidator<PT extends BulkPatchJobParameters>
+		extends BaseBulkModifyJobParametersValidator<PT> {
 
 	private final FhirContext myFhirContext;
-	private static final Pattern URL_PATTERN = Pattern.compile("([A-Z][a-zA-Z0-9]+)\\?.*");
-	private final IDaoRegistry myDaoRegistry;
 
 	public BulkPatchJobParametersValidator(FhirContext theFhirContext, IDaoRegistry theDaoRegistry) {
+		super(theDaoRegistry);
 		myFhirContext = theFhirContext;
-		myDaoRegistry = theDaoRegistry;
 	}
 
-	@Nullable
 	@Override
-	public List<String> validate(RequestDetails theRequestDetails, @Nonnull PT theParameters) {
+	protected void validateJobSpecificParameters(PT theParameters, List<String> theIssueListToPopulate) {
+		validatePatch(theParameters, theIssueListToPopulate);
+	}
 
-		List<String> urls = theParameters.getUrls();
-		if (urls.isEmpty()) {
-			return List.of("No URLs were provided");
-		}
-
-		for (String nextUrl : urls) {
-			Matcher matcher = URL_PATTERN.matcher(defaultString(nextUrl));
-			if (!matcher.matches()) {
-				return List.of("Invalid/unsupported URL (must use syntax '{resourceType}?[optional params]': "
-						+ sanitizeUrlPart(nextUrl));
-			}
-			String resourceType = matcher.group(1);
-			if (!myDaoRegistry.isResourceTypeSupported(resourceType)) {
-				return List.of("Resource type " + sanitizeUrlPart(resourceType) + " is not supported");
-			}
-		}
-
+	private void validatePatch(PT theParameters, List<String> theIssueListToPopulate) {
 		IBaseResource patch;
 		try {
 			patch = theParameters.getFhirPatch(myFhirContext);
 			if (patch == null) {
-				return List.of("No Patch document was provided");
+				theIssueListToPopulate.add("No Patch document was provided");
 			}
 		} catch (DataFormatException e) {
-			return List.of("Failed to parse FHIRPatch document: " + e.getMessage());
+			theIssueListToPopulate.add("Failed to parse FHIRPatch document: " + e.getMessage());
+			return;
 		}
 
 		if (!"Parameters".equals(myFhirContext.getResourceType(patch))) {
-			return List.of(
+			theIssueListToPopulate.add(
 					"FHIRPatch document must be a Parameters resource, found: " + myFhirContext.getResourceType(patch));
+			return;
 		}
 
 		try {
 			new FhirPatch(myFhirContext).validate(patch);
 		} catch (InvalidRequestException e) {
-			return List.of("Provided FHIRPatch document is invalid: " + e.getMessage());
+			theIssueListToPopulate.add("Provided FHIRPatch document is invalid: " + e.getMessage());
 		}
-
-		return List.of();
 	}
 }
