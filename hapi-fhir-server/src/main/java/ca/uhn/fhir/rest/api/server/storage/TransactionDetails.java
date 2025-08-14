@@ -97,7 +97,8 @@ public class TransactionDetails {
 	}
 
 	/**
-	 * Add an action that should be executed if the transaction is rolled back
+	 * Add an action that should be executed if the transaction is rolled back. If a rollback is triggered, the
+	 * actions will be executed in reverse order in order to leave .
 	 *
 	 * @since 5.5.0
 	 */
