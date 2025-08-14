@@ -231,7 +231,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("Duplicates")
@@ -7572,7 +7571,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				Pair.of("http://foo|123,456|", false),
 				Pair.of("http://foo\\|123\\,456|", true)
 				)
-			.map(t -> argumentSet(t.getKey(), "Patient?identifier=" + UrlUtil.escapeUrlParam(t.getKey()), t.getValue()));
+			.map(t -> Arguments.of("Patient?identifier=" + UrlUtil.escapeUrlParam(t.getKey()), t.getValue()));
 	}
 
 	public static Stream<Arguments> createFhirSearchWithChainingAndCountParams() {
