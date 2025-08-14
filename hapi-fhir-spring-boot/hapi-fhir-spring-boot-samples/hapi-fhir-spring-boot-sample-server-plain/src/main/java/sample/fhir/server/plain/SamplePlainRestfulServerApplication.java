@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-spring-boot-sample-client-apache
+ * hapi-fhir-spring-boot-sample-server-jersey
  * %%
  * Copyright (C) 2014 - 2017 University Health Network
  * %%
@@ -17,40 +17,20 @@
  * limitations under the License.
  * #L%
  */
-package sample.fhir.client;
+package sample.fhir.server.plain;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.spring.boot.autoconfigure.FhirAutoConfiguration;
-
-import org.hl7.fhir.dstu3.model.CapabilityStatement;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
+
+import ca.uhn.fhir.spring.boot.autoconfigure.FhirAutoConfiguration;
 
 @SpringBootApplication
 @ImportAutoConfiguration(FhirAutoConfiguration.class)
-public class SampleApacheRestfulClientApplication {
+public class SamplePlainRestfulServerApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SampleApacheRestfulClientApplication.class, args);
+		SpringApplication.run(SamplePlainRestfulServerApplication.class, args);
 	}
 
-	@Bean
-	public LoggingInterceptor loggingInterceptor() {
-		return new LoggingInterceptor(true);
-	}
-
-	@Bean
-	public CommandLineRunner runner(final IGenericClient fhirClient) {
-		return new CommandLineRunner() {
-
-			@Override
-			public void run(String... args) throws Exception {
-				fhirClient.capabilities().ofType(CapabilityStatement.class) /* .execute() */;
-			}
-		};
-	}
 }
