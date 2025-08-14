@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.jpa.searchparam.fulltext;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
 
 /**
  * This is a response object containing the FullText index data which should be stored during
@@ -72,7 +72,7 @@ public class FullTextExtractionResponse {
 	 *
 	 * @param thePayload The fulltext payload string. May be <code>null</code> if no payload should be specified for the given resource.
 	 */
-	public static FullTextExtractionResponse indexPayload(@Nullable String thePayload) {
+	public static FullTextExtractionResponse indexPayload(@Nonnull String thePayload) {
 		return new FullTextExtractionResponse(false, false, thePayload);
 	}
 

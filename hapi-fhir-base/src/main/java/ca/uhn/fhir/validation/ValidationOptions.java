@@ -29,8 +29,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ValidationOptions {
 
-	private static ValidationOptions ourEmpty;
 	private Set<String> myProfiles;
+
+	/**
+	 * Context for the validation (a RequestDetails object)
+	 */
+	private Object myAppContext;
 
 	public ValidationOptions() {}
 
@@ -55,13 +59,22 @@ public class ValidationOptions {
 		return this;
 	}
 
+	public ValidationOptions setAppContext(Object theContext) {
+		myAppContext = theContext;
+		return this;
+	}
+
+	/**
+	 * Returns the AppContext (RequestDetails) set to this options object.
+	 * Can be null.
+	 */
+	public Object getAppContext() {
+		return myAppContext;
+	}
+
 	public static ValidationOptions empty() {
-		ValidationOptions retVal = ourEmpty;
-		if (retVal == null) {
-			retVal = new ValidationOptions();
-			retVal.myProfiles = Collections.emptySet();
-			ourEmpty = retVal;
-		}
-		return retVal;
+		ValidationOptions retval = new ValidationOptions();
+		retval.myProfiles = Collections.emptySet();
+		return retval;
 	}
 }

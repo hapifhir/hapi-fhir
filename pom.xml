@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>8.5.0-SNAPSHOT</version>
+	<version>8.5.1-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -3010,6 +3010,52 @@
 	</build>
 
 	<profiles>
+		<profile>
+			<id>CHECKSTYLE</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-checkstyle-plugin</artifactId>
+						<inherited>false</inherited>
+						<dependencies>
+							<dependency>
+								<groupId>com.puppycrawl.tools</groupId>
+								<artifactId>checkstyle</artifactId>
+								<version>${checkstyle_version}</version>
+							</dependency>
+							<dependency>
+								<groupId>ca.uhn.hapi.fhir</groupId>
+								<artifactId>hapi-fhir-checkstyle</artifactId>
+								<version>${project.version}</version>
+							</dependency>
+						</dependencies>
+						<configuration>
+							<sourceDirectories>
+								<sourceDirectory>./</sourceDirectory>
+							</sourceDirectories>
+							<includes>**/src/main/java/**/*.java</includes>
+							<excludes>**/osgi/**/*, **/.mvn/**/*, **/.mvn_/**/*, **/target/**/*, **/test/**/*</excludes>
+							<includeTestSourceDirectory>false</includeTestSourceDirectory>
+							<configLocation>checkstyle/hapi-base-checkstyle.xml</configLocation>
+							<suppressionsLocation>checkstyle/hapi-base-checkstyle-suppression.xml</suppressionsLocation>
+							<inputEncoding>UTF-8</inputEncoding>
+							<consoleOutput>true</consoleOutput>
+							<failOnViolation>true</failOnViolation>
+						</configuration>
+						<executions>
+							<execution>
+								<id>checkstyle-all-modules</id>
+								<phase>validate</phase>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 		<profile>
 			<id>ERRORPRONE</id>
 			<build>

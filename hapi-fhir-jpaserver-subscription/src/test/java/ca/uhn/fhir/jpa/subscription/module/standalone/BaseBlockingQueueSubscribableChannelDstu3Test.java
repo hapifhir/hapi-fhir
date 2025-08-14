@@ -75,7 +75,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	protected static ObservationListener ourObservationListener;
 	protected static String ourListenerServerBase;
 	private static int ourListenerPort;
-	private static RestfulServer ourListenerRestServer;
+	protected static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static IChannelConsumer<ResourceModifiedMessage> ourMatchingConsumer;
 	private static IChannelProducer<ResourceModifiedMessage> ourMatchingProducer;
@@ -94,7 +94,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	protected SubscriptionSettings mySubscriptionSettings;
 	protected String myCode = "1000000050";
 	@Autowired
-	FhirContext myFhirContext;
+	protected FhirContext myFhirContext;
 	@Autowired
 	@Qualifier("subscriptionActivatingSubscriber")
 	IMessageListener<ResourceModifiedMessage> mySubscriptionActivatingSubscriber;

@@ -510,25 +510,23 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 	@Test
 	public void testReadResourceInPatientCompartment_WithTwoSubjects_VRead() {
 		// Setup
-
-		ListResource list = new ListResource();
-		list.addEntry().getItem().setReference("Patient/P1");
-		list.addEntry().getItem().setReference("Patient/P2");
-		IIdType listId = myListProvider.store(list);
+		Observation observation = new Observation();
+		observation.addPerformer(new Reference("Patient/P1"));
+		observation.addPerformer(new Reference("Patient/P2"));
+		IIdType obsId = myObservationProvider.store(observation);
 
 		mySvc.setAdditionalPatientCompartmentParamNames(Set.of("item"));
 
 		// Test
-
-		ListResource outcome = myClient
+		Observation outcome = myClient
 			.read()
-			.resource(ListResource.class)
-			.withId(listId)
+			.resource(Observation.class)
+			.withId(obsId)
 			.execute();
 
 		// Verify
 
-		assertThat(outcome.getEntry()).hasSize(2);
+		assertThat(outcome.getPerformer()).hasSize(2);
 
 		verify(myAuditEventSink, times(2)).recordAuditEvent(myAuditEventCaptor.capture());
 
@@ -538,7 +536,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertType(auditEvent);
 		assertSubType(auditEvent, "vread");
 		assertEquals(AuditEvent.AuditEventAction.R, auditEvent.getAction());
-		assertHasSystemObjectEntities(auditEvent, ourServer.getBaseUrl() + "/" + listId.getValue());
+		assertHasSystemObjectEntities(auditEvent, ourServer.getBaseUrl() + "/" + obsId.getValue());
 		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, "Patient/P1");
 	}
