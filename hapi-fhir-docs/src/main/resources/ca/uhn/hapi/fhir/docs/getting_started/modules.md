@@ -115,7 +115,7 @@ The following table shows the modules that make up the HAPI FHIR library.
     <tr>
         <td style="font-weight: bold; white-space: nowrap;">hapi-fhir-client-okhttp</td>
         <td>
-            <a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-client-okhttp">Sources&nbsp;&rsaquo;</a>
+            <a href="https://github.com/hapifhir/hapi-fhir/tree/master/hapi-fhir-client-okhttp">Sources&nbsp;&rsaquo;</a>
         </td>
         <td>
             This module contains an alternate HTTP implementation based on
@@ -126,7 +126,7 @@ The following table shows the modules that make up the HAPI FHIR library.
         <td style="font-weight: bold; white-space: nowrap;">hapi-fhir-android</td>
         <td>
             <a href="/hapi-fhir/docs/android/">Documentation&nbsp;&rsaquo;</a>
-            <a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-android/">Sources&nbsp;&rsaquo;</a>
+            <a href="https://github.com/hapifhir/hapi-fhir/tree/master/hapi-fhir-android/">Sources&nbsp;&rsaquo;</a>
         </td>
         <td>
             This module contains the Android HAPI FHIR framework, which is a FHIR
@@ -202,7 +202,7 @@ The following table shows the modules that make up the HAPI FHIR library.
         <td>
             <a href="/hapi-fhir/docs/server_plain/">Documentation&nbsp;&rsaquo;</a><br/>
             <a href="/hapi-fhir/apidocs/hapi-fhir-server/">JavaDoc&nbsp;&rsaquo;</a>
-            <a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-server/">Sources&nbsp;&rsaquo;</a>
+            <a href="https://github.com/hapifhir/hapi-fhir/tree/master/hapi-fhir-server/">Sources&nbsp;&rsaquo;</a>
         </td>
         <td>
             This module contains the HAPI FHIR Server framework, which can be used to
@@ -214,7 +214,7 @@ The following table shows the modules that make up the HAPI FHIR library.
         <td>
             <a href="/hapi-fhir/docs/server_jpa/">Documentation&nbsp;&rsaquo;</a><br/>
             <a href="/hapi-fhir/apidocs/hapi-fhir-jpaserver-base/">JavaDoc&nbsp;&rsaquo;</a>
-            <a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-jpaserver-base/">Sources&nbsp;&rsaquo;</a>
+            <a href="https://github.com/hapifhir/hapi-fhir/tree/master/hapi-fhir-jpaserver-base/">Sources&nbsp;&rsaquo;</a>
         </td>
         <td>
             This module contains the HAPI FHIR "JPA Server", which is a complete
@@ -226,7 +226,7 @@ The following table shows the modules that make up the HAPI FHIR library.
         <td style="font-weight: bold; white-space: nowrap;">hapi-fhir-testpage-overlay</td>
         <td>
             <a href="/hapi-fhir/docs/server_plain/web_testpage_overlay.html">Documentation&nbsp;&rsaquo;</a><br/>
-            <a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-testpage-overlay/">Sources&nbsp;&rsaquo;</a>
+            <a href="https://github.com/hapifhir/hapi-fhir/tree/master/hapi-fhir-testpage-overlay/">Sources&nbsp;&rsaquo;</a>
         </td>
         <td>
             This module contains the web based "testpage overlay", which is the
