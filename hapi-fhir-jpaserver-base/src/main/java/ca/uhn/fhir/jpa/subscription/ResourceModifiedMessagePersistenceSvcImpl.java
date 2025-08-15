@@ -171,11 +171,11 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		IIdType theMsgId = theMsg.getPayloadId(myFhirContext);
 
 		ResourceModifiedEntity resourceModifiedEntity = new ResourceModifiedEntity();
-		resourceModifiedEntity.setResourceModifiedEntityPK(with(theMsgId.getIdPart(), theMsgId.getVersionIdPart()));
+		resourceModifiedEntity.setResourceModifiedEntityPK(
+				with(theMsgId.getIdPart(), theMsgId.getVersionIdPart(), theMsgId.getResourceType()));
 
 		String partialModifiedMessage = getPayloadLessMessageAsString(theMsg);
 		resourceModifiedEntity.setSummaryResourceModifiedMessage(partialModifiedMessage);
-		resourceModifiedEntity.setResourceType(theMsgId.getResourceType());
 		resourceModifiedEntity.setCreatedTime(new Date());
 
 		return resourceModifiedEntity;

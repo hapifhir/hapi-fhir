@@ -596,7 +596,7 @@ public class FhirPatch {
 	private void throwNoElementsError(String theFullReplacePath) {
 		String msg =
 				myContext.getLocalizer().getMessage(FhirPatch.class, "noMatchingElementForPath", theFullReplacePath);
-		throw new InvalidRequestException(Msg.code(2617) + msg);
+		throw new InvalidRequestException(Msg.code(2761) + msg);
 	}
 
 	private void handleMoveOperation(@Nullable IBaseResource theResource, IBase theParameters) {

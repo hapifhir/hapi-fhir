@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.util.ResourceLinkUtils;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
@@ -340,7 +341,7 @@ public class ResourceLink extends BaseResourceIndex {
 	public void setTargetResourceUrlCanonical(String theTargetResourceUrl) {
 		Validate.notBlank(theTargetResourceUrl);
 
-		myTargetResourceType = "(unknown)";
+		myTargetResourceType = ResourceLinkUtils.UNKNOWN;
 		myTargetResourceUrl = theTargetResourceUrl;
 	}
 
