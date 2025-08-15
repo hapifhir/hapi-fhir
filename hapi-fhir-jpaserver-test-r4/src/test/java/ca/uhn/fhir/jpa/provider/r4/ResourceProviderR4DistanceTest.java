@@ -400,8 +400,8 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			"PractitionerRole-Toronto",
 			"PractitionerRole-Mississauga",
 			"PractitionerRole-St. Catharines",
-			"PractitionerRole-Oshawa",
 			"PractitionerRole-Hamilton",
+			"PractitionerRole-Oshawa",
 			"PractitionerRole-Barrie",
 			"PractitionerRole-Kitchener");
 
