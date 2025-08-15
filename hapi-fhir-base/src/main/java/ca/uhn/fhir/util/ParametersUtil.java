@@ -43,13 +43,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
@@ -137,27 +140,54 @@ public class ParametersUtil {
 				.findFirst();
 	}
 
+	/**
+	 * Returns a map containing all of the named parameters in a Parameters resource. The key will be the
+	 * <code>Parameters.parameter.name</code> value (or an empty string <code>""</code> if no name is present)
+	 * and the value will be the <code>Parameters.parameter</code> repetition.
+	 *
+	 * @param theCtx The FhirContext instance appropriate for the input
+	 * @param theParameters The Parameters resource to examine
+	 * @return A map containing named parameters
+	 * @since 8.4.0
+	 */
+	public static Map<String, List<IBase>> getNamedParameters(FhirContext theCtx, IBaseResource theParameters) {
+		Map<String, List<IBase>> retVal = new HashMap<>();
+		BiConsumer<String, IBase> consumer = (paramName, part) -> {
+			paramName = defaultString(paramName);
+			List<IBase> list = retVal.computeIfAbsent(paramName, k -> new ArrayList<>());
+			list.add(part);
+		};
+
+		getNamedParameters(theCtx, theParameters, consumer);
+
+		return retVal;
+	}
+
 	public static List<IBase> getNamedParameters(
 			FhirContext theCtx, IBaseResource theParameters, String theParameterName) {
-		Validate.notNull(theParameters, "theParameters must not be null");
-		RuntimeResourceDefinition resDef = theCtx.getResourceDefinition(theParameters.getClass());
-		BaseRuntimeChildDefinition parameterChild = resDef.getChildByName("parameter");
-		List<IBase> parameterReps = parameterChild.getAccessor().getValues(theParameters);
+		List<IBase> retVal = new ArrayList<>();
+		BiConsumer<String, IBase> consumer = (paramName, part) -> {
+			if (theParameterName.equals(paramName)) {
+				retVal.add(part);
+			}
+		};
 
-		return parameterReps.stream()
-				.filter(param -> {
-					BaseRuntimeElementCompositeDefinition<?> nextParameterDef =
-							(BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(param.getClass());
-					BaseRuntimeChildDefinition nameChild = nextParameterDef.getChildByName("name");
-					List<IBase> nameValues = nameChild.getAccessor().getValues(param);
-					Optional<? extends IPrimitiveType<?>> nameValue = nameValues.stream()
-							.filter(t -> t instanceof IPrimitiveType<?>)
-							.map(t -> ((IPrimitiveType<?>) t))
-							.findFirst();
-					return nameValue.isPresent()
-							&& theParameterName.equals(nameValue.get().getValueAsString());
-				})
-				.collect(Collectors.toList());
+		getNamedParameters(theCtx, theParameters, consumer);
+
+		return retVal;
+	}
+
+	private static void getNamedParameters(
+			FhirContext theCtx, IBaseResource theParameters, BiConsumer<String, IBase> theConsumer) {
+		Validate.notNull(theParameters, "theParameters must not be null");
+
+		FhirTerser terser = theCtx.newTerser();
+		List<IBase> parameterReps = terser.getValues(theParameters, "parameter");
+
+		for (IBase parameter : parameterReps) {
+			String name = terser.getSinglePrimitiveValueOrNull(parameter, "name");
+			theConsumer.accept(name, parameter);
+		}
 	}
 
 	public static Optional<IBase> getParameterPart(FhirContext theCtx, IBase theParameter, String theParameterName) {

@@ -42,6 +42,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -121,10 +122,15 @@ public class Batch2JobHelper {
 				.stream()
 				.map(t -> t.getInstanceId() + " " + t.getJobDefinitionId() + "/" + t.getStatus().name())
 				.collect(Collectors.joining("\n"));
-			String currentStatus = myJobCoordinator.getInstance(theInstanceId).getStatus().name();
-			fail("Job " + theInstanceId + " still has status " + currentStatus
+			JobInstance instance = myJobCoordinator.getInstance(theInstanceId);
+			String currentStatus = instance.getStatus().name();
+			String message = "Job " + theInstanceId + " still has status " + currentStatus
 				+ " after " + checkCount.get() + " checks in " + theSecondsToWait + " seconds."
-				+ " - All statuses:\n" + statuses);
+				+ " - All statuses:\n" + statuses;
+			if (isNotBlank(instance.getErrorMessage())) {
+				message += "\nError message: " + instance.getErrorMessage();
+			}
+			fail(message);
 		}
 		return myJobCoordinator.getInstance(theInstanceId);
 	}

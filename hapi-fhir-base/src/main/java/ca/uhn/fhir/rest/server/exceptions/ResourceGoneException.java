@@ -27,7 +27,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
- * Represents an <b>HTTP 410 Resource Gone</b> response, which geenerally
+ * Represents an <b>HTTP 410 Resource Gone</b> response, which generally
  * indicates that the resource has been deleted
  */
 @CoverageIgnore

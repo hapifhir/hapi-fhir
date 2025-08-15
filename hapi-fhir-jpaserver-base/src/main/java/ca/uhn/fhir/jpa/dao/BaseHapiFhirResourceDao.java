@@ -51,6 +51,7 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.interceptor.PatientCompartmentEnforcingInterceptor;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
@@ -1213,6 +1214,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
+	public Stream<IResourcePersistentId> fetchAllVersionsOfResources(
+			RequestDetails theRequestDetails, Collection<IResourcePersistentId> theIds) {
+		HapiTransactionService.requireTransaction();
+
+		List<JpaPidFk> ids = theIds.stream().map(t -> ((JpaPid) t).toFk()).toList();
+
+		return myResourceHistoryTableDao.findAllVersionsForResourcePids(ids).map(t -> (IResourcePersistentId) t);
+	}
+
+	@Override
 	public ExpungeOutcome forceExpungeInExistingTransaction(
 			IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
@@ -2079,10 +2090,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					List<IQueryParameterType> orList = new ArrayList<>();
 					for (IQueryParameterType value : orValues) {
 						orList.add(new HasParam(
-								"List",
-								ListResource.SP_ITEM,
-								BaseResource.SP_RES_ID,
-								value.getValueAsQueryToken(null)));
+								"List", ListResource.SP_ITEM, BaseResource.SP_RES_ID, value.getValueAsQueryToken()));
 					}
 					hasParamValues.add(orList);
 				}
@@ -2377,14 +2385,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 */
 		String id = theResource.getIdElement().getValue();
 		Runnable onRollback = () -> theResource.getIdElement().setValue(id);
+		theTransactionDetails.addRollbackUndoAction(onRollback);
 
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
 				theRequest, theResource, getResourceName());
 
+		boolean rewriteHistory = theRequest != null && theRequest.isRewriteHistory();
+		if (rewriteHistory && !myStorageSettings.isUpdateWithHistoryRewriteEnabled()) {
+			String msg =
+					getContext().getLocalizer().getMessage(BaseStorageDao.class, "updateWithHistoryRewriteDisabled");
+			throw new InvalidRequestException(Msg.code(2781) + msg);
+		}
+
 		Callable<DaoMethodOutcome> updateCallback;
-		if (myStorageSettings.isUpdateWithHistoryRewriteEnabled()
-				&& theRequest != null
-				&& theRequest.isRewriteHistory()) {
+		if (rewriteHistory) {
 			updateCallback = () -> doUpdateWithHistoryRewrite(
 					theResource, theRequest, theTransactionDetails, requestPartitionId, RestOperationTypeEnum.UPDATE);
 		} else {
@@ -2403,7 +2417,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.withRequest(theRequest)
 				.withTransactionDetails(theTransactionDetails)
 				.withRequestPartitionId(requestPartitionId)
-				.onRollback(onRollback)
 				.execute(updateCallback);
 	}
 
