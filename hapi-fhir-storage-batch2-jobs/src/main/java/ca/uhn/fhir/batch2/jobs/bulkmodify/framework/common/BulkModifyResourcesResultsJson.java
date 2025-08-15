@@ -27,6 +27,39 @@ public class BulkModifyResourcesResultsJson implements IModelJson {
 	@JsonProperty("report")
 	private String myReport;
 
+	@JsonProperty("resourcesChangedCount")
+	private Integer myResourcesChangedCount;
+
+	@JsonProperty("resourcesUnchangedCount")
+	private Integer myResourcesUnchangedCount;
+
+	@JsonProperty("resourcesFailedCount")
+	private Integer myResourcesFailedCount;
+
+	public Integer getResourcesFailedCount() {
+		return myResourcesFailedCount;
+	}
+
+	public void setResourcesFailedCount(Integer theResourcesFailedCount) {
+		myResourcesFailedCount = theResourcesFailedCount;
+	}
+
+	public Integer getResourcesUnchangedCount() {
+		return myResourcesUnchangedCount;
+	}
+
+	public void setResourcesUnchangedCount(Integer theResourcesUnchangedCount) {
+		myResourcesUnchangedCount = theResourcesUnchangedCount;
+	}
+
+	public Integer getResourcesChangedCount() {
+		return myResourcesChangedCount;
+	}
+
+	public void setResourcesChangedCount(Integer theResourcesChangedCount) {
+		myResourcesChangedCount = theResourcesChangedCount;
+	}
+
 	public String getReport() {
 		return myReport;
 	}

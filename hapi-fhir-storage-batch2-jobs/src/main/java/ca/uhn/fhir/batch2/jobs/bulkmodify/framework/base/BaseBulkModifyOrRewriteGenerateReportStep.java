@@ -173,6 +173,9 @@ public abstract class BaseBulkModifyOrRewriteGenerateReportStep<PT extends BaseB
 
 		BulkModifyResourcesResultsJson reportJson = new BulkModifyResourcesResultsJson();
 		reportJson.setReport(reportString);
+		reportJson.setResourcesChangedCount(myChangedCount);
+		reportJson.setResourcesUnchangedCount(myUnchangedCount);
+		reportJson.setResourcesFailedCount(myFailureCount);
 
 		if (!myIdToFailure.isEmpty()) {
 			throw new ReductionStepFailureException(
