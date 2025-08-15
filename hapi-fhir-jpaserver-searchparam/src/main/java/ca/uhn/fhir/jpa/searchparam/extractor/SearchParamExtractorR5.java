@@ -34,6 +34,7 @@ import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.fhirpath.ExpressionNode;
 import org.hl7.fhir.r5.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.r5.fhirpath.FHIRPathUtilityClasses.FunctionDetails;
+import org.hl7.fhir.r5.fhirpath.IHostApplicationServices;
 import org.hl7.fhir.r5.fhirpath.TypeDetails;
 import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.model.Base;
@@ -41,6 +42,7 @@ import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.ResourceType;
 import org.hl7.fhir.r5.model.ValueSet;
+import org.hl7.fhir.utilities.fhirpath.FHIRPathConstantEvaluationMode;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -98,20 +100,20 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 		};
 	}
 
-	private class SearchParamExtractorR5HostServices implements FHIRPathEngine.IEvaluationContext {
+	private class SearchParamExtractorR5HostServices implements IHostApplicationServices {
 
 		private final Map<String, Base> myResourceTypeToStub = Collections.synchronizedMap(new HashMap<>());
 
 		@Override
 		public List<Base> resolveConstant(
-				FHIRPathEngine engine, Object appContext, String name, boolean beforeContext, boolean explicitConstant)
+				FHIRPathEngine engine, Object appContext, String name, FHIRPathConstantEvaluationMode mode)
 				throws PathEngineException {
 			return Collections.emptyList();
 		}
 
 		@Override
 		public TypeDetails resolveConstantType(
-				FHIRPathEngine engine, Object appContext, String name, boolean explicitConstant)
+				FHIRPathEngine engine, Object appContext, String name, FHIRPathConstantEvaluationMode mode)
 				throws PathEngineException {
 			return null;
 		}
