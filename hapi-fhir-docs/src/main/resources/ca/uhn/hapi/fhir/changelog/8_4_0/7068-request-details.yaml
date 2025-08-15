@@ -1,0 +1,6 @@
+---
+type: change
+issue: 7068
+title: "RequestDetails.getAttribute() and RequestDetails.setAttribute() have been deprecated. Users are encouraged to 
+use getUserData() to share data. If Servlet Attributes are required, users can use the new getServletAttribute()
+and setServletAttribute() methods available on ServletRequestDetails."
