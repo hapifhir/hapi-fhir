@@ -49,7 +49,7 @@ public class SampleApacheRestfulClientApplication {
 
 			@Override
 			public void run(String... args) throws Exception {
-				fhirClient.capabilities().ofType(CapabilityStatement.class) /* .execute() */;
+				fhirClient.capabilities().ofType(CapabilityStatement.class).execute();
 			}
 		};
 	}
