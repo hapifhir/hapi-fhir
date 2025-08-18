@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class BulkPatchRewriteJobR5Test extends BaseJpaR5Test {
+public class BulkPatchRewriteJobR5Test extends BaseBulkPatchR5Test {
 
 	@Test
 	public void testBulkPatchRewrite() {
