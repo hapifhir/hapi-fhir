@@ -343,10 +343,18 @@ public class HapiTransactionService implements IHapiTransactionService {
 					return doExecuteCallback(theExecutionBuilder, theCallback);
 
 				} catch (Exception e) {
-					// we roll back on all exceptions.
-					theExecutionBuilder.rollbackTransactionProcessingChanges();
+					int retriesRemaining = 0;
+					int maxRetries = 0;
+					boolean exceptionIsRetriable = isRetriable(e);
+					if (exceptionIsRetriable) {
+						maxRetries = calculateMaxRetries(theExecutionBuilder.myRequestDetails, e);
+						retriesRemaining = maxRetries - i;
+					}
 
-					if (!isRetriable(e)) {
+					// we roll back on all exceptions.
+					theExecutionBuilder.rollbackTransactionProcessingChanges(retriesRemaining > 0);
+
+					if (!exceptionIsRetriable) {
 						ourLog.debug("Unexpected transaction exception. Will not be retried.", e);
 						throw e;
 					} else {
@@ -354,8 +362,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 						ourLog.debug("Version conflict detected", e);
 
 						// should we retry?
-						int maxRetries = calculateMaxRetries(theExecutionBuilder.myRequestDetails, e);
-						if (i < maxRetries) {
+						if (retriesRemaining > 0) {
 							// We are retrying.
 							sleepForRetry(i);
 						} else {
@@ -578,20 +585,36 @@ public class HapiTransactionService implements IHapiTransactionService {
 		 * <p>
 		 * This is used to undo any changes made during transaction resolution, such as conditional references,
 		 * placeholders, etc.
+		 *
+		 * @param theWillRetry Should be <code>true</code> if the transaction is about to be automatically retried
+		 *                     by the transaction service.
 		 */
-		void rollbackTransactionProcessingChanges() {
+		void rollbackTransactionProcessingChanges(boolean theWillRetry) {
 			if (myOnRollback != null) {
 				myOnRollback.run();
 			}
 
 			if (myTransactionDetails != null) {
-				// Loop through the rollback undo actions in reverse order so we undo them in the correct order
+				/*
+				 * Loop through the rollback undo actions in reverse order so we leave things in the correct
+				 * initial state. E.g., the resource ID may get modified twice if a resource is being modified
+				 * within a FHIR transaction: first the TransactionProcessor sets a new ID and adds a rollback
+				 * item, and then the Resource DAO touches the ID a second time and adds a second rollback item.
+				 */
 				List<Runnable> rollbackUndoActions = myTransactionDetails.getRollbackUndoActions();
-				for (int i = rollbackUndoActions.size() - 1; i > 0; i--) {
+				for (int i = rollbackUndoActions.size() - 1; i >= 0; i--) {
 					Runnable rollbackUndoAction = rollbackUndoActions.get(i);
 					rollbackUndoAction.run();
 				}
-				myTransactionDetails.clearRollbackUndoActions();
+
+				/*
+				 * If we're about to retry the transaction, we shouldn't clear the rollback undo actions
+				 * because we need to re-execute them if the transaction fails a second time.
+				 */
+				if (!theWillRetry) {
+					myTransactionDetails.clearRollbackUndoActions();
+				}
+
 				myTransactionDetails.clearResolvedItems();
 				myTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
 				myTransactionDetails.clearUserData(XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);

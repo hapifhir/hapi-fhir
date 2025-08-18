@@ -2379,12 +2379,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		/*
-		 * Resource updates will modify/update the version of the resource with the new version. This is generally helpful,
+		 * Resource updates will modify/update the version of the resource with the new version. This is generally helpful
 		 * but leads to issues if the transaction is rolled back and retried. So if we do a rollback, we reset the resource
 		 * version to what it was.
 		 */
 		String id = theResource.getIdElement().getValue();
-		Runnable onRollback = () -> theResource.getIdElement().setValue(id);
+		Runnable onRollback = () -> {
+			ourLog.trace("Rolling back from {} to {}", theResource.getIdElement(), id);
+			theResource.getIdElement().setValue(id);
+		};
 		theTransactionDetails.addRollbackUndoAction(onRollback);
 
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
