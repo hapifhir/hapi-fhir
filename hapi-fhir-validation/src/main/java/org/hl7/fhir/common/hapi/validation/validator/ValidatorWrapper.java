@@ -129,7 +129,6 @@ class ValidatorWrapper {
 		return this;
 	}
 
-
 	public List<ValidationMessage> validate(
 			IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
 		InstanceValidator v = getInstanceValidator(theWorkerContext);
@@ -237,15 +236,15 @@ class ValidatorWrapper {
 	private InstanceValidator getInstanceValidator(IWorkerContext theWorkerContext) {
 		InstanceValidator v;
 		FHIRPathEngine.IEvaluationContext evaluationCtx;
-		if( evaluationContext == null ) {}
-		evaluationCtx= new FhirInstanceValidator.NullEvaluationContext();
+		if (evaluationContext == null) {}
+		evaluationCtx = new FhirInstanceValidator.NullEvaluationContext();
 		if (evaluationContext != null) {
 			evaluationCtx = evaluationContext;
 		}
 		XVerExtensionManager xverManager = new XVerExtensionManager(theWorkerContext);
 		try {
 			v = new InstanceValidator(
-				theWorkerContext, evaluationCtx, xverManager, new ValidatorSession(), new ValidatorSettings());
+					theWorkerContext, evaluationCtx, xverManager, new ValidatorSession(), new ValidatorSettings());
 		} catch (Exception e) {
 			throw new ConfigurationException(Msg.code(648) + e.getMessage(), e);
 		}

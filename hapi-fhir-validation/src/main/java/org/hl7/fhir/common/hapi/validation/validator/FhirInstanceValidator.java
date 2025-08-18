@@ -306,7 +306,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		this.evaluationContext = evaluationContext;
 	}
 
-
 	/**
 	 * Clear any cached data held by the validator or any of its internal stores. This is mostly intended
 	 * for unit tests, but could be used for production uses too.
