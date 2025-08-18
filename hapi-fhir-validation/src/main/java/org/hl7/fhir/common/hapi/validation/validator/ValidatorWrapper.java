@@ -55,6 +55,7 @@ class ValidatorWrapper {
 	private Collection<? extends String> myExtensionDomains;
 	private IValidatorResourceFetcher myValidatorResourceFetcher;
 	private IValidationPolicyAdvisor myValidationPolicyAdvisor;
+	private FHIRPathEngine.IEvaluationContext evaluationContext;
 	private boolean myAllowExamples;
 
 	/**
@@ -123,17 +124,15 @@ class ValidatorWrapper {
 		return this;
 	}
 
+	public ValidatorWrapper setEvaluationContext(FHIRPathEngine.IEvaluationContext evaluationContext) {
+		this.evaluationContext = evaluationContext;
+		return this;
+	}
+
+
 	public List<ValidationMessage> validate(
 			IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
-		InstanceValidator v;
-		FHIRPathEngine.IEvaluationContext evaluationCtx = new FhirInstanceValidator.NullEvaluationContext();
-		XVerExtensionManager xverManager = new XVerExtensionManager(theWorkerContext);
-		try {
-			v = new InstanceValidator(
-					theWorkerContext, evaluationCtx, xverManager, new ValidatorSession(), new ValidatorSettings());
-		} catch (Exception e) {
-			throw new ConfigurationException(Msg.code(648) + e.getMessage(), e);
-		}
+		InstanceValidator v = getInstanceValidator(theWorkerContext);
 
 		v.setAssumeValidRestReferences(isAssumeValidRestReferences());
 		v.setBestPracticeWarningLevel(myBestPracticeWarningLevel);
@@ -233,6 +232,24 @@ class ValidatorWrapper {
 					.forEach(m -> m.setLevel(ValidationMessage.IssueSeverity.ERROR));
 		}
 		return messages;
+	}
+
+	private InstanceValidator getInstanceValidator(IWorkerContext theWorkerContext) {
+		InstanceValidator v;
+		FHIRPathEngine.IEvaluationContext evaluationCtx;
+		if( evaluationContext == null ) {}
+		evaluationCtx= new FhirInstanceValidator.NullEvaluationContext();
+		if (evaluationContext != null) {
+			evaluationCtx = evaluationContext;
+		}
+		XVerExtensionManager xverManager = new XVerExtensionManager(theWorkerContext);
+		try {
+			v = new InstanceValidator(
+				theWorkerContext, evaluationCtx, xverManager, new ValidatorSession(), new ValidatorSettings());
+		} catch (Exception e) {
+			throw new ConfigurationException(Msg.code(648) + e.getMessage(), e);
+		}
+		return v;
 	}
 
 	private ReaderInputStream constructNewReaderInputStream(Reader theReader) {

@@ -42,6 +42,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private IValidatorResourceFetcher validatorResourceFetcher;
 	private IValidationPolicyAdvisor validatorPolicyAdvisor = new FhirDefaultPolicyAdvisor();
 	private boolean myAllowExamples;
+	private FHIRPathEngine.IEvaluationContext evaluationContext;
 
 	/**
 	 * Constructor
@@ -253,6 +254,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 				.setValidatorResourceFetcher(getValidatorResourceFetcher())
 				.setAssumeValidRestReferences(isAssumeValidRestReferences())
 				.setAllowExamples(isAllowExamples())
+				.setEvaluationContext(getEvaluationContext())
 				.validate(wrappedWorkerContext, theValidationCtx);
 	}
 
@@ -295,6 +297,15 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	public void setAssumeValidRestReferences(boolean assumeValidRestReferences) {
 		this.assumeValidRestReferences = assumeValidRestReferences;
 	}
+
+	public FHIRPathEngine.IEvaluationContext getEvaluationContext() {
+		return evaluationContext;
+	}
+
+	public void setEvaluationContext(FHIRPathEngine.IEvaluationContext evaluationContext) {
+		this.evaluationContext = evaluationContext;
+	}
+
 
 	/**
 	 * Clear any cached data held by the validator or any of its internal stores. This is mostly intended
