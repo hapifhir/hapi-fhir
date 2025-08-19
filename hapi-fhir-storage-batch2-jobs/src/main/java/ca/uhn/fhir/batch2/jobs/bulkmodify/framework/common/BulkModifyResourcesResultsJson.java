@@ -21,7 +21,11 @@ package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(
+		name = "BulkModifyResourcesResults",
+		description = "Contains details about the outcome of a bulk modification operation")
 public class BulkModifyResourcesResultsJson implements IModelJson {
 
 	@JsonProperty("report")

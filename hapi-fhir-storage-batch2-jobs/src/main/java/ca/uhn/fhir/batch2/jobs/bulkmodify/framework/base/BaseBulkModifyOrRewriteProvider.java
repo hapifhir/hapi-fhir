@@ -21,19 +21,25 @@ package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesResultsJson;
-import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchJobAppCtx;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.dao.BaseTransactionProcessor;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
+import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.CanonicalBundleEntry;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
@@ -42,6 +48,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.http.HttpStatus;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -107,7 +114,7 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 
 		// Provide a response
 		HttpServletResponse servletResponse = theRequestDetails.getServletResponse();
-		servletResponse.setStatus(HttpServletResponse.SC_NO_CONTENT);
+		servletResponse.setStatus(HttpServletResponse.SC_ACCEPTED);
 		servletResponse.addHeader(Constants.HEADER_CONTENT_LOCATION, pollUrl.toString());
 	}
 
@@ -117,39 +124,48 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 	protected void pollForJobStatus(ServletRequestDetails theRequestDetails, IPrimitiveType<String> theJobId)
 			throws IOException {
 		ValidateUtil.isTrueOrThrowInvalidRequest(theJobId != null && theJobId.hasValue(), "Missing job id");
-		JobInstance instance = myJobCoordinator.getInstance(theJobId.getValue());
+
+		JobInstance instance;
+		try {
+			instance = myJobCoordinator.getInstance(theJobId.getValue());
+		} catch (ResourceNotFoundException e) {
+			throw new ResourceNotFoundException(
+					Msg.code(2787) + "Invalid/unknown job ID: " + UrlUtil.sanitizeUrlPart(theJobId.getValue()));
+		}
+
 		ValidateUtil.isTrueOrThrowInvalidRequest(
-				instance.getJobDefinitionId().equals(BulkPatchJobAppCtx.JOB_ID),
-				"Job ID does not correspond to a Bulk Patch job");
+				instance.getJobDefinitionId().equals(getJobId()),
+				"Job ID does not correspond to a " + getOperationName() + " job");
 
 		int status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
 		String message = "";
 		String severity = "";
 		String code = "";
 		String progressMessage = null;
+		boolean respondUsingBundle = false;
 		switch (instance.getStatus()) {
 			case QUEUED -> {
 				status = HttpStatus.SC_ACCEPTED;
-				message = "Job has not yet started";
+				message = getOperationName() + " job has not yet started";
 				severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
 				code = OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL;
 			}
 			case IN_PROGRESS -> {
 				status = HttpStatus.SC_ACCEPTED;
-				message = "Job has started and is in progress";
+				message = getOperationName() + " job has started and is in progress";
 				severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
 				code = OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL;
 			}
 			case FINALIZE -> {
 				status = HttpStatus.SC_ACCEPTED;
-				message = "Job has started and is being finalized";
+				message = getOperationName() + " job has started and is being finalized";
 				severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
 				code = OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL;
 			}
 			case COMPLETED -> {
 				status = HttpStatus.SC_OK;
 				String reportText = instance.getReport();
-				progressMessage = "Job has completed successfully";
+				progressMessage = getOperationName() + " job has completed successfully";
 				if (isBlank(reportText)) {
 					message = progressMessage;
 				} else {
@@ -159,18 +175,21 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 				}
 				severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
 				code = OperationOutcomeUtil.OO_ISSUE_CODE_SUCCESS;
+				respondUsingBundle = true;
 			}
 			case ERRORED, FAILED -> {
 				status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
-				message = instance.getErrorMessage();
+				message = getOperationName() + " job has failed with error: " + instance.getErrorMessage();
 				severity = OperationOutcomeUtil.OO_SEVERITY_ERROR;
 				code = OperationOutcomeUtil.OO_ISSUE_CODE_PROCESSING;
+				respondUsingBundle = true;
 			}
 			case CANCELLED -> {
 				status = HttpStatus.SC_OK;
-				message = "Job has been cancelled";
+				message = getOperationName() + " job has been cancelled";
 				severity = OperationOutcomeUtil.OO_SEVERITY_WARN;
 				code = OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL;
+				respondUsingBundle = true;
 			}
 		}
 
@@ -181,7 +200,20 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 				RestfulServerUtils.determineResponseEncodingWithDefault(theRequestDetails);
 
 		HttpServletResponse servletResponse = theRequestDetails.getServletResponse();
-		servletResponse.setStatus(status);
+
+		/*
+		 * According to the Asynchronous Interaction Request Pattern at
+		 * https://hl7.org/fhir/async-bundle.html,
+		 * if the job has completed (either successfully or unsuccessfully/prematurely), the response
+		 * should use an HTTP 200 status and should indicate the actual status in a Bundle
+		 * resource.
+		 */
+		if (respondUsingBundle) {
+			servletResponse.setStatus(HttpStatus.SC_OK);
+		} else {
+			servletResponse.setStatus(status);
+		}
+
 		servletResponse.setContentType(encoding.getContentType());
 		servletResponse.setCharacterEncoding(Constants.CHARSET_NAME_UTF8);
 		if (progressMessage != null) {
@@ -190,8 +222,21 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 			servletResponse.addHeader(Constants.HEADER_X_PROGRESS, message);
 		}
 
+		IBaseResource responseResource = oo;
+		if (respondUsingBundle) {
+			BundleBuilder bundleBuilder = new BundleBuilder(myContext);
+			bundleBuilder.setType(BundleTypeEnum.BATCH_RESPONSE.getCode());
+
+			CanonicalBundleEntry entry = new CanonicalBundleEntry();
+			entry.setResponseStatus(BaseTransactionProcessor.toStatusString(status));
+			entry.setResponseOutcome(oo);
+			bundleBuilder.addEntry(entry);
+
+			responseResource = bundleBuilder.getBundle();
+		}
+
 		try (PrintWriter writer = servletResponse.getWriter()) {
-			myContext.newJsonParser().encodeResourceToWriter(oo, writer);
+			myContext.newJsonParser().encodeResourceToWriter(responseResource, writer);
 		}
 	}
 
