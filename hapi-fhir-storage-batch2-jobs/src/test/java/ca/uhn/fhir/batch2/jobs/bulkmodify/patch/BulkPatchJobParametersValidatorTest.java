@@ -27,11 +27,11 @@ class BulkPatchJobParametersValidatorTest {
 	private IDaoRegistry myDaoRegistry;
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-	private BulkPatchJobParametersValidator mySvc;
+	private BulkPatchJobParametersValidator<BulkPatchJobParameters> mySvc;
 
 	@BeforeEach
 	public void beforeEach() {
-		mySvc = new BulkPatchJobParametersValidator(ourCtx, myDaoRegistry);
+		mySvc = new BulkPatchJobParametersValidator<>(ourCtx, myDaoRegistry);
 	}
 
 	@Test

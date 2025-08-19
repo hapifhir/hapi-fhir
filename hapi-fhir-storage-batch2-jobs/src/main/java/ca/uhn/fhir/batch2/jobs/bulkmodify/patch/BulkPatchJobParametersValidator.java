@@ -50,6 +50,7 @@ public class BulkPatchJobParametersValidator<PT extends BulkPatchJobParameters>
 			patch = theParameters.getFhirPatch(myFhirContext);
 			if (patch == null) {
 				theIssueListToPopulate.add("No Patch document was provided");
+				return;
 			}
 		} catch (DataFormatException e) {
 			theIssueListToPopulate.add("Failed to parse FHIRPatch document: " + e.getMessage());

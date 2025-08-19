@@ -50,8 +50,9 @@ public class OperationOutcomeUtil {
 	public static final String OO_SEVERITY_INFO = "information";
 	public static final String OO_SEVERITY_WARN = "warning";
 	public static final String OO_ISSUE_CODE_INFORMATIONAL = "informational";
+
 	/**
-	 * Note: This code was added in R5, so the {@link #addIssue(FhirContext, IBaseOperationOutcome, String, String, String, String) addIssue}
+	 * Note: This code was added in FHIR R5, so the {@link #addIssue(FhirContext, IBaseOperationOutcome, String, String, String, String) addIssue}
 	 * methods here will automatically convert it to {@link #OO_ISSUE_CODE_INFORMATIONAL} for
 	 * previous versions of FHIR.
 	 *
@@ -59,6 +60,9 @@ public class OperationOutcomeUtil {
 	 */
 	public static final String OO_ISSUE_CODE_SUCCESS = "success";
 
+	/**
+	 * @since 8.6.0
+	 */
 	public static final String OO_ISSUE_CODE_PROCESSING = "processing";
 
 	/**
@@ -68,7 +72,7 @@ public class OperationOutcomeUtil {
 	 * @param theOperationOutcome The OO resource to add to
 	 * @param theSeverity         The severity (fatal | error | warning | information)
 	 * @param theDiagnostics      The diagnostics string (this was called "details" in FHIR DSTU2 but was renamed to diagnostics in DSTU3)
-	 * @param theCode
+	 * @param theCode             A code, such as {@link #OO_ISSUE_CODE_INFORMATIONAL} or {@link #OO_ISSUE_CODE_SUCCESS}
 	 * @return Returns the newly added issue
 	 */
 	public static IBase addIssue(
