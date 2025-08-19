@@ -68,10 +68,10 @@ public class TypedPidAndVersionJson extends TypedPidJson {
 	 * of this object will be.
 	 */
 	public int estimateSerializedSize() {
-		// Adds 7 chars: ,"v":""
+		// Adds 7 chars: ,"v":
 		int retVal = super.estimateSerializedSize();
 		if (myVersionId != null) {
-			retVal += 7 + Long.toString(myVersionId).length();
+			retVal += 5 + Long.toString(myVersionId).length();
 		}
 		return retVal;
 	}
