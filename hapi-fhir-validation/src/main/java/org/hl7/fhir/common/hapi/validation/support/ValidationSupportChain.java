@@ -17,6 +17,7 @@ import ca.uhn.fhir.sl.cache.CacheFactory;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
@@ -531,6 +532,11 @@ public class ValidationSupportChain implements IValidationSupport {
 			putInCache(key, retVal);
 		}
 
+		if (retVal.getValue() == null) {
+			throw new ResourceNotFoundException(
+					Msg.code(2788) + "Unknown ValueSet: " + UrlUtil.escapeUrlParam(theValueSetUrlToExpand));
+		}
+
 		return retVal.getValue();
 	}
 
@@ -811,10 +817,62 @@ public class ValidationSupportChain implements IValidationSupport {
 				}
 			}
 
+			if (retVal.getValue() == null) {
+				CodeValidationResult unknownCodeSystemResult =
+						generateResultForUnknownCodeSystem(theCodeSystem, theCode);
+				if (unknownCodeSystemResult != null) {
+					retVal = new CacheValue<>(unknownCodeSystemResult);
+				}
+			}
+
 			putInCache(key, retVal);
 		}
 
 		return retVal.getValue();
+	}
+
+	/**
+	 * Generates a {@link CodeValidationResult} for an unknown CodeSystem.
+	 * <p>
+	 * If theCodeSystem is null, this method returns null.
+	 * If a ValidationSupport in the chain can fetch the CodeSystem, it returns null
+	 * Otherwise, it returns a CodeValidationResult with an error message. The message severity is set to ERROR by this function,
+	 * but it might be overridden after
+	 * - by the core validator, which has its own logic for determining the severity of an issue for an unknown CodeSystem,
+	 *   which is based on the binding strength. See https://github.com/hapifhir/org.hl7.fhir.core/issues/2129
+	 * - and by the {@link ca.uhn.fhir.rest.server.interceptor.validation.ValidationMessageUnknownCodeSystemProcessingInterceptor}
+	 *   to a configured severity if it is registered.
+	 * </p>
+	 *
+	 * This function was originally part of now deprecated UnknownCodeSystemWarningValidationSupport
+	 * @param theCodeSystem The CodeSystem URL to validate
+	 * @param theCode       The code to validate
+	 * @return A CodeValidationResult indicating the error, or null if theCodeSystem is null
+	 * or a validation support can fetch the code system.
+	 */
+	@Nullable
+	private CodeValidationResult generateResultForUnknownCodeSystem(String theCodeSystem, String theCode) {
+
+		if (theCodeSystem == null) {
+			return null;
+		}
+		IBaseResource codeSystem = fetchCodeSystem(theCodeSystem);
+		if (codeSystem != null) {
+			return null;
+		}
+
+		CodeValidationResult result = new CodeValidationResult();
+		result.setSeverity(IssueSeverity.ERROR);
+		String theMessage = "CodeSystem is unknown and can't be validated: %s for '%s#%s'"
+				.formatted(theCodeSystem, theCodeSystem, theCode);
+		result.setMessage(theMessage);
+
+		result.addIssue(new CodeValidationIssue(
+				theMessage,
+				IssueSeverity.ERROR,
+				CodeValidationIssueCode.NOT_FOUND,
+				CodeValidationIssueCoding.NOT_FOUND));
+		return result;
 	}
 
 	@Override
