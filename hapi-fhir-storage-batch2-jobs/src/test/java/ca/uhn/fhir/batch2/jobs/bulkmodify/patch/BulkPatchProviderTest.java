@@ -140,33 +140,7 @@ public class BulkPatchProviderTest {
 		String url = ourFhirServer.getBaseUrl() + "/" + OPERATION_BULK_PATCH_STATUS + "?" + OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID + "=MY-INSTANCE-ID";
 		HttpGet get = new HttpGet(url);
 		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-
-			if (theParams.expectBundleResponse()) {
-				assertEquals(200, response.getStatusLine().getStatusCode());
-				Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseString);
-				ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
-				assertEquals("batch-response", bundle.getType().toCode());
-				assertEquals(1, bundle.getEntry().size());
-
-				OperationOutcome oo = (OperationOutcome) bundle.getEntry().get(0).getResponse().getOutcome();
-				assertThat(bundle.getEntry().get(0).getResponse().getStatus()).startsWith(theParams.expectedStatusCode() + " ");
-				assertEquals(theParams.expectedOoMessage(), oo.getIssueFirstRep().getDiagnostics());
-
-			} else {
-				assertEquals(theParams.expectedStatusCode(), response.getStatusLine().getStatusCode());
-
-				OperationOutcome oo = ourCtx.newJsonParser().parseResource(OperationOutcome.class, responseString);
-				ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-
-				assertEquals(theParams.expectedOoMessage(), oo.getIssueFirstRep().getDiagnostics());
-			}
-
-			if (theParams.expectedProgressHeaderValue() != null) {
-				assertEquals(theParams.expectedProgressHeaderValue(), response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue());
-			} else {
-				assertNull(response.getFirstHeader(Constants.HEADER_X_PROGRESS));
-			}
+			validateStatusPollResponse(theParams, response);
 		}
 	}
 
@@ -216,23 +190,59 @@ public class BulkPatchProviderTest {
 		}
 	}
 
+	public static void validateStatusPollResponse(PollForStatusTest theParams, CloseableHttpResponse response) throws IOException {
+		String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+
+		if (theParams.expectBundleResponse()) {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseString);
+			ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+			assertEquals("batch-response", bundle.getType().toCode());
+			assertEquals(1, bundle.getEntry().size());
+
+			OperationOutcome oo = (OperationOutcome) bundle.getEntry().get(0).getResponse().getOutcome();
+			assertThat(bundle.getEntry().get(0).getResponse().getStatus()).startsWith(theParams.expectedStatusCode() + " ");
+			assertEquals(theParams.expectedOoMessage(), oo.getIssueFirstRep().getDiagnostics());
+
+		} else {
+			assertEquals(theParams.expectedStatusCode(), response.getStatusLine().getStatusCode());
+
+			OperationOutcome oo = ourCtx.newJsonParser().parseResource(OperationOutcome.class, responseString);
+			ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+
+			assertEquals(theParams.expectedOoMessage(), oo.getIssueFirstRep().getDiagnostics());
+		}
+
+		if (theParams.expectedProgressHeaderValue() != null) {
+			assertEquals(theParams.expectedProgressHeaderValue(), response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue());
+		} else {
+			assertNull(response.getFirstHeader(Constants.HEADER_X_PROGRESS));
+		}
+	}
+
 	public static Stream<PollForStatusTest> testPollForStatusParameters() {
+		return createTestPollForStatusParameters(JpaConstants.OPERATION_BULK_PATCH);
+	}
+
+	public static Stream<PollForStatusTest> createTestPollForStatusParameters(String theOperation) {
 		BulkModifyResourcesResultsJson successReportJson = new BulkModifyResourcesResultsJson();
 		successReportJson.setReport("This is the report\nLine 2 or report");
 		String successReport = JsonUtil.serialize(successReportJson);
 
 		return Stream.of(
-			new PollForStatusTest(StatusEnum.QUEUED, HttpStatus.Code.ACCEPTED.getCode(), "$bulk-patch job has not yet started"),
-			new PollForStatusTest(StatusEnum.IN_PROGRESS, HttpStatus.Code.ACCEPTED.getCode(), "$bulk-patch job has started and is in progress"),
-			new PollForStatusTest(StatusEnum.FINALIZE, HttpStatus.Code.ACCEPTED.getCode(), "$bulk-patch job has started and is being finalized"),
-			new PollForStatusTest(StatusEnum.CANCELLED, null, null, HttpStatus.Code.OK.getCode(), "$bulk-patch job has been cancelled", "$bulk-patch job has been cancelled", true),
-			new PollForStatusTest(StatusEnum.FAILED, "This is an error message", null, HttpStatus.Code.INTERNAL_SERVER_ERROR.getCode(), "$bulk-patch job has failed with error: This is an error message", "$bulk-patch job has failed with error: This is an error message", true),
-			new PollForStatusTest(StatusEnum.COMPLETED, null, null, HttpStatus.Code.OK.getCode(), "$bulk-patch job has completed successfully", "$bulk-patch job has completed successfully", true),
-			new PollForStatusTest(StatusEnum.COMPLETED, null, successReport, HttpStatus.Code.OK.getCode(), successReportJson.getReport(), "$bulk-patch job has completed successfully", true)
+			new PollForStatusTest(StatusEnum.QUEUED, HttpStatus.Code.ACCEPTED.getCode(), theOperation + " job has not yet started"),
+			new PollForStatusTest(StatusEnum.IN_PROGRESS, HttpStatus.Code.ACCEPTED.getCode(), theOperation + " job has started and is in progress"),
+			new PollForStatusTest(StatusEnum.FINALIZE, HttpStatus.Code.ACCEPTED.getCode(), theOperation + " job has started and is being finalized"),
+			new PollForStatusTest(StatusEnum.CANCELLED, null, null, HttpStatus.Code.OK.getCode(), theOperation + " job has been cancelled", theOperation + " job has been cancelled", true),
+			new PollForStatusTest(StatusEnum.FAILED, "This is an error message", null, HttpStatus.Code.INTERNAL_SERVER_ERROR.getCode(), theOperation + " job has failed with error: This is an error message", theOperation + " job has failed with error: This is an error message", true),
+			new PollForStatusTest(StatusEnum.COMPLETED, null, null, HttpStatus.Code.OK.getCode(), theOperation + " job has completed successfully", theOperation + " job has completed successfully", true),
+			new PollForStatusTest(StatusEnum.COMPLETED, null, successReport, HttpStatus.Code.OK.getCode(), successReportJson.getReport(), theOperation + " job has completed successfully", true)
 		);
 	}
 
-	public record PollForStatusTest(StatusEnum jobStatus, String errorMessage, String reportMessage, int expectedStatusCode, String expectedOoMessage, String expectedProgressHeaderValue, boolean expectBundleResponse) {
+	public record PollForStatusTest(StatusEnum jobStatus, String errorMessage, String reportMessage,
+									int expectedStatusCode, String expectedOoMessage,
+									String expectedProgressHeaderValue, boolean expectBundleResponse) {
 
 		PollForStatusTest(StatusEnum jobStatus, int expectedStatusCode, String expectedMessage) {
 			this(jobStatus, null, null, expectedStatusCode, expectedMessage, expectedMessage, false);

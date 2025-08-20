@@ -1,7 +1,6 @@
 package ca.uhn.fhir.batch2.jobs.bulkmodify.patchrewrite;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchJobAppCtx;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchProviderTest;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -38,6 +37,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchProviderTest.createTestPollForStatusParameters;
+import static ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchProviderTest.validateStatusPollResponse;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_BULK_PATCH_REWRITE_STATUS;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -103,7 +104,7 @@ class BulkPatchRewriteProviderTest {
 
 			// Verify
 			String expectedUrl = ourFhirServer.getBaseUrl() + "/$bulk-patch-rewrite-history-status?_jobId=MY-INSTANCE-ID";
-			assertEquals(HttpStatus.Code.NO_CONTENT.getCode(), response.getStatusLine().getStatusCode());
+			assertEquals(HttpStatus.Code.ACCEPTED.getCode(), response.getStatusLine().getStatusCode());
 			assertEquals(expectedUrl, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 
 		}
@@ -125,7 +126,7 @@ class BulkPatchRewriteProviderTest {
 		// Setup
 		JobInstance instance = new JobInstance();
 		instance.setStatus(theParams.jobStatus());
-		instance.setJobDefinitionId(BulkPatchJobAppCtx.JOB_ID);
+		instance.setJobDefinitionId(BulkPatchRewriteJobAppCtx.JOB_ID);
 		instance.setErrorMessage(theParams.errorMessage());
 		instance.setReport(theParams.reportMessage());
 		when(myJobCoordinator.getInstance(eq("MY-INSTANCE-ID"))).thenReturn(instance);
@@ -134,19 +135,12 @@ class BulkPatchRewriteProviderTest {
 		String url = ourFhirServer.getBaseUrl() + "/" + OPERATION_BULK_PATCH_REWRITE_STATUS + "?" + OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID + "=MY-INSTANCE-ID";
 		HttpGet get = new HttpGet(url);
 		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
-			assertEquals(theParams.expectedStatusCode(), response.getStatusLine().getStatusCode());
-
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			OperationOutcome oo = ourCtx.newJsonParser().parseResource(OperationOutcome.class, responseString);
-			ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-
-			assertEquals(theParams.expectedOoMessage(), oo.getIssueFirstRep().getDiagnostics());
-			assertEquals(theParams.expectedProgressHeaderValue(), response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue());
+			validateStatusPollResponse(theParams, response);
 		}
 	}
 
 	public static Stream<BulkPatchProviderTest.PollForStatusTest> testPollForStatusParameters() {
-		return BulkPatchProviderTest.testPollForStatusParameters();
+		return createTestPollForStatusParameters(JpaConstants.OPERATION_BULK_PATCH_REWRITE);
 	}
 
 }
