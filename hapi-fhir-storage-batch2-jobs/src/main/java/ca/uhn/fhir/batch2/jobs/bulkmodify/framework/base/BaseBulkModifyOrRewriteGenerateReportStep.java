@@ -33,7 +33,6 @@ import ca.uhn.fhir.util.StopWatch;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Date;
@@ -91,7 +90,7 @@ public abstract class BaseBulkModifyOrRewriteGenerateReportStep<PT extends BaseB
 	@Override
 	public RunOutcome run(
 			@Nonnull StepExecutionDetails<PT, BulkModifyResourcesChunkOutcomeJson> theStepExecutionDetails,
-			@NotNull IJobDataSink<BulkModifyResourcesResultsJson> theDataSink)
+			@Nonnull IJobDataSink<BulkModifyResourcesResultsJson> theDataSink)
 			throws JobExecutionFailedException, ReductionStepFailureException {
 		Date startTime = theStepExecutionDetails.getInstance().getStartTime();
 		long elapsedMillis = System.currentTimeMillis() - startTime.getTime();

@@ -271,7 +271,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			ResourceModificationResponse modificationResponse =
 					modifyResource(theJobParameters, modificationContext, modificationRequest);
 			if (modificationResponse == null) {
-				throw new JobExecutionFailedException(Msg.code(2782) + "Null response from Modification for Resource["
+				throw new JobExecutionFailedException(Msg.code(2789) + "Null response from Modification for Resource["
 						+ resource.getIdElement() + "]");
 			}
 
