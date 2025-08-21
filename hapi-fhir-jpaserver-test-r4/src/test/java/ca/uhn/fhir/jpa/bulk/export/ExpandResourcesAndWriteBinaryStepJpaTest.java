@@ -9,12 +9,19 @@ import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -25,7 +32,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -162,6 +173,109 @@ public class ExpandResourcesAndWriteBinaryStepJpaTest extends BaseJpaR4Test {
 		}
 		Collections.sort(actualResourceIdList);
 		assertEquals(expectedIds, actualResourceIdList);
+	}
+
+	@Test
+	public void testIncludeHistory() {
+		int testResourceSize = 10;
+		int maxFileSize = 3 * testResourceSize;
+		myStorageSettings.setBulkExportFileMaximumSize(maxFileSize);
+
+		List<Integer> versionCounts = List.of(1, 3, 5, 4, 2);
+		List<IIdType> patientIds = createPatients(versionCounts.size(), testResourceSize);
+		Map<IIdType, Integer> patientVersionCountMap = getPatientVersionCountMap(patientIds, versionCounts);
+		Map<Long, Set<Long>> patientVersionIdsMap = generatePatientsHistory(patientIds, patientVersionCountMap);
+
+		ResourceIdList resourceList = new ResourceIdList();
+		resourceList.setResourceType("Patient");
+		List<TypedPidJson> patientJsonIds = patientIds.stream().map(id -> new TypedPidJson().setResourceType("Patient").setPid(id.getIdPart())).toList();
+		resourceList.setIds(patientJsonIds);
+
+		BulkExportJobParameters params = new BulkExportJobParameters();
+		params.setIncludeHistory(true);
+		JobInstance jobInstance = new JobInstance();
+		String chunkId = "ABC";
+
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, new WorkChunk().setId(chunkId));
+
+		// Test
+
+		myExpandResourcesStep.run(details, mySink);
+
+		// Verify
+
+		verify(mySink, atLeast(1)).accept(myWorkChunkCaptor.capture());
+
+		Map<Long, Set<Long>>  exportedResourceVersionIdsMap = new HashMap<>();
+		for (BulkExportBinaryFileId next : myWorkChunkCaptor.getAllValues()) {
+
+			Binary nextBinary = myBinaryDao.read(new IdType(next.getBinaryId()), mySrd);
+			String nextNdJsonString = new String(nextBinary.getContent(), StandardCharsets.UTF_8);
+			IBaseResource resource = myFhirContext.newJsonParser().parseResource(nextNdJsonString);
+
+			exportedResourceVersionIdsMap.computeIfAbsent(
+					resource.getIdElement().getIdPartAsLong(),
+					k -> new HashSet<>())
+				.add(resource.getIdElement().getVersionIdPartAsLong());
+		}
+
+		assertThat(exportedResourceVersionIdsMap).isEqualTo(patientVersionIdsMap);
+	}
+
+	private Map<IIdType, Integer> getPatientVersionCountMap(List<IIdType> thePatientIds, List<Integer> theCounts) {
+		assertThat(thePatientIds).hasSameSizeAs(theCounts);
+		Map<IIdType, Integer> map = new HashMap<>();
+		for (int i = 0; i < thePatientIds.size(); i++) {
+			map.put(thePatientIds.get(i), theCounts.get(i));
+		}
+		return map;
+	}
+
+
+	private Map<Long, Set<Long>> generatePatientsHistory(List<IIdType> thePatientIds, Map<IIdType, Integer> thePatientVersionCountMap) {
+		Map<Long, Set<Long>> retVal = new HashMap<>();
+
+		for (IIdType patientId : thePatientIds) {
+
+			Set<Long> patientVersionIds = new HashSet<>();
+			retVal.computeIfAbsent(patientId.getIdPartAsLong(), k -> patientVersionIds);
+
+			int patientAdditionalVersions = thePatientVersionCountMap.get(patientId) - 1;
+			IIdType lastVersonId = patientId;
+			patientVersionIds.add(lastVersonId.getVersionIdPartAsLong());
+
+			for (int vCount = 0; vCount < patientAdditionalVersions; vCount++) {
+				Parameters patch = getPatch(vCount);
+				DaoMethodOutcome patchOutcome = myPatientDao.patch(lastVersonId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, patch, mySrd);
+				assertThat(patchOutcome).isNotNull();
+				lastVersonId = patchOutcome.getId();
+				patientVersionIds.add(lastVersonId.getVersionIdPartAsLong());
+			}
+		}
+
+		return retVal;
+	}
+
+	private Parameters getPatch(int theVersion) {
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.name.given"));
+		op.addPart().setName("value").setValue(new StringType("given-v" + theVersion+1));
+		return patch;
+	}
+
+	private List<IIdType> createPatients(@SuppressWarnings("SameParameterValue") int theCount, int theTestResourceSize) {
+		List<IIdType> patientIds = new ArrayList<>();
+		for (int i = 0; i < theCount; i++) {
+			Patient p = new Patient();
+			p.addName()
+				.setGiven(List.of(new StringType("given")))
+				.setFamily(StringUtils.leftPad("", theTestResourceSize, 'A'));
+			IIdType id = myPatientDao.create(p, mySrd).getId();
+			patientIds.add(id);
+		}
+		return patientIds;
 	}
 
 }

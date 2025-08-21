@@ -124,6 +124,9 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 	@JsonProperty("binarySecurityContextIdentifierValue")
 	private String myBinarySecurityContextIdentifierValue;
 
+	@JsonProperty("includeHistory")
+	private boolean myIncludeHistory;
+
 	public String getExportIdentifier() {
 		return myExportId;
 	}
@@ -248,6 +251,10 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 		return myPartitionId;
 	}
 
+	public boolean isIncludeHistory() {
+		return myIncludeHistory;
+	}
+
 	public void setPartitionId(RequestPartitionId thePartitionId) {
 		this.myPartitionId = thePartitionId;
 	}
@@ -282,6 +289,13 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 	 */
 	public String getBinarySecurityContextIdentifierValue() {
 		return myBinarySecurityContextIdentifierValue;
+	}
+
+	/**
+	 * Indicates if all history must be exported for exported resources
+	 */
+	public void setIncludeHistory(boolean theIncludeHistory) {
+		myIncludeHistory = theIncludeHistory;
 	}
 
 	public enum ExportStyle {
