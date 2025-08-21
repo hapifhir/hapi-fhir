@@ -1,4 +1,4 @@
 ---
 type: fix
 issue: 7206
-title: "Update the unit tests to ensure search by resource `meta.source` works correctly with MongoDB repositories."
+title: "Update the unit tests to ensure search by resource `meta.source` works correctly."
