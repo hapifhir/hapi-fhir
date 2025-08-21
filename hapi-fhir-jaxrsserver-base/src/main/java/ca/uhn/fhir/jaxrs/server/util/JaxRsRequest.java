@@ -27,6 +27,7 @@ import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.IHasServletAttributes;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -36,7 +37,6 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
@@ -50,7 +50,7 @@ import java.util.Map;
  *
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
-public class JaxRsRequest extends RequestDetails {
+public class JaxRsRequest extends RequestDetails implements IHasServletAttributes {
 
 	private HttpHeaders myHeaders;
 	private String myResourceString;
@@ -127,14 +127,50 @@ public class JaxRsRequest extends RequestDetails {
 		throw new UnsupportedOperationException(Msg.code(2500) + "Headers can not be modified in JAX-RS");
 	}
 
+	/**
+	 * Gets an attribute from the servlet request. Attributes are used for interacting with servlet request
+	 * attributes to communicate between servlet filters. These methods should not be used to pass information
+	 * between interceptor methods. Use {@link #getUserData()} instead to pass information
+	 * between interceptor methods.
+	 *
+	 * @param theAttributeName The attribute name
+	 * @return The attribute value, or null if the attribute is not set
+	 */
 	@Override
-	public Object getAttribute(String theAttributeName) {
+	public Object getServletAttribute(String theAttributeName) {
 		return myAttributes.get(theAttributeName);
 	}
 
+	/**
+	 * Sets an attribute on the servlet request. Attributes are used for interacting with servlet request
+	 * attributes to communicate between servlet filters. These methods should not be used to pass information
+	 * between interceptor methods. Use {@link #getUserData()} instead to pass information
+	 * between interceptor methods.
+	 *
+	 * @param theAttributeName The attribute name
+	 * @param theAttributeValue The attribute value
+	 */
+	@Override
+	public void setServletAttribute(String theAttributeName, Object theAttributeValue) {
+		myAttributes.put(theAttributeName, theAttributeValue);
+	}
+
+	/**
+	 * @deprecated Use {@link #getUserData()}. If servlet attributes are truly required, then use {@link IHasServletAttributes#getServletAttribute(String)}.
+	 */
+	@Deprecated
+	@Override
+	public Object getAttribute(String theAttributeName) {
+		return getServletAttribute(theAttributeName);
+	}
+
+	/**
+	 * @deprecated Use {@link #getUserData()}. If servlet attributes are truly required, then use {@link IHasServletAttributes#setServletAttribute(String, Object)}.
+	 */
+	@Deprecated
 	@Override
 	public void setAttribute(String theAttributeName, Object theAttributeValue) {
-		myAttributes.put(theAttributeName, theAttributeValue);
+		setServletAttribute(theAttributeName, theAttributeValue);
 	}
 
 	@Override
@@ -144,7 +180,7 @@ public class JaxRsRequest extends RequestDetails {
 	}
 
 	@Override
-	public Reader getReader() throws IOException {
+	public Reader getReader() {
 		// not yet implemented
 		throw new UnsupportedOperationException(Msg.code(600));
 	}
@@ -181,13 +217,14 @@ public class JaxRsRequest extends RequestDetails {
 	 */
 	public static class Builder {
 		private final String myResourceName;
+		private final RequestTypeEnum myRequestType;
+		private final String myRequestUrl;
+		private final RestOperationTypeEnum myRestOperation;
+		private final AbstractJaxRsProvider myServer;
+
+		private String myResource;
 		private String myCompartment;
 		private String myId;
-		private RequestTypeEnum myRequestType;
-		private String myRequestUrl;
-		private String myResource;
-		private RestOperationTypeEnum myRestOperation;
-		private AbstractJaxRsProvider myServer;
 		private String myVersion;
 
 		/**
@@ -196,7 +233,7 @@ public class JaxRsRequest extends RequestDetails {
 		 * @param theServer        the server
 		 * @param theRequestType   the request type
 		 * @param theRestOperation the rest operation
-		 * @param theRequestUrl
+		 * @param theRequestUrl    the request url
 		 */
 		public Builder(
 				AbstractJaxRsProvider theServer,
