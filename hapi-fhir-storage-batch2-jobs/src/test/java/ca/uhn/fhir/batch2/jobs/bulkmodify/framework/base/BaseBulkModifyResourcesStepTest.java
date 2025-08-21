@@ -77,7 +77,7 @@ class BaseBulkModifyResourcesStepTest {
 		{"resourceType":"Patient","id":"ZZZ","meta":{"versionId":"123"}} | HAPI-2783: Modification for Resource[Patient/ABC] attempted to change the resource ID
 		{"resourceType":"Patient","id":"ABC","meta":{"versionId":"111"}} | HAPI-2784: Modification for Resource[Patient/ABC] attempted to change the resource version
 		{"resourceType":"Basic","id":"ABC","meta":{"versionId":"123"}}   | HAPI-2782: Modification for Resource[Patient/ABC/_history/123] returned wrong resource type, expected Patient but was Basic
-		                                                                 | HAPI-2782: Null response from Modification for Resource[Patient/ABC/_history/123]
+		                                                                 | HAPI-2789: Null response from Modification for Resource[Patient/ABC/_history/123]
 		""")
 	public void testModificationChangingResourceIdBlocked(String theOutputResource, String theExpectedMessage) {
 		// Setup
