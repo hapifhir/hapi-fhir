@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6648
+title: "When performing validation with high concurrency, code validations could
+fail with a ConcurrentModificationException. Thanks to Max Bureck for the contribution!"
