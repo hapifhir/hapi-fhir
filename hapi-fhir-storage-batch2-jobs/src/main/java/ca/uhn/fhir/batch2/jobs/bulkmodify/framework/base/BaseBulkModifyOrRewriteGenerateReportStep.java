@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesResultsJson;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.StopWatch;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.IdType;
@@ -178,7 +179,9 @@ public abstract class BaseBulkModifyOrRewriteGenerateReportStep<PT extends BaseB
 
 		if (!myIdToFailure.isEmpty()) {
 			throw new ReductionStepFailureException(
-					provideJobName() + " had " + myFailureCount + " failure(s). See report for details.", reportJson);
+					Msg.code(2790) + provideJobName() + " had " + myFailureCount
+							+ " failure(s). See report for details.",
+					reportJson);
 		}
 
 		theDataSink.accept(reportJson);
