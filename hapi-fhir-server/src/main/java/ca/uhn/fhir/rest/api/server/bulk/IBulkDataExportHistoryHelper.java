@@ -5,7 +5,9 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 
 import java.util.List;
 
-// fixme jm: doc
+/**
+ * Bulk export history retrieval helper
+ */
 public interface IBulkDataExportHistoryHelper {
 
 	IBundleProvider fetchHistoryForResourceIds(
