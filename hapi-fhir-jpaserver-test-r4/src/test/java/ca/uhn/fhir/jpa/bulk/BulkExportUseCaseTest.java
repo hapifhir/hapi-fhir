@@ -1,8 +1,5 @@
 package ca.uhn.fhir.jpa.bulk;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
@@ -12,6 +9,7 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
@@ -24,24 +22,29 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Sets;
-import org.apache.commons.io.Charsets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -55,6 +58,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -64,9 +68,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -79,10 +81,16 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.PARAM_EXPORT_INCLUDE_HISTORY;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.stream.Collectors.mapping;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 
@@ -130,7 +138,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export?_type=Patient&_exportId=im-an-export-identifier";
 			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
 				assertEquals(200, status.getStatusLine().getStatusCode());
-				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+				String responseContent = IOUtils.toString(status.getEntity().getContent(), UTF_8);
 				assertThat(isNotBlank(responseContent)).as(responseContent).isTrue();
 
 				ourLog.info(responseContent);
@@ -195,7 +203,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			HttpGet statusGet = new HttpGet(pollingLocation);
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export?_type=Patient";
 			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
-				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+				String responseContent = IOUtils.toString(status.getEntity().getContent(), UTF_8);
 
 				ourLog.info(responseContent);
 
@@ -239,7 +247,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export";
 			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
 				assertEquals(200, status.getStatusLine().getStatusCode());
-				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+				String responseContent = IOUtils.toString(status.getEntity().getContent(), UTF_8);
 				assertThat(isNotBlank(responseContent)).as(responseContent).isTrue();
 
 				ourLog.info(responseContent);
@@ -283,12 +291,12 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			HttpGet statusGet = new HttpGet(pollingLocation);
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export";
 			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
-				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+				String responseContent = IOUtils.toString(status.getEntity().getContent(), UTF_8);
 				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
 				assertEquals(expectedOriginalUrl, result.getRequest());
 				assertEquals(true, result.getRequiresAccessToken());
 				assertNotNull(result.getTransactionTime());
-				assertEquals(result.getOutput().size(), 3);
+				assertEquals(3, result.getOutput().size());
 				assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Patient")).collect(Collectors.toList())).hasSize(1);
 				assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Observation")).collect(Collectors.toList())).hasSize(1);
 				assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Encounter")).collect(Collectors.toList())).hasSize(1);
@@ -322,12 +330,12 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			HttpGet statusGet = new HttpGet(pollingLocation);
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export";
 			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
-				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+				String responseContent = IOUtils.toString(status.getEntity().getContent(), UTF_8);
 				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
 				assertEquals(expectedOriginalUrl, result.getRequest());
 				assertEquals(true, result.getRequiresAccessToken());
 				assertNotNull(result.getTransactionTime());
-				assertEquals(result.getOutput().size(), 1);
+				assertEquals(1, result.getOutput().size());
 				assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Patient")).collect(Collectors.toList())).hasSize(1);
 				assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Binary")).collect(Collectors.toList())).isEmpty();
 
@@ -367,7 +375,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			for (int i = 0; i < patientCount; i++) {
 				Patient patient = new Patient();
 				patient.setId("pat-" + i);
-				myPatientDao.update(patient);
+				myPatientDao.update(patient, mySrd);
 			}
 
 			HashSet<String> types = Sets.newHashSet("Patient");
@@ -381,7 +389,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				HttpGet expandGet = new HttpGet(myServerBase + "/" + replace);
 				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
 					Header[] headers = status.getHeaders("Content-Type");
-					String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+					String response = IOUtils.toString(status.getEntity().getContent(), UTF_8);
 					logContentTypeAndResponse(headers, response);
 					validateNdJsonResponse(headers, response, patientCount);
 				}
@@ -392,7 +400,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				expandGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_NDJSON);
 				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
 					Header[] headers = status.getHeaders("Content-Type");
-					String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+					String response = IOUtils.toString(status.getEntity().getContent(), UTF_8);
 					logContentTypeAndResponse(headers, response);
 					validateNdJsonResponse(headers, response, patientCount);
 				}
@@ -403,7 +411,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				expandGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_OCTET_STREAM);
 				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
 					Header[] headers = status.getHeaders("Content-Type");
-					String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+					String response = IOUtils.toString(status.getEntity().getContent(), UTF_8);
 					logContentTypeAndResponse(headers, response);
 					validateNdJsonResponse(headers, response, patientCount);
 				}
@@ -415,7 +423,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
 					Header[] headers = status.getHeaders("Content-Type");
-					String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+					String response = IOUtils.toString(status.getEntity().getContent(), UTF_8);
 					logContentTypeAndResponse(headers, response);
 
 					assertThat(headers[0].getValue()).contains(Constants.CT_FHIR_JSON);
@@ -432,7 +440,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			for (int i = 0; i < patientCount; i++) {
 				Patient patient = new Patient();
 				patient.setId("pat-" + i);
-				myPatientDao.update(patient);
+				myPatientDao.update(patient, mySrd);
 			}
 
 			BulkExportJobParameters options = new BulkExportJobParameters();
@@ -554,16 +562,16 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		public void testPatientExportIgnoresResourcesNotInPatientCompartment() {
 			Patient patient = new Patient();
 			patient.setId("pat-1");
-			myPatientDao.update(patient);
+			myPatientDao.update(patient, mySrd);
 			Observation obs = new Observation();
 
 			obs.setId("obs-included");
 			obs.setSubject(new Reference("Patient/pat-1"));
-			myObservationDao.update(obs);
+			myObservationDao.update(obs, mySrd);
 
 			Observation obs2 = new Observation();
 			obs2.setId("obs-excluded");
-			myObservationDao.update(obs2);
+			myObservationDao.update(obs2, mySrd);
 
 			// test
 			HashSet<String> types = Sets.newHashSet("Patient", "Observation");
@@ -593,7 +601,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				patientIds.add(id);
 			}
 
-			int patientsCreated = myPatientDao.search(SearchParameterMap.newSynchronous(), details).size();
+			Integer patientsCreated = myPatientDao.search(SearchParameterMap.newSynchronous(), details).size();
 			assertEquals(numPatients, patientsCreated);
 
 			BulkExportJobParameters options = new BulkExportJobParameters();
@@ -1421,6 +1429,272 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				assertThat(typeToContents.get("Patient")).doesNotContain("POG2");
 			}
 		}
+	}
+
+	@Nested
+	class IncludeHistoryTests {
+
+		@Test
+		public void testPatientBulkExport() {
+			myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
+
+			// versions list size indicate number of patients to create
+			Map<Long, Set<String>> patientVersionsMap = createPatientsWithHistory(List.of(2, 3, 5, 2, 1, 4, 2, 3, 2, 3));
+
+			BulkExportJobParameters options = new BulkExportJobParameters();
+			options.setResourceTypes(Sets.newHashSet("Patient"));
+			options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+			options.setIncludeHistory(true);
+			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+			startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+			startRequest.setParameters(options);
+			Batch2JobStartResponse job = myJobCoordinator.startInstance(mySrd, startRequest);
+			myBatch2JobHelper.awaitJobCompletion(job.getInstanceId(), 60);
+			ourLog.debug("Job status after awaiting - {}", myJobCoordinator.getInstance(job.getInstanceId()).getStatus());
+			waitForCompletion(job);
+
+			Map<Long, Set<String>> exportedPatientVersionsMap = extractExportedResourceVersionsByTypeMap(job).get("Patient");
+			assertThat(exportedPatientVersionsMap).isEqualTo(patientVersionsMap);
+		}
+
+		@Test
+		public void testGroupBulkExportMultipleResourceTypes() {
+			Patient patient = new Patient();
+			patient.setId("PING1");
+			patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+			patient.setActive(true);
+			myClient.update().resource(patient).execute();
+
+			//Other patient not in group
+			Patient patient2 = new Patient();
+			patient2.setId("POG2");
+			patient2.setGender(Enumerations.AdministrativeGender.FEMALE);
+			patient2.setActive(true);
+			myClient.update().resource(patient2).execute();
+
+			Group group = new Group();
+			group.setId("Group/G2");
+			group.setActive(true);
+			group.addMember().getEntity().setReference("Patient/PING1");
+			myClient.update().resource(group).execute();
+
+			// versions list size indicate number of patients to create
+			Map<Long, Set<String>> observationVersionsMap = createObservationWithHistory(3, "Patient/PING1");
+			Map<Long, Set<String>> coverageVersionsMap = createCoverageWithHistory(2, "Patient/PING1");
+
+			HashSet<String> resourceTypes = Sets.newHashSet("Observation", "Coverage");
+			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G2", true);
+
+			Map<String, Map<Long, Set<String>>> typeToResourceVersionsMap = convertJobResultsToResourceVersionMap(bulkExportJobResults);
+			assertThat(typeToResourceVersionsMap.get("Observation")).isEqualTo(observationVersionsMap);
+			assertThat(typeToResourceVersionsMap.get("Coverage")).isEqualTo(coverageVersionsMap);
+		}
+
+		private Map<String, Map<Long, Set<String>>> convertJobResultsToResourceVersionMap(BulkExportJobResults theBulkExportJobResults) {
+			Map<String, List<IBaseResource>> exportedResourcesByType = convertJobResultsToResources(theBulkExportJobResults);
+
+			Map<String, Map<Long, Set<String>>> retVal = new HashMap<>();
+
+			for (Map.Entry<String, List<IBaseResource>> resourcesOfTypeEntry : exportedResourcesByType.entrySet()) {
+				retVal.put(
+					resourcesOfTypeEntry.getKey(),
+					resourcesOfTypeEntry.getValue().stream().collect(Collectors.groupingBy(
+						r -> r.getIdElement().getIdPartAsLong(),
+						mapping(r -> r.getIdElement().getValueAsString(), Collectors.toSet())
+					))
+				);
+			}
+
+			return  retVal;
+		}
+
+		@Test
+		public void testSystemBulkExport() {
+			// versions list size indicate number of patients to create
+			Map<Long, Set<String>> patientVersionsMap = createPatientsWithHistory(List.of(3, 5, 2, 1, 2));
+
+			BulkExportJobParameters options = new BulkExportJobParameters();
+			options.setResourceTypes(Collections.singleton("Patient"));
+			options.setFilters(Collections.emptySet());
+			options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
+			options.setIncludeHistory(true);
+			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+			myCaptureQueriesListener.clear();
+
+			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+			startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+			startRequest.setParameters(options);
+			Batch2JobStartResponse job = myJobCoordinator.startInstance(mySrd, startRequest);
+			myBatch2JobHelper.awaitJobCompletion(job.getInstanceId(), 60);
+			ourLog.debug("Job status after awaiting - {}", myJobCoordinator.getInstance(job.getInstanceId()).getStatus());
+			waitForCompletion(job);
+
+			Map<Long, Set<String>> exportedPatientVersionsMap = extractExportedResourceVersionsByTypeMap(job).get("Patient");
+			assertThat(exportedPatientVersionsMap).isEqualTo(patientVersionsMap);
+
+			assertThat(exportedPatientVersionsMap).isEqualTo(patientVersionsMap);
+		}
+
+		private Map<Long, Set<String>> createObservationWithHistory(
+				@SuppressWarnings("SameParameterValue") int theVersionCount,
+				@SuppressWarnings("SameParameterValue") String thePatientId) {
+
+			Map<Long, Set<String>> retVal = new HashMap<>();
+
+			IIdType id = createObservation(List.of(
+				withResourcePrimitiveAttribute("valueString", "version-1"),
+				withReference("subject", thePatientId)));
+
+			Set<String> versionIds = new HashSet<>();
+			retVal.put(id.getIdPartAsLong(), versionIds);
+
+			// create indicated additional versions
+
+			int additionalVersionCount = theVersionCount - 1;
+			IIdType lastVersonId = myObservationDao.read(id, mySrd).getIdElement();
+			versionIds.add(lastVersonId.getValueAsString());
+
+			for (int vCount = 0; vCount < additionalVersionCount; vCount++) {
+				Parameters patch = getObservationPatch(vCount);
+				DaoMethodOutcome patchOutcome = myObservationDao.patch(lastVersonId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, patch, mySrd);
+				AssertionsForClassTypes.assertThat(patchOutcome).isNotNull();
+				lastVersonId = patchOutcome.getId();
+				versionIds.add(lastVersonId.getValueAsString());
+			}
+			return retVal;
+		}
+
+		private Map<Long, Set<String>> createCoverageWithHistory(
+				@SuppressWarnings("SameParameterValue") int theVersionCount,
+				@SuppressWarnings("SameParameterValue") String thePatientId) {
+
+			Map<Long, Set<String>> retVal = new HashMap<>();
+
+			IIdType id = createCoverage(
+				withResourcePrimitiveAttribute("dependent", "version-1"),
+				withReference("beneficiary", thePatientId));
+
+			Set<String> versionIds = new HashSet<>();
+			retVal.put(id.getIdPartAsLong(), versionIds);
+
+			// create indicated additional versions
+
+			int additionalVersionCount = theVersionCount - 1;
+			IIdType lastVersonId = myCoverageDao.read(id, mySrd).getIdElement();
+			versionIds.add(lastVersonId.getValueAsString());
+
+			for (int vCount = 0; vCount < additionalVersionCount; vCount++) {
+				Parameters patch = getCoveragePatch(vCount);
+				DaoMethodOutcome patchOutcome = myCoverageDao.patch(lastVersonId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, patch, mySrd);
+				AssertionsForClassTypes.assertThat(patchOutcome).isNotNull();
+				lastVersonId = patchOutcome.getId();
+				versionIds.add(lastVersonId.getValueAsString());
+			}
+			return retVal;
+		}
+
+		private Parameters getObservationPatch(int theVersion) {
+			Parameters patch = new Parameters();
+			Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+			op.addPart().setName("type").setValue(new CodeType("replace"));
+			op.addPart().setName("path").setValue(new CodeType("Observation.value"));
+			op.addPart().setName("value").setValue(new StringType("version-" + theVersion+1));
+			return patch;
+		}
+
+		private Parameters getCoveragePatch(int theVersion) {
+			Parameters patch = new Parameters();
+			Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+			op.addPart().setName("type").setValue(new CodeType("replace"));
+			op.addPart().setName("path").setValue(new CodeType("Coverage.dependent"));
+			op.addPart().setName("value").setValue(new StringType("version-" + theVersion+1));
+			return patch;
+		}
+
+		private void waitForCompletion(Batch2JobStartResponse job) {
+			await()
+				.atMost(300, TimeUnit.SECONDS)
+				.until(() -> {
+					StatusEnum status = myJobCoordinator.getInstance(job.getInstanceId()).getStatus();
+					if (!StatusEnum.COMPLETED.equals(status)) {
+						fail("Job status was changed from COMPLETE to " + status);
+					}
+					return myJobCoordinator.getInstance(job.getInstanceId()).getReport() != null;
+				});
+		}
+
+		private Map<String, Map<Long, Set<String>>> extractExportedResourceVersionsByTypeMap(Batch2JobStartResponse theJob) {
+			String report = myJobCoordinator.getInstance(theJob.getInstanceId()).getReport();
+			BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
+			List<String> binaryUrls = results.getResourceTypeToBinaryIds().get("Patient");
+
+			Map<String, Map<Long, Set<String>>> retVal = new HashMap<>();
+
+			IParser jsonParser = myFhirContext.newNDJsonParser();
+			for (String url : binaryUrls) {
+				Binary binary = myClient.read().resource(Binary.class).withUrl(url).execute();
+				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
+				String resourceContents = new String(binary.getContent(), Constants.CHARSET_UTF8);
+
+				Bundle bundle = (Bundle) jsonParser.parseResource(resourceContents);
+				for (IBaseResource resource : BundleUtil.toListOfResources(myFhirContext, bundle)) {
+					String resourceType = resource.getIdElement().getResourceType();
+					IIdType resourceId = resource.getIdElement();
+					String resourceVersion = resource.getIdElement().getValueAsString();
+					retVal.computeIfAbsent(resourceType, k -> new HashMap<>())
+						.computeIfAbsent(
+							resourceId.getIdPartAsLong(),
+							k -> new HashSet<>()).add(resourceVersion);
+				}
+			}
+
+			return retVal;
+		}
+
+		private Parameters getPatch(int theVersion) {
+			Parameters patch = new Parameters();
+			Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+			op.addPart().setName("type").setValue(new CodeType("replace"));
+			op.addPart().setName("path").setValue(new CodeType("Patient.name.given"));
+			op.addPart().setName("value").setValue(new StringType("given-v" + theVersion+1));
+			return patch;
+		}
+
+		private Map<Long, Set<String>> createPatientsWithHistory(List<Integer> versionCounts) {
+			Map<Long, Set<String>> retVal = new HashMap<>();
+
+			for (Integer theVersionCount : versionCounts) {
+				IIdType id = createPatient();
+				Set<String> patientVersionIds = new HashSet<>();
+				retVal.put(id.getIdPartAsLong(), patientVersionIds);
+
+				// create indicated additional versions
+
+				int patientAdditionalVersionCount = theVersionCount - 1;
+				IIdType lastVersonId = id;
+				patientVersionIds.add(lastVersonId.getValueAsString());
+
+				for (int vCount = 0; vCount < patientAdditionalVersionCount; vCount++) {
+					Parameters patch = getPatch(vCount);
+					DaoMethodOutcome patchOutcome = myPatientDao.patch(lastVersonId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, patch, mySrd);
+					AssertionsForClassTypes.assertThat(patchOutcome).isNotNull();
+					lastVersonId = patchOutcome.getId();
+					patientVersionIds.add(lastVersonId.getValueAsString());
+				}
+			}
+			return retVal;
+		}
+
+		private IIdType createPatient() {
+			Patient p = new Patient();
+			p.addName()
+				.setGiven(List.of(new StringType("given")))
+				.setFamily("lastname");
+			return myPatientDao.create(p, mySrd).getId();
+		}
 
 	}
 
@@ -1480,13 +1754,17 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	}
 
 	private String getBinaryContentsAsString(String theBinaryId) {
-		Binary binary = myBinaryDao.read(new IdType(theBinaryId));
+		Binary binary = myBinaryDao.read(new IdType(theBinaryId), mySrd);
 		assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
         return new String(binary.getContent(), Constants.CHARSET_UTF8);
 	}
 
 	BulkExportJobResults startGroupBulkExportJobAndAwaitCompletion(HashSet<String> theResourceTypes, HashSet<String> theFilters, String theGroupId) {
-		return startBulkExportJobAndAwaitCompletion(BulkExportJobParameters.ExportStyle.GROUP, theResourceTypes, theFilters, theGroupId);
+		return startBulkExportJobAndAwaitCompletion(BulkExportJobParameters.ExportStyle.GROUP, theResourceTypes, theFilters, theGroupId, false);
+	}
+
+	BulkExportJobResults startGroupBulkExportJobAndAwaitCompletion(HashSet<String> theResourceTypes, HashSet<String> theFilters, @SuppressWarnings("SameParameterValue") String theGroupId, @SuppressWarnings("SameParameterValue") boolean includeHistory) {
+		return startBulkExportJobAndAwaitCompletion(BulkExportJobParameters.ExportStyle.GROUP, theResourceTypes, theFilters, theGroupId, includeHistory);
 	}
 
 	BulkExportJobResults startSystemBulkExportJobAndAwaitCompletion(Set<String> theResourceTypes, Set<String> theFilters) {
@@ -1499,7 +1777,20 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		Set<String> theFilters,
 		String theGroupOrPatientId
 	) {
+		return startBulkExportJobAndAwaitCompletion(theExportStyle, theResourceTypes, theFilters, theGroupOrPatientId, false);
+	}
+
+	BulkExportJobResults startBulkExportJobAndAwaitCompletion(
+		BulkExportJobParameters.ExportStyle theExportStyle,
+		Set<String> theResourceTypes,
+		Set<String> theFilters,
+		String theGroupOrPatientId,
+		boolean theIncludeHistory
+	) {
 		Parameters parameters = new Parameters();
+		if (theIncludeHistory) {
+			parameters.addParameter(PARAM_EXPORT_INCLUDE_HISTORY, true);
+		}
 
 		parameters.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, Constants.CT_FHIR_NDJSON);
 		if (theFilters != null && !theFilters.isEmpty()) {
@@ -1581,7 +1872,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
         return JsonUtil.deserialize(report, BulkExportJobResults.class);
 	}
 
-	private void verifyBulkExportResults(String theGroupId, HashSet<String> theFilters, List<String> theContainedList, List<String> theExcludedList) {
+	private void verifyBulkExportResults(@SuppressWarnings("SameParameterValue") String theGroupId, HashSet<String> theFilters, List<String> theContainedList, List<String> theExcludedList) {
 		BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setResourceTypes(Sets.newHashSet("Patient"));
 		options.setGroupId("Group/" + theGroupId);
@@ -1608,7 +1899,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			List<String> binaryIds = file.getValue();
 			assertThat(binaryIds).hasSize(1);
 			for (String binaryId : binaryIds) {
-				Binary binary = myBinaryDao.read(new IdType(binaryId));
+				Binary binary = myBinaryDao.read(new IdType(binaryId), mySrd);
 				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
 				String contents = new String(binary.getContent(), Constants.CHARSET_UTF8);
 				ourLog.info("Next contents for type {} :\n{}", binary.getResourceType(), contents);
@@ -1623,7 +1914,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 	}
 
-	private BulkExportJobResults startPatientBulkExportJobAndAwaitResults(HashSet<String> theTypes, HashSet<String> theFilters, String thePatientId) {
+	private BulkExportJobResults startPatientBulkExportJobAndAwaitResults(HashSet<String> theTypes, HashSet<String> theFilters, @SuppressWarnings("SameParameterValue") String thePatientId) {
 		return startBulkExportJobAndAwaitCompletion(BulkExportJobParameters.ExportStyle.PATIENT, theTypes, theFilters, thePatientId);
 	}
 }
