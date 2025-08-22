@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
+import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
+
 public class JpaBulkDataExportHistoryHelper implements IBulkDataExportHistoryHelper {
 
 	@Autowired
@@ -21,6 +23,8 @@ public class JpaBulkDataExportHistoryHelper implements IBulkDataExportHistoryHel
 
 		RequestDetails requestDetails = SystemRequestDetails.forRequestPartitionId(theRequestPartitionId);
 		requestDetails.setResourceName(theResourceType);
+		requestDetails.addParameter(PARAM_ID, theResourceIds.toArray(new String[0]));
+
 		return myBundleProviderFactory.history(
 				requestDetails, theResourceType, null, null, null, null, theRequestPartitionId);
 	}

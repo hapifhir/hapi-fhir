@@ -31,12 +31,17 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import jakarta.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
 
+import static ca.uhn.fhir.jpa.config.JpaConfig.PREDICATED_PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH;
+import static ca.uhn.fhir.model.dstu2.resource.BaseResource.SP_RES_ID;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 public class PersistedJpaBundleProviderFactory {
@@ -50,9 +55,25 @@ public class PersistedJpaBundleProviderFactory {
 	}
 
 	public PersistedJpaBundleProvider newInstance(RequestDetails theRequest, Search theSearch) {
+		Predicate<? super IBaseResource> predicate = buildIdPredicateFromParameters(theRequest);
+		if (predicate != null) {
+			Object retVal = myApplicationContext.getBean(
+					PREDICATED_PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH, theRequest, theSearch, predicate);
+			return (PersistedJpaBundleProvider) retVal;
+		}
+
 		Object retVal =
 				myApplicationContext.getBean(JpaConfig.PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH, theRequest, theSearch);
 		return (PersistedJpaBundleProvider) retVal;
+	}
+
+	private Predicate<? super IBaseResource> buildIdPredicateFromParameters(RequestDetails theRequest) {
+		String[] idParam = theRequest.getParameters().get(SP_RES_ID);
+		if (idParam == null || idParam.length == 0) {
+			return null;
+		}
+		return res -> List.of(idParam)
+				.contains(res.getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
 	public PersistedJpaSearchFirstPageBundleProvider newInstanceFirstPage(

@@ -1469,7 +1469,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			//Other patient not in group
 			Patient patient2 = new Patient();
-			patient2.setId("POG2");
+			patient2.setId("PONG2");
 			patient2.setGender(Enumerations.AdministrativeGender.FEMALE);
 			patient2.setActive(true);
 			myClient.update().resource(patient2).execute();
@@ -1480,9 +1480,14 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			group.addMember().getEntity().setReference("Patient/PING1");
 			myClient.update().resource(group).execute();
 
-			// versions list size indicate number of patients to create
+			// versions list size indicate number of resources to create
 			Map<Long, Set<String>> observationVersionsMap = createObservationWithHistory(3, "Patient/PING1");
+			// observations which versions should not be included (to validate history id filtering)
+			createObservationWithHistory(3, "Patient/PONG2");
+
 			Map<Long, Set<String>> coverageVersionsMap = createCoverageWithHistory(2, "Patient/PING1");
+			// coverages which versions should not be included (to validate history id filtering)
+			createCoverageWithHistory(2, "Patient/PONG2");
 
 			HashSet<String> resourceTypes = Sets.newHashSet("Observation", "Coverage");
 			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G2", true);
@@ -1490,6 +1495,32 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			Map<String, Map<Long, Set<String>>> typeToResourceVersionsMap = convertJobResultsToResourceVersionMap(bulkExportJobResults);
 			assertThat(typeToResourceVersionsMap.get("Observation")).isEqualTo(observationVersionsMap);
 			assertThat(typeToResourceVersionsMap.get("Coverage")).isEqualTo(coverageVersionsMap);
+		}
+
+		@Test
+		public void testSystemBulkExport() {
+			// versions list size indicate number of patients to create
+			Map<Long, Set<String>> patientVersionsMap = createPatientsWithHistory(List.of(3, 5, 2, 1, 2));
+
+			BulkExportJobParameters options = new BulkExportJobParameters();
+			options.setResourceTypes(Collections.singleton("Patient"));
+			options.setFilters(Collections.emptySet());
+			options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
+			options.setIncludeHistory(true);
+			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+			startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+			startRequest.setParameters(options);
+			Batch2JobStartResponse job = myJobCoordinator.startInstance(mySrd, startRequest);
+			myBatch2JobHelper.awaitJobCompletion(job.getInstanceId(), 60);
+			ourLog.debug("Job status after awaiting - {}", myJobCoordinator.getInstance(job.getInstanceId()).getStatus());
+			waitForCompletion(job);
+
+			Map<Long, Set<String>> exportedPatientVersionsMap = extractExportedResourceVersionsByTypeMap(job).get("Patient");
+			assertThat(exportedPatientVersionsMap).isEqualTo(patientVersionsMap);
+
+			assertThat(exportedPatientVersionsMap).isEqualTo(patientVersionsMap);
 		}
 
 		private Map<String, Map<Long, Set<String>>> convertJobResultsToResourceVersionMap(BulkExportJobResults theBulkExportJobResults) {
@@ -1508,34 +1539,6 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			}
 
 			return  retVal;
-		}
-
-		@Test
-		public void testSystemBulkExport() {
-			// versions list size indicate number of patients to create
-			Map<Long, Set<String>> patientVersionsMap = createPatientsWithHistory(List.of(3, 5, 2, 1, 2));
-
-			BulkExportJobParameters options = new BulkExportJobParameters();
-			options.setResourceTypes(Collections.singleton("Patient"));
-			options.setFilters(Collections.emptySet());
-			options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
-			options.setIncludeHistory(true);
-			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-
-			myCaptureQueriesListener.clear();
-
-			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-			startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
-			startRequest.setParameters(options);
-			Batch2JobStartResponse job = myJobCoordinator.startInstance(mySrd, startRequest);
-			myBatch2JobHelper.awaitJobCompletion(job.getInstanceId(), 60);
-			ourLog.debug("Job status after awaiting - {}", myJobCoordinator.getInstance(job.getInstanceId()).getStatus());
-			waitForCompletion(job);
-
-			Map<Long, Set<String>> exportedPatientVersionsMap = extractExportedResourceVersionsByTypeMap(job).get("Patient");
-			assertThat(exportedPatientVersionsMap).isEqualTo(patientVersionsMap);
-
-			assertThat(exportedPatientVersionsMap).isEqualTo(patientVersionsMap);
 		}
 
 		private Map<Long, Set<String>> createObservationWithHistory(
