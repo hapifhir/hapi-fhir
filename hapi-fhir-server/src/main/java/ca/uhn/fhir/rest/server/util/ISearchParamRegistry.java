@@ -205,6 +205,21 @@ public interface ISearchParamRegistry extends IResourceRepositoryCache {
 	}
 
 	/**
+	 * Adds a SearchParameter to the cache so that it can be used, but does *not*
+	 * add it to the repository (so it cannot be queried).
+	 *
+	 * These local cached searchparameters will remain in the cache, even after
+	 * requests to refresh, until restart or clearLocalCache is called.
+	 * @param theSearchParam
+	 */
+	void addActiveSearchParameterToLocalCache(RuntimeSearchParam theSearchParam);
+
+	/**
+	 * Clears search parameters from local cache.
+	 */
+	void clearLocalSearchParameterCache();
+
+	/**
 	 * Describes the context for looking up individual search parameters or lists of search parameters.
 	 * These can be thought of as filter criteria - Most search parameters generally apply to all
 	 * context, but some may be explicitly defined to only work for some.
@@ -229,7 +244,11 @@ public interface ISearchParamRegistry extends IResourceRepositoryCache {
 		/**
 		 * Return any search parameters that are known to the system for any context
 		 */
-		ALL
+		ALL,
+		/**
+		 *
+		 */
+		ALL_EXCLUDING_LOCAL_CACHE
 	}
 
 	static boolean isAllowedForContext(

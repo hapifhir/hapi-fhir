@@ -302,6 +302,16 @@ public class SearchParamExtractorDstu3Test {
 		}
 
 		@Override
+		public void addActiveSearchParameterToLocalCache(RuntimeSearchParam theSearchParam) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void clearLocalSearchParameterCache() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
 		public List<RuntimeSearchParam> getActiveComboSearchParams(@Nonnull String theResourceName, @Nonnull SearchParamLookupContextEnum theContext) {
 			throw new UnsupportedOperationException();
 		}

@@ -451,6 +451,16 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 		throw new UnsupportedOperationException(Msg.code(286));
 	}
 
+	@Override
+	public void addActiveSearchParameterToLocalCache(RuntimeSearchParam theSearchParam) {
+
+	}
+
+	@Override
+	public void clearLocalSearchParameterCache() {
+
+	}
+
 	private void createRuntimeBinding(
 			ResourceSearchParams theMapToPopulate, SearchMethodBinding theSearchMethodBinding) {
 
