@@ -53,6 +53,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import ca.uhn.fhir.rest.api.server.bulk.IBulkDataExportHistoryHelper;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -123,6 +124,9 @@ public class ExpandResourceAndWriteBinaryStep
 	@Autowired
 	private IHapiTransactionService myTransactionService;
 
+	@Autowired
+	private IBulkDataExportHistoryHelper myExportHelper;
+
 	private volatile ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
 	/**
@@ -137,7 +141,7 @@ public class ExpandResourceAndWriteBinaryStep
 	 * at any given time, so this class works a bit like a stream processor
 	 * (although not using Java streams).
 	 * <p>
-	 * The {@link #fetchResourcesByIdAndConsumeThem(ResourceIdList, RequestPartitionId, Consumer)}
+	 * The {@link #fetchResourcesByIdAndConsumeThem(ResourceIdList, BulkExportJobParameters, Consumer)}
 	 * method loads the resources by ID, {@link ExpandResourcesConsumer} handles
 	 * the filtering and whatnot, then the {@link NdJsonResourceWriter}
 	 * ultimately writes them.
@@ -169,13 +173,17 @@ public class ExpandResourceAndWriteBinaryStep
 				new ExpandResourcesConsumer(theStepExecutionDetails, theResourceWriter);
 
 		// search the resources
-		fetchResourcesByIdAndConsumeThem(idList, parameters.getPartitionId(), resourceListConsumer);
+		fetchResourcesByIdAndConsumeThem(idList, parameters, resourceListConsumer);
 	}
 
 	private void fetchResourcesByIdAndConsumeThem(
 			ResourceIdList theIds,
-			RequestPartitionId theRequestPartitionId,
+			BulkExportJobParameters theJobParameters,
 			Consumer<List<IBaseResource>> theResourceListConsumer) {
+
+		RequestPartitionId requestPartitionId = theJobParameters.getPartitionId();
+		boolean isIncludeHistory = theJobParameters.isIncludeHistory();
+
 		ArrayListMultimap<String, TypedPidJson> typeToIds = ArrayListMultimap.create();
 		theIds.getIds().forEach(t -> typeToIds.put(t.getResourceType(), t));
 
@@ -200,25 +208,40 @@ public class ExpandResourceAndWriteBinaryStep
 							.collect(Collectors.toSet());
 
 					PersistentIdToForcedIdMap nextBatchOfResourceIds = myTransactionService
-							.withSystemRequestOnPartition(theRequestPartitionId)
+							.withSystemRequestOnPartition(requestPartitionId)
 							.execute(() -> myIdHelperService.translatePidsToForcedIds(subBatchPids));
 
-					TokenOrListParam idListParam = new TokenOrListParam();
+					List<String> idList = new ArrayList<>();
 					for (IResourcePersistentId nextPid : subBatchPids) {
 						Optional<String> resourceId = nextBatchOfResourceIds.get(nextPid);
-						idListParam.add(resourceId.orElse(nextPid.getId().toString()));
+						idList.add(resourceId.orElse(nextPid.getId().toString()));
 					}
 
-					SearchParameterMap spMap =
-							SearchParameterMap.newSynchronous().add(PARAM_ID, idListParam);
-					IBundleProvider outcome =
-							dao.search(spMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId));
+					IBundleProvider outcome = isIncludeHistory
+							? searchForResourcesHistory(resourceType, idList, requestPartitionId)
+							: searchForResources(dao, idList, requestPartitionId);
+
 					batchResources.addAll(outcome.getAllResources());
 				}
 
 				theResourceListConsumer.accept(batchResources);
 			}
 		}
+	}
+
+	private IBundleProvider searchForResourcesHistory(
+			String theResourceType, List<String> theIdList, RequestPartitionId theRequestPartitionId) {
+		return myExportHelper.fetchHistoryForResourceIds(theResourceType, theIdList, theRequestPartitionId);
+	}
+
+	private IBundleProvider searchForResources(
+			IFhirResourceDao<?> theDao, List<String> theIdList, RequestPartitionId theRequestPartitionId) {
+
+		TokenOrListParam idListParam = new TokenOrListParam();
+		theIdList.forEach(idListParam::add);
+
+		SearchParameterMap spMap = SearchParameterMap.newSynchronous().add(PARAM_ID, idListParam);
+		return theDao.search(spMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId));
 	}
 
 	/**
