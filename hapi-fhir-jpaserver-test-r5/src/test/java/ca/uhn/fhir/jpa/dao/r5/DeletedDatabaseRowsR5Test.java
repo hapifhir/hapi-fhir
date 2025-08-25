@@ -5,6 +5,8 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.api.dao.ReindexOutcome;
+import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.dao.JpaStorageResourceParser;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -14,12 +16,13 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.test.ResetSequencesTestHelper;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.test.util.LogbackTestExtension;
-import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import jakarta.persistence.Query;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -42,6 +45,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -53,7 +57,10 @@ import static org.mockito.Mockito.verify;
 public class DeletedDatabaseRowsR5Test extends BaseJpaR5Test {
 
 	@RegisterExtension
-	private final LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(Level.WARN);
+	private final LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension();
+	@SuppressWarnings("unused")
+	@RegisterExtension
+	private final ResetSequencesTestHelper myResetSequencesTestHelper = new ResetSequencesTestHelper();
 
 	@Mock
 	private IAnonymousInterceptor myMockInterceptor;
@@ -172,9 +179,7 @@ public class DeletedDatabaseRowsR5Test extends BaseJpaR5Test {
 				List<ResourceHistoryTable> historyEntities = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(orgPid.toFk());
 				myResourceHistoryTableDao.deleteAll(historyEntities);
 			});
-			runInTransaction(() -> {
-				myResourceTableDao.deleteByPid(orgPid);
-			});
+			runInTransaction(() -> myResourceTableDao.deleteByPid(orgPid));
 
 			// Make sure that the Org was deleted
 			assertThrows(ResourceNotFoundException.class, () -> myOrganizationDao.read(new IdType("Organization/O"), mySrd));
@@ -210,33 +215,26 @@ public class DeletedDatabaseRowsR5Test extends BaseJpaR5Test {
 	@Test
 	void testSequenceReturnsReservedValue_ClientAssignedIds() {
 		// Setup
-		try {
-			runInTransaction(() -> {
-				myEntityManager.createNativeQuery("drop sequence SEQ_RESOURCE_ID").executeUpdate();
-				myEntityManager.createNativeQuery("create sequence SEQ_RESOURCE_ID minvalue -100 start with -100 increment by 50").executeUpdate();
-			});
+		runInTransaction(() -> {
+			myEntityManager.createNativeQuery("drop sequence SEQ_RESOURCE_ID").executeUpdate();
+			myEntityManager.createNativeQuery("create sequence SEQ_RESOURCE_ID minvalue -100 start with -100 increment by 50").executeUpdate();
+		});
 
-			for (int i = 0; i < 200; i++) {
-				try {
-					IIdType id = createPatient(withId("P" + i), withActiveTrue());
-				} catch (InternalErrorException e) {
-					assertEquals("HAPI-2791: Resource ID generator provided illegal value: -1", e.getMessage());
-					assertDoesntExist(new IdType("Patient/P" + i));
-					continue;
-				}
-
-				Patient patient = myPatientDao.read(new IdType("Patient/P" + i), newSrd());
-				JpaPid pid = (JpaPid) patient.getUserData(IDao.RESOURCE_PID_KEY);
-				ourLog.info("Created resource with PID: {}", pid);
-				assertNotEquals(JpaConstants.NO_MORE, pid);
+		for (int i = 0; i < 200; i++) {
+			try {
+				createPatient(withId("P" + i), withActiveTrue());
+			} catch (InternalErrorException e) {
+				assertEquals("HAPI-2791: Resource ID generator provided illegal value: -1", e.getMessage());
+				assertDoesntExist(new IdType("Patient/P" + i));
+				continue;
 			}
 
-		} finally {
-			runInTransaction(() -> {
-				myEntityManager.createNativeQuery("drop sequence if exists SEQ_RESOURCE_ID").executeUpdate();
-				myEntityManager.createNativeQuery("create sequence SEQ_RESOURCE_ID minvalue 1 start with 1 increment by 50").executeUpdate();
-			});
+			Patient patient = myPatientDao.read(new IdType("Patient/P" + i), newSrd());
+			JpaPid pid = (JpaPid) patient.getUserData(IDao.RESOURCE_PID_KEY);
+			ourLog.info("Created resource with PID: {}", pid);
+			assertNotEquals(JpaConstants.NO_MORE, pid);
 		}
+
 	}
 
 	/**
@@ -250,42 +248,38 @@ public class DeletedDatabaseRowsR5Test extends BaseJpaR5Test {
 	@Test
 	void testSequenceReturnsReservedValue_ServerAssignedIds() {
 		// Setup
-		try {
-			runInTransaction(() -> {
-				myEntityManager.createNativeQuery("drop sequence SEQ_RESOURCE_ID").executeUpdate();
-				myEntityManager.createNativeQuery("create sequence SEQ_RESOURCE_ID minvalue -100 start with -100 increment by 50").executeUpdate();
-			});
+		runInTransaction(() -> {
+			myEntityManager.createNativeQuery("drop sequence SEQ_RESOURCE_ID").executeUpdate();
+			myEntityManager.createNativeQuery("create sequence SEQ_RESOURCE_ID minvalue -100 start with -100 increment by 50").executeUpdate();
+		});
 
-			for (int i = 0; i < 200; i++) {
-				IIdType id;
-				try {
-					id = createPatient(withActiveTrue());
-					ourLog.info("Created resource with ID: {}", id);
-				} catch (InternalErrorException e) {
-					assertEquals("HAPI-2791: Resource ID generator provided illegal value: -1", e.getMessage());
-					assertDoesntExist(new IdType("Patient/P" + i));
-					continue;
-				}
+		logAllResources();
 
-				Patient patient = myPatientDao.read(id, newSrd());
-				JpaPid pid = (JpaPid) patient.getUserData(IDao.RESOURCE_PID_KEY);
-				ourLog.info("Created resource with PID: {}", pid);
-				assertNotEquals(JpaConstants.NO_MORE, pid);
+		for (int i = 0; i < 200; i++) {
+			IIdType id;
+			try {
+				ourLog.info("Creating resource index {}", i);
+				id = createPatient(withActiveTrue(), withFamily("FAMILY-" + i));
+				ourLog.info("Created resource with ID: {}", id);
+			} catch (InternalErrorException e) {
+				assertEquals("HAPI-2791: Resource ID generator provided illegal value: -1", e.getMessage());
+				assertDoesntExist(new IdType("Patient/P" + i));
+				continue;
 			}
 
-		} finally {
-			runInTransaction(() -> {
-				myEntityManager.createNativeQuery("drop sequence SEQ_RESOURCE_ID").executeUpdate();
-				myEntityManager.createNativeQuery("create sequence SEQ_RESOURCE_ID minvalue 1 start with 1 increment by 50").executeUpdate();
-			});
+			Patient patient = myPatientDao.read(id, newSrd());
+			JpaPid pid = (JpaPid) patient.getUserData(IDao.RESOURCE_PID_KEY);
+			ourLog.info("Created resource with PID: {}", pid);
+			assertNotEquals(JpaConstants.NO_MORE, pid);
 		}
+
 	}
 
 
 	@Test
 	void resourceTableHasInvalidCurrentVersion_Search() {
 		// Setup
-		JpaPid pid = createResourceWithVersions1_2_and_4(5);
+		JpaPid pid = createPatientAWithVersions1_2_and_4();
 
 		// Test
 		SearchParameterMap params = new SearchParameterMap();
@@ -306,25 +300,17 @@ public class DeletedDatabaseRowsR5Test extends BaseJpaR5Test {
 			.toList();
 		assertThat(logEvents).containsExactly(expectedMessage);
 
-		// FIXME: add search test
-		// FIXME: add read test
-		// FIXME: add reindexing to fix
-		// FIXME: add test where all versions are gone
-
 	}
 
 	@Test
-	void resourceTableHasNoVersions_Search() {
+	void resourceTableHasInvalidCurrentVersion_Read() {
 		// Setup
-		JpaPid pid = createResourceWithVersions1_2_and_4(1);
-		deleteVersion(1);
-		deleteVersion(2);
-		deleteVersion(4);
+		JpaPid pid = createPatientAWithVersions1_2_and_4();
 
 		// Test
-		SearchParameterMap params = new SearchParameterMap();
-		IBundleProvider outcome = myPatientDao.search(params, newSrd());
-		assertThat(toUnqualifiedIdValues(outcome)).isEmpty();
+		Patient patient = myPatientDao.read(new IdType("Patient/A"), newSrd());
+		assertEquals("4", patient.getIdElement().getVersionIdPart());
+		assertEquals("VERSION-4", patient.getNameFirstRep().getFamily());
 
 		verify(myMockInterceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_WARNING), myHookParamsCaptor.capture());
 		StorageProcessingMessage message = myHookParamsCaptor.getValue().get(StorageProcessingMessage.class);
@@ -337,20 +323,103 @@ public class DeletedDatabaseRowsR5Test extends BaseJpaR5Test {
 			.map(ILoggingEvent::getFormattedMessage)
 			.toList();
 		assertThat(logEvents).containsExactly(expectedMessage);
-
 	}
 
-	private Patient getFirstPatient(IBundleProvider theOutcome) {
-		return theOutcome
-			.getResources(0, 100)
+	@Test
+	void resourceTableHasInvalidCurrentVersion_Reindex() {
+		// Setup
+		JpaPid pid = createPatientAWithVersions1_2_and_4();
+		createPatientBWithVersions1_2();
+
+		// Test
+		ReindexParameters reindexParameters = new ReindexParameters();
+		reindexParameters.setCorrectCurrentVersion(ReindexParameters.CorrectCurrentVersionModeEnum.ALL);
+		runInTransaction(() -> {
+			myPatientDao.reindex(pid, reindexParameters, newSrd(), new TransactionDetails());
+		});
+
+		// Verify
+		runInTransaction(() -> {
+			ResourceTable resource = myResourceTableDao.findByTypeAndFhirId("Patient", "A").orElseThrow();
+			assertEquals(4L, resource.getVersion());
+
+			 resource = myResourceTableDao.findByTypeAndFhirId("Patient", "B").orElseThrow();
+			assertEquals(2L, resource.getVersion());
+		});
+	}
+
+	@Test
+	void resourceTableHasNoVersions_Search() {
+		// Setup
+		JpaPid pid = createPatientAWithNoVersions();
+
+		// Test
+		SearchParameterMap params = new SearchParameterMap();
+		IBundleProvider outcome = myPatientDao.search(params, newSrd());
+		assertThat(toUnqualifiedIdValues(outcome)).isEmpty();
+
+		verify(myMockInterceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_WARNING), myHookParamsCaptor.capture());
+		StorageProcessingMessage message = myHookParamsCaptor.getValue().get(StorageProcessingMessage.class);
+		String expectedMessage = "Database resource entry (HFJ_RESOURCE) with PID " + pid + " specifies an unknown current version, and no versions of this resource exist. This invalid entry has a negative impact on performance, consider performing an appropriate $reindex to correct your data.";
+		assertEquals(expectedMessage, message.getMessage());
+
+		List<String> logEvents = myLogbackTestExtension
+			.getLogEvents(t -> t.getLoggerName().equals(SearchBuilder.class.getName()))
 			.stream()
-			.filter(t -> t instanceof Patient)
-			.map(t -> (Patient) t)
-			.findFirst()
-			.orElseThrow();
+			.map(ILoggingEvent::getFormattedMessage)
+			.toList();
+		assertThat(logEvents).containsExactly(expectedMessage);
+
 	}
 
-	private JpaPid createResourceWithVersions1_2_and_4(int theCurrentVersion) {
+	@Test
+	void resourceTableHasNoVersions_Read() {
+		// Setup
+		JpaPid pid = createPatientAWithNoVersions();
+
+		// Test
+		myPatientDao.read(new IdType("Patient/A"), newSrd());
+
+		verify(myMockInterceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_WARNING), myHookParamsCaptor.capture());
+		StorageProcessingMessage message = myHookParamsCaptor.getValue().get(StorageProcessingMessage.class);
+		String expectedMessage = "Database resource entry (HFJ_RESOURCE) with PID " + pid + " specifies an unknown current version, and no versions of this resource exist. This invalid entry has a negative impact on performance, consider performing an appropriate $reindex to correct your data.";
+		assertEquals(expectedMessage, message.getMessage());
+
+		List<String> logEvents = myLogbackTestExtension
+			.getLogEvents(t -> t.getLoggerName().equals(SearchBuilder.class.getName()))
+			.stream()
+			.map(ILoggingEvent::getFormattedMessage)
+			.toList();
+		assertThat(logEvents).containsExactly(expectedMessage);
+
+	}
+
+	@Test
+	void resourceTableHasNoVersions_Reindex() {
+		// Setup
+		JpaPid pid = createPatientAWithNoVersions();
+		createPatientBWithVersions1_2();
+
+		// Test
+		ReindexParameters reindexParameters = new ReindexParameters();
+		reindexParameters.setCorrectCurrentVersion(ReindexParameters.CorrectCurrentVersionModeEnum.ALL);
+		runInTransaction(() -> {
+			myPatientDao.reindex(pid, reindexParameters, newSrd(), new TransactionDetails());
+		});
+
+		// Verify
+		runInTransaction(() -> {
+			ResourceTable resource = myResourceTableDao.findByTypeAndFhirId("Patient", "A").orElseThrow();
+			assertThat(resource.getDeleted()).isNotNull();
+			assertThat(resource.getParamsString()).isEmpty();
+			assertEquals(6L, resource.getVersion());
+
+			resource = myResourceTableDao.findByTypeAndFhirId("Patient", "B").orElseThrow();
+			assertEquals(2L, resource.getVersion());
+		});
+	}
+
+	private JpaPid createPatientAWithVersions1_2_and_4() {
 		createPatient(withId("A"), withFamily("VERSION-1"));
 		createPatient(withId("A"), withFamily("VERSION-2"));
 		createPatient(withId("A"), withFamily("VERSION-3"));
@@ -365,7 +434,7 @@ public class DeletedDatabaseRowsR5Test extends BaseJpaR5Test {
 
 		runInTransaction(() -> {
 			Query q = myEntityManager.createNativeQuery("update HFJ_RESOURCE set RES_VER = ? where RES_ID = ?");
-			q.setParameter(1, theCurrentVersion);
+			q.setParameter(1, 5);
 			q.setParameter(2, pid.getId());
 			assertEquals(1, q.executeUpdate());
 		});
@@ -373,15 +442,38 @@ public class DeletedDatabaseRowsR5Test extends BaseJpaR5Test {
 		return pid;
 	}
 
+	private JpaPid createPatientAWithNoVersions() {
+		JpaPid pid = createPatientAWithVersions1_2_and_4();
+		deleteVersion(1);
+		deleteVersion(2);
+		deleteVersion(4);
+		return pid;
+	}
+
+
+	private void createPatientBWithVersions1_2() {
+		createPatient(withId("B"), withFamily("VERSION-1"));
+		createPatient(withId("B"), withFamily("VERSION-2"));
+	}
+
+	private Patient getFirstPatient(IBundleProvider theOutcome) {
+		return theOutcome
+			.getResources(0, 100)
+			.stream()
+			.filter(t -> t instanceof Patient)
+			.map(t -> (Patient) t)
+			.findFirst()
+			.orElseThrow();
+	}
+
 	private JpaPid deleteVersion(int versionToDelete) {
-		JpaPid pid = runInTransaction(() -> {
+		return runInTransaction(() -> {
 			ResourceTable resource = myResourceTableDao.findByTypeAndFhirId("Patient", "A").orElseThrow();
 			ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(resource.getId().toFk(), versionToDelete);
 			assertNotNull(version);
 			myResourceHistoryTableDao.delete(version);
 			return resource.getResourceId();
 		});
-		return pid;
 	}
 
 

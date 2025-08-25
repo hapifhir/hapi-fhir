@@ -86,7 +86,8 @@ public class HapiSequenceStyleGenerator
 			 * a special meaning to HAPI.
 			 */
 			if (NO_MORE_PID.equals(next)) {
-				throw new InternalErrorException(Msg.code(2791) + "Resource ID generator provided illegal value: " + next);
+				throw new InternalErrorException(
+						Msg.code(2791) + "Resource ID generator provided illegal value: " + next);
 			}
 
 			retVal = myIdMassager.massage(myGeneratorName, next);

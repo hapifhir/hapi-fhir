@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -31,9 +32,12 @@ public interface IJpaStorageResourceParser extends IStorageResourceParser<JpaPid
 
 	/**
 	 * Convert a storage entity into a FHIR resource model instance. This method may return null if the entity is not
-	 * completely flushed, including the entities history entries.
+	 * completely flushed, including the entity's history entries.
+	 *
+	 * @since 8.6.0
 	 */
 	<R extends IBaseResource> R toResource(
+			RequestDetails theDetails,
 			Class<R> theResourceType,
 			IBaseResourceEntity<?> theEntity,
 			Collection<BaseTag> theTagList,

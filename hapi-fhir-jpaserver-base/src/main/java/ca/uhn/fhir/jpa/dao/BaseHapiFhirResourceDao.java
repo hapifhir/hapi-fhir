@@ -54,7 +54,6 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
-import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
@@ -171,6 +170,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
+import static ca.uhn.fhir.jpa.search.builder.SearchBuilder.SINGLE_RESULT;
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -803,7 +803,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		StopWatch w = new StopWatch();
 
-		T resourceToDelete = myJpaStorageResourceParser.toResource(myResourceType, entity, null, false);
+		T resourceToDelete =
+				myJpaStorageResourceParser.toResource(theRequestDetails, myResourceType, entity, null, false);
 		theDeleteConflicts.setResourceIdMarkedForDeletion(theId);
 
 		// Notify IServerOperationInterceptors about pre-action call
@@ -978,7 +979,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			ResourceTable entity = myEntityManager.find(ResourceTable.class, jpaPid);
 			deletedResources.add(entity);
 
-			T resourceToDelete = myJpaStorageResourceParser.toResource(myResourceType, entity, null, false);
+			T resourceToDelete =
+					myJpaStorageResourceParser.toResource(theRequestDetails, myResourceType, entity, null, false);
 
 			transactionDetails.addDeletedResourceId(pid);
 
@@ -1568,7 +1570,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw createResourceGoneException(entity.get());
 		}
 
-		T retVal = myJpaStorageResourceParser.toResource(myResourceType, entity.get(), null, false);
+		T retVal = myJpaStorageResourceParser.toResource(null, myResourceType, entity.get(), null, false);
 
 		ourLog.debug("Processed read on {} in {}ms", jpaPid, w.getMillis());
 		return retVal;
@@ -1610,8 +1612,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		BaseHasResource<?> entity = readEntity(theId, true, theRequest, theRequestPartitionId);
 		validateResourceType(entity);
 
-		T retVal = myJpaStorageResourceParser.toResource(
-				myResourceType, (IBaseResourceEntity<JpaPid>) entity, null, false);
+		T retVal = myJpaStorageResourceParser.toResource(theRequest, myResourceType, entity, null, false);
 
 		if (!theDeletedOk) {
 			if (isDeleted(entity)) {
@@ -1691,14 +1692,65 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			return retVal;
 		}
 
+		if (theReindexParameters.getCorrectCurrentVersion() != ReindexParameters.CorrectCurrentVersionModeEnum.NONE) {
+			ResourceTable newEntity = reindexCorrectCurrentVersion(entity);
+			if (newEntity != null) {
+				entity = newEntity;
+				reindexSearchParameters(entity, retVal, theTransactionDetails);
+			}
+		}
+
 		if (theReindexParameters.getReindexSearchParameters() == ReindexParameters.ReindexSearchParametersEnum.ALL) {
 			reindexSearchParameters(entity, retVal, theTransactionDetails);
 		}
+
 		if (theReindexParameters.getOptimizeStorage() != ReindexParameters.OptimizeStorageModeEnum.NONE) {
 			reindexOptimizeStorage(entity, theReindexParameters.getOptimizeStorage());
 		}
 
 		return retVal;
+	}
+
+	/**
+	 * @return Returns an updated copy of the entity if it was modified (returns null otherwise)
+	 */
+	private ResourceTable reindexCorrectCurrentVersion(ResourceTable theEntity) {
+		ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(
+				theEntity.getResourceId().toFk(), theEntity.getVersion());
+
+		if (version == null) {
+			Optional<ResourceHistoryTable> versions = myResourceHistoryTableDao
+					.findVersionsForResource(
+							SINGLE_RESULT, theEntity.getResourceId().toFk())
+					.findFirst();
+
+			if (versions.isPresent()) {
+				Long newVersion = versions.get().getVersion();
+				ourLog.info(
+						"Correcting current version for {}/{} (PID {}) from version {} to version {}",
+						theEntity.getResourceType(),
+						theEntity.getFhirId(),
+						theEntity.getResourceId(),
+						theEntity.getVersion(),
+						newVersion);
+				myEntityManager.flush();
+				myEntityManager.detach(theEntity);
+				myResourceTableDao.updateVersionAndLastUpdated(theEntity.getId(), newVersion, new Date());
+
+				return myEntityManager.find(ResourceTable.class, theEntity.getId());
+			} else {
+				ourLog.info(
+						"No versions exist for {}/{} (PID {}), setting status to deleted",
+						theEntity.getResourceType(),
+						theEntity.getFhirId(),
+						theEntity.getResourceId());
+				theEntity.setDeleted(new Date());
+				myEntityManager.merge(theEntity);
+				return theEntity;
+			}
+		}
+
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -2079,10 +2131,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					List<IQueryParameterType> orList = new ArrayList<>();
 					for (IQueryParameterType value : orValues) {
 						orList.add(new HasParam(
-								"List",
-								ListResource.SP_ITEM,
-								BaseResource.SP_RES_ID,
-								value.getValueAsQueryToken(null)));
+								"List", ListResource.SP_ITEM, BaseResource.SP_RES_ID, value.getValueAsQueryToken()));
 					}
 					hasParamValues.add(orList);
 				}

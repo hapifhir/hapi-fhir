@@ -87,6 +87,15 @@ public class ReindexProvider {
 									+ ReindexParameters.OPTIMISTIC_LOCK_DEFAULT + ")")
 					@OperationParam(name = ReindexJobParameters.OPTIMISTIC_LOCK, typeName = "boolean", min = 0, max = 1)
 					IPrimitiveType<Boolean> theOptimisticLock,
+			@Description(
+							"Should the indexer check and correct resources with an invalid current version pointer (default: "
+									+ ReindexParameters.CORRECT_CURRENT_VERSION_DEFAULT_STRING + ")")
+					@OperationParam(
+							name = ReindexJobParameters.CORRECT_CURRENT_VERSION,
+							typeName = "code",
+							min = 0,
+							max = 1)
+					IPrimitiveType<String> theCorrectCurrentVersion,
 			RequestDetails theRequestDetails) {
 
 		ReindexJobParameters params = new ReindexJobParameters();
@@ -97,8 +106,8 @@ public class ReindexProvider {
 				value = Ascii.toUpperCase(value);
 				ValidateUtil.isTrueOrThrowInvalidRequest(
 						EnumUtils.isValidEnum(ReindexParameters.ReindexSearchParametersEnum.class, value),
-						"Invalid " + REINDEX_SEARCH_PARAMETERS + " value: "
-								+ UrlUtil.sanitizeUrlPart(theReindexSearchParameters.getValue()));
+						"Invalid " + REINDEX_SEARCH_PARAMETERS + " value: %s",
+						UrlUtil.sanitizeUrlPart(theReindexSearchParameters.getValue()));
 				params.setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.valueOf(value));
 			}
 		}
@@ -108,13 +117,27 @@ public class ReindexProvider {
 				value = Ascii.toUpperCase(value);
 				ValidateUtil.isTrueOrThrowInvalidRequest(
 						EnumUtils.isValidEnum(ReindexParameters.OptimizeStorageModeEnum.class, value),
-						"Invalid " + OPTIMIZE_STORAGE + " value: "
-								+ UrlUtil.sanitizeUrlPart(theOptimizeStorage.getValue()));
+						"Invalid " + OPTIMIZE_STORAGE + " value: %s",
+						UrlUtil.sanitizeUrlPart(theOptimizeStorage.getValue()));
 				params.setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum.valueOf(value));
 			}
 		}
+
 		if (theOptimisticLock != null && theOptimisticLock.getValue() != null) {
 			params.setOptimisticLock(theOptimisticLock.getValue());
+		}
+
+		if (theCorrectCurrentVersion != null && theCorrectCurrentVersion.getValue() != null) {
+			String value = Ascii.toUpperCase(theCorrectCurrentVersion.getValueAsString());
+			ValidateUtil.isTrueOrThrowInvalidRequest(
+					EnumUtils.isValidEnum(ReindexParameters.CorrectCurrentVersionModeEnum.class, value),
+					"Invalid " + ReindexJobParameters.CORRECT_CURRENT_VERSION + " value: %s",
+					UrlUtil.sanitizeUrlPart(theCorrectCurrentVersion.getValueAsString()));
+			params.setCorrectCurrentVersion(ReindexParameters.CorrectCurrentVersionModeEnum.valueOf(value));
+
+			if (theOptimisticLock == null || theOptimisticLock.getValue() == null) {
+				params.setOptimisticLock(false);
+			}
 		}
 
 		List<String> urls = List.of();

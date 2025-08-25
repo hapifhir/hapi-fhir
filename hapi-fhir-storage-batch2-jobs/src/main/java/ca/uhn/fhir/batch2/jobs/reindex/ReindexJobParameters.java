@@ -24,7 +24,7 @@ import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nullable;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 public class ReindexJobParameters extends PartitionedUrlJobParameters {
 
@@ -32,6 +32,7 @@ public class ReindexJobParameters extends PartitionedUrlJobParameters {
 	public static final String REINDEX_SEARCH_PARAMETERS = "reindexSearchParameters";
 	public static final String OPTIMISTIC_LOCK = "optimisticLock";
 	public static final String INCLUDE_DELETED_RESOURCES = "includeDeletedResources";
+	public static final String CORRECT_CURRENT_VERSION = "correctCurrentVersion";
 
 	@JsonProperty(
 			value = OPTIMIZE_STORAGE,
@@ -54,8 +55,25 @@ public class ReindexJobParameters extends PartitionedUrlJobParameters {
 	@Nullable
 	private Boolean myOptimisticLock;
 
+	@JsonProperty(
+			value = CORRECT_CURRENT_VERSION,
+			defaultValue = ReindexParameters.CORRECT_CURRENT_VERSION_DEFAULT_STRING,
+			required = false)
+	@Nullable
+	private ReindexParameters.CorrectCurrentVersionModeEnum myCorrectCurrentVersion;
+
+	@Nullable
+	public ReindexParameters.CorrectCurrentVersionModeEnum getCorrectCurrentVersion() {
+		return getIfNull(myCorrectCurrentVersion, ReindexParameters.CORRECT_CURRENT_VERSION_DEFAULT);
+	}
+
+	public void setCorrectCurrentVersion(
+			@Nullable ReindexParameters.CorrectCurrentVersionModeEnum theCorrectCurrentVersion) {
+		myCorrectCurrentVersion = theCorrectCurrentVersion;
+	}
+
 	public boolean getOptimisticLock() {
-		return defaultIfNull(myOptimisticLock, ReindexParameters.OPTIMISTIC_LOCK_DEFAULT);
+		return getIfNull(myOptimisticLock, ReindexParameters.OPTIMISTIC_LOCK_DEFAULT);
 	}
 
 	public ReindexJobParameters setOptimisticLock(boolean theOptimisticLock) {
@@ -64,7 +82,7 @@ public class ReindexJobParameters extends PartitionedUrlJobParameters {
 	}
 
 	public ReindexParameters.OptimizeStorageModeEnum getOptimizeStorage() {
-		return defaultIfNull(myOptimizeStorage, ReindexParameters.OPTIMIZE_STORAGE_DEFAULT);
+		return getIfNull(myOptimizeStorage, ReindexParameters.OPTIMIZE_STORAGE_DEFAULT);
 	}
 
 	public ReindexJobParameters setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum myOptimizeStorage) {
@@ -73,7 +91,7 @@ public class ReindexJobParameters extends PartitionedUrlJobParameters {
 	}
 
 	public ReindexParameters.ReindexSearchParametersEnum getReindexSearchParameters() {
-		return defaultIfNull(myReindexSearchParameters, ReindexParameters.REINDEX_SEARCH_PARAMETERS_DEFAULT);
+		return getIfNull(myReindexSearchParameters, ReindexParameters.REINDEX_SEARCH_PARAMETERS_DEFAULT);
 	}
 
 	public ReindexJobParameters setReindexSearchParameters(

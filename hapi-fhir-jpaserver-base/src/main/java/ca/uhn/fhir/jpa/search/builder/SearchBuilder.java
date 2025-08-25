@@ -141,7 +141,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -199,6 +198,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private static final String MY_TARGET_RESOURCE_TYPE = "myTargetResourceType";
 	private static final String MY_TARGET_RESOURCE_VERSION = "myTargetResourceVersion";
 	public static final JpaPid[] EMPTY_JPA_PID_ARRAY = new JpaPid[0];
+	public static final PageRequest SINGLE_RESULT = PageRequest.of(0, 1);
 	public static boolean myUseMaxPageSize50ForTest = false;
 	public static Integer myMaxPageSizeForTests = null;
 	protected final IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -1237,7 +1237,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	private void doLoadPids(
-		RequestDetails theRequest,
+			RequestDetails theRequest,
 			Collection<JpaPid> thePids,
 			Collection<JpaPid> theIncludedPids,
 			List<IBaseResource> theResourceListToPopulate,
@@ -1262,8 +1262,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// Load the resource bodies
 		List<JpaPidFk> historyVersionPks = JpaPidFk.fromPids(versionlessPids);
 		List<ResourceHistoryTable> resourceSearchViewList =
-				myResourceHistoryTableDao.findCurrentVersionsByResourcePidsAndFetchResourceTable(
-					historyVersionPks);
+				myResourceHistoryTableDao.findCurrentVersionsByResourcePidsAndFetchResourceTable(historyVersionPks);
 
 		/*
 		 * If we have specific versions to load, replace the history entries with the
@@ -1297,27 +1296,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 * is the right version.
 		 */
 		if (resourceSearchViewList.size() != versionlessPids.size()) {
-			IInterceptorBroadcaster interceptorBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
 
-			Set<JpaPid> loadedPks = resourceSearchViewList
-				.stream()
-				.map(ResourceHistoryTable::getResourceId)
-				.collect(Collectors.toSet());
+			Set<JpaPid> loadedPks = resourceSearchViewList.stream()
+					.map(ResourceHistoryTable::getResourceId)
+					.collect(Collectors.toSet());
 			for (JpaPid nextWantedPid : versionlessPids) {
 				if (!loadedPks.contains(nextWantedPid)) {
-
-					Pageable page = PageRequest.of(0, 1);
-					Optional<ResourceHistoryTable> latestVersion = myResourceHistoryTableDao.findVersionsForResource(page, nextWantedPid.toFk()).findFirst();
-					if (latestVersion.isPresent()) {
-						String warning = "Database resource entry (HFJ_RESOURCE) with PID " + nextWantedPid + " specifies an unknown current version, returning version " + latestVersion.get().getVersion() + " instead. This invalid entry has a negative impact on performance, consider performing an appropriate $reindex to correct your data.";
-						logAndBoradcastWarning(theRequest, warning, interceptorBroadcaster);
-
-						resourceSearchViewList.add(latestVersion.get());
-					} else {
-						String warning = "Database resource entry (HFJ_RESOURCE) with PID " + nextWantedPid + " specifies an unknown current version, and no versions of this resource exist. This invalid entry has a negative impact on performance, consider performing an appropriate $reindex to correct your data.";
-						logAndBoradcastWarning(theRequest, warning, interceptorBroadcaster);
-					}
-
+					Optional<ResourceHistoryTable> latestVersion = findLatestVersion(
+							theRequest, nextWantedPid, myResourceHistoryTableDao, myInterceptorBroadcaster);
+					latestVersion.ifPresent(resourceSearchViewList::add);
 				}
 			}
 		}
@@ -1342,7 +1329,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			IBaseResource resource;
 			resource = myJpaStorageResourceParser.toResource(
-					resourceType, next, tagMap.get(next.getResourceId()), theForHistoryOperation);
+					theRequest, resourceType, next, tagMap.get(next.getResourceId()), theForHistoryOperation);
 			if (resource == null) {
 				ourLog.warn(
 						"Unable to find resource {}/{}/_history/{} in database",
@@ -1372,7 +1359,37 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
-	private static void logAndBoradcastWarning(RequestDetails theRequest, String warning, IInterceptorBroadcaster interceptorBroadcaster) {
+	@SuppressWarnings("OptionalIsPresent")
+	@Nonnull
+	public static Optional<ResourceHistoryTable> findLatestVersion(
+			RequestDetails theRequest,
+			JpaPid nextWantedPid,
+			IResourceHistoryTableDao resourceHistoryTableDao,
+			IInterceptorBroadcaster interceptorBroadcaster1) {
+		assert nextWantedPid != null && !nextWantedPid.equals(JpaConstants.NO_MORE);
+
+		Optional<ResourceHistoryTable> latestVersion = resourceHistoryTableDao
+				.findVersionsForResource(SINGLE_RESULT, nextWantedPid.toFk())
+				.findFirst();
+		String warning;
+		if (latestVersion.isPresent()) {
+			warning = "Database resource entry (HFJ_RESOURCE) with PID " + nextWantedPid
+					+ " specifies an unknown current version, returning version "
+					+ latestVersion.get().getVersion()
+					+ " instead. This invalid entry has a negative impact on performance, consider performing an appropriate $reindex to correct your data.";
+		} else {
+			warning = "Database resource entry (HFJ_RESOURCE) with PID " + nextWantedPid
+					+ " specifies an unknown current version, and no versions of this resource exist. This invalid entry has a negative impact on performance, consider performing an appropriate $reindex to correct your data.";
+		}
+
+		IInterceptorBroadcaster interceptorBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(interceptorBroadcaster1, theRequest);
+		logAndBoradcastWarning(theRequest, warning, interceptorBroadcaster);
+		return latestVersion;
+	}
+
+	private static void logAndBoradcastWarning(
+			RequestDetails theRequest, String warning, IInterceptorBroadcaster interceptorBroadcaster) {
 		ourLog.warn(warning);
 
 		if (interceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_WARNING)) {
@@ -1512,7 +1529,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// We only chunk because some jdbc drivers can't handle long param lists.
 		QueryChunker.chunk(
 				thePids,
-				t -> doLoadPids(theRequestDetails, t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
+				t -> doLoadPids(
+						theRequestDetails,
+						t,
+						theIncludedPids,
+						theResourceListToPopulate,
+						theForHistoryOperation,
+						position));
 	}
 
 	/**
