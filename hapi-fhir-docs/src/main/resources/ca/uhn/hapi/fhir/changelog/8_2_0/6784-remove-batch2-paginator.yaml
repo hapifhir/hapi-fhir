@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6783
+title: "The batch2 job processor will no longer use paginator to queue workchunks as 'ready' due to performance bottleneck
+around saturation of available workchunk-processors or consumers"
