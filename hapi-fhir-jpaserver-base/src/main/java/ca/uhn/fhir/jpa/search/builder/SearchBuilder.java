@@ -59,6 +59,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.SearchConstants;
 import ca.uhn.fhir.jpa.search.builder.models.ResolvedSearchQueryExecutor;
@@ -139,6 +140,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -154,6 +157,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -186,7 +190,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	public static final String PARTITION_ID_ALIAS = "partition_id";
 	public static final String RESOURCE_VERSION_ALIAS = "resource_version";
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
-	private static final JpaPid NO_MORE = JpaPid.fromId(-1L);
+
 	private static final String MY_SOURCE_RESOURCE_PID = "mySourceResourcePid";
 	private static final String MY_SOURCE_RESOURCE_PARTITION_ID = "myPartitionIdValue";
 	private static final String MY_SOURCE_RESOURCE_TYPE = "mySourceResourceType";
@@ -907,7 +911,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
 
 			List<JpaPid> output =
-					jdbcTemplate.query(sql, args, new JpaPidRowMapper(myPartitionSettings.isPartitioningEnabled()));
+					jdbcTemplate.query(sql, new JpaPidRowMapper(myPartitionSettings.isPartitioningEnabled()), args);
 
 			// we add a search executor to fetch unlinked patients first
 			theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(output));
@@ -982,14 +986,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		// first off, let's flatten the list of list
 		List<IQueryParameterType> iQueryParameterTypesList =
-				listOfList.stream().flatMap(List::stream).collect(Collectors.toList());
+				listOfList.stream().flatMap(List::stream).toList();
 
 		// then, extract all elements of each CSV into one big list
 		List<String> resourceTypes = iQueryParameterTypesList.stream()
 				.map(param -> ((StringParam) param).getValue())
 				.map(csvString -> List.of(csvString.split(",")))
 				.flatMap(List::stream)
-				.collect(Collectors.toList());
+				.toList();
 
 		Set<String> knownResourceTypes = myContext.getResourceTypes();
 
@@ -1233,6 +1237,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	private void doLoadPids(
+		RequestDetails theRequest,
 			Collection<JpaPid> thePids,
 			Collection<JpaPid> theIncludedPids,
 			List<IBaseResource> theResourceListToPopulate,
@@ -1255,9 +1260,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		// Load the resource bodies
+		List<JpaPidFk> historyVersionPks = JpaPidFk.fromPids(versionlessPids);
 		List<ResourceHistoryTable> resourceSearchViewList =
 				myResourceHistoryTableDao.findCurrentVersionsByResourcePidsAndFetchResourceTable(
-						JpaPidFk.fromPids(versionlessPids));
+					historyVersionPks);
 
 		/*
 		 * If we have specific versions to load, replace the history entries with the
@@ -1278,6 +1284,40 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					ResourceHistoryTable replacement = myResourceHistoryTableDao.findForIdAndVersion(
 							next.getResourceId().toFk(), version);
 					resourceSearchViewList.set(i, replacement);
+				}
+			}
+		}
+
+		/*
+		 * If we got fewer rows back than we expected, that means that one or more ResourceTable
+		 * entities (HFJ_RESOURCE) have a RES_VER version which doesn't exist in the
+		 * ResourceHistoryTable (HFJ_RES_VER) table. This should never happen under normal
+		 * operation, but if someone manually deletes a row or otherwise ends up in a weird
+		 * state it can happen. In that case, we do a manual process of figuring out what
+		 * is the right version.
+		 */
+		if (resourceSearchViewList.size() != versionlessPids.size()) {
+			IInterceptorBroadcaster interceptorBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+
+			Set<JpaPid> loadedPks = resourceSearchViewList
+				.stream()
+				.map(ResourceHistoryTable::getResourceId)
+				.collect(Collectors.toSet());
+			for (JpaPid nextWantedPid : versionlessPids) {
+				if (!loadedPks.contains(nextWantedPid)) {
+
+					Pageable page = PageRequest.of(0, 1);
+					Optional<ResourceHistoryTable> latestVersion = myResourceHistoryTableDao.findVersionsForResource(page, nextWantedPid.toFk()).findFirst();
+					if (latestVersion.isPresent()) {
+						String warning = "Database resource entry (HFJ_RESOURCE) with PID " + nextWantedPid + " specifies an unknown current version, returning version " + latestVersion.get().getVersion() + " instead. This invalid entry has a negative impact on performance, consider performing an appropriate $reindex to correct your data.";
+						logAndBoradcastWarning(theRequest, warning, interceptorBroadcaster);
+
+						resourceSearchViewList.add(latestVersion.get());
+					} else {
+						String warning = "Database resource entry (HFJ_RESOURCE) with PID " + nextWantedPid + " specifies an unknown current version, and no versions of this resource exist. This invalid entry has a negative impact on performance, consider performing an appropriate $reindex to correct your data.";
+						logAndBoradcastWarning(theRequest, warning, interceptorBroadcaster);
+					}
+
 				}
 			}
 		}
@@ -1329,6 +1369,18 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				theResourceListToPopulate.add(null);
 			}
 			theResourceListToPopulate.set(index, resource);
+		}
+	}
+
+	private static void logAndBoradcastWarning(RequestDetails theRequest, String warning, IInterceptorBroadcaster interceptorBroadcaster) {
+		ourLog.warn(warning);
+
+		if (interceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_WARNING)) {
+			HookParams params = new HookParams();
+			params.add(RequestDetails.class, theRequest);
+			params.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			params.add(StorageProcessingMessage.class, new StorageProcessingMessage().setMessage(warning));
+			interceptorBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_WARNING, params);
 		}
 	}
 
@@ -1428,7 +1480,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			Collection<JpaPid> theIncludedPids,
 			List<IBaseResource> theResourceListToPopulate,
 			boolean theForHistoryOperation,
-			RequestDetails theDetails) {
+			RequestDetails theRequestDetails) {
 		if (thePids.isEmpty()) {
 			ourLog.debug("The include pids are empty");
 		}
@@ -1460,7 +1512,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// We only chunk because some jdbc drivers can't handle long param lists.
 		QueryChunker.chunk(
 				thePids,
-				t -> doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
+				t -> doLoadPids(theRequestDetails, t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
 	}
 
 	/**
@@ -2412,7 +2464,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				IQueryParameterType nextOr = nextPermutation.get(paramIndex);
 				// The only prefix accepted when combo searching is 'eq' (see validateParamValuesAreValidForComboParam).
 				// As a result, we strip the prefix if present.
-				String nextOrValue = stripStart(nextOr.getValueAsQueryToken(myContext), EQUAL.getValue());
+				String nextOrValue = stripStart(nextOr.getValueAsQueryToken(), EQUAL.getValue());
 
 				RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(
 						myResourceName, nextParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
@@ -2624,7 +2676,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					if (myParams.containsKey(Constants.PARAM_TYPE)) {
 						for (List<IQueryParameterType> typeList : myParams.get(Constants.PARAM_TYPE)) {
 							for (IQueryParameterType type : typeList) {
-								String queryString = ParameterUtil.unescape(type.getValueAsQueryToken(myContext));
+								String queryString = ParameterUtil.unescape(type.getValueAsQueryToken());
 								for (String resourceType : queryString.split(",")) {
 									String rt = resourceType.trim();
 									if (isNotBlank(rt)) {
@@ -2653,7 +2705,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				if (myCurrentIterator.hasNext()) {
 					myNext = myCurrentIterator.next();
 				} else {
-					myNext = NO_MORE;
+					myNext = JpaConstants.NO_MORE;
 				}
 			}
 		}
@@ -2661,7 +2713,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		@Override
 		public boolean hasNext() {
 			fetchNext();
-			return !NO_MORE.equals(myNext);
+			return !JpaConstants.NO_MORE.equals(myNext);
 		}
 
 		@Override
@@ -2682,7 +2734,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		private final RequestDetails myRequest;
 		private final boolean myHaveRawSqlHooks;
 		private final boolean myHavePerfTraceFoundIdHook;
-		private final SortSpec mySort;
 		private final Integer myOffset;
 		private final IInterceptorBroadcaster myCompositeBroadcaster;
 		private boolean myFirst = true;
@@ -2720,7 +2771,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		private QueryIterator(SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest) {
 			mySearchRuntimeDetails = theSearchRuntimeDetails;
-			mySort = myParams.getSort();
 			myOffset = myParams.getOffset();
 			myRequest = theRequest;
 			myCompositeBroadcaster =
@@ -2852,10 +2902,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							}
 						}
 						if (myNext == null) {
-							myNext = NO_MORE;
+							myNext = JpaConstants.NO_MORE;
 						}
 					} else {
-						myNext = NO_MORE;
+						myNext = JpaConstants.NO_MORE;
 					}
 				}
 
@@ -2881,7 +2931,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				myFirst = false;
 			}
 
-			if (NO_MORE.equals(myNext)) {
+			if (JpaConstants.NO_MORE.equals(myNext)) {
 				HookParams params = new HookParams()
 						.add(RequestDetails.class, myRequest)
 						.addIfMatchesType(ServletRequestDetails.class, myRequest)
@@ -2966,7 +3016,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			if (myNext == null) {
 				fetchNext();
 			}
-			return !NO_MORE.equals(myNext);
+			return !JpaConstants.NO_MORE.equals(myNext);
 		}
 
 		@Override
@@ -2974,7 +3024,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			fetchNext();
 			JpaPid retVal = myNext;
 			myNext = null;
-			Validate.isTrue(!NO_MORE.equals(retVal), "No more elements");
+			Validate.isTrue(!JpaConstants.NO_MORE.equals(retVal), "No more elements");
 			return retVal;
 		}
 

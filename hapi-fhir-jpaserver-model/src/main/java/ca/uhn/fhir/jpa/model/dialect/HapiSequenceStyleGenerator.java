@@ -19,8 +19,10 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
@@ -41,6 +43,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
 import java.util.Properties;
+
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.NO_MORE_PID;
 
 /**
  * This is a sequence generator that wraps the Hibernate default sequence generator {@link SequenceStyleGenerator}
@@ -75,6 +79,16 @@ public class HapiSequenceStyleGenerator
 		Long retVal = myIdMassager != null ? myIdMassager.generate(myGeneratorName) : null;
 		if (retVal == null) {
 			Long next = (Long) myGen.generate(theSession, theObject);
+
+			/*
+			 * This should never happen since the sequence starts at 1, but if someone ever manually messes with sequences
+			 * or the sequence otherwise gets messed up, we don't want to end up with a resource using this PID which has
+			 * a special meaning to HAPI.
+			 */
+			if (NO_MORE_PID.equals(next)) {
+				throw new InternalErrorException(Msg.code(2791) + "Resource ID generator provided illegal value: " + next);
+			}
+
 			retVal = myIdMassager.massage(myGeneratorName, next);
 		}
 		return retVal;

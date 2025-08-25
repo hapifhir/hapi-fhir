@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.util;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -307,6 +308,17 @@ public class JpaConstants {
 			Set.of("Provenance", "List", "Group");
 	public static final String HAPI_DATABASE_PARTITION_MODE = "hapi.database_partition_mode";
 	public static final String HAPI_DATABASE_PARTITION_MODE_DEFAULT = "false";
+
+	/**
+	 * Numeric constant used for resource ID in {@link #NO_MORE}
+	 */
+	public static final Long NO_MORE_PID = -1L;
+
+	/**
+	 * Special PID value used as an internal constant indicating that no more results are available. PIDs should always
+	 * be positive, so this value will never appear in real data.
+	 */
+	public static final JpaPid NO_MORE = JpaPid.fromId(NO_MORE_PID);
 
 	/**
 	 * Non-instantiable

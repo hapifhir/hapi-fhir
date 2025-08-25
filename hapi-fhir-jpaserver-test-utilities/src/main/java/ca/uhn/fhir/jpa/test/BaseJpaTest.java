@@ -183,6 +183,7 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_CACHE_CONTROL;
 import static ca.uhn.fhir.util.TestUtil.doRandomizeLocaleAndTimezone;
 import static java.util.stream.Collectors.joining;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -1071,16 +1072,50 @@ public abstract class BaseJpaTest extends BaseTest {
 	 */
 	protected void assertGone(IIdType theId) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theId.getResourceType());
-		IBaseResource result = dao.read(theId, mySrd, true);
+		IBaseResource result = dao.read(theId, newSrd(), true);
 		assertTrue(result.isDeleted());
 	}
 
 	/**
-	 * Asserts that the resource with {@literal theId} exists and is not deleted
+	 * Asserts that the resource with {@literal theId} exists and is not deleted.
+	 * Note that {@link #assertExists(IIdType)} and {@link #assertNotGone(IIdType)}
+	 * are synonyms but both exist for better readability in different kinds
+	 * of tests.
+	 */
+	protected void assertExists(String theId) {
+		IIdType id = myFhirContext.getVersion().newIdType(theId);
+		assertExists(id);
+	}
+
+	/**
+	 * Asserts that the resource with {@literal theId} exists and is not deleted.
+	 * Note that {@link #assertExists(IIdType)} and {@link #assertNotGone(IIdType)}
+	 * are synonyms but both exist for better readability in different kinds
+	 * of tests.
+	 */
+	protected void assertExists(IIdType theId) {
+		assertNotGone(theId);
+	}
+
+	/**
+	 * Asserts that the resource with {@literal theId} exists and is not deleted.
+	 * Note that {@link #assertExists(IIdType)} and {@link #assertNotGone(IIdType)}
+	 * are synonyms but both exist for better readability in different kinds
+	 * of tests.
 	 */
 	protected void assertNotGone(IIdType theId) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theId.getResourceType());
-		assertNotNull(dao.read(theId, mySrd));
+		assertNotNull(dao.read(theId, newSrd()));
+	}
+
+	/**
+	 * Asserts that the resource with {@literal theId} does not exist (i.e. not that
+	 * it exists but that it was deleted, but rather that the ID doesn't exist at all).
+	 * This can be used to test that a resource was expunged.
+	 */
+	protected void assertDoesntExist(String theId) {
+		IIdType id = myFhirContext.getVersion().newIdType(theId);
+		assertDoesntExist(id);
 	}
 
 	/**
@@ -1099,6 +1134,30 @@ public abstract class BaseJpaTest extends BaseTest {
 				Msg.code(2001) + "Resource " + theId.toUnqualifiedVersionless().getValue() + " is not known"
 			);
 		}
+	}
+
+	/**
+	 * Asserts that the version of the resource with {@literal theId} does not exist
+	 * (i.e. that the resource exists, but that the given version does not)
+	 */
+	protected void assertVersionDoesntExist(String theId) {
+		IIdType id = myFhirContext.getVersion().newIdType(theId);
+		assertVersionDoesntExist(id);
+	}
+
+	/**
+	 * Asserts that the version of the resource with {@literal theId} does not exist
+	 * (i.e. that the resource exists, but that the given version does not)
+	 */
+	@SuppressWarnings("rawtypes")
+	protected void assertVersionDoesntExist(IIdType theId) {
+		assertTrue(theId.hasResourceType());
+		assertTrue(theId.hasIdPart());
+		assertTrue(theId.hasVersionIdPart());
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theId.getResourceType());
+		assertThatThrownBy(()->dao.read(theId, mySrd))
+			.isInstanceOf(ResourceNotFoundException.class)
+			.hasMessage(Msg.code(979) + "Version \"3\" is not valid for resource Patient/A");
 	}
 
 	/**

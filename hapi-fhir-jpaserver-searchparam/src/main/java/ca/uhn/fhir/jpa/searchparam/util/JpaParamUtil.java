@@ -144,6 +144,7 @@ public enum JpaParamUtil {
 		}
 	}
 
+	@Nonnull
 	public static List<RuntimeSearchParam> resolveComponentParameters(
 			ISearchParamRegistry theSearchParamRegistry, RuntimeSearchParam theParamDef) {
 		List<RuntimeSearchParam> compositeList =
