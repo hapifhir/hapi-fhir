@@ -22,7 +22,6 @@ package ca.uhn.fhir.rest.param;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.api.Constants;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -58,7 +57,7 @@ public class SpecialParam extends BaseParam /*implements IQueryParameterType*/ {
 	 * {@inheritDoc}
 	 */
 	@Override
-	String doGetValueAsQueryToken(FhirContext theContext) {
+	String doGetValueAsQueryToken() {
 		return ParameterUtil.escape(getValue());
 	}
 
@@ -89,10 +88,6 @@ public class SpecialParam extends BaseParam /*implements IQueryParameterType*/ {
 
 	public String getValueNotNull() {
 		return defaultString(myValue);
-	}
-
-	public boolean isEmpty() {
-		return StringUtils.isEmpty(myValue);
 	}
 
 	public SpecialParam setValue(String theValue) {

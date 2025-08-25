@@ -72,7 +72,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -203,7 +202,7 @@ public class ConsentInterceptorTest {
 		}
 	}
 
-	@Test
+	@Test  
 	public void testSummaryModeIgnoredTotalForConsentQueries() throws IOException {
 		Patient patientA = new Patient();
 		patientA.setId("Patient/A");

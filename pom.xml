@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>8.5.0-SNAPSHOT</version>
+	<version>8.5.1-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -1025,20 +1025,20 @@
 		<commons_pool2_version>2.12.0</commons_pool2_version>
 		<commons_text_version>1.10.0</commons_text_version>
 		<commons_io_version>2.17.0</commons_io_version>
-		<commons_lang3_version>3.17.0</commons_lang3_version>
+		<commons_lang3_version>3.18.0</commons_lang3_version>
 		<com_jamesmurty_utils_version>1.2</com_jamesmurty_utils_version>
 		<error_prone_core_version>2.36.0</error_prone_core_version>
-		<mockito_version>5.17.0</mockito_version>
+		<mockito_version>5.18.0</mockito_version>
 		<nullaway_version>0.7.9</nullaway_version>
 		<guava_version>33.2.1-jre</guava_version>
-		<gson_version>2.8.9</gson_version>
+		<gson_version>2.12.0</gson_version>
 		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
 		<jaxb_api_version>2.3.1</jaxb_api_version>
 		<jaxb_core_version>2.3.0.1</jaxb_core_version>
 		<jaxb_runtime_version>4.0.4</jaxb_runtime_version>
-		<jena_version>5.3.0</jena_version>
+		<jena_version>5.5.0</jena_version>
 		<jersey_version>3.0.3</jersey_version>
-		<jetty_version>12.0.15</jetty_version>
+		<jetty_version>12.0.17</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.10.1</junit_version>
 		<flexmark_version>0.64.8</flexmark_version>
@@ -1055,7 +1055,7 @@
 		<httpclient_version>4.5.14</httpclient_version>
 		<jackson_version>2.18.1</jackson_version>
 		<jackson_databind_version>2.18.1</jackson_databind_version>
-		<httpclient5_version>5.4.1</httpclient5_version>
+		<httpclient5_version>5.4.3</httpclient5_version>
 		<httpcore5_version>5.3.1</httpcore5_version>
 		<jackson_version>2.17.1</jackson_version>
 		<jackson_databind_version>2.17.1</jackson_databind_version>
@@ -1081,7 +1081,7 @@
 		<swagger_jakarta_version>2.2.30</swagger_jakarta_version>
 		<slf4j_version>2.0.16</slf4j_version>
 		<log4j_to_slf4j_version>2.24.1</log4j_to_slf4j_version>
-		<spring_version>6.1.14</spring_version>
+		<spring_version>6.1.21</spring_version>
 		<spring_data_bom_version>2024.0.5</spring_data_bom_version>
 		<spring_framework_bom_version>6.1.15</spring_framework_bom_version>
 		<spring_boot_version>3.3.11</spring_boot_version>
@@ -1344,6 +1344,13 @@
 				<version>3.9.1</version>
 			</dependency>
 
+			<!-- Pinned here for CVE: CVE-2025-7962 This is used transitively in simplejavamail which has no fix yet -->
+			<dependency>
+				<groupId>org.eclipse.angus</groupId>
+				<artifactId>angus-mail</artifactId>
+				<version>2.0.4</version>
+			</dependency>
+
 			<!-- Architecture Test -->
 			<dependency>
 				<groupId>com.tngtech.archunit</groupId>
@@ -1369,7 +1376,7 @@
 			<dependency>
 				<groupId>commons-beanutils</groupId>
 				<artifactId>commons-beanutils</artifactId>
-				<version>1.9.4</version>
+				<version>1.11.0</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-cli</groupId>
@@ -2092,7 +2099,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.7.4</version>
+				<version>42.7.7</version>
 			</dependency>
 			<dependency>
 				<groupId>com.oracle.database.jdbc</groupId>
@@ -2356,7 +2363,7 @@
 			<dependency>
 				<groupId>uk.org.webcompere</groupId>
 				<artifactId>system-stubs-jupiter</artifactId>
-				<version>2.0.1</version>
+				<version>2.1.8</version>
 			</dependency>
 			<!-- dependencies required for Android -->
 			<dependency>
@@ -3010,6 +3017,52 @@
 	</build>
 
 	<profiles>
+		<profile>
+			<id>CHECKSTYLE</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-checkstyle-plugin</artifactId>
+						<inherited>false</inherited>
+						<dependencies>
+							<dependency>
+								<groupId>com.puppycrawl.tools</groupId>
+								<artifactId>checkstyle</artifactId>
+								<version>${checkstyle_version}</version>
+							</dependency>
+							<dependency>
+								<groupId>ca.uhn.hapi.fhir</groupId>
+								<artifactId>hapi-fhir-checkstyle</artifactId>
+								<version>${project.version}</version>
+							</dependency>
+						</dependencies>
+						<configuration>
+							<sourceDirectories>
+								<sourceDirectory>./</sourceDirectory>
+							</sourceDirectories>
+							<includes>**/src/main/java/**/*.java</includes>
+							<excludes>**/osgi/**/*, **/.mvn/**/*, **/.mvn_/**/*, **/target/**/*, **/test/**/*</excludes>
+							<includeTestSourceDirectory>false</includeTestSourceDirectory>
+							<configLocation>checkstyle/hapi-base-checkstyle.xml</configLocation>
+							<suppressionsLocation>checkstyle/hapi-base-checkstyle-suppression.xml</suppressionsLocation>
+							<inputEncoding>UTF-8</inputEncoding>
+							<consoleOutput>true</consoleOutput>
+							<failOnViolation>true</failOnViolation>
+						</configuration>
+						<executions>
+							<execution>
+								<id>checkstyle-all-modules</id>
+								<phase>validate</phase>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 		<profile>
 			<id>ERRORPRONE</id>
 			<build>

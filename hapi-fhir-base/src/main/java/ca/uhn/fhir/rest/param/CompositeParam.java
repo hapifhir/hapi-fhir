@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.rest.param;
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.ReflectionUtil;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -37,8 +37,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class CompositeParam<A extends IQueryParameterType, B extends IQueryParameterType> extends BaseParam
 		implements IQueryParameterType {
 
-	private A myLeftType;
-	private B myRightType;
+	private final A myLeftType;
+	private final B myRightType;
 
 	public CompositeParam(A theLeftInstance, B theRightInstance) {
 		myLeftType = theLeftInstance;
@@ -46,22 +46,10 @@ public class CompositeParam<A extends IQueryParameterType, B extends IQueryParam
 	}
 
 	public CompositeParam(Class<A> theLeftType, Class<B> theRightType) {
-		Validate.notNull(theLeftType);
-		Validate.notNull(theRightType);
-		try {
-			myLeftType = theLeftType.newInstance();
-		} catch (InstantiationException e) {
-			throw new ConfigurationException(Msg.code(1943) + "Failed to instantiate type: " + myLeftType, e);
-		} catch (IllegalAccessException e) {
-			throw new ConfigurationException(Msg.code(1944) + "Failed to instantiate type: " + myLeftType, e);
-		}
-		try {
-			myRightType = theRightType.newInstance();
-		} catch (InstantiationException e) {
-			throw new ConfigurationException(Msg.code(1945) + "Failed to instantiate type: " + myRightType, e);
-		} catch (IllegalAccessException e) {
-			throw new ConfigurationException(Msg.code(1946) + "Failed to instantiate type: " + myRightType, e);
-		}
+		Validate.notNull(theLeftType, "theLeftType must not be null");
+		Validate.notNull(theRightType, "theRightType must not be null");
+		myLeftType = ReflectionUtil.newInstance(theLeftType);
+		myRightType = ReflectionUtil.newInstance(theRightType);
 	}
 
 	@Override
@@ -70,14 +58,14 @@ public class CompositeParam<A extends IQueryParameterType, B extends IQueryParam
 	}
 
 	@Override
-	String doGetValueAsQueryToken(FhirContext theContext) {
+	String doGetValueAsQueryToken() {
 		StringBuilder b = new StringBuilder();
 		if (myLeftType != null) {
-			b.append(myLeftType.getValueAsQueryToken(theContext));
+			b.append(myLeftType.getValueAsQueryToken());
 		}
 		b.append('$');
 		if (myRightType != null) {
-			b.append(myRightType.getValueAsQueryToken(theContext));
+			b.append(myRightType.getValueAsQueryToken());
 		}
 		return b.toString();
 	}

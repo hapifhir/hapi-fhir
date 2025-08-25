@@ -20,7 +20,7 @@
 			"contactName": "Kevin Mayfield",
 			"contactEmail": "Kevin.mayfield@mayfield-is.co.uk",
 			"link": "https://data.developer.nhs.uk/ccri/exp",
-            "city": "UK",
+			"city": "UK",
 			"lat": 55.378052,
 			"lon": -3.435973,
 			"added": "2019-08-19"
@@ -30,7 +30,7 @@
 			"contactName": "David Hay",
 			"contactEmail": "david.hay25@gmail.com",
 			"link": "http://clinfhir.com",
-            "city": "New Zealand",
+			"city": "New Zealand",
 			"lat": -42.651737,
 			"lon": 171.926909,
 			"added": "2019-08-18"
@@ -350,7 +350,8 @@
 			"lat": 37.7826622,
 			"lon": -122.3983786,
 			"added": "2020-05-06"
-		},{
+		},
+		{
 			"title": "MEDplat",
 			"description": "A comprehensive public health platform",
 			"link": "https://argusoft.com",
@@ -405,7 +406,7 @@
 			"lon": 10.17705,
 			"added": "2021-10-06"
 		},
-				{
+		{
 			"title": "Burai L.L.C",
 			"description": "SaaS ERP for Healthcare Services, SMART ON FHIR compliance with 21st century cures act and HIPPA",
 			"company": "Burai LLC",
@@ -416,7 +417,7 @@
 			"lon": 139.6503,
 			"added": "2021-12-03"
 		},
-			{
+		{
 			"title": "HealthChain",
 			"description": "Mobile FHIR EMR",
 			"company": "imageRAD Yazalım A.Ş.",
@@ -427,7 +428,7 @@
 			"lon": 26.634074,
 			"added": "2022-06-20"
 		},
-			{
+		{
 			"title": "SOLUTEMA, SRL",
 			"description": "Infrastructure based on HAPI FHIR + GNU Health to simplify data exchange between medical professionals, patients and EHRs systems Making technology work as service throught standards.",
 			"company": "SOLUTEMA, SRL",
@@ -439,7 +440,7 @@
 			"lon": -69.929611,
 			"added": "2022-08-15"
 		},
-			{
+		{
 			"title": "Eviden BSD R&D Spain (Atos)",
 			"description": "Use of HAPI-FHIR as the centralized data aggregation repository for clinical research studies.",
 			"company": "Eviden BSD R&D Spain (Atos)",
@@ -451,7 +452,7 @@
 			"lon": -3.63220,
 			"added": "2022-07-19"
 		},
-			{
+		{
 			"title": "Healthsoft",
 			"description": "Innovative software solutions for future-proof healthcare.",
 			"company": "Healthsoft B.V.",
@@ -462,6 +463,18 @@
 			"lat": 51.908779,
 			"lon": 4.477520,
 			"added": "2024-11-14"
+		},
+		{
+			"title": "HAPI FHIR + GNU Health",
+			"description": "Promoviendo la interoperabilidad en Salud: HAPI + GNU Health",
+			"company": "INTEGRADORES PERUANOS SAC",
+			"contactName": "Fernando Sánchez",
+			"contactEmail": "nando@integraper.com",
+			"link": "https://www.integraper.com",
+			"city": "Lima, Perú",
+			"lat": -11.920878,
+			"lon": -77.059573,
+			"added": "2025-08-25"
 		}
 	]
 }

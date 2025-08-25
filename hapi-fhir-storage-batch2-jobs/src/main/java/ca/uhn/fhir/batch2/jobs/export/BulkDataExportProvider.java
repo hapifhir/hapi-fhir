@@ -217,8 +217,8 @@ public class BulkDataExportProvider {
 	}
 
 	@VisibleForTesting
-	Set<String> getPatientCompartmentResources(FhirContext theFhirContext) {
-		return getBulkDataExportSupport().getPatientCompartmentResources(theFhirContext);
+	Set<String> getPatientCompartmentResources(FhirContext theFhirContext, ExportStyle theExportStyle) {
+		return getBulkDataExportSupport().getPatientCompartmentResources(theFhirContext, theExportStyle);
 	}
 
 	/**
@@ -341,10 +341,10 @@ public class BulkDataExportProvider {
 			} else if (value instanceof IBaseReference patientReference) {
 				return patientReference.getReferenceElement();
 			} else {
-				throw new InvalidRequestException("Unsupported type.");
+				throw new InvalidRequestException(Msg.code(2763) + "Unsupported type.");
 			}
 		} catch (Exception e) {
-			throw new InvalidRequestException("Invalid patient parameter.", e);
+			throw new InvalidRequestException(Msg.code(2779) + "Invalid patient parameter.", e);
 		}
 	}
 
@@ -370,7 +370,8 @@ public class BulkDataExportProvider {
 
 		// set resourceTypes to all patient compartment resources if it is null
 		IPrimitiveType<String> resourceTypes = theType == null
-				? new StringDt(String.join(",", getBulkDataExportSupport().getPatientCompartmentResources()))
+				? new StringDt(String.join(
+						",", getBulkDataExportSupport().getPatientCompartmentResources(ExportStyle.PATIENT)))
 				: theType;
 
 		BulkExportJobParameters bulkExportJobParameters = new BulkExportJobParametersBuilder()
@@ -386,7 +387,8 @@ public class BulkDataExportProvider {
 				.build();
 
 		getBulkDataExportSupport()
-				.validateResourceTypesAllContainPatientSearchParams(bulkExportJobParameters.getResourceTypes());
+				.validateResourceTypesAllContainPatientSearchParams(
+						bulkExportJobParameters.getResourceTypes(), ExportStyle.PATIENT);
 
 		getBulkDataExportJobService().startJob(theRequestDetails, bulkExportJobParameters);
 	}

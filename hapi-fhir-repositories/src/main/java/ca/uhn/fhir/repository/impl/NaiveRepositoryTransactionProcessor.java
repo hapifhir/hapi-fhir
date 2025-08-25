@@ -1,6 +1,26 @@
+/*-
+ * #%L
+ * HAPI FHIR - Repository implementations and utilities
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.repository.impl;
 
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.Constants;
@@ -83,7 +103,7 @@ public class NaiveRepositoryTransactionProcessor {
 						case PUT -> processPut(e, now);
 						case DELETE -> processDelete(e, now);
 						default -> throw new NotImplementedOperationException(
-								"Transaction stub only supports POST, PUT, or DELETE");
+								Msg.code(2769) + "Transaction stub only supports POST, PUT, or DELETE");
 					};
 			bundleBuilder.addEntry(myResponseEntryBuilder.apply(responseEntry));
 		}
@@ -120,7 +140,7 @@ public class NaiveRepositoryTransactionProcessor {
 		String url = theBundleEntryParts.getUrl();
 		Validate.notNull(url, "request url must not be null: entry %s", theBundleEntryParts.getFullUrl());
 		if (url.contains("?")) {
-			throw new UnprocessableEntityException("Conditional urls are not supported");
+			throw new UnprocessableEntityException(Msg.code(2770) + "Conditional urls are not supported");
 		}
 	}
 
@@ -129,7 +149,7 @@ public class NaiveRepositoryTransactionProcessor {
 			BundleEntryParts theBundleEntryParts, IPrimitiveType<Date> theInstant) {
 		// we assume POST is always "create", not an operation invocation
 		if (theBundleEntryParts.getConditionalUrl() != null) {
-			throw new UnprocessableEntityException("Conditional create urls are not supported");
+			throw new UnprocessableEntityException(Msg.code(2771) + "Conditional create urls are not supported");
 		}
 
 		var responseOutcome = myRepository.create(theBundleEntryParts.getResource());
@@ -197,7 +217,8 @@ public class NaiveRepositoryTransactionProcessor {
 			case Constants.STATUS_HTTP_409_CONFLICT -> "409 Conflict";
 			case Constants.STATUS_HTTP_204_NO_CONTENT -> "204 No Content";
 			case Constants.STATUS_HTTP_404_NOT_FOUND -> "404 Not Found";
-			default -> throw new IllegalArgumentException("Unsupported response status code: " + theResponseStatusCode);
+			default -> throw new IllegalArgumentException(
+					Msg.code(2776) + "Unsupported response status code: " + theResponseStatusCode);
 		};
 	}
 }

@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA - Search Parameters
+ * HAPI FHIR JPA Model
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -17,9 +17,26 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.searchparam;
+package ca.uhn.fhir.jpa.model.util;
 
-public class SearchParamConstants {
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 
-	public static final String UCUM_NS = "http://unitsofmeasure.org";
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
+public class ResourceLinkUtils {
+
+	/**
+	 * UNKNOWN resource type, used for flagging
+	 * canonical urls in ResourceLinks.
+	 */
+	public static final String UNKNOWN = "(unknown)";
+
+	/**
+	 * Returns true if the target of the resourcelink is a canonical url;
+	 * returns false otherwise.
+	 */
+	public static boolean isTargetCanonicalUrl(ResourceLink theLink) {
+		return isBlank(theLink.getTargetResourceId())
+				&& theLink.getTargetResourceType().equals(UNKNOWN);
+	}
 }

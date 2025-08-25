@@ -1,6 +1,26 @@
+/*-
+ * #%L
+ * HAPI FHIR - Repository implementations and utilities
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.repository.impl.memory;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -127,8 +147,8 @@ class NaiveSearching {
 		} else if (theIdParam instanceof StringParam stringParam) {
 			return new IdDt(stringParam.getValue());
 		} else {
-			throw new IllegalArgumentException(
-					"Unsupported _id parameter type: " + theIdParam.getClass().getName());
+			throw new IllegalArgumentException(Msg.code(2773) + "Unsupported _id parameter type: "
+					+ theIdParam.getClass().getName());
 		}
 	}
 
@@ -139,7 +159,7 @@ class NaiveSearching {
 		} else {
 			// SOMEDAY Apply the rest of the params with a matcher
 			throw new UnsupportedOperationException(
-					"NaiveSearching does not support search parameters other than _id. Received: "
+					Msg.code(2780) + "NaiveSearching does not support search parameters other than _id. Received: "
 							+ theSearchParameters.keys());
 		}
 	}

@@ -1,5 +1,25 @@
+/*-
+ * #%L
+ * HAPI FHIR - Repository implementations and utilities
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.repository.impl.memory;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.annotation.Nonnull;
@@ -90,7 +110,8 @@ public class ResourceStorage {
 			}
 
 			if (!resourceTypeName.equals(unqualifiedVersionless.getResourceType())) {
-				throw new IllegalArgumentException("Resource type mismatch: resource is " + resourceTypeName
+				throw new IllegalArgumentException(Msg.code(2775) + "Resource type mismatch: resource is "
+						+ resourceTypeName
 						+ " but id type is " + unqualifiedVersionless.getResourceType());
 			}
 
