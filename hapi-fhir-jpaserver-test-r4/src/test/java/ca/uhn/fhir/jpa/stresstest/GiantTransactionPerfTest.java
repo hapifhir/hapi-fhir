@@ -108,6 +108,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -425,6 +426,11 @@ public class GiantTransactionPerfTest {
 
 		@Override
 		public List<ResourceHistoryTable> findCurrentVersionsByResourcePidsAndFetchResourceTable(List<JpaPidFk> theVersionlessPids) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Stream<ResourceHistoryTable> findVersionsForResource(Pageable thePage, JpaPidFk theFk) {
 			throw new UnsupportedOperationException();
 		}
 
