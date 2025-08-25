@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7186
+title: "Two new operations called `$bulk-patch` and `$bulk-patch-rewrite-history` have been added to the JPA server. These
+   operations can be used to efficiently perform modifications to a large number of resources in a single batch operation."

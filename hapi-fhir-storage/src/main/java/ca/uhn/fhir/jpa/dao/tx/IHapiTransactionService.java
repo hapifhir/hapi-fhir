@@ -117,6 +117,10 @@ public interface IHapiTransactionService {
 
 		IExecutionBuilder readOnly();
 
+		/**
+		 * @deprecated Use {@link TransactionDetails#addRollbackUndoAction(Runnable)} instead
+		 */
+		@Deprecated(since = "8.6", forRemoval = true)
 		IExecutionBuilder onRollback(Runnable theOnRollback);
 
 		void execute(Runnable theTask);

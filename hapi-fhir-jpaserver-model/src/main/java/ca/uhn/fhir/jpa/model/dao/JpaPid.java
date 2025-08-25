@@ -94,6 +94,12 @@ public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable
 		myId = theId;
 	}
 
+	public JpaPid(Integer thePartitionId, Long theId, Long theVersion) {
+		super(theVersion, null);
+		myPartitionIdValue = thePartitionId;
+		myId = theId;
+	}
+
 	private JpaPid(Long theId, String theResourceType) {
 		super(theResourceType);
 		myId = theId;

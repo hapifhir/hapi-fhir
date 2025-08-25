@@ -52,13 +52,27 @@ public class OperationOutcomeUtil {
 	public static final String OO_ISSUE_CODE_INFORMATIONAL = "informational";
 
 	/**
+	 * Note: This code was added in FHIR R5, so the {@link #addIssue(FhirContext, IBaseOperationOutcome, String, String, String, String) addIssue}
+	 * methods here will automatically convert it to {@link #OO_ISSUE_CODE_INFORMATIONAL} for
+	 * previous versions of FHIR.
+	 *
+	 * @since 8.6.0
+	 */
+	public static final String OO_ISSUE_CODE_SUCCESS = "success";
+
+	/**
+	 * @since 8.6.0
+	 */
+	public static final String OO_ISSUE_CODE_PROCESSING = "processing";
+
+	/**
 	 * Add an issue to an OperationOutcome
 	 *
 	 * @param theCtx              The fhir context
 	 * @param theOperationOutcome The OO resource to add to
 	 * @param theSeverity         The severity (fatal | error | warning | information)
 	 * @param theDiagnostics      The diagnostics string (this was called "details" in FHIR DSTU2 but was renamed to diagnostics in DSTU3)
-	 * @param theCode
+	 * @param theCode             A code, such as {@link #OO_ISSUE_CODE_INFORMATIONAL} or {@link #OO_ISSUE_CODE_SUCCESS}
 	 * @return Returns the newly added issue
 	 */
 	public static IBase addIssue(
@@ -221,7 +235,13 @@ public class OperationOutcomeUtil {
 		BaseRuntimeChildDefinition codeChild = issueElement.getChildByName("code");
 		IPrimitiveType<?> codeElem = (IPrimitiveType<?>)
 				codeChild.getChildByName("code").newInstance(codeChild.getInstanceConstructorArguments());
-		codeElem.setValueAsString(theCode);
+		String code = theCode;
+		if (theCtx.getVersion().getVersion().isOlderThan(FhirVersionEnum.R5) && "success".equals(code)) {
+			// "success" was added in R5 so we switch back to "informational" for older versions
+			code = "informational";
+		}
+
+		codeElem.setValueAsString(code);
 		codeChild.getMutator().addValue(theIssue, codeElem);
 
 		BaseRuntimeElementDefinition<?> stringDef = diagnosticsChild.getChildByName(diagnosticsChild.getElementName());

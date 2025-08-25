@@ -46,7 +46,7 @@ public class ResourceIdListStep<PT extends PartitionedUrlJobParameters>
 		implements IJobStepWorker<PT, ChunkRangeJson, ResourceIdListWorkChunkJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
-	protected static final int MAX_BATCH_OF_IDS = 500;
+	public static final int MAX_BATCH_OF_IDS = 500;
 
 	private final IIdChunkProducer<ChunkRangeJson> myIdChunkProducer;
 
