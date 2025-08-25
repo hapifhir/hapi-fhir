@@ -61,7 +61,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -69,7 +68,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.isAllowedForContext;
@@ -123,7 +121,11 @@ public class SearchParamRegistryImpl
 	private volatile RuntimeSearchParamCache myActiveSearchParams;
 	private boolean myPrePopulateSearchParamIdentities = true;
 
-	private final Map<String, Set<RuntimeSearchParam>> myResourceTypeToSPLocalCache = new HashMap<>();
+	/**
+	 * Our local cache for search parameters stored in the system, that
+	 * are not saved into the DB.
+	 */
+	private final RuntimeSearchParamCache myLocalSPCache = new RuntimeSearchParamCache();
 
 	@VisibleForTesting
 	public void setPopulateSearchParamIdentities(boolean myPrePopulateSearchParamIdentities) {
@@ -220,17 +222,13 @@ public class SearchParamRegistryImpl
 			// todo - throw exception
 		}
 		for (String rt : theSearchParam.getTargets()) {
-			myResourceTypeToSPLocalCache.computeIfAbsent(rt, k -> {
-				Set<RuntimeSearchParam> set = new HashSet<>();
-				set.add(theSearchParam);
-				return set;
-			});
+			myLocalSPCache.add(rt, theSearchParam.getName(), theSearchParam);
 		}
 	}
 
 	@Override
 	public void clearLocalSearchParameterCache() {
-		myResourceTypeToSPLocalCache.clear();
+		myLocalSPCache.clear();
 	}
 
 	@Override
@@ -273,13 +271,12 @@ public class SearchParamRegistryImpl
 		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
 
 		// add the local cache search params
-		for (Map.Entry<String, Set<RuntimeSearchParam>> entry : myResourceTypeToSPLocalCache.entrySet()) {
-			Set<RuntimeSearchParam> set = entry.getValue();
-			for (RuntimeSearchParam rsp : set) {
-				searchParams.getSearchParamMap(entry.getKey())
-					.put(rsp.getName(), rsp);
-			}
-		}
+		myLocalSPCache.getSearchParamStream()
+			.forEach(sp -> {
+				for (String rt : sp.getTargets()) {
+					searchParams.add(rt, sp.getName(), sp);
+				}
+			});
 
 		// Auto-register: _language
 		if (myStorageSettings.isLanguageSearchParameterEnabled()) {

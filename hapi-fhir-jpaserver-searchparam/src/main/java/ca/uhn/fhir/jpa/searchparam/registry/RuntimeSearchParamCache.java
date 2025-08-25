@@ -63,6 +63,11 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 		myResourceNameToSpNameToSp.get(theResourceName).remove(theName);
 	}
 
+	public void clear() {
+		myResourceNameToSpNameToSp.clear();
+		myUrlToParam.clear();
+	}
+
 	private void putAll(ReadOnlySearchParamCache theReadOnlySearchParamCache) {
 		Set<Map.Entry<String, ResourceSearchParams>> builtInSps =
 				theReadOnlySearchParamCache.myResourceNameToSpNameToSp.entrySet();

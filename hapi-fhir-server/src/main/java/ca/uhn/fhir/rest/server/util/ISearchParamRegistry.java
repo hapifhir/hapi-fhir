@@ -244,11 +244,7 @@ public interface ISearchParamRegistry extends IResourceRepositoryCache {
 		/**
 		 * Return any search parameters that are known to the system for any context
 		 */
-		ALL,
-		/**
-		 *
-		 */
-		ALL_EXCLUDING_LOCAL_CACHE
+		ALL
 	}
 
 	static boolean isAllowedForContext(

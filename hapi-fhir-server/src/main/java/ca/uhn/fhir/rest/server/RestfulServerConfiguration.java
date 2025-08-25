@@ -453,12 +453,12 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 
 	@Override
 	public void addActiveSearchParameterToLocalCache(RuntimeSearchParam theSearchParam) {
-
+		// TODO - throw not supported exception with error code
 	}
 
 	@Override
 	public void clearLocalSearchParameterCache() {
-
+		// TODO - throw not supported exception with error code
 	}
 
 	private void createRuntimeBinding(
