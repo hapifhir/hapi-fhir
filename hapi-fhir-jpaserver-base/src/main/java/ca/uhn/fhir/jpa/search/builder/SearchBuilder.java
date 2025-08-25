@@ -59,7 +59,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.SearchConstants;
 import ca.uhn.fhir.jpa.search.builder.models.ResolvedSearchQueryExecutor;
@@ -160,6 +159,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.NO_MORE;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
@@ -1255,7 +1255,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		List<JpaPid> versionlessPids = new ArrayList<>(thePids);
+		int expectedCount = versionlessPids.size();
 		if (versionlessPids.size() < getMaximumPageSize()) {
+			/*
+			 * This method adds a bunch of extra params to the end of the parameter list
+			 * which are for a resource PID that will never exist (-1 / NO_MORE). We do this
+			 * so that the database can rely on a cached execution plan since we're not
+			 * generating a new SQL query for every possible number of resources.
+			 */
 			versionlessPids = normalizeIdListForInClause(versionlessPids);
 		}
 
@@ -1295,13 +1302,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 * state it can happen. In that case, we do a manual process of figuring out what
 		 * is the right version.
 		 */
-		if (resourceSearchViewList.size() != versionlessPids.size()) {
+		if (resourceSearchViewList.size() != expectedCount) {
 
 			Set<JpaPid> loadedPks = resourceSearchViewList.stream()
 					.map(ResourceHistoryTable::getResourceId)
 					.collect(Collectors.toSet());
 			for (JpaPid nextWantedPid : versionlessPids) {
-				if (!loadedPks.contains(nextWantedPid)) {
+				if (!nextWantedPid.equals(NO_MORE) && !loadedPks.contains(nextWantedPid)) {
 					Optional<ResourceHistoryTable> latestVersion = findLatestVersion(
 							theRequest, nextWantedPid, myResourceHistoryTableDao, myInterceptorBroadcaster);
 					latestVersion.ifPresent(resourceSearchViewList::add);
@@ -1366,7 +1373,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			JpaPid nextWantedPid,
 			IResourceHistoryTableDao resourceHistoryTableDao,
 			IInterceptorBroadcaster interceptorBroadcaster1) {
-		assert nextWantedPid != null && !nextWantedPid.equals(JpaConstants.NO_MORE);
+		assert nextWantedPid != null && !nextWantedPid.equals(NO_MORE);
 
 		Optional<ResourceHistoryTable> latestVersion = resourceHistoryTableDao
 				.findVersionsForResource(SINGLE_RESULT, nextWantedPid.toFk())
@@ -2728,7 +2735,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				if (myCurrentIterator.hasNext()) {
 					myNext = myCurrentIterator.next();
 				} else {
-					myNext = JpaConstants.NO_MORE;
+					myNext = NO_MORE;
 				}
 			}
 		}
@@ -2736,7 +2743,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		@Override
 		public boolean hasNext() {
 			fetchNext();
-			return !JpaConstants.NO_MORE.equals(myNext);
+			return !NO_MORE.equals(myNext);
 		}
 
 		@Override
@@ -2925,10 +2932,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							}
 						}
 						if (myNext == null) {
-							myNext = JpaConstants.NO_MORE;
+							myNext = NO_MORE;
 						}
 					} else {
-						myNext = JpaConstants.NO_MORE;
+						myNext = NO_MORE;
 					}
 				}
 
@@ -2954,7 +2961,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				myFirst = false;
 			}
 
-			if (JpaConstants.NO_MORE.equals(myNext)) {
+			if (NO_MORE.equals(myNext)) {
 				HookParams params = new HookParams()
 						.add(RequestDetails.class, myRequest)
 						.addIfMatchesType(ServletRequestDetails.class, myRequest)
@@ -3039,7 +3046,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			if (myNext == null) {
 				fetchNext();
 			}
-			return !JpaConstants.NO_MORE.equals(myNext);
+			return !NO_MORE.equals(myNext);
 		}
 
 		@Override
@@ -3047,7 +3054,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			fetchNext();
 			JpaPid retVal = myNext;
 			myNext = null;
-			Validate.isTrue(!JpaConstants.NO_MORE.equals(retVal), "No more elements");
+			Validate.isTrue(!NO_MORE.equals(retVal), "No more elements");
 			return retVal;
 		}
 
