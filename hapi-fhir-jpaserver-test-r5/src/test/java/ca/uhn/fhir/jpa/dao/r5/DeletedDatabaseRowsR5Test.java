@@ -224,7 +224,7 @@ public class DeletedDatabaseRowsR5Test extends BaseJpaR5Test {
 			try {
 				createPatient(withId("P" + i), withActiveTrue());
 			} catch (InternalErrorException e) {
-				assertEquals("HAPI-2791: Resource ID generator provided illegal value: -1", e.getMessage());
+				assertEquals("HAPI-2791: Resource ID generator provided illegal value: -1 / -1", e.getMessage());
 				assertDoesntExist(new IdType("Patient/P" + i));
 				continue;
 			}
@@ -262,7 +262,7 @@ public class DeletedDatabaseRowsR5Test extends BaseJpaR5Test {
 				id = createPatient(withActiveTrue(), withFamily("FAMILY-" + i));
 				ourLog.info("Created resource with ID: {}", id);
 			} catch (InternalErrorException e) {
-				assertEquals("HAPI-2791: Resource ID generator provided illegal value: -1", e.getMessage());
+				assertEquals("HAPI-2791: Resource ID generator provided illegal value: -1 / -1", e.getMessage());
 				assertDoesntExist(new IdType("Patient/P" + i));
 				continue;
 			}

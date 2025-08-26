@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7216
+title: "The JPA server will now fail if the ID-assignment sequence returns a value of -1. This should not be possible
+   under normal operation, but could happen if someone manually modifies the sequence, and causes very unpredictable
+   behaviour."

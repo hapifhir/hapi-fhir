@@ -33,8 +33,6 @@ public interface IJpaStorageResourceParser extends IStorageResourceParser<JpaPid
 	/**
 	 * Convert a storage entity into a FHIR resource model instance. This method may return null if the entity is not
 	 * completely flushed, including the entity's history entries.
-	 *
-	 * @since 8.6.0
 	 */
 	<R extends IBaseResource> R toResource(
 			RequestDetails theDetails,
