@@ -851,8 +851,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				myInMemoryResourceMatcher.match(theIfNoneExist, theResource, theParams, theRequestDetails);
 
 		if (outcome.supported() && !outcome.matched()) {
-			String errorMsg = getConditionalCreateOrUpdateErrorMsg(
-					theCreateOrUpdate, theRequestDetails.getFixedConditionalUrl(), theResource.fhirType());
+			String errorMsg =
+					getConditionalCreateOrUpdateErrorMsg(theCreateOrUpdate, theIfNoneExist, theResource.fhirType());
 			throw new InvalidRequestException(Msg.code(929) + errorMsg);
 		}
 	}
