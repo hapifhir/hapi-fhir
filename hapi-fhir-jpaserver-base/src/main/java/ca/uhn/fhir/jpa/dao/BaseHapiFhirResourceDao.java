@@ -170,7 +170,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
-import static ca.uhn.fhir.jpa.search.builder.SearchBuilder.SINGLE_RESULT;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.SINGLE_RESULT;
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -1733,14 +1733,22 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 						theEntity.getResourceId(),
 						theEntity.getVersion(),
 						newVersion);
-				myEntityManager.flush();
+
+				/*
+				 * We are going to manually change (i.e. correct) the version number on the HFJ_RESOURCE table. The
+				 * version number is used as the optimistic locking key, so we need to detach the entity first, or
+				 * we'll get an optimistic lock failure later.
+				 */
 				myEntityManager.detach(theEntity);
 				myResourceTableDao.updateVersionAndLastUpdated(theEntity.getId(), newVersion, new Date());
 
+				/*
+				 * And now reload the record from the database so we have a fresh copy to reindex.
+				 */
 				return myEntityManager.find(ResourceTable.class, theEntity.getId());
 			} else {
 				ourLog.info(
-						"No versions exist for {}/{} (PID {}), setting status to deleted",
+						"No versions exist for {}/{} (PID {}), marking resource as deleted",
 						theEntity.getResourceType(),
 						theEntity.getFhirId(),
 						theEntity.getResourceId());

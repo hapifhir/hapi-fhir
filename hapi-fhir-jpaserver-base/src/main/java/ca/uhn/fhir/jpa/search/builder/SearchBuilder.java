@@ -59,6 +59,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.SearchConstants;
 import ca.uhn.fhir.jpa.search.builder.models.ResolvedSearchQueryExecutor;
@@ -139,7 +140,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -198,8 +198,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private static final String MY_TARGET_RESOURCE_TYPE = "myTargetResourceType";
 	private static final String MY_TARGET_RESOURCE_VERSION = "myTargetResourceVersion";
 	public static final JpaPid[] EMPTY_JPA_PID_ARRAY = new JpaPid[0];
-	public static final PageRequest SINGLE_RESULT = PageRequest.of(0, 1);
-	public static boolean myUseMaxPageSize50ForTest = false;
 	public static Integer myMaxPageSizeForTests = null;
 	protected final IInterceptorBroadcaster myInterceptorBroadcaster;
 	protected final IResourceTagDao myResourceTagDao;
@@ -1376,7 +1374,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		assert nextWantedPid != null && !nextWantedPid.equals(NO_MORE);
 
 		Optional<ResourceHistoryTable> latestVersion = resourceHistoryTableDao
-				.findVersionsForResource(SINGLE_RESULT, nextWantedPid.toFk())
+				.findVersionsForResource(JpaConstants.SINGLE_RESULT, nextWantedPid.toFk())
 				.findFirst();
 		String warning;
 		if (latestVersion.isPresent()) {

@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.HapiExtensions;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.Set;
 
@@ -319,6 +320,13 @@ public class JpaConstants {
 	 * be positive, so this value will never appear in real data.
 	 */
 	public static final JpaPid NO_MORE = JpaPid.fromId(NO_MORE_PID);
+
+	/**
+	 * A page request which only returns a single result (page index = 0, page size = 1)
+	 *
+	 * @since 8.6.0
+	 */
+	public static final PageRequest SINGLE_RESULT = PageRequest.of(0, 1);
 
 	/**
 	 * Non-instantiable
