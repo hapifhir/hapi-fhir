@@ -1121,8 +1121,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	@Nonnull
 	public static SystemRequestDetails newSrd() {
-		SystemRequestDetails srd = new SystemRequestDetails();
-		return srd;
+		return new SystemRequestDetails();
 	}
 
 }
