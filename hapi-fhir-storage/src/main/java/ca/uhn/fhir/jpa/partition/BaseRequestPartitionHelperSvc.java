@@ -120,20 +120,18 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		boolean nonPartitionableResource = isResourceNonPartitionable(resourceType);
 
 		RequestPartitionId requestPartitionId = null;
-		// Handle system requests
-		if (requestDetails instanceof SystemRequestDetails
-				&& systemRequestHasExplicitPartition((SystemRequestDetails) requestDetails)
-				&& !nonPartitionableResource) {
-			requestPartitionId = getSystemRequestPartitionId((SystemRequestDetails) requestDetails, false);
-			logSystemRequestDetailsResolution((SystemRequestDetails) requestDetails);
 
-		} else if ((requestDetails instanceof SystemRequestDetails) && nonPartitionableResource) {
+		if (nonPartitionableResource) {
 			requestPartitionId = myPartitionSettings.getDefaultRequestPartitionId();
-			logSystemRequestDetailsResolution((SystemRequestDetails) requestDetails);
+			logRequestDetailsResolution(requestDetails);
 			logNonPartitionableType(resourceType);
+		} else if (requestDetails instanceof SystemRequestDetails systemRequestDetails
+				&& systemRequestHasExplicitPartition(systemRequestDetails)) {
+			// !nonPartitionableResource
+			requestPartitionId = getSystemRequestPartitionId(systemRequestDetails, false);
+			logRequestDetailsResolution(systemRequestDetails);
+
 		} else {
-			// TODO mb: why is this path different than create?
-			//  Here, a non-partitionable resource is still delivered to the pointcuts.
 			IInterceptorBroadcaster compositeBroadcaster =
 					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, requestDetails);
 			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY)) {
@@ -213,10 +211,10 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			return RequestPartitionId.allPartitions();
 		}
 
-		if (theRequestDetails instanceof SystemRequestDetails
-				&& systemRequestHasExplicitPartition((SystemRequestDetails) theRequestDetails)) {
-			requestPartitionId = getSystemRequestPartitionId((SystemRequestDetails) theRequestDetails);
-			logSystemRequestDetailsResolution((SystemRequestDetails) theRequestDetails);
+		if (theRequestDetails instanceof SystemRequestDetails systemRequestDetails
+				&& systemRequestHasExplicitPartition(systemRequestDetails)) {
+			requestPartitionId = getSystemRequestPartitionId(systemRequestDetails);
+			logRequestDetailsResolution(systemRequestDetails);
 		} else {
 			IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
 					myInterceptorBroadcaster, theRequestDetails);
@@ -303,12 +301,11 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		}
 
 		RequestPartitionId requestPartitionId = null;
-		if (theRequest instanceof SystemRequestDetails
-				&& systemRequestHasExplicitPartition((SystemRequestDetails) theRequest)) {
-			requestPartitionId =
-					getSystemRequestPartitionId((SystemRequestDetails) theRequest, nonPartitionableResource);
+		if (theRequest instanceof SystemRequestDetails systemRequestDetails
+				&& systemRequestHasExplicitPartition(systemRequestDetails)) {
+			requestPartitionId = getSystemRequestPartitionId(systemRequestDetails, nonPartitionableResource);
 
-			logSystemRequestDetailsResolution((SystemRequestDetails) theRequest);
+			logRequestDetailsResolution(systemRequestDetails);
 		} else {
 			IInterceptorBroadcaster compositeBroadcaster =
 					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, requestDetails);
@@ -492,10 +489,19 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 				theResult);
 	}
 
-	private void logSystemRequestDetailsResolution(SystemRequestDetails theRequest) {
-		ourLog.trace(
-				"Partitioning: request is a SystemRequestDetails, with RequestPartitionId={}.",
-				theRequest.getRequestPartitionId());
+	private void logRequestDetailsResolution(RequestDetails theRequest) {
+		String logString = "Partitioning: request is a {}, with tenantId {}";
+
+		String requestClassName = theRequest.getClass().getSimpleName();
+		String tenantId = theRequest.getTenantId();
+		RequestPartitionId requestPartitionId = null;
+
+		if (theRequest instanceof SystemRequestDetails systemRequestDetails) {
+			requestPartitionId = systemRequestDetails.getRequestPartitionId();
+			logString = logString + ", with request partitionId {}";
+		}
+
+		ourLog.trace(logString, requestClassName, tenantId, requestPartitionId);
 	}
 
 	private static void logSubstitutingDefaultSystemRequestDetails() {
