@@ -71,6 +71,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.isAllowedForContext;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchParamRegistryImpl
@@ -217,11 +218,11 @@ public class SearchParamRegistryImpl
 	}
 
 	@Override
-	public void addActiveSearchParameterToLocalCache(RuntimeSearchParam theSearchParam) {
-		if (!theSearchParam.hasTargets()) {
-			// todo - throw exception
-		}
-		for (String rt : theSearchParam.getTargets()) {
+	public void addActiveSearchParameterToLocalCache(@Nonnull RuntimeSearchParam theSearchParam) {
+		assert !isBlank(theSearchParam.getName());
+		assert theSearchParam.getBase() != null && !theSearchParam.getBase().isEmpty();
+
+		for (String rt : theSearchParam.getBase()) {
 			myLocalSPCache.add(rt, theSearchParam.getName(), theSearchParam);
 		}
 	}
@@ -273,7 +274,7 @@ public class SearchParamRegistryImpl
 		// add the local cache search params
 		myLocalSPCache.getSearchParamStream()
 			.forEach(sp -> {
-				for (String rt : sp.getTargets()) {
+				for (String rt : sp.getBase()) {
 					searchParams.add(rt, sp.getName(), sp);
 				}
 			});
