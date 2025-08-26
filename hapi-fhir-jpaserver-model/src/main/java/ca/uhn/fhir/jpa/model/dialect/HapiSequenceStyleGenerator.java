@@ -91,7 +91,6 @@ public class HapiSequenceStyleGenerator
 				throw new InternalErrorException(
 						Msg.code(2791) + "Resource ID generator provided illegal value: " + next + " / " + retVal);
 			}
-
 		}
 		return retVal;
 	}
