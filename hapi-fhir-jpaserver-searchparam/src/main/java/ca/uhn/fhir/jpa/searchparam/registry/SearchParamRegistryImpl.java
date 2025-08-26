@@ -272,12 +272,11 @@ public class SearchParamRegistryImpl
 		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
 
 		// add the local cache search params
-		myLocalSPCache.getSearchParamStream()
-			.forEach(sp -> {
-				for (String rt : sp.getBase()) {
-					searchParams.add(rt, sp.getName(), sp);
-				}
-			});
+		myLocalSPCache.getSearchParamStream().forEach(sp -> {
+			for (String rt : sp.getBase()) {
+				searchParams.add(rt, sp.getName(), sp);
+			}
+		});
 
 		// Auto-register: _language
 		if (myStorageSettings.isLanguageSearchParameterEnabled()) {
