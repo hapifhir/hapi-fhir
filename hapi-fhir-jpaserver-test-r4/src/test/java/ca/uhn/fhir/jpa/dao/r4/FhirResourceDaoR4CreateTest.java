@@ -430,7 +430,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			myObservationDao.create(obs, "identifier=A%20B", newSrd());
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
+			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource http://fixed.conditional.org of type Observation did not satisfy the conditional URL.", e.getMessage());
 		}
 	}
 
@@ -455,7 +455,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			mySystemDao.transaction(newSrd(), (Bundle) bb.getBundle());
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
+			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource http://fixed.conditional.org of type Observation did not satisfy the conditional URL.", e.getMessage());
 		}
 	}
 
@@ -466,7 +466,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertThatThrownBy(() -> myObservationDao.create(obs, "identifier=xxx", newSrd()))
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessage(Msg.code(929) +
-				"Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
+				"Failed to process conditional create. The supplied resource http://fixed.conditional.org of type Observation did not satisfy the conditional URL.");
 	}
 
 	@Test

@@ -1121,7 +1121,9 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	@Nonnull
 	public static SystemRequestDetails newSrd() {
-		return new SystemRequestDetails();
+		SystemRequestDetails srd = new SystemRequestDetails();
+		srd.setFixedConditionalUrl("http://fixed.conditional.org");
+		return srd;
 	}
 
 }
