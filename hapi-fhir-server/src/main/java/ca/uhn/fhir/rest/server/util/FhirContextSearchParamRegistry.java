@@ -109,12 +109,12 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 
 	@Override
 	public void addActiveSearchParameterToLocalCache(RuntimeSearchParam theSearchParam) {
-		// todo - throw unsupported exceptions
+		throw new UnsupportedOperationException(Msg.code(2792));
 	}
 
 	@Override
 	public void clearLocalSearchParameterCache() {
-		// todo - throw unsupported exceptions; requires updating the msg.code
+		throw new UnsupportedOperationException(Msg.code(2793));
 	}
 
 	@Override
