@@ -27,6 +27,7 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -107,6 +108,7 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -1105,7 +1107,18 @@ public abstract class BaseJpaTest extends BaseTest {
 	 */
 	protected void assertNotGone(IIdType theId) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theId.getResourceType());
-		assertNotNull(dao.read(theId, newSrd()));
+		assertNotNull(dao.read(theId, mySrd));
+	}
+
+	/**
+	 * Asserts that the resource with {@literal theId} exists and is not deleted.
+	 * Note that {@link #assertExists(IIdType)} and {@link #assertNotGone(IIdType)}
+	 * are synonyms but both exist for better readability in different kinds
+	 * of tests.
+	 */
+	protected void assertNotGone(IIdType theId, RequestPartitionId theRequestPartitionId) {
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theId.getResourceType());
+		assertNotNull(dao.read(theId, newSrd().setRequestPartitionId(theRequestPartitionId)));
 	}
 
 	/**
@@ -1124,9 +1137,27 @@ public abstract class BaseJpaTest extends BaseTest {
 	 * This can be used to test that a resource was expunged.
 	 */
 	protected void assertDoesntExist(IIdType theId) {
+		assertDoesntExist(theId, mySrd);
+	}
+
+	/**
+	 * Asserts that the resource with {@literal theId} does not exist (i.e. not that
+	 * it exists but that it was deleted, but rather that the ID doesn't exist at all).
+	 * This can be used to test that a resource was expunged.
+	 */
+	protected void assertDoesntExist(IIdType theId, RequestPartitionId theRequestPartitionId) {
+		assertDoesntExist(theId, newSrd().setRequestPartitionId(theRequestPartitionId));
+	}
+
+	/**
+	 * Asserts that the resource with {@literal theId} does not exist (i.e. not that
+	 * it exists but that it was deleted, but rather that the ID doesn't exist at all).
+	 * This can be used to test that a resource was expunged.
+	 */
+	protected void assertDoesntExist(IIdType theId, RequestDetails requestDetails) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theId.getResourceType());
 		try {
-			dao.read(theId, mySrd);
+			dao.read(theId, requestDetails);
 			fail("");
 		} catch (ResourceNotFoundException e) {
 			assertThat(e.getMessage()).containsAnyOf(
