@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.ClinicalUseDefinition;
 import org.hl7.fhir.r5.model.CodeableConcept;
@@ -182,13 +183,15 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
             myResourceTableDao.save(table);
         });
 
-			assertThat(outcome.getResources(0, 3)).hasSize(2);
+		List<IBaseResource> actual = outcome.getResources(0, 3);
+		assertThat(actual).hasSize(2);
 
         runInTransaction(() -> {
             myResourceHistoryTableDao.deleteAll();
         });
 
-			assertThat(outcome.getResources(0, 3)).isEmpty();
+		actual = outcome.getResources(0, 3);
+		assertThat(actual).isEmpty();
     }
 
     @Test
