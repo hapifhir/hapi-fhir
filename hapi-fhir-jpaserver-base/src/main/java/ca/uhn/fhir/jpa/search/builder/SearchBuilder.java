@@ -1381,10 +1381,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			warning = "Database resource entry (HFJ_RESOURCE) with PID " + nextWantedPid
 					+ " specifies an unknown current version, returning version "
 					+ latestVersion.get().getVersion()
-					+ " instead. This invalid entry has a negative impact on performance, consider performing an appropriate $reindex to correct your data.";
+					+ " instead. This invalid entry has a negative impact on performance; consider performing an appropriate $reindex to correct your data.";
 		} else {
 			warning = "Database resource entry (HFJ_RESOURCE) with PID " + nextWantedPid
-					+ " specifies an unknown current version, and no versions of this resource exist. This invalid entry has a negative impact on performance, consider performing an appropriate $reindex to correct your data.";
+					+ " specifies an unknown current version, and no versions of this resource exist. This invalid entry has a negative impact on performance; consider performing an appropriate $reindex to correct your data.";
 		}
 
 		IInterceptorBroadcaster interceptorBroadcaster =

@@ -1692,15 +1692,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			return retVal;
 		}
 
+		boolean forceReindexSps = false;
 		if (theReindexParameters.getCorrectCurrentVersion() != ReindexParameters.CorrectCurrentVersionModeEnum.NONE) {
 			ResourceTable newEntity = reindexCorrectCurrentVersion(entity);
 			if (newEntity != null) {
 				entity = newEntity;
-				reindexSearchParameters(entity, retVal, theTransactionDetails);
+				forceReindexSps = true;
 			}
 		}
 
-		if (theReindexParameters.getReindexSearchParameters() == ReindexParameters.ReindexSearchParametersEnum.ALL) {
+		if (forceReindexSps || theReindexParameters.getReindexSearchParameters() == ReindexParameters.ReindexSearchParametersEnum.ALL) {
 			reindexSearchParameters(entity, retVal, theTransactionDetails);
 		}
 

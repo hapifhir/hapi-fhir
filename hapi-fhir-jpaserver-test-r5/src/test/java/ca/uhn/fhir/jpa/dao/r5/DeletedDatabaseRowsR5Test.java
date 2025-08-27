@@ -290,7 +290,7 @@ public class DeletedDatabaseRowsR5Test extends BaseJpaR5Test {
 
 		verify(myMockInterceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_WARNING), myHookParamsCaptor.capture());
 		StorageProcessingMessage message = myHookParamsCaptor.getValue().get(StorageProcessingMessage.class);
-		String expectedMessage = "Database resource entry (HFJ_RESOURCE) with PID " + pid + " specifies an unknown current version, returning version 4 instead. This invalid entry has a negative impact on performance, consider performing an appropriate $reindex to correct your data.";
+		String expectedMessage = "Database resource entry (HFJ_RESOURCE) with PID " + pid + " specifies an unknown current version, returning version 4 instead. This invalid entry has a negative impact on performance; consider performing an appropriate $reindex to correct your data.";
 		assertEquals(expectedMessage, message.getMessage());
 
 		List<String> logEvents = myLogbackTestExtension
@@ -314,7 +314,7 @@ public class DeletedDatabaseRowsR5Test extends BaseJpaR5Test {
 
 		verify(myMockInterceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_WARNING), myHookParamsCaptor.capture());
 		StorageProcessingMessage message = myHookParamsCaptor.getValue().get(StorageProcessingMessage.class);
-		String expectedMessage = "Database resource entry (HFJ_RESOURCE) with PID " + pid + " specifies an unknown current version, returning version 4 instead. This invalid entry has a negative impact on performance, consider performing an appropriate $reindex to correct your data.";
+		String expectedMessage = "Database resource entry (HFJ_RESOURCE) with PID " + pid + " specifies an unknown current version, returning version 4 instead. This invalid entry has a negative impact on performance; consider performing an appropriate $reindex to correct your data.";
 		assertEquals(expectedMessage, message.getMessage());
 
 		List<String> logEvents = myLogbackTestExtension
@@ -360,7 +360,7 @@ public class DeletedDatabaseRowsR5Test extends BaseJpaR5Test {
 
 		verify(myMockInterceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_WARNING), myHookParamsCaptor.capture());
 		StorageProcessingMessage message = myHookParamsCaptor.getValue().get(StorageProcessingMessage.class);
-		String expectedMessage = "Database resource entry (HFJ_RESOURCE) with PID " + pid + " specifies an unknown current version, and no versions of this resource exist. This invalid entry has a negative impact on performance, consider performing an appropriate $reindex to correct your data.";
+		String expectedMessage = "Database resource entry (HFJ_RESOURCE) with PID " + pid + " specifies an unknown current version, and no versions of this resource exist. This invalid entry has a negative impact on performance; consider performing an appropriate $reindex to correct your data.";
 		assertEquals(expectedMessage, message.getMessage());
 
 		List<String> logEvents = myLogbackTestExtension
@@ -382,7 +382,7 @@ public class DeletedDatabaseRowsR5Test extends BaseJpaR5Test {
 
 		verify(myMockInterceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_WARNING), myHookParamsCaptor.capture());
 		StorageProcessingMessage message = myHookParamsCaptor.getValue().get(StorageProcessingMessage.class);
-		String expectedMessage = "Database resource entry (HFJ_RESOURCE) with PID " + pid + " specifies an unknown current version, and no versions of this resource exist. This invalid entry has a negative impact on performance, consider performing an appropriate $reindex to correct your data.";
+		String expectedMessage = "Database resource entry (HFJ_RESOURCE) with PID " + pid + " specifies an unknown current version, and no versions of this resource exist. This invalid entry has a negative impact on performance; consider performing an appropriate $reindex to correct your data.";
 		assertEquals(expectedMessage, message.getMessage());
 
 		List<String> logEvents = myLogbackTestExtension
