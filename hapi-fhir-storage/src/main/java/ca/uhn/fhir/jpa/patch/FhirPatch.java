@@ -30,6 +30,7 @@ import ca.uhn.fhir.parser.path.EncodeContextPath;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.IModelVisitor2;
 import ca.uhn.fhir.util.ParametersUtil;
+import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
@@ -113,29 +114,27 @@ public class FhirPatch {
 	 * @param theResource If this is <code>null</code>, the patch is validated but no work is done
 	 */
 	private void doApply(@Nullable IBaseResource theResource, @Nonnull IBaseResource thePatch) {
-		Map<String, List<IBase>> namedParameters = ParametersUtil.getNamedParameters(myContext, thePatch);
-		for (Map.Entry<String, List<IBase>> namedParameterEntry : namedParameters.entrySet()) {
+		Multimap<String, IBase> namedParameters = ParametersUtil.getNamedParameters(myContext, thePatch);
+		for (Map.Entry<String, IBase> namedParameterEntry : namedParameters.entries()) {
 			if (namedParameterEntry.getKey().equals(PARAMETER_OPERATION)) {
-				List<IBase> opParameters = namedParameterEntry.getValue();
-				for (IBase nextOperation : opParameters) {
-					String type =
-							ParametersUtil.getParameterPartValueAsString(myContext, nextOperation, PARAMETER_TYPE);
-					type = defaultString(type);
+				IBase nextOperation = namedParameterEntry.getValue();
+				String type = ParametersUtil.getParameterPartValueAsString(myContext, nextOperation, PARAMETER_TYPE);
+				type = defaultString(type);
 
-					if (OPERATION_DELETE.equals(type)) {
-						handleDeleteOperation(theResource, nextOperation);
-					} else if (OPERATION_ADD.equals(type)) {
-						handleAddOperation(theResource, nextOperation);
-					} else if (OPERATION_REPLACE.equals(type)) {
-						handleReplaceOperation(theResource, nextOperation);
-					} else if (OPERATION_INSERT.equals(type)) {
-						handleInsertOperation(theResource, nextOperation);
-					} else if (OPERATION_MOVE.equals(type)) {
-						handleMoveOperation(theResource, nextOperation);
-					} else {
-						throw new InvalidRequestException(Msg.code(1267) + "Unknown patch operation type: " + type);
-					}
+				if (OPERATION_DELETE.equals(type)) {
+					handleDeleteOperation(theResource, nextOperation);
+				} else if (OPERATION_ADD.equals(type)) {
+					handleAddOperation(theResource, nextOperation);
+				} else if (OPERATION_REPLACE.equals(type)) {
+					handleReplaceOperation(theResource, nextOperation);
+				} else if (OPERATION_INSERT.equals(type)) {
+					handleInsertOperation(theResource, nextOperation);
+				} else if (OPERATION_MOVE.equals(type)) {
+					handleMoveOperation(theResource, nextOperation);
+				} else {
+					throw new InvalidRequestException(Msg.code(1267) + "Unknown patch operation type: " + type);
 				}
+
 			} else {
 				throw new InvalidRequestException(
 						Msg.code(2756) + "Unknown patch parameter name: " + namedParameterEntry.getKey());
@@ -177,6 +176,10 @@ public class FhirPatch {
 		Integer insertIndex = ParametersUtil.getParameterPartValueAsInteger(myContext, theParameters, PARAMETER_INDEX)
 				.orElseThrow(() -> new InvalidRequestException("No index supplied for insert operation"));
 
+		/*
+		 * If there is no resource, we're only validating the patch so we can bail now since validation
+		 * is above
+		 */
 		if (theResource == null) {
 			return;
 		}

@@ -27,6 +27,8 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.StringDt;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -43,9 +45,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -150,12 +150,12 @@ public class ParametersUtil {
 	 * @return A map containing named parameters
 	 * @since 8.4.0
 	 */
-	public static Map<String, List<IBase>> getNamedParameters(FhirContext theCtx, IBaseResource theParameters) {
-		Map<String, List<IBase>> retVal = new HashMap<>();
+	public static Multimap<String, IBase> getNamedParameters(FhirContext theCtx, IBaseResource theParameters) {
+		Multimap<String, IBase> retVal =
+				MultimapBuilder.hashKeys().arrayListValues().build();
 		BiConsumer<String, IBase> consumer = (paramName, part) -> {
 			paramName = defaultString(paramName);
-			List<IBase> list = retVal.computeIfAbsent(paramName, k -> new ArrayList<>());
-			list.add(part);
+			retVal.put(paramName, part);
 		};
 
 		getNamedParameters(theCtx, theParameters, consumer);

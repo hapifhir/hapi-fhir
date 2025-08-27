@@ -68,6 +68,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * This is the base class for any <b>bulk modification</b> or <b>bulk rewrite</b> jobs. Any new bulk modification
+ * job type should subclass this class, and implement {@link #modifyResource(BaseBulkModifyJobParameters, Object, ResourceModificationRequest)}.
+ * Several other methods are provided which can also be overridden.
+ *
+ * @param <PT> The job parameters type
+ * @param <C> A context object which will be passed between methods for a single chunk of resources. The format of the
+ *           context object is up to the subclass, the framework doesn't look at it.
+ * @since 8.6.0
+ */
 public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobParameters, C>
 		implements IJobStepWorker<PT, TypedPidAndVersionListWorkChunkJson, BulkModifyResourcesChunkOutcomeJson> {
 	public static final int MAX_RETRIES = 2;
@@ -109,7 +119,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 				theStepExecutionDetails.getData().getRequestPartitionId();
 
 		// Try to update the whole chunk in a single database transaction for fast performance
-		performBatch(jobParameters, state, pids, requestPartitionId, false);
+		processPids(jobParameters, state, pids, requestPartitionId, false);
 
 		// If our attempt to process as a single DB transaction failed, we will try each
 		// resource individually in a separate DB transaction so that any failures on one
@@ -119,7 +129,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			state.addRetriedResourceCount(state.countPidsToModify());
 
 			boolean finalRetry = retryCount >= MAX_RETRIES;
-			performBatchInIndividualTransactions(jobParameters, state, requestPartitionId, finalRetry);
+			processPidsInIndividualTransactions(jobParameters, state, requestPartitionId, finalRetry);
 			if (!state.hasPidsToModify()) {
 				break;
 			}
@@ -128,7 +138,8 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			}
 		}
 
-		assert !state.hasPidsToModify();
+		Validate.isTrue(
+				!state.hasPidsToModify(), "PIDs remain in state, this is a bug: %s", state.getPidsToModifyAndClear());
 
 		BulkModifyResourcesChunkOutcomeJson outcome = generateOutcome(state);
 		theDataSink.accept(outcome);
@@ -136,7 +147,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		return RunOutcome.SUCCESS;
 	}
 
-	private void performBatch(
+	private void processPids(
 			PT jobParameters,
 			State theState,
 			List<TypedPidAndVersionJson> thePids,
@@ -150,7 +161,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			myTransactionService
 					.withSystemRequestOnPartition(theRequestPartitionId)
 					.withTransactionDetails(transactionDetails)
-					.execute(() -> performBatchInTransaction(jobParameters, theState, thePids, transactionDetails));
+					.execute(() -> processPidsInTransaction(jobParameters, theState, thePids, transactionDetails));
 
 			// Storage transaction succeeded
 			theState.movePendingToSaved();
@@ -172,7 +183,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		}
 	}
 
-	private void performBatchInTransaction(
+	private void processPidsInTransaction(
 			PT theJobParameters,
 			State theState,
 			List<TypedPidAndVersionJson> thePids,
@@ -195,12 +206,12 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		storeResourcesInTransaction(modificationContext, theState, theTransactionDetails);
 	}
 
-	private void performBatchInIndividualTransactions(
+	private void processPidsInIndividualTransactions(
 			PT theJobParameters, State theState, RequestPartitionId theRequestPartitionId, boolean theFinalRetry) {
 		List<TypedPidAndVersionJson> pids = theState.getPidsToModifyAndClear();
 
 		for (TypedPidAndVersionJson nextPid : pids) {
-			performBatch(theJobParameters, theState, List.of(nextPid), theRequestPartitionId, theFinalRetry);
+			processPids(theJobParameters, theState, List.of(nextPid), theRequestPartitionId, theFinalRetry);
 		}
 	}
 

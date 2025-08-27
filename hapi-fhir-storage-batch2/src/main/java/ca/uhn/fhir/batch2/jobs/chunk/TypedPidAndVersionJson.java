@@ -39,7 +39,7 @@ public class TypedPidAndVersionJson extends TypedPidJson {
 	public String toString() {
 		// We put a space in here and not a "/" since this is a PID, not
 		// a resource ID
-		return "[" + getResourceType() + " " + getPid() + " " + myVersionId + "]";
+		return "[type=" + getResourceType() + ", pid=" + getPid() + ", version=" + myVersionId + "]";
 	}
 
 	@Override
