@@ -1007,7 +1007,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	@Override
 	public <T extends Resource> List<T> fetchResourceVersionsByTypeAndUrl(Class<T> class_, String url) {
 		throw new UnsupportedOperationException(
-				Msg.code(2758) + "Can't fetch all resources of type : " + class_ + " and url: " + url);
+				Msg.code(2797) + "Can't fetch all resources of type : " + class_ + " and url: " + url);
 	}
 
 	@Override
