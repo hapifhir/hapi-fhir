@@ -77,7 +77,8 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 	protected void startJobAndReturnResponse(
 			ServletRequestDetails theRequestDetails,
 			List<IPrimitiveType<String>> theUrlsToReindex,
-			BaseBulkModifyJobParameters theJobParameters) throws IOException {
+			BaseBulkModifyJobParameters theJobParameters)
+			throws IOException {
 		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, getOperationName());
 		if (theUrlsToReindex != null) {
 			for (IPrimitiveType<String> url : theUrlsToReindex) {
@@ -120,7 +121,7 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 		String code = OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL;
 		OperationOutcomeUtil.addIssue(myContext, oo, severity, message, null, code);
 		RestfulServerUtils.ResponseEncoding encoding =
-			RestfulServerUtils.determineResponseEncodingWithDefault(theRequestDetails);
+				RestfulServerUtils.determineResponseEncodingWithDefault(theRequestDetails);
 
 		// Provide a response
 		HttpServletResponse servletResponse = theRequestDetails.getServletResponse();
@@ -252,7 +253,11 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 		writeResponse(servletResponse, encoding, responseResource);
 	}
 
-	private void writeResponse(HttpServletResponse servletResponse, RestfulServerUtils.ResponseEncoding encoding, IBaseResource responseResource) throws IOException {
+	private void writeResponse(
+			HttpServletResponse servletResponse,
+			RestfulServerUtils.ResponseEncoding encoding,
+			IBaseResource responseResource)
+			throws IOException {
 		try (PrintWriter writer = servletResponse.getWriter()) {
 			IParser parser = encoding.getEncoding().newParser(myContext);
 			parser.encodeResourceToWriter(responseResource, writer);
