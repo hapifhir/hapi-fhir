@@ -321,6 +321,11 @@ class InlineJobCoordinatorTest {
 
             return RunOutcome.SUCCESS;
         }
+
+		@Override
+		public IReductionStepWorker<InlineTestJobParams, Step2TestOutput, VoidModel> newInstance() {
+			return this;
+		}
 	}
 
     private static void assertBatchSteps(
