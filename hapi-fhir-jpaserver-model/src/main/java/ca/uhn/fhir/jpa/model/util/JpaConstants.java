@@ -309,6 +309,13 @@ public class JpaConstants {
 			Set.of("Provenance", "List", "Group");
 	public static final String HAPI_DATABASE_PARTITION_MODE = "hapi.database_partition_mode";
 	public static final String HAPI_DATABASE_PARTITION_MODE_DEFAULT = "false";
+	public static final String OPERATION_BULK_PATCH = "$bulk-patch";
+	public static final String OPERATION_BULK_PATCH_REWRITE = "$bulk-patch-rewrite-history";
+	public static final String OPERATION_BULK_PATCH_REWRITE_STATUS = "$bulk-patch-rewrite-history-status";
+	public static final String OPERATION_BULK_PATCH_PARAM_PATCH = "patch";
+	public static final String OPERATION_BULK_PATCH_STATUS = "$bulk-patch-status";
+	public static final String OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID = "_jobId";
+	public static final String OPERATION_BULK_PATCH_PARAM_URL = "url";
 
 	/**
 	 * Numeric constant used for resource ID in {@link #NO_MORE}

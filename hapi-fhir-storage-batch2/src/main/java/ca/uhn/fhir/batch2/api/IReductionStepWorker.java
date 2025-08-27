@@ -61,8 +61,5 @@ public interface IReductionStepWorker<PT extends IModelJson, IT extends IModelJs
 	 * will be used for each reduction invocation. The clone should have any
 	 * dependencies set, but should not have any job state present.
 	 */
-	// TODO: drop the default method once every task has implemented this method
-	default IReductionStepWorker<PT, IT, OT> newInstance() {
-		return this;
-	}
+	IReductionStepWorker<PT, IT, OT> newInstance();
 }

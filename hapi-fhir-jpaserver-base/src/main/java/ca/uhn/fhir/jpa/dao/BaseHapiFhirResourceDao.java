@@ -51,6 +51,7 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.interceptor.PatientCompartmentEnforcingInterceptor;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
@@ -1212,6 +1213,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (!getStorageSettings().isExpungeEnabled()) {
 			throw new MethodNotAllowedException(Msg.code(968) + "$expunge is not enabled on this server");
 		}
+	}
+
+	@Override
+	public Stream<IResourcePersistentId> fetchAllVersionsOfResources(
+			RequestDetails theRequestDetails, Collection<IResourcePersistentId> theIds) {
+		HapiTransactionService.requireTransaction();
+
+		List<JpaPidFk> ids = theIds.stream().map(t -> ((JpaPid) t).toFk()).toList();
+
+		return myResourceHistoryTableDao.findAllVersionsForResourcePids(ids).map(t -> (IResourcePersistentId) t);
 	}
 
 	@Override
@@ -2429,20 +2440,29 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		/*
-		 * Resource updates will modify/update the version of the resource with the new version. This is generally helpful,
+		 * Resource updates will modify/update the version of the resource with the new version. This is generally helpful
 		 * but leads to issues if the transaction is rolled back and retried. So if we do a rollback, we reset the resource
 		 * version to what it was.
 		 */
 		String id = theResource.getIdElement().getValue();
-		Runnable onRollback = () -> theResource.getIdElement().setValue(id);
+		Runnable onRollback = () -> {
+			ourLog.trace("Rolling back from {} to {}", theResource.getIdElement(), id);
+			theResource.getIdElement().setValue(id);
+		};
+		theTransactionDetails.addRollbackUndoAction(onRollback);
 
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
 				theRequest, theResource, getResourceName());
 
+		boolean rewriteHistory = theRequest != null && theRequest.isRewriteHistory();
+		if (rewriteHistory && !myStorageSettings.isUpdateWithHistoryRewriteEnabled()) {
+			String msg =
+					getContext().getLocalizer().getMessage(BaseStorageDao.class, "updateWithHistoryRewriteDisabled");
+			throw new InvalidRequestException(Msg.code(2781) + msg);
+		}
+
 		Callable<DaoMethodOutcome> updateCallback;
-		if (myStorageSettings.isUpdateWithHistoryRewriteEnabled()
-				&& theRequest != null
-				&& theRequest.isRewriteHistory()) {
+		if (rewriteHistory) {
 			updateCallback = () -> doUpdateWithHistoryRewrite(
 					theResource, theRequest, theTransactionDetails, requestPartitionId, RestOperationTypeEnum.UPDATE);
 		} else {
@@ -2461,7 +2481,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.withRequest(theRequest)
 				.withTransactionDetails(theTransactionDetails)
 				.withRequestPartitionId(requestPartitionId)
-				.onRollback(onRollback)
 				.execute(updateCallback);
 	}
 
