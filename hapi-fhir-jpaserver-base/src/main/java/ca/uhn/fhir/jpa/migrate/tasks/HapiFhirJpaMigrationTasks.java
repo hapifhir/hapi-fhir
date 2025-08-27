@@ -137,7 +137,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder version = forVersion(VersionEnum.V8_6_0);
 		// Add IDX_RL_SRCPATH_TGTURL to the HFJ_RES_LINK Table - HAPI-FHIR #7223
 		{
-			version.onTable("HFJ_RES_VER")
+			version.onTable("HFJ_RES_LINK")
 					.addIndex("20250827.01", "IDX_RL_SRCPATH_TGTURL")
 					.unique(false)
 					.withColumns("SRC_PATH, TARGET_RESOURCE_URL, PARTITION_ID, SRC_RESOURCE_ID");
