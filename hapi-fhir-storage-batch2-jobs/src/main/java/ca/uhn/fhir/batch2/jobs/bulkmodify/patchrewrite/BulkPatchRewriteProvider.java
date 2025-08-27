@@ -59,7 +59,7 @@ public class BulkPatchRewriteProvider extends BaseBulkModifyOrRewriteProvider {
 							typeName = "string",
 							min = 1,
 							max = OperationParam.MAX_UNLIMITED)
-					List<IPrimitiveType<String>> theUrlsToReindex) {
+					List<IPrimitiveType<String>> theUrlsToReindex) throws IOException {
 		BulkPatchRewriteJobParameters jobParameters = new BulkPatchRewriteJobParameters();
 		jobParameters.setFhirPatch(myContext, thePatch);
 

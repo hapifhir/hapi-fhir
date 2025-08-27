@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.test.util.CloseableHttpResponseUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -106,6 +107,8 @@ public class BulkPatchProviderTest {
 		post.setEntity(new ResourceEntity(ourCtx, request));
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
+
+			ourLog.info("Response:\n{}", CloseableHttpResponseUtil.parse(response));
 
 			// Verify
 			String expectedUrl = ourFhirServer.getBaseUrl() + "/$bulk-patch-status?_jobId=MY-INSTANCE-ID";

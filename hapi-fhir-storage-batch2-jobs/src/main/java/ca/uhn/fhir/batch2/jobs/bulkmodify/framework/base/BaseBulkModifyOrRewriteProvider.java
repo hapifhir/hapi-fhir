@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.BaseTransactionProcessor;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -76,7 +77,7 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 	protected void startJobAndReturnResponse(
 			ServletRequestDetails theRequestDetails,
 			List<IPrimitiveType<String>> theUrlsToReindex,
-			BaseBulkModifyJobParameters theJobParameters) {
+			BaseBulkModifyJobParameters theJobParameters) throws IOException {
 		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, getOperationName());
 		if (theUrlsToReindex != null) {
 			for (IPrimitiveType<String> url : theUrlsToReindex) {
@@ -112,10 +113,23 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 		pollUrl.append('=');
 		pollUrl.append(jobInstanceId);
 
+		// Create an OperationOutcome to return
+		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myContext);
+		String message = getOperationName() + " job has been accepted";
+		String severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
+		String code = OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL;
+		OperationOutcomeUtil.addIssue(myContext, oo, severity, message, null, code);
+		RestfulServerUtils.ResponseEncoding encoding =
+			RestfulServerUtils.determineResponseEncodingWithDefault(theRequestDetails);
+
 		// Provide a response
 		HttpServletResponse servletResponse = theRequestDetails.getServletResponse();
 		servletResponse.setStatus(HttpServletResponse.SC_ACCEPTED);
 		servletResponse.addHeader(Constants.HEADER_CONTENT_LOCATION, pollUrl.toString());
+
+		servletResponse.setContentType(encoding.getContentType());
+		servletResponse.setCharacterEncoding(Constants.CHARSET_NAME_UTF8);
+		writeResponse(servletResponse, encoding, oo);
 	}
 
 	/**
@@ -235,8 +249,13 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 			responseResource = bundleBuilder.getBundle();
 		}
 
+		writeResponse(servletResponse, encoding, responseResource);
+	}
+
+	private void writeResponse(HttpServletResponse servletResponse, RestfulServerUtils.ResponseEncoding encoding, IBaseResource responseResource) throws IOException {
 		try (PrintWriter writer = servletResponse.getWriter()) {
-			myContext.newJsonParser().encodeResourceToWriter(responseResource, writer);
+			IParser parser = encoding.getEncoding().newParser(myContext);
+			parser.encodeResourceToWriter(responseResource, writer);
 		}
 	}
 
