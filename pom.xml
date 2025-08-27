@@ -1055,7 +1055,7 @@
 		<httpclient_version>4.5.14</httpclient_version>
 		<jackson_version>2.18.1</jackson_version>
 		<jackson_databind_version>2.18.1</jackson_databind_version>
-		<httpclient5_version>5.4.1</httpclient5_version>
+		<httpclient5_version>5.4.3</httpclient5_version>
 		<httpcore5_version>5.3.1</httpcore5_version>
 		<jackson_version>2.17.1</jackson_version>
 		<jackson_databind_version>2.17.1</jackson_databind_version>
@@ -1342,6 +1342,13 @@
 				<groupId>com.squareup.okio</groupId>
 				<artifactId>okio-jvm</artifactId>
 				<version>3.9.1</version>
+			</dependency>
+
+			<!-- Pinned here for CVE: CVE-2025-7962 This is used transitively in simplejavamail which has no fix yet -->
+			<dependency>
+				<groupId>org.eclipse.angus</groupId>
+				<artifactId>angus-mail</artifactId>
+				<version>2.0.4</version>
 			</dependency>
 
 			<!-- Architecture Test -->
