@@ -134,7 +134,9 @@ public class SubscriptionTriggerMatcher {
 
 				@Override
 				public List<IBase> resolveConstant(
-						Object theAppContext, String theName, IFhirPathEvaluationContext.ConstantEvaluationMode theConstantEvaluationMode) {
+						Object theAppContext,
+						String theName,
+						IFhirPathEvaluationContext.ConstantEvaluationMode theConstantEvaluationMode) {
 					if ("current".equalsIgnoreCase(theName)) return List.of(myResource);
 
 					if ("previous".equalsIgnoreCase(theName)) {
