@@ -60,12 +60,12 @@ public interface IFhirPathEvaluationContext {
 
 	/**
 	 *
-	 * @param appContext
-	 * @param name The name of the constant(s) to be resolved
-	 * @param mode
+	 * @param theAppContext
+	 * @param theName The name of the constant(s) to be resolved
+	 * @param theConstantEvaluationMode
 	 * @return
 	 */
-	default List<IBase> resolveConstant(Object appContext, String name, ConstantEvaluationMode mode) {
+	default List<IBase> resolveConstant(Object theAppContext, String theName, ConstantEvaluationMode theConstantEvaluationMode) {
 		return null;
 	}
 }

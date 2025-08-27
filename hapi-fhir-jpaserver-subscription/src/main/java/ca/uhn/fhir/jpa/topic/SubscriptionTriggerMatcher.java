@@ -134,10 +134,10 @@ public class SubscriptionTriggerMatcher {
 
 				@Override
 				public List<IBase> resolveConstant(
-						Object appContext, String name, IFhirPathEvaluationContext.ConstantEvaluationMode mode) {
-					if ("current".equalsIgnoreCase(name)) return List.of(myResource);
+						Object theAppContext, String theName, IFhirPathEvaluationContext.ConstantEvaluationMode theConstantEvaluationMode) {
+					if ("current".equalsIgnoreCase(theName)) return List.of(myResource);
 
-					if ("previous".equalsIgnoreCase(name)) {
+					if ("previous".equalsIgnoreCase(theName)) {
 						Optional previousResource = myPreviousVersionReader.readPreviousVersion(myResource);
 						if (previousResource.isPresent()) return List.of((IBase) previousResource.get());
 					}
