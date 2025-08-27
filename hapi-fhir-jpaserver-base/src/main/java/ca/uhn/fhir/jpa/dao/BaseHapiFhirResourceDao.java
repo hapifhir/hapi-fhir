@@ -145,6 +145,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -1222,7 +1223,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		List<JpaPidFk> ids = theIds.stream().map(t -> ((JpaPid) t).toFk()).toList();
 
-		return myResourceHistoryTableDao.findAllVersionsForResourcePids(ids).map(t -> (IResourcePersistentId) t);
+		return myResourceHistoryTableDao
+				.findVersionPidsForResources(Pageable.unpaged(), ids)
+				.map(t -> (IResourcePersistentId) t);
 	}
 
 	@Override
@@ -1712,7 +1715,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		if (forceReindexSps || theReindexParameters.getReindexSearchParameters() == ReindexParameters.ReindexSearchParametersEnum.ALL) {
+		if (forceReindexSps
+				|| theReindexParameters.getReindexSearchParameters()
+						== ReindexParameters.ReindexSearchParametersEnum.ALL) {
 			reindexSearchParameters(entity, retVal, theTransactionDetails);
 		}
 
