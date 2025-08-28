@@ -51,7 +51,27 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SearchParameterDaoValidator {
 
+	public static class SPValidatorOptions {
+
+		public static SPValidatorOptions defaultOptions() {
+			return new SPValidatorOptions();
+		}
+
+		private boolean myAllowOverriding = false;
+
+		public boolean allowOverriding() {
+			return myAllowOverriding;
+		}
+
+		public SPValidatorOptions setAllowOverriding(boolean theAllowOverriding) {
+			myAllowOverriding = theAllowOverriding;
+			return this;
+		}
+	}
+
 	private static final Pattern REGEX_SP_EXPRESSION_HAS_PATH = Pattern.compile("[( ]*([A-Z][a-zA-Z]+\\.)?[a-z].*");
+
+	private static final String SP_FIELD_IS_MISSING = "SearchParameter.%s is missing.";
 
 	private final FhirContext myFhirContext;
 	private final JpaStorageSettings myStorageSettings;
@@ -66,12 +86,16 @@ public class SearchParameterDaoValidator {
 		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
-	public void validate(SearchParameter searchParameter) {
+	public void validate(SearchParameter theSearchParameter) {
+		validate(theSearchParameter, SPValidatorOptions.defaultOptions());
+	}
+
+	public void validate(SearchParameter searchParameter, SPValidatorOptions theOptions) {
 		/*
 		 * If overriding built-in SPs is disabled on this server, make sure we aren't
 		 * doing that
 		 */
-		if (myStorageSettings.isDefaultSearchParamsCanBeOverridden() == false) {
+		if (!theOptions.allowOverriding() && !myStorageSettings.isDefaultSearchParamsCanBeOverridden()) {
 			for (IPrimitiveType<?> nextBaseType : searchParameter.getBase()) {
 				String nextBase = nextBaseType.getValueAsString();
 				RuntimeSearchParam existingSearchParam = mySearchParamRegistry.getActiveSearchParam(
@@ -97,6 +121,28 @@ public class SearchParameterDaoValidator {
 		}
 		if (!searchParameter.getStatus().name().equals("ACTIVE")) {
 			return;
+		}
+
+		// requisite fields: base, name, description, status, url, code
+
+		if (isBlank(searchParameter.getName())) {
+			throw new UnprocessableEntityException(Msg.code(2798) + String.format(SP_FIELD_IS_MISSING, "name"));
+		}
+
+		if (isBlank(searchParameter.getDescription())) {
+			throw new UnprocessableEntityException(Msg.code(2799) + String.format(SP_FIELD_IS_MISSING, "description"));
+		}
+
+		if (isBlank(searchParameter.getUrl())) {
+			throw new UnprocessableEntityException(Msg.code(2800) + String.format(SP_FIELD_IS_MISSING, "url"));
+		}
+
+		if (isBlank(searchParameter.getCode())) {
+			throw new UnprocessableEntityException(Msg.code(2801) + String.format(SP_FIELD_IS_MISSING, "code"));
+		}
+
+		if (searchParameter.getBase() == null || searchParameter.getBase().isEmpty()) {
+			throw new UnprocessableEntityException(Msg.code(2802) + String.format(SP_FIELD_IS_MISSING, "base"));
 		}
 
 		// Search parameters must have a base
