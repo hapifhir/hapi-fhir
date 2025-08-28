@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7247
+title: "The MDM expansion is now supported when using MATCH_ONLY mode and MDM rules definition contains eidSystems. 
+  The expansion is based on having the same EID as the resource being operated on. It is supported with the existing 
+  mdm expansion parameters on search, group bulk export, and $everything operation."
