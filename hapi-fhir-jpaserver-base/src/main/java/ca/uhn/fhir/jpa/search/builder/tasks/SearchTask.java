@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -56,11 +57,13 @@ import co.elastic.apm.api.Transaction;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -531,6 +534,7 @@ public class SearchTask implements Callable<Void> {
 	}
 
 	private void doSaveSearch() {
+		mySearch.setExpiryOrNull(DateUtils.addMinutes(new Date(), SearchCoordinatorSvcImpl.EXPIRY_OFFSET_MINUTES));
 		Search newSearch = mySearchCacheSvc.save(mySearch, myRequestPartitionId);
 
 		// mySearchDao.save is not supposed to return null, but in unit tests

@@ -78,6 +78,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -97,6 +98,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCoordinatorSvcImpl.class);
+	public static final int EXPIRY_OFFSET_MINUTES = 10;
 
 	private final FhirContext myContext;
 	private final JpaStorageSettings myStorageSettings;
@@ -270,6 +272,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 					.withRequestPartitionId(theRequestPartitionId)
 					.execute(searchCallback);
 			QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(search);
+
+			search.setExpiryOrNull(DateUtils.addMinutes(new Date(), EXPIRY_OFFSET_MINUTES));
+			mySearchCacheSvc.save(search, theRequestPartitionId);
 
 			if (search.getStatus() == SearchStatusEnum.FINISHED) {
 				ourLog.trace("Search entity marked as finished with {} results", search.getNumFound());
