@@ -35,7 +35,7 @@ public class ExceptionService {
 
 	@Nonnull
 	public ResourceGoneException newUnknownSearchException(String theUuid) {
-		ourLog.trace("Client requested unknown paging ID[{}]", theUuid);
+		ourLog.error("Client requested unknown paging ID[{}]", theUuid);
 		String msg = myContext.getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", theUuid);
 		return new ResourceGoneException(msg);
 	}
