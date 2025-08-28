@@ -497,9 +497,10 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 		IIdType id = theResource.getIdElement();
 		RequestDetails requestDetails = createRequestDetails();
+		String query = createSearchParameterMapFor(theResource).toNormalizedQueryString(myFhirContext);
 
 		try {
-			outcome = theDao.update(theResource, requestDetails);
+			outcome = theDao.update(theResource, query, requestDetails);
 		} catch (ResourceVersionConflictException exception) {
 			final Optional<IBaseResource> optResource = readResourceById(theDao, id);
 
@@ -512,7 +513,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					(theResource instanceof MetadataResource) ? ((MetadataResource) theResource).getUrl() : null;
 
 			ourLog.error(
-					"Version conflict error: This is possibly due to a collision between ValueSets from different IGs that are coincidentally using the same resource ID: [{}] and new resource URL: [{}], with the exisitng resource having URL: [{}].  Ignoring this update and continuing:  The first IG wins.  ",
+					"Version conflict error: This is possibly due to a collision between ValueSets or CodeSystems from different IGs that are coincidentally using the same resource ID: [{}] and new resource URL: [{}], with the exisitng resource having URL: [{}].  Ignoring this update and continuing:  The first IG wins.  ",
 					id.getIdPart(),
 					newResourceUrlOrNull,
 					existingResourceUrlOrNull,
