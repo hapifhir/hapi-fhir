@@ -18,7 +18,10 @@ import org.slf4j.Logger;
  *
  * Note that this module must also be activated by calling {@link #setAllowNonExistentCodeSystem(boolean)}
  * in order to specify that unknown code systems should be allowed.
+ *
+ * @Deprecated Use {@link ca.uhn.fhir.rest.server.interceptor.validation.ValidationMessageUnknownCodeSystemProcessingInterceptor} instead.
  */
+@Deprecated(since = "8.6.0")
 public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSupport {
 	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 

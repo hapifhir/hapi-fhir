@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.test;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.OperationOutcome;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public final class R4ValidationTestUtil {
@@ -56,11 +58,21 @@ public final class R4ValidationTestUtil {
 		return ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theOperationOutcome);
 	}
 
+	public static List<OperationOutcome.OperationOutcomeIssueComponent> getIssuesDiagnosticContainsString(OperationOutcome theOo, String theExpectedDiagnosticSubstring) {
+		return theOo.getIssue().stream()
+			.filter(t -> t.getDiagnostics() != null && t.getDiagnostics().contains(theExpectedDiagnosticSubstring))
+			.toList();
+	}
+
+	public static void assertHasValidationIssueWithSeverityAndDiagnosticContainsString(OperationOutcome theOo, OperationOutcome.IssueSeverity theExpectedSeverity, String theExpectedDiagnosticSubstring) {
+		assertThat(theOo.getIssue().stream().anyMatch(t -> t.getSeverity() == theExpectedSeverity && t.getDiagnostics().contains(theExpectedDiagnosticSubstring))).as("Expected a validation issue with severity " + theExpectedSeverity + " and diagnostic containing '" + theExpectedDiagnosticSubstring + "', found none").isTrue();
+	}
+
 	public static void assertErrorDiagnosticContainsString(OperationOutcome theOo, String theExpectedDiagnosticSubstring) {
-		assertThat(theOo.getIssue().stream().anyMatch(t -> t.getSeverity() == OperationOutcome.IssueSeverity.ERROR && t.getDiagnostics().contains(theExpectedDiagnosticSubstring))).as("Expected a validation error with diagnostic containing '" + theExpectedDiagnosticSubstring + "', found none").isTrue();
+		assertHasValidationIssueWithSeverityAndDiagnosticContainsString(theOo, OperationOutcome.IssueSeverity.ERROR, theExpectedDiagnosticSubstring);
 	}
 
 	public static void assertFatalDiagnosticContainsString(OperationOutcome theOo, String theExpectedDiagnosticSubstring) {
-		assertThat(theOo.getIssue().stream().anyMatch(t -> t.getSeverity() == OperationOutcome.IssueSeverity.FATAL && t.getDiagnostics().contains(theExpectedDiagnosticSubstring))).as("Expected a validation error with diagnostic containing '" + theExpectedDiagnosticSubstring+ "', found none").isTrue();
+		assertHasValidationIssueWithSeverityAndDiagnosticContainsString(theOo, OperationOutcome.IssueSeverity.FATAL, theExpectedDiagnosticSubstring);
 	}
 }
