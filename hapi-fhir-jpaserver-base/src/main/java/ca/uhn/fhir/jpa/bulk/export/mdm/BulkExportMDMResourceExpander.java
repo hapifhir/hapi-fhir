@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -49,10 +50,12 @@ public class BulkExportMDMResourceExpander implements IBulkExportMDMResourceExpa
 	private IFhirPath myFhirPath;
 
 	@Override
-	public Set<JpaPid> expandGroup(String groupResourceId, SystemRequestDetails requestDetails) {
-		IdDt groupId = new IdDt(groupResourceId);
+	public Set<JpaPid> expandGroup(String theGroupResourceId, RequestPartitionId theRequestPartitionId) {
+		IdDt groupId = new IdDt(theGroupResourceId);
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setRequestPartitionId(theRequestPartitionId);
 		IBaseResource group = myDaoRegistry.getResourceDao("Group").read(groupId, requestDetails);
-		JpaPid pidOrNull = myIdHelperService.getPidOrNull(requestDetails.getRequestPartitionId(), group);
+		JpaPid pidOrNull = myIdHelperService.getPidOrNull(theRequestPartitionId, group);
 		// Attempt to perform MDM Expansion of membership
 		return performMembershipExpansionViaMdmTable(pidOrNull);
 	}

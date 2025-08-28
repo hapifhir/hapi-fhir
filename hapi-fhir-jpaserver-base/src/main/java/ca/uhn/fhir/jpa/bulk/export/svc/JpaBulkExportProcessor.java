@@ -53,7 +53,6 @@ import ca.uhn.fhir.util.TaskChunker;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,35 +77,40 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	public static final List<String> PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES =
 			List.of("Practitioner", "Organization");
 
-	@Autowired
 	private FhirContext myContext;
-
-	@Autowired
 	private BulkExportHelperService myBulkExportHelperSvc;
-
-	@Autowired
 	private JpaStorageSettings myStorageSettings;
-
-	@Autowired
 	private DaoRegistry myDaoRegistry;
-
-	@Autowired
 	protected SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
-
-	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
-
-	@Autowired
 	private EntityManager myEntityManager;
-
-	@Autowired
 	private IHapiTransactionService myHapiTransactionService;
-
-	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
+	private IBulkExportMDMResourceExpander myBulkExportMDMResourceExpander;
 
 	@Autowired
-	private IBulkExportMDMResourceExpander myBulkExportMDMResourceExpander;
+	public JpaBulkExportProcessor(
+			FhirContext theContext,
+			BulkExportHelperService theBulkExportHelperSvc,
+			JpaStorageSettings theStorageSettings,
+			DaoRegistry theDaoRegistry,
+			SearchBuilderFactory<JpaPid> theSearchBuilderFactory,
+			IIdHelperService<JpaPid> theIdHelperService,
+			EntityManager theEntityManager,
+			IHapiTransactionService theHapiTransactionService,
+			ISearchParamRegistry theSearchParamRegistry,
+			IBulkExportMDMResourceExpander theBulkExportMDMResourceExpander) {
+		myContext = theContext;
+		myBulkExportHelperSvc = theBulkExportHelperSvc;
+		myStorageSettings = theStorageSettings;
+		myDaoRegistry = theDaoRegistry;
+		mySearchBuilderFactory = theSearchBuilderFactory;
+		myIdHelperService = theIdHelperService;
+		myEntityManager = theEntityManager;
+		myHapiTransactionService = theHapiTransactionService;
+		mySearchParamRegistry = theSearchParamRegistry;
+		myBulkExportMDMResourceExpander = theBulkExportMDMResourceExpander;
+	}
 
 	@Override
 	public Iterator<JpaPid> getResourcePidIterator(ExportPIDIteratorParameters theParams) {
@@ -268,7 +272,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 		if (theResourceType.equalsIgnoreCase("Patient")) {
 			ourLog.info("Expanding Patients of a Group Bulk Export.");
-			pids = getExpandedPatientList(theParams);
+			pids = getExpandedPatientList(theParams, true);
 			ourLog.info("Obtained {} PIDs", pids.size());
 		} else if (theResourceType.equalsIgnoreCase("Group")) {
 			pids = getSingletonGroupList(theParams);
@@ -286,7 +290,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				getActivePatientSearchParamForCurrentResourceType(theParams.getResourceType());
 		if (activeSearchParam != null) {
 			// expand the group pid -> list of patients in that group (list of patient pids)
-			Set<JpaPid> expandedMemberResourceIds = expandAllPatientPidsFromGroup(theParams);
+			Set<JpaPid> expandedMemberResourceIds = getExpandedPatientList(theParams, false);
 			assert !expandedMemberResourceIds.isEmpty();
 			Logs.getBatchTroubleshootingLog()
 					.debug("{} has been expanded to members:[{}]", theParams.getGroupId(), expandedMemberResourceIds);
@@ -385,23 +389,26 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	}
 
 	/**
-	 * In case we are doing a Group Bulk Export and resourceType `Patient` is requested, we can just return the group members,
-	 * possibly expanded by MDM, and don't have to go and fetch other resource DAOs.
+	 * Given the local myGroupId, perform an expansion to retrieve all resource IDs of member patients.
+	 * if myMdmEnabled is set to true, we also attempt to also expand it into matched
+	 * patients.
+	 *
+	 * @return a Set of Strings representing the resource IDs of all members of a group.
 	 */
-	@SuppressWarnings("unchecked")
-	private LinkedHashSet<JpaPid> getExpandedPatientList(ExportPIDIteratorParameters theParameters) throws IOException {
-		List<JpaPid> members = getMembersFromGroupWithFilter(theParameters, true);
-		List<IIdType> ids =
-				members.stream().map(member -> new IdDt("Patient/" + member)).collect(Collectors.toList());
-		ourLog.info("While extracting patients from a group, we found {} patients.", ids.size());
-		ourLog.info("Found patients: {}", ids.stream().map(id -> id.getValue()).collect(Collectors.joining(", ")));
-
+	private LinkedHashSet<JpaPid> getExpandedPatientList(
+			ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) throws IOException {
+		List<JpaPid> members = getMembersFromGroupWithFilter(theParameters, theConsiderDateRange);
+		ourLog.info(
+				"Group with ID [{}] has been expanded to {} members, member JpaIds: {}",
+				theParameters.getGroupId(),
+				members.size(),
+				members);
 		LinkedHashSet<JpaPid> patientPidsToExport = new LinkedHashSet<>(members);
 
 		if (theParameters.isExpandMdm()) {
 			RequestPartitionId partitionId = theParameters.getPartitionIdOrAllPartitions();
-			SystemRequestDetails srd = new SystemRequestDetails().setRequestPartitionId(partitionId);
-			patientPidsToExport.addAll(myBulkExportMDMResourceExpander.expandGroup(theParameters.getGroupId(), srd));
+			patientPidsToExport.addAll(
+					myBulkExportMDMResourceExpander.expandGroup(theParameters.getGroupId(), partitionId));
 		}
 		return patientPidsToExport;
 	}
@@ -585,32 +592,5 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			throw new IllegalArgumentException(
 					Msg.code(2077) + " We can't handle forward references onto type " + theResourceType);
 		}
-	}
-
-	/**
-	 * Given the local myGroupId, perform an expansion to retrieve all resource IDs of member patients.
-	 * if myMdmEnabled is set to true, we also attempt to also expand it into matched
-	 * patients.
-	 *
-	 * @return a Set of Strings representing the resource IDs of all members of a group.
-	 */
-	private Set<JpaPid> expandAllPatientPidsFromGroup(ExportPIDIteratorParameters theParams) throws IOException {
-		Set<JpaPid> expandedIds = new HashSet<>();
-
-		// Attempt to perform MDM Expansion of membership
-		if (theParams.isExpandMdm()) {
-			RequestPartitionId partitionId = theParams.getPartitionIdOrAllPartitions();
-			SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId);
-			expandedIds.addAll(myBulkExportMDMResourceExpander.expandGroup(theParams.getGroupId(), requestDetails));
-		}
-
-		// Now manually add the members of the group (its possible even with mdm expansion that some members dont have
-		// MDM matches,
-		// so would be otherwise skipped
-		List<JpaPid> membersFromGroupWithFilter = getMembersFromGroupWithFilter(theParams, false);
-		ourLog.debug("Group with ID [{}] has been expanded to: {}", theParams.getGroupId(), membersFromGroupWithFilter);
-		expandedIds.addAll(membersFromGroupWithFilter);
-
-		return expandedIds;
 	}
 }
