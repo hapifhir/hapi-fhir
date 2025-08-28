@@ -301,6 +301,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		}
 
 		RequestPartitionId requestPartitionId = null;
+
 		if (theRequest instanceof SystemRequestDetails systemRequestDetails
 				&& systemRequestHasExplicitPartition(systemRequestDetails)) {
 			requestPartitionId = getSystemRequestPartitionId(systemRequestDetails, nonPartitionableResource);
