@@ -105,7 +105,11 @@ public interface IResourceHistoryTableDao
 	List<ResourceHistoryTable> findCurrentVersionsByResourcePidsAndFetchResourceTable(
 			@Param("pids") List<JpaPidFk> theVersionlessPids);
 
+	@Query("SELECT v FROM ResourceHistoryTable v " + "WHERE v.myResourcePid = :pid "
+			+ "ORDER BY v.myResourceVersion DESC")
+	Stream<ResourceHistoryTable> findVersionsForResource(Pageable thePage, @Param("pid") JpaPidFk theFk);
+
 	@Query(
 			"SELECT new ca.uhn.fhir.jpa.model.dao.JpaPid(v.myPartitionIdValue, v.myResourcePid.myId, v.myResourceVersion) FROM ResourceHistoryTable v WHERE v.myResourcePid IN :resIds")
-	Stream<JpaPid> findAllVersionsForResourcePids(@Param("resIds") List<JpaPidFk> theIds);
+	Stream<JpaPid> findVersionPidsForResources(Pageable thePage, @Param("resIds") List<JpaPidFk> theIds);
 }

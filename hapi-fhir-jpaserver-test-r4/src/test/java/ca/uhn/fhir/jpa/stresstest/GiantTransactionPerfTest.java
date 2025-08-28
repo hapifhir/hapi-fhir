@@ -430,7 +430,12 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public Stream<JpaPid> findAllVersionsForResourcePids(List<JpaPidFk> theIds) {
+		public Stream<ResourceHistoryTable> findVersionsForResource(Pageable thePage, JpaPidFk theFk) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Stream<JpaPid> findVersionPidsForResources(Pageable thePage, List<JpaPidFk> theIds) {
 			throw new UnsupportedOperationException();
 		}
 

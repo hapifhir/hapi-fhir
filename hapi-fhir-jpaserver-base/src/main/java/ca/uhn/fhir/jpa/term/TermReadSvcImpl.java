@@ -3272,7 +3272,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	private org.hl7.fhir.r4.model.ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable) {
 		Class<? extends IBaseResource> type =
 				getFhirContext().getResourceDefinition("ValueSet").getImplementingClass();
-		IBaseResource valueSet = myJpaStorageResourceParser.toResource(type, theResourceTable, null, false);
+		IBaseResource valueSet = myJpaStorageResourceParser.toResource(null, type, theResourceTable, null, false);
 		return myVersionCanonicalizer.valueSetToCanonical(valueSet);
 	}
 

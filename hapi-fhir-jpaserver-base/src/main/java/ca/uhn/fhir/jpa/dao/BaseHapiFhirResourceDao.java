@@ -55,7 +55,6 @@ import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
-import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
@@ -146,6 +145,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -172,6 +172,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.SINGLE_RESULT;
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -804,7 +805,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		StopWatch w = new StopWatch();
 
-		T resourceToDelete = myJpaStorageResourceParser.toResource(myResourceType, entity, null, false);
+		T resourceToDelete =
+				myJpaStorageResourceParser.toResource(theRequestDetails, myResourceType, entity, null, false);
 		theDeleteConflicts.setResourceIdMarkedForDeletion(theId);
 
 		// Notify IServerOperationInterceptors about pre-action call
@@ -979,7 +981,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			ResourceTable entity = myEntityManager.find(ResourceTable.class, jpaPid);
 			deletedResources.add(entity);
 
-			T resourceToDelete = myJpaStorageResourceParser.toResource(myResourceType, entity, null, false);
+			T resourceToDelete =
+					myJpaStorageResourceParser.toResource(theRequestDetails, myResourceType, entity, null, false);
 
 			transactionDetails.addDeletedResourceId(pid);
 
@@ -1220,7 +1223,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		List<JpaPidFk> ids = theIds.stream().map(t -> ((JpaPid) t).toFk()).toList();
 
-		return myResourceHistoryTableDao.findAllVersionsForResourcePids(ids).map(t -> (IResourcePersistentId) t);
+		return myResourceHistoryTableDao
+				.findVersionPidsForResources(Pageable.unpaged(), ids)
+				.map(t -> (IResourcePersistentId) t);
 	}
 
 	@Override
@@ -1579,7 +1584,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw createResourceGoneException(entity.get());
 		}
 
-		T retVal = myJpaStorageResourceParser.toResource(myResourceType, entity.get(), null, false);
+		T retVal = myJpaStorageResourceParser.toResource(null, myResourceType, entity.get(), null, false);
 
 		ourLog.debug("Processed read on {} in {}ms", jpaPid, w.getMillis());
 		return retVal;
@@ -1621,8 +1626,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		BaseHasResource<?> entity = readEntity(theId, true, theRequest, theRequestPartitionId);
 		validateResourceType(entity);
 
-		T retVal = myJpaStorageResourceParser.toResource(
-				myResourceType, (IBaseResourceEntity<JpaPid>) entity, null, false);
+		T retVal = myJpaStorageResourceParser.toResource(theRequest, myResourceType, entity, null, false);
 
 		if (!theDeletedOk) {
 			if (isDeleted(entity)) {
@@ -1702,14 +1706,76 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			return retVal;
 		}
 
-		if (theReindexParameters.getReindexSearchParameters() == ReindexParameters.ReindexSearchParametersEnum.ALL) {
+		boolean forceReindexSps = false;
+		if (theReindexParameters.getCorrectCurrentVersion() != ReindexParameters.CorrectCurrentVersionModeEnum.NONE) {
+			ResourceTable newEntity = reindexCorrectCurrentVersion(entity);
+			if (newEntity != null) {
+				entity = newEntity;
+				forceReindexSps = true;
+			}
+		}
+
+		if (forceReindexSps
+				|| theReindexParameters.getReindexSearchParameters()
+						== ReindexParameters.ReindexSearchParametersEnum.ALL) {
 			reindexSearchParameters(entity, retVal, theTransactionDetails);
 		}
+
 		if (theReindexParameters.getOptimizeStorage() != ReindexParameters.OptimizeStorageModeEnum.NONE) {
 			reindexOptimizeStorage(entity, theReindexParameters.getOptimizeStorage());
 		}
 
 		return retVal;
+	}
+
+	/**
+	 * @return Returns an updated copy of the entity if it was modified (returns null otherwise)
+	 */
+	private ResourceTable reindexCorrectCurrentVersion(ResourceTable theEntity) {
+		ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(
+				theEntity.getResourceId().toFk(), theEntity.getVersion());
+
+		if (version == null) {
+			Optional<ResourceHistoryTable> versions = myResourceHistoryTableDao
+					.findVersionsForResource(
+							SINGLE_RESULT, theEntity.getResourceId().toFk())
+					.findFirst();
+
+			if (versions.isPresent()) {
+				Long newVersion = versions.get().getVersion();
+				ourLog.info(
+						"Correcting current version for {}/{} (PID {}) from version {} to version {}",
+						theEntity.getResourceType(),
+						theEntity.getFhirId(),
+						theEntity.getResourceId(),
+						theEntity.getVersion(),
+						newVersion);
+
+				/*
+				 * We are going to manually change (i.e. correct) the version number on the HFJ_RESOURCE table. The
+				 * version number is used as the optimistic locking key, so we need to detach the entity first, or
+				 * we'll get an optimistic lock failure later.
+				 */
+				myEntityManager.detach(theEntity);
+				myResourceTableDao.updateVersionAndLastUpdated(theEntity.getId(), newVersion, new Date());
+
+				/*
+				 * And now reload the record from the database so we have a fresh copy to reindex.
+				 */
+				return myEntityManager.find(ResourceTable.class, theEntity.getId());
+			} else {
+				ourLog.info(
+						"No versions exist for {}/{} (PID {}), marking resource as deleted",
+						theEntity.getResourceType(),
+						theEntity.getFhirId(),
+						theEntity.getResourceId());
+				theEntity.setDeleted(new Date());
+				myEntityManager.merge(theEntity);
+				return theEntity;
+			}
+		}
+
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")

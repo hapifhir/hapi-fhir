@@ -25,9 +25,13 @@ public class ReindexParameters {
 	public static final boolean OPTIMISTIC_LOCK_DEFAULT = true;
 	public static final OptimizeStorageModeEnum OPTIMIZE_STORAGE_DEFAULT = OptimizeStorageModeEnum.NONE;
 	public static final String OPTIMIZE_STORAGE_DEFAULT_STRING = "NONE";
+	public static final CorrectCurrentVersionModeEnum CORRECT_CURRENT_VERSION_DEFAULT =
+			CorrectCurrentVersionModeEnum.NONE;
+	public static final String CORRECT_CURRENT_VERSION_DEFAULT_STRING = "NONE";
 	private ReindexSearchParametersEnum myReindexSearchParameters = REINDEX_SEARCH_PARAMETERS_DEFAULT;
 	private OptimizeStorageModeEnum myOptimizeStorage = OPTIMIZE_STORAGE_DEFAULT;
 	private boolean myOptimisticLock = OPTIMISTIC_LOCK_DEFAULT;
+	private CorrectCurrentVersionModeEnum myCorrectCurrentVersion = CORRECT_CURRENT_VERSION_DEFAULT;
 
 	public boolean isOptimisticLock() {
 		return myOptimisticLock;
@@ -56,6 +60,21 @@ public class ReindexParameters {
 		return this;
 	}
 
+	/**
+	 * @since 8.6.0
+	 */
+	public ReindexParameters setCorrectCurrentVersion(CorrectCurrentVersionModeEnum theCorrectCurrentVersion) {
+		myCorrectCurrentVersion = theCorrectCurrentVersion;
+		return this;
+	}
+
+	/**
+	 * @since 8.6.0
+	 */
+	public CorrectCurrentVersionModeEnum getCorrectCurrentVersion() {
+		return myCorrectCurrentVersion;
+	}
+
 	public enum ReindexSearchParametersEnum {
 		ALL,
 		NONE
@@ -65,5 +84,10 @@ public class ReindexParameters {
 		NONE,
 		CURRENT_VERSION,
 		ALL_VERSIONS
+	}
+
+	public enum CorrectCurrentVersionModeEnum {
+		ALL,
+		NONE
 	}
 }

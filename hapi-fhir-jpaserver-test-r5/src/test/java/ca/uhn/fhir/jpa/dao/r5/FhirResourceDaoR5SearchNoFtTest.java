@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
@@ -15,6 +16,7 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.ClinicalUseDefinition;
 import org.hl7.fhir.r5.model.CodeableConcept;
@@ -178,17 +180,21 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 
         runInTransaction(() -> {
             ResourceTable table = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
-            table.setDeleted(new Date());
-            myResourceTableDao.save(table);
+			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(table.getId().toFk(), 1);
+			history.setDeleted(new Date());
+			myResourceHistoryTableDao.save(history);
+
         });
 
-			assertThat(outcome.getResources(0, 3)).hasSize(2);
+		List<IBaseResource> actual = outcome.getResources(0, 3);
+		assertThat(actual).hasSize(2);
 
         runInTransaction(() -> {
             myResourceHistoryTableDao.deleteAll();
         });
 
-			assertThat(outcome.getResources(0, 3)).isEmpty();
+		actual = outcome.getResources(0, 3);
+		assertThat(actual).isEmpty();
     }
 
     @Test
