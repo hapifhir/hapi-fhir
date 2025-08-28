@@ -33,14 +33,14 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Plain provider for the <code>$bulk-patch</code> operation
+ * Plain provider for the <code>$hapi.fhir.bulk-patch</code> operation
  *
  * @since 8.6.0
  */
 public class BulkPatchProvider extends BaseBulkModifyOrRewriteProvider {
 
 	/**
-	 * Operation: $bulk-patch
+	 * Operation: $hapi.fhir.bulk-patch
 	 */
 	@Operation(name = JpaConstants.OPERATION_BULK_PATCH, manualResponse = true)
 	public void bulkPatch(
@@ -68,7 +68,7 @@ public class BulkPatchProvider extends BaseBulkModifyOrRewriteProvider {
 	}
 
 	/**
-	 * Operation: $bulk-patch-status
+	 * Operation: $hapi.fhir.bulk-patch-status
 	 */
 	@Operation(name = JpaConstants.OPERATION_BULK_PATCH_STATUS, idempotent = true, manualResponse = true)
 	public void bulkPatchStatus(

@@ -103,7 +103,7 @@ class BulkPatchRewriteProviderTest {
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 
 			// Verify
-			String expectedUrl = ourFhirServer.getBaseUrl() + "/$bulk-patch-rewrite-history-status?_jobId=MY-INSTANCE-ID";
+			String expectedUrl = ourFhirServer.getBaseUrl() + "/$hapi.fhir.bulk-patch-rewrite-history-status?_jobId=MY-INSTANCE-ID";
 			assertEquals(HttpStatus.Code.ACCEPTED.getCode(), response.getStatusLine().getStatusCode());
 			assertEquals(expectedUrl, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 

@@ -111,7 +111,7 @@ public class BulkPatchProviderTest {
 			ourLog.info("Response:\n{}", CloseableHttpResponseUtil.parse(response));
 
 			// Verify
-			String expectedUrl = ourFhirServer.getBaseUrl() + "/$bulk-patch-status?_jobId=MY-INSTANCE-ID";
+			String expectedUrl = ourFhirServer.getBaseUrl() + "/$hapi.fhir.bulk-patch-status?_jobId=MY-INSTANCE-ID";
 			assertEquals(HttpStatus.Code.ACCEPTED.getCode(), response.getStatusLine().getStatusCode());
 			assertEquals(expectedUrl, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 
@@ -165,7 +165,7 @@ public class BulkPatchProviderTest {
 			OperationOutcome oo = ourCtx.newJsonParser().parseResource(OperationOutcome.class, responseString);
 			ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 
-			assertEquals("HAPI-1769: Job ID does not correspond to a $bulk-patch job", oo.getIssueFirstRep().getDiagnostics());
+			assertEquals("HAPI-1769: Job ID does not correspond to a $hapi.fhir.bulk-patch job", oo.getIssueFirstRep().getDiagnostics());
 			assertNull(response.getFirstHeader(Constants.HEADER_X_PROGRESS));
 		}
 	}
