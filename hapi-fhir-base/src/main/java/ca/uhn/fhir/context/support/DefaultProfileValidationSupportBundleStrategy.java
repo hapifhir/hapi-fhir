@@ -52,8 +52,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 class DefaultProfileValidationSupportBundleStrategy implements IValidationSupport {
 
-	private static final String URL_PREFIX_STRUCTURE_DEFINITION = "http://hl7.org/fhir/StructureDefinition/";
-	private static final String URL_PREFIX_STRUCTURE_DEFINITION_BASE = "http://hl7.org/fhir/";
 	private static final org.slf4j.Logger ourLog =
 			org.slf4j.LoggerFactory.getLogger(DefaultProfileValidationSupport.class);
 	private final FhirContext myCtx;
@@ -264,18 +262,18 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 	@Override
 	public IBaseResource fetchStructureDefinition(String theUrl) {
 		String url = theUrl;
-		if (!url.startsWith(URL_PREFIX_STRUCTURE_DEFINITION)) {
+		if (!url.startsWith(IValidationSupport.URL_PREFIX_STRUCTURE_DEFINITION)) {
 			if (url.indexOf('/') == -1) {
-				url = URL_PREFIX_STRUCTURE_DEFINITION + url;
+				url = IValidationSupport.URL_PREFIX_STRUCTURE_DEFINITION + url;
 			} else if (StringUtils.countMatches(url, '/') == 1) {
-				url = URL_PREFIX_STRUCTURE_DEFINITION_BASE + url;
+				url = IValidationSupport.URL_PREFIX_BASE + url;
 			}
 		}
 		Map<String, IBaseResource> structureDefinitionMap = provideStructureDefinitionMap();
 		IBaseResource retVal = structureDefinitionMap.get(url);
 		if (retVal == null) {
 
-			if (url.startsWith(URL_PREFIX_STRUCTURE_DEFINITION)) {
+			if (url.startsWith(IValidationSupport.URL_PREFIX_STRUCTURE_DEFINITION)) {
 
 				/*
 				 * A few built-in R4 SearchParameters have the wrong casing for primitive
@@ -285,10 +283,10 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 				if (myCtx.getVersion().getVersion() == FhirVersionEnum.R4
 						|| myCtx.getVersion().getVersion() == FhirVersionEnum.R4B
 						|| myCtx.getVersion().getVersion() == FhirVersionEnum.R5) {
-					String end = url.substring(URL_PREFIX_STRUCTURE_DEFINITION.length());
+					String end = url.substring(IValidationSupport.URL_PREFIX_STRUCTURE_DEFINITION.length());
 					if (Character.isUpperCase(end.charAt(0))) {
 						String newEnd = Character.toLowerCase(end.charAt(0)) + end.substring(1);
-						String alternateUrl = URL_PREFIX_STRUCTURE_DEFINITION + newEnd;
+						String alternateUrl = IValidationSupport.URL_PREFIX_STRUCTURE_DEFINITION + newEnd;
 						retVal = structureDefinitionMap.get(alternateUrl);
 						if (retVal != null) {
 							retVal = myCtx.newTerser().clone(retVal);

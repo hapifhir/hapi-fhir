@@ -307,7 +307,114 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			IBundleProvider result = myCodeSystemDao.search(map);
 			assertEquals(1, result.sizeOrThrowNpe());
 			IBaseResource resource = result.getResources(0, 1).get(0);
-			assertEquals("CodeSystem/shorthand-code-system/_history/1", resource.getIdElement().toString());
+			// TODO JDJD - add issue URL when you make one
+			// As part of <issue>, we now use server-assigned IDs
+			assertThat(resource.getIdElement().toString()).matches("CodeSystem/[0-9]+/_history/1");
+		});
+	}
+
+	@Test
+	void testInstallTwoVersionsOfPackage() throws Exception {
+		myStorageSettings.setAllowExternalReferences(true);
+
+		{
+			byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/simple_ig_v1.tgz");
+			myFakeNpmServlet.responses.put("/simple_ig_v1/1.0.0", bytes);
+
+			PackageInstallationSpec spec = new PackageInstallationSpec()
+				.setName("test-profile")
+				.setVersion("1.0.0")
+				.setPackageContents(bytes)
+				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+			PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
+			assertThat(outcome.getResourcesInstalled()).containsEntry("StructureDefinition", 1);
+		}
+
+		{
+			byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/simple_ig_v2.tgz");
+			myFakeNpmServlet.responses.put("/simple_ig_v1/2.0.0", bytes);
+
+			PackageInstallationSpec spec = new PackageInstallationSpec()
+				.setName("test-profile")
+				.setVersion("2.0.0")
+				.setPackageContents(bytes)
+				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+			PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
+			assertThat(outcome.getResourcesInstalled()).containsEntry("StructureDefinition", 1);
+		}
+
+		// Be sure no further communication with the server
+		myServer.stopServer();
+
+		assertQueryPackageWithoutVersionReturnsCurrentPackage("test-profile", "2.0.0", "http://example/StructureDefinition/EndoPractitioner", "file://my_profile/package");
+		assertQueryByPackageVersionReturnsPackagesOfRequestedVersion("test-profile", "1.0.0", "http://example/StructureDefinition/EndoPractitioner", "file://my_profile/package");
+
+		// Search for the installed resource
+		runInTransaction(() -> {
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.add(StructureDefinition.SP_URL, new UriParam("http://example/StructureDefinition/EndoPractitioner"));
+			map.add(StructureDefinition.SP_VERSION, new TokenParam("2.0.0"));
+			IBundleProvider result = myStructureDefinitionDao.search(map, mySrd);
+			assertEquals(1, result.sizeOrThrowNpe());
+			IBaseResource resource = result.getResources(0, 1).get(0);
+			// TODO JDJD - add issue URL when you make one
+			// As part of <issue>, we now use server-assigned IDs
+			assertThat(resource.getIdElement().toString()).matches("StructureDefinition/[0-9]+/_history/1");
+			assertThat(((StructureDefinition) resource).getMeta().getSource()).isEqualTo("test-profile#2.0.0");
+			IIdType sdIdV2 = resource.getIdElement();
+
+			map = SearchParameterMap.newSynchronous();
+			map.add(StructureDefinition.SP_URL, new UriParam("http://example/StructureDefinition/EndoPractitioner"));
+			map.add(StructureDefinition.SP_VERSION, new TokenParam("1.0.0"));
+			result = myStructureDefinitionDao.search(map, mySrd);
+			assertEquals(1, result.sizeOrThrowNpe());
+			resource = result.getResources(0, 1).get(0);
+			assertThat(resource.getIdElement().toString()).matches("StructureDefinition/[0-9]+/_history/1");
+			assertThat(((StructureDefinition) resource).getMeta().getSource()).isEqualTo("test-profile#1.0.0");
+			assertThat(resource.getIdElement().toString()).isNotEqualTo(sdIdV2.toString());
+		});
+	}
+
+	private void assertQueryPackageWithoutVersionReturnsCurrentPackage(String thePackageId, String theCurrentPackageVersion, String theCanonicalResourceUrl, String theExpectedPkgUrl) throws IOException {
+		NpmPackage pkg = myPackageCacheManager.loadPackage(thePackageId, null);
+		assertThat(pkg.url()).isEqualTo(theExpectedPkgUrl);
+		assertThat(pkg.version()).isEqualTo(theCurrentPackageVersion); //latest version is fetched
+
+		// Make sure DB rows were saved
+		runInTransaction(() -> {
+			NpmPackageEntity pkgEntity = myPackageDao.findByPackageId(thePackageId).orElseThrow(() -> new IllegalArgumentException());
+			assertEquals(thePackageId, pkgEntity.getPackageId());
+			assertEquals(theCurrentPackageVersion, pkgEntity.getCurrentVersionId());
+
+			NpmPackageVersionResourceEntity resource = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, theCanonicalResourceUrl).getContent().get(0);
+			assertEquals(theCanonicalResourceUrl, resource.getCanonicalUrl());
+			assertEquals(theCurrentPackageVersion, resource.getCanonicalVersion());
+			assertEquals("EndoPractitioner_2_0_0.json", resource.getFilename());
+			assertEquals("4.0.1", resource.getFhirVersionId());
+			assertEquals(FhirVersionEnum.R4, resource.getFhirVersion());
+		});
+
+		// Fetch resource by URL
+		runInTransaction(() -> {
+			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, theCanonicalResourceUrl);
+			assertThat(myFhirContext.newJsonParser().encodeResourceToString(asset)).contains("\"url\":\"" + theCanonicalResourceUrl + "\",\"version\":\"" + theCurrentPackageVersion + "\"");
+		});
+	}
+
+	private void assertQueryByPackageVersionReturnsPackagesOfRequestedVersion(String thePackageId, String thePackageVersion, String theCanonicalResourceUrl, String theExpectedPkgUrl) throws IOException {
+		// Make sure we can fetch the package by ID and Version
+		NpmPackage pkg = myPackageCacheManager.loadPackage(thePackageId, thePackageVersion);
+		assertThat(pkg.url()).isEqualTo(theExpectedPkgUrl);
+		assertThat(pkg.version()).isEqualTo(thePackageVersion);
+
+		// Make sure DB rows were saved
+		runInTransaction(() -> {
+			NpmPackageVersionEntity versionEntity = myPackageVersionDao.findByPackageIdAndVersion(thePackageId, thePackageVersion).orElseThrow(() -> new IllegalArgumentException());
+			assertEquals(thePackageId, versionEntity.getPackageId());
+			assertEquals(thePackageVersion, versionEntity.getVersionId());
+			assertFalse(versionEntity.isCurrentVersion());
+			assertEquals("4.0.1", versionEntity.getFhirVersionId());
+			assertEquals(FhirVersionEnum.R4, versionEntity.getFhirVersion());
 		});
 	}
 
@@ -377,7 +484,10 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			IBundleProvider result = myCodeSystemDao.search(map);
 			assertEquals(1, result.sizeOrThrowNpe());
 			IBaseResource resource = result.getResources(0, 1).get(0);
-			assertEquals("CodeSystem/shorthand-code-system/_history/1", resource.getIdElement().toString());
+			// TODO JDJD - add issue URL when you make one
+			// As part of <issue>, we now use server-assigned IDs
+			assertThat(resource.getIdElement().toString()).matches("CodeSystem/[0-9]+/_history/1");
+//			assertEquals("CodeSystem/shorthand-code-system/_history/1", resource.getIdElement().toString());
 		});
 
 		myInterceptorService.unregisterInterceptor(myBinaryStorageInterceptor);
@@ -403,10 +513,15 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			IBundleProvider result = myCodeSystemDao.search(map);
 			assertEquals(1, result.sizeOrThrowNpe());
 			IBaseResource resource = result.getResources(0, 1).get(0);
-			assertEquals("CodeSystem/npm-1/_history/1", resource.getIdElement().toString());
+			// TODO JDJD - add issue URL when you make one
+			// As part of <issue>, we now use server-assigned IDs
+			assertThat(resource.getIdElement().toString()).matches("CodeSystem/[0-9]+/_history/1");
+//			assertEquals("CodeSystem/npm-1/_history/1", resource.getIdElement().toString());
 		});
 
 	}
+
+	//todo jdjd add test for npm prefix w/ search params
 
 	@Test
 	public void testInstallR4Package_NonConformanceResources() throws Exception {
@@ -1028,6 +1143,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			.stream()
 			.map(ILoggingEvent::getFormattedMessage)
 			.toList();
+		assertThat(myResourceTableDao.findAll().stream().filter(t->t.getResourceType().equals("StructureDefinition")).count()).isEqualTo(4L);
 		assertThat(snapshotMessages).hasSize(5);
 	}
 

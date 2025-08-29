@@ -39,7 +39,7 @@ public class PackageInstallerSvcImplRewriteHistoryTest extends BaseJpaR4Test {
 
 		// execute
 		// red-green this threw a NPE before the fix
-		mySvc.createOrUpdateResource(myConceptMapDao, conceptMap, null);
+		mySvc.createOrUpdateResource(myConceptMapDao, conceptMap, null, null);
 
 		// verify
 		ConceptMap readConceptMap = myConceptMapDao.read(CONCEPT_MAP_TEST_ID);

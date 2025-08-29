@@ -238,6 +238,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 					params.add(StructureDefinition.SP_URL, new UriParam(theUri.substring(0, versionSeparator)));
 				} else {
 					params.add(StructureDefinition.SP_URL, new UriParam(theUri));
+					params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));
 				}
 				search = myDaoRegistry.getResourceDao("StructureDefinition").search(params, new SystemRequestDetails());
 				break;

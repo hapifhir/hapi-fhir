@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -50,6 +51,7 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
@@ -385,7 +387,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 		IBaseResource existingResource =
 				!searchResult.isEmpty() ? searchResult.getResources(0, 1).get(0) : null;
-		boolean isInstalled = createOrUpdateResource(dao, theResource, existingResource);
+		boolean isInstalled = createOrUpdateResource(dao, theResource, existingResource, theInstallationSpec);
 		if (isInstalled) {
 			theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
 		}
@@ -408,21 +410,37 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	}
 
 	protected boolean createOrUpdateResource(
-			IFhirResourceDao theDao, IBaseResource theResource, IBaseResource theExistingResource) {
+			IFhirResourceDao theDao,
+			IBaseResource theResource,
+			IBaseResource theExistingResource,
+			PackageInstallationSpec thePackageInstallationSpec) {
 		final IIdType id = theResource.getIdElement();
 
-		if (theExistingResource == null && id.isEmpty()) {
-			ourLog.debug("Install resource without id will be created");
+		if (theExistingResource == null && !theResource.fhirType().equals("SearchParameter")) {
+			// For any resource type except SearchParameter, we will use a server-assigned ID
+			// This prevents FHIR ID conflicts for multiple versions of Conformance/Canonical resources (e.g.
+			// StructureDefinition.version)
+			// which is helpful for validation against versioned profiles.
+			// (Note: This is not to be confused with meta.versionId)
+			theResource.setId(new IdDt()); // Ignore the given ID
+			String metaSourceUrl = thePackageInstallationSpec.getName() + '#' + thePackageInstallationSpec.getVersion();
+			MetaUtil.setSource(myFhirContext, theResource, metaSourceUrl);
+			ourLog.debug("Installing resource with a server-assigned id");
 			theDao.create(theResource, createRequestDetails());
 			return true;
 		}
 
 		if (theExistingResource == null && !id.isEmpty() && id.isIdPartValidLong()) {
+			// When using the given FHIR ID, add a prefix since we don't allow purely numeric IDs by default
 			String newIdPart = "npm-" + id.getIdPart();
 			id.setParts(id.getBaseUrl(), id.getResourceType(), newIdPart, id.getVersionIdPart());
 		}
 
-		boolean isExistingUpdated = updateExistingResourceIfNecessary(theDao, theResource, theExistingResource);
+		boolean isExistingUpdated =
+				updateExistingSearchParameterBaseIfNecessary(theDao, theResource, theExistingResource);
+		// When an existing resource is found with the same URL/version, we will update this resource and force-use the
+		// old ID
+		// Except when we are updating a SearchParameter and changing its base
 		boolean shouldOverrideId = theExistingResource != null && !isExistingUpdated;
 
 		if (shouldOverrideId) {
@@ -456,7 +474,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * still works on ResourceTypeA, and the caller then creates a new SP that covers ResourceTypeB.
 	 * https://github.com/hapifhir/hapi-fhir/issues/5366
 	 */
-	private boolean updateExistingResourceIfNecessary(
+	private boolean updateExistingSearchParameterBaseIfNecessary(
 			IFhirResourceDao theDao, IBaseResource theResource, IBaseResource theExistingResource) {
 		if (!"SearchParameter".equals(theResource.getClass().getSimpleName())) {
 			return false;
@@ -641,8 +659,13 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		} else if ("SearchParameter".equals(resourceType)) {
 			return buildSearchParameterMapForSearchParameter(theResource);
 		} else if (resourceHasUrlElement(theResource)) {
-			String url = extractSimpleValue(theResource, "url");
-			return SearchParameterMap.newSynchronous().add("url", new UriParam(url));
+			SearchParameterMap retVal = SearchParameterMap.newSynchronous();
+			retVal.add("url", new UriParam(extractSimpleValueIfPresent(theResource, "url")));
+			String version = extractSimpleValueIfPresent(theResource, "version");
+			if (!version.isEmpty()) {
+				retVal.add("version", new TokenParam(version));
+			}
+			return retVal;
 		} else {
 			TokenParam identifierToken = extractIdentifierFromOtherResourceTypes(theResource);
 			return SearchParameterMap.newSynchronous().add("identifier", identifierToken);
@@ -697,17 +720,30 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private String extractSimpleValue(IBase theResource, String thePath) {
 		IPrimitiveType<?> asPrimitiveType = (IPrimitiveType<?>) extractValue(theResource, thePath);
+		if (asPrimitiveType == null) {
+			return "";
+		}
 		return (String) asPrimitiveType.getValue();
 	}
 
-	private boolean resourceHasUrlElement(IBaseResource resource) {
-		BaseRuntimeElementDefinition<?> def = myFhirContext.getElementDefinition(resource.getClass());
+	private String extractSimpleValueIfPresent(IBaseResource theResource, String theElementName) {
+		return resourceHasElementNamed(theResource, theElementName)
+				? extractSimpleValue(theResource, theElementName)
+				: "";
+	}
+
+	private boolean resourceHasUrlElement(IBaseResource theResource) {
+		return resourceHasElementNamed(theResource, "url");
+	}
+
+	private boolean resourceHasElementNamed(IBaseResource theResource, String theElementName) {
+		BaseRuntimeElementDefinition<?> def = myFhirContext.getElementDefinition(theResource.getClass());
 		if (!(def instanceof BaseRuntimeElementCompositeDefinition)) {
 			throw new IllegalArgumentException(Msg.code(1293) + "Resource is not a composite type: "
-					+ resource.getClass().getName());
+					+ theResource.getClass().getName());
 		}
 		BaseRuntimeElementCompositeDefinition<?> currentDef = (BaseRuntimeElementCompositeDefinition<?>) def;
-		BaseRuntimeChildDefinition nextDef = currentDef.getChildByName("url");
+		BaseRuntimeChildDefinition nextDef = currentDef.getChildByName(theElementName);
 		return nextDef != null;
 	}
 

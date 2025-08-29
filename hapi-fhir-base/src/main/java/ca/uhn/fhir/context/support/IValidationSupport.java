@@ -81,6 +81,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public interface IValidationSupport {
 	String URL_PREFIX_VALUE_SET = "http://hl7.org/fhir/ValueSet/";
+	String URL_PREFIX_STRUCTURE_DEFINITION = "http://hl7.org/fhir/StructureDefinition/";
+	String URL_PREFIX_BASE = "http://hl7.org/fhir/";
 
 	/**
 	 * Expands the given portion of a ValueSet
@@ -164,8 +166,8 @@ public interface IValidationSupport {
 			List<T> newList = new ArrayList<>(retVal.size());
 			for (T next : retVal) {
 				String url = defaultString(getFhirContext().newTerser().getSinglePrimitiveValueOrNull(next, "url"));
-				if (url.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
-					String lastPart = url.substring("http://hl7.org/fhir/StructureDefinition/".length());
+				if (isBaseStructureDefinition(url)) {
+					String lastPart = url.substring(URL_PREFIX_STRUCTURE_DEFINITION.length());
 					if (getFhirContext().getResourceTypes().contains(lastPart)) {
 						continue;
 					}
@@ -178,6 +180,10 @@ public interface IValidationSupport {
 		}
 
 		return retVal;
+	}
+
+	static boolean isBaseStructureDefinition(String theStructureDefinitionUrl) {
+		return theStructureDefinitionUrl.startsWith(URL_PREFIX_STRUCTURE_DEFINITION);
 	}
 
 	/**
