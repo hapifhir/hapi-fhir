@@ -49,6 +49,10 @@ import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.TOKEN;
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.URI;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+/**
+ * Validates SP to make sure they have all the requisite fields needed
+ * refer to <a href="https://hl7.org/fhir/R4/searchparameter.html">the spec</a>
+ */
 public class SearchParameterDaoValidator {
 
 	public static class SPValidatorOptions {
