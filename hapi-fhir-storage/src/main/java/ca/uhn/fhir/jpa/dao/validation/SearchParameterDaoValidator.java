@@ -145,10 +145,6 @@ public class SearchParameterDaoValidator {
 			throw new UnprocessableEntityException(Msg.code(2801) + String.format(SP_FIELD_IS_MISSING, "code"));
 		}
 
-		if (searchParameter.getBase() == null || searchParameter.getBase().isEmpty()) {
-			throw new UnprocessableEntityException(Msg.code(2802) + String.format(SP_FIELD_IS_MISSING, "base"));
-		}
-
 		// Search parameters must have a base
 		if (isCompositeWithoutBase(searchParameter)) {
 			throw new UnprocessableEntityException(Msg.code(1113) + "SearchParameter.base is missing");
