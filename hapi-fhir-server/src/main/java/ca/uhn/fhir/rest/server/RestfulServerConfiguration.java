@@ -453,8 +453,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 
 	@Override
 	public List<RuntimeSearchParam> getActiveSearchParamsByName(@Nonnull String theName, @Nonnull SearchParamLookupContextEnum theContext) {
-		// TODO - get a new msg code
-		return null;
+		throw new UnsupportedOperationException(Msg.code(2803));
 	}
 
 	@Override
