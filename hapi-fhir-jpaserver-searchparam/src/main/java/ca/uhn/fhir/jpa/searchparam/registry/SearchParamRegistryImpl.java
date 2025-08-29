@@ -222,15 +222,15 @@ public class SearchParamRegistryImpl
 	}
 
 	@Override
-	public List<RuntimeSearchParam> getActiveSearchParamsByName(@NotNull String theName, @NotNull ISearchParamRegistry.SearchParamLookupContextEnum theContext) {
+	public List<RuntimeSearchParam> getActiveSearchParamsByName(
+			@NotNull String theName, @NotNull ISearchParamRegistry.SearchParamLookupContextEnum theContext) {
 		List<RuntimeSearchParam> sps = new ArrayList<>();
 		if (myActiveSearchParams != null) {
-			myActiveSearchParams.getSearchParamStream()
-				.forEach(sp -> {
-					if (sp.getName().equals(theName)) {
-						sps.add(sp);
-					}
-				});
+			myActiveSearchParams.getSearchParamStream().forEach(sp -> {
+				if (sp.getName().equals(theName)) {
+					sps.add(sp);
+				}
+			});
 		}
 		return sps;
 	}
@@ -456,7 +456,10 @@ public class SearchParamRegistryImpl
 	 * @param theConvertFn A function used to convert an IBaseResource SearchParameter resource into a RuntimeSearchParameter
 	 *                     to be added to the cache.
 	 */
-	private long overrideSearchParam(RuntimeSearchParamCache theSearchParams, IBaseResource theSearchParameter, Function<IBaseResource, RuntimeSearchParam> theConvertFn) {
+	private long overrideSearchParam(
+			RuntimeSearchParamCache theSearchParams,
+			IBaseResource theSearchParameter,
+			Function<IBaseResource, RuntimeSearchParam> theConvertFn) {
 		if (theSearchParameter == null) {
 			return 0;
 		}
