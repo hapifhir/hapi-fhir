@@ -140,7 +140,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			version.onTable("HFJ_RES_LINK")
 					.addIndex("20250827.01", "IDX_RL_SRCPATH_TGTURL")
 					.unique(false)
-					.withColumns("SRC_PATH, TARGET_RESOURCE_URL, PARTITION_ID, SRC_RESOURCE_ID");
+					.withColumns("SRC_PATH, TARGET_RESOURCE_URL, PARTITION_ID, SRC_RESOURCE_ID")
+					.heavyweightSkipByDefault();
 		}
 	}
 
