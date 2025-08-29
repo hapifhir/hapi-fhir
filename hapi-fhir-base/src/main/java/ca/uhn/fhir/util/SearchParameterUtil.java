@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -418,6 +419,22 @@ public class SearchParameterUtil {
 		int open = StringUtils.countMatches(thePaths, "(");
 		int close = StringUtils.countMatches(thePaths, ")");
 		return open == close;
+	}
+
+	/**
+	 * Retrieves the first value in the provided field, or null or no such field exists or isn't populated.
+	 * @param theTerser
+	 * @param theSP
+	 * @param theField
+	 * @return
+	 */
+	public static IBase getFirstFieldValueOrNull(FhirTerser theTerser, IBaseResource theSP, String theField) {
+		List<IBase> fieldValues = theTerser.getValues(theSP, theField);
+
+		if (fieldValues != null && !fieldValues.isEmpty()) {
+			return fieldValues.get(0);
+		}
+		return null;
 	}
 
 	/**
