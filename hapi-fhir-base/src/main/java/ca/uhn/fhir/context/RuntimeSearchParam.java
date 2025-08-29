@@ -65,6 +65,10 @@ public class RuntimeSearchParam {
 		DATABASE,
 		/**
 		 * The originating source is an IG.
+		 * Specifically this is a SearchParameter
+		 * that is *not* saved in the Database,
+		 * *not* built in, but are sourced only
+		 * from an IG (ie, does not get saved in the DB).
 		 */
 		IMPLEMENTATION_GUIDE;
 	}

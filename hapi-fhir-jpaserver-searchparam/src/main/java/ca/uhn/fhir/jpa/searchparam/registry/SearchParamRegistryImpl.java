@@ -239,6 +239,11 @@ public class SearchParamRegistryImpl
 	public void addActiveSearchParameterToLocalCache(@Nonnull RuntimeSearchParam theSearchParam) {
 		assert !isBlank(theSearchParam.getName());
 		assert theSearchParam.getBase() != null && !theSearchParam.getBase().isEmpty();
+		assert theSearchParam.getOriginatingSource() != null;
+
+		if (theSearchParam.getOriginatingSource() == RuntimeSearchParam.Source.UNKNOWN) {
+			ourLog.warn("SearchParameter added with unknown source.");
+		}
 
 		for (String rt : theSearchParam.getBase()) {
 			myLocalSPCache.add(rt, theSearchParam.getName(), theSearchParam);
