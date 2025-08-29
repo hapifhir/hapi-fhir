@@ -28,17 +28,22 @@ import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
-import ca.uhn.fhir.mdm.svc.MdmLinkExpandSvc;
+import ca.uhn.fhir.mdm.svc.MdmLinkExpandSvcHolder;
 import ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class MdmJpaConfig {
+	/*
+	@Bean
+	EIDHelper eidHelper(FhirContext theFhirContext, IMdmSettings theMdmSettings) {
+		return new EIDHelper(theFhirContext, theMdmSettings);
+	}*/
 
 	@Bean
-	public MdmLinkExpandSvc mdmLinkExpandSvc() {
-		return new MdmLinkExpandSvc();
+	public MdmLinkExpandSvcHolder mdmLinkExpandSvc() {
+		return new MdmLinkExpandSvcHolder();
 	}
 
 	@Bean
