@@ -29,12 +29,14 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Meta;
@@ -42,11 +44,18 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -56,6 +65,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -1259,6 +1269,48 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			fail("Result id is not a UUID. Instead, it was: " + result);
 		}
 	}
+
+	@Test
+	void testCreate_withProvidedMetaAndNoRequestId_keepsMetaUnchanged() {
+		// Given
+		StructureDefinition sd = createSimpleStructureDefinition();
+
+		// When
+		IIdType result = myStructureDefinitionDao.update(sd, mySrd).getId();
+
+		// Then
+		StructureDefinition storedSd = myStructureDefinitionDao.read(result, mySrd);
+		assertThat(storedSd.getMeta().getSource()).isEqualTo("abc#123");
+	}
+
+	private static StructureDefinition createSimpleStructureDefinition() {
+		StructureDefinition sd = new StructureDefinition();
+		sd.setId("test-sd-123");
+		sd.setMeta(new Meta().setSource("abc#123"));
+		sd.setUrl("http://example.com/StructureDefinition/test");
+		sd.setName("test-sd");
+		sd.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sd.setAbstract(false);
+		sd.setKind(StructureDefinition.StructureDefinitionKind.RESOURCE);
+		sd.setType("Patient");
+		sd.addIdentifier().setSystem("http://example.com").setValue("123");
+		return sd;
+	}
+
+	@Test
+	void testCreate_withProvidedMetaAndRequestId_usesRequestIdInMetaSource() {
+		// Given
+		StructureDefinition sd = createSimpleStructureDefinition();
+		when(mySrd.getRequestId()).thenReturn("456");
+
+		// When
+		IIdType result = myStructureDefinitionDao.update(sd, mySrd).getId();
+
+		// Then
+		StructureDefinition storedSd = myStructureDefinitionDao.read(result, mySrd);
+		assertThat(storedSd.getMeta().getSource()).isEqualTo("abc#456");
+	}
+
 
 	@Test
 	public void testUpdateNoChange_ChangeForcedInPreStorageInterceptor() {

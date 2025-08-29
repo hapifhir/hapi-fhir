@@ -1356,7 +1356,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		String requestId = getRequestId(theRequest, source);
-		source = MetaUtil.cleanProvenanceSourceUriOrEmpty(source);
 
 		boolean shouldStoreSource =
 				myStorageSettings.getStoreMetaSourceInformation().isStoreSourceUri();
