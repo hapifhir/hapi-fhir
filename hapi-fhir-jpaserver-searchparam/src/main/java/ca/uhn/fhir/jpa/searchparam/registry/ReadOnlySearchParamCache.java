@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -35,8 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
-
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class ReadOnlySearchParamCache {
 
@@ -101,7 +100,7 @@ public class ReadOnlySearchParamCache {
 				FhirContext.forCached(theFhirContext.getVersion().getVersion());
 		List<IBaseResource> searchParams = cachedCtx.getValidationSupport().fetchAllSearchParameters();
 
-		searchParams = defaultIfNull(searchParams, Collections.emptyList());
+		searchParams = ObjectUtils.getIfNull(searchParams, Collections.emptyList());
 		for (IBaseResource next : searchParams) {
 			RuntimeSearchParam nextCanonical = theCanonicalizer.canonicalizeSearchParameter(next);
 
@@ -123,6 +122,7 @@ public class ReadOnlySearchParamCache {
 						nextCanonical.getComboSearchParamType(),
 						nextCanonical.getComponents(),
 						nextCanonical.getBase());
+				nextCanonical.setOriginatingSource(RuntimeSearchParam.Source.BUILT_IN);
 
 				Collection<String> base = nextCanonical.getBase();
 				if (base.contains("Resource") || base.contains("DomainResource")) {
