@@ -208,8 +208,8 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testDeleteSearchOnlyAfterMaxTimeSinceCreationAndAfterExpiryTime() {
-		// Set the max time since creation to 1 second
+	public void testSearchDeletedOnlyAfterConfiguredExpiryTimeAndLastAccessedExpiryTime() {
+		// Config the search to expire after one second
 		myStorageSettings.setExpireSearchResultsAfterMillis(1000L);
 		myStorageSettings.setReuseCachedSearchResultsForMillis(0L);
 		runInTransaction(() -> {
@@ -237,7 +237,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
 		sleepAtLeast(1100);
 
-		// Delete now that expiryOrNull has passed
+		// Delete now that expiryOrNull has also passed
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
 	}

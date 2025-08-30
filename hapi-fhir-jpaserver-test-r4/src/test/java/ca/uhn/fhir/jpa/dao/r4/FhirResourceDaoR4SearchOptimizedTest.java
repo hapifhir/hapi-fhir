@@ -497,7 +497,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			assertEquals(51, search.getNumFound());
 			assertEquals(search.getNumFound(), mySearchResultDao.count());
 			assertNull(search.getTotalCount());
-			assertEquals(3, search.getVersion().intValue());
+			assertEquals(5, search.getVersion().intValue());
 		});
 
 		/*
@@ -517,7 +517,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 */
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
-			assertEquals(3, search.getVersion().intValue());
+			assertEquals(5, search.getVersion().intValue());
 		});
 
 		/*
@@ -536,7 +536,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			assertEquals(191, search.getNumFound());
 			assertEquals(search.getNumFound(), mySearchResultDao.count());
 			assertEquals(191, search.getTotalCount().intValue());
-			assertEquals(5, search.getVersion().intValue());
+			assertEquals(9, search.getVersion().intValue());
 			assertEquals(SearchStatusEnum.FINISHED, search.getStatus());
 		});
 
@@ -712,7 +712,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			assertEquals(200, search.getNumFound());
 			assertEquals(search.getNumFound(), mySearchResultDao.count());
 			assertEquals(200, search.getTotalCount().intValue());
-			assertEquals(3, search.getVersion().intValue());
+			assertEquals(5, search.getVersion().intValue());
 			assertEquals(SearchStatusEnum.FINISHED, search.getStatus());
 		});
 	}
