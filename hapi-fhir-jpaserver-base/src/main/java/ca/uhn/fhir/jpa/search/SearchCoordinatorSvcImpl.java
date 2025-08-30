@@ -98,7 +98,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCoordinatorSvcImpl.class);
-	public static final int EXPIRY_OFFSET_MINUTES = 10;
+	public static final int SEARCH_EXPIRY_OFFSET_MINUTES = 10;
 
 	private final FhirContext myContext;
 	private final JpaStorageSettings myStorageSettings;
@@ -273,9 +273,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 					.execute(searchCallback);
 			QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(search);
 
-			search.setExpiryOrNull(DateUtils.addMinutes(new Date(), EXPIRY_OFFSET_MINUTES));
-			mySearchCacheSvc.save(search, theRequestPartitionId);
-
 			if (search.getStatus() == SearchStatusEnum.FINISHED) {
 				ourLog.trace("Search entity marked as finished with {} results", search.getNumFound());
 				break;
@@ -336,6 +333,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		ourLog.trace("Finished looping");
 
 		List<JpaPid> pids = fetchResultPids(theUuid, theFrom, theTo, theRequestDetails, search, theRequestPartitionId);
+
+		// Update the search expiry time based on latest access to search result
+		search.setExpiryOrNull(DateUtils.addMinutes(new Date(), SEARCH_EXPIRY_OFFSET_MINUTES));
+		mySearchCacheSvc.save(search, theRequestPartitionId);
 
 		ourLog.trace("Fetched {} results", pids.size());
 
