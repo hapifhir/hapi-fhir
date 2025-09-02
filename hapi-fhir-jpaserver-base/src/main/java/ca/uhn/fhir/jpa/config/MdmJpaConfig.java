@@ -50,17 +50,19 @@ public class MdmJpaConfig {
 	}
 
 	@Bean
-	public MdmLinkExpandSvcHolder mdmLinkExpandSvcHolder(IMdmSettings theMdmSettings,
-														 IMdmLinkExpandSvc theMdmLinkExpandSvc,
-														 MdmEidMatchOnlyLinkExpandSvc theMdmEidMatchOnlyLinkExpandSvc,
-														 EIDHelper theEidHelper) {
-		return new MdmLinkExpandSvcHolder(theMdmSettings, theMdmLinkExpandSvc, theMdmEidMatchOnlyLinkExpandSvc, theEidHelper);
+	public MdmLinkExpandSvcHolder mdmLinkExpandSvcHolder(
+			IMdmSettings theMdmSettings,
+			IMdmLinkExpandSvc theMdmLinkExpandSvc,
+			MdmEidMatchOnlyLinkExpandSvc theMdmEidMatchOnlyLinkExpandSvc,
+			EIDHelper theEidHelper) {
+		return new MdmLinkExpandSvcHolder(
+				theMdmSettings, theMdmLinkExpandSvc, theMdmEidMatchOnlyLinkExpandSvc, theEidHelper);
 	}
 
-
 	@Bean
-	//@Qualifier("mdmEidMatchOnlyLinkExpandSvc")
-	public MdmEidMatchOnlyLinkExpandSvc mdmEidMatchOnlyLinkExpandSvc(DaoRegistry theDaoRegistry, EIDHelper theEidHelper) {
+	// @Qualifier("mdmEidMatchOnlyLinkExpandSvc")
+	public MdmEidMatchOnlyLinkExpandSvc mdmEidMatchOnlyLinkExpandSvc(
+			DaoRegistry theDaoRegistry, EIDHelper theEidHelper) {
 		return new MdmEidMatchOnlyLinkExpandSvc(theDaoRegistry, theEidHelper);
 	}
 

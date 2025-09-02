@@ -52,7 +52,7 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	@Autowired
 	IIdHelperService myIdHelperService;
 
-	public MdmLinkExpandSvc() { }
+	public MdmLinkExpandSvc() {}
 
 	/**
 	 * Given a source resource, perform MDM expansion and return all the resource IDs of all resources that are

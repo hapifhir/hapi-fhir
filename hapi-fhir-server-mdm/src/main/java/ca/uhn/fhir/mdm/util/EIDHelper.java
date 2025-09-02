@@ -46,7 +46,6 @@ public class EIDHelper {
 		myMdmSettings = theMdmSettings;
 	}
 
-
 	public void setMdmSettings(IMdmSettings theMdmSettings) {
 		myMdmSettings = theMdmSettings;
 	}

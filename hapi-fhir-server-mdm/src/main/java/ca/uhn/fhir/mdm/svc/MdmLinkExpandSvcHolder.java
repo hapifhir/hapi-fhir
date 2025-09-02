@@ -17,11 +17,11 @@ public class MdmLinkExpandSvcHolder {
 
 	private final MdmEidMatchOnlyLinkExpandSvc myMdmEidMatchOnlyLinkExpandSvc;
 
-
-	public MdmLinkExpandSvcHolder(IMdmSettings theMdmSettings,
-								  IMdmLinkExpandSvc theMdmLinkExpandSvc,
-								  MdmEidMatchOnlyLinkExpandSvc theMdmEidMatchOnlyLinkExpandSvc,
-								  EIDHelper theEidHelper) {
+	public MdmLinkExpandSvcHolder(
+			IMdmSettings theMdmSettings,
+			IMdmLinkExpandSvc theMdmLinkExpandSvc,
+			MdmEidMatchOnlyLinkExpandSvc theMdmEidMatchOnlyLinkExpandSvc,
+			EIDHelper theEidHelper) {
 		myMdmSettings = theMdmSettings;
 		myMdmLinkExpandSvc = theMdmLinkExpandSvc;
 		myMdmEidMatchOnlyLinkExpandSvc = theMdmEidMatchOnlyLinkExpandSvc;
@@ -38,13 +38,12 @@ public class MdmLinkExpandSvcHolder {
 		return myInstance;
 	}
 
-
 	private IMdmLinkExpandSvc determineInstanceToUse() {
 		boolean isMatchOnly = myMdmSettings.getMode() == MdmModeEnum.MATCH_ONLY;
 		boolean hasEidSystems = false;
 		if (myMdmSettings.getMdmRules() != null) {
 			hasEidSystems = myMdmSettings.getMdmRules().getEnterpriseEIDSystems() != null
-				&& !myMdmSettings.getMdmRules().getEnterpriseEIDSystems().isEmpty();
+					&& !myMdmSettings.getMdmRules().getEnterpriseEIDSystems().isEmpty();
 		}
 		if (isMatchOnly && hasEidSystems) {
 			return myMdmEidMatchOnlyLinkExpandSvc;
@@ -53,24 +52,24 @@ public class MdmLinkExpandSvcHolder {
 		}
 	}
 
-/*
-	private IMdmLinkExpandSvc createInstance() {
+	/*
+		private IMdmLinkExpandSvc createInstance() {
 
-		boolean isMatchOnly = myMdmSettings.getMode() == MdmModeEnum.MATCH_ONLY;
-		boolean hasEidSystems = false;
-		if (myMdmSettings.getMdmRules() != null) {
-			hasEidSystems = myMdmSettings.getMdmRules().getEnterpriseEIDSystems() != null
-					&& !myMdmSettings.getMdmRules().getEnterpriseEIDSystems().isEmpty();
+			boolean isMatchOnly = myMdmSettings.getMode() == MdmModeEnum.MATCH_ONLY;
+			boolean hasEidSystems = false;
+			if (myMdmSettings.getMdmRules() != null) {
+				hasEidSystems = myMdmSettings.getMdmRules().getEnterpriseEIDSystems() != null
+						&& !myMdmSettings.getMdmRules().getEnterpriseEIDSystems().isEmpty();
+			}
+			if (isMatchOnly && hasEidSystems) {
+				EIDHelper myEidHelper = new EIDHelper(myFhirContext, myMdmSettings);
+				return new MdmEidMatchOnlyLinkExpandSvc(myDaoRegistry, myEidHelper);
+			} else {
+				return new MdmLinkExpandSvc(myMdmLinkDao, myIdHelperService);
+			}
 		}
-		if (isMatchOnly && hasEidSystems) {
-			EIDHelper myEidHelper = new EIDHelper(myFhirContext, myMdmSettings);
-			return new MdmEidMatchOnlyLinkExpandSvc(myDaoRegistry, myEidHelper);
-		} else {
-			return new MdmLinkExpandSvc(myMdmLinkDao, myIdHelperService);
-		}
-	}
 
-*/
+	*/
 	public void setMdmSettings(IMdmSettings theMdmSettings) {
 		myMdmSettings = theMdmSettings;
 		myEidHelper.setMdmSettings(myMdmSettings);
