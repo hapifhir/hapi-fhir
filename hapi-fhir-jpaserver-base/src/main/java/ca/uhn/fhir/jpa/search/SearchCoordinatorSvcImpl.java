@@ -334,9 +334,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 		List<JpaPid> pids = fetchResultPids(theUuid, theFrom, theTo, theRequestDetails, search, theRequestPartitionId);
 
-		// Update the search expiry when it is more than halfway to the latest access to expiry time
-		Date expiry = search.getExpiryOrNull();
-		if (expiry != null && expiry.before(DateUtils.addMinutes(new Date(), SEARCH_EXPIRY_OFFSET_MINUTES / 2))) {
+		// start tracking last-access time for this search when it is more than halfway to expire by created time
+		long expireAfterMillis = myStorageSettings.getExpireSearchResultsAfterMillis();
+		long createdCutoff = search.getCreated().getTime() + expireAfterMillis;
+		if (createdCutoff - System.currentTimeMillis() < expireAfterMillis / 2) {
 			search.setExpiryOrNull(DateUtils.addMinutes(new Date(), SEARCH_EXPIRY_OFFSET_MINUTES));
 			mySearchCacheSvc.save(search, theRequestPartitionId);
 		}
@@ -453,8 +454,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	}
 
 	/**
-	 * 	The max results to return if this is a synchronous search.
-	 *
+	 * The max results to return if this is a synchronous search.
+	 * <p>
 	 * We'll look in this order:
 	 * * load synchronous up to (on params)
 	 * * param count (+ offset)

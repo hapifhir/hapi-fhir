@@ -534,8 +534,6 @@ public class SearchTask implements Callable<Void> {
 	}
 
 	private void doSaveSearch() {
-		mySearch.setExpiryOrNull(
-				DateUtils.addMinutes(new Date(), SearchCoordinatorSvcImpl.SEARCH_EXPIRY_OFFSET_MINUTES));
 		Search newSearch = mySearchCacheSvc.save(mySearch, myRequestPartitionId);
 
 		// mySearchDao.save is not supposed to return null, but in unit tests

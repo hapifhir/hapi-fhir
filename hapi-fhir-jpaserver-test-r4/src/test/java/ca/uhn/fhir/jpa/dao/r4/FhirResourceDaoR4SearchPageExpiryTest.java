@@ -142,14 +142,11 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
 				Search search1 = mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid1).orElseThrow(() -> new InternalErrorException("Search doesn't exist"));
 				assertNotNull(search1);
-				search1.setExpiryOrNull(null);
 				search1timestamp.set(search1.getCreated().getTime());
 				Search search2 = mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid2).orElseThrow(() -> new InternalErrorException("Search doesn't exist"));
 				assertNotNull(search2);
-				search2.setExpiryOrNull(null);
 				search2timestamp.set(search2.getCreated().getTime());
 				Search search3 = mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid3).orElseThrow(() -> new InternalErrorException("Search doesn't exist"));
-				search3.setExpiryOrNull(null);
 				assertNotNull(search3);
 				search3timestamp.set(search3.getCreated().getTime());
 			}
@@ -218,7 +215,6 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
 				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(bundleProvider.getUuid()).orElseThrow(() -> new InternalErrorException("Search doesn't exist"));
 				assertNotNull(search, "Failed after " + sw.toString());
-				search.setExpiryOrNull(null);
 				start.set(search.getCreated().getTime());
 				ourLog.info("Search was created: {}", new InstantType(new Date(start.get())));
 			}
@@ -323,10 +319,8 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
 				Search search1 = mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid1).orElseThrow(() -> new InternalErrorException("Search doesn't exist"));
 				assertNotNull(search1);
-				search1.setExpiryOrNull(null);
 				Search search3 = mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid3).orElseThrow(() -> new InternalErrorException("Search doesn't exist"));
 				assertNotNull(search3);
-				search3.setExpiryOrNull(null);
 				search1timestamp.set(search1.getCreated().getTime());
 				search3timestamp.set(search3.getCreated().getTime());
 			}
