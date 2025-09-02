@@ -94,14 +94,6 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 		Thread.sleep(20);
 		myStorageSettings.setExpireSearchResultsAfterMillis(10);
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
-		// Also set the expiry field to past so that the search would be stale
-		final String uuid1 = toSearchUuidFromLinkNext(resp1);
-		runInTransaction(() -> {
-			Search searchEntity = mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(IllegalStateException::new);
-			searchEntity.setExpiryOrNull(DateUtils.addSeconds(new Date(), -1));
-			mySearchEntityDao.save(searchEntity);
-		});
-
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 
 		try {
