@@ -370,7 +370,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			allResourceIds = mySearchCoordinatorSvc.getResources(
 					theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, null, requestPartitionId);
 		} catch (ResourceGoneException e) {
-			ourLog.error("Search has expired, submission is done with error: {}", e.getMessage());
+			ourLog.debug("Search has expired, submission is done with error: {}", e.getMessage());
 			allResourceIds = new ArrayList<>();
 		}
 

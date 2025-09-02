@@ -18,6 +18,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Patient;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -440,7 +441,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+			protected void doInTransactionWithoutResult(@NotNull TransactionStatus theArg) {
 				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(
 					() -> new InternalErrorException("Search doesn't exist"));
 				assertNotNull(search, "Failed after " + sw);
@@ -454,7 +455,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+			protected void doInTransactionWithoutResult(@NotNull TransactionStatus theArg) {
 				assertNotNull(mySearchEntityDao.findByUuidAndFetchIncludes(bundleProvider.getUuid()));
 			}
 		});
@@ -464,7 +465,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+			protected void doInTransactionWithoutResult(@NotNull TransactionStatus theArg) {
 				assertNotNull(mySearchEntityDao.findByUuidAndFetchIncludes(bundleProvider.getUuid()));
 			}
 		});
@@ -474,7 +475,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+			protected void doInTransactionWithoutResult(@NotNull TransactionStatus theArg) {
 				assertFalse(mySearchEntityDao.findByUuidAndFetchIncludes(bundleProvider.getUuid()).isPresent());
 			}
 		});

@@ -1024,10 +1024,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		outcome = myPagingProvider.retrieveResultList(new SystemRequestDetails(), outcome.getUuid());
 		assertEquals(10, outcome.getResources(0, 10).size());
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(5, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(4, myCaptureQueriesListener.countCommits());
 
 	}
 
@@ -1437,8 +1437,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// This really generates a surprising number of selects and commits. We
 		// could stand to reduce this!
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(71, myCaptureQueriesListener.countSelectQueries());
-		assertEquals(86, myCaptureQueriesListener.countCommits());
+		assertEquals(56, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(71, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 	}
 
@@ -1462,8 +1462,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		foundIds.sort(Comparator.naturalOrder());
 		assertEquals(ids, foundIds);
 
-		assertEquals(25, myCaptureQueriesListener.countSelectQueries());
-		assertEquals(24, myCaptureQueriesListener.countCommits());
+		assertEquals(22, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(21, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 	}
 
@@ -3748,17 +3748,17 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 
 		myCaptureQueriesListener.logInsertQueries();
-		assertEquals(16, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(15, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(201, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(5, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
 		myCaptureQueriesListener.clear();
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 
-		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
 		myCaptureQueriesListener.clear();

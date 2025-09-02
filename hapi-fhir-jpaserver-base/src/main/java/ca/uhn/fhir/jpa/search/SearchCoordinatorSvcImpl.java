@@ -334,9 +334,12 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 		List<JpaPid> pids = fetchResultPids(theUuid, theFrom, theTo, theRequestDetails, search, theRequestPartitionId);
 
-		// Update the search expiry time based on latest access to search result
-		search.setExpiryOrNull(DateUtils.addMinutes(new Date(), SEARCH_EXPIRY_OFFSET_MINUTES));
-		mySearchCacheSvc.save(search, theRequestPartitionId);
+		// Update the search expiry when it is more than halfway to the latest access to expiry time
+		Date expiry = search.getExpiryOrNull();
+		if (expiry != null && expiry.before(DateUtils.addMinutes(new Date(), SEARCH_EXPIRY_OFFSET_MINUTES / 2))) {
+			search.setExpiryOrNull(DateUtils.addMinutes(new Date(), SEARCH_EXPIRY_OFFSET_MINUTES));
+			mySearchCacheSvc.save(search, theRequestPartitionId);
+		}
 
 		ourLog.trace("Fetched {} results", pids.size());
 
