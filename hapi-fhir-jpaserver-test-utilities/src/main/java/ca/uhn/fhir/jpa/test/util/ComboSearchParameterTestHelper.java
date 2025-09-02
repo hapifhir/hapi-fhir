@@ -98,6 +98,9 @@ public class ComboSearchParameterTestHelper {
 		sp.setId("SearchParameter/patient-family");
 		sp.setType(Enumerations.SearchParamType.STRING);
 		sp.setCode("family");
+		sp.setName("family");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/" + sp.getId());
 		sp.setExpression("Patient.name.family");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
@@ -107,6 +110,9 @@ public class ComboSearchParameterTestHelper {
 		sp.setId("SearchParameter/patient-gender");
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setCode("gender");
+		sp.setName("gender");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/" + sp.getId());
 		sp.setExpression("Patient.gender");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
@@ -116,6 +122,10 @@ public class ComboSearchParameterTestHelper {
 		sp.setId("SearchParameter/patient-family-gender");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setName("patient-family-gender");
+		sp.setCode("patient-family-gender");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/" + sp.getId());
 		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
 		sp.addComponent()
 			.setExpression("Patient")

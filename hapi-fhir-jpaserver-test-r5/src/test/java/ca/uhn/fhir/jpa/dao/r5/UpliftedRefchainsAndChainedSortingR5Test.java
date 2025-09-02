@@ -148,6 +148,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		sp.setCode(subjectSp.getName());
 		sp.setName(subjectSp.getName());
 		sp.setUrl(subjectSp.getUri());
+		sp.setDescription("Description");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.setExpression("Bundle.entry[0].resource.as(Composition)");
@@ -1024,6 +1025,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		sp.setCode(subjectSp.getName());
 		sp.setName(subjectSp.getName());
 		sp.setUrl(subjectSp.getUri());
+		sp.setDescription("Description");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.setExpression(subjectSp.getPath());

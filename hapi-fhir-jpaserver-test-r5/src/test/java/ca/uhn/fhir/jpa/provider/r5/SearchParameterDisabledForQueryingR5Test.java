@@ -80,6 +80,8 @@ public class SearchParameterDisabledForQueryingR5Test extends BaseResourceProvid
 		sp.setId(code);
 		sp.setName(code);
 		sp.setCode(code);
+		sp.setUrl("http://localhost/" + sp.getId());
+		sp.setDescription("description");
 		sp.setType(Enumerations.SearchParamType.STRING);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.setExpression(expression);
