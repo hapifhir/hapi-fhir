@@ -34,10 +34,8 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.SearchParameter;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -177,7 +175,8 @@ public class SearchParameterDaoValidator {
 			throw new UnprocessableEntityException(Msg.code(2798) + String.format(SP_FIELD_IS_MISSING, "name"));
 		}
 
-		if (!theOptions.getOmittedFields().contains(RequisiteFields.DESCRIPTION) && isBlank(searchParameter.getDescription())) {
+		if (!theOptions.getOmittedFields().contains(RequisiteFields.DESCRIPTION)
+				&& isBlank(searchParameter.getDescription())) {
 			throw new UnprocessableEntityException(Msg.code(2799) + String.format(SP_FIELD_IS_MISSING, "description"));
 		}
 
