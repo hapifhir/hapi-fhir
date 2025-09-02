@@ -81,6 +81,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp.setId("SearchParameter/patient-gender");
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setCode("gender");
+		sp.setName("gender");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/" + sp.getId());
 		sp.setExpression("Patient.gender");
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
@@ -90,6 +93,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp.setId("SearchParameter/patient-family");
 		sp.setType(Enumerations.SearchParamType.STRING);
 		sp.setCode("family");
+		sp.setName("family");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/" + sp.getId());
 		sp.setExpression("Patient.name.family");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
@@ -100,6 +106,10 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
+		sp.setUrl("http://localhost/" + sp.getId());
+		sp.setCode("patient-gender-family");
+		sp.setName("patient-gender-family");
+		sp.setDescription("description");
 		sp.addComponent()
 			.setExpression("Patient")
 			.setDefinition("SearchParameter/patient-gender");
@@ -120,6 +130,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/coverage-beneficiary");
 		sp.setCode("beneficiary");
+		sp.setName("beneficiary");
+		sp.setDescription("Description");
+		sp.setUrl("http://localhost/" + sp.getId());
 		sp.setExpression("Coverage.beneficiary");
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.setStatus(PublicationStatus.ACTIVE);
@@ -129,6 +142,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/coverage-identifier");
 		sp.setCode("identifier");
+		sp.setName("identifier");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/" + sp.getId());
 		sp.setExpression("Coverage.identifier");
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setStatus(PublicationStatus.ACTIVE);
@@ -138,6 +154,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/coverage-beneficiary-identifier");
 		sp.setCode("coverage-beneficiary-identifier");
+		sp.setName("coverage-beneficiary-identifier");
+		sp.setUrl("http://localhost/" + sp.getId());
+		sp.setDescription("description");
 		sp.setExpression("Coverage.beneficiary");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(PublicationStatus.ACTIVE);
@@ -160,6 +179,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/observation-subject");
 		sp.setCode("observation-subject");
+		sp.setName(sp.getCode());
+		sp.setUrl("http://localhost/" + sp.getId());
+		sp.setDescription("description");
 		sp.setExpression("Observation.subject");
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.setStatus(PublicationStatus.ACTIVE);
@@ -169,6 +191,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/observation-uniq-subject");
 		sp.setCode("observation-uniq-subject");
+		sp.setName(sp.getCode());
+		sp.setUrl("http://localhost/" + sp.getId());
+		sp.setDescription("description");
 		sp.setExpression("Observation.subject");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(PublicationStatus.ACTIVE);
@@ -188,6 +213,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-identifier");
 		sp.setCode("identifier");
+		sp.setName("identifier");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/" + sp.getId());
 		sp.setExpression("Patient.identifier");
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setStatus(PublicationStatus.ACTIVE);
@@ -197,6 +225,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-uniq-identifier");
 		sp.setCode("patient-uniq-identifier");
+		sp.setName("patient-uniq-identifier");
+		sp.setDescription("description");
+		sp.setUrl("http//localhost/" + sp.getId());
 		sp.setExpression("Patient");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(PublicationStatus.ACTIVE);
@@ -216,6 +247,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-identifier");
 		sp.setCode("first-identifier");
+		sp.setName("first-identifier");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/" + sp.getId());
 		sp.setExpression("Patient.identifier.first()");
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setStatus(PublicationStatus.ACTIVE);
@@ -225,6 +259,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-uniq-identifier");
 		sp.setCode("patient-uniq-identifier");
+		sp.setName(sp.getCode());
+		sp.setUrl("http://localhost/" + sp.getId());
+		sp.setDescription("description");
 		sp.setExpression("Patient.identifier");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(PublicationStatus.ACTIVE);
@@ -244,6 +281,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp.setId("SearchParameter/patient-name");
 		sp.setType(Enumerations.SearchParamType.STRING);
 		sp.setCode("name");
+		sp.setName(sp.getCode());
+		sp.setUrl("http://localhost/" + sp.getId());
+		sp.setDescription("description");
 		sp.setExpression("Patient.name");
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
@@ -253,6 +293,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp.setId("SearchParameter/patient-organization");
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.setCode("organization");
+		sp.setName(sp.getCode());
+		sp.setUrl("http://localhost/" + sp.getId());
+		sp.setDescription("description");
 		sp.setExpression("Patient.managingOrganization");
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
@@ -263,6 +306,10 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
+		sp.setCode("patient-name-organization");
+		sp.setName(sp.getCode());
+		sp.setUrl("http://localhost/" + sp.getId());
+		sp.setDescription("description");
 		sp.addComponent()
 			.setExpression("Patient")
 			.setDefinition("SearchParameter/patient-name");
@@ -282,6 +329,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp.setId("SearchParameter/obs-effective");
 		sp.setType(Enumerations.SearchParamType.DATE);
 		sp.setCode("date");
+		sp.setName(sp.getCode());
+		sp.setUrl("http://localhost/" + sp.getId());
+		sp.setDescription("description");
 		sp.setExpression("Observation.effective");
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Observation");
@@ -291,6 +341,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp.setId("SearchParameter/obs-code");
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setCode("code");
+		sp.setName(sp.getCode());
+		sp.setUrl("http://localhost/" + sp.getId());
+		sp.setDescription("description");
 		sp.setExpression("Observation.code");
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Observation");
@@ -301,6 +354,10 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Observation");
+		sp.setCode("observation-date-code");
+		sp.setName(sp.getCode());
+		sp.setUrl("http://localhost/" + sp.getId());
+		sp.setDescription("description");
 		sp.setExpression("Observation.code");
 		sp.addComponent()
 			.setExpression("Observation")
@@ -321,6 +378,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp.setId("SearchParameter/obs-subject");
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.setCode("subject");
+		sp.setName("subject");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/" + sp.getId());
 		sp.setExpression("Observation.subject");
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Observation");
@@ -331,6 +391,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp.setId("SearchParameter/obs-effective");
 		sp.setType(Enumerations.SearchParamType.DATE);
 		sp.setCode("date");
+		sp.setName("date");
+		sp.setUrl("http://localhost/" + sp.getId());
+		sp.setDescription("description");
 		sp.setExpression("Observation.effective");
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Observation");
@@ -340,6 +403,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp.setId("SearchParameter/obs-code");
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setCode("code");
+		sp.setName("code");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/" + sp.getId());
 		sp.setExpression("Observation.code");
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Observation");
@@ -349,6 +415,10 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp.setId("SearchParameter/observation-subject-date-code");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.setName("observation-subject-date-code");
+		sp.setCode("observation-subject-date-code");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/" + sp.getId());
 		sp.addBase("Observation");
 		sp.setExpression("Observation.code");
 		sp.addComponent()
@@ -373,6 +443,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-uniq-identifier");
 		sp.setCode("patient-uniq-identifier");
+		sp.setName("patient-uniq-identifier");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/" + sp.getId());
 		sp.setExpression("Patient");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(PublicationStatus.ACTIVE);
@@ -394,6 +467,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-uniq-identifier");
 		sp.setCode("patient-uniq-identifier");
+		sp.setName("patient-uniq-identifier");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/" + sp.getId());
 		sp.setExpression("Patient");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(PublicationStatus.ACTIVE);
@@ -599,7 +675,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp = new SearchParameter();
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.setCode("patient");
-		sp.setName("patient");
+		sp.setName(sp.getCode());
+		sp.setUrl("http://localhost/SearchParameter/patient");
+		sp.setDescription("description");
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.addBase(ServiceRequest.class.getSimpleName());
 		sp.setExpression("ServiceRequest.subject.where(resolve() is Patient)");
@@ -608,7 +686,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp = new SearchParameter();
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.setCode("performer");
-		sp.setName("performer");
+		sp.setName(sp.getCode());
+		sp.setUrl("http://localhost/SearchParameter/performer");
+		sp.setDescription("description");
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.addBase(ServiceRequest.class.getSimpleName());
 		sp.setExpression("ServiceRequest.performer");
@@ -617,7 +697,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp = new SearchParameter();
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.setCode("identifier");
-		sp.setName("identifier");
+		sp.setName(sp.getCode());
+		sp.setUrl("http://localhost/SearchParameter/identifier");
+		sp.setDescription("description");
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.addBase(ServiceRequest.class.getSimpleName());
 		sp.setExpression("ServiceRequest.identifier");
@@ -626,6 +708,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-uniq-identifier");
 		sp.setCode("procreq-patient-performer-identifier");
+		sp.setName(sp.getCode());
+		sp.setUrl("http://localhost/" + sp.getId());
+		sp.setDescription("description");
 		sp.setExpression("ServiceRequest.patient");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(PublicationStatus.ACTIVE);
@@ -1339,9 +1424,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		logCapturedMessages();
 		assertThat(myMessages.toString()).doesNotContain("unique index");
 		myMessages.clear();
-
 	}
-
 
 	@Test
 	public void testUniqueValuesAreIndexed_DateAndToken() {
