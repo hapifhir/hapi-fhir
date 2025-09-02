@@ -175,9 +175,9 @@ public class FhirInstanceValidatorDstu3Test extends BaseTest {
 			ValidationResult result = val.validateWithResult(p);
 			assertFalse(result.isSuccessful());
 			List<SingleValidationMessage> all = logResultsAndReturnAll(result);
-			assertThat(all).hasSize(2);
-			assertEquals(ResultSeverityEnum.ERROR, all.get(0).getSeverity());
-			assertEquals("Unknown code 'urn:iso:std:iso:3166#QQ'", all.get(0).getMessage());
+			assertThat(all).hasSize(3);
+			assertEquals(ResultSeverityEnum.ERROR, all.get(1).getSeverity());
+			assertEquals("Unknown code 'urn:iso:std:iso:3166#QQ'", all.get(1).getMessage());
 		}
 	}
 
@@ -612,8 +612,8 @@ public class FhirInstanceValidatorDstu3Test extends BaseTest {
 
 		ValidationResult results = myVal.validateWithResult(is);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome).hasSize(1);
-		assertThat(outcome.get(0).getMessage()).startsWith("The Coding provided (http://dicom.nema.org/resources/ontology/DCM#BAR) was not found in the value set 'Acquisition Modality Codes' (http://hl7.org/fhir/ValueSet/dicom-cid29|20121129)");
+		assertThat(outcome).hasSize(2);
+		assertThat(outcome.get(1).getMessage()).startsWith("The Coding provided (http://dicom.nema.org/resources/ontology/DCM#BAR) was not found in the value set 'Acquisition Modality Codes' (http://hl7.org/fhir/ValueSet/dicom-cid29|20121129)");
 	}
 
 	/**

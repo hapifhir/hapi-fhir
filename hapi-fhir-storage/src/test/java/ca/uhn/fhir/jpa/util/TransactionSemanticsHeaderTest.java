@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.util;
 
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -52,5 +53,22 @@ class TransactionSemanticsHeaderTest {
 		String actual = header.toHeaderValue();
 		assertEquals("retryCount=4; minRetryDelay=100; maxRetryDelay=200; tryBatchAsTransactionFirst=true", actual);
 	}
+
+	@Test
+	public void testApplyToRequest() {
+		TransactionSemanticsHeader header = TransactionSemanticsHeader
+			.newBuilder()
+			.withRetryCount(4)
+			.withMinRetryDelay(100)
+			.withMaxRetryDelay(200)
+			.withTryBatchAsTransactionFirst(true)
+			.build();
+
+		SystemRequestDetails request = new SystemRequestDetails();
+		header.applyToRequest(request);
+
+		assertEquals("retryCount=4; minRetryDelay=100; maxRetryDelay=200; tryBatchAsTransactionFirst=true", request.getHeader(TransactionSemanticsHeader.HEADER_NAME));
+	}
+
 
 }

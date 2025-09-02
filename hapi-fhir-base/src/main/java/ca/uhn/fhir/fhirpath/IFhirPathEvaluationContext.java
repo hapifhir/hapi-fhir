@@ -29,6 +29,25 @@ import java.util.List;
 public interface IFhirPathEvaluationContext {
 
 	/**
+	 * The is an adapter for org.hl7.fhir.utilities.fhirpath.FHIRPathConstantEvaluationMode. At present, it matches
+	 * org.hl7.fhir.core 1-to-1.
+	 * </br>
+	 * Comments are provided here for convenience, but org.hl7.fhir.utilities.fhirpath.FHIRPathConstantEvaluationMode
+	 * should be considered the source of truth.
+	 *
+	 */
+	public enum ConstantEvaluationMode {
+		EXPLICIT, // the FHIRPathEngine has encountered an explicit reference to a constant e.g. %{token} that it does
+		// not recognise internally
+		NOVALUE, // the FHIRPathEngine was invoked with no focus provided
+		IMPLICIT_BEFORE, // The FHIRPath engine is about to evaluate a named property reference, but the Host
+		// Application is being offered an opportunity to provide it's own value first
+		IMPLICIT_AFTER // The FHIRPath engine has evaluated a property and found nothing, and perhaps the Host
+		// Application wants to offer a value (constant fall through). This only happens if
+		// checkWithHostServicesBeforeHand is true on the FHIRPath engine
+	}
+
+	/**
 	 * Evaluates the <code>resolve()</code> function and returns the target
 	 * of the resolution.
 	 *
@@ -41,12 +60,13 @@ public interface IFhirPathEvaluationContext {
 
 	/**
 	 *
-	 * @param appContext
-	 * @param name The name of the constant(s) to be resolved
-	 * @param beforeContext
+	 * @param theAppContext
+	 * @param theName The name of the constant(s) to be resolved
+	 * @param theConstantEvaluationMode
 	 * @return
 	 */
-	default List<IBase> resolveConstant(Object appContext, String name, boolean beforeContext) {
+	default List<IBase> resolveConstant(
+			Object theAppContext, String theName, ConstantEvaluationMode theConstantEvaluationMode) {
 		return null;
 	}
 }
