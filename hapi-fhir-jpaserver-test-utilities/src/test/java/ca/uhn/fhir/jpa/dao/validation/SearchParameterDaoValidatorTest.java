@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
@@ -138,6 +139,90 @@ public class SearchParameterDaoValidatorTest {
 		}
 	}
 
+	@ParameterizedTest
+	@EnumSource(SearchParameterDaoValidator.RequisiteFields.class)
+	public void validate_noOmittedFields_throwsIfNotThere(SearchParameterDaoValidator.RequisiteFields theFieldToOmit) {
+		// setup
+		SearchParameter sp = new SearchParameter();
+		sp.setName("name");
+		sp.setCode("code");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/SearchParameter/name");
+		sp.addBase(PATIENT);
+		sp.setType(TOKEN);
+		sp.setStatus(ACTIVE);
+		sp.setExpression("Patient.extension('http://foo')");
+		sp.addTarget(PATIENT);
+
+		switch (theFieldToOmit) {
+			case URL -> {
+				sp.setUrl(null);
+			}
+			case CODE -> {
+				sp.setCode(null);
+			}
+			case NAME -> {
+				sp.setName(null);
+			}
+			case DESCRIPTION -> {
+				sp.setDescription(null);
+			}
+		}
+
+		// test
+		try {
+			SearchParameterDaoValidator.SPValidatorOptions options = new SearchParameterDaoValidator.SPValidatorOptions();
+			for (SearchParameterDaoValidator.RequisiteFields f : SearchParameterDaoValidator.RequisiteFields.values()) {
+				if (f != theFieldToOmit) {
+					options.addOmittedField(f);
+				}
+			}
+			mySvc.validate(sp, options);
+		} catch (UnprocessableEntityException ex) {
+			assertTrue(
+				ex.getLocalizedMessage().contains("SearchParameter." + theFieldToOmit.getFieldName() + " is missing")
+			);
+		}
+	}
+
+	@ParameterizedTest
+	@EnumSource(SearchParameterDaoValidator.RequisiteFields.class)
+	public void validate_withAllowedOmitFields_works(SearchParameterDaoValidator.RequisiteFields theFieldToOmit) {
+		SearchParameter sp = new SearchParameter();
+		sp.setName("name");
+		sp.setCode("code");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/SearchParameter/name");
+		sp.addBase(PATIENT);
+		sp.setType(TOKEN);
+		sp.setStatus(ACTIVE);
+		sp.setExpression("Patient.extension('http://foo')");
+		sp.addTarget(PATIENT);
+
+		switch (theFieldToOmit) {
+			case URL -> {
+				sp.setUrl(null);
+			}
+			case CODE -> {
+				sp.setCode(null);
+			}
+			case NAME -> {
+				sp.setName(null);
+			}
+			case DESCRIPTION -> {
+				sp.setDescription(null);
+			}
+		}
+
+		// test
+		SearchParameterDaoValidator.SPValidatorOptions options = new SearchParameterDaoValidator.SPValidatorOptions();
+		options.addOmittedField(theFieldToOmit);
+		mySvc.validate(sp, options);
+
+		// validate - we should get here
+		assertTrue(true);
+	}
+
 	private void runOverrideBuiltInSPTest(SearchParameterDaoValidator.SPValidatorOptions theOptions) {
 		SearchParameter sp = new SearchParameter();
 		sp.setName("name");
@@ -221,7 +306,7 @@ public class SearchParameterDaoValidatorTest {
 
 		// test
 		try {
-			mySvc.validate(sp);
+			mySvc.validate(sp, new SearchParameterDaoValidator.SPValidatorOptions());
 			fail("SP missing requisite field " + theFieldToOmit + " still passes validation when it shouldn't.");
 		} catch (UnprocessableEntityException ex) {
 			assertTrue(ex.getMessage().contains(

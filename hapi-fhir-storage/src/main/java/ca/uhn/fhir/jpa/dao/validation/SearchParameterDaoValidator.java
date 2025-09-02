@@ -34,7 +34,10 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.SearchParameter;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -55,13 +58,46 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 public class SearchParameterDaoValidator {
 
+	/**
+	 * These are fields that are required on a SearchParameter resource.
+	 * But due to backwards compatibility, some checks were not ensuring these
+	 * were populated. So they can be optionally omitted.
+	 */
+	public enum RequisiteFields {
+		NAME("name"),
+		DESCRIPTION("description"),
+		URL("url"),
+		CODE("code");
+
+		private final String myFieldName;
+
+		RequisiteFields(String theFieldName) {
+			myFieldName = theFieldName;
+		}
+
+		public String getFieldName() {
+			return myFieldName;
+		}
+	}
+
 	public static class SPValidatorOptions {
 
 		public static SPValidatorOptions defaultOptions() {
-			return new SPValidatorOptions();
+			SPValidatorOptions options = new SPValidatorOptions();
+			for (RequisiteFields f : RequisiteFields.values()) {
+				options.addOmittedField(f);
+			}
+			return options;
 		}
 
 		private boolean myAllowOverriding = false;
+
+		/**
+		 * Collection of fields that should be omitted during validation.
+		 * These are fields that are, otherwise, required on earchParameter
+		 * resources (ie, have a cardinality >= 1)
+		 */
+		private final Set<RequisiteFields> myOmittedFields = new HashSet<>();
 
 		public boolean allowOverriding() {
 			return myAllowOverriding;
@@ -70,6 +106,14 @@ public class SearchParameterDaoValidator {
 		public SPValidatorOptions setAllowOverriding(boolean theAllowOverriding) {
 			myAllowOverriding = theAllowOverriding;
 			return this;
+		}
+
+		public void addOmittedField(RequisiteFields theField) {
+			myOmittedFields.add(theField);
+		}
+
+		public Set<RequisiteFields> getOmittedFields() {
+			return myOmittedFields;
 		}
 	}
 
@@ -129,19 +173,19 @@ public class SearchParameterDaoValidator {
 
 		// requisite fields: base, name, description, status, url, code
 
-		if (isBlank(searchParameter.getName())) {
+		if (!theOptions.getOmittedFields().contains(RequisiteFields.NAME) && isBlank(searchParameter.getName())) {
 			throw new UnprocessableEntityException(Msg.code(2798) + String.format(SP_FIELD_IS_MISSING, "name"));
 		}
 
-		if (isBlank(searchParameter.getDescription())) {
+		if (!theOptions.getOmittedFields().contains(RequisiteFields.DESCRIPTION) && isBlank(searchParameter.getDescription())) {
 			throw new UnprocessableEntityException(Msg.code(2799) + String.format(SP_FIELD_IS_MISSING, "description"));
 		}
 
-		if (isBlank(searchParameter.getUrl())) {
+		if (!theOptions.getOmittedFields().contains(RequisiteFields.URL) && isBlank(searchParameter.getUrl())) {
 			throw new UnprocessableEntityException(Msg.code(2800) + String.format(SP_FIELD_IS_MISSING, "url"));
 		}
 
-		if (isBlank(searchParameter.getCode())) {
+		if (!theOptions.getOmittedFields().contains(RequisiteFields.CODE) && isBlank(searchParameter.getCode())) {
 			throw new UnprocessableEntityException(Msg.code(2801) + String.format(SP_FIELD_IS_MISSING, "code"));
 		}
 
