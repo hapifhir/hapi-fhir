@@ -335,6 +335,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		List<JpaPid> pids = fetchResultPids(theUuid, theFrom, theTo, theRequestDetails, search, theRequestPartitionId);
 
 		// start tracking last-access time for this search when it is more than halfway to expire by created time
+		// we do this to avoid generating excessive write traffic on busy cached searches.
 		long expireAfterMillis = myStorageSettings.getExpireSearchResultsAfterMillis();
 		long createdCutoff = search.getCreated().getTime() + expireAfterMillis;
 		if (createdCutoff - System.currentTimeMillis() < expireAfterMillis / 2) {
