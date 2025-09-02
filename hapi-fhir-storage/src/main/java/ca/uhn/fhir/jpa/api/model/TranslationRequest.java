@@ -226,7 +226,7 @@ public class TranslationRequest {
 					.addCoding()
 					.setSystem(aCoding.getSystem())
 					.setCode(aCoding.getCode())
-					.setVersion(((Coding) aCoding).getVersion());
+					.setVersion(aCoding.getVersion());
 		}
 
 		TranslationRequest translationRequest = new TranslationRequest();
