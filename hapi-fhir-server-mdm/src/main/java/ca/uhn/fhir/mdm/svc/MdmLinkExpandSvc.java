@@ -31,6 +31,7 @@ import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,14 +46,13 @@ import java.util.stream.Collectors;
 public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
+	@Autowired
 	IMdmLinkDao myMdmLinkDao;
 
+	@Autowired
 	IIdHelperService myIdHelperService;
 
-	public MdmLinkExpandSvc(IMdmLinkDao theMdmLinkDao, IIdHelperService theIdHelperService) {
-		myMdmLinkDao = theMdmLinkDao;
-		myIdHelperService = theIdHelperService;
-	}
+	public MdmLinkExpandSvc() { }
 
 	/**
 	 * Given a source resource, perform MDM expansion and return all the resource IDs of all resources that are

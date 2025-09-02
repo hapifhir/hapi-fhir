@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.api.svc.IMdmClearHelperSvc;
 import ca.uhn.fhir.jpa.bulk.mdm.MdmClearHelperSvcImpl;
@@ -26,24 +28,46 @@ import ca.uhn.fhir.jpa.dao.mdm.JpaMdmLinkImplFactory;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDaoJpaImpl;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
+import ca.uhn.fhir.mdm.svc.MdmEidMatchOnlyLinkExpandSvc;
+import ca.uhn.fhir.mdm.svc.MdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.svc.MdmLinkExpandSvcHolder;
 import ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc;
+import ca.uhn.fhir.mdm.util.EIDHelper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class MdmJpaConfig {
-	/*
-	@Bean
-	EIDHelper eidHelper(FhirContext theFhirContext, IMdmSettings theMdmSettings) {
-		return new EIDHelper(theFhirContext, theMdmSettings);
-	}*/
 
 	@Bean
-	public MdmLinkExpandSvcHolder mdmLinkExpandSvc() {
-		return new MdmLinkExpandSvcHolder();
+	public EIDHelper eidHelper(FhirContext theFhirContext, IMdmSettings theMdmSettings) {
+		return new EIDHelper(theFhirContext, theMdmSettings);
+	}
+
+	@Bean
+	public MdmLinkExpandSvcHolder mdmLinkExpandSvcHolder(IMdmSettings theMdmSettings,
+														 IMdmLinkExpandSvc theMdmLinkExpandSvc,
+														 MdmEidMatchOnlyLinkExpandSvc theMdmEidMatchOnlyLinkExpandSvc,
+														 EIDHelper theEidHelper) {
+		return new MdmLinkExpandSvcHolder(theMdmSettings, theMdmLinkExpandSvc, theMdmEidMatchOnlyLinkExpandSvc, theEidHelper);
+	}
+
+
+	@Bean
+	//@Qualifier("mdmEidMatchOnlyLinkExpandSvc")
+	public MdmEidMatchOnlyLinkExpandSvc mdmEidMatchOnlyLinkExpandSvc(DaoRegistry theDaoRegistry, EIDHelper theEidHelper) {
+		return new MdmEidMatchOnlyLinkExpandSvc(theDaoRegistry, theEidHelper);
+	}
+
+	@Bean
+	@Primary
+	public IMdmLinkExpandSvc mdmLinkExpandSvc() {
+		return new MdmLinkExpandSvc();
 	}
 
 	@Bean

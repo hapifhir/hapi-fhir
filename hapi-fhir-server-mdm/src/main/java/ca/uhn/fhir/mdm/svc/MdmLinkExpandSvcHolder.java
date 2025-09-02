@@ -1,50 +1,61 @@
 package ca.uhn.fhir.mdm.svc;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmModeEnum;
-import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.util.EIDHelper;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class MdmLinkExpandSvcHolder {
 
-	private static volatile IMdmLinkExpandSvc instance;
+	private IMdmLinkExpandSvc myInstance;
 
 	private IMdmSettings myMdmSettings;
 
-	@Autowired
-	private IMdmLinkDao myMdmLinkDao;
+	private final EIDHelper myEidHelper;
 
-	@Autowired
-	private IIdHelperService myIdHelperService;
+	private final IMdmLinkExpandSvc myMdmLinkExpandSvc;
 
-	@Autowired
-	private DaoRegistry myDaoRegistry;
+	private final MdmEidMatchOnlyLinkExpandSvc myMdmEidMatchOnlyLinkExpandSvc;
 
-	@Autowired
-	private FhirContext myFhirContext;
 
-	public MdmLinkExpandSvcHolder() {}
-
-	public IMdmLinkExpandSvc getInstance() {
-		if (instance == null) {
-			synchronized (MdmLinkExpandSvcHolder.class) {
-				if (instance == null) {
-					instance = createInstance();
-				}
-			}
-		}
-		return instance;
+	public MdmLinkExpandSvcHolder(IMdmSettings theMdmSettings,
+								  IMdmLinkExpandSvc theMdmLinkExpandSvc,
+								  MdmEidMatchOnlyLinkExpandSvc theMdmEidMatchOnlyLinkExpandSvc,
+								  EIDHelper theEidHelper) {
+		myMdmSettings = theMdmSettings;
+		myMdmLinkExpandSvc = theMdmLinkExpandSvc;
+		myMdmEidMatchOnlyLinkExpandSvc = theMdmEidMatchOnlyLinkExpandSvc;
+		myEidHelper = theEidHelper;
 	}
 
-	private IMdmLinkExpandSvc createInstance() {
-		if (myMdmSettings == null) {
-			throw new IllegalStateException("IMdmSettings must be set before calling getInstance()");
+	public IMdmLinkExpandSvc getInstance() {
+		if (myInstance != null) {
+			return myInstance;
 		}
+
+		myInstance = determineInstanceToUse();
+
+		return myInstance;
+	}
+
+
+	private IMdmLinkExpandSvc determineInstanceToUse() {
+		boolean isMatchOnly = myMdmSettings.getMode() == MdmModeEnum.MATCH_ONLY;
+		boolean hasEidSystems = false;
+		if (myMdmSettings.getMdmRules() != null) {
+			hasEidSystems = myMdmSettings.getMdmRules().getEnterpriseEIDSystems() != null
+				&& !myMdmSettings.getMdmRules().getEnterpriseEIDSystems().isEmpty();
+		}
+		if (isMatchOnly && hasEidSystems) {
+			return myMdmEidMatchOnlyLinkExpandSvc;
+		} else {
+			return myMdmLinkExpandSvc;
+		}
+	}
+
+/*
+	private IMdmLinkExpandSvc createInstance() {
+
 		boolean isMatchOnly = myMdmSettings.getMode() == MdmModeEnum.MATCH_ONLY;
 		boolean hasEidSystems = false;
 		if (myMdmSettings.getMdmRules() != null) {
@@ -59,7 +70,10 @@ public class MdmLinkExpandSvcHolder {
 		}
 	}
 
-	public void setMyMdmSettings(IMdmSettings theMdmSettings) {
+*/
+	public void setMdmSettings(IMdmSettings theMdmSettings) {
 		myMdmSettings = theMdmSettings;
+		myEidHelper.setMdmSettings(myMdmSettings);
+		myInstance = determineInstanceToUse();
 	}
 }

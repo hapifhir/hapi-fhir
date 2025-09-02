@@ -37,11 +37,17 @@ import java.util.stream.Collectors;
 public class EIDHelper {
 
 	private final FhirContext myFhirContext;
-	private final IMdmSettings myMdmSettings;
+
+	private IMdmSettings myMdmSettings;
 
 	@Autowired
 	public EIDHelper(FhirContext theFhirContext, IMdmSettings theMdmSettings) {
 		myFhirContext = theFhirContext;
+		myMdmSettings = theMdmSettings;
+	}
+
+
+	public void setMdmSettings(IMdmSettings theMdmSettings) {
 		myMdmSettings = theMdmSettings;
 	}
 

@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 
@@ -17,7 +18,7 @@ public class MdmEidMatchOnlyLinkExpandSvc implements IMdmLinkExpandSvc {
 	private DaoRegistry myDaoRegistry;
 	private EIDHelper myEidHelper;
 
-	// create constructor with args to initialize fields
+	@Autowired
 	public MdmEidMatchOnlyLinkExpandSvc(DaoRegistry theDaoRegistry, EIDHelper theEidHelper) {
 		myDaoRegistry = theDaoRegistry;
 		myEidHelper = theEidHelper;
