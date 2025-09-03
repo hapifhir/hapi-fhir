@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.jpa.bulk.export.job;
 
-import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
+import ca.uhn.fhir.mdm.svc.MdmExpansionCacheSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

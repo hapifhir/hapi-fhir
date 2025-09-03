@@ -21,6 +21,12 @@ import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.MdmModeEnum;
+import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
+import ca.uhn.fhir.mdm.svc.MdmLinkExpandersHolder;
+import ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -33,6 +39,7 @@ import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Sets;
+import jakarta.persistence.Id;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -40,6 +47,7 @@ import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
@@ -48,6 +56,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
@@ -102,6 +111,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private IBatch2WorkChunkRepository myWorkChunkRepository;
 	@Autowired
 	private IInterceptorService myInterceptorService;
+	@Autowired
+	private MdmSettings myMdmSettings;
 
 	@BeforeEach
 	public void beforeEach() {
@@ -663,6 +674,76 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 	@Nested
 	public class GroupBulkExportTests {
+
+		@Test
+		void testGroupExportWithMdmEnabled_EidMatchOnly() {
+			final String patientEidSys = "http://patient-eid-sys";
+			myMdmSettings.setEnabled(true);
+			myMdmSettings.setMdmMode(MdmModeEnum.MATCH_ONLY);
+			MdmRulesJson rules = new MdmRulesJson();
+			rules.setMdmTypes(List.of("Patient"));
+			rules.addEnterpriseEIDSystem("Patient", patientEidSys);
+			myMdmSettings.setMdmRules(rules);
+			MdmLinkExpandersHolder holder = myAppCtx.getBean(MdmLinkExpandersHolder.class);
+			holder.setMdmSettings(myMdmSettings);
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+
+			//In this test, we create two patients with the same Eid value for the eid system specified in mdm rules
+			//and 2 observations referencing one of each of these patients
+			//Create a group that contains one of the patients.
+			//When we export the group, we should get both patients and the 2 observations
+			//in the export as the other patient should be mdm expanded
+			//based on having the same eid value
+			Patient pat1 = new Patient();
+			pat1.setId("pat-1");
+			pat1.addIdentifier(new Identifier().setSystem(patientEidSys).setValue("the-patient-eid-value"));
+			bb.addTransactionUpdateEntry(pat1);
+
+			Observation obs1 = new Observation();
+			obs1.setId("obs-1");
+			obs1.setSubject(new Reference("Patient/pat-1"));
+			bb.addTransactionUpdateEntry(obs1);
+
+			Patient pat2 = new Patient();
+			pat2.setId("pat-2");
+			pat2.addIdentifier(new Identifier().setSystem(patientEidSys).setValue("the-patient-eid-value"));
+			bb.addTransactionUpdateEntry(pat2);
+
+			Observation obs2 = new Observation();
+			obs2.setId("obs-2");
+			obs2.setSubject(new Reference("Patient/pat-2"));
+			bb.addTransactionUpdateEntry(obs2);
+
+			Group group = new Group();
+			group.setId("Group/mdm-group");
+			group.setActive(true);
+			group.addMember().getEntity().setReference("Patient/pat-1");
+			bb.addTransactionUpdateEntry(group);
+
+			myClient.transaction().withBundle(bb.getBundle()).execute();
+
+			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(new HashSet<>(), new HashSet<>(), "mdm-group", true);
+			Map<String, List<IBaseResource>> exportedResourcesMap = convertJobResultsToResources(bulkExportJobResults);
+
+			assertThat(exportedResourcesMap.keySet()).hasSize(3);
+			assertThat(exportedResourcesMap).containsKey("Group");
+			List<IBaseResource> exportedPatients = exportedResourcesMap.get("Patient");
+			assertThat(exportedPatients).hasSize(2);
+			assertThat(exportedPatients)
+				.extracting(IBaseResource::getIdElement)
+				.extracting(IIdType::toUnqualifiedVersionless)
+				.extracting(IIdType::getValue)
+				.containsExactly("Patient/pat-1", "Patient/pat-2");
+
+			List<IBaseResource> exportedObservations = exportedResourcesMap.get("Observation");
+			assertThat(exportedObservations).hasSize(2);
+			assertThat(exportedObservations)
+				.extracting(IBaseResource::getIdElement)
+				.extracting(IIdType::toUnqualifiedVersionless)
+				.extracting(IIdType::getValue)
+				.containsExactly("Observation/obs-1", "Observation/obs-2");
+
+		}
 
 		@Test
 		public void testGroupExportSuccessfulyExportsPatientForwardReferences() {
@@ -1486,18 +1567,23 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	}
 
 	BulkExportJobResults startGroupBulkExportJobAndAwaitCompletion(HashSet<String> theResourceTypes, HashSet<String> theFilters, String theGroupId) {
-		return startBulkExportJobAndAwaitCompletion(BulkExportJobParameters.ExportStyle.GROUP, theResourceTypes, theFilters, theGroupId);
+		return startBulkExportJobAndAwaitCompletion(BulkExportJobParameters.ExportStyle.GROUP, theResourceTypes, theFilters, theGroupId, false);
+	}
+
+	BulkExportJobResults startGroupBulkExportJobAndAwaitCompletion(HashSet<String> theResourceTypes, HashSet<String> theFilters, String theGroupId, boolean theMdmExpandEnabled) {
+		return startBulkExportJobAndAwaitCompletion(BulkExportJobParameters.ExportStyle.GROUP, theResourceTypes, theFilters, theGroupId, theMdmExpandEnabled);
 	}
 
 	BulkExportJobResults startSystemBulkExportJobAndAwaitCompletion(Set<String> theResourceTypes, Set<String> theFilters) {
-		return startBulkExportJobAndAwaitCompletion(BulkExportJobParameters.ExportStyle.SYSTEM, theResourceTypes, theFilters, null);
+		return startBulkExportJobAndAwaitCompletion(BulkExportJobParameters.ExportStyle.SYSTEM, theResourceTypes, theFilters, null, false);
 	}
 
 	BulkExportJobResults startBulkExportJobAndAwaitCompletion(
 		BulkExportJobParameters.ExportStyle theExportStyle,
 		Set<String> theResourceTypes,
 		Set<String> theFilters,
-		String theGroupOrPatientId
+		String theGroupOrPatientId,
+		boolean mdmExpandEnabled
 	) {
 		Parameters parameters = new Parameters();
 
@@ -1516,6 +1602,10 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				JpaConstants.PARAM_EXPORT_TYPE,
 				String.join(",", theResourceTypes)
 			);
+		}
+
+		if (mdmExpandEnabled) {
+			parameters.addParameter(JpaConstants.PARAM_EXPORT_MDM, true);
 		}
 
 
@@ -1624,6 +1714,6 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	}
 
 	private BulkExportJobResults startPatientBulkExportJobAndAwaitResults(HashSet<String> theTypes, HashSet<String> theFilters, String thePatientId) {
-		return startBulkExportJobAndAwaitCompletion(BulkExportJobParameters.ExportStyle.PATIENT, theTypes, theFilters, thePatientId);
+		return startBulkExportJobAndAwaitCompletion(BulkExportJobParameters.ExportStyle.PATIENT, theTypes, theFilters, thePatientId, false);
 	}
 }
