@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk.export.mdm;
+package ca.uhn.fhir.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -8,8 +8,6 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
-import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
@@ -36,7 +34,7 @@ public class BulkExportMDMResourceExpander implements IBulkExportMDMResourceExpa
 	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
 
 	@Autowired
-	private IMdmLinkDao<JpaPid, MdmLink> myMdmLinkDao;
+	private IMdmLinkDao myMdmLinkDao;
 
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;

@@ -39,8 +39,6 @@ import ca.uhn.fhir.jpa.api.svc.ISearchUrlJobMaintenanceSvc;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
-import ca.uhn.fhir.jpa.bulk.export.mdm.BulkExportMDMResourceExpander;
-import ca.uhn.fhir.jpa.bulk.export.mdm.IBulkExportMDMResourceExpander;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportJobSchedulingHelperImpl;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportHelperService;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
@@ -1052,8 +1050,5 @@ public class JpaConfig {
 		return new PartitionedIdModeVerificationSvc(thePartitionSettings, theHibernatePropertiesProvider, theTxManager);
 	}
 
-	@Bean
-	public IBulkExportMDMResourceExpander bulkExportMDMResourceExpander() {
-		return new BulkExportMDMResourceExpander();
-	}
+
 }

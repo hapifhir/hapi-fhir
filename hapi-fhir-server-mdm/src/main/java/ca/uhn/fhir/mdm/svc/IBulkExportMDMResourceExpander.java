@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk.export.mdm;
+package ca.uhn.fhir.mdm.svc;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;

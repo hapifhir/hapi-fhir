@@ -58,7 +58,7 @@ public class MdmSearchExpansionSvc {
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Autowired
-	private MdmLinkExpandSvcHolder myMdmLinkExpandSvcHolder;
+	private MdmLinkExpandersHolder myMdmLinkExpandSvcHolder;
 
 	// @Autowired
 	// private IMdmLinkExpandSvc mdmLinkExpandSvc;
@@ -144,7 +144,7 @@ public class MdmSearchExpansionSvc {
 			IParamTester theParamTester,
 			MdmSearchExpansionResults theResultsToPopulate) {
 
-		IMdmLinkExpandSvc mdmLinkExpandSvc = myMdmLinkExpandSvcHolder.getInstance();
+		IMdmLinkExpandSvc mdmLinkExpandSvc = myMdmLinkExpandSvcHolder.getLinkExpandSvcInstance();
 
 		List<IQueryParameterType> toRemove = new ArrayList<>();
 		List<IQueryParameterType> toAdd = new ArrayList<>();
@@ -242,7 +242,7 @@ public class MdmSearchExpansionSvc {
 		} else if (mdmExpand) {
 			ourLog.debug("_id parameter must be expanded out from: {}", id.getValue());
 
-			IMdmLinkExpandSvc mdmLinkExpandSvc = myMdmLinkExpandSvcHolder.getInstance();
+			IMdmLinkExpandSvc mdmLinkExpandSvc = myMdmLinkExpandSvcHolder.getLinkExpandSvcInstance();
 			Set<String> expandedResourceIds = mdmLinkExpandSvc.expandMdmBySourceResourceId(theRequestPartitionId, id);
 
 			if (expandedResourceIds.isEmpty()) {

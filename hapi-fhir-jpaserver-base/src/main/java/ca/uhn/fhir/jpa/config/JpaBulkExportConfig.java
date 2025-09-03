@@ -24,12 +24,13 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
-import ca.uhn.fhir.jpa.bulk.export.mdm.IBulkExportMDMResourceExpander;
+import ca.uhn.fhir.mdm.svc.IBulkExportMDMResourceExpander;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportHelperService;
 import ca.uhn.fhir.jpa.bulk.export.svc.JpaBulkExportProcessor;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.mdm.svc.MdmLinkExpandersHolder;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import jakarta.persistence.EntityManager;
 import org.springframework.context.annotation.Bean;
@@ -48,7 +49,7 @@ public class JpaBulkExportConfig {
 			EntityManager theEntityManager,
 			IHapiTransactionService theHapiTransactionService,
 			ISearchParamRegistry theSearchParamRegistry,
-			IBulkExportMDMResourceExpander theBulkExportMDMResourceExpander) {
+			MdmLinkExpandersHolder theMdmLinkExpandersHolder) {
 		return new JpaBulkExportProcessor(
 				theFhirContext,
 				theBulkExportHelperService,
@@ -59,7 +60,7 @@ public class JpaBulkExportConfig {
 				theEntityManager,
 				theHapiTransactionService,
 				theSearchParamRegistry,
-				theBulkExportMDMResourceExpander);
+				theMdmLinkExpandersHolder);
 	}
 
 	@Bean

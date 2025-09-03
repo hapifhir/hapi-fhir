@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
-import ca.uhn.fhir.jpa.bulk.export.mdm.IBulkExportMDMResourceExpander;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -38,6 +37,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.svc.MdmLinkExpandersHolder;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -86,7 +86,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	private EntityManager myEntityManager;
 	private IHapiTransactionService myHapiTransactionService;
 	private ISearchParamRegistry mySearchParamRegistry;
-	private IBulkExportMDMResourceExpander myBulkExportMDMResourceExpander;
+	private MdmLinkExpandersHolder myMdmLinkExpandersHolder;
 
 	@Autowired
 	public JpaBulkExportProcessor(
@@ -99,7 +99,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			EntityManager theEntityManager,
 			IHapiTransactionService theHapiTransactionService,
 			ISearchParamRegistry theSearchParamRegistry,
-			IBulkExportMDMResourceExpander theBulkExportMDMResourceExpander) {
+			MdmLinkExpandersHolder theMdmLinkExpandersHolder) {
 		myContext = theContext;
 		myBulkExportHelperSvc = theBulkExportHelperSvc;
 		myStorageSettings = theStorageSettings;
@@ -109,7 +109,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		myEntityManager = theEntityManager;
 		myHapiTransactionService = theHapiTransactionService;
 		mySearchParamRegistry = theSearchParamRegistry;
-		myBulkExportMDMResourceExpander = theBulkExportMDMResourceExpander;
+		myMdmLinkExpandersHolder = theMdmLinkExpandersHolder;
 	}
 
 	@Override
@@ -351,7 +351,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	public void expandMdmResources(List<IBaseResource> theResources) {
 		for (IBaseResource resource : theResources) {
 			if (!PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(resource.fhirType())) {
-				myBulkExportMDMResourceExpander.annotateResource(resource);
+				myMdmLinkExpandersHolder.getBulkExportMDMResourceExpanderInstance().annotateResource(resource);
 			}
 		}
 	}
@@ -408,7 +408,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		if (theParameters.isExpandMdm()) {
 			RequestPartitionId partitionId = theParameters.getPartitionIdOrAllPartitions();
 			patientPidsToExport.addAll(
-					myBulkExportMDMResourceExpander.expandGroup(theParameters.getGroupId(), partitionId));
+					myMdmLinkExpandersHolder.getBulkExportMDMResourceExpanderInstance().expandGroup(theParameters.getGroupId(), partitionId));
 		}
 		return patientPidsToExport;
 	}

@@ -16,12 +16,16 @@ import java.util.*;
 public class MdmEidMatchOnlyLinkExpandSvc implements IMdmLinkExpandSvc {
 
 	private DaoRegistry myDaoRegistry;
+
 	private EIDHelper myEidHelper;
 
 	@Autowired
-	public MdmEidMatchOnlyLinkExpandSvc(DaoRegistry theDaoRegistry, EIDHelper theEidHelper) {
+	public MdmEidMatchOnlyLinkExpandSvc(DaoRegistry theDaoRegistry) {
 		myDaoRegistry = theDaoRegistry;
-		myEidHelper = theEidHelper;
+	}
+
+	public void setMyEidHelper(EIDHelper myEidHelper) {
+		this.myEidHelper = myEidHelper;
 	}
 
 	@Override
