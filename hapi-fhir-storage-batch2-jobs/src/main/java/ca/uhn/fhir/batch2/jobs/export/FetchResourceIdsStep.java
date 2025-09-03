@@ -50,7 +50,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsStep.class);
 
 	@Autowired
-	private IBulkExportProcessor myBulkExportProcessor;
+	private IBulkExportProcessor<?> myBulkExportProcessor;
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
@@ -77,7 +77,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		providerParams.setPatientIds(params.getPatientIds());
 		providerParams.setExpandMdm(params.isExpandMdm());
 		providerParams.setPartitionId(params.getPartitionId());
-		// This step doesn't care about this param. Included here to avoid confusing log readers
+		// This step doesn't use this param. Included here for logging purpose
 		providerParams.setIncludeHistory(params.isIncludeHistory());
 
 		/*
@@ -118,8 +118,9 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 						"Running FetchResourceIdsStep for resource type: {} with params: {}",
 						resourceType,
 						providerParams);
-				Iterator<IResourcePersistentId> pidIterator =
-						myBulkExportProcessor.getResourcePidIterator(providerParams);
+				@SuppressWarnings("unchecked")
+				Iterator<IResourcePersistentId<?>> pidIterator =
+					(Iterator<IResourcePersistentId<?>>) myBulkExportProcessor.getResourcePidIterator(providerParams);
 				List<TypedPidJson> idsToSubmit = new ArrayList<>();
 
 				int estimatedChunkSize = 0;
@@ -189,7 +190,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 	}
 
 	@VisibleForTesting
-	public void setBulkExportProcessorForUnitTest(IBulkExportProcessor theBulkExportProcessor) {
+	public void setBulkExportProcessorForUnitTest(IBulkExportProcessor<?> theBulkExportProcessor) {
 		myBulkExportProcessor = theBulkExportProcessor;
 	}
 }
