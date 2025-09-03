@@ -61,6 +61,13 @@ import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_LAST_UPDATED;
  * This class is a {@link IValidationSupport Validation support} module that loads
  * validation resources (StructureDefinition, ValueSet, CodeSystem, etc.) from the resources
  * persisted in the JPA server.
+ *
+ * Note that this class is aware of the resource business version (not to be confused with the FHIR version or
+ * meta.versionId) for CodeSystem, ValueSet, and StructureDefinition resources.
+ * For example, a request for <code>http://example.com/StructureDefinition/ABC|1.2.3</code> will
+ * return the resource that matches the URL http://example.com/StructureDefinition/ABC and version 1.2.3.
+ * Unversioned URLs will match the most recently updated resource by using the meta.lastUpdated field.
+ *
  */
 public class JpaPersistedResourceValidationSupport implements IValidationSupport {
 
