@@ -38,8 +38,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("LoggingSimilarMessage")
-public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(TermConceptMappingSvcImplTest.class);
+public class TermConceptMappingSvcImplR4Test extends BaseTermR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(TermConceptMappingSvcImplR4Test.class);
 
 	private IIdType myConceptMapId;
 
