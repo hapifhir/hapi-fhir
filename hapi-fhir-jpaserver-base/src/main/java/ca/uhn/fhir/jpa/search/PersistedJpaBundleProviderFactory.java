@@ -68,10 +68,15 @@ public class PersistedJpaBundleProviderFactory {
 	}
 
 	private Predicate<? super IBaseResource> buildIdPredicateFromParameters(RequestDetails theRequest) {
+		if (theRequest == null || theRequest.getParameters() == null) {
+			return null;
+		}
+
 		String[] idParam = theRequest.getParameters().get(SP_RES_ID);
 		if (idParam == null || idParam.length == 0) {
 			return null;
 		}
+
 		return res -> List.of(idParam)
 				.contains(res.getIdElement().toUnqualifiedVersionless().getValue());
 	}
