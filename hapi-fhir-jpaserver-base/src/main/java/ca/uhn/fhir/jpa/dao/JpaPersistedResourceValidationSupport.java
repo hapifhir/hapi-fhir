@@ -224,8 +224,8 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				break;
 			case "StructureDefinition": {
 				// Don't allow the core FHIR definitions to be overwritten
-				if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
-					String typeName = theUri.substring("http://hl7.org/fhir/StructureDefinition/".length());
+				if (IValidationSupport.isBaseStructureDefinition(theUri)) {
+					String typeName = theUri.substring(URL_PREFIX_STRUCTURE_DEFINITION.length());
 					if (myFhirContext.getElementDefinition(typeName) != null) {
 						return null;
 					}
@@ -238,6 +238,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 					params.add(StructureDefinition.SP_URL, new UriParam(theUri.substring(0, versionSeparator)));
 				} else {
 					params.add(StructureDefinition.SP_URL, new UriParam(theUri));
+					// When no version is specified, we will take the most recently updated resource as the current version
 					params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));
 				}
 				search = myDaoRegistry.getResourceDao("StructureDefinition").search(params, new SystemRequestDetails());

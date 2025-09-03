@@ -487,14 +487,13 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			// TODO JDJD - add issue URL when you make one
 			// As part of <issue>, we now use server-assigned IDs
 			assertThat(resource.getIdElement().toString()).matches("CodeSystem/[0-9]+/_history/1");
-//			assertEquals("CodeSystem/shorthand-code-system/_history/1", resource.getIdElement().toString());
 		});
 
 		myInterceptorService.unregisterInterceptor(myBinaryStorageInterceptor);
 	}
 
 	@Test
-	public void testNumericIdsInstalledWithNpmPrefix() throws Exception {
+	void testNumericIdsInstalled_replacesWithServerId() throws Exception {
 			myStorageSettings.setAllowExternalReferences(true);
 
 		// Load a copy of hl7.fhir.uv.shorthand-0.12.0, but with id set to 1 instead of "shorthand-code-system"
@@ -502,7 +501,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.13.0", bytes);
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.13.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
-		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
+		myPackageInstallerSvc.install(spec);
 		// Be sure no further communication with the server
 		myServer.stopServer();
 
@@ -516,12 +515,32 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			// TODO JDJD - add issue URL when you make one
 			// As part of <issue>, we now use server-assigned IDs
 			assertThat(resource.getIdElement().toString()).matches("CodeSystem/[0-9]+/_history/1");
-//			assertEquals("CodeSystem/npm-1/_history/1", resource.getIdElement().toString());
 		});
-
 	}
 
-	//todo jdjd add test for npm prefix w/ search params
+	@Test
+	void testSearchParametersWithNumericIds_installedWithNpmPrefix() throws Exception {
+		myStorageSettings.setAllowExternalReferences(true);
+
+		// Load a copy of hl7.fhir.uv.shorthand-0.12.0, but with id set to 1 instead of "shorthand-code-system"
+		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/test_sp_numeric_id.tgz");
+		myFakeNpmServlet.responses.put("/test-exchange.fhir.us.com/2.1.1", bytes);
+
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-exchange.fhir.us.com").setVersion("2.1.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		myPackageInstallerSvc.install(spec);
+		// Be sure no further communication with the server
+		myServer.stopServer();
+
+		// Search for the installed resource
+		runInTransaction(() -> {
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.add(SearchParameter.SP_URL, new UriParam("http://test-exchange.com/fhir/us/providerdataexchange/SearchParameter/test-exchange-practitionerrole-network-id"));
+			IBundleProvider result = mySearchParameterDao.search(map);
+			assertEquals(1, result.sizeOrThrowNpe());
+			IBaseResource resource = result.getResources(0, 1).get(0);
+			assertThat(resource.getIdElement().toString()).matches("SearchParameter/npm-1234/_history/1");
+		});
+	}
 
 	@Test
 	public void testInstallR4Package_NonConformanceResources() throws Exception {

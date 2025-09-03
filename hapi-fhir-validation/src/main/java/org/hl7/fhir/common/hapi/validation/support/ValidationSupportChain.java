@@ -606,6 +606,7 @@ public class ValidationSupportChain implements IValidationSupport {
 						String version = terser.getSinglePrimitiveValueOrNull(structureDefinition, "version");
 
 						// Most queries to the base structure definitions are versionless
+						// And they shouldn't be overwritten anyways
 						// So we'll cache them without version.
 						boolean shouldAppendVersionToUrl = !Strings.isNullOrEmpty(url)
 								&& version != null
@@ -734,13 +735,6 @@ public class ValidationSupportChain implements IValidationSupport {
 		Function<IValidationSupport, byte[]> invoker = v -> v.fetchBinary(theKey);
 		ResourceByUrlKey<byte[]> key = new ResourceByUrlKey<>(ResourceByUrlKey.TypeEnum.BINARY, theKey);
 		return fetchValue(key, invoker, theKey);
-	}
-
-	public IBaseResource fetchUnversionedStructureDefinition(String theUrl) {
-		Function<IValidationSupport, IBaseResource> invoker = v -> v.fetchStructureDefinition(theUrl);
-		ResourceByUrlKey<IBaseResource> key =
-				new ResourceByUrlKey<>(ResourceByUrlKey.TypeEnum.STRUCTUREDEFINITION, theUrl);
-		return fetchValue(key, invoker, theUrl);
 	}
 
 	@Override
