@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 7233
+title: "Two issues have been fixed with the `$translate` operation: A hardcoded reference to FHIR R4 meant that the operation failed on R5 servers. Also, the R5 version of this operation renamed several parameters to make their meaning more explicit. The resource provider has been adjusted to support both the R4 and R5 parameter names."

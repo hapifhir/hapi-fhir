@@ -19,9 +19,11 @@
  */
 package ca.uhn.fhir.jpa.model.util;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.HapiExtensions;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.Set;
 
@@ -311,6 +313,31 @@ public class JpaConstants {
 			Set.of("Provenance", "List", "Group");
 	public static final String HAPI_DATABASE_PARTITION_MODE = "hapi.database_partition_mode";
 	public static final String HAPI_DATABASE_PARTITION_MODE_DEFAULT = "false";
+	public static final String OPERATION_BULK_PATCH = "$hapi.fhir.bulk-patch";
+	public static final String OPERATION_BULK_PATCH_REWRITE = "$hapi.fhir.bulk-patch-rewrite-history";
+	public static final String OPERATION_BULK_PATCH_REWRITE_STATUS = "$hapi.fhir.bulk-patch-rewrite-history-status";
+	public static final String OPERATION_BULK_PATCH_PARAM_PATCH = "patch";
+	public static final String OPERATION_BULK_PATCH_STATUS = "$hapi.fhir.bulk-patch-status";
+	public static final String OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID = "_jobId";
+	public static final String OPERATION_BULK_PATCH_PARAM_URL = "url";
+
+	/**
+	 * Numeric constant used for resource ID in {@link #NO_MORE}
+	 */
+	public static final Long NO_MORE_PID = -1L;
+
+	/**
+	 * Special PID value used as an internal constant indicating that no more results are available. PIDs should always
+	 * be positive, so this value will never appear in real data.
+	 */
+	public static final JpaPid NO_MORE = JpaPid.fromId(NO_MORE_PID);
+
+	/**
+	 * A page request which only returns a single result (page index = 0, page size = 1)
+	 *
+	 * @since 8.6.0
+	 */
+	public static final PageRequest SINGLE_RESULT = PageRequest.of(0, 1);
 
 	/**
 	 * Non-instantiable

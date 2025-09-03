@@ -171,14 +171,6 @@ public class SystemRequestDetails extends RequestDetails {
 	}
 
 	@Override
-	public Object getAttribute(String theAttributeName) {
-		return null;
-	}
-
-	@Override
-	public void setAttribute(String theAttributeName, Object theAttributeValue) {}
-
-	@Override
 	public InputStream getInputStream() throws IOException {
 		return null;
 	}

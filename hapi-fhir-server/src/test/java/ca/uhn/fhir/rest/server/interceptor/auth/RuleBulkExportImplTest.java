@@ -13,16 +13,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class RuleBulkExportImplTest {
-	private RestOperationTypeEnum myOperation = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
-	private Pointcut myPointcut = Pointcut.STORAGE_INITIATE_BULK_EXPORT;
+	private final RestOperationTypeEnum myOperation = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
+	private final Pointcut myPointcut = Pointcut.STORAGE_INITIATE_BULK_EXPORT;
+
 	@Mock
 	private RequestDetails myRequestDetails;
 	@Mock
@@ -46,7 +48,7 @@ public class RuleBulkExportImplTest {
 		BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setResourceTypes(myWantTypes);
 
-		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 		assertDeny(verdict);
@@ -65,7 +67,7 @@ public class RuleBulkExportImplTest {
 
 		BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
-		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 		assertDeny(verdict);
@@ -82,7 +84,7 @@ public class RuleBulkExportImplTest {
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
 		options.setResourceTypes(Set.of("Patient", "Practitioner"));
 		
-		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 
@@ -102,7 +104,7 @@ public class RuleBulkExportImplTest {
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
 		options.setResourceTypes(Set.of("Patient", "Practitioner", "Encounter"));
 
-		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 
@@ -115,7 +117,7 @@ public class RuleBulkExportImplTest {
 		@BeforeEach
 		void setUp() {
 			myRule.setMode(PolicyEnum.ALLOW);
-			when(myRequestDetails.getAttribute(any())).thenReturn(myOptions);
+			when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, myOptions));
 		}
 		@Nested class RuleAnyStyle {
 			@BeforeEach
@@ -261,7 +263,7 @@ public class RuleBulkExportImplTest {
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
 		options.setGroupId("Group/123");
 
-		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 		assertAbstain(verdict);
@@ -277,7 +279,7 @@ public class RuleBulkExportImplTest {
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
 		options.setGroupId("Group/1");
 
-		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 		assertAllow(verdict);
@@ -292,7 +294,7 @@ public class RuleBulkExportImplTest {
 		BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setPatientIds(Set.of("Patient/123"));
-		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 
 		//When
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
@@ -310,7 +312,7 @@ public class RuleBulkExportImplTest {
 		BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setPatientIds(Set.of("Patient/456"));
-		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 
 		//When
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
@@ -327,7 +329,7 @@ public class RuleBulkExportImplTest {
 		myRule.setMode(PolicyEnum.ALLOW);
 		BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
-		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 
 		//When
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
@@ -345,7 +347,7 @@ public class RuleBulkExportImplTest {
 		BulkExportJobParameters options = new BulkExportJobParameters();
 
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
-		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 
 		//When
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
@@ -363,7 +365,7 @@ public class RuleBulkExportImplTest {
 		BulkExportJobParameters options = new BulkExportJobParameters();
 
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
-		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 
 		//When
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
@@ -382,7 +384,7 @@ public class RuleBulkExportImplTest {
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setFilters(Set.of("Patient?_id=123"));
 		options.setResourceTypes(Set.of("Patient", "Condition", "Immunization"));
-		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 
 		//When
 		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
@@ -401,7 +403,7 @@ public class RuleBulkExportImplTest {
 		final BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setFilters(Set.of("Patient?_id=123"));
-		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 
 		//When
 		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
@@ -420,7 +422,7 @@ public class RuleBulkExportImplTest {
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setPatientIds(Set.of("Patient/456"));
 		options.setResourceTypes(Set.of("Patient"));
-		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 
 		//When
 		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
@@ -439,7 +441,7 @@ public class RuleBulkExportImplTest {
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setPatientIds(Set.of("Patient/123"));
 		options.setResourceTypes(Set.of("Patient"));
-		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 
 		//When
 		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
@@ -459,7 +461,7 @@ public class RuleBulkExportImplTest {
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setPatientIds(Set.of("Patient/123", "Patient/456"));
 		options.setResourceTypes(Set.of("Patient"));
-		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 
 		//When
 		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
@@ -478,7 +480,7 @@ public class RuleBulkExportImplTest {
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setPatientIds(Set.of("Patient/123","Patient/456"));
 		options.setResourceTypes(Set.of("Patient"));
-		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 
 		//When
 		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
@@ -496,7 +498,7 @@ public class RuleBulkExportImplTest {
 		final BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setPatientIds(Set.of("Patient/123"));
-		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 
 		//When
 		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
@@ -513,7 +515,7 @@ public class RuleBulkExportImplTest {
 
 		final BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
-		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 
 		//When
 		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
@@ -530,7 +532,7 @@ public class RuleBulkExportImplTest {
 
 		final BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
-		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 
 		//When
 		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
@@ -549,7 +551,7 @@ public class RuleBulkExportImplTest {
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setFilters(Set.of("Patient?_id=123","Patient?_id=456"));
 		options.setResourceTypes(Set.of("Patient"));
-		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 
 		//When
 		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
@@ -560,16 +562,16 @@ public class RuleBulkExportImplTest {
 	}
 
 	private static void assertAbstain(AuthorizationInterceptor.Verdict verdict) {
-		Assertions.assertEquals(null, verdict, "Expect abstain");
+		assertNull(verdict, "Expect abstain");
 	}
 
 	private static void assertAllow(AuthorizationInterceptor.Verdict verdict) {
 		Assertions.assertNotNull(verdict, "Expect ALLOW, got abstain");
-		Assertions.assertEquals(PolicyEnum.ALLOW, verdict.getDecision(), "Expect ALLOW");
+		assertEquals(PolicyEnum.ALLOW, verdict.getDecision(), "Expect ALLOW");
 	}
 
 	private static void assertDeny(AuthorizationInterceptor.Verdict verdict) {
 		Assertions.assertNotNull(verdict, "Expect DENY, got abstain");
-		Assertions.assertEquals(PolicyEnum.DENY, verdict.getDecision(), "Expect DENY");
+		assertEquals(PolicyEnum.DENY, verdict.getDecision(), "Expect DENY");
 	}
 }

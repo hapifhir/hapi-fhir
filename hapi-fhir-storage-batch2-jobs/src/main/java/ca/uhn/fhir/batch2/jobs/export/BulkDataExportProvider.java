@@ -43,6 +43,7 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -137,7 +138,7 @@ public class BulkDataExportProvider {
 					IPrimitiveType<Boolean> theIncludeHistory,
 			ServletRequestDetails theRequestDetails) {
 		// JPA export provider
-		BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
+		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		BulkExportJobParameters bulkExportJobParameters = new BulkExportJobParametersBuilder()
 				.outputFormat(theOutputFormat)
@@ -199,7 +200,7 @@ public class BulkDataExportProvider {
 		ourLog.debug("_typeFilter={}", theTypeFilter);
 		ourLog.debug("_mdm={}", theMdm);
 
-		BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
+		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		// verify the Group exists before starting the job
 		getBulkDataExportSupport().validateTargetsExists(theRequestDetails, "Group", List.of(theIdParam));
@@ -371,7 +372,7 @@ public class BulkDataExportProvider {
 			List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
 			List<IPrimitiveType<String>> thePatientIds,
 			IPrimitiveType<Boolean> theIncludeHistory) {
-		BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
+		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		getBulkDataExportSupport()
 				.validateTargetsExists(

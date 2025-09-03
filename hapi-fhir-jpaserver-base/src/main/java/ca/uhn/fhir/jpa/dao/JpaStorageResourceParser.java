@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
@@ -43,6 +44,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
@@ -55,6 +57,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.IMetaTagSorter;
 import ca.uhn.fhir.util.MetaUtil;
 import jakarta.annotation.Nullable;
@@ -108,15 +111,19 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 	@Autowired
 	IMetaTagSorter myMetaTagSorter;
 
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	@Override
 	public IBaseResource toResource(IBasePersistedResource theEntity, boolean theForHistoryOperation) {
 		RuntimeResourceDefinition type = myFhirContext.getResourceDefinition(theEntity.getResourceType());
 		Class<? extends IBaseResource> resourceType = type.getImplementingClass();
-		return toResource(resourceType, (IBaseResourceEntity<JpaPid>) theEntity, null, theForHistoryOperation);
+		return toResource(null, resourceType, (IBaseResourceEntity<JpaPid>) theEntity, null, theForHistoryOperation);
 	}
 
 	@Override
 	public <R extends IBaseResource> R toResource(
+			RequestDetails theRequestDetails,
 			Class<R> theResourceType,
 			IBaseResourceEntity<?> theEntity,
 			Collection<BaseTag> theTagList,
@@ -173,22 +180,23 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 					}
 				}
 			}
-		} else if (theEntity instanceof ResourceTable) {
-			ResourceTable resource = (ResourceTable) theEntity;
+		} else if (theEntity instanceof ResourceTable entity) {
 			ResourceHistoryTable history;
-			if (resource.getCurrentVersionEntity() != null) {
-				history = resource.getCurrentVersionEntity();
+			if (entity.getCurrentVersionEntity() != null) {
+				history = entity.getCurrentVersionEntity();
 			} else {
-				version = theEntity.getVersion();
+				version = entity.getVersion();
 				history = myResourceHistoryTableDao.findForIdAndVersion(
-						theEntity.getResourceId().toFk(), version);
-				((ResourceTable) theEntity).setCurrentVersionEntity(history);
+						entity.getResourceId().toFk(), version);
+				entity.setCurrentVersionEntity(history);
 
-				while (history == null) {
-					if (version > 1L) {
-						version--;
-						history = myResourceHistoryTableDao.findForIdAndVersion(
-								theEntity.getResourceId().toFk(), version);
+				// If we failed to find the version specified as the latest version on the ResourceTable
+				// entity, we need to figure out what the most recent version actually is and return that.
+				if (history == null) {
+					Optional<ResourceHistoryTable> latestVersion = SearchBuilder.findLatestVersion(
+							theRequestDetails, entity.getId(), myResourceHistoryTableDao, myInterceptorBroadcaster);
+					if (latestVersion.isPresent()) {
+						history = latestVersion.get();
 					} else {
 						return null;
 					}
@@ -201,8 +209,8 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			switch (myStorageSettings.getTagStorageMode()) {
 				case VERSIONED:
 				case NON_VERSIONED:
-					if (resource.isHasTags()) {
-						tagList = resource.getTags();
+					if (entity.isHasTags()) {
+						tagList = entity.getTags();
 					} else {
 						tagList = List.of();
 					}
