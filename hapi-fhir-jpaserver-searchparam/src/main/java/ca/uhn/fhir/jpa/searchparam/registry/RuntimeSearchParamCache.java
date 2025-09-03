@@ -38,7 +38,11 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 		add(theResourceName, theName, theSearchParam, false);
 	}
 
-	public void add(String theResourceName, String theName, RuntimeSearchParam theSearchParam, boolean theAllowOverrideExisting) {
+	public void add(
+			String theResourceName,
+			String theName,
+			RuntimeSearchParam theSearchParam,
+			boolean theAllowOverrideExisting) {
 		ResourceSearchParams resourceSearchParams = getSearchParamMap(theResourceName);
 		resourceSearchParams.put(theName, theSearchParam);
 		String uri = theSearchParam.getUri();
