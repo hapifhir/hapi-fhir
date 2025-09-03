@@ -334,14 +334,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 		List<JpaPid> pids = fetchResultPids(theUuid, theFrom, theTo, theRequestDetails, search, theRequestPartitionId);
 
-		// start tracking last-access time for this search when it is more than halfway to expire by created time
-		// we do this to avoid generating excessive write traffic on busy cached searches.
-		long expireAfterMillis = myStorageSettings.getExpireSearchResultsAfterMillis();
-		long createdCutoff = search.getCreated().getTime() + expireAfterMillis;
-		if (createdCutoff - System.currentTimeMillis() < expireAfterMillis / 2) {
-			search.setExpiryOrNull(DateUtils.addMinutes(new Date(), SEARCH_EXPIRY_OFFSET_MINUTES));
-			mySearchCacheSvc.save(search, theRequestPartitionId);
-		}
+		updateSearchExpiryOrNull(search, theRequestPartitionId);
 
 		ourLog.trace("Fetched {} results", pids.size());
 
@@ -362,6 +355,20 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			throw myExceptionSvc.newUnknownSearchException(theUuid);
 		}
 		return pids;
+	}
+
+	private void updateSearchExpiryOrNull(Search theSearch, RequestPartitionId theRequestPartitionId) {
+		// The created time may be null in some unit tests
+		if (theSearch.getCreated() != null) {
+			// start tracking last-access-time for this search when it is more than halfway to expire by created time
+			// we do this to avoid generating excessive write traffic on busy cached searches.
+			long expireAfterMillis = myStorageSettings.getExpireSearchResultsAfterMillis();
+			long createdCutoff = theSearch.getCreated().getTime() + expireAfterMillis;
+			if (createdCutoff - System.currentTimeMillis() < expireAfterMillis / 2) {
+				theSearch.setExpiryOrNull(DateUtils.addMinutes(new Date(), SEARCH_EXPIRY_OFFSET_MINUTES));
+				mySearchCacheSvc.save(theSearch, theRequestPartitionId);
+			}
+		}
 	}
 
 	@Override
