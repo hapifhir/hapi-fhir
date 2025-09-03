@@ -366,6 +366,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			long createdCutoff = theSearch.getCreated().getTime() + expireAfterMillis;
 			if (createdCutoff - System.currentTimeMillis() < expireAfterMillis / 2) {
 				theSearch.setExpiryOrNull(DateUtils.addMinutes(new Date(), SEARCH_EXPIRY_OFFSET_MINUTES));
+				// TODO: A nice future enhancement might be to make this flush be asynchronous
 				mySearchCacheSvc.save(theSearch, theRequestPartitionId);
 			}
 		}
