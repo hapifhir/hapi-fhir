@@ -25,9 +25,11 @@ public class MdmLinkExpandersHolder {
 	private final FhirContext myFhirContext;
 
 	public MdmLinkExpandersHolder(
-		IMdmLinkExpandSvc theMdmLinkExpandSvc,
-		MdmEidMatchOnlyLinkExpandSvc theMdmEidMatchOnlyLinkExpandSvc, BulkExportMDMResourceExpander theBulkExportMDMResourceExpander, BulkExportMDMEidMatchOnlyResourceExpander theBulkExportMDMEidMatchOnlyResourceExpander,
-		FhirContext theFhirContext) {
+			IMdmLinkExpandSvc theMdmLinkExpandSvc,
+			MdmEidMatchOnlyLinkExpandSvc theMdmEidMatchOnlyLinkExpandSvc,
+			BulkExportMDMResourceExpander theBulkExportMDMResourceExpander,
+			BulkExportMDMEidMatchOnlyResourceExpander theBulkExportMDMEidMatchOnlyResourceExpander,
+			FhirContext theFhirContext) {
 		myMdmLinkExpandSvc = theMdmLinkExpandSvc;
 		myMdmEidMatchOnlyLinkExpandSvc = theMdmEidMatchOnlyLinkExpandSvc;
 		myBulkExportMDMResourceExpander = theBulkExportMDMResourceExpander;
@@ -46,7 +48,7 @@ public class MdmLinkExpandersHolder {
 	}
 
 	public IBulkExportMDMResourceExpander getBulkExportMDMResourceExpanderInstance() {
-	  		if (myBulkExportMDMResourceExpanderInstanceToUse != null) {
+		if (myBulkExportMDMResourceExpanderInstanceToUse != null) {
 			return myBulkExportMDMResourceExpanderInstanceToUse;
 		}
 
@@ -69,7 +71,7 @@ public class MdmLinkExpandersHolder {
 		boolean hasEidSystems = false;
 		if (myMdmSettings.getMdmRules() != null) {
 			hasEidSystems = myMdmSettings.getMdmRules().getEnterpriseEIDSystems() != null
-				&& !myMdmSettings.getMdmRules().getEnterpriseEIDSystems().isEmpty();
+					&& !myMdmSettings.getMdmRules().getEnterpriseEIDSystems().isEmpty();
 		}
 		return isMatchOnly && hasEidSystems;
 	}

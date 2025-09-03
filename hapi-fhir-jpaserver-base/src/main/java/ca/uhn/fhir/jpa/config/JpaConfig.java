@@ -1049,6 +1049,4 @@ public class JpaConfig {
 			PlatformTransactionManager theTxManager) {
 		return new PartitionedIdModeVerificationSvc(thePartitionSettings, theHibernatePropertiesProvider, theTxManager);
 	}
-
-
 }

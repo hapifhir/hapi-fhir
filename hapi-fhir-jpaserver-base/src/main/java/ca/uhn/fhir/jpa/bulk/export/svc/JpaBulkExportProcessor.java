@@ -351,7 +351,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	public void expandMdmResources(List<IBaseResource> theResources) {
 		for (IBaseResource resource : theResources) {
 			if (!PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(resource.fhirType())) {
-				myMdmLinkExpandersHolder.getBulkExportMDMResourceExpanderInstance().annotateResource(resource);
+				myMdmLinkExpandersHolder
+						.getBulkExportMDMResourceExpanderInstance()
+						.annotateResource(resource);
 			}
 		}
 	}
@@ -407,8 +409,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 		if (theParameters.isExpandMdm()) {
 			RequestPartitionId partitionId = theParameters.getPartitionIdOrAllPartitions();
-			patientPidsToExport.addAll(
-					myMdmLinkExpandersHolder.getBulkExportMDMResourceExpanderInstance().expandGroup(theParameters.getGroupId(), partitionId));
+			patientPidsToExport.addAll(myMdmLinkExpandersHolder
+					.getBulkExportMDMResourceExpanderInstance()
+					.expandGroup(theParameters.getGroupId(), partitionId));
 		}
 		return patientPidsToExport;
 	}
