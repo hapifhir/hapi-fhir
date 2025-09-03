@@ -119,8 +119,8 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 						resourceType,
 						providerParams);
 				@SuppressWarnings("unchecked")
-				Iterator<IResourcePersistentId<?>> pidIterator =
-					(Iterator<IResourcePersistentId<?>>) myBulkExportProcessor.getResourcePidIterator(providerParams);
+				Iterator<IResourcePersistentId<?>> pidIterator = (Iterator<IResourcePersistentId<?>>)
+						myBulkExportProcessor.getResourcePidIterator(providerParams);
 				List<TypedPidJson> idsToSubmit = new ArrayList<>();
 
 				int estimatedChunkSize = 0;
