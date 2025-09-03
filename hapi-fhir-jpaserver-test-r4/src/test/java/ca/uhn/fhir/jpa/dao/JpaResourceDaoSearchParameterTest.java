@@ -69,6 +69,10 @@ public class JpaResourceDaoSearchParameterTest {
 
 				SearchParameter nextSearchParameter = new SearchParameter();
 				nextSearchParameter.setExpression(nextp.getPath());
+				nextSearchParameter.setName(nextp.getName());
+				nextSearchParameter.setCode(nextp.getName());
+				nextSearchParameter.setDescription(nextp.getDescription());
+				nextSearchParameter.setUrl(nextp.getUri());
 				nextSearchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
 				nextSearchParameter.setType(Enumerations.SearchParamType.fromCode(nextp.getParamType().getCode()));
 				nextp.getBase().forEach(nextSearchParameter::addBase);
@@ -86,6 +90,10 @@ public class JpaResourceDaoSearchParameterTest {
 	public void testValidateInvalidExpression() {
 		SearchParameter nextSearchParameter = new SearchParameter();
 		nextSearchParameter.setExpression("Patient.ex[[[");
+		nextSearchParameter.setName("name");
+		nextSearchParameter.setUrl("http://localhost/SearchParameter/a");
+		nextSearchParameter.setDescription("description");
+		nextSearchParameter.setCode("name");
 		nextSearchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		nextSearchParameter.setType(Enumerations.SearchParamType.STRING);
 		nextSearchParameter.addBase("Patient");

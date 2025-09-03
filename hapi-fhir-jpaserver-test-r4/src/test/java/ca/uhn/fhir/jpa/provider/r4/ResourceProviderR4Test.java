@@ -297,6 +297,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		sp.setUrl("http://example.com/name");
 		sp.setId("name");
 		sp.setCode("name");
+		sp.setName("name");
+		sp.setDescription("description");
 		sp.setType(Enumerations.SearchParamType.STRING);
 		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
 		sp.addBase("Patient");
@@ -313,74 +315,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).hasWarnMessage("Skipping validation of submitted SearchParameter because " + SearchParamValidatingInterceptor.SKIP_VALIDATION + " flag is true");
 	}
 
-
-	// FIXME: remove
-	@Test
-	public void testSdm() {
-		Location loc = new Location();
-		loc.addIdentifier().setSystem("https://api.loblaw.ca/fhir/NamingSystem/hw-0999").setValue("123");
-		IIdType locId = myLocationDao.create(loc, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
-
-		Practitioner prac = new Practitioner();
-		prac.addIdentifier().setSystem("https://api.loblaw.ca/fhir/NamingSystem/hw-0999").setValue("09870999");
-		IIdType pracId = myPractitionerDao.create(prac, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
-
-		PractitionerRole pracRole = new PractitionerRole();
-		pracRole.addLocation().setReference(locId.getValue());
-		pracRole.getPractitioner().setReference(pracId.getValue());
-		myPractitionerRoleDao.create(pracRole, new SystemRequestDetails());
-
-		RequestValidatingInterceptor interceptor = new RequestValidatingInterceptor();
-		FhirValidator val = myFhirContext.newValidator();
-		val.setInterceptorBroadcaster(myInterceptorRegistry);
-		FhirInstanceValidator validatorModule = new FhirInstanceValidator(myFhirContext);
-		validatorModule.setBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore);
-		val.registerValidatorModule(validatorModule);
-		interceptor.setValidator(val);
-		myServer.registerInterceptor(interceptor);
-
-//		ValidationMessageSuppressingInterceptor suppression = new ValidationMessageSuppressingInterceptor();
-//		suppression.addMessageSuppressionPatterns("The query part of the conditional reference is not a valid query string");
-//		registerInterceptor(suppression);
-
-//		List<IRepositoryValidatingRule> rules = myRuleBuilder.forResourcesOfType("Patient").requireValidationToDeclaredProfiles().build();
-//		myInterceptorRegistry.registerInterceptor(new RepositoryValidatingInterceptor(myFhirContext, rules));
-
-		Patient pat = new Patient();
-		pat.getText().setStatus(NarrativeStatus.ADDITIONAL);
-		pat.getText().setDivAsString("<div>HELLO</div>");
-//		pat.addGeneralPractitioner().setReference("PractitionerRole?practitioner.identifier=https://api.loblaw.ca/fhir/NamingSystem/hw-0999%7C09870999&location.identifier=https://api.loblaw.ca/fhir/NamingSystem/hw-0999%7C123");
-//		IIdType patientId = myClient.create().resource(pat).execute().getId().toUnqualifiedVersionless();
-
-		BundleBuilder bb = new BundleBuilder(myFhirContext);
-
-		PractitionerRole pr = new PractitionerRole();
-		pr.setId(IdType.newRandomUuid());
-		pr.addLocation().setReference("Location?identifier=https://api.loblaw.ca/fhir/NamingSystem/hw-0999|123");
-		pr.getPractitioner().setReference("Practitioner?identifier=https://api.loblaw.ca/fhir/NamingSystem/hw-0999|09870999");
-		bb.addTransactionCreateEntry(pr).conditional("PractitionerRole?practitioner.identifier=https://api.loblaw.ca/fhir/NamingSystem/hw-0999%7C09870999&location.identifier=https://api.loblaw.ca/fhir/NamingSystem/hw-0999%7C123");
-
-		pat.setId(IdType.newRandomUuid());
-		pat.addGeneralPractitioner().setReference(pr.getId());
-//		pat.addGeneralPractitioner().setReference("PractitionerRole?practitioner.identifier=https://api.loblaw.ca/fhir/NamingSystem/hw-0999%7C09870999&location.identifier=https://api.loblaw.ca/fhir/NamingSystem/hw-0999%7C123");
-		bb.addTransactionCreateEntry(pat);
-
-		Bundle bundleTyped = (Bundle) bb.getBundleTyped();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundleTyped));
-
-		Bundle outcome = myClient.transaction().withBundle(bundleTyped).execute();
-		IIdType patientId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
-
-		pat = myPatientDao.read(patientId, new SystemRequestDetails());
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(pat));
-	}
-
-
 	@Test
 	public void testParameterWithNoValueThrowsError_InvalidChainOnCustomSearch() throws IOException {
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.addBase("BodyStructure").addBase("Procedure");
 		searchParameter.setCode("focalAccess");
+		searchParameter.setName("focalAccess");
+		searchParameter.setUrl("http://localhost/SearchParameter/focalAccess");
+		searchParameter.setDescription("description");
 		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
 		searchParameter.setExpression("Procedure.extension('Procedure#focalAccess')");
 		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
@@ -404,6 +346,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		searchParameter.setName("Security");
 		searchParameter.setCode("_security");
+		searchParameter.setDescription("description");
+		searchParameter.setUrl("http://localhost/SearchParameter/resource-security");
 		searchParameter.addBase("Patient").addBase("Account");
 		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
 		searchParameter.setExpression("meta.security");
@@ -420,6 +364,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		searchParameter.setCode("myGender");
+		searchParameter.setName("myGender");
+		searchParameter.setDescription("description");
+		searchParameter.setUrl("http://localhost/SearchParameter/myGender");
 		searchParameter.addBase("Patient").addBase("Person");
 		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
 		searchParameter.setExpression("Patient.gender|Person.gender");
@@ -434,6 +381,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.addBase("BodyStructure").addBase("Procedure");
 		searchParameter.setCode("focalAccess");
+		searchParameter.setName("focalAccess");
+		searchParameter.setUrl("http://localhost/SearchParameter/SearchParameter/focalAccess");
+		searchParameter.setDescription("description");
 		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
 		searchParameter.setExpression("Procedure.extension('Procedure#focalAccess')");
 		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
@@ -459,6 +409,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.addBase("Organization");
 		searchParameter.setCode("_profile");
+		searchParameter.setName("_profile");
+		searchParameter.setDescription("description");
+		searchParameter.setUrl("http://localhost/SearchParameter/_profile");
 		searchParameter.setType(Enumerations.SearchParamType.URI);
 		searchParameter.setExpression("meta.profile");
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -902,13 +855,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchWithDeepChain() throws IOException {
-
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.setCode("extpatorg");
 		sp.setName("extpatorg");
+		sp.setDescription("Description");
+		sp.setUrl("http://localhost/SearchParameter/extpatorg");
 		sp.setExpression("Patient.extension('http://patext').value.as(Reference)");
 		myClient.create().resource(sp).execute();
 
@@ -918,6 +872,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.setCode("extorgorg");
 		sp.setName("extorgorg");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/SearchParameter/extorgorg");
 		sp.setExpression("Organization.extension('http://orgext').value.as(Reference)");
 		myClient.create().resource(sp).execute();
 
@@ -7846,7 +7802,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		@ParameterizedTest
 		@MethodSource("provideParameters")
-		public void testMissingURLParameter(MissingSearchTestParameters theParams) {
+		public void testMissingSPSearch(MissingSearchTestParameters theParams) {
 			runTest(theParams,
 				hasField -> {
 					String methodName = new Exception().getStackTrace()[0].getMethodName();
@@ -7854,15 +7810,18 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 					SearchParameter sp = new SearchParameter();
 					sp.addBase("MolecularSequence");
 					sp.setCode(methodName);
+					sp.setName(methodName);
+					sp.setDescription("description");
+					sp.setUrl("http://localhost/SearchParameter/" + methodName);
 					sp.setType(Enumerations.SearchParamType.NUMBER);
 					sp.setExpression("MolecularSequence.variant-end");
 					sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 					sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 					if (hasField) {
-						sp.setUrl("http://example.com");
+						sp.setPublisher("smile");
 					}
 					return sp;
-				}, isMissing -> doSearch(SearchParameter.class, SearchParameter.URL.isMissing(isMissing)));
+				}, isMissing -> doSearch(SearchParameter.class, SearchParameter.PUBLISHER.isMissing(isMissing)));
 		}
 
 		@ParameterizedTest

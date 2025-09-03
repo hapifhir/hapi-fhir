@@ -13,11 +13,13 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.fhirpath.ExpressionNode;
 import org.hl7.fhir.r4.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.r4.fhirpath.FHIRPathUtilityClasses.FunctionDetails;
+import org.hl7.fhir.r4.fhirpath.IHostApplicationServices;
 import org.hl7.fhir.r4.fhirpath.TypeDetails;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.utilities.fhirpath.FHIRPathConstantEvaluationMode;
 
 import java.util.List;
 import java.util.Optional;
@@ -91,22 +93,18 @@ public class FhirPathR4 implements IFhirPath {
 
 	@Override
 	public void setEvaluationContext(@Nonnull IFhirPathEvaluationContext theEvaluationContext) {
-		myEngine.setHostServices(new FHIRPathEngine.IEvaluationContext() {
+		myEngine.setHostServices(new IHostApplicationServices() {
 
 			@Override
 			public List<Base> resolveConstant(
-					FHIRPathEngine engine,
-					Object appContext,
-					String name,
-					boolean beforeContext,
-					boolean explicitConstant)
+					FHIRPathEngine engine, Object appContext, String name, FHIRPathConstantEvaluationMode mode)
 					throws PathEngineException {
 				return null;
 			}
 
 			@Override
 			public TypeDetails resolveConstantType(
-					FHIRPathEngine engine, Object appContext, String name, boolean explicitConstant)
+					FHIRPathEngine engine, Object appContext, String name, FHIRPathConstantEvaluationMode mode)
 					throws PathEngineException {
 				return null;
 			}

@@ -133,10 +133,13 @@ public class SubscriptionTriggerMatcher {
 			fhirPathEngine.setEvaluationContext(new IFhirPathEvaluationContext() {
 
 				@Override
-				public List<IBase> resolveConstant(Object appContext, String name, boolean beforeContext) {
-					if ("current".equalsIgnoreCase(name)) return List.of(myResource);
+				public List<IBase> resolveConstant(
+						Object theAppContext,
+						String theName,
+						IFhirPathEvaluationContext.ConstantEvaluationMode theConstantEvaluationMode) {
+					if ("current".equalsIgnoreCase(theName)) return List.of(myResource);
 
-					if ("previous".equalsIgnoreCase(name)) {
+					if ("previous".equalsIgnoreCase(theName)) {
 						Optional previousResource = myPreviousVersionReader.readPreviousVersion(myResource);
 						if (previousResource.isPresent()) return List.of((IBase) previousResource.get());
 					}

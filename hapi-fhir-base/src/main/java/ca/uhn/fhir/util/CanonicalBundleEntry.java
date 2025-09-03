@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -61,6 +62,7 @@ public class CanonicalBundleEntry {
 
 	// Link fields (less common but part of spec)
 	private List<Map<String, String>> myLinks;
+	private IBaseOperationOutcome myResponseOutcome;
 
 	public CanonicalBundleEntry() {
 		// Default constructor
@@ -186,6 +188,14 @@ public class CanonicalBundleEntry {
 		myLinks = theLinks;
 	}
 
+	public void setResponseOutcome(IBaseOperationOutcome theResponseOutcome) {
+		myResponseOutcome = theResponseOutcome;
+	}
+
+	public IBaseOperationOutcome getResponseOutcome() {
+		return myResponseOutcome;
+	}
+
 	/**
 	 * Factory method to create a CanonicalBundleEntry from a Bundle Entry
 	 * @param theFhirContext The FHIR context
@@ -266,6 +276,12 @@ public class CanonicalBundleEntry {
 					terser.getSingleValueOrNull(response, "lastModified", IPrimitiveType.class);
 			if (lastModified != null) {
 				retVal.setResponseLastModified(lastModified.getValueAsString());
+			}
+
+			IBaseOperationOutcome outcome =
+					terser.getSingleValueOrNull(response, "outcome", IBaseOperationOutcome.class);
+			if (outcome != null) {
+				retVal.setResponseOutcome(outcome);
 			}
 		}
 
@@ -451,6 +467,13 @@ public class CanonicalBundleEntry {
 								lastModifiedChild.getChildByName("lastModified").newInstance();
 						lastModifiedValue.setValueAsString(myResponseLastModified);
 						lastModifiedChild.getMutator().setValue(response, lastModifiedValue);
+					}
+				}
+
+				if (myResponseOutcome != null) {
+					BaseRuntimeChildDefinition outcomeChild = responseDef.getChildByName("outcome");
+					if (outcomeChild != null) {
+						outcomeChild.getMutator().setValue(response, myResponseOutcome);
 					}
 				}
 			}
