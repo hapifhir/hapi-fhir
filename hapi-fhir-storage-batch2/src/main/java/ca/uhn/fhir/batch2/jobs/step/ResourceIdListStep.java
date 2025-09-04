@@ -40,7 +40,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.util.StreamUtil.partition;
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 public class ResourceIdListStep<PT extends PartitionedUrlJobParameters>

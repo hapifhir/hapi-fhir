@@ -37,5 +37,4 @@ public abstract class BaseBulkModifyJobParameters extends PartitionedUrlJobParam
 	public boolean isDryRun() {
 		return myDryRun;
 	}
-
 }

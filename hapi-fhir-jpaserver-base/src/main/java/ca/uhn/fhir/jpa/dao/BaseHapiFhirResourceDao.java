@@ -1708,7 +1708,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		boolean forceReindexSps = false;
 		if (theReindexParameters.getCorrectCurrentVersion() != ReindexParameters.CorrectCurrentVersionModeEnum.NONE) {
-			ResourceTable newEntity = reindexCorrectCurrentVersion(entity);
+			ResourceTable newEntity =
+					reindexCorrectCurrentVersion(entity, theReindexParameters.getReindexSearchParameters());
 			if (newEntity != null) {
 				entity = newEntity;
 				forceReindexSps = true;
@@ -1731,9 +1732,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	/**
 	 * @return Returns an updated copy of the entity if it was modified (returns null otherwise)
 	 */
-	private ResourceTable reindexCorrectCurrentVersion(ResourceTable theEntity) {
-		ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(
-				theEntity.getResourceId().toFk(), theEntity.getVersion());
+	private ResourceTable reindexCorrectCurrentVersion(
+			ResourceTable theEntity, ReindexParameters.ReindexSearchParametersEnum theReindexSearchParameters) {
+		ResourceHistoryTable version = theEntity.getCurrentVersionEntity();
 
 		if (version == null) {
 			Optional<ResourceHistoryTable> versions = myResourceHistoryTableDao
@@ -1757,12 +1758,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				 * we'll get an optimistic lock failure later.
 				 */
 				myEntityManager.detach(theEntity);
+
 				myResourceTableDao.updateVersionAndLastUpdated(theEntity.getId(), newVersion, new Date());
 
+				ResourceTable retVal = null;
 				/*
-				 * And now reload the record from the database so we have a fresh copy to reindex.
+				 * If we're going to be reindexing search parameters,
+				 * we now reload the record from the database so we have
+				 * a fresh copy to reindex.
 				 */
-				return myEntityManager.find(ResourceTable.class, theEntity.getId());
+				if (theReindexSearchParameters != ReindexParameters.ReindexSearchParametersEnum.NONE) {
+					retVal = myEntityManager.find(ResourceTable.class, theEntity.getId());
+					retVal.setCurrentVersionEntity(versions.get());
+				}
+				return retVal;
 			} else {
 				ourLog.info(
 						"No versions exist for {}/{} (PID {}), marking resource as deleted",

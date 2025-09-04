@@ -30,6 +30,8 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.interceptor.ForceOffsetSearchModeInterceptor;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -1194,6 +1196,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	})
 	public void testReindexJob_OptimizeStorage(boolean theOptimisticLock, ReindexParameters.OptimizeStorageModeEnum theOptimizeStorageModeEnum, int theExpectedSelectCount, int theExpectedUpdateCount) {
 		// Setup
+		when(myMockWorkChunk.getId()).thenReturn("A");
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
 		IIdType patientId = createPatient(withActiveTrue());
 		IIdType orgId = createOrganization(withName("MY ORG"));
@@ -1235,8 +1238,91 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(10, outcome.getRecordsProcessed());
 	}
 
+
+	@ParameterizedTest
+	@CsvSource(textBlock =
+		// MostResourcesNeedToBeCorrected , ReindexSearchParameters
+			"""
+			true                          , NONE
+			true                          , ALL
+			false                         , NONE
+			false                         , ALL
+			""")
+	public void testReindexJob_CorrectCurrentVersion(boolean theMostResourcesNeedToBeCorrected, ReindexParameters.ReindexSearchParametersEnum theReindexSearchParameters) {
+		// Setup
+		when(myMockWorkChunk.getId()).thenReturn("A");
+
+		List<Long> pids = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			IIdType id = createPatient(withActiveTrue());
+			createPatient(withId(id.getIdPart()), withActiveFalse());
+			pids.add(id.getIdPartAsLong());
+		}
+
+		// Delete one current version
+		List<Long> pidsToDeleteCurrentVersionOf = new ArrayList<>();
+		if (theMostResourcesNeedToBeCorrected) {
+			pidsToDeleteCurrentVersionOf.addAll(pids);
+		}else{
+			pidsToDeleteCurrentVersionOf.add(pids.get(0));
+		}
+		runInTransaction(()->{
+			for (Long pid : pidsToDeleteCurrentVersionOf) {
+				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromId(pid), 2);
+				assertNotNull(version);
+				myResourceHistoryTableDao.delete(version);
+			}
+		});
+
+		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+		for (Long pid : pids) {
+			data.addTypedPidWithNullPartitionForUnitTest("Patient", pid);
+		}
+
+		ReindexJobParameters params = new ReindexJobParameters()
+			.setCorrectCurrentVersion(ReindexParameters.CorrectCurrentVersionModeEnum.ALL)
+			.setReindexSearchParameters(theReindexSearchParameters)
+			.setOptimisticLock(false);
+
+		// execute
+		myCaptureQueriesListener.clear();
+		JobInstance instance = new JobInstance();
+		StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(
+			params,
+			data,
+			instance,
+			myMockWorkChunk
+		);
+		RunOutcome outcome = myReindexStep.run(stepExecutionDetails, myMockJobDataSinkReindexResults);
+
+		// validate
+		if (theMostResourcesNeedToBeCorrected) {
+			if (theReindexSearchParameters == ReindexParameters.ReindexSearchParametersEnum.ALL) {
+				assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(42);
+				assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).hasSize(30);
+			} else {
+				myCaptureQueriesListener.logSelectQueries();
+				assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(21);
+				assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).hasSize(10);
+			}
+		} else {
+			if (theReindexSearchParameters == ReindexParameters.ReindexSearchParametersEnum.ALL) {
+				assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(6);
+				assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).hasSize(3);
+			} else {
+				assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(3);
+				assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).hasSize(1);
+			}
+		}
+		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread()).isEmpty();
+		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread()).isEmpty();
+		assertEquals(10, outcome.getRecordsProcessed());
+	}
+
 	@Test
 	public void testReindexJob_ComboParamIndexesInUse() {
+		when(myMockWorkChunk.getId()).thenReturn("A");
+
 		myStorageSettings.setUniqueIndexesEnabled(true);
 		myReindexTestHelper.createUniqueCodeSearchParameter();
 		myReindexTestHelper.createNonUniqueStatusAndCodeSearchParameter();

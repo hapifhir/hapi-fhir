@@ -48,7 +48,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import com.google.common.collect.SetMultimap;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import jakarta.annotation.Nonnull;
@@ -67,7 +66,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -163,9 +161,9 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		try {
 
 			myTransactionService
-				.withSystemRequestOnPartition(theRequestPartitionId)
-				.withTransactionDetails(transactionDetails)
-				.execute(() -> processPidsInTransaction(jobParameters, theState, thePids, transactionDetails));
+					.withSystemRequestOnPartition(theRequestPartitionId)
+					.withTransactionDetails(transactionDetails)
+					.execute(() -> processPidsInTransaction(jobParameters, theState, thePids, transactionDetails));
 
 			// Storage transaction succeeded
 			theState.movePendingToSaved();
@@ -362,7 +360,8 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			SystemRequestDetails requestDetails = createRequestDetails(theModificationContext, pidAndResource);
 			if (requestDetails.isRewriteHistory()) {
 				// FIXME: new code
-				throw new JobExecutionFailedException(Msg.code(0) + "Can't store deleted resources as history rewrites");
+				throw new JobExecutionFailedException(
+						Msg.code(0) + "Can't store deleted resources as history rewrites");
 			}
 
 			IIdType resourceId = pidAndResource.resource().getIdElement();
@@ -488,7 +487,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			return switch (this) {
 				case CHANGED_UNSAVED -> CHANGED_PENDING;
 				case DELETED_UNSAVED -> DELETED_PENDING;
-				// FIXME: new code
+					// FIXME: new code
 				default -> throw new IllegalStateException(Msg.code(0) + "Can't convert " + this + " to pending");
 			};
 		}
@@ -497,7 +496,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			return switch (this) {
 				case CHANGED_PENDING -> CHANGED_SAVED;
 				case DELETED_PENDING -> DELETED_SAVED;
-				// FIXME: new code
+					// FIXME: new code
 				default -> throw new IllegalStateException(Msg.code(0) + "Can't convert " + this + " to saved");
 			};
 		}
@@ -509,8 +508,9 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 
 	private static class State {
 
-//		private final List<TypedPidAndVersionJson> myPidsToModify = new ArrayList<>();
-		private ListMultimap<StateEnum, PidAndResource> myStateMap = MultimapBuilder.enumKeys(StateEnum.class).arrayListValues().build();
+		//		private final List<TypedPidAndVersionJson> myPidsToModify = new ArrayList<>();
+		private ListMultimap<StateEnum, PidAndResource> myStateMap =
+				MultimapBuilder.enumKeys(StateEnum.class).arrayListValues().build();
 		private final Map<PidAndResource, String> myFailures = new HashMap<>();
 		private int myRetryCount;
 		private int myRetriedResourceCount;
@@ -569,7 +569,6 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			}
 		}
 
-
 		public void movePendingBackToModificationList() {
 			for (StateEnum state : StateEnum.pendingStates()) {
 				List<PidAndResource> pidsAndResources = getResourcesInStateAndClear(state);
@@ -603,7 +602,6 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		public void setJobFailure(JobExecutionFailedException theJobFailure) {
 			myJobFailure = theJobFailure;
 		}
-
 	}
 
 	private record PidAndResource(TypedPidAndVersionJson pid, IBaseResource resource) {}
