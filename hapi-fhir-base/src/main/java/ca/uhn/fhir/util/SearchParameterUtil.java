@@ -421,6 +421,22 @@ public class SearchParameterUtil {
 	}
 
 	/**
+	 * Retrieves the first value in the provided field, or null or no such field exists or isn't populated.
+	 * @param theTerser
+	 * @param theSP
+	 * @param theField
+	 * @return
+	 */
+	public static IBase getFirstFieldValueOrNull(FhirTerser theTerser, IBaseResource theSP, String theField) {
+		List<IBase> fieldValues = theTerser.getValues(theSP, theField);
+
+		if (fieldValues != null && !fieldValues.isEmpty()) {
+			return fieldValues.get(0);
+		}
+		return null;
+	}
+
+	/**
 	 * Given a FHIRPath expression which presumably addresses a FHIR reference or
 	 * canonical reference element (i.e. a FHIRPath expression used in a "reference"
 	 * SearchParameter), tries to determine whether the path could potentially resolve
