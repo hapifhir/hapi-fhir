@@ -268,8 +268,6 @@ public class SearchParamRegistryImpl
 		ReadOnlySearchParamCache builtInSearchParams = getBuiltInSearchParams();
 		RuntimeSearchParamCache searchParams =
 				RuntimeSearchParamCache.fromReadOnlySearchParamCache(builtInSearchParams);
-		long overriddenCount = overrideBuiltinSearchParamsWithActiveJpaSearchParams(searchParams, theJpaSearchParams);
-		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
 
 		// add the local cache search params
 		myLocalSPCache.getSearchParamStream().forEach(sp -> {
@@ -278,6 +276,9 @@ public class SearchParamRegistryImpl
 				searchParams.add(rt, sp.getName(), sp, true);
 			}
 		});
+
+		long overriddenCount = overrideBuiltinSearchParamsWithActiveJpaSearchParams(searchParams, theJpaSearchParams);
+		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
 
 		// Auto-register: _language
 		if (myStorageSettings.isLanguageSearchParameterEnabled()) {
@@ -325,7 +326,9 @@ public class SearchParamRegistryImpl
 
 	private void unregisterImplicitSearchParam(RuntimeSearchParamCache theSearchParams, String theParamName) {
 		for (String resourceType : theSearchParams.getResourceNameKeys()) {
-			theSearchParams.remove(resourceType, theParamName);
+			RuntimeSearchParam rsp = theSearchParams.get(resourceType, theParamName);
+			String uri = rsp == null ? null : rsp.getUri();
+			theSearchParams.remove(resourceType, theParamName, uri);
 		}
 	}
 
@@ -466,7 +469,7 @@ public class SearchParamRegistryImpl
 			} else {
 				Set<String> expandedBases = expandBaseList(existingParam.getBase());
 				for (String base : expandedBases) {
-					theSearchParams.remove(base, existingParam.getName());
+					theSearchParams.remove(base, existingParam.getName(), existingParam.getUri());
 				}
 			}
 		}

@@ -64,11 +64,12 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 		}
 	}
 
-	public void remove(String theResourceName, String theName) {
+	public void remove(String theResourceName, String theName, String theURL) {
 		if (!myResourceNameToSpNameToSp.containsKey(theResourceName)) {
 			return;
 		}
 		myResourceNameToSpNameToSp.get(theResourceName).remove(theName);
+		myUrlToParam.remove(theURL);
 	}
 
 	public void clear() {
