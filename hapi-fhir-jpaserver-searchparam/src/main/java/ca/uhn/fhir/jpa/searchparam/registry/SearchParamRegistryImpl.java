@@ -297,7 +297,8 @@ public class SearchParamRegistryImpl
 		// add the local cache search params
 		myLocalSPCache.getSearchParamStream().forEach(sp -> {
 			for (String rt : sp.getBase()) {
-				searchParams.add(rt, sp.getName(), sp);
+				// we will allow local cache SPs to override existing ones
+				searchParams.add(rt, sp.getName(), sp, true);
 			}
 		});
 

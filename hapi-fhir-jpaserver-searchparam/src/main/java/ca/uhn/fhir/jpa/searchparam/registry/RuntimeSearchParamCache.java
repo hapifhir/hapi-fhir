@@ -35,6 +35,14 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 	protected RuntimeSearchParamCache() {}
 
 	public void add(String theResourceName, String theName, RuntimeSearchParam theSearchParam) {
+		add(theResourceName, theName, theSearchParam, false);
+	}
+
+	public void add(
+			String theResourceName,
+			String theName,
+			RuntimeSearchParam theSearchParam,
+			boolean theAllowOverrideExisting) {
 		ResourceSearchParams resourceSearchParams = getSearchParamMap(theResourceName);
 		resourceSearchParams.put(theName, theSearchParam);
 		String uri = theSearchParam.getUri();
@@ -44,7 +52,7 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 				// This is expected, since the same SP can span multiple resource types
 				// so it may get added more than once by this method
 				ourLog.trace("Search param was previously registered for url: {}", uri);
-			} else if (existingForUrl != null) {
+			} else if (existingForUrl != null && !theAllowOverrideExisting) {
 				ourLog.debug("Multiple search parameters have URL: {}", uri);
 			} else {
 				myUrlToParam.put(uri, theSearchParam);
