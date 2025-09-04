@@ -1204,10 +1204,14 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 
 		ValidationResult output = myFhirValidator.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertThat(all).hasSize(1);
-		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
-		assertThat(all.get(0).getMessage()).contains("None of the codings provided are in the value set 'IdentifierType'");
+		assertThat(all).hasSize(2);
+
+		assertThat(all.get(0).getMessage()).contains("CodeSystem is unknown and can't be validated: http://example.com/foo/bar for 'http://example.com/foo/bar#bar'");
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
+
+		assertEquals("Patient.identifier[0].type", all.get(1).getLocationString());
+		assertThat(all.get(1).getMessage()).contains("None of the codings provided are in the value set 'IdentifierType'");
+		assertEquals(ResultSeverityEnum.WARNING, all.get(1).getSeverity());
 
 	}
 
