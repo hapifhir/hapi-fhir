@@ -20,8 +20,22 @@
 package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Base class for bulk modification job parameters objects
  */
-public abstract class BaseBulkModifyJobParameters extends PartitionedUrlJobParameters {}
+public abstract class BaseBulkModifyJobParameters extends PartitionedUrlJobParameters {
+
+	@JsonProperty("dryRun")
+	private boolean myDryRun;
+
+	public void setDryRun(boolean theDryRun) {
+		myDryRun = theDryRun;
+	}
+
+	public boolean isDryRun() {
+		return myDryRun;
+	}
+
+}

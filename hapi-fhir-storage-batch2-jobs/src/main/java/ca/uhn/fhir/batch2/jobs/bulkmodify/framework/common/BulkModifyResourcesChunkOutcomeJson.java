@@ -33,6 +33,9 @@ public class BulkModifyResourcesChunkOutcomeJson implements IModelJson {
 	@JsonProperty("changedIds")
 	private List<String> myChangedIds;
 
+	@JsonProperty("deletedIds")
+	private List<String> myDeletedIds;
+
 	@JsonProperty("unchangedIds")
 	private List<String> myUnchangedIds;
 
@@ -49,11 +52,22 @@ public class BulkModifyResourcesChunkOutcomeJson implements IModelJson {
 		getChangedIds().add(theIdElement.toUnqualified().getValue());
 	}
 
+	public void addDeletedId(IIdType theIdElement) {
+		getDeletedIds().add(theIdElement.toUnqualified().getValue());
+	}
+
 	public List<String> getChangedIds() {
 		if (myChangedIds == null) {
 			myChangedIds = new ArrayList<>();
 		}
 		return myChangedIds;
+	}
+
+	public List<String> getDeletedIds() {
+		if (myDeletedIds == null) {
+			myDeletedIds = new ArrayList<>();
+		}
+		return myDeletedIds;
 	}
 
 	public void addUnchangedId(IIdType theIdElement) {
