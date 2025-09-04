@@ -286,6 +286,8 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 		retVal.setUrl("http://example.org/" + theCodeValue);
 		retVal.addBase(theBase);
 		retVal.setCode(theCodeValue);
+		retVal.setName(theCodeValue);
+		retVal.setDescription("description");
 		retVal.setType(Enumerations.SearchParamType.COMPOSITE);
 		retVal.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		retVal.setExpression(theBase);

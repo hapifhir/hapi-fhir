@@ -143,6 +143,9 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		sp.setId("SearchParameter/patient-birthdate");
 		sp.setType(Enumerations.SearchParamType.DATE);
 		sp.setCode("birthdate");
+		sp.setName("birthdate");
+		sp.setDescription("description");
+		sp.setUrl("Http://localhost/SearchParameter/patient-birthdate");
 		sp.setExpression("Patient.birthDate");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
@@ -153,6 +156,10 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
+		sp.setName("birthday-unique");
+		sp.setCode("birthday-unique");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/SearchParameter/patient-birthdate-unique");
 		sp.addComponent()
 			.setExpression("Patient")
 			.setDefinition("SearchParameter/patient-birthdate");

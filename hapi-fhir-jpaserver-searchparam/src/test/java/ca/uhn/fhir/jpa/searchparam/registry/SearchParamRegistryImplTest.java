@@ -48,6 +48,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -479,7 +480,52 @@ public class SearchParamRegistryImplTest {
 		} else {
 			assertNull(textSp);
 		}
+	}
 
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void addActiveSearchParameterToLocalCache_withValidSP_addsItToCache(boolean theIsActive) {
+		// setup
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("Patient");
+		sp.setUrl("http://localhost/test");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.setName("HelloWorld");
+		sp.setDescription("description");
+		sp.setExpression("Patient.name.given");
+		sp.setCode("HelloWorld");
+		if (theIsActive) {
+			sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		} else {
+			sp.setStatus(Enumerations.PublicationStatus.RETIRED);
+		}
+		SearchParameterCanonicalizer canonicalizer = new SearchParameterCanonicalizer(FhirContext.forR4Cached());
+
+		// test
+		try {
+			mySearchParamRegistry.addActiveSearchParameterToLocalCache(canonicalizer.canonicalizeSearchParameter(sp));
+			mySearchParamRegistry.forceRefresh();
+
+			// validate
+			ReadOnlySearchParamCache cache = mySearchParamRegistry.getActiveSearchParams();
+
+			assertNotNull(cache);
+			if (theIsActive) {
+				assertTrue(cache.getSearchParamMap("Patient")
+					.containsParamName("HelloWorld"));
+			} else {
+				assertFalse(cache.getSearchParamMap("Patient")
+					.containsParamName("HelloWorld"));
+			}
+
+			// req'd or our beforeeach will fail
+			mySearchParamRegistry.clearLocalSearchParameterCache();
+			mySearchParamRegistry.forceRefresh();
+		} finally {
+			// verify
+			ReadOnlySearchParamCache cache = mySearchParamRegistry.getActiveSearchParams();
+			assertFalse(cache.getSearchParamMap("Patient").containsParamName("HelloWorld"));
+		}
 	}
 
 	private List<ResourceTable> resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus theStatus) {

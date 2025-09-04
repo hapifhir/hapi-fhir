@@ -301,7 +301,7 @@ public class SearchParameterUtil {
 		return getAllPatientCompartmentRuntimeSearchParams(runtimeResourceDefinition);
 	}
 
-	public static List<RuntimeSearchParam> getAllPatientCompartmenRuntimeSearchParams(FhirContext theFhirContext) {
+	public static List<RuntimeSearchParam> getAllPatientCompartmentRuntimeSearchParams(FhirContext theFhirContext) {
 		return theFhirContext.getResourceTypes().stream()
 				.flatMap(type ->
 						getAllPatientCompartmentRuntimeSearchParamsForResourceType(theFhirContext, type).stream())

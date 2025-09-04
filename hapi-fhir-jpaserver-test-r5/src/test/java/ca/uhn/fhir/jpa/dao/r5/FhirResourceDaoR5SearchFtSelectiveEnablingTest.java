@@ -346,6 +346,7 @@ public class FhirResourceDaoR5SearchFtSelectiveEnablingTest extends BaseJpaR5Tes
 		}
 		sp.setName(theParam);
 		sp.setCode(theParam);
+		sp.setDescription("description");
 		sp.setStatus(Enumerations.PublicationStatus.fromCode(theSpStatus));
 		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.fromCode(theSpBase));
 		sp.setType(Enumerations.SearchParamType.STRING);

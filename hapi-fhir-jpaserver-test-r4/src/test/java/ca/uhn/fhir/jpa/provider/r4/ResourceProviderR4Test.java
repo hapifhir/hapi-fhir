@@ -297,6 +297,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		sp.setUrl("http://example.com/name");
 		sp.setId("name");
 		sp.setCode("name");
+		sp.setName("name");
+		sp.setDescription("description");
 		sp.setType(Enumerations.SearchParamType.STRING);
 		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
 		sp.addBase("Patient");
@@ -318,6 +320,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.addBase("BodyStructure").addBase("Procedure");
 		searchParameter.setCode("focalAccess");
+		searchParameter.setName("focalAccess");
+		searchParameter.setUrl("http://localhost/SearchParameter/focalAccess");
+		searchParameter.setDescription("description");
 		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
 		searchParameter.setExpression("Procedure.extension('Procedure#focalAccess')");
 		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
@@ -341,6 +346,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		searchParameter.setName("Security");
 		searchParameter.setCode("_security");
+		searchParameter.setDescription("description");
+		searchParameter.setUrl("http://localhost/SearchParameter/resource-security");
 		searchParameter.addBase("Patient").addBase("Account");
 		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
 		searchParameter.setExpression("meta.security");
@@ -357,6 +364,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		searchParameter.setCode("myGender");
+		searchParameter.setName("myGender");
+		searchParameter.setDescription("description");
+		searchParameter.setUrl("http://localhost/SearchParameter/myGender");
 		searchParameter.addBase("Patient").addBase("Person");
 		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
 		searchParameter.setExpression("Patient.gender|Person.gender");
@@ -371,6 +381,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.addBase("BodyStructure").addBase("Procedure");
 		searchParameter.setCode("focalAccess");
+		searchParameter.setName("focalAccess");
+		searchParameter.setUrl("http://localhost/SearchParameter/SearchParameter/focalAccess");
+		searchParameter.setDescription("description");
 		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
 		searchParameter.setExpression("Procedure.extension('Procedure#focalAccess')");
 		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
@@ -396,6 +409,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.addBase("Organization");
 		searchParameter.setCode("_profile");
+		searchParameter.setName("_profile");
+		searchParameter.setDescription("description");
+		searchParameter.setUrl("http://localhost/SearchParameter/_profile");
 		searchParameter.setType(Enumerations.SearchParamType.URI);
 		searchParameter.setExpression("meta.profile");
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -839,13 +855,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchWithDeepChain() throws IOException {
-
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.setCode("extpatorg");
 		sp.setName("extpatorg");
+		sp.setDescription("Description");
+		sp.setUrl("http://localhost/SearchParameter/extpatorg");
 		sp.setExpression("Patient.extension('http://patext').value.as(Reference)");
 		myClient.create().resource(sp).execute();
 
@@ -855,6 +872,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.setCode("extorgorg");
 		sp.setName("extorgorg");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/SearchParameter/extorgorg");
 		sp.setExpression("Organization.extension('http://orgext').value.as(Reference)");
 		myClient.create().resource(sp).execute();
 
@@ -7783,7 +7802,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		@ParameterizedTest
 		@MethodSource("provideParameters")
-		public void testMissingURLParameter(MissingSearchTestParameters theParams) {
+		public void testMissingSPSearch(MissingSearchTestParameters theParams) {
 			runTest(theParams,
 				hasField -> {
 					String methodName = new Exception().getStackTrace()[0].getMethodName();
@@ -7791,15 +7810,18 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 					SearchParameter sp = new SearchParameter();
 					sp.addBase("MolecularSequence");
 					sp.setCode(methodName);
+					sp.setName(methodName);
+					sp.setDescription("description");
+					sp.setUrl("http://localhost/SearchParameter/" + methodName);
 					sp.setType(Enumerations.SearchParamType.NUMBER);
 					sp.setExpression("MolecularSequence.variant-end");
 					sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 					sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 					if (hasField) {
-						sp.setUrl("http://example.com");
+						sp.setPublisher("smile");
 					}
 					return sp;
-				}, isMissing -> doSearch(SearchParameter.class, SearchParameter.URL.isMissing(isMissing)));
+				}, isMissing -> doSearch(SearchParameter.class, SearchParameter.PUBLISHER.isMissing(isMissing)));
 		}
 
 		@ParameterizedTest
