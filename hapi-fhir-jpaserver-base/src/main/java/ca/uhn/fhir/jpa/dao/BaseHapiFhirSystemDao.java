@@ -189,6 +189,15 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	@Override
 	public <P extends IResourcePersistentId> void preFetchResources(
 			List<P> theResolvedIds, boolean thePreFetchIndexes) {
+		try {
+			doPreFetchResources(theResolvedIds, thePreFetchIndexes);
+		} catch (OutOfMemoryError e) {
+			ourLog.warn("Pre-fetching of resources failed with OutOfMemoryError: {}", e.toString());
+		}
+	}
+
+	private <P extends IResourcePersistentId> void doPreFetchResources(
+			List<P> theResolvedIds, boolean thePreFetchIndexes) {
 		HapiTransactionService.requireTransaction();
 		List<JpaPid> pids = theResolvedIds.stream().map(t -> ((JpaPid) t)).collect(Collectors.toList());
 

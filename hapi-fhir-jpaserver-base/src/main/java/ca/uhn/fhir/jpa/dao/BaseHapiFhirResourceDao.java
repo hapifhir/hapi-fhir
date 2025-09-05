@@ -1744,6 +1744,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			if (versions.isPresent()) {
 				Long newVersion = versions.get().getVersion();
+				if (newVersion == theEntity.getVersion()) {
+					// Already have the correct version
+					return null;
+				}
+
 				ourLog.info(
 						"Correcting current version for {}/{} (PID {}) from version {} to version {}",
 						theEntity.getResourceType(),

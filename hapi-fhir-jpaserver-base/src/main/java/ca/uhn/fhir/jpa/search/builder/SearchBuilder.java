@@ -373,7 +373,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 * parameters all have no modifiers.
 	 */
 	private boolean isCompositeUniqueSpCandidate() {
-		return myStorageSettings.isUniqueIndexesEnabled() && myParams.getEverythingMode() == null;
+		return myStorageSettings.isUniqueIndexesEnabled()
+				&& myParams.getEverythingMode() == null
+				&& myResourceName != null;
 	}
 
 	@SuppressWarnings("ConstantConditions")
@@ -736,8 +738,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				|| theParams.getSort() != null
 				|| theParams.keySet().contains(Constants.PARAM_HAS)
 				|| isPotentiallyContainedReferenceParameterExistsAtRoot(theParams)) {
-			List<RuntimeSearchParam> activeComboParams = mySearchParamRegistry.getActiveComboSearchParams(
-					myResourceName, theParams.keySet(), ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
+			List<RuntimeSearchParam> activeComboParams = List.of();
+			if (myResourceName != null) {
+				activeComboParams = mySearchParamRegistry.getActiveComboSearchParams(
+						myResourceName, theParams.keySet(), ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
+			}
 			if (activeComboParams.isEmpty()) {
 				sqlBuilder.setNeedResourceTableRoot(true);
 			}
