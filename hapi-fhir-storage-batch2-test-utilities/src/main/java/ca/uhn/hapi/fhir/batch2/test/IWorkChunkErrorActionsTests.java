@@ -119,7 +119,7 @@ public interface IWorkChunkErrorActionsTests extends IWorkChunkCommon, WorkChunk
 		assertEquals(WorkChunkStatusEnum.FAILED, chunk.getStatus());
 		assertEquals(4, chunk.getErrorCount());
 		assertThat(chunk.getErrorMessage()).as("Error message contains last error").contains(ERROR_MESSAGE_C);
-		assertThat(chunk.getErrorMessage()).as("Error message contains error count and complaint").contains("many errors: 4");
+		assertThat(chunk.getErrorMessage()).as("Error message contains error count and complaint").contains("many errors (4)");
 	}
 
 }
