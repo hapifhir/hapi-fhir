@@ -1,0 +1,84 @@
+{
+	"resourceType": "StructureDefinition",
+	"id": "profile-EndoPractitioner-2-0-0",
+	"url": "http://example/StructureDefinition/EndoPractitioner",
+	"version": "2.0.0",
+	"name": "EndoPractitioner",
+	"status": "active",
+	"date": "2025-05-14T10:00:00.00+00:00",
+	"fhirVersion": "4.0.1",
+	"kind": "resource",
+	"abstract": false,
+	"type": "Practitioner",
+	"baseDefinition": "http://hl7.org/fhir/StructureDefinition/Practitioner",
+	"derivation": "constraint",
+	"differential": {
+		"element": [
+			{
+				"id": "Practitioner.name",
+				"path": "Practitioner.name",
+				"min": 1,
+				"max": "1",
+				"mustSupport": true
+			},
+			{
+				"id": "Practitioner.name.family",
+				"path": "Practitioner.name.family",
+				"min": 1,
+				"mustSupport": true
+			},
+			{
+				"id": "Practitioner.name.given",
+				"path": "Practitioner.name.given",
+				"min": 1,
+				"mustSupport": true
+			},
+			{
+				"id": "Practitioner.qualification",
+				"path": "Practitioner.qualification",
+				"min": 1,
+				"mustSupport": true
+			},
+			{
+				"id": "Practitioner.qualification.identifier",
+				"path": "Practitioner.qualification.identifier",
+				"min": 1,
+				"mustSupport": true
+			},
+			{
+				"id": "Practitioner.qualification.identifier.use",
+				"path": "Practitioner.qualification.identifier.use",
+				"fixedCode": "official"
+			},
+			{
+				"id": "Practitioner.qualification.identifier.value",
+				"path": "Practitioner.qualification.identifier.value",
+				"min": 1,
+				"mustSupport": true
+			},
+			{
+				"id": "Practitioner.qualification.identifier.assigner",
+				"path": "Practitioner.qualification.identifier.assigner",
+				"min": 1,
+				"mustSupport": true
+			},
+			{
+				"id": "Practitioner.qualification.code",
+				"path": "Practitioner.qualification.code",
+				"mustSupport": true
+			},
+			{
+				"id": "Practitioner.qualification.code.coding.code",
+				"path": "Practitioner.qualification.code.coding.code",
+				"min": 1,
+				"mustSupport": true
+			},
+			{
+				"id": "Practitioner.qualification.code.coding.display",
+				"path": "Practitioner.qualification.code.coding.display",
+				"min": 1,
+				"mustSupport": true
+			}
+		]
+	}
+}

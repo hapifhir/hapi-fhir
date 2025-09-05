@@ -1,0 +1,38 @@
+{
+	"resourceType": "StructureDefinition",
+	"id": "profile-EndoPractitioner-1-0-0",
+	"url": "http://example/StructureDefinition/EndoPractitioner",
+	"version": "1.0.0",
+	"name": "EndoPractitioner",
+	"status": "active",
+	"date": "2024-05-29T19:48:14.3666153+00:00",
+	"fhirVersion": "4.0.1",
+	"kind": "resource",
+	"abstract": false,
+	"type": "Practitioner",
+	"baseDefinition": "http://hl7.org/fhir/StructureDefinition/Practitioner",
+	"derivation": "constraint",
+	"differential": {
+		"element": [
+			{
+				"id": "Practitioner.name",
+				"path": "Practitioner.name",
+				"min": 1,
+				"max": "1",
+				"mustSupport": true
+			},
+			{
+				"id": "Practitioner.name.family",
+				"path": "Practitioner.name.family",
+				"min": 1,
+				"mustSupport": true
+			},
+			{
+				"id": "Practitioner.name.given",
+				"path": "Practitioner.name.given",
+				"min": 1,
+				"mustSupport": true
+			}
+		]
+	}
+}

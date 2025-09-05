@@ -67,6 +67,9 @@ HAPI FHIR supports the use of FHIR NPM Packages for supplying validation artifac
 
 When using the HAPI FHIR [JPA Server](../server_jpa/) you can simply upload your packages into the JPA Server package registry and the contents will be made available to the validator.
 
+Please note that, when uploading packages through the package registry, the server will assign each resource a server-assigned ID and ignore the user-provided resource ID (with the exception of SearchParameters). 
+The package registry also supports uploading multiple versions of a profile. To validate against a specific profile version, the desired version can be appended to the profile URL with a `|` (e.g. `http://example.com/StructureDefinition/ABC|123`).
+
 If you are using the validator as a standalone service (i.e. you are invoking it via a Java call) you will need to explicitly make your packages available to the validation support chain.
 
 The following example shows the use of [NpmPackageValidationSupport](./validation_support_modules.html#npmpackagevalidationsupport) to load a package and use it to validate a resource.

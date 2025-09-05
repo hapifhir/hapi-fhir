@@ -94,7 +94,6 @@ public class ValidationSupportChainTest extends BaseTest {
 
 		assertNotNull(chain.fetchStructureDefinition("http://hl7.org/fhir/StructureDefinition/Patient"));
 		assertEquals(649, chain.fetchAllStructureDefinitions().size());
-
 	}
 
 

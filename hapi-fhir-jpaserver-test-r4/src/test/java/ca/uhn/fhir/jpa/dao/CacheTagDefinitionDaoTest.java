@@ -21,7 +21,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -142,10 +141,10 @@ public class CacheTagDefinitionDaoTest {
 
 	@Test
 	public void cleanProvenanceSourceUri() {
-		assertEquals("", MetaUtil.cleanProvenanceSourceUriOrEmpty(null));
-		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc"));
-		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#"));
-		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#def"));
-		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#def#ghi"));
+		assertEquals("", MetaUtil.extractSourceUriOrEmpty(null));
+		assertEquals("abc", MetaUtil.extractSourceUriOrEmpty("abc"));
+		assertEquals("abc", MetaUtil.extractSourceUriOrEmpty("abc#"));
+		assertEquals("abc", MetaUtil.extractSourceUriOrEmpty("abc#def"));
+		assertEquals("abc", MetaUtil.extractSourceUriOrEmpty("abc#def#ghi"));
 	}
 }

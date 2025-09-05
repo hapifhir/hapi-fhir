@@ -1,0 +1,6 @@
+---
+type: change
+issue: 7235
+title: "Previously, when uploading resources through the Package Registry, the user-provided FHIR ID would be used.
+This behaviour has changed to use a server-assigned ID to ensure multiple versions of the same profile do not get 
+overwritten in the database."
