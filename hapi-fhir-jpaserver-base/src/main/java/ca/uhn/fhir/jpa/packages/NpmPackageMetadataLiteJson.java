@@ -14,10 +14,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
 		setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class NpmPackageMetadataLiteJson {
-
+	/**
+	 * The npm package name
+	 */
 	@JsonProperty("name")
 	private String myName;
-
+	/**
+	 * The npm package version
+	 */
 	@JsonProperty("version")
 	private String myVersion;
 
