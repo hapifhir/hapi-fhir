@@ -223,7 +223,7 @@ public class SearchParamRegistryImpl
 		assert theSearchParam.getBase() != null && !theSearchParam.getBase().isEmpty();
 
 		for (String rt : theSearchParam.getBase()) {
-			myLocalSPCache.add(rt, theSearchParam.getName(), theSearchParam);
+			myLocalSPCache.add(rt, theSearchParam.getName(), theSearchParam, true);
 		}
 	}
 
