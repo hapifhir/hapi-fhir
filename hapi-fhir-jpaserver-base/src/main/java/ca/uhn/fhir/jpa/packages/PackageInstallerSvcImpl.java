@@ -426,7 +426,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				// (Note: This is not to be confused with meta.versionId)
 				theResource.setId(new IdDt()); // Ignore the given ID
 				if (thePackageInstallationSpec != null) {
-					String metaSourceUrl = thePackageInstallationSpec.getName() + OUR_VERSION_DELIMITER + thePackageInstallationSpec.getVersion();
+					String metaSourceUrl = thePackageInstallationSpec.getName()
+							+ OUR_VERSION_DELIMITER
+							+ thePackageInstallationSpec.getVersion();
 					MetaUtil.setSource(myFhirContext, theResource, metaSourceUrl);
 				}
 			}
