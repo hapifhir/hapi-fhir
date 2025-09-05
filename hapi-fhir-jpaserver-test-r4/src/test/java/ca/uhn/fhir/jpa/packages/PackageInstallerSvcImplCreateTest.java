@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.packages;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
@@ -12,7 +12,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
-import com.github.dnault.xmlpatch.repackaged.org.jaxen.util.SingletonList;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -34,6 +33,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
+	public static final String VERSION_1 = "abc";
+	public static final String COPYRIGHT_1 = "first";
+	public static final String VERSION_2 = "def";
+	public static final String COPYRIGHT_2 = "second";
 	private static final String PACKAGE_ID_1 = "package1";
 	private static final String PACKAGE_VERSION = "1.0";
 	private static final String VALUE_SET_OID_FIRST = "2.16.840.1.113762.1.4.1010.9";
@@ -53,6 +56,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 	@Autowired
 	private PackageInstallerSvcImpl mySvc;
+
 	@Test
 	void createNamingSystem() throws IOException {
 		final NamingSystem namingSystem = new NamingSystem();
@@ -65,67 +69,46 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 	@Test
 	void createWithNoExistingResourcesNoIdOnValueSet() throws IOException {
-		final String version1 = "abc";
-		final String copyright1 = "first";
-
-		createValueSetAndCallCreate(VALUE_SET_OID_FIRST, null, version1, FIRST_IG_URL_FIRST_OID, copyright1);
+		createValueSetAndCallCreate(VALUE_SET_OID_FIRST, null, VERSION_1, FIRST_IG_URL_FIRST_OID, COPYRIGHT_1);
 
 		final ValueSet actualValueSet1 = getFirstValueSet();
 
-		assertEquals("ValueSet/" + VALUE_SET_OID_FIRST, actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue());
+		assertThat(actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue()).matches("ValueSet/[0-9]+");
 		assertEquals(FIRST_IG_URL_FIRST_OID, actualValueSet1.getUrl());
-		assertEquals(version1, actualValueSet1.getVersion());
-		assertEquals(copyright1, actualValueSet1.getCopyright());
+		assertEquals(VERSION_1, actualValueSet1.getVersion());
+		assertEquals(COPYRIGHT_1, actualValueSet1.getCopyright());
 	}
 
 	@Test
 	void createWithNoExistingResourcesIdOnValueSet() throws IOException {
-		final String version1 = "abc";
-		final String copyright1 = "first";
+		createValueSetAndCallCreate(VALUE_SET_OID_FIRST, null, VERSION_1, FIRST_IG_URL_FIRST_OID, COPYRIGHT_1);
+		createValueSetAndCallCreate(VALUE_SET_OID_FIRST, "43", VERSION_1, SECOND_IG_URL_FIRST_OID, COPYRIGHT_1);
 
-		createValueSetAndCallCreate(VALUE_SET_OID_FIRST, null, version1, FIRST_IG_URL_FIRST_OID, copyright1);
-		createValueSetAndCallCreate(VALUE_SET_OID_FIRST, "43", version1, SECOND_IG_URL_FIRST_OID, copyright1);
+		final List<TermValueSet> allTermValueSets = myTermValueSetDao.findAll();
+		assertThat(allTermValueSets).hasSize(2);
+		assertEquals(FIRST_IG_URL_FIRST_OID, allTermValueSets.get(0).getUrl());
+		assertEquals(SECOND_IG_URL_FIRST_OID, allTermValueSets.get(1).getUrl());
 
-		final TermValueSet termValueSet = getFirstTermValueSet();
-
-		assertEquals(FIRST_IG_URL_FIRST_OID, termValueSet.getUrl());
-
-		final ValueSet actualValueSet1 = getFirstValueSet();
-
-		assertEquals("ValueSet/" + VALUE_SET_OID_FIRST, actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals(FIRST_IG_URL_FIRST_OID, actualValueSet1.getUrl());
-		assertEquals(version1, actualValueSet1.getVersion());
-		assertEquals(copyright1, actualValueSet1.getCopyright());
+		assertTwoDifferentValueSetsCreated(FIRST_IG_URL_FIRST_OID, SECOND_IG_URL_FIRST_OID, VERSION_1, VERSION_1, COPYRIGHT_1, COPYRIGHT_1);
 	}
 
 	@Test
-	void createValueSetThenUpdateSameUrl() throws IOException {
-		final String version1 = "abc";
-		final String version2 = "def";
-		final String copyright1 = "first";
-		final String copyright2 = "second";
+	void createTwoValueSets_sameUrlDifferentVersions() throws IOException {
+		createValueSetAndCallCreate(VALUE_SET_OID_FIRST, null, VERSION_1, FIRST_IG_URL_FIRST_OID, COPYRIGHT_1);
+		createValueSetAndCallCreate(VALUE_SET_OID_FIRST, "43", VERSION_2, FIRST_IG_URL_FIRST_OID, COPYRIGHT_2);
 
-		createValueSetAndCallCreate(VALUE_SET_OID_FIRST, null, version1, FIRST_IG_URL_FIRST_OID, copyright1);
-		createValueSetAndCallCreate(VALUE_SET_OID_FIRST, "43", version2, FIRST_IG_URL_FIRST_OID, copyright2);
-
-		final ValueSet actualValueSet1 = getFirstValueSet();
-
-		assertEquals("ValueSet/" + VALUE_SET_OID_FIRST, actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals(FIRST_IG_URL_FIRST_OID, actualValueSet1.getUrl());
-		assertEquals(version2, actualValueSet1.getVersion());
-		assertEquals(copyright2, actualValueSet1.getCopyright());
+		assertTwoDifferentValueSetsCreated(FIRST_IG_URL_FIRST_OID, FIRST_IG_URL_FIRST_OID, VERSION_1, VERSION_2, COPYRIGHT_1, COPYRIGHT_2);
 	}
 
 	@Test
-	void createTwoDifferentValueSets() throws IOException {
-		final String version1 = "abc";
-		final String version2 = "def";
-		final String copyright1 = "first";
-		final String copyright2 = "second";
+	void createTwoValueSets_withDifferentUrls() throws IOException {
+		createValueSetAndCallCreate(VALUE_SET_OID_FIRST, null, VERSION_1, FIRST_IG_URL_FIRST_OID, COPYRIGHT_1);
+		createValueSetAndCallCreate(VALUE_SET_OID_SECOND, "43", VERSION_2, SECOND_IG_URL_SECOND_OID, COPYRIGHT_2);
 
-		createValueSetAndCallCreate(VALUE_SET_OID_FIRST, null, version1, FIRST_IG_URL_FIRST_OID, copyright1);
-		createValueSetAndCallCreate(VALUE_SET_OID_SECOND, "43", version2, SECOND_IG_URL_SECOND_OID, copyright2);
+		assertTwoDifferentValueSetsCreated(FIRST_IG_URL_FIRST_OID, SECOND_IG_URL_SECOND_OID, VERSION_1, VERSION_2, COPYRIGHT_1, COPYRIGHT_2);
+	}
 
+	private void assertTwoDifferentValueSetsCreated(String theExpectedValueSetUrlV1, String theExpectedValueSetUrlV2, String theV1, String theV2, String theCopyrightV1, String theCopyrightV2) {
 		final List<TermValueSet> all2 = myTermValueSetDao.findAll();
 
 		assertThat(all2).hasSize(2);
@@ -133,26 +116,30 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 		final TermValueSet termValueSet1 = all2.get(0);
 		final TermValueSet termValueSet2 = all2.get(1);
 
-		assertEquals(FIRST_IG_URL_FIRST_OID, termValueSet1.getUrl());
-		assertEquals(SECOND_IG_URL_SECOND_OID, termValueSet2.getUrl());
+		assertEquals(theExpectedValueSetUrlV1, termValueSet1.getUrl());
+		assertEquals(theExpectedValueSetUrlV2, termValueSet2.getUrl());
 
 		final List<ValueSet> allValueSets = getAllValueSets();
 
 		assertThat(allValueSets).hasSize(2);
 
 		final ValueSet actualValueSet1 = allValueSets.get(0);
+		String idValueSet1 = actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue();
 
-		assertEquals("ValueSet/" + VALUE_SET_OID_FIRST, actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals(FIRST_IG_URL_FIRST_OID, actualValueSet1.getUrl());
-		assertEquals(version1, actualValueSet1.getVersion());
-		assertEquals(copyright1, actualValueSet1.getCopyright());
+		assertThat(idValueSet1).matches("ValueSet/[0-9]+");
+		assertEquals(theExpectedValueSetUrlV1, actualValueSet1.getUrl());
+		assertEquals(theV1, actualValueSet1.getVersion());
+		assertEquals(theCopyrightV1, actualValueSet1.getCopyright());
 
 		final ValueSet actualValueSet2 = allValueSets.get(1);
+		String idValueSet2 = actualValueSet2.getIdElement().toUnqualifiedVersionless().getValue();
 
-		assertEquals("ValueSet/" + VALUE_SET_OID_SECOND, actualValueSet2.getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals(SECOND_IG_URL_SECOND_OID, actualValueSet2.getUrl());
-		assertEquals(version2, actualValueSet2.getVersion());
-		assertEquals(copyright2, actualValueSet2.getCopyright());
+		assertThat(idValueSet2).matches("ValueSet/[0-9]+");
+		assertEquals(theExpectedValueSetUrlV2, actualValueSet2.getUrl());
+		assertEquals(theV2, actualValueSet2.getVersion());
+		assertEquals(theCopyrightV2, actualValueSet2.getCopyright());
+
+		assertThat(idValueSet1).isNotEqualTo(idValueSet2);
 	}
 
 	@Test
@@ -169,7 +156,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 		// verify the SP is created
 		SearchParameterMap map = SearchParameterMap.newSynchronous()
 			.add(SearchParameter.SP_CODE, new TokenParam(spCode));
-		IBundleProvider outcome = mySearchParameterDao.search(map);
+		IBundleProvider outcome = mySearchParameterDao.search(map, mySrd);
 		assertEquals(1, outcome.size());
 	}
 
@@ -178,7 +165,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 		final List<IBaseResource> allResources = myValueSetDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS).getAllResources();
 
 		assertThat(allResources).isNotEmpty();
-		assertTrue(allResources.get(0) instanceof ValueSet);
+		assertInstanceOf(ValueSet.class, allResources.get(0));
 
 		return allResources.stream()
 			.map(ValueSet.class::cast)
@@ -192,18 +179,9 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 		assertThat(allResources).hasSize(1);
 
 		final IBaseResource resource1 = allResources.get(0);
-		assertTrue(resource1 instanceof ValueSet);
+		assertInstanceOf(ValueSet.class, resource1);
 
 		return (ValueSet) resource1;
-	}
-
-	@Nonnull
-	private TermValueSet getFirstTermValueSet() {
-		final List<TermValueSet> all2 = myTermValueSetDao.findAll();
-
-		assertThat(all2).hasSize(1);
-
-		return all2.get(0);
 	}
 
 	private void createValueSetAndCallCreate(String theOid, String theResourceVersion, String theValueSetVersion, String theUrl, String theCopyright) throws IOException {
