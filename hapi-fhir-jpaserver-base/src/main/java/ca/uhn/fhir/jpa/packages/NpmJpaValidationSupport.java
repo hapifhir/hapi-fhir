@@ -22,11 +22,22 @@ package ca.uhn.fhir.jpa.packages;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
+import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
+import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
+import ca.uhn.fhir.jpa.packages.util.PackageUtils;
+import ca.uhn.fhir.model.api.PagingIterator;
+import ca.uhn.fhir.rest.annotation.Transaction;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class NpmJpaValidationSupport implements IValidationSupport {
 
@@ -34,7 +45,13 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 	private FhirContext myFhirContext;
 
 	@Autowired
-	private IHapiPackageCacheManager myHapiPackageCacheManager;
+	private IHapiPackageCacheManager myHapiPackageCacheManager; // this is JpaPackageCache
+
+	@Autowired
+	private INpmPackageVersionDao myPackageVersionDao;
+
+	@Autowired
+	private PackageResourceParsingSvc myPackageResourceParsingSvc;
 
 	@Override
 	public FhirContext getFhirContext() {
@@ -76,5 +93,52 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
 		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
 		return (List<T>) myHapiPackageCacheManager.loadPackageAssetsByType(fhirVersion, "StructureDefinition");
+	}
+
+	@Override
+	@Transaction
+	public <T extends IBaseResource> List<T> fetchAllSearchParameters() {
+		/*
+		 * default findall is probably fine
+		 * there's probably not a lot and even if there are
+		 * we don't reorder them
+		 */
+		PagingIterator<NpmPackageVersionEntity> iterator = new PagingIterator<>(1000, new PagingIterator.PageFetcher<NpmPackageVersionEntity>() {
+			@Override
+			public void fetchNextPage(int thePageIndex, int theBatchSize, Consumer<NpmPackageVersionEntity> theConsumer) {
+				myPackageVersionDao.findAll(Pageable.ofSize(theBatchSize).withPage(thePageIndex))
+					.stream().forEach(theConsumer);
+			}
+		});
+
+		// do we want to cache this?
+		List<T> sps = new ArrayList<>();
+		while (iterator.hasNext()) {
+			NpmPackageVersionEntity entity = iterator.next();
+			getAllSP(entity, sps);
+		}
+		return sps;
+	}
+
+	private <T extends IBaseResource> void getAllSP(NpmPackageVersionEntity theNpmPackageEntity, List<T> theSps) {
+		if (theNpmPackageEntity.getFhirVersion() != myFhirContext.getVersion().getVersion()) {
+			// not the same fhir version as this class is dependent on,
+			// so we cannot create these objects
+			return;
+		}
+
+		NpmPackage pkg;
+		try {
+			pkg = myHapiPackageCacheManager.loadPackage(theNpmPackageEntity.getPackageId(), theNpmPackageEntity.getVersionId());
+		} catch (IOException ex) {
+			// TODO - better handling
+			throw new RuntimeException(ex);
+		}
+
+		List<IBaseResource> pkgSps = myPackageResourceParsingSvc.parseResourcesOfType("SearchParameter", pkg);
+		for (IBaseResource sp : pkgSps) {
+			PackageUtils.addPackageMetadata(sp, pkg);
+			theSps.add((T) sp);
+		}
 	}
 }

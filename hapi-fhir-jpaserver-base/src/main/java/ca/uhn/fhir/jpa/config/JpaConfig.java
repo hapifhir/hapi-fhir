@@ -411,21 +411,6 @@ public class JpaConfig {
 		return new JpaDaoResourceLinkResolver();
 	}
 
-	@Bean(name = PackageUtils.LOADER_WITH_CACHE)
-	public IHapiPackageCacheManager packageCacheManager() {
-		return new JpaPackageCache();
-	}
-
-	@Bean
-	public NpmJpaValidationSupport npmJpaValidationSupport() {
-		return new NpmJpaValidationSupport();
-	}
-
-	@Bean
-	public ValidationSettings validationSettings() {
-		return new ValidationSettings();
-	}
-
 	@Bean
 	public ISearchCacheSvc searchCacheSvc() {
 		return new DatabaseSearchCacheSvcImpl();
