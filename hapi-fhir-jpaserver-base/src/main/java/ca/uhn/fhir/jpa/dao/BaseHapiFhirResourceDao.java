@@ -1792,6 +1792,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return null;
 	}
 
+	// FIXME: move
+//	private record CorrectCurrentVersionResponse(boolean forceReindexSps, boolean forceReloadResourceEntity, ResourceHistoryTable currentVersion);
+
 	@SuppressWarnings("unchecked")
 	private void reindexSearchParameters(
 			ResourceTable entity, ReindexOutcome theReindexOutcome, TransactionDetails theTransactionDetails) {
