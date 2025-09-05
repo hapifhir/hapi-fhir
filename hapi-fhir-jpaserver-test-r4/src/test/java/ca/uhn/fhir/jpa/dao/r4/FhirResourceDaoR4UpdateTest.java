@@ -1271,48 +1271,6 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testCreate_withProvidedMetaAndNoRequestId_keepsMetaUnchanged() {
-		// Given
-		StructureDefinition sd = createSimpleStructureDefinition();
-
-		// When
-		IIdType result = myStructureDefinitionDao.update(sd, mySrd).getId();
-
-		// Then
-		StructureDefinition storedSd = myStructureDefinitionDao.read(result, mySrd);
-		assertThat(storedSd.getMeta().getSource()).isEqualTo("abc#123");
-	}
-
-	private static StructureDefinition createSimpleStructureDefinition() {
-		StructureDefinition sd = new StructureDefinition();
-		sd.setId("test-sd-123");
-		sd.setMeta(new Meta().setSource("abc#123"));
-		sd.setUrl("http://example.com/StructureDefinition/test");
-		sd.setName("test-sd");
-		sd.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		sd.setAbstract(false);
-		sd.setKind(StructureDefinition.StructureDefinitionKind.RESOURCE);
-		sd.setType("Patient");
-		sd.addIdentifier().setSystem("http://example.com").setValue("123");
-		return sd;
-	}
-
-	@Test
-	void testCreate_withProvidedMetaAndRequestId_usesRequestIdInMetaSource() {
-		// Given
-		StructureDefinition sd = createSimpleStructureDefinition();
-		when(mySrd.getRequestId()).thenReturn("456");
-
-		// When
-		IIdType result = myStructureDefinitionDao.update(sd, mySrd).getId();
-
-		// Then
-		StructureDefinition storedSd = myStructureDefinitionDao.read(result, mySrd);
-		assertThat(storedSd.getMeta().getSource()).isEqualTo("abc#456");
-	}
-
-
-	@Test
 	public void testUpdateNoChange_ChangeForcedInPreStorageInterceptor() {
 		// Add interceptor which forces a change
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, new IAnonymousInterceptor() {

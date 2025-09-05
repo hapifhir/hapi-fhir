@@ -1797,6 +1797,10 @@ public class JpaStorageSettings extends StorageSettings {
 	 * If enabled, resource source information (<code>Resource.meta.source</code>) will be persisted along with
 	 * each resource. This adds extra table and index space so it should be disabled if it is not being
 	 * used.
+	 *
+	 * Please note that even with StoreMetaSourceInformationEnum.REQUEST_ID enabled, any request IDs present in
+	 * the resource body (Resource.meta.source) will not be preserved unless
+	 * {@link JpaStorageSettings#setPreserveRequestIdInResourceBody(boolean)} is enabled.
 	 * <p>
 	 * Default is {@link StoreMetaSourceInformationEnum#SOURCE_URI_AND_REQUEST_ID}
 	 * </p>
@@ -1809,6 +1813,10 @@ public class JpaStorageSettings extends StorageSettings {
 	 * If enabled, resource source information (<code>Resource.meta.source</code>) will be persisted along with
 	 * each resource. This adds extra table and index space so it should be disabled if it is not being
 	 * used.
+	 *
+	 * Please note that even with StoreMetaSourceInformationEnum.REQUEST_ID enabled, any request IDs present in
+	 * the resource body (Resource.meta.source) will not be preserved unless
+	 * {@link JpaStorageSettings#setPreserveRequestIdInResourceBody(boolean)} is enabled.
 	 * <p>
 	 * Default is {@link StoreMetaSourceInformationEnum#SOURCE_URI_AND_REQUEST_ID}
 	 * </p>
@@ -1816,6 +1824,27 @@ public class JpaStorageSettings extends StorageSettings {
 	public void setStoreMetaSourceInformation(StoreMetaSourceInformationEnum theStoreMetaSourceInformation) {
 		Validate.notNull(theStoreMetaSourceInformation, "theStoreMetaSourceInformation must not be null");
 		myStoreMetaSourceInformation = theStoreMetaSourceInformation;
+	}
+
+	/**
+	 * This setting indicate whether a provided Resource.meta.source requestID (formatted as `sourceURI#requestID`)
+	 * should be preserved or overwritten.
+	 *
+	 * @since 6.2.0
+	 */
+	public boolean isPreserveRequestIdInResourceBody() {
+		return myPreserveRequestIdInResourceBody;
+	}
+
+	/**
+	 * This setting indicate whether a provided Resource.meta.source requestID (formatted as `sourceURI#requestID`)
+	 * should be preserved or overwritten.
+	 * Default is false. This means that a client provided requestId will be overwritten.
+	 *
+	 * @since 6.2.0
+	 */
+	public void setPreserveRequestIdInResourceBody(boolean thePreserveRequestIdInResourceBody) {
+		myPreserveRequestIdInResourceBody = thePreserveRequestIdInResourceBody;
 	}
 
 	/**
@@ -2432,27 +2461,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public void setUpdateWithHistoryRewriteEnabled(boolean theUpdateWithHistoryRewriteEnabled) {
 		myUpdateWithHistoryRewriteEnabled = theUpdateWithHistoryRewriteEnabled;
-	}
-
-	/**
-	 * This setting indicate whether a providedResource.meta.source requestID (source#requestID)
-	 * should be preserved or overwritten.
-	 *
-	 * @since 6.2.0
-	 */
-	public boolean isPreserveRequestIdInResourceBody() {
-		return myPreserveRequestIdInResourceBody;
-	}
-
-	/**
-	 * This setting indicate whether a providedResource.meta.source requestID (source#requestID)
-	 * should be preserved or overwritten.
-	 * Default is false. This means that a client provided requestId will be overwritten.
-	 *
-	 * @since 6.2.0
-	 */
-	public void setPreserveRequestIdInResourceBody(boolean thePreserveRequestIdInResourceBody) {
-		myPreserveRequestIdInResourceBody = thePreserveRequestIdInResourceBody;
 	}
 
 	/**

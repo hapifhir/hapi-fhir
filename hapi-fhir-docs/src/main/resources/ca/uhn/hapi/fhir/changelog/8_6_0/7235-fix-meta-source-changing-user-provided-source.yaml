@@ -1,6 +1,0 @@
----
-type: fix
-issue: 7235
-title: "Previously, when a user provided `meta.source` URI included a `#`, all content after the `#` would always be ignored. 
-This has now been fixed such that the content after the `#` will only be replaced when the system is configured to replace 
-the content with a request-id when present."

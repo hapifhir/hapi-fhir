@@ -85,6 +85,7 @@ import static ca.uhn.fhir.util.SearchParameterUtil.getBaseAsStrings;
 public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PackageInstallerSvcImpl.class);
+	private static final String OUR_VERSION_DELIMITER = "|";
 
 	boolean enabled = true;
 
@@ -416,18 +417,25 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			PackageInstallationSpec thePackageInstallationSpec) {
 		final IIdType id = theResource.getIdElement();
 
-		if (theExistingResource == null && !theResource.fhirType().equals("SearchParameter")) {
-			// For any resource type except SearchParameter, we will use a server-assigned ID
-			// This prevents FHIR ID conflicts for multiple versions of Conformance/Canonical resources (e.g.
-			// StructureDefinition.version)
-			// which is helpful for validation against versioned profiles.
-			// (Note: This is not to be confused with meta.versionId)
-			theResource.setId(new IdDt()); // Ignore the given ID
-			String metaSourceUrl = thePackageInstallationSpec.getName() + '#' + thePackageInstallationSpec.getVersion();
-			MetaUtil.setSource(myFhirContext, theResource, metaSourceUrl);
-			ourLog.debug("Installing resource with a server-assigned id");
-			theDao.create(theResource, createRequestDetails());
-			return true;
+		if (theExistingResource == null) {
+			if (!theResource.fhirType().equals("SearchParameter")) {
+				// For any resource type except SearchParameter, we will use a server-assigned ID
+				// This prevents FHIR ID conflicts for multiple versions of Conformance/Canonical resources (e.g.
+				// StructureDefinition.version)
+				// which is helpful for validation against versioned profiles.
+				// (Note: This is not to be confused with meta.versionId)
+				theResource.setId(new IdDt()); // Ignore the given ID
+				if (thePackageInstallationSpec != null) {
+					String metaSourceUrl = thePackageInstallationSpec.getName() + OUR_VERSION_DELIMITER + thePackageInstallationSpec.getVersion();
+					MetaUtil.setSource(myFhirContext, theResource, metaSourceUrl);
+				}
+			}
+
+			if (theResource.getIdElement().isEmpty()) {
+				ourLog.debug("Installing resource with a server-assigned id");
+				theDao.create(theResource, createRequestDetails());
+				return true;
+			}
 		}
 
 		if (theExistingResource == null && !id.isEmpty() && id.isIdPartValidLong()) {

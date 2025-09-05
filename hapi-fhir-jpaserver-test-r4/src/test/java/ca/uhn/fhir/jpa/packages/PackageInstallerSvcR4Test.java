@@ -358,7 +358,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			IBaseResource resource = result.getResources(0, 1).get(0);
 			// As part of https://github.com/hapifhir/hapi-fhir/issues/7235, we now use server-assigned IDs
 			assertThat(resource.getIdElement().toString()).matches("StructureDefinition/[0-9]+/_history/1");
-			assertThat(((StructureDefinition) resource).getMeta().getSource()).isEqualTo("test-profile#2.0.0");
+			assertThat(((StructureDefinition) resource).getMeta().getSource()).isEqualTo("test-profile|2.0.0");
 			IIdType sdIdV2 = resource.getIdElement();
 
 			map = SearchParameterMap.newSynchronous();
@@ -368,7 +368,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			assertEquals(1, result.sizeOrThrowNpe());
 			resource = result.getResources(0, 1).get(0);
 			assertThat(resource.getIdElement().toString()).matches("StructureDefinition/[0-9]+/_history/1");
-			assertThat(((StructureDefinition) resource).getMeta().getSource()).isEqualTo("test-profile#1.0.0");
+			assertThat(((StructureDefinition) resource).getMeta().getSource()).isEqualTo("test-profile|1.0.0");
 			assertThat(resource.getIdElement().toString()).isNotEqualTo(sdIdV2.toString());
 		});
 	}
