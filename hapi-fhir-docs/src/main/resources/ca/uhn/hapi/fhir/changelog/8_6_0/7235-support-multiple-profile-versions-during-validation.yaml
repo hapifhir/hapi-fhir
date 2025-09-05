@@ -1,6 +1,7 @@
 ---
 type: fix
 issue: 7235
+jira: SMILE-10652
 title: "Previously, when uploading multiple versions of a profile through the Package Registry, the business version would
 be ignored which caused conformance resources that shared the same canonical URL to be overwritten. This has now been fixed,
 and support for validation with versioned canonical URLs has been added."
