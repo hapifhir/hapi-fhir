@@ -1779,7 +1779,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			} else {
 				ourLog.info(
-						"No currentVersionOpt exist for {}/{} (PID {}), marking resource as deleted",
+						"No versions exist for {}/{} (PID {}), marking resource as deleted",
 						theEntity.getResourceType(),
 						theEntity.getFhirId(),
 						theEntity.getResourceId());
