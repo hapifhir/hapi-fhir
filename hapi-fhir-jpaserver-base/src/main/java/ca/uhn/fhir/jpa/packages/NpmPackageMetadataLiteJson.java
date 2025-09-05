@@ -8,11 +8,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "Contains the bare minimum of NpmPackage metadata.")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(
-	creatorVisibility = JsonAutoDetect.Visibility.NONE,
-	fieldVisibility = JsonAutoDetect.Visibility.NONE,
-	getterVisibility = JsonAutoDetect.Visibility.NONE,
-	isGetterVisibility = JsonAutoDetect.Visibility.NONE,
-	setterVisibility = JsonAutoDetect.Visibility.NONE)
+		creatorVisibility = JsonAutoDetect.Visibility.NONE,
+		fieldVisibility = JsonAutoDetect.Visibility.NONE,
+		getterVisibility = JsonAutoDetect.Visibility.NONE,
+		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+		setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class NpmPackageMetadataLiteJson {
 
 	@JsonProperty("name")

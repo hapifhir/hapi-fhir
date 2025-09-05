@@ -103,13 +103,17 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 		 * there's probably not a lot and even if there are
 		 * we don't reorder them
 		 */
-		PagingIterator<NpmPackageVersionEntity> iterator = new PagingIterator<>(1000, new PagingIterator.PageFetcher<NpmPackageVersionEntity>() {
-			@Override
-			public void fetchNextPage(int thePageIndex, int theBatchSize, Consumer<NpmPackageVersionEntity> theConsumer) {
-				myPackageVersionDao.findAll(Pageable.ofSize(theBatchSize).withPage(thePageIndex))
-					.stream().forEach(theConsumer);
-			}
-		});
+		PagingIterator<NpmPackageVersionEntity> iterator =
+				new PagingIterator<>(1000, new PagingIterator.PageFetcher<NpmPackageVersionEntity>() {
+					@Override
+					public void fetchNextPage(
+							int thePageIndex, int theBatchSize, Consumer<NpmPackageVersionEntity> theConsumer) {
+						myPackageVersionDao
+								.findAll(Pageable.ofSize(theBatchSize).withPage(thePageIndex))
+								.stream()
+								.forEach(theConsumer);
+					}
+				});
 
 		// do we want to cache this?
 		List<T> sps = new ArrayList<>();
@@ -129,7 +133,8 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 
 		NpmPackage pkg;
 		try {
-			pkg = myHapiPackageCacheManager.loadPackage(theNpmPackageEntity.getPackageId(), theNpmPackageEntity.getVersionId());
+			pkg = myHapiPackageCacheManager.loadPackage(
+					theNpmPackageEntity.getPackageId(), theNpmPackageEntity.getVersionId());
 		} catch (IOException ex) {
 			// TODO - better handling
 			throw new RuntimeException(ex);

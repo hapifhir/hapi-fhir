@@ -38,35 +38,36 @@ public class ImplementationGuideCreator {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImplementationGuideCreator.class);
 
 	@Language("JSON")
-	private static final String PACKAGE_JSON_BASE = """
+	private static final String PACKAGE_JSON_BASE =
+			"""
 		{
-		  "name": "test.fhir.ca.com",
-		  "version": "1.2.3",
-		  "tools-version": 3,
-		  "type": "fhir.ig",
-		  "date": "20200831134427",
-		  "license": "not-open-source",
-		  "canonical": "http://test-ig.com/fhir/us/providerdataexchange",
-		  "url": "file://C:\\\\dev\\\\test-exchange\\\\fsh\\\\build\\\\output",
-		  "title": "Test Implementation Guide",
-		  "description": "Test Implementation Guide",
-		  "fhirVersions": [
-		    "4.0.1"
-		  ],
-		  "dependencies": {
-		  },
-		  "author": "SmileCDR",
-		  "maintainers": [
-		    {
-		      "name": "Smile",
-		      "email": "smilecdr@smiledigitalhealth.com",
-		      "url": "https://www.smilecdr.com"
-		    }
-		  ],
-		  "directories": {
-		    "lib": "package",
-		    "example": "example"
-		  }
+		"name": "test.fhir.ca.com",
+		"version": "1.2.3",
+		"tools-version": 3,
+		"type": "fhir.ig",
+		"date": "20200831134427",
+		"license": "not-open-source",
+		"canonical": "http://test-ig.com/fhir/us/providerdataexchange",
+		"url": "file://C:\\\\dev\\\\test-exchange\\\\fsh\\\\build\\\\output",
+		"title": "Test Implementation Guide",
+		"description": "Test Implementation Guide",
+		"fhirVersions": [
+			"4.0.1"
+		],
+		"dependencies": {
+		},
+		"author": "SmileCDR",
+		"maintainers": [
+			{
+			"name": "Smile",
+			"email": "smilecdr@smiledigitalhealth.com",
+			"url": "https://www.smilecdr.com"
+			}
+		],
+		"directories": {
+			"lib": "package",
+			"example": "example"
+		}
 		}
 	""";
 
@@ -94,8 +95,14 @@ public class ImplementationGuideCreator {
 		this(theFhirContext, "test.fhir.ca.com", "1.2.3");
 	}
 
-	public ImplementationGuideCreator(@Nonnull FhirContext theFhirContext, String thePackageName, String thePackageVersion) throws JsonProcessingException {
-		this(theFhirContext, theFhirContext.getVersion().getVersion().getFhirVersionString(), thePackageName, thePackageVersion);
+	public ImplementationGuideCreator(
+			@Nonnull FhirContext theFhirContext, String thePackageName, String thePackageVersion)
+			throws JsonProcessingException {
+		this(
+				theFhirContext,
+				theFhirContext.getVersion().getVersion().getFhirVersionString(),
+				thePackageName,
+				thePackageVersion);
 	}
 
 	/**
@@ -107,11 +114,8 @@ public class ImplementationGuideCreator {
 	 */
 	@SuppressWarnings("unchecked")
 	public ImplementationGuideCreator(
-		@Nonnull FhirContext theFhirContext,
-		String theFhirVersion,
-		String theName,
-		String theVersion
-	) throws JsonProcessingException {
+			@Nonnull FhirContext theFhirContext, String theFhirVersion, String theName, String theVersion)
+			throws JsonProcessingException {
 		myFhirContext = theFhirContext;
 		myTerser = myFhirContext.newTerser();
 		myParser = myFhirContext.newJsonParser();
@@ -130,8 +134,7 @@ public class ImplementationGuideCreator {
 		mapJson.replace("name", myPackageName);
 		mapJson.replace("version", myPackageVersion);
 
-		myPackageJson = mapper.writerWithDefaultPrettyPrinter()
-			.writeValueAsString(mapJson);
+		myPackageJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapJson);
 
 		ourLog.info(myPackageJson);
 	}
@@ -174,7 +177,9 @@ public class ImplementationGuideCreator {
 		for (String reqdField : new String[] {"name", "status", "url", "code", "expression", "type"}) {
 			Optional<String> fieldOp = myTerser.getSinglePrimitiveValue(theSP, reqdField);
 			if (!myLenientSetting) {
-				assertTrue(fieldOp.isPresent(), String.format("%s is a required field for IG SearchParameters", reqdField));
+				assertTrue(
+						fieldOp.isPresent(),
+						String.format("%s is a required field for IG SearchParameters", reqdField));
 			}
 		}
 		List<IBase> base = myTerser.getValues(theSP, "base");
@@ -242,5 +247,4 @@ public class ImplementationGuideCreator {
 			}
 		}
 	}
-
 }
