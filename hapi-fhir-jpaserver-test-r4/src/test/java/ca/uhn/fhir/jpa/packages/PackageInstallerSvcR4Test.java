@@ -479,7 +479,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			SearchParameterMap map = SearchParameterMap.newSynchronous();
 			map.add(StructureDefinition.SP_URL, new UriParam("http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system"));
-			IBundleProvider result = myCodeSystemDao.search(map);
+			IBundleProvider result = myCodeSystemDao.search(map, mySrd);
 			assertEquals(1, result.sizeOrThrowNpe());
 			IBaseResource resource = result.getResources(0, 1).get(0);
 			// As part of https://github.com/hapifhir/hapi-fhir/issues/7235, we now use server-assigned IDs

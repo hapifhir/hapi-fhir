@@ -109,7 +109,7 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 	}
 
 	@Override
-	public Map<Object, Object> getUserData() {
+	public @Nonnull Map<Object, Object> getUserData() {
 		return myWrap.getUserData();
 	}
 

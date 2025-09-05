@@ -3,16 +3,26 @@ package org.hl7.fhir.common.hapi.validation.validator;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssue;
+import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssueCode;
+import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssueCoding;
+import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
+import ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.PackageInformation;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.ValueSet;
+import org.hl7.fhir.r5.terminologies.utilities.ValidationResult;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -107,6 +117,45 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 		// verify
 		verify(myValidationSupport, times(1)).validateCodeInValueSet(any(), any(), eq(null), eq("code1"), any(), any());
 		verify(myValidationSupport, never()).validateCode(any(), any(), any(), any(), any(), any());
+	}
+
+	@Test
+	public void validateCode_codeNotInValueSet_codeNotInSystem_concurrent() {
+		// setup
+		setupValidation();
+
+		String system = "http://codesystems.com/system";
+		String badCode = "code3";
+
+		CodeValidationResult codeInValuesetValResult = new CodeValidationResult().setCode(badCode).setCodeSystemName(system).setMessage("Bad code in VS");
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), eq(system), eq(badCode), any(), any())).thenReturn(codeInValuesetValResult);
+
+		// We expect this code validation result as an additional result on the validation, if code is in value set
+		String issueMessage = "Code not in here!";
+		CodeValidationIssue codeValidationIssue = new CodeValidationIssue(issueMessage, IssueSeverity.ERROR, CodeValidationIssueCode.NOT_FOUND, CodeValidationIssueCoding.NOT_FOUND);
+		CodeValidationResult codeValResult = new CodeValidationResult().setMessage("Bad code in CS").setCode(badCode).setCodeSystemName(system).setSeverity(IssueSeverity.ERROR).addIssue(codeValidationIssue);
+		when(myValidationSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq(badCode) , any(), eq(null))).thenReturn(codeValResult);
+
+		ForkJoinPool pool = ForkJoinPool.commonPool();
+		List<ForkJoinTask<?>> futures = new ArrayList<>();
+		for(int i=0; i<1000; i++) {
+			ForkJoinTask<?> f = pool.submit(() -> {
+				org.hl7.fhir.r5.model.ValueSet valueSet = new ValueSet();
+				valueSet.getCompose().addInclude().setSystem(system).addConcept().setCode("code0");
+				valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
+
+				ValidationResult result = myWorkerContextWrapper.validateCode(new ValidationOptions(), new Coding(system, badCode, ""), valueSet);
+				
+				// here we check if the additional code validation result was added
+				assertThat(result.getIssues()).hasSize(1);
+				assertThat(result.getIssues().get(0).getDiagnostics()).isEqualTo(issueMessage);
+			});
+			futures.add(f);
+		}
+		// test if there was no assertion exception for any invocation
+		for(ForkJoinTask<?> f : futures) {
+			f.join();
+		}
 	}
 
 	@Test

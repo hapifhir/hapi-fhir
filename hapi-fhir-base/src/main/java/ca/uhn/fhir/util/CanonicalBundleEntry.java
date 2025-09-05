@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI FHIR - Core Library
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
@@ -5,6 +24,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -42,6 +62,7 @@ public class CanonicalBundleEntry {
 
 	// Link fields (less common but part of spec)
 	private List<Map<String, String>> myLinks;
+	private IBaseOperationOutcome myResponseOutcome;
 
 	public CanonicalBundleEntry() {
 		// Default constructor
@@ -167,6 +188,14 @@ public class CanonicalBundleEntry {
 		myLinks = theLinks;
 	}
 
+	public void setResponseOutcome(IBaseOperationOutcome theResponseOutcome) {
+		myResponseOutcome = theResponseOutcome;
+	}
+
+	public IBaseOperationOutcome getResponseOutcome() {
+		return myResponseOutcome;
+	}
+
 	/**
 	 * Factory method to create a CanonicalBundleEntry from a Bundle Entry
 	 * @param theFhirContext The FHIR context
@@ -247,6 +276,12 @@ public class CanonicalBundleEntry {
 					terser.getSingleValueOrNull(response, "lastModified", IPrimitiveType.class);
 			if (lastModified != null) {
 				retVal.setResponseLastModified(lastModified.getValueAsString());
+			}
+
+			IBaseOperationOutcome outcome =
+					terser.getSingleValueOrNull(response, "outcome", IBaseOperationOutcome.class);
+			if (outcome != null) {
+				retVal.setResponseOutcome(outcome);
 			}
 		}
 
@@ -432,6 +467,13 @@ public class CanonicalBundleEntry {
 								lastModifiedChild.getChildByName("lastModified").newInstance();
 						lastModifiedValue.setValueAsString(myResponseLastModified);
 						lastModifiedChild.getMutator().setValue(response, lastModifiedValue);
+					}
+				}
+
+				if (myResponseOutcome != null) {
+					BaseRuntimeChildDefinition outcomeChild = responseDef.getChildByName("outcome");
+					if (outcomeChild != null) {
+						outcomeChild.getMutator().setValue(response, myResponseOutcome);
 					}
 				}
 			}
