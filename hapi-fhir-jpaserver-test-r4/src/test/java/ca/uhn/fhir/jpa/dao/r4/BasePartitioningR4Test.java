@@ -1,11 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static ca.uhn.fhir.interceptor.model.RequestPartitionId.defaultPartition;
-import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionId;
-import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionIds;
-import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionNames;
-import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -39,7 +33,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static ca.uhn.fhir.interceptor.model.RequestPartitionId.defaultPartition;
+import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionId;
+import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionIds;
+import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionNames;
+import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
@@ -158,6 +158,9 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		sp.setId("SearchParameter/patient-gender");
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setCode("gender");
+		sp.setName("pgender");
+		sp.setUrl("http://localhost/" + sp.getId());
+		sp.setDescription("description");
 		sp.setExpression("Patient.gender");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
@@ -169,17 +172,25 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		sp.setId("SearchParameter/patient-family");
 		sp.setType(Enumerations.SearchParamType.STRING);
 		sp.setCode("family");
+		sp.setName("family");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/SearchParameter/patient-family");
 		sp.setExpression("Patient.name[0].family");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
 		mySearchParameterDao.update(sp, mySrd);
 
 		addNextTargetPartitionForCreateWithIdDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-gender-family-unique");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
+		sp.setName("patient-gender-family-unique");
+		sp.setCode("patient-gender-family-unique");
+		sp.setUrl("http://localhost/" + sp.getId());
+		sp.setDescription("description");
 		sp.addComponent()
 			.setExpression("Patient")
 			.setDefinition("SearchParameter/patient-gender");
@@ -203,6 +214,9 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		sp.setId("SearchParameter/patient-family");
 		sp.setType(Enumerations.SearchParamType.STRING);
 		sp.setCode("family");
+		sp.setName("family");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/" + sp.getId());
 		sp.setExpression("Patient.name.family");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
@@ -214,16 +228,24 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		sp.setId("SearchParameter/patient-managingorg");
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.setCode(Patient.SP_ORGANIZATION);
+		sp.setName(Patient.SP_ORGANIZATION);
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/" + sp.getId());
 		sp.setExpression("Patient.managingOrganization");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
 		mySearchParameterDao.update(sp, mySrd);
 
 		addNextTargetPartitionForCreateWithIdDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-family-and-org");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setCode("family-and-org");
+		sp.setName("family-and-org");
+		sp.setUrl("http://localhost/" + sp.getId());
+		sp.setDescription("description");
 		sp.addBase("Patient");
 		sp.addComponent()
 			.setExpression("Patient")

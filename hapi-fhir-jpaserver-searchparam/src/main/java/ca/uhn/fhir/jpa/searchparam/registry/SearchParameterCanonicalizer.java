@@ -52,6 +52,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -214,6 +215,27 @@ public class SearchParameterCanonicalizer {
 				unique,
 				components,
 				baseResource);
+	}
+
+	/**
+	 * Takes an IBaseResource SearchParameter (ie, fhir version independent)
+	 * and returns true if the SP has a status = ACTIVE; false otherwise
+	 * @param theSP the search parameter
+	 */
+	public boolean isSPActive(IBaseResource theSP) {
+		FhirTerser terser = myFhirContext.newTerser();
+		// "status" has a cardinality of at least 0 and at most 1 for
+		// all versions; so more than 1 is not expected and < 1 we'll
+		// treat as "not active"
+		Optional<String> statusOp = terser.getSinglePrimitiveValue(theSP, "status");
+
+		if (statusOp.isEmpty()) {
+			// not active?
+			return false;
+		}
+		String statusStr = statusOp.get();
+
+		return statusStr.equalsIgnoreCase("active");
 	}
 
 	private RuntimeSearchParam canonicalizeSearchParameterDstu3(org.hl7.fhir.dstu3.model.SearchParameter theNextSp) {

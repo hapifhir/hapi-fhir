@@ -71,6 +71,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.isAllowedForContext;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchParamRegistryImpl
@@ -120,6 +121,12 @@ public class SearchParamRegistryImpl
 	private volatile IPhoneticEncoder myPhoneticEncoder;
 	private volatile RuntimeSearchParamCache myActiveSearchParams;
 	private boolean myPrePopulateSearchParamIdentities = true;
+
+	/**
+	 * Our local cache for search parameters stored in the system, that
+	 * are not saved into the DB.
+	 */
+	private final RuntimeSearchParamCache myLocalSPCache = new RuntimeSearchParamCache();
 
 	@VisibleForTesting
 	public void setPopulateSearchParamIdentities(boolean myPrePopulateSearchParamIdentities) {
@@ -211,6 +218,21 @@ public class SearchParamRegistryImpl
 	}
 
 	@Override
+	public void addActiveSearchParameterToLocalCache(@Nonnull RuntimeSearchParam theSearchParam) {
+		assert !isBlank(theSearchParam.getName());
+		assert theSearchParam.getBase() != null && !theSearchParam.getBase().isEmpty();
+
+		for (String rt : theSearchParam.getBase()) {
+			myLocalSPCache.add(rt, theSearchParam.getName(), theSearchParam, true);
+		}
+	}
+
+	@Override
+	public void clearLocalSearchParameterCache() {
+		myLocalSPCache.clear();
+	}
+
+	@Override
 	public Optional<RuntimeSearchParam> getActiveComboSearchParamById(
 			@Nonnull String theResourceName, @Nonnull IIdType theId) {
 		return myJpaSearchParamCache.getActiveComboSearchParamById(theResourceName, theId);
@@ -246,6 +268,15 @@ public class SearchParamRegistryImpl
 		ReadOnlySearchParamCache builtInSearchParams = getBuiltInSearchParams();
 		RuntimeSearchParamCache searchParams =
 				RuntimeSearchParamCache.fromReadOnlySearchParamCache(builtInSearchParams);
+
+		// add the local cache search params
+		myLocalSPCache.getSearchParamStream().forEach(sp -> {
+			for (String rt : sp.getBase()) {
+				// we will allow local cache SPs to override existing ones
+				searchParams.add(rt, sp.getName(), sp, true);
+			}
+		});
+
 		long overriddenCount = overrideBuiltinSearchParamsWithActiveJpaSearchParams(searchParams, theJpaSearchParams);
 		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
 
@@ -295,7 +326,9 @@ public class SearchParamRegistryImpl
 
 	private void unregisterImplicitSearchParam(RuntimeSearchParamCache theSearchParams, String theParamName) {
 		for (String resourceType : theSearchParams.getResourceNameKeys()) {
-			theSearchParams.remove(resourceType, theParamName);
+			RuntimeSearchParam rsp = theSearchParams.get(resourceType, theParamName);
+			String uri = rsp == null ? null : rsp.getUri();
+			theSearchParams.remove(resourceType, theParamName, uri);
 		}
 	}
 
@@ -436,7 +469,7 @@ public class SearchParamRegistryImpl
 			} else {
 				Set<String> expandedBases = expandBaseList(existingParam.getBase());
 				for (String base : expandedBases) {
-					theSearchParams.remove(base, existingParam.getName());
+					theSearchParams.remove(base, existingParam.getName(), existingParam.getUri());
 				}
 			}
 		}

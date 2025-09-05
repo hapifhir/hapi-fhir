@@ -104,6 +104,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.setCode("foo");
+		fooSp.setName("foo");
+		fooSp.setDescription("description");
+		fooSp.setUrl("http://localhost/SearchParameter/foo");
 		fooSp.addBase("ActivityDefinition");
 		fooSp.setType(Enumerations.SearchParamType.REFERENCE);
 		fooSp.setTitle("FOO SP");
@@ -124,6 +127,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.setCode("foo");
+		fooSp.setName("foo");
+		fooSp.setDescription("description");
+		fooSp.setUrl("http://localhost/SearchParameter/foo");
 		fooSp.addBase("ActivityDefinition");
 		fooSp.setType(Enumerations.SearchParamType.REFERENCE);
 		fooSp.setTitle("FOO SP");
@@ -145,6 +151,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.setCode("foo");
+		fooSp.setName("foo");
+		fooSp.setDescription("description");
+		fooSp.setUrl("http://localhost/SearchParameter/foo");
 		fooSp.addBase("ActivityDefinition");
 		fooSp.setType(Enumerations.SearchParamType.REFERENCE);
 		fooSp.setTitle("FOO SP");
@@ -237,6 +246,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		// same encoder, but different lengths
 		SearchParameter searchParam = constructSearchParameter();
 		searchParam.setCode("fuzzydefault");
+		searchParam.setName(searchParam.getCode());
+		searchParam.setDescription("description");
+		searchParam.setUrl("http://localhost/SearchParameter/" + searchParam.getCode());
 		searchParam.addExtension()
 			.setUrl(HapiExtensions.EXT_SEARCHPARAM_PHONETIC_ENCODER)
 			.setValue(new StringType(PhoneticEncoderEnum.METAPHONE.name()));
@@ -246,6 +258,10 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 		SearchParameter searchParamModified = constructSearchParameter();
 		searchParamModified.setCode("fuzzymodified");
+		searchParamModified.setName(searchParam.getCode());
+		searchParamModified.setDescription("description");
+		searchParamModified.setUrl("http://localhost/SearchParameter/" + searchParam.getCode());
+		searchParamModified.setName(searchParamModified.getCode());
 		searchParamModified.addExtension()
 			.setUrl(HapiExtensions.EXT_SEARCHPARAM_PHONETIC_ENCODER)
 			.setValue(new StringType(PhoneticEncoderEnum.METAPHONE.name() + "(" + modifiedLength + ")"));
@@ -309,6 +325,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.setCode("foo");
+		fooSp.setName("foo");
+		fooSp.setDescription("description");
+		fooSp.setUrl("http://localhost/SearchParameter/foo");
 		fooSp.setType(Enumerations.SearchParamType.STRING);
 		fooSp.setTitle("FOO SP");
 		fooSp.setExpression(invalidExpression);
@@ -329,6 +348,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 	public void testCreateInvalidNoBase() {
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.setCode("foo");
+		fooSp.setName("foo");
+		fooSp.setDescription("description");
+		fooSp.setUrl("http://localhost/SearchParameter/foo");
 		fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
 		fooSp.setExpression("Patient.gender");
@@ -367,6 +389,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.addBase("Patient");
 		fooSp.setCode("foo");
+		fooSp.setName("foo");
+		fooSp.setDescription("description");
+		fooSp.setUrl("http://localhost/SearchParameter/foo");
 		fooSp.setType(Enumerations.SearchParamType.COMPOSITE);
 		fooSp.setTitle("FOO SP");
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
@@ -381,6 +406,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.addBase("Patient");
 		fooSp.setCode("foo");
+		fooSp.setName("foo");
+		fooSp.setDescription("description");
+		fooSp.setUrl("http://localhost/SearchParameter/foo");
 		fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
 		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
@@ -436,6 +464,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 	public void testCreateSearchParameterOnSearchParameterDoesntCauseEndlessReindexLoop() {
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.setCode("foo");
+		fooSp.setName("foo");
+		fooSp.setDescription("description");
+		fooSp.setUrl("http://localhost/SearchParameter/foo");
 		fooSp.addBase("SearchParameter");
 		fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
@@ -457,6 +488,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
 		sp.setCode("myDoctor");
+		sp.setName("myDoctor");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/SearchParameter/myDoctor");
 		sp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.REFERENCE);
 		sp.setTitle("My Doctor");
 		sp.setExpression("Patient.extension('http://fmcna.com/myDoctor').value.as(Reference)");
@@ -490,6 +524,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Bundle");
 		sp.setCode("messageid");
+		sp.setName(sp.getCode());
+		sp.setUrl("http://localhost/SearchParameter/messageid");
+		sp.setDescription("description");
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setTitle("Message ID");
 		sp.setExpression("Bundle.entry.resource.as(MessageHeader).id");
@@ -525,6 +562,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter eyeColourSp = new SearchParameter();
 		eyeColourSp.addBase("Patient");
 		eyeColourSp.setCode("eyecolour");
+		eyeColourSp.setName("eyecolour");
+		eyeColourSp.setDescription("description");
+		eyeColourSp.setUrl("http://localhost/SearchParameter/eyecolour");
 		eyeColourSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
 		eyeColourSp.setTitle("Eye Colour");
 		eyeColourSp.setExpression("Patient.extension('http://acme.org/eyecolour')");
@@ -546,6 +586,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter attendingSp = new SearchParameter();
 		attendingSp.addBase("Patient");
 		attendingSp.setCode("attending");
+		attendingSp.setName("attending");
+		attendingSp.setDescription("description");
+		attendingSp.setUrl("http://localhost/SearchParameter/attending");
 		attendingSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.REFERENCE);
 		attendingSp.setTitle("Attending");
 		attendingSp.setExpression("Patient.extension('http://acme.org/attending')");
@@ -610,6 +653,8 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			"  \"status\": \"active\",\n" +
 			"  \"publisher\": \"MOH-IDMS\",\n" +
 			"  \"code\": \"ServiceRequestIndication\",\n" +
+			"  \"name\": \"ServiceRequestIndication\",\n" +
+			"  \"description\": \"description\",\n" +
 			"  \"base\": [\n" +
 			"    \"ServiceRequest\"\n" +
 			"  ],\n" +
@@ -703,6 +748,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter sp = new SearchParameter();
 		sp.setUrl("http://clinicalcloud.solutions/fhir/SearchParameter/request-reason");
 		sp.setName("reason");
+		sp.setDescription("description");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.setCode("reason");
 		sp.addBase("MedicationRequest");
@@ -743,6 +789,8 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		sp.setName("reason");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.setCode("reason");
+		sp.setName("reason");
+		sp.setDescription("description");
 		sp.addBase("MedicationRequest");
 		sp.addBase("ServiceRequest");
 		sp.setType(Enumerations.SearchParamType.TOKEN);
@@ -770,6 +818,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter threadIdSp = new SearchParameter();
 		threadIdSp.addBase("Communication");
 		threadIdSp.setCode("has-attachments");
+		threadIdSp.setName("has-attachments");
+		threadIdSp.setDescription("description");
+		threadIdSp.setUrl("http://localhost/SearchParameter/has-attachments");
 		threadIdSp.setType(Enumerations.SearchParamType.REFERENCE);
 		threadIdSp.setExpression("Communication.payload[1].contentAttachment is not null");
 		threadIdSp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
@@ -787,6 +838,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter siblingSp = new SearchParameter();
 		siblingSp.addBase("Patient");
 		siblingSp.setCode("sibling");
+		siblingSp.setName("sibling");
+		siblingSp.setDescription("description");
+		siblingSp.setUrl("http://localhost/SearchParameter/sibling");
 		siblingSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.REFERENCE);
 		siblingSp.setTitle("Sibling");
 		siblingSp.setExpression("Patient.extension('http://acme.org/sibling')");
@@ -839,6 +893,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("DiagnosticReport");
 		sp.setCode("fooBar");
+		sp.setName(sp.getCode());
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/SearchParameter/foobar");
 		sp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.REFERENCE);
 		sp.setTitle("FOO AND BAR");
 		sp.setExpression("DiagnosticReport.extension('http://foo') | DiagnosticReport.extension('http://bar')");
@@ -881,6 +938,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter siblingSp = new SearchParameter();
 		siblingSp.addBase("Patient");
 		siblingSp.setCode("sibling");
+		siblingSp.setName("sibling");
+		siblingSp.setDescription("description");
+		siblingSp.setUrl("http://localhost/SearchParameter/sibling");
 		siblingSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.REFERENCE);
 		siblingSp.setTitle("Sibling");
 		siblingSp.setExpression("Patient.extension('http://acme.org/sibling')");
@@ -936,6 +996,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter siblingSp = new SearchParameter();
 		siblingSp.addBase("Patient");
 		siblingSp.setCode("sibling");
+		siblingSp.setName("sibling");
+		siblingSp.setDescription("description");
+		siblingSp.setUrl("http://localhost/SearchParameter/sibling");
 		siblingSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.REFERENCE);
 		siblingSp.setTitle("Sibling");
 		siblingSp.setExpression("Patient.extension('http://acme.org/sibling')");
@@ -1009,6 +1072,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter eyeColourSp = new SearchParameter();
 		eyeColourSp.addBase("Patient");
 		eyeColourSp.setCode("eyecolour");
+		eyeColourSp.setName("eyecolour");
+		eyeColourSp.setDescription("description");
+		eyeColourSp.setUrl("http://localhost/SearchParameter/eyecolour");
 		eyeColourSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
 		eyeColourSp.setTitle("Eye Colour");
 		eyeColourSp.setExpression("Patient.extension('http://acme.org/eyecolour')");
@@ -1042,6 +1108,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter siblingSp = new SearchParameter();
 		siblingSp.addBase("Patient");
 		siblingSp.setCode("foobar");
+		siblingSp.setName("foobar");
+		siblingSp.setDescription("Description");
+		siblingSp.setUrl("http://localhost/SearchParameter/foobar");
 		siblingSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
 		siblingSp.setTitle("FooBar");
 		siblingSp.setExpression("Patient.extension('http://acme.org/foo').extension('http://acme.org/bar')");
@@ -1080,6 +1149,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter siblingSp = new SearchParameter();
 		siblingSp.addBase("Patient");
 		siblingSp.setCode("foobar");
+		siblingSp.setName("foobar");
+		siblingSp.setUrl("http://localhost/SearchParameter/foobar");
+		siblingSp.setDescription("description");
 		siblingSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
 		siblingSp.setTitle("FooBar");
 		siblingSp.setExpression("Patient.extension('http://acme.org/foo').extension('http://acme.org/bar')");
@@ -1118,6 +1190,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter siblingSp = new SearchParameter();
 		siblingSp.addBase("Patient");
 		siblingSp.setCode("foobar");
+		siblingSp.setName("foobar");
+		siblingSp.setDescription("description");
+		siblingSp.setUrl("http://localhost/SearchParameter/foobar");
 		siblingSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.DATE);
 		siblingSp.setTitle("FooBar");
 		siblingSp.setExpression("Patient.extension('http://acme.org/foo').extension('http://acme.org/bar')");
@@ -1160,6 +1235,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		final SearchParameter siblingSp = new SearchParameter();
 		siblingSp.addBase("Patient");
 		siblingSp.setCode("foobar");
+		siblingSp.setName("foobar");
+		siblingSp.setDescription("description");
+		siblingSp.setUrl("http://localhost/SearchParameter/foobar");
 		siblingSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.NUMBER);
 		siblingSp.setTitle("FooBar");
 		siblingSp.setExpression("Patient.extension('http://acme.org/foo').extension('http://acme.org/bar')");
@@ -1215,6 +1293,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter siblingSp = new SearchParameter();
 		siblingSp.addBase("Patient");
 		siblingSp.setCode("foobar");
+		siblingSp.setName("foobar");
+		siblingSp.setDescription("description");
+		siblingSp.setUrl("http://localhost/SearchParameter/foobar");
 		siblingSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.NUMBER);
 		siblingSp.setTitle("FooBar");
 		siblingSp.setExpression("Patient.extension('http://acme.org/foo').extension('http://acme.org/bar')");
@@ -1252,6 +1333,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter siblingSp = new SearchParameter();
 		siblingSp.addBase("Patient");
 		siblingSp.setCode("foobar");
+		siblingSp.setName("foobar");
+		siblingSp.setDescription("Description");
+		siblingSp.setUrl("http://localhost/SearchParameter/foobar");
 		siblingSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.REFERENCE);
 		siblingSp.setTitle("FooBar");
 		siblingSp.setExpression("Patient.extension('http://acme.org/foo').extension('http://acme.org/bar')");
@@ -1295,6 +1379,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter siblingSp = new SearchParameter();
 		siblingSp.addBase("Patient");
 		siblingSp.setCode("foobar");
+		siblingSp.setName("foobar");
+		siblingSp.setUrl("http://localhost/SearchParameter/foobar");
+		siblingSp.setDescription("desdription");
 		siblingSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.REFERENCE);
 		siblingSp.setTitle("FooBar");
 		siblingSp.setExpression("Patient.extension('http://acme.org/foo').extension('http://acme.org/bar')");
@@ -1337,6 +1424,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter siblingSp = new SearchParameter();
 		siblingSp.addBase("Patient");
 		siblingSp.setCode("foobar");
+		siblingSp.setName("foobar");
+		siblingSp.setDescription("description");
+		siblingSp.setUrl("http://localhost/SearchParameter/foobar");
 		siblingSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.REFERENCE);
 		siblingSp.setTitle("FooBar");
 		siblingSp.setExpression("Patient.extension('http://acme.org/foo').extension('http://acme.org/bar')");
@@ -1380,6 +1470,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter siblingSp = new SearchParameter();
 		siblingSp.addBase("Patient");
 		siblingSp.setCode("foobar");
+		siblingSp.setName("foobar");
+		siblingSp.setDescription("description");
+		siblingSp.setUrl("http://localhost/SearchParameter/foobar");
 		siblingSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.STRING);
 		siblingSp.setTitle("FooBar");
 		siblingSp.setExpression("Patient.extension('http://acme.org/foo').extension('http://acme.org/bar')");
@@ -1422,6 +1515,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.addBase("Patient");
 		fooSp.setCode("foo");
+		fooSp.setName("foo");
+		fooSp.setDescription("description");
+		fooSp.setUrl("http://localhost/SearchParameter/foo");
 		fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.STRING);
 		fooSp.setTitle("FOO SP");
 		fooSp.setExpression("Patient.identifier.value");
@@ -1466,6 +1562,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.addBase("Patient");
 		fooSp.setCode("foo");
+		fooSp.setName("foo");
+		fooSp.setDescription("description");
+		fooSp.setUrl("http://localhost/SearchParameter/foo");
 		fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.STRING);
 		fooSp.setTitle("FOO SP");
 		fooSp.setExpression("Patient.identifier.where(system = 'http://AAA').value");
@@ -1510,6 +1609,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Observation");
 		sp.setCode("specimencollectedtime");
+		sp.setName(sp.getCode());
+		sp.setUrl("http://localhost/SearchParameter/" + sp.getName());
+		sp.setDescription("description");
 		sp.setType(Enumerations.SearchParamType.DATE);
 		sp.setTitle("Observation Specimen Collected Time");
 		sp.setExpression("Observation.specimen.resolve().receivedTime");
@@ -1555,6 +1657,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.addBase("Patient");
 		fooSp.setCode("foo");
+		fooSp.setName("foo");
+		fooSp.setDescription("description");
+		fooSp.setUrl("http://localhost/SearchParameter/foo");
 		fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
 		fooSp.setExpression("Patient.gender");
@@ -1636,6 +1741,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		searchParameter.addBase("PractitionerRole");
 		searchParameter.setId("random-extension-sp");
 		searchParameter.setCode("random-extension");
+		searchParameter.setName("random-extension");
+		searchParameter.setDescription("Description");
+		searchParameter.setUrl("http://localhost/SearchParameter/random-extension-sp");
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
 		mySearchParameterDao.update(searchParameter);
@@ -1671,6 +1779,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.addBase("Patient");
 		fooSp.setCode("foo");
+		fooSp.setName("foo");
+		fooSp.setDescription("description");
+		fooSp.setUrl("http://localhost/SearchParameter/foo-2");
 		fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
 		fooSp.setExpression("Patient.gender");
@@ -1717,6 +1828,8 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		fooSp.addBase("ChargeItem");
 		fooSp.setName("Product");
 		fooSp.setCode("product");
+		fooSp.setUrl("http://localhost/SearchParameter/product-p");
+		fooSp.setDescription("description");
 		fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("Product within a ChargeItem");
 		fooSp.setExpression("ChargeItem.product.as(CodeableConcept)");
@@ -1735,10 +1848,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("product", new TokenParam(null, "1"));
 		IBundleProvider results = myChargeItemDao.search(map);
 		assertEquals(1, results.size().intValue());
-
-
 	}
-
 
 	@Test
 	public void testCompositeWithInvalidTarget() {
@@ -1746,6 +1856,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
 		sp.setCode("myDoctor");
+		sp.setName("myDoctor");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/SearchParameter/myDoctor");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setTitle("My Doctor");
 		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
