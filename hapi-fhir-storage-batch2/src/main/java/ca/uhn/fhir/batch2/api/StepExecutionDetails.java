@@ -46,28 +46,12 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 		return new StepExecutionDetails<>(theParameters, theIntermediateParams, theInstance, reductionChunk);
 	}
 
-	/**
-	 * Deprecated in 7.3
-	 */
-	@Deprecated
-	public StepExecutionDetails(
-			@Nonnull PT theParameters, @Nullable IT theData, @Nonnull JobInstance theInstance, String theChunkId) {
-		this(
-				theParameters,
-				theData,
-				theInstance,
-				new WorkChunk()
-						.setId(theChunkId)
-						.setInstanceId(theInstance.getInstanceId())
-						.setData(theData));
-	}
-
 	public StepExecutionDetails(
 			@Nonnull PT theParameters,
 			@Nullable IT theData,
 			@Nonnull JobInstance theInstance,
 			@Nonnull WorkChunk theChunk) {
-		Validate.notNull(theParameters);
+		Validate.notNull(theParameters, "theParameters must not be null");
 		myParameters = theParameters;
 		myData = theData;
 		// Make a copy so the step worker can't change the one passed in
@@ -85,7 +69,7 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 	 */
 	@Nonnull
 	public IT getData() {
-		Validate.notNull(myData);
+		Validate.notNull(myData, "Data is currently null");
 		return myData;
 	}
 

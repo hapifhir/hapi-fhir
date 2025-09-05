@@ -14,6 +14,7 @@ import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
@@ -94,9 +95,8 @@ public class ReindexProviderTest {
 	public void testReindex_withUrlAndNonDefaultParams(String theUrl) {
 		// setup
 		Parameters input = new Parameters();
-		int batchSize = 2401;
 		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_URL, theUrl);
-		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE, new DecimalType(batchSize));
+		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE, new IntegerType(123));
 		input.addParameter(ReindexJobParameters.REINDEX_SEARCH_PARAMETERS, new CodeType("none"));
 		input.addParameter(ReindexJobParameters.OPTIMISTIC_LOCK, new BooleanType(false));
 		input.addParameter(ReindexJobParameters.OPTIMIZE_STORAGE, new CodeType("current_version"));
@@ -132,6 +132,7 @@ public class ReindexProviderTest {
 		assertFalse(params.getOptimisticLock());
 		assertEquals(ReindexParameters.OptimizeStorageModeEnum.CURRENT_VERSION, params.getOptimizeStorage());
 		assertEquals(ReindexParameters.CorrectCurrentVersionModeEnum.ALL, params.getCorrectCurrentVersion());
+		assertEquals(123, params.getBatchSize());
 	}
 
 	@Test

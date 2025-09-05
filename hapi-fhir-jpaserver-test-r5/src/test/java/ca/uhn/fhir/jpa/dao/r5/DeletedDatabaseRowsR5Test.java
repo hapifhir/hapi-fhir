@@ -48,6 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -342,6 +343,7 @@ public class DeletedDatabaseRowsR5Test extends BaseJpaR5Test {
 		runInTransaction(() -> {
 			ResourceTable resource = myResourceTableDao.findByTypeAndFhirId("Patient", "A").orElseThrow();
 			assertEquals(4L, resource.getVersion());
+			assertNull(resource.getDeleted());
 
 			 resource = myResourceTableDao.findByTypeAndFhirId("Patient", "B").orElseThrow();
 			assertEquals(2L, resource.getVersion());

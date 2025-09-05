@@ -45,6 +45,17 @@ public class PartitionedUrlJobParameters implements IModelJson {
 	@JsonProperty("partitionedUrl")
 	private List<PartitionedUrl> myPartitionedUrls;
 
+	@JsonProperty("limitResourceCount")
+	private Integer myLimitResourceCount;
+
+	public void setLimitResourceCount(Integer theLimitResourceCount) {
+		myLimitResourceCount = theLimitResourceCount;
+	}
+
+	public Integer getLimitResourceCount() {
+		return myLimitResourceCount;
+	}
+
 	public void setRequestPartitionId(@Nullable RequestPartitionId theRequestPartitionId) {
 		myRequestPartitionId = theRequestPartitionId;
 	}

@@ -25,6 +25,8 @@ import org.hl7.fhir.r5.model.UriType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.function.Consumer;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -129,8 +131,28 @@ public class BulkPatchJobR5Test extends BaseBulkPatchR5Test {
 	}
 
 
-	private String initiateAllPatientJobAndAwaitCompletion(Parameters patchDocument) {
-		String jobId = initiateAllPatientJob(patchDocument);
+	@Test
+	public void testBulkPatch_DryRun() {
+		// Setup
+		createPatient(withId("A"), withIdentifier("http://blah", "A1"));
+		createPatient(withId("B"), withIdentifier("http://blah", "B1"));
+		createPatient(withId("C"), withIdentifier("http://blah", "C1"));
+		// This one already has the right system
+		createPatient(withId("D"), withIdentifier("http://foo", "D1"));
+
+		// Test
+		Parameters patchDocument = createPatchWithModifyPatientIdentifierSystem();
+		String jobId = initiateAllPatientJobAndAwaitCompletion(patchDocument, request -> {
+			request.setDryRun(true);
+			request.setLimitResourceCount(100);
+		});
+	}
+
+
+
+	@SafeVarargs
+	private String initiateAllPatientJobAndAwaitCompletion(Parameters patchDocument, Consumer<BulkPatchJobParameters>... theCustomizers) {
+		String jobId = initiateAllPatientJob(patchDocument, theCustomizers);
 		myBatch2JobHelper.awaitJobCompletion(jobId);
 		return jobId;
 	}
@@ -141,10 +163,15 @@ public class BulkPatchJobR5Test extends BaseBulkPatchR5Test {
 		return jobId;
 	}
 
-	private String initiateAllPatientJob(Parameters patchDocument) {
+	@SafeVarargs
+	private String initiateAllPatientJob(Parameters patchDocument, Consumer<BulkPatchJobParameters>... theCustomizers) {
 		BulkPatchJobParameters jobParameters = new BulkPatchJobParameters();
 		jobParameters.addUrl("Patient?");
 		jobParameters.setFhirPatch(myFhirContext, patchDocument);
+
+		for (Consumer<BulkPatchJobParameters> nextCustomizer : theCustomizers) {
+			nextCustomizer.accept(jobParameters);
+		}
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(BulkPatchJobAppCtx.JOB_ID);
