@@ -606,7 +606,8 @@ public class ValidationSupportChain implements IValidationSupport {
 						String version = terser.getSinglePrimitiveValueOrNull(structureDefinition, "version");
 
 						// Most queries to the base structure definitions are versionless
-						// And they shouldn't be overwritten anyways
+						// And they shouldn't be overwritten with multiple versions anyways
+						// (see JpaPersistedResourceValidationSupportChain#doFetchResource())
 						// So we'll cache them without version.
 						boolean shouldAppendVersionToUrl = !Strings.isNullOrEmpty(url)
 								&& version != null

@@ -86,6 +86,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PackageInstallerSvcImpl.class);
 	private static final String OUR_VERSION_DELIMITER = "|";
+	public static final String OUR_SEARCH_PARAMETER_NAME = "SearchParameter";
 
 	boolean enabled = true;
 
@@ -418,7 +419,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		final IIdType id = theResource.getIdElement();
 
 		if (theExistingResource == null) {
-			if (!theResource.fhirType().equals("SearchParameter")) {
+			if (!theResource.fhirType().equals(OUR_SEARCH_PARAMETER_NAME)) {
 				// For any resource type except SearchParameter, we will use a server-assigned ID
 				// This prevents FHIR ID conflicts for multiple versions of Conformance/Canonical resources (e.g.
 				// StructureDefinition.version)
@@ -450,7 +451,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				updateExistingSearchParameterBaseIfNecessary(theDao, theResource, theExistingResource);
 		// When an existing resource is found with the same URL/version, we will update this resource and force-use the
 		// old ID
-		// Except when we are updating a SearchParameter and changing its base
+		// Except when we are updating a SearchParameter by changing its base
 		boolean shouldOverrideId = theExistingResource != null && !isExistingUpdated;
 
 		if (shouldOverrideId) {

@@ -1827,7 +1827,7 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
-	 * This setting indicate whether a provided Resource.meta.source requestID (formatted as `sourceURI#requestID`)
+	 * This setting indicate whether a provided `Resource.meta.source` requestID (formatted as `sourceURI#requestID`)
 	 * should be preserved or overwritten.
 	 *
 	 * @since 6.2.0
@@ -1837,7 +1837,7 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
-	 * This setting indicate whether a provided Resource.meta.source requestID (formatted as `sourceURI#requestID`)
+	 * This setting indicate whether a provided `Resource.meta.source` requestID (formatted as `sourceURI#requestID`)
 	 * should be preserved or overwritten.
 	 * Default is false. This means that a client provided requestId will be overwritten.
 	 *
