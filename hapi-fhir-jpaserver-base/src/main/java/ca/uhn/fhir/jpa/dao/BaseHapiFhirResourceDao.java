@@ -1706,23 +1706,32 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			return retVal;
 		}
 
-		boolean forceReindexSps = false;
-		if (theReindexParameters.getCorrectCurrentVersion() != ReindexParameters.CorrectCurrentVersionModeEnum.NONE) {
-			ResourceTable newEntity =
+		boolean reindexSearchParameters =
+				theReindexParameters.getReindexSearchParameters() != ReindexParameters.ReindexSearchParametersEnum.NONE;
+		boolean correctCurrentVersion =
+				theReindexParameters.getCorrectCurrentVersion() != ReindexParameters.CorrectCurrentVersionModeEnum.NONE;
+		boolean optimizeStorage =
+				theReindexParameters.getOptimizeStorage() != ReindexParameters.OptimizeStorageModeEnum.NONE;
+
+		if (correctCurrentVersion) {
+			CorrectCurrentVersionResponse outcome =
 					reindexCorrectCurrentVersion(entity, theReindexParameters.getReindexSearchParameters());
-			if (newEntity != null) {
-				entity = newEntity;
-				forceReindexSps = true;
+			if (outcome.forceReindexSps()) {
+				reindexSearchParameters = true;
+			}
+			if (outcome.forceReloadResourceEntity() && (reindexSearchParameters || optimizeStorage)) {
+				entity = myEntityManager.find(ResourceTable.class, jpaPid);
+				if (outcome.currentVersion() != null) {
+					entity.setCurrentVersionEntity(outcome.currentVersion());
+				}
 			}
 		}
 
-		if (forceReindexSps
-				|| theReindexParameters.getReindexSearchParameters()
-						== ReindexParameters.ReindexSearchParametersEnum.ALL) {
+		if (reindexSearchParameters) {
 			reindexSearchParameters(entity, retVal, theTransactionDetails);
 		}
 
-		if (theReindexParameters.getOptimizeStorage() != ReindexParameters.OptimizeStorageModeEnum.NONE) {
+		if (optimizeStorage) {
 			reindexOptimizeStorage(entity, theReindexParameters.getOptimizeStorage());
 		}
 
@@ -1732,18 +1741,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	/**
 	 * @return Returns an updated copy of the entity if it was modified (returns null otherwise)
 	 */
-	private ResourceTable reindexCorrectCurrentVersion(
+	private CorrectCurrentVersionResponse reindexCorrectCurrentVersion(
 			ResourceTable theEntity, ReindexParameters.ReindexSearchParametersEnum theReindexSearchParameters) {
 		ResourceHistoryTable version = theEntity.getCurrentVersionEntity();
 
 		if (version == null) {
-			Optional<ResourceHistoryTable> versions = myResourceHistoryTableDao
+			Optional<ResourceHistoryTable> currentVersionOpt = myResourceHistoryTableDao
 					.findVersionsForResource(
 							SINGLE_RESULT, theEntity.getResourceId().toFk())
 					.findFirst();
 
-			if (versions.isPresent()) {
-				Long newVersion = versions.get().getVersion();
+			if (currentVersionOpt.isPresent()) {
+				Long newVersion = currentVersionOpt.get().getVersion();
 				if (newVersion == theEntity.getVersion()) {
 					// Already have the correct version
 					return null;
@@ -1766,34 +1775,21 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 				myResourceTableDao.updateVersionAndLastUpdated(theEntity.getId(), newVersion, new Date());
 
-				ResourceTable retVal = null;
-				/*
-				 * If we're going to be reindexing search parameters,
-				 * we now reload the record from the database so we have
-				 * a fresh copy to reindex.
-				 */
-				if (theReindexSearchParameters != ReindexParameters.ReindexSearchParametersEnum.NONE) {
-					retVal = myEntityManager.find(ResourceTable.class, theEntity.getId());
-					retVal.setCurrentVersionEntity(versions.get());
-				}
-				return retVal;
+				return new CorrectCurrentVersionResponse(false, true, currentVersionOpt.get());
+
 			} else {
 				ourLog.info(
-						"No versions exist for {}/{} (PID {}), marking resource as deleted",
+						"No currentVersionOpt exist for {}/{} (PID {}), marking resource as deleted",
 						theEntity.getResourceType(),
 						theEntity.getFhirId(),
 						theEntity.getResourceId());
 				theEntity.setDeleted(new Date());
-				myEntityManager.merge(theEntity);
-				return theEntity;
+				return new CorrectCurrentVersionResponse(true, false, null);
 			}
 		}
 
-		return null;
+		return new CorrectCurrentVersionResponse(false, false, null);
 	}
-
-	// FIXME: move
-//	private record CorrectCurrentVersionResponse(boolean forceReindexSps, boolean forceReloadResourceEntity, ResourceHistoryTable currentVersion);
 
 	@SuppressWarnings("unchecked")
 	private void reindexSearchParameters(
@@ -2977,4 +2973,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new InvalidRequestException(Msg.code(2733) + msg);
 		}
 	}
+
+	/**
+	 * Method return type for {@link #reindexCorrectCurrentVersion(ResourceTable, ReindexParameters.ReindexSearchParametersEnum)}
+	 */
+	private record CorrectCurrentVersionResponse(
+			boolean forceReindexSps, boolean forceReloadResourceEntity, ResourceHistoryTable currentVersion) {}
 }

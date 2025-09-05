@@ -1301,7 +1301,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 				assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(42);
 				assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).hasSize(30);
 			} else {
-				myCaptureQueriesListener.logSelectQueries();
 				assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(21);
 				assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).hasSize(10);
 			}

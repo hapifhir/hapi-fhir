@@ -359,9 +359,8 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 
 			SystemRequestDetails requestDetails = createRequestDetails(theModificationContext, pidAndResource);
 			if (requestDetails.isRewriteHistory()) {
-				// FIXME: new code
 				throw new JobExecutionFailedException(
-						Msg.code(0) + "Can't store deleted resources as history rewrites");
+						Msg.code(2806) + "Can't store deleted resources as history rewrites");
 			}
 
 			IIdType resourceId = pidAndResource.resource().getIdElement();
@@ -487,8 +486,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			return switch (this) {
 				case CHANGED_UNSAVED -> CHANGED_PENDING;
 				case DELETED_UNSAVED -> DELETED_PENDING;
-					// FIXME: new code
-				default -> throw new IllegalStateException(Msg.code(0) + "Can't convert " + this + " to pending");
+				default -> throw new IllegalStateException(Msg.code(2807) + "Can't convert " + this + " to pending");
 			};
 		}
 
@@ -496,8 +494,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			return switch (this) {
 				case CHANGED_PENDING -> CHANGED_SAVED;
 				case DELETED_PENDING -> DELETED_SAVED;
-					// FIXME: new code
-				default -> throw new IllegalStateException(Msg.code(0) + "Can't convert " + this + " to saved");
+				default -> throw new IllegalStateException(Msg.code(2808) + "Can't convert " + this + " to saved");
 			};
 		}
 
