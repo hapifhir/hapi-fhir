@@ -35,6 +35,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -55,10 +56,12 @@ public class PersistedJpaBundleProviderFactory {
 	}
 
 	public PersistedJpaBundleProvider newInstance(RequestDetails theRequest, Search theSearch) {
-		Predicate<? super IBaseResource> predicate = buildIdPredicateFromParameters(theRequest);
-		if (predicate != null) {
+		List<String> resourceIdsFromParams = getRequestResourceIds(theRequest);
+		if (resourceIdsFromParams != null) {
+			Predicate<? super IBaseResource> predicate = res ->
+				resourceIdsFromParams.contains(res.getIdElement().toUnqualifiedVersionless().getValue());
 			Object retVal = myApplicationContext.getBean(
-					PREDICATED_PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH, theRequest, theSearch, predicate);
+				PREDICATED_PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH, theRequest, theSearch, predicate);
 			return (PersistedJpaBundleProvider) retVal;
 		}
 
@@ -67,7 +70,7 @@ public class PersistedJpaBundleProviderFactory {
 		return (PersistedJpaBundleProvider) retVal;
 	}
 
-	private Predicate<? super IBaseResource> buildIdPredicateFromParameters(RequestDetails theRequest) {
+	private @Nullable List<String> getRequestResourceIds(RequestDetails theRequest) {
 		if (theRequest == null || theRequest.getParameters() == null) {
 			return null;
 		}
@@ -77,8 +80,7 @@ public class PersistedJpaBundleProviderFactory {
 			return null;
 		}
 
-		return res -> List.of(idParam)
-				.contains(res.getIdElement().toUnqualifiedVersionless().getValue());
+		return Arrays.stream(idParam).toList();
 	}
 
 	public PersistedJpaSearchFirstPageBundleProvider newInstanceFirstPage(
