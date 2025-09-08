@@ -10,6 +10,7 @@ import jakarta.annotation.Nonnull;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Objects;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 
@@ -21,6 +22,8 @@ public class JpaBulkDataExportHistoryHelper implements IBulkDataExportHistoryHel
 	@Override
 	public IBundleProvider fetchHistoryForResourceIds(
 		@Nonnull String theResourceType, @Nonnull List<String> theResourceIds, RequestPartitionId theRequestPartitionId) {
+
+		Objects.requireNonNull(theResourceType);
 
 		RequestDetails requestDetails = SystemRequestDetails.forRequestPartitionId(theRequestPartitionId);
 		requestDetails.setResourceName(theResourceType);
