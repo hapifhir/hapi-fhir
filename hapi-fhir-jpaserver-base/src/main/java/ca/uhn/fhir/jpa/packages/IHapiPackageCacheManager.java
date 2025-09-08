@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
 import java.util.Date;
@@ -33,11 +34,39 @@ public interface IHapiPackageCacheManager extends IPackageCacheManager {
 
 	NpmPackage installPackage(PackageInstallationSpec theInstallationSpec) throws IOException;
 
+
+	/**
+	 * Returns the first instance of a resource by fhir version and canonical url
+	 * @param theFhirVersion the fhir version
+	 * @param theCanonicalUrl the canonical url
+	 * @return the first instance of a resource matching these conditions, or null if none found.
+	 * @deprecated Use loadPackageAssetsByUrl.
+	 */
+	@Deprecated(forRemoval = true, since = "8.5")
 	IBaseResource loadPackageAssetByUrl(FhirVersionEnum theFhirVersion, String theCanonicalUrl);
+
+	/**
+	 * Returns all possible resources by the provided url and fhir version.
+	 */
+	List<IBaseResource> loadPackageAssetsByUrl(FhirVersionEnum theFhirVersionEnum, String theCanonicalUrl, PageRequest thePageRequest);
 
 	List<NpmPackageAssetInfoJson> findPackageAssetInfoByUrl(FhirVersionEnum theFhirVersion, String theCanonicalUrl);
 
+	/**
+	 * Returns the first instance of a resource by fhir version and canonical url
+	 * @param theFindPackageAssetRequest The request parameters
+	 * @return the first instance of a resource matching these conditions, or null if none found.
+	 * @deprecated Use findsPackageAssets with a proper page size/page number.
+	 */
+	@Deprecated(forRemoval = true, since = "8.5")
 	IBaseResource findPackageAsset(FindPackageAssetRequest theFindPackageAssetRequest);
+
+	/**
+	 * Returns all package assets matching the request object.
+	 * @param theRequest the request object
+	 * @return a list of package assets
+	 */
+	List<IBaseResource> findPackageAssets(FindPackageAssetRequest theRequest);
 
 	NpmPackageMetadataJson loadPackageMetadata(String thePackageId) throws ResourceNotFoundException;
 
