@@ -33,7 +33,7 @@ public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 	private IPackageInstallerSvc myPackageInstallerSvc;
 
 	@RegisterExtension
-	private final LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(NpmJpaValidationSupport.class);
+	public final LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(NpmJpaValidationSupport.class);
 
 	@Test
 	public void fetchAllSearchParameters_withStoredIG_returnsSPsFromIG() throws IOException {
