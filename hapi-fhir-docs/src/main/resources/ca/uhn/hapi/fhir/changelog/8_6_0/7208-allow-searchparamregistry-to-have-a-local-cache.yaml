@@ -4,4 +4,6 @@ issue: 7208
 title: "Added the ability to add SearchParameters to a local cache
         without having them added to the built in search parameters
         or the database.
+        IValidationSupport can now also be used to read all SearchParameters
+        out of Npm packages (Implementation Guides).
 "
