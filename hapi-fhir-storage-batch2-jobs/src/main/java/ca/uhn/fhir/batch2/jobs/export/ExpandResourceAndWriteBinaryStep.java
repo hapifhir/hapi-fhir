@@ -64,6 +64,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
+import jakarta.validation.constraints.NotNull;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -71,7 +72,6 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -213,37 +213,58 @@ public class ExpandResourceAndWriteBinaryStep
 		// need to make sure not to exceed myStorageSettings.getBulkExportFileMaximumCapacity() or
 		// myStorageSettings.getBulkExportFileMaximumSize()
 
-		final int maxResourcesPerBatch = myStorageSettings.getBulkExportFileMaximumCapacity();
-
 		// for each resource type
 		for (String resourceType : theTypeToIds.keySet()) {
 			List<TypedPidJson> typePidJsonList = theTypeToIds.get(resourceType);
 
-			// keeps possible exceeding resources from last batch, which are always less than maxResourcesPerBatch
-			List<IBaseResource> pendingResourcesToProcess = new ArrayList<>();
-
 			// Break each batch up into query sub-batches to make sure we don't exceed the
-			// limit of 800 variables per SQL statement
+			// limit of variables per SQL statement
 
-			List<IBaseResource> resourcesToProcess = new ArrayList<>();
+			// keeps possible exceeding resources from last batch, which are always less than maxResourcesPerBatch
+			List<IBaseResource> pendingResourcesToProcess =
+				processInQueryBatches(resourceType, typePidJsonList, theRequestPartitionId, theResourceListConsumer);
 
-			for (List<TypedPidJson> queryBatch : ListUtils.partition(typePidJsonList, getMaxSizeBatchDefault())) {
-				resourcesToProcess.addAll(pendingResourcesToProcess);
-				pendingResourcesToProcess.clear();
-
-				List<String> idList = convertToStringIds(theRequestPartitionId, resourceType, queryBatch);
-				IBundleProvider outcome = searchForResourcesHistory(resourceType, idList, theRequestPartitionId);
-				resourcesToProcess.addAll(outcome.getAllResources());
-
-				// pendingResourcesToProcess size is less than maxResourcesPerBatch
-				pendingResourcesToProcess = consumeResourcesInBatches(resourcesToProcess, maxResourcesPerBatch, theResourceListConsumer);
-				resourcesToProcess.clear();
-			}
-
+			// consume possible remaining resources
 			if (!pendingResourcesToProcess.isEmpty()) {
 				theResourceListConsumer.accept(pendingResourcesToProcess);
 			}
 		}
+	}
+
+	/**
+	 * Processes resource history by breaking PIDs into query batches to avoid exceeding SQL variable limits.
+	 * Resources are accumulated across batches and consumed when reaching the maximum batch size.
+	 *
+	 * @param resourceType The type of resources being processed
+	 * @param typePidJsonList List of typed PID JSON objects for the resource type
+	 * @param theRequestPartitionId Partition ID for the request
+	 * @param theResourceListConsumer Consumer to process batches of resources
+	 * @return List of unprocessed resources that didn't meet the batch size threshold
+	 */
+	private List<IBaseResource> processInQueryBatches(String resourceType,
+													  List<TypedPidJson> typePidJsonList,
+													  RequestPartitionId theRequestPartitionId,
+													  Consumer<List<IBaseResource>> theResourceListConsumer) {
+
+		List<IBaseResource> resourcesToProcess = new ArrayList<>();
+		List<IBaseResource> pendingResourcesToProcess = new ArrayList<>();
+
+		final int maxResourcesPerBatch = myStorageSettings.getBulkExportFileMaximumCapacity();
+
+		for (List<TypedPidJson> queryBatch : ListUtils.partition(typePidJsonList, getMaxSizeBatchDefault())) {
+			resourcesToProcess.addAll(pendingResourcesToProcess);
+			pendingResourcesToProcess.clear();
+
+			List<String> idList = convertToStringIds(theRequestPartitionId, resourceType, queryBatch);
+			IBundleProvider outcome = searchForResourcesHistory(resourceType, idList, theRequestPartitionId);
+			resourcesToProcess.addAll(outcome.getAllResources());
+
+			// pendingResourcesToProcess size is less than maxResourcesPerBatch
+			pendingResourcesToProcess = consumeResourcesInBatches(resourcesToProcess, maxResourcesPerBatch, theResourceListConsumer);
+			resourcesToProcess.clear();
+		}
+
+		return pendingResourcesToProcess;
 	}
 
 	/**
@@ -274,7 +295,7 @@ public class ExpandResourceAndWriteBinaryStep
 
 	/**
 	 * Gets the default maximum batch size for SQL queries to avoid exceeding
-	 * database variable limits (typically 800 variables per SQL statement).
+	 * database variable limits.
 	 *
 	 * @return The default maximum batch size
 	 */
