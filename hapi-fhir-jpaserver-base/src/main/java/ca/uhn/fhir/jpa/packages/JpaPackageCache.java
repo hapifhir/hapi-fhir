@@ -584,9 +584,9 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		List<IBaseResource> resources = loadPackageAssetsByUrl(theFhirVersion, theCanonicalUrl, PageRequest.of(0, 2));
 		if (resources.size() > 1) {
 			ourLog.warn(
-				"Found multiple package versions for FHIR version: {} and canonical URL: {}",
-				theFhirVersion,
-				theCanonicalUrl);
+					"Found multiple package versions for FHIR version: {} and canonical URL: {}",
+					theFhirVersion,
+					theCanonicalUrl);
 		} else if (resources.isEmpty()) {
 			return null;
 		}
@@ -595,16 +595,17 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<IBaseResource> loadPackageAssetsByUrl(FhirVersionEnum theFhirVersion, String theCanonicalUrl, PageRequest thePageRequest) {
+	public List<IBaseResource> loadPackageAssetsByUrl(
+			FhirVersionEnum theFhirVersion, String theCanonicalUrl, PageRequest thePageRequest) {
 		final List<NpmPackageVersionResourceEntity> npmPackageVersionResourceEntities =
-			loadPackageInfoByCanonicalUrl(theFhirVersion, theCanonicalUrl, thePageRequest, null, null);
+				loadPackageInfoByCanonicalUrl(theFhirVersion, theCanonicalUrl, thePageRequest, null, null);
 
 		if (npmPackageVersionResourceEntities.isEmpty()) {
 			return List.of();
 		} else {
 			return npmPackageVersionResourceEntities.stream()
-				.map(this::loadPackageEntity)
-				.collect(Collectors.toList());
+					.map(this::loadPackageEntity)
+					.collect(Collectors.toList());
 		}
 	}
 
@@ -614,9 +615,9 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		List<IBaseResource> assets = findPackageAssets(theRequest);
 		if (assets.size() > 1) {
 			ourLog.warn(
-				"Found multiple package versions for FHIR version: {} and canonical URL: {}",
-				theRequest.getFhirVersion(),
-				theRequest.getCanonicalUrl());
+					"Found multiple package versions for FHIR version: {} and canonical URL: {}",
+					theRequest.getFhirVersion(),
+					theRequest.getCanonicalUrl());
 		}
 		// assets will always have a single element because findPackageAssets throws if nothing is found
 		return assets.get(0);
@@ -626,25 +627,25 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Transactional(readOnly = true)
 	public List<IBaseResource> findPackageAssets(FindPackageAssetRequest theRequest) {
 		final List<NpmPackageVersionResourceEntity> npmPackageVersionResourceEntities = loadPackageInfoByCanonicalUrl(
-			theRequest.getFhirVersion(),
-			theRequest.getCanonicalUrl(),
-			theRequest.getPageRequest(),
-			theRequest.getPackageId(),
-			theRequest.getVersion());
+				theRequest.getFhirVersion(),
+				theRequest.getCanonicalUrl(),
+				theRequest.getPageRequest(),
+				theRequest.getPackageId(),
+				theRequest.getVersion());
 
 		if (npmPackageVersionResourceEntities.isEmpty()) {
 			throw new ResourceNotFoundException(
-				"%s Could not find assets for FHIR version: %s, canonical URL: %s, package ID: %s and package version: %s"
-					.formatted(
-						Msg.code(2644),
-						theRequest.getFhirVersion(),
-						theRequest.getCanonicalUrl(),
-						theRequest.getPackageId(),
-						Optional.ofNullable(theRequest.getVersion()).orElse("[none]")));
+					"%s Could not find assets for FHIR version: %s, canonical URL: %s, package ID: %s and package version: %s"
+							.formatted(
+									Msg.code(2644),
+									theRequest.getFhirVersion(),
+									theRequest.getCanonicalUrl(),
+									theRequest.getPackageId(),
+									Optional.ofNullable(theRequest.getVersion()).orElse("[none]")));
 		} else {
 			return npmPackageVersionResourceEntities.stream()
-				.map(this::loadPackageEntity)
-				.collect(Collectors.toList());
+					.map(this::loadPackageEntity)
+					.collect(Collectors.toList());
 		}
 	}
 
@@ -697,21 +698,21 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 				}
 			} else {
 				slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndVersion(
-					thePageRequest, theFhirVersion, canonicalUrl, canonicalVersion);
+						thePageRequest, theFhirVersion, canonicalUrl, canonicalVersion);
 			}
 
 		} else {
 			if (thePackageId != null) {
 				if (theVersionId != null) {
 					slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndPackageIdAndVersion(
-						thePageRequest, theFhirVersion, canonicalUrl, thePackageId, theVersionId);
+							thePageRequest, theFhirVersion, canonicalUrl, thePackageId, theVersionId);
 				} else {
 					slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndPackageId(
-						thePageRequest, theFhirVersion, canonicalUrl, thePackageId);
+							thePageRequest, theFhirVersion, canonicalUrl, thePackageId);
 				}
 			} else {
 				slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(
-					thePageRequest, theFhirVersion, canonicalUrl);
+						thePageRequest, theFhirVersion, canonicalUrl);
 			}
 		}
 

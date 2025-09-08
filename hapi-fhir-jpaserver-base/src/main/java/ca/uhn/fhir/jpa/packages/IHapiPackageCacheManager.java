@@ -34,7 +34,6 @@ public interface IHapiPackageCacheManager extends IPackageCacheManager {
 
 	NpmPackage installPackage(PackageInstallationSpec theInstallationSpec) throws IOException;
 
-
 	/**
 	 * Returns the first instance of a resource by fhir version and canonical url
 	 * @param theFhirVersion the fhir version
@@ -48,7 +47,8 @@ public interface IHapiPackageCacheManager extends IPackageCacheManager {
 	/**
 	 * Returns all possible resources by the provided url and fhir version.
 	 */
-	List<IBaseResource> loadPackageAssetsByUrl(FhirVersionEnum theFhirVersionEnum, String theCanonicalUrl, PageRequest thePageRequest);
+	List<IBaseResource> loadPackageAssetsByUrl(
+			FhirVersionEnum theFhirVersionEnum, String theCanonicalUrl, PageRequest thePageRequest);
 
 	List<NpmPackageAssetInfoJson> findPackageAssetInfoByUrl(FhirVersionEnum theFhirVersion, String theCanonicalUrl);
 
