@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.bulk;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.jobs.export.BulkExportJobParametersBuilder;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -43,6 +44,7 @@ import org.assertj.core.api.AssertionsForClassTypes;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coverage;
@@ -88,10 +90,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-
 
 
 public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
@@ -119,7 +121,6 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 	@Nested
 	public class SpecConformanceTests {
-
 
 		@Test
 		public void testBulkExportJobsAreMetaTaggedWithJobIdAndExportId() throws IOException {
@@ -171,7 +172,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			myClient.update().resource(p).execute();
 
 			//And Given we start a bulk export job
-			String pollingLocation = submitBulkExportForTypesWithExportId("my-export-id-","Patient");
+			String pollingLocation = submitBulkExportForTypesWithExportId("my-export-id-", "Patient");
 			String jobId = getJobIdFromPollingLocation(pollingLocation);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
@@ -349,6 +350,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private String submitBulkExportForTypes(String... theTypes) throws IOException {
 		return submitBulkExportForTypesWithExportId(null, theTypes);
 	}
+
 	private String submitBulkExportForTypesWithExportId(String theExportId, String... theTypes) throws IOException {
 		String typeString = String.join(",", theTypes);
 		String uri = myClient.getServerBase() + "/$export?_type=" + typeString;
@@ -1031,9 +1033,9 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			{
 				String practitionerStr = """
 						{
-					      "resourceType": "Practitioner",
-					      "id": "f201"
-					    }
+						  "resourceType": "Practitioner",
+						  "id": "f201"
+						}
 					""";
 				Practitioner practitioner = parser.parseResource(Practitioner.class, practitionerStr);
 				myClient.update().resource(practitioner).execute();
@@ -1041,9 +1043,9 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			{
 				String orgString = """
 						{
-					      "resourceType": "Organization",
-					      "id": "f201"
-					    }
+						  "resourceType": "Organization",
+						  "id": "f201"
+						}
 					""";
 				Organization organization = parser.parseResource(Organization.class, orgString);
 				myClient.update().resource(organization).execute();
@@ -1051,98 +1053,98 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			{
 				String bundleStr = """
 						{
-					    "resourceType": "Bundle",
-					    "id": "bundle-transaction",
-					    "meta": {
-					      "lastUpdated": "2021-04-19T20:24:48.194+00:00"
-					    },
-					    "type": "transaction",
-					    "entry": [
-					      {
-					        "fullUrl": "http://example.org/fhir/Encounter/E1",
-					        "resource": {
-					          "resourceType": "Encounter",
-					          "id": "E1",
-					          "subject": {
-					            "reference": "Patient/f201",
-					            "display": "Roel"
-					          },
-					          "participant": [
-					            {
-					              "individual": {
-					                "reference": "Practitioner/f201"
-					              }
-					            }
-					          ],
-					          "serviceProvider": {
-					            "reference": "Organization/f201"
-					          }
-					        },
-					        "request": {
-					          "method": "PUT",
-					          "url": "Encounter/E1"
-					        }
-					      },
-					      {
-					        "fullUrl": "http://example.org/fhir/Encounter/E2",
-					        "resource": {
-					          "resourceType": "Encounter",
-					          "id": "E2",
-					          "subject": {
-					            "reference": "Patient/f201",
-					            "display": "Roel"
-					          },
-					          "participant": [
-					            {
-					              "individual": {
-					                "reference": "Practitioner/f201"
-					              }
-					            }
-					          ],
-					          "serviceProvider": {
-					            "reference": "Organization/f201"
-					          }
-					        },
-					        "request": {
-					          "method": "PUT",
-					          "url": "Encounter/A2"
-					        }
-					      },
-					      {
-					        "fullUrl": "http://example.org/fhir/Group/G3",
-					        "resource": {
-					          "resourceType": "Group",
-					          "id": "G3",
-					          "text": {
-					            "status": "additional"
-					          },
-					          "type": "person",
-					          "actual": true,
-					          "member": [
-					            {
-					              "entity": {
-					                "reference": "Patient/f201"
-					              },
-					              "period": {
-					                "start": "2021-01-01"
-					              }
-					            },
-					            {
-					              "entity": {
-					                "reference": "Patient/f201"
-					              },
-					              "period": {
-					                "start": "2021-01-01"
-					              }
-					            }
-					          ]
-					        },
-					        "request": {
-					          "method": "PUT",
-					          "url": "Group/G3"
-					        }
-					      }
-					    ]
+						"resourceType": "Bundle",
+						"id": "bundle-transaction",
+						"meta": {
+						  "lastUpdated": "2021-04-19T20:24:48.194+00:00"
+						},
+						"type": "transaction",
+						"entry": [
+						  {
+							"fullUrl": "http://example.org/fhir/Encounter/E1",
+							"resource": {
+							  "resourceType": "Encounter",
+							  "id": "E1",
+							  "subject": {
+								"reference": "Patient/f201",
+								"display": "Roel"
+							  },
+							  "participant": [
+								{
+								  "individual": {
+									"reference": "Practitioner/f201"
+								  }
+								}
+							  ],
+							  "serviceProvider": {
+								"reference": "Organization/f201"
+							  }
+							},
+							"request": {
+							  "method": "PUT",
+							  "url": "Encounter/E1"
+							}
+						  },
+						  {
+							"fullUrl": "http://example.org/fhir/Encounter/E2",
+							"resource": {
+							  "resourceType": "Encounter",
+							  "id": "E2",
+							  "subject": {
+								"reference": "Patient/f201",
+								"display": "Roel"
+							  },
+							  "participant": [
+								{
+								  "individual": {
+									"reference": "Practitioner/f201"
+								  }
+								}
+							  ],
+							  "serviceProvider": {
+								"reference": "Organization/f201"
+							  }
+							},
+							"request": {
+							  "method": "PUT",
+							  "url": "Encounter/A2"
+							}
+						  },
+						  {
+							"fullUrl": "http://example.org/fhir/Group/G3",
+							"resource": {
+							  "resourceType": "Group",
+							  "id": "G3",
+							  "text": {
+								"status": "additional"
+							  },
+							  "type": "person",
+							  "actual": true,
+							  "member": [
+								{
+								  "entity": {
+									"reference": "Patient/f201"
+								  },
+								  "period": {
+									"start": "2021-01-01"
+								  }
+								},
+								{
+								  "entity": {
+									"reference": "Patient/f201"
+								  },
+								  "period": {
+									"start": "2021-01-01"
+								  }
+								}
+							  ]
+							},
+							"request": {
+							  "method": "PUT",
+							  "url": "Group/G3"
+							}
+						  }
+						]
 					  }
 					""";
 				Bundle bundle = parser.parseResource(Bundle.class, bundleStr);
@@ -1439,7 +1441,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 
 			// versions list size indicate number of patients to create
-			Map<Long, Set<String>> patientVersionsMap = createPatientsWithHistory(List.of(2, 3, 5, 2, 1, 4, 2, 3, 2, 3));
+			Map<String, Set<String>> patientVersionsMap = createPatientsWithHistory(List.of(2, 3, 5, 2, 1, 4, 2, 3, 2, 3));
 
 			BulkExportJobParameters options = new BulkExportJobParameters();
 			options.setResourceTypes(Sets.newHashSet("Patient"));
@@ -1455,7 +1457,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			ourLog.debug("Job status after awaiting - {}", myJobCoordinator.getInstance(job.getInstanceId()).getStatus());
 			waitForCompletion(job);
 
-			Map<Long, Set<String>> exportedPatientVersionsMap = extractExportedResourceVersionsByTypeMap(job).get("Patient");
+			Map<String, Set<String>> exportedPatientVersionsMap = extractExportedResourceVersionsByTypeMap(job).get("Patient");
 			assertThat(exportedPatientVersionsMap).isEqualTo(patientVersionsMap);
 		}
 
@@ -1500,7 +1502,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		@Test
 		public void testSystemBulkExport() {
 			// versions list size indicate number of patients to create
-			Map<Long, Set<String>> patientVersionsMap = createPatientsWithHistory(List.of(3, 5, 2, 1, 2));
+			Map<String, Set<String>> patientVersionsMap = createPatientsWithHistory(List.of(3, 5, 2, 1, 2));
 
 			BulkExportJobParameters options = new BulkExportJobParameters();
 			options.setResourceTypes(Collections.singleton("Patient"));
@@ -1517,188 +1519,277 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			ourLog.debug("Job status after awaiting - {}", myJobCoordinator.getInstance(job.getInstanceId()).getStatus());
 			waitForCompletion(job);
 
-			Map<Long, Set<String>> exportedPatientVersionsMap = extractExportedResourceVersionsByTypeMap(job).get("Patient");
+			Map<String, Set<String>> exportedPatientVersionsMap = extractExportedResourceVersionsByTypeMap(job).get("Patient");
 			assertThat(exportedPatientVersionsMap).isEqualTo(patientVersionsMap);
 
 			assertThat(exportedPatientVersionsMap).isEqualTo(patientVersionsMap);
 		}
 
-		private Map<String, Map<Long, Set<String>>> convertJobResultsToResourceVersionMap(BulkExportJobResults theBulkExportJobResults) {
-			Map<String, List<IBaseResource>> exportedResourcesByType = convertJobResultsToResources(theBulkExportJobResults);
+		@Test
+		public void testShouldIncludeOnlyCurrentVersions() {
+			// Given - Create a patient with multiple versions
+			Patient patient = new Patient();
+			patient.setId("Patient-NoHistory-Test");
+			patient.addName().setFamily("InitialVersion");
+			myClient.update().resource(patient).execute();
 
-			Map<String, Map<Long, Set<String>>> retVal = new HashMap<>();
+			// Update the patient to create version 2
+			patient.getNameFirstRep().setFamily("FinalVersion");
+			MethodOutcome aa = myClient.update().resource(patient).execute();
+			String expectedExportedPatientVersionId = aa.getResource().getIdElement().getValueAsString();
 
-			for (Map.Entry<String, List<IBaseResource>> resourcesOfTypeEntry : exportedResourcesByType.entrySet()) {
-				retVal.put(
-					resourcesOfTypeEntry.getKey(),
-					resourcesOfTypeEntry.getValue().stream().collect(Collectors.groupingBy(
-						r -> r.getIdElement().getIdPartAsLong(),
-						mapping(r -> r.getIdElement().getValueAsString(), Collectors.toSet())
-					))
-				);
-			}
+			// When - Start bulk export without _includeHistory parameter (default behavior)
+			BulkExportJobParameters options = new BulkExportJobParameters();
+			options.setResourceTypes(Collections.singleton("Patient"));
+			options.setFilters(Collections.emptySet());
+			options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
+			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
-			return  retVal;
+			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+			startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+			startRequest.setParameters(options);
+			Batch2JobStartResponse job = myJobCoordinator.startInstance(mySrd, startRequest);
+			myBatch2JobHelper.awaitJobCompletion(job.getInstanceId(), 60);
+			ourLog.debug("Job status after awaiting - {}", myJobCoordinator.getInstance(job.getInstanceId()).getStatus());
+			waitForCompletion(job);
+
+			Map<String, Set<String>> exportedPatientVersionsMap = extractExportedResourceVersionsByTypeMap(job).get("Patient");
+
+			// validate only one patient was exported
+			assertThat(exportedPatientVersionsMap).hasSize(1);
+
+			// validate only right version of the patient was exported
+			assertThat(exportedPatientVersionsMap.values()).containsOnly(Set.of(expectedExportedPatientVersionId));
+
 		}
 
-		private Map<Long, Set<String>> createObservationWithHistory(
-				@SuppressWarnings("SameParameterValue") int theVersionCount,
-				@SuppressWarnings("SameParameterValue") String thePatientId) {
+		@Test
+		void test_includeHistoryParameter_defaultsToFalse() {
+			// Given
+			BulkExportJobParametersBuilder builder = new BulkExportJobParametersBuilder();
 
-			Map<Long, Set<String>> retVal = new HashMap<>();
+			// When
+			BulkExportJobParameters parameters = builder.build();
 
-			IIdType id = createObservation(List.of(
-				withResourcePrimitiveAttribute("valueString", "version-1"),
-				withReference("subject", thePatientId)));
+			// Then
+			assertFalse(parameters.isIncludeHistory());
+		}
 
-			Set<String> versionIds = new HashSet<>();
-			retVal.put(id.getIdPartAsLong(), versionIds);
+		@Test
+		void testBulkExportJobParametersBuilder_includeHistoryParameter_setsToTrue() {
+			// Given
+			BulkExportJobParametersBuilder builder = new BulkExportJobParametersBuilder();
+			BooleanType includeHistoryParam = new BooleanType(true);
 
-			// create indicated additional versions
+			// When
+			BulkExportJobParameters parameters = builder.includeHistory(includeHistoryParam).build();
 
-			int additionalVersionCount = theVersionCount - 1;
-			IIdType lastVersonId = myObservationDao.read(id, mySrd).getIdElement();
+			// Then
+			assertTrue(parameters.isIncludeHistory());
+		}
+
+		@Test
+		void testBulkExportJobParametersBuilder_includeHistoryParameter_setsToFalse() {
+			// Given
+			BulkExportJobParametersBuilder builder = new BulkExportJobParametersBuilder();
+			BooleanType includeHistoryParam = new BooleanType(false);
+
+			// When
+			BulkExportJobParameters parameters = builder.includeHistory(includeHistoryParam).build();
+
+			// Then
+			assertFalse(parameters.isIncludeHistory());
+		}
+
+		@Test
+		void testBulkExportJobParametersBuilder_includeHistoryParameter_handlesNullParameter() {
+			// Given
+			BulkExportJobParametersBuilder builder = new BulkExportJobParametersBuilder();
+
+			// When
+			BulkExportJobParameters parameters = builder.includeHistory(null).build();
+
+			// Then
+			assertFalse(parameters.isIncludeHistory());
+		}
+
+	}
+
+
+	private Map<String, Map<Long, Set<String>>> convertJobResultsToResourceVersionMap(BulkExportJobResults theBulkExportJobResults) {
+		Map<String, List<IBaseResource>> exportedResourcesByType = convertJobResultsToResources(theBulkExportJobResults);
+
+		Map<String, Map<Long, Set<String>>> retVal = new HashMap<>();
+
+		for (Map.Entry<String, List<IBaseResource>> resourcesOfTypeEntry : exportedResourcesByType.entrySet()) {
+			retVal.put(
+				resourcesOfTypeEntry.getKey(),
+				resourcesOfTypeEntry.getValue().stream().collect(Collectors.groupingBy(
+					r -> r.getIdElement().getIdPartAsLong(),
+					mapping(r -> r.getIdElement().getValueAsString(), Collectors.toSet())
+				))
+			);
+		}
+
+		return retVal;
+	}
+
+	private Map<Long, Set<String>> createObservationWithHistory(
+		@SuppressWarnings("SameParameterValue") int theVersionCount,
+		@SuppressWarnings("SameParameterValue") String thePatientId) {
+
+		Map<Long, Set<String>> retVal = new HashMap<>();
+
+		IIdType id = createObservation(List.of(
+			withResourcePrimitiveAttribute("valueString", "version-1"),
+			withReference("subject", thePatientId)));
+
+		Set<String> versionIds = new HashSet<>();
+		retVal.put(id.getIdPartAsLong(), versionIds);
+
+		// create indicated additional versions
+
+		int additionalVersionCount = theVersionCount - 1;
+		IIdType lastVersonId = myObservationDao.read(id, mySrd).getIdElement();
+		versionIds.add(lastVersonId.getValueAsString());
+
+		for (int vCount = 0; vCount < additionalVersionCount; vCount++) {
+			Parameters patch = getObservationPatch(vCount);
+			DaoMethodOutcome patchOutcome = myObservationDao.patch(lastVersonId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, patch, mySrd);
+			AssertionsForClassTypes.assertThat(patchOutcome).isNotNull();
+			lastVersonId = patchOutcome.getId();
 			versionIds.add(lastVersonId.getValueAsString());
-
-			for (int vCount = 0; vCount < additionalVersionCount; vCount++) {
-				Parameters patch = getObservationPatch(vCount);
-				DaoMethodOutcome patchOutcome = myObservationDao.patch(lastVersonId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, patch, mySrd);
-				AssertionsForClassTypes.assertThat(patchOutcome).isNotNull();
-				lastVersonId = patchOutcome.getId();
-				versionIds.add(lastVersonId.getValueAsString());
-			}
-			return retVal;
 		}
+		return retVal;
+	}
 
-		private Map<Long, Set<String>> createCoverageWithHistory(
-				@SuppressWarnings("SameParameterValue") int theVersionCount,
-				@SuppressWarnings("SameParameterValue") String thePatientId) {
+	private Map<Long, Set<String>> createCoverageWithHistory(
+		@SuppressWarnings("SameParameterValue") int theVersionCount,
+		@SuppressWarnings("SameParameterValue") String thePatientId) {
 
-			Map<Long, Set<String>> retVal = new HashMap<>();
+		Map<Long, Set<String>> retVal = new HashMap<>();
 
-			IIdType id = createCoverage(
-				withResourcePrimitiveAttribute("dependent", "version-1"),
-				withReference("beneficiary", thePatientId));
+		IIdType id = createCoverage(
+			withResourcePrimitiveAttribute("dependent", "version-1"),
+			withReference("beneficiary", thePatientId));
 
-			Set<String> versionIds = new HashSet<>();
-			retVal.put(id.getIdPartAsLong(), versionIds);
+		Set<String> versionIds = new HashSet<>();
+		retVal.put(id.getIdPartAsLong(), versionIds);
 
-			// create indicated additional versions
+		// create indicated additional versions
 
-			int additionalVersionCount = theVersionCount - 1;
-			IIdType lastVersonId = myCoverageDao.read(id, mySrd).getIdElement();
+		int additionalVersionCount = theVersionCount - 1;
+		IIdType lastVersonId = myCoverageDao.read(id, mySrd).getIdElement();
+		versionIds.add(lastVersonId.getValueAsString());
+
+		for (int vCount = 0; vCount < additionalVersionCount; vCount++) {
+			Parameters patch = getCoveragePatch(vCount);
+			DaoMethodOutcome patchOutcome = myCoverageDao.patch(lastVersonId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, patch, mySrd);
+			AssertionsForClassTypes.assertThat(patchOutcome).isNotNull();
+			lastVersonId = patchOutcome.getId();
 			versionIds.add(lastVersonId.getValueAsString());
-
-			for (int vCount = 0; vCount < additionalVersionCount; vCount++) {
-				Parameters patch = getCoveragePatch(vCount);
-				DaoMethodOutcome patchOutcome = myCoverageDao.patch(lastVersonId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, patch, mySrd);
-				AssertionsForClassTypes.assertThat(patchOutcome).isNotNull();
-				lastVersonId = patchOutcome.getId();
-				versionIds.add(lastVersonId.getValueAsString());
-			}
-			return retVal;
 		}
+		return retVal;
+	}
 
-		private Parameters getObservationPatch(int theVersion) {
-			Parameters patch = new Parameters();
-			Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
-			op.addPart().setName("type").setValue(new CodeType("replace"));
-			op.addPart().setName("path").setValue(new CodeType("Observation.value"));
-			op.addPart().setName("value").setValue(new StringType("version-" + theVersion+1));
-			return patch;
-		}
+	private Parameters getObservationPatch(int theVersion) {
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Observation.value"));
+		op.addPart().setName("value").setValue(new StringType("version-" + theVersion + 1));
+		return patch;
+	}
 
-		private Parameters getCoveragePatch(int theVersion) {
-			Parameters patch = new Parameters();
-			Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
-			op.addPart().setName("type").setValue(new CodeType("replace"));
-			op.addPart().setName("path").setValue(new CodeType("Coverage.dependent"));
-			op.addPart().setName("value").setValue(new StringType("version-" + theVersion+1));
-			return patch;
-		}
+	private Parameters getCoveragePatch(int theVersion) {
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Coverage.dependent"));
+		op.addPart().setName("value").setValue(new StringType("version-" + theVersion + 1));
+		return patch;
+	}
 
-		private void waitForCompletion(Batch2JobStartResponse job) {
-			await()
-				.atMost(300, TimeUnit.SECONDS)
-				.until(() -> {
-					StatusEnum status = myJobCoordinator.getInstance(job.getInstanceId()).getStatus();
-					if (!StatusEnum.COMPLETED.equals(status)) {
-						fail("Job status was changed from COMPLETE to " + status);
-					}
-					return myJobCoordinator.getInstance(job.getInstanceId()).getReport() != null;
-				});
-		}
+	private void waitForCompletion(Batch2JobStartResponse job) {
+		await()
+			.atMost(300, TimeUnit.SECONDS)
+			.until(() -> {
+				StatusEnum status = myJobCoordinator.getInstance(job.getInstanceId()).getStatus();
+				if (!StatusEnum.COMPLETED.equals(status)) {
+					fail("Job status was changed from COMPLETE to " + status);
+				}
+				return myJobCoordinator.getInstance(job.getInstanceId()).getReport() != null;
+			});
+	}
 
-		private Map<String, Map<Long, Set<String>>> extractExportedResourceVersionsByTypeMap(Batch2JobStartResponse theJob) {
-			String report = myJobCoordinator.getInstance(theJob.getInstanceId()).getReport();
-			BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
-			List<String> binaryUrls = results.getResourceTypeToBinaryIds().get("Patient");
+		private Map<String, Map<String, Set<String>>> extractExportedResourceVersionsByTypeMap(Batch2JobStartResponse theJob) {
+		String report = myJobCoordinator.getInstance(theJob.getInstanceId()).getReport();
+		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
+		List<String> binaryUrls = results.getResourceTypeToBinaryIds().get("Patient");
 
-			Map<String, Map<Long, Set<String>>> retVal = new HashMap<>();
+			Map<String, Map<String, Set<String>>> retVal = new HashMap<>();
 
-			IParser jsonParser = myFhirContext.newNDJsonParser();
-			for (String url : binaryUrls) {
-				Binary binary = myClient.read().resource(Binary.class).withUrl(url).execute();
-				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
-				String resourceContents = new String(binary.getContent(), Constants.CHARSET_UTF8);
+		IParser jsonParser = myFhirContext.newNDJsonParser();
+		for (String url : binaryUrls) {
+			Binary binary = myClient.read().resource(Binary.class).withUrl(url).execute();
+			assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
+			String resourceContents = new String(binary.getContent(), Constants.CHARSET_UTF8);
 
-				Bundle bundle = (Bundle) jsonParser.parseResource(resourceContents);
-				for (IBaseResource resource : BundleUtil.toListOfResources(myFhirContext, bundle)) {
-					String resourceType = resource.getIdElement().getResourceType();
-					IIdType resourceId = resource.getIdElement();
-					String resourceVersion = resource.getIdElement().getValueAsString();
-					retVal.computeIfAbsent(resourceType, k -> new HashMap<>())
-						.computeIfAbsent(
-							resourceId.getIdPartAsLong(),
+			Bundle bundle = (Bundle) jsonParser.parseResource(resourceContents);
+			for (IBaseResource resource : BundleUtil.toListOfResources(myFhirContext, bundle)) {
+				String resourceType = resource.getIdElement().getResourceType();
+				IIdType resourceId = resource.getIdElement();
+				String resourceVersion = resource.getIdElement().getValueAsString();
+				retVal.computeIfAbsent(resourceType, k -> new HashMap<>())
+					.computeIfAbsent(
+						resourceId.getIdPart(),
 							k -> new HashSet<>()).add(resourceVersion);
-				}
 			}
-
-			return retVal;
 		}
 
-		private Parameters getPatch(int theVersion) {
-			Parameters patch = new Parameters();
-			Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
-			op.addPart().setName("type").setValue(new CodeType("replace"));
-			op.addPart().setName("path").setValue(new CodeType("Patient.name.given"));
-			op.addPart().setName("value").setValue(new StringType("given-v" + theVersion+1));
-			return patch;
-		}
+		return retVal;
+	}
 
-		private Map<Long, Set<String>> createPatientsWithHistory(List<Integer> versionCounts) {
-			Map<Long, Set<String>> retVal = new HashMap<>();
+	private Parameters getPatch(int theVersion) {
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.name.given"));
+		op.addPart().setName("value").setValue(new StringType("given-v" + theVersion + 1));
+		return patch;
+	}
 
-			for (Integer theVersionCount : versionCounts) {
-				IIdType id = createPatient();
+		private Map<String, Set<String>> createPatientsWithHistory(List<Integer> versionCounts) {
+			Map<String, Set<String>> retVal = new HashMap<>();
+
+		for (Integer theVersionCount : versionCounts) {
+			IIdType id = createPatient();
 				Set<String> patientVersionIds = new HashSet<>();
-				retVal.put(id.getIdPartAsLong(), patientVersionIds);
+			retVal.put(id.getIdPart(), patientVersionIds);
 
-				// create indicated additional versions
+			// create indicated additional versions
 
-				int patientAdditionalVersionCount = theVersionCount - 1;
-				IIdType lastVersonId = id;
+			int patientAdditionalVersionCount = theVersionCount - 1;
+			IIdType lastVersonId = id;
+			patientVersionIds.add(lastVersonId.getValueAsString());
+
+			for (int vCount = 0; vCount < patientAdditionalVersionCount; vCount++) {
+				Parameters patch = getPatch(vCount);
+				DaoMethodOutcome patchOutcome = myPatientDao.patch(lastVersonId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, patch, mySrd);
+				AssertionsForClassTypes.assertThat(patchOutcome).isNotNull();
+				lastVersonId = patchOutcome.getId();
 				patientVersionIds.add(lastVersonId.getValueAsString());
-
-				for (int vCount = 0; vCount < patientAdditionalVersionCount; vCount++) {
-					Parameters patch = getPatch(vCount);
-					DaoMethodOutcome patchOutcome = myPatientDao.patch(lastVersonId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, patch, mySrd);
-					AssertionsForClassTypes.assertThat(patchOutcome).isNotNull();
-					lastVersonId = patchOutcome.getId();
-					patientVersionIds.add(lastVersonId.getValueAsString());
-				}
 			}
-			return retVal;
 		}
+		return retVal;
+	}
 
-		private IIdType createPatient() {
-			Patient p = new Patient();
-			p.addName()
-				.setGiven(List.of(new StringType("given")))
-				.setFamily("lastname");
-			return myPatientDao.create(p, mySrd).getId();
-		}
-
+	private IIdType createPatient() {
+		Patient p = new Patient();
+		p.addName()
+			.setGiven(List.of(new StringType("given")))
+			.setFamily("lastname");
+		return myPatientDao.create(p, mySrd).getId();
 	}
 
 	private Group createGroupWithPatients() {
@@ -1759,7 +1850,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private String getBinaryContentsAsString(String theBinaryId) {
 		Binary binary = myBinaryDao.read(new IdType(theBinaryId), mySrd);
 		assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
-        return new String(binary.getContent(), Constants.CHARSET_UTF8);
+		return new String(binary.getContent(), Constants.CHARSET_UTF8);
 	}
 
 	BulkExportJobResults startGroupBulkExportJobAndAwaitCompletion(HashSet<String> theResourceTypes, HashSet<String> theFilters, String theGroupId) {
@@ -1872,7 +1963,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		await().atMost(300, TimeUnit.SECONDS).until(() -> myJobCoordinator.getInstance(jobInstanceId).getReport() != null);
 
 		String report = myJobCoordinator.getInstance(jobInstanceId).getReport();
-        return JsonUtil.deserialize(report, BulkExportJobResults.class);
+		return JsonUtil.deserialize(report, BulkExportJobResults.class);
 	}
 
 	private void verifyBulkExportResults(@SuppressWarnings("SameParameterValue") String theGroupId, HashSet<String> theFilters, List<String> theContainedList, List<String> theExcludedList) {
