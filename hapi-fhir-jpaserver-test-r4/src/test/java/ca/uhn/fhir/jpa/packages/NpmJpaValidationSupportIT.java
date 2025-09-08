@@ -16,6 +16,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +48,7 @@ public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 		SearchParameter generated = generateSP();
 		igCreator.addSPToIG(generated);
 
-		PackageInstallationSpec spec = createAndInstallPackageSpec(igCreator);
+		PackageInstallationSpec spec = createAndInstallPackageSpec(igCreator, PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
 
 		// test
 		List<IBaseResource> sps = mySvc.fetchAllSearchParameters();
@@ -66,6 +68,44 @@ public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void fetchAllSearchParameters_multipleVersions_returnVersionsHigherToLower() throws IOException {
+		String name = "ig-test-dir";
+		// deliberately not in order to ensure the loading order
+		// is always in order
+		String[] versions = new String[] { "1.1.1", "3.1.2", "2.2.2" };
+
+		List<String> orderedVersions = new ArrayList<>();
+		SearchParameter generated = generateSP();
+		for (String version : versions) {
+			Path tempDirPath = createTempDir(name + version);
+			orderedVersions.add(version);
+
+			ImplementationGuideCreator igCreator = new ImplementationGuideCreator(myFhirContext, name, version);
+			igCreator.setDirectory(tempDirPath);
+			generated.setDescription("My SP for " + version);
+			igCreator.addSPToIG(generated);
+
+			PackageInstallationSpec spec = createAndInstallPackageSpec(igCreator, PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
+		}
+		orderedVersions.sort(String::compareTo);
+
+		// test
+		List<IBaseResource> sps = mySvc.fetchAllSearchParameters();
+
+		// verify
+		assertNotNull(sps);
+		assertEquals(orderedVersions.size(), sps.size());
+		for (int i = 0; i < sps.size(); i++) {
+			SearchParameter sp = (SearchParameter) sps.get(i);
+			String version = orderedVersions.get(i);
+
+			assertTrue(sp.getDescription()
+				.contains(version),
+				String.format("Expected %s but found %s", version, sp.getDescription()));
+		}
+	}
+
+	@Test
 	public void fetchAllSearchParameters_multipleVersion_returnsAllSPs() throws IOException {
 		String name = "ig-test-dir";
 		String[] versions = new String[] { "1.1.1", "1.2.2" };
@@ -78,7 +118,7 @@ public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 			igCreator.setDirectory(tempDirPath);
 			igCreator.addSPToIG(generated);
 
-			PackageInstallationSpec spec = createAndInstallPackageSpec(igCreator);
+			PackageInstallationSpec spec = createAndInstallPackageSpec(igCreator, PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
 		}
 
 		// test
@@ -144,8 +184,8 @@ public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 			igFhir3dstu.addSPToIG(spdstu3);
 		}
 
-		createAndInstallPackageSpec(igFhir4);
-		createAndInstallPackageSpec(igFhir3dstu);
+		createAndInstallPackageSpec(igFhir4, PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
+		createAndInstallPackageSpec(igFhir3dstu, PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
 
 		// test
 		List<IBaseResource> sps = mySvc.fetchAllSearchParameters();
@@ -175,7 +215,8 @@ public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 		return sp;
 	}
 
-	private PackageInstallationSpec createAndInstallPackageSpec(ImplementationGuideCreator theIgCreator) throws IOException {
+	private PackageInstallationSpec createAndInstallPackageSpec(ImplementationGuideCreator theIgCreator,
+																PackageInstallationSpec.InstallModeEnum theInstallModeEnum) throws IOException {
 		// create a source directory
 		Path outputFileName = theIgCreator.createTestIG();
 
@@ -183,7 +224,7 @@ public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 		PackageInstallationSpec spec = new PackageInstallationSpec()
 			.setName(theIgCreator.getPackageName())
 			.setVersion(theIgCreator.getPackageVersion())
-			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY)
+			.setInstallMode(theInstallModeEnum)
 			.setPackageContents(Files.readAllBytes(outputFileName))
 			;
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);

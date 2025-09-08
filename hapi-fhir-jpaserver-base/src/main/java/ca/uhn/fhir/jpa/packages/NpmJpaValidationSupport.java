@@ -35,11 +35,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class NpmJpaValidationSupport implements IValidationSupport {
 	private static final Logger ourLog = LoggerFactory.getLogger(NpmJpaValidationSupport.class);
@@ -107,15 +107,10 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 		 * we don't reorder them
 		 */
 		PagingIterator<NpmPackageVersionEntity> iterator =
-				new PagingIterator<>(1000, new PagingIterator.PageFetcher<NpmPackageVersionEntity>() {
-					@Override
-					public void fetchNextPage(
-							int thePageIndex, int theBatchSize, Consumer<NpmPackageVersionEntity> theConsumer) {
-						myPackageVersionDao
-								.findAll(Pageable.ofSize(theBatchSize).withPage(thePageIndex))
-								.stream()
-								.forEach(theConsumer);
-					}
+				new PagingIterator<>(1000, (thePageIndex, theBatchSize, theConsumer) -> {
+					myPackageVersionDao
+						.findAll(Pageable.ofSize(theBatchSize).withPage(thePageIndex).getSortOr(Sort.by(Sort.Direction.ASC, "myPackageId", "myVersionId")))
+						.forEach(theConsumer);
 				});
 
 		// do we want to cache this?
