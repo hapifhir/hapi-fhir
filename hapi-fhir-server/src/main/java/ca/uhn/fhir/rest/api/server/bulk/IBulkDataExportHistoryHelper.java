@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.api.server.bulk;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import jakarta.annotation.Nonnull;
 
 import java.util.List;
 
@@ -11,5 +12,5 @@ import java.util.List;
 public interface IBulkDataExportHistoryHelper {
 
 	IBundleProvider fetchHistoryForResourceIds(
-			String theResourceType, List<String> theIdList, RequestPartitionId theRequestPartitionId);
+		@Nonnull String theResourceType, List<String> theIdList, RequestPartitionId theRequestPartitionId);
 }

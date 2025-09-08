@@ -71,6 +71,7 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -83,6 +84,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -187,6 +189,112 @@ public class ExpandResourceAndWriteBinaryStep
 		ArrayListMultimap<String, TypedPidJson> typeToIds = ArrayListMultimap.create();
 		theIds.getIds().forEach(t -> typeToIds.put(t.getResourceType(), t));
 
+		if (isIncludeHistory) {
+			processHistoryResources(theResourceListConsumer, typeToIds, requestPartitionId);
+		} else {
+			processResources(theResourceListConsumer, typeToIds, requestPartitionId);
+		}
+	}
+
+	/**
+	 * Processes historical resources by resource type in batches to avoid exceeding
+	 * maximum file capacity or query size limits. This method handles pagination and
+	 * resource accumulation for history-enabled bulk exports.
+	 *
+	 * @param theResourceListConsumer Consumer to process batches of resources
+	 * @param theTypeToIds Multimap of resource types to their corresponding PIDs
+	 * @param theRequestPartitionId Partition ID for the request
+	 */
+	@VisibleForTesting
+	void processHistoryResources(Consumer<List<IBaseResource>> theResourceListConsumer,
+										 ArrayListMultimap<String, TypedPidJson> theTypeToIds,
+										 RequestPartitionId theRequestPartitionId) {
+
+		// need to make sure not to exceed myStorageSettings.getBulkExportFileMaximumCapacity() or
+		// myStorageSettings.getBulkExportFileMaximumSize()
+
+		final int maxResourcesPerBatch = myStorageSettings.getBulkExportFileMaximumCapacity();
+
+		// for each resource type
+		for (String resourceType : theTypeToIds.keySet()) {
+			List<TypedPidJson> typePidJsonList = theTypeToIds.get(resourceType);
+
+			// keeps possible exceeding resources from last batch, which are always less than maxResourcesPerBatch
+			List<IBaseResource> pendingResourcesToProcess = new ArrayList<>();
+
+			// Break each batch up into query sub-batches to make sure we don't exceed the
+			// limit of 800 variables per SQL statement
+
+			List<IBaseResource> resourcesToProcess = new ArrayList<>();
+
+			for (List<TypedPidJson> queryBatch : ListUtils.partition(typePidJsonList, getMaxSizeBatchDefault())) {
+				resourcesToProcess.addAll(pendingResourcesToProcess);
+				pendingResourcesToProcess.clear();
+
+				List<String> idList = convertToStringIds(theRequestPartitionId, resourceType, queryBatch);
+				IBundleProvider outcome = searchForResourcesHistory(resourceType, idList, theRequestPartitionId);
+				resourcesToProcess.addAll(outcome.getAllResources());
+
+				// pendingResourcesToProcess size is less than maxResourcesPerBatch
+				pendingResourcesToProcess = consumeResourcesInBatches(resourcesToProcess, maxResourcesPerBatch, theResourceListConsumer);
+				resourcesToProcess.clear();
+			}
+
+			if (!pendingResourcesToProcess.isEmpty()) {
+				theResourceListConsumer.accept(pendingResourcesToProcess);
+			}
+		}
+	}
+
+	/**
+	 * Consumes received resources through the consumer in batches of exactly theMaxResourcesPerBatch.
+	 * If the last batch partition has fewer resources than theMaxResourcesPerBatch, doesn't consume them but returns
+	 * them (to be consumed as part of the next batch).
+	 *
+	 * @param theResources List of resources to be consumed
+	 * @param theMaxResourcesPerBatch Maximum number of resources per batch
+	 * @param theConsumer Consumer to process each batch
+	 * @return List of unprocessed resources that didn't meet the batch size threshold
+	 */
+	private List<IBaseResource> consumeResourcesInBatches(
+			List<IBaseResource> theResources, int theMaxResourcesPerBatch, Consumer<List<IBaseResource>> theConsumer) {
+
+		List<IBaseResource> unprocessedResources = new ArrayList<>();
+
+		for (List<IBaseResource> resourceConsumingBatch : ListUtils.partition(theResources, theMaxResourcesPerBatch)) {
+			if (resourceConsumingBatch.size() >= theMaxResourcesPerBatch) {
+				theConsumer.accept(new ArrayList<>(resourceConsumingBatch));
+			} else {
+				unprocessedResources.addAll(resourceConsumingBatch);
+			}
+		}
+
+		return unprocessedResources;
+	}
+
+	/**
+	 * Gets the default maximum batch size for SQL queries to avoid exceeding
+	 * database variable limits (typically 800 variables per SQL statement).
+	 *
+	 * @return The default maximum batch size
+	 */
+	@VisibleForTesting
+	int getMaxSizeBatchDefault() {
+		return PARAM_MAXIMUM_BATCH_SIZE_DEFAULT;
+	}
+
+	/**
+	 * Processes current version resources (non-history) by resource type in batches.
+	 * This method handles pagination and resource retrieval for standard bulk exports.
+	 *
+	 * @param theResourceListConsumer Consumer to process batches of resources
+	 * @param typeToIds Multimap of resource types to their corresponding PIDs
+	 * @param requestPartitionId Partition ID for the request
+	 */
+	private void processResources(Consumer<List<IBaseResource>> theResourceListConsumer,
+								  ArrayListMultimap<String, TypedPidJson> typeToIds,
+								  RequestPartitionId requestPartitionId) {
+
 		final int maxResourcesPerBatches = myStorageSettings.getBulkExportFileMaximumCapacity();
 
 		for (String resourceType : typeToIds.keySet()) {
@@ -194,33 +302,15 @@ public class ExpandResourceAndWriteBinaryStep
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
 			List<TypedPidJson> allIds = typeToIds.get(resourceType);
 			List<List<TypedPidJson>> batches = ListUtils.partition(allIds, maxResourcesPerBatches);
-			for (List<TypedPidJson> batch : batches) {
+			for (List<TypedPidJson> consumingBatch : batches) {
 
 				List<IBaseResource> batchResources = new ArrayList<>(maxResourcesPerBatches);
 
-				// Break each batch up into sub-batches in order to make sure we don't exceed the
+				// Break each batch up into query sub-batches in order to make sure we don't exceed the
 				// limit of 800 variables per SQL statement
-				for (List<TypedPidJson> subBatch : ListUtils.partition(batch, PARAM_MAXIMUM_BATCH_SIZE_DEFAULT)) {
-
-					Set<IResourcePersistentId> subBatchPids = subBatch.stream()
-							.map(t -> myIdHelperService.newPidFromStringIdAndResourceName(
-									t.getPartitionId(), t.getPid(), resourceType))
-							.collect(Collectors.toSet());
-
-					PersistentIdToForcedIdMap nextBatchOfResourceIds = myTransactionService
-							.withSystemRequestOnPartition(requestPartitionId)
-							.execute(() -> myIdHelperService.translatePidsToForcedIds(subBatchPids));
-
-					List<String> idList = new ArrayList<>();
-					for (IResourcePersistentId nextPid : subBatchPids) {
-						Optional<String> resourceId = nextBatchOfResourceIds.get(nextPid);
-						idList.add(resourceId.orElse(nextPid.getId().toString()));
-					}
-
-					IBundleProvider outcome = isIncludeHistory
-							? searchForResourcesHistory(resourceType, idList, requestPartitionId)
-							: searchForResources(dao, idList, requestPartitionId);
-
+				for (List<TypedPidJson> queryBatch : ListUtils.partition(consumingBatch, PARAM_MAXIMUM_BATCH_SIZE_DEFAULT)) {
+					List<String> idList = convertToStringIds(requestPartitionId, resourceType, queryBatch);
+					IBundleProvider outcome = searchForResources(dao, idList, requestPartitionId);
 					batchResources.addAll(outcome.getAllResources());
 				}
 
@@ -229,11 +319,59 @@ public class ExpandResourceAndWriteBinaryStep
 		}
 	}
 
+	/**
+	 * Converts a batch of typed PID JSON objects to their corresponding string IDs,
+	 * handling both forced IDs and numeric PIDs.
+	 *
+	 * @param theRequestPartitionId Partition ID for the request
+	 * @param theResourceType Type of resources being processed
+	 * @param theQueryBatch Batch of typed PID JSON objects to convert
+	 * @return List of string IDs corresponding to the input PIDs
+	 */
+	@SuppressWarnings("rawtypes")
+	private @NotNull List<String> convertToStringIds(
+			RequestPartitionId theRequestPartitionId, String theResourceType, List<TypedPidJson> theQueryBatch) {
+
+		Set<IResourcePersistentId> queryBatchPids = theQueryBatch.stream()
+				.map(t -> myIdHelperService.newPidFromStringIdAndResourceName(
+						t.getPartitionId(), t.getPid(), theResourceType))
+				.collect(Collectors.toSet());
+
+		@SuppressWarnings("unchecked")
+		PersistentIdToForcedIdMap nextBatchOfResourceIds = myTransactionService
+				.withSystemRequestOnPartition(theRequestPartitionId)
+				.execute(() -> myIdHelperService.translatePidsToForcedIds(queryBatchPids));
+
+		List<String> idList = new ArrayList<>();
+		for (IResourcePersistentId nextPid : queryBatchPids) {
+			@SuppressWarnings("unchecked")
+			Optional<String> resourceId = nextBatchOfResourceIds.get(nextPid);
+			idList.add(resourceId.orElse(nextPid.getId().toString()));
+		}
+		return idList;
+	}
+
+	/**
+	 * Searches for historical versions of resources by their IDs using the bulk export history helper.
+	 *
+	 * @param theResourceType Type of resources to search for
+	 * @param theIdList List of resource IDs to fetch history for
+	 * @param theRequestPartitionId Partition ID for the request
+	 * @return Bundle provider containing historical versions of the resources
+	 */
 	private IBundleProvider searchForResourcesHistory(
 			String theResourceType, List<String> theIdList, RequestPartitionId theRequestPartitionId) {
 		return myExportHelper.fetchHistoryForResourceIds(theResourceType, theIdList, theRequestPartitionId);
 	}
 
+	/**
+	 * Searches for current versions of resources by their IDs using the resource DAO.
+	 *
+	 * @param theDao Resource DAO to perform the search
+	 * @param theIdList List of resource IDs to search for
+	 * @param theRequestPartitionId Partition ID for the request
+	 * @return Bundle provider containing the current versions of the resources
+	 */
 	private IBundleProvider searchForResources(
 			IFhirResourceDao<?> theDao, List<String> theIdList, RequestPartitionId theRequestPartitionId) {
 
@@ -246,7 +384,7 @@ public class ExpandResourceAndWriteBinaryStep
 
 	/**
 	 * Adds 3 extensions to the `binary.meta` element.
-	 *
+	 * <p>
 	 * 1. the _exportId provided at request time
 	 * 2. the job_id of the job instance.
 	 * 3. the resource type of the resources contained in the binary
@@ -257,8 +395,7 @@ public class ExpandResourceAndWriteBinaryStep
 			IBaseBinary binary) {
 		// Note that this applies only to hl7.org structures, so these extensions will not be added
 		// to DSTU2 structures
-		if (binary.getMeta() instanceof IBaseHasExtensions) {
-			IBaseHasExtensions meta = (IBaseHasExtensions) binary.getMeta();
+		if (binary.getMeta() instanceof IBaseHasExtensions meta) {
 
 			// export identifier, potentially null.
 			String exportIdentifier = theStepExecutionDetails.getParameters().getExportIdentifier();
@@ -545,11 +682,7 @@ public class ExpandResourceAndWriteBinaryStep
 			SystemRequestDetails srd = new SystemRequestDetails();
 			BulkExportJobParameters jobParameters = myStepExecutionDetails.getParameters();
 			RequestPartitionId partitionId = jobParameters.getPartitionId();
-			if (partitionId == null) {
-				srd.setRequestPartitionId(RequestPartitionId.defaultPartition());
-			} else {
-				srd.setRequestPartitionId(partitionId);
-			}
+			srd.setRequestPartitionId(Objects.requireNonNullElseGet(partitionId, RequestPartitionId::defaultPartition));
 
 			// Pick a unique ID and retry until we get one that isn't already used. This is just to
 			// avoid any possibility of people guessing the IDs of these Binaries and fishing for them.
