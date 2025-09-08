@@ -31,6 +31,8 @@ import ca.uhn.fhir.rest.annotation.Transaction;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 
@@ -40,6 +42,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class NpmJpaValidationSupport implements IValidationSupport {
+	private static final Logger ourLog = LoggerFactory.getLogger(NpmJpaValidationSupport.class);
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -128,6 +131,10 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 		if (theNpmPackageEntity.getFhirVersion() != myFhirContext.getVersion().getVersion()) {
 			// not the same fhir version as this class is dependent on,
 			// so we cannot create these objects
+			ourLog.info(
+					"Encountered an NPM package with an incompatible fhir version: {} when expecting {}",
+					theNpmPackageEntity.getFhirVersion().getFhirVersionString(),
+					myFhirContext.getVersion().getVersion().getFhirVersionString());
 			return;
 		}
 

@@ -4,10 +4,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.implementationguide.ImplementationGuideCreator;
 import ca.uhn.fhir.jpa.packages.util.PackageUtils;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.test.util.LogbackTestExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
@@ -29,6 +31,9 @@ public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 
 	@Autowired
 	private IPackageInstallerSvc myPackageInstallerSvc;
+
+	@RegisterExtension
+	private final LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(NpmJpaValidationSupport.class);
 
 	@Test
 	public void fetchAllSearchParameters_withStoredIG_returnsSPsFromIG() throws IOException {
@@ -144,12 +149,17 @@ public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 
 		// test
 		List<IBaseResource> sps = mySvc.fetchAllSearchParameters();
+
+		// verify
 		assertNotNull(sps);
 		assertEquals(1, sps.size());
 		assertTrue(sps.stream()
 			.anyMatch(sp -> sp instanceof SearchParameter));
 		assertFalse(sps.stream()
 			.anyMatch(sp -> sp instanceof org.hl7.fhir.dstu3.model.SearchParameter));
+
+		assertTrue(myLogbackTestExtension.getLogEvents()
+			.stream().anyMatch(e -> e.getFormattedMessage().contains("Encountered an NPM package with an incompatible fhir version")));
 	}
 
 	private SearchParameter generateSP() {
