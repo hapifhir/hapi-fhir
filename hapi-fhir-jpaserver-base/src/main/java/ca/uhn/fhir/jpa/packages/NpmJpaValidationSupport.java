@@ -19,9 +19,11 @@
  */
 package ca.uhn.fhir.jpa.packages;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
@@ -138,8 +140,11 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 			pkg = myHapiPackageCacheManager.loadPackage(
 					theNpmPackageEntity.getPackageId(), theNpmPackageEntity.getVersionId());
 		} catch (IOException ex) {
-			// TODO - better handling
-			throw new RuntimeException(ex);
+			// we shouldn't ever really see this
+			String msg = String.format("Failed to load package %s|%s",
+				theNpmPackageEntity.getPackageId(), theNpmPackageEntity.getVersionId());
+			ourLog.error(msg);
+			throw new ConfigurationException(Msg.code(2813) + msg, ex);
 		}
 
 		List<IBaseResource> pkgSps = myPackageResourceParsingSvc.parseResourcesOfType("SearchParameter", pkg);
