@@ -108,6 +108,11 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 	}
 
 	@Override
+	public List<RuntimeSearchParam> getActiveSearchParamsByName(@Nonnull String theName, @Nonnull SearchParamLookupContextEnum theContext) {
+		throw new UnsupportedOperationException(Msg.code(2804));
+	}
+
+	@Override
 	public void addActiveSearchParameterToLocalCache(RuntimeSearchParam theSearchParam) {
 		throw new UnsupportedOperationException(Msg.code(2792));
 	}

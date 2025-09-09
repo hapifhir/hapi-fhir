@@ -44,6 +44,31 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class RuntimeSearchParam {
+	/**
+	 * Enum defining the source of the SearchParameter
+	 * (ie, where it's from)
+	 */
+	public enum Source {
+		/**
+		 * Unknown source; a source should always be provided,
+		 * but if one cannot be, specify UNKNOWN.
+		 */
+		UNKNOWN,
+		/**
+		 * The SP is built-into the base FHIR models.
+		 */
+		BUILT_IN,
+		/**
+		 * The originating source is the DB (this was saved
+		 * via an API call or the like).
+		 */
+		DATABASE,
+		/**
+		 * The originating source is an IG.
+		 */
+		IMPLEMENTATION_GUIDE;
+	}
+
 	private final IIdType myId;
 	private final Set<String> myBase;
 	private final String myDescription;
@@ -61,6 +86,28 @@ public class RuntimeSearchParam {
 	private final IIdType myIdUnqualifiedVersionless;
 	private IPhoneticEncoder myPhoneticEncoder;
 	private boolean myEnabledForSearching = true;
+
+	/**
+	 * The originating source of this RuntimeSearchParameter.
+	 */
+	private Source myOriginatingSource = Source.UNKNOWN;
+
+	/**
+	 * The name of the source Implementation Guide
+	 */
+	private String myIGName;
+
+	/**
+	 * The version of the IG
+	 */
+	private String myIGVersion;
+
+	/**
+	 * The version of the SP itself.
+	 * If this SP comes from a builtin fhircontext,
+	 * this will be the FHIR version.
+	 */
+	private String mySPVersion;
 
 	/**
 	 * Constructor
@@ -183,6 +230,35 @@ public class RuntimeSearchParam {
 	 */
 	public void setEnabledForSearching(boolean theEnabledForSearching) {
 		myEnabledForSearching = theEnabledForSearching;
+	}
+
+	public Source getOriginatingSource() {
+		return myOriginatingSource;
+	}
+
+	public void setOriginatingSource(Source theOriginatingSource) {
+		myOriginatingSource = theOriginatingSource;
+	}
+
+	public String getIGName() {
+		return myIGName;
+	}
+
+	public String getIGVersion() {
+		return myIGVersion;
+	}
+
+	public void setIGUrlAndVersion(String theIGUrl, String theVersion) {
+		myIGName = theIGUrl;
+		myIGVersion = theVersion;
+	}
+
+	public String getSPVersion() {
+		return mySPVersion;
+	}
+
+	public void setSPVersion(String theSPVersion) {
+		mySPVersion = theSPVersion;
 	}
 
 	public List<Component> getComponents() {
