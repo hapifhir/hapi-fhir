@@ -113,7 +113,8 @@ public class SearchParameterCanonicalizer {
 		if (retVal != null) {
 			extractExtensions(theSearchParameter, retVal);
 
-			if (theSearchParameter.getIdElement() != null && theSearchParameter.getIdElement().hasVersionIdPart()) {
+			if (theSearchParameter.getIdElement() != null
+					&& theSearchParameter.getIdElement().hasVersionIdPart()) {
 				retVal.setSource(RuntimeResourceSource.databaseSource());
 			} else if (NpmPackageUtils.isFromNpmPackage(theSearchParameter)) {
 				NpmPackageUtils.setSourceForSP(theSearchParameter, retVal);

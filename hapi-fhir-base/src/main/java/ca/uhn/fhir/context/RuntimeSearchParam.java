@@ -55,7 +55,7 @@ public class RuntimeSearchParam {
 	private final Set<String> myProvidesMembershipInCompartments;
 	private final RuntimeSearchParamStatusEnum myStatus;
 	private final String myUri;
-	private  String myVersion;
+	private String myVersion;
 	private final Map<String, List<IBaseExtension<?, ?>>> myExtensions = new HashMap<>();
 	private final Map<String, String> myUpliftRefchains = new HashMap<>();
 	private final ComboSearchParamType myComboSearchParamType;

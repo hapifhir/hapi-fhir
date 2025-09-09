@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.RuntimeResourceSource;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -42,7 +42,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.IndexedSearchParam;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
-import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
@@ -426,8 +425,6 @@ public class SearchParamRegistryImpl
 		long retval = 0;
 		Function<IBaseResource, RuntimeSearchParam> conversion = (spResource) -> {
 			RuntimeSearchParam rtsp = mySearchParameterCanonicalizer.canonicalizeSearchParameter(spResource);
-//			RuntimeResourceSource source = RuntimeResourceSource.databaseSource();
-//			rtsp.setSource(source);
 			return rtsp;
 		};
 		for (IBaseResource searchParam : theSearchParams) {
