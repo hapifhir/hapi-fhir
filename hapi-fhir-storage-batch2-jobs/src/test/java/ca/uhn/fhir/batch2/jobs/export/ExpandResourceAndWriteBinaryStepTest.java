@@ -66,11 +66,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -115,15 +117,18 @@ public class ExpandResourceAndWriteBinaryStepTest {
 	@Mock
 	IIdHelperService<JpaPid> myIdHelperService;
 
+	@SuppressWarnings("unused")
 	@Spy
 	private InterceptorService myInterceptorService = new InterceptorService();
 
+	@SuppressWarnings("unused")
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	@Spy
 	private JpaStorageSettings myStorageSettings = new JpaStorageSettings();
 
+	@SuppressWarnings("unused")
 	@Spy
 	private IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
 
@@ -220,6 +225,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 			return JpaPid.fromId(Long.parseLong(fhirId));
 		});
 		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
+			@SuppressWarnings("unchecked")
 			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
 			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
 			for (var next : inputSet) {
@@ -286,6 +292,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 			return JpaPid.fromId(Long.parseLong(fhirId));
 		});
 		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
+			@SuppressWarnings("unchecked")
 			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
 			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
 			for (var next : inputSet) {
@@ -359,6 +366,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resources));
 		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
 		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
+			@SuppressWarnings("unchecked")
 			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
 			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
 			for (var next : inputSet) {
@@ -438,6 +446,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resources));
 		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
 		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
+			@SuppressWarnings("unchecked")
 			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
 			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
 			for (var next : inputSet) {
@@ -471,5 +480,88 @@ public class ExpandResourceAndWriteBinaryStepTest {
 
 		verify(sink, never())
 			.accept(any(BulkExportBinaryFileId.class));
+	}
+
+	@Test
+	void processBundleProviderInBatches_withLargeDataset_consumesBatches() {
+		// setup
+		final int totalResources = 2500;
+		final int maxBatchSize = 1000;
+		List<IBaseResource> allResources = new ArrayList<>();
+		for (int i = 0; i < totalResources; i++) {
+			Patient patient = new Patient();
+			patient.setId("Patient/" + i);
+			allResources.add(patient);
+		}
+
+		SimpleBundleProvider mockBundleProvider = mock(SimpleBundleProvider.class);
+		when(mockBundleProvider.size()).thenReturn(totalResources);
+		
+		// Mock the paginated getResources calls - using PARAM_MAXIMUM_BATCH_SIZE_DEFAULT (800)
+		when(mockBundleProvider.getResources(eq(0), eq(800))).thenReturn(allResources.subList(0, 800));
+		when(mockBundleProvider.getResources(eq(800), eq(1600))).thenReturn(allResources.subList(800, 1600));
+		when(mockBundleProvider.getResources(eq(1600), eq(2400))).thenReturn(allResources.subList(1600, 2400));
+		when(mockBundleProvider.getResources(eq(2400), eq(2500))).thenReturn(allResources.subList(2400, 2500));
+
+		List<IBaseResource> accumulatingList = new ArrayList<>();
+		List<List<IBaseResource>> consumedBatches = new ArrayList<>();
+		Consumer<List<IBaseResource>> consumer = consumedBatches::add;
+
+		// test
+		myFinalStep.processBundleProviderInBatches(mockBundleProvider, accumulatingList, maxBatchSize, consumer);
+
+		// verify
+		// Should have consumed 2 full batches of 1000 each
+		assertEquals(2, consumedBatches.size());
+		assertEquals(maxBatchSize, consumedBatches.get(0).size());
+		assertEquals(maxBatchSize, consumedBatches.get(1).size());
+		
+		// Remaining 500 resources should be in accumulating list
+		assertEquals(500, accumulatingList.size());
+		
+		// Verify pagination was used instead of getAllResources
+		verify(mockBundleProvider, times(1)).getResources(0, 800);
+		verify(mockBundleProvider, times(1)).getResources(800, 1600);
+		verify(mockBundleProvider, times(1)).getResources(1600, 2400);
+		verify(mockBundleProvider, times(1)).getResources(2400, 2500);
+		verify(mockBundleProvider, never()).getResources(eq(0), eq(totalResources)); // Should not call getAllResources equivalent
+	}
+
+	@Test
+	void processBundleProviderInBatches_withEmptyBundle_handlesGracefully() {
+		// setup
+		SimpleBundleProvider emptyBundleProvider = mock(SimpleBundleProvider.class);
+		when(emptyBundleProvider.size()).thenReturn(0);
+
+		List<IBaseResource> accumulatingList = new ArrayList<>();
+		List<List<IBaseResource>> consumedBatches = new ArrayList<>();
+		Consumer<List<IBaseResource>> consumer = consumedBatches::add;
+
+		// test
+		myFinalStep.processBundleProviderInBatches(emptyBundleProvider, accumulatingList, 1000, consumer);
+
+		// verify
+		assertTrue(accumulatingList.isEmpty());
+		assertTrue(consumedBatches.isEmpty());
+		verify(emptyBundleProvider, never()).getResources(any(Integer.class), any(Integer.class));
+	}
+
+	@Test
+	void processBundleProviderInBatches_withNullSize_handlesGracefully() {
+		// setup
+		SimpleBundleProvider nullSizeBundleProvider = mock(SimpleBundleProvider.class);
+		when(nullSizeBundleProvider.size()).thenReturn(null);
+
+		List<IBaseResource> accumulatingList = new ArrayList<>();
+		List<List<IBaseResource>> consumedBatches = new ArrayList<>();
+		Consumer<List<IBaseResource>> consumer = consumedBatches::add;
+
+		// test
+		myFinalStep.processBundleProviderInBatches(nullSizeBundleProvider, accumulatingList, 1000, consumer);
+
+		// verify
+		assertTrue(accumulatingList.isEmpty());
+		assertTrue(consumedBatches.isEmpty());
+		verify(nullSizeBundleProvider, never()).getResources(any(Integer.class), any(Integer.class));
 	}
 }

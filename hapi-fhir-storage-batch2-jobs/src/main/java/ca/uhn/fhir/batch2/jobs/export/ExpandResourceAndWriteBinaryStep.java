@@ -206,9 +206,10 @@ public class ExpandResourceAndWriteBinaryStep
 	 * @param theRequestPartitionId Partition ID for the request
 	 */
 	@VisibleForTesting
-	void processHistoryResources(Consumer<List<IBaseResource>> theResourceListConsumer,
-										 ArrayListMultimap<String, TypedPidJson> theTypeToIds,
-										 RequestPartitionId theRequestPartitionId) {
+	void processHistoryResources(
+			Consumer<List<IBaseResource>> theResourceListConsumer,
+			ArrayListMultimap<String, TypedPidJson> theTypeToIds,
+			RequestPartitionId theRequestPartitionId) {
 
 		// need to make sure not to exceed myStorageSettings.getBulkExportFileMaximumCapacity() or
 		// myStorageSettings.getBulkExportFileMaximumSize()
@@ -221,8 +222,8 @@ public class ExpandResourceAndWriteBinaryStep
 			// limit of variables per SQL statement
 
 			// keeps possible exceeding resources from last batch, which are always less than maxResourcesPerBatch
-			List<IBaseResource> pendingResourcesToProcess =
-				processInQueryBatches(resourceType, typePidJsonList, theRequestPartitionId, theResourceListConsumer);
+			List<IBaseResource> pendingResourcesToProcess = processInQueryBatches(
+					resourceType, typePidJsonList, theRequestPartitionId, theResourceListConsumer);
 
 			// consume possible remaining resources
 			if (!pendingResourcesToProcess.isEmpty()) {
@@ -241,10 +242,11 @@ public class ExpandResourceAndWriteBinaryStep
 	 * @param theResourceListConsumer Consumer to process batches of resources
 	 * @return List of unprocessed resources that didn't meet the batch size threshold
 	 */
-	private List<IBaseResource> processInQueryBatches(String resourceType,
-													  List<TypedPidJson> typePidJsonList,
-													  RequestPartitionId theRequestPartitionId,
-													  Consumer<List<IBaseResource>> theResourceListConsumer) {
+	private List<IBaseResource> processInQueryBatches(
+			String resourceType,
+			List<TypedPidJson> typePidJsonList,
+			RequestPartitionId theRequestPartitionId,
+			Consumer<List<IBaseResource>> theResourceListConsumer) {
 
 		List<IBaseResource> resourcesToProcess = new ArrayList<>();
 		List<IBaseResource> pendingResourcesToProcess = new ArrayList<>();
@@ -257,10 +259,12 @@ public class ExpandResourceAndWriteBinaryStep
 
 			List<String> idList = convertToStringIds(theRequestPartitionId, resourceType, queryBatch);
 			IBundleProvider outcome = searchForResourcesHistory(resourceType, idList, theRequestPartitionId);
-			resourcesToProcess.addAll(outcome.getAllResources());
 
-			// pendingResourcesToProcess size is less than maxResourcesPerBatch
-			pendingResourcesToProcess = consumeResourcesInBatches(resourcesToProcess, maxResourcesPerBatch, theResourceListConsumer);
+			// Process bundle provider resources in batches to avoid memory overload
+			processBundleProviderInBatches(outcome, resourcesToProcess, maxResourcesPerBatch, theResourceListConsumer);
+
+			// Keep remaining resources that didn't form a complete batch
+			pendingResourcesToProcess = new ArrayList<>(resourcesToProcess);
 			resourcesToProcess.clear();
 		}
 
@@ -312,9 +316,10 @@ public class ExpandResourceAndWriteBinaryStep
 	 * @param typeToIds Multimap of resource types to their corresponding PIDs
 	 * @param requestPartitionId Partition ID for the request
 	 */
-	private void processResources(Consumer<List<IBaseResource>> theResourceListConsumer,
-								  ArrayListMultimap<String, TypedPidJson> typeToIds,
-								  RequestPartitionId requestPartitionId) {
+	private void processResources(
+			Consumer<List<IBaseResource>> theResourceListConsumer,
+			ArrayListMultimap<String, TypedPidJson> typeToIds,
+			RequestPartitionId requestPartitionId) {
 
 		final int maxResourcesPerBatches = myStorageSettings.getBulkExportFileMaximumCapacity();
 
@@ -329,7 +334,8 @@ public class ExpandResourceAndWriteBinaryStep
 
 				// Break each batch up into query sub-batches in order to make sure we don't exceed the
 				// limit of 800 variables per SQL statement
-				for (List<TypedPidJson> queryBatch : ListUtils.partition(consumingBatch, PARAM_MAXIMUM_BATCH_SIZE_DEFAULT)) {
+				for (List<TypedPidJson> queryBatch :
+						ListUtils.partition(consumingBatch, PARAM_MAXIMUM_BATCH_SIZE_DEFAULT)) {
 					List<String> idList = convertToStringIds(requestPartitionId, resourceType, queryBatch);
 					IBundleProvider outcome = searchForResources(dao, idList, requestPartitionId);
 					batchResources.addAll(outcome.getAllResources());
@@ -450,8 +456,58 @@ public class ExpandResourceAndWriteBinaryStep
 		return new OutputStreamWriter(theOutputStream, Constants.CHARSET_UTF8);
 	}
 
+	/**
+	 * Processes resources from a bundle provider in batches to avoid memory overload.
+	 * This method replaces direct calls to {@link IBundleProvider#getAllResources()} which can cause
+	 * OutOfMemoryError for large datasets by loading all resources at once.
+	 *
+	 * @param theBundleProvider Bundle provider containing resources to extract
+	 * @param theAccumulatingList List to accumulate resources before consuming in batches
+	 * @param theMaxBatchSize Maximum batch size before consuming
+	 * @param theResourceConsumer Consumer to process full batches
+	 */
 	@VisibleForTesting
-	public void setIdHelperServiceForUnitTest(IIdHelperService theIdHelperService) {
+	void processBundleProviderInBatches(
+			IBundleProvider theBundleProvider,
+			List<IBaseResource> theAccumulatingList,
+			int theMaxBatchSize,
+			Consumer<List<IBaseResource>> theResourceConsumer) {
+
+		Integer totalSize = theBundleProvider.size();
+		if (totalSize == null || totalSize == 0) {
+			return;
+		}
+
+		// Use pagination to avoid loading all resources into memory at once
+		int currentIndex = 0;
+
+		while (currentIndex < totalSize) {
+			int toIndex = Math.min(currentIndex + PARAM_MAXIMUM_BATCH_SIZE_DEFAULT, totalSize);
+			List<IBaseResource> page = theBundleProvider.getResources(currentIndex, toIndex);
+
+			// Add resources from this page to accumulating list
+			theAccumulatingList.addAll(page);
+			currentIndex = toIndex;
+
+			// Check if we need to consume a batch
+			while (theAccumulatingList.size() >= theMaxBatchSize) {
+				List<IBaseResource> batchToConsume = new ArrayList<>(theAccumulatingList.subList(0, theMaxBatchSize));
+				theResourceConsumer.accept(batchToConsume);
+				theAccumulatingList.subList(0, theMaxBatchSize).clear();
+			}
+
+			ourLog.debug(
+					"Processed page of {} resources ({}-{} of {}), {} remaining in accumulator",
+					page.size(),
+					currentIndex - page.size(),
+					currentIndex - 1,
+					totalSize,
+					theAccumulatingList.size());
+		}
+	}
+
+	@VisibleForTesting
+	public void setIdHelperServiceForUnitTest(IIdHelperService<?> theIdHelperService) {
 		myIdHelperService = theIdHelperService;
 	}
 
@@ -634,7 +690,7 @@ public class ExpandResourceAndWriteBinaryStep
 			return false;
 		}
 
-		private IParser getParser(BulkExportJobParameters theParameters) {
+		private IParser getParser(@SuppressWarnings("unused") BulkExportJobParameters theParameters) {
 			// The parser depends on the output format
 			// but for now, only ndjson is supported
 			// see WriteBinaryStep as well
