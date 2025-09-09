@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.RuntimeSearchParamSource;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -122,7 +123,7 @@ public class ReadOnlySearchParamCache {
 						nextCanonical.getComboSearchParamType(),
 						nextCanonical.getComponents(),
 						nextCanonical.getBase());
-				nextCanonical.setOriginatingSource(RuntimeSearchParam.Source.BUILT_IN);
+				nextCanonical.setSource(RuntimeSearchParamSource.builtinSource());
 
 				Collection<String> base = nextCanonical.getBase();
 				if (base.contains("Resource") || base.contains("DomainResource")) {

@@ -36,7 +36,6 @@ import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
@@ -299,11 +298,6 @@ public class SearchParamExtractorDstu3Test {
 		@Nullable
 		@Override
 		public RuntimeSearchParam getActiveSearchParamByUrl(@Nonnull String theUrl, @Nonnull SearchParamLookupContextEnum theContext) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public List<RuntimeSearchParam> getActiveSearchParamsByName(@NotNull String theName, @NotNull ISearchParamRegistry.SearchParamLookupContextEnum theContext) {
 			throw new UnsupportedOperationException();
 		}
 

@@ -154,14 +154,6 @@ public interface ISearchParamRegistry extends IResourceRepositoryCache {
 			@Nonnull String theUrl, @Nonnull SearchParamLookupContextEnum theContext);
 
 	/**
-	 * Gets a list of RuntimeSearchParam objects by name.
-	 * @param theName the name of the SP to look for.
-	 * @param theContext Context
-	 * @return
-	 */
-	List<RuntimeSearchParam> getActiveSearchParamsByName(@Nonnull String theName, @Nonnull SearchParamLookupContextEnum theContext);
-
-	/**
 	 * Find a search param for a resource. First, check the resource itself, then check the top-level `Resource` resource.
 	 *
 	 * @param theResourceType the resource type.

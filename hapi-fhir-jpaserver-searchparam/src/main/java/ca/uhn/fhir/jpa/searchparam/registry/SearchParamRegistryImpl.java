@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.RuntimeSearchParamSource;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -55,7 +56,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -222,26 +222,12 @@ public class SearchParamRegistryImpl
 	}
 
 	@Override
-	public List<RuntimeSearchParam> getActiveSearchParamsByName(@NotNull String theName, @NotNull ISearchParamRegistry.SearchParamLookupContextEnum theContext) {
-		List<RuntimeSearchParam> sps = new ArrayList<>();
-		if (myActiveSearchParams != null) {
-			myActiveSearchParams.getSearchParamStream()
-				.forEach(sp -> {
-					if (sp.getName().equals(theName)) {
-						sps.add(sp);
-					}
-				});
-		}
-		return sps;
-	}
-
-	@Override
 	public void addActiveSearchParameterToLocalCache(@Nonnull RuntimeSearchParam theSearchParam) {
 		assert !isBlank(theSearchParam.getName());
 		assert theSearchParam.getBase() != null && !theSearchParam.getBase().isEmpty();
-		assert theSearchParam.getOriginatingSource() != null;
+		assert theSearchParam.getSource() != null;
 
-		if (theSearchParam.getOriginatingSource() == RuntimeSearchParam.Source.UNKNOWN) {
+		if (theSearchParam.getSource().getOriginatingSource() == RuntimeSearchParamSource.SourceType.UNKNOWN) {
 			ourLog.warn("SearchParameter added with unknown source.");
 		}
 
@@ -442,10 +428,11 @@ public class SearchParamRegistryImpl
 		long retval = 0;
 		Function<IBaseResource, RuntimeSearchParam> conversion = (spResource) -> {
 			RuntimeSearchParam rtsp = mySearchParameterCanonicalizer.canonicalizeSearchParameter(spResource);
-			rtsp.setOriginatingSource(RuntimeSearchParam.Source.DATABASE);
+			RuntimeSearchParamSource source = RuntimeSearchParamSource.databaseSource();
+			rtsp.setSource(source);
 			IBase versionField = SearchParameterUtil.getFirstFieldValueOrNull(terser, spResource, "version");
 			if (versionField != null) {
-				rtsp.setSPVersion(versionField.toString());
+				source.setSPVersion(versionField.toString());
 			}
 			return rtsp;
 		};
@@ -465,7 +452,10 @@ public class SearchParamRegistryImpl
 	 * @param theConvertFn A function used to convert an IBaseResource SearchParameter resource into a RuntimeSearchParameter
 	 *                     to be added to the cache.
 	 */
-	private long overrideSearchParam(RuntimeSearchParamCache theSearchParams, IBaseResource theSearchParameter, Function<IBaseResource, RuntimeSearchParam> theConvertFn) {
+	private long overrideSearchParam(
+			RuntimeSearchParamCache theSearchParams,
+			IBaseResource theSearchParameter,
+			Function<IBaseResource, RuntimeSearchParam> theConvertFn) {
 		if (theSearchParameter == null) {
 			return 0;
 		}

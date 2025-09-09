@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.RuntimeSearchParamSource;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
@@ -50,7 +51,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -294,28 +294,6 @@ public class SearchParamRegistryImplTest {
 	}
 
 	@Test
-	public void getActiveSearchParamsByName_withValidName_returnsListOfParams() {
-		// test
-		List<RuntimeSearchParam> sps = mySearchParamRegistry.getActiveSearchParamsByName("name", ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
-
-		// verify
-		assertFalse(sps.isEmpty());
-		assertTrue(sps.size() > 1);
-		for (RuntimeSearchParam sp : sps) {
-			assertEquals("name", sp.getName());
-		}
-	}
-
-	@Test
-	public void getActiveSearchParamsByName_withInvalidName_returnsEmptyList() {
-		// test
-		List<RuntimeSearchParam> sps = mySearchParamRegistry.getActiveSearchParamsByName("abcdefghijklmnopqrstuvwxyz", ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
-
-		// verify
-		assertTrue(sps.isEmpty());
-	}
-
-	@Test
 	public void testGetActiveUniqueSearchParams_Empty() {
 		assertThat(mySearchParamRegistry.getActiveComboSearchParams("Patient", null)).isEmpty();
 	}
@@ -516,7 +494,7 @@ public class SearchParamRegistryImplTest {
 		// verify
 		params.getSearchParamStream()
 			.forEach(sp -> {
-				assertEquals(RuntimeSearchParam.Source.BUILT_IN, sp.getOriginatingSource());
+				assertEquals(RuntimeSearchParamSource.SourceType.BUILT_IN, sp.getSource().getOriginatingSource());
 			});
 	}
 
@@ -547,12 +525,10 @@ public class SearchParamRegistryImplTest {
 		RuntimeSearchParam result = mySearchParamRegistry.getActiveSearchParam("Patient", "HelloWorld", ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 		assertNotNull(result);
 		assertEquals("HelloWorld", result.getName());
-		assertEquals(RuntimeSearchParam.Source.DATABASE, result.getOriginatingSource());
-		assertNull(result.getIGName());
-		assertNull(result.getIGVersion());
+		assertEquals(RuntimeSearchParamSource.SourceType.DATABASE, result.getSource().getOriginatingSource());
+		assertNull(result.getSource().getIGName());
+		assertNull(result.getSource().getIGVersion());
 	}
-
-
 
 	@ParameterizedTest
 	@ValueSource(booleans = { true, false })
