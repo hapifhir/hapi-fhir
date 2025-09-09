@@ -21,7 +21,9 @@ public class JpaBulkDataExportHistoryHelper implements IBulkDataExportHistoryHel
 
 	@Override
 	public IBundleProvider fetchHistoryForResourceIds(
-		@Nonnull String theResourceType, @Nonnull List<String> theResourceIds, RequestPartitionId theRequestPartitionId) {
+			@Nonnull String theResourceType,
+			@Nonnull List<String> theResourceIds,
+			RequestPartitionId theRequestPartitionId) {
 
 		Objects.requireNonNull(theResourceType);
 

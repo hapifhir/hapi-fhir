@@ -58,10 +58,10 @@ public class PersistedJpaBundleProviderFactory {
 	public PersistedJpaBundleProvider newInstance(RequestDetails theRequest, Search theSearch) {
 		List<String> resourceIdsFromParams = getRequestResourceIds(theRequest);
 		if (resourceIdsFromParams != null) {
-			Predicate<? super IBaseResource> predicate = res ->
-				resourceIdsFromParams.contains(res.getIdElement().toUnqualifiedVersionless().getValue());
+			Predicate<? super IBaseResource> predicate = res -> resourceIdsFromParams.contains(
+					res.getIdElement().toUnqualifiedVersionless().getValue());
 			Object retVal = myApplicationContext.getBean(
-				PREDICATED_PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH, theRequest, theSearch, predicate);
+					PREDICATED_PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH, theRequest, theSearch, predicate);
 			return (PersistedJpaBundleProvider) retVal;
 		}
 
