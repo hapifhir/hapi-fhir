@@ -111,8 +111,10 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 		PagingIterator<NpmPackageVersionEntity> iterator =
 				new PagingIterator<>(1000, (thePageIndex, theBatchSize, theConsumer) -> {
 					myPackageVersionDao
-						.findAll(Pageable.ofSize(theBatchSize).withPage(thePageIndex).getSortOr(Sort.by(Sort.Direction.ASC, "myPackageId", "myVersionId")))
-						.forEach(theConsumer);
+							.findAll(Pageable.ofSize(theBatchSize)
+									.withPage(thePageIndex)
+									.getSortOr(Sort.by(Sort.Direction.ASC, "myPackageId", "myVersionId")))
+							.forEach(theConsumer);
 				});
 
 		// do we want to cache this?
@@ -141,8 +143,9 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 					theNpmPackageEntity.getPackageId(), theNpmPackageEntity.getVersionId());
 		} catch (IOException ex) {
 			// we shouldn't ever really see this
-			String msg = String.format("Failed to load package %s|%s",
-				theNpmPackageEntity.getPackageId(), theNpmPackageEntity.getVersionId());
+			String msg = String.format(
+					"Failed to load package %s|%s",
+					theNpmPackageEntity.getPackageId(), theNpmPackageEntity.getVersionId());
 			ourLog.error(msg);
 			throw new ConfigurationException(Msg.code(2813) + msg, ex);
 		}

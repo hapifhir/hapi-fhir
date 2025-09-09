@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +71,7 @@ public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 		String name = "ig-test-dir";
 		// deliberately not in order to ensure the loading order
 		// is always in order
-		String[] versions = new String[] { "1.1.1", "3.1.2", "2.2.2" };
+		String[] versions = new String[] { "1.1.1", "3.3.3", "2.2.2" };
 
 		List<String> orderedVersions = new ArrayList<>();
 		SearchParameter generated = generateSP();
@@ -95,6 +94,7 @@ public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 		// verify
 		assertNotNull(sps);
 		assertEquals(orderedVersions.size(), sps.size());
+		ourLog.info(String.join(", ", orderedVersions));
 		for (int i = 0; i < sps.size(); i++) {
 			SearchParameter sp = (SearchParameter) sps.get(i);
 			String version = orderedVersions.get(i);
