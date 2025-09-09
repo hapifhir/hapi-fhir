@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.context.RuntimeSearchParamSource;
+import ca.uhn.fhir.context.RuntimeResourceSource;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
@@ -42,6 +42,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
@@ -494,7 +495,7 @@ public class SearchParamRegistryImplTest {
 		// verify
 		params.getSearchParamStream()
 			.forEach(sp -> {
-				assertEquals(RuntimeSearchParamSource.SourceType.BUILT_IN, sp.getSource().getOriginatingSource());
+				assertEquals(RuntimeResourceSource.SourceType.FHIR_CONTEXT, sp.getSource().getOriginatingSource());
 			});
 	}
 
@@ -510,6 +511,7 @@ public class SearchParamRegistryImplTest {
 		sp.setExpression("Patient.name.given");
 		sp.setCode("HelloWorld");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setId(new IdType("SearchParameter/1/_history/1"));
 
 		IBundleProvider provider = new SimpleBundleProvider(
 			List.of(sp)
@@ -525,7 +527,7 @@ public class SearchParamRegistryImplTest {
 		RuntimeSearchParam result = mySearchParamRegistry.getActiveSearchParam("Patient", "HelloWorld", ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 		assertNotNull(result);
 		assertEquals("HelloWorld", result.getName());
-		assertEquals(RuntimeSearchParamSource.SourceType.DATABASE, result.getSource().getOriginatingSource());
+		assertEquals(RuntimeResourceSource.SourceType.DATABASE, result.getSource().getOriginatingSource());
 		assertNull(result.getSource().getIGName());
 		assertNull(result.getSource().getIGVersion());
 	}

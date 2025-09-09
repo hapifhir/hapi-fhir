@@ -1,6 +1,8 @@
 package ca.uhn.fhir.context;
 
-public class RuntimeSearchParamSource {
+import ca.uhn.fhir.model.api.IFhirVersion;
+
+public class RuntimeResourceSource {
 	/**
 	 * Enum defining the source of the SearchParameter
 	 * (ie, where it's from)
@@ -12,9 +14,9 @@ public class RuntimeSearchParamSource {
 		 */
 		UNKNOWN,
 		/**
-		 * The SP is built-into the base FHIR models.
+		 * The Resource is built-into the base FHIR context.
 		 */
-		BUILT_IN,
+		FHIR_CONTEXT,
 		/**
 		 * The originating source is the DB (this was saved
 		 * via an API call or the like).
@@ -22,25 +24,28 @@ public class RuntimeSearchParamSource {
 		DATABASE,
 		/**
 		 * The originating source is an IG.
+		 * These are Implementation Guides from NPM
 		 */
-		IMPLEMENTATION_GUIDE;
+		NPM;
 	}
 
-	public static RuntimeSearchParamSource builtinSource() {
-		RuntimeSearchParamSource source = new RuntimeSearchParamSource();
-		source.setOriginatingSource(SourceType.BUILT_IN);
+	public static RuntimeResourceSource fhirContextSource(FhirContext theFhirContext) {
+		RuntimeResourceSource source = new RuntimeResourceSource();
+		source.setOriginatingSource(SourceType.FHIR_CONTEXT);
+		IFhirVersion fhirVersion = theFhirContext.getVersion();
+		source.setIGUrlAndVersion("FhirContext", fhirVersion.getVersion().getFhirVersionString());
 		return source;
 	}
 
-	public static RuntimeSearchParamSource databaseSource() {
-		RuntimeSearchParamSource source = new RuntimeSearchParamSource();
+	public static RuntimeResourceSource databaseSource() {
+		RuntimeResourceSource source = new RuntimeResourceSource();
 		source.setOriginatingSource(SourceType.DATABASE);
 		return source;
 	}
 
-	public static RuntimeSearchParamSource implementationGuid(String theIG, String theIGVersion) {
-		RuntimeSearchParamSource source = new RuntimeSearchParamSource();
-		source.setOriginatingSource(SourceType.IMPLEMENTATION_GUIDE);
+	public static RuntimeResourceSource npmSource(String theIG, String theIGVersion) {
+		RuntimeResourceSource source = new RuntimeResourceSource();
+		source.setOriginatingSource(SourceType.NPM);
 		source.setIGUrlAndVersion(theIG, theIGVersion);
 		return source;
 	}
@@ -59,13 +64,6 @@ public class RuntimeSearchParamSource {
 	 * The version of the IG
 	 */
 	private String myIGVersion;
-
-	/**
-	 * The version of the SP itself.
-	 * If this SP comes from a builtin fhircontext,
-	 * this will be the FHIR version.
-	 */
-	private String mySPVersion;
 
 	public SourceType getOriginatingSource() {
 		return myOriginatingSource;
@@ -86,13 +84,5 @@ public class RuntimeSearchParamSource {
 	public void setIGUrlAndVersion(String theIGUrl, String theVersion) {
 		myIGName = theIGUrl;
 		myIGVersion = theVersion;
-	}
-
-	public String getSPVersion() {
-		return mySPVersion;
-	}
-
-	public void setSPVersion(String theSPVersion) {
-		mySPVersion = theSPVersion;
 	}
 }

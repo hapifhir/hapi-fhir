@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceSource;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.i18n.Msg;
@@ -31,6 +32,7 @@ import ca.uhn.fhir.util.DatatypeUtil;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.NpmPackageUtils;
 import ca.uhn.fhir.util.PhoneticEncoderUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Extension;
@@ -110,6 +112,18 @@ public class SearchParameterCanonicalizer {
 
 		if (retVal != null) {
 			extractExtensions(theSearchParameter, retVal);
+
+			if (theSearchParameter.getIdElement() != null && theSearchParameter.getIdElement().hasVersionIdPart()) {
+				retVal.setSource(RuntimeResourceSource.databaseSource());
+			} else if (NpmPackageUtils.isFromNpmPackage(theSearchParameter)) {
+				NpmPackageUtils.setSourceForSP(theSearchParameter, retVal);
+			} else if (theSearchParameter.getIdElement() == null
+					|| !theSearchParameter.getIdElement().hasVersionIdPart()) {
+				retVal.setSource(RuntimeResourceSource.fhirContextSource(myFhirContext));
+			} else {
+				// unknown
+				retVal.setSource(new RuntimeResourceSource());
+			}
 		}
 
 		return retVal;

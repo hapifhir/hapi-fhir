@@ -2,8 +2,9 @@ package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.implementationguide.ImplementationGuideCreator;
-import ca.uhn.fhir.jpa.packages.util.PackageUtils;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.model.npm.NpmPackageMetadataLiteJson;
+import ca.uhn.fhir.util.NpmPackageUtils;
 import ca.uhn.test.util.LogbackTestExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -60,7 +61,7 @@ public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 		SearchParameter sp = (SearchParameter)r;
 		assertEquals(generated.getName(), sp.getName());
 		assertEquals(generated.getUrl(), sp.getUrl());
-		NpmPackageMetadataLiteJson metadata = PackageUtils.getPackageMetadata(sp);
+		NpmPackageMetadataLiteJson metadata = NpmPackageUtils.getPackageMetadata(sp);
 		assertNotNull(metadata);
 		assertEquals(spec.getName(), metadata.getName());
 		assertEquals(spec.getVersion(), metadata.getVersion());
@@ -135,7 +136,7 @@ public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 
 			assertEquals(generated.getUrl(), sp.getUrl());
 			assertEquals(generated.getName(), sp.getName());
-			NpmPackageMetadataLiteJson metadataLiteJson = PackageUtils.getPackageMetadata(sp);
+			NpmPackageMetadataLiteJson metadataLiteJson = NpmPackageUtils.getPackageMetadata(sp);
 			assertNotNull(metadataLiteJson);
 
 			map.put(metadataLiteJson.getVersion(), metadataLiteJson);

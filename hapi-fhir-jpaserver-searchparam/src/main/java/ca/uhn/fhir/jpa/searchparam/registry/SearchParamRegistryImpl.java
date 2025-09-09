@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.context.RuntimeSearchParamSource;
+import ca.uhn.fhir.context.RuntimeResourceSource;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -53,7 +53,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -227,7 +226,7 @@ public class SearchParamRegistryImpl
 		assert theSearchParam.getBase() != null && !theSearchParam.getBase().isEmpty();
 		assert theSearchParam.getSource() != null;
 
-		if (theSearchParam.getSource().getOriginatingSource() == RuntimeSearchParamSource.SourceType.UNKNOWN) {
+		if (theSearchParam.getSource().getOriginatingSource() == RuntimeResourceSource.SourceType.UNKNOWN) {
 			ourLog.warn("SearchParameter added with unknown source.");
 		}
 
@@ -424,16 +423,11 @@ public class SearchParamRegistryImpl
 			return 0;
 		}
 
-		FhirTerser terser = myFhirContext.newTerser();
 		long retval = 0;
 		Function<IBaseResource, RuntimeSearchParam> conversion = (spResource) -> {
 			RuntimeSearchParam rtsp = mySearchParameterCanonicalizer.canonicalizeSearchParameter(spResource);
-			RuntimeSearchParamSource source = RuntimeSearchParamSource.databaseSource();
-			rtsp.setSource(source);
-			IBase versionField = SearchParameterUtil.getFirstFieldValueOrNull(terser, spResource, "version");
-			if (versionField != null) {
-				source.setSPVersion(versionField.toString());
-			}
+//			RuntimeResourceSource source = RuntimeResourceSource.databaseSource();
+//			rtsp.setSource(source);
 			return rtsp;
 		};
 		for (IBaseResource searchParam : theSearchParams) {

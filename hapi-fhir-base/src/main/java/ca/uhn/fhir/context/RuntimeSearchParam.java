@@ -55,6 +55,7 @@ public class RuntimeSearchParam {
 	private final Set<String> myProvidesMembershipInCompartments;
 	private final RuntimeSearchParamStatusEnum myStatus;
 	private final String myUri;
+	private  String myVersion;
 	private final Map<String, List<IBaseExtension<?, ?>>> myExtensions = new HashMap<>();
 	private final Map<String, String> myUpliftRefchains = new HashMap<>();
 	private final ComboSearchParamType myComboSearchParamType;
@@ -68,7 +69,7 @@ public class RuntimeSearchParam {
 	 * We have it initialized so it's never null; but seeding services
 	 * should populate this value
 	 */
-	private RuntimeSearchParamSource mySource = new RuntimeSearchParamSource();
+	private RuntimeResourceSource mySource = new RuntimeResourceSource();
 	/**
 	 * Constructor
 	 */
@@ -192,11 +193,11 @@ public class RuntimeSearchParam {
 		myEnabledForSearching = theEnabledForSearching;
 	}
 
-	public RuntimeSearchParamSource getSource() {
+	public RuntimeResourceSource getSource() {
 		return mySource;
 	}
 
-	public void setSource(RuntimeSearchParamSource theSource) {
+	public void setSource(RuntimeResourceSource theSource) {
 		mySource = theSource;
 	}
 

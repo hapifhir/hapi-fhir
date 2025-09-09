@@ -27,9 +27,9 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
-import ca.uhn.fhir.jpa.packages.util.PackageUtils;
 import ca.uhn.fhir.model.api.PagingIterator;
 import ca.uhn.fhir.rest.annotation.Transaction;
+import ca.uhn.fhir.util.NpmPackageUtils;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.npm.NpmPackage;
@@ -152,7 +152,7 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 
 		List<IBaseResource> pkgSps = myPackageResourceParsingSvc.parseResourcesOfType("SearchParameter", pkg);
 		for (IBaseResource sp : pkgSps) {
-			PackageUtils.addPackageMetadata(sp, pkg);
+			NpmPackageUtils.addPackageMetadata(sp, pkg.name(), pkg.version());
 			theSps.add((T) sp);
 		}
 	}
