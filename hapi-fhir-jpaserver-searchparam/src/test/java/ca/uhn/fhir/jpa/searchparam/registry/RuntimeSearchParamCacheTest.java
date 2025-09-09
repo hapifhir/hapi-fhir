@@ -20,7 +20,6 @@ public class RuntimeSearchParamCacheTest {
 		myCache = new RuntimeSearchParamCache();
 	}
 
-
 	@Test
 	public void remove_anExistingSP_removesAllInstances() {
 		// setup
