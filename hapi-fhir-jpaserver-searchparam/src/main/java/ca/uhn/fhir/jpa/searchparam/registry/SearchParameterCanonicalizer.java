@@ -113,6 +113,12 @@ public class SearchParameterCanonicalizer {
 		if (retVal != null) {
 			extractExtensions(theSearchParameter, retVal);
 
+			// set the source of the RuntimeSearchParam
+			// Assumptions here are:
+			// * DB SPs have a version (they are in the db)
+			// * NpmPackage provided SPs have metadata in UserData
+			// * SPs that are built in have no Id or no version
+			// * otherwise, we list them as unknown
 			if (theSearchParameter.getIdElement() != null
 					&& theSearchParameter.getIdElement().hasVersionIdPart()) {
 				retVal.setSource(RuntimeResourceSource.databaseSource());

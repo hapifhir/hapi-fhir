@@ -164,6 +164,10 @@ public class SearchParamRegistryImpl
 			}
 		}
 
+		if (theContext == SearchParamLookupContextEnum.ALL) {
+			return myLocalSPCache.get(theResourceName, theParamName);
+		}
+
 		return null;
 	}
 
@@ -216,6 +220,11 @@ public class SearchParamRegistryImpl
 				return param;
 			}
 		}
+
+		if (theContext == SearchParamLookupContextEnum.ALL) {
+			return myLocalSPCache.getByUrl(theUrl);
+		}
+
 		return null;
 	}
 
@@ -272,6 +281,7 @@ public class SearchParamRegistryImpl
 	private void initializeActiveSearchParams(Collection<IBaseResource> theJpaSearchParams) {
 		StopWatch sw = new StopWatch();
 
+		// add built-in SPs
 		ReadOnlySearchParamCache builtInSearchParams = getBuiltInSearchParams();
 		RuntimeSearchParamCache searchParams =
 				RuntimeSearchParamCache.fromReadOnlySearchParamCache(builtInSearchParams);
@@ -284,6 +294,7 @@ public class SearchParamRegistryImpl
 			}
 		});
 
+		// add / override with SPs from the DB (these should always come last)
 		long overriddenCount = overrideBuiltinSearchParamsWithActiveJpaSearchParams(searchParams, theJpaSearchParams);
 		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
 
