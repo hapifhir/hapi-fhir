@@ -201,16 +201,19 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			return new HashMap<>();
 		}
 
-		Collection<IIdType> ids = new ArrayList<>(theIds);
+		Collection<IIdType> ids = new ArrayList<>(theIds.size());
 		for (IIdType id : theIds) {
 			if (!id.hasIdPart()) {
 				throw new InvalidRequestException(Msg.code(1101) + "Parameter value missing in request");
+			}
+			if (ids.stream().noneMatch(seen -> seen.getValueAsString().equals(id.getValueAsString()))) {
+				ids.add(id);
 			}
 		}
 
 		RequestPartitionId requestPartitionId = replaceDefault(theRequestPartitionId);
 		ListMultimap<IIdType, IResourceLookup<JpaPid>> idToLookup =
-				MultimapBuilder.hashKeys(theIds.size()).arrayListValues(1).build();
+				MultimapBuilder.hashKeys(ids.size()).arrayListValues(1).build();
 
 		// Do we have any FHIR ID lookups cached for any of the IDs
 		if (theMode.isUseCache(myStorageSettings.isDeleteEnabled()) && !ids.isEmpty()) {
