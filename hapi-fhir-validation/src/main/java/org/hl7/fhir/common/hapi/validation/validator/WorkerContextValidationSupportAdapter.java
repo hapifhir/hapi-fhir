@@ -704,7 +704,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	@Override
-	public <T extends Resource> boolean hasResource(Class<T> class_, String uri, FhirPublication fhirVersion) {
+	public <T extends Resource> boolean hasResource(Class<T> class_, String uri, String fhirVersion) {
 		return false;
 	}
 
