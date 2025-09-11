@@ -21,6 +21,10 @@ package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRawValue;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
@@ -28,10 +32,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
+
 public class BulkModifyResourcesChunkOutcomeJson implements IModelJson {
 
 	@JsonProperty("changedIds")
 	private List<String> myChangedIds;
+
+	@JsonProperty("changedResourceBodies")
+	@JsonRawValue
+	@JsonDeserialize(using = ArrayOfRawJsonObjectsAsStringsDeserializer.class)
+	private List<String> myChangedResourceBodies;
+
+	@JsonProperty("deletedIds")
+	private List<String> myDeletedIds;
 
 	@JsonProperty("unchangedIds")
 	private List<String> myUnchangedIds;
@@ -40,13 +54,24 @@ public class BulkModifyResourcesChunkOutcomeJson implements IModelJson {
 	private Map<String, String> myFailures;
 
 	@JsonProperty("chunkRetryCount")
-	private int myChunkRetryCount;
+	private Integer myChunkRetryCount;
 
 	@JsonProperty("resourceRetryCount")
-	private int myResourceRetryCount;
+	private Integer myResourceRetryCount;
 
 	public void addChangedId(IIdType theIdElement) {
 		getChangedIds().add(theIdElement.toUnqualified().getValue());
+	}
+
+	public void addDeletedId(IIdType theIdElement) {
+		getDeletedIds().add(theIdElement.toUnqualified().getValue());
+	}
+
+	public List<String> getChangedResourceBodies() {
+		if (myChangedResourceBodies == null) {
+			myChangedResourceBodies = new ArrayList<>();
+		}
+		return myChangedResourceBodies;
 	}
 
 	public List<String> getChangedIds() {
@@ -54,6 +79,13 @@ public class BulkModifyResourcesChunkOutcomeJson implements IModelJson {
 			myChangedIds = new ArrayList<>();
 		}
 		return myChangedIds;
+	}
+
+	public List<String> getDeletedIds() {
+		if (myDeletedIds == null) {
+			myDeletedIds = new ArrayList<>();
+		}
+		return myDeletedIds;
 	}
 
 	public void addUnchangedId(IIdType theIdElement) {
@@ -83,7 +115,7 @@ public class BulkModifyResourcesChunkOutcomeJson implements IModelJson {
 	}
 
 	public int getChunkRetryCount() {
-		return myChunkRetryCount;
+		return getIfNull(myChunkRetryCount, 0);
 	}
 
 	public void setChunkRetryCount(int theChunkRetryCount) {
@@ -91,10 +123,18 @@ public class BulkModifyResourcesChunkOutcomeJson implements IModelJson {
 	}
 
 	public int getResourceRetryCount() {
-		return myResourceRetryCount;
+		return getIfNull(myResourceRetryCount, 0);
 	}
 
 	public void setResourceRetryCount(int theResourceRetryCount) {
 		myResourceRetryCount = theResourceRetryCount;
+	}
+
+	public void addChangedResourceBody(@Nonnull String theChangedResourceBody) {
+		Validate.notBlank(theChangedResourceBody, "theChangedResourceBody must not be blank");
+		Validate.isTrue(
+				theChangedResourceBody.startsWith("{") && theChangedResourceBody.endsWith("}"),
+				"theChangedResourceBody must be JSON encoded");
+		getChangedResourceBodies().add(theChangedResourceBody);
 	}
 }

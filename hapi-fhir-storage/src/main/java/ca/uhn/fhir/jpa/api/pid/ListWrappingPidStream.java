@@ -20,14 +20,15 @@
 package ca.uhn.fhir.jpa.api.pid;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class ListWrappingPidStream implements IResourcePidStream {
-	private final IResourcePidList myList;
+public class ListWrappingPidStream<P extends IResourcePersistentId<?>> implements IResourcePidStream {
+	private final IResourcePidList<P> myList;
 
-	public ListWrappingPidStream(IResourcePidList theList) {
+	public ListWrappingPidStream(IResourcePidList<P> theList) {
 		myList = theList;
 	}
 

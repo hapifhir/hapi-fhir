@@ -9,10 +9,8 @@ import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesRe
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.util.JsonUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r5.model.IdType;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -26,6 +24,7 @@ import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -36,7 +35,7 @@ class BaseBulkModifyOrRewriteGenerateReportStepTest {
 	@Mock
 	private IJobDataSink<BulkModifyResourcesResultsJson> mySink;
 	@Captor
-	private ArgumentCaptor<BulkModifyResourcesResultsJson> myDataCaptor;
+	private ArgumentCaptor<BulkModifyResourcesResultsJson> mySinkCaptor;
 
 	@Test
 	void testReportTruncatesFailures() {
@@ -72,10 +71,49 @@ class BaseBulkModifyOrRewriteGenerateReportStepTest {
 		);
 	}
 
+	@Test
+	void testReportForDryRunIncludesSpecificIdentities() {
+		MySvc svc = new MySvc();
+
+		BulkModifyResourcesChunkOutcomeJson data = new BulkModifyResourcesChunkOutcomeJson();
+		data.addDeletedId(new IdType("Patient/10"));
+		data.addDeletedId(new IdType("Patient/11"));
+		data.addChangedResourceBody("{\"resourceType\":\"Patient\",\"id\":\"12\"}");
+		data.addChangedResourceBody("{\"resourceType\":\"Patient\",\"id\":\"13\"}");
+		MyParams params = new MyParams();
+		params.setDryRun(true);
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("an-instance-id");
+		instance.setStartTime(new Date());
+		instance.setEndTime(new Date());
+		instance.setStatus(StatusEnum.COMPLETED);
+		String instanceId = instance.getInstanceId();
+		String chunkId = null;
+		ChunkExecutionDetails<MyParams, BulkModifyResourcesChunkOutcomeJson> chunk = new ChunkExecutionDetails<>(data, params, instanceId, chunkId);
+
+		svc.consume(chunk);
+
+		// Test
+		StepExecutionDetails<MyParams, BulkModifyResourcesChunkOutcomeJson> executionDetails = new StepExecutionDetails<>(params, null, instance, new WorkChunk());
+		svc.run(executionDetails, mySink);
+
+		// Verify
+		verify(mySink, times(1)).accept(mySinkCaptor.capture());
+		BulkModifyResourcesResultsJson output = mySinkCaptor.getValue();
+		ourLog.info("Report:\n{}", output.getReport());
+		assertThat(output.getResourcesChangedBodies()).containsExactlyInAnyOrder(
+			"{\"resourceType\":\"Patient\",\"id\":\"12\"}", "{\"resourceType\":\"Patient\",\"id\":\"13\"}"
+		);
+		assertThat(output.getResourcesDeletedIds()).containsExactlyInAnyOrder(
+			"Patient/10", "Patient/11"
+		);
+	}
+
+
 	private static class MyParams extends BaseBulkModifyJobParameters {
 	}
 
-	private class MySvc extends BaseBulkModifyOrRewriteGenerateReportStep<MyParams> {
+	private static class MySvc extends BaseBulkModifyOrRewriteGenerateReportStep<MyParams> {
 
 		@Nonnull
 		@Override

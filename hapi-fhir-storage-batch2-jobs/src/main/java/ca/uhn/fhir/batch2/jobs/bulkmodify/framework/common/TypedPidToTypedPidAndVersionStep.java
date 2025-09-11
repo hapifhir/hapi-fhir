@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -66,6 +67,11 @@ public class TypedPidToTypedPidAndVersionStep<PT extends BaseBulkModifyJobParame
 			@Nonnull StepExecutionDetails<PT, ResourceIdListWorkChunkJson> theStepExecutionDetails,
 			@Nonnull IJobDataSink<TypedPidAndVersionListWorkChunkJson> theDataSink)
 			throws JobExecutionFailedException {
+
+		@Nullable
+		Integer limitResourceVersionCount =
+				theStepExecutionDetails.getParameters().getLimitResourceVersionCount();
+
 		return myTransactionService
 				.withSystemRequestOnPartition(theStepExecutionDetails.getData().getRequestPartitionId())
 				.execute(() -> {
@@ -89,6 +95,7 @@ public class TypedPidToTypedPidAndVersionStep<PT extends BaseBulkModifyJobParame
 						Stream<IResourcePersistentId> versionStream =
 								dao.fetchAllVersionsOfResources(new SystemRequestDetails(), typePersistentIds);
 						Iterator<IResourcePersistentId> iter = versionStream.iterator();
+						int versionCount = 0;
 						while (iter.hasNext()) {
 
 							IResourcePersistentId next = iter.next();
@@ -98,9 +105,17 @@ public class TypedPidToTypedPidAndVersionStep<PT extends BaseBulkModifyJobParame
 									next.getId().toString(),
 									next.getVersion()));
 
-							if (versionedPids.size() >= chunkSize || !iter.hasNext()) {
+							versionCount++;
+							boolean breakEarly =
+									limitResourceVersionCount != null && versionCount >= limitResourceVersionCount;
+
+							if (versionedPids.size() >= chunkSize || !iter.hasNext() || breakEarly) {
 								theDataSink.accept(new TypedPidAndVersionListWorkChunkJson(
 										data.getRequestPartitionId(), versionedPids));
+							}
+
+							if (breakEarly) {
+								break;
 							}
 						}
 					}
