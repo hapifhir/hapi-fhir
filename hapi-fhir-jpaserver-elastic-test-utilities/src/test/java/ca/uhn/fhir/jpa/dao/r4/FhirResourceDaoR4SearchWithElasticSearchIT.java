@@ -148,10 +148,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 		TestDaoSearch.Config.class
 	})
 })
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @TestExecutionListeners(listeners = {
 	DependencyInjectionTestExecutionListener.class
-	, FhirResourceDaoR4SearchWithElasticSearchIT.TestDirtiesContextTestExecutionListener.class
 })
 public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest implements ITestDataBuilder {
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
@@ -2602,19 +2600,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		@Override
 		protected boolean isRequestIdSupported() {
 			return false;
-		}
-	}
-
-	/**
-	 * Disallow context dirtying for nested classes
-	 */
-	public static final class TestDirtiesContextTestExecutionListener extends DirtiesContextTestExecutionListener {
-
-		@Override
-		protected void beforeOrAfterTestClass(TestContext testContext, DirtiesContext.ClassMode requiredClassMode) throws Exception {
-			if (!testContext.getTestClass().getName().contains("$")) {
-				super.beforeOrAfterTestClass(testContext, requiredClassMode);
-			}
 		}
 	}
 
