@@ -1547,6 +1547,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			ourLog.debug("Job status after awaiting - {}", myJobCoordinator.getInstance(job.getInstanceId()).getStatus());
 			waitForCompletion(job);
 
+			// fixme jm: check number of resources per binary file
 			Map<String, Set<String>> exportedPatientVersionsMap = extractExportedResourceVersionsByTypeMap(job).get("Patient");
 			assertThat(exportedPatientVersionsMap).isEqualTo(patientVersionsMap);
 
