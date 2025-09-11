@@ -46,12 +46,8 @@ public class HistoryBuilderFactory {
 				theRangeEndInclusive);
 	}
 
-	public HistoryBuilder newHistoryBuilder(
-			@Nullable String theResourceType,
-			@Nullable List<String> theResourceIds) {
-		return (HistoryBuilder) myApplicationContext.getBean(
-				JpaConfig.HISTORY_BUILDER_WITH_IDS,
-				theResourceType,
-				theResourceIds);
+	public HistoryBuilder newHistoryBuilder(@Nullable String theResourceType, @Nullable List<String> theResourceIds) {
+		return (HistoryBuilder)
+				myApplicationContext.getBean(JpaConfig.HISTORY_BUILDER_WITH_IDS, theResourceType, theResourceIds);
 	}
 }

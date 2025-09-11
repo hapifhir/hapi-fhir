@@ -43,9 +43,7 @@ public class PersistedJpaIdSearchBundleProvider implements IBundleProvider {
 	private IHapiTransactionService myTransactionService;
 
 	public PersistedJpaIdSearchBundleProvider(
-			String theResourceType,
-			@Nonnull List<String> theResourceIds,
-			RequestPartitionId thePartitionId) {
+			String theResourceType, @Nonnull List<String> theResourceIds, RequestPartitionId thePartitionId) {
 		myUuid = UUID.randomUUID().toString();
 		myResourceType = theResourceType;
 		myResourceIds = theResourceIds;

@@ -20,5 +20,5 @@ public interface IBulkDataExportHistoryHelper {
 	 * @return bundle provider containing historical versions of the resources
 	 */
 	IBundleProvider fetchHistoryForResourceIds(
-		@Nonnull String theResourceType, List<String> theIdList, RequestPartitionId theRequestPartitionId);
+			@Nonnull String theResourceType, List<String> theIdList, RequestPartitionId theRequestPartitionId);
 }

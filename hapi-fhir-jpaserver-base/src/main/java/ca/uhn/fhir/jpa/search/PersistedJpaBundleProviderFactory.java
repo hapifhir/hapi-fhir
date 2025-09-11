@@ -122,9 +122,7 @@ public class PersistedJpaBundleProviderFactory {
 	 * that can paginate through history entries for specific resource IDs.
 	 */
 	public IBundleProvider historyFromResourceIds(
-			String theResourceType,
-			@Nullable List<String> theResourceIds,
-			RequestPartitionId theRequestPartitionId) {
+			String theResourceType, @Nullable List<String> theResourceIds, RequestPartitionId theRequestPartitionId) {
 
 		return (PersistedJpaIdSearchBundleProvider) myApplicationContext.getBean(
 				JpaConfig.PERSISTED_JPA_ID_SEARCH_BUNDLE_PROVIDER,

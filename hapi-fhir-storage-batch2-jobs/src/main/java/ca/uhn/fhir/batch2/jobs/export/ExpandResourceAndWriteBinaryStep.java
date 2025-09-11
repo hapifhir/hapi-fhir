@@ -217,7 +217,7 @@ public class ExpandResourceAndWriteBinaryStep
 			List<String> idList = convertToStringIds(theRequestPartitionId, resourceType, typePidJsonList);
 
 			List<IBaseResource> partialBatch =
-				consumeHistoryInBatches(resourceType, idList, theRequestPartitionId, theResourceListConsumer);
+					consumeHistoryInBatches(resourceType, idList, theRequestPartitionId, theResourceListConsumer);
 
 			// consume possible remaining resources
 			if (!partialBatch.isEmpty()) {
@@ -227,27 +227,31 @@ public class ExpandResourceAndWriteBinaryStep
 	}
 
 	private List<IBaseResource> consumeHistoryInBatches(
-		String theResourceType,
-		List<String> theIdList,
-		RequestPartitionId theRequestPartitionId,
-		Consumer<List<IBaseResource>> theResourceListConsumer) {
+			String theResourceType,
+			List<String> theIdList,
+			RequestPartitionId theRequestPartitionId,
+			Consumer<List<IBaseResource>> theResourceListConsumer) {
 
 		final int fileLimitBatchSize = myStorageSettings.getBulkExportFileMaximumCapacity();
 		final int pageSize = Math.min(getMaxSizeBatchDefault(), fileLimitBatchSize);
 
 		List<IBaseResource> resourcesToConsume = new ArrayList<>();
 
-		IBundleProvider resHistoryProvider = searchForResourcesHistory(theResourceType, theIdList, theRequestPartitionId);
-		
+		IBundleProvider resHistoryProvider =
+				searchForResourcesHistory(theResourceType, theIdList, theRequestPartitionId);
+
 		int currentIndex = 0;
-		
-		while(true) {
-			ourLog.debug("Fetching history page from index {} to {} for resource type {}",
-				currentIndex, currentIndex + pageSize, theResourceType);
-			
+
+		while (true) {
+			ourLog.debug(
+					"Fetching history page from index {} to {} for resource type {}",
+					currentIndex,
+					currentIndex + pageSize,
+					theResourceType);
+
 			List<IBaseResource> page = resHistoryProvider.getResources(currentIndex, currentIndex + pageSize);
 			ourLog.debug("Retrieved {} history resources from page starting at index {}", page.size(), currentIndex);
-			
+
 			if (page.isEmpty()) {
 				ourLog.debug("No more history resources found, breaking pagination loop");
 				break;
@@ -256,25 +260,26 @@ public class ExpandResourceAndWriteBinaryStep
 			resourcesToConsume.addAll(page);
 
 			// process complete batches
-			while(resourcesToConsume.size() >= fileLimitBatchSize) {
+			while (resourcesToConsume.size() >= fileLimitBatchSize) {
 				List<IBaseResource> batch = new ArrayList<>(resourcesToConsume.subList(0, fileLimitBatchSize));
 				theResourceListConsumer.accept(batch);
 				resourcesToConsume.subList(0, fileLimitBatchSize).clear();
 			}
 
 			currentIndex += page.size();
-			
+
 			// If we got fewer results than requested, we've reached the end
 			if (page.size() < pageSize) {
-				ourLog.debug("Retrieved {} resources (less than page size: {}), reached end of history",
-					page.size(), pageSize);
+				ourLog.debug(
+						"Retrieved {} resources (less than page size: {}), reached end of history",
+						page.size(),
+						pageSize);
 				break;
 			}
 		}
 
 		return resourcesToConsume;
 	}
-
 
 	/**
 	 * Gets the default maximum batch size for SQL queries to avoid exceeding
@@ -366,7 +371,7 @@ public class ExpandResourceAndWriteBinaryStep
 	 * @return Bundle provider containing historical versions of the resources
 	 */
 	private IBundleProvider searchForResourcesHistory(
-		String theResourceType, List<String> theIdList, RequestPartitionId theRequestPartitionId) {
+			String theResourceType, List<String> theIdList, RequestPartitionId theRequestPartitionId) {
 
 		return myExportHelper.fetchHistoryForResourceIds(theResourceType, theIdList, theRequestPartitionId);
 	}
