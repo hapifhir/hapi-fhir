@@ -202,10 +202,15 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			return new HashMap<>();
 		}
 
-		Collection<IIdType> ids = new HashSet<>(theIds);
-		for (IIdType id : theIds) {
+		Collection<IIdType> ids = new ArrayList<>(theIds);
+		Set<String> idsSet = new HashSet<>(ids.size());
+		for (Iterator<IIdType> iterator = ids.iterator(); iterator.hasNext(); ) {
+			IIdType id = iterator.next();
 			if (!id.hasIdPart()) {
 				throw new InvalidRequestException(Msg.code(1101) + "Parameter value missing in request");
+			}
+			if (!idsSet.add(id.getValue())) {
+				iterator.remove();
 			}
 		}
 
