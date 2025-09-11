@@ -120,8 +120,8 @@ import ca.uhn.fhir.jpa.sched.HapiSchedulerServiceImpl;
 import ca.uhn.fhir.jpa.search.ISynchronousSearchSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
+import ca.uhn.fhir.jpa.search.PersistedJpaIdSearchBundleProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
-import ca.uhn.fhir.jpa.search.PredicatedPersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.search.SearchStrategyFactory;
 import ca.uhn.fhir.jpa.search.SearchUrlJobMaintenanceSvcImpl;
@@ -196,6 +196,7 @@ import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.IBulkDataExportHistoryHelper;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
+import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
@@ -210,7 +211,6 @@ import jakarta.annotation.Nullable;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -228,7 +228,6 @@ import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.Date;
-import java.util.function.Predicate;
 
 @Configuration
 // repositoryFactoryBeanClass: EnversRevisionRepositoryFactoryBean is needed primarily for unit testing
@@ -254,10 +253,9 @@ public class JpaConfig {
 	public static final String GRAPHQL_PROVIDER_NAME = "myGraphQLProvider";
 	public static final String PERSISTED_JPA_BUNDLE_PROVIDER = "PersistedJpaBundleProvider";
 	public static final String PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH = "PersistedJpaBundleProvider_BySearch";
-	public static final String PREDICATED_PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH =
-			"PredicatedPersistedJpaBundleProvider_BySearch";
+	public static final String PERSISTED_JPA_ID_SEARCH_BUNDLE_PROVIDER = "PersistedJpaIdSearchBundleProvider";
 	public static final String PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER =
-			"PersistedJpaSearchFirstPageBundleProvider";
+		"PersistedJpaSearchFirstPageBundleProvider";
 	public static final String HISTORY_BUILDER = "HistoryBuilder";
 	public static final String DEFAULT_PROFILE_VALIDATION_SUPPORT = "myDefaultProfileValidationSupport";
 	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
@@ -662,22 +660,29 @@ public class JpaConfig {
 		return new PersistedJpaBundleProvider(theRequest, theSearch);
 	}
 
-	@Bean(name = PREDICATED_PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH)
-	@Scope("prototype")
-	public PredicatedPersistedJpaBundleProvider newPredicatedPersistedJpaBundleProviderBySearch(
-			RequestDetails theRequest, Search theSearch, Predicate<? super IBaseResource> thePredicate) {
-		return new PredicatedPersistedJpaBundleProvider(theRequest, theSearch, thePredicate);
-	}
-
 	@Bean(name = PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER)
 	@Scope("prototype")
 	public PersistedJpaSearchFirstPageBundleProvider newPersistedJpaSearchFirstPageBundleProvider(
 			RequestDetails theRequest,
 			SearchTask theSearchTask,
-			ISearchBuilder theSearchBuilder,
+			ISearchBuilder<?> theSearchBuilder,
 			RequestPartitionId theRequestPartitionId) {
 		return new PersistedJpaSearchFirstPageBundleProvider(
 				theSearchTask, theSearchBuilder, theRequest, theRequestPartitionId);
+	}
+
+	@Bean(name = PERSISTED_JPA_ID_SEARCH_BUNDLE_PROVIDER)
+	@Scope("prototype")
+	public PersistedJpaIdSearchBundleProvider newPersistedJpaIdSearchBundleProvider(
+			String theResourceType,
+			JpaPid theResourceId,
+			Date theLowerBound,
+			Date theUpperBound,
+			RequestPartitionId thePartitionId,
+			HistorySearchStyleEnum theHistorySearchStyle) {
+		return new PersistedJpaIdSearchBundleProvider(
+				theResourceType, theResourceId, theLowerBound, 
+				theUpperBound, thePartitionId, theHistorySearchStyle);
 	}
 
 	@Bean(name = RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER)

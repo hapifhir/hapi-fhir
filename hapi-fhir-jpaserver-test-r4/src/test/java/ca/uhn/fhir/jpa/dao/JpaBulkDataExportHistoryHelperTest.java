@@ -63,7 +63,7 @@ class JpaBulkDataExportHistoryHelperTest {
 			.thenReturn(myMockBundleProvider);
 
 		// When
-		IBundleProvider result = myHistoryHelper.fetchHistoryForResourceIds(resourceType, resourceIds, partitionId);
+		IBundleProvider result = myHistoryHelper.fetchHistoryForResourceIds(resourceType, partitionId);
 
 		// Then
 		assertThat(result).isSameAs(myMockBundleProvider);
@@ -98,7 +98,7 @@ class JpaBulkDataExportHistoryHelperTest {
 			.thenReturn(myMockBundleProvider);
 
 		// When
-		IBundleProvider result = myHistoryHelper.fetchHistoryForResourceIds(resourceType, resourceIds, partitionId);
+		IBundleProvider result = myHistoryHelper.fetchHistoryForResourceIds(resourceType, partitionId);
 
 		// Then
 		assertThat(result).isSameAs(myMockBundleProvider);
@@ -127,7 +127,7 @@ class JpaBulkDataExportHistoryHelperTest {
 
 		// When/Then
 		assertThatThrownBy(() -> 
-			myHistoryHelper.fetchHistoryForResourceIds(null, resourceIds, partitionId))
+			myHistoryHelper.fetchHistoryForResourceIds(null, partitionId))
 			.isInstanceOf(NullPointerException.class);
 	}
 
@@ -139,7 +139,7 @@ class JpaBulkDataExportHistoryHelperTest {
 
 		// When/Then
 		assertThatThrownBy(() -> 
-			myHistoryHelper.fetchHistoryForResourceIds(resourceType, null, partitionId))
+			myHistoryHelper.fetchHistoryForResourceIds(resourceType, partitionId))
 			.isInstanceOf(NullPointerException.class);
 	}
 
@@ -154,7 +154,7 @@ class JpaBulkDataExportHistoryHelperTest {
 			.thenReturn(myMockBundleProvider);
 
 		// When
-		IBundleProvider result = myHistoryHelper.fetchHistoryForResourceIds(resourceType, resourceIds, partitionId);
+		IBundleProvider result = myHistoryHelper.fetchHistoryForResourceIds(resourceType, partitionId);
 
 		// Then
 		assertThat(result).isSameAs(myMockBundleProvider);

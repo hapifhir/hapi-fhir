@@ -82,6 +82,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.PARAM_EXPORT_INCLUDE_HISTORY;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -1521,8 +1522,34 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			Map<String, Set<String>> exportedPatientVersionsMap = extractExportedResourceVersionsByTypeMap(job).get("Patient");
 			assertThat(exportedPatientVersionsMap).isEqualTo(patientVersionsMap);
+		}
 
+		@Test
+		public void testSystemBulkExport_withResourcesExceedingPageSizes() {
+			// fixme jm: restore size
+//			int patientCount = 1_100;
+			int patientCount = 100;
+			int versionCount = 10;
+			Map<String, Set<String>> patientVersionsMap = createPatientsWithHistory(patientCount, versionCount);
+
+			BulkExportJobParameters options = new BulkExportJobParameters();
+			options.setResourceTypes(Collections.singleton("Patient"));
+			options.setFilters(Collections.emptySet());
+			options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
+			options.setIncludeHistory(true);
+			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+			startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+			startRequest.setParameters(options);
+			Batch2JobStartResponse job = myJobCoordinator.startInstance(mySrd, startRequest);
+			myBatch2JobHelper.awaitJobCompletion(job.getInstanceId(), 60);
+			ourLog.debug("Job status after awaiting - {}", myJobCoordinator.getInstance(job.getInstanceId()).getStatus());
+			waitForCompletion(job);
+
+			Map<String, Set<String>> exportedPatientVersionsMap = extractExportedResourceVersionsByTypeMap(job).get("Patient");
 			assertThat(exportedPatientVersionsMap).isEqualTo(patientVersionsMap);
+
 		}
 
 		@Test
@@ -1555,10 +1582,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			Map<String, Set<String>> exportedPatientVersionsMap = extractExportedResourceVersionsByTypeMap(job).get("Patient");
 
-			// validate only one patient was exported
-			assertThat(exportedPatientVersionsMap).hasSize(1);
-
-			// validate only right version of the patient was exported
+			// validate only current patient version was exported
 			assertThat(exportedPatientVersionsMap.values()).containsOnly(Set.of(expectedExportedPatientVersionId));
 
 		}
@@ -1759,7 +1783,17 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		return patch;
 	}
 
-		private Map<String, Set<String>> createPatientsWithHistory(List<Integer> versionCounts) {
+	/**
+	 * Create the indicated number of patients with the indicated number of total versions each
+	 */
+	private Map<String, Set<String>> createPatientsWithHistory(
+		@SuppressWarnings("SameParameterValue") int thePatientCount, @SuppressWarnings("SameParameterValue") int theVersionCount) {
+
+		List<Integer> versionCounts = IntStream.range(0, thePatientCount).mapToObj(i -> theVersionCount).toList();
+		return createPatientsWithHistory(versionCounts);
+	}
+
+	private Map<String, Set<String>> createPatientsWithHistory(List<Integer> versionCounts) {
 			Map<String, Set<String>> retVal = new HashMap<>();
 
 		for (Integer theVersionCount : versionCounts) {

@@ -3,16 +3,11 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.IBulkDataExportHistoryHelper;
 import jakarta.annotation.Nonnull;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
 import java.util.Objects;
-
-import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 
 public class JpaBulkDataExportHistoryHelper implements IBulkDataExportHistoryHelper {
 
@@ -21,17 +16,19 @@ public class JpaBulkDataExportHistoryHelper implements IBulkDataExportHistoryHel
 
 	@Override
 	public IBundleProvider fetchHistoryForResourceIds(
-			@Nonnull String theResourceType,
-			@Nonnull List<String> theResourceIds,
-			RequestPartitionId theRequestPartitionId) {
+			@Nonnull String theResourceType, RequestPartitionId theRequestPartitionId) {
 
 		Objects.requireNonNull(theResourceType);
 
-		RequestDetails requestDetails = SystemRequestDetails.forRequestPartitionId(theRequestPartitionId);
-		requestDetails.setResourceName(theResourceType);
-		requestDetails.addParameter(PARAM_ID, theResourceIds.toArray(new String[0]));
+		// fixme jm: remove commented
+//		RequestDetails requestDetails = SystemRequestDetails.forRequestPartitionId(theRequestPartitionId);
+//		requestDetails.setResourceName(theResourceType);
+//
+//		return myBundleProviderFactory.history(
+//			requestDetails, theResourceType, null, null, null, null, theRequestPartitionId);
 
-		return myBundleProviderFactory.history(
-				requestDetails, theResourceType, null, null, null, null, theRequestPartitionId);
+		// fixme jm: last param?
+		return myBundleProviderFactory.historyUnlimited(
+			theResourceType, null, null, null, theRequestPartitionId, null);
 	}
 }

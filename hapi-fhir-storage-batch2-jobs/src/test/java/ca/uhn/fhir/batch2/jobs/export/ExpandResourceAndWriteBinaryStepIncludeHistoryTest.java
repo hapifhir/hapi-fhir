@@ -129,14 +129,14 @@ public class ExpandResourceAndWriteBinaryStepIncludeHistoryTest {
 	}
 
 	private void setupExportHelperResultsMock(Consumer<List<IBaseResource>> theResourceVersionConsumer) {
-		when(myExportHelper.fetchHistoryForResourceIds(eq("Patient"), any(), any())).thenAnswer(invocation -> {
+		when(myExportHelper.fetchHistoryForResourceIds(eq("Patient"), any())).thenAnswer(invocation -> {
 			List<String> theResourceIdList = invocation.getArgument(1);
 			List<IBaseResource> resourceList = getHistoryResourcesForResourceIds("Patient", theResourceIdList, PATIENT_RESOURCE_VERSIONS_COUNT);
 			theResourceVersionConsumer.accept(resourceList);
 			return new SimpleBundleProvider(resourceList);
 		});
 
-		when(myExportHelper.fetchHistoryForResourceIds(eq("Observation"), any(), any())).thenAnswer(invocation -> {
+		when(myExportHelper.fetchHistoryForResourceIds(eq("Observation"), any())).thenAnswer(invocation -> {
 			List<String> theResourceIdList = invocation.getArgument(1);
 			List<IBaseResource> resourceList = getHistoryResourcesForResourceIds("Observation", theResourceIdList, OBSERVATION_RESOURCE_VERSIONS_COUNT);
 			theResourceVersionConsumer.accept(resourceList);
