@@ -1526,31 +1526,41 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 		@Test
 		public void testSystemBulkExport_withResourcesExceedingPageSizes() {
-			// fixme jm: restore size
-//			int patientCount = 1_100;
-			int patientCount = 100;
-			int versionCount = 10;
-			Map<String, Set<String>> patientVersionsMap = createPatientsWithHistory(patientCount, versionCount);
+			int exportFileMaxCapacity = 30;
+			int initialExportFileMaxCapacity = myStorageSettings.getBulkExportFileMaximumCapacity();
+			myStorageSettings.setBulkExportFileMaximumCapacity(exportFileMaxCapacity);
 
-			BulkExportJobParameters options = new BulkExportJobParameters();
-			options.setResourceTypes(Collections.singleton("Patient"));
-			options.setFilters(Collections.emptySet());
-			options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
-			options.setIncludeHistory(true);
-			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+			try {
+				int patientCount = 100;
+				int versionCount = 10;
+				Map<String, Set<String>> patientVersionsMap = createPatientsWithHistory(patientCount, versionCount);
 
-			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-			startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
-			startRequest.setParameters(options);
-			Batch2JobStartResponse job = myJobCoordinator.startInstance(mySrd, startRequest);
-			myBatch2JobHelper.awaitJobCompletion(job.getInstanceId(), 60);
-			ourLog.debug("Job status after awaiting - {}", myJobCoordinator.getInstance(job.getInstanceId()).getStatus());
-			waitForCompletion(job);
+				BulkExportJobParameters options = new BulkExportJobParameters();
+				options.setResourceTypes(Collections.singleton("Patient"));
+				options.setFilters(Collections.emptySet());
+				options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
+				options.setIncludeHistory(true);
+				options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
-			// fixme jm: check number of resources per binary file
-			Map<String, Set<String>> exportedPatientVersionsMap = extractExportedResourceVersionsByTypeMap(job).get("Patient");
-			assertThat(exportedPatientVersionsMap).isEqualTo(patientVersionsMap);
+				JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+				startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+				startRequest.setParameters(options);
+				Batch2JobStartResponse job = myJobCoordinator.startInstance(mySrd, startRequest);
+				myBatch2JobHelper.awaitJobCompletion(job.getInstanceId(), 60);
+				ourLog.debug("Job status after awaiting - {}", myJobCoordinator.getInstance(job.getInstanceId()).getStatus());
+				waitForCompletion(job);
 
+				Map<String, Set<String>> exportedPatientVersionsMap = extractExportedResourceVersionsByTypeMap(job).get("Patient");
+				assertThat(exportedPatientVersionsMap).isEqualTo(patientVersionsMap);
+
+				String report = myJobCoordinator.getInstance(job.getInstanceId()).getReport();
+				BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
+				int expectedExportOutputFiles = (int) Math.ceil((double) patientCount * versionCount / exportFileMaxCapacity);
+				assertThat(results.getResourceTypeToBinaryIds().get("Patient")).hasSize(expectedExportOutputFiles);
+
+			} finally {
+				myStorageSettings.setBulkExportFileMaximumCapacity(initialExportFileMaxCapacity);
+			}
 		}
 
 		@Test
