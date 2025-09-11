@@ -174,6 +174,7 @@ public class BulkPatchProviderTest {
 		instance.setJobDefinitionId(BulkPatchJobAppCtx.JOB_ID);
 		instance.setErrorMessage(theParams.errorMessage());
 		instance.setReport(theParams.reportMessage());
+		instance.setParameters(new BulkPatchJobParameters());
 		when(myJobCoordinator.getInstance(eq("MY-INSTANCE-ID"))).thenReturn(instance);
 
 		// Test
@@ -190,6 +191,7 @@ public class BulkPatchProviderTest {
 	void testPollForStatusReport() throws IOException {
 		// Setup
 		JobInstance instance = new JobInstance();
+		instance.setParameters(new BulkPatchJobParameters());
 		instance.setStatus(StatusEnum.COMPLETED);
 		instance.setJobDefinitionId(BulkPatchJobAppCtx.JOB_ID);
 		BulkModifyResourcesResultsJson report = createDryRunReport();

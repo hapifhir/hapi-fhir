@@ -82,6 +82,7 @@ class BaseBulkModifyOrRewriteGenerateReportStepTest {
 		data.addChangedResourceBody("{\"resourceType\":\"Patient\",\"id\":\"13\"}");
 		MyParams params = new MyParams();
 		params.setDryRun(true);
+		params.setDryRunMode(BaseBulkModifyJobParameters.DryRunMode.COLLECT_CHANGED);
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("an-instance-id");
 		instance.setStartTime(new Date());

@@ -30,13 +30,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-// FIXME: move somewhere more common, and document
+/**
+ * This Jackson deserializer is used to deserialize an array of raw JSON objects into a list of strings.
+ */
 public class ArrayOfRawJsonObjectsAsStringsDeserializer extends JsonDeserializer<List<String>> {
 
 	@Override
-	public List<String> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
-
-		TreeNode tree = jp.getCodec().readTree(jp);
+	public List<String> deserialize(JsonParser theJsonParser, DeserializationContext theContext) throws IOException {
+		TreeNode tree = theJsonParser.getCodec().readTree(theJsonParser);
 		ArrayNode treeArray = (ArrayNode) tree;
 
 		List<String> retVal = new ArrayList<>(treeArray.size());
