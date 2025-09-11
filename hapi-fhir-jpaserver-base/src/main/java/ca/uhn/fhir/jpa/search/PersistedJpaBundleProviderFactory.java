@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
@@ -117,25 +118,18 @@ public class PersistedJpaBundleProviderFactory {
 	}
 
 	/**
-	 * Create an unlimited history bundle provider for bulk export operations,
-	 * which can paginate through all history entries.
+	 * Create an unlimited history bundle provider for bulk export operations
+	 * that can paginate through history entries for specific resource IDs.
 	 */
-	public IBundleProvider historyUnlimited(
-		String theResourceType,
-		@Nullable JpaPid theResourcePid,
-		Date theRangeStartInclusive,
-		Date theRangeEndInclusive,
-		RequestPartitionId theRequestPartitionId,
-		HistorySearchStyleEnum searchParameterType) {
+	public IBundleProvider historyFromResourceIds(
+			String theResourceType,
+			@Nullable List<String> theResourceIds,
+			RequestPartitionId theRequestPartitionId) {
 
 		return (PersistedJpaIdSearchBundleProvider) myApplicationContext.getBean(
-			JpaConfig.PERSISTED_JPA_ID_SEARCH_BUNDLE_PROVIDER,
-			theResourceType,
-			theResourcePid,
-			theRangeStartInclusive,
-			theRangeEndInclusive,
-			theRequestPartitionId,
-			searchParameterType);
+				JpaConfig.PERSISTED_JPA_ID_SEARCH_BUNDLE_PROVIDER,
+				theResourceType,
+				theResourceIds,
+				theRequestPartitionId);
 	}
-
 }

@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.api.server.bulk.IBulkDataExportHistoryHelper;
 import jakarta.annotation.Nonnull;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.Objects;
 
 public class JpaBulkDataExportHistoryHelper implements IBulkDataExportHistoryHelper {
@@ -16,19 +17,10 @@ public class JpaBulkDataExportHistoryHelper implements IBulkDataExportHistoryHel
 
 	@Override
 	public IBundleProvider fetchHistoryForResourceIds(
-			@Nonnull String theResourceType, RequestPartitionId theRequestPartitionId) {
+		@Nonnull String theResourceType, List<String> theIdList, RequestPartitionId theRequestPartitionId) {
 
 		Objects.requireNonNull(theResourceType);
 
-		// fixme jm: remove commented
-//		RequestDetails requestDetails = SystemRequestDetails.forRequestPartitionId(theRequestPartitionId);
-//		requestDetails.setResourceName(theResourceType);
-//
-//		return myBundleProviderFactory.history(
-//			requestDetails, theResourceType, null, null, null, null, theRequestPartitionId);
-
-		// fixme jm: last param?
-		return myBundleProviderFactory.historyUnlimited(
-			theResourceType, null, null, null, theRequestPartitionId, null);
+		return myBundleProviderFactory.historyFromResourceIds(theResourceType, theIdList, theRequestPartitionId);
 	}
 }

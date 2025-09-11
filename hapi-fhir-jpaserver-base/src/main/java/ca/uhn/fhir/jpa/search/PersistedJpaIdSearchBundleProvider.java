@@ -5,11 +5,9 @@ import ca.uhn.fhir.jpa.dao.HistoryBuilder;
 import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import ca.uhn.fhir.rest.server.method.ResponsePage;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -32,35 +30,26 @@ public class PersistedJpaIdSearchBundleProvider implements IBundleProvider {
 
 	private final String myUuid;
 	private final String myResourceType;
-	private final JpaPid myResourceId;
-	private final Date myLowerBound;
-	private final Date myUpperBound;
+	private final @Nonnull List<String> myResourceIds;
 	private final RequestPartitionId myPartitionId;
-	private final HistorySearchStyleEnum myHistorySearchStyle;
-	
+
 	@Autowired
 	private HistoryBuilderFactory myHistoryBuilderFactory;
-	
+
 	@Autowired
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
-	
+
 	@Autowired
 	private IHapiTransactionService myTransactionService;
 
 	public PersistedJpaIdSearchBundleProvider(
 			String theResourceType,
-			JpaPid theResourceId,
-			Date theLowerBound,
-			Date theUpperBound,
-			RequestPartitionId thePartitionId,
-			HistorySearchStyleEnum theHistorySearchStyle) {
+			@Nonnull List<String> theResourceIds,
+			RequestPartitionId thePartitionId) {
 		myUuid = UUID.randomUUID().toString();
 		myResourceType = theResourceType;
-		myResourceId = theResourceId;
-		myLowerBound = theLowerBound;
-		myUpperBound = theUpperBound;
+		myResourceIds = theResourceIds;
 		myPartitionId = thePartitionId;
-		myHistorySearchStyle = theHistorySearchStyle;
 	}
 
 	@Override
@@ -77,33 +66,38 @@ public class PersistedJpaIdSearchBundleProvider implements IBundleProvider {
 	@Override
 	public List<IBaseResource> getResources(
 			int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
-		
-		ourLog.debug("PersistedJpaIdSearchBundleProvider.getResources called with fromIndex={}, toIndex={}, resourceType={}, partitionId={}",
-			theFromIndex, theToIndex, myResourceType, myPartitionId);
-		
-		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
-			HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(
-					myResourceType, myResourceId, myLowerBound, myUpperBound);
 
-			// Handle null partition ID by using allPartitions() which works for bulk operations
+		ourLog.debug(
+				"Invoked with fromIndex={}, toIndex={}, resourceType={}, partitionId={}",
+				theFromIndex,
+				theToIndex,
+				myResourceType,
+				myPartitionId);
+
+		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(myResourceType, myResourceIds);
+
 			RequestPartitionId partitionId = myPartitionId;
 			if (partitionId == null) {
 				partitionId = RequestPartitionId.allPartitions();
 			}
-			
-			// Use null offset and pass indexes directly to get proper pagination
-			List<ResourceHistoryTable> results = historyBuilder.fetchEntities(
-					partitionId, null, theFromIndex, theToIndex, myHistorySearchStyle);
 
-			ourLog.debug("HistoryBuilder.fetchEntities returned {} results for range {}-{}",
-				results.size(), theFromIndex, theToIndex);
+			// Use null offset and pass indexes directly to get proper pagination
+			List<ResourceHistoryTable> results =
+					historyBuilder.fetchEntities(partitionId, null, theFromIndex, theToIndex, null);
+
+			ourLog.debug(
+					"HistoryBuilder.fetchEntities returned {} results for range {}-{}",
+					results.size(),
+					theFromIndex,
+					theToIndex);
 
 			List<IBaseResource> retVal = new ArrayList<>();
 			for (ResourceHistoryTable next : results) {
 				retVal.add(myJpaStorageResourceParser.toResource(next, true));
 			}
 
-			ourLog.debug("PersistedJpaIdSearchBundleProvider returing {} resources", retVal.size());
+			ourLog.debug("returning {} resources", retVal.size());
 
 			theResponsePageBuilder.setTotalRequestedResourcesFetched(results.size());
 			return retVal;

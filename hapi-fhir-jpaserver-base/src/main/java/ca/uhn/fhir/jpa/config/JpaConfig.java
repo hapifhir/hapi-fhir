@@ -196,7 +196,6 @@ import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.IBulkDataExportHistoryHelper;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
-import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
@@ -228,6 +227,7 @@ import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.Date;
+import java.util.List;
 
 @Configuration
 // repositoryFactoryBeanClass: EnversRevisionRepositoryFactoryBean is needed primarily for unit testing
@@ -255,8 +255,9 @@ public class JpaConfig {
 	public static final String PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH = "PersistedJpaBundleProvider_BySearch";
 	public static final String PERSISTED_JPA_ID_SEARCH_BUNDLE_PROVIDER = "PersistedJpaIdSearchBundleProvider";
 	public static final String PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER =
-		"PersistedJpaSearchFirstPageBundleProvider";
+			"PersistedJpaSearchFirstPageBundleProvider";
 	public static final String HISTORY_BUILDER = "HistoryBuilder";
+	public static final String HISTORY_BUILDER_WITH_IDS = "HistoryBuilderWithIds";
 	public static final String DEFAULT_PROFILE_VALIDATION_SUPPORT = "myDefaultProfileValidationSupport";
 	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
 
@@ -674,15 +675,8 @@ public class JpaConfig {
 	@Bean(name = PERSISTED_JPA_ID_SEARCH_BUNDLE_PROVIDER)
 	@Scope("prototype")
 	public PersistedJpaIdSearchBundleProvider newPersistedJpaIdSearchBundleProvider(
-			String theResourceType,
-			JpaPid theResourceId,
-			Date theLowerBound,
-			Date theUpperBound,
-			RequestPartitionId thePartitionId,
-			HistorySearchStyleEnum theHistorySearchStyle) {
-		return new PersistedJpaIdSearchBundleProvider(
-				theResourceType, theResourceId, theLowerBound, 
-				theUpperBound, thePartitionId, theHistorySearchStyle);
+			String theResourceType, List<String> theResourceIds, RequestPartitionId thePartitionId) {
+		return new PersistedJpaIdSearchBundleProvider(theResourceType, theResourceIds, thePartitionId);
 	}
 
 	@Bean(name = RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER)
@@ -814,6 +808,13 @@ public class JpaConfig {
 			@Nullable Date theRangeStartInclusive,
 			@Nullable Date theRangeEndInclusive) {
 		return new HistoryBuilder(theResourceType, theResourceId, theRangeStartInclusive, theRangeEndInclusive);
+	}
+
+	@Bean(name = HISTORY_BUILDER_WITH_IDS)
+	@Scope("prototype")
+	public HistoryBuilder newHistoryBuilderWithIds(
+			@Nullable String theResourceType, @Nullable List<String> theResourceIds) {
+		return new HistoryBuilder(theResourceType, theResourceIds);
 	}
 
 	@Bean

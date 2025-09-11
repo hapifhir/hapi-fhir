@@ -227,17 +227,17 @@ public class ExpandResourceAndWriteBinaryStep
 	}
 
 	private List<IBaseResource> consumeHistoryInBatches(
-			String theResourceType,
-			List<String> theIdList,
-			RequestPartitionId theRequestPartitionId,
-			Consumer<List<IBaseResource>> theResourceListConsumer) {
+		String theResourceType,
+		List<String> theIdList,
+		RequestPartitionId theRequestPartitionId,
+		Consumer<List<IBaseResource>> theResourceListConsumer) {
 
 		final int fileLimitBatchSize = myStorageSettings.getBulkExportFileMaximumCapacity();
 		final int pageSize = Math.min(getMaxSizeBatchDefault(), fileLimitBatchSize);
 
 		List<IBaseResource> resourcesToConsume = new ArrayList<>();
 
-		IBundleProvider resHistoryProvider = searchForResourcesHistory(theResourceType, theRequestPartitionId);
+		IBundleProvider resHistoryProvider = searchForResourcesHistory(theResourceType, theIdList, theRequestPartitionId);
 		
 		int currentIndex = 0;
 		
@@ -253,14 +253,7 @@ public class ExpandResourceAndWriteBinaryStep
 				break;
 			}
 
-			// fixme jm: perf
-			List<IBaseResource> historyResources = page.stream()
-				.filter(rsrcHist ->
-					theIdList.contains(rsrcHist.getIdElement().toUnqualifiedVersionless().getValueAsString())
-				)
-				.toList();
-			
-			resourcesToConsume.addAll(historyResources);
+			resourcesToConsume.addAll(page);
 
 			// process complete batches
 			while(resourcesToConsume.size() >= fileLimitBatchSize) {
@@ -367,14 +360,15 @@ public class ExpandResourceAndWriteBinaryStep
 	/**
 	 * Searches for historical versions of resources by their IDs using the bulk export history helper.
 	 *
-	 * @param theResourceType         Type of resources to search for
-	 * @param theRequestPartitionId   Partition ID for the request
+	 * @param theResourceType       Type of resources to search for
+	 * @param theIdList				The resource IDs which history must be fetched
+	 * @param theRequestPartitionId Partition ID for the request
 	 * @return Bundle provider containing historical versions of the resources
 	 */
 	private IBundleProvider searchForResourcesHistory(
-			String theResourceType, RequestPartitionId theRequestPartitionId) {
+		String theResourceType, List<String> theIdList, RequestPartitionId theRequestPartitionId) {
 
-		return myExportHelper.fetchHistoryForResourceIds(theResourceType, theRequestPartitionId);
+		return myExportHelper.fetchHistoryForResourceIds(theResourceType, theIdList, theRequestPartitionId);
 	}
 
 	/**

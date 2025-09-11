@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Date;
+import java.util.List;
 
 public class HistoryBuilderFactory {
 
@@ -43,5 +44,14 @@ public class HistoryBuilderFactory {
 				theResourceId,
 				theRangeStartInclusive,
 				theRangeEndInclusive);
+	}
+
+	public HistoryBuilder newHistoryBuilder(
+			@Nullable String theResourceType,
+			@Nullable List<String> theResourceIds) {
+		return (HistoryBuilder) myApplicationContext.getBean(
+				JpaConfig.HISTORY_BUILDER_WITH_IDS,
+				theResourceType,
+				theResourceIds);
 	}
 }

@@ -1484,18 +1484,18 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			myClient.update().resource(group).execute();
 
 			// versions list size indicate number of resources to create
-			Map<Long, Set<String>> observationVersionsMap = createObservationWithHistory(3, "Patient/PING1");
+			Map<String, Set<String>> observationVersionsMap = createObservationWithHistory(3, "Patient/PING1");
 			// observations which versions should not be included (to validate history id filtering)
 			createObservationWithHistory(3, "Patient/PONG2");
 
-			Map<Long, Set<String>> coverageVersionsMap = createCoverageWithHistory(2, "Patient/PING1");
+			Map<String, Set<String>> coverageVersionsMap = createCoverageWithHistory(2, "Patient/PING1");
 			// coverages which versions should not be included (to validate history id filtering)
 			createCoverageWithHistory(2, "Patient/PONG2");
 
 			HashSet<String> resourceTypes = Sets.newHashSet("Observation", "Coverage");
 			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G2", true);
 
-			Map<String, Map<Long, Set<String>>> typeToResourceVersionsMap = convertJobResultsToResourceVersionMap(bulkExportJobResults);
+			Map<String, Map<String, Set<String>>> typeToResourceVersionsMap = convertJobResultsToResourceVersionMap(bulkExportJobResults);
 			assertThat(typeToResourceVersionsMap.get("Observation")).isEqualTo(observationVersionsMap);
 			assertThat(typeToResourceVersionsMap.get("Coverage")).isEqualTo(coverageVersionsMap);
 		}
@@ -1641,16 +1641,16 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	}
 
 
-	private Map<String, Map<Long, Set<String>>> convertJobResultsToResourceVersionMap(BulkExportJobResults theBulkExportJobResults) {
+	private Map<String, Map<String, Set<String>>> convertJobResultsToResourceVersionMap(BulkExportJobResults theBulkExportJobResults) {
 		Map<String, List<IBaseResource>> exportedResourcesByType = convertJobResultsToResources(theBulkExportJobResults);
 
-		Map<String, Map<Long, Set<String>>> retVal = new HashMap<>();
+		Map<String, Map<String, Set<String>>> retVal = new HashMap<>();
 
 		for (Map.Entry<String, List<IBaseResource>> resourcesOfTypeEntry : exportedResourcesByType.entrySet()) {
 			retVal.put(
 				resourcesOfTypeEntry.getKey(),
 				resourcesOfTypeEntry.getValue().stream().collect(Collectors.groupingBy(
-					r -> r.getIdElement().getIdPartAsLong(),
+					r -> r.getIdElement().toVersionless().getValueAsString(),
 					mapping(r -> r.getIdElement().getValueAsString(), Collectors.toSet())
 				))
 			);
@@ -1659,18 +1659,18 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		return retVal;
 	}
 
-	private Map<Long, Set<String>> createObservationWithHistory(
+	private Map<String, Set<String>> createObservationWithHistory(
 		@SuppressWarnings("SameParameterValue") int theVersionCount,
 		@SuppressWarnings("SameParameterValue") String thePatientId) {
 
-		Map<Long, Set<String>> retVal = new HashMap<>();
+		Map<String, Set<String>> retVal = new HashMap<>();
 
 		IIdType id = createObservation(List.of(
 			withResourcePrimitiveAttribute("valueString", "version-1"),
 			withReference("subject", thePatientId)));
 
 		Set<String> versionIds = new HashSet<>();
-		retVal.put(id.getIdPartAsLong(), versionIds);
+		retVal.put(id.getValueAsString(), versionIds);
 
 		// create indicated additional versions
 
@@ -1688,18 +1688,18 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		return retVal;
 	}
 
-	private Map<Long, Set<String>> createCoverageWithHistory(
+	private Map<String, Set<String>> createCoverageWithHistory(
 		@SuppressWarnings("SameParameterValue") int theVersionCount,
 		@SuppressWarnings("SameParameterValue") String thePatientId) {
 
-		Map<Long, Set<String>> retVal = new HashMap<>();
+		Map<String, Set<String>> retVal = new HashMap<>();
 
 		IIdType id = createCoverage(
 			withResourcePrimitiveAttribute("dependent", "version-1"),
 			withReference("beneficiary", thePatientId));
 
 		Set<String> versionIds = new HashSet<>();
-		retVal.put(id.getIdPartAsLong(), versionIds);
+		retVal.put(id.getValueAsString(), versionIds);
 
 		// create indicated additional versions
 
