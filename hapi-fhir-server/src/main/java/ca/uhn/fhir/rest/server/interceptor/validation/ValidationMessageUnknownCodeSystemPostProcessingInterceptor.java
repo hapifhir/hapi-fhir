@@ -20,14 +20,22 @@
 package ca.uhn.fhir.rest.server.interceptor.validation;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 
 import java.util.List;
 
+import static java.lang.String.format;
+import static org.hl7.fhir.utilities.i18n.I18nConstants.TERMINOLOGY_PASSTHROUGH_TX_MESSAGE;
+import static org.hl7.fhir.utilities.i18n.I18nConstants.TERMINOLOGY_TX_NOVALID_12;
+import static org.hl7.fhir.utilities.i18n.I18nConstants.TERMINOLOGY_TX_SYSTEM_UNKNOWN;
+
 /**
  * This interceptor is for changing the severity of the Unknown Code System validation issues to a desired severity
  * after the validation has been performed.
+ * @since 8.6.0
  */
+@Interceptor
 public class ValidationMessageUnknownCodeSystemPostProcessingInterceptor
 		extends ValidationMessagePostProcessingInterceptor {
 
@@ -38,16 +46,16 @@ public class ValidationMessageUnknownCodeSystemPostProcessingInterceptor
 				mapIssueSeverityToResultSeverityEnum(theDesiredSeverityForUnknownCodeSystem);
 
 		super.addPostProcessingPatterns(
-				// this is an unknown code system error produced by the validator
+				// this is an unknown code system error produced by the core validator
 				new ValidationPostProcessingRuleJson(
-						"Terminology_TX_System_Unknown",
+						TERMINOLOGY_TX_SYSTEM_UNKNOWN,
 						null,
 						List.of(ResultSeverityEnum.ERROR, ResultSeverityEnum.WARNING, ResultSeverityEnum.INFORMATION),
 						List.of("Unknown Code System"),
 						desiredResultSeverity),
 				// this is for the unknown code system error produced by HAPI-FHIR validation
 				new ValidationPostProcessingRuleJson(
-						"Terminology_PassThrough_TX_Message",
+						TERMINOLOGY_PASSTHROUGH_TX_MESSAGE,
 						null,
 						List.of(ResultSeverityEnum.ERROR, ResultSeverityEnum.WARNING, ResultSeverityEnum.INFORMATION),
 						List.of("CodeSystem is unknown and can't be validated"),
@@ -59,7 +67,7 @@ public class ValidationMessageUnknownCodeSystemPostProcessingInterceptor
 				// This rule covers both messages.
 				new ValidationPostProcessingRuleJson(
 						null,
-						"Terminology_PassThrough_TX_Message|Terminology_TX_NoValid_12",
+						format("%s|%s", TERMINOLOGY_PASSTHROUGH_TX_MESSAGE, TERMINOLOGY_TX_NOVALID_12),
 						List.of(ResultSeverityEnum.ERROR, ResultSeverityEnum.WARNING, ResultSeverityEnum.INFORMATION),
 						List.of("Unable to expand ValueSet because CodeSystem could not be found"),
 						desiredResultSeverity));

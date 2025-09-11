@@ -244,28 +244,28 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 			SingleValidationMessage message1 = theValidationResult.getMessages().get(0);
 			assertEquals(ResultSeverityEnum.ERROR, message1.getSeverity());
 			assertEquals("Procedure.code", message1.getLocationString());
-			String expectedMessage1 = "Unknown code \"http://acme.org/invalid#invalid\" for ValueSet with URL \"http://acme.org/ValueSet/valueset-combined\". The Remote Terminology server %s returned Unknown code 'http://acme.org/invalid#invalid' for in-memory expansion of ValueSet 'http://acme.org/ValueSet/valueset-combined'"
+			String unknownCodeInValueSetMsg = "Unknown code \"http://acme.org/invalid#invalid\" for ValueSet with URL \"http://acme.org/ValueSet/valueset-combined\". The Remote Terminology server %s returned Unknown code 'http://acme.org/invalid#invalid' for in-memory expansion of ValueSet 'http://acme.org/ValueSet/valueset-combined'"
 				.formatted(myServerBase);
-			assertEquals(expectedMessage1, message1.getMessage());
+			assertEquals(unknownCodeInValueSetMsg, message1.getMessage());
 
 			SingleValidationMessage message2 = theValidationResult.getMessages().get(1);
 			assertEquals(ResultSeverityEnum.ERROR, message2.getSeverity());
 			assertEquals("Procedure.code", message2.getLocationString());
-			String expectedMessage2 = "CodeSystem is unknown and can't be validated: http://acme.org/invalid for 'http://acme.org/invalid#invalid'";
-			assertEquals(expectedMessage2, message2.getMessage());
+			String codeSysUnknownMsg = "CodeSystem is unknown and can't be validated: http://acme.org/invalid for 'http://acme.org/invalid#invalid'";
+			assertEquals(codeSysUnknownMsg, message2.getMessage());
 
 			SingleValidationMessage message3 = theValidationResult.getMessages().get(2);
 			assertEquals(ResultSeverityEnum.ERROR, message3.getSeverity());
 			assertEquals("Procedure.code", message3.getLocationString());
 			Map<String, String> formatValues = Map.of("conceptNumber", String.valueOf(NUM_CONCEPTS));
-			String expectedMessage3 = "None of the codings provided are in the value set 'Value Set Combined' (http://acme.org/ValueSet/valueset-combined|1), and a coding from this value set is required) (codes = http://acme.org/CodeSystem/codesystem-1#codesystem-1-concept-${conceptNumber}, http://acme.org/CodeSystem/codesystem-2#codesystem-2-concept-${conceptNumber}, http://acme.org/invalid#invalid)";
-			assertEquals(formatMessage(expectedMessage3, formatValues), message3.getMessage());
+			String requiredCodingNotProvidedMsg = "None of the codings provided are in the value set 'Value Set Combined' (http://acme.org/ValueSet/valueset-combined|1), and a coding from this value set is required) (codes = http://acme.org/CodeSystem/codesystem-1#codesystem-1-concept-${conceptNumber}, http://acme.org/CodeSystem/codesystem-2#codesystem-2-concept-${conceptNumber}, http://acme.org/invalid#invalid)";
+			assertEquals(formatMessage(requiredCodingNotProvidedMsg, formatValues), message3.getMessage());
 
 			SingleValidationMessage message4 = theValidationResult.getMessages().get(3);
 			assertEquals(ResultSeverityEnum.INFORMATION, message4.getSeverity());
 			assertEquals("Procedure.code.coding[2]", message4.getLocationString());
-			String expectedMessage4 = "This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/TestProcedure|1.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)";
-			assertEquals(expectedMessage4, message4.getMessage());
+			String elementNotMatchingSliceMsg = "This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/TestProcedure|1.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)";
+			assertEquals(elementNotMatchingSliceMsg, message4.getMessage());
 		}
 	}
 

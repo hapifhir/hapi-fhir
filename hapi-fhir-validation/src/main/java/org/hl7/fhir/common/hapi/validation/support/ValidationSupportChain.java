@@ -863,15 +863,12 @@ public class ValidationSupportChain implements IValidationSupport {
 
 		CodeValidationResult result = new CodeValidationResult();
 		result.setSeverity(IssueSeverity.ERROR);
-		String theMessage = "CodeSystem is unknown and can't be validated: %s for '%s#%s'"
+		String message = "CodeSystem is unknown and can't be validated: %s for '%s#%s'"
 				.formatted(theCodeSystem, theCodeSystem, theCode);
-		result.setMessage(theMessage);
+		result.setMessage(message);
 
 		result.addIssue(new CodeValidationIssue(
-				theMessage,
-				IssueSeverity.ERROR,
-				CodeValidationIssueCode.NOT_FOUND,
-				CodeValidationIssueCoding.NOT_FOUND));
+				message, IssueSeverity.ERROR, CodeValidationIssueCode.NOT_FOUND, CodeValidationIssueCoding.NOT_FOUND));
 		return result;
 	}
 

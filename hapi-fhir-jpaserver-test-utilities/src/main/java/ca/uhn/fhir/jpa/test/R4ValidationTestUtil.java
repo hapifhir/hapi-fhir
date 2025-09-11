@@ -58,7 +58,7 @@ public final class R4ValidationTestUtil {
 		return ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theOperationOutcome);
 	}
 
-	public static List<OperationOutcome.OperationOutcomeIssueComponent> getIssuesDiagnosticContainsString(OperationOutcome theOo, String theExpectedDiagnosticSubstring) {
+	public static List<OperationOutcome.OperationOutcomeIssueComponent> getIssuesDiagnosticContainingString(OperationOutcome theOo, String theExpectedDiagnosticSubstring) {
 		return theOo.getIssue().stream()
 			.filter(t -> t.getDiagnostics() != null && t.getDiagnostics().contains(theExpectedDiagnosticSubstring))
 			.toList();

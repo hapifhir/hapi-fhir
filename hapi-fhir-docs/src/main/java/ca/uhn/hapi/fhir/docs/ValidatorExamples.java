@@ -26,10 +26,12 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.interceptor.validation.ValidationMessageUnknownCodeSystemPostProcessingInterceptor;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.SchemaBaseValidator;
@@ -63,6 +65,8 @@ import java.util.List;
 
 @SuppressWarnings({"serial", "unused"})
 public class ValidatorExamples {
+
+	private InterceptorService myInterceptorService;
 
 	public void validationIntro() {
 		// START SNIPPET: validationIntro
@@ -472,5 +476,18 @@ public class ValidatorExamples {
 		// Perform the validation
 		ValidationResult outcome = validator.validateWithResult(patient);
 		// END SNIPPET: npm
+	}
+
+	@SuppressWarnings("unused")
+	private void validationMessageUnknownCodeSystemPostProcessingInterceptor() {
+		// START SNIPPET: validationMessageUnknownCodeSystemPostProcessingInterceptor
+		// Create the interceptor with the desired issue severity for unknown CodeSystem errors.
+		// This example sets their severity to Information Level
+		ValidationMessageUnknownCodeSystemPostProcessingInterceptor unknownCodeSystemSeverityInterceptor =
+				new ValidationMessageUnknownCodeSystemPostProcessingInterceptor(
+						IValidationSupport.IssueSeverity.INFORMATION);
+
+		myInterceptorService.registerInterceptor(unknownCodeSystemSeverityInterceptor);
+		// END SNIPPET: validationMessageUnknownCodeSystemPostProcessingInterceptor
 	}
 }
