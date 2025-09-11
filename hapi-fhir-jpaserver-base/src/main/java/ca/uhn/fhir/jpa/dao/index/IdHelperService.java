@@ -71,6 +71,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -201,13 +202,10 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			return new HashMap<>();
 		}
 
-		Collection<IIdType> ids = new ArrayList<>(theIds.size());
+		Collection<IIdType> ids = new HashSet<>(theIds);
 		for (IIdType id : theIds) {
 			if (!id.hasIdPart()) {
 				throw new InvalidRequestException(Msg.code(1101) + "Parameter value missing in request");
-			}
-			if (ids.stream().noneMatch(seen -> seen.getValueAsString().equals(id.getValueAsString()))) {
-				ids.add(id);
 			}
 		}
 
