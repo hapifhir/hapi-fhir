@@ -441,7 +441,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 				.execute();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(404, e.getStatusCode());
-			assertEquals("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
+			assertEquals("HTTP 404 Not Found: HAPI-2788: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
 		}
 	}
 
@@ -489,7 +489,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 				.execute();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(404, e.getStatusCode());
-			assertEquals("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
+			assertEquals("HTTP 404 Not Found: HAPI-2788: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
 		}
 	}
 
