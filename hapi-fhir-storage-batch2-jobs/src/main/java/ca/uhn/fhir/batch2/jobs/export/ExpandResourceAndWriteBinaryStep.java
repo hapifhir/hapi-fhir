@@ -216,17 +216,11 @@ public class ExpandResourceAndWriteBinaryStep
 
 			List<String> idList = convertToStringIds(theRequestPartitionId, resourceType, typePidJsonList);
 
-			List<IBaseResource> partialBatch =
-					consumeHistoryInBatches(resourceType, idList, theRequestPartitionId, theResourceListConsumer);
-
-			// consume possible remaining resources
-			if (!partialBatch.isEmpty()) {
-				theResourceListConsumer.accept(partialBatch);
-			}
+			consumeHistoryInBatches(resourceType, idList, theRequestPartitionId, theResourceListConsumer);
 		}
 	}
 
-	private List<IBaseResource> consumeHistoryInBatches(
+	private void consumeHistoryInBatches(
 			String theResourceType,
 			List<String> theIdList,
 			RequestPartitionId theRequestPartitionId,
@@ -235,12 +229,11 @@ public class ExpandResourceAndWriteBinaryStep
 		final int fileLimitBatchSize = myStorageSettings.getBulkExportFileMaximumCapacity();
 		final int pageSize = Math.min(getMaxSizeBatchDefault(), fileLimitBatchSize);
 
-		List<IBaseResource> resourcesToConsume = new ArrayList<>();
-
 		IBundleProvider resHistoryProvider =
 				searchForResourcesHistory(theResourceType, theIdList, theRequestPartitionId);
 
 		int currentIndex = 0;
+		List<IBaseResource> resourcesToConsume = new ArrayList<>();
 
 		while (true) {
 			ourLog.debug(
@@ -263,6 +256,7 @@ public class ExpandResourceAndWriteBinaryStep
 			while (resourcesToConsume.size() >= fileLimitBatchSize) {
 				List<IBaseResource> batch = new ArrayList<>(resourcesToConsume.subList(0, fileLimitBatchSize));
 				theResourceListConsumer.accept(batch);
+				ourLog.debug("Sent batch of {} history resources to consumer", batch.size());
 				resourcesToConsume.subList(0, fileLimitBatchSize).clear();
 			}
 
@@ -278,7 +272,11 @@ public class ExpandResourceAndWriteBinaryStep
 			}
 		}
 
-		return resourcesToConsume;
+		// consume possible remaining resources
+		if (!resourcesToConsume.isEmpty()) {
+			theResourceListConsumer.accept(resourcesToConsume);
+			ourLog.debug("Sent batch of {} history resources to consumer", resourcesToConsume.size());
+		}
 	}
 
 	/**

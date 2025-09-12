@@ -1526,7 +1526,9 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 		@Test
 		public void testSystemBulkExport_withResourcesExceedingPageSizes() {
-			int exportFileMaxCapacity = 30;
+			// given
+
+			int exportFileMaxCapacity = 27;
 			int initialExportFileMaxCapacity = myStorageSettings.getBulkExportFileMaximumCapacity();
 			myStorageSettings.setBulkExportFileMaximumCapacity(exportFileMaxCapacity);
 
@@ -1534,6 +1536,10 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				int patientCount = 100;
 				int versionCount = 10;
 				Map<String, Set<String>> patientVersionsMap = createPatientsWithHistory(patientCount, versionCount);
+				// validate test data
+				assertThat(patientVersionsMap).hasSize(patientCount);
+				int totalVersions = patientVersionsMap.values().stream().mapToInt(Set::size).sum();
+				assertThat(totalVersions).isEqualTo(patientCount * versionCount);
 
 				BulkExportJobParameters options = new BulkExportJobParameters();
 				options.setResourceTypes(Collections.singleton("Patient"));
@@ -1542,6 +1548,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				options.setIncludeHistory(true);
 				options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
+				// when
+
 				JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 				startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
 				startRequest.setParameters(options);
@@ -1549,6 +1557,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				myBatch2JobHelper.awaitJobCompletion(job.getInstanceId(), 60);
 				ourLog.debug("Job status after awaiting - {}", myJobCoordinator.getInstance(job.getInstanceId()).getStatus());
 				waitForCompletion(job);
+
+				// then
 
 				Map<String, Set<String>> exportedPatientVersionsMap = extractExportedResourceVersionsByTypeMap(job).get("Patient");
 				assertThat(exportedPatientVersionsMap).isEqualTo(patientVersionsMap);
