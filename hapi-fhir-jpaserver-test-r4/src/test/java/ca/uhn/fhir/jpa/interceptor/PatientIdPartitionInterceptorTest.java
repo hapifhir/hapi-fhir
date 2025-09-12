@@ -646,8 +646,20 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		myServer.getFhirClient().transaction().withBundle(Resources.toString(Resources.getResource("transaction-bundles/synthea/practitionerInformation1743689610792.json"), Charsets.UTF_8)).execute();
 		Bundle patientBundle = parser.parseResource(Bundle.class, Resources.toString(Resources.getResource("transaction-bundles/synthea/Sherise735_Zofia65_Swaniawski813_e0f7758e-a749-4357-858c-53e1db808e37.json"), Charsets.UTF_8));
 
+		myCaptureQueriesListener.clear();
+
 		// when
 		assertDoesNotThrow(() -> myServer.getFhirClient().transaction().withBundle(patientBundle).execute());
+
+		// Verify
+		// This bundle contains 517 resources.
+		// fixme We are breaking up the insert batches.  We have WAY too many insert queries.
+		assertEquals(319, myCaptureQueriesListener.getInsertQueries().size());
+		assertEquals(9379, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(41, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(1031, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(36, myCaptureQueriesListener.getUpdateQueries().size());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
 	}
 

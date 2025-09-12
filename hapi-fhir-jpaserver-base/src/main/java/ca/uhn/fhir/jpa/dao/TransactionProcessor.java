@@ -604,6 +604,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			}
 		}
 
+		// fixme get the FHIR ids back too, and add this to TransactionDetails.resolvedIds.
 		preFetchSearchParameterMapsToken(
 				"myHashSystemAndValue",
 				systemAndValueHashes,
