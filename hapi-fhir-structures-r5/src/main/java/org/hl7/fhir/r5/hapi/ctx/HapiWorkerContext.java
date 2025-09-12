@@ -472,7 +472,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public <T extends Resource> boolean hasResource(Class<T> class_, String uri, FhirPublication fhirVersion) {
+	public <T extends Resource> boolean hasResource(Class<T> class_, String uri, String fhirVersion) {
 		throw new UnsupportedOperationException(Msg.code(2471));
 	}
 
