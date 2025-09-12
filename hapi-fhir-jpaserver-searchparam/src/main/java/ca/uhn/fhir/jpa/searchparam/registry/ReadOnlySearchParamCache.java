@@ -80,6 +80,7 @@ public class ReadOnlySearchParamCache {
 		return myResourceNameToSpNameToSp.size();
 	}
 
+	@Nullable
 	public RuntimeSearchParam getByUrl(String theUrl) {
 		return myUrlToParam.get(theUrl);
 	}
