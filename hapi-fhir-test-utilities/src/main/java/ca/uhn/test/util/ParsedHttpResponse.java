@@ -22,6 +22,7 @@ package ca.uhn.test.util;
 import ca.uhn.fhir.rest.api.Constants;
 import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
 
 import java.util.Map;
 import java.util.Optional;
@@ -67,10 +68,15 @@ public record ParsedHttpResponse(int statusCode, String statusReason, Multimap<S
 
 	/**
 	 * Returns the {@literal Content-Type} header value with any additional parameters
-	 * (e.g. {@literal charset} parameter) stripped off.
+	 * (e.g. {@literal charset} parameter) stripped off. Throws an exception if no
+	 * Content-Type header is found.
+	 *
+	 * @return the content type header value
 	 */
+	@Nonnull
 	public String contentType() {
 		String retVal = headers().get(Constants.HEADER_CONTENT_TYPE).stream().findFirst().orElse(null);
+		Validate.notNull(retVal, "No Content-Type header found");
 		if (retVal.contains(";")) {
 			retVal = retVal.substring(0, retVal.indexOf(';'));
 		}
