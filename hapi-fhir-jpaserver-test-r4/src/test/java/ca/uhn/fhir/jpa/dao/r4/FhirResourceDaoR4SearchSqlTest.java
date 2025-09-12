@@ -8,9 +8,14 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.HasOrListParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -23,7 +28,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.mock.web.MockHttpServletRequest;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -272,6 +279,45 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 			assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_SYS_AND_VALUE = '-2780914544385068076') fetch first '10000' rows only", myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false));
 		}
 	}
+
+	@Test
+	public void testSearchWithHas() {
+		List<String> ids = new ArrayList<>();
+		for (int i = 0; i < 50; i++) {
+			ids.add("Patient/P" + i);
+			createPatient(withId("P" + i), withActiveTrue());
+			createObservation(withSubject("Patient/P" + i), withObservationCode("http://foo", "123"), withObservationEffectiveDateTime("2025-01-01"));
+		}
+
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Constants.PARAM_HAS, new HasParam("Observation", "subject", "code", "http://foo|123"));
+		map.add(Constants.PARAM_HAS, new HasParam("Observation", "subject", "date", "gt1950"));
+
+		myCaptureQueriesListener.clear();
+		ServletRequestDetails requestDetails = new ServletRequestDetails();
+		RestfulServer server = new RestfulServer(myFhirContext);
+		server.setPagingProvider(new FifoMemoryPagingProvider(10));
+		requestDetails.setServer(server);
+		requestDetails.setServletRequest(new MockHttpServletRequest());
+		IBundleProvider outcome = myPatientDao.search(map, requestDetails);
+		String uuid = outcome.getUuid();
+		outcome.getResources(0, 10);
+		myCaptureQueriesListener.logSelectQueries();
+
+		myCaptureQueriesListener.clear();
+		outcome = myPagingProvider.retrieveResultList(newSrd(), uuid);
+		outcome.getResources(10, 20);
+		myCaptureQueriesListener.logSelectQueries();
+
+		myCaptureQueriesListener.clear();
+		outcome = myPagingProvider.retrieveResultList(newSrd(), uuid);
+		outcome.getResources(20, 30);
+		myCaptureQueriesListener.logSelectQueries();
+
+
+	}
+
 
 	public static class MyPartitionInterceptor {
 

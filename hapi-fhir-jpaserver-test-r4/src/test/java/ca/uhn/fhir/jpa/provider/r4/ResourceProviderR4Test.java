@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
@@ -52,6 +53,7 @@ import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.NumberClientParam;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
@@ -286,6 +288,38 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myClient.registerInterceptor(myCapturingInterceptor);
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 	}
+
+	@Test
+	public void testSearchWithHas() {
+		List<String> ids = new ArrayList<>();
+		for (int i = 0; i < 50; i++) {
+			ids.add("Patient/P" + i);
+			createPatient(withId("P" + i), withActiveTrue());
+			createObservation(withSubject("Patient/P" + i), withObservationCode("http://foo", "123"), withObservationEffectiveDateTime("2025-01-01"));
+		}
+
+		List<String> actualIds = new ArrayList<>();
+
+		myCaptureQueriesListener.clear();
+		Bundle outcome = myClient
+			.search()
+			.byUrl("Patient?_has:Observation:patient:code=http://foo|123&_has:Observation:patient:date=gt1930&_count=10")
+			.returnBundle(Bundle.class)
+			.execute();
+		outcome.getEntry().forEach(t -> actualIds.add(t.getResource().getIdElement().toUnqualifiedVersionless().getValue()));
+		myCaptureQueriesListener.logSelectQueries();
+
+		for (int i = 0; i < 4; i++) {
+		myCaptureQueriesListener.clear();
+		outcome = myClient
+			.loadPage()
+			.next(outcome)
+			.execute();
+		outcome.getEntry().forEach(t -> actualIds.add(t.getResource().getIdElement().toUnqualifiedVersionless().getValue()));
+		myCaptureQueriesListener.logSelectQueries();
+}
+	}
+
 
 	@Test
 	public void testSearchParameterValidation() {

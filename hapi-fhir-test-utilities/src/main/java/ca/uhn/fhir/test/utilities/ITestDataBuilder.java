@@ -449,6 +449,14 @@ public interface ITestDataBuilder {
 		};
 	}
 
+	default ICreationArgument withObservationEffectiveDateTime(@Nullable String theValue) {
+		return t -> {
+			IBase value = getFhirContext().getElementDefinition("dateTime").newInstance(theValue);
+			BaseRuntimeElementDefinition<?> resourceDef = getFhirContext().getElementDefinition(t.getClass());
+			resourceDef.getChildByName("effective[x]").getMutator().addValue(t, value);
+		};
+	}
+
 	default <T extends IBase> ICreationArgument withCodingAt(String thePath, @Nullable String theSystem, @Nullable String theValue) {
 		return withCodingAt(thePath, theSystem, theValue, null);
 	}
