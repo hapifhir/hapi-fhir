@@ -653,14 +653,13 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 
 		// Verify
 		// This bundle contains 517 resources.
-		// fixme We are breaking up the insert batches.  We have WAY too many insert queries.
 		myCaptureQueriesListener.logAllQueries();
+		assertEquals(26, myCaptureQueriesListener.countSelectQueries());
+		// this is so high because we limit Hibernate to batches of 30 rows.
 		assertEquals(319, myCaptureQueriesListener.getInsertQueries().size());
 		assertEquals(9379, myCaptureQueriesListener.countInsertQueries());
-		//assertEquals(41, myCaptureQueriesListener.countSelectQueries());
-		assertEquals(32, myCaptureQueriesListener.countSelectQueries());
-		assertEquals(1031, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(36, myCaptureQueriesListener.getUpdateQueries().size());
+		assertEquals(1031, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
 	}
