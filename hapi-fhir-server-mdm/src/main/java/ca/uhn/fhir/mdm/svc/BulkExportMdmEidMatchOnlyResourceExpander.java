@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -68,7 +67,7 @@ public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdm
 	}
 
 	/**
-	 * Expands a Group resource and returns theirs persistent ids.
+	 * Expands a Group resource and returns the Group members' resource persistent ids.
 	 * The returned ids consists of group members + all MDM matched resources based on EID only.
 	 *
 	 * <p>This method:</p>
@@ -94,11 +93,11 @@ public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdm
 		Set<String> allResourceIds = new HashSet<>();
 		FhirTerser terser = myFhirContext.newTerser();
 		// Extract all member.entity references from the Group resource
-		List<IBase> memberEntities = terser.getValues(groupResource, "Group.member.entity");
+		List<IBaseReference> memberEntities =
+				terser.getValues(groupResource, "Group.member.entity", IBaseReference.class);
 		// mdm expand each member based on eid
-		for (IBase entity : memberEntities) {
-			if (entity instanceof IBaseReference entityRef
-					&& !entityRef.getReferenceElement().isEmpty()) {
+		for (IBaseReference entityRef : memberEntities) {
+			if (!entityRef.getReferenceElement().isEmpty()) {
 				IIdType memberId = entityRef.getReferenceElement();
 				Set<String> expanded =
 						myMdmEidMatchOnlyLinkExpandSvc.expandMdmBySourceResourceId(requestPartitionId, memberId);
