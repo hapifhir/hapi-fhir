@@ -653,7 +653,6 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 
 		// Verify
 		// This bundle contains 517 resources.
-		myCaptureQueriesListener.logAllQueries();
 		assertEquals(26, myCaptureQueriesListener.countSelectQueries());
 		// this is so high because we limit Hibernate to batches of 30 rows.
 		assertEquals(319, myCaptureQueriesListener.getInsertQueries().size());
