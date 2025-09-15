@@ -27,18 +27,15 @@ import ca.uhn.fhir.rest.server.provider.BulkDataExportProvider;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.MultimapCollector;
-import ca.uhn.fhir.util.ResourceReferenceInfo;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.io.Resources;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
@@ -46,11 +43,9 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,14 +53,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -654,28 +645,49 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 
-		IParser parser = myFhirContext.newJsonParser().setPrettyPrint(true);
-		myServer.getFhirClient().transaction().withBundle(Resources.toString(Resources.getResource("transaction-bundles/synthea/hospitalInformation1743689610792.json"), Charsets.UTF_8)).execute();
-		myServer.getFhirClient().transaction().withBundle(Resources.toString(Resources.getResource("transaction-bundles/synthea/practitionerInformation1743689610792.json"), Charsets.UTF_8)).execute();
-		Bundle patientBundle = parser.parseResource(Bundle.class, Resources.toString(Resources.getResource("transaction-bundles/synthea/Sherise735_Zofia65_Swaniawski813_e0f7758e-a749-4357-858c-53e1db808e37.json"), Charsets.UTF_8));
-
-		// FIXME: remove
-		patientBundle.getEntry().removeIf(t->t.getResource() instanceof Medication);
-		patientBundle.getEntry().removeIf(t->t.getResource() instanceof Provenance);
-		for (IBaseResource resource : myFhirContext.newTerser().getAllEmbeddedResources(patientBundle, true)) {
-			List<ResourceReferenceInfo> refs = myFhirContext.newTerser().getAllResourceReferences(resource);
-			for (ResourceReferenceInfo ref : refs) {
-				String refString = ref.getResourceReference().getReferenceElement().getValue();
-				if ("urn:uuid:43840b2f-d48d-2bd9-e02e-abe63ed73bbc".equals(refString) || "urn:uuid:6bbf258d-f5a8-7485-0651-a9e06beb3b93".equals(refString)) {
-					ref.getResourceReference().setReference(null);
-					ref.getResourceReference().setResource(null);
-				}
-			}
-		}
+		// Load the Synthea supporting bundles
+		TransactionUtil.TransactionResponse parsedResponse;
+		parsedResponse = performTransactionAndParseResponse(loadResourceFromClasspath(Bundle.class, "transaction-bundles/synthea/hospitalInformation1743689610792.json"));
+		IIdType locationId = parsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Location")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
+		parsedResponse = performTransactionAndParseResponse(loadResourceFromClasspath(Bundle.class, "transaction-bundles/synthea/practitionerInformation1743689610792.json"));
+		IIdType practitionerId = parsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Practitioner")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
 
 		// when
-		assertDoesNotThrow(() -> myServer.getFhirClient().transaction().withBundle(patientBundle).execute());
+		parsedResponse = performTransactionAndParseResponse(loadResourceFromClasspath(Bundle.class, "transaction-bundles/synthea/Sherise735_Zofia65_Swaniawski813_e0f7758e-a749-4357-858c-53e1db808e37.json"));
 
+		// verify
+		IIdType patientId = parsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Patient")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
+		IIdType encounterId = parsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Encounter")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
+		IIdType observationId = parsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Observation")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
+		IIdType medicationId = parsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Medication")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
+
+		int patientPartition = getResourcePartition(patientId);
+		assertThat(patientPartition).isGreaterThan(0);
+		assertResourceIsInPartition(patientPartition, encounterId);
+		assertResourceIsInPartition(patientPartition, observationId);
+		assertResourceIsInPartition(-1, medicationId);
+		assertResourceIsInPartition(-1, locationId);
+		assertResourceIsInPartition(-1, practitionerId);
+	}
+
+	private void assertResourceIsInPartition(int theExpectedPartitionId, IIdType theResourceId) {
+		runInTransaction(()->{
+			ResourceTable entity = myResourceTableDao.findByTypeAndFhirId(theResourceId.getResourceType(), theResourceId.getIdPart()).orElseThrow();
+			assertEquals(theExpectedPartitionId, entity.getPartitionId().getPartitionId());
+		});
+	}
+
+	private int getResourcePartition(IIdType theResourceId) {
+		return runInTransaction(()->{
+			ResourceTable entity = myResourceTableDao.findByTypeAndFhirId(theResourceId.getResourceType(), theResourceId.getIdPart()).orElseThrow();
+			return entity.getPartitionId().getPartitionId();
+		});
+	}
+
+	@Nonnull
+	private TransactionUtil.TransactionResponse performTransactionAndParseResponse(Bundle request) {
+		Bundle response = assertDoesNotThrow(() -> myServer.getFhirClient().transaction().withBundle(request).execute());
+		return TransactionUtil.parseTransactionResponse(myFhirContext, request, response);
 	}
 
 	@Test

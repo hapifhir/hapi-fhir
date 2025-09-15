@@ -226,7 +226,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			List<IBase> theEntries,
 			ITransactionProcessorVersionAdapter theVersionAdapter,
 			RequestPartitionId theRequestPartitionId) {
-		Set<String> foundIds = new HashSet<>();
 		Set<JpaPid> idsToPreFetchBodiesFor = new HashSet<>();
 		Set<JpaPid> idsToPreFetchVersionsFor = new HashSet<>();
 
@@ -240,7 +239,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				theEntries,
 				theVersionAdapter,
 				theRequestPartitionId,
-				foundIds,
 				idsToPreFetchBodiesFor);
 
 		/*
@@ -328,7 +326,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			List<IBase> theEntries,
 			ITransactionProcessorVersionAdapter theVersionAdapter,
 			RequestPartitionId theRequestPartitionId,
-			Set<String> foundIds,
 			Set<JpaPid> theIdsToPreFetchBodiesFor) {
 
 		FhirTerser terser = myFhirContext.newTerser();
@@ -431,11 +428,10 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		doPreFetchResourcesById(
 				theTransactionDetails,
 				theRequestPartitionId,
-				foundIds,
-				theIdsToPreFetchBodiesFor,
 				referenceTargetIds,
+				idsToPreResolve,
 				resolveMode,
-				idsToPreResolve);
+				theIdsToPreFetchBodiesFor);
 
 		if (partitionToIds != null) {
 			for (RequestPartitionId nextPartition : partitionToIds.keySet()) {
@@ -443,38 +439,38 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				doPreFetchResourcesById(
 						theTransactionDetails,
 						nextPartition,
-						foundIds,
-						theIdsToPreFetchBodiesFor,
 						ids,
+						idsToPreResolve,
 						resolveMode,
-						idsToPreResolve);
+						theIdsToPreFetchBodiesFor);
 			}
 		}
 	}
 
-	// FIXME: move referenceTargetIds earlier and label it as the main input
 	private void doPreFetchResourcesById(
 			TransactionDetails theTransactionDetails,
 			RequestPartitionId theRequestPartitionId,
-			Set<String> foundIds,
-			Set<JpaPid> theIdsToPreFetchBodiesFor,
-			Set<IIdType> referenceTargetIds,
-			ResolveIdentityMode resolveMode,
-			Map<IIdType, PrefetchReasonEnum> idsToPreResolve) {
-		Map<IIdType, IResourceLookup<JpaPid>> outcomes =
-				myIdHelperService.resolveResourceIdentities(theRequestPartitionId, referenceTargetIds, resolveMode);
+			Set<IIdType> theInputIdsToPreFetch,
+			Map<IIdType, PrefetchReasonEnum> theInputIdsToPreResolve,
+			ResolveIdentityMode theResolveMode,
+			Set<JpaPid> theOutputIdsToPreFetchBodiesFor) {
+
+		Set<String> foundIds = new HashSet<>();
+
+		Map<IIdType, IResourceLookup<JpaPid>> outcomes = myIdHelperService.resolveResourceIdentities(
+				theRequestPartitionId, theInputIdsToPreFetch, theResolveMode);
 		for (Iterator<Map.Entry<IIdType, IResourceLookup<JpaPid>>> iterator =
 						outcomes.entrySet().iterator();
 				iterator.hasNext(); ) {
 			Map.Entry<IIdType, IResourceLookup<JpaPid>> entry = iterator.next();
 			JpaPid next = entry.getValue().getPersistentId();
 			IIdType unqualifiedVersionlessId = entry.getKey();
-			switch (idsToPreResolve.get(unqualifiedVersionlessId)) {
+			switch (theInputIdsToPreResolve.get(unqualifiedVersionlessId)) {
 				case DIRECT_TARGET -> {
 					if (myStorageSettings.getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY
 							|| (next.getAssociatedResourceId() != null
 									&& !next.getAssociatedResourceId().isIdPartValidLong())) {
-						theIdsToPreFetchBodiesFor.add(next);
+						theOutputIdsToPreFetchBodiesFor.add(next);
 					}
 				}
 				case REFERENCE_TARGET -> {
@@ -491,7 +487,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 		// Any IDs that could not be resolved are presumably not there, so
 		// cache that fact so we don't look again later
-		for (IIdType next : referenceTargetIds) {
+		for (IIdType next : theInputIdsToPreFetch) {
 			if (!foundIds.contains(next.getValue())) {
 				theTransactionDetails.addResolvedResourceId(next.toUnqualifiedVersionless(), null);
 			}

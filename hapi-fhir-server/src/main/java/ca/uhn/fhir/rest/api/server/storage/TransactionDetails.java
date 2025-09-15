@@ -187,7 +187,10 @@ public class TransactionDetails {
 		return Collections.unmodifiableSet(myDeletedResourceIds);
 	}
 
-	// FIXME: javadoc
+	/**
+	 * If a resource has been resolved within the current transaction to a specific partition, we
+	 * cache it here to avoid repeated lookups.
+	 */
 	public void addResolvedPartition(String theId, RequestPartitionId thePartitionId) {
 		Validate.notBlank(theId, "theId must not be blank");
 		if (myResolvedPartitions.isEmpty()) {
@@ -196,7 +199,10 @@ public class TransactionDetails {
 		myResolvedPartitions.put(theId, thePartitionId);
 	}
 
-	// FIXME: javadoc
+	/**
+	 * If a resource has been resolved within the current transaction to a specific partition, we
+	 * cache it here to avoid repeated lookups.
+	 */
 	public RequestPartitionId getResolvedPartition(String theId) {
 		return myResolvedPartitions.get(theId);
 	}
@@ -275,9 +281,6 @@ public class TransactionDetails {
 	public void addResolvedResourceId(IIdType theResourceId, @Nullable IResourcePersistentId thePersistentId) {
 		assert theResourceId != null;
 		String key = theResourceId.toVersionless().getValue();
-
-		// FIXME: remove
-		ourLog.info("AAAA setting resolved for {} from {} to {}", key, myResolvedResourceIds.get(key), thePersistentId);
 
 		if (myResolvedResourceIds.isEmpty()) {
 			myResolvedResourceIds = new HashMap<>();
