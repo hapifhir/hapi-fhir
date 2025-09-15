@@ -247,6 +247,10 @@ public interface ITestDataBuilder {
 		return t -> ((IBaseResource)t).getMeta().setLastUpdated(new InstantType(theIsoDate).getValue());
 	}
 
+	default IBaseResource buildEncounter(ICreationArgument... theModifiers) {
+		return buildResource("Encounter", theModifiers);
+	}
+
 	default IIdType createEncounter(ICreationArgument... theModifiers) {
 		return createResource("Encounter", theModifiers);
 	}
@@ -467,6 +471,11 @@ public interface ITestDataBuilder {
 
 	default ICreationArgument withObservationHasMember(@Nullable IIdType theHasMember) {
 		return withReference("hasMember", theHasMember);
+	}
+
+	default ICreationArgument withOrganization(@Nullable String theHasMember) {
+		IIdType id = theHasMember != null ? getFhirContext().getVersion().newIdType(theHasMember) : null;
+		return withReference("managingOrganization", id);
 	}
 
 	default ICreationArgument withOrganization(@Nullable IIdType theHasMember) {

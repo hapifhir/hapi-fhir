@@ -140,7 +140,8 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 				// looking it up again
 				if (theTransactionDetails != null
 						&& theTransactionDetails.hasNullResolvedResourceId(targetResourceId)) {
-					throw new ResourceNotFoundException(Msg.code(2602));
+					throw new ResourceNotFoundException(Msg.code(2602) + "Resource " + resourceType + "/" + idPart
+							+ " previously cached in transaction as not-found, specified in path: " + sourcePath);
 				}
 
 				resolvedResource = myIdHelperService.resolveResourceIdentity(

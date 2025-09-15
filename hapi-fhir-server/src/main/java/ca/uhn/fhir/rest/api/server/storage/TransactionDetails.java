@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import com.google.common.collect.ArrayListMultimap;
@@ -62,6 +63,7 @@ public class TransactionDetails {
 
 	private final Date myTransactionDate;
 	private List<Runnable> myRollbackUndoActions = Collections.emptyList();
+	private Map<String, RequestPartitionId> myResolvedPartitions = Collections.emptyMap();
 	private Map<String, IResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
 	private Map<String, IResourcePersistentId> myResolvedMatchUrls = Collections.emptyMap();
 	private Map<String, Supplier<IBaseResource>> myResolvedResources = Collections.emptyMap();
@@ -180,6 +182,20 @@ public class TransactionDetails {
 	@Nonnull
 	public Set<IResourcePersistentId> getDeletedResourceIds() {
 		return Collections.unmodifiableSet(myDeletedResourceIds);
+	}
+
+	// FIXME: javadoc
+	public void addResolvedPartition(String theId, RequestPartitionId thePartitionId) {
+		Validate.notBlank(theId, "theId must not be blank");
+		if (myResolvedPartitions.isEmpty()) {
+			myResolvedPartitions = new HashMap<>();
+		}
+		myResolvedPartitions.put(theId, thePartitionId);
+	}
+
+	// FIXME: javadoc
+	public RequestPartitionId getResolvedPartition(String theId) {
+		return myResolvedPartitions.get(theId);
 	}
 
 	/**

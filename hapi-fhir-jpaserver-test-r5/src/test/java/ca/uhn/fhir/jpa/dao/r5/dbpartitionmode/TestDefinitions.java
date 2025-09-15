@@ -21,11 +21,13 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
+import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
@@ -36,6 +38,7 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
+import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.SqlQuery;
@@ -52,6 +55,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.annotation.Nonnull;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -85,6 +89,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -98,6 +103,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.dao.r5.dbpartitionmode.DbpmDisabledPartitioningEnabledTest.PARTITION_1;
 import static ca.uhn.fhir.jpa.dao.r5.dbpartitionmode.DbpmDisabledPartitioningEnabledTest.PARTITION_2;
+import static ca.uhn.fhir.jpa.test.BaseJpaTest.newSrd;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
@@ -1676,6 +1682,39 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 
 	@Test
+	public void testTransactionWithResourceTypePartitioning() {
+		// Setup
+
+		// Force separate transactions for all partitions
+		// FIXME: restore this after test
+		myParentTest.myHapiTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
+
+		myPartitionSelectorInterceptor.setPartitionIdForResourceType("Patient", PARTITION_1);
+		myPartitionSelectorInterceptor.setPartitionIdForResourceType("Encounter", PARTITION_1);
+		myPartitionSelectorInterceptor.setPartitionIdForResourceType("Organization", PARTITION_2);
+
+		createOrganization(withId("ORG-0"), withName("Org 0"));
+
+		verifyResourceIsInPartition(PARTITION_2, "Organization", "ORG-0");
+
+		BundleBuilder bb = new BundleBuilder(myFhirCtx);
+		bb.addTransactionUpdateEntry(buildPatient(withId("PAT-0"), withOrganization("Organization/ORG-0")));
+		bb.addTransactionUpdateEntry(buildEncounter(withId("ENC-0"), withSubject("Patient/PAT-0")));
+		Bundle request = bb.getBundleTyped();
+
+		// Test
+		Bundle response = mySystemDao.transaction(newSrd(), request);
+
+		// Verify
+		TransactionUtil.TransactionResponse parsedResponse = TransactionUtil.parseTransactionResponse(myFhirCtx, request, response);
+		assertEquals("Patient/PAT-0", parsedResponse.getStorageOutcomes().get(0).getTargetId().toUnqualifiedVersionless().getValue());
+		assertEquals("Encounter/ENC-0", parsedResponse.getStorageOutcomes().get(1).getTargetId().toUnqualifiedVersionless().getValue());
+		verifyResourceIsInPartition(PARTITION_1, "Patient", "PAT-0");
+		verifyResourceIsInPartition(PARTITION_1, "Encounter", "ENC-0");
+	}
+
+
+	@Test
 	public void testValuesetExpansion_IncludePreExpandedVsWithFilter() {
 		// Setup
 		myStorageSettings.setPreExpandValueSets(true);
@@ -2090,6 +2129,15 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		return myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
+	}
+
+	private void verifyResourceIsInPartition(int partitionId, String resourceType, String resourceId) {
+		myPartitionSelectorInterceptor.withNextPartition(partitionId, ()->{
+			IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceType);
+			IBaseResource resource = dao.read(new IdType(resourceType + "/" + resourceId), newSrd());
+			JpaPid pid = (JpaPid) resource.getUserData(IdHelperService.RESOURCE_PID);
+			assertEquals(partitionId, pid.getPartitionId());
+		});
 	}
 
 }

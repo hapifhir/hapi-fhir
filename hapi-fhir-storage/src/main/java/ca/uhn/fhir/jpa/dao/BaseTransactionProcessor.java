@@ -184,7 +184,7 @@ public abstract class BaseTransactionProcessor {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Autowired
-	private IHapiTransactionService myHapiTransactionService;
+	protected IHapiTransactionService myHapiTransactionService;
 
 	@Autowired
 	private StorageSettings myStorageSettings;
@@ -871,7 +871,7 @@ public abstract class BaseTransactionProcessor {
 		EntriesToProcessMap entriesToProcess;
 
 		RequestPartitionId requestPartitionId =
-				determineRequestPartitionIdForWriteEntries(theRequestDetails, theEntries);
+				determineRequestPartitionIdForWriteEntries(theRequestDetails, theTransactionDetails, theEntries);
 
 		try {
 			entriesToProcess = myHapiTransactionService
@@ -905,13 +905,13 @@ public abstract class BaseTransactionProcessor {
 	 */
 	@Nullable
 	protected RequestPartitionId determineRequestPartitionIdForWriteEntries(
-			RequestDetails theRequestDetails, List<IBase> theEntries) {
+			RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, List<IBase> theEntries) {
 		if (!myPartitionSettings.isPartitioningEnabled()) {
 			return RequestPartitionId.allPartitions();
 		}
 
 		return theEntries.stream()
-				.map(e -> getEntryRequestPartitionId(theRequestDetails, e))
+				.map(e -> getEntryRequestPartitionId(theRequestDetails, theTransactionDetails, e))
 				.reduce(null, (accumulator, nextPartition) -> {
 					if (accumulator == null) {
 						return nextPartition;
@@ -930,13 +930,14 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	@Nullable
-	private RequestPartitionId getEntryRequestPartitionId(RequestDetails theRequestDetails, IBase nextEntry) {
+	private RequestPartitionId getEntryRequestPartitionId(
+			RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, IBase theEntry) {
 
 		RequestPartitionId nextWriteEntryRequestPartitionId = null;
-		String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextEntry);
-		String url = extractTransactionUrlOrThrowException(nextEntry, verb);
+		String verb = myVersionAdapter.getEntryRequestVerb(myContext, theEntry);
+		String url = extractTransactionUrlOrThrowException(theEntry, verb);
 		RequestDetails requestDetailsForEntry =
-				createRequestDetailsForWriteEntry(theRequestDetails, nextEntry, url, verb);
+				createRequestDetailsForWriteEntry(theRequestDetails, theEntry, url, verb);
 		if (isNotBlank(verb)) {
 			BundleEntryTransactionMethodEnum verbEnum = BundleEntryTransactionMethodEnum.valueOf(verb);
 			switch (verbEnum) {
@@ -944,7 +945,7 @@ public abstract class BaseTransactionProcessor {
 					nextWriteEntryRequestPartitionId = null;
 					break;
 				case DELETE: {
-					String requestUrl = myVersionAdapter.getEntryRequestUrl(nextEntry);
+					String requestUrl = myVersionAdapter.getEntryRequestUrl(theEntry);
 					if (isNotBlank(requestUrl)) {
 						IdType id = new IdType(requestUrl);
 						String resourceType = id.getResourceType();
@@ -957,7 +958,7 @@ public abstract class BaseTransactionProcessor {
 					break;
 				}
 				case PATCH: {
-					String requestUrl = myVersionAdapter.getEntryRequestUrl(nextEntry);
+					String requestUrl = myVersionAdapter.getEntryRequestUrl(theEntry);
 					if (isNotBlank(requestUrl)) {
 						IdType id = new IdType(requestUrl);
 						String resourceType = id.getResourceType();
@@ -970,7 +971,7 @@ public abstract class BaseTransactionProcessor {
 					break;
 				}
 				case POST: {
-					IBaseResource resource = myVersionAdapter.getResource(nextEntry);
+					IBaseResource resource = myVersionAdapter.getResource(theEntry);
 					String resourceType = myContext.getResourceType(resource);
 					nextWriteEntryRequestPartitionId =
 							myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
@@ -978,12 +979,26 @@ public abstract class BaseTransactionProcessor {
 					break;
 				}
 				case PUT: {
-					IBaseResource resource = myVersionAdapter.getResource(nextEntry);
+					IBaseResource resource = myVersionAdapter.getResource(theEntry);
 					if (resource != null) {
 						String resourceType = myContext.getResourceType(resource);
-						nextWriteEntryRequestPartitionId =
-								myRequestPartitionHelperService.determineCreatePartitionForRequest(
-										requestDetailsForEntry, resource, resourceType);
+						String resourceId = null;
+						if (resource.getIdElement().hasIdPart()) {
+							resourceId =
+									resourceType + "/" + resource.getIdElement().getIdPart();
+						}
+						if (resourceId != null) {
+							nextWriteEntryRequestPartitionId = theTransactionDetails.getResolvedPartition(resourceId);
+						}
+						if (nextWriteEntryRequestPartitionId == null) {
+							nextWriteEntryRequestPartitionId =
+									myRequestPartitionHelperService.determineCreatePartitionForRequest(
+											requestDetailsForEntry, resource, resourceType);
+							if (resourceId != null) {
+								theTransactionDetails.addResolvedPartition(
+										resourceId, nextWriteEntryRequestPartitionId);
+							}
+						}
 					}
 					break;
 				}
