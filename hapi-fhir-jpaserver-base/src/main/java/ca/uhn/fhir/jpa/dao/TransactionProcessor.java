@@ -532,9 +532,10 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		Map<MatchTarget, List<MatchUrlToResolve>> byMatchUrl =
 				searchParameterMapsToResolve.stream().collect(groupingBy(MatchTarget::getMatchTarget));
 
-		// Chunk references into query-friend sizes.
+		// Chunk references into query-friendly sizes to resolve in batches.
 		// Note: we can have 1000s of references all using the same url.
 		// E.g. Organization references in big patient bundles.
+		// So we build batches by url, not by reference.
 		// todo - if we are using partitioned tables, we want to also chunk these by target table partition.  Can we use
 		// isCompatiblePartition() to do this?
 		TaskChunker.chunk(byMatchUrl.entrySet(), CONDITIONAL_URL_FETCH_CHUNK_SIZE, nextUrlChunk -> {

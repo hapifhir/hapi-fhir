@@ -64,7 +64,7 @@ public class TransactionDetails {
 	private List<Runnable> myRollbackUndoActions = Collections.emptyList();
 	private Map<String, IResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
 	/** The reverse of myResolvedResourceIds. Safe since id:pid is 1:1. */
-	private Map<IResourcePersistentId, IIdType> myReverseResolvedResourceIds = new HashMap<>();
+	private Map<IResourcePersistentId, IIdType> myReverseResolvedResourceIds = Collections.emptyMap();
 
 	private Map<String, IResourcePersistentId> myResolvedMatchUrls = Collections.emptyMap();
 	private Map<String, Supplier<IBaseResource>> myResolvedResources = Collections.emptyMap();
@@ -261,6 +261,7 @@ public class TransactionDetails {
 
 		if (myResolvedResourceIds.isEmpty()) {
 			myResolvedResourceIds = new HashMap<>();
+			myReverseResolvedResourceIds = new HashMap<>();
 		}
 		String fhirId = theResourceId.toVersionless().getValue();
 		myResolvedResourceIds.put(fhirId, thePersistentId);
