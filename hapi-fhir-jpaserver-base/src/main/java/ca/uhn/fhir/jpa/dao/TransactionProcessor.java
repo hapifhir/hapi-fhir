@@ -529,13 +529,14 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				return new MatchTarget(r.myRequestUrl, r.myResourceDefinition.getName());
 			}
 		}
-		Map<MatchTarget, List<MatchUrlToResolve>> byMatchUrl = searchParameterMapsToResolve.stream()
-				.collect(groupingBy(MatchTarget::getMatchTarget));
+		Map<MatchTarget, List<MatchUrlToResolve>> byMatchUrl =
+				searchParameterMapsToResolve.stream().collect(groupingBy(MatchTarget::getMatchTarget));
 
 		// Chunk references into query-friend sizes.
 		// Note: we can have 1000s of references all using the same url.
 		// E.g. Organization references in big patient bundles.
-		// todo - if we are using partitioned tables, we want to also chunk these by target table partition.  Can we use isCompatiblePartition() to do this?
+		// todo - if we are using partitioned tables, we want to also chunk these by target table partition.  Can we use
+		// isCompatiblePartition() to do this?
 		TaskChunker.chunk(byMatchUrl.entrySet(), CONDITIONAL_URL_FETCH_CHUNK_SIZE, nextUrlChunk -> {
 			// combine all resolve entries under this chunk of urls.
 			List<MatchUrlToResolve> combinedChunk =
@@ -550,7 +551,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					theIdsToPreFetchVersionsFor);
 		});
 	}
-
 
 	/**
 	 * This method attempts to resolve a collection of conditional URLs that were found
@@ -624,7 +624,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			}
 		}
 
-		// fixme get the FHIR ids back too, and add this to TransactionDetails.resolvedIds.
 		preFetchSearchParameterMapsToken(
 				"myHashSystemAndValue",
 				systemAndValueHashes,

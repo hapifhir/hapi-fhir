@@ -65,6 +65,7 @@ public class TransactionDetails {
 	private Map<String, IResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
 	/** The reverse of myResolvedResourceIds. Safe since id:pid is 1:1. */
 	private Map<IResourcePersistentId, IIdType> myReverseResolvedResourceIds = new HashMap<>();
+
 	private Map<String, IResourcePersistentId> myResolvedMatchUrls = Collections.emptyMap();
 	private Map<String, Supplier<IBaseResource>> myResolvedResources = Collections.emptyMap();
 	private Set<IResourcePersistentId> myDeletedResourceIds = Collections.emptySet();
