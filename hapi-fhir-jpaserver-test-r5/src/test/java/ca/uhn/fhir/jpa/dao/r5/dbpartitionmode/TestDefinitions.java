@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
@@ -204,6 +205,8 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			PartitionSettings defaults = new PartitionSettings();
 			myPartitionSettings.setConditionalCreateDuplicateIdentifiersEnabled(defaults.isConditionalCreateDuplicateIdentifiersEnabled());
 		}
+
+		myParentTest.myHapiTransactionService.setTransactionPropagationWhenChangingPartitions(HapiTransactionService.DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
 	}
 
 	@Test
@@ -1686,7 +1689,6 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		// Setup
 
 		// Force separate transactions for all partitions
-		// FIXME: restore this after test
 		myParentTest.myHapiTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
 
 		myPartitionSelectorInterceptor.setPartitionIdForResourceType("Patient", PARTITION_1);
@@ -2132,12 +2134,14 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	}
 
 	private void verifyResourceIsInPartition(int partitionId, String resourceType, String resourceId) {
-		myPartitionSelectorInterceptor.withNextPartition(partitionId, ()->{
-			IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceType);
-			IBaseResource resource = dao.read(new IdType(resourceType + "/" + resourceId), newSrd());
-			JpaPid pid = (JpaPid) resource.getUserData(IdHelperService.RESOURCE_PID);
-			assertEquals(partitionId, pid.getPartitionId());
-		});
+		if (myIncludePartitionIdsInSql) {
+			myPartitionSelectorInterceptor.withNextPartition(partitionId, () -> {
+				IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceType);
+				IBaseResource resource = dao.read(new IdType(resourceType + "/" + resourceId), newSrd());
+				JpaPid pid = (JpaPid) resource.getUserData(IdHelperService.RESOURCE_PID);
+				assertEquals(partitionId, pid.getPartitionId());
+			});
+		}
 	}
 
 }

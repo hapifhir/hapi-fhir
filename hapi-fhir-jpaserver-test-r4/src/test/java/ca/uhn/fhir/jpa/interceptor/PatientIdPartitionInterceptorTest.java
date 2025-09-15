@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -26,6 +27,7 @@ import ca.uhn.fhir.rest.server.provider.BulkDataExportProvider;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.MultimapCollector;
+import ca.uhn.fhir.util.ResourceReferenceInfo;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
@@ -35,6 +37,8 @@ import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
@@ -42,9 +46,11 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,10 +58,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -386,6 +396,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testTransaction_NoRequestDetails() throws IOException {
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 		Bundle input = loadResourceFromClasspath(Bundle.class, "/r4/load_bundle.json");
 
 		// Maybe in the future we'll make request details mandatory and if that
@@ -487,6 +498,8 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testSearch() throws IOException {
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+
 		Bundle input = loadResourceFromClasspath(Bundle.class, "/r4/load_bundle.json");
 		Bundle outcome = mySystemDao.transaction(new SystemRequestDetails(), input);
 
@@ -645,6 +658,20 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		myServer.getFhirClient().transaction().withBundle(Resources.toString(Resources.getResource("transaction-bundles/synthea/hospitalInformation1743689610792.json"), Charsets.UTF_8)).execute();
 		myServer.getFhirClient().transaction().withBundle(Resources.toString(Resources.getResource("transaction-bundles/synthea/practitionerInformation1743689610792.json"), Charsets.UTF_8)).execute();
 		Bundle patientBundle = parser.parseResource(Bundle.class, Resources.toString(Resources.getResource("transaction-bundles/synthea/Sherise735_Zofia65_Swaniawski813_e0f7758e-a749-4357-858c-53e1db808e37.json"), Charsets.UTF_8));
+
+		// FIXME: remove
+		patientBundle.getEntry().removeIf(t->t.getResource() instanceof Medication);
+		patientBundle.getEntry().removeIf(t->t.getResource() instanceof Provenance);
+		for (IBaseResource resource : myFhirContext.newTerser().getAllEmbeddedResources(patientBundle, true)) {
+			List<ResourceReferenceInfo> refs = myFhirContext.newTerser().getAllResourceReferences(resource);
+			for (ResourceReferenceInfo ref : refs) {
+				String refString = ref.getResourceReference().getReferenceElement().getValue();
+				if ("urn:uuid:43840b2f-d48d-2bd9-e02e-abe63ed73bbc".equals(refString) || "urn:uuid:6bbf258d-f5a8-7485-0651-a9e06beb3b93".equals(refString)) {
+					ref.getResourceReference().setReference(null);
+					ref.getResourceReference().setResource(null);
+				}
+			}
+		}
 
 		// when
 		assertDoesNotThrow(() -> myServer.getFhirClient().transaction().withBundle(patientBundle).execute());

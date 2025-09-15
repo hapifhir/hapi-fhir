@@ -1194,6 +1194,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	})
 	public void testReindexJob_OptimizeStorage(boolean theOptimisticLock, ReindexParameters.OptimizeStorageModeEnum theOptimizeStorageModeEnum, int theExpectedSelectCount, int theExpectedUpdateCount) {
 		// Setup
+		when(myMockWorkChunk.getId()).thenReturn("chunk-id");
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
 		IIdType patientId = createPatient(withActiveTrue());
 		IIdType orgId = createOrganization(withName("MY ORG"));
@@ -1237,6 +1238,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testReindexJob_ComboParamIndexesInUse() {
+		// setup
+		when(myMockWorkChunk.getId()).thenReturn("chunk-id");
 		myStorageSettings.setUniqueIndexesEnabled(true);
 		myReindexTestHelper.createUniqueCodeSearchParameter();
 		myReindexTestHelper.createNonUniqueStatusAndCodeSearchParameter();

@@ -124,10 +124,12 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		T persistentId = null;
 		if (theTransactionDetails != null) {
 			T resolvedResourceId = (T) theTransactionDetails.getResolvedResourceId(targetResourceId);
-			if (resolvedResourceId != null
-					&& resolvedResourceId.getId() != null
-					&& resolvedResourceId.getAssociatedResourceId() != null) {
+			if (resolvedResourceId != null && resolvedResourceId.getId() != null) {
 				persistentId = resolvedResourceId;
+
+				if (resolvedResourceId.getAssociatedResourceId() == null) {
+					resolvedResourceId.setAssociatedResourceId(targetResourceId);
+				}
 			}
 		}
 

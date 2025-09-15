@@ -33,6 +33,8 @@ import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,6 +61,7 @@ import java.util.function.Supplier;
  */
 public class TransactionDetails {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(TransactionDetails.class);
 	public static final IResourcePersistentId NOT_FOUND = IResourcePersistentId.NOT_FOUND;
 
 	private final Date myTransactionDate;
@@ -271,11 +274,15 @@ public class TransactionDetails {
 	 */
 	public void addResolvedResourceId(IIdType theResourceId, @Nullable IResourcePersistentId thePersistentId) {
 		assert theResourceId != null;
+		String key = theResourceId.toVersionless().getValue();
+
+		// FIXME: remove
+		ourLog.info("AAAA setting resolved for {} from {} to {}", key, myResolvedResourceIds.get(key), thePersistentId);
 
 		if (myResolvedResourceIds.isEmpty()) {
 			myResolvedResourceIds = new HashMap<>();
 		}
-		myResolvedResourceIds.put(theResourceId.toVersionless().getValue(), thePersistentId);
+		myResolvedResourceIds.put(key, thePersistentId);
 	}
 
 	/**

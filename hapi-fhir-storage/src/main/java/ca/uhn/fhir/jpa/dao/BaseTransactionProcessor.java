@@ -919,12 +919,14 @@ public abstract class BaseTransactionProcessor {
 						return accumulator;
 					} else if (myHapiTransactionService.isCompatiblePartition(accumulator, nextPartition)) {
 						return accumulator.mergeIds(nextPartition);
-					} else {
+					} else if (!nextPartition.isAllPartitions()) {
 						String msg = myContext
 								.getLocalizer()
 								.getMessage(
 										BaseTransactionProcessor.class, "multiplePartitionAccesses", theEntries.size());
 						throw new InvalidRequestException(Msg.code(2541) + msg);
+					} else {
+						return accumulator;
 					}
 				});
 	}

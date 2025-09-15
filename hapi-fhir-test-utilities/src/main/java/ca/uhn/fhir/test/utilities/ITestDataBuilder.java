@@ -291,6 +291,10 @@ public interface ITestDataBuilder {
 		return createResource("Practitioner", theModifiers);
 	}
 
+	default IBaseResource buildPractitioner(ICreationArgument... theModifiers) {
+		return buildResource("Practitioner", theModifiers);
+	}
+
 	default void deleteResource(IIdType theIIdType){
 		doDeleteResource(theIIdType);
 	}
@@ -373,15 +377,12 @@ public interface ITestDataBuilder {
 
 	@Nonnull
 	default ICreationArgument withReference(String theReferenceName, @Nullable IIdType theReferenceValue) {
-		return t -> {
-			if (theReferenceValue != null && theReferenceValue.getValue() != null) {
-				IBaseReference reference = (IBaseReference) getFhirContext().getElementDefinition("Reference").newInstance();
+		return withElementAt(theReferenceName, t -> {
+			IBaseReference reference = (IBaseReference) t;
+			if (theReferenceValue != null) {
 				reference.setReference(theReferenceValue.getValue());
-
-				BaseRuntimeElementDefinition<?> resourceDef = getFhirContext().getElementDefinition(t.getClass());
-				resourceDef.getChildByName(theReferenceName).getMutator().addValue(t, reference);
 			}
-		};
+		});
 	}
 
 	default Consumer<IBase> withPrimitiveAttribute(String thePath, Object theValue) {
