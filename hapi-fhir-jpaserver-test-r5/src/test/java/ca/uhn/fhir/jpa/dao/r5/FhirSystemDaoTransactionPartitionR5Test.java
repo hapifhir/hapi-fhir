@@ -54,7 +54,12 @@ public class FhirSystemDaoTransactionPartitionR5Test extends BaseJpaR5Test {
 
 		private List<List<Integer>> myNextRanges;
 
-		public void setNextRanges(List<List<Integer>> theNextRanges) {
+		@SafeVarargs
+		public final void setNextRanges(List<Integer>... theNextRanges) {
+			myNextRanges = List.of(theNextRanges);
+		}
+
+		public final void setNextRanges(List<List<Integer>> theNextRanges) {
 			myNextRanges = theNextRanges;
 		}
 

@@ -399,28 +399,30 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				: ResolveIdentityMode.includeDeleted().cacheOk();
 
 		SetMultimap<RequestPartitionId, IIdType> partitionToIds = null;
+		Set<IIdType> referenceTargetIds = new HashSet<>(idsToPreResolve.keySet());
 
 		/*
 		 * If specific resources are on different non-compatible partitions, we will resolve them separately
 		 * in a separate transaction
 		 */
-		Set<IIdType> referenceTargetIds = new HashSet<>(idsToPreResolve.keySet());
-		for (Iterator<IIdType> iterator = referenceTargetIds.iterator(); iterator.hasNext(); ) {
-			IIdType nextId = iterator.next();
-			RequestPartitionId partition = theTransactionDetails.getResolvedPartition(nextId.getValue());
-			if (partition == null) {
-				ReadPartitionIdRequestDetails readDetails = ReadPartitionIdRequestDetails.forRead(nextId);
-				partition =
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			for (Iterator<IIdType> iterator = referenceTargetIds.iterator(); iterator.hasNext(); ) {
+				IIdType nextId = iterator.next();
+				RequestPartitionId partition = theTransactionDetails.getResolvedPartition(nextId.getValue());
+				if (partition == null) {
+					ReadPartitionIdRequestDetails readDetails = ReadPartitionIdRequestDetails.forRead(nextId);
+					partition =
 						myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, readDetails);
-			}
-			if (!partition.isAllPartitions()) {
-				if (!myHapiTransactionService.isCompatiblePartition(theRequestPartitionId, partition)) {
-					iterator.remove();
-					if (partitionToIds == null) {
-						partitionToIds =
+				}
+				if (!partition.isAllPartitions()) {
+					if (!myHapiTransactionService.isCompatiblePartition(theRequestPartitionId, partition)) {
+						iterator.remove();
+						if (partitionToIds == null) {
+							partitionToIds =
 								MultimapBuilder.hashKeys().hashSetValues().build();
+						}
+						partitionToIds.put(partition, nextId);
 					}
-					partitionToIds.put(partition, nextId);
 				}
 			}
 		}

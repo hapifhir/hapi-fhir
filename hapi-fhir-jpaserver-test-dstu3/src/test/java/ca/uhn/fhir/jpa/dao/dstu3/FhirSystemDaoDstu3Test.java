@@ -249,34 +249,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 			.stream()
 			.map(t -> new org.hl7.fhir.r4.model.IdType(t.getResponse().getLocation()).getResourceType())
 			.collect(Collectors.toList());
-		assertThat(responseTypes).as(responseTypes.toString()).containsExactly(
-			"Patient",
-			"Encounter",
-			"Location",
-			"Location",
-			"Practitioner",
-			"ProcedureRequest",
-			"DiagnosticReport",
-			"Specimen",
-			"Practitioner",
-			"Observation",
-			null,
-			"Observation",
-			null,
-			"Observation",
-			null,
-			"Observation",
-			null,
-			"Observation",
-			null,
-			"Observation",
-			null,
-			"Observation",
-			null,
-			"Observation",
-			null,
-			"Observation"
-		);
+		assertThat(responseTypes).as(responseTypes.toString()).containsExactly("Patient", "Encounter", "Location", "Location", "Practitioner", "ProcedureRequest", "DiagnosticReport", "Specimen", "Practitioner", "Observation", "Observation", "Observation", "Observation", "Observation", "Observation", "Observation", "Observation", "Observation");
 	}
 
 	@Test
