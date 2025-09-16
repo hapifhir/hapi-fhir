@@ -54,6 +54,7 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 
 	private static final org.slf4j.Logger ourLog =
 			org.slf4j.LoggerFactory.getLogger(DefaultProfileValidationSupport.class);
+	private static final String URL_PREFIX_STRUCTURE_DEFINITION_BASE = "http://hl7.org/fhir/";
 	private final FhirContext myCtx;
 
 	private Map<String, IBaseResource> myCodeSystems;
@@ -266,7 +267,7 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 			if (url.indexOf('/') == -1) {
 				url = IValidationSupport.URL_PREFIX_STRUCTURE_DEFINITION + url;
 			} else if (StringUtils.countMatches(url, '/') == 1) {
-				url = IValidationSupport.URL_PREFIX_BASE + url;
+				url = URL_PREFIX_STRUCTURE_DEFINITION_BASE + url;
 			}
 		}
 		Map<String, IBaseResource> structureDefinitionMap = provideStructureDefinitionMap();

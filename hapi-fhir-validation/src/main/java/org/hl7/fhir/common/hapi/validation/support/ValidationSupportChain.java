@@ -611,7 +611,7 @@ public class ValidationSupportChain implements IValidationSupport {
 						// So we'll cache them without version.
 						boolean shouldAppendVersionToUrl = !Strings.isNullOrEmpty(url)
 								&& version != null
-								&& !IValidationSupport.isBaseStructureDefinition(url);
+								&& !url.startsWith(URL_PREFIX_STRUCTURE_DEFINITION);
 						if (shouldAppendVersionToUrl) {
 							url = url + "|" + version;
 						}

@@ -63,6 +63,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.utilities.json.model.JsonObject;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
@@ -85,8 +86,7 @@ import static ca.uhn.fhir.util.SearchParameterUtil.getBaseAsStrings;
 public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PackageInstallerSvcImpl.class);
-	private static final String OUR_VERSION_DELIMITER = "|";
-	public static final String OUR_SEARCH_PARAMETER_NAME = "SearchParameter";
+	private static final String OUR_PIPE_CHARACTER = "|";
 
 	boolean enabled = true;
 
@@ -428,7 +428,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				theResource.setId(new IdDt()); // Ignore the given ID
 				if (thePackageInstallationSpec != null) {
 					String metaSourceUrl = thePackageInstallationSpec.getName()
-							+ OUR_VERSION_DELIMITER
+							+ OUR_PIPE_CHARACTER
 							+ thePackageInstallationSpec.getVersion();
 					MetaUtil.setSource(myFhirContext, theResource, metaSourceUrl);
 				}

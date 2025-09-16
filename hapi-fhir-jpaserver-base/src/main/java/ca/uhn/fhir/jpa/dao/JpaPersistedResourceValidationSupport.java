@@ -231,7 +231,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				break;
 			case "StructureDefinition": {
 				// Don't allow the core FHIR definitions to be overwritten
-				if (IValidationSupport.isBaseStructureDefinition(theUri)) {
+				if (theUri.startsWith(URL_PREFIX_STRUCTURE_DEFINITION)) {
 					String typeName = theUri.substring(URL_PREFIX_STRUCTURE_DEFINITION.length());
 					if (myFhirContext.getElementDefinition(typeName) != null) {
 						return null;
