@@ -45,6 +45,17 @@ public class PartitionedUrlJobParameters implements IModelJson {
 	@JsonProperty("partitionedUrl")
 	private List<PartitionedUrl> myPartitionedUrls;
 
+	@JsonProperty("limitResourceCount")
+	private Integer myLimitResourceCount;
+
+	public void setLimitResourceCount(Integer theLimitResourceCount) {
+		myLimitResourceCount = theLimitResourceCount;
+	}
+
+	public Integer getLimitResourceCount() {
+		return myLimitResourceCount;
+	}
+
 	public void setRequestPartitionId(@Nullable RequestPartitionId theRequestPartitionId) {
 		myRequestPartitionId = theRequestPartitionId;
 	}
@@ -54,10 +65,16 @@ public class PartitionedUrlJobParameters implements IModelJson {
 		return myRequestPartitionId;
 	}
 
+	/**
+	 * Note: Values above the maximum allowable will be ignored by {@link ca.uhn.fhir.batch2.jobs.step.ResourceIdListStep}
+	 */
 	public void setBatchSize(int theBatchSize) {
 		myBatchSize = theBatchSize;
 	}
 
+	/**
+	 * Note: Values above the maximum allowable will be ignored by {@link ca.uhn.fhir.batch2.jobs.step.ResourceIdListStep}
+	 */
 	@Nullable
 	public Integer getBatchSize() {
 		return myBatchSize;
