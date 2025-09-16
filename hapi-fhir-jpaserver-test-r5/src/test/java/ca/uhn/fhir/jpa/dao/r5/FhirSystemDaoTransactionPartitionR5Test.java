@@ -46,7 +46,8 @@ public class FhirSystemDaoTransactionPartitionR5Test extends BaseJpaR5Test {
 		TransactionUtil.TransactionResponse responseParsed = TransactionUtil.parseTransactionResponse(myFhirContext, request, response);
 		assertEquals("Observation/OBS-0", responseParsed.getStorageOutcomes().get(0).getTargetId().getValue());
 		assertEquals(201, responseParsed.getStorageOutcomes().get(0).getStatusCode());
-		// FIXME: add rest
+		assertEquals("Patient/PAT-0", responseParsed.getStorageOutcomes().get(0).getTargetId().getValue());
+		assertEquals(201, responseParsed.getStorageOutcomes().get(0).getStatusCode());
 	}
 
 
