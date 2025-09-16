@@ -1496,15 +1496,15 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 
 		private void createAndSetMdmSettingsForEidMatchOnly() {
-			MdmSettings myMdmSettings = new MdmSettings(myMdmRulesValidator);
-			myMdmSettings.setEnabled(true);
-			myMdmSettings.setMdmMode(MdmModeEnum.MATCH_ONLY);
+			MdmSettings mdmSettings = new MdmSettings(myMdmRulesValidator);
+			mdmSettings.setEnabled(true);
+			mdmSettings.setMdmMode(MdmModeEnum.MATCH_ONLY);
 			MdmRulesJson rules = new MdmRulesJson();
 			rules.setMdmTypes(List.of("Patient"));
 			rules.addEnterpriseEIDSystem("Patient", TEST_PATIENT_EID_SYS);
-			myMdmSettings.setMdmRules(rules);
+			mdmSettings.setMdmRules(rules);
 
-			myMdmExpandersHolder.setMdmSettings(myMdmSettings);
+			myMdmExpandersHolder.setMdmSettings(mdmSettings);
 		}
 
 		private void restoreMdmSettingsToDefault() {
