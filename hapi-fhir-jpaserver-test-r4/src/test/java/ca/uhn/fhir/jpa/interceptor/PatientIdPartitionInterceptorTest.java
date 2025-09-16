@@ -1,10 +1,14 @@
 package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.dao.TransactionPartitionResponse;
 import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -26,6 +30,7 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.BulkDataExportProvider;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MultimapCollector;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ListMultimap;
@@ -36,6 +41,7 @@ import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
@@ -47,12 +53,16 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -639,27 +649,40 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		}
 	}
 
-	@Test
-	void testSyntheaLoad() throws IOException {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testSyntheaLoad(boolean theSplitTransaction) throws IOException {
+
+		if (theSplitTransaction) {
+			registerInterceptor(new MyTransactionSplitInterceptor());
+		}
+
 	    // given
 		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 
 		// Load the Synthea supporting bundles
-		TransactionUtil.TransactionResponse parsedResponse;
-		parsedResponse = performTransactionAndParseResponse(loadResourceFromClasspath(Bundle.class, "transaction-bundles/synthea/hospitalInformation1743689610792.json"));
-		IIdType locationId = parsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Location")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
-		parsedResponse = performTransactionAndParseResponse(loadResourceFromClasspath(Bundle.class, "transaction-bundles/synthea/practitionerInformation1743689610792.json"));
-		IIdType practitionerId = parsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Practitioner")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
+		TransactionUtil.TransactionResponse hospitalParsedResponse;
+		hospitalParsedResponse = performTransactionAndParseResponse(loadResourceFromClasspath(Bundle.class, "transaction-bundles/synthea/hospitalInformation1743689610792.json"));
+		IIdType locationId = hospitalParsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Location")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
+		TransactionUtil.TransactionResponse practitionerParsedResponse = performTransactionAndParseResponse(loadResourceFromClasspath(Bundle.class, "transaction-bundles/synthea/practitionerInformation1743689610792.json"));
+		IIdType practitionerId = practitionerParsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Practitioner")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
 
 		// when
-		parsedResponse = performTransactionAndParseResponse(loadResourceFromClasspath(Bundle.class, "transaction-bundles/synthea/Sherise735_Zofia65_Swaniawski813_e0f7758e-a749-4357-858c-53e1db808e37.json"));
+		myCaptureQueriesListener.clear();
+		TransactionUtil.TransactionResponse mainParsedResponse = performTransactionAndParseResponse(loadResourceFromClasspath(Bundle.class, "transaction-bundles/synthea/Sherise735_Zofia65_Swaniawski813_e0f7758e-a749-4357-858c-53e1db808e37.json"));
 
 		// verify
-		IIdType patientId = parsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Patient")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
-		IIdType encounterId = parsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Encounter")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
-		IIdType observationId = parsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Observation")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
-		IIdType medicationId = parsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Medication")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
+		if (theSplitTransaction) {
+			assertEquals(2, myCaptureQueriesListener.countCommits());
+		} else {
+			assertEquals(1, myCaptureQueriesListener.countCommits());
+		}
+
+		IIdType patientId = mainParsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Patient")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
+		IIdType encounterId = mainParsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Encounter")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
+		IIdType observationId = mainParsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Observation")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
+		IIdType medicationId = mainParsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Medication")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
 
 		int patientPartition = getResourcePartition(patientId);
 		assertThat(patientPartition).isGreaterThan(0);
@@ -741,6 +764,45 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		//
 		Bundle search = myServer.getFhirClient().search().forResource("Encounter").where(Encounter.PATIENT.hasId(patientId)).and(Encounter.SERVICE_PROVIDER.hasId(orgId)).returnBundle(Bundle.class).execute();
 		assertEquals(1, search.getEntry().size(), "we find the Encounter linked to the organization and the patient");
+	}
+
+
+	@Interceptor
+	public class MyTransactionSplitInterceptor {
+
+		@Hook(Pointcut.STORAGE_TRANSACTION_PRE_PARTITION)
+		public TransactionPartitionResponse transactionPartition(IBaseBundle theInput) {
+			List<IBaseBundle> bundles = new ArrayList<>();
+			FhirTerser terser = myFhirContext.newTerser();
+
+			Bundle patientBundle = new Bundle();
+			patientBundle.setType(Bundle.BundleType.TRANSACTION);
+			Bundle nonPatientBundle = new Bundle();
+			nonPatientBundle.setType(Bundle.BundleType.TRANSACTION);
+
+			List<Bundle.BundleEntryComponent> entries = terser.getValues(theInput, "entry", Bundle.BundleEntryComponent.class);
+			for (Bundle.BundleEntryComponent entry : entries) {
+				Resource resource = entry.getResource();
+				switch (resource.getResourceType()) {
+					case Medication, Practitioner, Location -> {
+						nonPatientBundle.addEntry(entry);
+					}
+					default -> {
+						patientBundle.addEntry(entry);
+					}
+				}
+			}
+
+			if (!nonPatientBundle.getEntry().isEmpty()) {
+				bundles.add(nonPatientBundle);
+			}
+			if (!patientBundle.getEntry().isEmpty()) {
+				bundles.add(patientBundle);
+			}
+
+			return new TransactionPartitionResponse(bundles);
+		}
+
 	}
 
 }
