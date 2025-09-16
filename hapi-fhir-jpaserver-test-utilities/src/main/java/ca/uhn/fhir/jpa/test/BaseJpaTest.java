@@ -1077,6 +1077,13 @@ public abstract class BaseJpaTest extends BaseTest {
 	/**
 	 * Asserts that the resource with {@literal theId} is deleted
 	 */
+	protected void assertGone(String theId) {
+		assertGone(myFhirContext.getVersion().newIdType(theId));
+	}
+
+	/**
+	 * Asserts that the resource with {@literal theId} is deleted
+	 */
 	protected void assertGone(IIdType theId) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theId.getResourceType());
 		IBaseResource result = dao.read(theId, newSrd(), true);
@@ -1102,6 +1109,16 @@ public abstract class BaseJpaTest extends BaseTest {
 	 */
 	protected void assertExists(IIdType theId) {
 		assertNotGone(theId);
+	}
+
+	/**
+	 * Asserts that the resource with {@literal theId} exists and is not deleted.
+	 * Note that {@link #assertExists(IIdType)} and {@link #assertNotGone(IIdType)}
+	 * are synonyms but both exist for better readability in different kinds
+	 * of tests.
+	 */
+	protected void assertNotGone(String theId) {
+		assertNotGone(myFhirContext.getVersion().newIdType(theId));
 	}
 
 	/**

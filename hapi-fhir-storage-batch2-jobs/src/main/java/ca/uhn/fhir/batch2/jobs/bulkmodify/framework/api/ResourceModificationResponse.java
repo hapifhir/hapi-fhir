@@ -28,19 +28,27 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  * Implementations of bulk modification jobs will subclass {@link ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyResourcesStep}
  * and will return this object for each resource candidate to be modified.
  *
- * @since 8.6.0
  * @see ResourceModificationRequest
+ * @since 8.6.0
  */
+@SuppressWarnings("ClassCanBeRecord")
 public class ResourceModificationResponse {
 
 	@Nullable
 	private final IBaseResource myResource;
 
+	private final boolean myDeleted;
+
 	/**
 	 * Use static factory methods to instantiate this class
 	 */
-	private ResourceModificationResponse(@Nullable IBaseResource theResource) {
+	private ResourceModificationResponse(@Nullable IBaseResource theResource, boolean theDeleted) {
 		myResource = theResource;
+		myDeleted = theDeleted;
+	}
+
+	public boolean isDeleted() {
+		return myDeleted;
 	}
 
 	@Nullable
@@ -48,12 +56,25 @@ public class ResourceModificationResponse {
 		return myResource;
 	}
 
+	/**
+	 * Update the current resource contents with the given resource.
+	 */
 	public static ResourceModificationResponse updateResource(@Nonnull IBaseResource theResource) {
 		Validate.notNull(theResource, "theResource must not be null");
-		return new ResourceModificationResponse(theResource);
+		return new ResourceModificationResponse(theResource, false);
 	}
 
+	/**
+	 * This response indicates that the resource should not be modified.
+	 */
 	public static ResourceModificationResponse noChange() {
-		return new ResourceModificationResponse(null);
+		return new ResourceModificationResponse(null, false);
+	}
+
+	/**
+	 * This response indicates that the resource should be deleted.
+	 */
+	public static ResourceModificationResponse delete() {
+		return new ResourceModificationResponse(null, true);
 	}
 }

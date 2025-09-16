@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
@@ -96,6 +97,7 @@ import org.hl7.fhir.r5.model.Encounter;
 import org.hl7.fhir.r5.model.EpisodeOfCare;
 import org.hl7.fhir.r5.model.Group;
 import org.hl7.fhir.r5.model.HealthcareService;
+import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Immunization;
 import org.hl7.fhir.r5.model.ImmunizationRecommendation;
 import org.hl7.fhir.r5.model.Location;
@@ -147,6 +149,8 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR5Config.class, TestDaoSearch.Config.class})
 public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuilder {
+	@Autowired
+	protected IHapiTransactionService myTxService;
 	@Autowired
 	protected IJobCoordinator myJobCoordinator;
 	@Autowired
@@ -506,6 +510,10 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@AfterEach
 	public void afterEachClearCaches() {
 		myJpaValidationSupportChain.invalidateCaches();
+	}
+
+	protected Patient readPatient(String theId) {
+		return myPatientDao.read(new IdType(theId), newSrd());
 	}
 
 }
