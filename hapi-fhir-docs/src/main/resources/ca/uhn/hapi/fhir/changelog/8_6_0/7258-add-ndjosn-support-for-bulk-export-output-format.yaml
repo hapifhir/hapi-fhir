@@ -1,5 +1,0 @@
----
-type: add
-issue: 7258
-jira: SMILE-11001
-title: "Add support of `application/ndjson` as a Bulk Export output format."
