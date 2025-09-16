@@ -17,6 +17,8 @@ import ca.uhn.fhir.sl.cache.CacheFactory;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.base.Strings;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
@@ -602,6 +604,19 @@ public class ValidationSupportChain implements IValidationSupport {
 				synchronized (myStructureDefinitionsByUrl) {
 					for (IBaseResource structureDefinition : allStructureDefinitions) {
 						String url = terser.getSinglePrimitiveValueOrNull(structureDefinition, "url");
+						String version = terser.getSinglePrimitiveValueOrNull(structureDefinition, "version");
+
+						// Most queries to the base structure definitions are versionless
+						// And they shouldn't be overwritten with multiple versions anyway
+						// (see JpaPersistedResourceValidationSupportChain#doFetchResource())
+						// So we'll cache them without version.
+						boolean shouldAppendVersionToUrl = !Strings.isNullOrEmpty(url)
+								&& version != null
+								&& !url.startsWith(URL_PREFIX_STRUCTURE_DEFINITION);
+						if (shouldAppendVersionToUrl) {
+							url = url + "|" + version;
+						}
+
 						url = defaultIfBlank(url, UUID.randomUUID().toString());
 						if (myStructureDefinitionsByUrl.putIfAbsent(url, structureDefinition) == null) {
 							myStructureDefinitionsAsList.add(structureDefinition);
