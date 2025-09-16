@@ -1802,7 +1802,7 @@ public enum Pointcut implements IPointcut {
 
 	// FIXME: document
 	STORAGE_TRANSACTION_PRE_PARTITION(
-			"ca.uhn.fhir.jpa.dao.TransactionPartitionResponse",
+			"ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse",
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 			"org.hl7.fhir.instance.model.api.IBaseBundle"),

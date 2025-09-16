@@ -238,62 +238,7 @@ public abstract class BaseTransactionProcessor {
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
 
 		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PRE_PARTITION)) {
-			// FIXME: refactor into method
-			HookParams hookParams = new HookParams()
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-					.add(IBaseBundle.class, theRequest);
-			TransactionPartitionResponse partitionResponse =
-					(TransactionPartitionResponse) compositeBroadcaster.callHooksAndReturnObject(
-							Pointcut.STORAGE_TRANSACTION_PRE_PARTITION, hookParams);
-			Validate.isTrue(
-					partitionResponse != null && partitionResponse.splitBundles() != null,
-					"Hook for pointcut STORAGE_TRANSACTION_PRE_PARTITION did not return a value");
-
-			BaseRuntimeChildDefinition bundleEntryChild =
-					myContext.getResourceDefinition("Bundle").getChildByName("entry");
-
-			IBaseBundle response = null;
-			Map<String, IIdType> idSubstitutions = new HashMap<>();
-			for (IBaseBundle singlePartitionRequest : partitionResponse.splitBundles()) {
-
-				// Apply any placeholder ID substitutions from previous partition executions
-				for (IBaseResource resource :
-						myContext.newTerser().getAllEmbeddedResources(singlePartitionRequest, true)) {
-					List<ResourceReferenceInfo> allRefs = myContext.newTerser().getAllResourceReferences(resource);
-					for (ResourceReferenceInfo reference : allRefs) {
-						IIdType refElement = reference.getResourceReference().getReferenceElement();
-						IIdType substitution = idSubstitutions.get(refElement.getValue());
-						if (substitution != null) {
-							reference.getResourceReference().setReference(substitution.getValue());
-						}
-					}
-				}
-
-				IBaseBundle singlePartitionResponse = processTransactionAsSubRequest(
-						theRequestDetails, singlePartitionRequest, actionName, theNestedMode);
-
-				// Capture any placeholder ID substitutions from this partition
-				TransactionUtil.TransactionResponse singlePartitionResponseParsed =
-						TransactionUtil.parseTransactionResponse(
-								myContext, singlePartitionRequest, singlePartitionResponse);
-				for (TransactionUtil.StorageOutcome outcome : singlePartitionResponseParsed.getStorageOutcomes()) {
-					if (outcome.getSourceId() != null && outcome.getSourceId().isUuid()) {
-						idSubstitutions.put(outcome.getSourceId().getValue(), outcome.getTargetId());
-					}
-				}
-
-				if (response == null) {
-					response = singlePartitionResponse;
-				} else {
-					List<IBase> entries = bundleEntryChild.getAccessor().getValues(singlePartitionResponse);
-					for (IBase entry : entries) {
-						bundleEntryChild.getMutator().addValue(response, entry);
-					}
-				}
-			}
-
-			return (BUNDLE) response;
+			return new TransactionPartitionProcessor<>(this, myContext, theRequestDetails, theRequest, theNestedMode, compositeBroadcaster, actionName).execute();
 		}
 
 		IBaseBundle response = processTransactionAsSubRequest(theRequestDetails, theRequest, actionName, theNestedMode);
@@ -309,6 +254,7 @@ public abstract class BaseTransactionProcessor {
 
 		return (BUNDLE) response;
 	}
+
 
 	public IBaseBundle collection(final RequestDetails theRequestDetails, IBaseBundle theRequest) {
 		String transactionType = myVersionAdapter.getBundleType(theRequest);
@@ -435,8 +381,8 @@ public abstract class BaseTransactionProcessor {
 		return theRes.getMeta().getLastUpdated();
 	}
 
-	private IBaseBundle processTransactionAsSubRequest(
-			RequestDetails theRequestDetails, IBaseBundle theRequest, String theActionName, boolean theNestedMode) {
+	IBaseBundle processTransactionAsSubRequest(
+		RequestDetails theRequestDetails, IBaseBundle theRequest, String theActionName, boolean theNestedMode) {
 		BaseStorageDao.markRequestAsProcessingSubRequest(theRequestDetails);
 		try {
 			// Interceptor call: STORAGE_TRANSACTION_PROCESSING

@@ -8,7 +8,7 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.TransactionPartitionResponse;
+import ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse;
 import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -771,7 +771,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 	public class MyTransactionSplitInterceptor {
 
 		@Hook(Pointcut.STORAGE_TRANSACTION_PRE_PARTITION)
-		public TransactionPartitionResponse transactionPartition(IBaseBundle theInput) {
+		public TransactionPrePartitionResponse transactionPartition(IBaseBundle theInput) {
 			List<IBaseBundle> bundles = new ArrayList<>();
 			FhirTerser terser = myFhirContext.newTerser();
 
@@ -800,7 +800,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 				bundles.add(patientBundle);
 			}
 
-			return new TransactionPartitionResponse(bundles);
+			return new TransactionPrePartitionResponse(bundles);
 		}
 
 	}
