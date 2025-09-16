@@ -73,7 +73,7 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		// validate the output format
 		if (!isSupportedOutputFormat(theParameters.getOutputFormat())) {
 			errorMsgs.add("The allowed formats for Bulk Export are currently %s and %s"
-				.formatted(Constants.CT_FHIR_NDJSON, Constants.CT_APP_NDJSON));
+					.formatted(Constants.CT_FHIR_NDJSON, Constants.CT_APP_NDJSON));
 		}
 		// validate the exportId
 		if (!StringUtils.isBlank(theParameters.getExportIdentifier())) {
@@ -131,7 +131,7 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 	}
 
 	private boolean isSupportedOutputFormat(String theOutputFormat) {
-		return Constants.CT_FHIR_NDJSON.equalsIgnoreCase(theOutputFormat) ||
-			Constants.CT_APP_NDJSON.equalsIgnoreCase(theOutputFormat);
+		return Constants.CT_FHIR_NDJSON.equalsIgnoreCase(theOutputFormat)
+				|| Constants.CT_APP_NDJSON.equalsIgnoreCase(theOutputFormat);
 	}
 }
