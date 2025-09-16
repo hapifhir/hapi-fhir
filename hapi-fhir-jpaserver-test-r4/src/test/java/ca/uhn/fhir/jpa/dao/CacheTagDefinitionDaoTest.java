@@ -140,7 +140,7 @@ public class CacheTagDefinitionDaoTest {
 	////////// Static access tests
 
 	@Test
-	public void cleanProvenanceSourceUri() {
+	public void extractSourceUriOrEmpty() {
 		assertEquals("", MetaUtil.extractSourceUriOrEmpty(null));
 		assertEquals("abc", MetaUtil.extractSourceUriOrEmpty("abc"));
 		assertEquals("abc", MetaUtil.extractSourceUriOrEmpty("abc#"));
