@@ -166,9 +166,9 @@ This module will invoke the following operations on the remote terminology serve
 
 [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/support/UnknownCodeSystemWarningValidationSupport.html) / [Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/UnknownCodeSystemWarningValidationSupport.java)
 
-This validation support module may be placed at the end of a ValidationSupportChain in order to configure the validator to generate a warning if a resource being validated contains an unknown code system.
-
-Note that this module must also be activated by calling [setAllowNonExistentCodeSystem(true)](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/support/UnknownCodeSystemWarningValidationSupport.html#setAllowNonExistentCodeSystem(boolean)) in order to specify that unknown code systems should be allowed.
+This module is deprecated. If a resource being validated contains unknown code systems, validation issues will be 
+generated without requiring the use of a separate ValidationSupport module. To adjust the severity of 
+these generated issues, you can use the [ValidationMessageUnknownCodeSystemPostProcessingInterceptor](./instance_validator.html#validation-message-post-processing-interceptor).
 
 # CachingValidationSupport
 

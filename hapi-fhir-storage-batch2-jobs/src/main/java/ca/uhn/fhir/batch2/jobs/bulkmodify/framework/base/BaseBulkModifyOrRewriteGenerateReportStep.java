@@ -35,9 +35,11 @@ import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -51,13 +53,16 @@ public abstract class BaseBulkModifyOrRewriteGenerateReportStep<PT extends BaseB
 	private final Map<String, Integer> myResourceTypeToUnchangedCount = new HashMap<>();
 	private final Map<String, Integer> myResourceTypeToFailureCount = new HashMap<>();
 	private final Map<String, String> myIdToFailure = new TreeMap<>();
+	private final List<String> myChangedResourceBodies = new ArrayList<>();
+	private final List<String> myDeletedResourceIds = new ArrayList<>();
 
 	private int myChangedCount = 0;
 	private int myUnchangedCount = 0;
 	private int myFailureCount = 0;
 	private int myFailureListForReportTruncated = 0;
-	private int myChunkRetryCount;
-	private int myResourceRetryCount;
+	private int myChunkRetryCount = 0;
+	private int myResourceRetryCount = 0;
+	private int myDeletedCount = 0;
 
 	@Nonnull
 	@Override
@@ -69,11 +74,19 @@ public abstract class BaseBulkModifyOrRewriteGenerateReportStep<PT extends BaseB
 		incrementMap(data.getUnchangedIds(), myResourceTypeToUnchangedCount);
 		incrementMap(data.getFailures().keySet(), myResourceTypeToFailureCount);
 
+		myDeletedCount += data.getDeletedIds().size();
 		myChangedCount += data.getChangedIds().size();
 		myUnchangedCount += data.getUnchangedIds().size();
 		myFailureCount += data.getFailures().size();
 		myChunkRetryCount += data.getChunkRetryCount();
 		myResourceRetryCount += data.getResourceRetryCount();
+
+		PT parameters = theChunkDetails.getParameters();
+		if (parameters.isDryRun()
+				&& parameters.getDryRunMode() == BaseBulkModifyJobParameters.DryRunMode.COLLECT_CHANGED) {
+			myChangedResourceBodies.addAll(data.getChangedResourceBodies());
+			myDeletedResourceIds.addAll(data.getDeletedIds());
+		}
 
 		for (Map.Entry<String, String> failure : data.getFailures().entrySet()) {
 			if (myIdToFailure.size() >= 100) {
@@ -93,15 +106,26 @@ public abstract class BaseBulkModifyOrRewriteGenerateReportStep<PT extends BaseB
 			@Nonnull StepExecutionDetails<PT, BulkModifyResourcesChunkOutcomeJson> theStepExecutionDetails,
 			@Nonnull IJobDataSink<BulkModifyResourcesResultsJson> theDataSink)
 			throws JobExecutionFailedException, ReductionStepFailureException {
+		boolean dryRun = theStepExecutionDetails.getParameters().isDryRun();
 		Date startTime = theStepExecutionDetails.getInstance().getStartTime();
 		long elapsedMillis = System.currentTimeMillis() - startTime.getTime();
 		long changedPerSecond = (long) StopWatch.getThroughput(myChangedCount, elapsedMillis, TimeUnit.SECONDS);
 		long unchangedPerSecond = (long) StopWatch.getThroughput(myUnchangedCount, elapsedMillis, TimeUnit.SECONDS);
 		long failedPerSecond = (long) StopWatch.getThroughput(myFailureCount, elapsedMillis, TimeUnit.SECONDS);
+		long deletedPerSecond = (long) StopWatch.getThroughput(myDeletedCount, elapsedMillis, TimeUnit.SECONDS);
 
 		StringBuilder report = new StringBuilder();
-		report.append(provideJobName()).append(" Report\n");
+		report.append(provideJobName());
+		if (dryRun) {
+			report.append(" Dry-Run");
+		}
+		report.append(" Report\n");
 		report.append("-------------------------------------------------\n");
+		if (dryRun) {
+			report.append("NOTE: This report is for a DRY RUN. No resources\n");
+			report.append("have actually been modified by this job.\n");
+			report.append("-------------------------------------------------\n");
+		}
 		report.append("Start Time                : ")
 				.append(new InstantType(startTime).getValue())
 				.append('\n');
@@ -120,16 +144,30 @@ public abstract class BaseBulkModifyOrRewriteGenerateReportStep<PT extends BaseB
 				.append(unchangedPerSecond)
 				.append("/sec)")
 				.append('\n');
-		report.append("Total Failed Changes      : ")
-				.append(myFailureCount)
-				.append(" (")
-				.append(failedPerSecond)
-				.append("/sec)")
-				.append('\n');
-		report.append("Total Retried Chunks      : ").append(myChunkRetryCount).append('\n');
-		report.append("Total Retried Resources   : ")
-				.append(myResourceRetryCount)
-				.append('\n');
+		if (myDeletedCount > 0) {
+			report.append("Total Resources Deleted   : ")
+					.append(myDeletedCount)
+					.append(" (")
+					.append(deletedPerSecond)
+					.append("/sec)")
+					.append('\n');
+		}
+		if (myFailureCount > 0) {
+			report.append("Total Failed Changes      : ")
+					.append(myFailureCount)
+					.append(" (")
+					.append(failedPerSecond)
+					.append("/sec)")
+					.append('\n');
+		}
+		if (myChunkRetryCount > 0 || myResourceRetryCount > 0) {
+			report.append("Total Retried Chunks      : ")
+					.append(myChunkRetryCount)
+					.append('\n');
+			report.append("Total Retried Resources   : ")
+					.append(myResourceRetryCount)
+					.append('\n');
+		}
 		report.append("-------------------------------------------------\n");
 
 		for (String resourceType : getAllResourceTypes()) {
@@ -176,6 +214,11 @@ public abstract class BaseBulkModifyOrRewriteGenerateReportStep<PT extends BaseB
 		reportJson.setResourcesChangedCount(myChangedCount);
 		reportJson.setResourcesUnchangedCount(myUnchangedCount);
 		reportJson.setResourcesFailedCount(myFailureCount);
+
+		if (theStepExecutionDetails.getParameters().isDryRun()) {
+			reportJson.setResourcesChangedBodies(myChangedResourceBodies);
+			reportJson.setResourcesDeletedIds(myDeletedResourceIds);
+		}
 
 		if (!myIdToFailure.isEmpty()) {
 			throw new ReductionStepFailureException(

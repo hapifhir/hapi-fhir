@@ -78,6 +78,35 @@ The following example shows the use of [NpmPackageValidationSupport](./validatio
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ValidatorExamples.java|npm}}
 ```
 
+<a name="validation-message-post-processing-interceptor"></a>
+
+# Modifying Validation Message Severity Via Interceptor
+
+[ValidationMessagePostProcessingInterceptor](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/validation/ValidationMessagePostProcessingInterceptor.html) 
+can be used to modify message severities. This interceptor works with rules defined as 
+[ValidationPostProcessingRuleJson]
+(hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/validation/ValidationMessagePostProcessingInterceptor.html) 
+objects that have the following fields:
+
+
+| Field | Required                    | Description                                                                                                 |
+| ----- |-----------------------------|-------------------------------------------------------------------------------------------------------------|
+| msgId | one of msgId and msgIdRegex | Literal message ID to match                                                                                 |
+| msgIdRegex | one of msgId and msgIdRegex | Regex pattern to match message ID                                                                           |
+| oldSeverities | no                          | Array of ResultSeverityEnum(s) to match message severity (one must match the message's severity to produce a rule match)  |
+| messageFragments | no                          | Array of literal strings to match message fragments (all must be present in the message to produce a rule match)  |
+| newSeverity | yes                         | ResultSeverityEnum value to replace matched message severity                                                |
+
+A special implementation of this interceptor is 
+[ValidationMessageUnknownCodeSystemPostProcessingInterceptor](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/validation/ValidationMessageUnknownCodeSystemPostProcessingInterceptor.html) 
+which can be used to change the message severities for validation issues generated when unknown CodeSystems 
+are detected during resource validation. To use this interceptor, simply create it with the desired severity 
+and register it with the interceptor service. 
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/ValidatorExamples.java|validationMessageUnknownCodeSystemPostProcessingInterceptor}}
+```
+
 
 <a name="migrating-to-5x"></a>
 
