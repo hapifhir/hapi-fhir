@@ -110,9 +110,12 @@ public class ValidationMessagePostProcessingInterceptor {
 	}
 
 	private boolean matchesMessageId(String theMessageId, Rule theRule) {
-		boolean matched = (theRule.messageId() != null && theRule.messageId.equals(theMessageId))
-				|| (theRule.messagePattern != null
-						&& theRule.messagePattern.matcher(theMessageId).matches());
+		boolean matched = false;
+		if (theMessageId != null) {
+			matched = (theRule.messageId() != null && theRule.messageId.equals(theMessageId))
+					|| (theRule.messagePattern != null
+							&& theRule.messagePattern.matcher(theMessageId).matches());
+		}
 
 		ourLog.atTrace()
 				.setMessage("messageId match result: {} - input messageId: {} - matching rule: {}")

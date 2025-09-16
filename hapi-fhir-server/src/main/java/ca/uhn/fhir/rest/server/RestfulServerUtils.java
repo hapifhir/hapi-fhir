@@ -51,6 +51,7 @@ import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -901,6 +902,31 @@ public class RestfulServerUtils {
 			IIdType theOperationResourceId,
 			IPrimitiveType<Date> theOperationResourceLastUpdated)
 			throws IOException {
+		return streamResponseAsResource(
+				theServer,
+				theResource,
+				theSummaryMode,
+				theStatusCode,
+				null,
+				theAddContentLocationHeader,
+				respondGzip,
+				theRequestDetails,
+				theOperationResourceId,
+				theOperationResourceLastUpdated);
+	}
+
+	public static Object streamResponseAsResource(
+			IRestfulServerDefaults theServer,
+			IBaseResource theResource,
+			Set<SummaryEnum> theSummaryMode,
+			int theStatusCode,
+			Multimap<String, String> theAdditionalResponseHeaders,
+			boolean theAddContentLocationHeader,
+			boolean respondGzip,
+			RequestDetails theRequestDetails,
+			IIdType theOperationResourceId,
+			IPrimitiveType<Date> theOperationResourceLastUpdated)
+			throws IOException {
 		IRestfulResponse response = theRequestDetails.getResponse();
 
 		// Determine response encoding
@@ -923,6 +949,12 @@ public class RestfulServerUtils {
 				response.addHeader(Constants.HEADER_LOCATION, fullId.getValue());
 			}
 			response.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId.getValue());
+		}
+
+		if (theAdditionalResponseHeaders != null) {
+			for (Map.Entry<String, String> next : theAdditionalResponseHeaders.entries()) {
+				response.addHeader(next.getKey(), next.getValue());
+			}
 		}
 
 		if (theServer.getETagSupport() == ETagSupportEnum.ENABLED) {

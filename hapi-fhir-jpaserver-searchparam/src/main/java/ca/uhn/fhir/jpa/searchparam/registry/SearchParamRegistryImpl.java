@@ -203,7 +203,7 @@ public class SearchParamRegistryImpl
 			@Nonnull String theUrl, @Nonnull SearchParamLookupContextEnum theContext) {
 		if (myActiveSearchParams != null) {
 			RuntimeSearchParam param = myActiveSearchParams.getByUrl(theUrl);
-			if (isAllowedForContext(param, theContext)) {
+			if (param != null && isAllowedForContext(param, theContext)) {
 				return param;
 			}
 		}

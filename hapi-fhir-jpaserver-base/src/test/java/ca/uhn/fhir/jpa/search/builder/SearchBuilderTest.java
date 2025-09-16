@@ -150,7 +150,7 @@ class SearchBuilderTest {
 
 			when(myResourceHistoryTableDao.findCurrentVersionsByResourcePidsAndFetchResourceTable(any()))
 				.thenReturn(List.of(ht));
-			when(myJpaStorageResourceParser.toResource(any(Class.class), any(ResourceHistoryTable.class), any(), anyBoolean()))
+			when(myJpaStorageResourceParser.toResource(any(), any(Class.class), any(ResourceHistoryTable.class), any(), anyBoolean()))
 				.thenReturn(patient);
 		} else {
 			when(myFulltextSearchSvc.getResources(any(List.class)))
