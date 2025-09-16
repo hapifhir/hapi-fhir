@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -240,7 +239,9 @@ public abstract class BaseTransactionProcessor {
 
 		IBaseBundle response;
 		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PRE_PARTITION)) {
-			response = new TransactionPartitionProcessor<BUNDLE>(this, myContext, theRequestDetails, theNestedMode, compositeBroadcaster, actionName).execute(theRequest);
+			response = new TransactionPartitionProcessor<BUNDLE>(
+							this, myContext, theRequestDetails, theNestedMode, compositeBroadcaster, actionName)
+					.execute(theRequest);
 		} else {
 			response = processTransactionAsSubRequest(theRequestDetails, theRequest, actionName, theNestedMode);
 		}
@@ -255,7 +256,6 @@ public abstract class BaseTransactionProcessor {
 
 		return (BUNDLE) response;
 	}
-
 
 	public IBaseBundle collection(final RequestDetails theRequestDetails, IBaseBundle theRequest) {
 		String transactionType = myVersionAdapter.getBundleType(theRequest);
@@ -362,10 +362,10 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * Method which populates entry in idToPersistedOutcome.
-     * Will store whatever outcome is sent, unless the key already exists, then we only replace an instance if we find that the instance
-     * we are replacing with is non-lazy. This allows us to evaluate later more easily, as we _know_ we need access to these.
-     */
+	 * Method which populates entry in idToPersistedOutcome.
+	 * Will store whatever outcome is sent, unless the key already exists, then we only replace an instance if we find that the instance
+	 * we are replacing with is non-lazy. This allows us to evaluate later more easily, as we _know_ we need access to these.
+	 */
 	private void populateIdToPersistedOutcomeMap(
 			Map<IIdType, DaoMethodOutcome> idToPersistedOutcome, IIdType newId, DaoMethodOutcome outcome) {
 		// Prefer real method outcomes over lazy ones.
@@ -383,7 +383,7 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	IBaseBundle processTransactionAsSubRequest(
-		RequestDetails theRequestDetails, IBaseBundle theRequest, String theActionName, boolean theNestedMode) {
+			RequestDetails theRequestDetails, IBaseBundle theRequest, String theActionName, boolean theNestedMode) {
 		BaseStorageDao.markRequestAsProcessingSubRequest(theRequestDetails);
 		try {
 			// Interceptor call: STORAGE_TRANSACTION_PROCESSING
@@ -744,9 +744,9 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * Checks if the given request entry has the extension specified to override the partition ids to use when processing that entry.
-     * If the extension is present, this method will set the partition ids header in the given request details.
-     */
+	 * Checks if the given request entry has the extension specified to override the partition ids to use when processing that entry.
+	 * If the extension is present, this method will set the partition ids header in the given request details.
+	 */
 	private void setRequestPartitionHeaderIfEntryHasTheExtension(IBase theReqEntry, RequestDetails theRequestDetails) {
 		Optional<IBaseExtension<?, ?>> partitionIdsExtensionOptional =
 				myVersionAdapter.getEntryRequestExtensionByUrl(theReqEntry, EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS);
@@ -760,14 +760,14 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * Creates a new RequestDetails object based on the given RequestDetails. The new RequestDetails is to be used
-     * when processing a write entry.
-     * If the entry.request has the extension to override the partition ids, this method
-     * sets the partition ids header in the newly created request details with the values from extension.
-     * This allows using different partitions for different entries in the same transaction.
-     *
-     * @return the newly created request details
-     */
+	 * Creates a new RequestDetails object based on the given RequestDetails. The new RequestDetails is to be used
+	 * when processing a write entry.
+	 * If the entry.request has the extension to override the partition ids, this method
+	 * sets the partition ids header in the newly created request details with the values from extension.
+	 * This allows using different partitions for different entries in the same transaction.
+	 *
+	 * @return the newly created request details
+	 */
 	private RequestDetails createRequestDetailsForWriteEntry(
 			RequestDetails theRequestDetails, IBase theEntry, String theUrl, String theVerb) {
 
@@ -798,11 +798,11 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * Creates a new RequestDetails based on the given one. The returned RequestDetails is to be used when processing
-     * a GET entry of transaction.
-     * It sets the headers in the newly request details according to the information from entry.request if needed.
-     * Currently, GET entries only support ServletRequestDetails so it handles only that type.
-     */
+	 * Creates a new RequestDetails based on the given one. The returned RequestDetails is to be used when processing
+	 * a GET entry of transaction.
+	 * It sets the headers in the newly request details according to the information from entry.request if needed.
+	 * Currently, GET entries only support ServletRequestDetails so it handles only that type.
+	 */
 	private ServletSubRequestDetails createRequestDetailsForReadEntry(
 			ServletRequestDetails theRequestDetails, IBase theEntry, ArrayListMultimap<String, String> theParamValues) {
 
@@ -830,14 +830,14 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * All of the write operations in the transaction (PUT, POST, etc.. basically anything
-     * except GET) are performed in their own database transaction before we do the reads.
-     * We do this because the reads (specifically the searches) often spawn their own
-     * secondary database transaction and if we allow that within the primary
-     * database transaction we can end up with deadlocks if the server is under
-     * heavy load with lots of concurrent transactions using all available
-     * database connections.
-     */
+	 * All of the write operations in the transaction (PUT, POST, etc.. basically anything
+	 * except GET) are performed in their own database transaction before we do the reads.
+	 * We do this because the reads (specifically the searches) often spawn their own
+	 * secondary database transaction and if we allow that within the primary
+	 * database transaction we can end up with deadlocks if the server is under
+	 * heavy load with lots of concurrent transactions using all available
+	 * database connections.
+	 */
 	@SuppressWarnings("unchecked")
 	private void prepareThenExecuteTransactionWriteOperations(
 			RequestDetails theRequestDetails,
@@ -910,9 +910,9 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * This method looks at the FHIR actions being performed in a List of bundle entries,
-     * and determines the associated request partitions.
-     */
+	 * This method looks at the FHIR actions being performed in a List of bundle entries,
+	 * and determines the associated request partitions.
+	 */
 	@Nullable
 	protected RequestPartitionId determineRequestPartitionIdForWriteEntries(
 			RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, List<IBase> theEntries) {
@@ -1077,13 +1077,13 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * This method is called for nested bundles (e.g. if we received a transaction with an entry that
-     * was a GET search, this method is called on the bundle for the search result, that will be placed in the
-     * outer bundle). This method applies the _summary and _content parameters to the output of
-     * that bundle.
-     * <p>
-     * TODO: This isn't the most efficient way of doing this.. hopefully we can come up with something better in the future.
-     */
+	 * This method is called for nested bundles (e.g. if we received a transaction with an entry that
+	 * was a GET search, this method is called on the bundle for the search result, that will be placed in the
+	 * outer bundle). This method applies the _summary and _content parameters to the output of
+	 * that bundle.
+	 * <p>
+	 * TODO: This isn't the most efficient way of doing this.. hopefully we can come up with something better in the future.
+	 */
 	private IBaseResource filterNestedBundle(RequestDetails theRequestDetails, IBaseResource theResource) {
 		IParser p = myContext.newJsonParser();
 		RestfulServerUtils.configureResponseParser(theRequestDetails, p);
@@ -1100,8 +1100,8 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * Searches for duplicate conditional creates and consolidates them.
-     */
+	 * Searches for duplicate conditional creates and consolidates them.
+	 */
 	@SuppressWarnings("unchecked")
 	private void consolidateDuplicateConditionals(
 			RequestDetails theRequestDetails, String theActionName, List<IBase> theEntries) {
@@ -1192,9 +1192,9 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * Iterates over all entries, and if it finds any which have references which match the fullUrl of the entry that was consolidated out
-     * replace them with our new consolidated UUID
-     */
+	 * Iterates over all entries, and if it finds any which have references which match the fullUrl of the entry that was consolidated out
+	 * replace them with our new consolidated UUID
+	 */
 	private void replaceReferencesInEntriesWithConsolidatedUUID(
 			List<IBase> theEntries, String theEntryFullUrl, String existingUuid) {
 		for (IBase nextEntry : theEntries) {
@@ -1220,14 +1220,14 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * Retrieves the next resource id (IIdType) from the base resource and next request entry.
-     *
-     * @param theBaseResource - base resource
-     * @param theNextReqEntry - next request entry
-     * @param theAllIds       - set of all IIdType values
-     * @param theVerb
-     * @return
-     */
+	 * Retrieves the next resource id (IIdType) from the base resource and next request entry.
+	 *
+	 * @param theBaseResource - base resource
+	 * @param theNextReqEntry - next request entry
+	 * @param theAllIds       - set of all IIdType values
+	 * @param theVerb
+	 * @return
+	 */
 	private IIdType getNextResourceIdFromBaseResource(
 			IBaseResource theBaseResource, IBase theNextReqEntry, Set<IIdType> theAllIds, String theVerb) {
 		IIdType nextResourceId = null;
@@ -1294,8 +1294,8 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * After pre-hooks have been called
-     */
+	 * After pre-hooks have been called
+	 */
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	protected EntriesToProcessMap doTransactionWriteOperations(
 			final RequestDetails theRequest,
@@ -1712,27 +1712,27 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * Subclasses may override this in order to invoke specific operations when
-     * we're finished handling all the write entries in the transaction bundle
-     * with a given verb.
-     */
+	 * Subclasses may override this in order to invoke specific operations when
+	 * we're finished handling all the write entries in the transaction bundle
+	 * with a given verb.
+	 */
 	protected void handleVerbChangeInTransactionWriteOperations() {
 		// nothing
 	}
 
 	/**
-     * Implement to handle post transaction processing
-     */
+	 * Implement to handle post transaction processing
+	 */
 	protected void postTransactionProcess(TransactionDetails theTransactionDetails) {
 		// nothing
 	}
 
 	/**
-     * Check for if a resource id should be matched in a conditional update
-     * If the FHIR version is older than R4, it follows the old specifications and does not match
-     * If the resource id has been resolved, then it is an existing resource and does not need to be matched
-     * If the resource id is local or a placeholder, the id is temporary and should not be matched
-     */
+	 * Check for if a resource id should be matched in a conditional update
+	 * If the FHIR version is older than R4, it follows the old specifications and does not match
+	 * If the resource id has been resolved, then it is an existing resource and does not need to be matched
+	 * If the resource id is local or a placeholder, the id is temporary and should not be matched
+	 */
 	private boolean shouldConditionalUpdateMatchId(TransactionDetails theTransactionDetails, IIdType theId) {
 		if (myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {
 			return false;
@@ -1766,9 +1766,9 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * After transaction processing and resolution of indexes and references, we want to validate that the resources that were stored _actually_
-     * match the conditional URLs that they were brought in on.
-     */
+	 * After transaction processing and resolution of indexes and references, we want to validate that the resources that were stored _actually_
+	 * match the conditional URLs that they were brought in on.
+	 */
 	private void validateAllInsertsMatchTheirConditionalUrls(
 			Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
 			Map<String, IIdType> conditionalUrlToIdMap,
@@ -1803,12 +1803,12 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * Checks for any delete conflicts.
-     *
-     * @param theDeleteConflicts  - set of delete conflicts
-     * @param theDeletedResources - set of deleted resources
-     * @param theUpdatedResources - list of updated resources
-     */
+	 * Checks for any delete conflicts.
+	 *
+	 * @param theDeleteConflicts  - set of delete conflicts
+	 * @param theDeletedResources - set of deleted resources
+	 * @param theUpdatedResources - list of updated resources
+	 */
 	private void checkForDeleteConflicts(
 			DeleteConflictList theDeleteConflicts,
 			Set<String> theDeletedResources,
@@ -1858,27 +1858,27 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * This method replaces any placeholder references in the
-     * source transaction Bundle with their actual targets, then stores the resource contents and indexes
-     * in the database. This is trickier than you'd think because of a couple of possibilities during the
-     * save:
-     * * There may be resources that have not changed (e.g. an update/PUT with a resource body identical
-     * to what is already in the database)
-     * * There may be resources with auto-versioned references, meaning we're replacing certain references
-     * in the resource with a versioned references, referencing the current version at the time of the
-     * transaction processing
-     * * There may by auto-versioned references pointing to these unchanged targets
-     * <p>
-     * If we're not doing any auto-versioned references, we'll just iterate through all resources in the
-     * transaction and save them one at a time.
-     * <p>
-     * However, if we have any auto-versioned references we do this in 2 passes: First the resources from the
-     * transaction that don't have any auto-versioned references are stored. We do them first since there's
-     * a chance they may be a NOP and we'll need to account for their version number not actually changing.
-     * Then we do a second pass for any resources that have auto-versioned references. These happen in a separate
-     * pass because it's too complex to try and insert the auto-versioned references and still
-     * account for NOPs, so we block NOPs in that pass.
-     */
+	 * This method replaces any placeholder references in the
+	 * source transaction Bundle with their actual targets, then stores the resource contents and indexes
+	 * in the database. This is trickier than you'd think because of a couple of possibilities during the
+	 * save:
+	 * * There may be resources that have not changed (e.g. an update/PUT with a resource body identical
+	 * to what is already in the database)
+	 * * There may be resources with auto-versioned references, meaning we're replacing certain references
+	 * in the resource with a versioned references, referencing the current version at the time of the
+	 * transaction processing
+	 * * There may by auto-versioned references pointing to these unchanged targets
+	 * <p>
+	 * If we're not doing any auto-versioned references, we'll just iterate through all resources in the
+	 * transaction and save them one at a time.
+	 * <p>
+	 * However, if we have any auto-versioned references we do this in 2 passes: First the resources from the
+	 * transaction that don't have any auto-versioned references are stored. We do them first since there's
+	 * a chance they may be a NOP and we'll need to account for their version number not actually changing.
+	 * Then we do a second pass for any resources that have auto-versioned references. These happen in a separate
+	 * pass because it's too complex to try and insert the auto-versioned references and still
+	 * account for NOPs, so we block NOPs in that pass.
+	 */
 	private void resolveReferencesThenSaveAndIndexResources(
 			RequestDetails theRequest,
 			TransactionDetails theTransactionDetails,
@@ -2160,16 +2160,16 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * We should replace the references when
-     * 1. It is not a reference we should keep the client-supplied version for as configured by `DontStripVersionsFromReferences` or
-     * 2. It is a reference that has been identified for auto versioning or
-     * 3. Is a placeholder reference
-     *
-     * @param theReferencesToAutoVersion               list of references identified for auto versioning
-     * @param theReferencesToKeepClientSuppliedVersion list of references that we should not strip the version for
-     * @param theResourceReference                     the resource reference
-     * @return true if we should replace the resource reference, false if we should keep the client provided reference
-     */
+	 * We should replace the references when
+	 * 1. It is not a reference we should keep the client-supplied version for as configured by `DontStripVersionsFromReferences` or
+	 * 2. It is a reference that has been identified for auto versioning or
+	 * 3. Is a placeholder reference
+	 *
+	 * @param theReferencesToAutoVersion               list of references identified for auto versioning
+	 * @param theReferencesToKeepClientSuppliedVersion list of references that we should not strip the version for
+	 * @param theResourceReference                     the resource reference
+	 * @return true if we should replace the resource reference, false if we should keep the client provided reference
+	 */
 	private boolean shouldReplaceResourceReference(
 			Set<IBaseReference> theReferencesToAutoVersion,
 			Set<IBaseReference> theReferencesToKeepClientSuppliedVersion,
@@ -2313,14 +2313,14 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * Extracts the transaction url from the entry and verifies it's:
-     * <li>not null or blank (unless it is a POST), and</li>
-     * <li>is a relative url matching the resourceType it is about</li>
-     * <p>
-     * For POST requests, the url is allowed to be blank to preserve the existing behavior.
-     * <p>
-     * Returns the transaction url (or throws an InvalidRequestException if url is missing or not valid)
-     */
+	 * Extracts the transaction url from the entry and verifies it's:
+	 * <li>not null or blank (unless it is a POST), and</li>
+	 * <li>is a relative url matching the resourceType it is about</li>
+	 * <p>
+	 * For POST requests, the url is allowed to be blank to preserve the existing behavior.
+	 * <p>
+	 * Returns the transaction url (or throws an InvalidRequestException if url is missing or not valid)
+	 */
 	private String extractAndVerifyTransactionUrlForEntry(IBase theEntry, String theVerb) {
 		String url = extractTransactionUrlOrThrowException(theEntry, theVerb);
 		if (url.isEmpty() || isValidResourceTypeUrl(url)) {
@@ -2336,12 +2336,12 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * Returns true if the provided url is a valid entry request.url.
-     * <p>
-     * This means:
-     * a) not an absolute url (does not start with http/https)
-     * b) starts with either a ResourceType or /ResourceType
-     */
+	 * Returns true if the provided url is a valid entry request.url.
+	 * <p>
+	 * This means:
+	 * a) not an absolute url (does not start with http/https)
+	 * b) starts with either a ResourceType or /ResourceType
+	 */
 	private boolean isValidResourceTypeUrl(@Nonnull String theUrl) {
 		if (UrlUtil.isAbsolute(theUrl)) {
 			return false;
@@ -2366,10 +2366,10 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * Extracts the transaction url from the entry and verifies that it is not null/blank, unless it is a POST,
-     * and returns it. For POST requests allows null or blank values to keep the existing behaviour and returns
-     * an empty string in that case.
-     */
+	 * Extracts the transaction url from the entry and verifies that it is not null/blank, unless it is a POST,
+	 * and returns it. For POST requests allows null or blank values to keep the existing behaviour and returns
+	 * an empty string in that case.
+	 */
 	private String extractTransactionUrlOrThrowException(IBase nextEntry, String verb) {
 		String url = myVersionAdapter.getEntryRequestUrl(nextEntry);
 		if ("POST".equals(verb) && isBlank(url)) {
@@ -2432,14 +2432,14 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * Transaction Order, per the spec:
-     * <p>
-     * Process any DELETE interactions
-     * Process any POST interactions
-     * Process any PUT interactions
-     * Process any PATCH interactions
-     * Process any GET interactions
-     */
+	 * Transaction Order, per the spec:
+	 * <p>
+	 * Process any DELETE interactions
+	 * Process any POST interactions
+	 * Process any PUT interactions
+	 * Process any PATCH interactions
+	 * Process any GET interactions
+	 */
 	// @formatter:off
 	public class TransactionSorter implements Comparator<IBase> {
 

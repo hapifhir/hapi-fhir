@@ -411,15 +411,15 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				RequestPartitionId partition = theTransactionDetails.getResolvedPartition(nextId.getValue());
 				if (partition == null) {
 					ReadPartitionIdRequestDetails readDetails = ReadPartitionIdRequestDetails.forRead(nextId);
-					partition =
-						myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, readDetails);
+					partition = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
+							theRequestDetails, readDetails);
 				}
 				if (!partition.isAllPartitions()) {
 					if (!myHapiTransactionService.isCompatiblePartition(theRequestPartitionId, partition)) {
 						iterator.remove();
 						if (partitionToIds == null) {
 							partitionToIds =
-								MultimapBuilder.hashKeys().hashSetValues().build();
+									MultimapBuilder.hashKeys().hashSetValues().build();
 						}
 						partitionToIds.put(partition, nextId);
 					}

@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI FHIR Storage api
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
@@ -49,7 +68,13 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 	/**
 	 * Constructor
 	 */
-	public TransactionPartitionProcessor(BaseTransactionProcessor theTransactionProcessor, FhirContext theFhirContext, RequestDetails theRequestDetails, boolean theNestedMode, IInterceptorBroadcaster theCompositeBroadcaster, String theActionName) {
+	public TransactionPartitionProcessor(
+			BaseTransactionProcessor theTransactionProcessor,
+			FhirContext theFhirContext,
+			RequestDetails theRequestDetails,
+			boolean theNestedMode,
+			IInterceptorBroadcaster theCompositeBroadcaster,
+			String theActionName) {
 		myTransactionProcessor = theTransactionProcessor;
 		myFhirContext = theFhirContext;
 		myRequestDetails = theRequestDetails;
@@ -64,19 +89,18 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 	 */
 	public BUNDLE execute(BUNDLE theRequest) {
 		HookParams hookParams = new HookParams()
-			.add(RequestDetails.class, myRequestDetails)
-			.addIfMatchesType(ServletRequestDetails.class, myRequestDetails)
-			.add(IBaseBundle.class, theRequest);
+				.add(RequestDetails.class, myRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, myRequestDetails)
+				.add(IBaseBundle.class, theRequest);
 		TransactionPrePartitionResponse partitionResponse =
-			(TransactionPrePartitionResponse) myInterceptorBroadcaster.callHooksAndReturnObject(
-				Pointcut.STORAGE_TRANSACTION_PRE_PARTITION, hookParams);
+				(TransactionPrePartitionResponse) myInterceptorBroadcaster.callHooksAndReturnObject(
+						Pointcut.STORAGE_TRANSACTION_PRE_PARTITION, hookParams);
 		Validate.isTrue(
-			partitionResponse != null && partitionResponse.splitBundles() != null,
-			"Hook for pointcut STORAGE_TRANSACTION_PRE_PARTITION did not return a value");
+				partitionResponse != null && partitionResponse.splitBundles() != null,
+				"Hook for pointcut STORAGE_TRANSACTION_PRE_PARTITION did not return a value");
 		List<IBaseBundle> partitionRequestBundles = partitionResponse.splitBundles();
 
 		return processPartitionedBundles(theRequest, partitionRequestBundles);
-
 	}
 
 	@Nonnull
@@ -87,10 +111,9 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 		BaseRuntimeChildDefinition bundleEntryChild = bundleDefinition.getChildByName("entry");
 		FhirTerser terser = myFhirContext.newTerser();
 
-		List<IBaseBundle> partitionedRequests = thePartitionedRequests
-			.stream()
-			.filter(t -> !bundleEntryChild.getAccessor().getValues(t).isEmpty())
-			.toList();
+		List<IBaseBundle> partitionedRequests = thePartitionedRequests.stream()
+				.filter(t -> !bundleEntryChild.getAccessor().getValues(t).isEmpty())
+				.toList();
 
 		IdentityHashMap<IBase, Integer> originalEntryToIndex = new IdentityHashMap<>();
 		List<IBase> originalEntries = bundleEntryChild.getAccessor().getValues(theRequest);
@@ -106,7 +129,9 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 				Integer originalEntryIndex = originalEntryToIndex.get(requestEntry);
 				Boolean previousValue = entryFoundInPartitions.set(originalEntryIndex, true);
 				if (previousValue != null) {
-					throw new InternalErrorException(Msg.code(2816) + "Interceptor for pointcut " + Pointcut.STORAGE_TRANSACTION_PRE_PARTITION + " produced multiple partitions for Bundle.entry[" + originalEntryIndex + "]");
+					throw new InternalErrorException(
+							Msg.code(2816) + "Interceptor for pointcut " + Pointcut.STORAGE_TRANSACTION_PRE_PARTITION
+									+ " produced multiple partitions for Bundle.entry[" + originalEntryIndex + "]");
 				}
 			}
 		}
@@ -115,8 +140,7 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 		for (IBaseBundle singlePartitionRequest : partitionedRequests) {
 
 			// Apply any placeholder ID substitutions from previous partition executions
-			for (IBaseResource resource :
-				terser.getAllEmbeddedResources(singlePartitionRequest, true)) {
+			for (IBaseResource resource : terser.getAllEmbeddedResources(singlePartitionRequest, true)) {
 				List<ResourceReferenceInfo> allRefs = terser.getAllResourceReferences(resource);
 				for (ResourceReferenceInfo reference : allRefs) {
 					IIdType refElement = reference.getResourceReference().getReferenceElement();
@@ -128,12 +152,12 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 			}
 
 			IBaseBundle singlePartitionResponse = myTransactionProcessor.processTransactionAsSubRequest(
-				myRequestDetails, singlePartitionRequest, myActionName, myNestedMode);
+					myRequestDetails, singlePartitionRequest, myActionName, myNestedMode);
 
 			// Capture any placeholder ID substitutions from this partition
 			TransactionUtil.TransactionResponse singlePartitionResponseParsed =
-				TransactionUtil.parseTransactionResponse(
-					myFhirContext, singlePartitionRequest, singlePartitionResponse);
+					TransactionUtil.parseTransactionResponse(
+							myFhirContext, singlePartitionRequest, singlePartitionResponse);
 			for (TransactionUtil.StorageOutcome outcome : singlePartitionResponseParsed.getStorageOutcomes()) {
 				if (outcome.getSourceId() != null && outcome.getSourceId().isUuid()) {
 					idSubstitutions.put(outcome.getSourceId().getValue(), outcome.getTargetId());
@@ -141,8 +165,11 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 			}
 
 			List<IBase> partitionRequestEntries = bundleEntryChild.getAccessor().getValues(singlePartitionRequest);
-			List<IBase> partitionResponseEntries = bundleEntryChild.getAccessor().getValues(singlePartitionResponse);
-			Validate.isTrue(partitionRequestEntries.size() == partitionResponseEntries.size(), "Partitioned request and response bundles have different number of entries");
+			List<IBase> partitionResponseEntries =
+					bundleEntryChild.getAccessor().getValues(singlePartitionResponse);
+			Validate.isTrue(
+					partitionRequestEntries.size() == partitionResponseEntries.size(),
+					"Partitioned request and response bundles have different number of entries");
 			for (int i = 0; i < partitionRequestEntries.size(); i++) {
 				IBase partitionRequestEntry = partitionRequestEntries.get(i);
 				IBase partitionResponseEntry = partitionResponseEntries.get(i);
