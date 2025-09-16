@@ -61,6 +61,13 @@ import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_LAST_UPDATED;
  * This class is a {@link IValidationSupport Validation support} module that loads
  * validation resources (StructureDefinition, ValueSet, CodeSystem, etc.) from the resources
  * persisted in the JPA server.
+ *
+ * Note that this class is aware of the resource business version (not to be confused with the FHIR version or
+ * meta.versionId) for CodeSystem, ValueSet, and StructureDefinition resources.
+ * For example, a request for <code>http://example.com/StructureDefinition/ABC|1.2.3</code> will
+ * return the resource that matches the URL http://example.com/StructureDefinition/ABC and version 1.2.3.
+ * Unversioned URLs will match the most recently updated resource by using the meta.lastUpdated field.
+ *
  */
 public class JpaPersistedResourceValidationSupport implements IValidationSupport {
 
@@ -224,8 +231,8 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				break;
 			case "StructureDefinition": {
 				// Don't allow the core FHIR definitions to be overwritten
-				if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
-					String typeName = theUri.substring("http://hl7.org/fhir/StructureDefinition/".length());
+				if (theUri.startsWith(URL_PREFIX_STRUCTURE_DEFINITION)) {
+					String typeName = theUri.substring(URL_PREFIX_STRUCTURE_DEFINITION.length());
 					if (myFhirContext.getElementDefinition(typeName) != null) {
 						return null;
 					}
@@ -238,6 +245,9 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 					params.add(StructureDefinition.SP_URL, new UriParam(theUri.substring(0, versionSeparator)));
 				} else {
 					params.add(StructureDefinition.SP_URL, new UriParam(theUri));
+					// When no version is specified, we will take the most recently updated resource as the current
+					// version
+					params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));
 				}
 				search = myDaoRegistry.getResourceDao("StructureDefinition").search(params, new SystemRequestDetails());
 				break;
