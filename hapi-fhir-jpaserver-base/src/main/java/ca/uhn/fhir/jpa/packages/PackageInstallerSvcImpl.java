@@ -419,7 +419,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		final IIdType id = theResource.getIdElement();
 
 		if (theExistingResource == null) {
-			if (!theResource.fhirType().equals(OUR_SEARCH_PARAMETER_NAME)) {
+			if (!theResource.fhirType().equals(ResourceType.SearchParameter.name())) {
 				// For any resource type except SearchParameter, we will use a server-assigned ID
 				// This prevents FHIR ID conflicts for multiple versions of Conformance/Canonical resources (e.g.
 				// StructureDefinition.version)
