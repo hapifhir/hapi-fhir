@@ -52,9 +52,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 class DefaultProfileValidationSupportBundleStrategy implements IValidationSupport {
 
+	private static final String URL_PREFIX_STRUCTURE_DEFINITION_BASE = "http://hl7.org/fhir/";
 	private static final org.slf4j.Logger ourLog =
 			org.slf4j.LoggerFactory.getLogger(DefaultProfileValidationSupport.class);
-	private static final String URL_PREFIX_STRUCTURE_DEFINITION_BASE = "http://hl7.org/fhir/";
 	private final FhirContext myCtx;
 
 	private Map<String, IBaseResource> myCodeSystems;
