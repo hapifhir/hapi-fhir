@@ -1119,7 +1119,6 @@ public class BulkDataExportProviderR4Test {
 			assertEquals("Not Found", response.getStatusLine().getReasonPhrase());
 
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			// content would be blank, since the job is cancelled
 			ourLog.info("Response content: {}", responseContent);
 			assertThat(responseContent).contains("was cancelled.  No status to report.");
 		}
