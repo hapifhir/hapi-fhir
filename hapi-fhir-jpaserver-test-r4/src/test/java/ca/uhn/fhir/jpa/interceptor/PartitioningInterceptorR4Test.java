@@ -144,7 +144,7 @@ public class PartitioningInterceptorR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreateNonPartionableResourceWithDisallowedPartitionReturned() {
-		addNextTargetPartitionForCreate(RequestPartitionId.fromPartitionId(1));
+		addNextInterceptorCreateResult(RequestPartitionId.fromPartitionId(1));
 
 		StructureDefinition sd = new StructureDefinition();
 		sd.setUrl("http://foo");
