@@ -1,5 +1,6 @@
 ---
 type: fix
 issue: 7261
+jira: SMILE-11023
 title: "Querying the status of a cancelled bulk export job was returning a 
     HTTP 202 instead of a HTTP 404. This has been fixed."
