@@ -155,9 +155,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			throw new IllegalStateException(Msg.code(797) + errorMessage);
 		}
 
-		Set<String> patientSearchParams =
-				SearchParameterUtil.getPatientSearchParamsForResourceType(myContext, theParams.getResourceType());
-
+		Set<String> patientSearchParams = getPatientActiveSearchParamsForResourceType(theParams.getResourceType());
 		for (String patientSearchParam : patientSearchParams) {
 			List<SearchParameterMap> maps =
 					myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams, false);
@@ -593,5 +591,23 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			throw new IllegalArgumentException(
 					Msg.code(2077) + " We can't handle forward references onto type " + theResourceType);
 		}
+	}
+
+	private Set<String> getPatientActiveSearchParamsForResourceType(String theResourceType) {
+		Set<String> allPatientSearchParams =
+				SearchParameterUtil.getPatientSearchParamsForResourceType(myContext, theResourceType);
+
+		// Only consider the search params that are active
+		Set<String> patientSearchParams = allPatientSearchParams.stream()
+				.filter(s -> mySearchParamRegistry.hasActiveSearchParam(
+						theResourceType, s, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH))
+				.collect(Collectors.toSet());
+		if (patientSearchParams.isEmpty()) {
+			String errorMessage = String.format(
+					"Resource type [%s] is not eligible for this type of export, as it contains no active search parameters.",
+					theResourceType);
+			throw new IllegalArgumentException(Msg.code(2222) + errorMessage);
+		}
+		return patientSearchParams;
 	}
 }
