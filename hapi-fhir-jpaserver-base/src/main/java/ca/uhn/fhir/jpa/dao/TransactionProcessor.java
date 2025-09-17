@@ -52,6 +52,7 @@ import ca.uhn.fhir.util.TaskChunker;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SetMultimap;
 import jakarta.annotation.Nonnull;
@@ -567,16 +568,40 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			}
 		}
 
-		TaskChunker.chunk(
-				searchParameterMapsToResolve,
-				CONDITIONAL_URL_FETCH_CHUNK_SIZE,
-				map -> preFetchSearchParameterMaps(
-						theRequestDetails,
-						theTransactionDetails,
-						theRequestPartitionId,
-						map,
-						theIdsToPreFetchBodiesFor,
-						theIdsToPreFetchVersionsFor));
+		Multimap<RequestPartitionId, MatchUrlToResolve> partitionToMatchUrls =
+				MultimapBuilder.hashKeys().arrayListValues().build();
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			for (MatchUrlToResolve map : searchParameterMapsToResolve) {
+				RequestPartitionId partition =
+						myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+								theRequestDetails, map.myResourceDefinition.getName(), map.myMatchUrlSearchMap);
+				partitionToMatchUrls.put(partition, map);
+			}
+		} else {
+			partitionToMatchUrls.putAll(RequestPartitionId.allPartitions(), searchParameterMapsToResolve);
+		}
+
+		for (Map.Entry<RequestPartitionId, Collection<MatchUrlToResolve>> nextEntry :
+				partitionToMatchUrls.asMap().entrySet()) {
+			RequestPartitionId partition = nextEntry.getKey();
+			Collection<MatchUrlToResolve> maps = nextEntry.getValue();
+			myHapiTransactionService
+					.withRequest(theRequestDetails)
+					.withRequestPartitionId(partition)
+					.execute(() -> {
+						ourLog.debug("Pre-fetching {} conditional URLs for partition {}", maps.size(), partition);
+						TaskChunker.chunk(
+								maps,
+								CONDITIONAL_URL_FETCH_CHUNK_SIZE,
+								map -> preFetchSearchParameterMaps(
+										theRequestDetails,
+										theTransactionDetails,
+										partition,
+										map,
+										theIdsToPreFetchBodiesFor,
+										theIdsToPreFetchVersionsFor));
+					});
+		}
 	}
 
 	/**

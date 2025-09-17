@@ -237,7 +237,17 @@ public abstract class BaseTransactionProcessor {
 		IInterceptorBroadcaster compositeBroadcaster =
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
 
+		// Interceptor call: STORAGE_TRANSACTION_PROCESSING
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING)) {
+			HookParams params = new HookParams()
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(IBaseBundle.class, theRequest);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING, params);
+		}
+
 		IBaseBundle response;
+		// Interceptor call: STORAGE_TRANSACTION_PRE_PARTITION
 		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PRE_PARTITION)) {
 			response = new TransactionPartitionProcessor<BUNDLE>(
 							this, myContext, theRequestDetails, theNestedMode, compositeBroadcaster, actionName)
@@ -386,17 +396,6 @@ public abstract class BaseTransactionProcessor {
 			RequestDetails theRequestDetails, IBaseBundle theRequest, String theActionName, boolean theNestedMode) {
 		BaseStorageDao.markRequestAsProcessingSubRequest(theRequestDetails);
 		try {
-			// Interceptor call: STORAGE_TRANSACTION_PROCESSING
-			IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
-					myInterceptorBroadcaster, theRequestDetails);
-			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING)) {
-				HookParams params = new HookParams()
-						.add(RequestDetails.class, theRequestDetails)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest)
-						.add(IBaseBundle.class, theRequest);
-				compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING, params);
-			}
-
 			return processTransaction(theRequestDetails, theRequest, theActionName, theNestedMode);
 		} finally {
 			BaseStorageDao.clearRequestAsProcessingSubRequest(theRequestDetails);
@@ -578,7 +577,8 @@ public abstract class BaseTransactionProcessor {
 					Msg.code(527) + "Unable to process transaction where incoming Bundle.type = " + transactionType);
 		}
 
-		List<IBase> requestEntries = myVersionAdapter.getEntries(theRequest);
+		// Clone the list because we will sort it soon
+		List<IBase> requestEntries = new ArrayList<>(myVersionAdapter.getEntries(theRequest));
 		int numberOfEntries = requestEntries.size();
 
 		if (myStorageSettings.getMaximumTransactionBundleSize() != null
@@ -623,6 +623,7 @@ public abstract class BaseTransactionProcessor {
 		final IdentityHashMap<IBase, Integer> originalRequestOrder = new IdentityHashMap<>();
 		for (int i = 0; i < requestEntries.size(); i++) {
 			IBase requestEntry = requestEntries.get(i);
+
 			originalRequestOrder.put(requestEntry, i);
 			myVersionAdapter.addEntry(response);
 			if (myVersionAdapter.getEntryRequestVerb(myContext, requestEntry).equals("GET")) {
@@ -986,8 +987,8 @@ public abstract class BaseTransactionProcessor {
 					IBaseResource resource = myVersionAdapter.getResource(theEntry);
 					String resourceType = myContext.getResourceType(resource);
 					nextWriteEntryRequestPartitionId =
-							myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-									requestDetailsForEntry, resourceType);
+							myRequestPartitionHelperService.determineCreatePartitionForRequest(
+									requestDetailsForEntry, resource, resourceType);
 					break;
 				}
 				case PUT: {
@@ -2552,6 +2553,18 @@ public abstract class BaseTransactionProcessor {
 			IBaseBundle subRequestBundle =
 					myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode());
 			myVersionAdapter.addEntry(subRequestBundle, myNextReqEntry);
+
+			IInterceptorBroadcaster compositeBroadcaster =
+					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, myRequestDetails);
+
+			// Interceptor call: STORAGE_TRANSACTION_PROCESSING
+			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING)) {
+				HookParams params = new HookParams()
+						.add(RequestDetails.class, myRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, myRequestDetails)
+						.add(IBaseBundle.class, subRequestBundle);
+				compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING, params);
+			}
 
 			IBaseBundle nextResponseBundle = processTransactionAsSubRequest(
 					myRequestDetails, subRequestBundle, "Batch sub-request", myNestedMode);

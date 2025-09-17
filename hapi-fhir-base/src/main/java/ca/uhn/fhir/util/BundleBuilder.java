@@ -221,17 +221,33 @@ public class BundleBuilder {
 	 * @param theRequestUrl The url to attach to the Bundle.entry.request.url. If null, will default to the resource ID.
 	 */
 	public UpdateBuilder addTransactionUpdateEntry(IBaseResource theResource, String theRequestUrl) {
+		String fullUrl = null;
+		return addTransactionUpdateEntry(theResource, theRequestUrl, fullUrl);
+	}
+
+	/**
+	 * Adds an entry containing an update (PUT) request.
+	 * Also sets the Bundle.type value to "transaction" if it is not already set.
+	 *
+	 * @param theResource The resource to update
+	 * @param theRequestUrl The url to attach to the Bundle.entry.request.url. If null, will default to the resource ID.
+	 * @param theFullUrl The fullUrl to attach to the entry in {@literal Bundle.entry.fullUrl}.  If null, will default to the resource ID.
+	 */
+	@Nonnull
+	public UpdateBuilder addTransactionUpdateEntry(IBaseResource theResource, String theRequestUrl, String theFullUrl) {
 		Validate.notNull(theResource, "theResource must not be null");
 
 		IIdType id = getIdTypeForUpdate(theResource);
+		if (theFullUrl == null) {
+			theFullUrl = id.toVersionless().getValue();
+		}
 
-		String fullUrl = id.toVersionless().getValue();
 		String verb = "PUT";
 		String requestUrl = StringUtils.isBlank(theRequestUrl)
 				? id.toUnqualifiedVersionless().getValue()
 				: theRequestUrl;
 
-		IPrimitiveType<?> url = addAndPopulateTransactionBundleEntryRequest(theResource, fullUrl, requestUrl, verb);
+		IPrimitiveType<?> url = addAndPopulateTransactionBundleEntryRequest(theResource, theFullUrl, requestUrl, verb);
 
 		return new UpdateBuilder(url);
 	}

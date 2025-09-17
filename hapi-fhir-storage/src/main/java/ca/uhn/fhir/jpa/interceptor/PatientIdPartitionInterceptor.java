@@ -34,13 +34,18 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -56,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.getPartitionIfAssigned;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -154,6 +160,12 @@ public class PatientIdPartitionInterceptor {
 			String referenceString = reference.getReferenceElement().getValue();
 			IBaseResource target = placeholderToReference.get(referenceString);
 			if (target != null && Objects.equals(myFhirContext.getResourceType(target), "Patient")) {
+				if ("Patient".equals(target.getIdElement().getResourceType())) {
+					if (!target.getIdElement().isUuid() && target.getIdElement().hasIdPart()) {
+						return Optional.of(provideCompartmentMemberInstanceResponse(
+								theRequestDetails, target.getIdElement().getIdPart()));
+					}
+				}
 				return getPartitionIfAssigned(target);
 			}
 		}
@@ -237,6 +249,59 @@ public class PatientIdPartitionInterceptor {
 	 */
 	@Hook(Pointcut.STORAGE_TRANSACTION_PROCESSING)
 	public void transaction(RequestDetails theRequestDetails, IBaseBundle theBundle) {
+		FhirTerser terser = myFhirContext.newTerser();
+
+		/*
+		 * If we have a Patient in the transaction bundle which is being POST-ed as a normal
+		 * resource "create" (i.e., it will get a server-assigned ID), we'll proactively assign it an ID here.
+		 *
+		 * This is mostly a hack to get Synthea data working, but real clients could also be
+		 * following the same pattern.
+		 */
+		List<IBase> rawEntries = new ArrayList<>(terser.getValues(theBundle, "entry", IBase.class));
+		List<BundleEntryParts> parsedEntries = BundleUtil.toListOfEntries(myFhirContext, theBundle);
+		Validate.isTrue(rawEntries.size() == parsedEntries.size(), "Parsed and raw entries don't match");
+
+		Map<String, String> idSubstitutions = new HashMap<>();
+		for (int i = 0; i < rawEntries.size(); i++) {
+			BundleEntryParts nextEntry = parsedEntries.get(i);
+			if (nextEntry.getResource() != null
+					&& myFhirContext.getResourceType(nextEntry.getResource()).equals("Patient")) {
+				if (nextEntry.getMethod() == RequestTypeEnum.POST && isBlank(nextEntry.getConditionalUrl())) {
+					if (nextEntry.getFullUrl() != null && nextEntry.getFullUrl().startsWith("urn:uuid:")) {
+						String newId = UUID.randomUUID().toString();
+						nextEntry.getResource().setId(newId);
+						idSubstitutions.put(nextEntry.getFullUrl(), "Patient/" + newId);
+
+						IBase entry = rawEntries.get(i);
+						IBase request = terser.getValues(entry, "request").get(0);
+						terser.setElement(request, "ifNoneExist", null);
+						terser.setElement(request, "method", "PUT");
+						terser.setElement(request, "url", "Patient/" + newId);
+					}
+				}
+			}
+		}
+
+		if (!idSubstitutions.isEmpty()) {
+			for (BundleEntryParts entry : parsedEntries) {
+				IBaseResource resource = entry.getResource();
+				if (resource != null) {
+					List<ResourceReferenceInfo> references = terser.getAllResourceReferences(resource);
+					for (ResourceReferenceInfo reference : references) {
+						String referenceString = reference
+								.getResourceReference()
+								.getReferenceElement()
+								.getValue();
+						String substitution = idSubstitutions.get(referenceString);
+						if (substitution != null) {
+							reference.getResourceReference().setReference(substitution);
+						}
+					}
+				}
+			}
+		}
+
 		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(myFhirContext, theBundle);
 		Map<String, IBaseResource> placeholderToResource = new HashMap<>();
 		for (BundleEntryParts nextEntry : entries) {
@@ -274,7 +339,7 @@ public class PatientIdPartitionInterceptor {
 							+ " is not supported in patient compartment mode");
 				}
 			}
-			IdType id = new IdType(idParam.getValueAsQueryToken(myFhirContext));
+			IdType id = new IdType(idParam.getValueAsQueryToken());
 			if (!id.hasResourceType() || id.getResourceType().equals(theResourceType)) {
 				idParts.add(id.getIdPart());
 			}

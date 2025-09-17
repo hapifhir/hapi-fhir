@@ -23,4 +23,11 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 import java.util.List;
 
+/**
+ * Response object for interceptor hook methods implementing the
+ * {@link ca.uhn.fhir.interceptor.api.Pointcut#STORAGE_TRANSACTION_PRE_PARTITION} pointcut.
+ *
+ * @param splitBundles A collection of Bundles containing the original entries that were passed in.
+ * @since 8.6.0
+ */
 public record TransactionPrePartitionResponse(List<IBaseBundle> splitBundles) {}

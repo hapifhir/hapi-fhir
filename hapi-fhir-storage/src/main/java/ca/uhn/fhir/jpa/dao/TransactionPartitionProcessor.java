@@ -58,6 +58,7 @@ import java.util.Map;
  */
 @SuppressWarnings("ClassCanBeRecord")
 public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
+
 	private final RequestDetails myRequestDetails;
 	private final boolean myNestedMode;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -111,10 +112,6 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 		BaseRuntimeChildDefinition bundleEntryChild = bundleDefinition.getChildByName("entry");
 		FhirTerser terser = myFhirContext.newTerser();
 
-		List<IBaseBundle> partitionedRequests = thePartitionedRequests.stream()
-				.filter(t -> !bundleEntryChild.getAccessor().getValues(t).isEmpty())
-				.toList();
-
 		IdentityHashMap<IBase, Integer> originalEntryToIndex = new IdentityHashMap<>();
 		List<IBase> originalEntries = bundleEntryChild.getAccessor().getValues(theRequest);
 		for (int i = 0; i < originalEntries.size(); i++) {
@@ -124,6 +121,10 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 		List<Boolean> entryFoundInPartitions = createListOfNulls(originalEntries.size());
 
 		List<IBase> responseEntries = createListOfNulls(originalEntries.size());
+
+		List<IBaseBundle> partitionedRequests = thePartitionedRequests.stream()
+				.filter(t -> !bundleEntryChild.getAccessor().getValues(t).isEmpty())
+				.toList();
 		for (IBaseBundle singlePartitionRequest : partitionedRequests) {
 			for (IBase requestEntry : bundleEntryChild.getAccessor().getValues(singlePartitionRequest)) {
 				Integer originalEntryIndex = originalEntryToIndex.get(requestEntry);
@@ -170,6 +171,7 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 			Validate.isTrue(
 					partitionRequestEntries.size() == partitionResponseEntries.size(),
 					"Partitioned request and response bundles have different number of entries");
+
 			for (int i = 0; i < partitionRequestEntries.size(); i++) {
 				IBase partitionRequestEntry = partitionRequestEntries.get(i);
 				IBase partitionResponseEntry = partitionResponseEntries.get(i);

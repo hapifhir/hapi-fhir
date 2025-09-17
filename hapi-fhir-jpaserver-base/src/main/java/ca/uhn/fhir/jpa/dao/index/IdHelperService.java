@@ -492,7 +492,11 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			// This is only called when we know the resource exists.
 			// So this optional is only empty when there is no hfj_forced_id table
 			// note: this is obsolete with the new fhir_id column, and will go away.
-			forcedId = myResourceTableDao.findById(theId).map(ResourceTable::asTypedFhirResourceId);
+			forcedId = myTransactionService
+					.withSystemRequest()
+					.withRequestPartitionId(RequestPartitionId.fromPartitionIds(theId.getPartitionId()))
+					.execute(() -> myResourceTableDao.findById(theId).map(ResourceTable::asTypedFhirResourceId));
+
 			myMemoryCacheService.put(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theId, forcedId);
 		}
 

@@ -347,12 +347,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			boolean thePerformIndexing,
 			RequestDetails theRequestDetails,
 			@Nonnull TransactionDetails theTransactionDetails) {
-		// We start with search partition here because some partition interceptors can not
-		// process STORAGE_PARTITION_IDENTIFY_CREATE until after we've assigned the resource id.
-		// We resolve the write target later, after we've resolved the match urls.
-		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-						theRequestDetails, getResourceName());
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
+				theRequestDetails, theResource, getResourceName());
 
 		return myTransactionService
 				.withRequest(theRequestDetails)
