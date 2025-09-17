@@ -735,6 +735,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 
 		// an organization
 		IIdType orgId = createOrganization(withIdentifier("https://example.com/ns", "123"));
+		logAllResources();
 
 		// and a bundle with a Patient and linked Encounter
 		Patient patient = buildResource(

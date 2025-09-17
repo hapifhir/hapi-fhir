@@ -347,6 +347,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			boolean thePerformIndexing,
 			RequestDetails theRequestDetails,
 			@Nonnull TransactionDetails theTransactionDetails) {
+
+		assignServerAssignedUuidIfRequired(theResource);
+
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
 				theRequestDetails, theResource, getResourceName());
 
@@ -383,7 +386,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new InvalidRequestException(Msg.code(956) + msg);
 		}
 
-		if (isNotBlank(theResource.getIdElement().getIdPart())) {
+		if (isNotBlank(theResource.getIdElement().getIdPart()) && !isResourceIdServerAssigned(theResource)) {
 			if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
 				String message = getMessageSanitized(
 						"failedToCreateWithClientAssignedId",
@@ -396,10 +399,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		if (getStorageSettings().getResourceServerIdStrategy() == JpaStorageSettings.IdStrategyEnum.UUID) {
-			theResource.setId(UUID.randomUUID().toString());
-			theResource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED, Boolean.TRUE);
-		}
+		assignServerAssignedUuidIfRequired(theResource);
 
 		return doCreateForPostOrPut(
 				theRequestDetails,
@@ -410,6 +410,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				theRequestPartitionId,
 				RestOperationTypeEnum.CREATE,
 				theTransactionDetails);
+	}
+
+	private void assignServerAssignedUuidIfRequired(T theResource) {
+		if (getStorageSettings().getResourceServerIdStrategy() == JpaStorageSettings.IdStrategyEnum.UUID) {
+			if (!isResourceIdServerAssigned(theResource)) {
+				theResource.setId(UUID.randomUUID().toString());
+				theResource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED, Boolean.TRUE);
+			}
+		}
+	}
+
+	private static <T extends IBaseResource> boolean isResourceIdServerAssigned(T theResource) {
+		return Boolean.TRUE.equals(theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED));
 	}
 
 	/**

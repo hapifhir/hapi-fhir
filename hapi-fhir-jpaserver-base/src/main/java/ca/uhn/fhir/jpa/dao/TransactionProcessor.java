@@ -401,6 +401,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 		SetMultimap<RequestPartitionId, IIdType> partitionToIds = null;
 		Set<IIdType> referenceTargetIds = new HashSet<>(idsToPreResolve.keySet());
+		RequestPartitionId requestPartitionId = theRequestPartitionId;
 
 		/*
 		 * If specific resources are on different non-compatible partitions, we will resolve them separately
@@ -415,22 +416,23 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					partition = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
 							theRequestDetails, readDetails);
 				}
-				if (!partition.isAllPartitions()) {
-					if (!myHapiTransactionService.isCompatiblePartition(theRequestPartitionId, partition)) {
-						iterator.remove();
-						if (partitionToIds == null) {
-							partitionToIds =
-									MultimapBuilder.hashKeys().hashSetValues().build();
-						}
-						partitionToIds.put(partition, nextId);
+				if (!partition.isAllPartitions()
+						&& !myHapiTransactionService.isCompatiblePartition(theRequestPartitionId, partition)) {
+					iterator.remove();
+					if (partitionToIds == null) {
+						partitionToIds =
+								MultimapBuilder.hashKeys().hashSetValues().build();
 					}
+					partitionToIds.put(partition, nextId);
+				} else {
+					requestPartitionId = requestPartitionId.mergeIds(partition);
 				}
 			}
 		}
 
 		doPreFetchResourcesById(
 				theTransactionDetails,
-				theRequestPartitionId,
+				requestPartitionId,
 				referenceTargetIds,
 				idsToPreResolve,
 				resolveMode,
@@ -575,6 +577,11 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				RequestPartitionId partition =
 						myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
 								theRequestDetails, map.myResourceDefinition.getName(), map.myMatchUrlSearchMap);
+
+				if (partition.isAllPartitions()) {
+					partition = theRequestPartitionId;
+				}
+
 				partitionToMatchUrls.put(partition, map);
 			}
 		} else {
