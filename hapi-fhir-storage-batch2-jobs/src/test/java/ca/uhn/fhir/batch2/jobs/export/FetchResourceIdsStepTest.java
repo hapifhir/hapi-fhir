@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.rest.api.IResourceSupportedSvc;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -41,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -61,6 +63,9 @@ public class FetchResourceIdsStepTest {
 	private FetchResourceIdsStep myFirstStep;
 	@Mock
 	private JpaStorageSettings myStorageSettings;
+
+	@Mock
+	private IResourceSupportedSvc myResourceSupportedSvc;
 
 	@BeforeEach
 	public void init() {
@@ -124,6 +129,7 @@ public class FetchResourceIdsStepTest {
 		}
 
 		// when
+		when(myResourceSupportedSvc.isSupported(anyString())).thenReturn(true);
 		when(myBulkExportProcessor.getResourcePidIterator(
 			any(ExportPIDIteratorParameters.class)
 		)).thenReturn(patientIds.iterator())
@@ -192,6 +198,8 @@ public class FetchResourceIdsStepTest {
 		int maxFileCapacity = 5;
 		when(myStorageSettings.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
 		when(myStorageSettings.getBulkExportFileMaximumSize()).thenReturn(10000L);
+		when(myResourceSupportedSvc.isSupported(anyString())).thenReturn(true);
+
 
 		for (int i = 0; i <= maxFileCapacity; i++) {
 			JpaPid id = JpaPid.fromId((long) i);
