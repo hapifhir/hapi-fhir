@@ -606,7 +606,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			String errorMessage = String.format(
 					"Resource type [%s] is not eligible for this type of export, as it contains no active search parameters.",
 					theResourceType);
-			throw new IllegalArgumentException(Msg.code(2222) + errorMessage);
+			throw new IllegalArgumentException(Msg.code(2817) + errorMessage);
 		}
 		return patientSearchParams;
 	}
