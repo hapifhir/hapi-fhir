@@ -281,7 +281,8 @@ public class TransactionDetails {
 		if (myResolvedResources.isEmpty()) {
 			myResolvedResources = new HashMap<>();
 		}
-		myResolvedResources.put(theResourceId.toVersionless().getValue(), theResource);
+		IIdType versionless = theResourceId.toVersionless();
+		myResolvedResources.put(versionless.getValue(), theResource);
 	}
 
 	/**
