@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceSource;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.i18n.Msg;
@@ -31,6 +32,7 @@ import ca.uhn.fhir.util.DatatypeUtil;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.NpmPackageUtils;
 import ca.uhn.fhir.util.PhoneticEncoderUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Extension;
@@ -52,6 +54,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -109,6 +112,25 @@ public class SearchParameterCanonicalizer {
 
 		if (retVal != null) {
 			extractExtensions(theSearchParameter, retVal);
+
+			// set the source of the RuntimeSearchParam
+			// Assumptions here are:
+			// * DB SPs have a version (they are in the db)
+			// * NpmPackage provided SPs have metadata in UserData
+			// * SPs that are built in have no Id or no version
+			// * otherwise, we list them as unknown
+			if (theSearchParameter.getIdElement() != null
+					&& theSearchParameter.getIdElement().hasVersionIdPart()) {
+				retVal.setSource(RuntimeResourceSource.databaseSource());
+			} else if (NpmPackageUtils.isFromNpmPackage(theSearchParameter)) {
+				NpmPackageUtils.setSourceForSP(theSearchParameter, retVal);
+			} else if (theSearchParameter.getIdElement() == null
+					|| !theSearchParameter.getIdElement().hasVersionIdPart()) {
+				retVal.setSource(RuntimeResourceSource.fhirContextSource(myFhirContext));
+			} else {
+				// unknown
+				retVal.setSource(new RuntimeResourceSource());
+			}
 		}
 
 		return retVal;
@@ -214,6 +236,27 @@ public class SearchParameterCanonicalizer {
 				unique,
 				components,
 				baseResource);
+	}
+
+	/**
+	 * Takes an IBaseResource SearchParameter (ie, fhir version independent)
+	 * and returns true if the SP has a status = ACTIVE; false otherwise
+	 * @param theSP the search parameter
+	 */
+	public boolean isSPActive(IBaseResource theSP) {
+		FhirTerser terser = myFhirContext.newTerser();
+		// "status" has a cardinality of at least 0 and at most 1 for
+		// all versions; so more than 1 is not expected and < 1 we'll
+		// treat as "not active"
+		Optional<String> statusOp = terser.getSinglePrimitiveValue(theSP, "status");
+
+		if (statusOp.isEmpty()) {
+			// not active?
+			return false;
+		}
+		String statusStr = statusOp.get();
+
+		return statusStr.equalsIgnoreCase("active");
 	}
 
 	private RuntimeSearchParam canonicalizeSearchParameterDstu3(org.hl7.fhir.dstu3.model.SearchParameter theNextSp) {

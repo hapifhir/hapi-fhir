@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import jakarta.annotation.Nullable;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -33,6 +34,15 @@ public class FindPackageAssetRequest {
 	private final FhirVersionEnum myFhirVersion;
 	private final String myCanonicalUrl;
 	private final String myPackageId;
+
+	/**
+	 * The default page number
+	 */
+	private int myPageNumber = 0;
+	/**
+	 * The default page size
+	 */
+	private int myPageSize = 10;
 
 	@Nullable
 	private final String myVersion;
@@ -70,6 +80,20 @@ public class FindPackageAssetRequest {
 	@Nullable
 	public String getVersion() {
 		return myVersion;
+	}
+
+	public PageRequest getPageRequest() {
+		return PageRequest.of(myPageNumber, myPageSize);
+	}
+
+	public FindPackageAssetRequest setPageNumber(int thePageNumber) {
+		myPageNumber = thePageNumber;
+		return this;
+	}
+
+	public FindPackageAssetRequest setPageSize(int thePageSize) {
+		myPageSize = thePageSize;
+		return this;
 	}
 
 	@Override

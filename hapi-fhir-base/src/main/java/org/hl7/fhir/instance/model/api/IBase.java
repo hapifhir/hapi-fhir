@@ -63,7 +63,7 @@ public interface IBase extends Serializable {
 	}
 
 	/**
-	 * Retrieves any user suplied data in this element
+	 * Retrieves any user supplied data in this element
 	 */
 	Object getUserData(String theName);
 
