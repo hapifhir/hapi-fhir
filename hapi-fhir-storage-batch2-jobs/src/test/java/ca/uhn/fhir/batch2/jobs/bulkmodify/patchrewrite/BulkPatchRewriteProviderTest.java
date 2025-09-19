@@ -125,6 +125,7 @@ class BulkPatchRewriteProviderTest {
 	void testPollForStatus(BulkPatchProviderTest.PollForStatusTest theParams) throws IOException {
 		// Setup
 		JobInstance instance = new JobInstance();
+		instance.setParameters(new BulkPatchRewriteJobParameters());
 		instance.setStatus(theParams.jobStatus());
 		instance.setJobDefinitionId(BulkPatchRewriteJobAppCtx.JOB_ID);
 		instance.setErrorMessage(theParams.errorMessage());

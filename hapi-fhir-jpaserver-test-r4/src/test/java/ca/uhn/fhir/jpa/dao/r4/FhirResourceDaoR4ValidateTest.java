@@ -7,6 +7,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
@@ -57,9 +58,11 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
@@ -684,6 +687,67 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 				List.of("Warning"))
 		);
 
+	}
+
+	@Test
+	void testValidate_withMultipleVersionsOfStructureDefinition_validatesOnCorrectVersion() throws Exception {
+		// Given
+		// Requires Practitioner.name
+		StructureDefinition profile = loadResourceFromClasspath(StructureDefinition.class, "/r4/structure-definition-endo-practitioner-v1.json");
+		myStructureDefinitionDao.update(profile, mySrd);
+
+		// Requires Practitioner.name and Practitioner.qualification
+		profile = loadResourceFromClasspath(StructureDefinition.class, "/r4/structure-definition-endo-practitioner-v2.json");
+		myStructureDefinitionDao.update(profile, mySrd);
+
+		// When
+		Practitioner prac = new Practitioner();
+		prac.setMeta(new Meta().addProfile("http://example/StructureDefinition/EndoPractitioner|1.0.0"));
+		prac.addName().setUse(HumanName.NameUse.OFFICIAL).setFamily("Smith").addGiven("John").addSuffix("MD");
+		OperationOutcome oo = validateAndReturnOutcome(prac);
+
+		// Then
+		assertHasNoErrors(oo);
+
+		// When
+		prac.setMeta(new Meta().addProfile("http://example/StructureDefinition/EndoPractitioner|2.0.0"));
+		oo = validateAndReturnOutcome(prac);
+
+		// Then
+		assertHasErrors(oo);
+		String outcomeStr = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+		assertThat(outcomeStr).contains("Practitioner.qualification: minimum required = 1");
+	}
+
+	@Test
+	void testValidate_withMultipleVersionsOfStructureDefinitionAndNoVersionInProfileUrl_validatesOnLastUpdated() throws Exception {
+		// Given
+		// Requires Practitioner.name
+		StructureDefinition profileV1 = loadResourceFromClasspath(StructureDefinition.class, "/r4/structure-definition-endo-practitioner-v1.json");
+		DaoMethodOutcome loadSdOutcome = myStructureDefinitionDao.update(profileV1, mySrd);
+
+		// Requires Practitioner.name and Practitioner.qualification
+		StructureDefinition profileV2 = loadResourceFromClasspath(StructureDefinition.class, "/r4/structure-definition-endo-practitioner-v2.json");
+		myStructureDefinitionDao.update(profileV2, mySrd);
+
+		// When
+		Practitioner prac = new Practitioner();
+		prac.setMeta(new Meta().addProfile("http://example/StructureDefinition/EndoPractitioner"));
+		prac.addName().setUse(HumanName.NameUse.OFFICIAL).setFamily("Smith").addGiven("John").addSuffix("MD");
+		OperationOutcome oo = validateAndReturnOutcome(prac);
+
+		// Then
+		assertHasErrors(oo);
+		String outcomeStr = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+		assertThat(outcomeStr).contains("Practitioner.qualification: minimum required = 1");
+
+		// When: Update profileV1 so that now it is the most recently updated
+		profileV1.setName("EndoPractitioner1");
+		profileV1.setId(loadSdOutcome.getId());
+		myStructureDefinitionDao.update(profileV1, mySrd);
+
+		oo = validateAndReturnOutcome(prac);
+		assertHasNoErrors(oo);
 	}
 
 	@Test

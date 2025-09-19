@@ -8,6 +8,8 @@ import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -203,7 +205,28 @@ public class BulkExportJobParametersValidatorTest {
 
 		// validate
 		assertNotNull(errors);
-		assertThat(errors).isNotEmpty();
-		assertThat(errors).contains("The only allowed format for Bulk Export is currently " + Constants.CT_FHIR_NDJSON);
+		assertThat(errors)
+			.isNotEmpty()
+			.contains("The allowed formats for Bulk Export are currently %s and %s"
+				.formatted(Constants.CT_FHIR_NDJSON, Constants.CT_APP_NDJSON));
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {Constants.CT_FHIR_NDJSON, Constants.CT_APP_NDJSON})
+	public void validate_allowedOutputFormat_returnsEmptyList(String outputFormat) {
+		// setup
+		BulkExportJobParameters parameters = createSystemExportParameters();
+		parameters.setOutputFormat(outputFormat);
+		parameters.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+		parameters.setGroupId("groupId");
+
+		when(myDaoRegistry.isResourceTypeSupported(anyString())).thenReturn(true);
+
+		// execute
+		List<String> result = myValidator.validate(null, parameters);
+
+		// verify
+		assertNotNull(result);
+		assertThat(result).isEmpty();
 	}
 }

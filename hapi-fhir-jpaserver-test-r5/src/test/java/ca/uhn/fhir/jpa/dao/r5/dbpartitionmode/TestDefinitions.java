@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobParameters;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
@@ -115,6 +116,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * scenarios including non-partitioned mode, partitioned mode, and
  * database partitioning mode.
  */
+@SuppressWarnings("unchecked")
 abstract class TestDefinitions implements ITestDataBuilder {
 
 	private final TestPartitionSelectorInterceptor myPartitionSelectorInterceptor;
@@ -217,8 +219,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		);
 		ResourceIdListWorkChunkJson workChunk = new ResourceIdListWorkChunkJson(typedPids, RequestPartitionId.fromPartitionId(PARTITION_1));
 		JobInstance jobInstance = new JobInstance();
-		String workChunkId = "AA";
-		StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson> executionDetails = new StepExecutionDetails<>(params, workChunk, jobInstance, workChunkId);
+		StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson> executionDetails = new StepExecutionDetails<>(params, workChunk, jobInstance, new WorkChunk());
 		myDeleteExpungeStep.run(executionDetails, myVoidSink);
 
 		// Verify
@@ -1495,8 +1496,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		QuestionnaireResponse qr = new QuestionnaireResponse();
 		qr.setQuestionnaire("http://foo");
 		IIdType qrId = myQuestionnaireResponseDao.create(qr, newRequest()).getId().toUnqualifiedVersionless();
-		CreatedQuestionnaireAndResponseIds result = new CreatedQuestionnaireAndResponseIds(qId, qrId);
-		return result;
+		return new CreatedQuestionnaireAndResponseIds(qId, qrId);
 	}
 
 	private record CreatedQuestionnaireAndResponseIds(IIdType qId, IIdType qrId) {

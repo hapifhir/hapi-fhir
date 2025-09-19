@@ -317,9 +317,19 @@ public class JpaConstants {
 	public static final String OPERATION_BULK_PATCH_REWRITE = "$hapi.fhir.bulk-patch-rewrite-history";
 	public static final String OPERATION_BULK_PATCH_REWRITE_STATUS = "$hapi.fhir.bulk-patch-rewrite-history-status";
 	public static final String OPERATION_BULK_PATCH_PARAM_PATCH = "patch";
+	public static final String OPERATION_BULK_PATCH_PARAM_BATCH_SIZE = "batchSize";
+	public static final String OPERATION_BULK_PATCH_PARAM_DRY_RUN = "dryRun";
+	public static final String OPERATION_BULK_PATCH_PARAM_DRY_RUN_MODE = "dryRunMode";
+	public static final String OPERATION_BULK_PATCH_PARAM_DRY_RUN_MODE_COUNT = "count";
+	public static final String OPERATION_BULK_PATCH_PARAM_DRY_RUN_MODE_COLLECT_CHANGES = "collectChanges";
+	public static final String OPERATION_BULK_PATCH_PARAM_LIMIT_RESOURCE_COUNT = "limitResourceCount";
+	public static final String OPERATION_BULK_PATCH_PARAM_LIMIT_RESOURCE_VERSION_COUNT = "limitResourceVersionCount";
 	public static final String OPERATION_BULK_PATCH_STATUS = "$hapi.fhir.bulk-patch-status";
 	public static final String OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID = "_jobId";
 	public static final String OPERATION_BULK_PATCH_PARAM_URL = "url";
+	public static final String OPERATION_BULK_PATCH_STATUS_PARAM_RETURN = "_return";
+	public static final String OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_REPORT = "report";
+	public static final String OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_DRYRUN_CHANGES = "dryRunChanges";
 
 	/**
 	 * Numeric constant used for resource ID in {@link #NO_MORE}

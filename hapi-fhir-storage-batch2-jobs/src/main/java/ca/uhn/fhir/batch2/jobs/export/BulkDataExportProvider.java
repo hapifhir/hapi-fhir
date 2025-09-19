@@ -493,7 +493,6 @@ public class BulkDataExportProvider {
 			case FINALIZE:
 			case QUEUED:
 			case IN_PROGRESS:
-			case CANCELLED:
 				//noinspection deprecation - we need to support old jobs after upgrade.
 			case ERRORED:
 				if (theRequestDetails.getRequestType() == RequestTypeEnum.DELETE) {
@@ -506,6 +505,22 @@ public class BulkDataExportProvider {
 							"Build in progress - Status set to " + info.getStatus() + " at " + dateString);
 					response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
 				}
+				break;
+			case CANCELLED:
+				response.setStatus(Constants.STATUS_HTTP_404_NOT_FOUND);
+				IBaseOperationOutcome outcome = OperationOutcomeUtil.newInstance(myFhirContext);
+				OperationOutcomeUtil.addIssue(
+						myFhirContext,
+						outcome,
+						"error",
+						"Job instance <" + theJobId.getValueAsString() + "> was cancelled.  No status to report.",
+						null,
+						null);
+				myFhirContext
+						.newJsonParser()
+						.setPrettyPrint(true)
+						.encodeResourceToWriter(outcome, response.getWriter());
+				response.getWriter().close();
 				break;
 		}
 	}

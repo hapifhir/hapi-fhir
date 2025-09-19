@@ -65,6 +65,7 @@ class ResourceIdListStepTest {
 
 		when(myStepExecutionDetails.getData()).thenReturn(myData);
 		when(myParameters.getBatchSize()).thenReturn(500);
+		when(myParameters.getLimitResourceCount()).thenReturn(null);
 		when(myStepExecutionDetails.getParameters()).thenReturn(myParameters);
 		IResourcePidStream resourcePidStream = new ListWrappingPidStream(
 			new HomogeneousResourcePidList("Patient", idList, null, partitionId));
