@@ -90,9 +90,6 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 			retVal.put(BatchSettings.ORDER_UPDATES, "true");
 		}
 
-		if (!retVal.containsKey(BatchSettings.BATCH_VERSIONED_DATA)) {
-			retVal.put(BatchSettings.BATCH_VERSIONED_DATA, "true");
-		}
 		// Why is this here, you ask? LocalContainerEntityManagerFactoryBean actually clobbers the setting hibernate
 		// needs in order to be able to resolve beans, so we add it back in manually here
 		if (!retVal.containsKey(ManagedBeanSettings.BEAN_CONTAINER)) {

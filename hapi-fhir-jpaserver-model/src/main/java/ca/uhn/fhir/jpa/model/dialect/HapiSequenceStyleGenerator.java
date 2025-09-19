@@ -1,26 +1,6 @@
-/*-
- * #%L
- * HAPI FHIR JPA Model
- * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 package ca.uhn.fhir.jpa.model.dialect;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.Validate;
@@ -39,7 +19,6 @@ import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import org.hibernate.id.enhanced.StandardOptimizerDescriptor;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.type.Type;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
 import java.util.Properties;
@@ -47,17 +26,16 @@ import java.util.Properties;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.NO_MORE_PID;
 
 /**
- * This is a sequence generator that wraps the Hibernate default sequence generator {@link SequenceStyleGenerator}
- * and by default will therefore work exactly as the default would, but allows for customization.
+ * Hibernate 7.1.1 compatible sequence generator that wraps SequenceStyleGenerator and
+ * optionally massages values via ISequenceValueMassager.
  */
 @SuppressWarnings("unused")
 public class HapiSequenceStyleGenerator
 		implements PersistentIdentifierGenerator, BulkInsertionCapableIdentifierGenerator, ExportableProducer {
-	public static final String ID_MASSAGER_TYPE_KEY = "hapi_fhir.sequence_generator_massager";
-	private final SequenceStyleGenerator myGen = new SequenceStyleGenerator();
 
-	@Autowired
-	private StorageSettings myStorageSettings;
+	public static final String ID_MASSAGER_TYPE_KEY = "hapi_fhir.sequence_generator_massager";
+
+	private final SequenceStyleGenerator myGen = new SequenceStyleGenerator();
 
 	private ISequenceValueMassager myIdMassager;
 	private boolean myConfigured;
@@ -76,17 +54,12 @@ public class HapiSequenceStyleGenerator
 	@Override
 	public Serializable generate(SharedSessionContractImplementor theSession, Object theObject)
 			throws HibernateException {
+
 		Long retVal = myIdMassager != null ? myIdMassager.generate(myGeneratorName) : null;
 		if (retVal == null) {
 			Long next = (Long) myGen.generate(theSession, theObject);
-
 			retVal = myIdMassager.massage(myGeneratorName, next);
 
-			/*
-			 * This should never happen since the sequence starts at 1, but if someone ever manually messes with sequences
-			 * or the sequence otherwise gets messed up, we don't want to end up with a resource using this PID which has
-			 * a special meaning to HAPI.
-			 */
 			if (NO_MORE_PID.equals(next) || NO_MORE_PID.equals(retVal)) {
 				throw new InternalErrorException(
 						Msg.code(2791) + "Resource ID generator provided illegal value: " + next + " / " + retVal);
@@ -95,6 +68,8 @@ public class HapiSequenceStyleGenerator
 		return retVal;
 	}
 
+	// Hibernate 7.1.1 still calls this, but it is deprecated; suppress warnings and delegate.
+	@SuppressWarnings({"removal", "deprecation"})
 	@Override
 	public void configure(Type theType, Properties theParams, ServiceRegistry theServiceRegistry)
 			throws MappingException {
@@ -104,7 +79,6 @@ public class HapiSequenceStyleGenerator
 			myIdMassager = new ISequenceValueMassager.NoopSequenceValueMassager();
 		}
 
-		// Create a HAPI FHIR sequence style generator
 		myGeneratorName = theParams.getProperty(IdentifierGenerator.GENERATOR_NAME);
 		Validate.notBlank(myGeneratorName, "No generator name found");
 
@@ -112,10 +86,9 @@ public class HapiSequenceStyleGenerator
 		props.put(OptimizableGenerator.OPT_PARAM, StandardOptimizerDescriptor.POOLED.getExternalName());
 		props.put(OptimizableGenerator.INITIAL_PARAM, "1");
 		props.put(OptimizableGenerator.INCREMENT_PARAM, "50");
-		props.put(GENERATOR_NAME, myGeneratorName);
+		props.put(IdentifierGenerator.GENERATOR_NAME, myGeneratorName);
 
 		myGen.configure(theType, props, theServiceRegistry);
-
 		myConfigured = true;
 	}
 
@@ -127,11 +100,6 @@ public class HapiSequenceStyleGenerator
 	@Override
 	public void initialize(SqlStringGenerationContext context) {
 		myGen.initialize(context);
-	}
-
-	@Override
-	public boolean supportsJdbcBatchInserts() {
-		return myGen.supportsJdbcBatchInserts();
 	}
 
 	@Override
