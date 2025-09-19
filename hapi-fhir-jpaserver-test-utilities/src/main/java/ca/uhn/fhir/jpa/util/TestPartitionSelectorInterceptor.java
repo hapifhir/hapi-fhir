@@ -31,13 +31,16 @@ import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class TestPartitionSelectorInterceptor {
 	private RequestPartitionId myNextPartition;
 	private final Set<String> myNonPartitionableResources = new HashSet<>();
 	private BaseRequestPartitionHelperSvc myHelperSvc = new RequestPartitionHelperSvc();
+	private final Map<String, Integer> myResourceTypeToPartitionId = new HashMap<>();
 
 	/**
 	 * Constructor
@@ -61,6 +64,10 @@ public class TestPartitionSelectorInterceptor {
 		myNextPartition = theNextPartition;
 	}
 
+	public void setPartitionIdForResourceType(String theResourceType, Integer thePartitionId) {
+		myResourceTypeToPartitionId.put(theResourceType, thePartitionId);
+	}
+
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 	public RequestPartitionId selectPartitionCreate(IBaseResource theResource) {
 		FhirContext fhirContext = FhirContext.forCached(theResource.getStructureFhirVersionEnum());
@@ -75,6 +82,7 @@ public class TestPartitionSelectorInterceptor {
 
 	@Nonnull
 	private RequestPartitionId selectPartition(String theResourceType) {
+
 		if (theResourceType != null) {
 			if (!myHelperSvc.isResourcePartitionable(theResourceType)) {
 				return RequestPartitionId.fromPartitionId(myHelperSvc.getDefaultPartitionId());
@@ -82,9 +90,25 @@ public class TestPartitionSelectorInterceptor {
 			if (myNonPartitionableResources.contains(theResourceType)) {
 				return RequestPartitionId.fromPartitionId(myHelperSvc.getDefaultPartitionId());
 			}
+
+			if (myNextPartition == null) {
+				Integer partitionIdForResourceType = myResourceTypeToPartitionId.get(theResourceType);
+				if (partitionIdForResourceType != null) {
+					return RequestPartitionId.fromPartitionId(partitionIdForResourceType);
+				}
+			}
 		}
 
 		assert myNextPartition != null;
 		return myNextPartition;
+	}
+
+	public void withNextPartition(Integer theNextPartitionId, Runnable theRunnable) {
+		try {
+			myNextPartition = RequestPartitionId.fromPartitionId(theNextPartitionId);
+			theRunnable.run();
+		} finally {
+			myNextPartition = null;
+		}
 	}
 }

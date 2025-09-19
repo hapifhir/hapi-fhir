@@ -42,7 +42,7 @@ public interface IDefaultPartitionSettings {
 	 * @return true if the <code>theRequestPartitionId</code> is for the default partition only.
 	 */
 	default boolean isDefaultPartition(@Nonnull RequestPartitionId theRequestPartitionId) {
-		return theRequestPartitionId.isPartition(getDefaultPartitionId());
+		return theRequestPartitionId.isPartition(getDefaultPartitionId()) || theRequestPartitionId.isPartition(null);
 	}
 
 	/**

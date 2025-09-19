@@ -538,7 +538,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		return deliveryLatch;
 	}
 
-	protected void registerInterceptor(Object theInterceptor) {
+	public void registerInterceptor(Object theInterceptor) {
 		myRegisteredInterceptors.add(theInterceptor);
 		myInterceptorRegistry.registerInterceptor(theInterceptor);
 	}

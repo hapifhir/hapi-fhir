@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import com.google.common.collect.ArrayListMultimap;
@@ -32,6 +33,8 @@ import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,10 +61,12 @@ import java.util.function.Supplier;
  */
 public class TransactionDetails {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(TransactionDetails.class);
 	public static final IResourcePersistentId NOT_FOUND = IResourcePersistentId.NOT_FOUND;
 
 	private final Date myTransactionDate;
 	private List<Runnable> myRollbackUndoActions = Collections.emptyList();
+	private Map<String, RequestPartitionId> myResolvedPartitions = Collections.emptyMap();
 	private Map<String, IResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
 	private Map<String, IResourcePersistentId> myResolvedMatchUrls = Collections.emptyMap();
 	private Map<String, Supplier<IBaseResource>> myResolvedResources = Collections.emptyMap();
@@ -183,6 +188,26 @@ public class TransactionDetails {
 	}
 
 	/**
+	 * If a resource has been resolved within the current transaction to a specific partition, we
+	 * cache it here to avoid repeated lookups.
+	 */
+	public void addResolvedPartition(String theId, RequestPartitionId thePartitionId) {
+		Validate.notBlank(theId, "theId must not be blank");
+		if (myResolvedPartitions.isEmpty()) {
+			myResolvedPartitions = new HashMap<>();
+		}
+		myResolvedPartitions.put(theId, thePartitionId);
+	}
+
+	/**
+	 * If a resource has been resolved within the current transaction to a specific partition, we
+	 * cache it here to avoid repeated lookups.
+	 */
+	public RequestPartitionId getResolvedPartition(String theId) {
+		return myResolvedPartitions.get(theId);
+	}
+
+	/**
 	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
 	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
 	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
@@ -255,11 +280,12 @@ public class TransactionDetails {
 	 */
 	public void addResolvedResourceId(IIdType theResourceId, @Nullable IResourcePersistentId thePersistentId) {
 		assert theResourceId != null;
+		String key = theResourceId.toVersionless().getValue();
 
 		if (myResolvedResourceIds.isEmpty()) {
 			myResolvedResourceIds = new HashMap<>();
 		}
-		myResolvedResourceIds.put(theResourceId.toVersionless().getValue(), thePersistentId);
+		myResolvedResourceIds.put(key, thePersistentId);
 	}
 
 	/**

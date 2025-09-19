@@ -43,6 +43,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.util.RuntimeSearchParamHelper;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -100,6 +101,9 @@ public class SearchParamExtractorService {
 
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Autowired(required = false)
 	private IResourceLinkResolver myResourceLinkResolver;
@@ -716,7 +720,9 @@ public class SearchParamExtractorService {
 		ResourceLink resourceLink;
 
 		Long targetVersionId = nextId.getVersionIdPartAsLong();
-		if (resolvedTargetId != null) {
+		if (resolvedTargetId != null
+				&& myRequestPartitionHelperSvc.isPidPartitionWithinRequestPartition(
+						theRequestPartitionId, resolvedTargetId)) {
 
 			/*
 			 * If we have already resolved the given reference within this transaction, we don't
@@ -945,7 +951,9 @@ public class SearchParamExtractorService {
 			TransactionDetails theTransactionDetails) {
 		JpaPid resolvedResourceId = (JpaPid) theTransactionDetails.getResolvedResourceId(theNextId);
 
-		if (resolvedResourceId != null) {
+		if (resolvedResourceId != null
+				&& myRequestPartitionHelperSvc.isPidPartitionWithinRequestPartition(
+						theRequestPartitionId, resolvedResourceId)) {
 			String targetResourceType = theNextId.getResourceType();
 			Long targetResourcePid = resolvedResourceId.getId();
 			String targetResourceIdPart = theNextId.getIdPart();
@@ -989,8 +997,12 @@ public class SearchParamExtractorService {
 					targetResource = (IResourceLookup<JpaPid>) compositeBroadcaster.callHooksAndReturnObject(
 							Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE, params);
 				} else {
+					RequestPartitionId requestPartitionId = RequestPartitionId.allPartitions();
+					if (resolvedResourceId != null) {
+						requestPartitionId = RequestPartitionId.fromPartitionId(resolvedResourceId.getPartitionId());
+					}
 					targetResource = myResourceLinkResolver.findTargetResource(
-							RequestPartitionId.allPartitions(),
+							requestPartitionId,
 							theSourceResourceName,
 							thePathAndRef,
 							theRequest,
