@@ -378,8 +378,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	@Test
 	public void testCreate_UnknownPartition() {
 		RequestPartitionId requestPartitionId = fromPartitionId(99);
-//		addNextInterceptorReadResult(requestPartitionId);
-		addNextInterceptorCreateResult(requestPartitionId); // we fail before this
+		addNextInterceptorCreateResult(requestPartitionId);
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("system").setValue("value");

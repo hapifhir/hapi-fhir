@@ -404,8 +404,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		RequestPartitionId requestPartitionId = theRequestPartitionId;
 
 		/*
-		 * If specific resources are on different non-compatible partitions, we will resolve them separately
-		 * in a separate transaction
+		 * If specific resources are on different non-compatible partitions, we will pre-fetch them separately
+		 * in a separate transaction that is scoped to the appropriate partition.
 		 */
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			for (Iterator<IIdType> iterator = referenceTargetIds.iterator(); iterator.hasNext(); ) {

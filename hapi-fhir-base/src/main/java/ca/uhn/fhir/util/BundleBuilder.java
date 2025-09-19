@@ -232,6 +232,7 @@ public class BundleBuilder {
 	 * @param theResource The resource to update
 	 * @param theRequestUrl The url to attach to the Bundle.entry.request.url. If null, will default to the resource ID.
 	 * @param theFullUrl The fullUrl to attach to the entry in {@literal Bundle.entry.fullUrl}.  If null, will default to the resource ID.
+	 * @since 8.6.0
 	 */
 	@Nonnull
 	public UpdateBuilder addTransactionUpdateEntry(IBaseResource theResource, String theRequestUrl, String theFullUrl) {

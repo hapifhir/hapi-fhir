@@ -132,7 +132,6 @@ import jakarta.persistence.LockModeType;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.function.TriFunction;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -419,10 +418,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				theResource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED, Boolean.TRUE);
 			}
 		}
-	}
-
-	private static <T extends IBaseResource> boolean isResourceIdServerAssigned(T theResource) {
-		return Boolean.TRUE.equals(theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED));
 	}
 
 	/**
@@ -2898,6 +2893,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		myIdHelperService = theIdHelperService;
 	}
 
+	private static <T extends IBaseResource> boolean isResourceIdServerAssigned(T theResource) {
+		return Boolean.TRUE.equals(theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED));
+	}
+
 	private static class IdChecker implements IValidatorModule {
 
 		private final ValidationModeEnum myMode;
@@ -2952,8 +2951,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			return;
 		}
 
-		boolean sameResType = StringUtils.equals(theEntity.getResourceType(), theResourceIdType.getResourceType());
-		boolean sameFhirId = StringUtils.equals(theResourceIdType.getIdPart(), theEntity.getFhirId());
+		boolean sameResType = Objects.equals(theEntity.getResourceType(), theResourceIdType.getResourceType());
+		boolean sameFhirId = Objects.equals(theResourceIdType.getIdPart(), theEntity.getFhirId());
 		boolean differentPartition =
 				!theRequestPartitionId.isPartition(theEntity.getPartitionId().getPartitionId());
 

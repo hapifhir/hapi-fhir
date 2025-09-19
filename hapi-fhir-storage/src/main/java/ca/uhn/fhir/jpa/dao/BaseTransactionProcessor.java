@@ -577,7 +577,8 @@ public abstract class BaseTransactionProcessor {
 					Msg.code(527) + "Unable to process transaction where incoming Bundle.type = " + transactionType);
 		}
 
-		// Clone the list because we will sort it soon
+		// Make a copy of the list because it gets sorted below, and we don't want to
+		// modify the original Bundle
 		List<IBase> requestEntries = new ArrayList<>(myVersionAdapter.getEntries(theRequest));
 		int numberOfEntries = requestEntries.size();
 

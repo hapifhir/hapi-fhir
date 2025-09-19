@@ -379,6 +379,10 @@ public interface ITestDataBuilder {
 		return withReference(theReferenceName, getFhirContext().getVersion().newIdType(theReferenceValue));
 	}
 
+	/**
+	 * @param theReferenceName The path to a reference, e.g. "managingOrganization" or "participant.individual"
+	 * @param theReferenceValue A reference to set, or <code>null</code>
+	 */
 	@Nonnull
 	default ICreationArgument withReference(String theReferenceName, @Nullable IIdType theReferenceValue) {
 		return withElementAt(theReferenceName, t -> {
@@ -478,6 +482,9 @@ public interface ITestDataBuilder {
 		return withReference("hasMember", theHasMember);
 	}
 
+	/**
+	 * Sets the <code>managingOrganization</code> element on a Patient
+	 */
 	default ICreationArgument withOrganization(@Nullable String theHasMember) {
 		IIdType id = theHasMember != null ? getFhirContext().getVersion().newIdType(theHasMember) : null;
 		return withReference("managingOrganization", id);
