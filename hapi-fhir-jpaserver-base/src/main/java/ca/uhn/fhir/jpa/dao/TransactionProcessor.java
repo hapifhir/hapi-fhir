@@ -61,6 +61,7 @@ import jakarta.persistence.Tuple;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.apache.commons.lang3.Validate;
@@ -88,6 +89,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.UrlUtil.determineResourceTypeInResourceUrl;
+import static java.util.stream.Collectors.groupingBy;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -520,16 +522,35 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			}
 		}
 
-		TaskChunker.chunk(
-				searchParameterMapsToResolve,
-				CONDITIONAL_URL_FETCH_CHUNK_SIZE,
-				map -> preFetchSearchParameterMaps(
-						theRequestDetails,
-						theTransactionDetails,
-						theRequestPartitionId,
-						map,
-						theIdsToPreFetchBodiesFor,
-						theIdsToPreFetchVersionsFor));
+		// group things by match url so we can run them together.
+		record MatchTarget(String url, String resourceType) {
+			@Nonnull
+			static MatchTarget getMatchTarget(MatchUrlToResolve r) {
+				return new MatchTarget(r.myRequestUrl, r.myResourceDefinition.getName());
+			}
+		}
+		Map<MatchTarget, List<MatchUrlToResolve>> byMatchUrl =
+				searchParameterMapsToResolve.stream().collect(groupingBy(MatchTarget::getMatchTarget));
+
+		// Chunk references into query-friendly sizes to resolve in batches.
+		// Note: we can have 1000s of references all using the same url.
+		// E.g. Organization references in big patient bundles.
+		// So we build batches by url, not by reference.
+		// todo - if we are using partitioned tables, we want to also chunk these by target table partition.  Can we use
+		// isCompatiblePartition() to do this?
+		TaskChunker.chunk(byMatchUrl.entrySet(), CONDITIONAL_URL_FETCH_CHUNK_SIZE, nextUrlChunk -> {
+			// combine all resolve entries under this chunk of urls.
+			List<MatchUrlToResolve> combinedChunk =
+					nextUrlChunk.stream().flatMap(cc -> cc.getValue().stream()).toList();
+
+			preFetchSearchParameterMaps(
+					theRequestDetails,
+					theTransactionDetails,
+					theRequestPartitionId,
+					combinedChunk,
+					theIdsToPreFetchBodiesFor,
+					theIdsToPreFetchVersionsFor);
+		});
 	}
 
 	/**
@@ -652,27 +673,34 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					buildHashToSearchMap(theInputParameters, theIndexColumnName);
 			CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 			CriteriaQuery<Tuple> cq = cb.createTupleQuery();
-			Root<ResourceIndexedSearchParamToken> from = cq.from(ResourceIndexedSearchParamToken.class);
-			cq.multiselect(from.get("myPartitionIdValue"), from.get("myResourcePid"), from.get(theIndexColumnName));
+			Root<ResourceIndexedSearchParamToken> token = cq.from(ResourceIndexedSearchParamToken.class);
+			Join<ResourceIndexedSearchParamToken, ResourceTable> resourceTable = token.join("myResource");
+
+			cq.multiselect(
+					token.get("myPartitionIdValue"),
+					token.get("myResourcePid"),
+					token.get(theIndexColumnName),
+					resourceTable.get("myFhirId"),
+					resourceTable.get("myResourceType"));
 
 			Predicate masterPredicate;
 			if (theHashesForIndexColumn.size() == 1) {
 				masterPredicate = cb.equal(
-						from.get(theIndexColumnName),
+						token.get(theIndexColumnName),
 						theHashesForIndexColumn.iterator().next());
 			} else {
-				masterPredicate = from.get(theIndexColumnName).in(theHashesForIndexColumn);
+				masterPredicate = token.get(theIndexColumnName).in(theHashesForIndexColumn);
 			}
 
 			if (myPartitionSettings.isPartitioningEnabled()
 					&& !myPartitionSettings.isIncludePartitionInSearchHashes()) {
 				if (myRequestPartitionHelperSvc.isDefaultPartition(theRequestPartitionId)
 						&& myPartitionSettings.getDefaultPartitionId() == null) {
-					Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue"));
+					Predicate partitionIdCriteria = cb.isNull(token.get("myPartitionIdValue"));
 					masterPredicate = cb.and(partitionIdCriteria, masterPredicate);
 				} else if (!theRequestPartitionId.isAllPartitions()) {
 					Predicate partitionIdCriteria =
-							from.get("myPartitionIdValue").in(theRequestPartitionId.getPartitionIds());
+							token.get("myPartitionIdValue").in(theRequestPartitionId.getPartitionIds());
 					masterPredicate = cb.and(partitionIdCriteria, masterPredicate);
 				}
 			}
@@ -701,11 +729,17 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				Integer nextPartitionId = nextResult.get(0, Integer.class);
 				Long nextResourcePid = nextResult.get(1, Long.class);
 				Long nextHash = nextResult.get(2, Long.class);
+				String idPart = nextResult.get(3, String.class);
+				String resourceType = nextResult.get(4, String.class);
+
+				JpaPid pid = JpaPid.fromId(nextResourcePid, nextPartitionId);
+				IIdType fhirId = myFhirContext.getVersion().newIdType(resourceType, idPart);
+				theTransactionDetails.addResolvedResourceId(fhirId, pid);
 
 				List<MatchUrlToResolve> matchedSearch = hashToSearchMap.get(nextHash);
 				matchedSearch.forEach(matchUrl -> {
 					ourLog.debug("Matched url {} from database", matchUrl.myRequestUrl);
-					JpaPid pid = JpaPid.fromId(nextResourcePid, nextPartitionId);
+
 					handleFoundPreFetchResourceId(
 							theTransactionDetails,
 							theOutputPidsToLoadFully,

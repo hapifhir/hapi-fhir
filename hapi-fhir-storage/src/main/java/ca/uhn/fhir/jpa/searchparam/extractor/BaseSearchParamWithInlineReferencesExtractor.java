@@ -161,6 +161,9 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 				}
 
 				if (newId == null) {
+					newId = theTransactionDetails.getReverseResolvedId(match);
+				}
+				if (newId == null) {
 					newId = myIdHelperService.translatePidIdToForcedId(myFhirContext, resourceTypeString, match);
 				}
 				ourLog.debug("Replacing inline match URL[{}] with ID[{}}", nextId.getValue(), newId);
