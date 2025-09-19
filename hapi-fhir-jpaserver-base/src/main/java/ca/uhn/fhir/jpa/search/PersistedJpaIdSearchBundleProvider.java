@@ -10,6 +10,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.method.ResponsePage;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
@@ -29,9 +30,11 @@ public class PersistedJpaIdSearchBundleProvider implements IBundleProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(PersistedJpaIdSearchBundleProvider.class);
 
 	private final String myUuid;
-	private final String myResourceType;
+	private final @Nonnull String myResourceType;
 	private final @Nonnull List<String> myResourceIds;
 	private final RequestPartitionId myPartitionId;
+	private final Date myRangeStartInclusive;
+	private final @Nonnull Date myRangeEndInclusive;
 
 	@Autowired
 	private HistoryBuilderFactory myHistoryBuilderFactory;
@@ -43,11 +46,17 @@ public class PersistedJpaIdSearchBundleProvider implements IBundleProvider {
 	private IHapiTransactionService myTransactionService;
 
 	public PersistedJpaIdSearchBundleProvider(
-			String theResourceType, @Nonnull List<String> theResourceIds, RequestPartitionId thePartitionId) {
+			@Nonnull String theResourceType,
+			@Nonnull List<String> theResourceIds,
+			RequestPartitionId thePartitionId,
+			@Nullable Date theRangeStartInclusive,
+			@Nonnull Date theRangeEndInclusive) {
 		myUuid = UUID.randomUUID().toString();
 		myResourceType = theResourceType;
 		myResourceIds = theResourceIds;
 		myPartitionId = thePartitionId;
+		myRangeStartInclusive = theRangeStartInclusive;
+		myRangeEndInclusive = theRangeEndInclusive;
 	}
 
 	@Override
@@ -73,7 +82,8 @@ public class PersistedJpaIdSearchBundleProvider implements IBundleProvider {
 				myPartitionId);
 
 		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
-			HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(myResourceType, myResourceIds);
+			HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(
+				myResourceType, myResourceIds, myRangeStartInclusive, myRangeEndInclusive);
 
 			RequestPartitionId partitionId = myPartitionId;
 			if (partitionId == null) {

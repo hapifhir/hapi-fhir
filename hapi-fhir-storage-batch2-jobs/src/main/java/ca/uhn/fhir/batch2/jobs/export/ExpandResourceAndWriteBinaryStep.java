@@ -80,6 +80,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -98,6 +99,9 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class ExpandResourceAndWriteBinaryStep
 		implements IJobStepWorker<BulkExportJobParameters, ResourceIdList, BulkExportBinaryFileId> {
 	private static final Logger ourLog = getLogger(ExpandResourceAndWriteBinaryStep.class);
+
+	// small limit to account for the possible large size of history versions
+	private static final int MAX_HISTORY_PAGE_SIZE = 10;
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -143,7 +147,7 @@ public class ExpandResourceAndWriteBinaryStep
 	 * at any given time, so this class works a bit like a stream processor
 	 * (although not using Java streams).
 	 * <p>
-	 * The {@link #fetchResourcesByIdAndConsumeThem(ResourceIdList, BulkExportJobParameters, Consumer)}
+	 * The {@link #fetchResourcesByIdAndConsumeThem(ResourceIdList, BulkExportJobParameters, Consumer, StepExecutionDetails)}
 	 * method loads the resources by ID, {@link ExpandResourcesConsumer} handles
 	 * the filtering and batching, then the {@link NdJsonResourceWriter}
 	 * ultimately writes them.
@@ -175,13 +179,14 @@ public class ExpandResourceAndWriteBinaryStep
 				new ExpandResourcesConsumer(theStepExecutionDetails, theResourceWriter);
 
 		// search the resources
-		fetchResourcesByIdAndConsumeThem(idList, parameters, resourceListConsumer);
+		fetchResourcesByIdAndConsumeThem(idList, parameters, resourceListConsumer, theStepExecutionDetails);
 	}
 
 	private void fetchResourcesByIdAndConsumeThem(
 			ResourceIdList theIds,
 			BulkExportJobParameters theJobParameters,
-			Consumer<List<IBaseResource>> theResourceListConsumer) {
+			Consumer<List<IBaseResource>> theResourceListConsumer,
+			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails) {
 
 		RequestPartitionId requestPartitionId = theJobParameters.getPartitionId();
 
@@ -189,7 +194,8 @@ public class ExpandResourceAndWriteBinaryStep
 		theIds.getIds().forEach(t -> typeToIds.put(t.getResourceType(), t));
 
 		if (theJobParameters.isIncludeHistory()) {
-			processHistoryResources(theResourceListConsumer, typeToIds, requestPartitionId);
+			adjustJobParameters(theJobParameters, theStepExecutionDetails);
+			processHistoryResources(theResourceListConsumer, typeToIds, requestPartitionId, theJobParameters);
 		} else {
 			processResources(theResourceListConsumer, typeToIds, requestPartitionId);
 		}
@@ -201,14 +207,16 @@ public class ExpandResourceAndWriteBinaryStep
 	 * resource accumulation for history-enabled bulk exports.
 	 *
 	 * @param theResourceListConsumer Consumer to process batches of resources
-	 * @param theTypeToIds Multimap of resource types to their corresponding PIDs
-	 * @param theRequestPartitionId Partition ID for the request
+	 * @param theTypeToIds            Multimap of resource types to their corresponding PIDs
+	 * @param theRequestPartitionId   Partition ID for the request
+	 * @param theJobParameters        the batch job parameters
 	 */
 	@VisibleForTesting
-	void processHistoryResources(
+	public void processHistoryResources(
 			Consumer<List<IBaseResource>> theResourceListConsumer,
 			ArrayListMultimap<String, TypedPidJson> theTypeToIds,
-			RequestPartitionId theRequestPartitionId) {
+			RequestPartitionId theRequestPartitionId,
+			BulkExportJobParameters theJobParameters) {
 
 		// for each resource type
 		for (String resourceType : theTypeToIds.keySet()) {
@@ -216,7 +224,23 @@ public class ExpandResourceAndWriteBinaryStep
 
 			List<String> idList = convertToStringIds(theRequestPartitionId, resourceType, typePidJsonList);
 
-			consumeHistoryInBatches(resourceType, idList, theRequestPartitionId, theResourceListConsumer);
+			consumeHistoryInBatches(resourceType, idList, theRequestPartitionId, theJobParameters, theResourceListConsumer);
+		}
+	}
+
+	@VisibleForTesting
+	public void adjustJobParameters(
+			BulkExportJobParameters theJobParameters,
+			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails) {
+
+		// History export requires a valid `until` param with date not after the history querying start to
+		// cover for the case of new history records being created during export, which would generate
+		// pagination inconsistencies
+		Date jobStartTime = theStepExecutionDetails.getInstance().getStartTime();
+		if (theJobParameters.getUntil() == null || theJobParameters.getUntil().after(jobStartTime)) {
+			theJobParameters.setUntil(jobStartTime);
+			ourLog.info(
+				"Until time adjusted to match job start time: {}, as required by history type export.", jobStartTime);
 		}
 	}
 
@@ -224,13 +248,16 @@ public class ExpandResourceAndWriteBinaryStep
 			String theResourceType,
 			List<String> theIdList,
 			RequestPartitionId theRequestPartitionId,
+			BulkExportJobParameters theJobParameters,
 			Consumer<List<IBaseResource>> theResourceListConsumer) {
 
-		final int fileLimitBatchSize = myStorageSettings.getBulkExportFileMaximumCapacity();
-		final int pageSize = Math.min(getMaxSizeBatchDefault(), fileLimitBatchSize);
+		// only fileMaxResourceCount considered here because consumer takes care of fileMaximumSize
+
+		final int fileMaxResourceCount = myStorageSettings.getBulkExportFileMaximumCapacity();
+		final int pageSize = Math.min(MAX_HISTORY_PAGE_SIZE, fileMaxResourceCount);
 
 		IBundleProvider resHistoryProvider =
-				searchForResourcesHistory(theResourceType, theIdList, theRequestPartitionId);
+				searchForResourcesHistory(theResourceType, theIdList, theRequestPartitionId, theJobParameters);
 
 		int currentIndex = 0;
 		List<IBaseResource> resourcesToConsume = new ArrayList<>();
@@ -253,11 +280,11 @@ public class ExpandResourceAndWriteBinaryStep
 			resourcesToConsume.addAll(page);
 
 			// process complete batches
-			while (resourcesToConsume.size() >= fileLimitBatchSize) {
-				List<IBaseResource> batch = new ArrayList<>(resourcesToConsume.subList(0, fileLimitBatchSize));
+			while (resourcesToConsume.size() >= fileMaxResourceCount) {
+				List<IBaseResource> batch = new ArrayList<>(resourcesToConsume.subList(0, fileMaxResourceCount));
 				theResourceListConsumer.accept(batch);
 				ourLog.debug("Sent batch of {} history resources to consumer", batch.size());
-				resourcesToConsume.subList(0, fileLimitBatchSize).clear();
+				resourcesToConsume.subList(0, fileMaxResourceCount).clear();
 			}
 
 			currentIndex += page.size();
@@ -277,17 +304,6 @@ public class ExpandResourceAndWriteBinaryStep
 			theResourceListConsumer.accept(resourcesToConsume);
 			ourLog.debug("Sent batch of {} history resources to consumer", resourcesToConsume.size());
 		}
-	}
-
-	/**
-	 * Gets the default maximum batch size for SQL queries to avoid exceeding
-	 * database variable limits.
-	 *
-	 * @return The default maximum batch size
-	 */
-	@VisibleForTesting
-	int getMaxSizeBatchDefault() {
-		return PARAM_MAXIMUM_BATCH_SIZE_DEFAULT;
 	}
 
 	/**
@@ -364,14 +380,19 @@ public class ExpandResourceAndWriteBinaryStep
 	 * Searches for historical versions of resources by their IDs using the bulk export history helper.
 	 *
 	 * @param theResourceType       Type of resources to search for
-	 * @param theIdList				The resource IDs which history must be fetched
+	 * @param theIdList             The resource IDs which history must be fetched
 	 * @param theRequestPartitionId Partition ID for the request
+	 * @param theJobParameters		The job parameters
 	 * @return Bundle provider containing historical versions of the resources
 	 */
 	private IBundleProvider searchForResourcesHistory(
-			String theResourceType, List<String> theIdList, RequestPartitionId theRequestPartitionId) {
+			String theResourceType,
+			List<String> theIdList,
+			RequestPartitionId theRequestPartitionId,
+			BulkExportJobParameters theJobParameters) {
 
-		return myExportHelper.fetchHistoryForResourceIds(theResourceType, theIdList, theRequestPartitionId);
+		return myExportHelper.fetchHistoryForResourceIds(
+			theResourceType, theIdList, theRequestPartitionId, theJobParameters.getSince(), theJobParameters.getUntil());
 	}
 
 	/**

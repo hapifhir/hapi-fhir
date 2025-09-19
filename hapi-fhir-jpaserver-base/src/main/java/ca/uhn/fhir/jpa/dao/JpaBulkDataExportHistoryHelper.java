@@ -5,10 +5,11 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.bulk.IBulkDataExportHistoryHelper;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 public class JpaBulkDataExportHistoryHelper implements IBulkDataExportHistoryHelper {
 
@@ -17,10 +18,13 @@ public class JpaBulkDataExportHistoryHelper implements IBulkDataExportHistoryHel
 
 	@Override
 	public IBundleProvider fetchHistoryForResourceIds(
-			@Nonnull String theResourceType, List<String> theIdList, RequestPartitionId theRequestPartitionId) {
+			@Nonnull String theResourceType,
+			@Nonnull List<String> theIdList,
+			RequestPartitionId theRequestPartitionId,
+			@Nullable Date theRangeStartInclusive,
+			@Nonnull Date theRangeEndInclusive) {
 
-		Objects.requireNonNull(theResourceType);
-
-		return myBundleProviderFactory.historyFromResourceIds(theResourceType, theIdList, theRequestPartitionId);
+		return myBundleProviderFactory.historyFromResourceIds(
+			theResourceType, theIdList, theRequestPartitionId, theRangeStartInclusive, theRangeEndInclusive);
 	}
 }

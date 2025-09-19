@@ -206,6 +206,7 @@ import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.IMetaTagSorter;
 import ca.uhn.fhir.util.MetaTagSorterAlphabetical;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
@@ -675,8 +676,13 @@ public class JpaConfig {
 	@Bean(name = PERSISTED_JPA_ID_SEARCH_BUNDLE_PROVIDER)
 	@Scope("prototype")
 	public PersistedJpaIdSearchBundleProvider newPersistedJpaIdSearchBundleProvider(
-			String theResourceType, List<String> theResourceIds, RequestPartitionId thePartitionId) {
-		return new PersistedJpaIdSearchBundleProvider(theResourceType, theResourceIds, thePartitionId);
+			String theResourceType,
+			List<String> theResourceIds,
+			RequestPartitionId thePartitionId,
+			@Nullable Date theRangeStartInclusive,
+			@Nonnull Date theRangeEndInclusive) {
+		return new PersistedJpaIdSearchBundleProvider(
+			theResourceType, theResourceIds, thePartitionId, theRangeStartInclusive, theRangeEndInclusive);
 	}
 
 	@Bean(name = RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER)
@@ -813,8 +819,11 @@ public class JpaConfig {
 	@Bean(name = HISTORY_BUILDER_WITH_IDS)
 	@Scope("prototype")
 	public HistoryBuilder newHistoryBuilderWithIds(
-			@Nullable String theResourceType, @Nullable List<String> theResourceIds) {
-		return new HistoryBuilder(theResourceType, theResourceIds);
+			@Nonnull String theResourceType,
+			@Nonnull List<String> theResourceIds,
+			@Nullable Date theRangeStartInclusive,
+			@Nonnull Date theRangeEndInclusive) {
+		return new HistoryBuilder(theResourceType, theResourceIds, theRangeStartInclusive, theRangeEndInclusive);
 	}
 
 	@Bean

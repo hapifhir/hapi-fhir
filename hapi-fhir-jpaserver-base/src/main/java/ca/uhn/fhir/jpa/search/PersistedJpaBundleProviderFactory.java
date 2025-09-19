@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -122,12 +123,18 @@ public class PersistedJpaBundleProviderFactory {
 	 * that can paginate through history entries for specific resource IDs.
 	 */
 	public IBundleProvider historyFromResourceIds(
-			String theResourceType, @Nullable List<String> theResourceIds, RequestPartitionId theRequestPartitionId) {
+			String theResourceType,
+			@Nullable List<String> theResourceIds,
+			RequestPartitionId theRequestPartitionId,
+			@Nullable Date theRangeStartInclusive,
+			@Nonnull Date theRangeEndInclusive) {
 
 		return (PersistedJpaIdSearchBundleProvider) myApplicationContext.getBean(
 				JpaConfig.PERSISTED_JPA_ID_SEARCH_BUNDLE_PROVIDER,
 				theResourceType,
 				theResourceIds,
-				theRequestPartitionId);
+				theRequestPartitionId,
+				theRangeStartInclusive,
+				theRangeEndInclusive);
 	}
 }

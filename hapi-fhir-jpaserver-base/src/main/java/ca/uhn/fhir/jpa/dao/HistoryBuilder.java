@@ -106,12 +106,15 @@ public class HistoryBuilder {
 	/**
 	 * Constructor for multiple resource IDs
 	 */
-	public HistoryBuilder(@Nullable String theResourceType, @Nullable List<String> theResourceIds) {
+	public HistoryBuilder(@Nonnull String theResourceType,
+						  @Nonnull List<String> theResourceIds,
+						  @Nullable Date theRangeStartInclusive,
+						  @Nonnull Date theRangeEndInclusive) {
 		myResourceType = theResourceType;
 		myResourceIds = theResourceIds;
 		myResourceId = null;
-		myRangeStartInclusive = null;
-		myRangeEndInclusive = null;
+		myRangeStartInclusive = theRangeStartInclusive;
+		myRangeEndInclusive = theRangeEndInclusive;
 	}
 
 	public Long fetchCount(RequestPartitionId thePartitionId) {
@@ -151,7 +154,12 @@ public class HistoryBuilder {
 		 * IDX_RESVER_TYPE_DATE in the future.
 		 * -JA 2024-04-21
 		 */
-		criteriaQuery.orderBy(cb.desc(from.get("myUpdated")), cb.desc(from.get("myResourceId")));
+
+		if (CollectionUtils.isNotEmpty(myResourceIds)) {
+			criteriaQuery.orderBy(cb.asc(from.get("myResourceId")), cb.desc(from.get("myUpdated")));
+		} else {
+			criteriaQuery.orderBy(cb.desc(from.get("myUpdated")), cb.desc(from.get("myResourceId")));
+		}
 
 		TypedQuery<ResourceHistoryTable> query = myEntityManager.createQuery(criteriaQuery);
 

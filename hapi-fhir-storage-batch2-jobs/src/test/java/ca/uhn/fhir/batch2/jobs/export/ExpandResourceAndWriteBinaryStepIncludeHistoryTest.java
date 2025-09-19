@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.bulk.IBulkDataExportHistoryHelper;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import com.google.common.collect.ArrayListMultimap;
@@ -42,8 +43,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -69,15 +68,15 @@ public class ExpandResourceAndWriteBinaryStepIncludeHistoryTest {
 	@InjectMocks
 	private ExpandResourceAndWriteBinaryStep myJobStep;
 
-
 	public static final int EXPORT_FILE_MAX_CAPACITY = 7;
-	public static final int MAXIMUM_BATCH_SIZE_DEFAULT = 5;
 
 	public static final int PATIENT_RESOURCE_COUNT = 37;
 	public static final int PATIENT_RESOURCE_VERSIONS_COUNT = 3;
 
 	public static final int OBSERVATION_RESOURCE_COUNT = 71;
 	public static final int OBSERVATION_RESOURCE_VERSIONS_COUNT = 2;
+
+	private final BulkExportJobParameters myJobParams = new BulkExportJobParameters();
 
 	@BeforeEach
 	public void init() {
@@ -86,20 +85,14 @@ public class ExpandResourceAndWriteBinaryStepIncludeHistoryTest {
 
 	private ArrayListMultimap<String, TypedPidJson> myTypeToIdsMap;
 
-	private ExpandResourceAndWriteBinaryStep myTestedStep;
-
 	@Captor
 	private ArgumentCaptor<List<IBaseResource>> resourcesConsumedCaptor;
 
 	@BeforeEach
 	void setUp() {
-		myTestedStep = spy(myJobStep);
-		doReturn(MAXIMUM_BATCH_SIZE_DEFAULT).when(myTestedStep).getMaxSizeBatchDefault();
-
 		myStorageSettings.setBulkExportFileMaximumCapacity(EXPORT_FILE_MAX_CAPACITY);
 
-		setupIdHelperServiceMockAsASpy();
-
+		setupIdHelperServiceMock();
 	}
 
 	@Test
@@ -115,7 +108,7 @@ public class ExpandResourceAndWriteBinaryStepIncludeHistoryTest {
 		observationIds.forEach(t -> myTypeToIdsMap.put(t.getResourceType(), t));
 
 		// when
-		myTestedStep.processHistoryResources(myResourceListConsumer, myTypeToIdsMap, RequestPartitionId.allPartitions());
+		myJobStep.processHistoryResources(myResourceListConsumer, myTypeToIdsMap, RequestPartitionId.allPartitions(), myJobParams);
 
 		// then
 		// all resources should have been consumed in batches of MAXIMUM_BATCH_SIZE_DEFAULT (except last, which could have less)
@@ -129,14 +122,14 @@ public class ExpandResourceAndWriteBinaryStepIncludeHistoryTest {
 	}
 
 	private void setupExportHelperResultsMock(Consumer<List<IBaseResource>> theResourceVersionConsumer) {
-		when(myExportHelper.fetchHistoryForResourceIds(eq("Patient"), any(), any())).thenAnswer(invocation -> {
+		when(myExportHelper.fetchHistoryForResourceIds(eq("Patient"), any(), any(), any(), any())).thenAnswer(invocation -> {
 			List<String> theResourceIdList = invocation.getArgument(1);
 			List<IBaseResource> resourceList = getHistoryResourcesForResourceIds("Patient", theResourceIdList, PATIENT_RESOURCE_VERSIONS_COUNT);
 			theResourceVersionConsumer.accept(resourceList);
 			return new SimpleBundleProvider(resourceList);
 		});
 
-		when(myExportHelper.fetchHistoryForResourceIds(eq("Observation"), any(), any())).thenAnswer(invocation -> {
+		when(myExportHelper.fetchHistoryForResourceIds(eq("Observation"), any(), any(), any(), any())).thenAnswer(invocation -> {
 			List<String> theResourceIdList = invocation.getArgument(1);
 			List<IBaseResource> resourceList = getHistoryResourcesForResourceIds("Observation", theResourceIdList, OBSERVATION_RESOURCE_VERSIONS_COUNT);
 			theResourceVersionConsumer.accept(resourceList);
@@ -177,8 +170,7 @@ public class ExpandResourceAndWriteBinaryStepIncludeHistoryTest {
 		return IntStream.range(1, theCount+1).mapToObj(i -> new TypedPidJson(theResourceType, 1, String.valueOf(i))).toList();
 	}
 
-	// setup mock as a Spy for required methods as module doesn't have access to JPA module implementations
-	private void setupIdHelperServiceMockAsASpy() {
+	private void setupIdHelperServiceMock() {
 		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), any(), any())).thenAnswer(invocation -> {
 			Integer thePartitionId = invocation.getArgument(0);
 			String thePid = invocation.getArgument(1);
