@@ -106,10 +106,11 @@ public class HistoryBuilder {
 	/**
 	 * Constructor for multiple resource IDs
 	 */
-	public HistoryBuilder(@Nonnull String theResourceType,
-						  @Nonnull List<String> theResourceIds,
-						  @Nullable Date theRangeStartInclusive,
-						  @Nonnull Date theRangeEndInclusive) {
+	public HistoryBuilder(
+			@Nonnull String theResourceType,
+			@Nonnull List<String> theResourceIds,
+			@Nullable Date theRangeStartInclusive,
+			@Nonnull Date theRangeEndInclusive) {
 		myResourceType = theResourceType;
 		myResourceIds = theResourceIds;
 		myResourceId = null;

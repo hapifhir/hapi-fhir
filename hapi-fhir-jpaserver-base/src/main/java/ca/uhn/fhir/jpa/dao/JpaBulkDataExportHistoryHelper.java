@@ -25,6 +25,6 @@ public class JpaBulkDataExportHistoryHelper implements IBulkDataExportHistoryHel
 			@Nonnull Date theRangeEndInclusive) {
 
 		return myBundleProviderFactory.historyFromResourceIds(
-			theResourceType, theIdList, theRequestPartitionId, theRangeStartInclusive, theRangeEndInclusive);
+				theResourceType, theIdList, theRequestPartitionId, theRangeStartInclusive, theRangeEndInclusive);
 	}
 }

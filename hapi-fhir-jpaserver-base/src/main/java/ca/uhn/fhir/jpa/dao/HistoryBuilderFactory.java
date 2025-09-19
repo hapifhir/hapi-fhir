@@ -53,10 +53,10 @@ public class HistoryBuilderFactory {
 			@Nullable Date theRangeStartInclusive,
 			@Nonnull Date theRangeEndInclusive) {
 		return (HistoryBuilder) myApplicationContext.getBean(
-					JpaConfig.HISTORY_BUILDER_WITH_IDS,
-					theResourceType,
-					theResourceIds,
-					theRangeStartInclusive,
-					theRangeEndInclusive);
+				JpaConfig.HISTORY_BUILDER_WITH_IDS,
+				theResourceType,
+				theResourceIds,
+				theRangeStartInclusive,
+				theRangeEndInclusive);
 	}
 }

@@ -83,7 +83,7 @@ public class PersistedJpaIdSearchBundleProvider implements IBundleProvider {
 
 		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
 			HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(
-				myResourceType, myResourceIds, myRangeStartInclusive, myRangeEndInclusive);
+					myResourceType, myResourceIds, myRangeStartInclusive, myRangeEndInclusive);
 
 			RequestPartitionId partitionId = myPartitionId;
 			if (partitionId == null) {

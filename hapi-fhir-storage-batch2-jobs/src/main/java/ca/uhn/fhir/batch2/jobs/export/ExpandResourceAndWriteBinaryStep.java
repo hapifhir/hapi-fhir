@@ -224,7 +224,8 @@ public class ExpandResourceAndWriteBinaryStep
 
 			List<String> idList = convertToStringIds(theRequestPartitionId, resourceType, typePidJsonList);
 
-			consumeHistoryInBatches(resourceType, idList, theRequestPartitionId, theJobParameters, theResourceListConsumer);
+			consumeHistoryInBatches(
+					resourceType, idList, theRequestPartitionId, theJobParameters, theResourceListConsumer);
 		}
 	}
 
@@ -240,7 +241,8 @@ public class ExpandResourceAndWriteBinaryStep
 		if (theJobParameters.getUntil() == null || theJobParameters.getUntil().after(jobStartTime)) {
 			theJobParameters.setUntil(jobStartTime);
 			ourLog.info(
-				"Until time adjusted to match job start time: {}, as required by history type export.", jobStartTime);
+					"Until time adjusted to match job start time: {}, as required by history type export.",
+					jobStartTime);
 		}
 	}
 
@@ -392,7 +394,11 @@ public class ExpandResourceAndWriteBinaryStep
 			BulkExportJobParameters theJobParameters) {
 
 		return myExportHelper.fetchHistoryForResourceIds(
-			theResourceType, theIdList, theRequestPartitionId, theJobParameters.getSince(), theJobParameters.getUntil());
+				theResourceType,
+				theIdList,
+				theRequestPartitionId,
+				theJobParameters.getSince(),
+				theJobParameters.getUntil());
 	}
 
 	/**

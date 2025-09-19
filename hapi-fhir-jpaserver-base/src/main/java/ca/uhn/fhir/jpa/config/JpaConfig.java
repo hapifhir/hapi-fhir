@@ -682,7 +682,7 @@ public class JpaConfig {
 			@Nullable Date theRangeStartInclusive,
 			@Nonnull Date theRangeEndInclusive) {
 		return new PersistedJpaIdSearchBundleProvider(
-			theResourceType, theResourceIds, thePartitionId, theRangeStartInclusive, theRangeEndInclusive);
+				theResourceType, theResourceIds, thePartitionId, theRangeStartInclusive, theRangeEndInclusive);
 	}
 
 	@Bean(name = RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER)
