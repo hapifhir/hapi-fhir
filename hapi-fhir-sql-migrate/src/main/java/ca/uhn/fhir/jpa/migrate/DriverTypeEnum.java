@@ -167,9 +167,9 @@ public enum DriverTypeEnum {
 		 */
 		public ConnectionProperties(
 				DataSource theDataSource, TransactionTemplate theTxTemplate, DriverTypeEnum theDriverType) {
-			Validate.notNull(theDataSource);
-			Validate.notNull(theTxTemplate);
-			Validate.notNull(theDriverType);
+			Validate.notNull(theDataSource, "The data source must not be null");
+			Validate.notNull(theTxTemplate, "The transaction template must not be null");
+			Validate.notNull(theDriverType, "The driver type must not be null");
 
 			myDataSource = theDataSource;
 			myTxTemplate = theTxTemplate;
@@ -199,9 +199,9 @@ public enum DriverTypeEnum {
 
 		@Override
 		public void close() {
-			if (myDataSource instanceof DisposableBean) {
+			if (myDataSource instanceof DisposableBean disposableBean) {
 				try {
-					((DisposableBean) myDataSource).destroy();
+					disposableBean.destroy();
 				} catch (Exception e) {
 					ourLog.warn("Could not dispose of driver", e);
 				}

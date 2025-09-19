@@ -130,11 +130,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
 			<artifactId>mockito-junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
@@ -991,10 +986,10 @@
 
 	<properties>
 		<fhir_core_version>6.6.7</fhir_core_version>
-		<spotless_version>2.41.1</spotless_version>
+		<spotless_version>2.46.1</spotless_version>
 		<spotless.exclude.pattern>**/test/**/*.java</spotless.exclude.pattern>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
-		<surefire_version>3.5.2</surefire_version>
+		<surefire_version>3.5.4</surefire_version>
 
 
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
@@ -1009,29 +1004,29 @@
 		<activation_api_version>1.2.0</activation_api_version>
 		<apache_karaf_version>4.2.5</apache_karaf_version>
 		<aries_spifly_version>1.2</aries_spifly_version>
-		<caffeine_version>3.1.8</caffeine_version>
-		<checkstyle_version>10.21.1</checkstyle_version>
+		<caffeine_version>3.2.2</caffeine_version>
+		<checkstyle_version>10.26.1</checkstyle_version>
 		<maven_changes_version>2.12.1</maven_changes_version>
-		<commons_codec_version>1.15</commons_codec_version>
-		<commons_compress_version>1.26.0</commons_compress_version>
+		<commons_codec_version>1.19.0</commons_codec_version>
+		<commons_compress_version>1.28.0</commons_compress_version>
 		<!--
 		Note if you bump the version here - The commons-dbcp2 2.11.0 version
 		explicitly depends on commons-pool2 2.12.0, so we explicitly specify that
 		version below as well. If you bump this, make sure you're bumping the
 		pool2 version appropriately too.
 		-->
-		<commons_dbcp2_version>2.11.0</commons_dbcp2_version>
+		<commons_dbcp2_version>2.13.0</commons_dbcp2_version>
 		<!-- Before Bumping: See note above about dbcp2 -->
-		<commons_pool2_version>2.12.0</commons_pool2_version>
-		<commons_text_version>1.10.0</commons_text_version>
-		<commons_io_version>2.17.0</commons_io_version>
+		<commons_pool2_version>2.12.1</commons_pool2_version>
+		<commons_text_version>1.14.0</commons_text_version>
+		<commons_io_version>2.20.0</commons_io_version>
 		<commons_lang3_version>3.18.0</commons_lang3_version>
 		<com_jamesmurty_utils_version>1.2</com_jamesmurty_utils_version>
-		<error_prone_core_version>2.36.0</error_prone_core_version>
-		<mockito_version>5.18.0</mockito_version>
+		<error_prone_core_version>2.41.0</error_prone_core_version>
+		<mockito_version>5.19.0</mockito_version>
 		<nullaway_version>0.7.9</nullaway_version>
-		<guava_version>33.2.1-jre</guava_version>
-		<gson_version>2.12.0</gson_version>
+		<guava_version>33.5.0-jre</guava_version>
+		<gson_version>2.13.2</gson_version>
 		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
 		<jaxb_api_version>2.3.1</jaxb_api_version>
 		<jaxb_core_version>2.3.0.1</jaxb_core_version>
@@ -1040,62 +1035,61 @@
 		<jersey_version>3.0.3</jersey_version>
 		<jetty_version>12.0.17</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
-		<junit_version>5.10.1</junit_version>
+		<junit_version>5.13.4</junit_version>
+		<junit_platform_version>1.13.4</junit_platform_version>
 		<flexmark_version>0.64.8</flexmark_version>
-		<flyway_version>10.20.1</flyway_version>
-		<hibernate_version>6.6.4.Final</hibernate_version>
-		<logback_version>1.5.16</logback_version>
+		<flyway_version>11.13.1</flyway_version>
+		<hibernate_version>7.1.1.Final</hibernate_version>
+		<logback_version>1.5.18</logback_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
-		<hibernate_search_version>7.2.1.Final</hibernate_search_version>
+		<hibernate_search_version>8.1.2.Final</hibernate_search_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
-		<lucene_version>9.11.1</lucene_version>
+		<lucene_version>9.12.2</lucene_version>
 		<hamcrest_version>2.2</hamcrest_version>
-		<hibernate_validator_version>8.0.0.Final</hibernate_validator_version>
+		<hibernate_validator_version>9.0.1.Final</hibernate_validator_version>
 		<httpcore_version>4.4.16</httpcore_version>
 		<httpclient_version>4.5.14</httpclient_version>
 		<jackson_version>2.20.0</jackson_version>
 		<jackson_databind_version>2.20.0</jackson_databind_version>
 		<jackson_annotations_version>2.20</jackson_annotations_version>
-		<httpclient5_version>5.4.3</httpclient5_version>
-		<httpcore5_version>5.3.1</httpcore5_version>
-		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
-		<maven_license_plugin_version>1.8</maven_license_plugin_version>
+		<httpclient5_version>5.5</httpclient5_version>
+		<httpcore5_version>5.3.5</httpcore5_version>
 		<okhttp_version>4.12.0</okhttp_version>
 		<!--
 		Note: As of 2024-11, the opentelemetry-agent-for-testing dependency published to Maven
 		uses a version which lines up with the OTEL instrumentation version, but with "-alpha"
 		appended to it. So we do that too here. This could change in the future.
 		-->
-		<otel_instrumentation.version>2.10.0</otel_instrumentation.version>
+		<otel_instrumentation.version>2.20.0</otel_instrumentation.version>
 		<otel_agent_for_testing.version>${otel_instrumentation.version}-alpha</otel_agent_for_testing.version>
 		<poi_version>4.1.2</poi_version>
 		<poi_ooxml_schemas_version>1.4</poi_ooxml_schemas_version>
-		<resteasy_version>6.2.10.Final</resteasy_version>
+		<resteasy_version>6.2.12.Final</resteasy_version>
 		<ph_schematron_version>7.1.2</ph_schematron_version>
 		<ph_commons_version>9.5.4</ph_commons_version>
 		<plexus_compiler_api_version>2.13.0</plexus_compiler_api_version>
 		<reflections_version>0.9.11</reflections_version>
 		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
-		<swagger_jakarta_version>2.2.30</swagger_jakarta_version>
-		<slf4j_version>2.0.16</slf4j_version>
-		<log4j_to_slf4j_version>2.24.1</log4j_to_slf4j_version>
-		<spring_version>6.1.21</spring_version>
-		<spring_data_bom_version>2024.0.5</spring_data_bom_version>
-		<spring_framework_bom_version>6.1.15</spring_framework_bom_version>
-		<spring_boot_version>3.3.11</spring_boot_version>
-		<spring_retry_version>2.0.10</spring_retry_version>
+		<swagger_jakarta_version>2.2.37</swagger_jakarta_version>
+		<slf4j_version>2.0.17</slf4j_version>
+		<log4j_to_slf4j_version>2.25.1</log4j_to_slf4j_version>
+		<spring_version>6.2.11</spring_version>
+		<spring_data_bom_version>2025.0.4</spring_data_bom_version>
+		<spring_framework_bom_version>6.2.11</spring_framework_bom_version>
+		<spring_boot_version>3.5.6</spring_boot_version>
+		<spring_retry_version>2.0.12</spring_retry_version>
 		<json_path_version>2.9.0</json_path_version>
 		<jboss_logging_version>3.6.1.Final</jboss_logging_version>
 		<stax2_api_version>3.1.4</stax2_api_version>
-		<testcontainers_version>1.20.3</testcontainers_version>
-		<thymeleaf-version>3.1.2.RELEASE</thymeleaf-version>
+		<testcontainers_version>1.21.3</testcontainers_version>
+		<thymeleaf-version>3.1.3.RELEASE</thymeleaf-version>
 		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<elastic_apm_version>1.52.0</elastic_apm_version>
 		<elasticsearch_version>8.15.3</elasticsearch_version>
-		<ucum_version>1.0.9</ucum_version>
+		<ucum_version>1.0.10</ucum_version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -1110,12 +1104,12 @@
 		<argLine></argLine>
 
 		<!-- Plugin Versioning -->
-		<maven-resources-plugin-version>3.3.0</maven-resources-plugin-version>
+		<maven-resources-plugin-version>3.3.1</maven-resources-plugin-version>
 		<buildnumber-maven-plugin-version>3.2.1</buildnumber-maven-plugin-version>
-		<jacoco-maven-plugin-version>0.8.12</jacoco-maven-plugin-version>
+		<jacoco-maven-plugin-version>0.8.13</jacoco-maven-plugin-version>
 		<maven-assembly-plugin-version>3.7.1</maven-assembly-plugin-version>
 		<maven-license-plugin-version>2.5.0</maven-license-plugin-version>
-		<maven-enforcer-plugin-version>3.5.0</maven-enforcer-plugin-version>
+		<maven-enforcer-plugin-version>3.6.1</maven-enforcer-plugin-version>
 		<maven-checkstyle-version>3.6.0</maven-checkstyle-version>
 	</properties>
 
@@ -1555,7 +1549,7 @@
 			<dependency>
 				<groupId>com.mysql</groupId>
 				<artifactId>mysql-connector-j</artifactId>
-				<version>9.1.0</version>
+				<version>9.4.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springdoc</groupId>
@@ -1641,11 +1635,6 @@
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>fluent-hc</artifactId>
 				<version>${httpclient_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.httpcomponents</groupId>
-				<artifactId>httpclient-android</artifactId>
-				<version>4.3.5.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
@@ -1777,17 +1766,12 @@
 			<dependency>
 				<groupId>org.codehaus.plexus</groupId>
 				<artifactId>plexus-utils</artifactId>
-				<version>3.1.0</version>
+				<version>3.6.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.woodstox</groupId>
 				<artifactId>woodstox-core</artifactId>
-				<version>6.4.0</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ebaysf.web</groupId>
-				<artifactId>cors-filter</artifactId>
-				<version>${ebay_cors_filter_version}</version>
+				<version>6.7.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.ee10</groupId>
@@ -1997,6 +1981,12 @@
 				<artifactId>hibernate-envers</artifactId>
 				<version>${hibernate_version}</version>
 			</dependency>
+			<!-- For Derby Dialect https://github.com/hibernate/hibernate-orm/pull/8717 -->
+			<dependency>
+				<groupId>org.hibernate.orm</groupId>
+				<artifactId>hibernate-community-dialects</artifactId>
+				<version>${hibernate_version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.hibernate.validator</groupId>
 				<artifactId>hibernate-validator</artifactId>
@@ -2021,7 +2011,7 @@
 			<dependency>
 				<groupId>org.elasticsearch</groupId>
 				<artifactId>elasticsearch</artifactId>
-				<version>8.9.2</version>
+				<version>9.1.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
@@ -2075,14 +2065,20 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
+				<groupId>org.junit.platform</groupId>
+				<artifactId>junit-platform-launcher</artifactId>
+				<version>${junit_platform_version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
 				<groupId>org.junit-pioneer</groupId>
 				<artifactId>junit-pioneer</artifactId>
-				<version>1.3.8</version>
+				<version>2.3.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mariadb.jdbc</groupId>
 				<artifactId>mariadb-java-client</artifactId>
-				<version>3.0.4</version>
+				<version>3.5.6</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
@@ -2097,17 +2093,17 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.7.7</version>
+				<version>42.7.8</version>
 			</dependency>
 			<dependency>
 				<groupId>com.oracle.database.jdbc</groupId>
 				<artifactId>ojdbc11</artifactId>
-				<version>23.6.0.24.10</version>
+				<version>23.9.0.25.07</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
 				<artifactId>quartz</artifactId>
-				<version>2.3.2</version>
+				<version>2.5.0</version>
 				<exclusions>
 					<exclusion>
 						<groupId>com.zaxxer</groupId>
@@ -2514,7 +2510,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
-					<version>3.4.0</version>
+					<version>3.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -2550,12 +2546,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.4.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jxr-plugin</artifactId>
-					<version>3.0.0</version>
+					<version>3.6.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -2577,12 +2573,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-plugin-plugin</artifactId>
-					<version>3.9.0</version>
+					<version>3.15.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<version>3.6.0</version>
+					<version>3.6.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -2618,7 +2614,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>build-helper-maven-plugin</artifactId>
-					<version>3.6.0</version>
+					<version>3.6.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -2638,7 +2634,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>versions-maven-plugin</artifactId>
-					<version>2.18.0</version>
+					<version>2.19.0</version>
 					<configuration>
 						<processDependencyManagementTransitive>false</processDependencyManagementTransitive>
 					</configuration>
@@ -2672,7 +2668,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-install-plugin</artifactId>
-					<version>3.1.3</version>
+					<version>3.1.4</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>

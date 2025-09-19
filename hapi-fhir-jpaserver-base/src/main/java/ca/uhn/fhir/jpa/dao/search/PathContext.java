@@ -1,22 +1,3 @@
-/*-
- * #%L
- * HAPI FHIR JPA Server
- * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 package ca.uhn.fhir.jpa.dao.search;
 
 import jakarta.annotation.Nonnull;
@@ -62,17 +43,17 @@ import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NESTED_SEARCH_PARA
  * Holds current query path, boolean clause accumulating AND clauses, and a factory for new predicates.
  *
  * The Hibernate Search SearchPredicateFactory is "smart", and knows to wrap references to nested fields
- * in a nested clause.  This is a problem if we want to accumulate them in a single boolean before nesting.
+ * in a nested clause. This is a problem if we want to accumulate them in a single boolean before nesting.
  * Instead, we keep track of the current query path (e.g. "nsp.value-quantity"), and the right SearchPredicateFactory
  * to use.
  */
 class PathContext implements SearchPredicateFactory {
 	private final String myPathPrefix;
-	private final BooleanPredicateClausesStep<?> myRootClause;
+	private final BooleanPredicateClausesStep<?, ?> myRootClause;
 	private final SearchPredicateFactory myPredicateFactory;
 
 	PathContext(
-			String thePrefix, BooleanPredicateClausesStep<?> theClause, SearchPredicateFactory thePredicateFactory) {
+			String thePrefix, BooleanPredicateClausesStep<?, ?> theClause, SearchPredicateFactory thePredicateFactory) {
 		myRootClause = theClause;
 		myPredicateFactory = thePredicateFactory;
 		myPathPrefix = thePrefix;
@@ -80,7 +61,7 @@ class PathContext implements SearchPredicateFactory {
 
 	@Nonnull
 	static PathContext buildRootContext(
-			BooleanPredicateClausesStep<?> theRootClause, SearchPredicateFactory thePredicateFactory) {
+			BooleanPredicateClausesStep<?, ?> theRootClause, SearchPredicateFactory thePredicateFactory) {
 		return new PathContext("", theRootClause, thePredicateFactory);
 	}
 
@@ -126,7 +107,7 @@ class PathContext implements SearchPredicateFactory {
 		if (theOrList.size() == 1) {
 			finalClause = theOrList.get(0);
 		} else {
-			BooleanPredicateClausesStep<?> orClause = myPredicateFactory.bool();
+			BooleanPredicateClausesStep<?, ?> orClause = myPredicateFactory.bool();
 			orClause.minimumShouldMatchNumber(1);
 			theOrList.forEach(orClause::should);
 			finalClause = orClause;
@@ -137,7 +118,7 @@ class PathContext implements SearchPredicateFactory {
 	// implement SearchPredicateFactory
 
 	@Override
-	public MatchAllPredicateOptionsStep<?> matchAll() {
+	public MatchAllPredicateOptionsStep<?,?> matchAll() {
 		return myPredicateFactory.matchAll();
 	}
 
@@ -152,17 +133,17 @@ class PathContext implements SearchPredicateFactory {
 	}
 
 	@Override
-	public BooleanPredicateClausesStep<?> bool() {
+	public BooleanPredicateClausesStep<?, ?> bool() {
 		return myPredicateFactory.bool();
 	}
 
 	@Override
-	public PredicateFinalStep bool(Consumer<? super BooleanPredicateClausesStep<?>> clauseContributor) {
+	public PredicateFinalStep bool(Consumer<? super BooleanPredicateClausesStep<?, ?>> clauseContributor) {
 		return myPredicateFactory.bool(clauseContributor);
 	}
 
 	@Override
-	public SimpleBooleanPredicateClausesStep<?> and() {
+	public SimpleBooleanPredicateClausesStep<?, ?> and() {
 		return myPredicateFactory.and();
 	}
 
@@ -179,7 +160,7 @@ class PathContext implements SearchPredicateFactory {
 	}
 
 	@Override
-	public SimpleBooleanPredicateClausesStep<?> or() {
+	public SimpleBooleanPredicateClausesStep<?, ?> or() {
 		return myPredicateFactory.or();
 	}
 
@@ -206,62 +187,66 @@ class PathContext implements SearchPredicateFactory {
 	}
 
 	@Override
-	public MatchPredicateFieldStep<?> match() {
+	public MatchPredicateFieldStep<?,?> match() {
 		return myPredicateFactory.match();
 	}
 
 	@Override
-	public RangePredicateFieldStep<?> range() {
+	public RangePredicateFieldStep<?,?> range() {
 		return myPredicateFactory.range();
 	}
 
 	@Override
-	public PhrasePredicateFieldStep<?> phrase() {
+	public PhrasePredicateFieldStep<?,?> phrase() {
 		return myPredicateFactory.phrase();
 	}
 
 	@Override
-	public WildcardPredicateFieldStep<?> wildcard() {
+	public WildcardPredicateFieldStep<?,?> wildcard() {
 		return myPredicateFactory.wildcard();
 	}
 
 	@Override
-	public PrefixPredicateFieldStep<?> prefix() {
+	public PrefixPredicateFieldStep<?,?> prefix() {
 		return myPredicateFactory.prefix();
 	}
 
 	@Override
-	public RegexpPredicateFieldStep<?> regexp() {
+	public RegexpPredicateFieldStep<?,?> regexp() {
 		return myPredicateFactory.regexp();
 	}
 
 	@Override
-	public TermsPredicateFieldStep<?> terms() {
+	public TermsPredicateFieldStep<?,?> terms() {
 		return myPredicateFactory.terms();
 	}
 
+	/**
+	 * @deprecated use {@link #nested(String)} instead
+	 */
+	@Deprecated(since = "8.6.0", forRemoval = true)
 	@Override
-	public NestedPredicateFieldStep<?> nested() {
+	public NestedPredicateFieldStep<?,?> nested() {
 		return myPredicateFactory.nested();
 	}
 
 	@Override
-	public NestedPredicateClausesStep<?> nested(String theObjectFieldPath) {
+	public NestedPredicateClausesStep<?, ?> nested(String theObjectFieldPath) {
 		return myPredicateFactory.nested(theObjectFieldPath);
 	}
 
 	@Override
-	public SimpleQueryStringPredicateFieldStep<?> simpleQueryString() {
+	public SimpleQueryStringPredicateFieldStep<?,?> simpleQueryString() {
 		return myPredicateFactory.simpleQueryString();
 	}
 
 	@Override
-	public QueryStringPredicateFieldStep<?> queryString() {
+	public QueryStringPredicateFieldStep<?,?> queryString() {
 		return myPredicateFactory.queryString();
 	}
 
 	@Override
-	public ExistsPredicateFieldStep<?> exists() {
+	public ExistsPredicateFieldStep<?,?> exists() {
 		return myPredicateFactory.exists();
 	}
 
@@ -308,8 +293,6 @@ class PathContext implements SearchPredicateFactory {
 		return myPredicateFactory.toAbsolutePath(relativeFieldPath);
 	}
 
-	// HSearch uses a dotted path
-	// Some private static helpers that can be inlined.
 	@Nonnull
 	public static String joinPath(String thePath0, String thePath1) {
 		return thePath0 + PATH_JOINER + thePath1;
