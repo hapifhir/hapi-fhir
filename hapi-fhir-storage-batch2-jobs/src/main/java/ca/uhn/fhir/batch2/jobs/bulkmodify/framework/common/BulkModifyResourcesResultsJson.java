@@ -21,7 +21,12 @@ package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRawValue;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Schema(
 		name = "BulkModifyResourcesResults",
@@ -34,11 +39,19 @@ public class BulkModifyResourcesResultsJson implements IModelJson {
 	@JsonProperty("resourcesChangedCount")
 	private Integer myResourcesChangedCount;
 
+	@JsonProperty("resourcesChanged")
+	@JsonRawValue
+	@JsonDeserialize(using = ArrayOfRawJsonObjectsAsStringsDeserializer.class)
+	private List<String> myResourcesChangedBodies;
+
 	@JsonProperty("resourcesUnchangedCount")
 	private Integer myResourcesUnchangedCount;
 
 	@JsonProperty("resourcesFailedCount")
 	private Integer myResourcesFailedCount;
+
+	@JsonProperty("resourcesDeleted")
+	private List<String> myResourcesDeletedIds;
 
 	public Integer getResourcesFailedCount() {
 		return myResourcesFailedCount;
@@ -70,5 +83,26 @@ public class BulkModifyResourcesResultsJson implements IModelJson {
 
 	public void setReport(String theReport) {
 		myReport = theReport;
+	}
+
+	public List<String> getResourcesChangedBodies() {
+		if (myResourcesChangedBodies == null) {
+			myResourcesChangedBodies = new ArrayList<>();
+		}
+		return myResourcesChangedBodies;
+	}
+
+	public void setResourcesChangedBodies(List<String> theResourcesChangedBodies) {
+		assert theResourcesChangedBodies.stream().allMatch(t -> t.startsWith("{") && t.endsWith("}"))
+				: "All resources must be JSON: " + theResourcesChangedBodies;
+		myResourcesChangedBodies = theResourcesChangedBodies;
+	}
+
+	public void setResourcesDeletedIds(List<String> theResourcesDeletedIds) {
+		myResourcesDeletedIds = theResourcesDeletedIds;
+	}
+
+	public List<String> getResourcesDeletedIds() {
+		return myResourcesDeletedIds;
 	}
 }

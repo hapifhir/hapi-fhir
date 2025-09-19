@@ -45,6 +45,7 @@ public class BulkPatchProvider extends BaseBulkModifyOrRewriteProvider {
 	@Operation(name = JpaConstants.OPERATION_BULK_PATCH, manualResponse = true)
 	public void bulkPatch(
 			ServletRequestDetails theRequestDetails,
+			// patch
 			@Description("The FHIRPatch document to apply to resources. Must be a Parameters resource.")
 					@OperationParam(
 							name = JpaConstants.OPERATION_BULK_PATCH_PARAM_PATCH,
@@ -52,6 +53,7 @@ public class BulkPatchProvider extends BaseBulkModifyOrRewriteProvider {
 							min = 1,
 							max = 1)
 					IBaseResource thePatch,
+			// url
 			@Description(
 							"One ore more relative search parameter URLs (e.g. \"Patient?active=true\" or \"Observation?\") that will be reindexed.")
 					@OperationParam(
@@ -59,12 +61,37 @@ public class BulkPatchProvider extends BaseBulkModifyOrRewriteProvider {
 							typeName = "string",
 							min = 1,
 							max = OperationParam.MAX_UNLIMITED)
-					List<IPrimitiveType<String>> theUrlsToReindex)
+					List<IPrimitiveType<String>> theUrlsToReindex,
+			// batchSize
+			@OperationParam(name = JpaConstants.OPERATION_BULK_PATCH_PARAM_BATCH_SIZE, typeName = "integer")
+					IPrimitiveType<Integer> theBatchSize,
+			// dryRun
+			@OperationParam(name = JpaConstants.OPERATION_BULK_PATCH_PARAM_DRY_RUN, typeName = "boolean")
+					IPrimitiveType<Boolean> theDryRun,
+			// dryRunMode
+			@OperationParam(name = JpaConstants.OPERATION_BULK_PATCH_PARAM_DRY_RUN_MODE, typeName = "code")
+					IPrimitiveType<String> theDryRunMode,
+			// limitResourceCount
+			@OperationParam(name = JpaConstants.OPERATION_BULK_PATCH_PARAM_LIMIT_RESOURCE_COUNT, typeName = "integer")
+					IPrimitiveType<Integer> theLimitResourceCount,
+			// limitResourceVersionCount
+			@OperationParam(
+							name = JpaConstants.OPERATION_BULK_PATCH_PARAM_LIMIT_RESOURCE_VERSION_COUNT,
+							typeName = "integer")
+					IPrimitiveType<Integer> theLimitResourceVersionCount)
 			throws IOException {
 		BulkPatchJobParameters jobParameters = new BulkPatchJobParameters();
 		jobParameters.setFhirPatch(myContext, thePatch);
 
-		startJobAndReturnResponse(theRequestDetails, theUrlsToReindex, jobParameters);
+		startJobAndReturnResponse(
+				theRequestDetails,
+				theUrlsToReindex,
+				theDryRun,
+				theDryRunMode,
+				theBatchSize,
+				theLimitResourceCount,
+				theLimitResourceVersionCount,
+				jobParameters);
 	}
 
 	/**
@@ -80,10 +107,19 @@ public class BulkPatchProvider extends BaseBulkModifyOrRewriteProvider {
 							typeName = "string",
 							min = 1,
 							max = 1)
-					IPrimitiveType<String> theJobId)
+					IPrimitiveType<String> theJobId,
+
+			// _return
+			@Description("If provided, specifies that a specific part of the job report should be returned")
+					@OperationParam(
+							name = JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN,
+							typeName = "code",
+							min = 0,
+							max = 1)
+					IPrimitiveType<String> theReturn)
 			throws IOException {
 
-		pollForJobStatus(theRequestDetails, theJobId);
+		pollForJobStatus(theRequestDetails, theJobId, theReturn);
 	}
 
 	@Nonnull

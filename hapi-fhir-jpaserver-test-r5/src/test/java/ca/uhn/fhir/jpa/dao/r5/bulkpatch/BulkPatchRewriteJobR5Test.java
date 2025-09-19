@@ -108,11 +108,6 @@ public class BulkPatchRewriteJobR5Test extends BaseBulkPatchR5Test {
 		assertEquals("B13", readPatient("Patient/B/_history/3").getIdentifier().get(0).getValue());
 	}
 
-	private Patient readPatient(String id) {
-		return myPatientDao.read(new IdType(id), newSrd());
-	}
-
-
 	private String initiateAllPatientJobAndAwaitCompletion(Parameters patchDocument) {
 		BulkPatchRewriteJobParameters jobParameters = new BulkPatchRewriteJobParameters();
 		jobParameters.addUrl("Patient?");
