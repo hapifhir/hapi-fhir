@@ -21,11 +21,13 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Date;
+import java.util.List;
 
 public class HistoryBuilderFactory {
 
@@ -41,6 +43,19 @@ public class HistoryBuilderFactory {
 				JpaConfig.HISTORY_BUILDER,
 				theResourceType,
 				theResourceId,
+				theRangeStartInclusive,
+				theRangeEndInclusive);
+	}
+
+	public HistoryBuilder newHistoryBuilder(
+			@Nonnull String theResourceType,
+			@Nonnull List<String> theResourceIds,
+			@Nullable Date theRangeStartInclusive,
+			@Nonnull Date theRangeEndInclusive) {
+		return (HistoryBuilder) myApplicationContext.getBean(
+				JpaConfig.HISTORY_BUILDER_WITH_IDS,
+				theResourceType,
+				theResourceIds,
 				theRangeStartInclusive,
 				theRangeEndInclusive);
 	}
