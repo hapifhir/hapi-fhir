@@ -673,6 +673,15 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		TransactionUtil.TransactionResponse mainParsedResponse = performTransactionAndParseResponse(loadResourceFromClasspath(Bundle.class, "transaction-bundles/synthea/Sherise735_Zofia65_Swaniawski813_e0f7758e-a749-4357-858c-53e1db808e37.json"));
 
 		// verify
+        // This bundle contains 517 resources.
+        assertEquals(26, myCaptureQueriesListener.countSelectQueries());
+        // this is so high because we limit Hibernate to batches of 30 rows.
+        assertEquals(319, myCaptureQueriesListener.getInsertQueries().size());
+        assertEquals(9379, myCaptureQueriesListener.countInsertQueries());
+        assertEquals(36, myCaptureQueriesListener.getUpdateQueries().size());
+        assertEquals(1031, myCaptureQueriesListener.countUpdateQueries());
+        assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+        
 		if (theSplitTransaction) {
 			assertEquals(2, myCaptureQueriesListener.countCommits());
 		} else {

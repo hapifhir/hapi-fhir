@@ -1093,6 +1093,37 @@ public class BulkDataExportProviderR4Test {
 		}
 	}
 
+	@Test
+	public void testGetForOperationPollStatus_CANCELLED_ShouldReturnError() throws IOException {
+		// setup
+		JobInstance info = new JobInstance();
+		info.setInstanceId(A_JOB_ID);
+		info.setStatus(StatusEnum.CANCELLED);
+		info.setEndTime(InstantType.now().getValue());
+
+		BulkExportJobParameters parameters = new BulkExportJobParameters();
+		info.setParameters(parameters);
+
+		// when
+		when(myJobCoordinator.getInstance(eq(A_JOB_ID)))
+			.thenReturn(info);
+
+		// call
+		String url = myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
+		HttpDelete delete = new HttpDelete(url);
+		try (CloseableHttpResponse response = myClient.execute(delete)) {
+			ourLog.info("Response: {}", response.toString());
+
+			assertEquals(404, response.getStatusLine().getStatusCode());
+			assertEquals("Not Found", response.getStatusLine().getReasonPhrase());
+
+			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response content: {}", responseContent);
+			assertThat(responseContent).contains("was cancelled.  No status to report.");
+		}
+	}
+
 	@ParameterizedTest
 	@ValueSource(strings = {
 		"$export",
