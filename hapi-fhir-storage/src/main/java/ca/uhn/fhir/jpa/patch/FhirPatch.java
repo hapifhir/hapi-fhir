@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeChildPrimitiveDatatypeDefinition;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.util.FhirPathUtils;
@@ -41,6 +42,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.XhtmlType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import java.util.ArrayList;
@@ -106,14 +108,16 @@ public class FhirPatch {
 		myIncludePreviousValueInDiff = theIncludePreviousValueInDiff;
 	}
 
-	public void apply(IBaseResource theResource, IBaseResource thePatch) {
-		doApply(theResource, thePatch);
+	public PatchOutcome apply(IBaseResource theResource, IBaseResource thePatch) {
+		PatchOutcome retVal = new PatchOutcome();
+		doApply(theResource, thePatch, retVal);
+		return retVal;
 	}
 
 	/**
 	 * @param theResource If this is <code>null</code>, the patch is validated but no work is done
 	 */
-	private void doApply(@Nullable IBaseResource theResource, @Nonnull IBaseResource thePatch) {
+	private void doApply(@Nullable IBaseResource theResource, @Nonnull IBaseResource thePatch, PatchOutcome theOutcome) {
 		Multimap<String, IBase> namedParameters = ParametersUtil.getNamedParameters(myContext, thePatch);
 		for (Map.Entry<String, IBase> namedParameterEntry : namedParameters.entries()) {
 			if (namedParameterEntry.getKey().equals(PARAMETER_OPERATION)) {
@@ -124,7 +128,7 @@ public class FhirPatch {
 				if (OPERATION_DELETE.equals(type)) {
 					handleDeleteOperation(theResource, nextOperation);
 				} else if (OPERATION_ADD.equals(type)) {
-					handleAddOperation(theResource, nextOperation);
+					handleAddOperation(theResource, nextOperation, theOutcome);
 				} else if (OPERATION_REPLACE.equals(type)) {
 					handleReplaceOperation(theResource, nextOperation);
 				} else if (OPERATION_INSERT.equals(type)) {
@@ -142,7 +146,7 @@ public class FhirPatch {
 		}
 	}
 
-	private void handleAddOperation(@Nullable IBaseResource theResource, IBase theParameters) {
+	private void handleAddOperation(@Nullable IBaseResource theResource, IBase theParameters, PatchOutcome theOutcome) {
 
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		String elementName = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_NAME);
@@ -162,6 +166,10 @@ public class FhirPatch {
 			IBase newValue = getNewValue(theParameters, childDefinition);
 
 			childDefinition.getUseableChildDef().getMutator().addValue(nextElement, newValue);
+		}
+
+		if (containingElements.isEmpty()) {
+			theOutcome.addError("No content found at " + containingPath + " when adding");
 		}
 	}
 
@@ -383,6 +391,20 @@ public class FhirPatch {
 			ParsedFhirPath theParsedFhirPath,
 			FhirPathChildDefinition theTargetChildDefinition,
 			IBase theReplacementValue) {
+
+		/*
+		 * We handle XHTML a bit differently, since it isn't like any of the other FHIR types
+		 */
+		if (theTargetChildDefinition.getBaseRuntimeDefinition() instanceof RuntimeChildPrimitiveDatatypeDefinition child) {
+			if (child.getDatatype().equals(XhtmlNode.class) && child.getElementName().equals("div")) {
+				IPrimitiveType<?> target = (IPrimitiveType<?>) theTargetChildDefinition.getBase();
+				if (theReplacementValue instanceof IPrimitiveType<?> replacementValue) {
+					target.setValueAsString(replacementValue.getValueAsString());
+					return;
+				}
+			}
+		}
+
 		if (theTargetChildDefinition.getElementDefinition().getChildType()
 				== BaseRuntimeElementDefinition.ChildTypeEnum.PRIMITIVE_DATATYPE) {
 			if (theTargetChildDefinition.getBase() instanceof IPrimitiveType<?> target
@@ -722,7 +744,15 @@ public class FhirPatch {
 
 			// get all direct children
 			ParsedFhirPath.FhirPathNode newHead = newPath.getHead();
-			List<IBase> allChildren = theFhirPath.evaluate(theBase, directChildName, IBase.class);
+			List<IBase> allChildren;
+			if (directChildName.equals("div")) {
+				/*
+				 * We handle XHTML a bit differently, since it isn't like any of the other FHIR types
+				 */
+				allChildren = myContext.newTerser().getValues(theBase, directChildName);
+			} else {
+				allChildren = theFhirPath.evaluate(theBase, directChildName, IBase.class);
+			}
 
 			// go through the children and take only the ones that match the path we have
 			String filterPath = childFilteringPath;
@@ -1203,4 +1233,23 @@ public class FhirPatch {
 		}
 		return retVal;
 	}
+
+	public static class PatchOutcome {
+
+		private List<String> myErrors = new ArrayList<>(1);
+
+		public void addError(String theError) {
+			myErrors.add(theError);
+		}
+
+		public List<String> getErrors() {
+			return myErrors;
+		}
+
+		public boolean hasErrors() {
+			return !myErrors.isEmpty();
+		}
+
+	}
+
 }
