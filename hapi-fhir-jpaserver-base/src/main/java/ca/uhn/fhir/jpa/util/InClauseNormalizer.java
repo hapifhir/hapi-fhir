@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,7 +68,7 @@ public class InClauseNormalizer {
 		}
 
 		while (retVal.size() < preferredListSize) {
-			retVal.add(JpaPid.fromId(-1L));
+			retVal.add(JpaConstants.NO_MORE);
 		}
 
 		return retVal;

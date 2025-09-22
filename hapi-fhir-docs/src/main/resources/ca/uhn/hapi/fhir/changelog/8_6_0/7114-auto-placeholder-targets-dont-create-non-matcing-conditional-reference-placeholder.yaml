@@ -1,0 +1,10 @@
+---
+type: add
+issue: 7114
+title: "When _Auto-Create Placeholder Reference Targets_ is enabled in combination 
+  with _Allow Inline Match URLs_, a placeholder reference was incorrectly created 
+  if a conditional URL reference could not be resolved, even though the placeholder 
+  reference would not actually satisfy the conditional URL. This has been corrected 
+  and no placeholder resource will be created (meaning that the operation will now 
+  fail unless _Populate Identifier In Auto Created Placeholder Reference Targets_ is 
+  also enabled)."

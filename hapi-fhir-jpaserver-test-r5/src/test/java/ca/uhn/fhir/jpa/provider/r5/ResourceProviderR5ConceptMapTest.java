@@ -1,8 +1,13 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.CodeType;
@@ -187,4 +192,22 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		part = getPartByName(param, "source");
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
 	}
+
+	@Test
+	void testCombineR4AndR5Parameter() {
+
+		IOperationUntypedWithInputAndPartialOutput<Parameters> operation = myClient
+			.operation()
+			.onType(ConceptMap.class)
+			.named(JpaConstants.OPERATION_TRANSLATE)
+			.withParameter(Parameters.class, "system", new UriType("http://foo"))
+			.andParameter("code", new CodeType("123"))
+			.andParameter("sourceCode", new CodeType("123"));
+
+		assertThatThrownBy(()->operation.execute())
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("Can't combine the $translate R4 parameter 'code' with the R5 parameter 'sourceCode'");
+	}
+
+
 }

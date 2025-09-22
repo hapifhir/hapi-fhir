@@ -22,6 +22,6 @@ public class SubscriptionLoaderTest extends BaseBlockingQueueSubscribableChannel
 		}).start();
 
 		latch.await(10, TimeUnit.SECONDS);
-		svc.syncDatabaseToCache();
+		svc.requestRefresh();
 	}
 }

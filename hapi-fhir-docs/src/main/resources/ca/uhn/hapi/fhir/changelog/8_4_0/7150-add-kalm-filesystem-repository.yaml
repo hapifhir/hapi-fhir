@@ -1,0 +1,4 @@
+---
+type: add
+issue: 7150
+title: "Add a repository loader for fhir-repository:exp-kalm-filesystem:/path/to/directory repositories used by the KALM IDE."

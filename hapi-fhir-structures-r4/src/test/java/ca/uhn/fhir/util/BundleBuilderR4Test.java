@@ -106,6 +106,26 @@ public class BundleBuilderR4Test {
 	}
 
 	@Test
+	public void testAddEntryUpdate_withCustomRequestUrl() {
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+
+		Patient patient = new Patient();
+		patient.setId("http://foo/Patient/123");
+		patient.setActive(true);
+		builder.addTransactionUpdateEntry(patient, "Patient?identifier=test|123");
+
+		Bundle bundle = (Bundle) builder.getBundle();
+		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patient);
+		assertEquals("http://foo/Patient/123", bundle.getEntry().get(0).getFullUrl());
+		assertEquals("Patient?identifier=test|123", bundle.getEntry().get(0).getRequest().getUrl());
+		assertEquals(Bundle.HTTPVerb.PUT, bundle.getEntry().get(0).getRequest().getMethod());
+	}
+
+	@Test
 	public void testNewPrimitive() {
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		IPrimitiveType<Date> datePrimitive = builder.newPrimitive("instant", myCheckDate);

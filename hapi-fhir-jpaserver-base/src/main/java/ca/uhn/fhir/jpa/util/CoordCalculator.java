@@ -27,47 +27,39 @@ import static ca.uhn.fhir.jpa.searchparam.extractor.GeopointNormalizer.normalize
 import static ca.uhn.fhir.jpa.searchparam.extractor.GeopointNormalizer.normalizeLongitude;
 import static org.slf4j.LoggerFactory.getLogger;
 
+/**
+ * Utility for calculating a symmetric GeoBoundingBox around a center point,
+ * ensuring each edge is at least the given distance in kilometers away.
+ */
 public class CoordCalculator {
 	private static final Logger ourLog = getLogger(CoordCalculator.class);
 	public static final double MAX_SUPPORTED_DISTANCE_KM =
 			10000.0; // Slightly less than a quarter of the earth's circumference
 	private static final double RADIUS_EARTH_KM = 6378.1;
 
-	// Source: https://stackoverflow.com/questions/7222382/get-lat-long-given-current-point-distance-and-bearing
-	static GeoPoint findTarget(
-			double theLatitudeDegrees, double theLongitudeDegrees, double theBearingDegrees, double theDistanceKm) {
-
-		double latitudeRadians = Math.toRadians(normalizeLatitude(theLatitudeDegrees));
-		double longitudeRadians = Math.toRadians(normalizeLongitude(theLongitudeDegrees));
-		double bearingRadians = Math.toRadians(theBearingDegrees);
-		double distanceRadians = theDistanceKm / RADIUS_EARTH_KM;
-
-		double targetLatitude = Math.asin(Math.sin(latitudeRadians) * Math.cos(distanceRadians)
-				+ Math.cos(latitudeRadians) * Math.sin(distanceRadians) * Math.cos(bearingRadians));
-
-		double targetLongitude = longitudeRadians
-				+ Math.atan2(
-						Math.sin(bearingRadians) * Math.sin(distanceRadians) * Math.cos(latitudeRadians),
-						Math.cos(distanceRadians) - Math.sin(latitudeRadians) * Math.sin(targetLatitude));
-
-		double latitude = Math.toDegrees(targetLatitude);
-		double longitude = Math.toDegrees(targetLongitude);
-
-		GeoPoint of = GeoPoint.of(normalizeLatitude(latitude), normalizeLongitude(longitude));
-		return of;
-	}
-
 	/**
-	 * Find a box around my coordinates such that the closest distance to each edge is the provided distance
-	 * @return
+	 * Computes a symmetric bounding box around the given latitude/longitude center,
+	 * with each edge being at least the given distance in km away.
+	 *
+	 * @param lat center latitude
+	 * @param lon center longitude
+	 * @param distanceKm distance in kilometers from center to each edge
+	 * @return GeoBoundingBox centered around the given coordinates
 	 */
-	public static GeoBoundingBox getBox(double theLatitudeDegrees, double theLongitudeDegrees, Double theDistanceKm) {
-		double diagonalDistanceKm = theDistanceKm * Math.sqrt(2.0);
+	public static GeoBoundingBox getBox(double lat, double lon, double distanceKm) {
+		// Approximate 1 degree latitude as 111 km
+		double deltaLat = distanceKm / 111.0;
 
-		GeoPoint topLeft =
-				CoordCalculator.findTarget(theLatitudeDegrees, theLongitudeDegrees, 315.0, diagonalDistanceKm);
-		GeoPoint bottomRight =
-				CoordCalculator.findTarget(theLatitudeDegrees, theLongitudeDegrees, 135.0, diagonalDistanceKm);
+		// Longitude varies with latitude
+		double deltaLon = distanceKm / (111.320 * Math.cos(Math.toRadians(lat)));
+
+		double minLat = normalizeLatitude(lat - deltaLat);
+		double maxLat = normalizeLatitude(lat + deltaLat);
+		double minLon = normalizeLongitude(lon - deltaLon);
+		double maxLon = normalizeLongitude(lon + deltaLon);
+
+		GeoPoint topLeft = GeoPoint.of(maxLat, minLon);
+		GeoPoint bottomRight = GeoPoint.of(minLat, maxLon);
 
 		return GeoBoundingBox.of(topLeft, bottomRight);
 	}

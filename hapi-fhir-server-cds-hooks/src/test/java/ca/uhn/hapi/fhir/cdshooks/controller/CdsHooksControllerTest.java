@@ -53,7 +53,7 @@ public class CdsHooksControllerTest {
 	public static final String OUTCOME_TIMESTAMP = "2020-12-16";
 	private static final String TEST_KEY = "CdsServiceRegistryImplTest.testKey";
 	private static final String TEST_SERVICE_ID = "CdsServiceRegistryImplTest.testServiceId";
-	private final String MODULE_ID = "moduleId";
+	private final String SERVICE_GROUP_ID = "ServiceGroupId";
 
 	@Autowired
 	ICdsServiceRegistry myCdsHooksRegistry;
@@ -217,7 +217,7 @@ public class CdsHooksControllerTest {
 		cdsServiceJson.setId(TEST_SERVICE_ID);
 		boolean allowAutoFhirClientPrefetch = false;
 
-		myCdsServiceRegistry.registerService(TEST_SERVICE_ID, serviceFunction, cdsServiceJson, allowAutoFhirClientPrefetch, MODULE_ID);
+		myCdsServiceRegistry.registerService(TEST_SERVICE_ID, serviceFunction, cdsServiceJson, allowAutoFhirClientPrefetch, SERVICE_GROUP_ID);
 
 		// Call hook
 		String hookInstance = UUID.randomUUID().toString();
@@ -233,14 +233,13 @@ public class CdsHooksControllerTest {
 		;
 	}
 
-
 	@Test
 	void testEmptyCardsResponse() throws Exception {
 		//setup
 		final String expected = "{ \"cards\" : [ ]}";
 		final Function<CdsServiceRequestJson, CdsServiceResponseJson> serviceFunction = (CdsServiceRequestJson theCdsServiceRequestJson) -> new CdsServiceResponseJson();
-		myCdsServiceRegistry.unregisterService(TEST_SERVICE_ID, MODULE_ID);
-		myCdsServiceRegistry.registerService(TEST_SERVICE_ID, serviceFunction, new CdsServiceJson().setId(TEST_SERVICE_ID), false, MODULE_ID);
+		myCdsServiceRegistry.unregisterService(TEST_SERVICE_ID, SERVICE_GROUP_ID);
+		myCdsServiceRegistry.registerService(TEST_SERVICE_ID, serviceFunction, new CdsServiceJson().setId(TEST_SERVICE_ID), false, SERVICE_GROUP_ID);
 		final CdsServiceRequestJson request = buildRequest(UUID.randomUUID().toString());
 		final String requestBody = myObjectMapper.writeValueAsString(request);
 		//execute
@@ -254,7 +253,6 @@ public class CdsHooksControllerTest {
 		final String actual = result.getResponse().getContentAsString();
 		assertEquals(prettyJson(expected), prettyJson(actual));
 	}
-
 
 	@Nonnull
 	protected CdsServiceRequestJson buildRequest(String hookInstance) {

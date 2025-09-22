@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6754
+title: "The IPS generator will no longer strip references to contained resources when
+  assembling data to create an IPS document. Thanks to Xun Ma for the contribution!"

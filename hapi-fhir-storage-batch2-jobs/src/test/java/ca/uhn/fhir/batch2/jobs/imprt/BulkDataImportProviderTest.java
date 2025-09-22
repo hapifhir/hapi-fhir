@@ -18,6 +18,7 @@ import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.base.Charsets;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -152,7 +153,15 @@ public class BulkDataImportProviderTest {
 
 		JobInstanceStartRequest startRequest = myStartRequestCaptor.getValue();
 		ourLog.info("Parameters: {}", startRequest.getParameters());
-		assertTrue(startRequest.getParameters().startsWith("{\"ndJsonUrls\":[\"http://example.com/Patient\",\"http://example.com/Observation\"],\"httpBasicCredentials\":\"admin:password\",\"maxBatchResourceCount\":500,\"partitionId\":{\"allPartitions\":false"));
+		BulkImportJobParameters startParameters = JsonUtil.deserialize(startRequest.getParameters(), BulkImportJobParameters.class);
+
+		assertThat(startParameters.getNdJsonUrls()).containsExactly("http://example.com/Patient","http://example.com/Observation");
+		assertEquals("admin:password",  startParameters.getHttpBasicCredentials());
+		assertEquals(500,  startParameters.getMaxBatchResourceCount());
+		if (partitionEnabled) {
+			assertEquals(123, startParameters.getPartitionId().getFirstPartitionIdOrNull());
+		}
+		assertEquals("Patient", startParameters.getChunkByCompartmentName());
 	}
 
 	@Test
@@ -224,7 +233,8 @@ public class BulkDataImportProviderTest {
 			.setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL)
 			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE).setValue(new CodeType(BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE_VAL_HTTPS)))
 			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL_CREDENTIAL_HTTP_BASIC).setValue(new StringType("admin:password")))
-			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL_MAX_BATCH_RESOURCE_COUNT).setValue(new StringType("500")));
+			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL_MAX_BATCH_RESOURCE_COUNT).setValue(new StringType("500")))
+			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL_CHUNK_BY_COMPARTMENT_NAME).setValue(new StringType("Patient")));
 		input.addParameter()
 			.setName(BulkDataImportProvider.PARAM_INPUT)
 			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_TYPE).setValue(new CodeType("Observation")))

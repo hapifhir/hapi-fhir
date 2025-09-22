@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class ModelR5Test {
 
-	private static FhirContext ourCtx = FhirContext.forR5();
+	private static final FhirContext ourCtx = FhirContext.forR5();
 
 	@Test
 	public void testbase64BinaryName() {

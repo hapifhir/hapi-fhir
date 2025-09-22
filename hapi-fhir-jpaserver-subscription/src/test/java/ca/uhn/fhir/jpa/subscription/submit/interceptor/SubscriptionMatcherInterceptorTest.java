@@ -39,7 +39,7 @@ class SubscriptionMatcherInterceptorTest {
 	void testProcessResourceModifiedMessageQueuedImmediatelySuccess() {
 		// Arrange
 		when(mySubscriptionSettings.isSubscriptionChangeQueuedImmediately()).thenReturn(true);
-		when(theResourceModifiedMessage.hasPayloadType(myFhirContext, "Subscription")).thenReturn(true);
+		when(theResourceModifiedMessage.hasResourceType(myFhirContext, "Subscription")).thenReturn(true);
 
 		// Act
 		subscriptionMatcherInterceptor.processResourceModifiedMessage(theResourceModifiedMessage);
@@ -53,7 +53,7 @@ class SubscriptionMatcherInterceptorTest {
 	void testProcessResourceModifiedMessageQueuedImmediatelyFailure() {
 		// Arrange
 		when(mySubscriptionSettings.isSubscriptionChangeQueuedImmediately()).thenReturn(true);
-		when(theResourceModifiedMessage.hasPayloadType(myFhirContext, "Subscription")).thenReturn(true);
+		when(theResourceModifiedMessage.hasResourceType(myFhirContext, "Subscription")).thenReturn(true);
 		doThrow(new MessageDeliveryException("Submission failure")).when(myResourceModifiedConsumer).submitResourceModified(theResourceModifiedMessage);
 
 		// Act

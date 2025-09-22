@@ -26,6 +26,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -54,6 +55,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -85,6 +87,7 @@ public class SearchParameterMap implements Serializable {
 	private Integer myLastNMax;
 	private boolean myDeleteExpunge;
 	private SearchContainedModeEnum mySearchContainedMode = SearchContainedModeEnum.FALSE;
+	private SearchIncludeDeletedEnum mySearchIncludeDeletedMode;
 
 	/**
 	 * Constructor
@@ -123,6 +126,7 @@ public class SearchParameterMap implements Serializable {
 		map.setLoadSynchronousUpTo(getLoadSynchronousUpTo());
 		map.setOffset(getOffset());
 		map.setSearchContainedMode(getSearchContainedMode());
+		map.setSearchIncludeDeletedMode(getSearchIncludeDeletedMode());
 
 		for (Map.Entry<String, List<List<IQueryParameterType>>> entry : mySearchParameterMap.entrySet()) {
 			List<List<IQueryParameterType>> andParams = entry.getValue();
@@ -557,6 +561,13 @@ public class SearchParameterMap implements Serializable {
 			b.append(getSearchContainedMode().getCode());
 		}
 
+		if (getSearchIncludeDeletedMode() != null) {
+			addUrlParamSeparator(b);
+			b.append(Constants.PARAM_INCLUDE_DELETED);
+			b.append("=");
+			b.append(getSearchIncludeDeletedMode().getCode());
+		}
+
 		if (b.length() == 0) {
 			b.append('?');
 		}
@@ -725,7 +736,7 @@ public class SearchParameterMap implements Serializable {
 
 	/**
 	 * For each search parameter in the map, extract any which have the given qualifier.
-	 * e.g. Take the url: Observation?code:text=abc&code=123&code:text=def&reason:text=somereason
+	 * e.g. Take the url: {@code Observation?code:text=abc&code=123&code:text=def&reason:text=somereason}
 	 * <p>
 	 * If we call this function with `:text`, it will return a map that looks like:
 	 * <p>
@@ -764,11 +775,15 @@ public class SearchParameterMap implements Serializable {
 	}
 
 	public void setSearchContainedMode(SearchContainedModeEnum theSearchContainedMode) {
-		if (theSearchContainedMode == null) {
-			mySearchContainedMode = SearchContainedModeEnum.FALSE;
-		} else {
-			this.mySearchContainedMode = theSearchContainedMode;
-		}
+		this.mySearchContainedMode = Objects.requireNonNullElse(theSearchContainedMode, SearchContainedModeEnum.FALSE);
+	}
+
+	public SearchIncludeDeletedEnum getSearchIncludeDeletedMode() {
+		return mySearchIncludeDeletedMode;
+	}
+
+	public void setSearchIncludeDeletedMode(SearchIncludeDeletedEnum theSearchIncludeDeletedMode) {
+		this.mySearchIncludeDeletedMode = theSearchIncludeDeletedMode;
 	}
 
 	/**

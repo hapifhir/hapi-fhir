@@ -1,0 +1,4 @@
+---
+type: perf
+issue: 7257
+title: "Bundles with many conditional references now load faster by avoiding redundant lookups of the target FHIR id."

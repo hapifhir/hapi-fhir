@@ -153,7 +153,7 @@ jobs:
           inputs:
              dockerVersion: 17.09.0-ce
              releaseType: stable
-        - task: Maven@3
+        - task: Maven@4
           env:
              JAVA_HOME_11_X64: /opt/java/openjdk
           displayName: Checkstyle Build
@@ -166,11 +166,11 @@ jobs:
           inputs:
              targetType: 'inline'
              script: mkdir -p $(MAVEN_CACHE_FOLDER); pwd; ls -al $(MAVEN_CACHE_FOLDER)
-        - task: Maven@3
+        - task: Maven@4
           env:
              JAVA_HOME_11_X64: /opt/java/openjdk
           inputs:
-             goals: 'clean install'
+             goals: 'clean install -DskipTests'
              # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
              options: '-P JACOCO,CI -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -Dmaven.wagon.http.pool=false -Dhttp.keepAlive=false -Dstyle.color=always -Djansi.force=true'
              # These are JVM options (and don't show up in the build logs)

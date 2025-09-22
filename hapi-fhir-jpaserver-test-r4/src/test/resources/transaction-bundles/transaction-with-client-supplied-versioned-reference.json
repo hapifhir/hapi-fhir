@@ -66,7 +66,7 @@
                 "resourceType": "Provenance",
                 "target": [
                     {
-                        "reference": "#"
+                        "reference": "Encounter/ENCOUNTER_ID"
                     }
                 ],
                 "recorded": "2024-07-26T14:51:28.222+00:00",

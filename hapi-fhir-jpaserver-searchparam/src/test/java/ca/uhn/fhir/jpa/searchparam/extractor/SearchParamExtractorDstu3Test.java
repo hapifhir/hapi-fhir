@@ -17,7 +17,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
+import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -93,10 +93,9 @@ public class SearchParamExtractorDstu3Test {
 
 	@Test
 	public void testEncounterDuration_Normalized() {
-
 		Encounter enc = new Encounter();
 		Duration value = new Duration();
-		value.setSystem(SearchParamConstants.UCUM_NS);
+		value.setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL);
 		value.setCode("min");
 		value.setValue(2 * 24 * 60);
 		enc.setLength(value);
@@ -315,11 +314,6 @@ public class SearchParamExtractorDstu3Test {
 		@Override
 		public Optional<RuntimeSearchParam> getActiveComboSearchParamById(@Nonnull String theResourceName, @Nonnull IIdType theId) {
 			throw new UnsupportedOperationException(Msg.code(2212));
-		}
-
-		@Override
-		public void requestRefresh() {
-			// nothing
 		}
 
 		@Override

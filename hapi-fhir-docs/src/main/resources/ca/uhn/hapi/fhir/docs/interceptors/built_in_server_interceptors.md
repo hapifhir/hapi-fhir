@@ -225,6 +225,14 @@ When using Subscriptions, the debug log interceptor can be used to add a number 
 * [SubscriptionDebugLogInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-subscription/src/main/java/ca/uhn/fhir/jpa/subscription/util/SubscriptionDebugLogInterceptor.java)
 
 
+# Subscription: Subscription Rules Interceptor
+
+This interceptor can be used to enforce rules on allowable subscriptions, such as mandatory criteria patteerns, or requiring a reachable target URL for REST HOOK subscriptions.
+
+* [SubscriptionRulesInterceptor JavaDoc](/apidocs/hapi-fhir-jpaserver-subscription/ca/uhn/fhir/jpa/subscription/util/SubscriptionRulesInterceptor.html)
+* [SubscriptionRulesInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-subscription/src/main/java/ca/uhn/fhir/jpa/subscription/util/SubscriptionRulesInterceptor.java)
+
+
 # Request Pre-Processing: Override Meta.source
 
 If you wish to override the value of `Resource.meta.source` using the value	supplied in an HTTP header, you can use the CaptureResourceSourceFromHeaderInterceptor to accomplish this.
@@ -317,6 +325,13 @@ If the JPA server has [partitioning](/docs/server_jpa_partitioning/partitioning.
 # JPA Server: Retry on Version Conflicts
 
 The UserRequestRetryVersionConflictsInterceptor allows clients to request that the server avoid version conflicts (HTTP 409) when two concurrent client requests attempt to modify the same resource. See [Version Conflicts](/docs/server_jpa/configuration.html#retry-on-version-conflict) for more information. 
+
+# JPA Server: Selective Auto-Create Placeholder Reference Targets
+
+The `AutoCreatePlaceholderReferenceEnabledByTypeInterceptor` can be used in combination with [Auto-Create Placeholder Reference Targets](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#setAutoCreatePlaceholderReferenceTargets(boolean)) in order to specify that only reference targets with specific resource types should be created.
+
+* [AutoCreatePlaceholderReferenceEnabledByTypeInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-storage/src/main/java/ca/uhn/fhir/storage/interceptor/AutoCreatePlaceholderReferenceEnabledByTypeInterceptor.java)
+
 
 # JPA Server: Validate Data Being Stored
 

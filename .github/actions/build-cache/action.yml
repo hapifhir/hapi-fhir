@@ -51,7 +51,7 @@ runs:
         MAVEN_CACHE_FOLDER: ${{ inputs.cache-path }}
         MAVEN_OPTS: '-Xmx1024m -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
       run: |
-        mvn clean install -P CI,CHECKSTYLE \
+        mvn clean install -P CI \
           -Dmaven.test.skip=true -e -B \
           -Dmaven.javadoc.skip=true \
           -Dmaven.wagon.http.pool=false \

@@ -56,12 +56,11 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
-import jakarta.persistence.Query;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -75,7 +74,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -161,6 +159,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		// take a lock on the chunk id to ensure that the maintenance run isn't doing anything.
 		Batch2WorkChunkEntity chunkLock =
 				myEntityManager.find(Batch2WorkChunkEntity.class, theChunkId, LockModeType.PESSIMISTIC_WRITE);
+
+		if (chunkLock == null) {
+			ourLog.warn("Unknown chunk id {} encountered. Message will be discarded.", theChunkId);
+			return Optional.empty();
+		}
+
 		// remove from the current state to avoid stale data.
 		myEntityManager.detach(chunkLock);
 
@@ -200,6 +204,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setReport(theInstance.getReport());
 		entity.setTriggeringUsername(theInstance.getTriggeringUsername());
 		entity.setTriggeringClientId(theInstance.getTriggeringClientId());
+		entity.setUserDataJson(theInstance.getUserDataAsString());
 
 		entity = myJobInstanceRepository.save(entity);
 		return entity.getId();
@@ -236,16 +241,17 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		PageRequest pageRequest =
 				PageRequest.of(theRequest.getPageStart(), theRequest.getBatchSize(), theRequest.getSort());
 
-		String jobStatus = theRequest.getJobStatus();
-		if (Objects.equals(jobStatus, "")) {
-			Page<Batch2JobInstanceEntity> pageOfEntities = myJobInstanceRepository.findAll(pageRequest);
-			return pageOfEntities.map(this::toInstance);
-		}
-
-		StatusEnum status = StatusEnum.valueOf(jobStatus);
-		List<JobInstance> jobs = toInstanceList(myJobInstanceRepository.findInstancesByJobStatus(status, pageRequest));
-		Integer jobsOfStatus = myJobInstanceRepository.findTotalJobsOfStatus(status);
-		return new PageImpl<>(jobs, pageRequest, jobsOfStatus);
+		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> myJobInstanceRepository
+				.findByJobDefinitionIdOrStatusOrIdOrCreateTime(
+						theRequest.getJobDefinitionId(),
+						StringUtils.isNotEmpty(theRequest.getJobStatus())
+								? StatusEnum.valueOf(theRequest.getJobStatus())
+								: null,
+						theRequest.getJobId(),
+						theRequest.getJobCreateTimeFrom(),
+						theRequest.getJobCreateTimeTo(),
+						pageRequest)
+				.map(this::toInstance));
 	}
 
 	private List<JobInstance> toInstanceList(List<Batch2JobInstanceEntity> theInstancesByJobDefinitionId) {
@@ -381,15 +387,10 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
 			int changeCount = myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(
 					chunkId, new Date(), errorMessage, WorkChunkStatusEnum.ERRORED);
-			Validate.isTrue(changeCount > 0, "changed chunk matching %s", chunkId);
+			Validate.isTrue(changeCount > 0, "No changed chunk matching %s", chunkId);
 
-			Query query = myEntityManager.createQuery("update Batch2WorkChunkEntity " + "set myStatus = :failed "
-					+ ",myErrorMessage = CONCAT('Too many errors: ', CAST(myErrorCount as string), '. Last error msg was ', myErrorMessage) "
-					+ "where myId = :chunkId and myErrorCount > :maxCount");
-			query.setParameter("chunkId", chunkId);
-			query.setParameter("failed", WorkChunkStatusEnum.FAILED);
-			query.setParameter("maxCount", MAX_CHUNK_ERROR_COUNT);
-			int failChangeCount = query.executeUpdate();
+			int failChangeCount = myWorkChunkRepository.updateChunkForTooManyErrors(
+					WorkChunkStatusEnum.FAILED, chunkId, MAX_CHUNK_ERROR_COUNT, ERROR_MSG_MAX_LENGTH);
 
 			if (failChangeCount > 0) {
 				return WorkChunkStatusEnum.FAILED;

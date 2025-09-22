@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -32,11 +33,13 @@ import ca.uhn.fhir.model.dstu2.valueset.IssueTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public class TransactionProcessorVersionAdapterDstu2
 		implements ITransactionProcessorVersionAdapter<Bundle, Bundle.Entry> {
@@ -172,5 +175,11 @@ public class TransactionProcessorVersionAdapterDstu2
 	@Override
 	public void setRequestUrl(Bundle.Entry theEntry, String theUrl) {
 		theEntry.getRequest().setUrl(theUrl);
+	}
+
+	@Override
+	public Optional<IBaseExtension<?, ?>> getEntryRequestExtensionByUrl(Bundle.Entry theEntry, String theUrl) {
+		List<ExtensionDt> extensions = theEntry.getRequest().getUndeclaredExtensionsByUrl(theUrl);
+		return extensions.isEmpty() ? Optional.empty() : Optional.ofNullable(extensions.get(0));
 	}
 }

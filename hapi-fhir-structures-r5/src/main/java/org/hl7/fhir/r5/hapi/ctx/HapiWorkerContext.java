@@ -22,6 +22,7 @@ import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent;
 import org.hl7.fhir.r5.model.NamingSystem;
+import org.hl7.fhir.r5.model.OperationOutcome;
 import org.hl7.fhir.r5.model.PackageInformation;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Resource;
@@ -43,8 +44,6 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -167,6 +166,16 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public SystemSupportInformation getTxSupportInfo(String system, String version) {
+		return null;
+	}
+
+	@Override
+	public SystemSupportInformation getTxSupportInfo(String system) {
+		return null;
+	}
+
+	@Override
 	public ValidationResult validateCode(ValidationOptions theOptions, CodeableConcept theCode, ValueSet theVs) {
 		for (Coding next : theCode.getCoding()) {
 			ValidationResult retVal = validateCode(theOptions, next, theVs);
@@ -194,19 +203,16 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public void validateCodeBatch(
-			ValidationOptions options, List<? extends CodingValidationRequest> codes, ValueSet vs) {
-		throw new UnsupportedOperationException(Msg.code(209));
-	}
-
-	@Override
-	public void validateCodeBatchByRef(
-			ValidationOptions validationOptions, List<? extends CodingValidationRequest> list, String s) {
-		throw new UnsupportedOperationException(Msg.code(2430));
-	}
+			ValidationOptions options, List<? extends CodingValidationRequest> codes, ValueSet vs, boolean passVS) {}
 
 	@Override
 	public ValueSetExpansionOutcome expandVS(
 			ValueSet theValueSet, boolean cacheOk, boolean heiarchical, boolean incompleteOk) {
+		return null;
+	}
+
+	@Override
+	public ValueSetExpansionOutcome expandVS(String s, boolean b, boolean b1, int i) {
 		return null;
 	}
 
@@ -297,6 +303,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk, boolean theHierarchical, int i) {
+		throw new UnsupportedOperationException(Msg.code(2650));
+	}
+
+	/*1@Override
 	public ValueSetExpansionOutcome expandVS(ConceptSetComponent theInc, boolean theHierarchical, boolean theNoInactive)
 			throws TerminologyServiceException {
 		ValueSet input = new ValueSet();
@@ -306,7 +317,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 				myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), null, input);
 		return new ValueSetExpansionOutcome(
 				(ValueSet) output.getValueSet(), output.getError(), null, output.getErrorIsFromServer());
-	}
+	}*/
 
 	@Override
 	public Locale getLocale() {
@@ -461,7 +472,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public <T extends Resource> boolean hasResource(Class<T> class_, String uri, FhirPublication fhirVersion) {
+	public <T extends Resource> boolean hasResource(Class<T> class_, String uri, String fhirVersion) {
 		throw new UnsupportedOperationException(Msg.code(2471));
 	}
 
@@ -496,6 +507,16 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public ValueSetExpansionOutcome expandVS(
+			ITerminologyOperationDetails iTerminologyOperationDetails,
+			ConceptSetComponent conceptSetComponent,
+			boolean b,
+			boolean b1)
+			throws TerminologyServiceException {
+		return null;
+	}
+
+	@Override
 	public Set<String> getBinaryKeysAsSet() {
 		throw new UnsupportedOperationException(Msg.code(2115));
 	}
@@ -513,12 +534,6 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader) throws FHIRException {
 		throw new UnsupportedOperationException(Msg.code(233));
-	}
-
-	@Override
-	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, List<String> types)
-			throws FileNotFoundException, IOException, FHIRException {
-		throw new UnsupportedOperationException(Msg.code(2328));
 	}
 
 	@Override
@@ -585,6 +600,12 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public <T extends Resource> List<T> fetchResourceVersionsByTypeAndUrl(Class<T> class_, String url) {
+		throw new UnsupportedOperationException(
+				Msg.code(2796) + "Can't fetch all resources of type : " + class_ + " and url: " + url);
+	}
+
+	@Override
 	public <T extends Resource> List<T> fetchResourcesByUrl(Class<T> class_, String url) {
 		throw new UnsupportedOperationException(Msg.code(2508) + "Can't fetch all resources of url: " + url);
 	}
@@ -643,5 +664,10 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public boolean isServerSideSystem(String url) {
 		return false;
+	}
+
+	@Override
+	public OperationOutcome validateTxResource(ValidationOptions options, Resource resource) {
+		throw new UnsupportedOperationException(Msg.code(2734));
 	}
 }

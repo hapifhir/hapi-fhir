@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 6968
+title: "When validating a Message or Document bundle, the validator
+  tries to fetch any references within resources found in the bundle
+  to resources not found in the bundle. A bug prevented this check
+  from working on non-R4 JPA systems. This has been fixed."

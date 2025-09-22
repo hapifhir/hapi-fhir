@@ -45,6 +45,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -962,10 +963,14 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			obs.getContained().add(p2);
 			obs.getSubject().setReference("#patient2");
 
-			ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 			// -- update
 			oid1 = myObservationDao.update(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			runInTransaction(()->{
+				ourLog.info("Versions:\n\n{}\n\n", myResourceHistoryTableDao.findAll().stream().map(t->t.getResourceTextVc()).collect(Collectors.joining("\n\n")));
+			});
 
 			Observation updatedObs = myObservationDao.read(oid1);
 

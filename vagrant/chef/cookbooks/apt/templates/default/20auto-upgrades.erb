@@ -1,2 +1,0 @@
-APT::Periodic::Update-Package-Lists "<%= node['apt']['unattended_upgrades']['update_package_lists'] ? 1 : 0 %>";
-APT::Periodic::Unattended-Upgrade "<%= node['apt']['unattended_upgrades']['enable'] ? 1 : 0 %>";

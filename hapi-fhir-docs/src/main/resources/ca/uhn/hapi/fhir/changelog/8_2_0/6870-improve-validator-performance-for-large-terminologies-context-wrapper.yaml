@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 6870
+title: "Previously, the `VersionSpecificWorkerContextWrapper` was converting canonicalized `ValueSet` resources 
+back to their original FHIR version every time codes were validated. Now the converted `ValueSet` 
+is stored in the canonical `ValueSet`'s user data and used to avoid repeated conversions."

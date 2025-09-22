@@ -1,6 +1,5 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -10,6 +9,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
@@ -40,6 +40,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ServerExceptionDstu3Test {
 
@@ -81,7 +82,7 @@ public class ServerExceptionDstu3Test {
 
 			assertEquals(404, status.getStatusLine().getStatusCode());
 			assertEquals("BAR BAR", status.getFirstHeader("X-Foo").getValue());
-			assertThat(status.getFirstHeader("X-Powered-By").getValue()).contains("HAPI FHIR");
+			assertThat(status.getFirstHeader(Constants.HEADER_POWERED_BY).getValue()).contains("HAPI FHIR");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}

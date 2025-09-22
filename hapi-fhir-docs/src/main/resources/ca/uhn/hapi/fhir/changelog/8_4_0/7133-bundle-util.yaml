@@ -1,0 +1,4 @@
+---
+type: add
+issue: 7133
+title: "Added CanonicalBundleEntry class to support working with Bundle entries in a FHIR version independent way."

@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.embedded;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.OracleContainer;
 
 import java.util.ArrayList;
@@ -30,27 +31,41 @@ import java.util.Map;
  * For testing purposes.
  * <br/><br/>
  * Embedded database that uses a {@link DriverTypeEnum#ORACLE_12C} driver
- * and a dockerized Testcontainer.
+ * and a dockerized Testcontainer with lazy initialization.
  *
  * @see <a href="https://www.testcontainers.org/modules/databases/oraclexe/">Oracle TestContainer</a>
  */
 public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
-
-	private final OracleContainer myContainer;
+	private JdbcDatabaseContainer<?> myContainer;
 
 	public OracleEmbeddedDatabase() {
-		myContainer = new OracleContainer("gvenzl/oracle-xe:21-slim-faststart").withPrivilegedMode(true);
-		myContainer.start();
-		super.initialize(
-				DriverTypeEnum.ORACLE_12C,
-				myContainer.getJdbcUrl(),
-				myContainer.getUsername(),
-				myContainer.getPassword());
+		this(new OracleContainer("gvenzl/oracle-xe:21-slim-faststart").withPrivilegedMode(true));
+	}
+
+	public OracleEmbeddedDatabase(JdbcDatabaseContainer<?> theContainer) {
+		myContainer = theContainer;
+		this.setInitializionSupplier(() -> {
+			myContainer.start();
+			return new InitializationData(
+					DriverTypeEnum.ORACLE_12C,
+					myContainer.getJdbcUrl(),
+					myContainer.getUsername(),
+					myContainer.getPassword(),
+					myContainer);
+		});
+	}
+
+	@Override
+	public DriverTypeEnum getDriverType() {
+		return DriverTypeEnum.ORACLE_12C;
 	}
 
 	@Override
 	public void stop() {
-		myContainer.stop();
+		OracleContainer container = (OracleContainer) getContainerReference();
+		if (container != null && container.isRunning()) {
+			container.stop();
+		}
 	}
 
 	@Override

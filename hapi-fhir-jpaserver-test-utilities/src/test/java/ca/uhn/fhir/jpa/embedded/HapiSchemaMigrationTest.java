@@ -81,20 +81,31 @@ public class HapiSchemaMigrationTest {
 	@RegisterExtension
 	static HapiEmbeddedDatabasesExtension myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtension();
 
+	private DriverTypeEnum myCurrentDriverType;
+
 	@AfterEach
 	public void afterEach() {
-		try {
-			myEmbeddedServersExtension.clearDatabases();
-			// The stack trace for this failure does not appear in CI logs.  Catching and rethrowing to log the error.
-		} catch (Exception e) {
-			ourLog.error("Failed to clear databases", e);
-			throw e;
+		if (myCurrentDriverType != null) {
+			try {
+				ourLog.debug("Clearing database for driver type: {}", myCurrentDriverType);
+				JpaEmbeddedDatabase database = myEmbeddedServersExtension.getEmbeddedDatabase(myCurrentDriverType);
+				if (database.isInitialized()) {
+					database.clearDatabase();
+				}
+			} catch (Exception e) {
+				ourLog.error("Failed to clear database for driver type: {}", myCurrentDriverType, e);
+				throw e;
+			} finally {
+				myCurrentDriverType = null;
+			}
 		}
 	}
 
 	@ParameterizedTest
 	@ArgumentsSource(HapiEmbeddedDatabasesExtension.DatabaseVendorProvider.class)
 	public void testMigration(DriverTypeEnum theDriverType) throws SQLException {
+		myCurrentDriverType = theDriverType;
+		
 		// ensure all migrations are run
 		HapiSystemProperties.disableUnitTestMode();
 

@@ -1,10 +1,9 @@
 package ca.uhn.fhir.jpa.interceptor;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -13,6 +12,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -29,15 +29,18 @@ import ca.uhn.fhir.util.MultimapCollector;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.io.Resources;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
@@ -54,8 +57,11 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Test {
 	public static final int ALTERNATE_DEFAULT_ID = -1;
@@ -78,6 +84,8 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
 		myPartitionSettings.setDefaultPartitionId(ALTERNATE_DEFAULT_ID);
+
+		initResourceTypeCacheFromConfig();
 	}
 
 	@Override
@@ -87,9 +95,11 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		myInterceptorRegistry.unregisterInterceptor(mySvc);
 		myInterceptorRegistry.unregisterInterceptor(myForceOffsetSearchModeInterceptor);
 
-		myPartitionSettings.setPartitioningEnabled(false);
-		myPartitionSettings.setUnnamedPartitionMode(new PartitionSettings().isUnnamedPartitionMode());
-		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
+		PartitionSettings defaultSettings = new PartitionSettings();
+		myPartitionSettings.setPartitioningEnabled(defaultSettings.isPartitioningEnabled());
+		myPartitionSettings.setUnnamedPartitionMode(defaultSettings.isUnnamedPartitionMode());
+		myPartitionSettings.setDefaultPartitionId(defaultSettings.getDefaultPartitionId());
+		myPartitionSettings.setAllowReferencesAcrossPartitions(defaultSettings.getAllowReferencesAcrossPartitions());
 	}
 
 
@@ -129,7 +139,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			myPatientDao.create(patient);
 			fail();
 		} catch (MethodNotAllowedException e) {
-			assertEquals(Msg.code(1321) + "Patient resource IDs must be client-assigned in patient compartment mode", e.getMessage());
+			assertEquals(Msg.code(1321) + "Patient resource IDs must be client-assigned in patient compartment mode, or server id strategy must be UUID", e.getMessage());
 		}
 	}
 
@@ -179,6 +189,21 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			ResourceTable observation = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
 			assertEquals("Organization", observation.getResourceType());
 			assertEquals(ALTERNATE_DEFAULT_ID, observation.getPartitionId().getPartitionId().intValue());
+		});
+	}
+
+	@Test
+	public void testCreateGroupWithNoPatientReferenceValueIsInTheDefaultPartition() {
+		//Given: A Group resource with no members
+		Group group = new Group();
+		group.setActual(false);
+
+		Long id =  myGroupDao.create(group, mySrd).getId().getIdPartAsLong();
+		//Verify: Group is successfully created and put in the default partition
+		runInTransaction(() -> {
+			ResourceTable table = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
+			assertEquals("Group", table.getResourceType());
+			assertEquals(ALTERNATE_DEFAULT_ID, table.getPartitionId().getPartitionId().intValue());
 		});
 	}
 
@@ -454,7 +479,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			mySystemDao.transaction(mySrd, (Bundle) tx.getBundle());
 			fail();
 		} catch (MethodNotAllowedException e) {
-			assertEquals("HAPI-1321: Patient resource IDs must be client-assigned in patient compartment mode", e.getMessage());
+			assertEquals("HAPI-1321: Patient resource IDs must be client-assigned in patient compartment mode, or server id strategy must be UUID", e.getMessage());
 		}
 	}
 
@@ -597,6 +622,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			assertEquals(202, postResponse.getStatusLine().getStatusCode());
 		}
 	}
+
 	@Test
 	public void testSystemOperation_withNoResourceType_success() throws IOException {
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
@@ -608,4 +634,86 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
 		}
 	}
+
+	@Test
+	void testSyntheaLoad() throws IOException {
+	    // given
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+
+		IParser parser = myFhirContext.newJsonParser().setPrettyPrint(true);
+		myServer.getFhirClient().transaction().withBundle(Resources.toString(Resources.getResource("transaction-bundles/synthea/hospitalInformation1743689610792.json"), Charsets.UTF_8)).execute();
+		myServer.getFhirClient().transaction().withBundle(Resources.toString(Resources.getResource("transaction-bundles/synthea/practitionerInformation1743689610792.json"), Charsets.UTF_8)).execute();
+		Bundle patientBundle = parser.parseResource(Bundle.class, Resources.toString(Resources.getResource("transaction-bundles/synthea/Sherise735_Zofia65_Swaniawski813_e0f7758e-a749-4357-858c-53e1db808e37.json"), Charsets.UTF_8));
+
+		myCaptureQueriesListener.clear();
+
+		// when
+		assertDoesNotThrow(() -> myServer.getFhirClient().transaction().withBundle(patientBundle).execute());
+
+		// Verify
+		// This bundle contains 517 resources.
+		assertEquals(26, myCaptureQueriesListener.countSelectQueries());
+		// this is so high because we limit Hibernate to batches of 30 rows.
+		assertEquals(319, myCaptureQueriesListener.getInsertQueries().size());
+		assertEquals(9379, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(36, myCaptureQueriesListener.getUpdateQueries().size());
+		assertEquals(1031, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+	}
+
+	@Test
+	void testIdReferenceToDefaultPartition_resolvesWithoutError() {
+	    // given
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		IIdType practitionerId = createPractitioner();
+		Patient patient = buildResource(Patient.class,
+			withReference("generalPractitioner", practitionerId));
+
+		// when
+		assertDoesNotThrow(() -> myServer.getFhirClient().create().resource(patient).execute());
+	}
+
+
+	@Test
+	void testLoadBundle_resourceInCompartmentReferencesExistingNonCompartmentResource() {
+		// given
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		IParser parser = myFhirContext.newJsonParser();
+
+		// an organization
+		IIdType orgId = createOrganization(withIdentifier("https://example.com/ns", "123"));
+
+		// and a bundle with a Patient and linked Encounter
+		Patient patient = buildResource(
+			Patient.class,
+			withIdentifier("https://example.com/ns", "456"));
+		Encounter encounter = buildResource(
+			Encounter.class,
+			withSubject("urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea"),
+			// that refers to the existing organization
+			withReference("serviceProvider", orgId)
+		);
+
+		Bundle bundle = new BundleBuilder(myFhirContext)
+			.addTransactionCreateEntry(patient, "urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea").andThen()
+			.addTransactionCreateEntry(encounter).andThen()
+			.getBundleTyped();
+
+		// when processed
+		// Warning: this is weird.
+		// It works going through the server, but not through the dao without this parser dance.
+		// The parser is stitching the resources into the references during parsing, and we need this to allow a server-assigned UUID.
+		bundle = parser.parseResource(Bundle.class, parser.encodeResourceToString(bundle));
+		Bundle outcomes = mySystemDao.transaction(mySrd, bundle);
+
+		// then
+		String patientId = outcomes.getEntry().get(0).getId();
+		//
+		Bundle search = myServer.getFhirClient().search().forResource("Encounter").where(Encounter.PATIENT.hasId(patientId)).and(Encounter.SERVICE_PROVIDER.hasId(orgId)).returnBundle(Bundle.class).execute();
+		assertEquals(1, search.getEntry().size(), "we find the Encounter linked to the organization and the patient");
+	}
+
 }

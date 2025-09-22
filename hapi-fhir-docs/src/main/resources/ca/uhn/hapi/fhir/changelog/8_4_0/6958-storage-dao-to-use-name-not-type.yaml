@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 6958
+title: "When attempting to patch a resource in a partitioned system
+        with a registered `STORAGE_PARTITION_SELECTED` interceptor,
+        an error would result.
+        This has now been fixed.
+"

@@ -1,19 +1,20 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
+import ca.uhn.fhir.broker.api.IChannelNamer;
+import ca.uhn.fhir.broker.impl.LinkedBlockingBrokerClient;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
+import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSearchParamProvider;
-import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.system.HapiSystemProperties;
@@ -73,6 +74,9 @@ public abstract class BaseSubscriptionTest {
 	@Configuration
 	public static class MyConfig {
 
+		// would normally be a bean; but this is a test
+		private RetryPolicyProvider myRetryPolicyProvider = new RetryPolicyProvider();
+
 		@Bean
 		public JpaStorageSettings jpaStorageSettings() {
 			return new JpaStorageSettings();
@@ -84,13 +88,16 @@ public abstract class BaseSubscriptionTest {
 		}
 
 		@Bean
-		public IChannelFactory channelFactory(IChannelNamer theNamer) {
-			return new LinkedBlockingChannelFactory(theNamer);
+		public LinkedBlockingChannelFactory channelFactory(IChannelNamer theNamer) {
+			return new LinkedBlockingChannelFactory(theNamer, myRetryPolicyProvider);
 		}
 
 		@Bean
 		public SubscriptionChannelFactory mySubscriptionChannelFactory(IChannelNamer theChannelNamer) {
-			return new SubscriptionChannelFactory(new LinkedBlockingChannelFactory(theChannelNamer));
+			LinkedBlockingChannelFactory linkedBlockingChannelFactory = new LinkedBlockingChannelFactory(theChannelNamer, myRetryPolicyProvider);
+			LinkedBlockingBrokerClient brokerClient = new LinkedBlockingBrokerClient(theChannelNamer);
+			brokerClient.setLinkedBlockingChannelFactory(linkedBlockingChannelFactory);
+			return new SubscriptionChannelFactory(brokerClient);
 		}
 
 		@Bean

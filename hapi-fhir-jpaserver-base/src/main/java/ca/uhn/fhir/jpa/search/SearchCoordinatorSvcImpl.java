@@ -48,6 +48,7 @@ import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
@@ -77,6 +78,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -95,6 +98,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCoordinatorSvcImpl.class);
+	public static final int SEARCH_EXPIRY_OFFSET_MINUTES = 10;
 
 	private final FhirContext myContext;
 	private final JpaStorageSettings myStorageSettings;
@@ -194,7 +198,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 	@SuppressWarnings("SameParameterValue")
 	@VisibleForTesting
-	void setMaxMillisToWaitForRemoteResultsForUnitTest(long theMaxMillisToWaitForRemoteResults) {
+	public void setMaxMillisToWaitForRemoteResultsForUnitTest(long theMaxMillisToWaitForRemoteResults) {
 		myMaxMillisToWaitForRemoteResults = theMaxMillisToWaitForRemoteResults;
 	}
 
@@ -209,7 +213,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	 * include if two different clients request the same search and are both paging at the
 	 * same time, but also includes clients that are hacking the paging links to
 	 * fetch multiple pages of a search result in parallel. In both cases we need to only
-	 * let one of them actually activate the search, or we will have conficts. The other thread
+	 * let one of them actually activate the search, or we will have conflicts. The other thread
 	 * just needs to wait until the first one actually fetches more results.
 	 */
 	@Override
@@ -280,12 +284,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 			if (sw.getMillis() > myMaxMillisToWaitForRemoteResults) {
 				ourLog.error(
-						"Search {} of type {} for {}{} timed out after {}ms",
+						"Search {} of type {} for {}{} timed out after {}ms with status {}.",
 						search.getId(),
 						search.getSearchType(),
 						search.getResourceType(),
 						search.getSearchQueryString(),
-						sw.getMillis());
+						sw.getMillis(),
+						search.getStatus());
 				throw new InternalErrorException(Msg.code(1163) + "Request timed out after " + sw.getMillis() + "ms");
 			}
 
@@ -329,6 +334,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 		List<JpaPid> pids = fetchResultPids(theUuid, theFrom, theTo, theRequestDetails, search, theRequestPartitionId);
 
+		updateSearchExpiryOrNull(search, theRequestPartitionId);
+
 		ourLog.trace("Fetched {} results", pids.size());
 
 		return pids;
@@ -348,6 +355,21 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			throw myExceptionSvc.newUnknownSearchException(theUuid);
 		}
 		return pids;
+	}
+
+	private void updateSearchExpiryOrNull(Search theSearch, RequestPartitionId theRequestPartitionId) {
+		// The created time may be null in some unit tests
+		if (theSearch.getCreated() != null) {
+			// start tracking last-access-time for this search when it is more than halfway to expire by created time
+			// we do this to avoid generating excessive write traffic on busy cached searches.
+			long expireAfterMillis = myStorageSettings.getExpireSearchResultsAfterMillis();
+			long createdCutoff = theSearch.getCreated().getTime() + expireAfterMillis;
+			if (createdCutoff - System.currentTimeMillis() < expireAfterMillis / 2) {
+				theSearch.setExpiryOrNull(DateUtils.addMinutes(new Date(), SEARCH_EXPIRY_OFFSET_MINUTES));
+				// TODO: A nice future enhancement might be to make this flush be asynchronous
+				mySearchCacheSvc.save(theSearch, theRequestPartitionId);
+			}
+		}
 	}
 
 	@Override
@@ -441,8 +463,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	}
 
 	/**
-	 * 	The max results to return if this is a synchronous search.
-	 *
+	 * The max results to return if this is a synchronous search.
+	 * <p>
 	 * We'll look in this order:
 	 * * load synchronous up to (on params)
 	 * * param count (+ offset)
@@ -470,8 +492,36 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	}
 
 	private void validateSearch(SearchParameterMap theParams) {
+		assert checkNoDuplicateParameters(theParams)
+				: "Duplicate parameters found in query: " + theParams.toNormalizedQueryString(myContext);
+
 		validateIncludes(theParams.getIncludes(), Constants.PARAM_INCLUDE);
 		validateIncludes(theParams.getRevIncludes(), Constants.PARAM_REVINCLUDE);
+	}
+
+	/**
+	 * This method detects whether we have any duplicate lists of parameters and returns
+	 * {@literal true} if none are found. For example, the following query would result
+	 * in this method returning {@literal false}:
+	 * <code>Patient?name=bart,homer&name=bart,homer</code>
+	 * <p>
+	 * This is not an optimized test, and it's not technically even prohibited to have
+	 * duplicates like these in queries so this method should only be called as a
+	 * part of an {@literal assert} statement to catch errors in tests.
+	 */
+	private boolean checkNoDuplicateParameters(SearchParameterMap theParams) {
+		HashSet<List<IQueryParameterType>> lists = new HashSet<>();
+		for (List<List<IQueryParameterType>> andList : theParams.values()) {
+
+			lists.clear();
+			for (int i = 0; i < andList.size(); i++) {
+				List<IQueryParameterType> orListI = andList.get(i);
+				if (!orListI.isEmpty() && !lists.add(orListI)) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	private void validateIncludes(Set<Include> includes, String name) {

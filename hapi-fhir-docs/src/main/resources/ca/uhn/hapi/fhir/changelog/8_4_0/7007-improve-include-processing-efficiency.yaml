@@ -1,0 +1,7 @@
+---
+type: perf
+issue: 7007
+title: "When processing `_include` and `_revinclude` directives on JPA server searches,
+   the query will use a simplified SQL query which does not search for canonical URLs if the
+   SearchParameter paths do not resolve to any elements which can potentially contain canonical
+   references. Also, these searches now use a scrollable resultset for better efficiency."

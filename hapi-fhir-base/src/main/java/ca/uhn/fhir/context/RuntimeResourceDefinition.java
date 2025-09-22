@@ -200,13 +200,8 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 
 		myNameToSearchParam = Collections.unmodifiableMap(myNameToSearchParam);
 
-		ArrayList<RuntimeSearchParam> searchParams = new ArrayList<RuntimeSearchParam>(myNameToSearchParam.values());
-		Collections.sort(searchParams, new Comparator<RuntimeSearchParam>() {
-			@Override
-			public int compare(RuntimeSearchParam theArg0, RuntimeSearchParam theArg1) {
-				return theArg0.getName().compareTo(theArg1.getName());
-			}
-		});
+		ArrayList<RuntimeSearchParam> searchParams = new ArrayList<>(myNameToSearchParam.values());
+		Collections.sort(searchParams, Comparator.comparing(RuntimeSearchParam::getName));
 		mySearchParams = Collections.unmodifiableList(searchParams);
 
 		Map<String, List<RuntimeSearchParam>> compartmentNameToSearchParams = new HashMap<>();

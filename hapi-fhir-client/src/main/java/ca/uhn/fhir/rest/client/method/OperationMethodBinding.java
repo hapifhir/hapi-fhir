@@ -57,7 +57,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private final String myName;
 	private final RestOperationTypeEnum myOtherOperationType;
 	private final ReturnTypeEnum myReturnType;
-	private BundleTypeEnum myBundleType;
+	private final BundleTypeEnum myBundleType;
 	private String myDescription;
 
 	protected OperationMethodBinding(
@@ -89,7 +89,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 					+ theMethod.getDeclaringClass().getName() + " is annotated with @" + Operation.class.getSimpleName()
 					+ " but this annotation has no name defined");
 		}
-		if (theOperationName.startsWith("$") == false) {
+		if (!theOperationName.startsWith("$")) {
 			theOperationName = "$" + theOperationName;
 		}
 		myName = theOperationName;
@@ -97,7 +97,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		if (theReturnTypeFromRp != null) {
 			setResourceName(theContext.getResourceType(theReturnTypeFromRp));
 		} else {
-			if (Modifier.isAbstract(theOperationType.getModifiers()) == false) {
+			if (!Modifier.isAbstract(theOperationType.getModifiers())) {
 				setResourceName(theContext.getResourceType(theOperationType));
 			} else {
 				setResourceName(null);
@@ -223,8 +223,8 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		List<IBase> parameters = t.getValues(theInput, "Parameters.parameter");
 
 		Map<String, List<String>> params = new LinkedHashMap<>();
-		for (Object nextParameter : parameters) {
-			IPrimitiveType<?> nextNameDt = (IPrimitiveType<?>) t.getSingleValueOrNull((IBase) nextParameter, "name");
+		for (IBase nextParameter : parameters) {
+			IPrimitiveType<?> nextNameDt = (IPrimitiveType<?>) t.getSingleValueOrNull(nextParameter, "name");
 			if (nextNameDt == null || nextNameDt.isEmpty()) {
 				ourLog.warn(
 						"Ignoring input parameter with no value in Parameters.parameter.name in operation client invocation");
@@ -235,13 +235,13 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 				params.put(nextName, new ArrayList<>());
 			}
 
-			IBaseDatatype value = (IBaseDatatype) t.getSingleValueOrNull((IBase) nextParameter, "value[x]");
+			IBaseDatatype value = (IBaseDatatype) t.getSingleValueOrNull(nextParameter, "value[x]");
 			if (value == null) {
 				continue;
 			}
 			if (!(value instanceof IPrimitiveType)) {
 				throw new IllegalArgumentException(Msg.code(1453)
-						+ "Can not invoke operation as HTTP GET when it has parameters with a composite (non priitive) datatype as the value. Found value: "
+						+ "Can not invoke operation as HTTP GET when it has parameters with a composite (non primitive) datatype as the value. Found value: "
 						+ value.getClass().getName());
 			}
 			IPrimitiveType<?> primitive = (IPrimitiveType<?>) value;

@@ -138,7 +138,7 @@ public class PrePopulatedValidationSupport extends BaseValidationSupport impleme
 
 	/**
 	 * Add a new CodeSystem resource which will be available to the validator. Note that
-	 * {@link CodeSystem#getUrl() the URL field) in this resource must contain a value as this
+	 * {@link CodeSystem#getUrl() the URL field} in this resource must contain a value as this
 	 * value will be used as the logical URL.
 	 * <p>
 	 * Note that if the URL is a canonical FHIR URL (e.g. http://hl7.org/StructureDefinition/Extension),
@@ -196,7 +196,7 @@ public class PrePopulatedValidationSupport extends BaseValidationSupport impleme
 
 	/**
 	 * Add a new StructureDefinition resource which will be available to the validator. Note that
-	 * {@link StructureDefinition#getUrl() the URL field) in this resource must contain a value as this
+	 * {@link StructureDefinition#getUrl() the URL field} in this resource must contain a value as this
 	 * value will be used as the logical URL.
 	 * <p>
 	 * Note that if the URL is a canonical FHIR URL (e.g. http://hl7.org/StructureDefinition/Extension),
@@ -241,7 +241,7 @@ public class PrePopulatedValidationSupport extends BaseValidationSupport impleme
 
 	/**
 	 * Add a new ValueSet resource which will be available to the validator. Note that
-	 * {@link ValueSet#getUrl() the URL field) in this resource must contain a value as this
+	 * {@link ValueSet#getUrl() the URL field} in this resource must contain a value as this
 	 * value will be used as the logical URL.
 	 * <p>
 	 * Note that if the URL is a canonical FHIR URL (e.g. http://hl7.org/StructureDefinition/Extension),

@@ -1,0 +1,5 @@
+---
+type: add
+issue: 6826
+title: "The `_offset` query parameter can now be used when constructing a history request via the IGenericClient API. 
+Please see the [documentation](/hapi-fhir/docs/client/generic_client.html#history-servertypeinstance) for example usage."

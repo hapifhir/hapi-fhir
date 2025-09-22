@@ -118,8 +118,8 @@ public class JpaSearchParamCache {
 		return Collections.unmodifiableList(retVal);
 	}
 
-	public Optional<IndexedSearchParam> getIndexedSearchParamByHashIdentity(Long theHashIdentity) {
-		return Optional.ofNullable(myHashIdentityToIndexedSearchParams.get(theHashIdentity));
+	public Map<Long, IndexedSearchParam> getHashIdentityToIndexedSearchParamMap() {
+		return myHashIdentityToIndexedSearchParams;
 	}
 
 	void populateActiveSearchParams(
@@ -213,7 +213,7 @@ public class JpaSearchParamCache {
 			}
 		}
 
-		ourLog.info("Have {} unique search params", activeParamNamesToComboSearchParams.size());
+		ourLog.debug("Have {} unique search params", activeParamNamesToComboSearchParams.size());
 
 		myActiveComboSearchParams = resourceNameToComboSearchParams;
 		myActiveParamNamesToComboSearchParams = activeParamNamesToComboSearchParams;

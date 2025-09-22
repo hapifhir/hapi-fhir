@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.helper;
 
+import ca.uhn.fhir.broker.jms.SpringMessagingReceiverAdapter;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -10,6 +11,7 @@ import ca.uhn.fhir.jpa.mdm.config.MdmSubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.test.concurrency.PointcutLatch;
@@ -105,7 +107,8 @@ public abstract class BaseMdmHelper implements BeforeEachCallback, AfterEachCall
 	}
 
 	public int getExecutorQueueSize() {
-		LinkedBlockingChannel channel = (LinkedBlockingChannel) myMdmQueueConsumerLoader.getMdmChannelForUnitTest();
+		SpringMessagingReceiverAdapter<ResourceModifiedMessage> adapter = (SpringMessagingReceiverAdapter<ResourceModifiedMessage>) myMdmQueueConsumerLoader.getMdmChannelConsumerForUnitTest();
+		LinkedBlockingChannel channel = (LinkedBlockingChannel) adapter.getSpringMessagingChannelReceiver();
 		return channel.getQueueSizeForUnitTest();
 	}
 

@@ -530,7 +530,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 
 
 	@ParameterizedTest
-	@ValueSource(strings = {"x-request-id", "X-Request-Id", "X-Request-ID", "X-REQUEST-ID"})
+	@ValueSource(strings = {Constants.HEADER_REQUEST_ID, Constants.HEADER_REQUEST_ID, Constants.HEADER_REQUEST_ID, Constants.HEADER_REQUEST_ID})
 	public void testXRequestIdHeaderRetainsCase(String theXRequestIdHeaderKey) throws Exception {
 		HttpGet get = new HttpGet(myServerBase + "/Patient");
 		String xRequestIdHeaderValue = "abc123";

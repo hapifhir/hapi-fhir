@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.jpa.mdm.config;
 
+import ca.uhn.fhir.broker.api.IBrokerClient;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
-import ca.uhn.fhir.jpa.mdm.broker.MdmMessageHandler;
 import ca.uhn.fhir.jpa.mdm.broker.MdmMessageKeySvc;
+import ca.uhn.fhir.jpa.mdm.broker.MdmMessageListener;
 import ca.uhn.fhir.jpa.mdm.broker.MdmQueueConsumerLoader;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.svc.BlockRuleEvaluationSvcImpl;
@@ -49,7 +50,6 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchCriteriaBuilderSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
@@ -93,13 +93,13 @@ public class MdmConsumerConfig {
 
 	@Bean
 	public MdmQueueConsumerLoader mdmQueueConsumerLoader(
-			IChannelFactory theChannelFactory, IMdmSettings theMdmSettings, MdmMessageHandler theMdmMessageHandler) {
-		return new MdmQueueConsumerLoader(theChannelFactory, theMdmSettings, theMdmMessageHandler);
+			IBrokerClient theBrokerClient, IMdmSettings theMdmSettings, MdmMessageListener theMdmMessageListener) {
+		return new MdmQueueConsumerLoader(theBrokerClient, theMdmSettings, theMdmMessageListener);
 	}
 
 	@Bean
-	MdmMessageHandler mdmMessageHandler() {
-		return new MdmMessageHandler();
+	MdmMessageListener mdmMessageHandler() {
+		return new MdmMessageListener();
 	}
 
 	@Bean
@@ -164,7 +164,7 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmProviderLoader mdmProviderLoader() {
+	protected MdmProviderLoader mdmProviderLoader() {
 		return new MdmProviderLoader();
 	}
 

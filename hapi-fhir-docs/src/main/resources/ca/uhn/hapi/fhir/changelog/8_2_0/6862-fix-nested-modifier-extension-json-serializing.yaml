@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 6862
+title: "Modifier extensions with child modifier extensions were incorrectly serialized by the
+  JSON Parser using the element name `modifierExtension`. This was incorrect (the child element
+  should always be called `extension` per the [spec](https://www.hl7.org/fhir/R4B/extensibility.html#modifierExtension)).
+  Thanks to Vytis Valentinavičius for the contribution!"

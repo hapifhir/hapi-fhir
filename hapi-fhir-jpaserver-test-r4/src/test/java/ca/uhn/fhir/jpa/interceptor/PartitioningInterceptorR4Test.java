@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import static ca.uhn.fhir.interceptor.model.RequestPartitionId.defaultPartition;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
@@ -7,14 +8,11 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4SystemTest;
-import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.dao.r4.BasePartitioningR4Test;
 import ca.uhn.fhir.jpa.interceptor.ex.PartitionInterceptorReadAllPartitions;
 import ca.uhn.fhir.jpa.interceptor.ex.PartitionInterceptorReadPartitionsBasedOnScopes;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -33,8 +31,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -57,52 +53,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
-public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
+public class PartitioningInterceptorR4Test extends BasePartitioningR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PartitioningInterceptorR4Test.class);
-
-	@Autowired
-	private IPartitionLookupSvc myPartitionConfigSvc;
-	private MyWriteInterceptor myPartitionInterceptor;
-
-	@AfterEach
-	public void after() {
-		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
-		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
-		myPartitionSettings.setAllowReferencesAcrossPartitions(new PartitionSettings().getAllowReferencesAcrossPartitions());
-
-		myPartitionInterceptor.assertNoRemainingIds();
-		myInterceptorRegistry.unregisterInterceptor(myPartitionInterceptor);
-		myInterceptorRegistry.unregisterInterceptorsIf(t->t instanceof MySubscriptionReadInterceptor);
-		myInterceptorRegistry.unregisterInterceptorsIf(t->t instanceof MySubscriptionWriteInterceptor);
-
-		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
-	}
-
-	@Override
-	@BeforeEach
-	public void before() throws Exception {
-		super.before();
-
-		myPartitionSettings.setPartitioningEnabled(true);
-
-		myPartitionInterceptor = new MyWriteInterceptor();
-		myInterceptorRegistry.registerInterceptor(myPartitionInterceptor);
-
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName("PART-1"), null);
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName("PART-2"), null);
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(3).setName("PART-3"), null);
-
-		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
-	}
 
 	@Test
 	public void testCrossPartitionUpdate() {
 		// setup
 		String id = "RED";
-		ServletRequestDetails dets = new ServletRequestDetails();
-		dets.setRestOperationType(RestOperationTypeEnum.UPDATE);
-		dets.setServletRequest(new MockHttpServletRequest());
+		mySrd.setRestOperationType(RestOperationTypeEnum.UPDATE);
+		mySrd.setServletRequest(new MockHttpServletRequest());
 		AtomicInteger readIndex = new AtomicInteger();
 		AtomicInteger writeIndex = new AtomicInteger();
 
@@ -132,24 +92,31 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		myInterceptorRegistry.registerInterceptor(readInterceptor);
 		myInterceptorRegistry.registerInterceptor(writeInterceptor);
 
-		// run test
-		IFhirResourceDao<Subscription> dao = myDaoRegistry.getResourceDao(Subscription.class);
-		DaoMethodOutcome outcome = dao.update(subscription, dets);
+		try {
 
-		// verify
-		assertNotNull(outcome);
-		assertEquals(id, outcome.getResource().getIdElement().getIdPart());
-		assertEquals(0, readIndex.get()); // should be no read interactions
-		assertEquals(1, writeIndex.get());
+			// run test
+			IFhirResourceDao<Subscription> dao = myDaoRegistry.getResourceDao(Subscription.class);
+			DaoMethodOutcome outcome = dao.update(subscription, mySrd);
+
+			// verify
+			assertNotNull(outcome);
+			assertEquals(id, outcome.getResource().getIdElement().getIdPart());
+			assertEquals(0, readIndex.get()); // should be no read interactions
+			assertEquals(2, writeIndex.get());
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(myPartitionInterceptor);
+			myInterceptorRegistry.unregisterInterceptorsIf(t->t instanceof MySubscriptionReadInterceptor);
+			myInterceptorRegistry.unregisterInterceptorsIf(t->t instanceof MySubscriptionWriteInterceptor);
+		}
 	}
 
 	@Test
 	public void testCreateNonPartionableResourceWithPartitionDate() {
-		myPartitionInterceptor.addCreatePartition(RequestPartitionId.defaultPartition(LocalDate.of(2021, 2, 22)));
+		addNextTargetPartitionForCreate(defaultPartition(LocalDate.of(2021, 2, 22)));
 
 		StructureDefinition sd = new StructureDefinition();
 		sd.setUrl("http://foo");
-		myStructureDefinitionDao.create(sd, new ServletRequestDetails());
+		myStructureDefinitionDao.create(sd, mySrd);
 
 		runInTransaction(() -> {
 			List<ResourceTable> resources = myResourceTableDao.findAll();
@@ -162,11 +129,11 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testCreateNonPartionableResourceWithNullPartitionReturned() {
-		myPartitionInterceptor.addCreatePartition(null);
+		addNextTargetPartitionForCreate(RequestPartitionId.defaultPartition());
 
 		StructureDefinition sd = new StructureDefinition();
 		sd.setUrl("http://foo");
-		myStructureDefinitionDao.create(sd, new ServletRequestDetails());
+		myStructureDefinitionDao.create(sd, mySrd);
 
 		runInTransaction(() -> {
 			List<ResourceTable> resources = myResourceTableDao.findAll();
@@ -177,12 +144,12 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testCreateNonPartionableResourceWithDisallowedPartitionReturned() {
-		myPartitionInterceptor.addCreatePartition(RequestPartitionId.fromPartitionName("FOO"));
+		addNextTargetPartitionForCreate(RequestPartitionId.fromPartitionId(1));
 
 		StructureDefinition sd = new StructureDefinition();
 		sd.setUrl("http://foo");
 		try {
-			myStructureDefinitionDao.create(sd, new ServletRequestDetails());
+			myStructureDefinitionDao.create(sd, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(1318) + "Resource type StructureDefinition can not be partitioned", e.getMessage());
@@ -206,9 +173,9 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearch_InterceptorForAllPartitions() {
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue());
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
-		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue());
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withActiveTrue());
+		IIdType patientId1 = createPatient(withCreatePartition(1), withActiveTrue());
+		IIdType patientId2 = createPatient(withCreatePartition(2), withActiveTrue());
 
 
 		PartitionInterceptorReadAllPartitions interceptor = new PartitionInterceptorReadAllPartitions();
@@ -233,9 +200,11 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearch_InterceptorWithScopes() {
-		createPatient(withPartition(null), withActiveTrue());
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
-		createPatient(withPartition(2), withActiveTrue());
+		assertNoRemainingPartitionIds();
+		createPatient(withCreatePartition(null), withActiveTrue());
+		IIdType patientId1 = createPatient(withCreatePartition(1), withActiveTrue());
+		createPatient(withCreatePartition(2), withActiveTrue());
+		assertNoRemainingPartitionIds();
 
 		HttpServletRequest servletRequest = mock(HttpServletRequest.class);
 		when(mySrd.getServletRequest()).thenReturn(servletRequest);
@@ -269,25 +238,15 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 	private void addCreatePartition(Integer thePartitionId, LocalDate thePartitionDate) {
 		Validate.notNull(thePartitionId);
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(thePartitionId, thePartitionDate);
-		myPartitionInterceptor.addCreatePartition(requestPartitionId);
+		addNextInterceptorCreateResult(requestPartitionId);
 	}
 
 	private void addCreateDefaultPartition() {
-		myPartitionInterceptor.addCreatePartition(RequestPartitionId.defaultPartition());
+		addNextInterceptorCreateResult(defaultPartition());
 	}
 
 	public void createRequestId() {
 		when(mySrd.getRequestId()).thenReturn("REQUEST_ID");
-	}
-
-	private ICreationArgument withPartition(Integer thePartitionId) {
-		return t -> {
-			if (thePartitionId != null) {
-				addCreatePartition(thePartitionId, null);
-			} else {
-				addCreateDefaultPartition();
-			}
-		};
 	}
 
 	@Interceptor
@@ -348,7 +307,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 				myObjectConsumer.accept(theResource);
 			}
 			// doesn't matter; just not allPartitions
-			return RequestPartitionId.defaultPartition(LocalDate.of(2021, 2, 22));
+			return defaultPartition(LocalDate.of(2021, 2, 22));
 		}
 	}
 }

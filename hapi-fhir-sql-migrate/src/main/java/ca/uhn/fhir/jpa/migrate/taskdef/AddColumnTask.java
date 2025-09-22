@@ -68,6 +68,12 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 			}
 		}
 
+		String sql = generateSql();
+		logInfo(ourLog, "Adding column {} of type {} to table {}", getColumnName(), getSqlType(), getTableName());
+		executeSql(getTableName(), sql);
+	}
+
+	String generateSql() {
 		String typeStatement = getTypeStatement();
 
 		String sql;
@@ -94,8 +100,7 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 				throw new IllegalStateException(Msg.code(60));
 		}
 
-		logInfo(ourLog, "Adding column {} of type {} to table {}", getColumnName(), getSqlType(), getTableName());
-		executeSql(getTableName(), sql);
+		return sql;
 	}
 
 	@Nonnull

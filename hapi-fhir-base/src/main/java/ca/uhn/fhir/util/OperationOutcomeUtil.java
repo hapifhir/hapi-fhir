@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nullable;
@@ -45,30 +46,51 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class OperationOutcomeUtil {
 
+	public static final String OO_SEVERITY_ERROR = "error";
+	public static final String OO_SEVERITY_INFO = "information";
+	public static final String OO_SEVERITY_WARN = "warning";
+	public static final String OO_ISSUE_CODE_INFORMATIONAL = "informational";
+
+	/**
+	 * Note: This code was added in FHIR R5, so the {@link #addIssue(FhirContext, IBaseOperationOutcome, String, String, String, String) addIssue}
+	 * methods here will automatically convert it to {@link #OO_ISSUE_CODE_INFORMATIONAL} for
+	 * previous versions of FHIR.
+	 *
+	 * @since 8.6.0
+	 */
+	public static final String OO_ISSUE_CODE_SUCCESS = "success";
+
+	/**
+	 * @since 8.6.0
+	 */
+	public static final String OO_ISSUE_CODE_PROCESSING = "processing";
+
 	/**
 	 * Add an issue to an OperationOutcome
-	 *  @param theCtx              The fhir context
+	 *
+	 * @param theCtx              The fhir context
 	 * @param theOperationOutcome The OO resource to add to
 	 * @param theSeverity         The severity (fatal | error | warning | information)
-	 * @param theDetails          The details string
-	 * @param theCode
+	 * @param theDiagnostics      The diagnostics string (this was called "details" in FHIR DSTU2 but was renamed to diagnostics in DSTU3)
+	 * @param theCode             A code, such as {@link #OO_ISSUE_CODE_INFORMATIONAL} or {@link #OO_ISSUE_CODE_SUCCESS}
 	 * @return Returns the newly added issue
 	 */
 	public static IBase addIssue(
 			FhirContext theCtx,
 			IBaseOperationOutcome theOperationOutcome,
 			String theSeverity,
-			String theDetails,
+			String theDiagnostics,
 			String theLocation,
 			String theCode) {
-		return addIssue(theCtx, theOperationOutcome, theSeverity, theDetails, theLocation, theCode, null, null, null);
+		return addIssue(
+				theCtx, theOperationOutcome, theSeverity, theDiagnostics, theLocation, theCode, null, null, null);
 	}
 
 	public static IBase addIssue(
 			FhirContext theCtx,
 			IBaseOperationOutcome theOperationOutcome,
 			String theSeverity,
-			String theDetails,
+			String theDiagnostics,
 			String theLocation,
 			String theCode,
 			@Nullable String theDetailSystem,
@@ -79,7 +101,7 @@ public class OperationOutcomeUtil {
 				theCtx,
 				issue,
 				theSeverity,
-				theDetails,
+				theDiagnostics,
 				theLocation,
 				theCode,
 				theDetailSystem,
@@ -99,15 +121,29 @@ public class OperationOutcomeUtil {
 		return issue;
 	}
 
+	/**
+	 * @deprecated Use {@link #getFirstIssueDiagnostics(FhirContext, IBaseOperationOutcome)} instead. This
+	 * 	method has always been misnamed for historical reasons.
+	 */
+	@Deprecated(forRemoval = true, since = "8.2.0")
 	public static String getFirstIssueDetails(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
-		return getFirstIssueStringPart(theCtx, theOutcome, "diagnostics");
+		return getFirstIssueDiagnostics(theCtx, theOutcome);
+	}
+
+	public static String getFirstIssueDiagnostics(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
+		return getIssueStringPart(theCtx, theOutcome, "diagnostics", 0);
+	}
+
+	public static String getIssueDiagnostics(FhirContext theCtx, IBaseOperationOutcome theOutcome, int theIndex) {
+		return getIssueStringPart(theCtx, theOutcome, "diagnostics", theIndex);
 	}
 
 	public static String getFirstIssueLocation(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
-		return getFirstIssueStringPart(theCtx, theOutcome, "location");
+		return getIssueStringPart(theCtx, theOutcome, "location", 0);
 	}
 
-	private static String getFirstIssueStringPart(FhirContext theCtx, IBaseOperationOutcome theOutcome, String name) {
+	private static String getIssueStringPart(
+			FhirContext theCtx, IBaseOperationOutcome theOutcome, String theName, int theIndex) {
 		if (theOutcome == null) {
 			return null;
 		}
@@ -116,14 +152,14 @@ public class OperationOutcomeUtil {
 		BaseRuntimeChildDefinition issueChild = ooDef.getChildByName("issue");
 
 		List<IBase> issues = issueChild.getAccessor().getValues(theOutcome);
-		if (issues.isEmpty()) {
+		if (issues.size() <= theIndex) {
 			return null;
 		}
 
-		IBase issue = issues.get(0);
+		IBase issue = issues.get(theIndex);
 		BaseRuntimeElementCompositeDefinition<?> issueElement =
 				(BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(issue.getClass());
-		BaseRuntimeChildDefinition detailsChild = issueElement.getChildByName(name);
+		BaseRuntimeChildDefinition detailsChild = issueElement.getChildByName(theName);
 
 		List<IBase> details = detailsChild.getAccessor().getValues(issue);
 		if (details.isEmpty()) {
@@ -185,7 +221,7 @@ public class OperationOutcomeUtil {
 			FhirContext theCtx,
 			IBase theIssue,
 			String theSeverity,
-			String theDetails,
+			String theDiagnostics,
 			String theLocation,
 			String theCode,
 			String theDetailSystem,
@@ -199,7 +235,13 @@ public class OperationOutcomeUtil {
 		BaseRuntimeChildDefinition codeChild = issueElement.getChildByName("code");
 		IPrimitiveType<?> codeElem = (IPrimitiveType<?>)
 				codeChild.getChildByName("code").newInstance(codeChild.getInstanceConstructorArguments());
-		codeElem.setValueAsString(theCode);
+		String code = theCode;
+		if (theCtx.getVersion().getVersion().isOlderThan(FhirVersionEnum.R5) && "success".equals(code)) {
+			// "success" was added in R5 so we switch back to "informational" for older versions
+			code = "informational";
+		}
+
+		codeElem.setValueAsString(code);
 		codeChild.getMutator().addValue(theIssue, codeElem);
 
 		BaseRuntimeElementDefinition<?> stringDef = diagnosticsChild.getChildByName(diagnosticsChild.getElementName());
@@ -211,7 +253,7 @@ public class OperationOutcomeUtil {
 		severityChild.getMutator().addValue(theIssue, severityElem);
 
 		IPrimitiveType<?> string = (IPrimitiveType<?>) stringDef.newInstance();
-		string.setValueAsString(theDetails);
+		string.setValueAsString(theDiagnostics);
 		diagnosticsChild.getMutator().setValue(theIssue, string);
 
 		addLocationToIssue(theCtx, theIssue, theLocation);
@@ -244,6 +286,28 @@ public class OperationOutcomeUtil {
 					.getChildByName("location")
 					.newInstance(locationChild.getInstanceConstructorArguments());
 			locationElem.setValueAsString(theLocation);
+			locationChild.getMutator().addValue(theIssue, locationElem);
+		}
+	}
+
+	/**
+	 * Given an instance of <code>OperationOutcome.issue</code>, adds a new instance of
+	 * <code>OperationOutcome.issue.expression</code> with the given string value.
+	 *
+	 * @param theContext            The FhirContext for the appropriate FHIR version
+	 * @param theIssue              The <code>OperationOutcome.issue</code> to add to
+	 * @param theLocationExpression The string to use as content
+	 */
+	public static void addExpressionToIssue(FhirContext theContext, IBase theIssue, String theLocationExpression) {
+		if (isNotBlank(theLocationExpression)
+				&& theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+			BaseRuntimeElementCompositeDefinition<?> issueElement =
+					(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theIssue.getClass());
+			BaseRuntimeChildDefinition locationChild = issueElement.getChildByName("expression");
+			IPrimitiveType<?> locationElem = (IPrimitiveType<?>) locationChild
+					.getChildByName("expression")
+					.newInstance(locationChild.getInstanceConstructorArguments());
+			locationElem.setValueAsString(theLocationExpression);
 			locationChild.getMutator().addValue(theIssue, locationElem);
 		}
 	}
@@ -341,5 +405,33 @@ public class OperationOutcomeUtil {
 					"string",
 					theMessageId);
 		}
+	}
+
+	public static IBaseOperationOutcome createOperationOutcome(
+			String theSeverity,
+			String theMessage,
+			String theCode,
+			FhirContext theFhirContext,
+			@Nullable StorageResponseCodeEnum theStorageResponseCode) {
+		IBaseOperationOutcome oo = newInstance(theFhirContext);
+		String detailSystem = null;
+		String detailCode = null;
+		String detailDescription = null;
+		if (theStorageResponseCode != null) {
+			detailSystem = theStorageResponseCode.getSystem();
+			detailCode = theStorageResponseCode.getCode();
+			detailDescription = theStorageResponseCode.getDisplay();
+		}
+		addIssue(
+				theFhirContext,
+				oo,
+				theSeverity,
+				theMessage,
+				null,
+				theCode,
+				detailSystem,
+				detailCode,
+				detailDescription);
+		return oo;
 	}
 }

@@ -573,6 +573,11 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 					.toString();
 		}
 
+		@Override
+		public String getHookDescription() {
+			return getInterceptor().getClass().getName() + "." + myMethod.getName();
+		}
+
 		public POINTCUT getPointcut() {
 			return myPointcut;
 		}

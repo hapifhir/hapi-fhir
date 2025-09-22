@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import jakarta.persistence.EntityManager;
+import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -97,10 +98,16 @@ public class ResourceSearchUrlSvc {
 	}
 
 	/**
+	 * @param theResourceName The resource name associated with the conditional URL
+	 * @param theMatchUrl The URL parameters portion of the match URL. Should not include a leading {@literal ?}, but can include {@literal &} separators.
+	 *
 	 *  We store a record of match urls with res_id so a db constraint can catch simultaneous creates that slip through.
 	 */
 	public void enforceMatchUrlResourceUniqueness(
 			String theResourceName, String theMatchUrl, ResourceTable theResourceTable) {
+		Validate.notBlank(theResourceName, "theResourceName must not be blank");
+		Validate.notBlank(theMatchUrl, "theMatchUrl must not be blank");
+
 		String canonicalizedUrlForStorage = createCanonicalizedUrlForStorage(theResourceName, theMatchUrl);
 
 		ResourceSearchUrlEntity searchUrlEntity = ResourceSearchUrlEntity.from(

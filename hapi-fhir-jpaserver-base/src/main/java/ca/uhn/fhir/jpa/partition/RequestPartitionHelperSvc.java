@@ -34,7 +34,10 @@ import java.util.Objects;
 public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 
 	@Autowired
-	IPartitionLookupSvc myPartitionConfigSvc;
+	private IPartitionLookupSvc myPartitionConfigSvc;
+
+	public RequestPartitionHelperSvc() {}
+	;
 
 	@Override
 	public RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
@@ -144,7 +147,7 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 				if (partition != null) {
 					ids.add(partition.getId());
 				} else {
-					ids.add(null);
+					ids.add(myPartitionSettings.getDefaultPartitionId());
 				}
 			}
 		}

@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 6767
+jira: SMILE-7942
+title: "Previously, when both Match URL cache and Partitioning were enabled, the Match URL cache would sometimes 
+return the incorrect resource while resolving a conditional URL that matched to resources in multiple 
+partitions. This has now been fixed."

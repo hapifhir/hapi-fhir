@@ -174,6 +174,11 @@ public class Builder {
 		addTask(task);
 	}
 
+	public void addIdGenerator(String theVersion, String theGeneratorName, Integer theIncrement) {
+		AddIdGeneratorTask task = new AddIdGeneratorTask(myRelease, theVersion, theGeneratorName, theIncrement);
+		addTask(task);
+	}
+
 	public BuilderCompleteTask dropIdGenerator(String theVersion, String theIdGeneratorName) {
 		DropIdGeneratorTask task = new DropIdGeneratorTask(myRelease, theVersion, theIdGeneratorName);
 		addTask(task);

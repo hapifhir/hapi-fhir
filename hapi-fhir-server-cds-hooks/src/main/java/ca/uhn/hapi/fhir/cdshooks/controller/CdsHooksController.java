@@ -82,7 +82,7 @@ public class CdsHooksController {
 	/**
 	 * Here is the description of the CDS Hooks feedback method from the CDS Hooks specification:
 	 * <p>
-	 * Once a CDS Hooks service responds to a hook by returning a card, the service has no further interaction with the CDS client. The acceptance of a suggestion or rejection of a card is valuable information to enable a service to improve its behavior towards the goal of the end-user having a positive and meaningful experience with the CDS. A feedback endpoint enables suggestion tracking & analytics.
+	 * Once a CDS Hooks service responds to a hook by returning a card, the service has no further interaction with the CDS client. The acceptance of a suggestion or rejection of a card is valuable information to enable a service to improve its behavior towards the goal of the end-user having a positive and meaningful experience with the CDS. A feedback endpoint enables suggestion tracking and analytics.
 	 * <p>
 	 * Upon receiving a card, a user may accept its suggestions, ignore it entirely, or dismiss it with or without an override reason. Note that while one or more suggestions can be accepted, an entire card is either ignored or overridden.
 	 * <p>

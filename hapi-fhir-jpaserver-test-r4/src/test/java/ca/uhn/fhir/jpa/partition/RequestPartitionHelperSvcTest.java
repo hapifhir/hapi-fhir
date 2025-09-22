@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.DEFAULT_PARTITION_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -51,6 +52,7 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 	@BeforeEach
 	public void before(){
 		myPartitionDao.deleteAll();
+		myPartitionSettings.setDefaultPartitionId(null);
 		myPartitionSettings.setPartitioningEnabled(true);
 
 		myPatient = new Patient();
@@ -190,7 +192,7 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 	}
 
 	@ParameterizedTest
-	@MethodSource
+	@MethodSource("withPartitionIds")
 	public void testDefaultPartition_whenDefaultPartitionIsNotNull(Integer theRequestPartitionId) {
 		final Integer defaultPartitionId = 0;
 		myPartitionSettings.setDefaultPartitionId(defaultPartitionId);
@@ -206,7 +208,20 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 		}
 	}
 
-	private static Stream<Integer> testDefaultPartition_whenDefaultPartitionIsNotNull(){
+	@ParameterizedTest
+	@MethodSource("withPartitionIds")
+	public void testValidateAndNormalizePartitionNames_willResolveDefaultPartitionNameToCorrectPartitionId(Integer theDefaultPartitionId) {
+		myPartitionSettings.setDefaultPartitionId(theDefaultPartitionId);
+
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionName(DEFAULT_PARTITION_NAME);
+
+		RequestPartitionId normalizedRequestPartitionId = mySvc.validateAndNormalizePartitionNames(requestPartitionId);
+
+		assertThat(normalizedRequestPartitionId.isPartition(theDefaultPartitionId)).isTrue();
+
+	}
+
+	private static Stream<Integer> withPartitionIds(){
 		return Stream.of(null, 1,2,3);
 	}
 

@@ -97,6 +97,14 @@ public class StrictErrorHandler extends ParseErrorHandler implements IParserErro
 	}
 
 	@Override
+	public void invalidInternalReference(IParseLocation theLocation, String theReference) {
+		throw new DataFormatException(Msg.code(2724)
+				+ describeLocation(theLocation)
+				+ "There is a reference that begins with #, but no resource with this ID is contained. [reference="
+				+ theReference + "]");
+	}
+
+	@Override
 	public void extensionContainsValueAndNestedExtensions(IParseLocation theLocation) {
 		throw new DataFormatException(Msg.code(1827) + describeLocation(theLocation)
 				+ "Extension contains both a value and nested extensions");

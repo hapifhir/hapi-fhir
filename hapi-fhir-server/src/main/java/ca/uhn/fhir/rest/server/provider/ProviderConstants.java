@@ -251,6 +251,11 @@ public class ProviderConstants {
 	public static final String OPERATION_REPLACE_REFERENCES = "$hapi.fhir.replace-references";
 
 	/**
+	 * Operation name for the "$hapi.fhir.undo-replace-references" operation
+	 */
+	public static final String OPERATION_UNDO_REPLACE_REFERENCES = "$hapi.fhir.undo-replace-references";
+
+	/**
 	 * Parameter for source reference of the "$hapi.fhir.replace-references" operation
 	 */
 	public static final String OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID = "source-reference-id";
@@ -273,6 +278,9 @@ public class ProviderConstants {
 
 	public static final String OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME = "outcome";
 
+	public static final String OPERATION_UNDO_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME =
+			OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
+
 	/**
 	 * Operation name for the Resource "$merge" operation
 	 * Hapi-fhir use is based on https://www.hl7.org/fhir/patient-operation-merge.html
@@ -294,6 +302,9 @@ public class ProviderConstants {
 	public static final String OPERATION_MERGE_OUTPUT_PARAM_OUTCOME = OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
 	public static final String OPERATION_MERGE_OUTPUT_PARAM_RESULT = "result";
 	public static final String OPERATION_MERGE_OUTPUT_PARAM_TASK = OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
+
+	public static final String OPERATION_UNDO_MERGE = "$hapi.fhir.undo-merge";
+	public static final String OPERATION_UNDO_MERGE_OUTCOME = "outcome";
 
 	public static final String HAPI_BATCH_JOB_ID_SYSTEM = "http://hapifhir.io/batch/jobId";
 	public static final String OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT_DEFAULT_STRING = "512";

@@ -1,0 +1,5 @@
+---
+type: add
+issue: 6873
+title: "The Subscription registry has been made more resilient to failures when
+    fetching Subscriptions on startup"

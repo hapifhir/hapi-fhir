@@ -98,6 +98,7 @@ public class ResponseHighlighterInterceptor {
 	private static final String[] PARAM_FORMAT_VALUE_JSON = new String[] {Constants.FORMAT_JSON};
 	private static final String[] PARAM_FORMAT_VALUE_XML = new String[] {Constants.FORMAT_XML};
 	private static final String[] PARAM_FORMAT_VALUE_TTL = new String[] {Constants.FORMAT_TURTLE};
+	public static final String RESPONSE_HIGHLIGHTER_INTERCEPTOR_HANDLED_KEY = "ResponseHighlighterInterceptorHandled";
 	private boolean myShowRequestHeaders = false;
 	private boolean myShowResponseHeaders = true;
 	private boolean myShowNarrative = true;
@@ -357,7 +358,7 @@ public class ResponseHighlighterInterceptor {
 		/*
 		 * It's an AJAX request, so no HTML
 		 */
-		String requestedWith = theServletRequest.getHeader("X-Requested-With");
+		String requestedWith = theServletRequest.getHeader(Constants.HEADER_X_REQUESTED_WITH);
 		if (requestedWith != null) {
 			return true;
 		}
@@ -447,7 +448,7 @@ public class ResponseHighlighterInterceptor {
 			return true;
 		}
 
-		theRequestDetails.setAttribute("ResponseHighlighterInterceptorHandled", Boolean.TRUE);
+		theRequestDetails.getUserData().put(RESPONSE_HIGHLIGHTER_INTERCEPTOR_HANDLED_KEY, Boolean.TRUE);
 
 		return true;
 	}
@@ -460,7 +461,7 @@ public class ResponseHighlighterInterceptor {
 			HttpServletResponse theServletResponse)
 			throws AuthenticationException {
 
-		if (!Boolean.TRUE.equals(theRequestDetails.getAttribute("ResponseHighlighterInterceptorHandled"))) {
+		if (!Boolean.TRUE.equals(theRequestDetails.getUserData().get(RESPONSE_HIGHLIGHTER_INTERCEPTOR_HANDLED_KEY))) {
 			String graphqlResponse = null;
 			IBaseResource resourceResponse = theResponseObject.getResponseResource();
 			if (handleOutgoingResponse(
@@ -563,13 +564,13 @@ public class ResponseHighlighterInterceptor {
 		/*
 		 * It's an AJAX request, so no HTML
 		 */
-		if (!force && isNotBlank(theServletRequest.getHeader("X-Requested-With"))) {
+		if (!force && isNotBlank(theServletRequest.getHeader(Constants.HEADER_X_REQUESTED_WITH))) {
 			return true;
 		}
 		/*
 		 * If the request has an Origin header, it is probably an AJAX request
 		 */
-		if (!force && isNotBlank(theServletRequest.getHeader(Constants.HEADER_ORIGIN))) {
+		if (!force && isNotBlank(theServletRequest.getHeader(Constants.HEADER_CORS_ORIGIN))) {
 			return true;
 		}
 
@@ -992,7 +993,7 @@ public class ResponseHighlighterInterceptor {
 	 *    <ul>
 	 *       <li>if the resource is a DomainResource, the narrative in Resource.text will be rendered.</li>
 	 *       <li>If the resource is a document bundle, the narrative in the document Composition will be rendered.</li>
-	 *       <li>If the resource is a Parameters resource, and the first parameter has the name "Narrative" and a value consisting of a string starting with "<div", that will be rendered.</li>
+	 *       <li>If the resource is a Parameters resource, and the first parameter has the name "Narrative" and a value consisting of a string starting with "{@code <div}", that will be rendered.</li>
 	 *    </ul>
 	 * </p>
 	 * <p>
@@ -1023,7 +1024,7 @@ public class ResponseHighlighterInterceptor {
 	 *    <ul>
 	 *       <li>if the resource is a DomainResource, the narrative in Resource.text will be rendered.</li>
 	 *       <li>If the resource is a document bundle, the narrative in the document Composition will be rendered.</li>
-	 *       <li>If the resource is a Parameters resource, and the first parameter has the name "Narrative" and a value consisting of a string starting with "<div", that will be rendered.</li>
+	 *       <li>If the resource is a Parameters resource, and the first parameter has the name "Narrative" and a value consisting of a string starting with "{@code <div}", that will be rendered.</li>
 	 *    </ul>
 	 * </p>
 	 * <p>

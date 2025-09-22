@@ -228,11 +228,12 @@ public class XmlParserDstu2Test {
 		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, string);
 
 		DiagnosticReport resource = (DiagnosticReport) bundle.getEntry().get(0).getResource();
+		assertEquals("#2", resource.getResult().get(1).getReference().getValue());
 		Observation obs = (Observation) resource.getResult().get(1).getResource();
-		assertEquals("#2", obs.getId().getValue());
+		assertEquals("2", obs.getId().getValue());
 		ResourceReferenceDt performerFirstRep = obs.getPerformer().get(0);
 		Practitioner performer = (Practitioner) performerFirstRep.getResource();
-		assertEquals("#3", performer.getId().getValue());
+		assertEquals("3", performer.getId().getValue());
 	}
 
 	@Test
@@ -493,79 +494,6 @@ public class XmlParserDstu2Test {
 		assertEquals("Organization/orgid", org.getId().getValue());
 		assertEquals("Organization/orgid", pt.getManagingOrganization().getReference().getValue());
 		assertThat(pt.getManagingOrganization().getResource()).isSameAs(org);
-	}
-
-	@Test
-	public void testEncodeAndParseContained() {
-		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
-
-		// Create an organization, note that the organization does not have an ID
-		Organization org = new Organization();
-		org.getNameElement().setValue("Contained Test Organization");
-
-		// Create a patient
-		Patient patient = new Patient();
-		patient.setId("Patient/1333");
-		patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
-
-		// Put the organization as a reference in the patient resource
-		patient.getManagingOrganization().setResource(org);
-
-		String encoded = xmlParser.encodeResourceToString(patient);
-		ourLog.info(encoded);
-		String organizationUuid = UuidUtils.findFirstUUID(encoded);
-		assertNotNull(organizationUuid);
-		assertThat(encoded).contains("<contained>");
-		assertThat(encoded).contains("<reference value=\"#" + organizationUuid + "\"/>");
-
-		// Create a bundle with just the patient resource
-		ca.uhn.fhir.model.dstu2.resource.Bundle b = new ca.uhn.fhir.model.dstu2.resource.Bundle();
-		b.addEntry().setResource(patient);
-
-		// Encode the bundle
-		encoded = xmlParser.encodeResourceToString(b);
-		ourLog.info(encoded);
-		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<id value=\"" + organizationUuid + "\"/>", "</contained>"));
-		assertThat(encoded).contains("<reference value=\"#" + organizationUuid + "\"/>");
-		assertThat(encoded).containsSubsequence(Arrays.asList("<entry>", "</entry>"));
-		assertThat(encoded).doesNotContainPattern("(?s)<entry>.*</entry>.*<entry>");
-
-		// Re-parse the bundle
-		patient = (Patient) xmlParser.parseResource(xmlParser.encodeResourceToString(patient));
-		assertEquals("#" + organizationUuid, patient.getManagingOrganization().getReference().getValue());
-
-		assertNotNull(patient.getManagingOrganization().getResource());
-		org = (Organization) patient.getManagingOrganization().getResource();
-		assertEquals("#" + organizationUuid, org.getId().getValue());
-		assertEquals("Contained Test Organization", org.getName());
-
-		// And re-encode a second time
-		encoded = xmlParser.encodeResourceToString(patient);
-		ourLog.info(encoded);
-		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\""
-			+ organizationUuid + "\"/>", "</Organization", "</contained>", "<reference value=\"#" + organizationUuid + "\"/>"));
-		assertThat(encoded).doesNotContainPattern("(?s)<contained>.*<Org.*<contained>");
-		assertThat(encoded).contains("<reference value=\"#" + organizationUuid + "\"/>");
-
-		// And re-encode once more, with the references cleared
-		patient.getContained().getContainedResources().clear();
-		patient.getManagingOrganization().setReference((String) null);
-		encoded = xmlParser.encodeResourceToString(patient);
-		ourLog.info(encoded);
-		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"" + organizationUuid +
-			"\"/>", "</Organization", "</contained>", "<reference value=\"#" + organizationUuid + "\"/>"));
-		assertThat(encoded).doesNotContainPattern("(?s)<contained>.*<Org.*<contained>");
-		assertThat(encoded).contains("<reference value=\"#" + organizationUuid + "\"/>");
-
-		// And re-encode once more, with the references cleared and a manually set local ID
-		patient.getContained().getContainedResources().clear();
-		patient.getManagingOrganization().setReference((String) null);
-		patient.getManagingOrganization().getResource().setId(("#333"));
-		encoded = xmlParser.encodeResourceToString(patient);
-		ourLog.info(encoded);
-		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"333\"/>", "</Organization", "</contained>", "<reference value=\"#333\"/>"));
-		assertThat(encoded).doesNotContainPattern("(?s)<contained>.*<Org.*<contained>");
-
 	}
 
 	@Test
@@ -2523,7 +2451,6 @@ public class XmlParserDstu2Test {
 			+ "<entry><fullUrl value=\"http://localhost:58402/fhir/context/Patient/1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1\"/><meta><versionId value=\"1\"/><lastUpdated value=\"2015-09-11T23:35:42.295-04:00\"/></meta><name><family value=\"testHistoryWithDeletedResource\"/></name></Patient></resource></entry>"
 			+ "</Bundle>\n";
 		//@formatter:on
-
 		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, input);
 		assertEquals("http://localhost:58402/fhir/context/Patient/1/_history/3", bundle.getEntry().get(0).getResource().getId().getValue());
 		assertEquals("http://localhost:58402/fhir/context/Patient/1/_history/2", bundle.getEntry().get(1).getResource().getId().getValue());
@@ -2951,12 +2878,6 @@ public class XmlParserDstu2Test {
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	public static void main(String[] args) {
-		IGenericClient c = ourCtx.newRestfulGenericClient("http://fhir-dev.healthintersections.com.au/open");
-		// c.registerInterceptor(new LoggingInterceptor(true));
-		c.read().resource("Patient").withId("324").execute();
 	}
 
 	public static void compareXml(String content, String reEncoded) {

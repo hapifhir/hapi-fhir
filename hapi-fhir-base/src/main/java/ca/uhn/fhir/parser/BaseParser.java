@@ -50,6 +50,7 @@ import ca.uhn.fhir.util.ResourceUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import jakarta.annotation.Nullable;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -182,6 +183,19 @@ public abstract class BaseParser implements IParser {
 				});
 	}
 
+	/**
+	 * We add the reference to the input resources to ensure it doesn't get
+	 * overwritten if it wasn't there.
+	 * The resource is being mutated anyways, so this is fine.
+	 *
+	 * We need to maintain the reference as an internal reference (ie,
+	 * preceded by an #) because otherwise later transactions cannot
+	 * process the resource (since the reference will not be set).
+	 */
+	private void setReference(IBaseReference theReference, String theText) {
+		theReference.setReference(theText);
+	}
+
 	private String determineReferenceText(
 			IBaseReference theRef,
 			CompositeChildElement theCompositeChildElement,
@@ -192,12 +206,19 @@ public abstract class BaseParser implements IParser {
 			String reference = ref.getValue();
 			if (theRef.getResource() != null) {
 				IIdType containedId = theContext.getContainedResources().getResourceId(theRef.getResource());
+				IIdType previouslyContainedId =
+						theContext.getContainedResources().getPreviouslyContainedResourceId(theRef.getResource());
 				if (containedId != null && !containedId.isEmpty()) {
 					if (containedId.isLocal()) {
 						reference = containedId.getValue();
 					} else {
 						reference = "#" + containedId.getValue();
+						setReference(theRef, reference);
 					}
+				} else if (previouslyContainedId != null) {
+					reference = "#" + previouslyContainedId.getValue();
+					theContext.getContainedResources().addContained(previouslyContainedId, theRef.getResource());
+					setReference(theRef, reference);
 				} else {
 					IIdType refId = theRef.getResource().getIdElement();
 					if (refId != null) {
@@ -221,6 +242,13 @@ public abstract class BaseParser implements IParser {
 				}
 			}
 			return reference;
+		} else {
+			if (!isValidInternalReference(theContext, ref)) {
+				myErrorHandler.invalidInternalReference(
+						ParseLocation.fromElementName(
+								theCompositeChildElement.getDef().getElementName()),
+						ref.getValue());
+			}
 		}
 		if (!ref.hasResourceType() && !ref.isLocal() && theRef.getResource() != null) {
 			ref = ref.withResourceType(
@@ -236,6 +264,13 @@ public abstract class BaseParser implements IParser {
 			return ref.toVersionless().getValue();
 		}
 		return ref.getValue();
+	}
+
+	private boolean isValidInternalReference(EncodeContext theContext, IIdType ref) {
+		// a # is a reference to the container resource.
+		return !ref.isLocal()
+				|| ref.getValue().equals("#")
+				|| theContext.getContainedResources().referenceMatchesAContainedResource(ref);
 	}
 
 	protected abstract void doEncodeResourceToWriter(
@@ -293,6 +328,20 @@ public abstract class BaseParser implements IParser {
 					new EncodeContext(this, myContext.getParserOptions(), new FhirTerser.ContainedResources());
 			encodeToWriter(theElement, theWriter, encodeContext);
 		}
+	}
+
+	@Override
+	public void parseInto(Reader theSource, IBase theTarget) throws IOException {
+		if (theTarget instanceof IPrimitiveType) {
+			((IPrimitiveType<?>) theTarget).setValueAsString(IOUtils.toString(theSource));
+		} else {
+			doParseIntoComplexStructure(theSource, theTarget);
+		}
+	}
+
+	protected void doParseIntoComplexStructure(Reader theSource, IBase theTarget) {
+		throw new InternalErrorException(
+				Msg.code(2633) + "This " + getEncoding() + " parser does not support parsing non-resource values");
 	}
 
 	protected void encodeResourceToWriter(IBaseResource theResource, Writer theWriter, EncodeContext theEncodeContext)
@@ -819,6 +868,7 @@ public abstract class BaseParser implements IParser {
 							myContext.getElementDefinition(nextRef.getClass()).newInstance();
 					myContext.newTerser().cloneInto(nextRef, newRef, true);
 					newRef.setReference(refText);
+
 					retVal.set(i, newRef);
 				}
 			}
@@ -1024,7 +1074,9 @@ public abstract class BaseParser implements IParser {
 			}
 		}
 
-		theContext.setContainedResources(getContext().newTerser().containResources(theResource));
+		FhirTerser.ContainedResources containedResources =
+				getContext().newTerser().containResources(theResource, theContext.getContainedResources(), false);
+		theContext.setContainedResources(containedResources);
 	}
 
 	static class ChildNameAndDef {

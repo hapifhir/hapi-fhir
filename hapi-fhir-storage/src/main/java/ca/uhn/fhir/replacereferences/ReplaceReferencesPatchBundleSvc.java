@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import jakarta.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -85,8 +86,12 @@ public class ReplaceReferencesPatchBundleSvc {
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(referencingResourceId.getResourceType());
 			IBaseResource resource = dao.read(referencingResourceId, theRequestDetails);
 			Parameters patchParams = buildPatchParams(theReplaceReferencesRequest, resource);
-			IIdType resourceId = resource.getIdElement();
-			bundleBuilder.addTransactionFhirPatchEntry(resourceId, patchParams);
+			// the patchParams could be empty if the resource contains only versioned references to the source,
+			// no need to add patch entry in that case
+			if (patchParams.hasParameter()) {
+				IIdType resourceId = resource.getIdElement();
+				bundleBuilder.addTransactionFhirPatchEntry(resourceId, patchParams);
+			}
 		});
 		return bundleBuilder.getBundleTyped();
 	}
@@ -107,11 +112,14 @@ public class ReplaceReferencesPatchBundleSvc {
 	}
 
 	private static boolean matches(ResourceReferenceInfo refInfo, IIdType theSourceId) {
-		return refInfo.getResourceReference()
-				.getReferenceElement()
-				.toUnqualified()
-				.getValueAsString()
-				.equals(theSourceId.getValueAsString());
+
+		IBaseReference iBaseRef = refInfo.getResourceReference();
+		if (iBaseRef == null || (iBaseRef instanceof Reference ref && !ref.hasReferenceElement())) {
+			// the reference doesn't have a reference element, it is probably just a logical reference (using an
+			// identifier). so this is not a match.
+			return false;
+		}
+		return iBaseRef.getReferenceElement().toUnqualified().getValueAsString().equals(theSourceId.getValueAsString());
 	}
 
 	private String getFhirPathForPatch(IBaseResource theReferencingResource, ResourceReferenceInfo theRefInfo) {

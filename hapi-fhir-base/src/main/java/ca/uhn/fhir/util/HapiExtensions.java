@@ -82,6 +82,12 @@ public class HapiExtensions {
 			"http://hapifhir.io/fhir/StructureDefinition/externalized-binary-id";
 
 	/**
+	 * Extension ID for the SHA-256 hash of external binary content
+	 */
+	public static final String EXT_EXTERNALIZED_BINARY_HASH_SHA_256 =
+			"http://hapifhir.io/fhir/StructureDefinition/externalized-binary-hash-sha256";
+
+	/**
 	 * For subscription, deliver a bundle containing a search result instead of just a single resource
 	 */
 	public static final String EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA =
@@ -195,6 +201,13 @@ public class HapiExtensions {
 			"http://hl7.org/fhir/tools/CustomTargetResource";
 
 	/**
+	 * When an OperationOutcome returned by the JPA server includes a declaration that a placeholder
+	 * reference was automatically created, this extension indicates the ID of the placeholder.
+	 */
+	public static final String EXTENSION_PLACEHOLDER_ID =
+			"http://hapifhir.io/fhir/StructureDefinition/oo-placeholder-id";
+
+	/**
 	 * When a resource is replacing another resource, this extension can be added
 	 * to include a reference to the resource that is being replaced.
 	 */
@@ -206,6 +219,14 @@ public class HapiExtensions {
 	 */
 	public static final String EXTENSION_REPLACED_BY = "http://hapifhir.io/fhir/StructureDefinition/replaced-by";
 
+	/**
+	 * This extension is to specify the partition IDs for a request entry in a transaction bundle.
+	 * This allows overriding partition id for a request entry in a transaction bundle so that a single transaction can
+	 * have entries destined for different storage partitions. The expected value is a comma-separated string
+	 * of partition IDs.
+	 */
+	public static final String EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS =
+			"http://hapifhir.io/fhir/ns/StructureDefinition/request-partition-ids";
 	/**
 	 * Non instantiable
 	 */

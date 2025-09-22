@@ -43,7 +43,9 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.searchparam.util.RuntimeSearchParamHelper;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -110,7 +112,7 @@ public class SearchParamExtractorService {
 	}
 
 	/**
-	 * This method is responsible for scanning a resource for all of the search parameter instances.
+	 * This method is responsible for scanning a resource for all the search parameter instances.
 	 * I.e. for all search parameters defined for
 	 * a given resource type, it extracts the associated indexes and populates
 	 * {@literal theParams}.
@@ -125,12 +127,25 @@ public class SearchParamExtractorService {
 			TransactionDetails theTransactionDetails,
 			boolean theFailOnInvalidReference,
 			@Nonnull ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
+
+		/*
+		 * The FHIRPath evaluator doesn't know how to handle reference which are
+		 * stored by value in Reference#setResource(IBaseResource) as opposed to being
+		 * stored by reference in Reference#setReference(String). It also doesn't know
+		 * how to handle contained resources where the ID contains a hash mark (which
+		 * was the default in HAPI FHIR until 8.2.0 but became disallowed by the
+		 * FHIRPath evaluator in that version. So prior to indexing we will now always
+		 * clean references up.
+		 */
+		myContext.newTerser().containResources(theResource, null, true);
+
 		// All search parameter types except Reference
 		ResourceIndexedSearchParams normalParams = ResourceIndexedSearchParams.withSets();
 		getExtractionUtil()
 				.extractSearchIndexParameters(theRequestDetails, normalParams, theResource, theSearchParamFilter);
 		mergeParams(normalParams, theNewParams);
 
+		// Reference search parameters
 		boolean indexOnContainedResources = myStorageSettings.isIndexOnContainedResources();
 		ISearchParamExtractor.SearchParamSet<PathAndRef> indexedReferences =
 				mySearchParamExtractor.extractResourceLinks(theResource, indexOnContainedResources);
@@ -231,7 +246,17 @@ public class SearchParamExtractorService {
 
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(
 				entity.getResourceType(), ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
-		activeSearchParams.getReferenceSearchParamNames().forEach(key -> retval.putIfAbsent(key, Boolean.FALSE));
+		for (RuntimeSearchParam nextParam : activeSearchParams.values()) {
+			if (nextParam.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
+				continue;
+			}
+			if (RuntimeSearchParamHelper.isSpeciallyHandledSearchParameter(nextParam, myStorageSettings)) {
+				continue;
+			}
+
+			retval.putIfAbsent(nextParam.getName(), Boolean.FALSE);
+		}
+
 		return retval;
 	}
 
@@ -462,7 +487,13 @@ public class SearchParamExtractorService {
 
 	private IBaseResource findContainedResource(Collection<IBaseResource> resources, IBaseReference reference) {
 		for (IBaseResource resource : resources) {
-			if (resource.getIdElement().equals(reference.getReferenceElement())) return resource;
+			String referenceString = reference.getReferenceElement().getValue();
+			if (referenceString != null && referenceString.length() > 1) {
+				referenceString = referenceString.substring(1);
+				if (resource.getIdElement().getValue().equals(referenceString)) {
+					return resource;
+				}
+			}
 		}
 		return null;
 	}
@@ -558,7 +589,7 @@ public class SearchParamExtractorService {
 	}
 
 	private void extractResourceLinks(
-			@Nonnull RequestPartitionId theRequestPartitionId,
+			RequestPartitionId theRequestPartitionId,
 			ResourceIndexedSearchParams theExistingParams,
 			ResourceIndexedSearchParams theNewParams,
 			ResourceTable theEntity,
@@ -582,12 +613,7 @@ public class SearchParamExtractorService {
 			nextId = nextReference.getResource().getIdElement();
 		}
 
-		if (myContext.getParserOptions().isStripVersionsFromReferences()
-				&& !myContext
-						.getParserOptions()
-						.getDontStripVersionsFromReferencesAtPaths()
-						.contains(thePathAndRef.getPath())
-				&& nextId.hasVersionIdPart()) {
+		if (nextId.hasVersionIdPart() && shouldStripVersionFromReferenceAtPath(thePathAndRef.getPath())) {
 			nextId = nextId.toVersionless();
 		}
 
@@ -680,6 +706,12 @@ public class SearchParamExtractorService {
 		}
 
 		IIdType referenceElement = thePathAndRef.getRef().getReferenceElement();
+		if (isBlank(referenceElement.getValue())) {
+			// it's an embedded element maybe;
+			// we need a valid referenceElement, becuase we
+			// resolve the resource by this value (and if we use "null", we can't resolve multiple values)
+			referenceElement = thePathAndRef.getRef().getResource().getIdElement();
+		}
 		JpaPid resolvedTargetId = (JpaPid) theTransactionDetails.getResolvedResourceId(referenceElement);
 		ResourceLink resourceLink;
 
@@ -903,7 +935,7 @@ public class SearchParamExtractorService {
 
 	@SuppressWarnings("unchecked")
 	private ResourceLink resolveTargetAndCreateResourceLinkOrReturnNull(
-			@Nonnull RequestPartitionId theRequestPartitionId,
+			RequestPartitionId theRequestPartitionId,
 			String theSourceResourceName,
 			PathAndRef thePathAndRef,
 			ResourceTable theEntity,
@@ -1051,6 +1083,30 @@ public class SearchParamExtractorService {
 				mySearchParamExtractor.extractSearchParamComboNonUnique(resourceType, theParams);
 		theParams.myComboTokenNonUnique.addAll(comboNonUniques);
 		populateResourceTableForComboParams(theParams.myComboTokenNonUnique, theEntity);
+	}
+
+	private boolean shouldStripVersionFromReferenceAtPath(String theSearchParamPath) {
+
+		if (!myContext.getParserOptions().isStripVersionsFromReferences()) {
+			// all references allowed to have versions globally, so don't strip
+			return false;
+		}
+
+		// global setting is to strip versions, see if there's any exceptions configured for specific paths
+		Set<String> pathsAllowedToHaveVersionedRefs =
+				myContext.getParserOptions().getDontStripVersionsFromReferencesAtPaths();
+
+		if (pathsAllowedToHaveVersionedRefs.contains(theSearchParamPath)) {
+			// path exactly matches
+			return false;
+		}
+
+		// there are some search parameters using a where clause to index the element for a specific resource type, such
+		// as "Provenance.target.where(resolve() is Patient)". We insert these in the ResourceLink table as well.
+		// Such entries in the ResourceLink table should remain versioned if the element is allowed to be versioned.
+		return pathsAllowedToHaveVersionedRefs.stream()
+				.noneMatch(pathToKeepVersioned -> theSearchParamPath.matches(
+						pathToKeepVersioned + "\\.where\\(resolve\\(\\) is [A-Z][a-zA-Z]*\\)"));
 	}
 
 	/**

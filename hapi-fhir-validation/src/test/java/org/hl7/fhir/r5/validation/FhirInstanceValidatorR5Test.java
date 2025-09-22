@@ -17,6 +17,7 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r5.model.Base64BinaryType;
 import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.Communication;
 import org.hl7.fhir.r5.model.ContactPoint;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.DocumentReference;
@@ -344,20 +345,16 @@ public class FhirInstanceValidatorR5Test extends BaseTest {
 
 		when(policyAdvisor.policyForElement(any(), any(), any(), any(), any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.ElementValidationAction.class));
 		when(policyAdvisor.policyForCodedContent(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.CodedContentValidationAction.class));
-		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
+		when(policyAdvisor.policyForReference(any(), any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 		myVal.validateWithResult(input);
 
-		//verify(resourceFetcher, times(13)).resolveURL(any(), any(), anyString(), anyString(), anyString());
-
 		/* The number of policyForReference invocations is subject to changes in org.hl7.fhir.core InstanceValidator.
 		The minimum and maximum invocations are based on this test's history and deviations should be investigated.
 		*/
-		verify(policyAdvisor, atLeast(4)).policyForReference(any(), any(), anyString(), anyString());
-		verify(policyAdvisor, atMost(8)).policyForReference(any(), any(), anyString(), anyString());
-
-		//verify(resourceFetcher, times(3)).fetch(any(), any(), anyString());
+		verify(policyAdvisor, atLeast(4)).policyForReference(any(), any(), anyString(), anyString(), any());
+		verify(policyAdvisor, atMost(8)).policyForReference(any(), any(), anyString(), anyString(), any());
 	}
 
 	@Test
@@ -380,6 +377,21 @@ public class FhirInstanceValidatorR5Test extends BaseTest {
 			"}";
 
 		ValidationResult output = myVal.validateWithResult(input);
+		assertThat(output.getMessages().size()).as(output.toString()).isEqualTo(0);
+	}
+
+	/**
+	 * See #6316
+	 */
+	@Test
+	public void testValidateConditionalReferenceWithChain() {
+
+		Communication resource = new Communication();
+		resource.getText().setDiv(new XhtmlNode().setValue("<div>HELLO</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+		resource.setStatus(Enumerations.EventStatus.COMPLETED);
+		resource.getSender().setReference("PractitionerRole?practitioner.identifier=myValue");
+
+		ValidationResult output = myVal.validateWithResult(resource);
 		assertThat(output.getMessages().size()).as(output.toString()).isEqualTo(0);
 	}
 
@@ -891,10 +903,15 @@ public class FhirInstanceValidatorR5Test extends BaseTest {
 
 		ValidationResult output = myVal.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertThat(all).hasSize(1);
-		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
-		assertThat(all.get(0).getMessage()).contains("None of the codings provided are in the value set 'Identifier Type Codes'");
+
+		assertThat(all).hasSize(2);
+
+		assertThat(all.get(0).getMessage()).contains("CodeSystem is unknown and can't be validated: http://example.com/foo/bar for 'http://example.com/foo/bar#bar'");
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
+
+		assertEquals("Patient.identifier[0].type", all.get(1).getLocationString());
+		assertThat(all.get(1).getMessage()).contains("None of the codings provided are in the value set 'Identifier Type Codes'");
+		assertEquals(ResultSeverityEnum.WARNING, all.get(1).getSeverity());
 
 	}
 

@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoStructureDefinition;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSubscription;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
@@ -118,12 +119,16 @@ import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import jakarta.persistence.EntityManager;
+
+import java.util.Objects;
+
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.AuditEvent;
+import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.BodyStructure;
 import org.hl7.fhir.r4.model.Bundle;
@@ -153,6 +158,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.ImmunizationRecommendation;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Media;
@@ -195,6 +201,7 @@ import org.hl7.fhir.r5.utils.validation.constants.BindingKind;
 import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPolicy;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.hl7.fhir.validation.instance.advisor.BasePolicyAdvisorForFullValidation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -253,7 +260,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected IBatch2JobInstanceRepository myJobInstanceRepository;
 	@Autowired
-	private IBatch2WorkChunkRepository myWorkChunkRepository;
+	protected IBatch2WorkChunkRepository myWorkChunkRepository;
 
 	@Autowired
 	protected ISearchIncludeDao mySearchIncludeEntityDao;
@@ -487,6 +494,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Qualifier("mySubscriptionDaoR4")
 	protected IFhirResourceDaoSubscription<Subscription> mySubscriptionDao;
 	@Autowired
+	@Qualifier("myBasicDaoR4")
+	protected IFhirResourceDao<Basic> myBasicDao;
+	@Autowired
 	@Qualifier("mySubstanceDaoR4")
 	protected IFhirResourceDao<Substance> mySubstanceDao;
 	@Autowired
@@ -517,6 +527,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
 	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
+	@Autowired
+	protected IFhirResourceDao<Library> myLibraryDao;
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
 	@Autowired
@@ -562,6 +574,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected IJobCoordinator myJobCoordinator;
 
+	private IValidationPolicyAdvisor policyAdvisor;
 	@RegisterExtension
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
 
@@ -583,6 +596,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		myStorageSettings.setDeleteEnabled(new JpaStorageSettings().isDeleteEnabled());
 		myStorageSettings.setMatchUrlCacheEnabled(new JpaStorageSettings().isMatchUrlCacheEnabled());
 		myStorageSettings.setStoreMetaSourceInformation(new JpaStorageSettings().getStoreMetaSourceInformation());
+		myStorageSettings.setUpdateWithHistoryRewriteEnabled(new JpaStorageSettings().isUpdateWithHistoryRewriteEnabled());
 
 		myPagingProvider.setDefaultPageSize(BasePagingProvider.DEFAULT_DEFAULT_PAGE_SIZE);
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
@@ -682,14 +696,28 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
+		return doCreateResourceAndReturnOutcome(theResource).getId().toUnqualifiedVersionless();
+	}
+
+	public DaoMethodOutcome doCreateResourceAndReturnOutcome(IBaseResource theResource) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
-		return dao.create(theResource, mySrd).getId().toUnqualifiedVersionless();
+		return dao.create(theResource, mySrd);
 	}
 
 	@Override
 	public IIdType doUpdateResource(IBaseResource theResource) {
+		return doUpdateResourceAndReturnOutcome(theResource).getId().toUnqualifiedVersionless();
+	}
+
+	public DaoMethodOutcome doUpdateResourceAndReturnOutcome(IBaseResource theResource) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
-		return dao.update(theResource, mySrd).getId().toUnqualifiedVersionless();
+		return dao.update(theResource, mySrd);
+	}
+
+	@Override
+	public void doDeleteResource(IIdType theIIdType){
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theIIdType.getResourceType());
+		dao.delete(theIIdType);
 	}
 
 	protected String encode(IBaseResource theResource) {
@@ -1018,11 +1046,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	public class ValidationPolicyAdvisor implements IValidationPolicyAdvisor {
 		@Override
-		public ReferenceValidationPolicy policyForReference(IResourceValidator validator, Object appContext, String path, String url) {
-			return ReferenceValidationPolicy.CHECK_VALID;
-		}
-
-		@Override
 		public EnumSet<ResourceValidationAction> policyForResource(IResourceValidator validator, Object appContext,
 																   org.hl7.fhir.r5.model.StructureDefinition type, String path) {
 			return EnumSet.allOf(ResourceValidationAction.class);
@@ -1047,6 +1070,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		}
 
 		@Override
+		public SpecialValidationAction policyForSpecialValidation(IResourceValidator validator, Object appContext, SpecialValidationRule rule, String stackPath, Element resource, Element element) {
+			return null;
+		}
+
+		@Override
 		public List<org.hl7.fhir.r5.model.StructureDefinition> getImpliedProfilesForResource(IResourceValidator validator, Object appContext, String stackPath, ElementDefinition definition, org.hl7.fhir.r5.model.StructureDefinition structure, Element resource, boolean valid, IMessagingServices msgServices, List<ValidationMessage> messages) {
 			return List.of();
 		}
@@ -1067,6 +1095,25 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		@Override
 		public boolean isSuppressMessageId(String path, String messageId) {
 			return false;
+		}
+
+		@Override
+		public ReferenceValidationPolicy policyForReference(IResourceValidator validator, Object appContext, String path, String url, ReferenceDestinationType destinationType) {
+			return ReferenceValidationPolicy.CHECK_VALID;
+		}
+
+		@Override
+		public IValidationPolicyAdvisor getPolicyAdvisor() {
+		  if (Objects.isNull(policyAdvisor)) {
+			  return new BasePolicyAdvisorForFullValidation(getReferencePolicy());
+		  }
+
+		  return policyAdvisor;
+	  }
+
+		@Override
+		public IValidationPolicyAdvisor setPolicyAdvisor(IValidationPolicyAdvisor policyAdvisor) {
+			return this;
 		}
 
 		@Override

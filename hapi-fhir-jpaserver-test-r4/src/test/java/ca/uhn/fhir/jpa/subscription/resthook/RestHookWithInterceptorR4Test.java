@@ -1,8 +1,5 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
@@ -14,7 +11,7 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
-import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookListener;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.apache.commons.lang3.Validate;
@@ -43,6 +40,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 
@@ -65,15 +65,15 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	Logger loggerMock;
 
 	@Autowired
-	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
+    StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookListener;
 	@Autowired
 	private IInterceptorService myInterceptorRegistry;
 	private MyTestInterceptor myTestInterceptor = new MyTestInterceptor();
 
 	@AfterEach
-	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+	public void cleanupStoppableSubscriptionDeliveringRestHookListener() {
+		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(null);
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 	}
 
 	@AfterEach

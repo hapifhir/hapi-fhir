@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.XmlUtil;
 import ca.uhn.fhir.validation.IValidationContext;
+import ca.uhn.fhir.validation.ValidationOptions;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -15,15 +16,18 @@ import org.apache.commons.io.input.ReaderInputStream;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.elementmodel.Manager;
-import org.hl7.fhir.r5.fhirpath.FHIRPathEngine;
+import org.hl7.fhir.r5.fhirpath.IHostApplicationServices;
 import org.hl7.fhir.r5.model.StructureDefinition;
-import org.hl7.fhir.r5.utils.XVerExtensionManager;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
+import org.hl7.fhir.r5.utils.validation.ValidatorSession;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.hl7.fhir.r5.utils.validation.constants.IdStatus;
+import org.hl7.fhir.r5.utils.xver.XVerExtensionManager;
+import org.hl7.fhir.r5.utils.xver.XVerExtensionManagerOld;
 import org.hl7.fhir.utilities.i18n.I18nConstants;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.hl7.fhir.validation.ValidatorSettings;
 import org.hl7.fhir.validation.instance.InstanceValidator;
 import org.slf4j.Logger;
 import org.w3c.dom.Document;
@@ -52,6 +56,7 @@ class ValidatorWrapper {
 	private Collection<? extends String> myExtensionDomains;
 	private IValidatorResourceFetcher myValidatorResourceFetcher;
 	private IValidationPolicyAdvisor myValidationPolicyAdvisor;
+	private boolean myAllowExamples;
 
 	/**
 	 * Constructor
@@ -66,6 +71,11 @@ class ValidatorWrapper {
 
 	public ValidatorWrapper setAssumeValidRestReferences(boolean assumeValidRestReferences) {
 		this.myAssumeValidRestReferences = assumeValidRestReferences;
+		return this;
+	}
+
+	public ValidatorWrapper setAllowExamples(boolean theAllowExamples) {
+		myAllowExamples = theAllowExamples;
 		return this;
 	}
 
@@ -117,10 +127,11 @@ class ValidatorWrapper {
 	public List<ValidationMessage> validate(
 			IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
 		InstanceValidator v;
-		FHIRPathEngine.IEvaluationContext evaluationCtx = new FhirInstanceValidator.NullEvaluationContext();
-		XVerExtensionManager xverManager = new XVerExtensionManager(theWorkerContext);
+		IHostApplicationServices evaluationCtx = new FhirInstanceValidator.NullEvaluationContext();
+		XVerExtensionManager xverManager = new XVerExtensionManagerOld(theWorkerContext);
 		try {
-			v = new InstanceValidator(theWorkerContext, evaluationCtx, xverManager);
+			v = new InstanceValidator(
+					theWorkerContext, evaluationCtx, xverManager, new ValidatorSession(), new ValidatorSettings());
 		} catch (Exception e) {
 			throw new ConfigurationException(Msg.code(648) + e.getMessage(), e);
 		}
@@ -138,13 +149,15 @@ class ValidatorWrapper {
 		v.setPolicyAdvisor(myValidationPolicyAdvisor);
 		v.setNoExtensibleWarnings(myNoExtensibleWarnings);
 		v.setNoBindingMsgSuppressed(myNoBindingMsgSuppressed);
+		v.setAllowExamples(myAllowExamples);
 		v.setAllowXsiLocation(true);
 
 		List<ValidationMessage> messages = new ArrayList<>();
 
 		List<StructureDefinition> profiles = new ArrayList<>();
+		List<ValidationMessage> invalidProfileValidationMessages = new ArrayList<>();
 		for (String nextProfileUrl : theValidationContext.getOptions().getProfiles()) {
-			fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, messages);
+			fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, invalidProfileValidationMessages);
 		}
 
 		String input = theValidationContext.getResourceAsString();
@@ -167,7 +180,7 @@ class ValidatorWrapper {
 			// Determine if meta/profiles are present...
 			ArrayList<String> profileUrls = determineIfProfilesSpecified(document);
 			for (String nextProfileUrl : profileUrls) {
-				fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, messages);
+				fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, invalidProfileValidationMessages);
 			}
 
 			Manager.FhirFormat format = Manager.FhirFormat.XML;
@@ -185,15 +198,21 @@ class ValidatorWrapper {
 					JsonArray profilesArray = profileElement.getAsJsonArray();
 					for (JsonElement element : profilesArray) {
 						String nextProfileUrl = element.getAsString();
-						fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, messages);
+						fetchAndAddProfile(
+								theWorkerContext, profiles, nextProfileUrl, invalidProfileValidationMessages);
 					}
 				}
 			}
 
 			Manager.FhirFormat format = Manager.FhirFormat.JSON;
-			v.validate(null, messages, inputStream, format, profiles);
+			ValidationOptions options = theValidationContext.getOptions();
+			v.validate(options.getAppContext(), messages, inputStream, format, profiles);
 		} else {
 			throw new IllegalArgumentException(Msg.code(649) + "Unknown encoding: " + encoding);
+		}
+
+		if (profiles.isEmpty() && !invalidProfileValidationMessages.isEmpty()) {
+			messages.addAll(invalidProfileValidationMessages);
 		}
 
 		// TODO: are these still needed?
@@ -234,11 +253,17 @@ class ValidatorWrapper {
 			IWorkerContext theWorkerContext,
 			List<StructureDefinition> theProfileStructureDefinitions,
 			String theUrl,
-			List<ValidationMessage> theMessages) {
+			List<ValidationMessage> theValidationMessages) {
 		try {
 			StructureDefinition structureDefinition = theWorkerContext.fetchResource(StructureDefinition.class, theUrl);
 			if (structureDefinition != null) {
 				theProfileStructureDefinitions.add(structureDefinition);
+			} else {
+				ValidationMessage m = new ValidationMessage();
+				m.setMessageId(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN);
+				m.setLevel(ValidationMessage.IssueSeverity.ERROR);
+				m.setMessage("Invalid profile. Failed to retrieve profile with url=" + theUrl);
+				theValidationMessages.add(m);
 			}
 		} catch (FHIRException e) {
 			ourLog.debug("Failed to load profile: {}", theUrl);

@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -37,6 +38,7 @@ import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,6 +57,8 @@ public class BalpAuditCaptureInterceptor {
 	private final IBalpAuditEventSink myAuditEventSink;
 	private final IBalpAuditContextServices myContextServices;
 	private Set<String> myAdditionalPatientCompartmentParamNames;
+
+	private Set<String> myOmittedSPNamesInPatientCompartment;
 
 	/**
 	 * Constructor
@@ -108,6 +112,24 @@ public class BalpAuditCaptureInterceptor {
 
 	public void setAdditionalPatientCompartmentParamNames(Set<String> theAdditionalPatientCompartmentParamNames) {
 		myAdditionalPatientCompartmentParamNames = theAdditionalPatientCompartmentParamNames;
+	}
+
+	public void setOmittedSPNamesInPatientCompartment(Set<String> theOmittedSPNamesInPatientCompartment) {
+		myOmittedSPNamesInPatientCompartment = theOmittedSPNamesInPatientCompartment;
+	}
+
+	public Set<String> getAdditionalPatientCompartmentSPNames() {
+		if (myAdditionalPatientCompartmentParamNames == null) {
+			myAdditionalPatientCompartmentParamNames = new HashSet<>();
+		}
+		return myAdditionalPatientCompartmentParamNames;
+	}
+
+	public Set<String> getOmittedPatientCompartmentSPNames() {
+		if (myOmittedSPNamesInPatientCompartment == null) {
+			myOmittedSPNamesInPatientCompartment = new HashSet<>();
+		}
+		return myOmittedSPNamesInPatientCompartment;
 	}
 
 	/**
@@ -229,7 +251,12 @@ public class BalpAuditCaptureInterceptor {
 					FhirTerser terser = fhirContext.newTerser();
 					terser
 							.getCompartmentOwnersForResource(
-									"Patient", resource, myAdditionalPatientCompartmentParamNames)
+									"Patient",
+									resource,
+									CompartmentSearchParameterModifications.fromAdditionalAndOmittedSPNames(
+											fhirContext.getResourceType(resource),
+											getAdditionalPatientCompartmentSPNames(),
+											getOmittedPatientCompartmentSPNames()))
 							.stream()
 							.map(t -> myContextServices.massageResourceIdForStorage(theRequestDetails, resource, t))
 							.forEach(patientIds::add);

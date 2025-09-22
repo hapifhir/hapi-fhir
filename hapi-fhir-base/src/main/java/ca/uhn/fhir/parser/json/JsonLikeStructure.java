@@ -28,7 +28,7 @@ import java.io.Writer;
 /**
  * This interface is the generic representation of any sort of data
  * structure that looks and smells like JSON. These data structures
- * can be abstractly viewed as a <code.Map</code> or <code>List</code>
+ * can be abstractly viewed as a <code>Map</code> or <code>List</code>
  * whose members are other Maps, Lists, or scalars (Strings, Numbers, Boolean)
  *
  * @author Bill.Denton

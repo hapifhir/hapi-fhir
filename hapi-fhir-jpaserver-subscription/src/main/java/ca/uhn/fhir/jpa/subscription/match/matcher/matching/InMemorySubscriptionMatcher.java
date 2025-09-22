@@ -43,7 +43,7 @@ public class InMemorySubscriptionMatcher implements ISubscriptionMatcher {
 	public InMemoryMatchResult match(CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
 		try {
 			return mySearchParamMatcher.match(
-					theSubscription.getCriteriaString(), theMsg.getNewPayload(myContext), null);
+					theSubscription.getCriteriaString(), theMsg.getNewResource(myContext), null);
 		} catch (Exception e) {
 			ourLog.error("Failure in in-memory matcher", e);
 			throw new InternalErrorException(

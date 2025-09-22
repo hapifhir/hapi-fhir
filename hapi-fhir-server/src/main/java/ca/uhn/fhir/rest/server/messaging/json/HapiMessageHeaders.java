@@ -95,9 +95,26 @@ public class HapiMessageHeaders implements IModelJson {
 
 	public MessageHeaders toMessageHeaders() {
 		Map<String, Object> returnedHeaders = new HashMap<>(this.headers);
-		returnedHeaders.put(RETRY_COUNT_KEY, myRetryCount);
-		returnedHeaders.put(FIRST_FAILURE_KEY, myFirstFailureTimestamp);
-		returnedHeaders.put(LAST_FAILURE_KEY, myLastFailureTimestamp);
+		if (myRetryCount != null) {
+			returnedHeaders.put(RETRY_COUNT_KEY, myRetryCount);
+		}
+		if (myFirstFailureTimestamp != null) {
+			returnedHeaders.put(FIRST_FAILURE_KEY, myFirstFailureTimestamp);
+		}
+		if (myLastFailureTimestamp != null) {
+			returnedHeaders.put(LAST_FAILURE_KEY, myLastFailureTimestamp);
+		}
 		return new MessageHeaders(returnedHeaders);
+	}
+
+	/**
+	 * Adds a custom header to the message headers.
+	 * This method allows adding arbitrary key-value pairs to the custom headers map.
+	 *
+	 * @param theKey the header key/name
+	 * @param theValue the header value
+	 */
+	public void addCustomHeader(String theKey, Object theValue) {
+		getCustomHeaders().put(theKey, theValue);
 	}
 }

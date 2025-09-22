@@ -50,17 +50,6 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 	private FhirContext myFhirContext;
 
 	@Override
-	public ReferenceValidationPolicy policyForReference(
-			IResourceValidator validator, Object appContext, String path, String url) {
-		int slashIdx = url.indexOf("/");
-		if (slashIdx > 0 && myFhirContext.getResourceTypes().contains(url.substring(0, slashIdx))) {
-			return myValidationSettings.getLocalReferenceValidationDefaultPolicy();
-		}
-
-		return ReferenceValidationPolicy.IGNORE;
-	}
-
-	@Override
 	public EnumSet<ResourceValidationAction> policyForResource(
 			IResourceValidator validator, Object appContext, StructureDefinition type, String path) {
 		return EnumSet.allOf(ResourceValidationAction.class);
@@ -88,6 +77,17 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 			ValueSet valueSet,
 			List<String> systems) {
 		return EnumSet.allOf(CodedContentValidationAction.class);
+	}
+
+	@Override
+	public SpecialValidationAction policyForSpecialValidation(
+			IResourceValidator validator,
+			Object appContext,
+			SpecialValidationRule rule,
+			String stackPath,
+			Element resource,
+			Element element) {
+		return null;
 	}
 
 	@Override
@@ -121,6 +121,30 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 	@Override
 	public boolean isSuppressMessageId(String path, String messageId) {
 		return false;
+	}
+
+	@Override
+	public ReferenceValidationPolicy policyForReference(
+			IResourceValidator validator,
+			Object appContext,
+			String path,
+			String url,
+			ReferenceDestinationType destinationType) {
+		int slashIdx = url.indexOf("/");
+		if (slashIdx > 0 && myFhirContext.getResourceTypes().contains(url.substring(0, slashIdx))) {
+			return myValidationSettings.getLocalReferenceValidationDefaultPolicy();
+		}
+		return ReferenceValidationPolicy.IGNORE;
+	}
+
+	@Override
+	public IValidationPolicyAdvisor getPolicyAdvisor() {
+		return this;
+	}
+
+	@Override
+	public IValidationPolicyAdvisor setPolicyAdvisor(IValidationPolicyAdvisor policyAdvisor) {
+		return this;
 	}
 
 	@Override
