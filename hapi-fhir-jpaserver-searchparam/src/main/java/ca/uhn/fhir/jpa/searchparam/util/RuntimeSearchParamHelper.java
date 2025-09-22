@@ -67,8 +67,8 @@ public class RuntimeSearchParamHelper {
 			case PARAM_LANGUAGE -> false;
 			case PARAM_SOURCE -> true;
 			case PARAM_TEXT -> true;
-			case PARAM_PROFILE, PARAM_TAG, PARAM_SECURITY -> theStorageSettings.getTagStorageMode()
-					!= StorageSettings.TagStorageModeEnum.INLINE;
+			case PARAM_PROFILE, PARAM_TAG, PARAM_SECURITY ->
+				theStorageSettings.getTagStorageMode() != StorageSettings.TagStorageModeEnum.INLINE;
 			default -> false;
 		};
 	}

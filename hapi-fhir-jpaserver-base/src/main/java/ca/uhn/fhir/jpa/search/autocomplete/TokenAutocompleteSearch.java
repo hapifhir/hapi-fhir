@@ -49,18 +49,18 @@ class TokenAutocompleteSearch {
 
 		// Run the query with 0 hits; we only need aggregations.
 		SearchResult<?> result = mySession
-			.search(ResourceTable.class)
-			.where(predFactory -> predFactory.bool(boolBuilder -> {
-				ExtendedHSearchClauseBuilder clauseBuilder = new ExtendedHSearchClauseBuilder(
-						myFhirContext, myStorageSettings, boolBuilder, predFactory);
+				.search(ResourceTable.class)
+				.where(predFactory -> predFactory.bool(boolBuilder -> {
+					ExtendedHSearchClauseBuilder clauseBuilder = new ExtendedHSearchClauseBuilder(
+							myFhirContext, myStorageSettings, boolBuilder, predFactory);
 
-				// apply resource-level predicates
-				if (isNotBlank(theResourceName)) {
-					clauseBuilder.addResourceTypeClause(theResourceName);
-				}
-			}))
-			.aggregation(AGGREGATION_KEY, buildAggregation(tokenAutocompleteAggregation))
-			.fetch(0);
+					// apply resource-level predicates
+					if (isNotBlank(theResourceName)) {
+						clauseBuilder.addResourceTypeClause(theResourceName);
+					}
+				}))
+				.aggregation(AGGREGATION_KEY, buildAggregation(tokenAutocompleteAggregation))
+				.fetch(0);
 
 		// extract the top-n results from the aggregation json.
 		JsonObject resultAgg = result.aggregation(AGGREGATION_KEY);
@@ -74,10 +74,10 @@ class TokenAutocompleteSearch {
 		JsonObject jsonAggregation = tokenAutocompleteAggregation.toJsonAggregation();
 
 		return mySession
-			.scope(ResourceTable.class)
-			.aggregation()
-			.extension(ElasticsearchExtension.get())
-			.fromJson(jsonAggregation)
-			.toAggregation();
+				.scope(ResourceTable.class)
+				.aggregation()
+				.extension(ElasticsearchExtension.get())
+				.fromJson(jsonAggregation)
+				.toAggregation();
 	}
 }

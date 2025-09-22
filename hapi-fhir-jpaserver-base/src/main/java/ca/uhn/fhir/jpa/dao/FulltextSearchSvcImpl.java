@@ -95,468 +95,466 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Service
 public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
- private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FulltextSearchSvcImpl.class);
- private static final int DEFAULT_MAX_NON_PAGED_SIZE = 500;
- private final ExtendedHSearchSearchBuilder myAdvancedIndexQueryBuilder = new ExtendedHSearchSearchBuilder();
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FulltextSearchSvcImpl.class);
+	private static final int DEFAULT_MAX_NON_PAGED_SIZE = 500;
+	private final ExtendedHSearchSearchBuilder myAdvancedIndexQueryBuilder = new ExtendedHSearchSearchBuilder();
 
- @Autowired
- ISearchParamExtractor mySearchParamExtractor;
+	@Autowired
+	ISearchParamExtractor mySearchParamExtractor;
 
- @Autowired
- IIdHelperService myIdHelperService;
+	@Autowired
+	IIdHelperService myIdHelperService;
 
- @PersistenceContext(type = PersistenceContextType.TRANSACTION)
- private EntityManager myEntityManager;
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	private EntityManager myEntityManager;
 
- @Autowired
- private PlatformTransactionManager myTxManager;
+	@Autowired
+	private PlatformTransactionManager myTxManager;
 
- @Autowired
- private FhirContext myFhirContext;
+	@Autowired
+	private FhirContext myFhirContext;
 
- @Autowired
- private ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
 
- @Autowired
- private JpaStorageSettings myStorageSettings;
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
 
- @Autowired
- private IHSearchSortHelper myExtendedFulltextSortHelper;
+	@Autowired
+	private IHSearchSortHelper myExtendedFulltextSortHelper;
 
- @Autowired(required = false)
- private IHSearchEventListener myHSearchEventListener;
+	@Autowired(required = false)
+	private IHSearchEventListener myHSearchEventListener;
 
- @Autowired
- private IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
- private Boolean ourDisabled;
+	private Boolean ourDisabled;
 
- /**
-  * Constructor
-  */
- public FulltextSearchSvcImpl() {
-  super();
- }
+	/**
+	 * Constructor
+	 */
+	public FulltextSearchSvcImpl() {
+		super();
+	}
 
- @Override
- public ExtendedHSearchIndexData extractLuceneIndexData(
-   IBaseResource theResource, ResourceTable theEntity, ResourceIndexedSearchParams theNewParams) {
-  String resourceType = myFhirContext.getResourceType(theResource);
-  ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(
-    resourceType, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
-  ExtendedHSearchIndexExtractor extractor = new ExtendedHSearchIndexExtractor(
-    myStorageSettings, myFhirContext, activeSearchParams, mySearchParamExtractor);
-  return extractor.extract(theResource, theEntity, theNewParams);
- }
+	@Override
+	public ExtendedHSearchIndexData extractLuceneIndexData(
+			IBaseResource theResource, ResourceTable theEntity, ResourceIndexedSearchParams theNewParams) {
+		String resourceType = myFhirContext.getResourceType(theResource);
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(
+				resourceType, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
+		ExtendedHSearchIndexExtractor extractor = new ExtendedHSearchIndexExtractor(
+				myStorageSettings, myFhirContext, activeSearchParams, mySearchParamExtractor);
+		return extractor.extract(theResource, theEntity, theNewParams);
+	}
 
- @Override
- public boolean canUseHibernateSearch(String theResourceType, SearchParameterMap myParams) {
-  boolean requiresHibernateSearchAccess = myParams.containsKey(Constants.PARAM_CONTENT)
-    || myParams.containsKey(Constants.PARAM_TEXT)
-    || myParams.isLastN();
-  if (requiresHibernateSearchAccess) {
-   return true;
-  }
-  if (!mySearchParamRegistry.isInitialized()) {
-   return false;
-  }
-  return myStorageSettings.isHibernateSearchIndexSearchParams()
-    && myAdvancedIndexQueryBuilder.canUseHibernateSearch(theResourceType, myParams, mySearchParamRegistry);
- }
+	@Override
+	public boolean canUseHibernateSearch(String theResourceType, SearchParameterMap myParams) {
+		boolean requiresHibernateSearchAccess = myParams.containsKey(Constants.PARAM_CONTENT)
+				|| myParams.containsKey(Constants.PARAM_TEXT)
+				|| myParams.isLastN();
+		if (requiresHibernateSearchAccess) {
+			return true;
+		}
+		if (!mySearchParamRegistry.isInitialized()) {
+			return false;
+		}
+		return myStorageSettings.isHibernateSearchIndexSearchParams()
+				&& myAdvancedIndexQueryBuilder.canUseHibernateSearch(theResourceType, myParams, mySearchParamRegistry);
+	}
 
- @Override
- public void reindex(ResourceTable theEntity) {
-  validateHibernateSearchIsEnabled();
-  SearchIndexingPlan plan = getSearchSession().indexingPlan();
-  plan.addOrUpdate(theEntity);
- }
+	@Override
+	public void reindex(ResourceTable theEntity) {
+		validateHibernateSearchIsEnabled();
+		SearchIndexingPlan plan = getSearchSession().indexingPlan();
+		plan.addOrUpdate(theEntity);
+	}
 
- @Override
- public ISearchQueryExecutor searchNotScrolled(
-   String theResourceName,
-   SearchParameterMap theParams,
-   Integer theMaxResultsToFetch,
-   RequestDetails theRequestDetails) {
-  validateHibernateSearchIsEnabled();
-  return doSearch(theResourceName, theParams, null, theMaxResultsToFetch, theRequestDetails);
- }
+	@Override
+	public ISearchQueryExecutor searchNotScrolled(
+			String theResourceName,
+			SearchParameterMap theParams,
+			Integer theMaxResultsToFetch,
+			RequestDetails theRequestDetails) {
+		validateHibernateSearchIsEnabled();
+		return doSearch(theResourceName, theParams, null, theMaxResultsToFetch, theRequestDetails);
+	}
 
- @Transactional
- @Override
- public ISearchQueryExecutor searchScrolled(
-   String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {
-  validateHibernateSearchIsEnabled();
+	@Transactional
+	@Override
+	public ISearchQueryExecutor searchScrolled(
+			String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {
+		validateHibernateSearchIsEnabled();
 
 		SearchQueryOptionsStep<JpaPid, ?, ?, SearchLoadingOptionsStep, ?, ?> searchQueryOptionsStep =
 				getSearchQueryOptionsStep(theResourceType, theParams, null);
 		logQuery(searchQueryOptionsStep, theRequestDetails);
 
-  return new SearchScrollQueryExecutorAdaptor(searchQueryOptionsStep.scroll(SearchBuilder.getMaximumPageSize()));
- }
+		return new SearchScrollQueryExecutorAdaptor(searchQueryOptionsStep.scroll(SearchBuilder.getMaximumPageSize()));
+	}
 
- @SuppressWarnings("rawtypes")
- private ISearchQueryExecutor doSearch(
-   String theResourceType,
-   SearchParameterMap theParams,
-   IResourcePersistentId theReferencingPid,
-   Integer theMaxResultsToFetch,
-   RequestDetails theRequestDetails) {
+	@SuppressWarnings("rawtypes")
+	private ISearchQueryExecutor doSearch(
+			String theResourceType,
+			SearchParameterMap theParams,
+			IResourcePersistentId theReferencingPid,
+			Integer theMaxResultsToFetch,
+			RequestDetails theRequestDetails) {
 
-  int offset = theParams.getOffset() == null ? 0 : theParams.getOffset();
-  int count = getMaxFetchSize(theParams, theMaxResultsToFetch);
+		int offset = theParams.getOffset() == null ? 0 : theParams.getOffset();
+		int count = getMaxFetchSize(theParams, theMaxResultsToFetch);
 
-  SearchQueryOptionsStep<JpaPid, ?, ?, SearchLoadingOptionsStep, SearchSortFactory, ?> searchQueryOptionsStep =
-    getSearchQueryOptionsStep(theResourceType, theParams, theReferencingPid);
-  logQuery(searchQueryOptionsStep, theRequestDetails);
-  List<JpaPid> longs = searchQueryOptionsStep.fetchHits(offset, count);
+		SearchQueryOptionsStep<JpaPid, ?, ?, SearchLoadingOptionsStep, SearchSortFactory, ?> searchQueryOptionsStep =
+				getSearchQueryOptionsStep(theResourceType, theParams, theReferencingPid);
+		logQuery(searchQueryOptionsStep, theRequestDetails);
+		List<JpaPid> longs = searchQueryOptionsStep.fetchHits(offset, count);
 
-  theParams.setOffset(null);
-  return SearchQueryExecutors.from(longs);
- }
+		theParams.setOffset(null);
+		return SearchQueryExecutors.from(longs);
+	}
 
- private int getMaxFetchSize(SearchParameterMap theParams, Integer theMax) {
-  if (theMax != null) {
-   return theMax;
-  }
-  if (theParams.getCount() != null) {
-   return theParams.getCount();
-  }
-  return DEFAULT_MAX_NON_PAGED_SIZE;
- }
+	private int getMaxFetchSize(SearchParameterMap theParams, Integer theMax) {
+		if (theMax != null) {
+			return theMax;
+		}
+		if (theParams.getCount() != null) {
+			return theParams.getCount();
+		}
+		return DEFAULT_MAX_NON_PAGED_SIZE;
+	}
 
- @SuppressWarnings("rawtypes")
- private SearchQueryOptionsStep<JpaPid, ?, ?, SearchLoadingOptionsStep, SearchSortFactory, ?> getSearchQueryOptionsStep(
-   String theResourceType, SearchParameterMap theParams, IResourcePersistentId theReferencingPid) {
+	@SuppressWarnings("rawtypes")
+	private SearchQueryOptionsStep<JpaPid, ?, ?, SearchLoadingOptionsStep, SearchSortFactory, ?>
+			getSearchQueryOptionsStep(
+					String theResourceType, SearchParameterMap theParams, IResourcePersistentId theReferencingPid) {
 
-  dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
-  SearchQueryOptionsStep<JpaPid, ?, ?, SearchLoadingOptionsStep, SearchSortFactory, ?> query = getSearchSession()
-    .search(ResourceTable.class)
-    // The document id is the PK which is pid. We use this instead of _myId to avoid fetching the doc body.
-    .select(
-      f -> f.composite(docRef -> JpaPid.fromId(Long.valueOf(docRef.id())), f.documentReference()))
-    .where(f -> buildWhereClause(f, theResourceType, theParams, theReferencingPid));
+		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
+		SearchQueryOptionsStep<JpaPid, ?, ?, SearchLoadingOptionsStep, SearchSortFactory, ?> query = getSearchSession()
+				.search(ResourceTable.class)
+				// The document id is the PK which is pid. We use this instead of _myId to avoid fetching the doc body.
+				.select(f -> f.composite(docRef -> JpaPid.fromId(Long.valueOf(docRef.id())), f.documentReference()))
+				.where(f -> buildWhereClause(f, theResourceType, theParams, theReferencingPid));
 
-  if (theParams.getSort() != null) {
-   query.sort(f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort(), theResourceType));
-   theParams.setSort(null);
-  }
+		if (theParams.getSort() != null) {
+			query.sort(f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort(), theResourceType));
+			theParams.setSort(null);
+		}
 
-  return query;
- }
+		return query;
+	}
 
- @SuppressWarnings("rawtypes")
- private PredicateFinalStep buildWhereClause(
-   SearchPredicateFactory f,
-   String theResourceType,
-   SearchParameterMap theParams,
-   IResourcePersistentId theReferencingPid) {
+	@SuppressWarnings("rawtypes")
+	private PredicateFinalStep buildWhereClause(
+			SearchPredicateFactory f,
+			String theResourceType,
+			SearchParameterMap theParams,
+			IResourcePersistentId theReferencingPid) {
 
-  verifyContentAndTextParamsAreSupportedIfUsed(theResourceType, theParams);
+		verifyContentAndTextParamsAreSupportedIfUsed(theResourceType, theParams);
 
-  return f.bool(b -> {
-   ExtendedHSearchClauseBuilder builder =
-     new ExtendedHSearchClauseBuilder(myFhirContext, myStorageSettings, b, f);
+		return f.bool(b -> {
+			ExtendedHSearchClauseBuilder builder =
+					new ExtendedHSearchClauseBuilder(myFhirContext, myStorageSettings, b, f);
 
-   List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
-   builder.addStringTextSearch(Constants.PARAM_CONTENT, contentAndTerms);
+			List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
+			builder.addStringTextSearch(Constants.PARAM_CONTENT, contentAndTerms);
 
-   List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
-   builder.addStringTextSearch(Constants.PARAM_TEXT, textAndTerms);
+			List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
+			builder.addStringTextSearch(Constants.PARAM_TEXT, textAndTerms);
 
-   if (theReferencingPid != null) {
-    b.must(f.match().field("myResourceLinksField").matching(theReferencingPid.toString()));
-   }
+			if (theReferencingPid != null) {
+				b.must(f.match().field("myResourceLinksField").matching(theReferencingPid.toString()));
+			}
 
-   if (isNotBlank(theResourceType)) {
-    builder.addResourceTypeClause(theResourceType);
-   }
+			if (isNotBlank(theResourceType)) {
+				builder.addResourceTypeClause(theResourceType);
+			}
 
-   if (myStorageSettings.isHibernateSearchIndexSearchParams() && theParams.getEverythingMode() == null) {
-    ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams params =
-      new ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams();
-    params.setSearchParamRegistry(mySearchParamRegistry)
-      .setResourceType(theResourceType)
-      .setSearchParameterMap(theParams);
-    myAdvancedIndexQueryBuilder.addAndConsumeAdvancedQueryClauses(builder, params);
-   }
-  });
- }
+			if (myStorageSettings.isHibernateSearchIndexSearchParams() && theParams.getEverythingMode() == null) {
+				ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams params =
+						new ExtendedHSearchBuilderConsumeAdvancedQueryClausesParams();
+				params.setSearchParamRegistry(mySearchParamRegistry)
+						.setResourceType(theResourceType)
+						.setSearchParameterMap(theParams);
+				myAdvancedIndexQueryBuilder.addAndConsumeAdvancedQueryClauses(builder, params);
+			}
+		});
+	}
 
- private void verifyContentAndTextParamsAreSupportedIfUsed(String theResourceType, SearchParameterMap theParams) {
-  boolean haveParamText = theParams.containsKey(Constants.PARAM_TEXT);
-  boolean haveParamContent = theParams.containsKey(Constants.PARAM_CONTENT);
-  if (!haveParamText && !haveParamContent) {
-   return;
-  }
-  if (!myStorageSettings.isHibernateSearchIndexFullText()) {
-   String failingParams = theParams.keySet().stream()
-     .filter(t -> t.equals(Constants.PARAM_TEXT) || t.equals(Constants.PARAM_CONTENT))
-     .sorted()
-     .collect(Collectors.joining(", "));
-   String msg = myFhirContext
-     .getLocalizer()
-     .getMessage(FulltextSearchSvcImpl.class, "fullTextSearchingNotPossible", failingParams);
-   throw new InvalidRequestException(Msg.code(2566) + msg);
-  }
+	private void verifyContentAndTextParamsAreSupportedIfUsed(String theResourceType, SearchParameterMap theParams) {
+		boolean haveParamText = theParams.containsKey(Constants.PARAM_TEXT);
+		boolean haveParamContent = theParams.containsKey(Constants.PARAM_CONTENT);
+		if (!haveParamText && !haveParamContent) {
+			return;
+		}
+		if (!myStorageSettings.isHibernateSearchIndexFullText()) {
+			String failingParams = theParams.keySet().stream()
+					.filter(t -> t.equals(Constants.PARAM_TEXT) || t.equals(Constants.PARAM_CONTENT))
+					.sorted()
+					.collect(Collectors.joining(", "));
+			String msg = myFhirContext
+					.getLocalizer()
+					.getMessage(FulltextSearchSvcImpl.class, "fullTextSearchingNotPossible", failingParams);
+			throw new InvalidRequestException(Msg.code(2566) + msg);
+		}
 
-  List<String> failingParams = null;
-  if (theResourceType != null) {
-   if (haveParamContent
-     && !mySearchParamRegistry.hasActiveSearchParam(
-       theResourceType,
-       Constants.PARAM_CONTENT,
-       ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)) {
-    failingParams = new ArrayList<>(2);
-    failingParams.add(Constants.PARAM_CONTENT);
-   }
+		List<String> failingParams = null;
+		if (theResourceType != null) {
+			if (haveParamContent
+					&& !mySearchParamRegistry.hasActiveSearchParam(
+							theResourceType,
+							Constants.PARAM_CONTENT,
+							ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)) {
+				failingParams = new ArrayList<>(2);
+				failingParams.add(Constants.PARAM_CONTENT);
+			}
 
-   if (haveParamText
-     && !mySearchParamRegistry.hasActiveSearchParam(
-       theResourceType,
-       Constants.PARAM_TEXT,
-       ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)) {
-    failingParams = Objects.requireNonNullElseGet(failingParams, () -> new ArrayList<>(2));
-    failingParams.add(Constants.PARAM_TEXT);
-   }
-  }
+			if (haveParamText
+					&& !mySearchParamRegistry.hasActiveSearchParam(
+							theResourceType,
+							Constants.PARAM_TEXT,
+							ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)) {
+				failingParams = Objects.requireNonNullElseGet(failingParams, () -> new ArrayList<>(2));
+				failingParams.add(Constants.PARAM_TEXT);
+			}
+		}
 
-  if (failingParams != null) {
-   String msg = myFhirContext
-     .getLocalizer()
-     .getMessage(
-       FulltextSearchSvcImpl.class,
-       "fullTextSearchingNotPossibleForResourceType",
-       theResourceType,
-       String.join(",", failingParams));
-   throw new InvalidRequestException(Msg.code(2727) + msg);
-  }
- }
+		if (failingParams != null) {
+			String msg = myFhirContext
+					.getLocalizer()
+					.getMessage(
+							FulltextSearchSvcImpl.class,
+							"fullTextSearchingNotPossibleForResourceType",
+							theResourceType,
+							String.join(",", failingParams));
+			throw new InvalidRequestException(Msg.code(2727) + msg);
+		}
+	}
 
- @Nonnull
- private SearchSession getSearchSession() {
-  return Search.session(myEntityManager);
- }
+	@Nonnull
+	private SearchSession getSearchSession() {
+		return Search.session(myEntityManager);
+	}
 
- @SuppressWarnings("rawtypes")
- private List<IResourcePersistentId> convertLongsToResourcePersistentIds(List<Long> theLongPids) {
-  return theLongPids.stream().map(JpaPid::fromId).collect(Collectors.toList());
- }
+	@SuppressWarnings("rawtypes")
+	private List<IResourcePersistentId> convertLongsToResourcePersistentIds(List<Long> theLongPids) {
+		return theLongPids.stream().map(JpaPid::fromId).collect(Collectors.toList());
+	}
 
- @Override
- @SuppressWarnings({"rawtypes", "unchecked"})
- public List<IResourcePersistentId> everything(
-   String theResourceName,
-   SearchParameterMap theParams,
-   IResourcePersistentId theReferencingPid,
-   RequestDetails theRequestDetails) {
-  validateHibernateSearchIsEnabled();
+	@Override
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	public List<IResourcePersistentId> everything(
+			String theResourceName,
+			SearchParameterMap theParams,
+			IResourcePersistentId theReferencingPid,
+			RequestDetails theRequestDetails) {
+		validateHibernateSearchIsEnabled();
 
-  List<IResourcePersistentId> retVal =
-    toList(doSearch(null, theParams, theReferencingPid, 10_000, theRequestDetails), 10_000);
-  if (theReferencingPid != null) {
-   retVal.add(theReferencingPid);
-  }
-  return retVal;
- }
+		List<IResourcePersistentId> retVal =
+				toList(doSearch(null, theParams, theReferencingPid, 10_000, theRequestDetails), 10_000);
+		if (theReferencingPid != null) {
+			retVal.add(theReferencingPid);
+		}
+		return retVal;
+	}
 
- private void validateHibernateSearchIsEnabled() {
-  if (isDisabled()) {
-   throw new UnsupportedOperationException(Msg.code(2137) + "Hibernate search is not enabled!");
-  }
- }
+	private void validateHibernateSearchIsEnabled() {
+		if (isDisabled()) {
+			throw new UnsupportedOperationException(Msg.code(2137) + "Hibernate search is not enabled!");
+		}
+	}
 
- @Override
- public boolean isDisabled() {
-  Boolean retVal = ourDisabled;
+	@Override
+	public boolean isDisabled() {
+		Boolean retVal = ourDisabled;
 
-  if (retVal == null) {
-   retVal = new TransactionTemplate(myTxManager).execute(t -> {
-    try {
-     SearchSession searchSession = getSearchSession();
-     searchSession.search(ResourceTable.class);
-     return Boolean.FALSE;
-    } catch (Exception e) {
-     ourLog.trace("FullText test failed", e);
-     ourLog.debug(
-       "Hibernate Search (Lucene) appears to be disabled on this server, fulltext will be disabled");
-     return Boolean.TRUE;
-    }
-   });
-   ourDisabled = retVal;
-  }
+		if (retVal == null) {
+			retVal = new TransactionTemplate(myTxManager).execute(t -> {
+				try {
+					SearchSession searchSession = getSearchSession();
+					searchSession.search(ResourceTable.class);
+					return Boolean.FALSE;
+				} catch (Exception e) {
+					ourLog.trace("FullText test failed", e);
+					ourLog.debug(
+							"Hibernate Search (Lucene) appears to be disabled on this server, fulltext will be disabled");
+					return Boolean.TRUE;
+				}
+			});
+			ourDisabled = retVal;
+		}
 
-  assert retVal != null;
-  return retVal;
- }
+		assert retVal != null;
+		return retVal;
+	}
 
- @Transactional()
- @Override
- @SuppressWarnings("unchecked")
- public List<IResourcePersistentId> search(
-   String theResourceName, SearchParameterMap theParams, RequestDetails theRequestDetails) {
-  validateHibernateSearchIsEnabled();
-  return toList(
-    doSearch(theResourceName, theParams, null, DEFAULT_MAX_NON_PAGED_SIZE, theRequestDetails),
-    DEFAULT_MAX_NON_PAGED_SIZE);
- }
+	@Transactional()
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<IResourcePersistentId> search(
+			String theResourceName, SearchParameterMap theParams, RequestDetails theRequestDetails) {
+		validateHibernateSearchIsEnabled();
+		return toList(
+				doSearch(theResourceName, theParams, null, DEFAULT_MAX_NON_PAGED_SIZE, theRequestDetails),
+				DEFAULT_MAX_NON_PAGED_SIZE);
+	}
 
- @SuppressWarnings("rawtypes")
- private List<IResourcePersistentId> toList(ISearchQueryExecutor theSearchResultStream, long theMaxSize) {
-  return StreamSupport.stream(Spliterators.spliteratorUnknownSize(theSearchResultStream, 0), false)
-    .limit(theMaxSize)
-    .collect(Collectors.toList());
- }
+	@SuppressWarnings("rawtypes")
+	private List<IResourcePersistentId> toList(ISearchQueryExecutor theSearchResultStream, long theMaxSize) {
+		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(theSearchResultStream, 0), false)
+				.limit(theMaxSize)
+				.collect(Collectors.toList());
+	}
 
- @Transactional()
- @Override
- public IBaseResource tokenAutocompleteValueSetSearch(ValueSetAutocompleteOptions theOptions) {
-  validateHibernateSearchIsEnabled();
-  ensureElastic();
+	@Transactional()
+	@Override
+	public IBaseResource tokenAutocompleteValueSetSearch(ValueSetAutocompleteOptions theOptions) {
+		validateHibernateSearchIsEnabled();
+		ensureElastic();
 
-  ValueSetAutocompleteSearch autocomplete =
-    new ValueSetAutocompleteSearch(myFhirContext, myStorageSettings, getSearchSession());
+		ValueSetAutocompleteSearch autocomplete =
+				new ValueSetAutocompleteSearch(myFhirContext, myStorageSettings, getSearchSession());
 
-  dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
-  return autocomplete.search(theOptions);
- }
+		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
+		return autocomplete.search(theOptions);
+	}
 
- private void ensureElastic() {
-  try {
-   getSearchSession().scope(ResourceTable.class).aggregation().extension(ElasticsearchExtension.get());
-  } catch (SearchException e) {
-   throw new IllegalStateException(
-     Msg.code(2070) + "This operation requires Elasticsearch.  Lucene is not supported.");
-  }
- }
+	private void ensureElastic() {
+		try {
+			getSearchSession().scope(ResourceTable.class).aggregation().extension(ElasticsearchExtension.get());
+		} catch (SearchException e) {
+			throw new IllegalStateException(
+					Msg.code(2070) + "This operation requires Elasticsearch.  Lucene is not supported.");
+		}
+	}
 
- @Override
- @SuppressWarnings("rawtypes")
- public List<IResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults) {
-  ensureElastic();
-  dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
-  List<Long> pidList = new LastNOperation(
-      getSearchSession(), myFhirContext, myStorageSettings, mySearchParamRegistry)
-    .executeLastN(theParams, theMaximumResults);
-  return convertLongsToResourcePersistentIds(pidList);
- }
+	@Override
+	@SuppressWarnings("rawtypes")
+	public List<IResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults) {
+		ensureElastic();
+		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
+		List<Long> pidList = new LastNOperation(
+						getSearchSession(), myFhirContext, myStorageSettings, mySearchParamRegistry)
+				.executeLastN(theParams, theMaximumResults);
+		return convertLongsToResourcePersistentIds(pidList);
+	}
 
- @Override
- public List<IBaseResource> getResources(Collection<Long> thePids) {
-  if (thePids.isEmpty()) {
-   return Collections.emptyList();
-  }
+	@Override
+	public List<IBaseResource> getResources(Collection<Long> thePids) {
+		if (thePids.isEmpty()) {
+			return Collections.emptyList();
+		}
 
-  SearchSession session = getSearchSession();
-  dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
-  List<ExtendedHSearchResourceProjection> rawResourceDataList = session.search(ResourceTable.class)
-    .select(this::buildResourceSelectClause)
-    .where(
-      f -> f.id().matchingAny(JpaPid.fromLongList(thePids))
-      )
-    .fetchAllHits();
+		SearchSession session = getSearchSession();
+		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
+		List<ExtendedHSearchResourceProjection> rawResourceDataList = session.search(ResourceTable.class)
+				.select(this::buildResourceSelectClause)
+				.where(f -> f.id().matchingAny(JpaPid.fromLongList(thePids)))
+				.fetchAllHits();
 
-  ArrayList<Long> pidList = new ArrayList<>(thePids);
-  List<ExtendedHSearchResourceProjection> orderedAsPidsResourceDataList = rawResourceDataList.stream()
-    .sorted(Ordering.explicit(pidList).onResultOf(ExtendedHSearchResourceProjection::getPid))
-    .collect(Collectors.toList());
+		ArrayList<Long> pidList = new ArrayList<>(thePids);
+		List<ExtendedHSearchResourceProjection> orderedAsPidsResourceDataList = rawResourceDataList.stream()
+				.sorted(Ordering.explicit(pidList).onResultOf(ExtendedHSearchResourceProjection::getPid))
+				.collect(Collectors.toList());
 
-  return resourceProjectionsToResources(orderedAsPidsResourceDataList);
- }
+		return resourceProjectionsToResources(orderedAsPidsResourceDataList);
+	}
 
- @Nonnull
- private List<IBaseResource> resourceProjectionsToResources(
-   List<ExtendedHSearchResourceProjection> theResourceDataList) {
-  IParser parser = myFhirContext.newJsonParser();
-  return theResourceDataList.stream().map(p -> p.toResource(parser)).collect(Collectors.toList());
- }
+	@Nonnull
+	private List<IBaseResource> resourceProjectionsToResources(
+			List<ExtendedHSearchResourceProjection> theResourceDataList) {
+		IParser parser = myFhirContext.newJsonParser();
+		return theResourceDataList.stream().map(p -> p.toResource(parser)).collect(Collectors.toList());
+	}
 
- private CompositeProjectionOptionsStep<?, ExtendedHSearchResourceProjection> buildResourceSelectClause(
-   SearchProjectionFactory<EntityReference, ResourceTable> f) {
-  return f.composite(
-    ExtendedHSearchResourceProjection::new,
-    f.field("myId", JpaPid.class),
-    f.field("myForcedId", String.class),
-    f.field("myRawResource", String.class));
- }
+	private CompositeProjectionOptionsStep<?, ExtendedHSearchResourceProjection> buildResourceSelectClause(
+			SearchProjectionFactory<EntityReference, ResourceTable> f) {
+		return f.composite(
+				ExtendedHSearchResourceProjection::new,
+				f.field("myId", JpaPid.class),
+				f.field("myForcedId", String.class),
+				f.field("myRawResource", String.class));
+	}
 
- @Override
- public long count(String theResourceName, SearchParameterMap theParams) {
-  SearchQueryOptionsStep<JpaPid, ?, ?, SearchLoadingOptionsStep, SearchSortFactory, ?> queryOptionsStep =
-    getSearchQueryOptionsStep(theResourceName, theParams, null);
+	@Override
+	public long count(String theResourceName, SearchParameterMap theParams) {
+		SearchQueryOptionsStep<JpaPid, ?, ?, SearchLoadingOptionsStep, SearchSortFactory, ?> queryOptionsStep =
+				getSearchQueryOptionsStep(theResourceName, theParams, null);
 
-  return queryOptionsStep.fetchTotalHitCount();
- }
+		return queryOptionsStep.fetchTotalHitCount();
+	}
 
- @Override
- @Transactional(readOnly = true)
- public List<IBaseResource> searchForResources(
-   String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {
-  int offset = 0;
-  int limit = theParams.getCount() == null ? DEFAULT_MAX_PAGE_SIZE : theParams.getCount();
+	@Override
+	@Transactional(readOnly = true)
+	public List<IBaseResource> searchForResources(
+			String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {
+		int offset = 0;
+		int limit = theParams.getCount() == null ? DEFAULT_MAX_PAGE_SIZE : theParams.getCount();
 
-  if (theParams.getOffset() != null && theParams.getOffset() != 0) {
-   offset = theParams.getOffset();
-   theParams.setOffset(null);
-  }
+		if (theParams.getOffset() != null && theParams.getOffset() != 0) {
+			offset = theParams.getOffset();
+			theParams.setOffset(null);
+		}
 
-  dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
+		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 
-  SearchQueryOptionsStep<ExtendedHSearchResourceProjection, ?, ?, SearchLoadingOptionsStep, SearchSortFactory, ?> query =
-    getSearchSession()
-      .search(ResourceTable.class)
-      .select(this::buildResourceSelectClause)
-      .where(f -> buildWhereClause(f, theResourceType, theParams, null));
+		SearchQueryOptionsStep<ExtendedHSearchResourceProjection, ?, ?, SearchLoadingOptionsStep, SearchSortFactory, ?>
+				query = getSearchSession()
+						.search(ResourceTable.class)
+						.select(this::buildResourceSelectClause)
+						.where(f -> buildWhereClause(f, theResourceType, theParams, null));
 
-  if (theParams.getSort() != null) {
-   query.sort(f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort(), theResourceType));
-  }
+		if (theParams.getSort() != null) {
+			query.sort(f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort(), theResourceType));
+		}
 
-  logQuery(query, theRequestDetails);
-  List<ExtendedHSearchResourceProjection> extendedLuceneResourceProjections = query.fetchHits(offset, limit);
+		logQuery(query, theRequestDetails);
+		List<ExtendedHSearchResourceProjection> extendedLuceneResourceProjections = query.fetchHits(offset, limit);
 
-  return resourceProjectionsToResources(extendedLuceneResourceProjections);
- }
+		return resourceProjectionsToResources(extendedLuceneResourceProjections);
+	}
 
- @SuppressWarnings("rawtypes")
- private void logQuery(SearchQueryOptionsStep theQuery, RequestDetails theRequestDetails) {
-  IInterceptorBroadcaster compositeBroadcaster =
-    CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
-  if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO)) {
-   StorageProcessingMessage storageProcessingMessage = new StorageProcessingMessage();
-   String queryString = theQuery.toQuery().queryString();
-   storageProcessingMessage.setMessage(queryString);
-   HookParams params = new HookParams()
-     .add(RequestDetails.class, theRequestDetails)
-     .addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-     .add(StorageProcessingMessage.class, storageProcessingMessage);
-   compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
-  }
- }
+	@SuppressWarnings("rawtypes")
+	private void logQuery(SearchQueryOptionsStep theQuery, RequestDetails theRequestDetails) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO)) {
+			StorageProcessingMessage storageProcessingMessage = new StorageProcessingMessage();
+			String queryString = theQuery.toQuery().queryString();
+			storageProcessingMessage.setMessage(queryString);
+			HookParams params = new HookParams()
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+					.add(StorageProcessingMessage.class, storageProcessingMessage);
+			compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
+		}
+	}
 
- @Override
- public boolean supportsAllOf(SearchParameterMap theParams) {
-  return myAdvancedIndexQueryBuilder.isSupportsAllOf(theParams);
- }
+	@Override
+	public boolean supportsAllOf(SearchParameterMap theParams) {
+		return myAdvancedIndexQueryBuilder.isSupportsAllOf(theParams);
+	}
 
- @Override
- public boolean supportsAllSortTerms(String theResourceType, SearchParameterMap theParams) {
-  return myExtendedFulltextSortHelper.supportsAllSortTerms(theResourceType, theParams);
- }
+	@Override
+	public boolean supportsAllSortTerms(String theResourceType, SearchParameterMap theParams) {
+		return myExtendedFulltextSortHelper.supportsAllSortTerms(theResourceType, theParams);
+	}
 
- private void dispatchEvent(IHSearchEventListener.HSearchEventType theEventType) {
-  if (myHSearchEventListener != null) {
-   myHSearchEventListener.hsearchEvent(theEventType);
-  }
- }
+	private void dispatchEvent(IHSearchEventListener.HSearchEventType theEventType) {
+		if (myHSearchEventListener != null) {
+			myHSearchEventListener.hsearchEvent(theEventType);
+		}
+	}
 
- @Override
- public void deleteIndexedDocumentsByTypeAndId(Class theClazz, List<Object> theGivenIds) {
-  SearchSession session = Search.session(myEntityManager);
-  SearchIndexingPlan indexingPlan = session.indexingPlan();
-  for (Object givenId : theGivenIds) {
-   indexingPlan.purge(theClazz, givenId, null);
-  }
-  indexingPlan.process();
-  indexingPlan.execute();
- }
+	@Override
+	public void deleteIndexedDocumentsByTypeAndId(Class theClazz, List<Object> theGivenIds) {
+		SearchSession session = Search.session(myEntityManager);
+		SearchIndexingPlan indexingPlan = session.indexingPlan();
+		for (Object givenId : theGivenIds) {
+			indexingPlan.purge(theClazz, givenId, null);
+		}
+		indexingPlan.process();
+		indexingPlan.execute();
+	}
 }

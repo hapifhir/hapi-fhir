@@ -80,14 +80,14 @@ public class ExtendedHSearchClauseBuilder {
 	final PathContext myRootContext;
 
 	final List<TemporalPrecisionEnum> ordinalSearchPrecisions =
-		Arrays.asList(TemporalPrecisionEnum.YEAR, TemporalPrecisionEnum.MONTH, TemporalPrecisionEnum.DAY);
+			Arrays.asList(TemporalPrecisionEnum.YEAR, TemporalPrecisionEnum.MONTH, TemporalPrecisionEnum.DAY);
 
 	public ExtendedHSearchClauseBuilder(
-		FhirContext myFhirContext,
-		StorageSettings theStorageSettings,
-		// Raw type to be compatible with HS 7.1.x
-		BooleanPredicateClausesStep theRootClause,
-		SearchPredicateFactory thePredicateFactory) {
+			FhirContext myFhirContext,
+			StorageSettings theStorageSettings,
+			// Raw type to be compatible with HS 7.1.x
+			BooleanPredicateClausesStep theRootClause,
+			SearchPredicateFactory thePredicateFactory) {
 		this.myFhirContext = myFhirContext;
 		this.myStorageSettings = theStorageSettings;
 		this.myRootClause = theRootClause;
@@ -120,7 +120,7 @@ public class ExtendedHSearchClauseBuilder {
 				}
 			} else {
 				throw new IllegalArgumentException(
-					Msg.code(1088) + "Unsupported full-text param type: " + nextOr.getClass());
+						Msg.code(1088) + "Unsupported full-text param type: " + nextOr.getClass());
 			}
 			if (isNotBlank(nextValueTrimmed)) {
 				terms.add(nextValueTrimmed);
@@ -137,8 +137,8 @@ public class ExtendedHSearchClauseBuilder {
 			value = ((SpecialParam) nextOr).getValue();
 		} else {
 			throw new IllegalArgumentException(Msg.code(2535)
-				+ "Failed to extract value for fulltext search from parameter. Needs to be a `string` parameter, or `_text` or `_content` special parameter."
-				+ nextOr);
+					+ "Failed to extract value for fulltext search from parameter. Needs to be a `string` parameter, or `_text` or `_content` special parameter."
+					+ nextOr);
 		}
 		return StringUtils.defaultString(value).trim();
 	}
@@ -146,7 +146,7 @@ public class ExtendedHSearchClauseBuilder {
 	private static boolean isStringParamOrEquivalent(String theSearchParamName, IQueryParameterType nextOr) {
 		List<String> specialSearchParamsToTreatAsStrings = List.of(Constants.PARAM_TEXT, Constants.PARAM_CONTENT);
 		return (nextOr instanceof StringParam)
-			|| (nextOr instanceof SpecialParam && specialSearchParamsToTreatAsStrings.contains(theSearchParamName));
+				|| (nextOr instanceof SpecialParam && specialSearchParamsToTreatAsStrings.contains(theSearchParamName));
 	}
 
 	public void addTokenUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theAndOrTerms) {
@@ -158,8 +158,8 @@ public class ExtendedHSearchClauseBuilder {
 
 			ourLog.debug("addTokenUnmodifiedSearch {} {}", theSearchParamName, nextAnd);
 			List<? extends PredicateFinalStep> clauses = nextAnd.stream()
-				.map(orTerm -> buildTokenUnmodifiedMatchOn(orTerm, spContext))
-				.collect(Collectors.toList());
+					.map(orTerm -> buildTokenUnmodifiedMatchOn(orTerm, spContext))
+					.collect(Collectors.toList());
 			PredicateFinalStep finalClause = spContext.orPredicateOrSingle(clauses);
 
 			myRootClause.must(finalClause);
@@ -178,32 +178,32 @@ public class ExtendedHSearchClauseBuilder {
 			if (StringUtils.isBlank(token.getSystem())) {
 				// bare value
 				return thePathContext
-					.match()
-					.field(joinPath(pathPrefix, INDEX_TYPE_TOKEN, TOKEN_CODE))
-					.matching(token.getValue());
+						.match()
+						.field(joinPath(pathPrefix, INDEX_TYPE_TOKEN, TOKEN_CODE))
+						.matching(token.getValue());
 			} else if (StringUtils.isBlank(token.getValue())) {
 				// system without value
 				return thePathContext
-					.match()
-					.field(joinPath(pathPrefix, INDEX_TYPE_TOKEN, TOKEN_SYSTEM))
-					.matching(token.getSystem());
+						.match()
+						.field(joinPath(pathPrefix, INDEX_TYPE_TOKEN, TOKEN_SYSTEM))
+						.matching(token.getSystem());
 			} else {
 				// system + value
 				return thePathContext
-					.match()
-					.field(joinPath(pathPrefix, INDEX_TYPE_TOKEN, TOKEN_SYSTEM_CODE))
-					.matching(token.getValueAsQueryToken(this.myFhirContext));
+						.match()
+						.field(joinPath(pathPrefix, INDEX_TYPE_TOKEN, TOKEN_SYSTEM_CODE))
+						.matching(token.getValueAsQueryToken(this.myFhirContext));
 			}
 		} else if (orTerm instanceof StringParam) {
 			// treat a string as a code with no system (like _id)
 			StringParam string = (StringParam) orTerm;
 			return thePathContext
-				.match()
-				.field(joinPath(pathPrefix, INDEX_TYPE_TOKEN, TOKEN_CODE))
-				.matching(string.getValue());
+					.match()
+					.field(joinPath(pathPrefix, INDEX_TYPE_TOKEN, TOKEN_CODE))
+					.matching(string.getValue());
 		} else {
 			throw new IllegalArgumentException(Msg.code(1089) + "Unexpected param type for token search-param: "
-				+ orTerm.getClass().getName());
+					+ orTerm.getClass().getName());
 		}
 	}
 
@@ -236,23 +236,23 @@ public class ExtendedHSearchClauseBuilder {
 	}
 
 	private void addSimpleQueryMatchClauses(
-		String theSearchParamName, List<? extends IQueryParameterType> nextOrList, String fieldName) {
+			String theSearchParamName, List<? extends IQueryParameterType> nextOrList, String fieldName) {
 		Set<String> orTerms = TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
 		ourLog.debug("addStringTextSearch {}, {}", theSearchParamName, orTerms);
 		if (!orTerms.isEmpty()) {
 			String query = orTerms.stream().map(s -> "( " + s + " )").collect(Collectors.joining(" | "));
 			myRootClause.must(myRootContext
-				.simpleQueryString()
-				.field(fieldName)
-				.matching(query)
-				.defaultOperator(BooleanOperator.AND));
+					.simpleQueryString()
+					.field(fieldName)
+					.matching(query)
+					.defaultOperator(BooleanOperator.AND));
 		} else {
 			ourLog.warn("No Terms found in query parameter {}", nextOrList);
 		}
 	}
 
 	private void addPreciseMatchClauses(
-		String theSearchParamName, List<? extends IQueryParameterType> nextOrList, String fieldName) {
+			String theSearchParamName, List<? extends IQueryParameterType> nextOrList, String fieldName) {
 		Set<String> orTerms = TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
 		for (String orTerm : orTerms) {
 			myRootClause.must(myRootContext.match().field(fieldName).matching(orTerm));
@@ -266,23 +266,23 @@ public class ExtendedHSearchClauseBuilder {
 			Set<String> terms = extractOrStringParams(theSearchParamName, nextAnd);
 			ourLog.debug("addStringExactSearch {} {}", theSearchParamName, terms);
 			List<? extends PredicateFinalStep> orTerms = terms.stream()
-				.map(s -> myRootContext.match().field(fieldPath).matching(s))
-				.collect(Collectors.toList());
+					.map(s -> myRootContext.match().field(fieldPath).matching(s))
+					.collect(Collectors.toList());
 
 			myRootClause.must(myRootContext.orPredicateOrSingle(orTerms));
 		}
 	}
 
 	public void addStringContainsSearch(
-		String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
+			String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
 		String fieldPath = joinPath(SEARCH_PARAM_ROOT, theSearchParamName, INDEX_TYPE_STRING, IDX_STRING_NORMALIZED);
 		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(theSearchParamName, nextAnd);
 			ourLog.debug("addStringContainsSearch {} {}", theSearchParamName, terms);
 			List<? extends PredicateFinalStep> orTerms = terms.stream()
-				.map(this::normalize)
-				.map(s -> myRootContext.wildcard().field(fieldPath).matching("*" + s + "*"))
-				.collect(Collectors.toList());
+					.map(this::normalize)
+					.map(s -> myRootContext.wildcard().field(fieldPath).matching("*" + s + "*"))
+					.collect(Collectors.toList());
 
 			myRootClause.must(myRootContext.orPredicateOrSingle(orTerms));
 		}
@@ -294,14 +294,14 @@ public class ExtendedHSearchClauseBuilder {
 	}
 
 	public void addStringUnmodifiedSearch(
-		String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
+			String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
 		PathContext context = contextForFlatSP(theSearchParamName);
 		for (List<? extends IQueryParameterType> nextOrList : theStringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(theSearchParamName, nextOrList);
 			ourLog.debug("addStringUnmodifiedSearch {} {}", theSearchParamName, terms);
 			List<PredicateFinalStep> orTerms = terms.stream()
-				.map(s -> buildStringUnmodifiedClause(s, context))
-				.collect(Collectors.toList());
+					.map(s -> buildStringUnmodifiedClause(s, context))
+					.collect(Collectors.toList());
 
 			myRootClause.must(context.orPredicateOrSingle(orTerms));
 		}
@@ -310,22 +310,23 @@ public class ExtendedHSearchClauseBuilder {
 	// Return PredicateFinalStep instead of WildcardPredicateOptionsStep<?>
 	private PredicateFinalStep buildStringUnmodifiedClause(String theString, PathContext theContext) {
 		return theContext
-			.wildcard()
-			.field(joinPath(theContext.getContextPath(), INDEX_TYPE_STRING, IDX_STRING_NORMALIZED))
-			// wildcard is a term-level query, so it isn't analyzed.  Do our own case-folding to match the normStringAnalyzer
-			.matching(normalize(theString) + "*");
+				.wildcard()
+				.field(joinPath(theContext.getContextPath(), INDEX_TYPE_STRING, IDX_STRING_NORMALIZED))
+				// wildcard is a term-level query, so it isn't analyzed.  Do our own case-folding to match the
+				// normStringAnalyzer
+				.matching(normalize(theString) + "*");
 	}
 
 	public void addReferenceUnchainedSearch(
-		String theSearchParamName, List<List<IQueryParameterType>> theReferenceAndOrTerms) {
+			String theSearchParamName, List<List<IQueryParameterType>> theReferenceAndOrTerms) {
 		String fieldPath = joinPath(SEARCH_PARAM_ROOT, theSearchParamName, "reference", "value");
 		for (List<? extends IQueryParameterType> nextAnd : theReferenceAndOrTerms) {
 			Set<String> terms = extractOrStringParams(theSearchParamName, nextAnd);
 			ourLog.trace("reference unchained search {}", terms);
 
 			List<? extends PredicateFinalStep> orTerms = terms.stream()
-				.map(s -> myRootContext.match().field(fieldPath).matching(s))
-				.collect(Collectors.toList());
+					.map(s -> myRootContext.match().field(fieldPath).matching(s))
+					.collect(Collectors.toList());
 
 			myRootClause.must(myRootContext.orPredicateOrSingle(orTerms));
 		}
@@ -337,8 +338,8 @@ public class ExtendedHSearchClauseBuilder {
 			PathContext spContext = contextForFlatSP(theSearchParamName);
 
 			List<PredicateFinalStep> clauses = nextOrList.stream()
-				.map(d -> buildDateTermClause(d, spContext))
-				.collect(Collectors.toList());
+					.map(d -> buildDateTermClause(d, spContext))
+					.collect(Collectors.toList());
 
 			myRootClause.must(myRootContext.orPredicateOrSingle(clauses));
 		}
@@ -348,8 +349,8 @@ public class ExtendedHSearchClauseBuilder {
 		DateParam dateParam = (DateParam) theQueryParameter;
 		boolean isOrdinalSearch = ordinalSearchPrecisions.contains(dateParam.getPrecision());
 		return isOrdinalSearch
-			? generateDateOrdinalSearchTerms(dateParam, theSpContext)
-			: generateDateInstantSearchTerms(dateParam, theSpContext);
+				? generateDateOrdinalSearchTerms(dateParam, theSpContext)
+				: generateDateInstantSearchTerms(dateParam, theSpContext);
 	}
 
 	private PredicateFinalStep generateDateOrdinalSearchTerms(DateParam theDateParam, PathContext theSpContext) {
@@ -370,8 +371,8 @@ public class ExtendedHSearchClauseBuilder {
 
 		if (Objects.isNull(prefix) || prefix == ParamPrefixEnum.EQUAL) {
 			List<? extends PredicateFinalStep> predicateSteps = Arrays.asList(
-				theSpContext.range().field(lowerOrdinalField).atLeast(lowerBoundAsOrdinal),
-				theSpContext.range().field(upperOrdinalField).atMost(upperBoundAsOrdinal));
+					theSpContext.range().field(lowerOrdinalField).atLeast(lowerBoundAsOrdinal),
+					theSpContext.range().field(upperOrdinalField).atMost(upperBoundAsOrdinal));
 			// Raw type to absorb HS 7.x generic changes
 			BooleanPredicateClausesStep booleanStep = theSpContext.bool();
 			predicateSteps.forEach(booleanStep::must);
@@ -386,15 +387,15 @@ public class ExtendedHSearchClauseBuilder {
 			return theSpContext.range().field(lowerOrdinalField).atMost(lowerBoundAsOrdinal);
 		} else if (ParamPrefixEnum.NOT_EQUAL == prefix) {
 			List<? extends PredicateFinalStep> predicateSteps = Arrays.asList(
-				theSpContext.range().field(upperOrdinalField).lessThan(lowerBoundAsOrdinal),
-				theSpContext.range().field(lowerOrdinalField).greaterThan(upperBoundAsOrdinal));
+					theSpContext.range().field(upperOrdinalField).lessThan(lowerBoundAsOrdinal),
+					theSpContext.range().field(lowerOrdinalField).greaterThan(upperBoundAsOrdinal));
 			BooleanPredicateClausesStep booleanStep = theSpContext.bool();
 			predicateSteps.forEach(booleanStep::should);
 			booleanStep.minimumShouldMatchNumber(1);
 			return booleanStep;
 		}
 		throw new IllegalArgumentException(
-			Msg.code(2255) + "Date search param does not support prefix of type: " + prefix);
+				Msg.code(2255) + "Date search param does not support prefix of type: " + prefix);
 	}
 
 	private PredicateFinalStep generateDateInstantSearchTerms(DateParam theDateParam, PathContext theSpContext) {
@@ -405,8 +406,14 @@ public class ExtendedHSearchClauseBuilder {
 		if (ParamPrefixEnum.NOT_EQUAL == prefix) {
 			Instant dateInstant = theDateParam.getValue().toInstant();
 			List<? extends PredicateFinalStep> predicateSteps = Arrays.asList(
-				((SearchPredicateFactory) theSpContext).range().field(upperInstantField).lessThan(dateInstant),
-				((SearchPredicateFactory) theSpContext).range().field(lowerInstantField).greaterThan(dateInstant));
+					((SearchPredicateFactory) theSpContext)
+							.range()
+							.field(upperInstantField)
+							.lessThan(dateInstant),
+					((SearchPredicateFactory) theSpContext)
+							.range()
+							.field(lowerInstantField)
+							.greaterThan(dateInstant));
 			BooleanPredicateClausesStep booleanStep = ((SearchPredicateFactory) theSpContext).bool();
 			predicateSteps.forEach(booleanStep::should);
 			booleanStep.minimumShouldMatchNumber(1);
@@ -415,70 +422,70 @@ public class ExtendedHSearchClauseBuilder {
 
 		DateRangeParam dateRange = new DateRangeParam(theDateParam);
 		Instant lowerBoundAsInstant = Optional.ofNullable(dateRange.getLowerBound())
-			.map(param -> param.getValue().toInstant())
-			.orElse(null);
+				.map(param -> param.getValue().toInstant())
+				.orElse(null);
 		Instant upperBoundAsInstant = Optional.ofNullable(dateRange.getUpperBound())
-			.map(param -> param.getValue().toInstant())
-			.orElse(null);
+				.map(param -> param.getValue().toInstant())
+				.orElse(null);
 
 		if (prefix == ParamPrefixEnum.EQUAL) {
 			List<? extends PredicateFinalStep> predicateSteps = Arrays.asList(
-				((SearchPredicateFactory) theSpContext)
-					.range()
-					.field(lowerInstantField)
-					.atLeast(lowerBoundAsInstant),
-				((SearchPredicateFactory) theSpContext)
-					.range()
-					.field(upperInstantField)
-					.atMost(upperBoundAsInstant));
+					((SearchPredicateFactory) theSpContext)
+							.range()
+							.field(lowerInstantField)
+							.atLeast(lowerBoundAsInstant),
+					((SearchPredicateFactory) theSpContext)
+							.range()
+							.field(upperInstantField)
+							.atMost(upperBoundAsInstant));
 			BooleanPredicateClausesStep booleanStep = ((SearchPredicateFactory) theSpContext).bool();
 			predicateSteps.forEach(booleanStep::must);
 			return booleanStep;
 		} else if (ParamPrefixEnum.GREATERTHAN == prefix || ParamPrefixEnum.STARTS_AFTER == prefix) {
 			return ((SearchPredicateFactory) theSpContext)
-				.range()
-				.field(upperInstantField)
-				.greaterThan(lowerBoundAsInstant);
+					.range()
+					.field(upperInstantField)
+					.greaterThan(lowerBoundAsInstant);
 		} else if (ParamPrefixEnum.GREATERTHAN_OR_EQUALS == prefix) {
 			return ((SearchPredicateFactory) theSpContext)
-				.range()
-				.field(upperInstantField)
-				.atLeast(lowerBoundAsInstant);
+					.range()
+					.field(upperInstantField)
+					.atLeast(lowerBoundAsInstant);
 		} else if (ParamPrefixEnum.LESSTHAN == prefix || ParamPrefixEnum.ENDS_BEFORE == prefix) {
 			return ((SearchPredicateFactory) theSpContext)
-				.range()
-				.field(lowerInstantField)
-				.lessThan(upperBoundAsInstant);
+					.range()
+					.field(lowerInstantField)
+					.lessThan(upperBoundAsInstant);
 		} else if (ParamPrefixEnum.LESSTHAN_OR_EQUALS == prefix) {
 			return ((SearchPredicateFactory) theSpContext)
-				.range()
-				.field(lowerInstantField)
-				.atMost(upperBoundAsInstant);
+					.range()
+					.field(lowerInstantField)
+					.atMost(upperBoundAsInstant);
 		}
 
 		throw new IllegalArgumentException(
-			Msg.code(2256) + "Date search param does not support prefix of type: " + prefix);
+				Msg.code(2256) + "Date search param does not support prefix of type: " + prefix);
 	}
 
 	public void addQuantityUnmodifiedSearch(
-		String theSearchParamName, List<List<IQueryParameterType>> theQuantityAndOrTerms) {
+			String theSearchParamName, List<List<IQueryParameterType>> theQuantityAndOrTerms) {
 
 		for (List<IQueryParameterType> nextOrList : theQuantityAndOrTerms) {
 			PredicateFinalStep nestedClause =
-				myRootContext.buildPredicateInNestedContext(theSearchParamName, nextedContext -> {
-					List<PredicateFinalStep> orClauses = nextOrList.stream()
-						.map(quantityTerm -> buildQuantityTermClause(quantityTerm, nextedContext))
-						.collect(Collectors.toList());
+					myRootContext.buildPredicateInNestedContext(theSearchParamName, nextedContext -> {
+						List<PredicateFinalStep> orClauses = nextOrList.stream()
+								.map(quantityTerm -> buildQuantityTermClause(quantityTerm, nextedContext))
+								.collect(Collectors.toList());
 
-					return nextedContext.orPredicateOrSingle(orClauses);
-				});
+						return nextedContext.orPredicateOrSingle(orClauses);
+					});
 
 			myRootClause.must(nestedClause);
 		}
 	}
 
 	private BooleanPredicateClausesStep buildQuantityTermClause(
-		IQueryParameterType theQueryParameter, PathContext thePathContext) {
+			IQueryParameterType theQueryParameter, PathContext thePathContext) {
 
 		BooleanPredicateClausesStep quantityClause = ((SearchPredicateFactory) thePathContext).bool();
 
@@ -487,17 +494,17 @@ public class ExtendedHSearchClauseBuilder {
 		String quantityElement = joinPath(thePathContext.getContextPath(), INDEX_TYPE_QUANTITY);
 
 		if (myStorageSettings.getNormalizedQuantitySearchLevel()
-			== NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED) {
+				== NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED) {
 			QuantityParam canonicalQty = UcumServiceUtil.toCanonicalQuantityOrNull(qtyParam);
 			if (canonicalQty != null) {
 				String valueFieldPath = joinPath(quantityElement, QTY_VALUE_NORM);
 
 				quantityClause.must(
-					buildNumericClause(valueFieldPath, activePrefix, canonicalQty.getValue(), thePathContext));
+						buildNumericClause(valueFieldPath, activePrefix, canonicalQty.getValue(), thePathContext));
 				quantityClause.must(((SearchPredicateFactory) thePathContext)
-					.match()
-					.field(joinPath(quantityElement, QTY_CODE_NORM))
-					.matching(canonicalQty.getUnits()));
+						.match()
+						.field(joinPath(quantityElement, QTY_CODE_NORM))
+						.matching(canonicalQty.getUnits()));
 				return quantityClause;
 			}
 		}
@@ -508,16 +515,16 @@ public class ExtendedHSearchClauseBuilder {
 
 		if (isNotBlank(qtyParam.getSystem())) {
 			quantityClause.must(((SearchPredicateFactory) thePathContext)
-				.match()
-				.field(joinPath(quantityElement, QTY_SYSTEM))
-				.matching(qtyParam.getSystem()));
+					.match()
+					.field(joinPath(quantityElement, QTY_SYSTEM))
+					.matching(qtyParam.getSystem()));
 		}
 
 		if (isNotBlank(qtyParam.getUnits())) {
 			quantityClause.must(((SearchPredicateFactory) thePathContext)
-				.match()
-				.field(joinPath(quantityElement, QTY_CODE))
-				.matching(qtyParam.getUnits()));
+					.match()
+					.field(joinPath(quantityElement, QTY_CODE))
+					.matching(qtyParam.getUnits()));
 		}
 
 		return quantityClause;
@@ -525,7 +532,7 @@ public class ExtendedHSearchClauseBuilder {
 
 	@Nonnull
 	private PredicateFinalStep buildNumericClause(
-		String valueFieldPath, ParamPrefixEnum thePrefix, BigDecimal theNumberValue, PathContext thePathContext) {
+			String valueFieldPath, ParamPrefixEnum thePrefix, BigDecimal theNumberValue, PathContext thePathContext) {
 		PredicateFinalStep predicate = null;
 
 		double value = theNumberValue.doubleValue();
@@ -536,54 +543,54 @@ public class ExtendedHSearchClauseBuilder {
 		switch (activePrefix) {
 			case APPROXIMATE:
 				predicate = ((SearchPredicateFactory) thePathContext)
-					.range()
-					.field(valueFieldPath)
-					.between(value - approxTolerance, value + approxTolerance);
+						.range()
+						.field(valueFieldPath)
+						.between(value - approxTolerance, value + approxTolerance);
 				break;
 
 			case EQUAL:
 				predicate = ((SearchPredicateFactory) thePathContext)
-					.range()
-					.field(valueFieldPath)
-					.between(range.getLeft().doubleValue(), range.getRight().doubleValue());
+						.range()
+						.field(valueFieldPath)
+						.between(range.getLeft().doubleValue(), range.getRight().doubleValue());
 				break;
 
 			case GREATERTHAN:
 			case STARTS_AFTER:
 				predicate = ((SearchPredicateFactory) thePathContext)
-					.range()
-					.field(valueFieldPath)
-					.greaterThan(value);
+						.range()
+						.field(valueFieldPath)
+						.greaterThan(value);
 				break;
 
 			case GREATERTHAN_OR_EQUALS:
 				predicate = ((SearchPredicateFactory) thePathContext)
-					.range()
-					.field(valueFieldPath)
-					.atLeast(value);
+						.range()
+						.field(valueFieldPath)
+						.atLeast(value);
 				break;
 
 			case LESSTHAN:
 			case ENDS_BEFORE:
 				predicate = ((SearchPredicateFactory) thePathContext)
-					.range()
-					.field(valueFieldPath)
-					.lessThan(value);
+						.range()
+						.field(valueFieldPath)
+						.lessThan(value);
 				break;
 
 			case LESSTHAN_OR_EQUALS:
 				predicate = ((SearchPredicateFactory) thePathContext)
-					.range()
-					.field(valueFieldPath)
-					.atMost(value);
+						.range()
+						.field(valueFieldPath)
+						.atMost(value);
 				break;
 
 			case NOT_EQUAL:
 				// Avoid RangePredicateOptionsStep<?> type — keep as PredicateFinalStep for compatibility
 				PredicateFinalStep negRange = ((SearchPredicateFactory) thePathContext)
-					.range()
-					.field(valueFieldPath)
-					.between(range.getLeft().doubleValue(), range.getRight().doubleValue());
+						.range()
+						.field(valueFieldPath)
+						.between(range.getLeft().doubleValue(), range.getRight().doubleValue());
 				predicate = ((SearchPredicateFactory) thePathContext).bool().mustNot(negRange);
 				break;
 		}
@@ -592,7 +599,7 @@ public class ExtendedHSearchClauseBuilder {
 	}
 
 	public void addUriUnmodifiedSearch(
-		String theParamName, List<List<IQueryParameterType>> theUriUnmodifiedAndOrTerms) {
+			String theParamName, List<List<IQueryParameterType>> theUriUnmodifiedAndOrTerms) {
 		PathContext spContext = this.contextForFlatSP(theParamName);
 		for (List<IQueryParameterType> nextOrList : theUriUnmodifiedAndOrTerms) {
 
@@ -604,24 +611,24 @@ public class ExtendedHSearchClauseBuilder {
 
 	private PredicateFinalStep buildURIClause(List<IQueryParameterType> theOrList, PathContext thePathContext) {
 		List<String> orTerms =
-			theOrList.stream().map(p -> ((UriParam) p).getValue()).collect(Collectors.toList());
+				theOrList.stream().map(p -> ((UriParam) p).getValue()).collect(Collectors.toList());
 
 		return ((SearchPredicateFactory) thePathContext)
-			.terms()
-			.field(joinPath(thePathContext.getContextPath(), URI_VALUE))
-			.matchingAny(orTerms);
+				.terms()
+				.field(joinPath(thePathContext.getContextPath(), URI_VALUE))
+				.matchingAny(orTerms);
 	}
 
 	public void addNumberUnmodifiedSearch(
-		String theParamName, List<List<IQueryParameterType>> theNumberUnmodifiedAndOrTerms) {
+			String theParamName, List<List<IQueryParameterType>> theNumberUnmodifiedAndOrTerms) {
 		PathContext pathContext = contextForFlatSP(theParamName);
 		String fieldPath = joinPath(SEARCH_PARAM_ROOT, theParamName, NUMBER_VALUE);
 
 		for (List<IQueryParameterType> nextOrList : theNumberUnmodifiedAndOrTerms) {
 			List<PredicateFinalStep> orTerms = nextOrList.stream()
-				.map(NumberParam.class::cast)
-				.map(orTerm -> buildNumericClause(fieldPath, orTerm.getPrefix(), orTerm.getValue(), pathContext))
-				.collect(Collectors.toList());
+					.map(NumberParam.class::cast)
+					.map(orTerm -> buildNumericClause(fieldPath, orTerm.getPrefix(), orTerm.getValue(), pathContext))
+					.collect(Collectors.toList());
 
 			myRootClause.must(pathContext.orPredicateOrSingle(orTerms));
 		}
@@ -631,48 +638,48 @@ public class ExtendedHSearchClauseBuilder {
 		NumberParam p = (NumberParam) theValue;
 
 		return buildNumericClause(
-			joinPath(thePathContext.getContextPath(), NUMBER_VALUE), p.getPrefix(), p.getValue(), thePathContext);
+				joinPath(thePathContext.getContextPath(), NUMBER_VALUE), p.getPrefix(), p.getValue(), thePathContext);
 	}
 
 	public void addCompositeUnmodifiedSearch(
-		RuntimeSearchParam theSearchParam,
-		List<RuntimeSearchParam> theSubSearchParams,
-		List<List<IQueryParameterType>> theCompositeAndOrTerms) {
+			RuntimeSearchParam theSearchParam,
+			List<RuntimeSearchParam> theSubSearchParams,
+			List<List<IQueryParameterType>> theCompositeAndOrTerms) {
 		for (List<IQueryParameterType> nextOrList : theCompositeAndOrTerms) {
 
 			PredicateFinalStep nestedClause =
-				myRootContext.buildPredicateInNestedContext(theSearchParam.getName(), nestedContext -> {
-					List<PredicateFinalStep> orClauses = nextOrList.stream()
-						.map(term -> computeCompositeTermClause(
-							theSearchParam, theSubSearchParams, (CompositeParam<?, ?>) term, nestedContext))
-						.collect(Collectors.toList());
+					myRootContext.buildPredicateInNestedContext(theSearchParam.getName(), nestedContext -> {
+						List<PredicateFinalStep> orClauses = nextOrList.stream()
+								.map(term -> computeCompositeTermClause(
+										theSearchParam, theSubSearchParams, (CompositeParam<?, ?>) term, nestedContext))
+								.collect(Collectors.toList());
 
-					return nestedContext.orPredicateOrSingle(orClauses);
-				});
+						return nestedContext.orPredicateOrSingle(orClauses);
+					});
 			myRootClause.must(nestedClause);
 		}
 	}
 
 	private PredicateFinalStep computeCompositeTermClause(
-		RuntimeSearchParam theSearchParam,
-		List<RuntimeSearchParam> theSubSearchParams,
-		CompositeParam<?, ?> theCompositeQueryParam,
-		PathContext theCompositeContext) {
+			RuntimeSearchParam theSearchParam,
+			List<RuntimeSearchParam> theSubSearchParams,
+			CompositeParam<?, ?> theCompositeQueryParam,
+			PathContext theCompositeContext) {
 		Validate.notNull(theSearchParam);
 		Validate.notNull(theSubSearchParams);
 		Validate.notNull(theCompositeQueryParam);
 		Validate.isTrue(
-			theSubSearchParams.size() == 2,
-			"Hapi only supports composite search parameters with 2 components. %s %d",
-			theSearchParam.getName(),
-			theSubSearchParams.size());
+				theSubSearchParams.size() == 2,
+				"Hapi only supports composite search parameters with 2 components. %s %d",
+				theSearchParam.getName(),
+				theSubSearchParams.size());
 		List<IQueryParameterType> values = theCompositeQueryParam.getValues();
 		Validate.isTrue(
-			theSubSearchParams.size() == values.size(),
-			"Different number of query components than defined. %s %d %d",
-			theSearchParam.getName(),
-			theSubSearchParams.size(),
-			values.size());
+				theSubSearchParams.size() == values.size(),
+				"Different number of query components than defined. %s %d %d",
+				theSearchParam.getName(),
+				theSubSearchParams.size(),
+				values.size());
 
 		BooleanPredicateClausesStep compositeClause = ((SearchPredicateFactory) theCompositeContext).bool();
 		for (int i = 0; i < theSubSearchParams.size(); i += 1) {
@@ -705,11 +712,11 @@ public class ExtendedHSearchClauseBuilder {
 			}
 
 			Validate.notNull(
-				subMatch,
-				"Unsupported composite type in %s: %s %s",
-				theSearchParam.getName(),
-				component.getName(),
-				component.getParamType());
+					subMatch,
+					"Unsupported composite type in %s: %s %s",
+					theSearchParam.getName(),
+					component.getName(),
+					component.getParamType());
 			compositeClause.must(subMatch);
 		}
 
@@ -718,14 +725,14 @@ public class ExtendedHSearchClauseBuilder {
 
 	private boolean hasAContainsModifier(List<List<IQueryParameterType>> stringAndOrTerms) {
 		return stringAndOrTerms.stream()
-			.flatMap(List::stream)
-			.anyMatch(next ->
-				Constants.PARAMQUALIFIER_STRING_CONTAINS.equalsIgnoreCase(next.getQueryParameterQualifier()));
+				.flatMap(List::stream)
+				.anyMatch(next ->
+						Constants.PARAMQUALIFIER_STRING_CONTAINS.equalsIgnoreCase(next.getQueryParameterQualifier()));
 	}
 
 	private boolean isContainsSearch(String theSearchParamName, List<List<IQueryParameterType>> stringAndOrTerms) {
 		return (Constants.PARAM_TEXT.equalsIgnoreCase(theSearchParamName)
-				|| Constants.PARAM_CONTENT.equalsIgnoreCase(theSearchParamName))
-			&& hasAContainsModifier(stringAndOrTerms);
+						|| Constants.PARAM_CONTENT.equalsIgnoreCase(theSearchParamName))
+				&& hasAContainsModifier(stringAndOrTerms);
 	}
 }

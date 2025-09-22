@@ -118,7 +118,7 @@ class PathContext implements SearchPredicateFactory {
 	// implement SearchPredicateFactory
 
 	@Override
-	public MatchAllPredicateOptionsStep<?,?> matchAll() {
+	public MatchAllPredicateOptionsStep<?, ?> matchAll() {
 		return myPredicateFactory.matchAll();
 	}
 
@@ -187,37 +187,37 @@ class PathContext implements SearchPredicateFactory {
 	}
 
 	@Override
-	public MatchPredicateFieldStep<?,?> match() {
+	public MatchPredicateFieldStep<?, ?> match() {
 		return myPredicateFactory.match();
 	}
 
 	@Override
-	public RangePredicateFieldStep<?,?> range() {
+	public RangePredicateFieldStep<?, ?> range() {
 		return myPredicateFactory.range();
 	}
 
 	@Override
-	public PhrasePredicateFieldStep<?,?> phrase() {
+	public PhrasePredicateFieldStep<?, ?> phrase() {
 		return myPredicateFactory.phrase();
 	}
 
 	@Override
-	public WildcardPredicateFieldStep<?,?> wildcard() {
+	public WildcardPredicateFieldStep<?, ?> wildcard() {
 		return myPredicateFactory.wildcard();
 	}
 
 	@Override
-	public PrefixPredicateFieldStep<?,?> prefix() {
+	public PrefixPredicateFieldStep<?, ?> prefix() {
 		return myPredicateFactory.prefix();
 	}
 
 	@Override
-	public RegexpPredicateFieldStep<?,?> regexp() {
+	public RegexpPredicateFieldStep<?, ?> regexp() {
 		return myPredicateFactory.regexp();
 	}
 
 	@Override
-	public TermsPredicateFieldStep<?,?> terms() {
+	public TermsPredicateFieldStep<?, ?> terms() {
 		return myPredicateFactory.terms();
 	}
 
@@ -226,7 +226,7 @@ class PathContext implements SearchPredicateFactory {
 	 */
 	@Deprecated(since = "8.6.0", forRemoval = true)
 	@Override
-	public NestedPredicateFieldStep<?,?> nested() {
+	public NestedPredicateFieldStep<?, ?> nested() {
 		return myPredicateFactory.nested();
 	}
 
@@ -236,17 +236,17 @@ class PathContext implements SearchPredicateFactory {
 	}
 
 	@Override
-	public SimpleQueryStringPredicateFieldStep<?,?> simpleQueryString() {
+	public SimpleQueryStringPredicateFieldStep<?, ?> simpleQueryString() {
 		return myPredicateFactory.simpleQueryString();
 	}
 
 	@Override
-	public QueryStringPredicateFieldStep<?,?> queryString() {
+	public QueryStringPredicateFieldStep<?, ?> queryString() {
 		return myPredicateFactory.queryString();
 	}
 
 	@Override
-	public ExistsPredicateFieldStep<?,?> exists() {
+	public ExistsPredicateFieldStep<?, ?> exists() {
 		return myPredicateFactory.exists();
 	}
 
