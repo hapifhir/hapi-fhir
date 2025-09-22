@@ -2,79 +2,156 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.patch.FhirPatch;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class FhirPatchBuilderTest {
-
-	private final FhirContext myContext	= FhirContext.forR4Cached();
-	private FhirPatchBuilder myBuilder;
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirPatchBuilderTest.class);
+	private final FhirContext myContext = FhirContext.forR4Cached();
 	private FhirPatch myPatchSvc;
 
 	@BeforeEach
 	void before() {
-		myBuilder = new FhirPatchBuilder(myContext);
 		myPatchSvc = new FhirPatch(myContext);
 	}
 
 	@Test
 	void testAdd() {
-		myBuilder
+		FhirPatchBuilder builder = new FhirPatchBuilder(myContext);
+		builder
 			.add()
 			.path("Patient")
-			.name("birthDate")
-			.value(new DateType("2020-01-02"));
-		IBaseParameters patch = myBuilder.build();
+			.name("identifier")
+			.value(new Identifier().setSystem("http://system").setValue("value-new"));
+		IBaseParameters patch = builder.build();
+		ourLog.info("Patch:\n{}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
 
-		Patient patient = new Patient();
-		FhirPatch.PatchOutcome outcome = myPatchSvc.apply(patient, patch);
+		Patient input = createPatientWith3Identifiers();
+		FhirPatch.PatchOutcome outcome = myPatchSvc.apply(input, patch);
 		assertThat(outcome.getErrors()).isEmpty();
 
-		assertEquals("2020-01-02", patient.getBirthDateElement().getValueAsString());
+		List<String> actualIdentifier = input.getIdentifier().stream().map(t -> t.getValue()).toList();
+		assertThat(actualIdentifier).containsExactly(
+			"value-0",
+			"value-1",
+			"value-2",
+			"value-new"
+		);
 	}
 
 	@Test
 	void testInsert() {
-		myBuilder
+		FhirPatchBuilder builder = new FhirPatchBuilder(myContext);
+		builder
 			.insert()
-			.path("Patient")
-			.name("birthDate")
-			.value(new DateTimeType("2020-01-02"));
+			.path("Patient.identifier")
+			.index(1)
+			.value(new Identifier().setSystem("http://system").setValue("value-new"));
+		IBaseParameters patch = builder.build();
+		ourLog.info("Patch:\n{}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
 
-		String expected = """
-			<Parameters xmlns="http://hl7.org/fhir">
-			   <parameter>
-			      <name value="operation"/>
-			      <part>
-			         <name value="type"/>
-			         <valueString value="add"/>
-			      </part>
-			      <part>
-			         <name value="path"/>
-			         <valueString value="Patient"/>
-			      </part>
-			      <part>
-			         <name value="name"/>
-			         <valueString value="birthDate"/>
-			      </part>
-			      <part>
-			         <name value="value"/>
-			         <valueDateTime value="2020-01-02"/>
-			      </part>
-			   </parameter>
-			</Parameters>""";
-		String actual = myContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(myBuilder.build());
-		assertEquals(expected, actual);
+		Patient input = createPatientWith3Identifiers();
+		FhirPatch.PatchOutcome outcome = myPatchSvc.apply(input, patch);
+		assertThat(outcome.getErrors()).isEmpty();
+
+		List<String> actualIdentifier = input.getIdentifier().stream().map(t -> t.getValue()).toList();
+		assertThat(actualIdentifier).containsExactly(
+			"value-0",
+			"value-new",
+			"value-1",
+			"value-2"
+		);
+
 	}
 
+	@Test
+	void testDelete() {
+		FhirPatchBuilder builder = new FhirPatchBuilder(myContext);
+		builder
+			.delete()
+			.path("Patient.identifier[1]");
+		IBaseParameters patch = builder.build();
+		ourLog.info("Patch:\n{}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
 
+		Patient input = createPatientWith3Identifiers();
+		FhirPatch.PatchOutcome outcome = myPatchSvc.apply(input, patch);
+		assertThat(outcome.getErrors()).isEmpty();
+
+		List<String> actualIdentifier = input.getIdentifier().stream().map(t -> t.getValue()).toList();
+		assertThat(actualIdentifier).containsExactly(
+			"value-0",
+			"value-2"
+		);
+
+	}
+
+	@Test
+	void testReplace() {
+		FhirPatchBuilder builder = new FhirPatchBuilder(myContext);
+		builder
+			.replace()
+			.path("Patient.identifier[1]")
+			.value(new Identifier().setSystem("http://system").setValue("value-new"));
+		IBaseParameters patch = builder.build();
+		ourLog.info("Patch:\n{}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
+
+		Patient input = createPatientWith3Identifiers();
+		FhirPatch.PatchOutcome outcome = myPatchSvc.apply(input, patch);
+		assertThat(outcome.getErrors()).isEmpty();
+
+		List<String> actualIdentifier = input.getIdentifier().stream().map(t -> t.getValue()).toList();
+		assertThat(actualIdentifier).containsExactly(
+			"value-0",
+			"value-new",
+			"value-2"
+		);
+
+	}
+
+	@Test
+	void testMove() {
+		FhirPatchBuilder builder = new FhirPatchBuilder(myContext);
+		builder
+			.move()
+			.path("Patient.identifier")
+			.source(1)
+			.destination(2);
+		IBaseParameters patch = builder.build();
+		ourLog.info("Patch:\n{}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
+
+		Patient input = createPatientWith3Identifiers();
+		FhirPatch.PatchOutcome outcome = myPatchSvc.apply(input, patch);
+		assertThat(outcome.getErrors()).isEmpty();
+
+		List<String> actualIdentifier = input.getIdentifier().stream().map(t -> t.getValue()).toList();
+		assertThat(actualIdentifier).containsExactly(
+			"value-0",
+			"value-2",
+			"value-1"
+		);
+
+	}
+
+	@Nonnull
+	private static Patient createPatientWith3Identifiers() {
+		Patient input = new Patient();
+		input.addIdentifier().setValue("value-0");
+		input.addIdentifier().setValue("value-1");
+		input.addIdentifier().setValue("value-2");
+		return input;
+	}
 
 
 }

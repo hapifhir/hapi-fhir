@@ -31,6 +31,7 @@ import ca.uhn.fhir.parser.path.EncodeContextPath;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.IModelVisitor2;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -132,7 +133,7 @@ public class FhirPatch {
 				} else if (OPERATION_REPLACE.equals(type)) {
 					handleReplaceOperation(theResource, nextOperation);
 				} else if (OPERATION_INSERT.equals(type)) {
-					handleInsertOperation(theResource, nextOperation);
+					handleInsertOperation(theResource, nextOperation, theOutcome);
 				} else if (OPERATION_MOVE.equals(type)) {
 					handleMoveOperation(theResource, nextOperation);
 				} else {
@@ -173,12 +174,17 @@ public class FhirPatch {
 		}
 	}
 
-	private void handleInsertOperation(@Nullable IBaseResource theResource, IBase theParameters) {
+	private void handleInsertOperation(@Nullable IBaseResource theResource, IBase theParameters, PatchOutcome theOutcome) {
 
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
 
 		int lastDot = path.lastIndexOf(".");
+		if (lastDot == -1) {
+			theOutcome.addError("Invalid path for insert operation (must point to a repeatable element): " + UrlUtil.sanitizeUrlPart(path));
+			return;
+		}
+
 		String containingPath = path.substring(0, lastDot);
 		String elementName = path.substring(lastDot + 1);
 		Integer insertIndex = ParametersUtil.getParameterPartValueAsInteger(myContext, theParameters, PARAMETER_INDEX)

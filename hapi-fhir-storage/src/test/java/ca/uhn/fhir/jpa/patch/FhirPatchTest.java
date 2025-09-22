@@ -3,9 +3,13 @@ package ca.uhn.fhir.jpa.patch;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.FhirPatchBuilder;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.intellij.lang.annotations.Language;
@@ -20,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -318,6 +323,28 @@ public class FhirPatchTest {
 			assertTrue(ex.getMessage().contains("List contains more than a single element"));
 		}
 	}
+
+	@Test
+	public void testInsert_InvalidPath_NoDots() {
+		FhirPatchBuilder builder = new FhirPatchBuilder(myFhirContext);
+		builder
+			.insert()
+			.path("Patient")
+			.index(1)
+			.value(new Identifier().setValue("value-new"));
+		IBaseParameters patch = builder.build();
+
+		Patient input = new Patient();
+		input.addIdentifier().setValue("value-0");
+		input.addIdentifier().setValue("value-1");
+		input.addIdentifier().setValue("value-2");
+		FhirPatch.PatchOutcome outcome = myPatch.apply(input, patch);
+
+		assertThat(outcome.getErrors()).contains(
+			"Invalid path for insert operation (must point to a repeatable element): Patient"
+		);
+	}
+
 
 	@ParameterizedTest
 	@ValueSource(strings = {
