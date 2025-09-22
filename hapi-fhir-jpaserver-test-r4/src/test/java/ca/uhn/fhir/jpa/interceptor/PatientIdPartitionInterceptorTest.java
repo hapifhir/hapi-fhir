@@ -674,17 +674,21 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 
 		// verify
         // This bundle contains 517 resources.
-        assertEquals(26, myCaptureQueriesListener.countSelectQueries());
+        assertEquals(27, myCaptureQueriesListener.countSelectQueries());
         // this is so high because we limit Hibernate to batches of 30 rows.
-        assertEquals(319, myCaptureQueriesListener.getInsertQueries().size());
-        assertEquals(9379, myCaptureQueriesListener.countInsertQueries());
-        assertEquals(36, myCaptureQueriesListener.getUpdateQueries().size());
-        assertEquals(1031, myCaptureQueriesListener.countUpdateQueries());
-        assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-        
-		if (theSplitTransaction) {
+        if (theSplitTransaction) {
+			assertEquals(328, myCaptureQueriesListener.getInsertQueries().size());
+			assertEquals(9379, myCaptureQueriesListener.countInsertQueries());
+			assertEquals(36, myCaptureQueriesListener.getUpdateQueries().size());
+			assertEquals(1016, myCaptureQueriesListener.countUpdateQueries());
+			assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 			assertEquals(2, myCaptureQueriesListener.countCommits());
 		} else {
+			assertEquals(322, myCaptureQueriesListener.getInsertQueries().size());
+			assertEquals(9379, myCaptureQueriesListener.countInsertQueries());
+			assertEquals(35, myCaptureQueriesListener.getUpdateQueries().size());
+			assertEquals(1016, myCaptureQueriesListener.countUpdateQueries());
+			assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 			assertEquals(1, myCaptureQueriesListener.countCommits());
 		}
 

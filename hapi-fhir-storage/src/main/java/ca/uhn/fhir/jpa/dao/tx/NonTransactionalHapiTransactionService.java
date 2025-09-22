@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.dao.tx;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.transaction.support.SimpleTransactionStatus;
@@ -45,7 +44,8 @@ public class NonTransactionalHapiTransactionService extends HapiTransactionServi
 	}
 
 	@Override
-	public boolean isCompatiblePartition(RequestPartitionId theRequestPartitionId, RequestPartitionId theOtherRequestPartitionId) {
+	public boolean isCompatiblePartition(
+			RequestPartitionId theRequestPartitionId, RequestPartitionId theOtherRequestPartitionId) {
 		if (myNonCompatiblePartitions.contains(Pair.of(theRequestPartitionId, theOtherRequestPartitionId))) {
 			return false;
 		} else return !myNonCompatiblePartitions.contains(Pair.of(theOtherRequestPartitionId, theRequestPartitionId));
@@ -58,5 +58,4 @@ public class NonTransactionalHapiTransactionService extends HapiTransactionServi
 	public void addNonCompatiblePartition(RequestPartitionId thePartitionA, RequestPartitionId thePartitionB) {
 		myNonCompatiblePartitions.add(Pair.of(thePartitionA, thePartitionB));
 	}
-
 }

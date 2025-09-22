@@ -385,6 +385,56 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 * See the class javadoc before changing the counts in this test!
 	 */
 	@Test
+	public void testUpdateWithManyInlineReferences() {
+		// Setup
+		createPractitioner(withId("A0"), withActiveTrue());
+		createPractitioner(withId("A1"), withActiveTrue());
+		createPractitioner(withId("A2"), withActiveTrue());
+		createPractitioner(withId("A3"), withActiveTrue());
+		createPractitioner(withId("A4"), withActiveTrue());
+		createPractitioner(withId("A5"), withActiveTrue());
+
+		// Test
+		myCaptureQueriesListener.clear();
+		createPatient(
+			withReference("generalPractitioner", "Practitioner/A0"),
+			withReference("generalPractitioner", "Practitioner/A1"),
+			withReference("generalPractitioner", "Practitioner/A2"),
+			withReference("generalPractitioner", "Practitioner/A3"),
+			withReference("generalPractitioner", "Practitioner/A4"),
+			withReference("generalPractitioner", "Practitioner/A5")
+		);
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(6, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(9, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+		// Second pass test
+		myCaptureQueriesListener.clear();
+		createPatient(
+			withReference("generalPractitioner", "Practitioner/A0"),
+			withReference("generalPractitioner", "Practitioner/A1"),
+			withReference("generalPractitioner", "Practitioner/A2"),
+			withReference("generalPractitioner", "Practitioner/A3"),
+			withReference("generalPractitioner", "Practitioner/A4"),
+			withReference("generalPractitioner", "Practitioner/A5")
+		);
+
+		// Verify
+		assertEquals(6, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(9, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+	}
+
+	/*
+	 * See the class javadoc before changing the counts in this test!
+	 */
+	@Test
 	public void testUpdateWithNoChanges() {
 		IIdType orgId = createOrganization(withName("MY ORG"));
 
@@ -4460,12 +4510,19 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(20, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(5, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		// Test 3 - Still the same URLs, the ID cache should now reduce the last select
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input.get());
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
 		if (theMatchUrlCacheEnabled) {
-			// todo the match url cache actually makes this case slower now
-			// since we still need to do the pid->fhir id translation with the cache.
-			// But without the cache, we are batching match url resolution and fhir id lookup in a single query.
-			// Consider deleting this feature, or changing the prefetch to do match-url first, and id 2nd so we can do both.
-			assertEquals(10, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+			assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		} else {
 			assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		}
