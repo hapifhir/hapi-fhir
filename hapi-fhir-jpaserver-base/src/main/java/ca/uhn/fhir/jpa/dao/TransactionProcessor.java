@@ -52,7 +52,6 @@ import ca.uhn.fhir.util.TaskChunker;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SetMultimap;
 import jakarta.annotation.Nonnull;
@@ -573,35 +572,31 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			}
 		}
 
-		/*
-		 * Chunk references into query-friendly sizes to resolve in batches.
-		 * Note: we can have 1000s of references all using the same url.
-		 * E.g. Organization references in big patient bundles. But if
-		 * these are scattered among other different URLs within the Bundle,
-		 * we don't want to end up resolving the same URL over and over.
-		 * So we build batches by url, not by reference.
-		 */
-		Map<MatchTarget, List<MatchUrlToResolve>> byMatchUrl =
-				searchParameterMapsToResolve.stream().collect(groupingBy(r -> {
-					RequestPartitionId partition = RequestPartitionId.allPartitions();
-					if (myPartitionSettings.isPartitioningEnabled()) {
-						partition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-							theRequestDetails, r.myResourceDefinition.getName(), r.myMatchUrlSearchMap);
-						if (partition.isAllPartitions()) {
-							partition = theRequestPartitionId;
-						}
-					}
+		// group things by match url so we can run them together.
+		record MatchTarget(String url, String resourceType) {
+			@Nonnull
+			static MatchTarget getMatchTarget(MatchUrlToResolve r) {
+				return new MatchTarget(r.myRequestUrl, r.myResourceDefinition.getName());
+			}
+		}
 
-					return new MatchTarget(partition, r.myRequestUrl, r.myResourceDefinition.getName());
-				}));
+		ListMultimap<RequestPartitionId, MatchUrlToResolve> partitionToMatchUrls = groupMatchTargetListByPartitionId(theRequestDetails, searchParameterMapsToResolve, theRequestPartitionId);
+		for (RequestPartitionId partitionId : partitionToMatchUrls.keySet()) {
 
-		Map<RequestPartitionId, List<Map.Entry<MatchTarget, List<MatchUrlToResolve>>>> byPartitionToMatchUrl = groupMatchTargetListByPartitionId(byMatchUrl);
+			List<MatchUrlToResolve> matchUrls = partitionToMatchUrls.get(partitionId);
 
-		for (Map.Entry<RequestPartitionId, List<Map.Entry<MatchTarget, List<MatchUrlToResolve>>>> by : byPartitionToMatchUrl.entrySet()) {
-			RequestPartitionId requestPartitionId = by.getKey();
-			List<Map.Entry<MatchTarget, List<MatchUrlToResolve>>> entries = by.getValue();
+			/*
+			 * Chunk references into query-friendly sizes to resolve in batches.
+			 * Note: we can have 1000s of references all using the same url.
+			 * E.g. Organization references in big patient bundles. But if
+			 * these are scattered among other different URLs within the Bundle,
+			 * we don't want to end up resolving the same URL over and over.
+			 * So we build batches by url, not by reference.
+			 */
+			Map<MatchTarget, List<MatchUrlToResolve>> byMatchUrl =
+				matchUrls.stream().collect(groupingBy(MatchTarget::getMatchTarget));
 
-			TaskChunker.chunk(entries, CONDITIONAL_URL_FETCH_CHUNK_SIZE, nextUrlChunk -> {
+			TaskChunker.chunk(byMatchUrl.entrySet(), CONDITIONAL_URL_FETCH_CHUNK_SIZE, nextUrlChunk -> {
 
 				/*
 				 * Combine all resolve entries under this chunk of urls. If we have several entries with
@@ -615,7 +610,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				preFetchSearchParameterMaps(
 					theRequestDetails,
 					theTransactionDetails,
-					requestPartitionId,
+					partitionId,
 					combinedChunk,
 					theIdsToPreFetchBodiesFor,
 					theIdsToPreFetchVersionsFor);
@@ -624,14 +619,49 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 	}
 
+	/**
+	 * Given a collection of {@link MatchUrlToResolve} objects, calculates the read
+	 * {@link RequestPartitionId} associated with each one and returns a
+	 * map of the partition ID to the list of associated match URLs.
+	 * <p>
+	 * If two different {@link RequestPartitionId} are considered compatible per the
+	 * {@link ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService#isCompatiblePartition(RequestPartitionId, RequestPartitionId)}
+	 * method, the two partitions are combined into a single {@link RequestPartitionId} object and all
+	 * match URLs associated with both will be returned in a single list associated with the
+	 * combined {@link RequestPartitionId}.
+	 * </p>
+	 */
 	@Nonnull
-	private Map<RequestPartitionId, List<Map.Entry<MatchTarget, List<MatchUrlToResolve>>>> groupMatchTargetListByPartitionId(Map<MatchTarget, List<MatchUrlToResolve>> byMatchUrl) {
-		Map<RequestPartitionId, List<Map.Entry<MatchTarget, List<MatchUrlToResolve>>>> byPartitionToMatchUrl = byMatchUrl.entrySet().stream().collect(groupingBy(t -> t.getKey().requestPartitionId()));
+	private ListMultimap<RequestPartitionId, MatchUrlToResolve> groupMatchTargetListByPartitionId(RequestDetails theRequestDetails, List<MatchUrlToResolve> theMatchUrls, RequestPartitionId theOuterRequestPartitionId) {
+		ListMultimap<RequestPartitionId, MatchUrlToResolve> retVal = MultimapBuilder.hashKeys().arrayListValues().build();
 
+		/*
+		 * For each Match URL, calculate the request partition and populate a Multimap
+		 */
+		for (MatchUrlToResolve next : theMatchUrls) {
+			RequestPartitionId partition =  RequestPartitionId.allPartitions();
+			if (myPartitionSettings.isPartitioningEnabled()) {
+				partition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+					theRequestDetails, next.myResourceDefinition.getName(), next.myMatchUrlSearchMap);
+				if (partition.isAllPartitions()) {
+					partition = theOuterRequestPartitionId;
+				}
+			}
+
+			retVal.put(partition, next);
+		}
+
+		/*
+		 * Try to combine any request partitions which are considered compatible by the
+		 * transaction service. We're just using a brute force way to determine this, which
+		 * could probably be optimized some, but it's not expected that we'll typically have
+		 * many different partitions in the same transaction so it probably doesn't matter
+		 * too much.
+		 */
 		while (true) {
 			boolean changes = false;
 
-			List<RequestPartitionId> partitionUds = new ArrayList<>(byPartitionToMatchUrl.keySet());
+			List<RequestPartitionId> partitionUds = new ArrayList<>(retVal.keySet());
 			for (int  indexA = 0; indexA < partitionUds.size(); indexA++) {
 				for (int  indexB = 0; indexB < partitionUds.size(); indexB++) {
 					if (indexA == indexB) {
@@ -646,13 +676,13 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 					if (myHapiTransactionService.isCompatiblePartition(partitionA, partitionB)) {
 						changes = true;
-						List<Map.Entry<MatchTarget, List<MatchUrlToResolve>>> byMatchUrlsA = byPartitionToMatchUrl.remove(partitionA);
-						List<Map.Entry<MatchTarget, List<MatchUrlToResolve>>> byMatchUrlsB = byPartitionToMatchUrl.remove(partitionB);
+						List<MatchUrlToResolve> matchUrlsA = retVal.removeAll(partitionA);
+						List<MatchUrlToResolve> matchUrlsB = retVal.removeAll(partitionB);
 
 						RequestPartitionId partitionBoth =  partitionA.mergeIds(partitionB);
-						byMatchUrlsA.addAll(byMatchUrlsB);
+						List<MatchUrlToResolve> matchUrlsBoth = ListUtils.union(matchUrlsA, matchUrlsB);
 
-						byPartitionToMatchUrl.put(partitionBoth, byMatchUrlsA);
+						retVal.putAll(partitionBoth, matchUrlsBoth);
 						partitionUds.set(indexA, null);
 						partitionUds.set(indexB, null);
 					}
@@ -663,7 +693,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				break;
 			}
 		}
-		return byPartitionToMatchUrl;
+		return retVal;
 	}
 
 	/**
@@ -1119,7 +1149,5 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		 */
 		DIRECT_TARGET
 	}
-
-	record MatchTarget(RequestPartitionId requestPartitionId, String url, String resourceType) { }
 
 }
