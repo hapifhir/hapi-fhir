@@ -3,11 +3,17 @@ package ca.uhn.fhir.jpa.patch;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.FhirPatchBuilder;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
@@ -26,10 +32,11 @@ import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FhirPatchTest {
+public class FhirPatchTest implements ITestDataBuilder {
 	org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirPatchTest.class);
 
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
@@ -41,6 +48,21 @@ public class FhirPatchTest {
 	@BeforeEach
 	public void before() {
 		myPatch = new FhirPatch(myFhirContext);
+	}
+
+	@Override
+	public IIdType doCreateResource(IBaseResource theResource) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IIdType doUpdateResource(IBaseResource theResource) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myFhirContext;
 	}
 
 	/**
@@ -346,12 +368,74 @@ public class FhirPatchTest {
 	}
 
 
+	@Test
+	void testReplace() {
+		FhirPatchBuilder builder = new FhirPatchBuilder(myFhirContext);
+		IBaseParameters patch = builder
+			.replace()
+			.path("Observation.code.coding.where(system='http://loinc.org')")
+			.value(new Coding().setSystem("http://foo").setCode("code-new"))
+			.andThen()
+			.build();
+
+		Observation input = (Observation) buildObservation(
+			withObservationCode("http://loinc.org", "code"),
+			withObservationCode("http://foo", "code")
+		);
+
+		FhirPatch.PatchOutcome outcome = myPatch.apply(input, patch);
+		assertThat(outcome.getErrors()).isEmpty();
+
+		assertEquals("code-new", input.getCode().getCoding().get(0).getCode());
+		assertEquals("code", input.getCode().getCoding().get(1).getCode());
+	}
+
+
+	@Test
+	void fail_Delete_MatchesMultipleElements() {
+		IBaseParameters patch = new FhirPatchBuilder(myFhirContext)
+			.delete()
+			.path("Patient.identifier")
+			.andThen()
+			.build();
+
+		IBaseResource patient = buildPatient(
+			withIdentifier("http://system0", "value0"),
+			withIdentifier("http://system1", "value1"));
+
+		FhirPatch.PatchOutcome outcome = myPatch.apply(patient, patch);
+		assertThat(outcome.getErrors()).containsExactly(
+			"Multiple elements found at Patient.identifier when deleting"
+		);
+	}
+
+	@Test
+	void fail_Delete_MatchesMultipleElements_WithFilter() {
+		IBaseParameters patch = new FhirPatchBuilder(myFhirContext)
+			.delete()
+			.path("Patient.identifier.where(system='http://system0')")
+			.andThen()
+			.build();
+
+		IBaseResource patient = buildPatient(
+			withIdentifier("http://system0", "value0"),
+			withIdentifier("http://system0", "value1"),
+			withIdentifier("http://system1", "value2"));
+
+		FhirPatch.PatchOutcome outcome = myPatch.apply(patient, patch);
+		assertThat(outcome.getErrors()).containsExactly(
+			"Multiple elements found at Patient.identifier.where(system='http://system0') when deleting"
+		);
+	}
+
+
+
 	@ParameterizedTest
 	@ValueSource(strings = {
 		"Appointment.participant.actor.reference.where(startsWith('Patient')",
 		"Appointment.participant.actor.reference.where(contains(')')"
 	})
-	public void patch_invalidPaths_throw(String thePath) {
+	void fail_invalidPaths_throw(String thePath) {
 		// setup
 		Appointment appointment;
 		{

@@ -29,7 +29,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.util.FhirPathUtils;
 import ca.uhn.fhir.parser.path.EncodeContextPath;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.IModelVisitor2;
+import ca.uhn.fhir.util.FhirPatchBuilder;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Multimap;
@@ -43,7 +43,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.XhtmlType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import java.util.ArrayList;
@@ -82,6 +81,7 @@ public class FhirPatch {
 	public static final String PARAMETER_SOURCE = "source";
 	public static final String PARAMETER_TYPE = "type";
 	public static final String PARAMETER_VALUE = "value";
+	public static final String PARAMETER_ALLOW_MULTIPLE_MATCHES = FhirPatchBuilder.PARAMETER_ALLOW_MULTIPLE_MATCHES;
 
 	private final FhirContext myContext;
 	private boolean myIncludePreviousValueInDiff;
@@ -127,7 +127,7 @@ public class FhirPatch {
 				type = defaultString(type);
 
 				if (OPERATION_DELETE.equals(type)) {
-					handleDeleteOperation(theResource, nextOperation);
+					handleDeleteOperation(theResource, nextOperation, theOutcome);
 				} else if (OPERATION_ADD.equals(type)) {
 					handleAddOperation(theResource, nextOperation, theOutcome);
 				} else if (OPERATION_REPLACE.equals(type)) {
@@ -222,34 +222,48 @@ public class FhirPatch {
 		}
 	}
 
-	private void handleDeleteOperation(@Nullable IBaseResource theResource, IBase theParameters) {
+	private void handleDeleteOperation(@Nullable IBaseResource theResource, IBase theParameters, PatchOutcome theOutcome) {
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
 
-		ParsedPath parsedPath = ParsedPath.parse(path);
+		boolean allowMultiDelete = ParametersUtil
+			.getParameterPartValueAsBoolean(myContext, theParameters, PARAMETER_ALLOW_MULTIPLE_MATCHES)
+			.orElse(Boolean.FALSE);
+
+		ParsedFhirPath parsedPath = ParsedFhirPath.parse(path);
 
 		if (theResource == null) {
 			return;
 		}
 
+		String pathToSelect;
+		if (parsedPath.endsWithFilterOrIndex()) {
+			pathToSelect = parsedPath.getContainingPath();
+		} else {
+			pathToSelect = path;
+		}
 		List<IBase> containingElements = myContext
 				.newFhirPath()
-				.evaluate(
-						theResource,
-						parsedPath.getEndsWithAFilterOrIndex() ? parsedPath.getContainingPath() : path,
-						IBase.class);
+				.evaluate(theResource, pathToSelect, IBase.class);
 
+		int count = 0;
 		for (IBase nextElement : containingElements) {
-			if (parsedPath.getEndsWithAFilterOrIndex()) {
+			if (parsedPath.endsWithFilterOrIndex()) {
 				// if the path ends with a filter or index, we must be dealing with a list
-				deleteFromList(theResource, nextElement, parsedPath.getLastElementName(), path);
+				count += deleteFromList(theResource, nextElement, parsedPath.getLastElementName(), path);
 			} else {
-				deleteSingleElement(nextElement);
+				count += deleteSingleElement(nextElement);
 			}
 		}
+
+		if (count > 1 && !allowMultiDelete) {
+			theOutcome.addError("Multiple elements found at " + path + " when deleting");
+			return;
+		}
+
 	}
 
-	private void deleteFromList(
+	private int deleteFromList(
 			IBaseResource theResource,
 			IBase theContainingElement,
 			String theListElementName,
@@ -260,12 +274,17 @@ public class FhirPatch {
 				childDefinition.getUseableChildDef().getAccessor().getValues(theContainingElement));
 		List<IBase> elementsToRemove =
 				myContext.newFhirPath().evaluate(theResource, theElementToDeletePath, IBase.class);
+
+		int initialSize = existingValues.size();
 		existingValues.removeAll(elementsToRemove);
+		int delta = initialSize - existingValues.size();
 
 		childDefinition.getUseableChildDef().getMutator().setValue(theContainingElement, null);
 		for (IBase nextNewValue : existingValues) {
 			childDefinition.getUseableChildDef().getMutator().addValue(theContainingElement, nextNewValue);
 		}
+
+		return delta;
 	}
 
 	private void handleReplaceOperation(@Nullable IBaseResource theResource, @Nullable IBase theParameters) {
@@ -978,20 +997,12 @@ public class FhirPatch {
 		return newElement;
 	}
 
-	private void deleteSingleElement(IBase theElementToDelete) {
-		myContext.newTerser().visit(theElementToDelete, new IModelVisitor2() {
-			@Override
-			public boolean acceptElement(
-					IBase theElement,
-					List<IBase> theContainingElementPath,
-					List<BaseRuntimeChildDefinition> theChildDefinitionPath,
-					List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
-				if (theElement instanceof IPrimitiveType) {
-					((IPrimitiveType<?>) theElement).setValueAsString(null);
-				}
-				return true;
-			}
-		});
+	private int deleteSingleElement(IBase theElementToDelete) {
+		if (myContext.newTerser().clear(theElementToDelete)) {
+			return 1;
+		} else {
+			return 0;
+		}
 	}
 
 	public IBaseParameters diff(@Nullable IBaseResource theOldValue, @Nonnull IBaseResource theNewValue) {
