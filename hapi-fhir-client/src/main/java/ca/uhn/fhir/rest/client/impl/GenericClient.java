@@ -45,6 +45,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PagingHttpMethodEnum;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -61,6 +62,7 @@ import ca.uhn.fhir.rest.client.method.DeleteMethodBinding;
 import ca.uhn.fhir.rest.client.method.HistoryMethodBinding;
 import ca.uhn.fhir.rest.client.method.HttpDeleteClientInvocation;
 import ca.uhn.fhir.rest.client.method.HttpGetClientInvocation;
+import ca.uhn.fhir.rest.client.method.HttpRawClientInvocation;
 import ca.uhn.fhir.rest.client.method.HttpSimpleClientInvocation;
 import ca.uhn.fhir.rest.client.method.IClientResponseHandler;
 import ca.uhn.fhir.rest.client.method.MethodUtil;
@@ -108,6 +110,7 @@ import ca.uhn.fhir.rest.gclient.IPatchWithBody;
 import ca.uhn.fhir.rest.gclient.IPatchWithQuery;
 import ca.uhn.fhir.rest.gclient.IPatchWithQueryTyped;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.gclient.IRawHttp;
 import ca.uhn.fhir.rest.gclient.IRead;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IReadIfNoneMatch;
@@ -363,6 +366,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	public IRead read() {
 		return new ReadInternal();
 	}
+
+	@Override
+	public IRawHttp noFhirRequest() { return new RawHttpInternal();	}
 
 	@Override
 	public <T extends IBaseResource> T read(Class<T> theType, String theId) {
@@ -1283,6 +1289,23 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				return (T) myContext.getElementDefinition(myType).newInstance();
 			}
 			return (T) meta.get(0);
+		}
+	}
+
+	private class RawHttpInternal extends BaseClientExecutable implements IRawHttp {
+		private IHttpRequest myRequest;
+
+		@Override
+		public Object execute() {
+			StringResponseHandler binding = new StringResponseHandler();
+			HttpRawClientInvocation invocation = new HttpRawClientInvocation(myContext, myRequest.getUri(), RequestTypeEnum.valueOf(myRequest.getHttpVerbName()));
+
+			return invokeClient(myContext, binding, invocation);
+		}
+
+		public IRawHttp fromRequest(IHttpRequest theRequest) {
+			myRequest = theRequest;
+			return this;
 		}
 	}
 

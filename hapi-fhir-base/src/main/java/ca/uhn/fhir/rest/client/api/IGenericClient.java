@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.gclient.IHistory;
 import ca.uhn.fhir.rest.gclient.IMeta;
 import ca.uhn.fhir.rest.gclient.IOperation;
 import ca.uhn.fhir.rest.gclient.IPatch;
+import ca.uhn.fhir.rest.gclient.IRawHttp;
 import ca.uhn.fhir.rest.gclient.IRead;
 import ca.uhn.fhir.rest.gclient.ITransaction;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
@@ -107,6 +108,11 @@ public interface IGenericClient extends IRestfulClient {
 	 * Fluent method for "read" and "vread" methods.
 	 */
 	IRead read();
+
+	/**
+	 * Implementation of a raw call
+	 */
+	IRawHttp noFhirRequest();
 
 	/**
 	 * Implementation of the "instance read" method.
