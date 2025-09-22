@@ -30,6 +30,7 @@ import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {SearchQueryBuilderTest.MyConfig.class})
@@ -430,7 +431,60 @@ public class SearchQueryBuilderTest {
 		assertThat(generated.getBindVariables()).as(generated.getBindVariables().toString()).containsExactly("Patient", 500L, 501L, 10, 5);
 
 	}
-	
+
+	/**
+	 * Test for SQL GROUP BY issue with coordinate near sorting and offset.
+	 * Bug: "ERROR: column must appear in the GROUP BY clause or be used in an aggregate function"
+	 * Fix: The distance calculation column (MHD0, MHD1, etc.) is automatically added to GROUP BY when detected
+	 */
+	@Test
+	public void testCoordinateNearSortingWithGroupByHandlesSQLCorrectly() {
+		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
+		dialectProvider.setDialectForUnitTest(new PostgreSQLDialect());
+
+		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myStorageSettings, myPartitionSettings, myRequestPartitionId, "Location", mySqlBuilderFactory, dialectProvider, false, false);
+
+		// Trigger GROUP BY scenario
+		builder.addResourceIdsPredicate(Lists.newArrayList(JpaPid.fromId(100L), JpaPid.fromId(101L)));
+
+		// Add coordinate distance sorting
+		ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder coordsPredicate =
+			builder.addCoordsPredicateBuilder(null);
+
+		double latitude = 50.097;
+		double longitude = 8.6648;
+		builder.addSortCoordsNear(coordsPredicate, latitude, longitude, true);
+
+		// Generate SQL with offset
+		GeneratedSql generatedSql = builder.generate(1, 1);
+		String sql = generatedSql.getSql();
+
+		assertTrue(sql.contains("SELECT"), "SQL should contain SELECT clause");
+
+		// Find distance calculation column name (MHD0, MHD1, etc.)
+		String distanceColumnName = null;
+		java.util.regex.Pattern mhdPattern = java.util.regex.Pattern.compile("MHD\\d+");
+		java.util.regex.Matcher matcher = mhdPattern.matcher(sql);
+		if (matcher.find()) {
+			distanceColumnName = matcher.group();
+		}
+
+		assertTrue(distanceColumnName != null, "SQL should contain distance calculation column (MHD0, MHD1, etc.)");
+
+		// Critical test: verify distance column is in GROUP BY clause
+		boolean hasGroupBy = sql.contains("GROUP BY");
+		if (hasGroupBy) {
+			assertTrue(sql.contains("GROUP BY") && sql.indexOf(distanceColumnName, sql.indexOf("GROUP BY")) > 0,
+				"Distance calculation column (" + distanceColumnName + ") must be included in GROUP BY clause when GROUP BY is present. " +
+					"This prevents PostgreSQL error: 'column must appear in the GROUP BY clause'. SQL: " + sql);
+		}
+
+		assertTrue(sql.contains("ORDER BY") && sql.contains(distanceColumnName),
+			"SQL should contain ORDER BY with " + distanceColumnName + " distance calculation");
+
+		assertThat(generatedSql.getBindVariables()).contains(latitude, longitude);
+	}
+
 	@Configuration
 	public static class MyConfig {
 
@@ -446,6 +500,18 @@ public class SearchQueryBuilderTest {
 		}
 
 		@Bean
+		@Scope("prototype")
+		public ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder coordsPredicateBuilder(SearchQueryBuilder theSearchQueryBuilder) {
+			return new ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder(theSearchQueryBuilder);
+		}
+
+		@Bean
+		public ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc searchParamIdentityCacheSvc() {
+			return org.mockito.Mockito.mock(ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc.class);
+		}
+
+		@Bean
+		@Scope("prototype")
 		public SqlObjectFactory sqlObjectFactory() {
 			return new SqlObjectFactory();
 		}
