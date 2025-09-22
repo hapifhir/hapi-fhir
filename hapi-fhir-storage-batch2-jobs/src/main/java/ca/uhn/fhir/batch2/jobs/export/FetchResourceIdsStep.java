@@ -31,6 +31,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
+import ca.uhn.fhir.rest.api.IResourceSupportedSvc;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.util.SearchParameterUtil;
@@ -54,6 +55,9 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
+
+	@Autowired
+	private IResourceSupportedSvc myResourceSupportedSvc;
 
 	@Nonnull
 	@Override
@@ -106,7 +110,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 			 * We will fetch ids for each resource type in the ResourceTypes (_type filter).
 			 */
 			for (String resourceType : params.getResourceTypes()) {
-				if (resourceTypesToOmit.contains(resourceType)) {
+				if (resourceTypesToOmit.contains(resourceType) || !myResourceSupportedSvc.isSupported(resourceType)) {
 					continue;
 				}
 				providerParams.setResourceType(resourceType);

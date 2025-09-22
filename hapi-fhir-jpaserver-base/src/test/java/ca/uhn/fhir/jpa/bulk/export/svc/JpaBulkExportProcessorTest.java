@@ -195,6 +195,8 @@ public class JpaBulkExportProcessorTest {
 		ISearchBuilder<JpaPid> searchBuilder = mock(ISearchBuilder.class);
 
 		// when
+		when(mySearchParamRegistry.hasActiveSearchParam(anyString(), anyString(), any()))
+			.thenReturn(true);
 		when(myStorageSettings.getIndexMissingFields())
 			.thenReturn(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(any(RuntimeResourceDefinition.class), eq(parameters), any(boolean.class)))
