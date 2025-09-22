@@ -598,7 +598,7 @@ public class SearchFilterParser {
 				return CODES_LogicalOperation.get(getOperation().ordinal()) + " " + FFilter1.toString();
 			} else {
 				return FFilter1.toString() + " "
-					+ CODES_LogicalOperation.get(getOperation().ordinal()) + " " + FFilter2.toString();
+						+ CODES_LogicalOperation.get(getOperation().ordinal()) + " " + FFilter2.toString();
 			}
 		}
 	}

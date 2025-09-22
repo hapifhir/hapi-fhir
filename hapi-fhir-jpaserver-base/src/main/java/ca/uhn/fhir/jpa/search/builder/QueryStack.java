@@ -963,13 +963,14 @@ public class QueryStack {
 					theRequestPartitionId);
 
 			// Right side
-			Condition yPredicate = ((SearchFilterParser.FilterLogical) theFilter).getOperation() == SearchFilterParser.FilterLogicalOperation.not ?
-				null :
-				createPredicateFilter(
-					theQueryStack3,
-					((SearchFilterParser.FilterLogical) theFilter).getFilter2(),
-					theResourceName,
-					theRequestPartitionId);
+			Condition yPredicate = ((SearchFilterParser.FilterLogical) theFilter).getOperation()
+							== SearchFilterParser.FilterLogicalOperation.not
+					? null
+					: createPredicateFilter(
+							theQueryStack3,
+							((SearchFilterParser.FilterLogical) theFilter).getFilter2(),
+							theResourceName,
+							theRequestPartitionId);
 
 			if (((SearchFilterParser.FilterLogical) theFilter).getOperation()
 					== SearchFilterParser.FilterLogicalOperation.and) {
@@ -977,8 +978,8 @@ public class QueryStack {
 			} else if (((SearchFilterParser.FilterLogical) theFilter).getOperation()
 					== SearchFilterParser.FilterLogicalOperation.or) {
 				return ComboCondition.or(xPredicate, yPredicate);
-			}  else if (((SearchFilterParser.FilterLogical) theFilter).getOperation()
-				== SearchFilterParser.FilterLogicalOperation.not) {
+			} else if (((SearchFilterParser.FilterLogical) theFilter).getOperation()
+					== SearchFilterParser.FilterLogicalOperation.not) {
 				return new NotCondition(xPredicate);
 			} else {
 				// Shouldn't happen
