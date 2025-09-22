@@ -938,8 +938,8 @@ public class SearchQueryBuilder {
 			case NOT_EQUAL:
 				return BinaryCondition.notEqualTo(theColumn, generatePlaceholder(theValue));
 			case EQUAL:
-				// NB: fhir searches are always range searches;
-				// which is why we do not use "EQUAL"
+			// NB: fhir searches are always range searches;
+			// which is why we do not use "EQUAL"
 			case STARTS_AFTER:
 			case APPROXIMATE:
 			case ENDS_BEFORE:

@@ -460,10 +460,10 @@ public class HfqlStatementParser {
 		void consume(HfqlLexerToken theToken) {
 			String keyword = theToken.asKeyword();
 			switch (keyword) {
-					/*
-					 * Update DIRECTIVE_KEYWORDS if you add new
-					 * keywords here!
-					 */
+				/*
+				 * Update DIRECTIVE_KEYWORDS if you add new
+				 * keywords here!
+				 */
 				case KEYWORD_WHERE:
 					validateNotPresent(myStatement.getWhereClauses(), theToken);
 					myState = new StateInWhereInitial();

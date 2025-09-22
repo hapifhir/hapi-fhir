@@ -342,7 +342,7 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
 			case Type:
 			case Union:
 			case Upper:
-				// TODO: unimplemented, what to do?
+			// TODO: unimplemented, what to do?
 			case ConvertsToDate:
 				break;
 			case Round:

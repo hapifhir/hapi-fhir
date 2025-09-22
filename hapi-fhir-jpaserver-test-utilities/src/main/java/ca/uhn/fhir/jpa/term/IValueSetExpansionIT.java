@@ -180,8 +180,8 @@ public interface IValueSetExpansionIT {
 			case NOTIN -> filterComponent.setValue("1,2,3");
 			case EQUAL -> filterComponent.setValue("2");
 			default ->
-			// just in case
-			fail(theOperator.getDisplay() + " is not added for testing");
+				// just in case
+				fail(theOperator.getDisplay() + " is not added for testing");
 		}
 		conceptSetComponent.setFilter(List.of(filterComponent));
 

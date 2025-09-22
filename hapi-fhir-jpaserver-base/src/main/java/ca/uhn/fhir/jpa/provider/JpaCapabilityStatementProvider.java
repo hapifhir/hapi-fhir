@@ -153,8 +153,9 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 	protected boolean searchParamEnabled(String theResourceName, String theSearchParam) {
 		return switch (theSearchParam) {
 			case PARAM_FILTER -> myStorageSettings.isFilterParameterEnabled();
-			case PARAM_CONTENT, PARAM_TEXT, PARAM_LANGUAGE -> mySearchParamRegistry.hasActiveSearchParam(
-					theResourceName, theSearchParam, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
+			case PARAM_CONTENT, PARAM_TEXT, PARAM_LANGUAGE ->
+				mySearchParamRegistry.hasActiveSearchParam(
+						theResourceName, theSearchParam, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 			default -> true;
 		};
 	}

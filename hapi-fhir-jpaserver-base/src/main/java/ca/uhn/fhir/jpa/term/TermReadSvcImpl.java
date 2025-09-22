@@ -1395,7 +1395,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	private void handleFilter(
 			String theCodeSystemIdentifier,
 			SearchPredicateFactory theF,
-			BooleanPredicateClausesStep<?,?> theB,
+			BooleanPredicateClausesStep<?, ?> theB,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 		if (isBlank(theFilter.getValue()) && theFilter.getOp() == null && isBlank(theFilter.getProperty())) {
 			return;
@@ -1447,7 +1447,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	private void handleFilterPropertyDefault(
 			SearchPredicateFactory theF,
-			BooleanPredicateClausesStep<?,?> theB,
+			BooleanPredicateClausesStep<?, ?> theB,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 
 		String value = theFilter.getValue();
@@ -1497,7 +1497,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	private void handleFilterRegex(
 			SearchPredicateFactory theF,
-			BooleanPredicateClausesStep<?,?> theB,
+			BooleanPredicateClausesStep<?, ?> theB,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 		/*
 		 * We treat the regex filter as a match on the regex
@@ -1524,7 +1524,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	private void handleFilterLoincCopyright(
 			SearchPredicateFactory theF,
-			BooleanPredicateClausesStep<?,?> theB,
+			BooleanPredicateClausesStep<?, ?> theB,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 
 		if (theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
@@ -1548,11 +1548,11 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		}
 	}
 
-	private void addFilterLoincCopyrightLoinc(SearchPredicateFactory theF, BooleanPredicateClausesStep<?,?> theB) {
+	private void addFilterLoincCopyrightLoinc(SearchPredicateFactory theF, BooleanPredicateClausesStep<?, ?> theB) {
 		theB.mustNot(theF.exists().field(CONCEPT_PROPERTY_PREFIX_NAME + "EXTERNAL_COPYRIGHT_NOTICE"));
 	}
 
-	private void addFilterLoincCopyright3rdParty(SearchPredicateFactory theF, BooleanPredicateClausesStep<?,?> theB) {
+	private void addFilterLoincCopyright3rdParty(SearchPredicateFactory theF, BooleanPredicateClausesStep<?, ?> theB) {
 		theB.must(theF.exists().field(CONCEPT_PROPERTY_PREFIX_NAME + "EXTERNAL_COPYRIGHT_NOTICE"));
 	}
 
@@ -1560,7 +1560,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	private void handleFilterLoincAncestor(
 			String theSystem,
 			SearchPredicateFactory f,
-			BooleanPredicateClausesStep<?,?> b,
+			BooleanPredicateClausesStep<?, ?> b,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 		switch (theFilter.getOp()) {
 			case EQUAL:
@@ -1578,7 +1578,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	private void addLoincFilterAncestorEqual(
 			String theSystem,
 			SearchPredicateFactory f,
-			BooleanPredicateClausesStep<?,?> b,
+			BooleanPredicateClausesStep<?, ?> b,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 		addLoincFilterAncestorEqual(theSystem, f, b, theFilter.getProperty(), theFilter.getValue());
 	}
@@ -1586,7 +1586,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	private void addLoincFilterAncestorEqual(
 			String theSystem,
 			SearchPredicateFactory f,
-			BooleanPredicateClausesStep<?,?> b,
+			BooleanPredicateClausesStep<?, ?> b,
 			String theProperty,
 			String theValue) {
 		List<Term> terms = getAncestorTerms(theSystem, theProperty, theValue);
@@ -1610,7 +1610,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	private void handleFilterLoincParentChild(
-			SearchPredicateFactory f, BooleanPredicateClausesStep<?,?> b, ValueSet.ConceptSetFilterComponent theFilter) {
+			SearchPredicateFactory f,
+			BooleanPredicateClausesStep<?, ?> b,
+			ValueSet.ConceptSetFilterComponent theFilter) {
 		switch (theFilter.getOp()) {
 			case EQUAL:
 				addLoincFilterParentChildEqual(f, b, theFilter.getProperty(), theFilter.getValue());
@@ -1625,7 +1627,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	private void addLoincFilterParentChildIn(
-			SearchPredicateFactory f, BooleanPredicateClausesStep<?, ?> b, ValueSet.ConceptSetFilterComponent theFilter) {
+			SearchPredicateFactory f,
+			BooleanPredicateClausesStep<?, ?> b,
+			ValueSet.ConceptSetFilterComponent theFilter) {
 		String[] values = theFilter.getValue().split(",");
 		List<Term> terms = new ArrayList<>();
 		for (String value : values) {
@@ -1697,7 +1701,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	private void handleFilterDisplay(
-			SearchPredicateFactory f, BooleanPredicateClausesStep<?, ?> b, ValueSet.ConceptSetFilterComponent theFilter) {
+			SearchPredicateFactory f,
+			BooleanPredicateClausesStep<?, ?> b,
+			ValueSet.ConceptSetFilterComponent theFilter) {
 		if (theFilter.getProperty().equals("display:exact") && theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
 			addDisplayFilterExact(f, b, theFilter);
 		} else if (theFilter.getProperty().equals("display") && theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
