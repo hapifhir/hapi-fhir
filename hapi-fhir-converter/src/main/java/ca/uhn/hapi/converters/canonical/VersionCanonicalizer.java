@@ -358,7 +358,6 @@ public class VersionCanonicalizer {
 		IBaseResource auditEventFromCanonical(AuditEvent theResource);
 
 		IBaseConformance capabilityStatementFromCanonical(CapabilityStatement theResource);
-
 	}
 
 	private static class Dstu2Strategy implements IStrategy {
@@ -473,7 +472,7 @@ public class VersionCanonicalizer {
 		@Override
 		public IBaseResource conceptMapFromCanonical(ConceptMap theConceptMap) {
 			Resource codeSystemDstu2Hl7Org =
-				VersionConvertorFactory_10_40.convertResource(theConceptMap, ADVISOR_10_40);
+					VersionConvertorFactory_10_40.convertResource(theConceptMap, ADVISOR_10_40);
 			return reencodeFromHl7Org(codeSystemDstu2Hl7Org);
 		}
 
@@ -987,7 +986,7 @@ public class VersionCanonicalizer {
 		@Override
 		public IBaseResource conceptMapFromCanonical(ConceptMap theConceptMap) {
 			org.hl7.fhir.r5.model.ConceptMap conceptMapR5 = (org.hl7.fhir.r5.model.ConceptMap)
-				VersionConvertorFactory_40_50.convertResource(theConceptMap, ADVISOR_40_50);
+					VersionConvertorFactory_40_50.convertResource(theConceptMap, ADVISOR_40_50);
 			return VersionConvertorFactory_43_50.convertResource(conceptMapR5, ADVISOR_43_50);
 		}
 

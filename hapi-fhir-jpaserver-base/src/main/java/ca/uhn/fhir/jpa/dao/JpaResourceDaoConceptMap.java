@@ -117,12 +117,14 @@ public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResour
 		String equivalence = theRequest.getEquivalence();
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(equivalence, "Equivalence must be provided");
 
-		ConceptMap conceptMapCanonical = fetchExistingConceptMapAndConvertToCanonical(theRequest, true, theRequestDetails);
+		ConceptMap conceptMapCanonical =
+				fetchExistingConceptMapAndConvertToCanonical(theRequest, true, theRequestDetails);
 
 		List<ConceptMap.ConceptMapGroupComponent> groups = findOrCreateGroup(theRequest, conceptMapCanonical, true);
 		ConceptMap.ConceptMapGroupComponent group = groups.get(0);
 
-		List<ConceptMap.SourceElementComponent> sourceElements = findOrCreateSourceElements(theRequest, group, true, sourceDisplay);
+		List<ConceptMap.SourceElementComponent> sourceElements =
+				findOrCreateSourceElements(theRequest, group, true, sourceDisplay);
 		ConceptMap.SourceElementComponent sourceElement = sourceElements.get(0);
 
 		findOrCreateTargetElement(theRequest, sourceElement, true, targetDisplay, equivalence);
@@ -135,29 +137,28 @@ public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResour
 		}
 
 		IBaseOperationOutcome operationOutcome = OperationOutcomeUtil.createOperationOutcome(
-			OperationOutcomeUtil.OO_SEVERITY_WARN,
-			"Mapping has been added",
-			OperationOutcomeUtil.OO_ISSUE_CODE_PROCESSING,
-			myFhirContext,
-			null
-		);
+				OperationOutcomeUtil.OO_SEVERITY_WARN,
+				"Mapping has been added",
+				OperationOutcomeUtil.OO_ISSUE_CODE_PROCESSING,
+				myFhirContext,
+				null);
 		return operationOutcome;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public IBaseOperationOutcome removeMapping(RemoveMappingRequest theRequest, RequestDetails theRequestDetails) {
-		ConceptMap conceptMapCanonical = fetchExistingConceptMapAndConvertToCanonical(theRequest, false, theRequestDetails);
+		ConceptMap conceptMapCanonical =
+				fetchExistingConceptMapAndConvertToCanonical(theRequest, false, theRequestDetails);
 		if (conceptMapCanonical == null) {
 			String message = "No ConceptMap found matching the given URL and/or version. No action performed.";
 			ourLog.warn(message);
 			IBaseOperationOutcome operationOutcome = OperationOutcomeUtil.createOperationOutcome(
-				OperationOutcomeUtil.OO_SEVERITY_WARN,
-				message,
-				OperationOutcomeUtil.OO_ISSUE_CODE_PROCESSING,
-				myFhirContext,
-				null
-			);
+					OperationOutcomeUtil.OO_SEVERITY_WARN,
+					message,
+					OperationOutcomeUtil.OO_ISSUE_CODE_PROCESSING,
+					myFhirContext,
+					null);
 			return operationOutcome;
 		}
 
@@ -165,10 +166,12 @@ public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResour
 		List<ConceptMap.ConceptMapGroupComponent> groups = findOrCreateGroup(theRequest, conceptMapCanonical, false);
 		for (ConceptMap.ConceptMapGroupComponent group : groups) {
 
-			List<ConceptMap.SourceElementComponent> sourceElements = findOrCreateSourceElements(theRequest, group, false, null);
+			List<ConceptMap.SourceElementComponent> sourceElements =
+					findOrCreateSourceElements(theRequest, group, false, null);
 			for (ConceptMap.SourceElementComponent sourceElement : sourceElements) {
 
-				List<ConceptMap.TargetElementComponent> targetElements = findOrCreateTargetElement(theRequest, sourceElement, false, null, null);
+				List<ConceptMap.TargetElementComponent> targetElements =
+						findOrCreateTargetElement(theRequest, sourceElement, false, null, null);
 				for (ConceptMap.TargetElementComponent targetElement : targetElements) {
 					mappingsRemoved++;
 					sourceElement.getTarget().remove(targetElement);
@@ -178,7 +181,6 @@ public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResour
 					group.getElement().remove(sourceElement);
 				}
 			}
-
 		}
 
 		T conceptMapToStore = (T) myVersionCanonicalizer.conceptMapFromCanonical(conceptMapCanonical);
@@ -187,24 +189,26 @@ public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResour
 		String message = "Removed " + mappingsRemoved + " ConceptMap mappings";
 		ourLog.info(message);
 		IBaseOperationOutcome operationOutcome = OperationOutcomeUtil.createOperationOutcome(
-			OperationOutcomeUtil.OO_SEVERITY_WARN,
-			message,
-			OperationOutcomeUtil.OO_ISSUE_CODE_PROCESSING,
-			myFhirContext,
-			null
-		);
+				OperationOutcomeUtil.OO_SEVERITY_WARN,
+				message,
+				OperationOutcomeUtil.OO_ISSUE_CODE_PROCESSING,
+				myFhirContext,
+				null);
 		return operationOutcome;
 	}
 
-	private static List<ConceptMap.TargetElementComponent> findOrCreateTargetElement(RemoveMappingRequest theRequest, ConceptMap.SourceElementComponent sourceElement, boolean theCreate, String targetDisplay, String equivalence) {
+	private static List<ConceptMap.TargetElementComponent> findOrCreateTargetElement(
+			RemoveMappingRequest theRequest,
+			ConceptMap.SourceElementComponent sourceElement,
+			boolean theCreate,
+			String targetDisplay,
+			String equivalence) {
 		String targetCode = theRequest.getTargetCode();
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(targetCode, "Target code must be provided");
 
-		List<ConceptMap.TargetElementComponent> retVal = sourceElement
-			.getTarget()
-			.stream()
-			.filter(t -> targetCode.equals(t.getCode()))
-			.collect(Collectors.toList());
+		List<ConceptMap.TargetElementComponent> retVal = sourceElement.getTarget().stream()
+				.filter(t -> targetCode.equals(t.getCode()))
+				.collect(Collectors.toList());
 
 		if (retVal.isEmpty() && theCreate) {
 			ConceptMap.TargetElementComponent newTarget = sourceElement.addTarget();
@@ -217,15 +221,17 @@ public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResour
 		return retVal;
 	}
 
-	private static List<ConceptMap.SourceElementComponent> findOrCreateSourceElements(RemoveMappingRequest theRequest, ConceptMap.ConceptMapGroupComponent group, boolean theCreate, String sourceDisplay) {
+	private static List<ConceptMap.SourceElementComponent> findOrCreateSourceElements(
+			RemoveMappingRequest theRequest,
+			ConceptMap.ConceptMapGroupComponent group,
+			boolean theCreate,
+			String sourceDisplay) {
 		String sourceCode = theRequest.getSourceCode();
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(sourceCode, "Source code must be provided");
 
-		List<ConceptMap.SourceElementComponent> retVal = group
-			.getElement()
-			.stream()
-			.filter(t -> sourceCode.equals(t.getCode()))
-			.collect(Collectors.toList());
+		List<ConceptMap.SourceElementComponent> retVal = group.getElement().stream()
+				.filter(t -> sourceCode.equals(t.getCode()))
+				.collect(Collectors.toList());
 
 		if (retVal.isEmpty() && theCreate) {
 			ConceptMap.SourceElementComponent newElement = group.addElement();
@@ -237,7 +243,8 @@ public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResour
 		return retVal;
 	}
 
-	private static List<ConceptMap.ConceptMapGroupComponent> findOrCreateGroup(RemoveMappingRequest theRequest, ConceptMap conceptMapCanonical, boolean theCreateIfNotFound) {
+	private static List<ConceptMap.ConceptMapGroupComponent> findOrCreateGroup(
+			RemoveMappingRequest theRequest, ConceptMap conceptMapCanonical, boolean theCreateIfNotFound) {
 		String sourceSystem = theRequest.getSourceSystem();
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(sourceSystem, "Source system must be provided");
 		String sourceSystemVersion = theRequest.getSourceSystemVersion();
@@ -245,17 +252,15 @@ public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResour
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(sourceSystem, "Target system must be provided");
 		String targetSystemVersion = theRequest.getTargetSystemVersion();
 
-		List<ConceptMap.ConceptMapGroupComponent> retVal = conceptMapCanonical
-			.getGroup()
-			.stream()
-			.filter(t -> {
-				boolean match = sourceSystem.equals(t.getSource());
-				match &= targetSystem.equals(t.getTarget());
-				match &= isBlank(sourceSystemVersion) || sourceSystemVersion.equals(t.getSourceVersion());
-				match &= isBlank(targetSystemVersion) || targetSystemVersion.equals(t.getTargetVersion());
-				return match;
-			})
-			.collect(Collectors.toList());
+		List<ConceptMap.ConceptMapGroupComponent> retVal = conceptMapCanonical.getGroup().stream()
+				.filter(t -> {
+					boolean match = sourceSystem.equals(t.getSource());
+					match &= targetSystem.equals(t.getTarget());
+					match &= isBlank(sourceSystemVersion) || sourceSystemVersion.equals(t.getSourceVersion());
+					match &= isBlank(targetSystemVersion) || targetSystemVersion.equals(t.getTargetVersion());
+					return match;
+				})
+				.collect(Collectors.toList());
 
 		if (retVal.isEmpty() && theCreateIfNotFound) {
 			ConceptMap.ConceptMapGroupComponent newGroup = conceptMapCanonical.addGroup();
@@ -269,7 +274,8 @@ public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResour
 		return retVal;
 	}
 
-	private ConceptMap fetchExistingConceptMapAndConvertToCanonical(RemoveMappingRequest theRequest, boolean theCreateIfNotFound, RequestDetails theRequestDetails) {
+	private ConceptMap fetchExistingConceptMapAndConvertToCanonical(
+			RemoveMappingRequest theRequest, boolean theCreateIfNotFound, RequestDetails theRequestDetails) {
 		String conceptMapUrl = theRequest.getConceptMapUri();
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(conceptMapUrl, "ConceptMap URI must be provided");
 		String conceptMapVersion = theRequest.getConceptMapVersion();
@@ -279,7 +285,8 @@ public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResour
 
 		ConceptMap conceptMapCanonical;
 		if (bundle.sizeOrThrowNpe() > 1) {
-			throw new InvalidRequestException(Msg.code(1743) + "Multiple ConceptMap resources match URL[" + conceptMapUrl + "]. Do you need to specify a version?");
+			throw new InvalidRequestException(Msg.code(1743) + "Multiple ConceptMap resources match URL["
+					+ conceptMapUrl + "]. Do you need to specify a version?");
 		} else if (bundle.isEmpty()) {
 
 			if (theCreateIfNotFound) {
@@ -296,7 +303,6 @@ public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResour
 
 			IBaseResource conceptMap = bundle.getResources(0, 1).get(0);
 			conceptMapCanonical = myVersionCanonicalizer.conceptMapToCanonical(conceptMap);
-
 		}
 		return conceptMapCanonical;
 	}
@@ -322,7 +328,8 @@ public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResour
 
 		if (isNotBlank(theConceptMapVersion) && isNotBlank(version) && !theConceptMapVersion.equals(version)) {
 			// FIXME: add code
-			throw new InvalidRequestException(Msg.code(1) + "ConceptMap URL includes a version[" + version + "] which conflicts with specified version[" + theConceptMapVersion + "]");
+			throw new InvalidRequestException(Msg.code(1) + "ConceptMap URL includes a version[" + version
+					+ "] which conflicts with specified version[" + theConceptMapVersion + "]");
 		}
 
 		SearchParameterMap map = new SearchParameterMap();

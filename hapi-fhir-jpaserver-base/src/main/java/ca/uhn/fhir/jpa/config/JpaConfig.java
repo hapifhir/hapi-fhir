@@ -526,7 +526,8 @@ public class JpaConfig {
 
 	@Bean
 	@Lazy
-	public ConceptMapAddAndRemoveMappingProvider conceptMapAddAndRemoveMappingProvider(IFhirResourceDaoConceptMap<?> theConceptMapDao) {
+	public ConceptMapAddAndRemoveMappingProvider conceptMapAddAndRemoveMappingProvider(
+			IFhirResourceDaoConceptMap<?> theConceptMapDao) {
 		return new ConceptMapAddAndRemoveMappingProvider(theConceptMapDao);
 	}
 

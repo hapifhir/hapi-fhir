@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
@@ -23,21 +42,29 @@ public class ConceptMapAddAndRemoveMappingProvider {
 		myConceptMapDao = theConceptMapDao;
 	}
 
-
 	@Operation(typeName = "ConceptMap", name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING)
 	public IBaseOperationOutcome addMapping(
-		@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_CONCEPTMAP_URL, typeName = "uri") IPrimitiveType<String> theUrl,
-		@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_SOURCE_SYSTEM, typeName = "uri") IPrimitiveType<String> theSourceSystem,
-		@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_SOURCE_VERSION, typeName = "code") IPrimitiveType<String> theSourceVersion,
-		@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_SOURCE_CODE, typeName = "code") IPrimitiveType<String> theSourceCode,
-		@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_SOURCE_DISPLAY, typeName = "string") IPrimitiveType<String> theSourceDisplay,
-		@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_TARGET_SYSTEM, typeName = "uri") IPrimitiveType<String> theTargetSystem,
-		@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_TARGET_VERSION, typeName = "code") IPrimitiveType<String> theTargetVersion,
-		@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_TARGET_CODE, typeName = "code") IPrimitiveType<String> theTargetCode,
-		@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_TARGET_DISPLAY, typeName = "string") IPrimitiveType<String> theTargetDisplay,
-		@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_EQUIVALENCE, typeName = "code") IPrimitiveType<String> theEquivalence,
-		RequestDetails theRequestDetails
-	) {
+			@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_CONCEPTMAP_URL, typeName = "uri")
+					IPrimitiveType<String> theUrl,
+			@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_SOURCE_SYSTEM, typeName = "uri")
+					IPrimitiveType<String> theSourceSystem,
+			@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_SOURCE_VERSION, typeName = "code")
+					IPrimitiveType<String> theSourceVersion,
+			@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_SOURCE_CODE, typeName = "code")
+					IPrimitiveType<String> theSourceCode,
+			@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_SOURCE_DISPLAY, typeName = "string")
+					IPrimitiveType<String> theSourceDisplay,
+			@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_TARGET_SYSTEM, typeName = "uri")
+					IPrimitiveType<String> theTargetSystem,
+			@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_TARGET_VERSION, typeName = "code")
+					IPrimitiveType<String> theTargetVersion,
+			@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_TARGET_CODE, typeName = "code")
+					IPrimitiveType<String> theTargetCode,
+			@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_TARGET_DISPLAY, typeName = "string")
+					IPrimitiveType<String> theTargetDisplay,
+			@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_EQUIVALENCE, typeName = "code")
+					IPrimitiveType<String> theEquivalence,
+			RequestDetails theRequestDetails) {
 
 		IFhirResourceDaoConceptMap.AddMappingRequest request = new IFhirResourceDaoConceptMap.AddMappingRequest();
 		request.setConceptMapUri(DatatypeUtil.toStringValue(theUrl));
@@ -56,15 +83,21 @@ public class ConceptMapAddAndRemoveMappingProvider {
 
 	@Operation(typeName = "ConceptMap", name = JpaConstants.OPERATION_CONCEPTMAP_REMOVE_MAPPING)
 	public IBaseOperationOutcome removeMapping(
-		@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_CONCEPTMAP_URL, typeName = "uri") IPrimitiveType<String> theUrl,
-		@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_SOURCE_SYSTEM, typeName = "uri") IPrimitiveType<String> theSourceSystem,
-		@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_SOURCE_VERSION, typeName = "code") IPrimitiveType<String> theSourceVersion,
-		@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_SOURCE_CODE, typeName = "code") IPrimitiveType<String> theSourceCode,
-		@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_TARGET_SYSTEM, typeName = "uri") IPrimitiveType<String> theTargetSystem,
-		@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_TARGET_VERSION, typeName = "code") IPrimitiveType<String> theTargetVersion,
-		@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_TARGET_CODE, typeName = "code") IPrimitiveType<String> theTargetCode,
-		RequestDetails theRequestDetails
-	) {
+			@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_CONCEPTMAP_URL, typeName = "uri")
+					IPrimitiveType<String> theUrl,
+			@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_SOURCE_SYSTEM, typeName = "uri")
+					IPrimitiveType<String> theSourceSystem,
+			@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_SOURCE_VERSION, typeName = "code")
+					IPrimitiveType<String> theSourceVersion,
+			@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_SOURCE_CODE, typeName = "code")
+					IPrimitiveType<String> theSourceCode,
+			@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_TARGET_SYSTEM, typeName = "uri")
+					IPrimitiveType<String> theTargetSystem,
+			@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_TARGET_VERSION, typeName = "code")
+					IPrimitiveType<String> theTargetVersion,
+			@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_TARGET_CODE, typeName = "code")
+					IPrimitiveType<String> theTargetCode,
+			RequestDetails theRequestDetails) {
 
 		IFhirResourceDaoConceptMap.RemoveMappingRequest request = new IFhirResourceDaoConceptMap.RemoveMappingRequest();
 		request.setConceptMapUri(DatatypeUtil.toStringValue(theUrl));
@@ -77,5 +110,4 @@ public class ConceptMapAddAndRemoveMappingProvider {
 
 		return myConceptMapDao.removeMapping(request, theRequestDetails);
 	}
-
 }

@@ -58,7 +58,6 @@ public interface IFhirResourceDaoConceptMap<T extends IBaseResource> extends IFh
 			myConceptMapUri = theConceptMapUri;
 		}
 
-
 		public void setConceptMapVersion(String theConceptMapVersion) {
 			myConceptMapVersion = theConceptMapVersion;
 		}
@@ -66,7 +65,6 @@ public interface IFhirResourceDaoConceptMap<T extends IBaseResource> extends IFh
 		public String getConceptMapVersion() {
 			return myConceptMapVersion;
 		}
-
 
 		public String getSourceSystem() {
 			return mySourceSystem;
@@ -117,7 +115,6 @@ public interface IFhirResourceDaoConceptMap<T extends IBaseResource> extends IFh
 		}
 	}
 
-
 	class AddMappingRequest extends RemoveMappingRequest {
 		private String mySourceDisplay;
 		private String myTargetDisplay;
@@ -139,8 +136,6 @@ public interface IFhirResourceDaoConceptMap<T extends IBaseResource> extends IFh
 			mySourceDisplay = theSourceDisplay;
 		}
 
-
-
 		public String getEquivalence() {
 			return myEquivalence;
 		}
@@ -148,8 +143,5 @@ public interface IFhirResourceDaoConceptMap<T extends IBaseResource> extends IFh
 		public void setEquivalence(String theEquivalence) {
 			myEquivalence = theEquivalence;
 		}
-
-
 	}
-
 }
