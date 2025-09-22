@@ -1,0 +1,16 @@
+---
+type: fix
+issue: fixme
+title: "A number of new test cases and fixes have been added to the HAPI FHIR FHIRPath Patch engine:
+  <ul>
+    <li>
+      Replace and Delete operations containing FHIRPath expressions where the final element was
+      a filter (such as <code>Observation.code.coding.where(system='http://loinc.org')</code>)
+      would fail if the system URL contained a dot character.
+    </li>
+    <li>
+      Insert operations can now add an extension to an anonymous element, as shown in the
+      FHIR specification
+      <a href=\"https://hl7.org/fhir/fhirpatch.html#extension\">Extension Example</a>.
+    </li>
+  </ul>"

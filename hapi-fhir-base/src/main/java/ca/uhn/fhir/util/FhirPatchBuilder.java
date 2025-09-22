@@ -25,6 +25,13 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 
+/**
+ * This utility class can be used to create
+ * <a href="https://smilecdr.com/fhir_standard/fhir_patch.html">FHIRPath Patch</a>
+ * documents.
+ *
+ * @since 8.6.0
+ */
 public class FhirPatchBuilder {
 	public static final String PARAMETER_ALLOW_MULTIPLE_MATCHES = "allowMultipleMatches";
 
@@ -72,21 +79,37 @@ public class FhirPatchBuilder {
 		return new MoveBuilder();
 	}
 
+	/**
+	 * Create and return the generated FHIRPath Patch Parameters document.
+	 */
 	public IBaseParameters build() {
 		return myPatch;
 	}
 
+	/*
+	 * NOTE: See the JavaDoc for BaseOperationBuilder below for an explanation
+	 * of all the interfaces that follow.
+	 */
+
+	/**
+	 * This interface is returned after the final property for a given operation.
+	 */
 	public interface IStepComplete {
 
 		/**
 		 * @return Returns a reference to the {@link FhirPatchBuilder} instance, so
-		 * that additional operations can be added to the chain, or {@link #build()}
-		 * can be called to return the created patch document.
+		 * 	that additional operations can be added to the chain, or {@link #build()}
+		 * 	can be called to return the created patch document.
 		 */
 		FhirPatchBuilder andThen();
 
 	}
 
+	/**
+	 * Interface exposing the <code>path</code> property
+	 *
+	 * @param <T> The interface corresponding to the next step
+	 */
 	public interface IStepPath<T> {
 
 		/**
@@ -95,6 +118,11 @@ public class FhirPatchBuilder {
 		T path(String thePath);
 	}
 
+	/**
+	 * Interface exposing the <code>name</code> property
+	 *
+	 * @param <T> The interface corresponding to the next step
+	 */
 	public interface IStepName<T> {
 
 		/**
@@ -103,6 +131,11 @@ public class FhirPatchBuilder {
 		T name(String theName);
 	}
 
+	/**
+	 * Interface exposing the <code>value</code> property
+	 *
+	 * @param <T> The interface corresponding to the next step
+	 */
 	public interface IStepValue<T> {
 
 		/**
@@ -111,6 +144,11 @@ public class FhirPatchBuilder {
 		T value(IBase theValue);
 	}
 
+	/**
+	 * Interface exposing the <code>index</code> property
+	 *
+	 * @param <T> The interface corresponding to the next step
+	 */
 	public interface IStepIndex<T> {
 
 		/**
@@ -119,6 +157,11 @@ public class FhirPatchBuilder {
 		T index(int theIndex);
 	}
 
+	/**
+	 * Interface exposing the <code>source</code> property
+	 *
+	 * @param <T> The interface corresponding to the next step
+	 */
 	public interface IStepSource<T> {
 
 		/**
@@ -127,6 +170,11 @@ public class FhirPatchBuilder {
 		T source(int theIndex);
 	}
 
+	/**
+	 * Interface exposing the <code>destination</code> property
+	 *
+	 * @param <T> The interface corresponding to the next step
+	 */
 	public interface IStepDestination<T> {
 
 		/**
@@ -135,14 +183,109 @@ public class FhirPatchBuilder {
 		T destination(int theIndex);
 	}
 
+	/**
+	 * Step 1 for creating an <b>ADD</b> operation, returned by
+	 * calling {@link #add()}
+	 */
+	public interface IAddStep1 extends IStepPath<IAddStep2> {
+	}
+
+	public interface IAddStep2 extends IStepName<IAddStep3> {
+	}
+
+	public interface IAddStep3 extends IStepValue<IStepComplete> {
+	}
+
+	/**
+	 * Step 1 for creating an <b>INSERT</b> operation, returned by
+	 * calling {@link #insert()}
+	 */
+	public interface IInsertStep1 extends IStepPath<IInsertStep2> {
+	}
+
+	public interface IInsertStep2 extends IStepIndex<IInsertStep3> {
+	}
+
+	public interface IInsertStep3 extends IStepValue<IStepComplete> {
+	}
+
+	/**
+	 * Step 1 for creating an <b>DELETE</b> operation, returned by
+	 * calling {@link #delete()}
+	 */
+	public interface IDeleteStep1 extends IStepPath<IDeleteStepAfter> {
+	}
+
+	public interface IDeleteStepAfter extends IStepComplete {
+
+		/**
+		 * Marks this operation as allowing multiple matches to be deleted. Per the FHIR Patch
+		 * specification, it is an error for the path to match multiple elements. This
+		 * method prevents the existence of multiple matches from causing an error, and deletes
+		 * all matches.
+		 * <p>
+		 * Note: This method adds a HAPI FHIR-specific parameter to the patch document and may
+		 * not work on other implementations.
+		 * </p>
+		 */
+		@SuppressWarnings("UnusedReturnValue")
+		IDeleteStepAfter allowMultipleMatches();
+
+	}
+
+	/**
+	 * Step 1 for creating an <b>REPLACE</b> operation, returned by
+	 * calling {@link #replace()}
+	 */
+	public interface IReplaceStep1 extends IStepPath<IReplaceStep2> {
+	}
+
+	public interface IReplaceStep2 extends IStepValue<IStepComplete> {
+	}
+
+	/**
+	 * Step 1 for creating a <b>MOVE</b> operation, returned by
+	 * calling {@link #move()}
+	 */
+	public interface IMoveStep1 extends IStepPath<IMoveStep2> {
+	}
+
+
+	public interface IMoveStep2 extends IStepSource<IMoveStep3> {
+	}
+
+	public interface IMoveStep3 extends IStepDestination<IStepComplete> {
+	}
+
+	/**
+	 * An instance of {@literal BaseOperationBuilder} is created for each new operation being
+	 * created. This class has setters for each of the potential properties that the different
+	 * patch operations can have, e.g. {@link #add()} takes "path", "name", and "value",
+	 * {@link #delete()} takes only "path", etc.
+	 * <p>
+	 * This class uses some generics trickery to guide the creation of patch operations so that
+	 * only the actual applicable properties are exposed depending on the specific operation.
+	 * </p>
+	 * <p>
+	 * Each operation (add, delete, etc) also has a concreate subclass of this class which actually
+	 * builds the <code>Parameters.parameter</code> entry for the given operation type.
+	 * </p>
+	 *
+	 * @param <RET_PATH>        The interface representing the next step after adding the path property
+	 * @param <RET_NAME>        The interface representing the next step after adding the name property
+	 * @param <RET_VALUE>       The interface representing the next step after adding the value property
+	 * @param <RET_INDEX>       The interface representing the next step after adding the index property
+	 * @param <RET_SOURCE>      The interface representing the next step after adding the source property
+	 * @param <RET_DESTINATION> The interface representing the next step after adding the destination property
+	 */
 	private class BaseOperationBuilder<RET_PATH, RET_NAME, RET_VALUE, RET_INDEX, RET_SOURCE, RET_DESTINATION>
-			implements IStepPath<RET_PATH>,
-					IStepName<RET_NAME>,
-					IStepValue<RET_VALUE>,
-					IStepIndex<RET_INDEX>,
-					IStepSource<RET_SOURCE>,
-					IStepDestination<RET_DESTINATION>,
-					IStepComplete {
+		implements IStepPath<RET_PATH>,
+		IStepName<RET_NAME>,
+		IStepValue<RET_VALUE>,
+		IStepIndex<RET_INDEX>,
+		IStepSource<RET_SOURCE>,
+		IStepDestination<RET_DESTINATION>,
+		IStepComplete {
 
 		protected String myPath;
 		protected String myName;
@@ -209,14 +352,8 @@ public class FhirPatchBuilder {
 		}
 	}
 
-	public interface IAddStep1 extends IStepPath<IAddStep2> {}
-
-	public interface IAddStep2 extends IStepName<IAddStep3> {}
-
-	public interface IAddStep3 extends IStepValue<IStepComplete> {}
-
 	private class AddBuilder extends BaseOperationBuilder<IAddStep2, IAddStep3, IStepComplete, Void, Void, Void>
-			implements IAddStep1, IAddStep2, IAddStep3 {
+		implements IAddStep1, IAddStep2, IAddStep3 {
 
 		@Override
 		public IStepComplete value(@Nonnull IBase theValue) {
@@ -232,15 +369,9 @@ public class FhirPatchBuilder {
 		}
 	}
 
-	public interface IInsertStep1 extends IStepPath<IInsertStep2> {}
-
-	public interface IInsertStep2 extends IStepIndex<IInsertStep3> {}
-
-	public interface IInsertStep3 extends IStepValue<IStepComplete> {}
-
 	private class InsertBuilder
-			extends BaseOperationBuilder<IInsertStep2, Void, IStepComplete, IInsertStep3, Void, Void>
-			implements IInsertStep1, IInsertStep2, IInsertStep3 {
+		extends BaseOperationBuilder<IInsertStep2, Void, IStepComplete, IInsertStep3, Void, Void>
+		implements IInsertStep1, IInsertStep2, IInsertStep3 {
 
 		@Override
 		public IStepComplete value(@Nonnull IBase theValue) {
@@ -256,27 +387,8 @@ public class FhirPatchBuilder {
 		}
 	}
 
-	public interface IDeleteStep1 extends IStepPath<IDeleteStepAfter> {}
-
-	public interface IDeleteStepAfter extends IStepComplete {
-
-		/**
-		 * Marks this operation as allowing multiple matches to be deleted. Per the FHIR Patch
-		 * specification, it is an error for the path to match multiple elements. This
-		 * method prevents the existence of multiple matches from causing an error, and deletes
-		 * all matches.
-		 * <p>
-		 * Note: This method adds a HAPI FHIR-specific parameter to the patch document and may
-		 * not work on other implementations.
-		 * </p>
-		 */
-		IDeleteStepAfter allowMultipleMatches();
-
-	}
-
-
 	private class DeleteBuilder extends BaseOperationBuilder<IDeleteStepAfter, Void, Void, Void, Void, Void>
-			implements IDeleteStep1, IDeleteStepAfter {
+		implements IDeleteStep1, IDeleteStepAfter {
 
 		private IBase myOperation;
 		private IBase myAllowMultipleMatches;
@@ -302,12 +414,8 @@ public class FhirPatchBuilder {
 		}
 	}
 
-	public interface IReplaceStep1 extends IStepPath<IReplaceStep2> {}
-
-	public interface IReplaceStep2 extends IStepValue<IStepComplete> {}
-
 	private class ReplaceBuilder extends BaseOperationBuilder<IReplaceStep2, Void, IStepComplete, Void, Void, Void>
-			implements IReplaceStep1, IReplaceStep2 {
+		implements IReplaceStep1, IReplaceStep2 {
 
 		@Override
 		public IStepComplete value(@Nonnull IBase theValue) {
@@ -322,14 +430,8 @@ public class FhirPatchBuilder {
 		}
 	}
 
-	public interface IMoveStep1 extends IStepPath<IMoveStep2> {}
-
-	public interface IMoveStep2 extends IStepSource<IMoveStep3> {}
-
-	public interface IMoveStep3 extends IStepDestination<IStepComplete> {}
-
 	private class MoveBuilder extends BaseOperationBuilder<IMoveStep2, Void, Void, Void, IMoveStep3, IStepComplete>
-			implements IMoveStep1, IMoveStep2, IMoveStep3 {
+		implements IMoveStep1, IMoveStep2, IMoveStep3 {
 
 		@Override
 		public IStepComplete destination(int theDestination) {

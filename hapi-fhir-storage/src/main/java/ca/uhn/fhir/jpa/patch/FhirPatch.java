@@ -39,6 +39,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -961,6 +962,17 @@ public class FhirPatch {
 					myContext.newTerser().getSingleValue(nextValuePartPart, "value[x]", IBase.class);
 
 			if (optionalValue.isPresent()) {
+
+				// Special case for Extension.url because it isn't a normal model element
+				if ("url".equals(name)) {
+					if (theDefinition.getChildElement().getName().equals("Extension")) {
+						if (optionalValue.get() instanceof IPrimitiveType<?> primitive) {
+							((IBaseExtension<?, ?>)newElement).setUrl(primitive.getValueAsString());
+							continue;
+						}
+					}
+				}
+
 				// we have a dataType. let's extract its value and assign it.
 				ChildDefinition childDefinition;
 				childDefinition = findChildDefinition(newElement, name);

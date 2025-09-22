@@ -1,0 +1,6 @@
+---
+type: add
+issue: fixme
+title: "A new utility class called FhirPatchBuilder has been added. This class can be used to
+   programmatically generate FHIR Patch documents. See [FHIR Patch](https://smilecdr.com/docs/fhir_standard/fhir_patch.html) for
+   examples on how to use this class."

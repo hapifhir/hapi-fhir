@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Specimen;
 import org.hl7.fhir.r4.model.StringType;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
@@ -346,6 +347,69 @@ public class FhirPatchTest implements ITestDataBuilder {
 		}
 	}
 
+	/**
+	 * Test case directly from the FHIR Patch spec
+	 */
+	@Test
+	void testAdd_ObjectWithExtension() {
+		String patchXml = """
+			<Parameters xmlns="http://hl7.org/fhir">
+			  <parameter>
+			      <name value="operation"/>
+			      <part>
+			        <name value="type"/>
+			        <valueString value="add"/>
+			      </part>
+			      <part>
+			        <name value="path"/>
+			        <valueString value="Specimen"/>
+			      </part>
+			      <part>
+			        <name value="name"/>
+			        <valueString value="processing"/>
+			      </part>
+			      <part>
+			        <name value="value" />
+			        <part>
+			          <name value="description" />
+			          <valueString value="test" />
+			        </part>
+			        <part>
+			          <name value="time" />
+			          <valueDateTime value="2021-08-13T07:44:38.342+00:00" />
+			        </part>
+			        <part>
+			          <name value="extension" />
+			          <part>
+			            <name value="url" />
+			            <valueUri value="http://example.org/fhir/DeviceExtension" />
+			          </part>
+			          <part>
+			            <name value="value" />
+			            <valueReference>
+			              <reference value="Device/1"/>
+			            </valueReference>
+			          </part>
+			        </part>
+			      </part>
+			  </parameter>
+			</Parameters>""";
+		Parameters patch = myFhirContext.newXmlParser().parseResource(Parameters.class, patchXml);
+
+		Specimen input = new Specimen();
+		myPatch.apply(input, patch);
+
+		ourLog.info("Result:\n{}", myParser.encodeResourceToString(input));
+
+		assertEquals("test", input.getProcessingFirstRep().getDescription());
+		assertEquals("2021-08-13T07:44:38.342+00:00", input.getProcessingFirstRep().getTimeDateTimeType().getValueAsString());
+		assertEquals(1, input.getProcessingFirstRep().getExtension().size());
+		assertEquals("http://example.org/fhir/DeviceExtension", input.getProcessingFirstRep().getExtension().get(0).getUrl());
+		assertEquals("Device/1", ((Reference)input.getProcessingFirstRep().getExtension().get(0).getValue()).getReference());
+	}
+
+
+
 	@Test
 	public void testInsert_InvalidPath_NoDots() {
 		FhirPatchBuilder builder = new FhirPatchBuilder(myFhirContext);
@@ -369,7 +433,7 @@ public class FhirPatchTest implements ITestDataBuilder {
 
 
 	@Test
-	void testReplace() {
+	void testReplace_PathEndingInFilter() {
 		FhirPatchBuilder builder = new FhirPatchBuilder(myFhirContext);
 		IBaseParameters patch = builder
 			.replace()
