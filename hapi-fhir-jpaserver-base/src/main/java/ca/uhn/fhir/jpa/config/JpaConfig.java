@@ -33,6 +33,7 @@ import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchUrlJobMaintenanceSvc;
@@ -105,6 +106,7 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl;
 import ca.uhn.fhir.jpa.partition.PartitionManagementProvider;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.provider.ConceptMapAddAndRemoveMappingProvider;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.InstanceReindexProvider;
@@ -520,6 +522,12 @@ public class JpaConfig {
 	@Lazy
 	public DiffProvider diffProvider() {
 		return new DiffProvider();
+	}
+
+	@Bean
+	@Lazy
+	public ConceptMapAddAndRemoveMappingProvider conceptMapAddAndRemoveMappingProvider(IFhirResourceDaoConceptMap<?> theConceptMapDao) {
+		return new ConceptMapAddAndRemoveMappingProvider(theConceptMapDao);
 	}
 
 	@Bean

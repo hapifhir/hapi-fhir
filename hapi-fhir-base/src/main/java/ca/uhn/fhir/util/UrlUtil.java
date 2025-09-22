@@ -39,6 +39,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -559,13 +560,7 @@ public class UrlUtil {
 		for (int i = 0; i < theString.length(); i++) {
 			char nextChar = theString.charAt(i);
 			if (nextChar == '%' || (nextChar == '+' && shouldEscapePlus)) {
-				try {
-					// Yes it would be nice to not use a string "UTF-8" but the equivalent
-					// method that takes Charset is JDK10+ only... sigh....
-					return URLDecoder.decode(theString, "UTF-8");
-				} catch (UnsupportedEncodingException e) {
-					throw new Error(Msg.code(1743) + "UTF-8 not supported, this shouldn't happen", e);
-				}
+				return URLDecoder.decode(theString, StandardCharsets.UTF_8);
 			}
 		}
 		return theString;

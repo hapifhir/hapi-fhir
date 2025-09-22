@@ -3,12 +3,16 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupElementDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupElementTargetDao;
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -19,6 +23,8 @@ import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,14 +37,18 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import jakarta.annotation.Nonnull;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
+import static ca.uhn.fhir.jpa.dao.JpaResourceDaoConceptMap.conceptMapUrlToParameterMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -1100,6 +1110,294 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 			}
 		});
 	}
+
+	@Test
+	void testAddMapping_PreExisting() {
+		// Setup
+		createPreExistingConceptMapWithTwoMappings();
+
+		// Test
+		IFhirResourceDaoConceptMap.AddMappingRequest request = createAddMapping3ToTrillion();
+		myConceptMapDao.addMapping(request, newSrd());
+
+		// Verify Translate Works
+		verifyCode3MapsToCodeTrillion();
+
+		// Verify ConceptMap has right codes
+		List<String> mappings = readConceptMapAndReturnStructuredMappings("http://foo-to-bar");
+		assertThat(mappings).containsExactly(
+			"http://foo|100 -> http://bar|200",
+			"  source: 1",
+			"    target: MILLION",
+			"  source: 2",
+			"    target: BILLION",
+			"  source: 3",
+			"    target: TRILLION"
+		);
+	}
+
+	@Test
+	void testAddMapping_PreExisting_DifferentVersion() {
+		// Setup
+		createPreExistingConceptMapWithTwoMappings();
+
+		// Test
+		IFhirResourceDaoConceptMap.AddMappingRequest request = createAddMapping3ToTrillion();
+		request.setSourceSystemVersion("400");
+		request.setTargetSystemVersion("500");
+		myConceptMapDao.addMapping(request, newSrd());
+
+		// Verify Translate Works
+		verifyCode3MapsToCodeTrillion();
+
+		// Verify ConceptMap has right codes
+		List<String> mappings = readConceptMapAndReturnStructuredMappings("http://foo-to-bar");
+		assertThat(mappings).containsExactly(
+			"http://foo|100 -> http://bar|200",
+			"  source: 1",
+			"    target: MILLION",
+			"  source: 2",
+			"    target: BILLION",
+			"http://foo|400 -> http://bar|500",
+			"  source: 3",
+			"    target: TRILLION"
+		);
+	}
+
+
+	@Test
+	void testAddMapping_NotPreExisting() {
+		// Test
+		IFhirResourceDaoConceptMap.AddMappingRequest request = createAddMapping3ToTrillion();
+		myConceptMapDao.addMapping(request, newSrd());
+
+		// Verify Translate Works
+		verifyCode3MapsToCodeTrillion();
+
+		// Verify ConceptMap has right codes
+		List<String> mappings = readConceptMapAndReturnStructuredMappings("http://foo-to-bar");
+		assertThat(mappings).containsExactly(
+			"http://foo -> http://bar",
+			"  source: 3",
+			"    target: TRILLION"
+		);
+	}
+
+	@Test
+	void testAddMapping_MultiplePreExistingAndNoVersionSpecified() {
+		// Setup
+		createPreExistingConceptMapWithTwoMappings();
+
+		ConceptMap cm = new ConceptMap();
+		cm.setId("foo-to-bar-2");
+		cm.setUrl("http://foo-to-bar");
+		cm.setVersion("2.0");
+		myConceptMapDao.update(cm, newSrd());
+
+		// Test and Verify
+		IFhirResourceDaoConceptMap.AddMappingRequest request = createAddMapping3ToTrillion();
+		assertThatThrownBy(()->myConceptMapDao.addMapping(request, newSrd()))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("HAPI-1743: Multiple ConceptMap resources match URL[http://foo-to-bar]. Do you need to specify a version?");
+
+	}
+
+	@Test
+	void testAddMapping_InconsistentVersionsSpecified() {
+		// Setup
+		// Test and Verify
+		IFhirResourceDaoConceptMap.AddMappingRequest request = createAddMapping3ToTrillion();
+		request.setConceptMapUri("http://foo-to-bar|1.0");
+		request.setConceptMapVersion("2.0");
+
+		assertThatThrownBy(()->myConceptMapDao.addMapping(request, newSrd()))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("ConceptMap URL includes a version[1.0] which conflicts with specified version[2.0]");
+
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testAddMapping_MultiplePreExisting_VersionSpecified(boolean theSpecifyInUrl) {
+		// Setup
+		createPreExistingConceptMapWithTwoMappings();
+
+		ConceptMap cm = new ConceptMap();
+		cm.setId("foo-to-bar-2");
+		cm.setUrl("http://foo-to-bar");
+		cm.setVersion("2.0");
+		myConceptMapDao.update(cm, newSrd());
+
+		// Test
+		IFhirResourceDaoConceptMap.AddMappingRequest request = createAddMapping3ToTrillion();
+		if (theSpecifyInUrl) {
+			request.setConceptMapUri("http://foo-to-bar|2.0");
+		} else {
+			request.setConceptMapVersion("2.0");
+		}
+		myConceptMapDao.addMapping(request, newSrd());
+
+		// Verify Translate Works
+		verifyCode3MapsToCodeTrillion();
+
+		// Verify ConceptMap has right codes
+		List<String> mappings = readConceptMapAndReturnStructuredMappings("http://foo-to-bar|1.0");
+		assertThat(mappings).containsExactly(
+			"http://foo|100 -> http://bar|200",
+			"  source: 1",
+			"    target: MILLION",
+			"  source: 2",
+			"    target: BILLION"
+		);
+
+		mappings = readConceptMapAndReturnStructuredMappings("http://foo-to-bar|2.0");
+		assertThat(mappings).containsExactly(
+			"http://foo -> http://bar",
+			"  source: 3",
+			"    target: TRILLION"
+		);
+
+	}
+
+
+	@Test
+	void testRemoveMapping_PreExisting() {
+		// Setup
+		createPreExistingConceptMapWithTwoMappings();
+		verifyCode2MapsToCodeBillion();
+
+		// Test
+		IFhirResourceDaoConceptMap.RemoveMappingRequest request = createRemoveMapping2ToBillion();
+		myConceptMapDao.removeMapping(request, newSrd());
+
+		// Verify Translate no longer works
+		verifyCode2MapsToCodeBillion_NotMapped();
+
+		// Verify ConceptMap has right codes
+		List<String> mappings = readConceptMapAndReturnStructuredMappings("http://foo-to-bar");
+		assertThat(mappings).containsExactly(
+			"http://foo|100 -> http://bar|200",
+			"  source: 1",
+			"    target: MILLION"
+		);
+	}
+
+
+	private void verifyCode2MapsToCodeBillion() {
+		myValidationSupport.invalidateCaches();
+
+		IValidationSupport.TranslateCodeRequest translateRequest = new IValidationSupport.TranslateCodeRequest(
+			List.of(new Coding("http://foo", "2", null)),
+			"http://bar"
+		);
+		TranslateConceptResults outcome = myValidationSupport.translateConcept(translateRequest);
+		assertNotNull(outcome);
+		assertNotNull(outcome.getResults());
+		assertEquals(1, outcome.getResults().size());
+		assertEquals("BILLION", outcome.getResults().get(0).getCode());
+		assertEquals("One billion", outcome.getResults().get(0).getDisplay());
+		assertEquals("equivalent", outcome.getResults().get(0).getEquivalence());
+		assertEquals("http://foo-to-bar", outcome.getResults().get(0).getConceptMapUrl());
+	}
+
+	private void verifyCode2MapsToCodeBillion_NotMapped() {
+		myValidationSupport.invalidateCaches();
+
+		IValidationSupport.TranslateCodeRequest translateRequest = new IValidationSupport.TranslateCodeRequest(
+			List.of(new Coding("http://foo", "2", null)),
+			"http://bar"
+		);
+		TranslateConceptResults outcome = myValidationSupport.translateConcept(translateRequest);
+		assertNotNull(outcome);
+		assertNotNull(outcome.getResults());
+		assertEquals(0, outcome.getResults().size());
+	}
+
+	private void verifyCode3MapsToCodeTrillion() {
+		myValidationSupport.invalidateCaches();
+
+		IValidationSupport.TranslateCodeRequest translateRequest = new IValidationSupport.TranslateCodeRequest(
+			List.of(new Coding("http://foo", "3", null)),
+			"http://bar"
+		);
+		TranslateConceptResults outcome = myValidationSupport.translateConcept(translateRequest);
+		assertNotNull(outcome);
+		assertNotNull(outcome.getResults());
+		assertEquals(1, outcome.getResults().size());
+		assertEquals("TRILLION", outcome.getResults().get(0).getCode());
+		assertEquals("One Trillion", outcome.getResults().get(0).getDisplay());
+		assertEquals("equivalent", outcome.getResults().get(0).getEquivalence());
+		assertEquals("http://foo-to-bar", outcome.getResults().get(0).getConceptMapUrl());
+	}
+
+	private static IFhirResourceDaoConceptMap.AddMappingRequest createAddMapping3ToTrillion() {
+		IFhirResourceDaoConceptMap.AddMappingRequest request = new  IFhirResourceDaoConceptMap.AddMappingRequest();
+		request.setConceptMapUri("http://foo-to-bar");
+		request.setSourceSystem("http://foo");
+		request.setSourceCode("3");
+		request.setSourceDisplay("Three");
+		request.setTargetSystem("http://bar");
+		request.setTargetCode("TRILLION");
+		request.setTargetDisplay("One Trillion");
+		request.setEquivalence("equivalent");
+		return request;
+	}
+
+	private static IFhirResourceDaoConceptMap.RemoveMappingRequest createRemoveMapping2ToBillion() {
+		IFhirResourceDaoConceptMap.RemoveMappingRequest request = new  IFhirResourceDaoConceptMap.RemoveMappingRequest();
+		request.setConceptMapUri("http://foo-to-bar");
+		request.setSourceSystem("http://foo");
+		request.setSourceCode("2");
+		request.setTargetSystem("http://bar");
+		request.setTargetCode("BILLION");
+		return request;
+	}
+
+	private List<String> readConceptMapAndReturnStructuredMappings(String theConceptMapUrl) {
+		SearchParameterMap map = conceptMapUrlToParameterMap(theConceptMapUrl, null);
+		List<IBaseResource> allResources = myConceptMapDao.search(map, newSrd()).getAllResources();
+		assertThat(allResources).hasSize(1);
+		ConceptMap outcome = (ConceptMap) allResources.get(0);
+
+		List<String> retVal = new ArrayList<>();
+
+		for (ConceptMap.ConceptMapGroupComponent group : outcome.getGroup()) {
+			String sourceVersionSuffix = group.getSourceVersion() != null ? "|" + group.getSourceVersion() : "";
+			String targetVersionSuffix = group.getTargetVersion() != null ? "|" + group.getTargetVersion() : "";
+
+			retVal.add(group.getSource() + sourceVersionSuffix + " -> " + group.getTarget() + targetVersionSuffix);
+			for (ConceptMap.SourceElementComponent next : group.getElement()) {
+				retVal.add("  source: " + next.getCode());
+				for (ConceptMap.TargetElementComponent target : next.getTarget()) {
+					retVal.add("    target: " + target.getCode());
+				}
+			}
+		}
+
+		return retVal;
+	}
+
+	private void createPreExistingConceptMapWithTwoMappings() {
+		ConceptMap cm = new ConceptMap();
+		cm.setId("foo-to-bar");
+		cm.setUrl("http://foo-to-bar");
+		cm.setVersion("1.0");
+		ConceptMap.ConceptMapGroupComponent group = cm.addGroup();
+		group.setSource("http://foo");
+		group.setSourceVersion("100");
+		group.setTarget("http://bar");
+		group.setTargetVersion("200");
+		group.addElement()
+			.setCode("1")
+			.setDisplay("One")
+			.addTarget(new ConceptMap.TargetElementComponent().setCode("MILLION").setDisplay("One million").setEquivalence(ConceptMapEquivalence.EQUIVALENT));
+		group.addElement()
+			.setCode("2")
+			.setDisplay("Two")
+			.addTarget(new ConceptMap.TargetElementComponent().setCode("BILLION").setDisplay("One billion").setEquivalence(ConceptMapEquivalence.EQUIVALENT));
+		myConceptMapDao.update(cm, newSrd());
+	}
+
 
 	/**
 	 * Some US core ConceptMaps use this style, e.g:
