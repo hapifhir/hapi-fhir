@@ -98,6 +98,7 @@ import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.Expression;
 import com.healthmarketscience.sqlbuilder.InCondition;
+import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.SetOperationQuery;
 import com.healthmarketscience.sqlbuilder.Subquery;
@@ -962,7 +963,9 @@ public class QueryStack {
 					theRequestPartitionId);
 
 			// Right side
-			Condition yPredicate = createPredicateFilter(
+			Condition yPredicate = ((SearchFilterParser.FilterLogical) theFilter).getOperation() == SearchFilterParser.FilterLogicalOperation.not ?
+				null :
+				createPredicateFilter(
 					theQueryStack3,
 					((SearchFilterParser.FilterLogical) theFilter).getFilter2(),
 					theResourceName,
@@ -974,6 +977,9 @@ public class QueryStack {
 			} else if (((SearchFilterParser.FilterLogical) theFilter).getOperation()
 					== SearchFilterParser.FilterLogicalOperation.or) {
 				return ComboCondition.or(xPredicate, yPredicate);
+			}  else if (((SearchFilterParser.FilterLogical) theFilter).getOperation()
+				== SearchFilterParser.FilterLogicalOperation.not) {
+				return new NotCondition(xPredicate);
 			} else {
 				// Shouldn't happen
 				throw new InvalidRequestException(Msg.code(1205) + "Don't know how to handle operation "

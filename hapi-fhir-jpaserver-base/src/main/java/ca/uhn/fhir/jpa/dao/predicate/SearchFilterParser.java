@@ -237,14 +237,14 @@ public class SearchFilterParser {
 	}
 
 	private BaseFilter parseLogical(BaseFilter filter) throws FilterSyntaxException {
-
 		BaseFilter result = null;
-		String s;
 		FilterLogical logical;
 		if (filter == null) {
-			s = "not";
+			logical = new FilterLogical();
+			logical.setOperation(FilterLogicalOperation.not);
+			logical.setFilter1(parseOpen());
 		} else {
-			s = consumeName();
+			String s = consumeName();
 			if ((!s.equals("or")) && (!s.equals("and")) && (!s.equals("not"))) {
 				throw new FilterSyntaxException(Msg.code(1059) + String.format("Unexpected Name %s at %d", s, cursor));
 			}
@@ -260,8 +260,8 @@ public class SearchFilterParser {
 			}
 
 			logical.setFilter2(parseOpen());
-			result = logical;
 		}
+		result = logical;
 		return result;
 	}
 
@@ -594,8 +594,12 @@ public class SearchFilterParser {
 
 		@Override
 		public String toString() {
-			return FFilter1.toString() + " "
+			if ("not".equals(CODES_LogicalOperation.get(getOperation().ordinal()))) {
+				return CODES_LogicalOperation.get(getOperation().ordinal()) + " " + FFilter1.toString();
+			} else {
+				return FFilter1.toString() + " "
 					+ CODES_LogicalOperation.get(getOperation().ordinal()) + " " + FFilter2.toString();
+			}
 		}
 	}
 

@@ -27,6 +27,11 @@ public class SearchFilterSyntaxTest {
 	}
 
 	@Test
+	public void testTokenNot() throws SearchFilterParser.FilterSyntaxException {
+		testParse("not name eq loinc|1234");
+	}
+
+	@Test
 	public void testUrl() throws SearchFilterParser.FilterSyntaxException {
 		testParse("name in http://loinc.org/vs/LP234");
 	}
@@ -54,6 +59,11 @@ public class SearchFilterSyntaxTest {
 	@Test
 	public void testFilter2() throws SearchFilterParser.FilterSyntaxException {
 		testParse("related[type eq comp and this lt that].target pr false");
+	}
+
+	@Test
+	public void testFilter2WithNot() throws SearchFilterParser.FilterSyntaxException {
+		testParse("related[type eq comp and not this lt that].target pr false");
 	}
 
 	@Test
