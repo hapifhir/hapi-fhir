@@ -1,8 +1,25 @@
 package ca.uhn.fhir.rest.gclient;
 
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-
+/**
+ * Interface to make non-FHIR requests using the GenericClient plumbing.
+ * Useful for the interceptor infrastructure when dealing with thinks like $export poll locations
+ * which are not FHIR payloads.  Boo.
+ */
 public interface IRawHttp {
-	Object execute();
-	IRawHttp fromRequest(IHttpRequest theRequest);
+
+	IGetRaw get();
+
+	interface IGetRaw {
+		IGetRawUntyped byUrl(String thePageUrl);
+
+	}
+
+
+	// fixme we might want a different response type here - maybe IHttpResponse?
+	//  something like a generic Http entity (see StringEntity)  which exposes status line, mime type,
+	// location headers, etc.
+	interface IGetRawUntyped {
+		IClientHttpExecutable<IClientHttpExecutable<?,String>,String>  forString();
+	}
+
 }

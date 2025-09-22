@@ -7,6 +7,8 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.VersionUtil;
+import com.google.common.base.Supplier;
+import jakarta.validation.constraints.NotNull;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.http.Header;
@@ -68,16 +70,26 @@ public abstract class BaseGenericClientR4Test {
 	}
 
 	protected ArgumentCaptor<HttpUriRequest> prepareClientForSearchResponse() throws IOException {
-		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
+		return prepareClientForResponse(Constants.CT_FHIR_JSON + "; charset=UTF-8", () -> {
+			return new ReaderInputStream(new StringReader("""
+				 {"resourceType":"Bundle","id":null,
+				 "base":"http://localhost:57931/fhir/contextDev",
+				 "total":1,
+				 "link":[{"relation":"self","url":"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json"}],
+				 "entry":[{"resource":{"resourceType":"Patient","id":"1","meta":{"versionId":"1","lastUpdated":"2014-12-20T18:41:29.706-05:00"},"identifier":[{"system":"urn:MultiFhirVersionTest","value":"testSubmitPatient01"}]}}]}""")
+				 , StandardCharsets.UTF_8);
+		});
+	}
 
+	protected @NotNull ArgumentCaptor<HttpUriRequest> prepareClientForResponse(String theContentType, Supplier<InputStream> theResultSupplier) throws IOException {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", theContentType));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
-				return new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8);
+				return theResultSupplier.get();
 			}
 		});
 		return capt;

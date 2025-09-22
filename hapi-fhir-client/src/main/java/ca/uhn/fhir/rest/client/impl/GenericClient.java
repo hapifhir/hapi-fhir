@@ -62,7 +62,6 @@ import ca.uhn.fhir.rest.client.method.DeleteMethodBinding;
 import ca.uhn.fhir.rest.client.method.HistoryMethodBinding;
 import ca.uhn.fhir.rest.client.method.HttpDeleteClientInvocation;
 import ca.uhn.fhir.rest.client.method.HttpGetClientInvocation;
-import ca.uhn.fhir.rest.client.method.HttpRawClientInvocation;
 import ca.uhn.fhir.rest.client.method.HttpSimpleClientInvocation;
 import ca.uhn.fhir.rest.client.method.IClientResponseHandler;
 import ca.uhn.fhir.rest.client.method.MethodUtil;
@@ -74,6 +73,7 @@ import ca.uhn.fhir.rest.client.method.TransactionMethodBinding;
 import ca.uhn.fhir.rest.client.method.ValidateMethodBindingDstu2Plus;
 import ca.uhn.fhir.rest.gclient.IBaseQuery;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
+import ca.uhn.fhir.rest.gclient.IClientHttpExecutable;
 import ca.uhn.fhir.rest.gclient.ICreate;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.ICreateWithQuery;
@@ -368,7 +368,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public IRawHttp noFhirRequest() { return new RawHttpInternal();	}
+	public IRawHttp rawHttpReqeust() {
+		return new RawHttpBuilder();
+	}
 
 	@Override
 	public <T extends IBaseResource> T read(Class<T> theType, String theId) {
@@ -476,8 +478,83 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		GET
 	}
 
+	private class RawHttpBuilder implements IRawHttp  {
+
+		@Override
+		public IGetRaw get() {
+			final RequestTypeEnum requestType = RequestTypeEnum.GET;
+
+			return new IGetRaw() {
+
+				@Override
+				public IGetRawUntyped byUrl(String theUrl) {
+					return new IGetRawUntyped() {
+						String url = theUrl;
+						@Override
+						public IClientHttpExecutable<IClientHttpExecutable<?, String>, String> forString() {
+							return new RawGetStringInternal<>(url);
+						}
+					};
+				}
+			};
+		}
+	}
+
+	class RawGetStringInternal<T extends IClientHttpExecutable<?,String>>
+		extends BaseClientHttpExecutable<T, String> {
+		final String myUrl;
+
+		public RawGetStringInternal(String theUrl) {
+			myUrl = theUrl;
+		}
+
+		@Override
+		public String execute() {
+			IClientResponseHandler<String> binding = new StringResponseHandler();
+			HttpGetClientInvocation invocation = new HttpGetClientInvocation(myContext, myUrl);
+			return invokeClient(myContext, binding, invocation);
+		}
+	}
+
+	private abstract class BaseClientHttpExecutable<T extends IClientHttpExecutable<?,Y>, Y> implements  IClientHttpExecutable<T,Y> {
+		CacheControlDirective myCacheControlDirective;
+		Map<String, List<String>> myCustomHeaderValues = new HashMap<>();
+		String myCustomAcceptHeaderValue;
+
+		public String getCustomAcceptHeaderValue() {
+			return myCustomAcceptHeaderValue;
+		}
+
+		@SuppressWarnings("unchecked")
+		public T accept(String theHeaderValue) {
+			myCustomAcceptHeaderValue = theHeaderValue;
+			return (T) this;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public T cacheControl(CacheControlDirective theCacheControlDirective) {
+			myCacheControlDirective = theCacheControlDirective;
+			return (T) this;
+		}
+
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public T withAdditionalHeader(String theHeaderName, String theHeaderValue) {
+			Objects.requireNonNull(theHeaderName, "headerName cannot be null");
+			Objects.requireNonNull(theHeaderValue, "headerValue cannot be null");
+			if (!myCustomHeaderValues.containsKey(theHeaderName)) {
+				myCustomHeaderValues.put(theHeaderName, new ArrayList<>());
+			}
+			myCustomHeaderValues.get(theHeaderName).add(theHeaderValue);
+			return (T) this;
+		}
+
+	}
+
 	private abstract class BaseClientExecutable<T extends IClientExecutable<?, Y>, Y>
-			implements IClientExecutable<T, Y> {
+		implements IClientExecutable<T, Y> {
 
 		EncodingEnum myParamEncoding;
 		Boolean myPrettyPrint;
@@ -580,32 +657,32 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		protected <Z> Z invoke(
-				Map<String, List<String>> theParams,
-				IClientResponseHandler<Z> theHandler,
-				BaseHttpClientInvocation theInvocation) {
+			Map<String, List<String>> theParams,
+			IClientResponseHandler<Z> theHandler,
+			BaseHttpClientInvocation theInvocation) {
 			if (isKeepResponses()) {
 				myLastRequest = theInvocation.asHttpRequest(getServerBase(), theParams, getEncoding(), myPrettyPrint);
 			}
 
 			return invokeClient(
-					myContext,
-					theHandler,
-					theInvocation,
-					myParamEncoding,
-					myPrettyPrint,
-					myQueryLogRequestAndResponse || myLogRequestAndResponse,
-					mySummaryMode,
-					mySubsetElements,
-					myCacheControlDirective,
-					myCustomAcceptHeaderValue,
-					myCustomHeaderValues);
+				myContext,
+				theHandler,
+				theInvocation,
+				myParamEncoding,
+				myPrettyPrint,
+				myQueryLogRequestAndResponse || myLogRequestAndResponse,
+				mySummaryMode,
+				mySubsetElements,
+				myCacheControlDirective,
+				myCustomAcceptHeaderValue,
+				myCustomHeaderValues);
 		}
 
 		protected IBaseResource parseResourceBody(String theResourceBody) {
 			EncodingEnum encoding = EncodingEnum.detectEncodingNoDefault(theResourceBody);
 			if (encoding == null) {
 				throw new IllegalArgumentException(Msg.code(1368)
-						+ myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
+					+ myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
 			}
 			return encoding.newParser(myContext).parseResource(theResourceBody);
 		}
@@ -1292,22 +1369,22 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 	}
 
-	private class RawHttpInternal extends BaseClientExecutable implements IRawHttp {
-		private IHttpRequest myRequest;
-
-		@Override
-		public Object execute() {
-			StringResponseHandler binding = new StringResponseHandler();
-			HttpRawClientInvocation invocation = new HttpRawClientInvocation(myContext, myRequest.getUri(), RequestTypeEnum.valueOf(myRequest.getHttpVerbName()));
-
-			return invokeClient(myContext, binding, invocation);
-		}
-
-		public IRawHttp fromRequest(IHttpRequest theRequest) {
-			myRequest = theRequest;
-			return this;
-		}
-	}
+//	private class RawHttpInternal extends BaseClientExecutable implements IRawHttp {
+//		private IHttpRequest myRequest;
+//
+//		@Override
+//		public Object execute() {
+//			StringResponseHandler binding = new StringResponseHandler();
+//			HttpRawClientInvocation invocation = new HttpRawClientInvocation(myContext, myRequest.getUri(), RequestTypeEnum.valueOf(myRequest.getHttpVerbName()));
+//
+//			return invokeClient(myContext, binding, invocation);
+//		}
+//
+//		public IRawHttp fromRequest(IHttpRequest theRequest) {
+//			myRequest = theRequest;
+//			return this;
+//		}
+//	}
 
 	@SuppressWarnings("rawtypes")
 	private class OperationInternal extends BaseClientExecutable

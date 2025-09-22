@@ -112,7 +112,7 @@ public interface IGenericClient extends IRestfulClient {
 	/**
 	 * Implementation of a raw call
 	 */
-	IRawHttp noFhirRequest();
+	IRawHttp rawHttpReqeust();
 
 	/**
 	 * Implementation of the "instance read" method.

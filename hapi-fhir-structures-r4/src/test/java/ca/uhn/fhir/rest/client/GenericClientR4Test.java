@@ -107,6 +107,26 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericClientR4Test.class);
 
 	@Test
+	void testRawGetRequest() throws IOException {
+	    // given
+		String responseBody = """
+			 { "jobId": "blahblah" }
+			 """;
+		ArgumentCaptor<HttpUriRequest> capt = prepareClientForResponse(
+			 Constants.CT_JSON, ()->new ByteArrayInputStream(responseBody.getBytes(StandardCharsets.UTF_8)));
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+	    // when
+		String result = client.rawHttpReqeust().get().byUrl("someurl?param1=value1").forString().execute();
+
+	    // then
+		HttpUriRequest httpUriRequest = capt.getAllValues().get(0);
+		assertEquals("http://example.com/fhir/someurl?param1=value1", UrlUtil.unescape(httpUriRequest.getURI().toString()));
+		assertEquals(responseBody, result);
+	}
+
+
+	@Test
 	public void testAcceptHeaderCustom() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = prepareClientForSearchResponse();
 
