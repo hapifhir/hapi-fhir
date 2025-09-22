@@ -68,6 +68,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -573,75 +574,96 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		}
 
 		/*
-        Multimap<RequestPartitionId, MatchUrlToResolve> partitionToMatchUrls =
-				MultimapBuilder.hashKeys().arrayListValues().build();
-		if (myPartitionSettings.isPartitioningEnabled()) {
-			for (MatchUrlToResolve map : searchParameterMapsToResolve) {
-				RequestPartitionId partition =
-						myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-								theRequestDetails, map.myResourceDefinition.getName(), map.myMatchUrlSearchMap);
-
-				if (partition.isAllPartitions()) {
-					partition = theRequestPartitionId;
-				}
-
-				partitionToMatchUrls.put(partition, map);
-			}
-		} else {
-			partitionToMatchUrls.putAll(RequestPartitionId.allPartitions(), searchParameterMapsToResolve);
-		}
-
-		for (Map.Entry<RequestPartitionId, Collection<MatchUrlToResolve>> nextEntry :
-				partitionToMatchUrls.asMap().entrySet()) {
-			RequestPartitionId partition = nextEntry.getKey();
-			Collection<MatchUrlToResolve> maps = nextEntry.getValue();
-			myHapiTransactionService
-					.withRequest(theRequestDetails)
-					.withRequestPartitionId(partition)
-					.execute(() -> {
-						ourLog.debug("Pre-fetching {} conditional URLs for partition {}", maps.size(), partition);
-						TaskChunker.chunk(
-								maps,
-								CONDITIONAL_URL_FETCH_CHUNK_SIZE,
-								map -> preFetchSearchParameterMaps(
-										theRequestDetails,
-										theTransactionDetails,
-										partition,
-										map,
-										theIdsToPreFetchBodiesFor,
-										theIdsToPreFetchVersionsFor));
-					});
-		}
-         */
-		// group things by match url so we can run them together.
-		record MatchTarget(String url, String resourceType) {
-			@Nonnull
-			static MatchTarget getMatchTarget(MatchUrlToResolve r) {
-				return new MatchTarget(r.myRequestUrl, r.myResourceDefinition.getName());
-			}
-		}
+		 * Chunk references into query-friendly sizes to resolve in batches.
+		 * Note: we can have 1000s of references all using the same url.
+		 * E.g. Organization references in big patient bundles. But if
+		 * these are scattered among other different URLs within the Bundle,
+		 * we don't want to end up resolving the same URL over and over.
+		 * So we build batches by url, not by reference.
+		 */
 		Map<MatchTarget, List<MatchUrlToResolve>> byMatchUrl =
-				searchParameterMapsToResolve.stream().collect(groupingBy(MatchTarget::getMatchTarget));
+				searchParameterMapsToResolve.stream().collect(groupingBy(r -> {
+					RequestPartitionId partition = RequestPartitionId.allPartitions();
+					if (myPartitionSettings.isPartitioningEnabled()) {
+						partition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+							theRequestDetails, r.myResourceDefinition.getName(), r.myMatchUrlSearchMap);
+						if (partition.isAllPartitions()) {
+							partition = theRequestPartitionId;
+						}
+					}
 
-		// Chunk references into query-friendly sizes to resolve in batches.
-		// Note: we can have 1000s of references all using the same url.
-		// E.g. Organization references in big patient bundles.
-		// So we build batches by url, not by reference.
-		// todo - if we are using partitioned tables, we want to also chunk these by target table partition.  Can we use
-		// isCompatiblePartition() to do this?
-		TaskChunker.chunk(byMatchUrl.entrySet(), CONDITIONAL_URL_FETCH_CHUNK_SIZE, nextUrlChunk -> {
-			// combine all resolve entries under this chunk of urls.
-			List<MatchUrlToResolve> combinedChunk =
+					return new MatchTarget(partition, r.myRequestUrl, r.myResourceDefinition.getName());
+				}));
+
+		Map<RequestPartitionId, List<Map.Entry<MatchTarget, List<MatchUrlToResolve>>>> byPartitionToMatchUrl = groupMatchTargetListByPartitionId(byMatchUrl);
+
+		for (Map.Entry<RequestPartitionId, List<Map.Entry<MatchTarget, List<MatchUrlToResolve>>>> by : byPartitionToMatchUrl.entrySet()) {
+			RequestPartitionId requestPartitionId = by.getKey();
+			List<Map.Entry<MatchTarget, List<MatchUrlToResolve>>> entries = by.getValue();
+
+			TaskChunker.chunk(entries, CONDITIONAL_URL_FETCH_CHUNK_SIZE, nextUrlChunk -> {
+
+				/*
+				 * Combine all resolve entries under this chunk of urls. If we have several entries with
+				 * the exact same URL, that means we'll have several entries in the following list, but
+				 * preFetchSearchParameterMaps(..) will only add one parameter to the SQL it generates for
+				 * each URL's SP hash value.
+				 */
+				List<MatchUrlToResolve> combinedChunk =
 					nextUrlChunk.stream().flatMap(cc -> cc.getValue().stream()).toList();
 
-			preFetchSearchParameterMaps(
+				preFetchSearchParameterMaps(
 					theRequestDetails,
 					theTransactionDetails,
-					theRequestPartitionId,
+					requestPartitionId,
 					combinedChunk,
 					theIdsToPreFetchBodiesFor,
 					theIdsToPreFetchVersionsFor);
-		});
+			});
+		}
+
+	}
+
+	@Nonnull
+	private Map<RequestPartitionId, List<Map.Entry<MatchTarget, List<MatchUrlToResolve>>>> groupMatchTargetListByPartitionId(Map<MatchTarget, List<MatchUrlToResolve>> byMatchUrl) {
+		Map<RequestPartitionId, List<Map.Entry<MatchTarget, List<MatchUrlToResolve>>>> byPartitionToMatchUrl = byMatchUrl.entrySet().stream().collect(groupingBy(t -> t.getKey().requestPartitionId()));
+
+		while (true) {
+			boolean changes = false;
+
+			List<RequestPartitionId> partitionUds = new ArrayList<>(byPartitionToMatchUrl.keySet());
+			for (int  indexA = 0; indexA < partitionUds.size(); indexA++) {
+				for (int  indexB = 0; indexB < partitionUds.size(); indexB++) {
+					if (indexA == indexB) {
+						continue;
+					}
+
+					RequestPartitionId partitionA = partitionUds.get(indexA);
+					RequestPartitionId partitionB = partitionUds.get(indexB);
+					if (partitionA == null || partitionA.isAllPartitions() || partitionB == null || partitionB.isAllPartitions()) {
+						continue;
+					}
+
+					if (myHapiTransactionService.isCompatiblePartition(partitionA, partitionB)) {
+						changes = true;
+						List<Map.Entry<MatchTarget, List<MatchUrlToResolve>>> byMatchUrlsA = byPartitionToMatchUrl.remove(partitionA);
+						List<Map.Entry<MatchTarget, List<MatchUrlToResolve>>> byMatchUrlsB = byPartitionToMatchUrl.remove(partitionB);
+
+						RequestPartitionId partitionBoth =  partitionA.mergeIds(partitionB);
+						byMatchUrlsA.addAll(byMatchUrlsB);
+
+						byPartitionToMatchUrl.put(partitionBoth, byMatchUrlsA);
+						partitionUds.set(indexA, null);
+						partitionUds.set(indexB, null);
+					}
+				}
+			}
+
+			if (!changes) {
+				break;
+			}
+		}
+		return byPartitionToMatchUrl;
 	}
 
 	/**
@@ -906,6 +928,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
 			SearchParameterMap matchUrlSearchMap =
 					myMatchUrlService.translateMatchUrl(theRequestUrl, resourceDefinition);
+			assert matchUrlSearchMap != null;
 			theOutputSearchParameterMapsToResolve.add(new MatchUrlToResolve(
 					theRequestUrl,
 					matchUrlSearchMap,
@@ -1060,11 +1083,14 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		private Long myHashSystemAndValue;
 
 		public MatchUrlToResolve(
-				String theRequestUrl,
-				SearchParameterMap theMatchUrlSearchMap,
-				RuntimeResourceDefinition theResourceDefinition,
+				@Nonnull String theRequestUrl,
+				@Nonnull SearchParameterMap theMatchUrlSearchMap,
+				@Nonnull RuntimeResourceDefinition theResourceDefinition,
 				boolean theShouldPreFetchResourceBody,
 				boolean theShouldPreFetchResourceVersion) {
+			Validate.notNull(theRequestUrl, "theRequestUrl must not be null");
+			Validate.notNull(theMatchUrlSearchMap, "theMatchUrlSearchMap must not be null");
+			Validate.notNull(theResourceDefinition, "theResourceDefinition must not be null");
 			myRequestUrl = theRequestUrl;
 			myMatchUrlSearchMap = theMatchUrlSearchMap;
 			myResourceDefinition = theResourceDefinition;
@@ -1093,4 +1119,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		 */
 		DIRECT_TARGET
 	}
+
+	record MatchTarget(RequestPartitionId requestPartitionId, String url, String resourceType) { }
+
 }
