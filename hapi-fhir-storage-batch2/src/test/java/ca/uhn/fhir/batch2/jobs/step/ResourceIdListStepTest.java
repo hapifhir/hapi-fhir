@@ -114,6 +114,7 @@ class ResourceIdListStepTest {
 			100,                222,          50
 			100,                20,           500
 			100,                20,           0
+			999,                999,          999
 			""")
 	void testLimitResourceCount(int theLimitResourceCount, int theAvailableIds, int theBatchSize) {
 		// Setup
