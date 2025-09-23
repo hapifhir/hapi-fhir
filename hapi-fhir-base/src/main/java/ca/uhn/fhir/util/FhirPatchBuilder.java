@@ -252,7 +252,7 @@ public class FhirPatchBuilder {
 	 * only the actual applicable properties are exposed depending on the specific operation.
 	 * </p>
 	 * <p>
-	 * Each operation (add, delete, etc) also has a concreate subclass of this class which actually
+	 * Each operation (add, delete, etc.) also has a concrete subclass of this class which actually
 	 * builds the <code>Parameters.parameter</code> entry for the given operation type.
 	 * </p>
 	 *
@@ -263,7 +263,7 @@ public class FhirPatchBuilder {
 	 * @param <RET_SOURCE>      The interface representing the next step after adding the source property
 	 * @param <RET_DESTINATION> The interface representing the next step after adding the destination property
 	 */
-	private class BaseOperationBuilder<RET_PATH, RET_NAME, RET_VALUE, RET_INDEX, RET_SOURCE, RET_DESTINATION>
+	private abstract class BaseOperationBuilder<RET_PATH, RET_NAME, RET_VALUE, RET_INDEX, RET_SOURCE, RET_DESTINATION>
 			implements IStepPath<RET_PATH>,
 					IStepName<RET_NAME>,
 					IStepValue<RET_VALUE>,
