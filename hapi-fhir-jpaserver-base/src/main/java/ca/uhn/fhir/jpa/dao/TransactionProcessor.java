@@ -606,40 +606,44 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		ListMultimap<RequestPartitionId, MatchUrlToResolve> partitionToMatchUrls = groupMatchTargetListByPartitionId(
 				theRequestDetails, searchParameterMapsToResolve, theRequestPartitionId);
 		for (RequestPartitionId partitionId : partitionToMatchUrls.keySet()) {
+			myHapiTransactionService
+					.withRequest(theRequestDetails)
+					.withRequestPartitionId(partitionId)
+					.execute(() -> {
+						List<MatchUrlToResolve> matchUrls = partitionToMatchUrls.get(partitionId);
 
-			List<MatchUrlToResolve> matchUrls = partitionToMatchUrls.get(partitionId);
+						/*
+						 * Chunk references into query-friendly sizes to resolve in batches.
+						 * Note: we can have 1000s of references all using the same url.
+						 * E.g. Organization references in big patient bundles. But if
+						 * these are scattered among other different URLs within the Bundle,
+						 * we don't want to end up resolving the same URL over and over.
+						 * So we build batches by url, not by reference.
+						 */
+						Map<MatchTarget, List<MatchUrlToResolve>> byMatchUrl =
+								matchUrls.stream().collect(groupingBy(MatchTarget::getMatchTarget));
 
-			/*
-			 * Chunk references into query-friendly sizes to resolve in batches.
-			 * Note: we can have 1000s of references all using the same url.
-			 * E.g. Organization references in big patient bundles. But if
-			 * these are scattered among other different URLs within the Bundle,
-			 * we don't want to end up resolving the same URL over and over.
-			 * So we build batches by url, not by reference.
-			 */
-			Map<MatchTarget, List<MatchUrlToResolve>> byMatchUrl =
-					matchUrls.stream().collect(groupingBy(MatchTarget::getMatchTarget));
+						TaskChunker.chunk(byMatchUrl.entrySet(), CONDITIONAL_URL_FETCH_CHUNK_SIZE, nextUrlChunk -> {
 
-			TaskChunker.chunk(byMatchUrl.entrySet(), CONDITIONAL_URL_FETCH_CHUNK_SIZE, nextUrlChunk -> {
+							/*
+							 * Combine all resolve entries under this chunk of urls. If we have several entries with
+							 * the exact same URL, that means we'll have several entries in the following list, but
+							 * preFetchSearchParameterMaps(..) will only add one parameter to the SQL it generates for
+							 * each URL's SP hash value.
+							 */
+							List<MatchUrlToResolve> combinedChunk = nextUrlChunk.stream()
+									.flatMap(cc -> cc.getValue().stream())
+									.toList();
 
-				/*
-				 * Combine all resolve entries under this chunk of urls. If we have several entries with
-				 * the exact same URL, that means we'll have several entries in the following list, but
-				 * preFetchSearchParameterMaps(..) will only add one parameter to the SQL it generates for
-				 * each URL's SP hash value.
-				 */
-				List<MatchUrlToResolve> combinedChunk = nextUrlChunk.stream()
-						.flatMap(cc -> cc.getValue().stream())
-						.toList();
-
-				preFetchSearchParameterMaps(
-						theRequestDetails,
-						theTransactionDetails,
-						partitionId,
-						combinedChunk,
-						theIdsToPreFetchBodiesFor,
-						theIdsToPreFetchVersionsFor);
-			});
+							preFetchSearchParameterMaps(
+									theRequestDetails,
+									theTransactionDetails,
+									partitionId,
+									combinedChunk,
+									theIdsToPreFetchBodiesFor,
+									theIdsToPreFetchVersionsFor);
+						});
+					});
 		}
 	}
 
