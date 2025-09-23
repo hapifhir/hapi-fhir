@@ -646,8 +646,20 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		myServer.getFhirClient().transaction().withBundle(Resources.toString(Resources.getResource("transaction-bundles/synthea/practitionerInformation1743689610792.json"), Charsets.UTF_8)).execute();
 		Bundle patientBundle = parser.parseResource(Bundle.class, Resources.toString(Resources.getResource("transaction-bundles/synthea/Sherise735_Zofia65_Swaniawski813_e0f7758e-a749-4357-858c-53e1db808e37.json"), Charsets.UTF_8));
 
+		myCaptureQueriesListener.clear();
+
 		// when
 		assertDoesNotThrow(() -> myServer.getFhirClient().transaction().withBundle(patientBundle).execute());
+
+		// Verify
+		// This bundle contains 517 resources.
+		assertEquals(26, myCaptureQueriesListener.countSelectQueries());
+		// this is so high because we limit Hibernate to batches of 30 rows.
+		assertEquals(319, myCaptureQueriesListener.getInsertQueries().size());
+		assertEquals(9379, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(36, myCaptureQueriesListener.getUpdateQueries().size());
+		assertEquals(1031, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
 	}
 
