@@ -116,6 +116,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * scenarios including non-partitioned mode, partitioned mode, and
  * database partitioning mode.
  */
+@SuppressWarnings("unchecked")
 abstract class TestDefinitions implements ITestDataBuilder {
 
 	private final TestPartitionSelectorInterceptor myPartitionSelectorInterceptor;
@@ -1495,8 +1496,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		QuestionnaireResponse qr = new QuestionnaireResponse();
 		qr.setQuestionnaire("http://foo");
 		IIdType qrId = myQuestionnaireResponseDao.create(qr, newRequest()).getId().toUnqualifiedVersionless();
-		CreatedQuestionnaireAndResponseIds result = new CreatedQuestionnaireAndResponseIds(qId, qrId);
-		return result;
+		return new CreatedQuestionnaireAndResponseIds(qId, qrId);
 	}
 
 	private record CreatedQuestionnaireAndResponseIds(IIdType qId, IIdType qrId) {

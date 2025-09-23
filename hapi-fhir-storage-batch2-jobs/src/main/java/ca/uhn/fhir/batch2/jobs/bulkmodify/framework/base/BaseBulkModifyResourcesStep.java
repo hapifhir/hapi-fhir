@@ -143,14 +143,14 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		Validate.isTrue(
 				!state.hasPidsToModify(), "PIDs remain in state, this is a bug: %s", state.getPidsToModifyAndClear());
 
-		BulkModifyResourcesChunkOutcomeJson outcome = generateOutcome(state);
+		BulkModifyResourcesChunkOutcomeJson outcome = generateOutcome(jobParameters, state);
 		theDataSink.accept(outcome);
 
 		return RunOutcome.SUCCESS;
 	}
 
 	private void processPids(
-			PT jobParameters,
+			PT theJobParameters,
 			State theState,
 			List<TypedPidAndVersionJson> thePids,
 			RequestPartitionId theRequestPartitionId,
@@ -163,7 +163,8 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			myTransactionService
 					.withSystemRequestOnPartition(theRequestPartitionId)
 					.withTransactionDetails(transactionDetails)
-					.execute(() -> processPidsInTransaction(jobParameters, theState, thePids, transactionDetails));
+					.readOnly(theJobParameters.isDryRun())
+					.execute(() -> processPidsInTransaction(theJobParameters, theState, thePids, transactionDetails));
 
 			// Storage transaction succeeded
 			theState.movePendingToSaved();
@@ -207,7 +208,11 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		}
 
 		// Store the modified resources to the DB
-		storeResourcesInTransaction(modificationContext, theState, theTransactionDetails);
+		if (!theJobParameters.isDryRun()) {
+			storeResourcesInTransaction(modificationContext, theState, theTransactionDetails);
+		} else {
+			theState.moveUnsavedToSaved();
+		}
 	}
 
 	private void processPidsInIndividualTransactions(
@@ -442,13 +447,21 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	}
 
 	@Nonnull
-	private static BulkModifyResourcesChunkOutcomeJson generateOutcome(State theState) {
+	private BulkModifyResourcesChunkOutcomeJson generateOutcome(
+			BaseBulkModifyJobParameters theJobParameters, State theState) {
 		BulkModifyResourcesChunkOutcomeJson outcome = new BulkModifyResourcesChunkOutcomeJson();
 
 		outcome.setChunkRetryCount(theState.getRetryCount());
 		outcome.setResourceRetryCount(theState.getRetriedResourceCount());
 
 		for (PidAndResource next : theState.getResourcesInState(StateEnum.CHANGED_SAVED)) {
+			if (theJobParameters.isDryRun()) {
+				if (theJobParameters.getDryRunMode() == BaseBulkModifyJobParameters.DryRunMode.COLLECT_CHANGED) {
+					outcome.addChangedResourceBody(
+							myFhirContext.newJsonParser().encodeResourceToString(next.resource()));
+				}
+			}
+
 			outcome.addChangedId(next.resource().getIdElement());
 		}
 		for (PidAndResource next : theState.getResourcesInState(StateEnum.DELETED_SAVED)) {
@@ -492,10 +505,14 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 
 		public StateEnum toSaved() {
 			return switch (this) {
-				case CHANGED_PENDING -> CHANGED_SAVED;
-				case DELETED_PENDING -> DELETED_SAVED;
+				case CHANGED_UNSAVED, CHANGED_PENDING -> CHANGED_SAVED;
+				case DELETED_UNSAVED, DELETED_PENDING -> DELETED_SAVED;
 				default -> throw new IllegalStateException(Msg.code(2808) + "Can't convert " + this + " to saved");
 			};
+		}
+
+		public static Set<StateEnum> unsavedStates() {
+			return EnumSet.of(CHANGED_UNSAVED, DELETED_UNSAVED);
 		}
 
 		public static Set<StateEnum> pendingStates() {
@@ -503,10 +520,12 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		}
 	}
 
+	/**
+	 * This object contains the current state for a single batch/execution of this step
+	 */
 	private static class State {
 
-		//		private final List<TypedPidAndVersionJson> myPidsToModify = new ArrayList<>();
-		private ListMultimap<StateEnum, PidAndResource> myStateMap =
+		private final ListMultimap<StateEnum, PidAndResource> myStateMap =
 				MultimapBuilder.enumKeys(StateEnum.class).arrayListValues().build();
 		private final Map<PidAndResource, String> myFailures = new HashMap<>();
 		private int myRetryCount;
@@ -598,6 +617,15 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 
 		public void setJobFailure(JobExecutionFailedException theJobFailure) {
 			myJobFailure = theJobFailure;
+		}
+
+		public void moveUnsavedToSaved() {
+			for (StateEnum state : StateEnum.unsavedStates()) {
+				List<PidAndResource> entries = myStateMap.removeAll(state);
+				StateEnum savedState = state.toSaved();
+				assert savedState != null;
+				myStateMap.putAll(savedState, entries);
+			}
 		}
 	}
 

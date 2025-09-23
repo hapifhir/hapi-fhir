@@ -20,6 +20,8 @@
 package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
+import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -28,13 +30,51 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public abstract class BaseBulkModifyJobParameters extends PartitionedUrlJobParameters {
 
 	@JsonProperty("dryRun")
-	private boolean myDryRun;
+	private Boolean myDryRun;
 
-	public void setDryRun(boolean theDryRun) {
-		myDryRun = theDryRun;
+	@JsonProperty("dryRunMode")
+	private DryRunMode myDryRunMode;
+
+	@JsonProperty("limitResourceVersionCount")
+	private Integer myLimitResourceVersionCount;
+
+	public DryRunMode getDryRunMode() {
+		return myDryRunMode;
+	}
+
+	public BaseBulkModifyJobParameters setDryRunMode(DryRunMode theDryRunMode) {
+		myDryRunMode = theDryRunMode;
+		return this;
+	}
+
+	public Integer getLimitResourceVersionCount() {
+		return myLimitResourceVersionCount;
+	}
+
+	public void setLimitResourceVersionCount(Integer theLimitResourceVersionCount) {
+		myLimitResourceVersionCount = theLimitResourceVersionCount;
 	}
 
 	public boolean isDryRun() {
-		return myDryRun;
+		return Boolean.TRUE.equals(myDryRun);
+	}
+
+	public BaseBulkModifyJobParameters setDryRun(boolean theDryRun) {
+		myDryRun = theDryRun;
+		return this;
+	}
+
+	public enum DryRunMode {
+		COUNT,
+		COLLECT_CHANGED
+	}
+
+	/**
+	 * Concrete implementation of this class which can be used to deserialize
+	 * any subclass of {@link BaseBulkModifyJobParameters}
+	 */
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static class DeserializingImpl extends BaseBulkModifyJobParameters implements IModelJson {
+		// nothing
 	}
 }

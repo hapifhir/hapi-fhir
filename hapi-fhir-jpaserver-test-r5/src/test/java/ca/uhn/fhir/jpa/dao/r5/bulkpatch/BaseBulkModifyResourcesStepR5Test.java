@@ -13,6 +13,7 @@ import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -23,14 +24,21 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
@@ -39,6 +47,8 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 	private IMockStep myMockStep;
 	@Mock
 	private IJobDataSink<BulkModifyResourcesChunkOutcomeJson> mySink;
+	@Captor
+	private ArgumentCaptor<BulkModifyResourcesChunkOutcomeJson> myDataCaptor;
 
 	private MyBulkModifyResourcesStep myStep;
 
@@ -56,21 +66,25 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 		myStep.setMockStep(myMockStep);
 	}
 
-	@Test
-	public void testDeleteResource() {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testDeleteResource(boolean theDryRun) {
 		createPatient(withId("P1"), withFamily("Family1"));
 		createPatient(withId("P2"), withFamily("Family2"));
 		TypedPidAndVersionListWorkChunkJson data = createWorkChunkForAllResources();
-		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(new BulkPatchJobParameters(), data, new JobInstance(), new WorkChunk());
+		BulkPatchJobParameters jobParameters = new BulkPatchJobParameters();
+		jobParameters.setDryRun(theDryRun);
+		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(jobParameters, data, new JobInstance(), new WorkChunk());
 
 		when(myMockStep.modifyResource(any(), any(), any())).thenAnswer(t->{
 			ResourceModificationRequest request = t.getArgument(2, ResourceModificationRequest.class);
 			Patient patient = (Patient) request.getResource();
-			if ("P1".equals(patient.getIdElement().getIdPart())) {
-				return ResourceModificationResponse.noChange();
-			}
+			// Delete Patient/P2, leave Patient/P1 alone
 			if ("P2".equals(patient.getIdElement().getIdPart())) {
 				return ResourceModificationResponse.delete();
+			}
+			if ("P1".equals(patient.getIdElement().getIdPart())) {
+				return ResourceModificationResponse.noChange();
 			}
 			throw new IllegalStateException();
 		});
@@ -81,7 +95,15 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 
 		// Verify
 		assertNotGone("Patient/P1");
-		assertGone("Patient/P2");
+		if (theDryRun) {
+			assertNotGone("Patient/P2");
+		} else {
+			assertGone("Patient/P2");
+		}
+
+		verify(mySink, times(1)).accept(myDataCaptor.capture());
+		BulkModifyResourcesChunkOutcomeJson stepOutcome = myDataCaptor.getValue();
+		assertThat(stepOutcome.getDeletedIds()).containsExactlyInAnyOrder("Patient/P2/_history/1");
 	}
 
 	@Test

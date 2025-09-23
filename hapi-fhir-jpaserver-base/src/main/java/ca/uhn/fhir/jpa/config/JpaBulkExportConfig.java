@@ -19,18 +19,47 @@
  */
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportHelperService;
 import ca.uhn.fhir.jpa.bulk.export.svc.JpaBulkExportProcessor;
+import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.mdm.svc.MdmExpandersHolder;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import jakarta.persistence.EntityManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class JpaBulkExportConfig {
 	@Bean
-	public IBulkExportProcessor<JpaPid> jpaBulkExportProcessor() {
-		return new JpaBulkExportProcessor();
+	public IBulkExportProcessor<JpaPid> jpaBulkExportProcessor(
+			FhirContext theFhirContext,
+			BulkExportHelperService theBulkExportHelperService,
+			JpaStorageSettings theJpaStorageSettings,
+			DaoRegistry theDaoRegistry,
+			SearchBuilderFactory<JpaPid> theSearchBuilderFactory,
+			IIdHelperService<JpaPid> theIdHelperService,
+			EntityManager theEntityManager,
+			IHapiTransactionService theHapiTransactionService,
+			ISearchParamRegistry theSearchParamRegistry,
+			MdmExpandersHolder theMdmExpandersHolder) {
+		return new JpaBulkExportProcessor(
+				theFhirContext,
+				theBulkExportHelperService,
+				theJpaStorageSettings,
+				theDaoRegistry,
+				theSearchBuilderFactory,
+				theIdHelperService,
+				theEntityManager,
+				theHapiTransactionService,
+				theSearchParamRegistry,
+				theMdmExpandersHolder);
 	}
 
 	@Bean

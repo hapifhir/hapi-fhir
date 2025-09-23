@@ -97,6 +97,7 @@ import org.hl7.fhir.r5.model.Encounter;
 import org.hl7.fhir.r5.model.EpisodeOfCare;
 import org.hl7.fhir.r5.model.Group;
 import org.hl7.fhir.r5.model.HealthcareService;
+import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Immunization;
 import org.hl7.fhir.r5.model.ImmunizationRecommendation;
 import org.hl7.fhir.r5.model.Location;
@@ -509,6 +510,10 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@AfterEach
 	public void afterEachClearCaches() {
 		myJpaValidationSupportChain.invalidateCaches();
+	}
+
+	protected Patient readPatient(String theId) {
+		return myPatientDao.read(new IdType(theId), newSrd());
 	}
 
 }
