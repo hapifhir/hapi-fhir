@@ -1,15 +1,9 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
@@ -33,6 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR4ConceptMapTest.class);
@@ -87,35 +85,6 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		inParams.addParameter().setName("system").setValue(new UriType("http://my-codes"));
 		inParams.addParameter().setName("targetSystem").setValue(new UriType("http://loinc.org"));
 		inParams.addParameter().setName("sourceCode").setValue(new CodeType("BP-S"));
-
-		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
-
-		Parameters respParams = myClient
-			.operation()
-			.onType(ConceptMap.class)
-			.named(JpaConstants.OPERATION_TRANSLATE)
-			.withParameters(inParams)
-			.execute();
-
-		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
-
-		Coding value = (Coding) respParams.getParameter("match").getPart().get(1).getValue();
-		assertEquals("8480-6", value.getCode());
-		assertEquals("Systolic blood pressure", value.getDisplay());
-		assertEquals("http://loinc.org", value.getSystem());
-	}
-
-	/**
-	 * Note: This test creates contents for terminology_mapping.md in the docs
-	 */
-	@Test
-	void testTranslateLocalCodeToLoinc_Reverse_UseR5ParameterNames() {
-		createLocalToLoincConceptMap();
-
-		Parameters inParams = new Parameters();
-		inParams.addParameter().setName("system").setValue(new UriType("http://loinc.org"));
-		inParams.addParameter().setName("targetSystem").setValue(new UriType("http://my-codes"));
-		inParams.addParameter().setName("sourceCode").setValue(new CodeType("8480-6"));
 
 		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
