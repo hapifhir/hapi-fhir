@@ -99,7 +99,7 @@ public class ReindexProvider {
 					IPrimitiveType<String> theCorrectCurrentVersion,
 			@Description(
 							"How many resources should be reindexed in a single batch. This can be reduced if you need to reindex large resources and therefore need to reduce memory footprint. Values larger than "
-									+ ResourceIdListStep.MAX_BATCH_OF_IDS + " will be ignored (default: "
+									+ ResourceIdListStep.MAX_BATCH_OF_IDS + " or less than 1 will be ignored (default: "
 									+ ResourceIdListStep.MAX_BATCH_OF_IDS + ")")
 					@OperationParam(
 							name = ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE,
@@ -160,7 +160,11 @@ public class ReindexProvider {
 		}
 
 		if (theBatchSize != null && theBatchSize.getValue() != null) {
-			params.setBatchSize(theBatchSize.getValue());
+			int value = theBatchSize.getValue();
+			// Ignore invalid values
+			value = Math.min(value, ResourceIdListStep.MAX_BATCH_OF_IDS);
+			value = Math.max(value, 1);
+			params.setBatchSize(value);
 		}
 
 		myJobPartitionProvider.getPartitionedUrls(theRequestDetails, urls).forEach(params::addPartitionedUrl);

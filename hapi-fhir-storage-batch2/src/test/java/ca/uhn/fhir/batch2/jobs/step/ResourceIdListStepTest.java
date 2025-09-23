@@ -113,6 +113,7 @@ class ResourceIdListStepTest {
 			100,                222,          500
 			100,                222,          50
 			100,                20,           500
+			100,                20,           0
 			""")
 	void testLimitResourceCount(int theLimitResourceCount, int theAvailableIds, int theBatchSize) {
 		// Setup
@@ -142,8 +143,12 @@ class ResourceIdListStepTest {
 			.map(t -> new TypedPidJson("Patient", 1, t.getId().toString()))
 			.toList();
 		List<ResourceIdListWorkChunkJson> allChunks = myDataCaptor.getAllValues();
+		int expectedBatchSize = theBatchSize;
+		if (expectedBatchSize < 1) {
+			expectedBatchSize = 1;
+		}
 		for (var chunk : allChunks) {
-			assertThat(chunk.getTypedPids()).asList().hasSizeBetween(0, theBatchSize);
+			assertThat(chunk.getTypedPids()).asList().hasSizeBetween(0, expectedBatchSize);
 		}
 		List<TypedPidJson> actualPids = allChunks
 			.stream()
