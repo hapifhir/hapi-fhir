@@ -1,0 +1,6 @@
+---
+type: add
+issue: fixme
+title: "Two new operations have been added to the JPA server called `ConceptMap/$hapi.fhir.add-mapping`
+   and `ConceptMap/$hapi.fhir.remove-mapping`. These operations can be used to add or remove individual
+   entries within a ConceptMap resource."

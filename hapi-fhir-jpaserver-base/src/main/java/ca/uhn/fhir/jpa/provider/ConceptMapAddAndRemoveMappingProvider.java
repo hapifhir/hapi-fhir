@@ -30,6 +30,11 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+/**
+ * This resource provider implements the <code>ConceptMap/$hapi.fhir.add-mapping</code>
+ * and <code>ConceptMap/$hapi.fhir.remove-mapping</code> operations.
+ */
+@SuppressWarnings("ClassCanBeRecord")
 public class ConceptMapAddAndRemoveMappingProvider {
 
 	private final IFhirResourceDaoConceptMap<?> myConceptMapDao;
@@ -42,6 +47,9 @@ public class ConceptMapAddAndRemoveMappingProvider {
 		myConceptMapDao = theConceptMapDao;
 	}
 
+	/**
+	 * Operation: <code>ConceptMap/$hapi.fhir.add-mapping</code>
+	 */
 	@Operation(typeName = "ConceptMap", name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING)
 	public IBaseOperationOutcome addMapping(
 			@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_CONCEPTMAP_URL, typeName = "uri")
@@ -81,6 +89,9 @@ public class ConceptMapAddAndRemoveMappingProvider {
 		return myConceptMapDao.addMapping(request, theRequestDetails);
 	}
 
+	/**
+	 * Operation: <code>ConceptMap/$hapi.fhir.remove-mapping</code>
+	 */
 	@Operation(typeName = "ConceptMap", name = JpaConstants.OPERATION_CONCEPTMAP_REMOVE_MAPPING)
 	public IBaseOperationOutcome removeMapping(
 			@OperationParam(name = JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_CONCEPTMAP_URL, typeName = "uri")

@@ -29,13 +29,15 @@ public interface IFhirResourceDaoConceptMap<T extends IBaseResource> extends IFh
 	TranslateConceptResults translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails);
 
 	/**
-	 * @return
+	 * Operation: <code>ConceptMap/$hapi.fhir.add-mapping</code>
+	 *
 	 * @since 8.6.0
 	 */
 	IBaseOperationOutcome addMapping(AddMappingRequest theRequest, RequestDetails theRequestDetails);
 
 	/**
-	 * @return
+	 * Operation: <code>ConceptMap/$hapi.fhir.remove-mapping</code>
+	 *
 	 * @since 8.6.0
 	 */
 	IBaseOperationOutcome removeMapping(RemoveMappingRequest theRequest, RequestDetails theRequestDetails);

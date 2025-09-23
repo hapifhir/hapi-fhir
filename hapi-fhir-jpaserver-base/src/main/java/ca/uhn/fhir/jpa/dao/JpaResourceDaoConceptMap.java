@@ -66,6 +66,9 @@ public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResour
 	@Autowired
 	private VersionCanonicalizer myVersionCanonicalizer;
 
+	/**
+	 * Operation: <code>ConceptMap/$translate</code>
+	 */
 	@Override
 	public TranslateConceptResults translate(
 			TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
@@ -109,6 +112,9 @@ public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResour
 		return retVal;
 	}
 
+	/**
+	 * Operation: <code>ConceptMap/$hapi.fhir.add-mapping</code>
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public IBaseOperationOutcome addMapping(AddMappingRequest theRequest, RequestDetails theRequestDetails) {
@@ -145,6 +151,9 @@ public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResour
 		return operationOutcome;
 	}
 
+	/**
+	 * Operation: <code>ConceptMap/$hapi.fhir.remove-mapping</code>
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public IBaseOperationOutcome removeMapping(RemoveMappingRequest theRequest, RequestDetails theRequestDetails) {
