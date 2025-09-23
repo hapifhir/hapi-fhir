@@ -34,7 +34,7 @@ public class FhirPatchCoreTest extends BaseTest {
 	@MethodSource("parameters")
 	public void testApply(TestCase theTestCase) {
 
-		ourLog.info("Testing diff in {} mode: {}", theTestCase.mode(), theTestCase.name());
+		ourLog.info("Testing diff {} in {} mode", theTestCase.name(), theTestCase.mode());
 
 		if (theTestCase.mode().equals("both") || theTestCase.mode().equals("forwards")) {
 
