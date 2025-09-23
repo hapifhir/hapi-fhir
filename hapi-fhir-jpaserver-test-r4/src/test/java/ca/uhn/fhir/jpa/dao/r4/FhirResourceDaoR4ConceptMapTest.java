@@ -1358,6 +1358,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 		List<IBaseResource> allResources = myConceptMapDao.search(map, newSrd()).getAllResources();
 		assertThat(allResources).hasSize(1);
 		ConceptMap outcome = (ConceptMap) allResources.get(0);
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		List<String> retVal = new ArrayList<>();
 

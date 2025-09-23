@@ -91,7 +91,8 @@ public class LoggingInterceptor implements IClientInterceptor {
 			try {
 				String content = theRequest.getRequestBodyFromStream();
 				if (content != null) {
-					myLog.debug("Client request body:\n{}", content);
+					// FIXME: restore
+					myLog.info("Client request body:\n{}", content);
 				}
 			} catch (IllegalStateException | IOException e) {
 				myLog.warn(
@@ -154,7 +155,8 @@ public class LoggingInterceptor implements IClientInterceptor {
 					} catch (IllegalStateException e) {
 						throw new InternalErrorException(Msg.code(1405) + e);
 					}
-					myLog.debug("Client response body:\n{}", new String(bytes, StandardCharsets.UTF_8));
+					// FIXME: restore
+					myLog.info("Client response body:\n{}", new String(bytes, StandardCharsets.UTF_8));
 				} else {
 					myLog.info("Client response body: (none)");
 				}

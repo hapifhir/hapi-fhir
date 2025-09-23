@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -49,9 +50,9 @@ class ConceptMapAddAndRemoveMappingProviderTest {
 	public void testAddMapping() {
 		// Setup
 		IBaseOperationOutcome operationOutcome = OperationOutcomeUtil.createOperationOutcome(
-			OperationOutcomeUtil.OO_SEVERITY_WARN,
+			OperationOutcomeUtil.OO_SEVERITY_INFO,
 			"Mapping has been added",
-			OperationOutcomeUtil.OO_ISSUE_CODE_PROCESSING,
+			OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL,
 			myContext,
 			null
 		);
@@ -59,6 +60,7 @@ class ConceptMapAddAndRemoveMappingProviderTest {
 
 		// Test
 		IGenericClient client = myServer.getFhirClient();
+		client.registerInterceptor(new LoggingInterceptor(true));
 		client
 			.operation()
 			.onType(ConceptMap.class)
@@ -74,6 +76,7 @@ class ConceptMapAddAndRemoveMappingProviderTest {
 			.andParameter(JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_TARGET_DISPLAY, new StringType("Systolic blood pressure at First encounter"))
 			.andParameter(JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_EQUIVALENCE, new CodeType("equivalent"))
 			.returnResourceType(OperationOutcome.class)
+			.prettyPrint()
 			.execute();
 
 		// Verify
@@ -95,9 +98,9 @@ class ConceptMapAddAndRemoveMappingProviderTest {
 	public void testRemoveMapping() {
 		// Setup
 		IBaseOperationOutcome operationOutcome = OperationOutcomeUtil.createOperationOutcome(
-			OperationOutcomeUtil.OO_SEVERITY_WARN,
+			OperationOutcomeUtil.OO_SEVERITY_INFO,
 			"Removed 1 ConceptMap mappings",
-			OperationOutcomeUtil.OO_ISSUE_CODE_PROCESSING,
+			OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL,
 			myContext,
 			null
 		);
@@ -105,6 +108,7 @@ class ConceptMapAddAndRemoveMappingProviderTest {
 
 		// Test
 		IGenericClient client = myServer.getFhirClient();
+		client.registerInterceptor(new LoggingInterceptor(true));
 		client
 			.operation()
 			.onType(ConceptMap.class)
@@ -113,13 +117,11 @@ class ConceptMapAddAndRemoveMappingProviderTest {
 			.andParameter(JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_SOURCE_SYSTEM, new UriType("http://my-code-system"))
 			.andParameter(JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_SOURCE_VERSION, new CodeType("1.0"))
 			.andParameter(JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_SOURCE_CODE, new StringType("BP-SYS"))
-			.andParameter(JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_SOURCE_DISPLAY, new StringType("Systolic BP"))
 			.andParameter(JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_TARGET_SYSTEM, new UriType("http://loinc.org"))
 			.andParameter(JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_TARGET_VERSION, new CodeType("2.57"))
 			.andParameter(JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_TARGET_CODE, new CodeType("11378-7"))
-			.andParameter(JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_TARGET_DISPLAY, new StringType("Systolic blood pressure at First encounter"))
-			.andParameter(JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_EQUIVALENCE, new CodeType("equivalent"))
 			.returnResourceType(OperationOutcome.class)
+			.prettyPrint()
 			.execute();
 
 		// Verify
