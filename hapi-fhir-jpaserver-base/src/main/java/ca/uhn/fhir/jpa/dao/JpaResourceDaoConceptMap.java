@@ -336,8 +336,7 @@ public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResour
 		}
 
 		if (isNotBlank(theConceptMapVersion) && isNotBlank(version) && !theConceptMapVersion.equals(version)) {
-			// FIXME: add code
-			throw new InvalidRequestException(Msg.code(1) + "ConceptMap URL includes a version[" + version
+			throw new InvalidRequestException(Msg.code(2818) + "ConceptMap URL includes a version[" + version
 					+ "] which conflicts with specified version[" + theConceptMapVersion + "]");
 		}
 
