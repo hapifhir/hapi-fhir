@@ -45,6 +45,8 @@ class ConceptMapAddAndRemoveMappingProviderTest {
 		});
 	@Captor
 	private ArgumentCaptor<IFhirResourceDaoConceptMap.AddMappingRequest> myAddMappingRequestCaptor;
+	@Captor
+	private ArgumentCaptor<IFhirResourceDaoConceptMap.RemoveMappingRequest> myRemoveMappingRequestCaptor;
 
 	@Test
 	public void testAddMapping() {
@@ -104,7 +106,7 @@ class ConceptMapAddAndRemoveMappingProviderTest {
 			myContext,
 			null
 		);
-		when(myConceptMapDao.addMapping(any(),any())).thenReturn(operationOutcome);
+		when(myConceptMapDao.removeMapping(any(),any())).thenReturn(operationOutcome);
 
 		// Test
 		IGenericClient client = myServer.getFhirClient();
@@ -112,7 +114,7 @@ class ConceptMapAddAndRemoveMappingProviderTest {
 		client
 			.operation()
 			.onType(ConceptMap.class)
-			.named(JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING)
+			.named(JpaConstants.OPERATION_CONCEPTMAP_REMOVE_MAPPING)
 			.withParameter(Parameters.class, JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_CONCEPTMAP_URL, new UriType("http://my-concept-map-url"))
 			.andParameter(JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_SOURCE_SYSTEM, new UriType("http://my-code-system"))
 			.andParameter(JpaConstants.OPERATION_CONCEPTMAP_ADD_MAPPING_SOURCE_VERSION, new CodeType("1.0"))
@@ -125,18 +127,15 @@ class ConceptMapAddAndRemoveMappingProviderTest {
 			.execute();
 
 		// Verify
-		verify(myConceptMapDao, times(1)).addMapping(myAddMappingRequestCaptor.capture(), any());
-		IFhirResourceDaoConceptMap.AddMappingRequest request = myAddMappingRequestCaptor.getValue();
+		verify(myConceptMapDao, times(1)).removeMapping(myRemoveMappingRequestCaptor.capture(), any());
+		IFhirResourceDaoConceptMap.RemoveMappingRequest request = myRemoveMappingRequestCaptor.getValue();
 		assertEquals("http://my-concept-map-url", request.getConceptMapUri());
 		assertEquals("http://my-code-system", request.getSourceSystem());
 		assertEquals("1.0", request.getSourceSystemVersion());
 		assertEquals("BP-SYS", request.getSourceCode());
-		assertEquals("Systolic BP", request.getSourceDisplay());
 		assertEquals("http://loinc.org", request.getTargetSystem());
 		assertEquals("2.57", request.getTargetSystemVersion());
 		assertEquals("11378-7", request.getTargetCode());
-		assertEquals("Systolic blood pressure at First encounter", request.getTargetDisplay());
-		assertEquals("equivalent", request.getEquivalence());
 	}
 
 }
