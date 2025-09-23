@@ -45,7 +45,6 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PagingHttpMethodEnum;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -84,6 +83,7 @@ import ca.uhn.fhir.rest.gclient.IDelete;
 import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.gclient.IDeleteWithQuery;
 import ca.uhn.fhir.rest.gclient.IDeleteWithQueryTyped;
+import ca.uhn.fhir.rest.gclient.IEntityResult;
 import ca.uhn.fhir.rest.gclient.IFetchConformanceTyped;
 import ca.uhn.fhir.rest.gclient.IFetchConformanceUntyped;
 import ca.uhn.fhir.rest.gclient.IGetPage;
@@ -481,36 +481,22 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private class RawHttpBuilder implements IRawHttp  {
 
 		@Override
-		public IGetRaw get() {
-			final RequestTypeEnum requestType = RequestTypeEnum.GET;
-
-			return new IGetRaw() {
-
-				@Override
-				public IGetRawUntyped byUrl(String theUrl) {
-					return new IGetRawUntyped() {
-						String url = theUrl;
-						@Override
-						public IClientHttpExecutable<IClientHttpExecutable<?, String>, String> forString() {
-							return new RawGetStringInternal<>(url);
-						}
-					};
-				}
-			};
+		public IClientHttpExecutable<IClientHttpExecutable<?, IEntityResult>, IEntityResult> get(String theUrl) {
+			return new RawGetEntityResultInternal(theUrl);
 		}
 	}
 
-	class RawGetStringInternal<T extends IClientHttpExecutable<?,String>>
-		extends BaseClientHttpExecutable<T, String> {
+	class RawGetEntityResultInternal<T extends IClientHttpExecutable<?,EntityResult>>
+		extends BaseClientHttpExecutable<T, EntityResult> {
 		final String myUrl;
 
-		public RawGetStringInternal(String theUrl) {
+		public RawGetEntityResultInternal(String theUrl) {
 			myUrl = theUrl;
 		}
 
 		@Override
-		public String execute() {
-			IClientResponseHandler<String> binding = new StringResponseHandler();
+		public EntityResult execute() {
+			IClientResponseHandler<EntityResult> binding = new EntityResultResponseHandler();
 			HttpGetClientInvocation invocation = new HttpGetClientInvocation(myContext, myUrl);
 			return invokeClient(myContext, binding, invocation);
 		}
@@ -2462,6 +2448,54 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				Map<String, List<String>> theHeaders)
 				throws IOException, BaseServerResponseException {
 			return IOUtils.toString(theResponseInputStream, Charsets.UTF_8);
+		}
+	}
+
+	private static class EntityResult implements IEntityResult {
+		private String myMimeType;
+		private InputStream myInputStream;
+		private int myStatusCode;
+		private Map<String, List<String>> myHeaders;
+
+		public EntityResult(
+			String theResponseMimeType,
+			InputStream theResponseInputStream,
+			int theResponseStatusCode,
+			Map<String, List<String>> theHeaders
+		) {
+			myMimeType = theResponseMimeType;
+			myInputStream = theResponseInputStream;
+			myStatusCode = theResponseStatusCode;
+			myHeaders = theHeaders;
+		}
+
+		public String getMimeType() {
+			return myMimeType;
+		}
+
+		public InputStream getInputStream() {
+			return myInputStream;
+		}
+
+		public int getStatusCode() {
+			return myStatusCode;
+		}
+
+		public Map<String, List<String>> getHeaders() {
+			return myHeaders;
+		}
+	}
+
+	private static final class EntityResultResponseHandler implements IClientResponseHandler<EntityResult> {
+
+		@Override
+		public EntityResult invokeClient(
+			String theResponseMimeType,
+			InputStream theResponseInputStream,
+			int theResponseStatusCode,
+			Map<String, List<String>> theHeaders)
+			throws IOException, BaseServerResponseException {
+			return new EntityResult(theResponseMimeType, theResponseInputStream, theResponseStatusCode, theHeaders);
 		}
 	}
 

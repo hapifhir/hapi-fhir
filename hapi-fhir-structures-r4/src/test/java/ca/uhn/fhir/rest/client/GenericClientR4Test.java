@@ -24,6 +24,8 @@ import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
 import ca.uhn.fhir.rest.client.interceptor.CookieInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.UserInfoInterceptor;
+import ca.uhn.fhir.rest.gclient.IEntityResult;
+import ca.uhn.fhir.rest.gclient.IRawHttp;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -117,12 +119,13 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 	    // when
-		String result = client.rawHttpReqeust().get().byUrl("someurl?param1=value1").forString().execute();
+		IEntityResult result = client.rawHttpReqeust().get("someurl?param1=value1").execute();
 
 	    // then
 		HttpUriRequest httpUriRequest = capt.getAllValues().get(0);
 		assertEquals("http://example.com/fhir/someurl?param1=value1", UrlUtil.unescape(httpUriRequest.getURI().toString()));
-		assertEquals(responseBody, result);
+		String response = new String(result.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+		assertEquals(responseBody, response);
 	}
 
 
