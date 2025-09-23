@@ -1,6 +1,6 @@
 ---
 type: add
-issue: fixme
+issue: 7275
 title: "A HAPI FHIR extension to the FHIR Patch specification has been added, which permits the
    **delete** operation to find and delete multiple elements matching a single FHIRPath expression.
    See [Deleting Multiple Elements](https://smilecdr.com/docs/fhir_standard/fhir_patch.html#multi-delete) for

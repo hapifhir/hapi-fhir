@@ -1,6 +1,6 @@
 ---
 type: fix
-issue: fixme
+issue: 7275
 title: "A number of new test cases and fixes have been added to the HAPI FHIR FHIRPath Patch engine:
   <ul>
     <li>

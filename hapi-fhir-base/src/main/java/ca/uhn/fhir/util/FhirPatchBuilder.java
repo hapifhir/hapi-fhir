@@ -102,7 +102,6 @@ public class FhirPatchBuilder {
 		 * 	can be called to return the created patch document.
 		 */
 		FhirPatchBuilder andThen();
-
 	}
 
 	/**
@@ -187,34 +186,27 @@ public class FhirPatchBuilder {
 	 * Step 1 for creating an <b>ADD</b> operation, returned by
 	 * calling {@link #add()}
 	 */
-	public interface IAddStep1 extends IStepPath<IAddStep2> {
-	}
+	public interface IAddStep1 extends IStepPath<IAddStep2> {}
 
-	public interface IAddStep2 extends IStepName<IAddStep3> {
-	}
+	public interface IAddStep2 extends IStepName<IAddStep3> {}
 
-	public interface IAddStep3 extends IStepValue<IStepComplete> {
-	}
+	public interface IAddStep3 extends IStepValue<IStepComplete> {}
 
 	/**
 	 * Step 1 for creating an <b>INSERT</b> operation, returned by
 	 * calling {@link #insert()}
 	 */
-	public interface IInsertStep1 extends IStepPath<IInsertStep2> {
-	}
+	public interface IInsertStep1 extends IStepPath<IInsertStep2> {}
 
-	public interface IInsertStep2 extends IStepIndex<IInsertStep3> {
-	}
+	public interface IInsertStep2 extends IStepIndex<IInsertStep3> {}
 
-	public interface IInsertStep3 extends IStepValue<IStepComplete> {
-	}
+	public interface IInsertStep3 extends IStepValue<IStepComplete> {}
 
 	/**
 	 * Step 1 for creating an <b>DELETE</b> operation, returned by
 	 * calling {@link #delete()}
 	 */
-	public interface IDeleteStep1 extends IStepPath<IDeleteStepAfter> {
-	}
+	public interface IDeleteStep1 extends IStepPath<IDeleteStepAfter> {}
 
 	public interface IDeleteStepAfter extends IStepComplete {
 
@@ -230,32 +222,25 @@ public class FhirPatchBuilder {
 		 */
 		@SuppressWarnings("UnusedReturnValue")
 		IDeleteStepAfter allowMultipleMatches();
-
 	}
 
 	/**
 	 * Step 1 for creating an <b>REPLACE</b> operation, returned by
 	 * calling {@link #replace()}
 	 */
-	public interface IReplaceStep1 extends IStepPath<IReplaceStep2> {
-	}
+	public interface IReplaceStep1 extends IStepPath<IReplaceStep2> {}
 
-	public interface IReplaceStep2 extends IStepValue<IStepComplete> {
-	}
+	public interface IReplaceStep2 extends IStepValue<IStepComplete> {}
 
 	/**
 	 * Step 1 for creating a <b>MOVE</b> operation, returned by
 	 * calling {@link #move()}
 	 */
-	public interface IMoveStep1 extends IStepPath<IMoveStep2> {
-	}
+	public interface IMoveStep1 extends IStepPath<IMoveStep2> {}
 
+	public interface IMoveStep2 extends IStepSource<IMoveStep3> {}
 
-	public interface IMoveStep2 extends IStepSource<IMoveStep3> {
-	}
-
-	public interface IMoveStep3 extends IStepDestination<IStepComplete> {
-	}
+	public interface IMoveStep3 extends IStepDestination<IStepComplete> {}
 
 	/**
 	 * An instance of {@literal BaseOperationBuilder} is created for each new operation being
@@ -279,13 +264,13 @@ public class FhirPatchBuilder {
 	 * @param <RET_DESTINATION> The interface representing the next step after adding the destination property
 	 */
 	private class BaseOperationBuilder<RET_PATH, RET_NAME, RET_VALUE, RET_INDEX, RET_SOURCE, RET_DESTINATION>
-		implements IStepPath<RET_PATH>,
-		IStepName<RET_NAME>,
-		IStepValue<RET_VALUE>,
-		IStepIndex<RET_INDEX>,
-		IStepSource<RET_SOURCE>,
-		IStepDestination<RET_DESTINATION>,
-		IStepComplete {
+			implements IStepPath<RET_PATH>,
+					IStepName<RET_NAME>,
+					IStepValue<RET_VALUE>,
+					IStepIndex<RET_INDEX>,
+					IStepSource<RET_SOURCE>,
+					IStepDestination<RET_DESTINATION>,
+					IStepComplete {
 
 		protected String myPath;
 		protected String myName;
@@ -353,7 +338,7 @@ public class FhirPatchBuilder {
 	}
 
 	private class AddBuilder extends BaseOperationBuilder<IAddStep2, IAddStep3, IStepComplete, Void, Void, Void>
-		implements IAddStep1, IAddStep2, IAddStep3 {
+			implements IAddStep1, IAddStep2, IAddStep3 {
 
 		@Override
 		public IStepComplete value(@Nonnull IBase theValue) {
@@ -370,8 +355,8 @@ public class FhirPatchBuilder {
 	}
 
 	private class InsertBuilder
-		extends BaseOperationBuilder<IInsertStep2, Void, IStepComplete, IInsertStep3, Void, Void>
-		implements IInsertStep1, IInsertStep2, IInsertStep3 {
+			extends BaseOperationBuilder<IInsertStep2, Void, IStepComplete, IInsertStep3, Void, Void>
+			implements IInsertStep1, IInsertStep2, IInsertStep3 {
 
 		@Override
 		public IStepComplete value(@Nonnull IBase theValue) {
@@ -388,7 +373,7 @@ public class FhirPatchBuilder {
 	}
 
 	private class DeleteBuilder extends BaseOperationBuilder<IDeleteStepAfter, Void, Void, Void, Void, Void>
-		implements IDeleteStep1, IDeleteStepAfter {
+			implements IDeleteStep1, IDeleteStepAfter {
 
 		private IBase myOperation;
 		private IBase myAllowMultipleMatches;
@@ -396,11 +381,11 @@ public class FhirPatchBuilder {
 		@Override
 		public IDeleteStepAfter allowMultipleMatches() {
 			if (myAllowMultipleMatches == null) {
-				myAllowMultipleMatches = ParametersUtil.addPartBoolean(myContext, myOperation, PARAMETER_ALLOW_MULTIPLE_MATCHES, true);
+				myAllowMultipleMatches =
+						ParametersUtil.addPartBoolean(myContext, myOperation, PARAMETER_ALLOW_MULTIPLE_MATCHES, true);
 			}
 			return this;
 		}
-
 
 		@Override
 		public IDeleteStepAfter path(String thePath) {
@@ -415,7 +400,7 @@ public class FhirPatchBuilder {
 	}
 
 	private class ReplaceBuilder extends BaseOperationBuilder<IReplaceStep2, Void, IStepComplete, Void, Void, Void>
-		implements IReplaceStep1, IReplaceStep2 {
+			implements IReplaceStep1, IReplaceStep2 {
 
 		@Override
 		public IStepComplete value(@Nonnull IBase theValue) {
@@ -431,7 +416,7 @@ public class FhirPatchBuilder {
 	}
 
 	private class MoveBuilder extends BaseOperationBuilder<IMoveStep2, Void, Void, Void, IMoveStep3, IStepComplete>
-		implements IMoveStep1, IMoveStep2, IMoveStep3 {
+			implements IMoveStep1, IMoveStep2, IMoveStep3 {
 
 		@Override
 		public IStepComplete destination(int theDestination) {

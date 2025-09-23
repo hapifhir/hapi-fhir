@@ -119,7 +119,8 @@ public class FhirPatch {
 	/**
 	 * @param theResource If this is <code>null</code>, the patch is validated but no work is done
 	 */
-	private void doApply(@Nullable IBaseResource theResource, @Nonnull IBaseResource thePatch, PatchOutcome theOutcome) {
+	private void doApply(
+			@Nullable IBaseResource theResource, @Nonnull IBaseResource thePatch, PatchOutcome theOutcome) {
 		Multimap<String, IBase> namedParameters = ParametersUtil.getNamedParameters(myContext, thePatch);
 		for (Map.Entry<String, IBase> namedParameterEntry : namedParameters.entries()) {
 			if (namedParameterEntry.getKey().equals(PARAMETER_OPERATION)) {
@@ -175,14 +176,16 @@ public class FhirPatch {
 		}
 	}
 
-	private void handleInsertOperation(@Nullable IBaseResource theResource, IBase theParameters, PatchOutcome theOutcome) {
+	private void handleInsertOperation(
+			@Nullable IBaseResource theResource, IBase theParameters, PatchOutcome theOutcome) {
 
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
 
 		int lastDot = path.lastIndexOf(".");
 		if (lastDot == -1) {
-			theOutcome.addError("Invalid path for insert operation (must point to a repeatable element): " + UrlUtil.sanitizeUrlPart(path));
+			theOutcome.addError("Invalid path for insert operation (must point to a repeatable element): "
+					+ UrlUtil.sanitizeUrlPart(path));
 			return;
 		}
 
@@ -223,13 +226,14 @@ public class FhirPatch {
 		}
 	}
 
-	private void handleDeleteOperation(@Nullable IBaseResource theResource, IBase theParameters, PatchOutcome theOutcome) {
+	private void handleDeleteOperation(
+			@Nullable IBaseResource theResource, IBase theParameters, PatchOutcome theOutcome) {
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
 
-		boolean allowMultiDelete = ParametersUtil
-			.getParameterPartValueAsBoolean(myContext, theParameters, PARAMETER_ALLOW_MULTIPLE_MATCHES)
-			.orElse(Boolean.FALSE);
+		boolean allowMultiDelete = ParametersUtil.getParameterPartValueAsBoolean(
+						myContext, theParameters, PARAMETER_ALLOW_MULTIPLE_MATCHES)
+				.orElse(Boolean.FALSE);
 
 		ParsedFhirPath parsedPath = ParsedFhirPath.parse(path);
 
@@ -243,9 +247,7 @@ public class FhirPatch {
 		} else {
 			pathToSelect = path;
 		}
-		List<IBase> containingElements = myContext
-				.newFhirPath()
-				.evaluate(theResource, pathToSelect, IBase.class);
+		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, pathToSelect, IBase.class);
 
 		int count = 0;
 		for (IBase nextElement : containingElements) {
@@ -261,7 +263,6 @@ public class FhirPatch {
 			theOutcome.addError("Multiple elements found at " + path + " when deleting");
 			return;
 		}
-
 	}
 
 	private int deleteFromList(
@@ -421,8 +422,10 @@ public class FhirPatch {
 		/*
 		 * We handle XHTML a bit differently, since it isn't like any of the other FHIR types
 		 */
-		if (theTargetChildDefinition.getBaseRuntimeDefinition() instanceof RuntimeChildPrimitiveDatatypeDefinition child) {
-			if (child.getDatatype().equals(XhtmlNode.class) && child.getElementName().equals("div")) {
+		if (theTargetChildDefinition.getBaseRuntimeDefinition()
+				instanceof RuntimeChildPrimitiveDatatypeDefinition child) {
+			if (child.getDatatype().equals(XhtmlNode.class)
+					&& child.getElementName().equals("div")) {
 				IPrimitiveType<?> target = (IPrimitiveType<?>) theTargetChildDefinition.getBase();
 				if (theReplacementValue instanceof IPrimitiveType<?> replacementValue) {
 					target.setValueAsString(replacementValue.getValueAsString());
@@ -967,7 +970,7 @@ public class FhirPatch {
 				if ("url".equals(name)) {
 					if (theDefinition.getChildElement().getName().equals("Extension")) {
 						if (optionalValue.get() instanceof IPrimitiveType<?> primitive) {
-							((IBaseExtension<?, ?>)newElement).setUrl(primitive.getValueAsString());
+							((IBaseExtension<?, ?>) newElement).setUrl(primitive.getValueAsString());
 							continue;
 						}
 					}
@@ -1278,7 +1281,5 @@ public class FhirPatch {
 		public boolean hasErrors() {
 			return !myErrors.isEmpty();
 		}
-
 	}
-
 }
