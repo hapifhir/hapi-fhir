@@ -1,6 +1,6 @@
 ---
 type: add
-issue: fixme
+issue: 7276
 title: "The `ConceptMap/$translate` had several parameter changes in the FHIR R5 specification. HAPI FHIR
    now supports both R4 (and below) parameters as well as R5 parameters on JPA servers running any version
    of FHIR."
