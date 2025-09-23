@@ -64,7 +64,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * FhirPatch handler.
- * Patch is defined by the spec: https://www.hl7.org/fhir/R4/fhirpatch.html
+ * Patch is defined by the spec: https://hl7.org/fhir/fhirpatch.html
  */
 public class FhirPatch {
 	org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirPatch.class);
@@ -110,10 +110,17 @@ public class FhirPatch {
 		myIncludePreviousValueInDiff = theIncludePreviousValueInDiff;
 	}
 
-	public PatchOutcome apply(IBaseResource theResource, IBaseResource thePatch) {
+	/**
+	 * Apply the patch against the given resource.
+	 * @param theResource The resourece to patch. This object will be modified in-place.
+	 * @param thePatch The patch document.
+	 */
+	public void apply(IBaseResource theResource, IBaseResource thePatch) {
 		PatchOutcome retVal = new PatchOutcome();
 		doApply(theResource, thePatch, retVal);
-		return retVal;
+		if (retVal.hasErrors()) {
+			throw new InvalidRequestException(Msg.code(1267) + retVal.getErrors());
+		}
 	}
 
 	/**
@@ -133,18 +140,17 @@ public class FhirPatch {
 				} else if (OPERATION_ADD.equals(type)) {
 					handleAddOperation(theResource, nextOperation, theOutcome);
 				} else if (OPERATION_REPLACE.equals(type)) {
-					handleReplaceOperation(theResource, nextOperation);
+					handleReplaceOperation(theResource, nextOperation, theOutcome);
 				} else if (OPERATION_INSERT.equals(type)) {
 					handleInsertOperation(theResource, nextOperation, theOutcome);
 				} else if (OPERATION_MOVE.equals(type)) {
 					handleMoveOperation(theResource, nextOperation);
 				} else {
-					throw new InvalidRequestException(Msg.code(1267) + "Unknown patch operation type: " + type);
+					theOutcome.addError("Unknown patch operation type: " + type);
 				}
 
 			} else {
-				throw new InvalidRequestException(
-						Msg.code(2756) + "Unknown patch parameter name: " + namedParameterEntry.getKey());
+				theOutcome.addError("Unknown patch parameter name: " + namedParameterEntry.getKey());
 			}
 		}
 	}
@@ -215,7 +221,8 @@ public class FhirPatch {
 				String msg = myContext
 						.getLocalizer()
 						.getMessage(FhirPatch.class, "invalidInsertIndex", insertIndex, path, existingValues.size());
-				throw new InvalidRequestException(Msg.code(1270) + msg);
+				theOutcome.addError(msg);
+				return;
 			}
 			existingValues.add(insertIndex, newValue);
 
@@ -289,7 +296,8 @@ public class FhirPatch {
 		return delta;
 	}
 
-	private void handleReplaceOperation(@Nullable IBaseResource theResource, @Nullable IBase theParameters) {
+	private void handleReplaceOperation(
+			@Nullable IBaseResource theResource, @Nullable IBase theParameters, PatchOutcome theOutcome) {
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
 
@@ -322,17 +330,23 @@ public class FhirPatch {
 		}
 
 		// fetch all runtime definitions along fhirpath
-		FhirPathChildDefinition cd = childDefinition(parentDef, parts, theResource, fhirPath, parsedFhirPath, path);
+		Optional<FhirPathChildDefinition> cdOpt =
+				childDefinition(parentDef, parts, theResource, fhirPath, parsedFhirPath, path, theOutcome);
+		if (cdOpt.isEmpty()) {
+			return;
+		}
+		FhirPathChildDefinition cd = cdOpt.get();
 
 		// replace the value
-		replaceValuesByPath(cd, theParameters, fhirPath, parsedFhirPath);
+		replaceValuesByPath(cd, theParameters, fhirPath, parsedFhirPath, theOutcome);
 	}
 
 	private void replaceValuesByPath(
 			FhirPathChildDefinition theChildDefinition,
 			IBase theParameters,
 			IFhirPath theFhirPath,
-			ParsedFhirPath theParsedFhirPath) {
+			ParsedFhirPath theParsedFhirPath,
+			PatchOutcome theOutcome) {
 		Optional<IBase> singleValuePart =
 				ParametersUtil.getParameterPartValue(myContext, theParameters, PARAMETER_VALUE);
 		if (singleValuePart.isPresent()) {
@@ -342,7 +356,7 @@ public class FhirPatch {
 					findChildDefinitionByReplacementType(theChildDefinition, replacementValue);
 
 			// only a single replacement value (ie, not a replacement CompositeValue or anything)
-			replaceSingleValue(theFhirPath, theParsedFhirPath, childDefinitionToUse, replacementValue);
+			replaceSingleValue(theFhirPath, theParsedFhirPath, childDefinitionToUse, replacementValue, theOutcome);
 			return; // guard
 		}
 
@@ -378,7 +392,7 @@ public class FhirPatch {
 		}
 
 		// fall through to error state
-		throw new InvalidRequestException(Msg.code(2720) + " No valid replacement value for patch operation.");
+		theOutcome.addError(" No valid replacement value for patch operation.");
 	}
 
 	private FhirPathChildDefinition findChildDefinitionByReplacementType(
@@ -417,7 +431,8 @@ public class FhirPatch {
 			IFhirPath theFhirPath,
 			ParsedFhirPath theParsedFhirPath,
 			FhirPathChildDefinition theTargetChildDefinition,
-			IBase theReplacementValue) {
+			IBase theReplacementValue,
+			PatchOutcome theOutcome) {
 
 		/*
 		 * We handle XHTML a bit differently, since it isn't like any of the other FHIR types
@@ -479,7 +494,7 @@ public class FhirPatch {
 				} else if (theTargetChildDefinition.getChild() != null) {
 					// there's subchildren (possibly we're setting an 'extension' value
 					FhirPathChildDefinition ct = findChildDefinitionAtEndOfPath(theTargetChildDefinition);
-					replaceSingleValue(theFhirPath, theParsedFhirPath, ct, theReplacementValue);
+					replaceSingleValue(theFhirPath, theParsedFhirPath, ct, theReplacementValue, theOutcome);
 				} else {
 					if (theTargetChildDefinition.getBaseRuntimeDefinition() != null
 							&& !theTargetChildDefinition
@@ -522,7 +537,8 @@ public class FhirPatch {
 				String msg = myContext
 						.getLocalizer()
 						.getMessage(FhirPatch.class, "noMatchingElementForPath", theParsedFhirPath.getRawPath());
-				throw new InvalidRequestException(Msg.code(2617) + msg);
+				theOutcome.addError(msg);
+				return;
 			}
 
 			List<IBase> replaceables;
@@ -706,13 +722,18 @@ public class FhirPatch {
 		}
 	}
 
-	private FhirPathChildDefinition childDefinition(
+	/**
+	 * Returns {@link Optional#empty()} if the child could not be found, which is an error
+	 * and should result in aborting the operation.
+	 */
+	private Optional<FhirPathChildDefinition> childDefinition(
 			FhirPathChildDefinition theParent,
 			List<String> theFhirPathParts,
 			@Nonnull IBase theBase,
 			IFhirPath theFhirPath,
 			ParsedFhirPath theParsedFhirPath,
-			String theOriginalPath) {
+			String theOriginalPath,
+			PatchOutcome theOutcome) {
 		FhirPathChildDefinition definition = new FhirPathChildDefinition();
 		definition.setBase(theBase); // set this IBase value
 		BaseRuntimeElementDefinition<?> parentElementDefinition = myContext.getElementDefinition(theBase.getClass());
@@ -730,7 +751,7 @@ public class FhirPatch {
 		if (rawPath.equalsIgnoreCase(head)) {
 			// we're at the bottom
 			// return
-			return definition;
+			return Optional.of(definition);
 		}
 
 		// detach the head
@@ -859,16 +880,20 @@ public class FhirPatch {
 				if (childs.isEmpty()) {
 					throwNoElementsError(theOriginalPath);
 				}
-				throw new InvalidRequestException(Msg.code(2704)
-						+ " FhirPath returns more than 1 element. Patch cannot be done. " + theOriginalPath);
+				throw new InvalidRequestException(
+						Msg.code(2704) + " FhirPath returns more than 1 element: " + theOriginalPath);
 			}
 			IBase child = childs.get(0);
 
-			definition.setChild(
-					childDefinition(definition, theFhirPathParts, child, theFhirPath, newPath, theOriginalPath));
+			Optional<FhirPathChildDefinition> fhirPathChildDefinition = childDefinition(
+					definition, theFhirPathParts, child, theFhirPath, newPath, theOriginalPath, theOutcome);
+			if (fhirPathChildDefinition.isEmpty()) {
+				return Optional.empty();
+			}
+			definition.setChild(fhirPathChildDefinition.get());
 		}
 
-		return definition;
+		return Optional.of(definition);
 	}
 
 	private ChildDefinition findChildDefinition(IBase theContainingElement, String theElementName) {
@@ -1245,14 +1270,17 @@ public class FhirPatch {
 
 	/**
 	 * Validates a FHIRPatch Parameters document and throws an {@link InvalidRequestException}
-	 * if it is not valid.
+	 * if it is not valid. Note, in previous versions of HAPI FHIR this method threw an exception
+	 * but the full error list is now returned instead.
 	 *
-	 * @param theParameters The Parameters resource to validate as a FHIRPatch document
-	 * @throws InvalidRequestException if the document is not a valid FHIRPatch document
+	 * @param thePatch The Parameters resource to validate as a FHIRPatch document
+	 * @return Returns a {@link PatchOutcome} containing any errors
 	 * @since 8.4.0
 	 */
-	public void validate(IBaseResource theParameters) throws InvalidRequestException {
-		apply(null, theParameters);
+	public PatchOutcome validate(IBaseResource thePatch) {
+		PatchOutcome retVal = new PatchOutcome();
+		doApply(null, thePatch, retVal);
+		return retVal;
 	}
 
 	private static IFhirPath.IParsedExpression parseFhirPathExpression(IFhirPath fhirPath, String containingPath) {

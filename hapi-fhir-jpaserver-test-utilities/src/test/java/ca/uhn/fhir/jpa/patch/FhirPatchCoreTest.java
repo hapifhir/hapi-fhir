@@ -22,8 +22,8 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirPatchCoreTest extends BaseTest {
@@ -39,12 +39,12 @@ public class FhirPatchCoreTest extends BaseTest {
 		if (theTestCase.mode().equals("both") || theTestCase.mode().equals("forwards")) {
 
 			FhirPatch patch = new FhirPatch(theTestCase.theFhirContext());
-			FhirPatch.PatchOutcome outcome = patch.apply(theTestCase.input(), theTestCase.diff());
 
 			if (theTestCase.error() != null) {
-				assertTrue(outcome.hasErrors());
-				assertThat(outcome.getErrors()).contains(theTestCase.error());
+				assertThatThrownBy(() -> patch.apply(theTestCase.input(), theTestCase.diff()))
+					.hasMessageContaining(theTestCase.error());
 			} else {
+				patch.apply(theTestCase.input(), theTestCase.diff());
 				String expected = theTestCase.theFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(theTestCase.output());
 				String actual = theTestCase.theFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(theTestCase.input());
 				assertEquals(expected, actual);
@@ -110,7 +110,7 @@ public class FhirPatchCoreTest extends BaseTest {
 			if (outputElement == null && error == null) {
 				fail("Unable to parse case: " + XmlUtil.encodeDocument(next, true));
 			}
-				IBaseResource output = null;
+			IBaseResource output = null;
 			if (outputElement != null) {
 				Element outputResourceElement = getFirstChildElement(outputElement);
 				String outputEncoded = XmlUtil.encodeDocument(outputResourceElement);
@@ -124,14 +124,6 @@ public class FhirPatchCoreTest extends BaseTest {
 		return retVal;
 	}
 
-	public record TestCase(String name, String mode, IBaseResource input, IBaseResource diff, IBaseResource output, String error, FhirContext theFhirContext) {
-		@Nonnull
-		@Override
-		public String toString() {
-			return theFhirContext.getVersion().getVersion().name() + " " + name;
-		}
-	}
-
 	private static Element getFirstChildElement(Element theInput) {
 		for (int i = 0; i < theInput.getChildNodes().getLength(); i++) {
 			if (theInput.getChildNodes().item(i) instanceof Element) {
@@ -140,5 +132,14 @@ public class FhirPatchCoreTest extends BaseTest {
 		}
 		fail("No child of type Element");
 		throw new Error();
+	}
+
+	public record TestCase(String name, String mode, IBaseResource input, IBaseResource diff, IBaseResource output,
+						   String error, FhirContext theFhirContext) {
+		@Nonnull
+		@Override
+		public String toString() {
+			return theFhirContext.getVersion().getVersion().name() + " " + name;
+		}
 	}
 }

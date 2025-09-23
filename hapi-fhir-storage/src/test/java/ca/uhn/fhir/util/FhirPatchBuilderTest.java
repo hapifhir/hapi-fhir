@@ -40,8 +40,7 @@ class FhirPatchBuilderTest {
 		ourLog.info("Patch:\n{}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
 
 		Patient input = createPatientWith3Identifiers();
-		FhirPatch.PatchOutcome outcome = myPatchSvc.apply(input, patch);
-		assertThat(outcome.getErrors()).isEmpty();
+		myPatchSvc.apply(input, patch);
 
 		List<String> actualIdentifier = input.getIdentifier().stream().map(t -> t.getValue()).toList();
 		assertThat(actualIdentifier).containsExactly(
@@ -64,8 +63,7 @@ class FhirPatchBuilderTest {
 		ourLog.info("Patch:\n{}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
 
 		Patient input = createPatientWith3Identifiers();
-		FhirPatch.PatchOutcome outcome = myPatchSvc.apply(input, patch);
-		assertThat(outcome.getErrors()).isEmpty();
+		 myPatchSvc.apply(input, patch);
 
 		List<String> actualIdentifier = input.getIdentifier().stream().map(t -> t.getValue()).toList();
 		assertThat(actualIdentifier).containsExactly(
@@ -87,8 +85,7 @@ class FhirPatchBuilderTest {
 		ourLog.info("Patch:\n{}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
 
 		Patient input = createPatientWith3Identifiers();
-		FhirPatch.PatchOutcome outcome = myPatchSvc.apply(input, patch);
-		assertThat(outcome.getErrors()).isEmpty();
+		myPatchSvc.apply(input, patch);
 
 		List<String> actualIdentifier = input.getIdentifier().stream().map(t -> t.getValue()).toList();
 		assertThat(actualIdentifier).containsExactly(
@@ -113,8 +110,7 @@ class FhirPatchBuilderTest {
 		input1.addIdentifier().setSystem("http://system0").setValue("value-1");
 		input1.addIdentifier().setSystem("http://system1").setValue("value-2");
 		Patient input = input1;
-		FhirPatch.PatchOutcome outcome = myPatchSvc.apply(input, patch);
-		assertThat(outcome.getErrors()).isEmpty();
+		myPatchSvc.apply(input, patch);
 
 		List<String> actualIdentifier = input.getIdentifier().stream().map(t -> t.getValue()).toList();
 		assertThat(actualIdentifier).containsExactly(
@@ -134,8 +130,7 @@ class FhirPatchBuilderTest {
 		ourLog.info("Patch:\n{}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
 
 		Patient input = createPatientWith3Identifiers();
-		FhirPatch.PatchOutcome outcome = myPatchSvc.apply(input, patch);
-		assertThat(outcome.getErrors()).isEmpty();
+		myPatchSvc.apply(input, patch);
 
 		List<String> actualIdentifier = input.getIdentifier().stream().map(t -> t.getValue()).toList();
 		assertThat(actualIdentifier).containsExactly(
@@ -158,8 +153,7 @@ class FhirPatchBuilderTest {
 		ourLog.info("Patch:\n{}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
 
 		Patient input = createPatientWith3Identifiers();
-		FhirPatch.PatchOutcome outcome = myPatchSvc.apply(input, patch);
-		assertThat(outcome.getErrors()).isEmpty();
+		myPatchSvc.apply(input, patch);
 
 		List<String> actualIdentifier = input.getIdentifier().stream().map(t -> t.getValue()).toList();
 		assertThat(actualIdentifier).containsExactly(
@@ -206,8 +200,7 @@ class FhirPatchBuilderTest {
 		input
 			.getCode()
 			.addCoding(new Coding("http://loinc.org", "2", "Code 2"));
-		FhirPatch.PatchOutcome outcome = myPatchSvc.apply(input, patch);
-		assertThat(outcome.getErrors()).isEmpty();
+		myPatchSvc.apply(input, patch);
 
 		assertEquals("http://loinc.org", input.getCode().getCoding().get(0).getSystem());
 		assertEquals("85354-9", input.getCode().getCoding().get(0).getCode());

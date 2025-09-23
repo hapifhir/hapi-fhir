@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
-import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.FhirPatchBuilder;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -38,12 +37,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirPatchTest implements ITestDataBuilder {
-	org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirPatchTest.class);
-
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
-
 	private final IParser myParser = myFhirContext.newJsonParser();
-
+	org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirPatchTest.class);
 	private FhirPatch myPatch;
 
 	@BeforeEach
@@ -64,138 +60,6 @@ public class FhirPatchTest implements ITestDataBuilder {
 	@Override
 	public FhirContext getFhirContext() {
 		return myFhirContext;
-	}
-
-	/**
-	 * Returns a list of parameters for the
-	 * patchApply_withValidParams_works test.
-	 *
-	 * All inputs should assume an Appointment with the following references:
-	 * * Patient/p1
-	 * * Location/l1
-	 * * Patient/p3
-	 */
-	static List<Arguments> patchParams() {
-		List<Arguments> params = new ArrayList<>();
-
-		// 1 - Appointment.participant.actor.reference.where(startsWith('Patient/')).first()
-		{
-			Parameters parameters = new Parameters();
-			Parameters.ParametersParameterComponent comp = parameters.addParameter()
-				.setName("operation");
-
-			comp.addPart().setName("type").setValue(new CodeType("replace"));
-			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.reference.where(startsWith('Patient/')).first()"));
-			comp.addPart().setName("value").setValue(new StringType("Patient/p2"));
-
-			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p2", "Location/l1", "Patient/p3")));
-		}
-
-		// 2 - Appointment.participant.actor.where(reference.startsWith('Patient/')).first()
-		{
-			Parameters parameters = new Parameters();
-			Parameters.ParametersParameterComponent comp = parameters.addParameter()
-				.setName("operation");
-
-			comp.addPart().setName("type").setValue(new CodeType("replace"));
-			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.where(reference.startsWith('Patient/')).first()"));
-			comp.addPart().setName("value").setValue(new Reference("Patient/p2"));
-
-			params.add(Arguments.of(parameters, "Patient/P2", List.of("Patient/p2", "Location/l1", "Patient/p3")));
-		}
-
-		// 3 - Appointment.participant.actor.where(reference.startsWith('Patient/'))[0]
-		{
-			Parameters parameters = new Parameters();
-			Parameters.ParametersParameterComponent comp = parameters.addParameter()
-				.setName("operation");
-
-			comp.addPart().setName("type").setValue(new CodeType("replace"));
-			// should act like "first"
-			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.where(reference.startsWith('Patient/'))[0]"));
-			comp.addPart().setName("value").setValue(new Reference("Patient/p2"));
-
-			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p2", "Location/l1", "Patient/p3")));
-		}
-
-		// 4 - Appointment.participant.actor.where(reference.startsWith('Patient/'))[1]
-		{
-			Parameters parameters = new Parameters();
-			Parameters.ParametersParameterComponent comp = parameters.addParameter()
-				.setName("operation");
-
-			comp.addPart().setName("type").setValue(new CodeType("replace"));
-			// should act like "first"
-			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.where(reference.startsWith('Patient/'))[1]"));
-			comp.addPart().setName("value").setValue(new Reference("Patient/p2"));
-
-			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p1", "Location/l1", "Patient/p2")));
-		}
-
-		// 5 - Appointment.participant.actor.reference.where(startsWith('Patient/')).last()
-		{
-			Parameters parameters = new Parameters();
-			Parameters.ParametersParameterComponent comp = parameters.addParameter()
-				.setName("operation");
-			comp.addPart().setName("type").setValue(new CodeType("replace"));
-			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.reference.where(startsWith('Patient/')).last()"));
-			comp.addPart().setName("value").setValue(new StringType("Patient/p2"));
-
-			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p1", "Location/l1", "Patient/p2")));
-		}
-
-		// 6 - Appointment.participant.actor.reference.where(endsWith('Patient/p1')).single()
-		{
-			Parameters parameters = new Parameters();
-			Parameters.ParametersParameterComponent comp = parameters.addParameter()
-				.setName("operation");
-			comp.addPart().setName("type").setValue(new CodeType("replace"));
-			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.reference.where(endsWith('Patient/p1')).single()"));
-			comp.addPart().setName("value").setValue(new StringType("Patient/p2"));
-
-			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p3", "Location/l1", "Patient/p2")));
-		}
-
-		// 7 - Appointment.participant.actor.reference.where(startsWith('Patient/')).tail()
-		{
-			Parameters parameters = new Parameters();
-			Parameters.ParametersParameterComponent comp = parameters.addParameter()
-				.setName("operation");
-			comp.addPart().setName("type").setValue(new CodeType("replace"));
-			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.reference.where(startsWith('Patient/')).tail()"));
-			comp.addPart().setName("value").setValue(new StringType("Patient/p2"));
-
-			// tail should be the same as replacing everything (that matches Patient/) except Patient/p1
-			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p1", "Location/l1", "Patient/p2")));
-		}
-
-		// 8 - Appointment.participant.actor.reference.where(startsWith('Patient/')).skip(1)
-		{
-			Parameters parameters = new Parameters();
-			Parameters.ParametersParameterComponent comp = parameters.addParameter()
-				.setName("operation");
-			comp.addPart().setName("type").setValue(new CodeType("replace"));
-			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.reference.where(startsWith('Patient/')).skip(1)"));
-			comp.addPart().setName("value").setValue(new StringType("Patient/p2"));
-
-			// skip should skip the first value that matches "Patient" and replace it (ie, skip Patient/p1 and replace Patient/p3)
-			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p1", "Location/l1", "Patient/p2")));
-		}
-
-		// 9 - Appointment.participant.actor.reference.where(startsWith('Patient/')).take(1)
-		{
-			Parameters parameters = new Parameters();
-			Parameters.ParametersParameterComponent comp = parameters.addParameter()
-				.setName("operation");
-			comp.addPart().setName("type").setValue(new CodeType("replace"));
-			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.reference.where(startsWith('Patient/')).take(1)"));
-			comp.addPart().setName("value").setValue(new StringType("Patient/p2"));
-
-			// take should grab the first value that matches "Patient" (ie, take should grab Patient/p1 and not Patient/p3)
-			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p3", "Location/l1", "Patient/p2")));
-		}
-
-		return params;
 	}
 
 	@ParameterizedTest
@@ -405,10 +269,8 @@ public class FhirPatchTest implements ITestDataBuilder {
 		assertEquals("2021-08-13T07:44:38.342+00:00", input.getProcessingFirstRep().getTimeDateTimeType().getValueAsString());
 		assertEquals(1, input.getProcessingFirstRep().getExtension().size());
 		assertEquals("http://example.org/fhir/DeviceExtension", input.getProcessingFirstRep().getExtension().get(0).getUrl());
-		assertEquals("Device/1", ((Reference)input.getProcessingFirstRep().getExtension().get(0).getValue()).getReference());
+		assertEquals("Device/1", ((Reference) input.getProcessingFirstRep().getExtension().get(0).getValue()).getReference());
 	}
-
-
 
 	@Test
 	public void testInsert_InvalidPath_NoDots() {
@@ -424,13 +286,11 @@ public class FhirPatchTest implements ITestDataBuilder {
 		input.addIdentifier().setValue("value-0");
 		input.addIdentifier().setValue("value-1");
 		input.addIdentifier().setValue("value-2");
-		FhirPatch.PatchOutcome outcome = myPatch.apply(input, patch);
 
-		assertThat(outcome.getErrors()).contains(
-			"Invalid path for insert operation (must point to a repeatable element): Patient"
-		);
+		assertThatThrownBy(() -> myPatch.apply(input, patch))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("Invalid path for insert operation (must point to a repeatable element): Patient");
 	}
-
 
 	@Test
 	void testReplace_PathEndingInFilter() {
@@ -447,13 +307,11 @@ public class FhirPatchTest implements ITestDataBuilder {
 			withObservationCode("http://foo", "code")
 		);
 
-		FhirPatch.PatchOutcome outcome = myPatch.apply(input, patch);
-		assertThat(outcome.getErrors()).isEmpty();
+		myPatch.apply(input, patch);
 
 		assertEquals("code-new", input.getCode().getCoding().get(0).getCode());
 		assertEquals("code", input.getCode().getCoding().get(1).getCode());
 	}
-
 
 	@Test
 	void fail_Delete_MatchesMultipleElements() {
@@ -467,10 +325,10 @@ public class FhirPatchTest implements ITestDataBuilder {
 			withIdentifier("http://system0", "value0"),
 			withIdentifier("http://system1", "value1"));
 
-		FhirPatch.PatchOutcome outcome = myPatch.apply(patient, patch);
-		assertThat(outcome.getErrors()).containsExactly(
-			"Multiple elements found at Patient.identifier when deleting"
-		);
+		assertThatThrownBy(() -> myPatch.apply(patient, patch))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("Multiple elements found at Patient.identifier when deleting");
+
 	}
 
 	@Test
@@ -486,13 +344,30 @@ public class FhirPatchTest implements ITestDataBuilder {
 			withIdentifier("http://system0", "value1"),
 			withIdentifier("http://system1", "value2"));
 
-		FhirPatch.PatchOutcome outcome = myPatch.apply(patient, patch);
-		assertThat(outcome.getErrors()).containsExactly(
+		assertThatThrownBy(()->myPatch.apply(patient, patch)).hasMessageContaining(
 			"Multiple elements found at Patient.identifier.where(system='http://system0') when deleting"
 		);
 	}
 
+	@Test
+	void fail_Patch_PathResolvesToMultipleElements() {
+		FhirPatchBuilder builder = new FhirPatchBuilder(myFhirContext);
+		IBaseParameters patch = builder
+			.replace()
+			.path("Patient.name.given")
+			.value(new StringType("Bart"))
+			.andThen()
+			.build();
 
+		Patient input = (Patient) buildPatient(
+			withGiven("Homer"),
+			withGiven("Jay")
+		);
+
+		assertThatThrownBy(()->myPatch.apply(input, patch))
+			.hasMessageContaining("FhirPath returns more than 1 element: Patient.name.given");
+
+	}
 
 	@ParameterizedTest
 	@ValueSource(strings = {
@@ -552,23 +427,155 @@ public class FhirPatchTest implements ITestDataBuilder {
 		}
 
 		// test
-		assertThatThrownBy(()->myPatch.apply(appointment, patch))
+		assertThatThrownBy(() -> myPatch.apply(appointment, patch))
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("is not a valid fhir path");
 
 	}
-
 
 	@Test
 	void testValidate() {
 		Parameters parameters = new Parameters();
 		parameters.addParameter().setName("foo");
 
-		assertThatThrownBy(()->myPatch.validate(parameters))
-			.isInstanceOf(InvalidRequestException.class)
-			.hasMessageContaining("Unknown patch parameter name: foo");
+		FhirPatch.PatchOutcome outcome = myPatch.validate(parameters);
+		assertThat(outcome.getErrors()).
+			containsExactly(
+				"Unknown patch parameter name: foo"
+			);
 	}
 
+	/**
+	 * Returns a list of parameters for the
+	 * patchApply_withValidParams_works test.
+	 * <p>
+	 * All inputs should assume an Appointment with the following references:
+	 * * Patient/p1
+	 * * Location/l1
+	 * * Patient/p3
+	 */
+	static List<Arguments> patchParams() {
+		List<Arguments> params = new ArrayList<>();
+
+		// 1 - Appointment.participant.actor.reference.where(startsWith('Patient/')).first()
+		{
+			Parameters parameters = new Parameters();
+			Parameters.ParametersParameterComponent comp = parameters.addParameter()
+				.setName("operation");
+
+			comp.addPart().setName("type").setValue(new CodeType("replace"));
+			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.reference.where(startsWith('Patient/')).first()"));
+			comp.addPart().setName("value").setValue(new StringType("Patient/p2"));
+
+			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p2", "Location/l1", "Patient/p3")));
+		}
+
+		// 2 - Appointment.participant.actor.where(reference.startsWith('Patient/')).first()
+		{
+			Parameters parameters = new Parameters();
+			Parameters.ParametersParameterComponent comp = parameters.addParameter()
+				.setName("operation");
+
+			comp.addPart().setName("type").setValue(new CodeType("replace"));
+			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.where(reference.startsWith('Patient/')).first()"));
+			comp.addPart().setName("value").setValue(new Reference("Patient/p2"));
+
+			params.add(Arguments.of(parameters, "Patient/P2", List.of("Patient/p2", "Location/l1", "Patient/p3")));
+		}
+
+		// 3 - Appointment.participant.actor.where(reference.startsWith('Patient/'))[0]
+		{
+			Parameters parameters = new Parameters();
+			Parameters.ParametersParameterComponent comp = parameters.addParameter()
+				.setName("operation");
+
+			comp.addPart().setName("type").setValue(new CodeType("replace"));
+			// should act like "first"
+			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.where(reference.startsWith('Patient/'))[0]"));
+			comp.addPart().setName("value").setValue(new Reference("Patient/p2"));
+
+			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p2", "Location/l1", "Patient/p3")));
+		}
+
+		// 4 - Appointment.participant.actor.where(reference.startsWith('Patient/'))[1]
+		{
+			Parameters parameters = new Parameters();
+			Parameters.ParametersParameterComponent comp = parameters.addParameter()
+				.setName("operation");
+
+			comp.addPart().setName("type").setValue(new CodeType("replace"));
+			// should act like "first"
+			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.where(reference.startsWith('Patient/'))[1]"));
+			comp.addPart().setName("value").setValue(new Reference("Patient/p2"));
+
+			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p1", "Location/l1", "Patient/p2")));
+		}
+
+		// 5 - Appointment.participant.actor.reference.where(startsWith('Patient/')).last()
+		{
+			Parameters parameters = new Parameters();
+			Parameters.ParametersParameterComponent comp = parameters.addParameter()
+				.setName("operation");
+			comp.addPart().setName("type").setValue(new CodeType("replace"));
+			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.reference.where(startsWith('Patient/')).last()"));
+			comp.addPart().setName("value").setValue(new StringType("Patient/p2"));
+
+			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p1", "Location/l1", "Patient/p2")));
+		}
+
+		// 6 - Appointment.participant.actor.reference.where(endsWith('Patient/p1')).single()
+		{
+			Parameters parameters = new Parameters();
+			Parameters.ParametersParameterComponent comp = parameters.addParameter()
+				.setName("operation");
+			comp.addPart().setName("type").setValue(new CodeType("replace"));
+			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.reference.where(endsWith('Patient/p1')).single()"));
+			comp.addPart().setName("value").setValue(new StringType("Patient/p2"));
+
+			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p3", "Location/l1", "Patient/p2")));
+		}
+
+		// 7 - Appointment.participant.actor.reference.where(startsWith('Patient/')).tail()
+		{
+			Parameters parameters = new Parameters();
+			Parameters.ParametersParameterComponent comp = parameters.addParameter()
+				.setName("operation");
+			comp.addPart().setName("type").setValue(new CodeType("replace"));
+			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.reference.where(startsWith('Patient/')).tail()"));
+			comp.addPart().setName("value").setValue(new StringType("Patient/p2"));
+
+			// tail should be the same as replacing everything (that matches Patient/) except Patient/p1
+			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p1", "Location/l1", "Patient/p2")));
+		}
+
+		// 8 - Appointment.participant.actor.reference.where(startsWith('Patient/')).skip(1)
+		{
+			Parameters parameters = new Parameters();
+			Parameters.ParametersParameterComponent comp = parameters.addParameter()
+				.setName("operation");
+			comp.addPart().setName("type").setValue(new CodeType("replace"));
+			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.reference.where(startsWith('Patient/')).skip(1)"));
+			comp.addPart().setName("value").setValue(new StringType("Patient/p2"));
+
+			// skip should skip the first value that matches "Patient" and replace it (ie, skip Patient/p1 and replace Patient/p3)
+			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p1", "Location/l1", "Patient/p2")));
+		}
+
+		// 9 - Appointment.participant.actor.reference.where(startsWith('Patient/')).take(1)
+		{
+			Parameters parameters = new Parameters();
+			Parameters.ParametersParameterComponent comp = parameters.addParameter()
+				.setName("operation");
+			comp.addPart().setName("type").setValue(new CodeType("replace"));
+			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.reference.where(startsWith('Patient/')).take(1)"));
+			comp.addPart().setName("value").setValue(new StringType("Patient/p2"));
+
+			// take should grab the first value that matches "Patient" (ie, take should grab Patient/p1 and not Patient/p3)
+			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p3", "Location/l1", "Patient/p2")));
+		}
+
+		return params;
+	}
 
 
 }
