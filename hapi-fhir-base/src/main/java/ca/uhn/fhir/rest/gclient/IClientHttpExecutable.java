@@ -22,6 +22,7 @@ public interface IClientHttpExecutable<T extends IClientHttpExecutable<?, Y>, Y>
 	 * <p>It is the responsibility of the caller to care for proper encoding of the header value, e.g.
 	 * using Base64.</p>
 	 * <p>This is a short-cut alternative to using a corresponding client interceptor</p>
+	 * <p>It is a multi-valued header. Calling it multiple times will add to the list rather than replace the value</p>
 	 *
 	 * @param theHeaderName header name
 	 * @param theHeaderValue header value
