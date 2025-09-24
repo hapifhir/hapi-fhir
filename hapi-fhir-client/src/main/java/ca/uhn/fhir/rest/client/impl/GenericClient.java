@@ -139,6 +139,7 @@ import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -478,7 +479,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		GET
 	}
 
-	private class RawHttpBuilder implements IRawHttp  {
+	private class RawHttpBuilder implements IRawHttp {
 
 		@Override
 		public IClientHttpExecutable<IClientHttpExecutable<?, IEntityResult>, IEntityResult> get(String theUrl) {
@@ -486,8 +487,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 	}
 
-	class RawGetEntityResultInternal<T extends IClientHttpExecutable<?,EntityResult>>
-		extends BaseClientHttpExecutable<T, EntityResult> {
+	class RawGetEntityResultInternal<T extends IClientHttpExecutable<?, EntityResult>>
+			extends BaseClientHttpExecutable<T, EntityResult> {
 		final String myUrl;
 
 		public RawGetEntityResultInternal(String theUrl) {
@@ -502,7 +503,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 	}
 
-	private abstract class BaseClientHttpExecutable<T extends IClientHttpExecutable<?,Y>, Y> implements  IClientHttpExecutable<T,Y> {
+	private abstract class BaseClientHttpExecutable<T extends IClientHttpExecutable<?, Y>, Y>
+			implements IClientHttpExecutable<T, Y> {
 		CacheControlDirective myCacheControlDirective;
 		Map<String, List<String>> myCustomHeaderValues = new HashMap<>();
 		String myCustomAcceptHeaderValue;
@@ -524,7 +526,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return (T) this;
 		}
 
-
 		@SuppressWarnings("unchecked")
 		@Override
 		public T withAdditionalHeader(String theHeaderName, String theHeaderValue) {
@@ -536,11 +537,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myCustomHeaderValues.get(theHeaderName).add(theHeaderValue);
 			return (T) this;
 		}
-
 	}
 
 	private abstract class BaseClientExecutable<T extends IClientExecutable<?, Y>, Y>
-		implements IClientExecutable<T, Y> {
+			implements IClientExecutable<T, Y> {
 
 		EncodingEnum myParamEncoding;
 		Boolean myPrettyPrint;
@@ -643,32 +643,32 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		protected <Z> Z invoke(
-			Map<String, List<String>> theParams,
-			IClientResponseHandler<Z> theHandler,
-			BaseHttpClientInvocation theInvocation) {
+				Map<String, List<String>> theParams,
+				IClientResponseHandler<Z> theHandler,
+				BaseHttpClientInvocation theInvocation) {
 			if (isKeepResponses()) {
 				myLastRequest = theInvocation.asHttpRequest(getServerBase(), theParams, getEncoding(), myPrettyPrint);
 			}
 
 			return invokeClient(
-				myContext,
-				theHandler,
-				theInvocation,
-				myParamEncoding,
-				myPrettyPrint,
-				myQueryLogRequestAndResponse || myLogRequestAndResponse,
-				mySummaryMode,
-				mySubsetElements,
-				myCacheControlDirective,
-				myCustomAcceptHeaderValue,
-				myCustomHeaderValues);
+					myContext,
+					theHandler,
+					theInvocation,
+					myParamEncoding,
+					myPrettyPrint,
+					myQueryLogRequestAndResponse || myLogRequestAndResponse,
+					mySummaryMode,
+					mySubsetElements,
+					myCacheControlDirective,
+					myCustomAcceptHeaderValue,
+					myCustomHeaderValues);
 		}
 
 		protected IBaseResource parseResourceBody(String theResourceBody) {
 			EncodingEnum encoding = EncodingEnum.detectEncodingNoDefault(theResourceBody);
 			if (encoding == null) {
 				throw new IllegalArgumentException(Msg.code(1368)
-					+ myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
+						+ myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
 			}
 			return encoding.newParser(myContext).parseResource(theResourceBody);
 		}
@@ -1354,23 +1354,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return (T) meta.get(0);
 		}
 	}
-
-//	private class RawHttpInternal extends BaseClientExecutable implements IRawHttp {
-//		private IHttpRequest myRequest;
-//
-//		@Override
-//		public Object execute() {
-//			StringResponseHandler binding = new StringResponseHandler();
-//			HttpRawClientInvocation invocation = new HttpRawClientInvocation(myContext, myRequest.getUri(), RequestTypeEnum.valueOf(myRequest.getHttpVerbName()));
-//
-//			return invokeClient(myContext, binding, invocation);
-//		}
-//
-//		public IRawHttp fromRequest(IHttpRequest theRequest) {
-//			myRequest = theRequest;
-//			return this;
-//		}
-//	}
 
 	@SuppressWarnings("rawtypes")
 	private class OperationInternal extends BaseClientExecutable
@@ -2452,27 +2435,27 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	private static class EntityResult implements IEntityResult {
-		private String myMimeType;
-		private InputStream myInputStream;
-		private int myStatusCode;
-		private Map<String, List<String>> myHeaders;
+		private final String myMimeType;
+		private final InputStream myInputStream;
+		private final int myStatusCode;
+		private final Map<String, List<String>> myHeaders;
 
 		public EntityResult(
-			String theResponseMimeType,
-			InputStream theResponseInputStream,
-			int theResponseStatusCode,
-			Map<String, List<String>> theHeaders
-		) {
+				String theResponseMimeType,
+				InputStream theResponseInputStream,
+				int theResponseStatusCode,
+				Map<String, List<String>> theHeaders) {
 			myMimeType = theResponseMimeType;
-			myInputStream = theResponseInputStream;
+			myInputStream = theResponseInputStream != null ? theResponseInputStream : InputStream.nullInputStream();
 			myStatusCode = theResponseStatusCode;
-			myHeaders = theHeaders;
+			myHeaders = theHeaders != null ? theHeaders : new HashMap<>();
 		}
 
 		public String getMimeType() {
 			return myMimeType;
 		}
 
+		@NonNull
 		public InputStream getInputStream() {
 			return myInputStream;
 		}
@@ -2481,6 +2464,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return myStatusCode;
 		}
 
+		@NonNull
 		public Map<String, List<String>> getHeaders() {
 			return myHeaders;
 		}
@@ -2490,11 +2474,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@Override
 		public EntityResult invokeClient(
-			String theResponseMimeType,
-			InputStream theResponseInputStream,
-			int theResponseStatusCode,
-			Map<String, List<String>> theHeaders)
-			throws IOException, BaseServerResponseException {
+				String theResponseMimeType,
+				InputStream theResponseInputStream,
+				int theResponseStatusCode,
+				Map<String, List<String>> theHeaders)
+				throws IOException, BaseServerResponseException {
 			return new EntityResult(theResponseMimeType, theResponseInputStream, theResponseStatusCode, theHeaders);
 		}
 	}

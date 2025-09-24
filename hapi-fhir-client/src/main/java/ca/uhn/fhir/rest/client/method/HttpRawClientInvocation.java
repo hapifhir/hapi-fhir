@@ -21,7 +21,6 @@ package ca.uhn.fhir.rest.client.method;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.PagingHttpMethodEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.UrlSourceEnum;
@@ -36,8 +35,7 @@ public class HttpRawClientInvocation extends BaseHttpClientInvocation {
 	private UrlSourceEnum myUrlSource = UrlSourceEnum.EXPLICIT;
 	private RequestTypeEnum myRequestType;
 
-	public HttpRawClientInvocation(
-		FhirContext theContext, String theUrlPath, RequestTypeEnum theRequestType) {
+	public HttpRawClientInvocation(FhirContext theContext, String theUrlPath, RequestTypeEnum theRequestType) {
 		super(theContext);
 		myUrl = theUrlPath;
 		myRequestType = theRequestType;

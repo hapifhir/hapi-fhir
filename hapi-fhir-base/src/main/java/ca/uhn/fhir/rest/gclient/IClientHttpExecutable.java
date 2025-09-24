@@ -8,8 +8,7 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
  * @param <T> the builder self type
  * @param <Y> the result type
  */
-public interface IClientHttpExecutable  <T extends IClientHttpExecutable<?, Y>, Y> {
-
+public interface IClientHttpExecutable<T extends IClientHttpExecutable<?, Y>, Y> {
 
 	/**
 	 * Sets the <code>Cache-Control</code> header value, which advises the server (or any cache in front of it)
