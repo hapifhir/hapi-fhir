@@ -25,7 +25,7 @@ import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
 /**
  * Dialect for Derby database.
- * Minimum version: 10.14.2
+ * Minimum version: 10.15.2
  */
 public class HapiFhirDerbyDialect extends DerbyDialect implements IHapiFhirDialect {
 
