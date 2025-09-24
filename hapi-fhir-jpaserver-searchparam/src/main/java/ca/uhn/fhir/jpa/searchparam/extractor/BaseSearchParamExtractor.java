@@ -44,7 +44,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
-import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.RuntimeSearchParamHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -1704,7 +1703,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	private BigDecimal normalizeQuantityContainingTimeUnitsIntoDaysForNumberParam(
 			String theSystem, String theCode, BigDecimal theValue) {
-		if (SearchParamConstants.UCUM_NS.equals(theSystem)) {
+		if (UcumServiceUtil.UCUM_CODESYSTEM_URL.equals(theSystem)) {
 			if (isNotBlank(theCode)) {
 				Unit<? extends Quantity> unit = Unit.valueOf(theCode);
 				javax.measure.converter.UnitConverter dayConverter = unit.getConverterTo(NonSI.DAY);

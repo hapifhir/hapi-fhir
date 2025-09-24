@@ -130,6 +130,19 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init780();
 		init820();
 		init840();
+		init860();
+	}
+
+	protected void init860() {
+		Builder version = forVersion(VersionEnum.V8_6_0);
+		// Add IDX_RL_SRCPATH_TGTURL to the HFJ_RES_LINK Table - HAPI-FHIR #7223
+		{
+			version.onTable("HFJ_RES_LINK")
+					.addIndex("20250827.01", "IDX_RL_SRCPATH_TGTURL")
+					.unique(false)
+					.withColumns("SRC_PATH, TARGET_RESOURCE_URL, PARTITION_ID, SRC_RESOURCE_ID")
+					.heavyweightSkipByDefault();
+		}
 	}
 
 	protected void init840() {
@@ -168,6 +181,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			Builder.BuilderWithTableName resLink = version.onTable("HFJ_RES_LINK");
 			resLink.addColumn("20250515.501", "SRC_RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
 			resLink.addColumn("20250515.502", "TARGET_RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+
+			// Add RESOURCE_TYPE to the HFJ_RESOURCE_MODIFIED primary key
+			version.onTable("HFJ_RESOURCE_MODIFIED").dropPrimaryKey("20250729.1");
+			version.onTable("HFJ_RESOURCE_MODIFIED").addPrimaryKey("20250729.2", "RES_ID", "RES_VER", "RESOURCE_TYPE");
 		}
 	}
 

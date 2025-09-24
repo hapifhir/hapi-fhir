@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.method.ResponsePage;
+import ca.uhn.fhir.util.BundleUtil;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -31,6 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SimpleBundleProvider implements IBundleProvider {
 
@@ -41,6 +43,7 @@ public class SimpleBundleProvider implements IBundleProvider {
 	private IPrimitiveType<Date> myPublished = InstantDt.withCurrentTime();
 	private Integer myCurrentPageOffset;
 	private Integer myCurrentPageSize;
+	private boolean myHasAllResources;
 	private ResponsePage.ResponsePageBuilder myPageBuilder;
 
 	/**
@@ -85,7 +88,14 @@ public class SimpleBundleProvider implements IBundleProvider {
 	public SimpleBundleProvider(List<? extends IBaseResource> theList, String theUuid) {
 		myList = theList;
 		myUuid = theUuid;
-		setSize(theList.size());
+		int size = 0;
+		for (IBaseResource r : theList) {
+			if (r != null && BundleUtil.isMatchResource(r)) {
+				size++;
+			}
+		}
+		myHasAllResources = true;
+		setSize(size);
 	}
 
 	/**
@@ -195,6 +205,16 @@ public class SimpleBundleProvider implements IBundleProvider {
 	@Override
 	public Integer size() {
 		return mySize;
+	}
+
+	@Override
+	public boolean containsAllResources() {
+		return myHasAllResources;
+	}
+
+	@Override
+	public List<IBaseResource> getResourceListComplete() {
+		return myList.stream().map(r -> (IBaseResource) r).collect(Collectors.toList());
 	}
 
 	@Override

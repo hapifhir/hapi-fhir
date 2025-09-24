@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7114
+title: "When _Populate Identifier In Auto Created Placeholder Reference Targets_ is 
+  used, the system will now copy multiple identifiers into the created placeholder 
+  resource if multiple identifiers are present on the conditional URL."

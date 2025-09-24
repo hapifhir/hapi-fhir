@@ -25,6 +25,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -36,7 +37,7 @@ public abstract class BaseParam implements IQueryParameterType {
 
 	abstract String doGetQueryParameterQualifier();
 
-	abstract String doGetValueAsQueryToken(FhirContext theContext);
+	abstract String doGetValueAsQueryToken();
 
 	abstract void doSetValueAsQueryToken(
 			FhirContext theContext, String theParamName, String theQualifier, String theValue);
@@ -58,11 +59,11 @@ public abstract class BaseParam implements IQueryParameterType {
 	}
 
 	@Override
-	public final String getValueAsQueryToken(FhirContext theContext) {
+	public final String getValueAsQueryToken() {
 		if (myMissing != null) {
 			return myMissing ? Constants.PARAMQUALIFIER_MISSING_TRUE : Constants.PARAMQUALIFIER_MISSING_FALSE;
 		}
-		return doGetValueAsQueryToken(theContext);
+		return doGetValueAsQueryToken();
 	}
 
 	/**
@@ -105,5 +106,15 @@ public abstract class BaseParam implements IQueryParameterType {
 			myMissing = null;
 			doSetValueAsQueryToken(theContext, theParamName, theQualifier, theValue);
 		}
+	}
+
+	/**
+	 * Returns {@literal true} if this parameter has a {@literal null} or empty {@link #getValueAsQueryToken()}
+	 * value, and doesn't have a {@link #getMissing()} value.
+	 *
+	 * @since 8.4.0
+	 */
+	public boolean isEmpty() {
+		return isBlank(getValueAsQueryToken()) && getMissing() == null;
 	}
 }

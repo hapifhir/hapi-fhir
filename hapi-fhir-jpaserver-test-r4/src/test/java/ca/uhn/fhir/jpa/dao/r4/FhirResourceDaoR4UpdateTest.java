@@ -61,7 +61,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -206,7 +205,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 				InvalidRequestException thrown = assertThrows(InvalidRequestException.class,
 					() -> myPatientDao.update(p2,
 						"Patient?identifier=http://kookaburra.text/id|kookaburra2", mySrd));
-				assertThat(thrown.getMessage()).endsWith("Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
+				assertThat(thrown.getMessage()).endsWith("Failed to process conditional create. The supplied resource Patient?identifier=http://kookaburra.text/id|kookaburra2 of type Patient did not satisfy the conditional URL.");
 			}
 
 			@Test
@@ -220,7 +219,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 				InvalidRequestException thrown = assertThrows(InvalidRequestException.class,
 					() -> myPatientDao.update(p2,
 						"Patient?identifier=http://kookaburra.text/id|kookaburra2", mySrd));
-				assertThat(thrown.getMessage()).endsWith("Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
+				assertThat(thrown.getMessage()).endsWith("Failed to process conditional create. The supplied resource Patient?identifier=http://kookaburra.text/id|kookaburra2 of type Patient did not satisfy the conditional URL.");
 			}
 
 		}
@@ -251,7 +250,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 				InvalidRequestException thrown = assertThrows(InvalidRequestException.class,
 					() -> myPatientDao.update(p2,
 						"Patient?identifier=http://kookaburra.text/id|kookaburra1", mySrd));
-				assertThat(thrown.getMessage()).endsWith("Failed to process conditional update. The supplied resource did not satisfy the conditional URL.");
+				assertThat(thrown.getMessage()).endsWith("Failed to process conditional update. The supplied resource Patient?identifier=http://kookaburra.text/id|kookaburra1 of type Patient did not satisfy the conditional URL.");
 			}
 		}
 	}

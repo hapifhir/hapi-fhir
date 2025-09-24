@@ -589,7 +589,7 @@ public class SearchParamExtractorService {
 	}
 
 	private void extractResourceLinks(
-			@Nonnull RequestPartitionId theRequestPartitionId,
+			RequestPartitionId theRequestPartitionId,
 			ResourceIndexedSearchParams theExistingParams,
 			ResourceIndexedSearchParams theNewParams,
 			ResourceTable theEntity,
@@ -613,12 +613,7 @@ public class SearchParamExtractorService {
 			nextId = nextReference.getResource().getIdElement();
 		}
 
-		if (myContext.getParserOptions().isStripVersionsFromReferences()
-				&& !myContext
-						.getParserOptions()
-						.getDontStripVersionsFromReferencesAtPaths()
-						.contains(thePathAndRef.getPath())
-				&& nextId.hasVersionIdPart()) {
+		if (nextId.hasVersionIdPart() && shouldStripVersionFromReferenceAtPath(thePathAndRef.getPath())) {
 			nextId = nextId.toVersionless();
 		}
 
@@ -940,7 +935,7 @@ public class SearchParamExtractorService {
 
 	@SuppressWarnings("unchecked")
 	private ResourceLink resolveTargetAndCreateResourceLinkOrReturnNull(
-			@Nonnull RequestPartitionId theRequestPartitionId,
+			RequestPartitionId theRequestPartitionId,
 			String theSourceResourceName,
 			PathAndRef thePathAndRef,
 			ResourceTable theEntity,
@@ -1088,6 +1083,30 @@ public class SearchParamExtractorService {
 				mySearchParamExtractor.extractSearchParamComboNonUnique(resourceType, theParams);
 		theParams.myComboTokenNonUnique.addAll(comboNonUniques);
 		populateResourceTableForComboParams(theParams.myComboTokenNonUnique, theEntity);
+	}
+
+	private boolean shouldStripVersionFromReferenceAtPath(String theSearchParamPath) {
+
+		if (!myContext.getParserOptions().isStripVersionsFromReferences()) {
+			// all references allowed to have versions globally, so don't strip
+			return false;
+		}
+
+		// global setting is to strip versions, see if there's any exceptions configured for specific paths
+		Set<String> pathsAllowedToHaveVersionedRefs =
+				myContext.getParserOptions().getDontStripVersionsFromReferencesAtPaths();
+
+		if (pathsAllowedToHaveVersionedRefs.contains(theSearchParamPath)) {
+			// path exactly matches
+			return false;
+		}
+
+		// there are some search parameters using a where clause to index the element for a specific resource type, such
+		// as "Provenance.target.where(resolve() is Patient)". We insert these in the ResourceLink table as well.
+		// Such entries in the ResourceLink table should remain versioned if the element is allowed to be versioned.
+		return pathsAllowedToHaveVersionedRefs.stream()
+				.noneMatch(pathToKeepVersioned -> theSearchParamPath.matches(
+						pathToKeepVersioned + "\\.where\\(resolve\\(\\) is [A-Z][a-zA-Z]*\\)"));
 	}
 
 	/**

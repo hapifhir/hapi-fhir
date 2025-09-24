@@ -31,10 +31,10 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.merge.MergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -137,7 +137,7 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 		return deleteSource;
 	}
 
-	private @Nullable Patient getResultResource(Parameters theOriginalInputParameters) {
+	private @Nonnull Patient getResultResource(Parameters theOriginalInputParameters) {
 		Patient resultResource = null;
 		String resultResourceParamName = myMergeOperationInputParameterNames.getResultResourceParameterName();
 		if (theOriginalInputParameters.hasParameter(resultResourceParamName)) {

@@ -43,6 +43,7 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -135,7 +136,7 @@ public class BulkDataExportProvider {
 					IPrimitiveType<String> theExportId,
 			ServletRequestDetails theRequestDetails) {
 		// JPA export provider
-		BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
+		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		BulkExportJobParameters bulkExportJobParameters = new BulkExportJobParametersBuilder()
 				.outputFormat(theOutputFormat)
@@ -194,7 +195,7 @@ public class BulkDataExportProvider {
 		ourLog.debug("_typeFilter={}", theTypeFilter);
 		ourLog.debug("_mdm={}", theMdm);
 
-		BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
+		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		// verify the Group exists before starting the job
 		getBulkDataExportSupport().validateTargetsExists(theRequestDetails, "Group", List.of(theIdParam));
@@ -341,10 +342,10 @@ public class BulkDataExportProvider {
 			} else if (value instanceof IBaseReference patientReference) {
 				return patientReference.getReferenceElement();
 			} else {
-				throw new InvalidRequestException("Unsupported type.");
+				throw new InvalidRequestException(Msg.code(2763) + "Unsupported type.");
 			}
 		} catch (Exception e) {
-			throw new InvalidRequestException("Invalid patient parameter.", e);
+			throw new InvalidRequestException(Msg.code(2779) + "Invalid patient parameter.", e);
 		}
 	}
 
@@ -358,7 +359,7 @@ public class BulkDataExportProvider {
 			List<IPrimitiveType<String>> theTypeFilter,
 			List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
 			List<IPrimitiveType<String>> thePatientIds) {
-		BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
+		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		getBulkDataExportSupport()
 				.validateTargetsExists(
@@ -478,7 +479,6 @@ public class BulkDataExportProvider {
 			case FINALIZE:
 			case QUEUED:
 			case IN_PROGRESS:
-			case CANCELLED:
 				//noinspection deprecation - we need to support old jobs after upgrade.
 			case ERRORED:
 				if (theRequestDetails.getRequestType() == RequestTypeEnum.DELETE) {
@@ -491,6 +491,22 @@ public class BulkDataExportProvider {
 							"Build in progress - Status set to " + info.getStatus() + " at " + dateString);
 					response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
 				}
+				break;
+			case CANCELLED:
+				response.setStatus(Constants.STATUS_HTTP_404_NOT_FOUND);
+				IBaseOperationOutcome outcome = OperationOutcomeUtil.newInstance(myFhirContext);
+				OperationOutcomeUtil.addIssue(
+						myFhirContext,
+						outcome,
+						"error",
+						"Job instance <" + theJobId.getValueAsString() + "> was cancelled.  No status to report.",
+						null,
+						null);
+				myFhirContext
+						.newJsonParser()
+						.setPrettyPrint(true)
+						.encodeResourceToWriter(outcome, response.getWriter());
+				response.getWriter().close();
 				break;
 		}
 	}

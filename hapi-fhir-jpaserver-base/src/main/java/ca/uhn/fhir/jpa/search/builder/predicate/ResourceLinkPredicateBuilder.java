@@ -211,6 +211,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		}
 	}
 
+	@Nullable
 	public Condition createPredicate(
 			RequestDetails theRequest,
 			String theResourceType,
@@ -429,6 +430,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	 * This is for handling queries like the following: /Observation?device.identifier=urn:system|foo in which we use a chain
 	 * on the device.
 	 */
+	@Nullable
 	private Condition addPredicateReferenceWithChain(
 			String theResourceName,
 			String theParamName,

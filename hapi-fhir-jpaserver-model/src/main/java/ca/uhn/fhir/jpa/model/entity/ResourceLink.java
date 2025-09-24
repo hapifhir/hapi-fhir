@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.util.ResourceLinkUtils;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
@@ -60,7 +61,11 @@ import java.util.Date;
 			// in separate block.
 			@Index(
 					name = "IDX_RL_TGT_v2",
-					columnList = "TARGET_RESOURCE_ID, SRC_PATH, SRC_RESOURCE_ID, TARGET_RESOURCE_TYPE,PARTITION_ID")
+					columnList = "TARGET_RESOURCE_ID, SRC_PATH, SRC_RESOURCE_ID, TARGET_RESOURCE_TYPE,PARTITION_ID"),
+			// See https://github.com/hapifhir/hapi-fhir/issues/7223
+			@Index(
+					name = "IDX_RL_SRCPATH_TGTURL",
+					columnList = "SRC_PATH, TARGET_RESOURCE_URL, PARTITION_ID, SRC_RESOURCE_ID")
 		})
 @IdClass(IdAndPartitionId.class)
 public class ResourceLink extends BaseResourceIndex {
@@ -340,7 +345,7 @@ public class ResourceLink extends BaseResourceIndex {
 	public void setTargetResourceUrlCanonical(String theTargetResourceUrl) {
 		Validate.notBlank(theTargetResourceUrl);
 
-		myTargetResourceType = "(unknown)";
+		myTargetResourceType = ResourceLinkUtils.UNKNOWN;
 		myTargetResourceUrl = theTargetResourceUrl;
 	}
 

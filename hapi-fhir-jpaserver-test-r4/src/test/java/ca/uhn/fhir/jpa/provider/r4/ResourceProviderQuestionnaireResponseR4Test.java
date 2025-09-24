@@ -92,7 +92,8 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		spMap.addInclude(QuestionnaireResponse.INCLUDE_QUESTIONNAIRE);
 		spMap.add("_id", new TokenParam("my-questionnaire-response"));
 		IBundleProvider search = myQuestionnaireResponseDao.search(spMap);
-		assertEquals(2, search.size());
+		assertEquals(1, search.size());
+		assertEquals(2, search.getResourceListComplete().size());
 	}
 
 	@SuppressWarnings("unused")

@@ -106,7 +106,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@SuppressWarnings({"unchecked", "ConstantConditions"})
+@SuppressWarnings({"unchecked", "ConstantConditions", "SqlNoDataSourceInspection"})
 
 public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitioningSqlR4Test.class);
@@ -742,14 +742,10 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		// Validate
 		JobInstance outcome = myBatch2JobHelper.awaitJobCompletion(startResponse);
 		assertEquals(2, outcome.getCombinedRecordsProcessed());
-		addNextTargetPartitionForReadAllPartitions();
-		assertDoesntExist(p1);
-		addNextTargetPartitionForReadAllPartitions();
-		assertDoesntExist(o1);
-		addNextTargetPartitionForReadAllPartitions();
-		assertNotGone(p2);
-		addNextTargetPartitionForReadAllPartitions();
-		assertNotGone(o2);
+		assertDoesntExist(p1, RequestPartitionId.allPartitions());
+		assertDoesntExist(o1, RequestPartitionId.allPartitions());
+		assertNotGone(p2, RequestPartitionId.allPartitions());
+		assertNotGone(o2, RequestPartitionId.allPartitions());
 	}
 
 	private void assertPersistedPartitionIdMatches(JpaPid patientId) {
@@ -3121,8 +3117,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		Bundle output = mySystemDao.transaction(requestDetails, input);
 		myCaptureQueriesListener.logSelectQueries();
 
-		assertEquals(17, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(6189, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(6208, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(418, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countCommits());

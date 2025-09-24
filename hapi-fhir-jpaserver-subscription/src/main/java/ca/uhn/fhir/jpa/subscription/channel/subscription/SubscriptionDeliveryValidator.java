@@ -71,7 +71,7 @@ public class SubscriptionDeliveryValidator implements ISubscriptionDeliveryValid
 			case OFF:
 			case NULL:
 			default:
-				throw new SubscriptionInactiveException(Msg.code(2668) + "Attempting to deliver "
+				throw new SubscriptionInactiveException(Msg.code(2762) + "Attempting to deliver "
 						+ theResourceDeliveryMessage.getPayloadId() + " to disabled subscription "
 						+ subscription.getIdElementString() + ".  Aborting delivery.");
 		}

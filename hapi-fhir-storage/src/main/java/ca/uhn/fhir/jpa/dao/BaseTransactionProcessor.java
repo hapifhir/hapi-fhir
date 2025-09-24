@@ -2603,7 +2603,7 @@ public abstract class BaseTransactionProcessor {
 		return false;
 	}
 
-	private static String toStatusString(int theStatusCode) {
+	public static String toStatusString(int theStatusCode) {
 		return theStatusCode + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
 	}
 

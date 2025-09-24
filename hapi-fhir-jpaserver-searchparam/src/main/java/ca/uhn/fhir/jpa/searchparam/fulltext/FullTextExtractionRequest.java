@@ -24,7 +24,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.function.Supplier;
-import javax.annotation.Nullable;
 
 /**
  * This is a request object containing a request to extract the FullText index data from
@@ -35,10 +34,10 @@ import javax.annotation.Nullable;
  */
 public class FullTextExtractionRequest {
 
-	@Nullable
+	@Nonnull
 	private final IIdType myResourceId;
 
-	@Nullable
+	@Nonnull
 	private final IBaseResource myResource;
 
 	@Nonnull
@@ -51,8 +50,8 @@ public class FullTextExtractionRequest {
 	 * Constructor
 	 */
 	public FullTextExtractionRequest(
-			@Nullable IIdType theResourceId,
-			@Nullable IBaseResource theResource,
+			@Nonnull IIdType theResourceId,
+			@Nonnull IBaseResource theResource,
 			@Nonnull String theResourceType,
 			@Nonnull Supplier<String> theDefaultSupplier) {
 		myResourceId = theResourceId;
@@ -71,7 +70,7 @@ public class FullTextExtractionRequest {
 	/**
 	 * @return Returns the ID of the resource being indexed. This may be <code>null</code> if a new resource is being created, and a type isn't assigned yet
 	 */
-	@Nullable
+	@Nonnull
 	public IIdType getResourceId() {
 		return myResourceId;
 	}
@@ -79,7 +78,7 @@ public class FullTextExtractionRequest {
 	/**
 	 * @return Returns the resource being indexed. May be <code>null</code> if the operation is a resource deletion.
 	 */
-	@Nullable
+	@Nonnull
 	public IBaseResource getResource() {
 		return myResource;
 	}

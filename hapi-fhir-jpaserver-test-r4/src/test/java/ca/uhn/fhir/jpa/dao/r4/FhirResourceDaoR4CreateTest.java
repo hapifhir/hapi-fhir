@@ -47,9 +47,12 @@ import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -75,6 +78,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -426,7 +430,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			myObservationDao.create(obs, "identifier=A%20B", newSrd());
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
+			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource identifier=A%20B of type Observation did not satisfy the conditional URL.", e.getMessage());
 		}
 	}
 
@@ -451,7 +455,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			mySystemDao.transaction(newSrd(), (Bundle) bb.getBundle());
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
+			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource identifier=A%20B of type Observation did not satisfy the conditional URL.", e.getMessage());
 		}
 	}
 
@@ -462,7 +466,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertThatThrownBy(() -> myObservationDao.create(obs, "identifier=xxx", newSrd()))
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessage(Msg.code(929) +
-				"Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
+				"Failed to process conditional create. The supplied resource identifier=xxx of type Observation did not satisfy the conditional URL.");
 	}
 
 	@Test

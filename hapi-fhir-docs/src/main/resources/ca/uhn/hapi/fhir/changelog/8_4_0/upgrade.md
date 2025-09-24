@@ -27,3 +27,6 @@ As of `8.3.12-SNAPSHOT`, HAPI-FHIR snapshots are now published on [Maven Central
 
 * `$export` and `$everything` operations on Patient Compartment (instance or type) will no longer return `List` or `Group` resources, regardless of auth rules.
 
+## Zero-Downtime Upgrades with Subscriptions
+
+The database upgrade includes changes to the `HFJ_RESOURCE_MODIFIED` table. This table holds transitional data about resources that have been modified. Under normal conditions, this table will be empty or nearly so. It is recommended to verify that subscriptions are running smoothly to avoid prolonged table locks while the table structure is updated.

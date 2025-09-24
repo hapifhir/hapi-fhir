@@ -1,0 +1,64 @@
+name: 'Cross-Module Checkstyle Validation'
+description: 'Runs cross-module checkstyle validation to detect duplicate error codes and other violations'
+
+inputs:
+  java-version:
+    description: 'The Java version to use'
+    required: false
+    default: '17'
+  maven-cache-key:
+    description: 'The cache key for Maven dependencies'
+    required: true
+  hapi-cache-key:
+    description: 'The cache key for HAPI dependencies'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Create and List Maven Cache Directory
+      shell: bash
+      run: |
+        mkdir -p $HOME/.m2/repository
+        pwd
+        ls -al $HOME/.m2/repository
+      env:
+        MAVEN_CACHE_FOLDER: $HOME/.m2/repository
+
+    - name: Restore HAPI Cache
+      uses: ./.github/actions/caching-handler
+      with:
+        path: "$HOME/.m2/repository/ca/uhn/"
+        key: ${{ inputs.hapi-cache-key }}
+
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: ${{ inputs.java-version }}
+        cache: 'maven'
+
+    - name: Restore Maven Cache
+      uses: ./.github/actions/caching-handler
+      with:
+        key: ${{ inputs.maven-cache-key }}
+
+    - name: Debug cache contents
+      shell: bash
+      run: |
+        echo "Checking Maven repository contents..."
+        ls -la $HOME/.m2/repository/ca/uhn/hapi/fhir/ || echo "HAPI FHIR directory not found"
+        ls -la $HOME/.m2/repository/ca/uhn/hapi/fhir/hapi-fhir-checkstyle/ || echo "hapi-fhir-checkstyle directory not found"
+        find $HOME/.m2/repository -name "*checkstyle*" -type f || echo "No checkstyle artifacts found"
+
+    - name: Run cross-module checkstyle validation
+      shell: bash
+      env:
+        MAVEN_CACHE_FOLDER: $HOME/.m2/repository
+      run: |
+        echo "Running cross-module checkstyle validation to detect duplicate error codes and other violations..."
+        echo "This step ensures that HAPI FHIR error codes (Msg.code) are unique across all modules."
+        echo "If this step fails, it means there are checkstyle violations that must be fixed before the build can proceed."
+        echo ""
+        mvn validate -P CHECKSTYLE --batch-mode --no-transfer-progress \
+          -Dmaven.repo.local=$MAVEN_CACHE_FOLDER

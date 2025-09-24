@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -24,6 +25,7 @@ import ca.uhn.fhir.test.utilities.server.ResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -43,20 +45,30 @@ import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r5.elementmodel.Element;
+import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
+import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
+import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMocks {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RequestValidatingInterceptorR4Test.class);
@@ -89,6 +101,31 @@ public class RequestValidatingInterceptorR4Test extends BaseValidationTestWithIn
 
 		ourServlet.registerInterceptor(myInterceptor);
 		ourPort = ourServlet.getPort();
+	}
+
+	@Test
+	public void testCreateResource_whenResourceHasReference_willValidateRefWithRequestDetails() throws IOException {
+		ArgumentCaptor<Object> argumentCaptor = ArgumentCaptor.forClass(Object.class);
+
+		FhirValidator fhirValidator = createFhirValidatorWithReferenceChecking(argumentCaptor);
+
+		myInterceptor.setFailOnSeverity(null);
+		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+		myInterceptor.setValidator(fhirValidator);
+
+		Patient patient = new Patient();
+		patient.setManagingOrganization(new Reference("Organization/123"));
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+
+		HttpResponse status = ourClient.getClient().execute(httpPost);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", status);
+
+		assertThat(argumentCaptor.getValue()).isInstanceOf(RequestDetails.class);
 	}
 
 	@Test
@@ -542,6 +579,23 @@ public class RequestValidatingInterceptorR4Test extends BaseValidationTestWithIn
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(status.toString()).doesNotContain("X-FHIR-Request-Validation");
 		assertEquals(true, ourLastRequestWasSearch);
+	}
+
+	private FhirValidator createFhirValidatorWithReferenceChecking(ArgumentCaptor<Object> theArgumentCaptor) throws IOException {
+		IValidatorResourceFetcher validatorResourceFetcher = mock(IValidatorResourceFetcher.class);
+		IValidationPolicyAdvisor policyAdvisor = mock(IValidationPolicyAdvisor.class);
+
+		FhirValidator fhirValidator = ourCtx.newValidator();
+		FhirInstanceValidator instanceValidatorModule = new FhirInstanceValidator(ourCtx);
+		instanceValidatorModule.setValidatorResourceFetcher(validatorResourceFetcher);
+		instanceValidatorModule.setValidatorPolicyAdvisor(policyAdvisor);
+		fhirValidator.registerValidatorModule(instanceValidatorModule);
+
+		when(validatorResourceFetcher.fetch(any(), theArgumentCaptor.capture(), anyString())).thenReturn(new Element("Organization").setType("Organization"));
+		when(policyAdvisor.policyForReference(any(), any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_EXISTS);
+		when(policyAdvisor.policyForElement(any(), any(), any(), any(), any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.ElementValidationAction.class));
+
+		return fhirValidator;
 	}
 
 	public static class PatientProvider implements IResourceProvider {

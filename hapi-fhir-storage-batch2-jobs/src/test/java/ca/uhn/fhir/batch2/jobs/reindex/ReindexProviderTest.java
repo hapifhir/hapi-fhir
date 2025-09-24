@@ -8,6 +8,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -55,7 +57,7 @@ public class ReindexProviderTest {
 	@RegisterExtension
 	public final RestfulServerExtension myServerExtension = new RestfulServerExtension(myCtx);
 
-	@Mock
+	@Mock(strictness = Mock.Strictness.LENIENT)
 	private IJobCoordinator myJobCoordinator;
 
 	@Mock
@@ -98,6 +100,7 @@ public class ReindexProviderTest {
 		input.addParameter(ReindexJobParameters.REINDEX_SEARCH_PARAMETERS, new CodeType("none"));
 		input.addParameter(ReindexJobParameters.OPTIMISTIC_LOCK, new BooleanType(false));
 		input.addParameter(ReindexJobParameters.OPTIMIZE_STORAGE, new CodeType("current_version"));
+		input.addParameter(ReindexJobParameters.CORRECT_CURRENT_VERSION, new CodeType("ALL"));
 
 		RequestPartitionId partitionId = RequestPartitionId.fromPartitionId(1);
 		final PartitionedUrl partitionedUrl = new PartitionedUrl().setUrl(theUrl).setRequestPartitionId(partitionId);
@@ -128,6 +131,7 @@ public class ReindexProviderTest {
 		assertEquals(ReindexParameters.ReindexSearchParametersEnum.NONE, params.getReindexSearchParameters());
 		assertFalse(params.getOptimisticLock());
 		assertEquals(ReindexParameters.OptimizeStorageModeEnum.CURRENT_VERSION, params.getOptimizeStorage());
+		assertEquals(ReindexParameters.CorrectCurrentVersionModeEnum.ALL, params.getCorrectCurrentVersion());
 	}
 
 	@Test
@@ -157,5 +161,27 @@ public class ReindexProviderTest {
 		assertEquals(ReindexParameters.ReindexSearchParametersEnum.ALL, params.getReindexSearchParameters());
 		assertTrue(params.getOptimisticLock());
 		assertEquals(ReindexParameters.OptimizeStorageModeEnum.NONE, params.getOptimizeStorage());
+		assertEquals(ReindexParameters.CorrectCurrentVersionModeEnum.NONE, params.getCorrectCurrentVersion());
+	}
+
+	@Test
+	public void testReindex_invalidRequest_BadCorrectCurrentVersionValue() {
+		// setup
+		Parameters input = new Parameters();
+		input.addParameter(ReindexJobParameters.CORRECT_CURRENT_VERSION, new CodeType("BAD_VALUE"));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+
+		// Execute
+		assertThatThrownBy(()->myServerExtension
+				.getFhirClient()
+				.operation()
+				.onServer()
+				.named(ProviderConstants.OPERATION_REINDEX)
+				.withParameters(input)
+				.execute())
+				// Verify
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("Invalid correctCurrentVersion value: BAD_VALUE");
+
 	}
 }

@@ -104,7 +104,7 @@ public class SearchParameterUtil {
 		RestSearchParameterTypeEnum paramType = RestSearchParameterTypeEnum.forCode(
 				theSearchParamDefinition.type().toLowerCase());
 		if (paramType == null) {
-			throw new ConfigurationException(Msg.code(1721) + "Search param " + theSearchParamDefinition.name()
+			throw new ConfigurationException(Msg.code(2786) + "Search param " + theSearchParamDefinition.name()
 					+ " has an invalid type: " + theSearchParamDefinition.type());
 		}
 

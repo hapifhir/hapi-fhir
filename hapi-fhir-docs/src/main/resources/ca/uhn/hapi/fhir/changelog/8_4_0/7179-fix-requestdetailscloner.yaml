@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7179
+title: "A bug in the class used to copy and reuse the RequestDetails during operations
+ invoked through the HapiFhirRepository would cause an invalid cast exception downstream
+ when authentication interceptors were enabled for the operation.  This has been fixed."

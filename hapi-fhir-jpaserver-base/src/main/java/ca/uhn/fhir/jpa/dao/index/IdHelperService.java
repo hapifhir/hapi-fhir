@@ -71,6 +71,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -202,15 +203,20 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		}
 
 		Collection<IIdType> ids = new ArrayList<>(theIds);
-		for (IIdType id : theIds) {
+		Set<String> idsSet = new HashSet<>(ids.size());
+		for (Iterator<IIdType> iterator = ids.iterator(); iterator.hasNext(); ) {
+			IIdType id = iterator.next();
 			if (!id.hasIdPart()) {
 				throw new InvalidRequestException(Msg.code(1101) + "Parameter value missing in request");
+			}
+			if (!idsSet.add(id.getValue())) {
+				iterator.remove();
 			}
 		}
 
 		RequestPartitionId requestPartitionId = replaceDefault(theRequestPartitionId);
 		ListMultimap<IIdType, IResourceLookup<JpaPid>> idToLookup =
-				MultimapBuilder.hashKeys(theIds.size()).arrayListValues(1).build();
+				MultimapBuilder.hashKeys(ids.size()).arrayListValues(1).build();
 
 		// Do we have any FHIR ID lookups cached for any of the IDs
 		if (theMode.isUseCache(myStorageSettings.isDeleteEnabled()) && !ids.isEmpty()) {

@@ -19,14 +19,14 @@
  */
 package ca.uhn.fhir.broker.api;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
 
 public class ChannelProducerSettings extends BaseChannelSettings {
 	public static final Integer DEFAULT_CHANNEL_CONSUMERS = 2;
 
 	private Integer myConcurrentConsumers = DEFAULT_CHANNEL_CONSUMERS;
 
-	@Nullable
+	@Nonnull
 	private String myProducerSuffix;
 
 	/**
@@ -34,6 +34,7 @@ public class ChannelProducerSettings extends BaseChannelSettings {
 	 */
 	public ChannelProducerSettings() {
 		super();
+		myProducerSuffix = "";
 	}
 
 	public Integer getConcurrentConsumers() {
@@ -51,7 +52,7 @@ public class ChannelProducerSettings extends BaseChannelSettings {
 	 * 	In the case where the Message Broker adds a suffix to the channel name to define the producer name, this allows
 	 * 	control of the suffix used.
 	 */
-	@Nullable
+	@Nonnull
 	public String getProducerNameSuffix() {
 		return myProducerSuffix;
 	}
@@ -60,7 +61,7 @@ public class ChannelProducerSettings extends BaseChannelSettings {
 	 * 	In the case where the Message Broker adds a suffix to the channel name to define the producer name, this allows
 	 * 	control of the suffix used.
 	 */
-	public ChannelProducerSettings setProducerNameSuffix(@Nullable String theProducerNameSuffix) {
+	public ChannelProducerSettings setProducerNameSuffix(@Nonnull String theProducerNameSuffix) {
 		myProducerSuffix = theProducerNameSuffix;
 		return this;
 	}

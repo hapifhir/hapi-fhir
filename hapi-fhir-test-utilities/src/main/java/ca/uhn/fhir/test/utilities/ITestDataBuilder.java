@@ -259,6 +259,10 @@ public interface ITestDataBuilder {
 		return createResource("Observation", theModifiers);
 	}
 
+	default IBaseResource buildObservation(ICreationArgument... theModifiers) {
+		return buildResource("Observation", theModifiers);
+	}
+
 	default IIdType createObservation(Collection<ICreationArgument> theModifiers) {
 		return createResource("Observation", theModifiers.toArray(new ICreationArgument[0]));
 	}
@@ -273,6 +277,10 @@ public interface ITestDataBuilder {
 
 	default IIdType createPatient(ICreationArgument... theModifiers) {
 		return createResource("Patient", theModifiers);
+	}
+
+	default IIdType createCoverage(ICreationArgument... theModifiers) {
+		return createResource("Coverage", theModifiers);
 	}
 
 	default IIdType createOrganization(ICreationArgument... theModifiers) {
@@ -356,6 +364,11 @@ public interface ITestDataBuilder {
 
 	default ICreationArgument withEncounter(@Nullable IIdType theEncounter) {
 		return withReference("encounter", theEncounter);
+	}
+
+	@Nonnull
+	default ICreationArgument withReference(String theReferenceName, @Nullable String theReferenceValue) {
+		return withReference(theReferenceName, getFhirContext().getVersion().newIdType(theReferenceValue));
 	}
 
 	@Nonnull

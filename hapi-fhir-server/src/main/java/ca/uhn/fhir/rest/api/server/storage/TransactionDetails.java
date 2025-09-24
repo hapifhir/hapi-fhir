@@ -63,6 +63,9 @@ public class TransactionDetails {
 	private final Date myTransactionDate;
 	private List<Runnable> myRollbackUndoActions = Collections.emptyList();
 	private Map<String, IResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
+	/** The reverse of myResolvedResourceIds. Safe since id:pid is 1:1. */
+	private Map<IResourcePersistentId, IIdType> myReverseResolvedResourceIds = Collections.emptyMap();
+
 	private Map<String, IResourcePersistentId> myResolvedMatchUrls = Collections.emptyMap();
 	private Map<String, Supplier<IBaseResource>> myResolvedResources = Collections.emptyMap();
 	private Set<IResourcePersistentId> myDeletedResourceIds = Collections.emptySet();
@@ -97,7 +100,8 @@ public class TransactionDetails {
 	}
 
 	/**
-	 * Add an action that should be executed if the transaction is rolled back
+	 * Add an action that should be executed if the transaction is rolled back. If a rollback is triggered, the
+	 * actions will be executed in reverse order in order to leave .
 	 *
 	 * @since 5.5.0
 	 */
@@ -257,8 +261,11 @@ public class TransactionDetails {
 
 		if (myResolvedResourceIds.isEmpty()) {
 			myResolvedResourceIds = new HashMap<>();
+			myReverseResolvedResourceIds = new HashMap<>();
 		}
-		myResolvedResourceIds.put(theResourceId.toVersionless().getValue(), thePersistentId);
+		String fhirId = theResourceId.toVersionless().getValue();
+		myResolvedResourceIds.put(fhirId, thePersistentId);
+		myReverseResolvedResourceIds.put(thePersistentId, theResourceId);
 	}
 
 	/**
@@ -274,7 +281,8 @@ public class TransactionDetails {
 		if (myResolvedResources.isEmpty()) {
 			myResolvedResources = new HashMap<>();
 		}
-		myResolvedResources.put(theResourceId.toVersionless().getValue(), theResource);
+		IIdType versionless = theResourceId.toVersionless();
+		myResolvedResources.put(versionless.getValue(), theResource);
 	}
 
 	/**
@@ -447,6 +455,7 @@ public class TransactionDetails {
 
 	public void clearResolvedItems() {
 		myResolvedResourceIds.clear();
+		myReverseResolvedResourceIds.clear();
 		myResolvedMatchUrls.clear();
 	}
 
@@ -476,5 +485,9 @@ public class TransactionDetails {
 			myAutoCreatedPlaceholderResources = Collections.emptyList();
 		}
 		return retVal;
+	}
+
+	public <T extends IResourcePersistentId<?>> IIdType getReverseResolvedId(T thePid) {
+		return myReverseResolvedResourceIds.get(thePid);
 	}
 }

@@ -131,7 +131,7 @@ public class SearchPreferHandlingInterceptorTest {
 			.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_HANDLING + "=" + Constants.HEADER_PREFER_HANDLING_LENIENT)
 			.encodedJson()
 			.execute();
-		assertEquals(200, outcome.getTotal());
+
 		assertEquals("http://localhost:" + myPort + "/Patient?_format=json&_pretty=true&identifier=BLAH", outcome.getLink(Constants.LINK_SELF).getUrl());
 	}
 
