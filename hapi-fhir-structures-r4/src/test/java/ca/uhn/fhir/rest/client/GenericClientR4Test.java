@@ -125,6 +125,9 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		assertEquals("http://example.com/fhir/someurl?param1=value1", UrlUtil.unescape(httpUriRequest.getURI().toString()));
 		String response = new String(result.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 		assertEquals(responseBody, response);
+		assertEquals("application/json", result.getMimeType());
+		assertEquals(200, result.getStatusCode());
+		assertTrue(result.getHeaders().isEmpty());
 	}
 
 
