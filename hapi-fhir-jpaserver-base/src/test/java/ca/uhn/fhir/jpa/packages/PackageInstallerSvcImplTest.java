@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.packages;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -17,6 +18,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
@@ -65,6 +67,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -315,6 +318,55 @@ public class PackageInstallerSvcImplTest {
 			assertEquals(theInstallId, capturedSP.getIdPart());
 		}
 		assertEquals(theInstallBase, capturedSP.getBase().stream().map(CodeType::getCode).toList());
+	}
+
+	@Test
+	void testInstall_WithPartitioningEnabled_UsesDefaultPartition() throws IOException {
+
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setDefaultPartitionId(0);
+
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setId("CodeSystem/test-cs");
+		codeSystem.setUrl("http://example.com/test-codesystem");
+		codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		PackageInstallationSpec spec = setupResourceInPackage(null, codeSystem, myCodeSystemDao);
+
+		mySvc.install(spec);
+
+		verify(myCodeSystemDao, times(1)).search(any(SearchParameterMap.class), myRequestDetailsCaptor.capture());
+		verify(myCodeSystemDao, times(1)).update(any(CodeSystem.class), myRequestDetailsCaptor.capture());
+
+		List<RequestDetails> allRequestDetails = myRequestDetailsCaptor.getAllValues();
+		RequestPartitionId defaultPartitionId = RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
+		for (RequestDetails requestDetails : allRequestDetails) {
+			SystemRequestDetails systemRequest = (SystemRequestDetails) requestDetails;
+			assertEquals(defaultPartitionId, systemRequest.getRequestPartitionId());
+		}
+	}
+
+	@Test
+	void testInstall_WithPartitioningDisabled_NoPartitionSet() throws IOException {
+		myPartitionSettings.setPartitioningEnabled(false);
+
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setId("CodeSystem/test-cs");
+		codeSystem.setUrl("http://example.com/test-codesystem");
+		codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		PackageInstallationSpec spec = setupResourceInPackage(null, codeSystem, myCodeSystemDao);
+
+		mySvc.install(spec);
+
+		verify(myCodeSystemDao, times(1)).search(any(SearchParameterMap.class), myRequestDetailsCaptor.capture());
+		verify(myCodeSystemDao, times(1)).update(any(CodeSystem.class), myRequestDetailsCaptor.capture());
+
+		List<RequestDetails> allRequestDetails = myRequestDetailsCaptor.getAllValues();
+		for (RequestDetails requestDetails : allRequestDetails) {
+			SystemRequestDetails systemRequest = (SystemRequestDetails) requestDetails;
+			assertNull(systemRequest.getRequestPartitionId());
+		}
 	}
 
 	private PackageInstallationSpec setupResourceInPackage(IBaseResource myExistingResource, IBaseResource myInstallResource,
