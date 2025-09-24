@@ -110,7 +110,12 @@ public interface IGenericClient extends IRestfulClient {
 	IRead read();
 
 	/**
-	 * Implementation of a raw call
+	 * Provides access to raw HTTP operations that bypass FHIR resource parsing.
+	 * This is useful for making non-FHIR HTTP requests through the same client
+	 * infrastructure, including interceptors and authentication.
+	 *
+	 * @return A builder for constructing raw HTTP requests
+	 * @since 8.6.0
 	 */
 	IRawHttp rawHttpRequest();
 
