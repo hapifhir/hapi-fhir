@@ -23,7 +23,6 @@ public class PartitioningAllowedUnqualifiedR4Test extends BasePartitioningR4Test
 	@AfterEach
 	@Override
 	public void after() {
-
 		PartitionSettings defaultPartitionSettings = new PartitionSettings();
 		myPartitionSettings.setIncludePartitionInSearchHashes(defaultPartitionSettings.isIncludePartitionInSearchHashes());
 		myPartitionSettings.setPartitioningEnabled(defaultPartitionSettings.isPartitioningEnabled());
@@ -31,6 +30,7 @@ public class PartitioningAllowedUnqualifiedR4Test extends BasePartitioningR4Test
 		myPartitionSettings.setDefaultPartitionId(defaultPartitionSettings.getDefaultPartitionId());
 
 		mySrdInterceptorService.unregisterInterceptorsIf(MyReadWriteInterceptor.class::isInstance);
+		afterPurgeDatabase();
 	}
 
 	@Test
