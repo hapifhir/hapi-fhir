@@ -5,98 +5,85 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
+import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.collections.EnumerationUtils;
-import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class HttpProxyTest {
-	private static FhirContext ourCtx;
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HttpProxyTest.class);
-	private static HttpServletRequest ourRequest;
-	private boolean myFirstRequest;
-	private String myAuthHeader;
+	/**
+	 * Don't use the cached FhirContext here because we modify the
+	 * REST Client Factory!
+	 */
+	private final FhirContext ourCtx = FhirContext.forR4();
+	private final MyProxySimulatingFilter myProxySimulatingFilter = new MyProxySimulatingFilter();
 
-	@SuppressWarnings("serial")
+	@SuppressWarnings({"JUnitMalformedDeclaration", "SpellCheckingInspection"})
+	@RegisterExtension
+	private final RestfulServerExtension myServer = new RestfulServerExtension(ourCtx)
+		 .withServletFilter(myProxySimulatingFilter)
+		 .registerProvider(new PatientResourceProvider())
+		 .withContextPath("/rootctx/rcp2")
+		 .withServletPath("/fhirctx/fcp2/*");
+
 	@Test
-	public void testProxiedRequest() throws Exception {
-		Server server = new Server(0);
-		myFirstRequest = true;
-		myAuthHeader = null;
-		
-		RestfulServer restServer = new RestfulServer(ourCtx) {
+	public void testProxiedRequest() {
+		int port = myServer.getPort();
+		ourCtx.getRestfulClientFactory().setProxy("127.0.0.1", port);
+		ourCtx.getRestfulClientFactory().setProxyCredentials("username", "password");
 
-			@Override
-			protected void doGet(HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
-				if (myFirstRequest) {
-					theResponse.addHeader("Proxy-Authenticate", "Basic realm=\"some_realm\"");
-					theResponse.setStatus(407);
-					theResponse.getWriter().close();
-					myFirstRequest = false;
-					return;
-				}
-				String auth = theRequest.getHeader("Proxy-Authorization");
-				if (auth != null) {
-					myAuthHeader = auth;
-				}
-				
-				super.doGet(theRequest, theResponse);
-			}
+		String baseUri = "http://99.99.99.99:" + port + "/rootctx/rcp2/fhirctx/fcp2";
+		IGenericClient client = ourCtx.newRestfulGenericClient(baseUri);
 
-		};
-		restServer.setResourceProviders(new PatientResourceProvider());
+		IdType id = new IdType("Patient", "123");
+		client.read().resource(Patient.class).withId(id).execute();
 
-		// ServletHandler proxyHandler = new ServletHandler();
-		ServletHolder servletHolder = new ServletHolder(restServer);
-
-		ServletContextHandler ch = new ServletContextHandler();
-		ch.setContextPath("/rootctx/rcp2");
-		ch.addServlet(servletHolder, "/fhirctx/fcp2/*");
-
-		ContextHandlerCollection contexts = new ContextHandlerCollection();
-		server.setHandler(contexts);
-
-		server.setHandler(ch);
-		JettyUtil.startServer(server);
-        int port = JettyUtil.getPortForStartedServer(server);
-		try {
-
-			ourCtx.getRestfulClientFactory().setProxy("127.0.0.1", port);
-			ourCtx.getRestfulClientFactory().setProxyCredentials("username", "password");
-			
-			String baseUri = "http://99.99.99.99:" + port + "/rootctx/rcp2/fhirctx/fcp2";
-			IGenericClient client = ourCtx.newRestfulGenericClient(baseUri);
-
-			IdType id = new IdType("Patient", "123");
-			client.read().resource(Patient.class).withId(id).execute();
-
-			assertEquals("Basic dXNlcm5hbWU6cGFzc3dvcmQ=", myAuthHeader);
-			
-		} finally {
-			JettyUtil.closeServer(server);
-		}
-
+		assertEquals("Basic dXNlcm5hbWU6cGFzc3dvcmQ=", myProxySimulatingFilter.myAuthHeader);
 	}
 
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourCtx = FhirContext.forR4();
+	@AfterAll
+	public static void afterClassClearContext() {
+		TestUtil.randomizeLocaleAndTimezone();
+	}
+
+	public static class MyProxySimulatingFilter extends HttpFilter {
+
+		private final AtomicBoolean myFirstRequest = new AtomicBoolean(true);
+		private String myAuthHeader;
+
+		@Override
+		protected void doFilter(HttpServletRequest theRequest, HttpServletResponse theResponse, FilterChain theChain) throws IOException, ServletException {
+			if (myFirstRequest.get()) {
+				myFirstRequest.set(false);
+				theResponse.addHeader("Proxy-Authenticate", "Basic realm=\"some_realm\"");
+				theResponse.setStatus(407);
+				theResponse.getWriter().close();
+				return;
+			}
+			String auth = theRequest.getHeader("Proxy-Authorization");
+			if (auth != null) {
+				myAuthHeader = auth;
+			}
+
+			theChain.doFilter(theRequest, theResponse);
+		}
 	}
 
 	public static class PatientResourceProvider implements IResourceProvider {
@@ -110,22 +97,15 @@ public class HttpProxyTest {
 		public Patient read(@IdParam IdType theId, HttpServletRequest theRequest) {
 			Patient retVal = new Patient();
 			retVal.setId(theId);
-			ourRequest = theRequest;
 
-			ourLog.info(EnumerationUtils.toList(ourRequest.getHeaderNames()).toString());
-			ourLog.info("Proxy-Connection: " + EnumerationUtils.toList(ourRequest.getHeaders("Proxy-Connection")));
-			ourLog.info("Host: " + EnumerationUtils.toList(ourRequest.getHeaders("Host")));
-			ourLog.info("User-Agent: " + EnumerationUtils.toList(ourRequest.getHeaders("User-Agent")));
+			ourLog.info(EnumerationUtils.toList(theRequest.getHeaderNames()).toString());
+			ourLog.info("Proxy-Connection: {}",  EnumerationUtils.toList(theRequest.getHeaders("Proxy-Connection")));
+			ourLog.info("Host: {}", EnumerationUtils.toList(theRequest.getHeaders("Host")));
+			ourLog.info("User-Agent: {}", EnumerationUtils.toList(theRequest.getHeaders("User-Agent")));
 
 			return retVal;
 		}
 
-	}
-
-
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 }
