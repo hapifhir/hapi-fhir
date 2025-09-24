@@ -17,10 +17,8 @@ public interface IClientHttpExecutable<T extends IClientHttpExecutable<?, Y>, Y>
 	T cacheControl(CacheControlDirective theCacheControlDirective);
 
 	/**
-	 * Set a HTTP header not explicitly defined in FHIR but commonly used in real-world scenarios. One
-	 * important example is to set the Authorization header (e.g. Basic Auth or OAuth2-based Bearer auth),
-	 * which tends to be cumbersome using {@link ca.uhn.fhir.rest.client.api.IClientInterceptor IClientInterceptors},
-	 * particularly when REST clients shall be reused and are thus supposed to remain stateless.
+	 * Set an HTTP header. One
+	 *
 	 * <p>It is the responsibility of the caller to care for proper encoding of the header value, e.g.
 	 * using Base64.</p>
 	 * <p>This is a short-cut alternative to using a corresponding client interceptor</p>
@@ -40,11 +38,8 @@ public interface IClientHttpExecutable<T extends IClientHttpExecutable<?, Y>, Y>
 	 * Specifies a custom <code>Accept</code> header that should be supplied with the
 	 * request.
 	 *
-	 * @param theHeaderValue The header value, e.g. "application/fhir+json". Constants such
-	 *                       as {@link ca.uhn.fhir.rest.api.Constants#CT_FHIR_XML_NEW} and
-	 *                       {@link ca.uhn.fhir.rest.api.Constants#CT_FHIR_JSON_NEW} may
-	 *                       be useful. If set to <code>null</code> or an empty string, the
-	 *                       default Accept header will be used.
+	 * @param theHeaderValue The header value, e.g. "application/json". If set to <code>null</code> or an empty string,
+	 *                       the default Accept header will be used.
 	 */
 	T accept(String theHeaderValue);
 }
