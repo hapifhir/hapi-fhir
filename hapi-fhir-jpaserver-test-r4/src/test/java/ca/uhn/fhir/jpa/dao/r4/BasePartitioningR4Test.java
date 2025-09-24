@@ -6,6 +6,7 @@ import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionIds;
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionNames;
 import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -84,6 +85,8 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		if (myRegisteredSearchParamValidatingInterceptor) {
 			myInterceptorRegistry.unregisterInterceptor(mySearchParamValidatingInterceptor);
 		}
+
+		afterPurgeDatabase();
 	}
 
 	protected void assertNoRemainingPartitionIds() {
@@ -128,7 +131,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			myPartitionConfigSvc.getPartitionById(i);
 		}
 
-		if (myInterceptorRegistry.getAllRegisteredInterceptors().stream().noneMatch(t->t instanceof SearchParamValidatingInterceptor)) {
+		if (myInterceptorRegistry.getAllRegisteredInterceptors().stream().noneMatch(t -> t instanceof SearchParamValidatingInterceptor)) {
 			myRegisteredSearchParamValidatingInterceptor = true;
 			myInterceptorRegistry.registerInterceptor(mySearchParamValidatingInterceptor);
 		}
@@ -287,8 +290,10 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		addNextInterceptorCreateResult(requestPartitionId);
 	}
 
-	/** Actual update of an existing resource.
-	 * We only need one call for the tx boundary, since the actual partition is already assigned. */
+	/**
+	 * Actual update of an existing resource.
+	 * We only need one call for the tx boundary, since the actual partition is already assigned.
+	 */
 	protected void addNextTargetPartitionForUpdate(RequestPartitionId theRequestPartitionId) {
 		addNextInterceptorCreateResult(theRequestPartitionId);
 	}
@@ -430,7 +435,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
 		public RequestPartitionId partitionIdentifyRead(ServletRequestDetails theRequestDetails,
-																		ReadPartitionIdRequestDetails theDetails) {
+														ReadPartitionIdRequestDetails theDetails) {
 
 			// Just to be nice, figure out the first line in the stack that isn't a part of the
 			// partitioning or interceptor infrastructure, just so it's obvious who is asking
@@ -464,10 +469,10 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		} catch (Exception e) {
 			stack = StackTraceHelper.getStackAsString(e);
 			stack = Arrays.stream(stack.split("\\n"))
-				.filter(t->t.contains("ca.uhn.fhir"))
-				.filter(t->!t.toLowerCase().contains("interceptor"))
-				.filter(t->!t.toLowerCase().contains("partitionhelper"))
-				.filter(t->!t.contains("Test"))
+				.filter(t -> t.contains("ca.uhn.fhir"))
+				.filter(t -> !t.toLowerCase().contains("interceptor"))
+				.filter(t -> !t.toLowerCase().contains("partitionhelper"))
+				.filter(t -> !t.contains("Test"))
 				.findFirst()
 				.orElse("UNKNOWN");
 		}

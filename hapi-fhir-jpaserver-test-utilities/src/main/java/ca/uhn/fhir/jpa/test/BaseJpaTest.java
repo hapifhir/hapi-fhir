@@ -489,8 +489,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	@AfterEach
 	public void afterValidateNoTransaction() {
 		PlatformTransactionManager txManager = getTxManager();
-		if (txManager instanceof JpaTransactionManager) {
-			JpaTransactionManager hibernateTxManager = (JpaTransactionManager) txManager;
+		if (txManager instanceof JpaTransactionManager hibernateTxManager) {
 			SessionFactory sessionFactory = (SessionFactory) hibernateTxManager.getEntityManagerFactory();
 			AtomicBoolean isReadOnly = new AtomicBoolean();
 			Session currentSession;
