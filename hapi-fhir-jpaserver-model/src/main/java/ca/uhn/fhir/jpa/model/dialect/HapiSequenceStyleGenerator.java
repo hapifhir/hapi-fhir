@@ -5,11 +5,11 @@ import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.HibernateException;
-import org.hibernate.MappingException;
 import org.hibernate.boot.model.relational.Database;
 import org.hibernate.boot.model.relational.ExportableProducer;
 import org.hibernate.boot.model.relational.SqlStringGenerationContext;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.generator.GeneratorCreationContext;
 import org.hibernate.id.BulkInsertionCapableIdentifierGenerator;
 import org.hibernate.id.IdentifierGenerator;
 import org.hibernate.id.OptimizableGenerator;
@@ -17,8 +17,6 @@ import org.hibernate.id.PersistentIdentifierGenerator;
 import org.hibernate.id.enhanced.Optimizer;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import org.hibernate.id.enhanced.StandardOptimizerDescriptor;
-import org.hibernate.service.ServiceRegistry;
-import org.hibernate.type.Type;
 
 import java.io.Serializable;
 import java.util.Properties;
@@ -68,27 +66,22 @@ public class HapiSequenceStyleGenerator
 		return retVal;
 	}
 
-	// Hibernate 7.1.1 still calls this, but it is deprecated; suppress warnings and delegate.
-	@SuppressWarnings({"removal", "deprecation"})
 	@Override
-	public void configure(Type theType, Properties theParams, ServiceRegistry theServiceRegistry)
-			throws MappingException {
-
-		myIdMassager = theServiceRegistry.getService(ISequenceValueMassager.class);
+	public void configure(GeneratorCreationContext creationContext, Properties parameters) {
+		myIdMassager = creationContext.getServiceRegistry().getService(ISequenceValueMassager.class);
 		if (myIdMassager == null) {
 			myIdMassager = new ISequenceValueMassager.NoopSequenceValueMassager();
 		}
-
-		myGeneratorName = theParams.getProperty(IdentifierGenerator.GENERATOR_NAME);
+		myGeneratorName = parameters.getProperty(IdentifierGenerator.GENERATOR_NAME);
 		Validate.notBlank(myGeneratorName, "No generator name found");
 
-		Properties props = new Properties(theParams);
+		Properties props = new Properties(parameters);
 		props.put(OptimizableGenerator.OPT_PARAM, StandardOptimizerDescriptor.POOLED.getExternalName());
 		props.put(OptimizableGenerator.INITIAL_PARAM, "1");
 		props.put(OptimizableGenerator.INCREMENT_PARAM, "50");
 		props.put(IdentifierGenerator.GENERATOR_NAME, myGeneratorName);
 
-		myGen.configure(theType, props, theServiceRegistry);
+		myGen.configure(creationContext, props);
 		myConfigured = true;
 	}
 

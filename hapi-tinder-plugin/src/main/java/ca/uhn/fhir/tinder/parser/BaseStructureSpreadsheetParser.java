@@ -63,7 +63,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 
 	public void parse() throws Exception {
 
-		myNameToValueSetUrl = new HashMap<String, String>();
+		myNameToValueSetUrl = new HashMap<>();
 		if (getVersion().equals("dstu2")) {
 			ourLog.info("Loading ValueSets...");
 			FhirContext ctx = FhirContext.forDstu2();
@@ -123,9 +123,6 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 
 			Map<String, BaseElement> elements = new HashMap<String, BaseElement>();
 			elements.put(resource.getElementName(), resource);
-
-			// Map<String,String> blockFullNameToShortName = new
-			// HashMap<String,String>();
 
 			List<Child> blockCopies = new ArrayList<Child>();
 			for (int i = 2; i < rows.getLength(); i++) {

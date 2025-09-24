@@ -3,7 +3,7 @@ package ca.uhn.fhir.tinder;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.tinder.parser.BaseStructureSpreadsheetParser;
+import ca.uhn.fhir.tinder.parser.BaseStructureParser;
 import org.apache.commons.text.WordUtils;
 
 import java.io.File;
@@ -17,16 +17,15 @@ public class Configuration {
 
 	private final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(Configuration.class);
 
-	private String version;
-	private File targetDirectory;
+	private final String version;
+	private final File targetDirectory;
 	private String packageSuffix;
 
-	private String packageBase;
-	private FhirContext fhirContext;
-	private File packageDirectoryBase;
+	private final String packageBase;
+	private final File packageDirectoryBase;
 
 	private final List<String> resourceNames = new ArrayList<>();
-	private String baseDir;
+	private final String baseDir;
 
 	public Configuration(
 			String version,
@@ -37,27 +36,10 @@ public class Configuration {
 			List<String> excludeResourceNames) {
 		this.targetDirectory = targetDirectory;
 		this.packageBase = packageBase;
+		this.baseDir = baseDir;
 		this.packageDirectoryBase = new File(targetDirectory, packageBase.replace(".", File.separatorChar + ""));
 
-		switch (version) {
-			case "dstu2":
-				fhirContext = FhirContext.forDstu2();
-				break;
-			case "dstu3":
-				fhirContext = FhirContext.forDstu3();
-				packageSuffix = ".dstu3";
-				break;
-			case "r4":
-				fhirContext = FhirContext.forR4();
-				packageSuffix = ".r4";
-				break;
-			case "r5":
-				fhirContext = FhirContext.forR5();
-				packageSuffix = ".r5";
-				break;
-			default:
-				throw new IllegalArgumentException(Msg.code(92) + "Unknown version configured: " + version);
-		}
+		FhirContext fhirContext = getFhirContext(version);
 
 		this.version = version;
 		if (baseResourceNames == null || baseResourceNames.isEmpty()) {
@@ -74,7 +56,7 @@ public class Configuration {
 
 			ourLog.debug("Property file contains: {}", p);
 
-			TreeSet<String> keys = new TreeSet<String>();
+			TreeSet<String> keys = new TreeSet<>();
 			for (Object next : p.keySet()) {
 				keys.add((String) next);
 			}
@@ -123,7 +105,7 @@ public class Configuration {
 	}
 
 	public String getResourcePackage() {
-		if (BaseStructureSpreadsheetParser.determineVersionEnum(version).isRi()) {
+		if (BaseStructureParser.determineVersionEnum(version).isRi()) {
 			return "org.hl7.fhir." + version + ".model";
 		}
 		return "ca.uhn.fhir.model." + version + ".resource";
@@ -143,5 +125,29 @@ public class Configuration {
 
 	public String getBaseDir() {
 		return baseDir;
+	}
+
+	private FhirContext getFhirContext(String version) {
+		FhirContext fhirContext;
+		switch (version) {
+			case "dstu2":
+				fhirContext = FhirContext.forDstu2();
+				break;
+			case "dstu3":
+				fhirContext = FhirContext.forDstu3();
+				packageSuffix = ".dstu3";
+				break;
+			case "r4":
+				fhirContext = FhirContext.forR4();
+				packageSuffix = ".r4";
+				break;
+			case "r5":
+				fhirContext = FhirContext.forR5();
+				packageSuffix = ".r5";
+				break;
+			default:
+				throw new IllegalArgumentException(Msg.code(92) + "Unknown version configured: " + version);
+		}
+		return fhirContext;
 	}
 }

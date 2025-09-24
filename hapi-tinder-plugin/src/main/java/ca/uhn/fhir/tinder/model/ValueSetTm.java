@@ -1,6 +1,6 @@
 package ca.uhn.fhir.tinder.model;
 
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +16,7 @@ public class ValueSetTm {
 	private String myDescription;
 	private String myId;
 	private String myName;
-	private Set<String> myCodeValues = new HashSet<String>();
+	private final Set<String> myCodeValues = new HashSet<String>();
 
 	public void addConcept(String theSystem, String theCode, String theText, String theDefinition) {
 		String key = theSystem + "|" + theCode;
@@ -35,8 +35,8 @@ public class ValueSetTm {
 		if (getClass() != obj.getClass()) return false;
 		ValueSetTm other = (ValueSetTm) obj;
 
-		String id1 = myId != null && myId.isEmpty() == false ? myId : myName;
-		String id2 = other.myId != null && other.myId.isEmpty() == false ? other.myId : other.myName;
+		String id1 = myId != null && !myId.isEmpty() ? myId : myName;
+		String id2 = other.myId != null && !other.myId.isEmpty() ? other.myId : other.myName;
 		id1 = StringUtils.defaultString(id1);
 		id2 = StringUtils.defaultString(id2);
 		return id1.equals(id2);
@@ -92,10 +92,10 @@ public class ValueSetTm {
 
 	public class Code {
 
-		private String myCode;
-		private String myDefinition;
-		private String myDisplay;
-		private String mySystem;
+		private final String myCode;
+		private final String myDefinition;
+		private final String myDisplay;
+		private final String mySystem;
 
 		private Code(String theSystem, String theCode, String theDisplay, String theDefinition) {
 			mySystem = theSystem;
@@ -131,8 +131,7 @@ public class ValueSetTm {
 								newValue = newValue.substring(0, newValue.length() - 1);
 							}
 							ourLog.info(
-									"[{}] Replacing numeric code {} with description: {}",
-									new Object[] {myName, retVal, newValue});
+									"[{}] Replacing numeric code {} with description: {}", myName, retVal, newValue);
 							retVal = newValue;
 						}
 					}
