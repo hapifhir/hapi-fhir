@@ -30,7 +30,8 @@ public interface IClientHttpExecutable<T extends IClientHttpExecutable<?, Y>, Y>
 	T withAdditionalHeader(String theHeaderName, String theHeaderValue);
 
 	/**
-	 * Actually execute the client operation
+	 * Actually execute the client operation and return the result.
+	 * @return The result of the HTTP operation
 	 */
 	Y execute();
 
