@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.patch.FhirPatch;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
@@ -63,10 +62,11 @@ public class BulkPatchJobParametersValidator<PT extends BulkPatchJobParameters>
 			return;
 		}
 
-		try {
-			new FhirPatch(myFhirContext).validate(patch);
-		} catch (InvalidRequestException e) {
-			theIssueListToPopulate.add("Provided FHIRPatch document is invalid: " + e.getMessage());
+		FhirPatch.PatchOutcome outcome = new FhirPatch(myFhirContext).validate(patch);
+		if (outcome.hasErrors()) {
+			for (String error : outcome.getErrors()) {
+				theIssueListToPopulate.add("Provided FHIRPatch document is invalid: " + error);
+			}
 		}
 	}
 }
