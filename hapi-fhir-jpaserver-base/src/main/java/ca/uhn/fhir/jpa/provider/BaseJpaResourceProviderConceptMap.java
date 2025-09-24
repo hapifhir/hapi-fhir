@@ -79,7 +79,7 @@ public abstract class BaseJpaResourceProviderConceptMap<T extends IBaseResource>
 					IPrimitiveType<String> theConceptMapVersion,
 			@OperationParam(name = "system", min = 0, max = 1, typeName = "uri")
 					IPrimitiveType<String> theSourceCodeSystem,
-			@OperationParam(name = "version", min = 0, max = 1, typeName = "string")
+			@OperationParam(name = "version", min = 0, max = 1, typeName = "code")
 					IPrimitiveType<String> theSourceCodeSystemVersion,
 
 			// R4 (and below) source ValueSet
@@ -203,7 +203,7 @@ public abstract class BaseJpaResourceProviderConceptMap<T extends IBaseResource>
 			return theR4Value;
 		}
 		if (theR5Value != null && !theR5Value.isEmpty()) {
-			return theR4Value;
+			return theR5Value;
 		}
 		return null;
 	}

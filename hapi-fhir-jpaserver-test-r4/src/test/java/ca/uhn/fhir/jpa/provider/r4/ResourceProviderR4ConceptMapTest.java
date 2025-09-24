@@ -1,9 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -30,6 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR4ConceptMapTest.class);
@@ -71,6 +72,61 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertNull(methodOutcome.getCreated());
 		assertEquals("2", methodOutcome.getId().getVersionIdPart());
 	}
+
+
+	/**
+	 * Note: This test creates contents for terminology_mapping.md in the docs
+	 */
+	@Test
+	void testTranslateLocalCodeToLoinc_UseR5ParameterNames() {
+		createLocalToLoincConceptMap();
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("system").setValue(new UriType("http://my-codes"));
+		inParams.addParameter().setName("targetSystem").setValue(new UriType("http://loinc.org"));
+		inParams.addParameter().setName("sourceCode").setValue(new CodeType("BP-S"));
+
+		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+
+		Parameters respParams = myClient
+			.operation()
+			.onType(ConceptMap.class)
+			.named(JpaConstants.OPERATION_TRANSLATE)
+			.withParameters(inParams)
+			.execute();
+
+		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+
+		Coding value = (Coding) respParams.getParameter("match").getPart().get(1).getValue();
+		assertEquals("8480-6", value.getCode());
+		assertEquals("Systolic blood pressure", value.getDisplay());
+		assertEquals("http://loinc.org", value.getSystem());
+	}
+
+	private void createLocalToLoincConceptMap() {
+		ConceptMap conceptMap = new ConceptMap();
+		conceptMap.setId("my-codes-to-loinc");
+		conceptMap.setUrl("http://my-codes-to-loinc");
+		conceptMap.setVersion("1.0");
+		ConceptMapGroupComponent group = conceptMap.addGroup();
+		group.setSource("http://my-codes");
+		group.setTarget("http://loinc.org");
+		group.addElement()
+			.setCode("BP-S")
+			.addTarget()
+			.setCode("8480-6")
+			.setDisplay("Systolic blood pressure")
+			.setEquivalence(ConceptMapEquivalence.EQUIVALENT);
+		group.addElement()
+			.setCode("BP-D")
+			.addTarget()
+			.setCode("8462-4")
+			.setDisplay("Diastolic blood pressure")
+			.setEquivalence(ConceptMapEquivalence.EQUIVALENT);
+		ourLog.info("ConceptMap:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		myConceptMapDao.update(conceptMap);
+	}
+
 
 	@Test
 	public void testTranslateByCodeSystemsAndSourceCodeOneToMany() {

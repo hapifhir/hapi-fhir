@@ -2086,19 +2086,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	/**
 	 * @deprecated Use {@link #search(SearchParameterMap, RequestDetails)} instead
 	 */
-	@Transactional(propagation = Propagation.SUPPORTS)
 	@Override
 	public IBundleProvider search(final SearchParameterMap theParams) {
 		return search(theParams, null);
 	}
 
-	@Transactional(propagation = Propagation.SUPPORTS)
 	@Override
 	public IBundleProvider search(final SearchParameterMap theParams, RequestDetails theRequest) {
 		return search(theParams, theRequest, null);
 	}
 
-	@Transactional(propagation = Propagation.SUPPORTS)
 	@Override
 	public IBundleProvider search(
 			final SearchParameterMap theParams, RequestDetails theRequest, HttpServletResponse theServletResponse) {

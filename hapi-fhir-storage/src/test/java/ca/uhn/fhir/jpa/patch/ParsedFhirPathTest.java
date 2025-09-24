@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.patch;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
@@ -55,6 +57,44 @@ public class ParsedFhirPathTest {
 			}
 		});
 	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		Patient.identifier.where(system='A')                     ,   Patient
+		Patient.identifier.where(system='A').where(value='B')    ,   Patient
+		Patient.name                                             ,   Patient
+		Patient.name[0]                                          ,   Patient
+		Patient.name.first()                                     ,   Patient
+		Patient.name.given                                       ,   Patient.name
+		Patient.name[0].given                                    ,   Patient.name
+		Patient.name.where(family='A').given.last()              ,   Patient.name
+		Patient.where(foo)                                       ,   Patient
+		Patient                                                  ,   Patient
+		Observation.code.coding.where(system='http://loinc.org') ,   Observation.code
+		""")
+	public void testGetContainingPath(String theInput, String theExpected) {
+		ParsedFhirPath parsedFhirPath = ParsedFhirPath.parse(theInput);
+		String actual = parsedFhirPath.getContainingPath();
+		assertEquals(theExpected, actual);
+	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		Patient.identifier.where(system='A')                     ,   identifier
+		Patient.identifier.where(system='A').where(value='B')    ,   identifier
+		Patient.name.given                                       ,   given
+		Patient.name[0].given                                    ,   given
+		Patient.name.where(family='A').given.last()              ,   given
+		Patient.where(foo='a')                                   ,   Patient
+		Patient                                                  ,   Patient
+		Observation.code.coding.where(system='http://loinc.org') ,   coding
+		""")
+	public void testGetLastElementName(String theInput, String theExpected) {
+		ParsedFhirPath parsedFhirPath = ParsedFhirPath.parse(theInput);
+		String actual = parsedFhirPath.getLastElementName();
+		assertEquals(theExpected, actual);
+	}
+
 
 	@Test
 	public void parseWithIndexOnFilter() {

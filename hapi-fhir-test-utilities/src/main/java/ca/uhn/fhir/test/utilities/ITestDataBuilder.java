@@ -259,6 +259,10 @@ public interface ITestDataBuilder {
 		return createResource("Observation", theModifiers);
 	}
 
+	default IBaseResource buildObservation(ICreationArgument... theModifiers) {
+		return buildResource("Observation", theModifiers);
+	}
+
 	default IIdType createObservation(Collection<ICreationArgument> theModifiers) {
 		return createResource("Observation", theModifiers.toArray(new ICreationArgument[0]));
 	}

@@ -36,6 +36,7 @@ import static net.sourceforge.plantuml.StringUtils.isNotEmpty;
  * It does not *validate* said fhir path (it might not be a valid path at all).
  * It is only used for parsing convenience.
  */
+@SuppressWarnings("JavadocLinkAsPlainText")
 public class ParsedFhirPath {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ParsedFhirPath.class);
 
@@ -156,6 +157,11 @@ public class ParsedFhirPath {
 		public boolean hasNext() {
 			return myNext != null;
 		}
+
+		@Override
+		public String toString() {
+			return "Node[" + myValue + "]";
+		}
 	}
 
 	/**
@@ -203,7 +209,7 @@ public class ParsedFhirPath {
 
 		private boolean isFilteredFunction() {
 			switch (getValue()) {
-				case "first", "last", "tail", "skip", "take", "intersect", "exclude", "single" -> {
+				case "where", "first", "last", "tail", "skip", "take", "intersect", "exclude", "single" -> {
 					return true;
 				}
 			}
@@ -349,18 +355,62 @@ public class ParsedFhirPath {
 	 * Returns the fhir path up to the last element.
 	 * If there is a filter, it will return the element before the last
 	 * (filtered) element.
+	 * <p>
+	 * For example, given the path <code>Patient.identifier.where(system='http://foo')</code>
+	 * this method will return <code>Patient</code>
+	 * </p>
 	 */
 	public String getContainingPath() {
+
+		/*
+		 * Work backwards from the end until we find the first element that isn't a filter
+		 * and then move one farther to find the last element we want to keep. For example,
+		 * given the path
+		 *    Patient.identifier.where(system='A')
+		 * we want to end at "identifier".
+		 */
+
+		FhirPathNode end = getTail();
+		while (end != null && end.isFilter() && end.getPrevious() != null) {
+			end = end.getPrevious();
+		}
+
+		/*
+		 * Move one farther back to get the containing element. So, in the
+		 * example above we want to move back to "Patient" since that's the
+		 * containing element for "identifier".
+		 */
+
+		if (end.getPrevious() != null) {
+			end = end.getPrevious();
+		}
+
+		/*
+		 * If moving one back put is in another function, keep going back until we find a
+		 * non-function element. This is needed for paths like
+		 *   Patient.name.where(family='A').given.last()
+		 */
+
+		while (end != null && end.isFilter() && end.getPrevious() != null) {
+			end = end.getPrevious();
+		}
+
+		FhirPathNode current = getHead();
 		StringBuilder sb = new StringBuilder();
-		FhirPathNode current = myHead;
-		while (current != null && !current.isFunction()) {
+
+		while (end != null && current != null) {
 			if (!sb.isEmpty()) {
 				sb.append(".");
 			}
 			sb.append(current.getValue());
 
+			if (current == end) {
+				break;
+			}
+
 			current = current.getNext();
 		}
+
 		return sb.toString();
 	}
 
@@ -460,7 +510,9 @@ public class ParsedFhirPath {
 	 * it's neighbours and/or children (if it's a function).
 	 */
 	private static FhirPathNode createNode(ParsedFhirPath theParsedFhirPath, String thePath) {
-		int dotIndex = thePath.indexOf(".");
+		ourLog.trace("Parsing path: {}", thePath);
+
+		int dotIndex = indexOfNotInString(thePath, '.');
 		int braceIndex = thePath.indexOf("(");
 
 		FhirPathNode next;
@@ -621,6 +673,32 @@ public class ParsedFhirPath {
 		}
 
 		return next;
+	}
+
+	private static int indexOfNotInString(String thePath, char toFind) {
+		int dotIndex = -1;
+		boolean inSingleQuotes = false;
+		for (int i = 0; i < thePath.length(); i++) {
+			char c = thePath.charAt(i);
+			if (c == '\'') {
+				if (!inSingleQuotes) {
+					inSingleQuotes = true;
+				} else {
+					char prev = thePath.charAt(i - 1);
+					if (prev != '\'') {
+						inSingleQuotes = false;
+					}
+				}
+			}
+
+			if (c == toFind) {
+				if (!inSingleQuotes) {
+					dotIndex = i;
+					break;
+				}
+			}
+		}
+		return dotIndex;
 	}
 
 	private static boolean isValueNode(String theValue) {
