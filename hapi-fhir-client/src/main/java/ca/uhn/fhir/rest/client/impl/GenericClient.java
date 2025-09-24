@@ -369,7 +369,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public IRawHttp rawHttpReqeust() {
+	public IRawHttp rawHttpRequest() {
 		return new RawHttpBuilder();
 	}
 
