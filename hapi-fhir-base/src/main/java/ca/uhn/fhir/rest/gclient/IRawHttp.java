@@ -11,5 +11,12 @@ package ca.uhn.fhir.rest.gclient;
  * @since 8.6.0
  */
 public interface IRawHttp {
+	/**
+	 * Creates a GET request to the specified URL.
+	 *
+	 * @param theUrl The URL to send the GET request to. Can be absolute or relative
+	 *               to the client's base URL.
+	 * @return A builder for configuring and executing the HTTP GET request
+	 */
 	IClientHttpExecutable<IClientHttpExecutable<?, IEntityResult>, IEntityResult> get(String theUrl);
 }
