@@ -14,6 +14,15 @@ public interface IEntityResult {
 	String getMimeType();
 
 	@NonNull
+     /**
+       * Gets the response body as an InputStream. 
+       * 
+       * <p><strong>Warning:</strong> The returned stream can only be read once.
+       * Subsequent calls to this method will return the same exhausted stream.
+       * Consider copying the content to a byte array if multiple reads are needed.</p>
+       * 
+       * @return The response body as an InputStream (single-use only)
+       */
 	InputStream getInputStream();
 
 	int getStatusCode();
