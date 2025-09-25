@@ -5,8 +5,10 @@ import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
@@ -39,6 +41,8 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 
 	static final int UNKNOWN_PARTITION_ID = 1_000_000;
 	static final String UNKNOWN_PARTITION_NAME = "UNKNOWN";
+
+	static final Integer DEFAULT_PARTITION_ID = null;
 
 	@Autowired
 	IPartitionDao myPartitionDao;
@@ -77,6 +81,34 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 		// verify
 		assertEquals(PARTITION_ID_1, result.getFirstPartitionIdOrNull());
 		assertEquals(PARTITION_NAME_1, result.getFirstPartitionNameOrNull());
+	}
+
+
+	@Test
+	public void testDetermineReadPartitionForServletRequest_whenResourceIsNonPartitionable() {
+		PartitionEntity partition1 = createPartition1();
+		ServletRequestDetails servletRequestDetails = new ServletRequestDetails();
+		servletRequestDetails.setTenantId(partition1.getName());
+
+		testDetermineReadPartitionRequest_whenResourceIsNonPartitionable_returnsDefaultPartition(servletRequestDetails);
+	}
+
+	@Test
+	public void testDetermineReadPartitionForSystemRequest_whenResourceIsNonPartitionable() {
+		PartitionEntity partitionEntity = createPartition1();
+		SystemRequestDetails srd = new SystemRequestDetails();
+		srd.setTenantId(partitionEntity.getName());
+		srd.setRequestPartitionId(RequestPartitionId.fromPartitionId(partitionEntity.getId()));
+
+		testDetermineReadPartitionRequest_whenResourceIsNonPartitionable_returnsDefaultPartition(srd);
+	}
+
+	public void testDetermineReadPartitionRequest_whenResourceIsNonPartitionable_returnsDefaultPartition(RequestDetails theDetails) {
+		// execute
+		RequestPartitionId result = mySvc.determineReadPartitionForRequestForSearchType(theDetails, "Library");
+
+		// verify
+		assertThat(result.hasDefaultPartitionId(DEFAULT_PARTITION_ID)).isTrue();
 	}
 
 	@Test
