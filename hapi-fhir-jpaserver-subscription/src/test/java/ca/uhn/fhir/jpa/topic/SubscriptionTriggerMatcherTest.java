@@ -174,7 +174,7 @@ class SubscriptionTriggerMatcherTest {
 
 		// verify
 		assertFalse(result.matched());
-		assertEquals("Error @1, 2: Premature ExpressionNode termination at unexpected token \"text\"", result.getUnsupportedReason());
+		assertEquals("Error @1, 12: Premature ExpressionNode termination at unexpected token \"text\"", result.getUnsupportedReason());
 	}
 
 	@Test
@@ -300,7 +300,7 @@ class SubscriptionTriggerMatcherTest {
 
 		// verify
 		assertFalse(result.matched());
-		assertEquals("Error @1, 2: Premature ExpressionNode termination at unexpected token \"text\"", result.getUnsupportedReason());
+		assertEquals("Error @1, 12: Premature ExpressionNode termination at unexpected token \"text\"", result.getUnsupportedReason());
 	}
 
 	@Test
@@ -346,6 +346,63 @@ class SubscriptionTriggerMatcherTest {
 		when(myDaoRegistry.getResourceDao("Encounter")).thenReturn(mockEncounterDao);
 		Encounter encounterPreviousVersion = new Encounter();
 		when(mockEncounterDao.read(any(), any(), eq(false))).thenReturn(encounterPreviousVersion);
+
+		// run
+		SubscriptionTriggerMatcher svc = new SubscriptionTriggerMatcher(mySubscriptionTopicSupport, msg, trigger, myMemoryCacheService);
+		InMemoryMatchResult result = svc.match();
+
+		// verify
+		assertTrue(result.matched());
+	}
+
+	@Test
+	public void testUpdateOnlyFhirPathR4bCriteriaUsingPreviousVersion() {
+
+		org.hl7.fhir.r4b.model.Encounter r4Encounter = new org.hl7.fhir.r4b.model.Encounter();
+		r4Encounter.setIdElement(new org.hl7.fhir.r4b.model.IdType("Encounter", "123", "2"));
+		mySubscriptionTopicSupport = new SubscriptionTopicSupport(FhirContext.forR4BCached(), myDaoRegistry, mySearchParamMatcher);
+		r4Encounter.setStatus(org.hl7.fhir.r4b.model.Encounter.EncounterStatus.INPROGRESS);
+		ResourceModifiedMessage msg = new ResourceModifiedMessage(FhirContext.forR4BCached(), r4Encounter, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
+
+		// setup
+		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent trigger = new SubscriptionTopic.SubscriptionTopicResourceTriggerComponent();
+		trigger.setResource("Encounter");
+		trigger.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.UPDATE);
+		trigger.setFhirPathCriteria("%current.status='in-progress' and %previous.status.exists().not()");
+
+
+		IFhirResourceDao mockEncounterDao = mock(IFhirResourceDao.class);
+		when(myDaoRegistry.getResourceDao("Encounter")).thenReturn(mockEncounterDao);
+		org.hl7.fhir.r4b.model.Encounter encounterPreviousVersion = new org.hl7.fhir.r4b.model.Encounter();
+		when(mockEncounterDao.read(any(), any(), eq(false))).thenReturn(encounterPreviousVersion);
+
+		// run
+		SubscriptionTriggerMatcher svc = new SubscriptionTriggerMatcher(mySubscriptionTopicSupport, msg, trigger, myMemoryCacheService);
+		InMemoryMatchResult result = svc.match();
+
+		// verify
+		assertTrue(result.matched());
+	}
+
+	@Test
+	public void testCombineFhirPathR4bCriteriaAndQueryCriteria() {
+
+		org.hl7.fhir.r4b.model.Encounter r4Encounter = new org.hl7.fhir.r4b.model.Encounter();
+		r4Encounter.setIdElement(new org.hl7.fhir.r4b.model.IdType("Encounter", "123", "2"));
+		mySubscriptionTopicSupport = new SubscriptionTopicSupport(FhirContext.forR4BCached(), myDaoRegistry, mySearchParamMatcher);
+		r4Encounter.setStatus(org.hl7.fhir.r4b.model.Encounter.EncounterStatus.INPROGRESS);
+		ResourceModifiedMessage msg = new ResourceModifiedMessage(FhirContext.forR4BCached(), r4Encounter, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
+
+		// setup
+		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent trigger = new SubscriptionTopic.SubscriptionTopicResourceTriggerComponent();
+		trigger.setResource("Encounter");
+		trigger.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.UPDATE);
+		trigger.setFhirPathCriteria("true");
+		SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent query = new SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent();
+		query.setCurrent("status=in-progress");
+		trigger.setQueryCriteria(query);
+
+		when(mySearchParamMatcher.match(any(), any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
 
 		// run
 		SubscriptionTriggerMatcher svc = new SubscriptionTriggerMatcher(mySubscriptionTopicSupport, msg, trigger, myMemoryCacheService);

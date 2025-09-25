@@ -126,7 +126,7 @@ public class SqlLoggerFilteringUtil {
 
 			} catch (Exception theE) {
 				ourLog.error("Hibernate SQL log filters not refreshed. Exception: {} \n{}", theE, theE.getStackTrace());
-				throw new RuntimeException(Msg.code(2478) + theE);
+				throw new RuntimeException(Msg.code(2778) + theE);
 			} finally {
 				myRefreshDoneLatch.countDown();
 			}

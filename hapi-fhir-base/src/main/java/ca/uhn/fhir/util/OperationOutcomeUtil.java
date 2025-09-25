@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nullable;
@@ -45,6 +46,25 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class OperationOutcomeUtil {
 
+	public static final String OO_SEVERITY_ERROR = "error";
+	public static final String OO_SEVERITY_INFO = "information";
+	public static final String OO_SEVERITY_WARN = "warning";
+	public static final String OO_ISSUE_CODE_INFORMATIONAL = "informational";
+
+	/**
+	 * Note: This code was added in FHIR R5, so the {@link #addIssue(FhirContext, IBaseOperationOutcome, String, String, String, String) addIssue}
+	 * methods here will automatically convert it to {@link #OO_ISSUE_CODE_INFORMATIONAL} for
+	 * previous versions of FHIR.
+	 *
+	 * @since 8.6.0
+	 */
+	public static final String OO_ISSUE_CODE_SUCCESS = "success";
+
+	/**
+	 * @since 8.6.0
+	 */
+	public static final String OO_ISSUE_CODE_PROCESSING = "processing";
+
 	/**
 	 * Add an issue to an OperationOutcome
 	 *
@@ -52,7 +72,7 @@ public class OperationOutcomeUtil {
 	 * @param theOperationOutcome The OO resource to add to
 	 * @param theSeverity         The severity (fatal | error | warning | information)
 	 * @param theDiagnostics      The diagnostics string (this was called "details" in FHIR DSTU2 but was renamed to diagnostics in DSTU3)
-	 * @param theCode
+	 * @param theCode             A code, such as {@link #OO_ISSUE_CODE_INFORMATIONAL} or {@link #OO_ISSUE_CODE_SUCCESS}
 	 * @return Returns the newly added issue
 	 */
 	public static IBase addIssue(
@@ -215,7 +235,13 @@ public class OperationOutcomeUtil {
 		BaseRuntimeChildDefinition codeChild = issueElement.getChildByName("code");
 		IPrimitiveType<?> codeElem = (IPrimitiveType<?>)
 				codeChild.getChildByName("code").newInstance(codeChild.getInstanceConstructorArguments());
-		codeElem.setValueAsString(theCode);
+		String code = theCode;
+		if (theCtx.getVersion().getVersion().isOlderThan(FhirVersionEnum.R5) && "success".equals(code)) {
+			// "success" was added in R5 so we switch back to "informational" for older versions
+			code = "informational";
+		}
+
+		codeElem.setValueAsString(code);
 		codeChild.getMutator().addValue(theIssue, codeElem);
 
 		BaseRuntimeElementDefinition<?> stringDef = diagnosticsChild.getChildByName(diagnosticsChild.getElementName());
@@ -260,6 +286,28 @@ public class OperationOutcomeUtil {
 					.getChildByName("location")
 					.newInstance(locationChild.getInstanceConstructorArguments());
 			locationElem.setValueAsString(theLocation);
+			locationChild.getMutator().addValue(theIssue, locationElem);
+		}
+	}
+
+	/**
+	 * Given an instance of <code>OperationOutcome.issue</code>, adds a new instance of
+	 * <code>OperationOutcome.issue.expression</code> with the given string value.
+	 *
+	 * @param theContext            The FhirContext for the appropriate FHIR version
+	 * @param theIssue              The <code>OperationOutcome.issue</code> to add to
+	 * @param theLocationExpression The string to use as content
+	 */
+	public static void addExpressionToIssue(FhirContext theContext, IBase theIssue, String theLocationExpression) {
+		if (isNotBlank(theLocationExpression)
+				&& theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+			BaseRuntimeElementCompositeDefinition<?> issueElement =
+					(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theIssue.getClass());
+			BaseRuntimeChildDefinition locationChild = issueElement.getChildByName("expression");
+			IPrimitiveType<?> locationElem = (IPrimitiveType<?>) locationChild
+					.getChildByName("expression")
+					.newInstance(locationChild.getInstanceConstructorArguments());
+			locationElem.setValueAsString(theLocationExpression);
 			locationChild.getMutator().addValue(theIssue, locationElem);
 		}
 	}
@@ -357,5 +405,33 @@ public class OperationOutcomeUtil {
 					"string",
 					theMessageId);
 		}
+	}
+
+	public static IBaseOperationOutcome createOperationOutcome(
+			String theSeverity,
+			String theMessage,
+			String theCode,
+			FhirContext theFhirContext,
+			@Nullable StorageResponseCodeEnum theStorageResponseCode) {
+		IBaseOperationOutcome oo = newInstance(theFhirContext);
+		String detailSystem = null;
+		String detailCode = null;
+		String detailDescription = null;
+		if (theStorageResponseCode != null) {
+			detailSystem = theStorageResponseCode.getSystem();
+			detailCode = theStorageResponseCode.getCode();
+			detailDescription = theStorageResponseCode.getDisplay();
+		}
+		addIssue(
+				theFhirContext,
+				oo,
+				theSeverity,
+				theMessage,
+				null,
+				theCode,
+				detailSystem,
+				detailCode,
+				detailDescription);
+		return oo;
 	}
 }

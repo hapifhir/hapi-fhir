@@ -176,6 +176,15 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	<P extends IResourcePersistentId> void expunge(Collection<P> theResourceIds, RequestDetails theRequest);
 
+	/**
+	 * Given a collection of resource IDs, return a stream of resource IDs with the versions populated. For example, if the
+	 * input contains two different resource IDs and each of those IDs corresponds to a resource
+	 * with 2 versions, then the response will include 4 objects, 2 for each input ID.
+	 *
+	 */
+	Stream<IResourcePersistentId> fetchAllVersionsOfResources(
+			RequestDetails theRequestDetails, Collection<IResourcePersistentId> theIds);
+
 	ExpungeOutcome forceExpungeInExistingTransaction(
 			IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest);
 

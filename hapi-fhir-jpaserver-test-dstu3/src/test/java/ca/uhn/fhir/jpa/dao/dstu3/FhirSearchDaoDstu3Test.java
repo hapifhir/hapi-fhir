@@ -30,6 +30,8 @@ public class FhirSearchDaoDstu3Test extends BaseJpaDstu3Test {
 		super.before();
 
 		myStorageSettings.setHibernateSearchIndexFullText(true);
+
+		mySearchParamRegistry.forceRefresh();
 	}
 
 	@Test

@@ -42,7 +42,6 @@ import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
-import ca.uhn.fhir.jpa.interceptor.RequestHeaderPartitionInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -746,7 +745,7 @@ public abstract class BaseTransactionProcessor {
 			IPrimitiveType<?> valueAsPrimitiveType =
 					(IPrimitiveType<?>) partitionIdsExtensionOptional.get().getValue();
 			String value = valueAsPrimitiveType.getValueAsString();
-			theRequestDetails.setHeaders(RequestHeaderPartitionInterceptor.PARTITIONS_HEADER, List.of(value));
+			theRequestDetails.setHeaders(Constants.HEADER_X_REQUEST_PARTITION_IDS, List.of(value));
 		}
 	}
 
@@ -970,7 +969,14 @@ public abstract class BaseTransactionProcessor {
 					}
 					break;
 				}
-				case POST:
+				case POST: {
+					IBaseResource resource = myVersionAdapter.getResource(nextEntry);
+					String resourceType = myContext.getResourceType(resource);
+					nextWriteEntryRequestPartitionId =
+							myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
+									requestDetailsForEntry, resourceType);
+					break;
+				}
 				case PUT: {
 					IBaseResource resource = myVersionAdapter.getResource(nextEntry);
 					if (resource != null) {
@@ -979,6 +985,7 @@ public abstract class BaseTransactionProcessor {
 								myRequestPartitionHelperService.determineCreatePartitionForRequest(
 										requestDetailsForEntry, resource, resourceType);
 					}
+					break;
 				}
 			}
 		}
@@ -1726,7 +1733,7 @@ public abstract class BaseTransactionProcessor {
 
 	private void setConditionalUrlToBeValidatedLater(
 			Map<String, IIdType> theConditionalUrlToIdMap, String theMatchUrl, IIdType theId) {
-		if (!StringUtils.isBlank(theMatchUrl)) {
+		if (!isBlank(theMatchUrl)) {
 			theConditionalUrlToIdMap.put(theMatchUrl, theId);
 		}
 	}
@@ -1954,7 +1961,7 @@ public abstract class BaseTransactionProcessor {
 			if (!nextId.hasIdPart()) {
 				if (resourceReference.getResource() != null) {
 					IIdType targetId = resourceReference.getResource().getIdElement();
-					if (targetId.getValue() == null || targetId.getValue().startsWith("#")) {
+					if (targetId.getValue() == null) {
 						// This means it's a contained resource
 						continue;
 					} else if (theIdSubstitutions.containsTarget(targetId)) {
@@ -2244,7 +2251,7 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	private IIdType newIdType(String theResourceType, String theResourceId, String theVersion) {
-		org.hl7.fhir.r4.model.IdType id = new org.hl7.fhir.r4.model.IdType(theResourceType, theResourceId, theVersion);
+		IdType id = new IdType(theResourceType, theResourceId, theVersion);
 		return myContext.getVersion().newIdType().setValue(id.getValue());
 	}
 
@@ -2596,7 +2603,7 @@ public abstract class BaseTransactionProcessor {
 		return false;
 	}
 
-	private static String toStatusString(int theStatusCode) {
+	public static String toStatusString(int theStatusCode) {
 		return theStatusCode + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
 	}
 

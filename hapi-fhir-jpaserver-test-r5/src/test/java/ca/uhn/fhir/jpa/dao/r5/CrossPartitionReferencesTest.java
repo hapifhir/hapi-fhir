@@ -90,6 +90,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		myInterceptorRegistry.registerInterceptor(myCrossPartitionReferencesDetectedInterceptor);
 
 		myTransactionSvc.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
+		initResourceTypeCacheFromConfig();
 	}
 
 	@AfterEach

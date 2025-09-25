@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -482,9 +483,12 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				private Collection<? extends IIdType> myInCompartmentOwners;
 				private Collection<IIdType> myAppliesToInstances;
 				private RuleImplOp myRule;
-				private AdditionalCompartmentSearchParameters myAdditionalSearchParamsForCompartmentTypes =
-						new AdditionalCompartmentSearchParameters();
-
+				/**
+				 * Special cases for Search Parameters.
+				 * Possible inclusion of additional SP, or removal of existing ones.
+				 */
+				private CompartmentSearchParameterModifications myAdditionalSearchParamsForCompartmentTypes =
+						new CompartmentSearchParameterModifications();
 				/**
 				 * Constructor
 				 */
@@ -529,15 +533,15 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				@Override
 				public IAuthRuleBuilderRuleOpClassifierFinished inCompartment(
 						String theCompartmentName, Collection<? extends IIdType> theOwners) {
-					return inCompartmentWithAdditionalSearchParams(
-							theCompartmentName, theOwners, new AdditionalCompartmentSearchParameters());
+					return inModifiedCompartment(
+							theCompartmentName, theOwners, new CompartmentSearchParameterModifications());
 				}
 
 				@Override
-				public IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithAdditionalSearchParams(
+				public IAuthRuleBuilderRuleOpClassifierFinished inModifiedCompartment(
 						String theCompartmentName,
 						Collection<? extends IIdType> theOwners,
-						AdditionalCompartmentSearchParameters theAdditionalTypeSearchParams) {
+						CompartmentSearchParameterModifications theModifications) {
 					Validate.notBlank(theCompartmentName, "theCompartmentName must not be null");
 					Validate.notNull(theOwners, "theOwners must not be null");
 					Validate.noNullElements(theOwners, "theOwners must not contain any null elements");
@@ -546,7 +550,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					}
 					myInCompartmentName = theCompartmentName;
 					myInCompartmentOwners = theOwners;
-					myAdditionalSearchParamsForCompartmentTypes = theAdditionalTypeSearchParams;
+					myAdditionalSearchParamsForCompartmentTypes = theModifications;
 					myClassifierType = ClassifierTypeEnum.IN_COMPARTMENT;
 					return finished();
 				}
@@ -554,21 +558,21 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				@Override
 				public IAuthRuleBuilderRuleOpClassifierFinished inCompartment(
 						String theCompartmentName, IIdType theOwner) {
-					return inCompartmentWithAdditionalSearchParams(
-							theCompartmentName, theOwner, new AdditionalCompartmentSearchParameters());
+					return inModifiedCompartment(
+							theCompartmentName, theOwner, new CompartmentSearchParameterModifications());
 				}
 
 				@Override
-				public IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithAdditionalSearchParams(
+				public IAuthRuleBuilderRuleOpClassifierFinished inModifiedCompartment(
 						String theCompartmentName,
 						IIdType theOwner,
-						AdditionalCompartmentSearchParameters theAdditionalTypeSearchParamNames) {
+						CompartmentSearchParameterModifications theModifications) {
 					Validate.notBlank(theCompartmentName, "theCompartmentName must not be null");
 					Validate.notNull(theOwner, "theOwner must not be null");
 					validateOwner(theOwner);
 					myClassifierType = ClassifierTypeEnum.IN_COMPARTMENT;
 					myInCompartmentName = theCompartmentName;
-					myAdditionalSearchParamsForCompartmentTypes = theAdditionalTypeSearchParamNames;
+					myAdditionalSearchParamsForCompartmentTypes = theModifications;
 					Optional<RuleImplOp> oRule = findMatchingRule();
 					if (oRule.isPresent()) {
 						RuleImplOp rule = oRule.get();
@@ -635,7 +639,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					// inlined from inCompartmentWithAdditionalSearchParams()
 					myClassifierType = ClassifierTypeEnum.IN_COMPARTMENT;
 					myInCompartmentName = theCompartmentName;
-					myAdditionalSearchParamsForCompartmentTypes = new AdditionalCompartmentSearchParameters();
+					myAdditionalSearchParamsForCompartmentTypes = new CompartmentSearchParameterModifications();
 					// todo JR/MB this is a quick and dirty fix at the last minute before the release.
 					//  We should revisit approach so that findMatchingRule() takes the filters into account
 					//  and only merges the rules if the filters are compatible
@@ -999,7 +1003,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		}
 	}
 
-	private static String toTypeName(Class<? extends IBaseResource> theType) {
+	private String toTypeName(Class<? extends IBaseResource> theType) {
 		String retVal = ourTypeToName.get(theType);
 		if (retVal == null) {
 			ResourceDef resourceDef = theType.getAnnotation(ResourceDef.class);

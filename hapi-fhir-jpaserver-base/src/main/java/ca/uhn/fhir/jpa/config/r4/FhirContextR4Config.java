@@ -22,7 +22,9 @@ package ca.uhn.fhir.jpa.config.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.ParserOptions;
+import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
@@ -34,9 +36,12 @@ public class FhirContextR4Config {
 
 	@Bean(name = "primaryFhirContext")
 	@Primary
-	public FhirContext fhirContextR4() {
+	public FhirContext fhirContextR4(@Autowired(required = false) INarrativeGenerator theNarrativeGenerator) {
 		FhirContext retVal = FhirContext.forR4();
 
+		if (theNarrativeGenerator != null) {
+			retVal.setNarrativeGenerator(theNarrativeGenerator);
+		}
 		configureFhirContext(retVal);
 
 		return retVal;

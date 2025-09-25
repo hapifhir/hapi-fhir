@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -64,6 +66,8 @@ public class SubscriptionValidatingInterceptorTest {
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Mock
 	private SubscriptionSettings mySubscriptionSettings;
+	@Spy
+	private PartitionSettings myPartitionSettings = new PartitionSettings();
 
 	private SubscriptionChannelTypeValidatorFactory mySubscriptionChannelTypeValidatorFactory;
 
@@ -72,7 +76,7 @@ public class SubscriptionValidatingInterceptorTest {
 	@BeforeEach
 	public void before() {
 		mySvc = new SubscriptionValidatingInterceptor();
-		mySubscriptionCanonicalizer = spy(new SubscriptionCanonicalizer(myCtx, new SubscriptionSettings()));
+		mySubscriptionCanonicalizer = 	spy(new SubscriptionCanonicalizer(myCtx, new SubscriptionSettings(), myPartitionSettings));
 		mySvc.setSubscriptionCanonicalizerForUnitTest(mySubscriptionCanonicalizer);
 		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
 		mySvc.setSubscriptionStrategyEvaluatorForUnitTest(mySubscriptionStrategyEvaluator);

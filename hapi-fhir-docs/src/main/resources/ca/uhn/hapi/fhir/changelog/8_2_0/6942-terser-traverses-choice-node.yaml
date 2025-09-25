@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6942
+title: "Previously, the `FhirTerser.getValues()` method would throw a ClassCastException if
+the FHIRPath expression traversed a choice node and the resource instance being introspected
+contained a primitive data type at that node. This has been fixed."

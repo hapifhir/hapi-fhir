@@ -1087,6 +1087,46 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
+	 * Invoked when we are about to <a href="https://smilecdr.com/docs/fhir_repository/creating_data.html#auto-create-placeholder-reference-targets">Auto-Create a Placeholder Reference</a>.
+	 * Hooks may modify/enhance the placeholder reference target that is about to be created, or
+	 * reject the creation of the resource, which generally means that the transaction will be
+	 * rejected instead (because of the invalid reference).
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetRequest - Contains details about the placeholder that is about to be created, including the source resource whose reference is being fulfilled, as well as the candidate placeholder resource that will be created.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks may return <code>void</code> (in which case the placeholder creation will proceed as normal),
+	 * an object of type
+	 * <code>ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetResponse</code>
+	 * (in which case the response object can approve or reject the creation),
+	 * and can throw exceptions (which will trigger an appropriate error message being returned
+	 * to the client).
+	 * </p>
+	 */
+	STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE(
+			"ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetResponse",
+			"ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetRequest",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+
+	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked when a Bulk Export job is being kicked off, but before any permission checks
 	 * have been done.
 	 * This hook can be used to modify or update parameters as need be before
@@ -2563,6 +2603,89 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>JPA Hook:</b>
+	 * This hook is invoked during resource indexing and can be used to influence the
+	 * text extracted from a given resource for FullText indexing in support of the
+	 * <code>_content</code> Search Parameter.
+	 * By default, when FullText indexing is enabled HAPI FHIR extracts all string
+	 * content from resources for indexing in order to support the <code>_content</code>
+	 * Search Parameter. This means looking for all <code>string</code> datatypes
+	 * found within a given resource instance, and combining the strings.
+	 * <p>
+	 * Hooks may choose to replace the automatically extracted index text.
+	 * They may also declare that a given resource should not be indexed.
+	 * </p>
+	 * <p>
+	 * Note on selectively disabling indexing: If you return
+	 * <code>FullTextExtractionResponse.doNotIndex()</code> for both invocations of this
+	 * Pointcut for a given resource, this will flag to the indexing
+	 * service that no data should be written to the index for the resource. This is useful
+	 * if you want to selectively enable FullText indexing only for specific resource types,
+	 * or by some other property. Be careful of resource deletes in this scenario! If you
+	 * allow indexing for a given resource, but then invoke <code>doNotIndex()</code>
+	 * when the resource is being deleted then the existing FullText index record will
+	 * be left in place. This can lead to inefficient use of space, and potentially cause
+	 * slow/inefficient searches.
+	 * </p>
+	 * Hooks should accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionRequest</li>
+	 * </ul>
+	 * <p>
+	 * Hooks may return either <code>null</code> (to indicate that the default indexing should
+	 * be used) or an instance of <code>ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionResponse</code>
+	 * if you wish to override the default indexing behaviour.
+	 * </p>
+	 *
+	 * @since 8.4.0
+	 * @see #JPA_INDEX_EXTRACT_FULLTEXT_TEXT
+	 */
+	JPA_INDEX_EXTRACT_FULLTEXT_CONTENT(
+			"ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionResponse",
+			"ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionRequest"),
+
+	/**
+	 * <b>JPA Hook:</b>
+	 * This hook is invoked during resource indexing and can be used to influence the
+	 * text extracted from a given resource for FullText indexing in support of the
+	 * <code>_text</code> Search Parameter.
+	 * HAPI FHIR extracts all text in the narrative
+	 * (<code>Resource.text.div</code>) for indexing in order to support the <code>_text</code>
+	 * Search Parameter.
+	 * <p>
+	 * Hooks may choose to replace the automatically extracted index text.
+	 * They may also declare that a given resource should not be indexed.
+	 * </p>
+	 * <p>
+	 * Note on selectively disabling indexing: If you return
+	 * <code>FullTextExtractionResponse.doNotIndex()</code> for both invocations of this
+	 * Pointcut for a given resource, this will flag to the indexing
+	 * service that no data should be written to the index for the resource. This is useful
+	 * if you want to selectively enable FullText indexing only for specific resource types,
+	 * or by some other property. Be careful of resource deletes in this scenario! If you
+	 * allow indexing for a given resource, but then invoke <code>doNotIndex()</code>
+	 * when the resource is being deleted then the existing FullText index record will
+	 * be left in place. This can lead to inefficient use of space, and potentially cause
+	 * slow/inefficient searches.
+	 * </p>
+	 * Hooks should accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionRequest</li>
+	 * </ul>
+	 * <p>
+	 * Hooks may return either <code>null</code> (to indicate that the default indexing should
+	 * be used) or an instance of <code>ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionResponse</code>
+	 * if you wish to override the default indexing behaviour.
+	 * </p>
+	 *
+	 * @since 8.4.0
+	 * @see #JPA_INDEX_EXTRACT_FULLTEXT_CONTENT
+	 */
+	JPA_INDEX_EXTRACT_FULLTEXT_TEXT(
+			"ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionResponse",
+			"ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionRequest"),
+
+	/**
+	 * <b>JPA Hook:</b>
 	 * This hook is invoked when a cross-partition reference is about to be
 	 * stored in the database.
 	 * <p>
@@ -3168,6 +3291,23 @@ public enum Pointcut implements IPointcut {
 	 */
 	BATCH2_CHUNK_PROCESS_FILTER(
 			IInterceptorFilterHook.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.batch2.model.WorkChunk"),
+
+	/**
+	 * <b>Provenance Agents Pointcut:</b>
+	 * This is a pointcut to retrieve data for populating the agent element of a Provenance resource that needs to be created
+	 * as a result of a request, such as a $merge or a $hapi.fhir.replace-references operation.
+	 * <p> Hooks should accept the following parameter:</p>
+	 * <ul>
+	 *     <li>ca.uhn.fhir.jpa.model.ProvenanceAgentPointcutParameters - an object containing the parameters for the hook, including:</li>
+	 *     <ul>
+	 *         <li>ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is being processed.</li>
+	 *         <li>List of ca.uhn.fhir.model.api.IProvenanceAgent - This is an output parameter; the hook should add the agent information to this list</li>
+	 *     </ul>
+	 * </ul>
+	 * Hooks should return <code>void</code> and use the parameter object to add the agent information.
+	 */
+	PROVENANCE_AGENTS(void.class, "ca.uhn.fhir.jpa.model.IProvenanceAgentsPointcutParameter"),
+
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
 	 * removed at any time.

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6911
+jira: SMILE-10103
+title: "MDM was previously only able to handle up to 30 sequential matching rules before throwing an exception. This value has been increased to 64."

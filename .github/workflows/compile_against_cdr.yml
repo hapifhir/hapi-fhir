@@ -1,7 +1,7 @@
 name: Compile against CDR
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types: [ opened, reopened, synchronize ]
   workflow_dispatch:
     inputs:
       cdr_branch:
@@ -14,24 +14,33 @@ jobs:
   compile-against-cdr:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-      name: Checkout
-    - name: Install poetry
-      run: pipx install poetry
-    - name: Setup Python
-      uses: actions/setup-python@v4.6.0
-      with:
-        python-version: '3.10'
-    - run: poetry install
-      name: Install Dependencies
-      working-directory: ./.github/workflows/cdr_check
-    - run: poetry run python trigger_and_poll_gitlab.py
-      name: Execute Poller
-      working-directory: ./.github/workflows/cdr_check
-      env:
-        READ_API_TOKEN: ${{ secrets.GITLAB_READ_API_TOKEN }}
-        HAPI_BRANCH: ${{ github.head_ref || github.ref_name }}
-        REQUESTING_USER: ${{ github.event.pull_request.user.login }}
-        PR_NUMBER: ${{ github.event.pull_request.number }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        CDR_BRANCH: ${{ inputs.cdr_branch }}
+      - name: Pass for fork
+        if: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
+        run: echo "Skipping CDR compilation for fork - this is expected and safe"
+
+      - uses: actions/checkout@v3
+        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+        name: Checkout
+      - name: Install poetry
+        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+        run: pipx install poetry
+      - name: Setup Python
+        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: actions/setup-python@v4.6.0
+        with:
+          python-version: '3.10'
+      - run: poetry install
+        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+        name: Install Dependencies
+        working-directory: ./.github/workflows/cdr_check
+      - run: poetry run python trigger_and_poll_gitlab.py
+        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+        name: Execute Poller
+        working-directory: ./.github/workflows/cdr_check
+        env:
+          READ_API_TOKEN: ${{ secrets.GITLAB_READ_API_TOKEN }}
+          HAPI_BRANCH: ${{ github.head_ref || github.ref_name }}
+          REQUESTING_USER: ${{ github.event.pull_request.user.login }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CDR_BRANCH: ${{ inputs.cdr_branch }}

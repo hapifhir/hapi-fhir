@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 7153
+title: "Resources included in a retunred bundle
+        that are marked as either OUTCOME or INCLUDE
+        will no longer count toward the bundle total.
+"

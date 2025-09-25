@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoStructureDefinition;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSubscription;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
@@ -157,6 +158,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.ImmunizationRecommendation;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Media;
@@ -208,7 +210,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
@@ -259,7 +260,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected IBatch2JobInstanceRepository myJobInstanceRepository;
 	@Autowired
-	private IBatch2WorkChunkRepository myWorkChunkRepository;
+	protected IBatch2WorkChunkRepository myWorkChunkRepository;
 
 	@Autowired
 	protected ISearchIncludeDao mySearchIncludeEntityDao;
@@ -527,6 +528,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Qualifier("myValueSetDaoR4")
 	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
+	protected IFhirResourceDao<Library> myLibraryDao;
+	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
 	@Autowired
 	protected ITermValueSetConceptDao myTermValueSetConceptDao;
@@ -593,6 +596,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		myStorageSettings.setDeleteEnabled(new JpaStorageSettings().isDeleteEnabled());
 		myStorageSettings.setMatchUrlCacheEnabled(new JpaStorageSettings().isMatchUrlCacheEnabled());
 		myStorageSettings.setStoreMetaSourceInformation(new JpaStorageSettings().getStoreMetaSourceInformation());
+		myStorageSettings.setUpdateWithHistoryRewriteEnabled(new JpaStorageSettings().isUpdateWithHistoryRewriteEnabled());
 
 		myPagingProvider.setDefaultPageSize(BasePagingProvider.DEFAULT_DEFAULT_PAGE_SIZE);
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
@@ -692,14 +696,28 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
+		return doCreateResourceAndReturnOutcome(theResource).getId().toUnqualifiedVersionless();
+	}
+
+	public DaoMethodOutcome doCreateResourceAndReturnOutcome(IBaseResource theResource) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
-		return dao.create(theResource, mySrd).getId().toUnqualifiedVersionless();
+		return dao.create(theResource, mySrd);
 	}
 
 	@Override
 	public IIdType doUpdateResource(IBaseResource theResource) {
+		return doUpdateResourceAndReturnOutcome(theResource).getId().toUnqualifiedVersionless();
+	}
+
+	public DaoMethodOutcome doUpdateResourceAndReturnOutcome(IBaseResource theResource) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
-		return dao.update(theResource, mySrd).getId().toUnqualifiedVersionless();
+		return dao.update(theResource, mySrd);
+	}
+
+	@Override
+	public void doDeleteResource(IIdType theIIdType){
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theIIdType.getResourceType());
+		dao.delete(theIIdType);
 	}
 
 	protected String encode(IBaseResource theResource) {

@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI-FHIR Storage Batch2 Jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -31,8 +31,10 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
+import ca.uhn.fhir.rest.api.IResourceSupportedSvc;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
@@ -53,6 +55,9 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
+
+	@Autowired
+	private IResourceSupportedSvc myResourceSupportedSvc;
 
 	@Nonnull
 	@Override
@@ -89,9 +94,25 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 			Set<TypedPidJson> submittedBatchResourceIds = new HashSet<>();
 
 			/*
+			 * NB: patient-compartment limitation
+			 * We know that Group and List are part of patient compartment.
+			 * But allowing export of them seems like a security flaw.
+			 * So we'll exclude them.
+			 */
+			Set<String> resourceTypesToOmit =
+					theStepExecutionDetails.getParameters().getExportStyle()
+									== BulkExportJobParameters.ExportStyle.PATIENT
+							? new HashSet<>(
+									SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.keySet())
+							: Set.of();
+
+			/*
 			 * We will fetch ids for each resource type in the ResourceTypes (_type filter).
 			 */
 			for (String resourceType : params.getResourceTypes()) {
+				if (resourceTypesToOmit.contains(resourceType) || !myResourceSupportedSvc.isSupported(resourceType)) {
+					continue;
+				}
 				providerParams.setResourceType(resourceType);
 
 				// filters are the filters for searching

@@ -20,11 +20,9 @@
 package ca.uhn.hapi.fhir.cdshooks.svc;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrSettings;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -32,9 +30,7 @@ import jakarta.annotation.Nullable;
 public class CdsConfigServiceImpl implements ICdsConfigService {
 	private final FhirContext myFhirContext;
 	private final ObjectMapper myObjectMapper;
-	private final CdsCrSettings myCdsCrSettings;
 	private final DaoRegistry myDaoRegistry;
-	private final IRepositoryFactory myRepositoryFactory;
 	private final RestfulServer myRestfulServer;
 
 	public CdsConfigServiceImpl(
@@ -45,24 +41,6 @@ public class CdsConfigServiceImpl implements ICdsConfigService {
 		myFhirContext = theFhirContext;
 		myObjectMapper = theObjectMapper;
 		myDaoRegistry = theDaoRegistry;
-		myRestfulServer = theRestfulServer;
-		myCdsCrSettings = new CdsCrSettings();
-		myRepositoryFactory = null;
-	}
-
-	@Deprecated(since = "8.1.4", forRemoval = true)
-	public CdsConfigServiceImpl(
-			@Nonnull FhirContext theFhirContext,
-			@Nonnull ObjectMapper theObjectMapper,
-			@Nonnull CdsCrSettings theCdsCrSettings,
-			@Nullable DaoRegistry theDaoRegistry,
-			@Nullable IRepositoryFactory theRepositoryFactory,
-			@Nullable RestfulServer theRestfulServer) {
-		myFhirContext = theFhirContext;
-		myObjectMapper = theObjectMapper;
-		myCdsCrSettings = theCdsCrSettings;
-		myDaoRegistry = theDaoRegistry;
-		myRepositoryFactory = theRepositoryFactory;
 		myRestfulServer = theRestfulServer;
 	}
 
@@ -78,22 +56,10 @@ public class CdsConfigServiceImpl implements ICdsConfigService {
 		return myObjectMapper;
 	}
 
-	@Nonnull
-	@Override
-	public CdsCrSettings getCdsCrSettings() {
-		return myCdsCrSettings;
-	}
-
 	@Nullable
 	@Override
 	public DaoRegistry getDaoRegistry() {
 		return myDaoRegistry;
-	}
-
-	@Nullable
-	@Override
-	public IRepositoryFactory getRepositoryFactory() {
-		return myRepositoryFactory;
 	}
 
 	@Nullable

@@ -19,6 +19,8 @@
  */
 package org.hl7.fhir.instance.model.api;
 
+import ca.uhn.fhir.i18n.Msg;
+
 public interface IBaseReference extends ICompositeType {
 
 	IBaseResource getResource();
@@ -35,5 +37,13 @@ public interface IBaseReference extends ICompositeType {
 
 	default boolean hasIdentifier() {
 		return false;
+	}
+
+	default IBaseReference setIdentifier(ICompositeType theIdentifier) {
+		throw new UnsupportedOperationException(Msg.code(2759) + "This reference does not support identifiers");
+	}
+
+	default ICompositeType getIdentifier() {
+		return null;
 	}
 }

@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI-FHIR Storage Batch2 Jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -179,7 +179,8 @@ public class ReindexTaskV2 implements TransactionCallback<ReindexResults> {
 		ReindexParameters parameters = new ReindexParameters()
 				.setReindexSearchParameters(myJobParameters.getReindexSearchParameters())
 				.setOptimizeStorage(myJobParameters.getOptimizeStorage())
-				.setOptimisticLock(myJobParameters.getOptimisticLock());
+				.setOptimisticLock(myJobParameters.getOptimisticLock())
+				.setCorrectCurrentVersion(myJobParameters.getCorrectCurrentVersion());
 
 		// Reindex
 

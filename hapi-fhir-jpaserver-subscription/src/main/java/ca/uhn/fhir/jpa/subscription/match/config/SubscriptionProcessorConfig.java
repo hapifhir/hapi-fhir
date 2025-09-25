@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription.match.config;
 import ca.uhn.fhir.broker.api.IBrokerClient;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
@@ -134,8 +135,8 @@ public class SubscriptionProcessorConfig {
 	@Bean
 	@Scope("prototype")
 	public SubscriptionDeliveringMessageListener subscriptionDeliveringMessageSubscriber(
-			IBrokerClient theBrokerClient) {
-		return new SubscriptionDeliveringMessageListener(theBrokerClient);
+			IBrokerClient theBrokerClient, IDefaultPartitionSettings theDefaultPartitionSettings) {
+		return new SubscriptionDeliveringMessageListener(theBrokerClient, theDefaultPartitionSettings);
 	}
 
 	@Bean

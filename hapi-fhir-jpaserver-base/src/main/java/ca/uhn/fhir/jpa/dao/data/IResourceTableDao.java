@@ -81,9 +81,9 @@ public interface IResourceTableDao
 			@Param("partition_ids") List<Integer> theRequestPartitionIds);
 
 	@Query(
-			"SELECT t.myPid, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
+			"SELECT t.myPid, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND ((:dpid IS NULL AND t.myPartitionIdValue IS NULL) OR (t.myPartitionIdValue = :dpid)) ORDER BY t.myUpdated ASC")
 	Stream<Object[]> streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForDefaultPartition(
-			@Param("low") Date theLow, @Param("high") Date theHigh);
+			@Param("low") Date theLow, @Param("high") Date theHigh, @Param("dpid") Integer theDefaultPartitionId);
 
 	@Query(
 			"SELECT t.myPid FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myResourceType = :restype ORDER BY t.myUpdated ASC")
@@ -100,6 +100,11 @@ public interface IResourceTableDao
 	@Modifying
 	@Query("UPDATE ResourceTable t SET t.myUpdated = :updated WHERE t.myPid = :id")
 	void updateLastUpdated(@Param("id") JpaPid theId, @Param("updated") Date theUpdated);
+
+	@Modifying
+	@Query("UPDATE ResourceTable t SET t.myVersion = :version, t.myUpdated = :updated WHERE t.myPid = :id")
+	void updateVersionAndLastUpdated(
+			@Param("id") JpaPid theId, @Param("version") Long theVersion, @Param("updated") Date theUpdated);
 
 	@Modifying
 	@Query("DELETE FROM ResourceTable t WHERE t.myPid = :pid")

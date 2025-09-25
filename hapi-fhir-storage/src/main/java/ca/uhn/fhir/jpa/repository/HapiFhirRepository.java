@@ -22,12 +22,14 @@ package ca.uhn.fhir.jpa.repository;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -42,6 +44,7 @@ import ca.uhn.fhir.rest.server.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.server.method.PageMethodBinding;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Multimap;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -100,10 +103,10 @@ public class HapiFhirRepository implements IRepository {
 				.setAction(RestOperationTypeEnum.PATCH)
 				.addHeaders(theHeaders)
 				.create();
-		// TODO update FHIR patchType once FHIRPATCH bug has been fixed
+
 		return myDaoRegistry
 				.getResourceDao(theId.getResourceType())
-				.patch(theId, null, null, null, thePatchParameters, details);
+				.patch(theId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, thePatchParameters, details);
 	}
 
 	@Override
@@ -113,7 +116,14 @@ public class HapiFhirRepository implements IRepository {
 				.addHeaders(theHeaders)
 				.create();
 
-		return myDaoRegistry.getResourceDao(theResource).update(theResource, details);
+		DaoMethodOutcome update = myDaoRegistry.getResourceDao(theResource).update(theResource, details);
+		boolean created = update.getCreated() != null && update.getCreated();
+		if (created) {
+			update.setResponseStatusCode(Constants.STATUS_HTTP_201_CREATED);
+		} else {
+			update.setResponseStatusCode(Constants.STATUS_HTTP_200_OK);
+		}
+		return update;
 	}
 
 	@Override
@@ -140,7 +150,7 @@ public class HapiFhirRepository implements IRepository {
 		SearchConverter converter = new SearchConverter();
 		converter.convertParameters(theSearchParameters, fhirContext());
 		details.setParameters(converter.myResultParameters);
-		details.setResourceName(myRestfulServer.getFhirContext().getResourceType(theResourceType));
+		details.setResourceName(myDaoRegistry.getFhirContext().getResourceType(theResourceType));
 		IBundleProvider bundleProvider =
 				myDaoRegistry.getResourceDao(theResourceType).search(converter.mySearchParameterMap, details);
 
@@ -152,7 +162,7 @@ public class HapiFhirRepository implements IRepository {
 	}
 
 	private <B extends IBaseBundle> B createBundle(
-			RequestDetails theRequestDetails, IBundleProvider theBundleProvider, String thePagingAction) {
+			RequestDetails theRequestDetails, @Nonnull IBundleProvider theBundleProvider, String thePagingAction) {
 		Integer count = RestfulServerUtils.extractCountParameter(theRequestDetails);
 		String linkSelf = RestfulServerUtils.createLinkSelf(theRequestDetails.getFhirServerBase(), theRequestDetails);
 
@@ -169,11 +179,12 @@ public class HapiFhirRepository implements IRepository {
 			offset = 0;
 		}
 		int start = offset;
-		if (theBundleProvider.size() != null) {
-			start = Math.max(0, Math.min(offset, theBundleProvider.size()));
+		Integer size = theBundleProvider.size();
+		if (size != null) {
+			start = Math.max(0, Math.min(offset, size));
 		}
 
-		BundleTypeEnum bundleType = null;
+		BundleTypeEnum bundleType;
 		String[] bundleTypeValues = theRequestDetails.getParameters().get(Constants.PARAM_BUNDLETYPE);
 		if (bundleTypeValues != null) {
 			bundleType = BundleTypeEnum.VALUESET_BINDER.fromCodeString(bundleTypeValues[0]);
@@ -386,8 +397,8 @@ public class HapiFhirRepository implements IRepository {
 	}
 
 	@Override
-	public FhirContext fhirContext() {
-		return myRestfulServer.getFhirContext();
+	public @Nonnull FhirContext fhirContext() {
+		return myDaoRegistry.getFhirContext();
 	}
 
 	protected <R> R invoke(RequestDetails theDetails) {

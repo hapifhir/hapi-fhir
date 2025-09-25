@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
@@ -77,6 +78,7 @@ import org.hl7.fhir.r5.model.AllergyIntolerance;
 import org.hl7.fhir.r5.model.Appointment;
 import org.hl7.fhir.r5.model.AuditEvent;
 import org.hl7.fhir.r5.model.Binary;
+import org.hl7.fhir.r5.model.BodyStructure;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CarePlan;
 import org.hl7.fhir.r5.model.ChargeItem;
@@ -92,8 +94,10 @@ import org.hl7.fhir.r5.model.Coverage;
 import org.hl7.fhir.r5.model.Device;
 import org.hl7.fhir.r5.model.DiagnosticReport;
 import org.hl7.fhir.r5.model.Encounter;
+import org.hl7.fhir.r5.model.EpisodeOfCare;
 import org.hl7.fhir.r5.model.Group;
 import org.hl7.fhir.r5.model.HealthcareService;
+import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Immunization;
 import org.hl7.fhir.r5.model.ImmunizationRecommendation;
 import org.hl7.fhir.r5.model.Location;
@@ -128,7 +132,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -146,6 +149,8 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR5Config.class, TestDaoSearch.Config.class})
 public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuilder {
+	@Autowired
+	protected IHapiTransactionService myTxService;
 	@Autowired
 	protected IJobCoordinator myJobCoordinator;
 	@Autowired
@@ -202,6 +207,12 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	@Qualifier("myCarePlanDaoR5")
 	protected IFhirResourceDao<CarePlan> myCarePlanDao;
+	@Autowired
+	@Qualifier("myEpisodeOfCareDaoR5")
+	protected IFhirResourceDao<EpisodeOfCare> myEpisodeOfCareDao;
+	@Autowired
+	@Qualifier("myBodyStructureDaoR5")
+	protected IFhirResourceDao<BodyStructure> myBodyStructureDao;
 	@Autowired
 	@Qualifier("myCodeSystemDaoR5")
 	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
@@ -499,6 +510,10 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@AfterEach
 	public void afterEachClearCaches() {
 		myJpaValidationSupportChain.invalidateCaches();
+	}
+
+	protected Patient readPatient(String theId) {
+		return myPatientDao.read(new IdType(theId), newSrd());
 	}
 
 }

@@ -1278,6 +1278,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 			Observation observation = new Observation();
 			observation.addExtension().setUrl("Observation#accessType").setValue(new Coding().setCode("Catheter"));
 			observation.getSubject().setReferenceElement(patientId.toUnqualifiedVersionless());
+
 			MethodOutcome methodOutcome = myClient.create().resource(observation).execute();
 			assertEquals(true, methodOutcome.getCreated());
 

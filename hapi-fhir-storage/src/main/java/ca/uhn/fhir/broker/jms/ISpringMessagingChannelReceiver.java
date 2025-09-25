@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.broker.jms;
 
+import ca.uhn.fhir.i18n.Msg;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.InterceptableChannel;
@@ -36,20 +37,20 @@ public interface ISpringMessagingChannelReceiver extends SubscribableChannel, In
 	 * Pause the service (e.g. stop subscriber threads)
 	 */
 	default void pause() {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(2660));
 	}
 
 	/**
 	 * Resume the service (e.g. start subscriber threads)
 	 */
 	default void resume() {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(2661));
 	}
 
 	/**
 	 * Start the service (e.g. start the subscriber threads)
 	 */
 	default void start() {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(2662));
 	}
 }

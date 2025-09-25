@@ -164,7 +164,7 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmProviderLoader mdmProviderLoader() {
+	protected MdmProviderLoader mdmProviderLoader() {
 		return new MdmProviderLoader();
 	}
 

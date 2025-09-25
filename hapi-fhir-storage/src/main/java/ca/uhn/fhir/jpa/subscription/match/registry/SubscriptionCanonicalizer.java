@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
@@ -72,30 +73,26 @@ public class SubscriptionCanonicalizer {
 	final FhirContext myFhirContext;
 	private final SubscriptionSettings mySubscriptionSettings;
 
+	private PartitionSettings myPartitionSettings;
+
 	private IRequestPartitionHelperSvc myHelperSvc;
 
 	@Autowired
-	public SubscriptionCanonicalizer(FhirContext theFhirContext, SubscriptionSettings theSubscriptionSettings) {
+	public SubscriptionCanonicalizer(
+			FhirContext theFhirContext,
+			SubscriptionSettings theSubscriptionSettings,
+			@Nullable PartitionSettings thePartitionSettings) {
 		myFhirContext = theFhirContext;
 		mySubscriptionSettings = theSubscriptionSettings;
+		myPartitionSettings = thePartitionSettings;
 	}
+
 	// TODO GGG: Eventually, we will unify autowiring styles. It is this way now as this is the least destrctive method
 	// to accomplish a minimal MR. I recommend moving all dependencies to setter autowiring, but that is for another
 	// day.
 	@Autowired
 	public void setPartitionHelperSvc(IRequestPartitionHelperSvc thePartitionHelperSvc) {
 		myHelperSvc = thePartitionHelperSvc;
-	}
-
-	// TODO:  LD:  remove this constructor once all callers call the 2 arg constructor above
-
-	/**
-	 * @deprecated All callers should invoke {@link SubscriptionCanonicalizer()} instead.
-	 */
-	@Deprecated
-	public SubscriptionCanonicalizer(FhirContext theFhirContext) {
-		myFhirContext = theFhirContext;
-		mySubscriptionSettings = new SubscriptionSettings();
 	}
 
 	public CanonicalSubscription canonicalize(IBaseResource theSubscription) {
@@ -790,6 +787,23 @@ public class SubscriptionCanonicalizer {
 		return status.getValueAsString();
 	}
 
+	protected Integer getDefaultPartitionId() {
+		if (myPartitionSettings != null) {
+			return myPartitionSettings.getDefaultPartitionId();
+		}
+
+		/*
+		 * We log a warning because in most cases you will want a partitionsettings
+		 * object.
+		 * However, PartitionSettings beans are not provided in the same
+		 * config as the one that provides this bean; as such, it is the responsibility
+		 * of whomever includes the config for this bean to also provide a PartitionSettings
+		 * bean (or import a config that does)
+		 */
+		ourLog.warn("No partition settings available.");
+		return null;
+	}
+
 	private boolean handleCrossPartition(IBaseResource theSubscription) {
 		RequestPartitionId requestPartitionId =
 				(RequestPartitionId) theSubscription.getUserData(Constants.RESOURCE_PARTITION_ID);
@@ -798,7 +812,7 @@ public class SubscriptionCanonicalizer {
 
 		if (nonNull(requestPartitionId)) {
 			isSubscriptionCreatedOnDefaultPartition = myHelperSvc == null
-					? requestPartitionId.isDefaultPartition()
+					? requestPartitionId.isPartition(getDefaultPartitionId())
 					: myHelperSvc.isDefaultPartition(requestPartitionId);
 		}
 

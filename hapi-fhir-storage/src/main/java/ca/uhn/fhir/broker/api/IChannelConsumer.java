@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.broker.api;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 
 /**
@@ -61,14 +62,14 @@ public interface IChannelConsumer<T> extends AutoCloseable {
 	 * Pause requesting new messages from the broker until resume() is called.
 	 */
 	default void pause() {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(2655));
 	}
 
 	/**
 	 * Resume requesting messages from the broker.
 	 */
 	default void resume() {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(2656));
 	}
 
 	/**
@@ -76,8 +77,8 @@ public interface IChannelConsumer<T> extends AutoCloseable {
 	 */
 	default void checkState() {
 		if (isClosed()) {
-			throw new BrokerConsumerClosedException(
-					"Attempted to use a closed " + this.getClass().getSimpleName() + ": " + this);
+			throw new BrokerConsumerClosedException(Msg.code(2657) + "Attempted to use a closed "
+					+ this.getClass().getSimpleName() + ": " + this);
 		}
 	}
 }

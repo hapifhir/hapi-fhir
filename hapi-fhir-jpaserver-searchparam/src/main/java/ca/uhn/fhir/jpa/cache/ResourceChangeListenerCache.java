@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -38,6 +39,8 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Scope("prototype")
@@ -48,7 +51,17 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 	 */
 	private static final int MAX_RETRIES = 60;
 
+	/**
+	 * Timeout in milliseconds for acquiring the semaphore lock (1 minute)
+	 */
+	private static final long SEMAPHORE_TIMEOUT_MS = 60000;
+
 	private static Instant ourNowForUnitTests;
+
+	/**
+	 * Semaphore used to control access to the cache refresh operation
+	 */
+	private final Semaphore myCacheSemaphore = new Semaphore(1);
 
 	@Autowired
 	IResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
@@ -95,6 +108,7 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 
 	/**
 	 * Refresh the cache if theResource matches our SearchParameterMap
+	 *
 	 * @param theResource
 	 */
 	public void requestRefreshIfWatching(IBaseResource theResource) {
@@ -150,14 +164,34 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 	}
 
 	private ResourceChangeResult refreshCacheAndNotifyListenersWithRetry() {
-		Retrier<ResourceChangeResult> refreshCacheRetrier = new Retrier<>(
-				() -> {
-					synchronized (this) {
-						return myResourceChangeListenerCacheRefresher.refreshCacheAndNotifyListener(this);
-					}
-				},
-				getMaxRetries());
+		Retrier<ResourceChangeResult> refreshCacheRetrier =
+				new Retrier<>(this::tryRefreshCacheAndNotifyListener, getMaxRetries());
 		return refreshCacheRetrier.runWithRetry();
+	}
+
+	private ResourceChangeResult tryRefreshCacheAndNotifyListener() {
+		boolean acquired = false;
+		try {
+			// Try to acquire the semaphore with a timeout
+			acquired = myCacheSemaphore.tryAcquire(SEMAPHORE_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+			if (acquired) {
+				return myResourceChangeListenerCacheRefresher.refreshCacheAndNotifyListener(this);
+			} else {
+				ourLog.warn(
+						"Timed out waiting {} ms to acquire lock for refreshing cache for resource {}",
+						SEMAPHORE_TIMEOUT_MS,
+						myResourceName);
+				throw new InternalErrorException(
+						Msg.code(2702) + "Timed out waiting to acquire lock for refreshing cache");
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new InternalErrorException(Msg.code(2703) + "Interrupted while waiting to refresh cache", e);
+		} finally {
+			if (acquired) {
+				myCacheSemaphore.release();
+			}
+		}
 	}
 
 	@Override

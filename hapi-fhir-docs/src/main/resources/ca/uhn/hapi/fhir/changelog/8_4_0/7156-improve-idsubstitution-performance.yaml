@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 7156
+title: "When performing FHIR transaction operations which create a large number of resources,
+  a CPU bottleneck in the transaction processor was resolved."

@@ -34,6 +34,7 @@ import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.UriType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -55,6 +56,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
 public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
+
+	@Override
+	@BeforeEach
+	public void before() {
+		initResourceTypeCacheFromConfig();
+	}
 
 	@AfterEach
 	public void after() {
@@ -320,7 +327,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(theTargetAlreadyExists ? 20 : 24, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(theTargetAlreadyExists ? 20 : 25, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countCommits());

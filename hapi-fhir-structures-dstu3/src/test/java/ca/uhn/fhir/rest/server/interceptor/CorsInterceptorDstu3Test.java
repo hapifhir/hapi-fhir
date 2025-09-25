@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -28,10 +26,10 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.HumanName;
@@ -52,6 +50,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class CorsInterceptorDstu3Test {
 	private static String ourBaseUri;
@@ -64,9 +64,9 @@ public class CorsInterceptorDstu3Test {
 	public void testContextWithSpace() throws Exception {
 		{
 			HttpOptions httpOpt = new HttpOptions(ourBaseUri + "/Organization/b27ed191-f62d-4128-d99d-40b5e84f2bf2");
-			httpOpt.addHeader("Access-Control-Request-Method", "POST");
-			httpOpt.addHeader("Origin", "http://www.fhir-starter.com");
-			httpOpt.addHeader("Access-Control-Request-Headers", "accept, x-fhir-starter, content-type");
+			httpOpt.addHeader(Constants.HEADER_CORS_REQUEST_METHOD, "POST");
+			httpOpt.addHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com");
+			httpOpt.addHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type");
 			HttpResponse status = ourClient.execute(httpOpt);
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -77,8 +77,8 @@ public class CorsInterceptorDstu3Test {
 		{
 			String uri = ourBaseUri + "/Patient?identifier=urn:hapitest:mrns%7C00001";
 			HttpGet httpGet = new HttpGet(uri);
-			httpGet.addHeader("X-FHIR-Starter", "urn:fhir.starter");
-			httpGet.addHeader("Origin", "http://www.fhir-starter.com");
+			httpGet.addHeader(Constants.HEADER_X_FHIR_STARTER, "urn:fhir.starter");
+			httpGet.addHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com");
 			HttpResponse status = ourClient.execute(httpGet);
 
 			Header origin = status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN);
@@ -95,9 +95,9 @@ public class CorsInterceptorDstu3Test {
 		}
 		{
 			HttpPost httpOpt = new HttpPost(ourBaseUri + "/Patient");
-			httpOpt.addHeader("Access-Control-Request-Method", "POST");
-			httpOpt.addHeader("Origin", "http://www.fhir-starter.com");
-			httpOpt.addHeader("Access-Control-Request-Headers", "accept, x-fhir-starter, content-type");
+			httpOpt.addHeader(Constants.HEADER_CORS_REQUEST_METHOD, "POST");
+			httpOpt.addHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com");
+			httpOpt.addHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type");
 			httpOpt.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(new Patient())));
 			HttpResponse status = ourClient.execute(httpOpt);
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -125,9 +125,9 @@ public class CorsInterceptorDstu3Test {
 	public void testRequestWithInvalidOrigin() throws ClientProtocolException, IOException {
 		{
 			HttpOptions httpOpt = new HttpOptions(ourBaseUri + "/Organization/b27ed191-f62d-4128-d99d-40b5e84f2bf2");
-			httpOpt.addHeader("Access-Control-Request-Method", "GET");
-			httpOpt.addHeader("Origin", "http://yahoo.com");
-			httpOpt.addHeader("Access-Control-Request-Headers", "accept, x-fhir-starter, content-type");
+			httpOpt.addHeader(Constants.HEADER_CORS_REQUEST_METHOD, "GET");
+			httpOpt.addHeader(Constants.HEADER_CORS_ORIGIN, "http://yahoo.com");
+			httpOpt.addHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type");
 			HttpResponse status = ourClient.execute(httpOpt);
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -140,9 +140,9 @@ public class CorsInterceptorDstu3Test {
 	public void testRequestWithNullOrigin() throws ClientProtocolException, IOException {
 		{
 			HttpOptions httpOpt = new HttpOptions(ourBaseUri + "/Organization/b27ed191-f62d-4128-d99d-40b5e84f2bf2");
-			httpOpt.addHeader("Access-Control-Request-Method", "GET");
-			httpOpt.addHeader("Origin", "null");
-			httpOpt.addHeader("Access-Control-Request-Headers", "accept, x-fhir-starter, content-type");
+			httpOpt.addHeader(Constants.HEADER_CORS_REQUEST_METHOD, "GET");
+			httpOpt.addHeader(Constants.HEADER_CORS_ORIGIN, "null");
+			httpOpt.addHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type");
 			HttpResponse status = ourClient.execute(httpOpt);
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -180,18 +180,18 @@ public class CorsInterceptorDstu3Test {
 
 		CorsConfiguration config = new CorsConfiguration();
 		CorsInterceptor interceptor = new CorsInterceptor(config);
-		config.addAllowedHeader("x-fhir-starter");
-		config.addAllowedHeader("Origin");
-		config.addAllowedHeader("Accept");
-		config.addAllowedHeader("X-Requested-With");
-		config.addAllowedHeader("Content-Type");
-		config.addAllowedHeader("Access-Control-Request-Method");
-		config.addAllowedHeader("Access-Control-Request-Headers");
+		config.addAllowedHeader(Constants.HEADER_X_FHIR_STARTER);
+		config.addAllowedHeader(Constants.HEADER_CORS_ORIGIN);
+		config.addAllowedHeader(Constants.HEADER_ACCEPT);
+		config.addAllowedHeader(Constants.HEADER_X_REQUESTED_WITH);
+		config.addAllowedHeader(Constants.HEADER_CONTENT_TYPE);
+		config.addAllowedHeader(Constants.HEADER_CORS_REQUEST_METHOD);
+		config.addAllowedHeader(Constants.HEADER_CORS_REQUEST_HEADERS);
 		config.addAllowedOrigin("http://www.fhir-starter.com");
 		config.addAllowedOrigin("null");
 		config.addAllowedOrigin("file://");
-		config.addExposedHeader("Location");
-		config.addExposedHeader("Content-Location");
+		config.addExposedHeader(Constants.HEADER_LOCATION);
+		config.addExposedHeader(Constants.HEADER_CONTENT_LOCATION);
 		config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
 		restServer.registerInterceptor(interceptor);
 		

@@ -1,0 +1,71 @@
+{
+	"resourceType": "Bundle",
+	"type": "transaction",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "SearchParameter",
+				"id": "identifier-system-sp",
+				"extension": [
+					{
+						"url": "https://smilecdr.com/fhir/ns/StructureDefinition/searchparameter-uplift-token",
+						"extension": [
+							{
+								"url": "system",
+								"valueUri": "http://some-system.com"
+							},
+							{
+								"url": "token-to-element",
+								"valueUri": "p2p_source_resource_id"
+							}
+						]
+					}
+				],
+				"url": "https://smilecdr.com/fhir/ns/StructureDefinition/identifier-system-sp",
+				"name": "identifier-system-sp",
+				"status": "active",
+				"code": "identifier-system-sp",
+				"base": [
+					"Patient"
+				],
+				"type": "token",
+				"expression": "identifier.where(system='http://some-system.com').value"
+			},
+			"request": {
+				"method": "PUT",
+				"url": "SearchParameter/identifier-system-sp"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "SearchParameter",
+				"id": "identifier-system-sp-unique",
+				"extension": [
+					{
+						"url": "http://hapifhir.io/fhir/StructureDefinition/sp-unique",
+						"valueBoolean": true
+					}
+				],
+				"url": "https://smilecdr.com/fhir/ns/StructureDefinition/identifier-system-sp-unique",
+				"name": "identifier-system-sp-unique",
+				"status": "active",
+				"code": "identifier-system-sp-unique",
+				"base": [
+					"Patient"
+				],
+				"type": "composite",
+				"expression": "identifier.where(system='http://some-system.com').value",
+				"component": [
+					{
+						"definition": "SearchParameter/identifier-system-sp",
+						"expression": "Resource"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "SearchParameter/identifier-system-sp-unique"
+			}
+		}
+	]
+}

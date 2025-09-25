@@ -40,7 +40,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		myStorageSettings.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setHibernateSearchIndexSearchParams(false);
 
 		myInterceptorRegistry.registerInterceptor(new MyPartitionInterceptor());
 	}

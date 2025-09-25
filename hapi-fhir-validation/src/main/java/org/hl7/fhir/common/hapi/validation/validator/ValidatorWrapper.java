@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.XmlUtil;
 import ca.uhn.fhir.validation.IValidationContext;
+import ca.uhn.fhir.validation.ValidationOptions;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -15,14 +16,15 @@ import org.apache.commons.io.input.ReaderInputStream;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.elementmodel.Manager;
-import org.hl7.fhir.r5.fhirpath.FHIRPathEngine;
+import org.hl7.fhir.r5.fhirpath.IHostApplicationServices;
 import org.hl7.fhir.r5.model.StructureDefinition;
-import org.hl7.fhir.r5.utils.XVerExtensionManager;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
 import org.hl7.fhir.r5.utils.validation.ValidatorSession;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.hl7.fhir.r5.utils.validation.constants.IdStatus;
+import org.hl7.fhir.r5.utils.xver.XVerExtensionManager;
+import org.hl7.fhir.r5.utils.xver.XVerExtensionManagerOld;
 import org.hl7.fhir.utilities.i18n.I18nConstants;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.validation.ValidatorSettings;
@@ -125,8 +127,8 @@ class ValidatorWrapper {
 	public List<ValidationMessage> validate(
 			IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
 		InstanceValidator v;
-		FHIRPathEngine.IEvaluationContext evaluationCtx = new FhirInstanceValidator.NullEvaluationContext();
-		XVerExtensionManager xverManager = new XVerExtensionManager(theWorkerContext);
+		IHostApplicationServices evaluationCtx = new FhirInstanceValidator.NullEvaluationContext();
+		XVerExtensionManager xverManager = new XVerExtensionManagerOld(theWorkerContext);
 		try {
 			v = new InstanceValidator(
 					theWorkerContext, evaluationCtx, xverManager, new ValidatorSession(), new ValidatorSettings());
@@ -203,7 +205,8 @@ class ValidatorWrapper {
 			}
 
 			Manager.FhirFormat format = Manager.FhirFormat.JSON;
-			v.validate(null, messages, inputStream, format, profiles);
+			ValidationOptions options = theValidationContext.getOptions();
+			v.validate(options.getAppContext(), messages, inputStream, format, profiles);
 		} else {
 			throw new IllegalArgumentException(Msg.code(649) + "Unknown encoding: " + encoding);
 		}

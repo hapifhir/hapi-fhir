@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobParameters;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
@@ -28,7 +29,6 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -62,9 +62,9 @@ import net.sf.jsqlparser.statement.update.UpdateSet;
 import org.assertj.core.api.Assertions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r5.model.ConceptMap;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.ConceptMap;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Encounter;
 import org.hl7.fhir.r5.model.Enumerations;
@@ -116,6 +116,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * scenarios including non-partitioned mode, partitioned mode, and
  * database partitioning mode.
  */
+@SuppressWarnings("unchecked")
 abstract class TestDefinitions implements ITestDataBuilder {
 
 	private final TestPartitionSelectorInterceptor myPartitionSelectorInterceptor;
@@ -218,8 +219,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		);
 		ResourceIdListWorkChunkJson workChunk = new ResourceIdListWorkChunkJson(typedPids, RequestPartitionId.fromPartitionId(PARTITION_1));
 		JobInstance jobInstance = new JobInstance();
-		String workChunkId = "AA";
-		StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson> executionDetails = new StepExecutionDetails<>(params, workChunk, jobInstance, workChunkId);
+		StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson> executionDetails = new StepExecutionDetails<>(params, workChunk, jobInstance, new WorkChunk());
 		myDeleteExpungeStep.run(executionDetails, myVoidSink);
 
 		// Verify
@@ -626,6 +626,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		assertThat(actualIds).asList().containsExactlyInAnyOrder(ids.allIdValues().toArray(new String[0]));
 
 		assertEquals(6, myCaptureQueriesListener.countSelectQueries());
+		assertThat(getSelectSql(0)).doesNotContainIgnoringCase("union");
 		if (myIncludePartitionIdsInSql) {
 			assertThat(getSelectSql(0)).endsWith(" where rt1_0.PARTITION_ID='1' and (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='" + ids.patientPid + "')");
 		} else {
@@ -638,7 +639,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			assertThat(getSelectSql(1)).startsWith("SELECT DISTINCT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK");
 		}
 		if (myIncludePartitionIdsInPks) {
-			assertThat(getSelectSql(1)).contains("WHERE ((t0.TARGET_RES_PARTITION_ID,t0.TARGET_RESOURCE_ID) IN (('1','" + ids.patientPid + "')) )");
+			assertThat(getSelectSql(1)).contains("WHERE (((t0.TARGET_RES_PARTITION_ID,t0.TARGET_RESOURCE_ID) IN (('1','" + ids.patientPid + "')) )");
 			assertThat(getSelectSql(1)).contains("GROUP BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
 			assertThat(getSelectSql(1)).contains("ORDER BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
 			assertThat(getSelectSql(2)).containsAnyOf(
@@ -648,7 +649,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			assertThat(getSelectSql(3)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.childOrgPid() + "') ");
 			assertThat(getSelectSql(4)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.parentOrgPid() + "') ");
 		} else {
-			assertThat(getSelectSql(1)).contains("WHERE (t0.TARGET_RESOURCE_ID = '" + ids.patientPid() + "') ");
+			assertThat(getSelectSql(1)).contains("WHERE ((t0.TARGET_RESOURCE_ID = '" + ids.patientPid() + "') ");
 			if (myIncludePartitionIdsInSql) {
 				assertThat(getSelectSql(1)).contains(" GROUP BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
 			} else {
@@ -1059,15 +1060,15 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 		if (myIncludePartitionIdsInPks) {
 			if (theAccessMetaSourceInformationFromProvenanceTable) {
-				assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_VER_PROV t1 ON ((t0.PARTITION_ID = t1.PARTITION_ID) AND (t0.RES_ID = t1.RES_PID)) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t1.SOURCE_URI = 'http://foo')) fetch first '10000' rows only", getSelectSql(0));
+				assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_VER_PROV t1 ON ((t0.PARTITION_ID = t1.PARTITION_ID) AND (t0.RES_ID = t1.RES_PID)) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND ((t1.PARTITION_ID = '1') AND (t1.SOURCE_URI = 'http://foo'))) fetch first '10000' rows only", getSelectSql(0));
 			} else {
-				assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_VER t1 ON ((t0.PARTITION_ID = t1.PARTITION_ID) AND (t0.RES_ID = t1.RES_ID)) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t1.SOURCE_URI = 'http://foo')) fetch first '10000' rows only", getSelectSql(0));
+				assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_VER t1 ON ((t0.PARTITION_ID = t1.PARTITION_ID) AND (t0.RES_ID = t1.RES_ID)) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND ((t1.PARTITION_ID = '1') AND (t1.SOURCE_URI = 'http://foo'))) fetch first '10000' rows only", getSelectSql(0));
 			}
 		} else if (myIncludePartitionIdsInSql) {
 			if (theAccessMetaSourceInformationFromProvenanceTable) {
-				assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_VER_PROV t1 ON (t0.RES_ID = t1.RES_PID) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t1.SOURCE_URI = 'http://foo')) fetch first '10000' rows only", getSelectSql(0));
+				assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_VER_PROV t1 ON (t0.RES_ID = t1.RES_PID) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND ((t1.PARTITION_ID = '1') AND (t1.SOURCE_URI = 'http://foo'))) fetch first '10000' rows only", getSelectSql(0));
 			} else {
-				assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_VER t1 ON (t0.RES_ID = t1.RES_ID) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t1.SOURCE_URI = 'http://foo')) fetch first '10000' rows only", getSelectSql(0));
+				assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_VER t1 ON (t0.RES_ID = t1.RES_ID) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND ((t1.PARTITION_ID = '1') AND (t1.SOURCE_URI = 'http://foo'))) fetch first '10000' rows only", getSelectSql(0));
 			}
 		} else {
 			if (theAccessMetaSourceInformationFromProvenanceTable) {
@@ -1334,9 +1335,9 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 		sql = myCaptureQueriesListener.getSelectQueries().get(1).getSql(true, false);
 		if (myIncludePartitionIdsInPks) {
-			assertThat(sql).isEqualTo("select rl1_0.TARGET_RESOURCE_ID,rl1_0.TARGET_RESOURCE_TYPE,rl1_0.TARGET_RESOURCE_URL,rl1_0.TARGET_RES_PARTITION_ID from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.qrId.getIdPart() + "') fetch first '1000' rows only");
+			assertThat(sql).isEqualTo("select rl1_0.TARGET_RESOURCE_ID,rl1_0.TARGET_RESOURCE_TYPE,rl1_0.TARGET_RESOURCE_URL,null,rl1_0.TARGET_RES_PARTITION_ID from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.qrId.getIdPart() + "') fetch first '1000' rows only");
 		} else {
-			assertThat(sql).isEqualTo("select rl1_0.TARGET_RESOURCE_ID,rl1_0.TARGET_RESOURCE_TYPE,rl1_0.TARGET_RESOURCE_URL from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.qrId().getIdPart() + "') fetch first '1000' rows only");
+			assertThat(sql).isEqualTo("select rl1_0.TARGET_RESOURCE_ID,rl1_0.TARGET_RESOURCE_TYPE,rl1_0.TARGET_RESOURCE_URL,null,null from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.qrId().getIdPart() + "') fetch first '1000' rows only");
 		}
 
 		sql = myCaptureQueriesListener.getSelectQueries().get(2).getSql(true, false);
@@ -1381,16 +1382,16 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 		sql = myCaptureQueriesListener.getSelectQueries().get(1).getSql(true, false);
 		if (myIncludePartitionIdsInPks) {
-			assertThat(sql).contains("WHERE r.src_path = 'Organization.partOf' AND r.target_resource_id IS NOT NULL AND r.src_resource_id IN ('" + ids.patientPid + "') AND r.partition_id = '1' AND r.target_resource_type = 'Organization' UNION");
+			assertThat(sql).contains("WHERE r.src_path = 'Organization.partOf' AND r.target_resource_id IS NOT NULL AND r.src_resource_id IN ('" + ids.patientPid + "') AND r.partition_id = '1' AND r.target_resource_type = 'Organization'");
 		} else {
-			assertThat(sql).contains("WHERE r.src_path = 'Organization.partOf' AND r.target_resource_id IS NOT NULL AND r.src_resource_id IN ('" + ids.patientPid + "') AND r.target_resource_type = 'Organization' UNION");
+			assertThat(sql).contains("WHERE r.src_path = 'Organization.partOf' AND r.target_resource_id IS NOT NULL AND r.src_resource_id IN ('" + ids.patientPid + "') AND r.target_resource_type = 'Organization'");
 		}
 
 		sql = myCaptureQueriesListener.getSelectQueries().get(2).getSql(true, false);
 		if (myIncludePartitionIdsInPks) {
-			assertThat(sql).contains("WHERE r.src_path = 'Patient.managingOrganization' AND r.target_resource_id IS NOT NULL AND r.src_resource_id IN ('" + ids.patientPid + "') AND r.partition_id = '1' AND r.target_resource_type = 'Organization' UNION");
+			assertThat(sql).contains("WHERE r.src_path = 'Patient.managingOrganization' AND r.target_resource_id IS NOT NULL AND r.src_resource_id IN ('" + ids.patientPid + "') AND r.partition_id = '1' AND r.target_resource_type = 'Organization'");
 		} else {
-			assertThat(sql).contains("WHERE r.src_path = 'Patient.managingOrganization' AND r.target_resource_id IS NOT NULL AND r.src_resource_id IN ('" + ids.patientPid + "') AND r.target_resource_type = 'Organization' UNION");
+			assertThat(sql).contains("WHERE r.src_path = 'Patient.managingOrganization' AND r.target_resource_id IS NOT NULL AND r.src_resource_id IN ('" + ids.patientPid + "') AND r.target_resource_type = 'Organization'");
 		}
 
 		// Index 3-6 are just more includes loading
@@ -1495,8 +1496,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		QuestionnaireResponse qr = new QuestionnaireResponse();
 		qr.setQuestionnaire("http://foo");
 		IIdType qrId = myQuestionnaireResponseDao.create(qr, newRequest()).getId().toUnqualifiedVersionless();
-		CreatedQuestionnaireAndResponseIds result = new CreatedQuestionnaireAndResponseIds(qId, qrId);
-		return result;
+		return new CreatedQuestionnaireAndResponseIds(qId, qrId);
 	}
 
 	private record CreatedQuestionnaireAndResponseIds(IIdType qId, IIdType qrId) {

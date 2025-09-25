@@ -23,6 +23,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ReindexTerminologyResult;
+import ca.uhn.fhir.replacereferences.UndoReplaceReferencesSvc;
 import ca.uhn.fhir.rest.annotation.At;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.Offset;
@@ -72,6 +73,9 @@ public abstract class BaseJpaSystemProvider<T, MT> extends BaseStorageSystemProv
 	@Autowired
 	private IReplaceReferencesSvc myReplaceReferencesSvc;
 
+	@Autowired
+	private UndoReplaceReferencesSvc myUndoReplaceReferencesSvc;
+
 	public BaseJpaSystemProvider() {
 		// nothing
 	}
@@ -82,6 +86,10 @@ public abstract class BaseJpaSystemProvider<T, MT> extends BaseStorageSystemProv
 
 	public IReplaceReferencesSvc getReplaceReferencesSvc() {
 		return myReplaceReferencesSvc;
+	}
+
+	public UndoReplaceReferencesSvc getUndoReplaceReferencesSvc() {
+		return myUndoReplaceReferencesSvc;
 	}
 
 	@History

@@ -83,6 +83,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		public void before() {
 			super.before();
 			beforeAutoVersionReferencesWithSetting();
+			initResourceTypeCacheFromConfig();
 		}
 	}
 
@@ -91,6 +92,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		@BeforeEach
 		public void before() {
 			beforeAutoVersionReferencesWithSetting();
+			initResourceTypeCacheFromConfig();
 		}
 	}
 
@@ -112,6 +114,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			observationAutoVersionExtension = createAutoVersionReferencesExtensions("subject");
 			explanationOfBenefitAutoVersionExtension = createAutoVersionReferencesExtensions("patient");
 			messageHeaderAutoVersionExtension = createAutoVersionReferencesExtensions("focus");
+			initResourceTypeCacheFromConfig();
 		}
 
 		@Nonnull
@@ -874,7 +877,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		{
 			myCaptureQueriesListener.clear();
 			IBundleProvider outcome = myObservationDao.search(SearchParameterMap.newSynchronous().addInclude(IBaseResource.INCLUDE_ALL), mySrd);
-			assertEquals(2, outcome.sizeOrThrowNpe());
+			validateSize(outcome, 1, 2);
 			List<IBaseResource> resources = outcome.getResources(0, 2);
 			assertEquals(5, myCaptureQueriesListener.logSelectQueries().size());
 			assertThat(resources).hasSize(2);
@@ -888,7 +891,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		// Search - Non-Synchronous for named include
 		{
 			IBundleProvider outcome = myObservationDao.search(SearchParameterMap.newSynchronous().addInclude(Observation.INCLUDE_PATIENT), mySrd);
-			assertEquals(2, outcome.sizeOrThrowNpe());
+			validateSize(outcome, 1, 2);
 			List<IBaseResource> resources = outcome.getResources(0, 2);
 			assertThat(resources).hasSize(2);
 			assertEquals(observationId.getValue(), resources.get(0).getIdElement().getValue());
@@ -922,7 +925,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		// Search for the Task using an _include=Task.basedOn and make sure we get the Condition resource in the Response
 		IBundleProvider outcome = myTaskDao.search(SearchParameterMap.newSynchronous().addInclude(Task.INCLUDE_BASED_ON), mySrd);
-		assertEquals(2, outcome.size());
+		assertEquals(1, outcome.size());
 		List<IBaseResource> resources = outcome.getResources(0, 2);
 		assertThat(resources.size()).as(resources.stream().map(t -> t.getIdElement().toUnqualified().getValue()).collect(Collectors.joining(", "))).isEqualTo(2);
 		assertEquals(taskId.getValue(), resources.get(0).getIdElement().getValue());
@@ -935,12 +938,18 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		// Search for the Task again and make sure that we get the original version of the Condition resource in the Response
 		outcome = myTaskDao.search(SearchParameterMap.newSynchronous().addInclude(Task.INCLUDE_BASED_ON), mySrd);
-		assertEquals(2, outcome.size());
+		validateSize(outcome, 1, 2);
 		resources = outcome.getResources(0, 2);
 		assertThat(resources).hasSize(2);
 		assertEquals(taskId.getValue(), resources.get(0).getIdElement().getValue());
 		assertEquals(conditionId.getValue(), ((Task) resources.get(0)).getBasedOn().get(0).getReference());
 		assertEquals(conditionId.withVersion("1").getValue(), resources.get(1).getIdElement().getValue());
+	}
+
+	private void validateSize(IBundleProvider theProvider, int theSize, int theSizeIncludingIncludesAndOutcomes) {
+		assertEquals(theSize, theProvider.size());
+		Integer totalSize = theProvider.containsAllResources() ? (Integer) theProvider.getResourceListComplete().size() : theProvider.size();
+		assertEquals(theSizeIncludingIncludesAndOutcomes, totalSize);
 	}
 
 	@Test
@@ -971,7 +980,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		// Search for the Task using an _include=Task.basedOn and make sure we get the Condition resource in the Response
 		IBundleProvider outcome = myTaskDao.search(SearchParameterMap.newSynchronous().addInclude(Task.INCLUDE_BASED_ON), mySrd);
-		assertEquals(2, outcome.size());
+		validateSize(outcome, 1, 2);
 		List<IBaseResource> resources = outcome.getResources(0, 2);
 		assertThat(resources.size()).as(resources.stream().map(t -> t.getIdElement().toUnqualified().getValue()).collect(Collectors.joining(", "))).isEqualTo(2);
 		assertEquals(taskId.getValue(), resources.get(0).getIdElement().getValue());
@@ -1015,7 +1024,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		// Search for the Task using an _include=Task.basedOn and make sure we get the Condition resource in the Response
 		IBundleProvider outcome = myTaskDao.search(SearchParameterMap.newSynchronous().addInclude(Task.INCLUDE_BASED_ON), mySrd);
-		assertEquals(2, outcome.size());
+		validateSize(outcome, 1, 2);
 		List<IBaseResource> resources = outcome.getResources(0, 2);
 		assertThat(resources.size()).as(resources.stream().map(t -> t.getIdElement().toUnqualified().getValue()).collect(Collectors.joining(", "))).isEqualTo(2);
 		assertEquals(taskId.getValue(), resources.get(0).getIdElement().getValue());
@@ -1090,7 +1099,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		// Search - Non Synchronous for *
 		{
 			IBundleProvider outcome = myObservationDao.search(SearchParameterMap.newSynchronous().addInclude(IBaseResource.INCLUDE_ALL), mySrd);
-			assertEquals(2, outcome.sizeOrThrowNpe());
+			validateSize(outcome, 1, 2);
 			List<IBaseResource> resources = outcome.getResources(0, 2);
 			assertThat(resources).hasSize(2);
 			assertEquals(observationId.getValue(), resources.get(0).getIdElement().getValue());
@@ -1100,7 +1109,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		// Search - Non Synchronous for named include
 		{
 			IBundleProvider outcome = myObservationDao.search(SearchParameterMap.newSynchronous().addInclude(Observation.INCLUDE_PATIENT), mySrd);
-			assertEquals(2, outcome.sizeOrThrowNpe());
+			validateSize(outcome, 1, 2);
 			List<IBaseResource> resources = outcome.getResources(0, 2);
 			assertThat(resources).hasSize(2);
 			assertEquals(observationId.getValue(), resources.get(0).getIdElement().getValue());

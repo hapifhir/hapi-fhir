@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CorsDstu3Test extends BaseResourceProviderDstu3Test {
 
@@ -17,7 +17,7 @@ public class CorsDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void saveLocalOrigin() throws IOException {
 		HttpGet get = new HttpGet(myServerBase + "/Patient?name=test");
-		get.addHeader("Origin", "file://");
+		get.addHeader(Constants.HEADER_CORS_ORIGIN, "file://");
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		
 		ourLog.info(resp.toString());

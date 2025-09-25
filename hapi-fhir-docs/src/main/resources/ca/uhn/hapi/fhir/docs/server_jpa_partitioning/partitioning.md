@@ -158,6 +158,9 @@ None of the limitations listed here are considered permanent. Over time the HAPI
    * StructureDefinition
    * StructureMap
    * ValueSet
+   * Group
+
+* **Group Resources**: In Patient ID partitioning, Group resources are treated as if they aren't in the patient compartment. Due to the fact that Group resources can have many patient members, this may lead to creation errors therefore all Group resources are added to the default partition.
 
 * **Server Capability Statement is not partition aware**: The server creates and exposes a single server capability statement, covering all partitions. This can be misleading when partitioning us used as a multitenancy strategy.
 

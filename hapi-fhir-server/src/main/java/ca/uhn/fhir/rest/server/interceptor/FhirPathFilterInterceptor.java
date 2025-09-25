@@ -81,7 +81,7 @@ public class FhirPathFilterInterceptor {
 							outputs = fhirPath.evaluate(responseResource, expression, IBase.class);
 						} catch (FhirPathExecutionException e) {
 							throw new InvalidRequestException(
-									Msg.code(327) + "Error parsing FHIRPath expression: " + e.getMessage());
+									Msg.code(327) + "Error parsing FHIRPath expression: " + e.getMessage(), e);
 						}
 
 						for (IBase nextOutput : outputs) {

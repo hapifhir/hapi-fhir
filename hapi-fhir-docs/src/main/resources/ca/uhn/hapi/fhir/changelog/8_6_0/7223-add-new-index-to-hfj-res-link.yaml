@@ -1,0 +1,4 @@
+---
+type: add
+issue: 7223
+title: "Add a new DB Index to the HFJ_RES_LINK Table called IDX_RL_SRCPATH_TGTURL to avoid Full Table Scans for certain queries."

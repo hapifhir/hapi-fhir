@@ -37,6 +37,7 @@ public class ConsumeFilesStepV2R4Test extends BasePartitioningR4Test {
 	public void before() throws Exception {
 		super.before();
 		myPartitionSettings.setPartitioningEnabled(false);
+		initResourceTypeCacheFromConfig();
 	}
 
 	@AfterEach
@@ -101,7 +102,8 @@ public class ConsumeFilesStepV2R4Test extends BasePartitioningR4Test {
 		if (partitionEnabled) {
 			myPartitionSettings.setPartitioningEnabled(true);
 			myPartitionSettings.setIncludePartitionInSearchHashes(true);
-			addNextTargetPartitionNTimesForCreate(1, 2);
+			addNextTargetPartitionForCreateWithId(1);
+			addNextTargetPartitionForCreateWithId(1);
 		}
 		Patient patient = new Patient();
 		patient.setId("A");

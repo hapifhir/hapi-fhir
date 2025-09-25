@@ -37,8 +37,11 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+
+import java.util.Objects;
 
 public class SqlObjectFactory {
 
@@ -81,8 +84,13 @@ public class SqlObjectFactory {
 				ResourceLinkPredicateBuilder.class, theQueryStack, theSearchSqlBuilder, theReversed);
 	}
 
-	public ResourceTablePredicateBuilder resourceTable(SearchQueryBuilder theSearchSqlBuilder) {
-		return myApplicationContext.getBean(ResourceTablePredicateBuilder.class, theSearchSqlBuilder);
+	public ResourceTablePredicateBuilder resourceTable(
+			SearchQueryBuilder theSearchSqlBuilder, SearchIncludeDeletedEnum theSearchIncludeDeleted) {
+		// the default is searching non-deleted resources
+		return myApplicationContext.getBean(
+				ResourceTablePredicateBuilder.class,
+				theSearchSqlBuilder,
+				Objects.requireNonNullElse(theSearchIncludeDeleted, SearchIncludeDeletedEnum.NEVER));
 	}
 
 	public ResourceIdPredicateBuilder resourceId(SearchQueryBuilder theSearchSqlBuilder) {

@@ -40,11 +40,13 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 
 	private final DbTable myTable;
 	private final DbColumn myColumnPartitionId;
+	private final DbColumn myColumnResType;
 
 	BaseJoiningPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, DbTable theTable) {
 		super(theSearchSqlBuilder);
 		myTable = theTable;
 		myColumnPartitionId = theTable.addColumn("PARTITION_ID");
+		myColumnResType = theTable.addColumn("RES_TYPE");
 	}
 
 	public DbTable getTable() {
@@ -55,6 +57,10 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 
 	public DbColumn getPartitionIdColumn() {
 		return myColumnPartitionId;
+	}
+
+	public DbColumn getResourceTypeColumn() {
+		return myColumnResType;
 	}
 
 	public DbColumn[] getJoinColumns() {
@@ -72,14 +78,14 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 
 	@Nullable
 	public Condition createPartitionIdPredicate(RequestPartitionId theRequestPartitionId) {
-
 		if (theRequestPartitionId != null && !theRequestPartitionId.isAllPartitions()) {
 			Condition condition;
 
-			boolean defaultPartitionIsNull = getPartitionSettings().getDefaultPartitionId() == null;
-			if (theRequestPartitionId.isDefaultPartition() && defaultPartitionIsNull) {
+			Integer defaultPartitionId = getPartitionSettings().getDefaultPartitionId();
+			boolean defaultPartitionIsNull = defaultPartitionId == null;
+			if (theRequestPartitionId.isPartition(defaultPartitionId) && defaultPartitionIsNull) {
 				condition = UnaryCondition.isNull(getPartitionIdColumn());
-			} else if (theRequestPartitionId.hasDefaultPartitionId() && defaultPartitionIsNull) {
+			} else if (theRequestPartitionId.hasDefaultPartitionId(defaultPartitionId) && defaultPartitionIsNull) {
 				List<String> placeholders = generatePlaceholders(theRequestPartitionId.getPartitionIdsWithoutDefault());
 				UnaryCondition partitionNullPredicate = UnaryCondition.isNull(getPartitionIdColumn());
 				Condition partitionIdsPredicate =

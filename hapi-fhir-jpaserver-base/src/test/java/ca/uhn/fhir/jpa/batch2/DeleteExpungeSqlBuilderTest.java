@@ -7,40 +7,41 @@ import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.delete.batch2.DeleteExpungeSqlBuilder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.QueryChunker;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 
-public class DeleteExpungeSqlBuilderTest {
-	@Autowired
-	private ResourceTableFKProvider theResourceTableFKProvider;
-	private JpaStorageSettings myStorageSettings = new JpaStorageSettings();
+@ExtendWith(MockitoExtension.class)
+class DeleteExpungeSqlBuilderTest {
+	@Mock
+	private ResourceTableFKProvider myResourceTableFKProvider;
+	@Mock
+	private JpaStorageSettings myStorageSettings;
+	@Mock
 	private IIdHelperService<JpaPid> myIdHelper;
 	@Mock
-	private IResourceLinkDao theResourceLinkDao;
-	private PartitionSettings thePartitionSettings = new PartitionSettings();
+	private IResourceLinkDao myResourceLinkDao;
+	@Mock
+	private PartitionSettings myPartitionSettings;
+	@InjectMocks
 	private DeleteExpungeSqlBuilder myDeleteExpungeSqlBuilderTest;
-
-	@BeforeEach
-	public void beforeEach() {
-		myDeleteExpungeSqlBuilderTest = new DeleteExpungeSqlBuilder(
-			theResourceTableFKProvider,
-			myStorageSettings,
-			myIdHelper,
-			theResourceLinkDao,
-			thePartitionSettings
-		);
-	}
 
 	@Test
 	public void testQueryChunkingWhenFindingChildResources(){
@@ -56,5 +57,30 @@ public class DeleteExpungeSqlBuilderTest {
 			//Verify: That the SQL query is done in chunks.
 			queryChunker.verify(() -> QueryChunker.chunk(anyCollection(), any()), times(1));
 		}
+	}
+
+	@Test
+	void testValidateOkToDeleteAndExpunge_whenEnforceReferentialIntegrityDisableForPaths_noException() {
+		// Set up
+		String path = "Encounter.subject";
+		when(myStorageSettings.getEnforceReferentialIntegrityOnDeleteDisableForPaths()).thenReturn(Set.of(path));
+		when(myStorageSettings.isEnforceReferentialIntegrityOnDelete()).thenReturn(true);
+
+		ResourceTable sourceRes = new ResourceTable();
+		sourceRes.setId(JpaPid.fromIdAndResourceType(20L, "Encounter"));
+
+		ResourceLink resLink = new ResourceLink();
+		resLink.setSourceResource(sourceRes);
+		resLink.setSourcePath(path);
+
+		List<ResourceLink> conflictResourceLinks = List.of(resLink);
+		when(myResourceLinkDao.findWithTargetPidIn(anyList())).thenReturn(conflictResourceLinks);
+
+		Set<JpaPid> pids = Set.of(JpaPid.fromIdAndResourceType(10L, "Patient"));
+
+		// Execute & Verify
+		assertDoesNotThrow(() -> {
+			myDeleteExpungeSqlBuilderTest.validateOkToDeleteAndExpunge(pids, false, null);
+		});
 	}
 }
