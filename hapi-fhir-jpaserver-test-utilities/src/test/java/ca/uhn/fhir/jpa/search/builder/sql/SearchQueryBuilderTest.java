@@ -433,9 +433,7 @@ public class SearchQueryBuilderTest {
 	}
 
 	/**
-	 * Test for SQL GROUP BY issue with coordinate near sorting and offset.
-	 * Bug: "ERROR: column must appear in the GROUP BY clause or be used in an aggregate function"
-	 * Fix: The distance calculation column (MHD0, MHD1, etc.) is automatically added to GROUP BY when detected
+	 * Test for SQL GROUP BY issue (6709) with coordinate near sorting and offset.
 	 */
 	@Test
 	public void testCoordinateNearSortingWithGroupByHandlesSQLCorrectly() {
@@ -444,16 +442,18 @@ public class SearchQueryBuilderTest {
 
 		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myStorageSettings, myPartitionSettings, myRequestPartitionId, "Location", mySqlBuilderFactory, dialectProvider, false, false);
 
-		// Trigger GROUP BY scenario
-		builder.addResourceIdsPredicate(Lists.newArrayList(JpaPid.fromId(100L), JpaPid.fromId(101L)));
-
 		// Add coordinate distance sorting
 		ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder coordsPredicate =
 			builder.addCoordsPredicateBuilder(null);
 
+		// Trigger GROUP BY scenario BEFORE adding coordinate sorting
+		// This simulates the correct production sequence where GROUP BY exists before coordinate sorting is added
+		builder.getSelect().addGroupings(builder.getOrCreateFirstPredicateBuilder().getResourceIdColumn());
+
 		double latitude = 50.097;
 		double longitude = 8.6648;
 		builder.addSortCoordsNear(coordsPredicate, latitude, longitude, true);
+
 
 		// Generate SQL with offset
 		GeneratedSql generatedSql = builder.generate(1, 1);
@@ -462,26 +462,33 @@ public class SearchQueryBuilderTest {
 		assertTrue(sql.contains("SELECT"), "SQL should contain SELECT clause");
 
 		// Find distance calculation column name (MHD0, MHD1, etc.)
-		String distanceColumnName = null;
-		java.util.regex.Pattern mhdPattern = java.util.regex.Pattern.compile("MHD\\d+");
-		java.util.regex.Matcher matcher = mhdPattern.matcher(sql);
-		if (matcher.find()) {
-			distanceColumnName = matcher.group();
+		java.util.regex.Pattern distanceColumnPattern = java.util.regex.Pattern.compile("MHD\\d+");
+		java.util.regex.Matcher matcher = distanceColumnPattern.matcher(sql);
+		assertTrue(matcher.find(), "SQL should contain distance calculation column (MHD0, MHD1, etc.)");
+		String distanceColumnName = matcher.group();
+
+		// Verify GROUP BY clause exists
+		assertTrue(sql.contains("GROUP BY"), "SQL should contain GROUP BY clause (this test specifically tests the GROUP BY scenario)");
+
+		// Extract GROUP BY clause and verify distance column is included
+		int groupByIndex = sql.indexOf("GROUP BY");
+		int orderByIndex = sql.indexOf("ORDER BY");
+		if (orderByIndex == -1) {
+			orderByIndex = sql.length();
 		}
+		String groupByClause = sql.substring(groupByIndex, orderByIndex).trim();
 
-		assertTrue(distanceColumnName != null, "SQL should contain distance calculation column (MHD0, MHD1, etc.)");
+		// This assertion should FAIL and expose the bug: MHD0 is NOT in the GROUP BY clause
+		assertTrue(groupByClause.contains(distanceColumnName),
+			"Distance calculation column (" + distanceColumnName + ") must be included in GROUP BY clause when GROUP BY is present. " +
+				"This prevents PostgreSQL error: 'column must appear in the GROUP BY clause'. " +
+				"SQL: " + sql + ", GROUP BY clause: " + groupByClause);
 
-		// Critical test: verify distance column is in GROUP BY clause
-		boolean hasGroupBy = sql.contains("GROUP BY");
-		if (hasGroupBy) {
-			assertTrue(sql.contains("GROUP BY") && sql.indexOf(distanceColumnName, sql.indexOf("GROUP BY")) > 0,
-				"Distance calculation column (" + distanceColumnName + ") must be included in GROUP BY clause when GROUP BY is present. " +
-					"This prevents PostgreSQL error: 'column must appear in the GROUP BY clause'. SQL: " + sql);
-		}
-
-		assertTrue(sql.contains("ORDER BY") && sql.contains(distanceColumnName),
+		// Verify ORDER BY contains distance column
+		assertTrue(sql.contains("ORDER BY " + distanceColumnName),
 			"SQL should contain ORDER BY with " + distanceColumnName + " distance calculation");
 
+		// Verify bind variables
 		assertThat(generatedSql.getBindVariables()).contains(latitude, longitude);
 	}
 
@@ -511,7 +518,6 @@ public class SearchQueryBuilderTest {
 		}
 
 		@Bean
-		@Scope("prototype")
 		public SqlObjectFactory sqlObjectFactory() {
 			return new SqlObjectFactory();
 		}
