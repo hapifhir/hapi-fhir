@@ -138,6 +138,31 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 	}
 
 	@Test
+	void testRawGetRequestWith201Response() throws IOException {
+		// given
+		Header[] headers = new Header[0];
+
+		ArgumentCaptor<HttpUriRequest> capt = prepareClientForResponse(
+			 Constants.CT_JSON,
+			 ()->new ByteArrayInputStream(new byte[0]),
+			 new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "No Content"),
+			 headers
+		);
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		// when
+		IEntityResult result = client.rawHttpRequest().get("someurl?param1=value1").execute();
+
+		// then
+		HttpUriRequest httpUriRequest = capt.getAllValues().get(0);
+		assertEquals("http://example.com/fhir/someurl?param1=value1", UrlUtil.unescape(httpUriRequest.getURI().toString()));
+		String response = new String(result.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+		assertEquals("", response);
+		assertEquals("application/json", result.getMimeType());
+		assertEquals(201, result.getStatusCode());
+	}
+
+	@Test
 	void testRawGetRequestWith400Response() throws IOException {
 		// given
 		Header[] headers = new Header[0];
