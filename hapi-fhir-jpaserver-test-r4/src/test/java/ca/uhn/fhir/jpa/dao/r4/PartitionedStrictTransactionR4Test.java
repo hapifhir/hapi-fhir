@@ -47,9 +47,9 @@ public class PartitionedStrictTransactionR4Test extends BasePartitioningR4Test {
 
 	@Override
 	public void after() {
-		super.after();
 		myTransactionService.setTransactionPropagationWhenChangingPartitions(HapiTransactionService.DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
-		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof MyPartitionSelectorInterceptor);
+		myInterceptorRegistry.unregisterInterceptorsIf(MyPartitionSelectorInterceptor.class::isInstance);
+		super.after();
 	}
 
 	/**
@@ -89,6 +89,7 @@ public class PartitionedStrictTransactionR4Test extends BasePartitioningR4Test {
 		IdType id = new IdType(output.getEntry().get(0).getResponse().getLocation());
 		Patient actualPatient = myPatientDao.read(id, mySrd);
 		RequestPartitionId actualPartitionId = (RequestPartitionId) actualPatient.getUserData(Constants.RESOURCE_PARTITION_ID);
+		assertThat(actualPartitionId).isNotNull();
 		assertThat(actualPartitionId.getPartitionIds()).containsExactly(myPartitionId);
 	}
 

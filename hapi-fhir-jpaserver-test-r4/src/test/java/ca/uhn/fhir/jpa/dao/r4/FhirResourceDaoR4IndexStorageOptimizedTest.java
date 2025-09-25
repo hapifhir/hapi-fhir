@@ -300,7 +300,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 		JpaRepository<? extends BaseResourceIndexedSearchParam, Long> theIndexedSpRepository,
 		IIdType theId, String theSearchParam, String theResourceType) {
 		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(),
-			RequestPartitionId.defaultPartition(), theResourceType, theSearchParam);
+			RequestPartitionId.allPartitions(), theResourceType, theSearchParam);
 
 		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
 			IndexedSearchParamIdentity spIdentity = runInTransaction(() ->

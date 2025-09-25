@@ -16,7 +16,6 @@ import ca.uhn.test.concurrency.LockstepEnumPhaser;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
 import jakarta.annotation.Nullable;
-import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.HumanName;
@@ -42,7 +41,7 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 	private ThreadSafeResourceDeleterSvc myThreadSafeResourceDeleterSvc;
 
 	@RegisterExtension
-	final LogbackTestExtension mySqlExceptionHelperLog = new LogbackTestExtension(SqlExceptionHelper.class);
+	final LogbackTestExtension mySqlExceptionHelperLog = new LogbackTestExtension("org.hibernate.orm.jdbc.error");
 
 	@Autowired
 	IInterceptorBroadcaster myIdInterceptorBroadcaster;
@@ -57,7 +56,7 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 
 
 	@BeforeEach
-	void beforeEach() {
+	void beforeEach() throws Exception {
 		myThreadSafeResourceDeleterSvc = new ThreadSafeResourceDeleterSvc(myDaoRegistry, myIdInterceptorBroadcaster, myHapiTransactionService);
 	}
 
@@ -176,7 +175,7 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 		// Unpause and succeed in deleting the second patient because we will get the correct version now
 		// Red Green: If you delete the updatePatient above, it will timeout here
 		phaser.arriveAndAwaitSharedEndOf(UpdateSteps.DEL_BEFORE_SECOND_PATIENT_DELETE_SUCCEED);
-		LogbackTestExtensionAssert.assertThat(mySqlExceptionHelperLog).hasErrorMessage("Unique index or primary key violation");
+		LogbackTestExtensionAssert.assertThat(mySqlExceptionHelperLog).hasWarnMessage("Unique index or primary key violation");
 
 		phaser.assertInPhase(UpdateSteps.BOTH_COMPLETE);
 

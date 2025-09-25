@@ -140,7 +140,7 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 	/**
 	 * @deprecated Use {@link #setLoggerLevel(Level)} instead
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public void setUp(Level theLevel) {
 		setLoggerLevel(theLevel);
 	}
@@ -149,7 +149,7 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 	 * @deprecated This class should be registered as a junit5 extension, and will be set
 	 * up automatically.
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public void setUp() {
 		// nothing
 	}
