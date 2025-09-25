@@ -37,6 +37,7 @@ import org.springframework.test.util.XmlExpectationsHelper;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hl7.fhir.r4.model.Encounter.EncounterLocationStatus.ACTIVE;
 import static org.hl7.fhir.r4.model.Encounter.EncounterLocationStatus.RESERVED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -62,11 +63,8 @@ public class FhirPatchApplyR4Test {
 			.setName("type")
 			.setValue(new CodeType("foo"));
 
-		try {
-			svc.apply(patient, patch);
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1267) + "Unknown patch operation type: foo", e.getMessage());
-		}
+		assertThatThrownBy(() -> svc.apply(patient, patch))
+			.hasMessageContaining("Unknown patch operation type: foo");
 	}
 
 	@Test
@@ -91,11 +89,8 @@ public class FhirPatchApplyR4Test {
 			.setName("index")
 			.setValue(new IntegerType(2));
 
-		try {
-			svc.apply(patient, patch);
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1270) + "Invalid insert index 2 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
-		}
+		assertThatThrownBy(() -> svc.apply(patient, patch))
+			.hasMessageContaining("Invalid insert index 2 for path Patient.identifier - Only have 0 existing entries");
 	}
 
 	@Test
@@ -120,11 +115,8 @@ public class FhirPatchApplyR4Test {
 			.setName("index")
 			.setValue(new IntegerType(-1));
 
-		try {
-			svc.apply(patient, patch);
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1270) + "Invalid insert index -1 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
-		}
+		assertThatThrownBy(() -> svc.apply(patient, patch))
+			.hasMessageContaining("Invalid insert index -1 for path Patient.identifier - Only have 0 existing entries");
 	}
 
 	@Test
