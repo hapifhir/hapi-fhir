@@ -276,6 +276,9 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		SearchParameter eyeColourSp = new SearchParameter();
 		eyeColourSp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
 		eyeColourSp.setCode("eyecolour");
+		eyeColourSp.setName("eyecolour");
+		eyeColourSp.setDescription("description");
+		eyeColourSp.setUrl("http://localhost/SearchParameter/eyecolour");
 		eyeColourSp.setType(Enumerations.SearchParamType.STRING);
 		eyeColourSp.setTitle("Eye Colour");
 		eyeColourSp.setExpression("Patient.extension('http://acme.org/eyecolour')");
@@ -304,6 +307,9 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		sp.setId("SearchParameter/patient-family");
 		sp.setType(Enumerations.SearchParamType.STRING);
 		sp.setCode("family");
+		sp.setName("family");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/" + sp.getId());
 		sp.setExpression("Patient.name.family + '|'");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
@@ -313,6 +319,9 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		sp.setId("SearchParameter/patient-given");
 		sp.setType(Enumerations.SearchParamType.STRING);
 		sp.setCode("given");
+		sp.setName("given");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost" + sp.getId());
 		sp.setExpression("Patient.name.given");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
@@ -321,6 +330,10 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-names-and-gender");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setName("patient-names-and-gender");
+		sp.setCode("patient-names-and-gender");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost" + sp.getId());
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
 		sp.addComponent()

@@ -44,6 +44,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class RuntimeSearchParam {
+
 	private final IIdType myId;
 	private final Set<String> myBase;
 	private final String myDescription;
@@ -54,6 +55,7 @@ public class RuntimeSearchParam {
 	private final Set<String> myProvidesMembershipInCompartments;
 	private final RuntimeSearchParamStatusEnum myStatus;
 	private final String myUri;
+	private String myVersion;
 	private final Map<String, List<IBaseExtension<?, ?>>> myExtensions = new HashMap<>();
 	private final Map<String, String> myUpliftRefchains = new HashMap<>();
 	private final ComboSearchParamType myComboSearchParamType;
@@ -62,6 +64,12 @@ public class RuntimeSearchParam {
 	private IPhoneticEncoder myPhoneticEncoder;
 	private boolean myEnabledForSearching = true;
 
+	/**
+	 * The source of this SP.
+	 * We have it initialized so it's never null; but seeding services
+	 * should populate this value
+	 */
+	private RuntimeResourceSource mySource = new RuntimeResourceSource();
 	/**
 	 * Constructor
 	 */
@@ -183,6 +191,14 @@ public class RuntimeSearchParam {
 	 */
 	public void setEnabledForSearching(boolean theEnabledForSearching) {
 		myEnabledForSearching = theEnabledForSearching;
+	}
+
+	public RuntimeResourceSource getSource() {
+		return mySource;
+	}
+
+	public void setSource(RuntimeResourceSource theSource) {
+		mySource = theSource;
 	}
 
 	public List<Component> getComponents() {
