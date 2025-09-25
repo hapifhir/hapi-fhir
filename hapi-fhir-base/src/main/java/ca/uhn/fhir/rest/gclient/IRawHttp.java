@@ -1,7 +1,7 @@
 package ca.uhn.fhir.rest.gclient;
 
 /**
-* Interface for making raw HTTP requests using the GenericClient infrastructure.
+ * Interface for making raw HTTP requests using the GenericClient infrastructure.
  * This allows non-FHIR HTTP calls to benefit from the same interceptor chain,
  * authentication, and configuration as regular FHIR operations.
  *
