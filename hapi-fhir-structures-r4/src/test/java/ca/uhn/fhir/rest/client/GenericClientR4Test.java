@@ -108,13 +108,20 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericClientR4Test.class);
 
 	@Test
-	void testRawGetRequest() throws IOException {
+	void testRawGetRequestWith200Response() throws IOException {
 	    // given
+		Header header = new BasicHeader("custom-header", "custom-value");
+		Header[] headers = new Header[1];
+		headers[0] = header;
 		String responseBody = """
 			 { "jobId": "blahblah" }
 			 """;
 		ArgumentCaptor<HttpUriRequest> capt = prepareClientForResponse(
-			 Constants.CT_JSON, ()->new ByteArrayInputStream(responseBody.getBytes(StandardCharsets.UTF_8)));
+			 Constants.CT_JSON,
+			 ()->new ByteArrayInputStream(responseBody.getBytes(StandardCharsets.UTF_8)),
+			 new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"),
+			 headers
+			 );
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 	    // when
@@ -127,7 +134,29 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		assertEquals(responseBody, response);
 		assertEquals("application/json", result.getMimeType());
 		assertEquals(200, result.getStatusCode());
-		assertTrue(result.getHeaders().isEmpty());
+		assertEquals("custom-value", result.getHeaders().get("custom-header").get(0));
+	}
+
+	@Test
+	void testRawGetRequestWith400Response() throws IOException {
+		// given
+		Header[] headers = new Header[0];
+
+		prepareClientForResponse(
+			 Constants.CT_JSON,
+			 ()->new ByteArrayInputStream(new byte[0]),
+			 new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 400, "Bad Request"),
+			 headers
+		);
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		// when
+		try {
+			client.rawHttpRequest().get("someurl?param1=value1").execute();
+		} catch (InvalidRequestException e) {
+			assertEquals(400, e.getStatusCode());
+			assertEquals("HTTP 400 Bad Request", e.getMessage());
+		}
 	}
 
 

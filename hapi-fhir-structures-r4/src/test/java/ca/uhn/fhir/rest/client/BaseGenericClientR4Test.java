@@ -70,21 +70,29 @@ public abstract class BaseGenericClientR4Test {
 	}
 
 	protected ArgumentCaptor<HttpUriRequest> prepareClientForSearchResponse() throws IOException {
-		return prepareClientForResponse(Constants.CT_FHIR_JSON + "; charset=UTF-8", () -> {
-			return new ReaderInputStream(new StringReader("""
-				 {"resourceType":"Bundle","id":null,
-				 "base":"http://localhost:57931/fhir/contextDev",
-				 "total":1,
-				 "link":[{"relation":"self","url":"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json"}],
-				 "entry":[{"resource":{"resourceType":"Patient","id":"1","meta":{"versionId":"1","lastUpdated":"2014-12-20T18:41:29.706-05:00"},"identifier":[{"system":"urn:MultiFhirVersionTest","value":"testSubmitPatient01"}]}}]}""")
-				 , StandardCharsets.UTF_8);
-		});
+		return prepareClientForResponse(
+			 Constants.CT_FHIR_JSON + "; charset=UTF-8",
+			 () -> new ReaderInputStream(new StringReader("""
+				  {"resourceType":"Bundle","id":null,
+				  "base":"http://localhost:57931/fhir/contextDev",
+				  "total":1,
+				  "link":[{"relation":"self","url":"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json"}],
+				  "entry":[{"resource":{"resourceType":"Patient","id":"1","meta":{"versionId":"1","lastUpdated":"2014-12-20T18:41:29.706-05:00"},"identifier":[{"system":"urn:MultiFhirVersionTest","value":"testSubmitPatient01"}]}}]}""")
+				  , StandardCharsets.UTF_8),
+			 new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"),
+			 new Header[0]
+		);
 	}
 
-	protected @NotNull ArgumentCaptor<HttpUriRequest> prepareClientForResponse(String theContentType, Supplier<InputStream> theResultSupplier) throws IOException {
+	protected @NotNull ArgumentCaptor<HttpUriRequest> prepareClientForResponse(
+		 String theContentType,
+		 Supplier<InputStream> theResultSupplier,
+		 BasicStatusLine theStatusLine,
+		 Header[] theHeaders
+	) throws IOException {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getStatusLine()).thenReturn(theStatusLine);
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", theContentType));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
@@ -92,6 +100,7 @@ public abstract class BaseGenericClientR4Test {
 				return theResultSupplier.get();
 			}
 		});
+		when(myHttpResponse.getAllHeaders()).thenReturn(theHeaders);
 		return capt;
 	}
 
