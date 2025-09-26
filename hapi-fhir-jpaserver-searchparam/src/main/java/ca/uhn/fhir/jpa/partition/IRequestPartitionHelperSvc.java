@@ -237,10 +237,7 @@ public interface IRequestPartitionHelperSvc {
 		if (isDefaultPartition(theRequestPartitionId)) {
 			return Objects.equals(thePid.getPartitionId(), getDefaultPartitionId());
 		}
-		if (theRequestPartitionId.hasPartitionIds()
-				&& !theRequestPartitionId.getPartitionIds().contains(thePid.getPartitionId())) {
-			return false;
-		}
-		return true;
+		return !theRequestPartitionId.hasPartitionIds()
+				|| theRequestPartitionId.getPartitionIds().contains(thePid.getPartitionId());
 	}
 }

@@ -97,7 +97,9 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 				(TransactionPrePartitionResponse) myInterceptorBroadcaster.callHooksAndReturnObject(
 						Pointcut.STORAGE_TRANSACTION_PRE_PARTITION, hookParams);
 		Validate.isTrue(
-				partitionResponse != null && partitionResponse.splitBundles() != null,
+				partitionResponse != null
+						&& partitionResponse.splitBundles() != null
+						&& !partitionResponse.splitBundles().isEmpty(),
 				"Hook for pointcut STORAGE_TRANSACTION_PRE_PARTITION did not return a value");
 		List<IBaseBundle> partitionRequestBundles = partitionResponse.splitBundles();
 
@@ -106,14 +108,14 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 
 	@Nonnull
 	@SuppressWarnings("unchecked")
-	private BUNDLE processPartitionedBundles(BUNDLE theRequest, List<IBaseBundle> thePartitionedRequests) {
+	private BUNDLE processPartitionedBundles(BUNDLE theOriginalBundle, List<IBaseBundle> thePartitionedRequests) {
 
 		RuntimeResourceDefinition bundleDefinition = myFhirContext.getResourceDefinition("Bundle");
 		BaseRuntimeChildDefinition bundleEntryChild = bundleDefinition.getChildByName("entry");
 		FhirTerser terser = myFhirContext.newTerser();
 
 		IdentityHashMap<IBase, Integer> originalEntryToIndex = new IdentityHashMap<>();
-		List<IBase> originalEntries = bundleEntryChild.getAccessor().getValues(theRequest);
+		List<IBase> originalEntries = bundleEntryChild.getAccessor().getValues(theOriginalBundle);
 		for (int i = 0; i < originalEntries.size(); i++) {
 			originalEntryToIndex.put(originalEntries.get(i), i);
 		}
