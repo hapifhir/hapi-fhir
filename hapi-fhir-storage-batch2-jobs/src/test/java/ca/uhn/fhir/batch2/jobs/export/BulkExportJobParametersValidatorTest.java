@@ -207,12 +207,12 @@ public class BulkExportJobParametersValidatorTest {
 		assertNotNull(errors);
 		assertThat(errors)
 			.isNotEmpty()
-			.contains("The allowed formats for Bulk Export are currently %s and %s"
-				.formatted(Constants.CT_FHIR_NDJSON, Constants.CT_APP_NDJSON));
+			.contains("The allowed formats for Bulk Export are %s, %s and %s"
+				.formatted(Constants.CT_FHIR_NDJSON, Constants.CT_APP_NDJSON, Constants.CT_NDJSON));
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = {Constants.CT_FHIR_NDJSON, Constants.CT_APP_NDJSON})
+	@ValueSource(strings = {Constants.CT_FHIR_NDJSON, Constants.CT_APP_NDJSON, Constants.CT_NDJSON})
 	public void validate_allowedOutputFormat_returnsEmptyList(String outputFormat) {
 		// setup
 		BulkExportJobParameters parameters = createSystemExportParameters();

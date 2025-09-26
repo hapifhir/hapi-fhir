@@ -1475,33 +1475,27 @@ public class FhirTerser {
 	}
 
 	/**
-	 * Clear all content on a resource
+	 * Clear all content on an element
+	 *
+	 * @return Returns <code>true</code> if any content was actually cleared
+	 * @since 8.6.0
 	 */
-	public void clear(IBaseResource theInput) {
-		visit(theInput, new IModelVisitor2() {
-			@Override
-			public boolean acceptElement(
-					IBase theElement,
-					List<IBase> theContainingElementPath,
-					List<BaseRuntimeChildDefinition> theChildDefinitionPath,
-					List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
-				if (theElement instanceof IPrimitiveType) {
-					((IPrimitiveType) theElement).setValueAsString(null);
-				}
-				return true;
-			}
+	public boolean clear(IBase theInput) {
+		ClearingModelVisitor visitor = new ClearingModelVisitor();
+		visit(theInput, visitor);
+		return visitor.myFoundContent;
+	}
 
-			@Override
-			public boolean acceptUndeclaredExtension(
-					IBaseExtension<?, ?> theNextExt,
-					List<IBase> theContainingElementPath,
-					List<BaseRuntimeChildDefinition> theChildDefinitionPath,
-					List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
-				theNextExt.setUrl(null);
-				theNextExt.setValue(null);
-				return true;
-			}
-		});
+	/**
+	 * Clear all content on a resource.
+	 *
+	 * @return Returns <code>true</code> if any content was actually cleared
+	 * @see #clear(IBase) This method is a synonym for {@link #clear(IBase)}, provided for historical reasons.
+	 */
+	public boolean clear(IBaseResource theInput) {
+		ClearingModelVisitor visitor = new ClearingModelVisitor();
+		visit(theInput, visitor);
+		return visitor.myFoundContent;
 	}
 
 	private void containResourcesForEncoding(ContainedResources theContained, IBaseResource theResource) {
@@ -2001,6 +1995,47 @@ public class FhirTerser {
 				return getPreviouslyContainedResourceToIdMap().get(theResource);
 			}
 			return null;
+		}
+	}
+
+	private static class ClearingModelVisitor implements IModelVisitor2 {
+
+		private boolean myFoundContent;
+
+		@Override
+		public boolean acceptElement(
+				IBase theElement,
+				List<IBase> theContainingElementPath,
+				List<BaseRuntimeChildDefinition> theChildDefinitionPath,
+				List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+			if (theElement instanceof IPrimitiveType<?> type) {
+				if (type.getValueAsString() != null) {
+					myFoundContent = true;
+					type.setValueAsString(null);
+				}
+			}
+			return true;
+		}
+
+		@Override
+		public boolean acceptUndeclaredExtension(
+				IBaseExtension<?, ?> theNextExt,
+				List<IBase> theContainingElementPath,
+				List<BaseRuntimeChildDefinition> theChildDefinitionPath,
+				List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+			if (theNextExt.getUrl() != null) {
+				theNextExt.setUrl(null);
+				myFoundContent = true;
+			}
+			if (theNextExt.getValue() != null) {
+				myFoundContent = true;
+				theNextExt.setValue(null);
+			}
+			if (!theNextExt.getExtension().isEmpty()) {
+				theNextExt.getExtension().clear();
+				myFoundContent = true;
+			}
+			return true;
 		}
 	}
 }

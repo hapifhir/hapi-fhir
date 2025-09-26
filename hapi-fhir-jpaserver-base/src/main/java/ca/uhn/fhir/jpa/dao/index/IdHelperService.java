@@ -231,7 +231,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		if (!ids.isEmpty()) {
 			myTransactionService
 					.withSystemRequest()
-					.withRequestPartitionId(theRequestPartitionId)
+					.withRequestPartitionId(requestPartitionId)
 					.execute(() ->
 							resolveResourceIdentitiesForFhirIdsUsingDatabase(requestPartitionId, ids, idToLookup));
 		}

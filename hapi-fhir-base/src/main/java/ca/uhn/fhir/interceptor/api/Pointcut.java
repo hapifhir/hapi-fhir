@@ -1812,10 +1812,6 @@ public enum Pointcut implements IPointcut {
 	 * FHIR transaction processing not actually fully respecting the atomicity specified
 	 * in the FHIR specification. Use with caution!
 	 * </p>
-	 * <p>
-	 * Hooks will have access to the contents of the resource being deleted
-	 * but should not make any changes as storage has already occurred
-	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>org.hl7.fhir.instance.model.api.IBaseBundle - The FHIR transaction Bundle</li>

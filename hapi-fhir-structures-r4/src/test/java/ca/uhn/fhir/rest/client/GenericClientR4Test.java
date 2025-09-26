@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
 import ca.uhn.fhir.rest.client.interceptor.CookieInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.UserInfoInterceptor;
+import ca.uhn.fhir.rest.gclient.IEntityResult;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -105,6 +106,84 @@ import static org.mockito.Mockito.when;
 
 public class GenericClientR4Test extends BaseGenericClientR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericClientR4Test.class);
+
+	@Test
+	void testRawGetRequestWith200Response() throws IOException {
+	    // given
+		Header header = new BasicHeader("custom-header", "custom-value");
+		Header[] headers = new Header[1];
+		headers[0] = header;
+		String responseBody = """
+			 { "jobId": "blahblah" }
+			 """;
+		ArgumentCaptor<HttpUriRequest> capt = prepareClientForResponse(
+			 Constants.CT_JSON,
+			 ()->new ByteArrayInputStream(responseBody.getBytes(StandardCharsets.UTF_8)),
+			 new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"),
+			 headers
+			 );
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+	    // when
+		IEntityResult result = client.rawHttpRequest().get("someurl?param1=value1").execute();
+
+	    // then
+		HttpUriRequest httpUriRequest = capt.getAllValues().get(0);
+		assertEquals("http://example.com/fhir/someurl?param1=value1", UrlUtil.unescape(httpUriRequest.getURI().toString()));
+		String response = new String(result.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+		assertEquals(responseBody, response);
+		assertEquals("application/json", result.getMimeType());
+		assertEquals(200, result.getStatusCode());
+		assertEquals("custom-value", result.getHeaders().get("custom-header").get(0));
+	}
+
+	@Test
+	void testRawGetRequestWith201Response() throws IOException {
+		// given
+		Header[] headers = new Header[0];
+
+		ArgumentCaptor<HttpUriRequest> capt = prepareClientForResponse(
+			 Constants.CT_JSON,
+			 ()->new ByteArrayInputStream(new byte[0]),
+			 new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "No Content"),
+			 headers
+		);
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		// when
+		IEntityResult result = client.rawHttpRequest().get("someurl?param1=value1").execute();
+
+		// then
+		HttpUriRequest httpUriRequest = capt.getAllValues().get(0);
+		assertEquals("http://example.com/fhir/someurl?param1=value1", UrlUtil.unescape(httpUriRequest.getURI().toString()));
+		String response = new String(result.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+		assertEquals("", response);
+		assertEquals("application/json", result.getMimeType());
+		assertEquals(201, result.getStatusCode());
+	}
+
+	@Test
+	void testRawGetRequestWith400Response() throws IOException {
+		// given
+		Header[] headers = new Header[0];
+
+		prepareClientForResponse(
+			 Constants.CT_JSON,
+			 ()->new ByteArrayInputStream(new byte[0]),
+			 new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 400, "Bad Request"),
+			 headers
+		);
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		// when
+		try {
+			client.rawHttpRequest().get("someurl?param1=value1").execute();
+		} catch (InvalidRequestException e) {
+			assertEquals(400, e.getStatusCode());
+			assertEquals("HTTP 400 Bad Request", e.getMessage());
+		}
+	}
+
 
 	@Test
 	public void testAcceptHeaderCustom() throws Exception {

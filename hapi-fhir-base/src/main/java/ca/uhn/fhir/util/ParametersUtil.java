@@ -234,6 +234,19 @@ public class ParametersUtil {
 				.map(t -> (Integer) t);
 	}
 
+	/**
+	 * @since 8.6.0
+	 */
+	public static Optional<Boolean> getParameterPartValueAsBoolean(
+			FhirContext theCtx, IBase theParameter, String theParameterName) {
+		return getParameterPartValue(theCtx, theParameter, theParameterName)
+				.filter(t -> IPrimitiveType.class.isAssignableFrom(t.getClass()))
+				.map(t -> (IPrimitiveType<?>) t)
+				.map(IPrimitiveType::getValue)
+				.filter(t -> Boolean.class.isAssignableFrom(t.getClass()))
+				.map(t -> (Boolean) t);
+	}
+
 	private static <T> List<T> extractNamedParameterValues(
 			FhirContext theCtx,
 			IBaseParameters theParameters,
@@ -481,8 +494,11 @@ public class ParametersUtil {
 		addPart(theContext, theParameter, theName, value);
 	}
 
-	public static void addPartBoolean(FhirContext theContext, IBase theParameter, String theName, Boolean theValue) {
-		addPart(theContext, theParameter, theName, theContext.newPrimitiveBoolean(theValue));
+	/**
+	 * @return Returns the added part
+	 */
+	public static IBase addPartBoolean(FhirContext theContext, IBase theParameter, String theName, Boolean theValue) {
+		return addPart(theContext, theParameter, theName, theContext.newPrimitiveBoolean(theValue));
 	}
 
 	public static void addPartDecimal(FhirContext theContext, IBase theParameter, String theName, Double theValue) {
