@@ -25,12 +25,12 @@ import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.Collections;
@@ -42,7 +42,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class HapiMigrator {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrator.class);
+	private static final Logger ourLog = Logs.getDatabaseMigrationLog();
 	private final MigrationTaskList myTaskList = new MigrationTaskList();
 	private boolean myDryRun;
 	private boolean myRunHeavyweightSkippableTasks;

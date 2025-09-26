@@ -53,7 +53,9 @@ public class Logs {
 
 	// FIXME KHS use this in all db migration infrastructure
 	// FIXME KHS repeat these log entries to smile.log
-	public static Logger getDatabaseMigrationLog() {return ourDatabaseMigrationLog;}
+	public static Logger getDatabaseMigrationLog() {
+		return ourDatabaseMigrationLog;
+	}
 
 	public static final String CA_UHN_FHIR_LOG_BATCH_TROUBLESHOOTING = "ca.uhn.fhir.log.batch_troubleshooting";
 	public static final String CA_UHN_FHIR_LOG_NARRATIVE_GENERATION_TROUBLESHOOTING =

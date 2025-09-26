@@ -21,9 +21,9 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.util.Logs;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -31,7 +31,7 @@ import java.util.Set;
 
 public class DropTableTask extends BaseTableTask {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(DropTableTask.class);
+	private static final Logger ourLog = Logs.getDatabaseMigrationLog();
 
 	public DropTableTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);

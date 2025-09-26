@@ -21,11 +21,11 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.Set;
@@ -36,7 +36,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class AddIdGeneratorTask extends BaseTask {
 
 	private static final Integer DEFAULT_INCREMENT = 50;
-	private static final Logger ourLog = LoggerFactory.getLogger(AddIdGeneratorTask.class);
+	private static final Logger ourLog = Logs.getDatabaseMigrationLog();
 	private final String myGeneratorName;
 	private final Integer myIncrement;
 
