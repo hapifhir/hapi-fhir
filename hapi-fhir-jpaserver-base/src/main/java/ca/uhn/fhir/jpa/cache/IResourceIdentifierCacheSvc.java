@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
 
 import java.util.function.Supplier;
@@ -28,13 +30,11 @@ public interface IResourceIdentifierCacheSvc {
 	/**
 	 * Retrieves (and creates if necessary) the PID associated with the
 	 * given identifier system URL.
-	 * <p>
-	 * Transactionality note: This method must be called from within an existing transaction
-	 * </p>
 	 *
 	 * @param theSystem The <code>Identifier.system</code> value
 	 */
-	long getOrCreateResourceIdentifierSystem(String theSystem);
+	long getOrCreateResourceIdentifierSystem(
+			RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, String theSystem);
 
 	/**
 	 * Retrieves the FHIR ID assimilated with the given Patient identifier, creating a new
@@ -42,9 +42,6 @@ public interface IResourceIdentifierCacheSvc {
 	 * uniqueness on the identifier using a database constraint, and will therefore only allow
 	 * one FHIR ID to be associated with one Identifier. No uniqueness is enforced on the FHIR
 	 * ID.
-	 * <p>
-	 * Transactionality note: This method must be called from within an existing transaction
-	 * </p>
 	 *
 	 * @param theSystem        The <code>Identifier.system</code> value
 	 * @param theValue         The <code>Identifier.value</code> value
@@ -53,5 +50,9 @@ public interface IResourceIdentifierCacheSvc {
 	 */
 	@Nonnull
 	String getFhirIdAssociatedWithUniquePatientIdentifier(
-			String theSystem, String theValue, Supplier<String> theNewIdSupplier);
+			RequestDetails theRequestDetails,
+			RequestPartitionId theRequestPartitionId,
+			String theSystem,
+			String theValue,
+			Supplier<String> theNewIdSupplier);
 }

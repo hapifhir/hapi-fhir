@@ -496,6 +496,51 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 	}
 
 
+	@Test
+	public void testTransaction_SplitAncillaryAndPatient() {
+		registerInterceptor(new MyTransactionSplitInterceptor());
+
+		String practitionerFullUrl = IdType.newRandomUuid().getValue();
+		String patientFullUrl = IdType.newRandomUuid().getValue();
+		String encounterFullUrl = IdType.newRandomUuid().getValue();
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(
+			buildPractitioner(
+				withIdentifier("http://practitioner", "1")
+			),
+			practitionerFullUrl
+		);
+		bb.addTransactionCreateEntry(
+			buildPatient(
+				withIdentifier("http://patient", "1"),
+				withReference("generalPractitioner", practitionerFullUrl)
+			),
+			patientFullUrl
+		);
+		bb.addTransactionCreateEntry(
+			buildEncounter(
+				withIdentifier("http://encounter", "1"),
+				withSubject(patientFullUrl),
+				withReference("participant.individual", practitionerFullUrl)
+			),
+			encounterFullUrl
+		);
+
+		Bundle request = bb.getBundleTyped();
+
+		// Test
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, request);
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+
+	}
+
+
+
 
 	@Test
 	public void testSearch() throws IOException {

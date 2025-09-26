@@ -19,16 +19,22 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.IResourceIdentifierPatientUniqueEntityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIdentifierSystemEntityDao;
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.ResourceIdentifierPatientUniqueEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIdentifierSystemEntity;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.util.SleepUtil;
 import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.util.function.Supplier;
 
@@ -38,85 +44,156 @@ public class ResourceIdentifierCacheSvcImpl implements IResourceIdentifierCacheS
 	private final MemoryCacheService myMemoryCache;
 	private final IResourceIdentifierSystemEntityDao myResourceIdentifierSystemEntityDao;
 	private final IResourceIdentifierPatientUniqueEntityDao myResourceIdentifierPatientUniqueEntityDao;
+	private final IHapiTransactionService myTransactionService;
+	private final EntityManager myEntityManaher;
 
 	/**
 	 * Constructor
 	 */
 	public ResourceIdentifierCacheSvcImpl(
+			IHapiTransactionService theTransactionService,
 			MemoryCacheService theMemoryCache,
 			IResourceIdentifierSystemEntityDao theResourceIdentifierSystemEntityDao,
-			IResourceIdentifierPatientUniqueEntityDao theResourceIdentifierPatientUniqueEntityDao) {
+			IResourceIdentifierPatientUniqueEntityDao theResourceIdentifierPatientUniqueEntityDao,
+			EntityManager theEntityManager) {
+		myTransactionService = theTransactionService;
 		myMemoryCache = theMemoryCache;
 		myResourceIdentifierSystemEntityDao = theResourceIdentifierSystemEntityDao;
 		myResourceIdentifierPatientUniqueEntityDao = theResourceIdentifierPatientUniqueEntityDao;
+		myEntityManaher = theEntityManager;
 	}
 
 	@Override
-	public long getOrCreateResourceIdentifierSystem(String theSystem) {
-		HapiTransactionService.requireTransaction();
+	public long getOrCreateResourceIdentifierSystem(
+			RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, String theSystem) {
 		Validate.notBlank(theSystem, "theIdentifierSystem must not be blank");
 
+		Long pid =
+				lookupResourceIdentifierSystemFromCacheOrDatabase(theRequestDetails, theRequestPartitionId, theSystem);
+
+		/*
+		 * If we don't find an existing entry for the system in the database,
+		 * we need to try to create a new one. We expect that identifier systems
+		 * are relatively unique
+		 */
+		if (pid == null) {
+			int max = 5;
+			for (int i = 0; i < max && pid == null; i++) {
+				try {
+					pid = myTransactionService
+							.withRequest(theRequestDetails)
+							.withRequestPartitionId(theRequestPartitionId)
+							.withPropagation(Propagation.REQUIRES_NEW)
+							.execute(() -> {
+								Long newPid = lookupResourceIdentifierSystemFromCacheOrDatabase(
+										theRequestDetails, theRequestPartitionId, theSystem);
+								if (newPid == null) {
+									ResourceIdentifierSystemEntity newEntity = new ResourceIdentifierSystemEntity();
+									newEntity.setSystem(theSystem);
+									newEntity = myResourceIdentifierSystemEntityDao.save(newEntity);
+									assert newEntity.getPid() != null;
+									myMemoryCache.putAfterCommit(
+											MemoryCacheService.CacheEnum.RESOURCE_IDENTIFIER_SYSTEM_TO_PID,
+											theSystem,
+											newEntity.getPid());
+									ourLog.info(
+											"Created identifier System[{}] with PID: {}",
+											theSystem,
+											newEntity.getPid());
+									newPid = newEntity.getPid();
+								}
+								return newPid;
+							});
+				} catch (ResourceVersionConflictException e) {
+					ourLog.info(
+							"Concurrency failure (attempt {}/{}) creating identifier system cache: {}",
+							(i + 1),
+							max,
+							theSystem);
+					new SleepUtil().sleepAtLeast(500L);
+				}
+			}
+		}
+
+		Validate.isTrue(pid != null, "Failed to create resource identifier cache entry for system: %s", theSystem);
+		return pid;
+	}
+
+	private Long lookupResourceIdentifierSystemFromCacheOrDatabase(
+			RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, String theSystem) {
 		Long pid = myMemoryCache.get(
 				MemoryCacheService.CacheEnum.RESOURCE_IDENTIFIER_SYSTEM_TO_PID,
 				theSystem,
-				t -> lookupResourceIdentifierSystem(theSystem));
-
-		if (pid == null) {
-			ResourceIdentifierSystemEntity newEntity = new ResourceIdentifierSystemEntity();
-			newEntity.setSystem(theSystem);
-			newEntity = myResourceIdentifierSystemEntityDao.save(newEntity);
-			pid = newEntity.getPid();
-			assert pid != null;
-			myMemoryCache.putAfterCommit(
-					MemoryCacheService.CacheEnum.RESOURCE_IDENTIFIER_SYSTEM_TO_PID, theSystem, pid);
-		}
-
+				t -> lookupResourceIdentifierSystemFromDatabase(theRequestDetails, theRequestPartitionId, theSystem));
 		return pid;
 	}
 
 	@Override
 	public String getFhirIdAssociatedWithUniquePatientIdentifier(
-			String theSystem, String theValue, Supplier<String> theNewIdSupplier) {
-		HapiTransactionService.requireTransaction();
+			RequestDetails theRequestDetails,
+			RequestPartitionId theRequestPartitionId,
+			String theSystem,
+			String theValue,
+			Supplier<String> theNewIdSupplier) {
 
 		Validate.notBlank(theSystem, "theSystem must not be blank");
 		Validate.notBlank(theValue, "theValue must not be blank");
 
-		long identifierSystemPid = getOrCreateResourceIdentifierSystem(theSystem);
+		long identifierSystemPid =
+				getOrCreateResourceIdentifierSystem(theRequestDetails, theRequestPartitionId, theSystem);
 		MemoryCacheService.IdentifierKey key = new MemoryCacheService.IdentifierKey(theSystem, theValue);
-		String fhirId = myMemoryCache.get(
+		return myMemoryCache.getThenPutAfterCommit(
 				MemoryCacheService.CacheEnum.PATIENT_IDENTIFIER_TO_FHIR_ID,
 				key,
-				t -> lookupResourceFhirIdForPatientIdentifier(identifierSystemPid, theValue));
-
-		if (fhirId == null) {
-			fhirId = theNewIdSupplier.get();
-			Validate.notBlank(fhirId, "Supplied fhirId must not be blank");
-
-			ResourceIdentifierPatientUniqueEntity newEntity = new ResourceIdentifierPatientUniqueEntity();
-			newEntity.setPk(
-					new ResourceIdentifierPatientUniqueEntity.PatientIdentifierPk(identifierSystemPid, theValue));
-			newEntity.setFhirId(fhirId);
-			myResourceIdentifierPatientUniqueEntityDao.save(newEntity);
-			myMemoryCache.putAfterCommit(MemoryCacheService.CacheEnum.PATIENT_IDENTIFIER_TO_FHIR_ID, key, fhirId);
-		}
-
-		return fhirId;
+				t -> lookupResourceFhirIdForPatientIdentifier(
+						theRequestDetails, theRequestPartitionId, identifierSystemPid, theValue, theNewIdSupplier));
 	}
 
 	@Nullable
-	private String lookupResourceFhirIdForPatientIdentifier(long theSystem, String theValue) {
-		return myResourceIdentifierPatientUniqueEntityDao
-				.findById(new ResourceIdentifierPatientUniqueEntity.PatientIdentifierPk(theSystem, theValue))
-				.map(ResourceIdentifierPatientUniqueEntity::getFhirId)
-				.orElse(null);
+	private String lookupResourceFhirIdForPatientIdentifier(
+			RequestDetails theRequestDetails,
+			RequestPartitionId theRequestPartitionId,
+			long theSystem,
+			String theValue,
+			Supplier<String> theNewIdSupplier) {
+		return myTransactionService
+				.withRequest(theRequestDetails)
+				.withRequestPartitionId(theRequestPartitionId)
+				.execute(() -> {
+					String retVal = myResourceIdentifierPatientUniqueEntityDao
+							.findById(
+									new ResourceIdentifierPatientUniqueEntity.PatientIdentifierPk(theSystem, theValue))
+							.map(ResourceIdentifierPatientUniqueEntity::getFhirId)
+							.orElse(null);
+
+					if (retVal == null) {
+						retVal = theNewIdSupplier.get();
+						ourLog.info("Created FHIR ID [{}] for SystemPid[{}] Value[{}]", retVal, theSystem, theValue);
+						ResourceIdentifierPatientUniqueEntity newEntity = new ResourceIdentifierPatientUniqueEntity();
+						newEntity.setPk(
+								new ResourceIdentifierPatientUniqueEntity.PatientIdentifierPk(theSystem, theValue));
+						newEntity.setFhirId(retVal);
+						myEntityManaher.persist(newEntity);
+					}
+
+					assert retVal != null;
+					return retVal;
+				});
 	}
 
-	private Long lookupResourceIdentifierSystem(String theIdentifierSystem) {
-		Long retVal = myResourceIdentifierSystemEntityDao
-				.findBySystemUrl(theIdentifierSystem)
-				.orElse(null);
-		ourLog.trace("Fetched PID[{}] for Identifier System: {}", retVal, theIdentifierSystem);
-		return retVal;
+	private Long lookupResourceIdentifierSystemFromDatabase(
+			RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, String theIdentifierSystem) {
+		return myTransactionService
+				.withRequest(theRequestDetails)
+				.withRequestPartitionId(theRequestPartitionId)
+				.readOnly()
+				.execute(() -> {
+					Long retVal = myResourceIdentifierSystemEntityDao
+							.findBySystemUrl(theIdentifierSystem)
+							.orElse(null);
+					// FIXME: make all info be trace
+					ourLog.info("Fetched PID[{}] for Identifier System: {}", retVal, theIdentifierSystem);
+					return retVal;
+				});
 	}
 }

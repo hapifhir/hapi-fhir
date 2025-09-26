@@ -208,6 +208,7 @@ import ca.uhn.fhir.util.IMetaTagSorter;
 import ca.uhn.fhir.util.MetaTagSorterAlphabetical;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityManager;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
@@ -528,11 +529,17 @@ public class JpaConfig {
 
 	@Bean
 	public IResourceIdentifierCacheSvc resourceIdentifierCacheSvc(
+			IHapiTransactionService theTransactionService,
 			MemoryCacheService theMemoryCache,
 			IResourceIdentifierSystemEntityDao theResourceIdentifierSystemEntityDao,
-			IResourceIdentifierPatientUniqueEntityDao theResourceIdentifierPatientUniqueEntityDao) {
+			IResourceIdentifierPatientUniqueEntityDao theResourceIdentifierPatientUniqueEntityDao,
+			EntityManager theEntityManager) {
 		return new ResourceIdentifierCacheSvcImpl(
-				theMemoryCache, theResourceIdentifierSystemEntityDao, theResourceIdentifierPatientUniqueEntityDao);
+				theTransactionService,
+				theMemoryCache,
+				theResourceIdentifierSystemEntityDao,
+				theResourceIdentifierPatientUniqueEntityDao,
+				theEntityManager);
 	}
 
 	@Bean
