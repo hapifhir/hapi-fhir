@@ -30,6 +30,7 @@ import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {SearchQueryBuilderTest.MyConfig.class})
@@ -430,7 +431,67 @@ public class SearchQueryBuilderTest {
 		assertThat(generated.getBindVariables()).as(generated.getBindVariables().toString()).containsExactly("Patient", 500L, 501L, 10, 5);
 
 	}
-	
+
+	/**
+	 * Test for SQL GROUP BY issue (6709) with coordinate near sorting and offset.
+	 */
+	@Test
+	public void testCoordinateNearSortingWithGroupByHandlesSQLCorrectly() {
+		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
+		dialectProvider.setDialectForUnitTest(new PostgreSQLDialect());
+
+		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myStorageSettings, myPartitionSettings, myRequestPartitionId, "Location", mySqlBuilderFactory, dialectProvider, false, false);
+
+		// Add coordinate distance sorting
+		ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder coordsPredicate =
+			builder.addCoordsPredicateBuilder(null);
+
+		// Trigger GROUP BY scenario BEFORE adding coordinate sorting
+		// This simulates the correct production sequence where GROUP BY exists before coordinate sorting is added
+		builder.getSelect().addGroupings(builder.getOrCreateFirstPredicateBuilder().getResourceIdColumn());
+
+		double latitude = 50.097;
+		double longitude = 8.6648;
+		builder.addSortCoordsNear(coordsPredicate, latitude, longitude, true);
+
+
+		// Generate SQL with offset
+		GeneratedSql generatedSql = builder.generate(1, 1);
+		String sql = generatedSql.getSql();
+
+		assertTrue(sql.contains("SELECT"), "SQL should contain SELECT clause");
+
+		// Find distance calculation column name (MHD0, MHD1, etc.)
+		java.util.regex.Pattern distanceColumnPattern = java.util.regex.Pattern.compile("MHD\\d+");
+		java.util.regex.Matcher matcher = distanceColumnPattern.matcher(sql);
+		assertTrue(matcher.find(), "SQL should contain distance calculation column (MHD0, MHD1, etc.)");
+		String distanceColumnName = matcher.group();
+
+		// Verify GROUP BY clause exists
+		assertTrue(sql.contains("GROUP BY"), "SQL should contain GROUP BY clause (this test specifically tests the GROUP BY scenario)");
+
+		// Extract GROUP BY clause and verify distance column is included
+		int groupByIndex = sql.indexOf("GROUP BY");
+		int orderByIndex = sql.indexOf("ORDER BY");
+		if (orderByIndex == -1) {
+			orderByIndex = sql.length();
+		}
+		String groupByClause = sql.substring(groupByIndex, orderByIndex).trim();
+
+		// This assertion should FAIL and expose the bug: MHD0 is NOT in the GROUP BY clause
+		assertTrue(groupByClause.contains(distanceColumnName),
+			"Distance calculation column (" + distanceColumnName + ") must be included in GROUP BY clause when GROUP BY is present. " +
+				"This prevents PostgreSQL error: 'column must appear in the GROUP BY clause'. " +
+				"SQL: " + sql + ", GROUP BY clause: " + groupByClause);
+
+		// Verify ORDER BY contains distance column
+		assertTrue(sql.contains("ORDER BY " + distanceColumnName),
+			"SQL should contain ORDER BY with " + distanceColumnName + " distance calculation");
+
+		// Verify bind variables
+		assertThat(generatedSql.getBindVariables()).contains(latitude, longitude);
+	}
+
 	@Configuration
 	public static class MyConfig {
 
@@ -443,6 +504,17 @@ public class SearchQueryBuilderTest {
 		@Scope("prototype")
 		public ResourceTablePredicateBuilder ResourceTablePredicateBuilder(SearchQueryBuilder theSearchQueryBuilder, SearchIncludeDeletedEnum theSearchIncludeDeleted) {
 			return new ResourceTablePredicateBuilder(theSearchQueryBuilder, theSearchIncludeDeleted);
+		}
+
+		@Bean
+		@Scope("prototype")
+		public ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder coordsPredicateBuilder(SearchQueryBuilder theSearchQueryBuilder) {
+			return new ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder(theSearchQueryBuilder);
+		}
+
+		@Bean
+		public ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc searchParamIdentityCacheSvc() {
+			return org.mockito.Mockito.mock(ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc.class);
 		}
 
 		@Bean
