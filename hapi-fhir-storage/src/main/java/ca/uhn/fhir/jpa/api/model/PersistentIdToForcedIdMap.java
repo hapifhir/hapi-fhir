@@ -26,7 +26,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class PersistentIdToForcedIdMap<P extends IResourcePersistentId> {
+public class PersistentIdToForcedIdMap<P extends IResourcePersistentId<?>> {
 	private final Map<P, Optional<String>> myResourcePersistentIdOptionalMap;
 
 	public PersistentIdToForcedIdMap(Map<P, Optional<String>> theResourcePersistentIdOptionalMap) {
