@@ -135,6 +135,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.function.TriFunction;
+import org.hibernate.exception.SQLGrammarException;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -2134,8 +2135,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		RequestPartitionId requestPartitionId =
 				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
 						theRequest, getResourceName(), theParams);
-		IBundleProvider retVal = mySearchCoordinatorSvc.registerSearch(
-				this, theParams, getResourceName(), cacheControlDirective, theRequest, requestPartitionId);
+		IBundleProvider retVal = null;
+		try {
+			retVal = mySearchCoordinatorSvc.registerSearch(
+					this, theParams, getResourceName(), cacheControlDirective, theRequest, requestPartitionId);
+		} catch (SQLGrammarException e) {
+			String trackingUUID = UUID.randomUUID().toString();
+			ourLog.error("SQLGrammarException during search, tracking uuid: {}", trackingUUID, e);
+			throw new InternalErrorException("SQLGrammarException during search, tracking uuid: " + trackingUUID);
+		}
 
 		if (retVal instanceof PersistedJpaBundleProvider) {
 			PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) retVal;
