@@ -28,6 +28,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleUtil;
@@ -137,6 +138,7 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 			}
 		}
 
+		TransactionDetails transactionDetails = new TransactionDetails();
 		Map<String, IIdType> idSubstitutions = new HashMap<>();
 		for (IBaseBundle singlePartitionRequest : partitionedRequests) {
 
@@ -153,7 +155,7 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 			}
 
 			IBaseBundle singlePartitionResponse = myTransactionProcessor.processTransactionAsSubRequest(
-					myRequestDetails, singlePartitionRequest, myActionName, myNestedMode);
+					myRequestDetails, transactionDetails, singlePartitionRequest, myActionName, myNestedMode);
 
 			// Capture any placeholder ID substitutions from this partition
 			TransactionUtil.TransactionResponse singlePartitionResponseParsed =
