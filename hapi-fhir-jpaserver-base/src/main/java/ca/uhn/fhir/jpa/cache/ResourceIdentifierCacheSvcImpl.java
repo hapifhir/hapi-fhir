@@ -168,7 +168,7 @@ public class ResourceIdentifierCacheSvcImpl implements IResourceIdentifierCacheS
 
 					if (retVal == null) {
 						retVal = theNewIdSupplier.get();
-						ourLog.info("Created FHIR ID [{}] for SystemPid[{}] Value[{}]", retVal, theSystem, theValue);
+						ourLog.trace("Created FHIR ID [{}] for SystemPid[{}] Value[{}]", retVal, theSystem, theValue);
 						ResourceIdentifierPatientUniqueEntity newEntity = new ResourceIdentifierPatientUniqueEntity();
 						newEntity.setPk(
 								new ResourceIdentifierPatientUniqueEntity.PatientIdentifierPk(theSystem, theValue));
@@ -191,8 +191,7 @@ public class ResourceIdentifierCacheSvcImpl implements IResourceIdentifierCacheS
 					Long retVal = myResourceIdentifierSystemEntityDao
 							.findBySystemUrl(theIdentifierSystem)
 							.orElse(null);
-					// FIXME: make all info be trace
-					ourLog.info("Fetched PID[{}] for Identifier System: {}", retVal, theIdentifierSystem);
+					ourLog.trace("Fetched PID[{}] for Identifier System: {}", retVal, theIdentifierSystem);
 					return retVal;
 				});
 	}
