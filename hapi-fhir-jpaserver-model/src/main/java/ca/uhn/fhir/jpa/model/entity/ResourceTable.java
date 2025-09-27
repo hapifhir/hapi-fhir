@@ -119,6 +119,7 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	private static final long serialVersionUID = 1L;
 	public static final int MAX_FORCED_ID_LENGTH = 100;
 	public static final String IDX_RES_TYPE_FHIR_ID = "IDX_RES_TYPE_FHIR_ID";
+	public static final int FHIR_ID_LENGTH = 64;
 
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
@@ -377,7 +378,7 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	@Column(
 			name = FHIR_ID,
 			// [A-Za-z0-9\-\.]{1,64} - https://www.hl7.org/fhir/datatypes.html#id
-			length = 64,
+			length = FHIR_ID_LENGTH,
 			// we never update this after insert, and the Generator will otherwise "dirty" the object.
 			updatable = false)
 

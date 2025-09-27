@@ -147,6 +147,7 @@ import static ca.uhn.fhir.util.HapiExtensions.EXTENSION_TRANSACTION_ENTRY_PARTIT
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -394,9 +395,20 @@ public abstract class BaseTransactionProcessor {
 
 	IBaseBundle processTransactionAsSubRequest(
 			RequestDetails theRequestDetails, IBaseBundle theRequest, String theActionName, boolean theNestedMode) {
+		return processTransactionAsSubRequest(
+				theRequestDetails, new TransactionDetails(), theRequest, theActionName, theNestedMode);
+	}
+
+	IBaseBundle processTransactionAsSubRequest(
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails,
+			IBaseBundle theRequest,
+			String theActionName,
+			boolean theNestedMode) {
 		BaseStorageDao.markRequestAsProcessingSubRequest(theRequestDetails);
 		try {
-			return processTransaction(theRequestDetails, theRequest, theActionName, theNestedMode);
+			return processTransaction(
+					theRequestDetails, theTransactionDetails, theRequest, theActionName, theNestedMode);
 		} finally {
 			BaseStorageDao.clearRequestAsProcessingSubRequest(theRequestDetails);
 		}
@@ -419,8 +431,8 @@ public abstract class BaseTransactionProcessor {
 		int totalAttempts = defaultIfNull(transactionSemantics.getRetryCount(), 0) + 1;
 		boolean switchedToBatch = false;
 
-		int minRetryDelay = defaultIfNull(transactionSemantics.getMinRetryDelay(), 0);
-		int maxRetryDelay = defaultIfNull(transactionSemantics.getMaxRetryDelay(), 0);
+		int minRetryDelay = getIfNull(transactionSemantics.getMinRetryDelay(), 0);
+		int maxRetryDelay = getIfNull(transactionSemantics.getMaxRetryDelay(), 0);
 
 		// Don't let the user request a crazy delay, this could be used
 		// as a DOS attack
@@ -433,7 +445,8 @@ public abstract class BaseTransactionProcessor {
 			try {
 				if (i < totalAttempts && transactionSemantics.isTryBatchAsTransactionFirst()) {
 					BundleUtil.setBundleType(myContext, theRequest, "transaction");
-					response = processTransaction(theRequestDetails, theRequest, "Transaction", theNestedMode);
+					response = processTransaction(
+							theRequestDetails, new TransactionDetails(), theRequest, "Transaction", theNestedMode);
 				} else {
 					BundleUtil.setBundleType(myContext, theRequest, "batch");
 					response = processBatch(theRequestDetails, theRequest, theNestedMode);
@@ -555,6 +568,7 @@ public abstract class BaseTransactionProcessor {
 
 	private IBaseBundle processTransaction(
 			final RequestDetails theRequestDetails,
+			final TransactionDetails theTransactionDetails,
 			final IBaseBundle theRequest,
 			final String theActionName,
 			boolean theNestedMode) {
@@ -592,8 +606,7 @@ public abstract class BaseTransactionProcessor {
 
 		ourLog.debug("Beginning {} with {} resources", theActionName, numberOfEntries);
 
-		final TransactionDetails transactionDetails = new TransactionDetails();
-		transactionDetails.setFhirTransaction(true);
+		theTransactionDetails.setFhirTransaction(true);
 		final StopWatch transactionStopWatch = new StopWatch();
 
 		// Do all entries have a verb?
@@ -650,7 +663,7 @@ public abstract class BaseTransactionProcessor {
 		prepareThenExecuteTransactionWriteOperations(
 				theRequestDetails,
 				theActionName,
-				transactionDetails,
+				theTransactionDetails,
 				transactionStopWatch,
 				response,
 				originalRequestOrder,

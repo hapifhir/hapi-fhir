@@ -37,6 +37,7 @@ import ca.uhn.fhir.util.bundle.BundleEntryMutator;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import ca.uhn.fhir.util.bundle.EntryListAccumulator;
 import ca.uhn.fhir.util.bundle.ModifiableBundleEntry;
+import ca.uhn.fhir.util.bundle.ModifiableBundleEntryParts;
 import ca.uhn.fhir.util.bundle.PartsConverter;
 import ca.uhn.fhir.util.bundle.SearchBundleEntryParts;
 import com.google.common.collect.Sets;
@@ -326,6 +327,74 @@ public class BundleUtil {
 		BaseRuntimeChildDefinition entryChildDef = bundleDef.getChildByName("entry");
 		List<IBase> entries = entryChildDef.getAccessor().getValues(theBundle);
 		return entries.stream().map(partsConverter::fromElement).toList();
+	}
+
+	/**
+	 * Returns a list of entries in the Bundle with a modifiable type that can be used
+	 * to manipulate the entries.
+	 *
+	 * @param theContext The FhirContext associated with the version of FHIR
+	 * @param theBundle The Bundle
+	 * @return A list of modifiable entries
+	 * @since 8.6.0
+	 */
+	public static List<ModifiableBundleEntryParts> toListOfEntriesModifiable(
+			FhirContext theContext, IBaseBundle theBundle) {
+		RuntimeResourceDefinition bundleDef = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChildDef = bundleDef.getChildByName("entry");
+		List<IBase> entries = entryChildDef.getAccessor().getValues(theBundle);
+
+		BaseRuntimeElementCompositeDefinition<?> entryChildContentsDef =
+				(BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
+		BaseRuntimeChildDefinition fullUrlChildDef = entryChildContentsDef.getChildByName("fullUrl");
+		BaseRuntimeChildDefinition resourceChildDef = entryChildContentsDef.getChildByName("resource");
+		BaseRuntimeChildDefinition requestChildDef = entryChildContentsDef.getChildByName("request");
+		BaseRuntimeElementCompositeDefinition<?> requestChildContentsDef =
+				(BaseRuntimeElementCompositeDefinition<?>) requestChildDef.getChildByName("request");
+		BaseRuntimeChildDefinition requestUrlChildDef = requestChildContentsDef.getChildByName("url");
+		BaseRuntimeChildDefinition requestIfNoneExistChildDef = requestChildContentsDef.getChildByName("ifNoneExist");
+		BaseRuntimeChildDefinition methodChildDef = requestChildContentsDef.getChildByName("method");
+
+		List<ModifiableBundleEntryParts> retVal = new ArrayList<>(entries.size());
+		for (IBase nextEntry : entries) {
+			BundleEntryParts parts = getBundleEntryParts(
+					fullUrlChildDef,
+					resourceChildDef,
+					requestChildDef,
+					requestUrlChildDef,
+					requestIfNoneExistChildDef,
+					methodChildDef,
+					nextEntry);
+			/*
+			 * All 3 might be null - That's ok because we still want to know the
+			 * order in the original bundle.
+			 */
+			BundleEntryMutator mutator = new BundleEntryMutator(
+					theContext,
+					nextEntry,
+					requestChildDef,
+					requestChildContentsDef,
+					entryChildContentsDef,
+					methodChildDef);
+			ModifiableBundleEntryParts entry = new ModifiableBundleEntryParts(theContext, parts, mutator);
+			retVal.add(entry);
+		}
+
+		return retVal;
+	}
+
+	/**
+	 * Invokes a consumer for each entry in the Bundle, passing a {@link ModifiableBundleEntryParts}
+	 * which contains a version-independent means of accessing and modifiing each entry
+	 *
+	 * @param theContext The FhirContext for the FHIR version associated with the Bundle
+	 * @param theBundle The Bundle to process
+	 * @param theEntryConsumer A consumer to process each entry
+	 * @since 8.6.0
+	 */
+	public static void processAllEntries(
+			FhirContext theContext, IBaseBundle theBundle, Consumer<ModifiableBundleEntryParts> theEntryConsumer) {
+		toListOfEntriesModifiable(theContext, theBundle).forEach(theEntryConsumer);
 	}
 
 	/**
@@ -661,7 +730,9 @@ public class BundleUtil {
 	 * @param theContext   The FHIR Context
 	 * @param theBundle    The bundle to have its entries processed.
 	 * @param theProcessor a {@link Consumer} which will operate on all the entries of a bundle.
+	 * @deprecated Use {@link #processAllEntries(FhirContext, IBaseBundle, Consumer)} instead
 	 */
+	@Deprecated(since = "8.6.0", forRemoval = true)
 	public static void processEntries(
 			FhirContext theContext, IBaseBundle theBundle, Consumer<ModifiableBundleEntry> theProcessor) {
 		RuntimeResourceDefinition bundleDef = theContext.getResourceDefinition(theBundle);
@@ -693,7 +764,12 @@ public class BundleUtil {
 			 * order in the original bundle.
 			 */
 			BundleEntryMutator mutator = new BundleEntryMutator(
-					theContext, nextEntry, requestChildDef, requestChildContentsDef, entryChildContentsDef);
+					theContext,
+					nextEntry,
+					requestChildDef,
+					requestChildContentsDef,
+					entryChildContentsDef,
+					methodChildDef);
 			ModifiableBundleEntry entry = new ModifiableBundleEntry(parts, mutator);
 			theProcessor.accept(entry);
 		}
@@ -734,19 +810,15 @@ public class BundleUtil {
 			if (requestType != null) {
 				//noinspection EnumSwitchStatementWhichMissesCases
 				switch (requestType) {
-					case PUT:
-					case DELETE:
-					case PATCH:
-						conditionalUrl = url != null && url.contains("?") ? url : null;
-						break;
-					case POST:
+					case PUT, DELETE, PATCH -> conditionalUrl = url != null && url.contains("?") ? url : null;
+					case POST -> {
 						List<IBase> ifNoneExistReps =
 								requestIfNoneExistChildDef.getAccessor().getValues(nextRequest);
-						if (ifNoneExistReps.size() > 0) {
+						if (!ifNoneExistReps.isEmpty()) {
 							IPrimitiveType<?> ifNoneExist = (IPrimitiveType<?>) ifNoneExistReps.get(0);
 							conditionalUrl = ifNoneExist.getValueAsString();
 						}
-						break;
+					}
 				}
 			}
 		}

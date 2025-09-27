@@ -126,6 +126,11 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 		myUniqueTaskExecutor.submitIfAbsent(persistSpIdentityTask);
 	}
 
+	@Override
+	public boolean hasInFlightTasks() {
+		return myUniqueTaskExecutor.hasInFlightTasks();
+	}
+
 	/**
 	 * Asynchronously ensures that a {@link IndexedSearchParamIdentity} exists for the given
 	 * hash identity, parameter name, and resource type. If the identity is already present
@@ -381,6 +386,10 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 					myInFlightTasks.remove(hashIdentity, futureTask);
 				}
 			});
+		}
+
+		public synchronized boolean hasInFlightTasks() {
+			return !myInFlightTasks.isEmpty();
 		}
 	}
 

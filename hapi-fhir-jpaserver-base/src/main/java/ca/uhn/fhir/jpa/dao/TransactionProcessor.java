@@ -31,7 +31,9 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
@@ -483,8 +485,41 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 		Set<String> foundIds = new HashSet<>();
 
-		Map<IIdType, IResourceLookup<JpaPid>> outcomes = myIdHelperService.resolveResourceIdentities(
-				theRequestPartitionId, theInputIdsToPreFetch, theResolveMode);
+		// If any of the IDs are already resolved in the TransactionDetails, just
+		// use the resolution from there
+		Map<IIdType, IResourceLookup<JpaPid>> outcomesFromTransactionDetails = null;
+		if (theRequestPartitionId.hasPartitionIds()
+				&& theRequestPartitionId.getPartitionIds().size() == 1) {
+			for (IIdType inputIdToResult : theInputIdsToPreFetch) {
+				JpaPid pidResolvedInTransaction = (JpaPid) theTransactionDetails.getResolvedResourceId(inputIdToResult);
+				if (pidResolvedInTransaction != null) {
+					if (outcomesFromTransactionDetails == null) {
+						outcomesFromTransactionDetails = new HashMap<>();
+					}
+					JpaResourceLookup resourceLookup = new JpaResourceLookup(
+							inputIdToResult.getResourceType(),
+							inputIdToResult.getIdPart(),
+							pidResolvedInTransaction,
+							null,
+							PartitionablePartitionId.with(theRequestPartitionId.getFirstPartitionIdOrNull(), null));
+					outcomesFromTransactionDetails.put(inputIdToResult, resourceLookup);
+				}
+			}
+		}
+
+		Set<IIdType> inputIdsToPreFetch = theInputIdsToPreFetch;
+		if (outcomesFromTransactionDetails != null) {
+			inputIdsToPreFetch = new HashSet<>(theInputIdsToPreFetch);
+			inputIdsToPreFetch.removeAll(outcomesFromTransactionDetails.keySet());
+		}
+
+		Map<IIdType, IResourceLookup<JpaPid>> outcomes =
+				myIdHelperService.resolveResourceIdentities(theRequestPartitionId, inputIdsToPreFetch, theResolveMode);
+
+		if (outcomesFromTransactionDetails != null) {
+			outcomes.putAll(outcomesFromTransactionDetails);
+		}
+
 		for (Iterator<Map.Entry<IIdType, IResourceLookup<JpaPid>>> iterator =
 						outcomes.entrySet().iterator();
 				iterator.hasNext(); ) {
