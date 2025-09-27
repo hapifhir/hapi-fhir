@@ -257,12 +257,7 @@ public abstract class BaseTransactionProcessor {
 		}
 
 		List<IBase> entries = myVersionAdapter.getEntries(response);
-		for (int i = 0; i < entries.size(); i++) {
-			if (ElementUtil.isEmpty(entries.get(i))) {
-				entries.remove(i);
-				i--;
-			}
-		}
+		entries.removeIf(ElementUtil::isEmpty);
 
 		return (BUNDLE) response;
 	}
@@ -343,7 +338,7 @@ public abstract class BaseTransactionProcessor {
 			theRes = theIdToPersistedOutcome.get(newId).getResource();
 		}
 
-		if (theOutcome.getCreated()) {
+		if (Boolean.TRUE.equals(theOutcome.getCreated())) {
 			myVersionAdapter.setResponseStatus(theNewEntry, toStatusString(Constants.STATUS_HTTP_201_CREATED));
 		} else {
 			myVersionAdapter.setResponseStatus(theNewEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
@@ -753,9 +748,7 @@ public abstract class BaseTransactionProcessor {
 		Optional<IBaseExtension<?, ?>> partitionIdsExtensionOptional =
 				myVersionAdapter.getEntryRequestExtensionByUrl(theReqEntry, EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS);
 		if (partitionIdsExtensionOptional.isPresent()
-				&& partitionIdsExtensionOptional.get().getValue() instanceof IPrimitiveType<?>) {
-			IPrimitiveType<?> valueAsPrimitiveType =
-					(IPrimitiveType<?>) partitionIdsExtensionOptional.get().getValue();
+				&& partitionIdsExtensionOptional.get().getValue() instanceof IPrimitiveType<?> valueAsPrimitiveType) {
 			String value = valueAsPrimitiveType.getValueAsString();
 			theRequestDetails.setHeaders(Constants.HEADER_X_REQUEST_PARTITION_IDS, List.of(value));
 		}
@@ -1133,7 +1126,7 @@ public abstract class BaseTransactionProcessor {
 						}
 						break;
 
-						// Conditional CREATE
+					// Conditional CREATE
 					case "POST":
 						conditionalUrl = ifNoneExist;
 						if (isNotBlank(ifNoneExist)) {

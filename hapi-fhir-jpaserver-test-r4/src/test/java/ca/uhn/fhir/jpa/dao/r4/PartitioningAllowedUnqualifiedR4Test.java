@@ -30,7 +30,7 @@ public class PartitioningAllowedUnqualifiedR4Test extends BasePartitioningR4Test
 		myPartitionSettings.setDefaultPartitionId(defaultPartitionSettings.getDefaultPartitionId());
 
 		mySrdInterceptorService.unregisterInterceptorsIf(MyReadWriteInterceptor.class::isInstance);
-
+		afterPurgeDatabase();
 	}
 
 	@Test

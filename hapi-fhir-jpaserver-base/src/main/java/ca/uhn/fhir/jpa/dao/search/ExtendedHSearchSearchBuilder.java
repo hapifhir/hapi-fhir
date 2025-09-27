@@ -187,7 +187,7 @@ public class ExtendedHSearchSearchBuilder {
 			}
 		} else if (param instanceof StringParam) {
 			switch (modifier) {
-					// we support string:text, string:contains, string:exact, and unmodified string.
+				// we support string:text, string:contains, string:exact, and unmodified string.
 				case Constants.PARAMQUALIFIER_STRING_TEXT:
 				case Constants.PARAMQUALIFIER_STRING_EXACT:
 				case Constants.PARAMQUALIFIER_STRING_CONTAINS:

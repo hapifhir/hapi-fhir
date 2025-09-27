@@ -48,8 +48,6 @@ import java.util.Date;
 
 public class FhirDstu2 implements IFhirVersion {
 
-	private String myId;
-
 	@Override
 	public IFhirPath createFhirPathExecutor(FhirContext theFhirContext) {
 		throw new UnsupportedOperationException(Msg.code(74) + "FluentPath is not supported in DSTU2 contexts");
@@ -59,9 +57,7 @@ public class FhirDstu2 implements IFhirVersion {
 	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
 		StructureDefinition retVal = new StructureDefinition();
 
-		RuntimeResourceDefinition def = theRuntimeResourceDefinition;
-
-		myId = def.getId();
+		String myId = theRuntimeResourceDefinition.getId();
 		if (StringUtils.isBlank(myId)) {
 			myId = theRuntimeResourceDefinition.getName().toLowerCase();
 		}

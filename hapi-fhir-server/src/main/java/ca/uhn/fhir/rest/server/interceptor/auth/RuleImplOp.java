@@ -193,7 +193,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 									theOutputResource,
 									theRuleApplier);
 
-							// None of the following are checked on the way in
+						// None of the following are checked on the way in
 						case ADD_TAGS:
 						case DELETE_TAGS:
 						case GET_TAGS:

@@ -111,7 +111,7 @@ public enum WorkChunkStatusEnum {
 				return EnumSet.of(POLL_WAITING, READY);
 			case ERRORED:
 				return EnumSet.of(IN_PROGRESS, FAILED, COMPLETED);
-				// terminal states
+			// terminal states
 			case FAILED:
 			case COMPLETED:
 			default:

@@ -55,9 +55,6 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.Session;
-import org.hibernate.annotations.GenerationTime;
-import org.hibernate.annotations.GeneratorType;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.search.engine.backend.types.Projectable;
@@ -74,7 +71,6 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDe
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ObjectPath;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
-import org.hibernate.tuple.ValueGenerator;
 import org.hibernate.type.SqlTypes;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.InstantType;
@@ -378,11 +374,8 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 			name = FHIR_ID,
 			// [A-Za-z0-9\-\.]{1,64} - https://www.hl7.org/fhir/datatypes.html#id
 			length = 64,
-			// we never update this after insert, and the Generator will otherwise "dirty" the object.
+			// we never update this after insert.
 			updatable = false)
-
-	// inject the pk for server-assigned sequence ids.
-	@GeneratorType(when = GenerationTime.INSERT, type = FhirIdGenerator.class)
 	// Make sure the generator doesn't bump the history version.
 	@OptimisticLock(excluded = true)
 	private String myFhirId;
@@ -969,6 +962,15 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	@PrePersist
 	@PreUpdate
 	public void preSave() {
+		/**
+		 * Pre-insert hook used to populate `myFhirId` with the server-assigned sequence id
+		 * when no client-assigned id is provided. This emulates the old Hibernate insert
+		 * generator behavior.
+		 */
+		if ((myFhirId == null || myFhirId.isEmpty()) && myPid != null && myPid.getId() != null) {
+			myFhirId = myPid.getId().toString();
+		}
+
 		if (myHasLinks && myResourceLinks != null) {
 			myResourceLinksField = getResourceLinks().stream()
 					.map(ResourceLink::getTargetResourcePid)
@@ -1105,19 +1107,5 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 
 	public void setParamsComboTokensNonUnique(Collection<ResourceIndexedComboTokenNonUnique> theComboTokensNonUnique) {
 		myParamsComboTokensNonUnique = theComboTokensNonUnique;
-	}
-
-	/**
-	 * Populate myFhirId with server-assigned sequence id when no client-id provided.
-	 * We eat this complexity during insert to simplify query time with a uniform column.
-	 * Server-assigned sequence ids aren't available until just before insertion.
-	 * Hibernate calls insert Generators after the pk has been assigned, so we can use myId safely here.
-	 */
-	public static final class FhirIdGenerator implements ValueGenerator<String> {
-		@Override
-		public String generateValue(Session session, Object owner) {
-			ResourceTable that = (ResourceTable) owner;
-			return that.myFhirId != null ? that.myFhirId : that.myPid.getId().toString();
-		}
 	}
 }

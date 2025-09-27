@@ -100,7 +100,7 @@ public class SearchParameterCanonicalizer {
 				break;
 			case DSTU2_HL7ORG:
 			case DSTU2_1:
-				// Non-supported - these won't happen so just fall through
+			// Non-supported - these won't happen so just fall through
 			default:
 				throw new InternalErrorException(
 						Msg.code(510) + "SearchParameter canonicalization not supported for FHIR version"
