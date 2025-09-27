@@ -56,7 +56,7 @@ public class ResourceIdentifierPatientUniqueEntity {
 		@Column(name = "IDENT_SYSTEM_PID")
 		private Long mySystemPid;
 
-		@Column(name = "IDENT_VALUE")
+		@Column(name = "IDENT_VALUE", length = 500)
 		private String myValue;
 
 		/**

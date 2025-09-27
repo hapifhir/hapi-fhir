@@ -40,6 +40,7 @@ public class ResourceIdentifierSystemEntity {
 
 	@SequenceGenerator(name = "SEQ_RES_IDENTIFIER_SYSTEM", sequenceName = "SEQ_RES_IDENTIFIER_SYSTEM")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RES_IDENTIFIER_SYSTEM")
+	@Column(name = "PID")
 	@Id
 	private Long myPid;
 

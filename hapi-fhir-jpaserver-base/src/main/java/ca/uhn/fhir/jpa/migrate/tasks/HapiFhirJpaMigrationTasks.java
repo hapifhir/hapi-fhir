@@ -143,6 +143,25 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.withColumns("SRC_PATH, TARGET_RESOURCE_URL, PARTITION_ID, SRC_RESOURCE_ID")
 					.heavyweightSkipByDefault();
 		}
+
+		// Add HFJ_RES_IDENTIFIER_SYSTEM and HFJ_RES_IDENTIFIER_PT_UNIQ
+		{
+			version.addIdGenerator("20250927.01", "SEQ_RES_IDENTIFIER_SYSTEM");
+			Builder.BuilderAddTableByColumns resIdentifierSystem =
+					version.addTableByColumns("20250927.02", "HFJ_RES_IDENTIFIER_SYSTEM", "PID");
+			resIdentifierSystem.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+			resIdentifierSystem.addColumn("SYSTEM_URL").nonNullable().type(ColumnTypeEnum.STRING, 500);
+			resIdentifierSystem
+					.addIndex("20250927.03", "IDX_RES_IDENT_SYS")
+					.unique(true)
+					.includeColumns("SYSTEM_URL");
+
+			Builder.BuilderAddTableByColumns resIdentifierPatient = version.addTableByColumns(
+					"20250927.02", "HFJ_RES_IDENTIFIER_PT_UNIQ", "IDENT_SYSTEM_PID", "IDENT_VALUE");
+			resIdentifierPatient.addColumn("IDENT_SYSTEM_PID").nonNullable().type(ColumnTypeEnum.LONG);
+			resIdentifierPatient.addColumn("IDENT_VALUE").nonNullable().type(ColumnTypeEnum.STRING, 500);
+			resIdentifierPatient.addColumn("FHIR_ID").nonNullable().type(ColumnTypeEnum.STRING, 64);
+		}
 	}
 
 	protected void init840() {
