@@ -34,11 +34,19 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.ResourceReferenceInfo;
+import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -48,9 +56,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.getPartitionIfAssigned;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -65,6 +76,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 @Interceptor
 public class PatientIdPartitionInterceptor {
+
+	public static final String PLACEHOLDER_TO_REFERENCE_KEY =
+			PatientIdPartitionInterceptor.class.getName() + "_placeholderToResource";
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -112,7 +126,7 @@ public class PatientIdPartitionInterceptor {
 			if (oCompartmentIdentity.isPresent()) {
 				return provideCompartmentMemberInstanceResponse(theRequestDetails, oCompartmentIdentity.get());
 			} else {
-				return getPartitionViaPartiallyProcessedReference(theResource)
+				return getPartitionViaPartiallyProcessedReference(theRequestDetails, theResource)
 						// or give up and fail
 						.orElseGet(() -> throwNonCompartmentMemberInstanceFailureResponse(theResource));
 			}
@@ -124,16 +138,39 @@ public class PatientIdPartitionInterceptor {
 	 * If we don't have a simple id for a compartment owner, maybe we're in a bundle during processing
 	 * and a reference points to the Patient which has already been processed and assigned a partition.
 	 */
+	@SuppressWarnings("unchecked")
 	@Nonnull
-	private Optional<RequestPartitionId> getPartitionViaPartiallyProcessedReference(IBaseResource theResource) {
-		return myFhirContext
+	private Optional<RequestPartitionId> getPartitionViaPartiallyProcessedReference(
+			RequestDetails theRequestDetails, IBaseResource theResource) {
+		Map<String, IBaseResource> placeholderToReference = null;
+		if (theRequestDetails != null) {
+			placeholderToReference =
+					(Map<String, IBaseResource>) theRequestDetails.getUserData().get(PLACEHOLDER_TO_REFERENCE_KEY);
+		}
+		if (placeholderToReference == null) {
+			placeholderToReference = Map.of();
+		}
+
+		List<IBaseReference> references = myFhirContext
 				.newTerser()
 				.getCompartmentReferencesForResource(
 						"Patient", theResource, new CompartmentSearchParameterModifications())
-				.map(IBaseReference::getResource)
-				.filter(Objects::nonNull)
-				.flatMap(nextResource -> getPartitionIfAssigned(nextResource).stream())
-				.findFirst();
+				.toList();
+		for (IBaseReference reference : references) {
+			String referenceString = reference.getReferenceElement().getValue();
+			IBaseResource target = placeholderToReference.get(referenceString);
+			if (target != null && Objects.equals(myFhirContext.getResourceType(target), "Patient")) {
+				if ("Patient".equals(target.getIdElement().getResourceType())) {
+					if (!target.getIdElement().isUuid() && target.getIdElement().hasIdPart()) {
+						return Optional.of(provideCompartmentMemberInstanceResponse(
+								theRequestDetails, target.getIdElement().getIdPart()));
+					}
+				}
+				return getPartitionIfAssigned(target);
+			}
+		}
+
+		return Optional.empty();
 	}
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
@@ -203,6 +240,84 @@ public class PatientIdPartitionInterceptor {
 		return provideNonPatientSpecificQueryResponse();
 	}
 
+	/**
+	 * If we're about to process a FHIR transaction, we want to note the mappings between placeholder IDs
+	 * and their resources and stuff them into a userdata map where we can access them later. We do this
+	 * so that when we see a resource in the patient compartment (e.g. an Encounter) and it has a subject
+	 * reference that's just a placeholder ID, we can look up the target of that and figure out which
+	 * compartment that Encounter actually belongs to.
+	 */
+	@Hook(Pointcut.STORAGE_TRANSACTION_PROCESSING)
+	public void transaction(RequestDetails theRequestDetails, IBaseBundle theBundle) {
+		FhirTerser terser = myFhirContext.newTerser();
+
+		/*
+		 * If we have a Patient in the transaction bundle which is being POST-ed as a normal
+		 * resource "create" (i.e., it will get a server-assigned ID), we'll proactively assign it an ID here.
+		 *
+		 * This is mostly a hack to get Synthea data working, but real clients could also be
+		 * following the same pattern.
+		 */
+		List<IBase> rawEntries = new ArrayList<>(terser.getValues(theBundle, "entry", IBase.class));
+		List<BundleEntryParts> parsedEntries = BundleUtil.toListOfEntries(myFhirContext, theBundle);
+		Validate.isTrue(rawEntries.size() == parsedEntries.size(), "Parsed and raw entries don't match");
+
+		Map<String, String> idSubstitutions = new HashMap<>();
+		for (int i = 0; i < rawEntries.size(); i++) {
+			BundleEntryParts nextEntry = parsedEntries.get(i);
+			if (nextEntry.getResource() != null
+					&& myFhirContext.getResourceType(nextEntry.getResource()).equals("Patient")) {
+				if (nextEntry.getMethod() == RequestTypeEnum.POST && isBlank(nextEntry.getConditionalUrl())) {
+					if (nextEntry.getFullUrl() != null && nextEntry.getFullUrl().startsWith("urn:uuid:")) {
+						String newId = UUID.randomUUID().toString();
+						nextEntry.getResource().setId(newId);
+						idSubstitutions.put(nextEntry.getFullUrl(), "Patient/" + newId);
+
+						IBase entry = rawEntries.get(i);
+						IBase request = terser.getValues(entry, "request").get(0);
+						terser.setElement(request, "ifNoneExist", null);
+						terser.setElement(request, "method", "PUT");
+						terser.setElement(request, "url", "Patient/" + newId);
+					}
+				}
+			}
+		}
+
+		if (!idSubstitutions.isEmpty()) {
+			for (BundleEntryParts entry : parsedEntries) {
+				IBaseResource resource = entry.getResource();
+				if (resource != null) {
+					List<ResourceReferenceInfo> references = terser.getAllResourceReferences(resource);
+					for (ResourceReferenceInfo reference : references) {
+						String referenceString = reference
+								.getResourceReference()
+								.getReferenceElement()
+								.getValue();
+						String substitution = idSubstitutions.get(referenceString);
+						if (substitution != null) {
+							reference.getResourceReference().setReference(substitution);
+						}
+					}
+				}
+			}
+		}
+
+		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(myFhirContext, theBundle);
+		Map<String, IBaseResource> placeholderToResource = new HashMap<>();
+		for (BundleEntryParts nextEntry : entries) {
+			String fullUrl = nextEntry.getFullUrl();
+			if (fullUrl != null && fullUrl.startsWith("urn:uuid:")) {
+				if (nextEntry.getResource() != null) {
+					placeholderToResource.put(fullUrl, nextEntry.getResource());
+				}
+			}
+		}
+
+		if (theRequestDetails != null) {
+			theRequestDetails.getUserData().put(PLACEHOLDER_TO_REFERENCE_KEY, placeholderToResource);
+		}
+	}
+
 	@SuppressWarnings("SameParameterValue")
 	private List<String> getResourceIdList(
 			SearchParameterMap theParams, String theParamName, String theResourceType, boolean theExpectOnlyOneBool) {
@@ -224,7 +339,7 @@ public class PatientIdPartitionInterceptor {
 							+ " is not supported in patient compartment mode");
 				}
 			}
-			IdType id = new IdType(idParam.getValueAsQueryToken(myFhirContext));
+			IdType id = new IdType(idParam.getValueAsQueryToken());
 			if (!id.hasResourceType() || id.getResourceType().equals(theResourceType)) {
 				idParts.add(id.getIdPart());
 			}

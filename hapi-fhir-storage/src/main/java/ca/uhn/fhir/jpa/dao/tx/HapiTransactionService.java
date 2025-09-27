@@ -250,7 +250,15 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 	@Nullable
 	protected <T> T doExecute(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
-		final RequestPartitionId requestPartitionId = theExecutionBuilder.getEffectiveRequestPartitionId();
+		RequestPartitionId effectiveRequestPartitionId = theExecutionBuilder.getEffectiveRequestPartitionId();
+		final RequestPartitionId requestPartitionId;
+		if (effectiveRequestPartitionId != null
+				&& myPartitionSettings.isDefaultPartition(effectiveRequestPartitionId)) {
+			requestPartitionId = myPartitionSettings.getDefaultRequestPartitionId();
+		} else {
+			requestPartitionId = effectiveRequestPartitionId;
+		}
+
 		RequestPartitionId previousRequestPartitionId = null;
 		if (requestPartitionId != null) {
 			previousRequestPartitionId = ourRequestPartitionThreadLocal.get();

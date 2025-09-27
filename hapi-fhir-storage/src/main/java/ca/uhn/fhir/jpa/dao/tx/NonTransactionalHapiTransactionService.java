@@ -19,9 +19,14 @@
  */
 package ca.uhn.fhir.jpa.dao.tx;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A transaction service implementation that does not actually
@@ -30,9 +35,27 @@ import org.springframework.transaction.support.TransactionCallback;
  */
 public class NonTransactionalHapiTransactionService extends HapiTransactionService {
 
+	private Set<Pair<RequestPartitionId, RequestPartitionId>> myNonCompatiblePartitions = new HashSet<>();
+
 	@Nullable
 	@Override
 	protected <T> T doExecute(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
 		return theCallback.doInTransaction(new SimpleTransactionStatus());
+	}
+
+	@Override
+	public boolean isCompatiblePartition(
+			RequestPartitionId theRequestPartitionId, RequestPartitionId theOtherRequestPartitionId) {
+		if (myNonCompatiblePartitions.contains(Pair.of(theRequestPartitionId, theOtherRequestPartitionId))) {
+			return false;
+		} else return !myNonCompatiblePartitions.contains(Pair.of(theOtherRequestPartitionId, theRequestPartitionId));
+	}
+
+	public void clearNonCompatiblePartitions() {
+		myNonCompatiblePartitions.clear();
+	}
+
+	public void addNonCompatiblePartition(RequestPartitionId thePartitionA, RequestPartitionId thePartitionB) {
+		myNonCompatiblePartitions.add(Pair.of(thePartitionA, thePartitionB));
 	}
 }

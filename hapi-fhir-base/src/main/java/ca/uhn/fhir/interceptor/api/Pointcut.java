@@ -1802,6 +1802,47 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
+	 * Invoked before a FHIR transaction is processed, and allows interceptor code to
+	 * split the FHIR transaction into multiple sub-transactions which will be processed
+	 * individually. These sub-transactions will be executed in the order they are
+	 * returned by the interceptor.
+	 * <p>
+	 * If any sub-transaction fails, any previous sub-transactions will not be rolled back.
+	 * This means that splitting a transaction with this pointcut can result in
+	 * FHIR transaction processing not actually fully respecting the atomicity specified
+	 * in the FHIR specification. Use with caution!
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseBundle - The FHIR transaction Bundle</li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks must return an instance of <code>ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse</code>.
+	 * </p>
+	 *
+	 * @since 8.6.0
+	 */
+	STORAGE_TRANSACTION_PRE_PARTITION(
+			"ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+			"org.hl7.fhir.instance.model.api.IBaseBundle"),
+
+	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked when a FHIR transaction bundle is about to begin processing. Hooks may choose to
 	 * modify the bundle, and may affect processing by doing so.
 	 * <p>

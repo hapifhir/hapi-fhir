@@ -132,6 +132,8 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			myRegisteredSearchParamValidatingInterceptor = true;
 			myInterceptorRegistry.registerInterceptor(mySearchParamValidatingInterceptor);
 		}
+
+		myPartitionInterceptor.clearPartitions();
 	}
 
 	protected void registerPartitionInterceptor() {
@@ -252,7 +254,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 
 	// all the create-paths have a read path first for the tx boundary.
 	protected void addNextTargetPartitionForCreate(RequestPartitionId requestPartitionId) {
-		addNextInterceptorReadResult(requestPartitionId);
+		addNextInterceptorCreateResult(requestPartitionId);
 		addNextInterceptorCreateResult(requestPartitionId);
 	}
 
@@ -295,6 +297,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	 * We need lots of calls: pre-fetch, main tx boundary, redundant boundary for dao.update(), and finally the assign call
 	 */
 	private void addNextTargetPartitionForUpdateInTxBundle(RequestPartitionId requestPartitionId) {
+		addNextInterceptorReadResult(requestPartitionId);
 		addNextInterceptorCreateResult(requestPartitionId);
 		addNextInterceptorCreateResult(requestPartitionId);
 		addNextTargetPartitionForCreateWithId(requestPartitionId);
@@ -307,6 +310,13 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	protected void addNextTargetPartitionForCreate(Integer thePartitionId, LocalDate thePartitionDate) {
 		Validate.notNull(thePartitionId);
 		RequestPartitionId requestPartitionId = fromPartitionId(thePartitionId, thePartitionDate);
+		addNextTargetPartitionForCreate(requestPartitionId);
+	}
+
+	protected void addNextTargetPartitionForCreateInTransaction(Integer thePartitionId, LocalDate thePartitionDate) {
+		Validate.notNull(thePartitionId);
+		RequestPartitionId requestPartitionId = fromPartitionId(thePartitionId, thePartitionDate);
+		addNextTargetPartitionForCreate(requestPartitionId);
 		addNextTargetPartitionForCreate(requestPartitionId);
 	}
 
@@ -439,6 +449,11 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			assertThat(myReadRequestPartitionIds).as("Found " + myReadRequestPartitionIds.size() + " READ partitions remaining in interceptor").isEmpty();
 		}
 
+		@Override
+		public void clearPartitions() {
+			super.clearPartitions();
+			myReadRequestPartitionIds.clear();
+		}
 	}
 
 	@Nonnull
@@ -482,5 +497,8 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			assertThat(myCreateRequestPartitionIds).as(() -> "Still have " + myCreateRequestPartitionIds.size() + " CREATE partitions remaining in interceptor").isEmpty();
 		}
 
+		public void clearPartitions() {
+			myCreateRequestPartitionIds.clear();
+		}
 	}
 }
