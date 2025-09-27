@@ -36,7 +36,7 @@ public class ResourceIdentifierPatientUniqueEntity {
 	@EmbeddedId
 	private PatientIdentifierPk myPk;
 
-	@Column(name = FHIR_ID, length = FHIR_ID_LENGTH)
+	@Column(name = FHIR_ID, length = FHIR_ID_LENGTH, nullable = false)
 	private String myFhirId;
 
 	public void setPk(PatientIdentifierPk thePk) {

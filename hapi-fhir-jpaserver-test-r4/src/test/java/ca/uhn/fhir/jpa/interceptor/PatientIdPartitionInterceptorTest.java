@@ -866,7 +866,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 				bundles.add(patientBundle);
 			}
 
-			return new TransactionPrePartitionResponse(bundles);
+			return new TransactionPrePartitionResponse().setSplitBundles(bundles);
 		}
 
 	}

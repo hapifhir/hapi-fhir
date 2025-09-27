@@ -64,7 +64,7 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 		response1.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
 		addResponseEntry(response1, "201", "Observation/OBS-0", StorageResponseCodeEnum.SUCCESSFUL_CREATE);
 		addResponseEntry(response1, "201", "Observation/OBS-1", StorageResponseCodeEnum.SUCCESSFUL_CREATE);
-		when(myTransactionProcessor.processTransactionAsSubRequest(any(), any(), any(), anyBoolean())).thenReturn(response0, response1);
+		when(myTransactionProcessor.processTransactionAsSubRequest(any(), any(), any(), any(), anyBoolean())).thenReturn(response0, response1);
 
 		myInterceptor.setNextRanges(List.of(1, 3), List.of(0, 2));
 
@@ -72,7 +72,7 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 		Bundle response = mySvc.execute(request);
 
 		// Verify
-		verify(myTransactionProcessor, times(2)).processTransactionAsSubRequest(any(), any(), any(), anyBoolean());
+		verify(myTransactionProcessor, times(2)).processTransactionAsSubRequest(any(), any(), any(), any(), anyBoolean());
 
 		TransactionUtil.TransactionResponse parsedResponse = TransactionUtil.parseTransactionResponse(myFhirContext, request, response);
 		assertEquals("Observation/OBS-0", parsedResponse.getStorageOutcomes().get(0).getTargetId().getValue());
@@ -92,7 +92,7 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 		addResponseEntry(response0, "201", "Observation/OBS-0", StorageResponseCodeEnum.SUCCESSFUL_CREATE);
 		addResponseEntry(response0, "201", "Patient/PAT-1", StorageResponseCodeEnum.SUCCESSFUL_CREATE);
 		addResponseEntry(response0, "201", "Observation/OBS-1", StorageResponseCodeEnum.SUCCESSFUL_CREATE);
-		when(myTransactionProcessor.processTransactionAsSubRequest(any(), any(), any(), anyBoolean())).thenReturn(response0);
+		when(myTransactionProcessor.processTransactionAsSubRequest(any(), any(), any(), any(), anyBoolean())).thenReturn(response0);
 
 		myInterceptor.setNextRanges(List.of(), List.of(), List.of(0, 1, 2, 3), List.of());
 
@@ -100,7 +100,7 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 		Bundle response = mySvc.execute(request);
 
 		// Verify
-		verify(myTransactionProcessor, times(1)).processTransactionAsSubRequest(any(), myBundleCaptor.capture(), any(), anyBoolean());
+		verify(myTransactionProcessor, times(1)).processTransactionAsSubRequest(any(), any(), myBundleCaptor.capture(), any(), anyBoolean());
 		assertEquals(4, myBundleCaptor.getAllValues().get(0).getEntry().size());
 	}
 
@@ -114,9 +114,36 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 
 		// Test / Verify
 		assertThatThrownBy(()->mySvc.execute(request))
-			.isInstanceOf(InternalErrorException.class)
-			.hasMessageContaining("HAPI-2816: Interceptor for pointcut STORAGE_TRANSACTION_PRE_PARTITION produced multiple partitions for Bundle.entry[0]");
+			.hasMessageContaining("Interceptor for Pointcut STORAGE_TRANSACTION_PRE_PARTITION must return Bundles containing duplicates or entries which were not present in the original Bundle");
 	}
+
+	@Test
+	public void testInvalidRanges_MissingEntry() {
+		// Setup
+		Bundle request = createRequest_Obs0_Patient0_Obs1_Patient1();
+
+		// Missing entry index 1
+		myInterceptor.setNextRanges(List.of(0, 1), List.of(3));
+
+		// Test / Verify
+		assertThatThrownBy(()->mySvc.execute(request))
+			.hasMessageContaining("Interceptor for Pointcut STORAGE_TRANSACTION_PRE_PARTITION must include all entries from the original Bundle in the partitioned Bundles");
+	}
+
+	@Test
+	public void testInvalidRanges_EntryAddedWhichWasNotInOriginalBundle() {
+		// Setup
+		Bundle request = createRequest_Obs0_Patient0_Obs1_Patient1();
+
+		// Missing entry index 1
+		myInterceptor.setNextRanges(List.of(0, 1), List.of(-1, 2, 3));
+
+		// Test / Verify
+		assertThatThrownBy(()->mySvc.execute(request))
+			.hasMessageContaining("Interceptor for Pointcut STORAGE_TRANSACTION_PRE_PARTITION must return Bundles containing duplicates or entries which were not present in the original Bundle");
+	}
+
+
 
 	private Bundle createRequest_Obs0_Patient0_Obs1_Patient1() {
 		BundleBuilder requestBuilder = new BundleBuilder(myFhirContext);

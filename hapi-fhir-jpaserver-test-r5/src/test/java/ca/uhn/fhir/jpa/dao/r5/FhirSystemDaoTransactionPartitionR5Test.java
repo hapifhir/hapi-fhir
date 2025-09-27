@@ -72,7 +72,14 @@ public class FhirSystemDaoTransactionPartitionR5Test extends BaseJpaR5Test {
 			for (List<Integer> nextRange : myNextRanges) {
 				List<Bundle.BundleEntryComponent> entries = new ArrayList<>();
 				for (int nextIndex : nextRange) {
-					entries.add(inputBundle.getEntry().get(nextIndex));
+					Bundle.BundleEntryComponent entry;
+					if (nextIndex == -1) {
+						entry = new Bundle.BundleEntryComponent();
+						entry.setFullUrl("http://foo-123");
+					} else {
+						entry = inputBundle.getEntry().get(nextIndex);
+					}
+					entries.add(entry);
 				}
 
 				Bundle requestBundle = new Bundle();
@@ -81,7 +88,7 @@ public class FhirSystemDaoTransactionPartitionR5Test extends BaseJpaR5Test {
 				entries.forEach(requestBundle::addEntry);
 			}
 
-			return new TransactionPrePartitionResponse(requestBundles);
+			return new TransactionPrePartitionResponse().setSplitBundles(requestBundles);
 		}
 
 	}

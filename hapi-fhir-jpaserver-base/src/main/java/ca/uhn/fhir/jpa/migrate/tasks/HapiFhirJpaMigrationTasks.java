@@ -154,10 +154,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			resIdentifierSystem
 					.addIndex("20250927.03", "IDX_RES_IDENT_SYS")
 					.unique(true)
-					.includeColumns("SYSTEM_URL");
+					.withColumns("SYSTEM_URL");
 
 			Builder.BuilderAddTableByColumns resIdentifierPatient = version.addTableByColumns(
-					"20250927.02", "HFJ_RES_IDENTIFIER_PT_UNIQ", "IDENT_SYSTEM_PID", "IDENT_VALUE");
+					"20250927.04", "HFJ_RES_IDENTIFIER_PT_UNIQ", "IDENT_SYSTEM_PID", "IDENT_VALUE");
 			resIdentifierPatient.addColumn("IDENT_SYSTEM_PID").nonNullable().type(ColumnTypeEnum.LONG);
 			resIdentifierPatient.addColumn("IDENT_VALUE").nonNullable().type(ColumnTypeEnum.STRING, 500);
 			resIdentifierPatient.addColumn("FHIR_ID").nonNullable().type(ColumnTypeEnum.STRING, 64);

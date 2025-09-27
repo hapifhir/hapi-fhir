@@ -44,7 +44,7 @@ public class ResourceIdentifierSystemEntity {
 	@Id
 	private Long myPid;
 
-	@Column(name = "SYSTEM_URL", length = 500)
+	@Column(name = "SYSTEM_URL", length = 500, nullable = false)
 	private String mySystem;
 
 	public Long getPid() {
