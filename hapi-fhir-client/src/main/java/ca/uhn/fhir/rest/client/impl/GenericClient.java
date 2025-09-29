@@ -499,7 +499,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public EntityResult execute() {
 			IClientResponseHandler<EntityResult> binding = new EntityResultResponseHandler();
 			HttpGetClientInvocation invocation = new HttpGetClientInvocation(myContext, myUrl);
-			return invokeClient(myContext, binding, invocation);
+			return invokeClient(
+					myContext, binding, invocation, null, null, false, null, null, null, null, myCustomHeaderValues);
 		}
 	}
 
