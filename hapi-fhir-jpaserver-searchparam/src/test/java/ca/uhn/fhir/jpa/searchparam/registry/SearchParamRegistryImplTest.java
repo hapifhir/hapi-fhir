@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.RuntimeResourceSource;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
@@ -16,6 +17,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
@@ -24,6 +26,7 @@ import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -39,6 +42,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
@@ -48,6 +52,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -102,7 +107,6 @@ public class SearchParamRegistryImplTest {
 	SearchParamRegistryImpl mySearchParamRegistry;
 	@Autowired
 	private ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
-
 	@MockBean
 	private PartitionSettings myPartitionSettings;
 	@MockBean
@@ -290,7 +294,6 @@ public class SearchParamRegistryImplTest {
 		assertSame(patientAddress, personAddress);
 	}
 
-
 	@Test
 	public void testGetActiveUniqueSearchParams_Empty() {
 		assertThat(mySearchParamRegistry.getActiveComboSearchParams("Patient", null)).isEmpty();
@@ -330,7 +333,7 @@ public class SearchParamRegistryImplTest {
 	}
 
 	@Test
-	public void testAddActiveSearchparam() {
+	public void testAddActiveSearchParams() {
 		// Initialize the registry
 		mySearchParamRegistry.forceRefresh();
 
@@ -479,7 +482,100 @@ public class SearchParamRegistryImplTest {
 		} else {
 			assertNull(textSp);
 		}
+	}
 
+	@Test
+	public void getActiveSearchParams_builtIn_haveProperSource() {
+		// setup
+		mySearchParamRegistry.forceRefresh();
+
+		// test
+		ReadOnlySearchParamCache params = mySearchParamRegistry.getActiveSearchParams();
+
+		// verify
+		params.getSearchParamStream()
+			.forEach(sp -> {
+				assertEquals(RuntimeResourceSource.SourceType.FHIR_CONTEXT, sp.getSource().getOriginatingSource());
+			});
+	}
+
+	@Test
+	public void getActiveSearchParams_SPsFromDB_haveProperSource() {
+		// setup
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("Patient");
+		sp.setUrl("http://localhost/test");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.setName("HelloWorld");
+		sp.setDescription("description");
+		sp.setExpression("Patient.name.given");
+		sp.setCode("HelloWorld");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setId(new IdType("SearchParameter/1/_history/1"));
+
+		IBundleProvider provider = new SimpleBundleProvider(
+			List.of(sp)
+		);
+
+		// when
+		when(mySearchParamProvider.search(any(SearchParameterMap.class)))
+			.thenReturn(provider);
+
+		// test
+		mySearchParamRegistry.forceRefresh();
+
+		RuntimeSearchParam result = mySearchParamRegistry.getActiveSearchParam("Patient", "HelloWorld", ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
+		assertNotNull(result);
+		assertEquals("HelloWorld", result.getName());
+		assertEquals(RuntimeResourceSource.SourceType.DATABASE, result.getSource().getOriginatingSource());
+		assertNull(result.getSource().getIGName());
+		assertNull(result.getSource().getIGVersion());
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void addActiveSearchParameterToLocalCache_withValidSP_addsItToCache(boolean theIsActive) {
+		// setup
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("Patient");
+		sp.setUrl("http://localhost/test");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.setName("HelloWorld");
+		sp.setDescription("description");
+		sp.setExpression("Patient.name.given");
+		sp.setCode("HelloWorld");
+		if (theIsActive) {
+			sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		} else {
+			sp.setStatus(Enumerations.PublicationStatus.RETIRED);
+		}
+		SearchParameterCanonicalizer canonicalizer = new SearchParameterCanonicalizer(FhirContext.forR4Cached());
+
+		// test
+		try {
+			mySearchParamRegistry.addActiveSearchParameterToLocalCache(canonicalizer.canonicalizeSearchParameter(sp));
+			mySearchParamRegistry.forceRefresh();
+
+			// validate
+			ReadOnlySearchParamCache cache = mySearchParamRegistry.getActiveSearchParams();
+
+			assertNotNull(cache);
+			if (theIsActive) {
+				assertTrue(cache.getSearchParamMap("Patient")
+					.containsParamName("HelloWorld"));
+			} else {
+				assertFalse(cache.getSearchParamMap("Patient")
+					.containsParamName("HelloWorld"));
+			}
+
+			// req'd or our beforeeach will fail
+			mySearchParamRegistry.clearLocalSearchParameterCache();
+			mySearchParamRegistry.forceRefresh();
+		} finally {
+			// verify
+			ReadOnlySearchParamCache cache = mySearchParamRegistry.getActiveSearchParams();
+			assertFalse(cache.getSearchParamMap("Patient").containsParamName("HelloWorld"));
+		}
 	}
 
 	private List<ResourceTable> resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus theStatus) {
