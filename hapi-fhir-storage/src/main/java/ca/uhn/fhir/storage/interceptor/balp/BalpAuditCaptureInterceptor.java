@@ -360,7 +360,6 @@ public class BalpAuditCaptureInterceptor {
 		AuditEvent.AuditEventAgentComponent clientAgent = auditEvent.addAgent();
 		clientAgent.setWho(myContextServices.getAgentClientWho(theRequestDetails));
 		clientAgent.getType().addCoding(theProfile.getAgentClientTypeCoding());
-		clientAgent.getWho().setDisplay(myContextServices.getNetworkAddress(theRequestDetails));
 		clientAgent
 				.getNetwork()
 				.setAddress(myContextServices.getNetworkAddress(theRequestDetails))
