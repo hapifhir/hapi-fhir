@@ -37,12 +37,14 @@ public class FetchIdsV3Step implements IJobStepWorker<BulkExportJobParameters, M
 
 	@Override
 	public RunOutcome run(
-		@Nonnull StepExecutionDetails<BulkExportJobParameters, MdmExpandedPatientIds> theStepExecutionDetails,
-		@Nonnull IJobDataSink<ResourceIdList> theDataSink) throws JobExecutionFailedException {
+			@Nonnull StepExecutionDetails<BulkExportJobParameters, MdmExpandedPatientIds> theStepExecutionDetails,
+			@Nonnull IJobDataSink<ResourceIdList> theDataSink)
+			throws JobExecutionFailedException {
 		BulkExportJobParameters params = theStepExecutionDetails.getParameters();
 		MdmExpandedPatientIds expandedPatientIds = theStepExecutionDetails.getData();
-		ourLog.info("Fetching resource IDs for bulk export job instance [{}]",
-			theStepExecutionDetails.getInstance().getInstanceId());
+		ourLog.info(
+				"Fetching resource IDs for bulk export job instance [{}]",
+				theStepExecutionDetails.getInstance().getInstanceId());
 
 		ExportPIDIteratorParameters providerParams = new ExportPIDIteratorParameters();
 		providerParams.setInstanceId(theStepExecutionDetails.getInstance().getInstanceId());
@@ -58,9 +60,7 @@ public class FetchIdsV3Step implements IJobStepWorker<BulkExportJobParameters, M
 		providerParams.setRequestedResourceTypes(params.getResourceTypes());
 
 		if (params.isExpandMdm()) {
-			providerParams.setExpandedPatientIds(
-				convertExpandedPatientIds(expandedPatientIds.getExpandedPatientIds())
-			);
+			providerParams.setExpandedPatientIds(convertExpandedPatientIds(expandedPatientIds.getExpandedPatientIds()));
 		}
 
 		int submissionCount = 0;
@@ -77,9 +77,9 @@ public class FetchIdsV3Step implements IJobStepWorker<BulkExportJobParameters, M
 
 	private List<IResourcePersistentId<?>> convertExpandedPatientIds(List<PatientIdAndPidJson> theExpanded) {
 		return theExpanded.stream()
-			.map(id -> {
-				return id.toPersistentId(myIdHelperService, myFhirContext);
-			})
-			.collect(Collectors.toList());
+				.map(id -> {
+					return id.toPersistentId(myIdHelperService, myFhirContext);
+				})
+				.collect(Collectors.toList());
 	}
 }

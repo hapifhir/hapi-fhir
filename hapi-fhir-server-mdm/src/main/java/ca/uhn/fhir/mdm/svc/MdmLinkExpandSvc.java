@@ -87,25 +87,25 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	}
 
 	@Override
-	public Set<String> expandMdmBySourceResourceIdsForSingleResourceType(RequestPartitionId theRequestPartitionId, Collection<IIdType> theIds) {
-		Set<String> resourceTypes = theIds.stream()
-				.map(IIdType::getResourceType)
-					.collect(Collectors.toSet());
-		Validate.isTrue(
-			resourceTypes.size() == 1,
-			"Expected only 1 resource type, found " + resourceTypes.size()
-		);
+	public Set<String> expandMdmBySourceResourceIdsForSingleResourceType(
+			RequestPartitionId theRequestPartitionId, Collection<IIdType> theIds) {
+		Set<String> resourceTypes =
+				theIds.stream().map(IIdType::getResourceType).collect(Collectors.toSet());
+		Validate.isTrue(resourceTypes.size() == 1, "Expected only 1 resource type, found " + resourceTypes.size());
 
-		Collection<MdmPidTuple<?>> response = myMdmLinkDao.resolveGoldenResources(
-			Arrays.asList(theIds.toArray())
-		);
+		Collection<MdmPidTuple<?>> response = myMdmLinkDao.resolveGoldenResources(Arrays.asList(theIds.toArray()));
 
 		Set<String> expandedIds = new HashSet<>();
-		response.stream()
-			.forEach(tuple -> {
-				expandedIds.add(tuple.getSourcePid().getAssociatedResourceId().toUnqualifiedVersionless().getIdPart());
-				expandedIds.add(tuple.getGoldenPid().getAssociatedResourceId().toUnqualifiedVersionless().getIdPart());
-			});
+		response.stream().forEach(tuple -> {
+			expandedIds.add(tuple.getSourcePid()
+					.getAssociatedResourceId()
+					.toUnqualifiedVersionless()
+					.getIdPart());
+			expandedIds.add(tuple.getGoldenPid()
+					.getAssociatedResourceId()
+					.toUnqualifiedVersionless()
+					.getIdPart());
+		});
 
 		return expandedIds;
 	}

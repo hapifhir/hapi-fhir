@@ -25,9 +25,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
-import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -120,13 +118,13 @@ public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdm
 
 	@Override
 	public Set<JpaPid> expandPatients(Collection<IIdType> thePatientIds, RequestPartitionId theRequestPartitionId) {
-		Set<String> ids = myMdmEidMatchOnlyLinkExpandSvc
-			.expandMdmBySourceResourceIdsForSingleResourceType(theRequestPartitionId, thePatientIds);
+		Set<String> ids = myMdmEidMatchOnlyLinkExpandSvc.expandMdmBySourceResourceIdsForSingleResourceType(
+				theRequestPartitionId, thePatientIds);
 
 		List<JpaPid> pids = myIdHelperService.resolveResourcePids(
-			theRequestPartitionId,
-			ids.stream().map(id -> myFhirContext.getVersion().newIdType(id)).collect(Collectors.toList()),
-			ResolveIdentityMode.excludeDeleted().cacheOk());
+				theRequestPartitionId,
+				ids.stream().map(id -> myFhirContext.getVersion().newIdType(id)).collect(Collectors.toList()),
+				ResolveIdentityMode.excludeDeleted().cacheOk());
 		return new HashSet<>(pids);
 	}
 

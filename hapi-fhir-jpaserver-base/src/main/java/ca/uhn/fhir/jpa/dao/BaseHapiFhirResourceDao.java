@@ -2299,8 +2299,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.searchList(() -> {
 					ISearchBuilder<JpaPid> builder =
 							mySearchBuilderFactory.newSearchBuilder(getResourceName(), getResourceType());
-					try (Stream<JpaPid> pidStream =
-							builder.createQueryStream(theParams, searchRuntimeDetails, theRequest, requestPartitionId)) {
+					try (Stream<JpaPid> pidStream = builder.createQueryStream(
+							theParams, searchRuntimeDetails, theRequest, requestPartitionId)) {
 
 						try (Stream<V> transformedStream = transform.apply(theRequest, pidStream, requestPartitionId)) {
 							return transformedStream.collect(Collectors.toList());

@@ -257,7 +257,7 @@ public class BulkDataExportProvider {
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean")
-				IPrimitiveType<Boolean> theMdm,
+					IPrimitiveType<Boolean> theMdm,
 			ServletRequestDetails theRequestDetails) {
 
 		final List<IPrimitiveType<String>> patientIds =
@@ -273,8 +273,7 @@ public class BulkDataExportProvider {
 				theTypeFilter,
 				theTypePostFetchFilterUrl,
 				patientIds,
-				theMdm
-		);
+				theMdm);
 	}
 
 	/**
@@ -310,7 +309,7 @@ public class BulkDataExportProvider {
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean")
-				IPrimitiveType<Boolean> theMdm,
+					IPrimitiveType<Boolean> theMdm,
 			ServletRequestDetails theRequestDetails) {
 
 		// call the type-level export to ensure spec compliance
@@ -324,8 +323,7 @@ public class BulkDataExportProvider {
 				List.of(theIdParam),
 				theExportIdentifier,
 				theMdm,
-				theRequestDetails
-			);
+				theRequestDetails);
 	}
 
 	static List<IPrimitiveType<String>> parsePatientList(@Nonnull List<IBase> thePatient) {
@@ -367,8 +365,7 @@ public class BulkDataExportProvider {
 			List<IPrimitiveType<String>> theTypeFilter,
 			List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
 			List<IPrimitiveType<String>> thePatientIds,
-			IPrimitiveType<Boolean> theMdmExpansion
-	) {
+			IPrimitiveType<Boolean> theMdmExpansion) {
 		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		getBulkDataExportSupport()

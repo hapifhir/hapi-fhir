@@ -25,7 +25,6 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -186,13 +185,12 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	default void fillOutPids(Set<T> thePids, FhirContext theContext) {
 		PersistentIdToForcedIdMap<T> pidToForcedIdMap = translatePidsToForcedIds(thePids);
 
-		thePids
-			.forEach(pid -> {
-				Optional<String> val = pidToForcedIdMap.get(pid);
-				val.ifPresent(id -> {
-					pid.setAssociatedResourceId(theContext.getVersion().newIdType(id));
-				});
+		thePids.forEach(pid -> {
+			Optional<String> val = pidToForcedIdMap.get(pid);
+			val.ifPresent(id -> {
+				pid.setAssociatedResourceId(theContext.getVersion().newIdType(id));
 			});
+		});
 	}
 
 	/**

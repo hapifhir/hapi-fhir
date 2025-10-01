@@ -35,9 +35,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration()
-@Import({
-	BulkExportV3Config.class
-})
+@Import({BulkExportV3Config.class})
 public class BulkExportAppCtx {
 
 	public static final String WRITE_TO_BINARIES = "write-to-binaries";

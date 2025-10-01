@@ -94,17 +94,17 @@ public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpa
 
 	@Override
 	public Set<JpaPid> expandPatients(Collection<IIdType> thePatientIds, RequestPartitionId theRequestPartitionId) {
-		List<JpaPid> resolvedPids = myIdHelperService.resolveResourcePids(theRequestPartitionId,
-			thePatientIds.stream().map(IdDt::new).collect(Collectors.toList()),
-			ResolveIdentityMode.excludeDeleted().cacheOk());
+		List<JpaPid> resolvedPids = myIdHelperService.resolveResourcePids(
+				theRequestPartitionId,
+				thePatientIds.stream().map(IdDt::new).collect(Collectors.toList()),
+				ResolveIdentityMode.excludeDeleted().cacheOk());
 		Set<JpaPid> pids = new HashSet<>();
 
 		Collection<MdmPidTuple<JpaPid>> matchedGoldenAndSourceIds = myMdmLinkDao.resolveGoldenResources(resolvedPids);
-		matchedGoldenAndSourceIds
-			.forEach(set -> {
-				pids.add(set.getGoldenPid());
-				pids.add(set.getSourcePid());
-			});
+		matchedGoldenAndSourceIds.forEach(set -> {
+			pids.add(set.getGoldenPid());
+			pids.add(set.getSourcePid());
+		});
 		return pids;
 	}
 

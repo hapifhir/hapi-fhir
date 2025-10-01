@@ -25,7 +25,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 public interface IMdmLinkExpandSvc {
@@ -39,7 +38,8 @@ public interface IMdmLinkExpandSvc {
 	 * @param theIds the list of patient ids to expand
 	 * @return the mdm expanded set of patient ids (should include the original set as well as any linked patient ids)
 	 */
-	Set<String> expandMdmBySourceResourceIdsForSingleResourceType(RequestPartitionId theRequestPartitionId, Collection<IIdType> theIds);
+	Set<String> expandMdmBySourceResourceIdsForSingleResourceType(
+			RequestPartitionId theRequestPartitionId, Collection<IIdType> theIds);
 
 	Set<String> expandMdmBySourceResourcePid(
 			RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theSourceResourcePid);

@@ -33,12 +33,16 @@ public class MdmExpansionStep implements IFirstJobStepWorker<BulkExportJobParame
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Override
-	public RunOutcome run(StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
-						  @Nonnull IJobDataSink<MdmExpandedPatientIds> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
+			@Nonnull IJobDataSink<MdmExpandedPatientIds> theDataSink)
+			throws JobExecutionFailedException {
 		BulkExportJobParameters jobParameters = theStepExecutionDetails.getParameters();
 
 		if (jobParameters.isExpandMdm()) {
-			ourLog.info("Doing MDM expansion for bulk export job instance[{}]", theStepExecutionDetails.getInstance().getInstanceId());
+			ourLog.info(
+					"Doing MDM expansion for bulk export job instance[{}]",
+					theStepExecutionDetails.getInstance().getInstanceId());
 
 			ExpandPatientIdsParams params = new ExpandPatientIdsParams(jobParameters.getExportStyle());
 			params.setToDoMdmExpansion(jobParameters.isExpandMdm());
@@ -53,13 +57,14 @@ public class MdmExpansionStep implements IFirstJobStepWorker<BulkExportJobParame
 			Set<IResourcePersistentId<?>> resourcePersistentIdSet = myBulkExportProcessor.expandPatientIdList(params);
 
 			MdmExpandedPatientIds expandedPatientIds = new MdmExpandedPatientIds();
-			expandedPatientIds.setExpandedPatientIds(resourcePersistentIdSet
-				.stream().map(PatientIdAndPidJson::new)
-				.collect(Collectors.toList()));
+			expandedPatientIds.setExpandedPatientIds(resourcePersistentIdSet.stream()
+					.map(PatientIdAndPidJson::new)
+					.collect(Collectors.toList()));
 			theDataSink.accept(expandedPatientIds);
 
-			ourLog.info("MDM expansion performed generating {} ids",
-				expandedPatientIds.getExpandedPatientIds().size());
+			ourLog.info(
+					"MDM expansion performed generating {} ids",
+					expandedPatientIds.getExpandedPatientIds().size());
 		} else {
 			ourLog.info("No MDM expansion required. Job will continue.");
 			// no mdm expansion; but we need to accept something

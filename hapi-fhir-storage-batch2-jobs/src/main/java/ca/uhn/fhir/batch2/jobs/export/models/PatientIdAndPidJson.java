@@ -22,9 +22,10 @@ public class PatientIdAndPidJson extends TypedPidJson {
 	public PatientIdAndPidJson() {}
 
 	public PatientIdAndPidJson(IResourcePersistentId theResourcePersistentId) {
-		super(theResourcePersistentId.getResourceType(),
-			theResourcePersistentId.getPartitionId(),
-			theResourcePersistentId.getId().toString());
+		super(
+				theResourcePersistentId.getResourceType(),
+				theResourcePersistentId.getPartitionId(),
+				theResourcePersistentId.getId().toString());
 
 		setResourceId(theResourcePersistentId.getAssociatedResourceId());
 	}
@@ -41,15 +42,12 @@ public class PatientIdAndPidJson extends TypedPidJson {
 		myResourceId = theResourceId;
 	}
 
-	public <T extends IResourcePersistentId<?>> T toPersistentId(IIdHelperService<T> theIdHelperService,
-																 FhirContext theFhirContext) {
+	public <T extends IResourcePersistentId<?>> T toPersistentId(
+			IIdHelperService<T> theIdHelperService, FhirContext theFhirContext) {
 		T pid = super.toPersistentId(theIdHelperService);
 
 		// set the resource persistent id
-		pid.setAssociatedResourceId(
-			theFhirContext.getVersion()
-				.newIdType(getResourceId())
-		);
+		pid.setAssociatedResourceId(theFhirContext.getVersion().newIdType(getResourceId()));
 		return pid;
 	}
 }

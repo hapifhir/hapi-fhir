@@ -30,35 +30,34 @@ public class BulkExportV3Config {
 		builder.setJobDefinitionVersion(3);
 
 		JobDefinition def = builder.setParametersType(BulkExportJobParameters.class)
-			// validator
-			.setParametersValidator(bulkExportJobParametersValidator())
-			.gatedExecution()
-			.addFirstStep(
-				"mdm-expand-if-necessary",
-				"Expand out patient ids if necessary",
-				MdmExpandedPatientIds.class,
-				mdmExpansionStep()
-			)
-			// load in (all) ids and create id chunks of 1000 each
-			.addIntermediateStep(
-				"fetch-resources",
-				"Fetches resource PIDs for exporting",
-				ResourceIdList.class,
-				fetchResourceIdsV3Step())
-			// expand out - fetch resources
-			// and write binaries and save to db
-			.addIntermediateStep(
-				WRITE_TO_BINARIES,
-				"Writes the expanded resources to the binaries and saves",
-				BulkExportBinaryFileId.class,
-				expandResourceAndWriteBinaryStep())
-			// finalize the job (set to complete)
-			.addFinalReducerStep(
-				"create-report-step",
-				"Creates the output report from a bulk export job",
-				BulkExportJobResults.class,
-				createReportStep())
-			.build();
+				// validator
+				.setParametersValidator(bulkExportJobParametersValidator())
+				.gatedExecution()
+				.addFirstStep(
+						"mdm-expand-if-necessary",
+						"Expand out patient ids if necessary",
+						MdmExpandedPatientIds.class,
+						mdmExpansionStep())
+				// load in (all) ids and create id chunks of 1000 each
+				.addIntermediateStep(
+						"fetch-resources",
+						"Fetches resource PIDs for exporting",
+						ResourceIdList.class,
+						fetchResourceIdsV3Step())
+				// expand out - fetch resources
+				// and write binaries and save to db
+				.addIntermediateStep(
+						WRITE_TO_BINARIES,
+						"Writes the expanded resources to the binaries and saves",
+						BulkExportBinaryFileId.class,
+						expandResourceAndWriteBinaryStep())
+				// finalize the job (set to complete)
+				.addFinalReducerStep(
+						"create-report-step",
+						"Creates the output report from a bulk export job",
+						BulkExportJobResults.class,
+						createReportStep())
+				.build();
 
 		return def;
 	}

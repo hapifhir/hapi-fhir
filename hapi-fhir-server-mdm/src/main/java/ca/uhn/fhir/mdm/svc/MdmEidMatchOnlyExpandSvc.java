@@ -94,13 +94,16 @@ public class MdmEidMatchOnlyExpandSvc implements IMdmLinkExpandSvc {
 	}
 
 	@Override
-	public Set<String> expandMdmBySourceResourceIdsForSingleResourceType(RequestPartitionId theRequestPartitionId, Collection<IIdType> theIds) {
-		Set<String> resourceTypes = theIds.stream().map(IIdType::getResourceType).collect(Collectors.toSet());
+	public Set<String> expandMdmBySourceResourceIdsForSingleResourceType(
+			RequestPartitionId theRequestPartitionId, Collection<IIdType> theIds) {
+		Set<String> resourceTypes =
+				theIds.stream().map(IIdType::getResourceType).collect(Collectors.toSet());
 		Validate.isTrue(
-			resourceTypes.size() == 1,
-			"Expected only single resource type; found " + resourceTypes.size() + "." +
-				(resourceTypes.isEmpty() ? "" : " Found resource Types: " + String.join(", ", resourceTypes))
-		);
+				resourceTypes.size() == 1,
+				"Expected only single resource type; found " + resourceTypes.size() + "."
+						+ (resourceTypes.isEmpty()
+								? ""
+								: " Found resource Types: " + String.join(", ", resourceTypes)));
 
 		@SuppressWarnings("OptionalGetWithoutIsPresent")
 		String resourceType = resourceTypes.stream().findFirst().get();

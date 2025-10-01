@@ -35,8 +35,7 @@ public class BulkExportIdFetchingSvc {
 	@Autowired
 	private IResourceSupportedSvc myResourceSupportedSvc;
 
-	public int fetchIds(ExportPIDIteratorParameters theProviderParameters,
-						Consumer<ResourceIdList> theConsumer) {
+	public int fetchIds(ExportPIDIteratorParameters theProviderParameters, Consumer<ResourceIdList> theConsumer) {
 		BulkExportJobParameters.ExportStyle exportStyle = theProviderParameters.getExportStyle();
 		List<String> resourceTypes = theProviderParameters.getRequestedResourceTypes();
 
@@ -51,11 +50,8 @@ public class BulkExportIdFetchingSvc {
 			 * But allowing export of them seems like a security flaw.
 			 * So we'll exclude them.
 			 */
-			Set<String> resourceTypesToOmit =
-				exportStyle
-					== BulkExportJobParameters.ExportStyle.PATIENT
-					? new HashSet<>(
-					SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.keySet())
+			Set<String> resourceTypesToOmit = exportStyle == BulkExportJobParameters.ExportStyle.PATIENT
+					? new HashSet<>(SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.keySet())
 					: Set.of();
 
 			/*
@@ -69,11 +65,11 @@ public class BulkExportIdFetchingSvc {
 
 				// filters are the filters for searching
 				ourLog.info(
-					"Running FetchResourceIdsStep for resource type: {} with params: {}",
-					resourceType,
-					providerParams);
+						"Running FetchResourceIdsStep for resource type: {} with params: {}",
+						resourceType,
+						providerParams);
 				Iterator<IResourcePersistentId> pidIterator =
-					myBulkExportProcessor.getResourcePidIterator(providerParams);
+						myBulkExportProcessor.getResourcePidIterator(providerParams);
 				List<TypedPidJson> idsToSubmit = new ArrayList<>();
 
 				int estimatedChunkSize = 0;
@@ -105,7 +101,7 @@ public class BulkExportIdFetchingSvc {
 
 					// Make sure resources stored in each batch does not go over the max capacity
 					if (idsToSubmit.size() >= myStorageSettings.getBulkExportFileMaximumCapacity()
-						|| estimatedChunkSize >= myStorageSettings.getBulkExportFileMaximumSize()) {
+							|| estimatedChunkSize >= myStorageSettings.getBulkExportFileMaximumSize()) {
 						ResourceIdList list = new ResourceIdList();
 						list.setIds(idsToSubmit);
 						list.setResourceType(resourceType);
