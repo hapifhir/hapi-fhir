@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -13,6 +14,7 @@ import ca.uhn.fhir.mdm.svc.MdmEidMatchOnlyExpandSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
@@ -103,6 +105,42 @@ public class BulkExportMdmEidMatchOnlyResourceExpanderIT extends BaseMdmR4Test {
 
 		assertNotNull(pids);
 		assertEquals(4, pids.size());
+	}
+
+	@Test
+	public void expandMdmBySourceResourceIdsForSingleResourceType_largeNumber_works() {
+		// setup
+		int count = 10000;
+		RequestPartitionId requestPartitionId = RequestPartitionId.allPartitions();
+		String eidValue = "eid-value";
+		String patientEidSystem = myMdmSettings.getMdmRules()
+			.getEnterpriseEIDSystemForResourceType("Patient");
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		DaoMethodOutcome outcome;
+
+		IIdType id = null;
+		for (int i = 0; i < count; i++) {
+			Patient patient = new Patient();
+			patient.setId("Patient/pat-" + i);
+			patient.setActive(true);
+			patient.addName()
+					.setFamily("Simpsons");
+			patient.addIdentifier()
+				.setSystem(patientEidSystem)
+				.setValue(eidValue);
+
+			outcome = myPatientDao.update(patient, requestDetails);
+			if (id == null) {
+				id = outcome.getId();
+			}
+		}
+
+		// test
+		Set<String> expanded = myMdmEidMatchOnlyExpandSvc.expandMdmBySourceResourceIdsForSingleResourceType(requestPartitionId,
+			Set.of(id));
+
+		// validate
+		assertEquals(count, expanded.size());
 	}
 
 	private <T> T withTransaction(Callable<T> theCallable) {

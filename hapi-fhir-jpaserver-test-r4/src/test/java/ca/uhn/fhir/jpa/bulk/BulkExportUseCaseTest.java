@@ -9,6 +9,7 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
@@ -581,6 +582,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			// test
 			BulkExportJobResults results = null;
 			if (theTypeExport) {
+				// for type we'll use an id filter for the patient to make 'similar' behaviour
 				results = startBulkExportJobAndAwaitCompletion(
 					BulkExportJobParameters.ExportStyle.PATIENT,
 					new HashSet<>(),
@@ -606,6 +608,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			assertEquals(2, exportedResourcesMap.size());
 			assertEquals(2, exportedResourcesMap.get("Patient").size());
+			// ensure our unmatched resource isn't included
 			assertFalse(exportedResourcesMap.get("Patient")
 				.stream().anyMatch(p -> p.getIdElement().toUnqualifiedVersionless().getValue().equalsIgnoreCase(created.getIdElement().toUnqualifiedVersionless().getId())));
 			assertEquals(2, exportedResourcesMap.get("Observation").size());
@@ -1531,44 +1534,50 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		void testGroupExportWithMdmEnabled_EidMatchOnly() {
-
+		public void groupExport_withMdmEnabled_returnsLinkedResources() {
+			// setup
 			createAndSetMdmSettingsForEidMatchOnly();
-			BundleBuilder bb = new BundleBuilder(myFhirContext);
+			GroupExportSetup info = setupForMdmGroupExport();
 
-			//In this test, we create two patients with the same Eid value for the eid system specified in mdm rules
-			//and 2 observations referencing one of each of these patients
-			//Create a group that contains one of the patients.
-			//When we export the group, we should get both patients and the 2 observations
-			//in the export as the other patient should be mdm expanded
-			//based on having the same eid value
-			Patient pat1 = new Patient();
-			pat1.setId("pat-1");
-			pat1.addIdentifier(new Identifier().setSystem(TEST_PATIENT_EID_SYS).setValue("the-patient-eid-value"));
-			bb.addTransactionUpdateEntry(pat1);
+			Patient excluded = new Patient();
+			excluded.setActive(true);
+			excluded.setId("Patient/patex");
+			excluded.addIdentifier()
+				.setSystem(TEST_PATIENT_EID_SYS)
+				.setValue("different-value"); // don't want it pulled in by mdm
+			excluded.addName()
+				.setFamily("Bouvier");
+			DaoMethodOutcome result = myPatientDao.update(excluded, mySrd);
 
-			Observation obs1 = new Observation();
-			obs1.setId("obs-1");
-			obs1.setSubject(new Reference("Patient/pat-1"));
-			bb.addTransactionUpdateEntry(obs1);
+			// add to the group
+			Group updated = info.Group;
+			updated.addMember()
+				.getEntity()
+				.setReference(result.getId().toUnqualifiedVersionless().getValue());
+			myGroupDao.update(updated, mySrd);
 
-			Patient pat2 = new Patient();
-			pat2.setId("pat-2");
-			pat2.addIdentifier(new Identifier().setSystem(TEST_PATIENT_EID_SYS).setValue("the-patient-eid-value"));
-			bb.addTransactionUpdateEntry(pat2);
+			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(
+				new HashSet<>(),
+				Set.of("Patient?name=Simpson"), // filters
+				"mdm-group",
+				true);
+			Map<String, List<IBaseResource>> exportedResourcesMap = convertJobResultsToResources(bulkExportJobResults);
 
-			Observation obs2 = new Observation();
-			obs2.setId("obs-2");
-			obs2.setSubject(new Reference("Patient/pat-2"));
-			bb.addTransactionUpdateEntry(obs2);
+			assertThat(exportedResourcesMap.keySet()).hasSize(3);
+			List<IBaseResource> exportedGroups = exportedResourcesMap.get("Group");
+			assertResourcesIds(exportedGroups, "Group/mdm-group");
 
-			Group group = new Group();
-			group.setId("Group/mdm-group");
-			group.setActive(true);
-			group.addMember().getEntity().setReference("Patient/pat-1");
-			bb.addTransactionUpdateEntry(group);
+			List<IBaseResource> exportedPatients = exportedResourcesMap.get("Patient");
+			assertResourcesIds(exportedPatients, "Patient/pat-1", "Patient/pat-2");
 
-			myClient.transaction().withBundle(bb.getBundle()).execute();
+			List<IBaseResource> exportedObservations = exportedResourcesMap.get("Observation");
+			assertResourcesIds(exportedObservations, "Observation/obs-1", "Observation/obs-2");
+		}
+
+		@Test
+		void testGroupExportWithMdmEnabled_EidMatchOnly() {
+			createAndSetMdmSettingsForEidMatchOnly();
+			setupForMdmGroupExport();
 
 			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(new HashSet<>(), new HashSet<>(), "mdm-group", true);
 			Map<String, List<IBaseResource>> exportedResourcesMap = convertJobResultsToResources(bulkExportJobResults);
@@ -1590,6 +1599,55 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 	}
+
+	private GroupExportSetup setupForMdmGroupExport() {
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+
+		//we create two patients with the same Eid value for the eid system specified in mdm rules
+		//and 2 observations referencing one of each of these patients
+		//Create a group that contains one of the patients.
+		//When we export the group, we should get both patients and the 2 observations
+		//in the export as the other patient should be mdm expanded
+		//based on having the same eid value
+		Patient pat1 = new Patient();
+		pat1.setId("pat-1");
+		pat1.setActive(true);
+		pat1.addName()
+				.setFamily("Simpson");
+		pat1.addIdentifier(new Identifier().setSystem(TEST_PATIENT_EID_SYS).setValue("the-patient-eid-value"));
+		bb.addTransactionUpdateEntry(pat1);
+
+		Observation obs1 = new Observation();
+		obs1.setId("obs-1");
+		obs1.setSubject(new Reference("Patient/pat-1"));
+		bb.addTransactionUpdateEntry(obs1);
+
+		Patient pat2 = new Patient();
+		pat2.setId("pat-2");
+		pat2.setActive(true);
+		pat1.addName()
+			.setFamily("Simpson");
+		pat2.addIdentifier(new Identifier().setSystem(TEST_PATIENT_EID_SYS).setValue("the-patient-eid-value"));
+		bb.addTransactionUpdateEntry(pat2);
+
+		Observation obs2 = new Observation();
+		obs2.setId("obs-2");
+		obs2.setSubject(new Reference("Patient/pat-2"));
+		bb.addTransactionUpdateEntry(obs2);
+
+		Group group = new Group();
+		group.setId("Group/mdm-group");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/pat-1");
+		bb.addTransactionUpdateEntry(group);
+
+		Bundle b = (Bundle) bb.getBundle();
+		myClient.transaction().withBundle(b).execute();
+
+		return new GroupExportSetup(group, b);
+	}
+
+	public record GroupExportSetup(Group Group, Bundle BundleOfResources) {}
 
 	private void createAndSetMdmSettingsForEidMatchOnly() {
 		MdmSettings mdmSettings = new MdmSettings(myMdmRulesValidator);
@@ -1678,7 +1736,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		return startBulkExportJobAndAwaitCompletion(BulkExportJobParameters.ExportStyle.GROUP, theResourceTypes, theFilters, theGroupId, false);
 	}
 
-	BulkExportJobResults startGroupBulkExportJobAndAwaitCompletion(HashSet<String> theResourceTypes, HashSet<String> theFilters, String theGroupId, boolean theMdmExpandEnabled) {
+	BulkExportJobResults startGroupBulkExportJobAndAwaitCompletion(HashSet<String> theResourceTypes, Set<String> theFilters, String theGroupId, boolean theMdmExpandEnabled) {
 		return startBulkExportJobAndAwaitCompletion(BulkExportJobParameters.ExportStyle.GROUP, theResourceTypes, theFilters, theGroupId, theMdmExpandEnabled);
 	}
 

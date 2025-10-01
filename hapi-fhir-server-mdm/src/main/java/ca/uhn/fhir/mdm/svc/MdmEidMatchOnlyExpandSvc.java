@@ -98,14 +98,15 @@ public class MdmEidMatchOnlyExpandSvc implements IMdmLinkExpandSvc {
 		Set<String> resourceTypes = theIds.stream().map(IIdType::getResourceType).collect(Collectors.toSet());
 		Validate.isTrue(
 			resourceTypes.size() == 1,
-			"Expected only single resource type; found " + resourceTypes.size()
+			"Expected only single resource type; found " + resourceTypes.size() + "." +
+				(resourceTypes.isEmpty() ? "" : " Found resource Types: " + String.join(", ", resourceTypes))
 		);
+
+		@SuppressWarnings("OptionalGetWithoutIsPresent")
 		String resourceType = resourceTypes.stream().findFirst().get();
 		SystemRequestDetails srd = SystemRequestDetails.forRequestPartitionId(theRequestPartitionId);
 
-		String eidSystem = myEidHelper.getMdmSettings()
-			.getMdmRules().getEnterpriseEIDSystemForResourceType(resourceType);
-
+		@SuppressWarnings("unchecked")
 		IFhirResourceDao<IBaseResource> resourceDao = myDaoRegistry.getResourceDao(resourceType);
 
 		SearchParameterMap map;
@@ -117,21 +118,14 @@ public class MdmEidMatchOnlyExpandSvc implements IMdmLinkExpandSvc {
 				theIds.forEach(id -> idsParam.add(new ReferenceParam(id)));
 				map.add("_id", idsParam);
 			}
-//			ReferenceOrListParam idsParam = new ReferenceOrListParam();
-//			theIds.forEach(id -> idsParam.add(new ReferenceParam(id)));
-//			TokenParam tokenParam = new TokenParam(eidSystem, null);
-////			map.add("_id", idsParam);
-//			map.add("identifier", tokenParam);
-//			map.setLoadSynchronous(true);
 		}
 
 		IBundleProvider bundleProvider = resourceDao.search(map, srd);
-		// todo - handle multiple pages
+
 		Set<CanonicalEID> eids = new HashSet<>();
 		for (IBaseResource resource : bundleProvider.getAllResources()) {
 			eids.addAll(myEidHelper.getExternalEid(resource));
 		}
-
 
 		// construct a new search for the eids
 		{

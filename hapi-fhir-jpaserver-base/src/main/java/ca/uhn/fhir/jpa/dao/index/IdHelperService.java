@@ -648,19 +648,6 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	}
 
 	@Override
-	public void fillOutPids(Set<JpaPid> thePids) {
-		PersistentIdToForcedIdMap<JpaPid> pidToForcedIdMap = translatePidsToForcedIds(thePids);
-
-		thePids
-			.forEach(pid -> {
-				Optional<String> val = pidToForcedIdMap.get(pid);
-				val.ifPresent(id -> {
-					pid.setAssociatedResourceId(myFhirCtx.getVersion().newIdType(id));
-				});
-			});
-	}
-
-	@Override
 	public JpaPid newPid(Object thePid) {
 		return JpaPid.fromId((Long) thePid);
 	}

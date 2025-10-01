@@ -45,24 +45,20 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.rest.server.util.MatchUrlUtil;
-import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.TaskChunker;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
-import org.apache.http.NameValuePair;
-import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +77,6 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.upperCase;
 
 public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaBulkExportProcessor.class);
@@ -169,10 +164,6 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 						populateListOfPatientIdsForGroupExport(theParams, patientPids);
 					}
 					case PATIENT -> {
-//						if (theParams.getPatientIds().isEmpty()) {
-//							// todo - we should log as warning?
-//							ourLog.error("No patient ids specified for expansion; skipping");
-//						}
 						populateListOfPatientIdsForPatientExport(theParams, patientPids);
 					}
 					default -> {
@@ -186,35 +177,20 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 	private void populateListOfPatientIdsForPatientExport(ExpandPatientIdsParams theParams, Set<JpaPid> theJpaPids) throws IOException {
 		RequestPartitionId partitionId = theParams.getRequestPartitionId();
-
-		// first get the specified patient ids as IIdTypes
-//		Set<IIdType> patientIds = theParams.getPatientIds()
-//			.stream()
-//			.map(strId -> myContext.getVersion().newIdType(strId))
-//			.collect(Collectors.toSet());
-//
-//		SearchParameterMap map = new SearchParameterMap();
-//		if (!patientIds.isEmpty()) {
-//			ReferenceOrListParam idsParam = new ReferenceOrListParam();
-//			patientIds.forEach(id -> idsParam.add(new ReferenceParam(id)));
-//			map.add("_id", idsParam);
-//		}
-//		if (!theParams.getFilters().isEmpty()) {
-//			theParams.getFilters().stream()
-//				.filter(typeFilter -> typeFilter.startsWith("Patient?"))
-//				.forEach(filter -> {
-//						List<NameValuePair> pairs = MatchUrlUtil.translateMatchUrl(filter);
-//						map.add(pairs);
-//					});
-//		}
 		List<SearchParameterMap> maps = makeSearchParameterMapsForPatientExport(theParams);
 
 		Set<JpaPid> pids = new HashSet<>(getPatientPidsUsingSearchMaps(maps, null, null, theParams.getRequestPartitionId()));
 
-		myIdHelperService.fillOutPids(pids);
+		/*
+		 * the pids do not necessarily have the associated IIdType attached ot them.
+		 * But we need them, so we'll expand them out here.
+		 * This will be fast if the pid is still in the cache (which it should be)
+		 */
+		myIdHelperService.fillOutPids(pids, myContext);
 
-		Collection<IIdType> patientIds = pids.stream().map(IResourcePersistentId::getAssociatedResourceId).collect(Collectors.toList());
 		if (theParams.isToDoMdmExpansion()) {
+			Collection<IIdType> patientIds = pids.stream().map(IResourcePersistentId::getAssociatedResourceId).collect(Collectors.toList());
+
 			// MDM expansion requested -> we'll have MdmExpansionHolder do the work
 			// of fetching mdm linked patients as well as converting all of them to
 			// JpaPid
@@ -223,33 +199,45 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				.expandPatients(patientIds, partitionId);
 			theJpaPids.addAll(resolvedAndMdmExpanded);
 		} else {
-			// just convert them to JpaPid
-			List<JpaPid> resolvedPids = myIdHelperService.resolveResourcePids(partitionId,
-				patientIds,
-				ResolveIdentityMode.excludeDeleted().cacheOk());
-			theJpaPids.addAll(resolvedPids);
+			theJpaPids.addAll(pids);
 		}
 	}
 
-	private void populateListOfPatientIdsForGroupExport(ExpandPatientIdsParams theParams, Set<JpaPid> thePatientPids) {
+	private void populateListOfPatientIdsForGroupExport(ExpandPatientIdsParams theParams, Set<JpaPid> thePatientPids) throws IOException {
 		RequestPartitionId partitionId = theParams.getRequestPartitionId();
 
-		// TODO
-		// add filters here for group
-		IBaseResource group = myDaoRegistry
-			.getResourceDao("Group")
-			.read(new IdDt(theParams.getGroupId()), new SystemRequestDetails().setRequestPartitionId(partitionId));
+		// we have to apply the parameters to filter
+		// the patients we want (ie, not all the members of the group necessarily fit the filters)
+		// so first we get a set of SP maps
+		RuntimeResourceDefinition def = myContext.getResourceDefinition("Patient");
+		List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourcetype(
+			def,
+			theParams.getFilters(),
+			theParams.getStartDate(),
+			theParams.getEndDate(),
+			true
+		);
 
-		Set<IIdType> patientIds = new HashSet<>();
+		// use those maps to get the patient ids we care about
+		List<JpaPid> pids = getPatientPidsUsingSearchMaps(maps,
+			theParams.getGroupId(),
+			null,
+			theParams.getRequestPartitionId());
 
-		// first get all (patients) of the group
-		FhirTerser terser = myContext.newTerser();
-		List<IBaseReference> memberEntities = terser.getValues(group, "Group.member.entity", IBaseReference.class);
-		for (IBaseReference entityRef : memberEntities) {
-			if (!entityRef.isEmpty() && entityRef.getReferenceElement().hasResourceType() && entityRef.getReferenceElement().getResourceType().equalsIgnoreCase("Patient")) {
-				patientIds.add(entityRef.getReferenceElement());
-			}
-		}
+		/*
+		 * and fill them out.
+		 *
+		 * Like with patient export above, the JpaPids here might not have
+		 * their associated resource id populated.
+		 * But since we need it, we'll "fill them out" here.
+		 * (should be fast, because the ids should be in the cache)
+		 */
+		Set<JpaPid> pidsSet = new HashSet<>(pids);
+		myIdHelperService.fillOutPids(pidsSet, myContext);
+
+		Set<IIdType> patientIds = pidsSet.stream()
+			.map(BaseResourcePersistentId::getAssociatedResourceId)
+			.collect(Collectors.toSet());
 
 		if (theParams.isToDoMdmExpansion()) {
 			// expand them out and add them to our list
@@ -574,7 +562,6 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 *
 	 * @return A list of strings representing the Patient IDs of the members (e.g. ["P1", "P2", "P3"]
 	 */
-	@SuppressWarnings("unchecked")
 	private List<JpaPid> getMembersFromGroupWithFilter(
 			ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) throws IOException {
 		final List<SearchParameterMap> maps = makeSearchParameterMapsForGroupExport(theParameters, theConsiderDateRange);

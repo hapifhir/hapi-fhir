@@ -183,7 +183,17 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	 * pulls it from the db and adds it.
 	 * @param thePids
 	 */
-	void fillOutPids(Set<T> thePids);
+	default void fillOutPids(Set<T> thePids, FhirContext theContext) {
+		PersistentIdToForcedIdMap<T> pidToForcedIdMap = translatePidsToForcedIds(thePids);
+
+		thePids
+			.forEach(pid -> {
+				Optional<String> val = pidToForcedIdMap.get(pid);
+				val.ifPresent(id -> {
+					pid.setAssociatedResourceId(theContext.getVersion().newIdType(id));
+				});
+			});
+	}
 
 	/**
 	 * @deprecated Use {@link #newPid(Object, Integer)}
