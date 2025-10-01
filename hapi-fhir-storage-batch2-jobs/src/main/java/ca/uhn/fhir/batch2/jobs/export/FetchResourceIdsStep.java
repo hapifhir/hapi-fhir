@@ -25,39 +25,20 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
+import ca.uhn.fhir.batch2.jobs.export.svc.BulkExportIdFetchingSvc;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
-import ca.uhn.fhir.rest.api.IResourceSupportedSvc;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import ca.uhn.fhir.util.SearchParameterUtil;
-import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobParameters, ResourceIdList> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsStep.class);
 
 	@Autowired
-	private IBulkExportProcessor myBulkExportProcessor;
-
-	@Autowired
-	private JpaStorageSettings myStorageSettings;
-
-	@Autowired
-	private IResourceSupportedSvc myResourceSupportedSvc;
+	private BulkExportIdFetchingSvc myBulkExportProcessor;
 
 	@Nonnull
 	@Override
@@ -91,107 +72,14 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 		int submissionCount = 0;
 		try {
-			Set<TypedPidJson> submittedBatchResourceIds = new HashSet<>();
-
-			/*
-			 * NB: patient-compartment limitation
-			 * We know that Group and List are part of patient compartment.
-			 * But allowing export of them seems like a security flaw.
-			 * So we'll exclude them.
-			 */
-			Set<String> resourceTypesToOmit =
-					theStepExecutionDetails.getParameters().getExportStyle()
-									== BulkExportJobParameters.ExportStyle.PATIENT
-							? new HashSet<>(
-									SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.keySet())
-							: Set.of();
-
-			/*
-			 * We will fetch ids for each resource type in the ResourceTypes (_type filter).
-			 */
-			for (String resourceType : params.getResourceTypes()) {
-				if (resourceTypesToOmit.contains(resourceType) || !myResourceSupportedSvc.isSupported(resourceType)) {
-					continue;
-				}
-				providerParams.setResourceType(resourceType);
-
-				// filters are the filters for searching
-				ourLog.info(
-						"Running FetchResourceIdsStep for resource type: {} with params: {}",
-						resourceType,
-						providerParams);
-				Iterator<IResourcePersistentId> pidIterator =
-						myBulkExportProcessor.getResourcePidIterator(providerParams);
-				List<TypedPidJson> idsToSubmit = new ArrayList<>();
-
-				int estimatedChunkSize = 0;
-
-				if (!pidIterator.hasNext()) {
-					ourLog.debug("Bulk Export generated an iterator with no results!");
-				}
-				while (pidIterator.hasNext()) {
-					IResourcePersistentId<?> pid = pidIterator.next();
-
-					TypedPidJson batchResourceId;
-					if (pid.getResourceType() != null) {
-						batchResourceId = new TypedPidJson(pid.getResourceType(), pid);
-					} else {
-						batchResourceId = new TypedPidJson(resourceType, pid);
-					}
-
-					if (!submittedBatchResourceIds.add(batchResourceId)) {
-						continue;
-					}
-
-					idsToSubmit.add(batchResourceId);
-
-					if (estimatedChunkSize > 0) {
-						// Account for comma between array entries
-						estimatedChunkSize++;
-					}
-					estimatedChunkSize += batchResourceId.estimateSerializedSize();
-
-					// Make sure resources stored in each batch does not go over the max capacity
-					if (idsToSubmit.size() >= myStorageSettings.getBulkExportFileMaximumCapacity()
-							|| estimatedChunkSize >= myStorageSettings.getBulkExportFileMaximumSize()) {
-						submitWorkChunk(idsToSubmit, resourceType, theDataSink);
-						submissionCount++;
-						idsToSubmit = new ArrayList<>();
-						estimatedChunkSize = 0;
-					}
-				}
-
-				// if we have any other Ids left, submit them now
-				if (!idsToSubmit.isEmpty()) {
-					submitWorkChunk(idsToSubmit, resourceType, theDataSink);
-					submissionCount++;
-				}
-			}
-		} catch (Exception ex) {
-			ourLog.error(ex.getMessage(), ex);
-
+			myBulkExportProcessor.fetchIds(providerParams, theDataSink::accept);
+		} catch (JobExecutionFailedException ex) {
 			theDataSink.recoveredError(ex.getMessage());
-
-			throw new JobExecutionFailedException(Msg.code(2239) + " : " + ex.getMessage());
+			// rethrow so it can be properly handled
+			throw ex;
 		}
 
 		ourLog.info("Submitted {} groups of ids for processing", submissionCount);
 		return RunOutcome.SUCCESS;
-	}
-
-	private void submitWorkChunk(
-			List<TypedPidJson> theBatchResourceIds, String theResourceType, IJobDataSink<ResourceIdList> theDataSink) {
-		ResourceIdList idList = new ResourceIdList();
-
-		idList.setIds(theBatchResourceIds);
-
-		idList.setResourceType(theResourceType);
-
-		theDataSink.accept(idList);
-	}
-
-	@VisibleForTesting
-	public void setBulkExportProcessorForUnitTest(IBulkExportProcessor theBulkExportProcessor) {
-		myBulkExportProcessor = theBulkExportProcessor;
 	}
 }

@@ -70,7 +70,7 @@ public class FetchResourceIdsStepTest {
 	@BeforeEach
 	public void init() {
 		ourLog.addAppender(myAppender);
-		myFirstStep.setBulkExportProcessorForUnitTest(myBulkExportProcessor);
+//		myFirstStep.setBulkExportProcessorForUnitTest(myBulkExportProcessor);
 	}
 
 	@AfterEach

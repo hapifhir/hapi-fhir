@@ -28,6 +28,7 @@ import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -35,8 +36,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -81,6 +84,30 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 		return expandMdmBySourceResourcePid(
 				theRequestPartitionId,
 				myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theId));
+	}
+
+	@Override
+	public Set<String> expandMdmBySourceResourceIdsForSingleResourceType(RequestPartitionId theRequestPartitionId, Collection<IIdType> theIds) {
+		Set<String> resourceTypes = theIds.stream()
+				.map(IIdType::getResourceType)
+					.collect(Collectors.toSet());
+		Validate.isTrue(
+			resourceTypes.size() == 1,
+			"Expected only 1 resource type, found " + resourceTypes.size()
+		);
+
+		Collection<MdmPidTuple<?>> response = myMdmLinkDao.resolveGoldenResources(
+			Arrays.asList(theIds.toArray())
+		);
+
+		Set<String> expandedIds = new HashSet<>();
+		response.stream()
+			.forEach(tuple -> {
+				expandedIds.add(tuple.getSourcePid().getAssociatedResourceId().toUnqualifiedVersionless().getIdPart());
+				expandedIds.add(tuple.getGoldenPid().getAssociatedResourceId().toUnqualifiedVersionless().getIdPart());
+			});
+
+		return expandedIds;
 	}
 
 	/**

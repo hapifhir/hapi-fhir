@@ -81,6 +81,9 @@ public abstract class BaseResourcePersistentId<T> implements IResourcePersistent
 
 	@Override
 	public String getResourceType() {
+		if (myResourceType == null && myAssociatedResourceId != null && myAssociatedResourceId.hasResourceType()) {
+			myResourceType = myAssociatedResourceId.getResourceType();
+		}
 		return myResourceType;
 	}
 

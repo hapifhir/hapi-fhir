@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.bulk.export.model;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -88,6 +89,28 @@ public class ExportPIDIteratorParameters {
 	 * This should always have at least one resource in it (the resource being requested)!
 	 */
 	private List<String> myRequestedResourceTypes;
+
+	private List<IResourcePersistentId<?>> myExpandedPatientIds;
+
+	public ExportPIDIteratorParameters() {}
+
+	/**
+	 * Copy constructor
+	 */
+	public ExportPIDIteratorParameters(ExportPIDIteratorParameters theParameters) {
+		setExpandedPatientIds(theParameters.getExpandedPatientIds());
+		setExportStyle(theParameters.getExportStyle());
+		setResourceType(theParameters.getResourceType());
+		setFilters(theParameters.getFilters());
+		setStartDate(theParameters.getStartDate());
+		setChunkId(theParameters.getChunkId());
+		setEndDate(theParameters.getEndDate());
+		setRequestedResourceTypes(theParameters.getRequestedResourceTypes());
+		setPartitionId(theParameters.getPartitionIdOrAllPartitions());
+		setGroupId(theParameters.getGroupId());
+		setInstanceId(theParameters.getInstanceId());
+		setExpandMdm(theParameters.isExpandMdm());
+	}
 
 	public String getChunkId() {
 		return myChunkId;
@@ -179,6 +202,21 @@ public class ExportPIDIteratorParameters {
 
 	public void setPartitionId(RequestPartitionId thePartitionId) {
 		myPartitionId = thePartitionId;
+	}
+
+	public List<IResourcePersistentId<?>> getExpandedPatientIds() {
+		return myExpandedPatientIds;
+	}
+
+	public void setExpandedPatientIds(List<IResourcePersistentId<?>> theExpandedPatientIds) {
+		myExpandedPatientIds = theExpandedPatientIds;
+	}
+
+	public void addExpandedPatientId(IResourcePersistentId<?> theId) {
+		if (myExpandedPatientIds == null) {
+			myExpandedPatientIds = new ArrayList<>();
+		}
+		myExpandedPatientIds.add(theId);
 	}
 
 	public List<String> getRequestedResourceTypes() {

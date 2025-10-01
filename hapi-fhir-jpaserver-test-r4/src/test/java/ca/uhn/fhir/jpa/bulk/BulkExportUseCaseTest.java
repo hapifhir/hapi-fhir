@@ -1,8 +1,5 @@
 package ca.uhn.fhir.jpa.bulk;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
@@ -38,12 +35,14 @@ import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Sets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
@@ -67,11 +66,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -88,8 +88,12 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 
@@ -353,6 +357,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private String submitBulkExportForTypes(String... theTypes) throws IOException {
 		return submitBulkExportForTypesWithExportId(null, theTypes);
 	}
+
 	private String submitBulkExportForTypesWithExportId(String theExportId, String... theTypes) throws IOException {
 		String typeString = String.join(",", theTypes);
 		String uri = myClient.getServerBase() + "/$export?_type=" + typeString;
@@ -558,6 +563,92 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 			myStorageSettings.setBulkExportFileMaximumCapacity(JpaStorageSettings.DEFAULT_BULK_EXPORT_FILE_MAXIMUM_CAPACITY);
 		}
+
+		@ParameterizedTest
+		@ValueSource(booleans = { true, false })
+		public void patientExport_withMdmEnabledAndEIDMatch_returnsLinkedResources(
+			boolean theTypeExport
+		) {
+			// setup
+			PatientExportMdmExpansionSetup info = setupForPatientMdmLinkedTests();
+
+			// an unmatched patient to verify it isn't included
+			Patient unmatched = new Patient();
+			unmatched.setActive(true);
+			Patient created = (Patient) myPatientDao.create(unmatched, mySrd)
+				.getResource();
+
+			// test
+			BulkExportJobResults results = null;
+			if (theTypeExport) {
+				results = startBulkExportJobAndAwaitCompletion(
+					BulkExportJobParameters.ExportStyle.PATIENT,
+					new HashSet<>(),
+					Set.of("_id=" + info.PrimaryPatient.getId()),
+					null,
+					true
+				);
+			} else {
+				results = startBulkExportJobAndAwaitCompletion(
+					BulkExportJobParameters.ExportStyle.PATIENT,
+					new HashSet<>(),
+					new HashSet<>(),
+					info.PrimaryPatient.getId(),
+					true
+				);
+			}
+
+			// validate
+			assertNotNull(results);
+			// Patient && Observation
+			assertEquals(2, results.getResourceTypeToBinaryIds().size());
+			Map<String, List<IBaseResource>> exportedResourcesMap = convertJobResultsToResources(results);
+
+			assertEquals(2, exportedResourcesMap.size());
+			assertEquals(2, exportedResourcesMap.get("Patient").size());
+			assertFalse(exportedResourcesMap.get("Patient")
+				.stream().anyMatch(p -> p.getIdElement().toUnqualifiedVersionless().getValue().equalsIgnoreCase(created.getIdElement().toUnqualifiedVersionless().getId())));
+			assertEquals(2, exportedResourcesMap.get("Observation").size());
+		}
+
+		/**
+		 * This does setup for
+		 * batch export tests that require mdm linking on patient eid.
+		 * It will create a series of patients and observations that will
+		 * be linked.
+		 */
+		private PatientExportMdmExpansionSetup setupForPatientMdmLinkedTests() {
+			createAndSetMdmSettingsForEidMatchOnly();
+
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+			Patient pat1 = new Patient();
+			pat1.setId("pat-1");
+			pat1.addIdentifier(new Identifier().setSystem(TEST_PATIENT_EID_SYS).setValue("the-patient-eid-value"));
+			bb.addTransactionUpdateEntry(pat1);
+
+			Observation obs1 = new Observation();
+			obs1.setId("obs-1");
+			obs1.setSubject(new Reference("Patient/pat-1"));
+			bb.addTransactionUpdateEntry(obs1);
+
+			Patient pat2 = new Patient();
+			pat2.setId("pat-2");
+			pat2.addIdentifier(new Identifier().setSystem(TEST_PATIENT_EID_SYS).setValue("the-patient-eid-value"));
+			bb.addTransactionUpdateEntry(pat2);
+
+			Observation obs2 = new Observation();
+			obs2.setId("obs-2");
+			obs2.setSubject(new Reference("Patient/pat-2"));
+			bb.addTransactionUpdateEntry(obs2);
+
+			IBaseBundle createdBundle = myClient.transaction().withBundle(bb.getBundle()).execute();
+
+			return new PatientExportMdmExpansionSetup(pat1, (Bundle) createdBundle);
+		}
+
+		public record PatientExportMdmExpansionSetup(Patient PrimaryPatient, Bundle BundleOResources) {
+		}
+
 
 		// TODO reenable 4637
 		// Reenable when bulk exports that return no results work as expected
@@ -1491,27 +1582,25 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			List<IBaseResource> exportedObservations = exportedResourcesMap.get("Observation");
 			assertResourcesIds(exportedObservations, "Observation/obs-1", "Observation/obs-2");
-
 		}
 
-
-		private void createAndSetMdmSettingsForEidMatchOnly() {
-			MdmSettings mdmSettings = new MdmSettings(myMdmRulesValidator);
-			mdmSettings.setEnabled(true);
-			mdmSettings.setMdmMode(MdmModeEnum.MATCH_ONLY);
-			MdmRulesJson rules = new MdmRulesJson();
-			rules.setMdmTypes(List.of("Patient"));
-			rules.addEnterpriseEIDSystem("Patient", TEST_PATIENT_EID_SYS);
-			mdmSettings.setMdmRules(rules);
-
-			myMdmExpandersHolder.setMdmSettings(mdmSettings);
-		}
 
 		private void restoreMdmSettingsToDefault() {
 			myMdmExpandersHolder.setMdmSettings(new MdmSettings(myMdmRulesValidator));
 		}
 
+	}
 
+	private void createAndSetMdmSettingsForEidMatchOnly() {
+		MdmSettings mdmSettings = new MdmSettings(myMdmRulesValidator);
+		mdmSettings.setEnabled(true);
+		mdmSettings.setMdmMode(MdmModeEnum.MATCH_ONLY);
+		MdmRulesJson rules = new MdmRulesJson();
+		rules.setMdmTypes(List.of("Patient"));
+		rules.addEnterpriseEIDSystem("Patient", TEST_PATIENT_EID_SYS);
+		mdmSettings.setMdmRules(rules);
+
+		myMdmExpandersHolder.setMdmSettings(mdmSettings);
 	}
 
 	private static void assertResourcesIds(List<IBaseResource> theResources, String... theExpectedResourceIds) {
@@ -1639,17 +1728,27 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				.returnMethodOutcome()
 				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
 				.execute();
-		} else if (theExportStyle == BulkExportJobParameters.ExportStyle.PATIENT && theGroupOrPatientId != null) {
+		} else if (theExportStyle == BulkExportJobParameters.ExportStyle.PATIENT) {
 			//TODO add support for this actual processor.
-			fail("Bulk Exports that return no data do not return");
-			outcome = myClient
-				.operation()
-				.onInstance("Patient/" + theGroupOrPatientId)
-				.named(ProviderConstants.OPERATION_EXPORT)
-				.withParameters(parameters)
-				.returnMethodOutcome()
-				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
-				.execute();
+			if (theGroupOrPatientId != null) {
+				outcome = myClient
+					.operation()
+					.onInstance("Patient/" + theGroupOrPatientId)
+					.named(ProviderConstants.OPERATION_EXPORT)
+					.withParameters(parameters)
+					.returnMethodOutcome()
+					.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+					.execute();
+			} else {
+				outcome = myClient
+					.operation()
+					.onType("Patient")
+					.named(ProviderConstants.OPERATION_EXPORT)
+					.withParameters(parameters)
+					.returnMethodOutcome()
+					.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+					.execute();
+			}
 		} else {
 			// system request
 			outcome = myClient

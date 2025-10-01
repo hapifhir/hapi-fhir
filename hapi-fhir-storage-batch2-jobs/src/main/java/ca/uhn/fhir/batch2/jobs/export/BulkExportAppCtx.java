@@ -23,6 +23,8 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
+import ca.uhn.fhir.batch2.jobs.export.svc.BulkExportIdFetchingSvc;
+import ca.uhn.fhir.batch2.jobs.export.v3.BulkExportV3Config;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -30,8 +32,12 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
-@Configuration
+@Configuration()
+@Import({
+	BulkExportV3Config.class
+})
 public class BulkExportAppCtx {
 
 	public static final String WRITE_TO_BINARIES = "write-to-binaries";
@@ -146,5 +152,12 @@ public class BulkExportAppCtx {
 	@Bean
 	public BulkExportCreateReportStep createReportStep() {
 		return new BulkExportCreateReportStep();
+	}
+
+	// shared
+
+	@Bean
+	public BulkExportIdFetchingSvc resourceIdFetchingSvc() {
+		return new BulkExportIdFetchingSvc();
 	}
 }

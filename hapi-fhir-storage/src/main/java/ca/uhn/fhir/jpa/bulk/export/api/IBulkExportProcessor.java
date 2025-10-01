@@ -19,12 +19,18 @@
  */
 package ca.uhn.fhir.jpa.bulk.export.api;
 
+import ca.uhn.fhir.jpa.bulk.export.model.ExpandPatientIdsParams;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public interface IBulkExportProcessor<T extends IResourcePersistentId> {
 
@@ -34,6 +40,15 @@ public interface IBulkExportProcessor<T extends IResourcePersistentId> {
 	 * @return
 	 */
 	Iterator<T> getResourcePidIterator(ExportPIDIteratorParameters theParams);
+
+	/**
+	 * Expand out patient ids based on group, patient ids, and whether or not mdm expansion is
+	 * desired
+	 * @param theParams - parameters for doing the expansion of patient ids
+	 * @return a list of patient ids (or an empty list if not applicable)
+	 */
+	@Nonnull
+	Set<T> expandPatientIdList(ExpandPatientIdsParams theParams);
 
 	/**
 	 * Does the MDM expansion of resources if necessary

@@ -256,6 +256,8 @@ public class BulkDataExportProvider {
 					List<IBase> thePatient,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean")
+				IPrimitiveType<Boolean> theMdm,
 			ServletRequestDetails theRequestDetails) {
 
 		final List<IPrimitiveType<String>> patientIds =
@@ -270,7 +272,9 @@ public class BulkDataExportProvider {
 				theExportIdentifier,
 				theTypeFilter,
 				theTypePostFetchFilterUrl,
-				patientIds);
+				patientIds,
+				theMdm
+		);
 	}
 
 	/**
@@ -305,6 +309,8 @@ public class BulkDataExportProvider {
 					List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean")
+				IPrimitiveType<Boolean> theMdm,
 			ServletRequestDetails theRequestDetails) {
 
 		// call the type-level export to ensure spec compliance
@@ -317,7 +323,9 @@ public class BulkDataExportProvider {
 				theTypePostFetchFilterUrl,
 				List.of(theIdParam),
 				theExportIdentifier,
-				theRequestDetails);
+				theMdm,
+				theRequestDetails
+			);
 	}
 
 	static List<IPrimitiveType<String>> parsePatientList(@Nonnull List<IBase> thePatient) {
@@ -358,7 +366,9 @@ public class BulkDataExportProvider {
 			IPrimitiveType<String> theExportIdentifier,
 			List<IPrimitiveType<String>> theTypeFilter,
 			List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
-			List<IPrimitiveType<String>> thePatientIds) {
+			List<IPrimitiveType<String>> thePatientIds,
+			IPrimitiveType<Boolean> theMdmExpansion
+	) {
 		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		getBulkDataExportSupport()
@@ -385,6 +395,7 @@ public class BulkDataExportProvider {
 				.exportStyle(ExportStyle.PATIENT)
 				.postFetchFilterUrl(theTypePostFetchFilterUrl)
 				.patientIds(thePatientIds)
+				.expandMdm(theMdmExpansion)
 				.build();
 
 		getBulkDataExportSupport()

@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -102,7 +103,7 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	 */
 	default List<T> resolveResourcePids(
 			RequestPartitionId theRequestPartitionId,
-			List<IIdType> theTargetIds,
+			Collection<IIdType> theTargetIds,
 			ResolveIdentityMode theResolveIdentityMode) {
 		return resolveResourceIdentities(theRequestPartitionId, theTargetIds, theResolveIdentityMode).values().stream()
 				.map(IResourceLookup::getPersistentId)
@@ -176,6 +177,13 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	 * @return A Set of strings representing the FHIR IDs of the pids.
 	 */
 	Set<String> translatePidsToFhirResourceIds(Set<T> thePids);
+
+	/**
+	 * This takes PIDs and, if they do not have the associated resource id added,
+	 * pulls it from the db and adds it.
+	 * @param thePids
+	 */
+	void fillOutPids(Set<T> thePids);
 
 	/**
 	 * @deprecated Use {@link #newPid(Object, Integer)}
