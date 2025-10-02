@@ -87,7 +87,7 @@ class BulkPatchJobParametersValidatorTest {
 		params.setFhirPatch(ourCtx, patch);
 
 		List<String> outcome = mySvc.validate(null, params);
-		assertThat(outcome).contains("Provided FHIRPatch document is invalid: HAPI-2756: Unknown patch parameter name: foo");
+		assertThat(outcome).contains("Provided FHIRPatch document is invalid: Unknown patch parameter name: foo");
 	}
 
 	@Test

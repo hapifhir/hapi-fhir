@@ -1,0 +1,4 @@
+---
+type: add
+issue: 7238
+title: "Added a new parameter to the `$reindex` operation called `batchSize` to allow the user to specify the maximum resource batch size to use when reindexing."

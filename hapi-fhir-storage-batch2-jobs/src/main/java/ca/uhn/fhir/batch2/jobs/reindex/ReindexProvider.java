@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
+import ca.uhn.fhir.batch2.jobs.step.ResourceIdListStep;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
@@ -96,6 +97,16 @@ public class ReindexProvider {
 							min = 0,
 							max = 1)
 					IPrimitiveType<String> theCorrectCurrentVersion,
+			@Description(
+							"How many resources should be reindexed in a single batch. This can be reduced if you need to reindex large resources and therefore need to reduce memory footprint. Values larger than "
+									+ ResourceIdListStep.MAX_BATCH_OF_IDS + " or less than 1 will be ignored (default: "
+									+ ResourceIdListStep.MAX_BATCH_OF_IDS + ")")
+					@OperationParam(
+							name = ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE,
+							typeName = "integer",
+							min = 0,
+							max = 1)
+					IPrimitiveType<Integer> theBatchSize,
 			RequestDetails theRequestDetails) {
 
 		ReindexJobParameters params = new ReindexJobParameters();
@@ -146,6 +157,14 @@ public class ReindexProvider {
 					.map(IPrimitiveType::getValue)
 					.filter(StringUtils::isNotBlank)
 					.collect(Collectors.toList());
+		}
+
+		if (theBatchSize != null && theBatchSize.getValue() != null) {
+			int value = theBatchSize.getValue();
+			// Ignore invalid values
+			value = Math.min(value, ResourceIdListStep.MAX_BATCH_OF_IDS);
+			value = Math.max(value, 1);
+			params.setBatchSize(value);
 		}
 
 		myJobPartitionProvider.getPartitionedUrls(theRequestDetails, urls).forEach(params::addPartitionedUrl);

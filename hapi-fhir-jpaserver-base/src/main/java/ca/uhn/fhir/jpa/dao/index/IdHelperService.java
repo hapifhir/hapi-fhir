@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
@@ -118,6 +119,9 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
+
+	@Autowired
+	private IHapiTransactionService myTransactionService;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
@@ -225,7 +229,11 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 		// We still haven't found IDs, let's look them up in the DB
 		if (!ids.isEmpty()) {
-			resolveResourceIdentitiesForFhirIdsUsingDatabase(requestPartitionId, ids, idToLookup);
+			myTransactionService
+					.withSystemRequest()
+					.withRequestPartitionId(requestPartitionId)
+					.execute(() ->
+							resolveResourceIdentitiesForFhirIdsUsingDatabase(requestPartitionId, ids, idToLookup));
 		}
 
 		// Convert the multimap into a simple map
@@ -484,7 +492,11 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			// This is only called when we know the resource exists.
 			// So this optional is only empty when there is no hfj_forced_id table
 			// note: this is obsolete with the new fhir_id column, and will go away.
-			forcedId = myResourceTableDao.findById(theId).map(ResourceTable::asTypedFhirResourceId);
+			forcedId = myTransactionService
+					.withSystemRequest()
+					.withRequestPartitionId(RequestPartitionId.fromPartitionIds(theId.getPartitionId()))
+					.execute(() -> myResourceTableDao.findById(theId).map(ResourceTable::asTypedFhirResourceId));
+
 			myMemoryCacheService.put(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theId, forcedId);
 		}
 

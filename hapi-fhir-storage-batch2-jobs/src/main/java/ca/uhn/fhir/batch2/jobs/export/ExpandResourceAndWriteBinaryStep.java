@@ -693,8 +693,6 @@ public class ExpandResourceAndWriteBinaryStep
 
 			addMetadataExtensionsToBinary(myStepExecutionDetails, theExpandedResourcesList, binary);
 
-			binary.setContentType(Constants.CT_FHIR_NDJSON);
-
 			int processedRecordsCount = 0;
 			try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 				try (OutputStreamWriter streamWriter = getStreamWriter(outputStream)) {
@@ -720,6 +718,8 @@ public class ExpandResourceAndWriteBinaryStep
 			BulkExportJobParameters jobParameters = myStepExecutionDetails.getParameters();
 			RequestPartitionId partitionId = jobParameters.getPartitionId();
 			srd.setRequestPartitionId(Objects.requireNonNullElseGet(partitionId, RequestPartitionId::defaultPartition));
+
+			binary.setContentType(jobParameters.getOutputFormat());
 
 			// Pick a unique ID and retry until we get one that isn't already used. This is just to
 			// avoid any possibility of people guessing the IDs of these Binaries and fishing for them.
