@@ -99,6 +99,7 @@ public class ExportPIDIteratorParameters {
 	 */
 	public ExportPIDIteratorParameters(ExportPIDIteratorParameters theParameters) {
 		setExpandedPatientIds(theParameters.getExpandedPatientIds());
+		setPatientIds(theParameters.getPatientIds());
 		setExportStyle(theParameters.getExportStyle());
 		setResourceType(theParameters.getResourceType());
 		setFilters(theParameters.getFilters());

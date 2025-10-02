@@ -67,10 +67,7 @@ public class BulkExportIdFetchingSvc {
 				providerParams.setResourceType(resourceType);
 
 				// filters are the filters for searching
-				ourLog.info(
-						"Running FetchIds for resource type: {} with params: {}",
-						resourceType,
-						providerParams);
+				ourLog.info("Running FetchIds for resource type: {} with params: {}", resourceType, providerParams);
 
 				@SuppressWarnings({"rawtypes", "unchecked"})
 				Iterator<IResourcePersistentId> pidIterator =
