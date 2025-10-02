@@ -72,6 +72,7 @@ import ca.uhn.fhir.rest.client.method.TransactionMethodBinding;
 import ca.uhn.fhir.rest.client.method.ValidateMethodBindingDstu2Plus;
 import ca.uhn.fhir.rest.gclient.IBaseQuery;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
+import ca.uhn.fhir.rest.gclient.IClientHttpExecutable;
 import ca.uhn.fhir.rest.gclient.ICreate;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.ICreateWithQuery;
@@ -82,6 +83,7 @@ import ca.uhn.fhir.rest.gclient.IDelete;
 import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.gclient.IDeleteWithQuery;
 import ca.uhn.fhir.rest.gclient.IDeleteWithQueryTyped;
+import ca.uhn.fhir.rest.gclient.IEntityResult;
 import ca.uhn.fhir.rest.gclient.IFetchConformanceTyped;
 import ca.uhn.fhir.rest.gclient.IFetchConformanceUntyped;
 import ca.uhn.fhir.rest.gclient.IGetPage;
@@ -108,6 +110,7 @@ import ca.uhn.fhir.rest.gclient.IPatchWithBody;
 import ca.uhn.fhir.rest.gclient.IPatchWithQuery;
 import ca.uhn.fhir.rest.gclient.IPatchWithQueryTyped;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.gclient.IRawHttp;
 import ca.uhn.fhir.rest.gclient.IRead;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IReadIfNoneMatch;
@@ -136,6 +139,7 @@ import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -365,6 +369,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
+	public IRawHttp rawHttpRequest() {
+		return new RawHttpBuilder();
+	}
+
+	@Override
 	public <T extends IBaseResource> T read(Class<T> theType, String theId) {
 		return read(theType, new IdDt(theId));
 	}
@@ -468,6 +477,66 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		ADD,
 		DELETE,
 		GET
+	}
+
+	private class RawHttpBuilder implements IRawHttp {
+
+		@Override
+		public IClientHttpExecutable<IClientHttpExecutable<?, IEntityResult>, IEntityResult> get(String theUrl) {
+			return new RawGetEntityResultInternal(theUrl);
+		}
+	}
+
+	class RawGetEntityResultInternal<T extends IClientHttpExecutable<?, EntityResult>>
+			extends BaseClientHttpExecutable<T, EntityResult> {
+		final String myUrl;
+
+		public RawGetEntityResultInternal(String theUrl) {
+			myUrl = theUrl;
+		}
+
+		@Override
+		public EntityResult execute() {
+			IClientResponseHandler<EntityResult> binding = new EntityResultResponseHandler();
+			HttpGetClientInvocation invocation = new HttpGetClientInvocation(myContext, myUrl);
+			return invokeClient(myContext, binding, invocation);
+		}
+	}
+
+	private abstract class BaseClientHttpExecutable<T extends IClientHttpExecutable<?, Y>, Y>
+			implements IClientHttpExecutable<T, Y> {
+		CacheControlDirective myCacheControlDirective;
+		Map<String, List<String>> myCustomHeaderValues = new HashMap<>();
+		String myCustomAcceptHeaderValue;
+
+		public String getCustomAcceptHeaderValue() {
+			return myCustomAcceptHeaderValue;
+		}
+
+		@SuppressWarnings("unchecked")
+		public T accept(String theHeaderValue) {
+			myCustomAcceptHeaderValue = theHeaderValue;
+			return (T) this;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public T cacheControl(CacheControlDirective theCacheControlDirective) {
+			myCacheControlDirective = theCacheControlDirective;
+			return (T) this;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public T withAdditionalHeader(String theHeaderName, String theHeaderValue) {
+			Objects.requireNonNull(theHeaderName, "headerName cannot be null");
+			Objects.requireNonNull(theHeaderValue, "headerValue cannot be null");
+			if (!myCustomHeaderValues.containsKey(theHeaderName)) {
+				myCustomHeaderValues.put(theHeaderName, new ArrayList<>());
+			}
+			myCustomHeaderValues.get(theHeaderName).add(theHeaderValue);
+			return (T) this;
+		}
 	}
 
 	private abstract class BaseClientExecutable<T extends IClientExecutable<?, Y>, Y>
@@ -2362,6 +2431,55 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				Map<String, List<String>> theHeaders)
 				throws IOException, BaseServerResponseException {
 			return IOUtils.toString(theResponseInputStream, Charsets.UTF_8);
+		}
+	}
+
+	private static class EntityResult implements IEntityResult {
+		private final String myMimeType;
+		private final InputStream myInputStream;
+		private final int myStatusCode;
+		private final Map<String, List<String>> myHeaders;
+
+		public EntityResult(
+				String theResponseMimeType,
+				InputStream theResponseInputStream,
+				int theResponseStatusCode,
+				Map<String, List<String>> theHeaders) {
+			myMimeType = theResponseMimeType;
+			myInputStream = theResponseInputStream != null ? theResponseInputStream : InputStream.nullInputStream();
+			myStatusCode = theResponseStatusCode;
+			myHeaders = theHeaders != null ? theHeaders : new HashMap<>();
+		}
+
+		public String getMimeType() {
+			return myMimeType;
+		}
+
+		@NonNull
+		public InputStream getInputStream() {
+			return myInputStream;
+		}
+
+		public int getStatusCode() {
+			return myStatusCode;
+		}
+
+		@NonNull
+		public Map<String, List<String>> getHeaders() {
+			return myHeaders;
+		}
+	}
+
+	private static final class EntityResultResponseHandler implements IClientResponseHandler<EntityResult> {
+
+		@Override
+		public EntityResult invokeClient(
+				String theResponseMimeType,
+				InputStream theResponseInputStream,
+				int theResponseStatusCode,
+				Map<String, List<String>> theHeaders)
+				throws IOException, BaseServerResponseException {
+			return new EntityResult(theResponseMimeType, theResponseInputStream, theResponseStatusCode, theHeaders);
 		}
 	}
 

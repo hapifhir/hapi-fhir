@@ -233,13 +233,12 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	}
 
 	private Bundle loadBundle(String theFileName) throws IOException {
-		String req = ClasspathUtil.loadResource(theFileName);
-		return myFhirContext.newXmlParser().parseResource(Bundle.class, req);
+		return loadResourceFromClasspath(Bundle.class, theFileName);
 	}
 
 	@Test
 	public void testTransactionWithDuplicateConditionalCreates2() throws IOException {
-		Bundle request = myFhirContext.newJsonParser().parseResource(Bundle.class, IOUtils.toString(FhirSystemDaoR4.class.getResourceAsStream("/dstu3/duplicate-conditional-create.json"), Constants.CHARSET_UTF8));
+		Bundle request = loadResourceFromClasspath(Bundle.class, "/dstu3/duplicate-conditional-create.json");
 
 		Bundle response = mySystemDao.transaction(null, request);
 

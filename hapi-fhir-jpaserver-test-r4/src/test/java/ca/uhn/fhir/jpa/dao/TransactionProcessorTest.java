@@ -3,44 +3,62 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.interceptor.ResponseSizeCapturingInterceptor;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.MedicationKnowledge;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r5.model.IdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,16 +70,16 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import java.util.Collection;
 import java.util.List;
 
+import static ca.uhn.fhir.jpa.test.BaseJpaTest.newSrd;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -70,28 +88,52 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = TransactionProcessorTest.MyConfig.class)
 public class TransactionProcessorTest {
 
+	public static final String PRACTITIONER_MATCH_URL_FOO_123 = "Practitioner?identifier=http://foo|123";
+	public static final long PRACTITIONER_MATCH_URL_FOO_123_HASH = 5166745101503280662L;
+	public static final String PRACTITIONER_MATCH_URL_FOO_456 = "Practitioner?identifier=http://foo|456";
+	public static final SearchParameterMap PRACTITIONER_MATCH_URL_FOO_123_SP_MAP = new SearchParameterMap()
+		.add(Practitioner.SP_IDENTIFIER, new TokenParam("http://foo", "123"));
+	public static final SearchParameterMap PRACTITIONER_MATCH_URL_FOO_456_SP_MAP = new SearchParameterMap()
+		.add(Practitioner.SP_IDENTIFIER, new TokenParam("http://foo", "456"));
+	private static final long PRACTITIONER_MATCH_URL_FOO_456_HASH = 9212997248395834704L;
+
 	@RegisterExtension
-	private LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(BaseTransactionProcessor.class);
+	private final LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(BaseTransactionProcessor.class);
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessorTest.class);
+
+	@Mock
+	private IFhirResourceDao<Practitioner> myPractitionerDao;
+	@Mock
+	private IFhirResourceDao<Patient> myPatientDao;
 	@Autowired
 	private TransactionProcessor myTransactionProcessor;
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private NonTransactionalHapiTransactionService myHapiTransactionService;
 	@MockBean
 	private EntityManagerFactory myEntityManagerFactory;
 	@MockBean(answer = Answers.RETURNS_DEEP_STUBS)
 	private EntityManager myEntityManager;
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
+	private CriteriaBuilder myCriteriaBuilder;
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
+	private Root<ResourceIndexedSearchParamToken> myRootToken;
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
+	private CriteriaQuery<Tuple> myCriteriaQuery;
+	@Mock
+	private Path myHashSystemAndValuePath;
 	@MockBean
 	private PlatformTransactionManager myPlatformTransactionManager;
 	@MockBean
-	private MatchResourceUrlService myMatchResourceUrlService;
+	private MatchResourceUrlService<JpaPid> myMatchResourceUrlService;
 	@MockBean
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 	@MockBean
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
 	@MockBean
 	private PartitionSettings myPartitionSettings;
 	@MockBean
@@ -110,20 +152,28 @@ public class TransactionProcessorTest {
 	private ResourceSearchUrlSvc myResourceSearchUrlSvc;
 	@MockBean
 	private MemoryCacheService myMemoryCacheService;
-	@Autowired
-	private IFhirResourceDao<Patient> myPatientDao;
-	@Autowired
-	private InterceptorService myInterceptorService;
+	@Captor
+	private ArgumentCaptor<Long> myLongCaptor;
+	@Captor
+	private ArgumentCaptor<Collection<Long>> myLongCollectionCaptor;
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		myTransactionProcessor.setEntityManagerForUnitTest(myEntityManager);
 		when(myEntityManager.unwrap(eq(Session.class))).thenReturn(mySession);
+
+		when(myPractitionerDao.getResourceType()).thenReturn(Practitioner.class);
+		when(myPractitionerDao.getContext()).thenReturn(myFhirContext);
+		myDaoRegistry.register(myPractitionerDao);
+
+		when(myPatientDao.getResourceType()).thenReturn(Patient.class);
+		when(myPatientDao.getContext()).thenReturn(myFhirContext);
+		myDaoRegistry.register(myPatientDao);
 	}
 
 	@AfterEach
-	public void after() {
-		reset(myPatientDao);
+	void after() {
+		myHapiTransactionService.clearNonCompatiblePartitions();
 	}
 
 
@@ -146,7 +196,7 @@ public class TransactionProcessorTest {
 			myTransactionProcessor.transaction(null, input, false);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(544) + "Resource MedicationKnowledge is not supported on this server. Supported resource types: [Patient]", e.getMessage());
+			assertEquals(Msg.code(544) + "Resource MedicationKnowledge is not supported on this server. Supported resource types: [Patient, Practitioner]", e.getMessage());
 		}
 	}
 
@@ -193,23 +243,138 @@ public class TransactionProcessorTest {
 	}
 
 
+	@Test
+	public void testPreFetch_CollapseDuplicates() {
+		// Setup
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(new Patient().addGeneralPractitioner(new Reference(PRACTITIONER_MATCH_URL_FOO_123)));
+		bb.addTransactionCreateEntry(new Patient().addGeneralPractitioner(new Reference(PRACTITIONER_MATCH_URL_FOO_123)));
+		bb.addTransactionCreateEntry(new Patient().addGeneralPractitioner(new Reference(PRACTITIONER_MATCH_URL_FOO_123)));
+		Bundle input = bb.getBundleTyped();
+
+		when(myMatchUrlService.translateMatchUrl(eq(PRACTITIONER_MATCH_URL_FOO_123), any())).thenReturn(PRACTITIONER_MATCH_URL_FOO_123_SP_MAP);
+
+		mockPreFetchHashCapture();
+		mockPatientDaoCreate();
+
+		// Test
+
+		myTransactionProcessor.transaction(newSrd(), input, false);
+
+		// Verify
+
+		// Only 1 pre-fetch covering all 3 URLs
+		verify(myEntityManager, times(1)).createQuery(anyCriteriaQuery());
+		verify(myCriteriaBuilder, times(1)).equal(any(), myLongCaptor.capture());
+		assertEquals(PRACTITIONER_MATCH_URL_FOO_123_HASH, myLongCaptor.getValue());
+	}
+
+	@Test
+	public void testPreFetch_CollapseDuplicates_MultiplePartitions_CompatiblePartitions() {
+		// Setup
+		when(myPartitionSettings.isPartitioningEnabled()).thenReturn(true);
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(new Patient().addGeneralPractitioner(new Reference(PRACTITIONER_MATCH_URL_FOO_123)));
+		bb.addTransactionCreateEntry(new Patient().addGeneralPractitioner(new Reference(PRACTITIONER_MATCH_URL_FOO_123)));
+		bb.addTransactionCreateEntry(new Patient().addGeneralPractitioner(new Reference(PRACTITIONER_MATCH_URL_FOO_456)));
+		bb.addTransactionCreateEntry(new Patient().addGeneralPractitioner(new Reference(PRACTITIONER_MATCH_URL_FOO_456)));
+		Bundle input = bb.getBundleTyped();
+
+		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(any(), any(), eq("Patient"))).thenReturn(RequestPartitionId.fromPartitionId(100));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_123_SP_MAP))).thenReturn(RequestPartitionId.fromPartitionId(123));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_456_SP_MAP))).thenReturn(RequestPartitionId.fromPartitionId(456));
+
+		when(myMatchUrlService.translateMatchUrl(eq(PRACTITIONER_MATCH_URL_FOO_123), any())).thenReturn(PRACTITIONER_MATCH_URL_FOO_123_SP_MAP);
+		when(myMatchUrlService.translateMatchUrl(eq(PRACTITIONER_MATCH_URL_FOO_456), any())).thenReturn(PRACTITIONER_MATCH_URL_FOO_456_SP_MAP);
+
+		mockPreFetchHashCapture();
+		mockPatientDaoCreate();
+
+		// Test
+
+		myTransactionProcessor.transaction(newSrd(), input, false);
+
+		// Verify
+
+		// One pre-fetch for each partition
+		verify(myEntityManager, times(1)).createQuery(anyCriteriaQuery());
+
+		verify(myHashSystemAndValuePath, times(1)).in(myLongCollectionCaptor.capture());
+		Collection<Long> systemAndValuePreFetchHashes = myLongCollectionCaptor.getValue();
+		assertThat(systemAndValuePreFetchHashes).containsExactlyInAnyOrder(
+			PRACTITIONER_MATCH_URL_FOO_123_HASH,
+			PRACTITIONER_MATCH_URL_FOO_456_HASH
+		);
+	}
+
+	@Test
+	public void testPreFetch_CollapseDuplicates_MultiplePartitions_NonCompatiblePartitions() {
+		// Setup
+		when(myPartitionSettings.isPartitioningEnabled()).thenReturn(true);
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(new Patient().addGeneralPractitioner(new Reference(PRACTITIONER_MATCH_URL_FOO_123)));
+		bb.addTransactionCreateEntry(new Patient().addGeneralPractitioner(new Reference(PRACTITIONER_MATCH_URL_FOO_123)));
+		bb.addTransactionCreateEntry(new Patient().addGeneralPractitioner(new Reference(PRACTITIONER_MATCH_URL_FOO_456)));
+		bb.addTransactionCreateEntry(new Patient().addGeneralPractitioner(new Reference(PRACTITIONER_MATCH_URL_FOO_456)));
+		Bundle input = bb.getBundleTyped();
+
+		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(any(), any(), eq("Patient"))).thenReturn(RequestPartitionId.fromPartitionId(100));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_123_SP_MAP))).thenReturn(RequestPartitionId.fromPartitionId(123));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_456_SP_MAP))).thenReturn(RequestPartitionId.fromPartitionId(456));
+
+		when(myMatchUrlService.translateMatchUrl(eq(PRACTITIONER_MATCH_URL_FOO_123), any())).thenReturn(PRACTITIONER_MATCH_URL_FOO_123_SP_MAP);
+		when(myMatchUrlService.translateMatchUrl(eq(PRACTITIONER_MATCH_URL_FOO_456), any())).thenReturn(PRACTITIONER_MATCH_URL_FOO_456_SP_MAP);
+
+		myHapiTransactionService.addNonCompatiblePartition(RequestPartitionId.fromPartitionId(123), RequestPartitionId.fromPartitionId(456));
+
+		mockPreFetchHashCapture();
+		mockPatientDaoCreate();
+
+		// Test
+
+		myTransactionProcessor.transaction(newSrd(), input, false);
+
+		// Verify
+
+		// One pre-fetch for each partition
+		verify(myEntityManager, times(2)).createQuery(anyCriteriaQuery());
+		verify(myCriteriaBuilder, times(2)).equal(any(), myLongCaptor.capture());
+
+		assertThat(myLongCaptor.getAllValues()).containsExactlyInAnyOrder(
+			PRACTITIONER_MATCH_URL_FOO_123_HASH,
+			PRACTITIONER_MATCH_URL_FOO_456_HASH
+		);
+	}
+
+	private void mockPreFetchHashCapture() {
+		when(myEntityManager.getCriteriaBuilder()).thenReturn(myCriteriaBuilder);
+		when(myCriteriaBuilder.createTupleQuery()).thenReturn(myCriteriaQuery);
+		when(myCriteriaQuery.from(ResourceIndexedSearchParamToken.class)).thenReturn(myRootToken);
+		when(myRootToken.get(eq("myHashSystemAndValue"))).thenReturn(myHashSystemAndValuePath);
+	}
+
+	private void mockPatientDaoCreate() {
+		DaoMethodOutcome outcome = new DaoMethodOutcome();
+		outcome.setId(new IdType("Patient/A"));
+		outcome.setCreated(true);
+		when(myPatientDao.create(any(), any(), anyBoolean(), any(), any())).thenReturn(outcome);
+	}
+
+	private static CriteriaQuery<?> anyCriteriaQuery() {
+		return any(CriteriaQuery.class);
+	}
+
 	@Configuration
 	@Import(ThreadPoolFactoryConfig.class)
 	public static class MyConfig {
 
 		@Bean
-		public IFhirResourceDao<Patient> patientDao() {
-			IFhirResourceDao retVal = mock(IFhirResourceDao.class);
-
-			when(retVal.getResourceType()).thenReturn(Patient.class);
-			daoRegistry().setResourceDaos(List.of(retVal));
-
-			return retVal;
-		}
-
-		@Bean
 		public DaoRegistry daoRegistry() {
-			return new DaoRegistry(fhirContext());
+			DaoRegistry retVal = new DaoRegistry(fhirContext());
+			retVal.setResourceDaos(List.of());
+			return retVal;
 		}
 
 		@Bean

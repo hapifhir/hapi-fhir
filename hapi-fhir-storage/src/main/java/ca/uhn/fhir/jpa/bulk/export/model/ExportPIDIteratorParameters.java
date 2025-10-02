@@ -90,6 +90,8 @@ public class ExportPIDIteratorParameters {
 	 */
 	private List<String> myRequestedResourceTypes;
 
+	private boolean myIncludeHistory;
+
 	private List<IResourcePersistentId<?>> myExpandedPatientIds;
 
 	public ExportPIDIteratorParameters() {}
@@ -232,6 +234,14 @@ public class ExportPIDIteratorParameters {
 
 	public void setRequestedResourceTypes(List<String> theRequestedResourceTypes) {
 		myRequestedResourceTypes = theRequestedResourceTypes;
+	}
+
+	public boolean isIncludeHistory() {
+		return myIncludeHistory;
+	}
+
+	public void setIncludeHistory(boolean theIncludeHistory) {
+		myIncludeHistory = theIncludeHistory;
 	}
 
 	@Override
