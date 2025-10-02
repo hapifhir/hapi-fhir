@@ -439,6 +439,8 @@ public abstract class BaseClient implements IRestfulClient {
 						keepResponseAndLogIt(theLogRequestAndResponse, response, responseString);
 						inputStreamToReturn = new ByteArrayInputStream(responseString.getBytes(Charsets.UTF_8));
 					}
+				} else {
+					inputStreamToReturn = new ByteArrayInputStream(inputStream.readAllBytes());
 				}
 
 				if (inputStreamToReturn == null) {

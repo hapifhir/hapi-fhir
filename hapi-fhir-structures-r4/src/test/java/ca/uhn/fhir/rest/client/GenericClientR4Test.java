@@ -125,7 +125,10 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 	    // when
-		IEntityResult result = client.rawHttpRequest().get("someurl?param1=value1").withAdditionalHeader("custom-request-header", "custom-type").execute();
+		IEntityResult result = client.rawHttpRequest().get("someurl?param1=value1")
+			 .withAdditionalHeader("custom-request-header", "custom-type")
+			 .accept("application/custom-accept")
+			 .execute();
 
 	    // then
 		HttpUriRequest httpUriRequest = capt.getAllValues().get(0);
@@ -136,6 +139,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		assertEquals(200, result.getStatusCode());
 		assertEquals("custom-value", result.getHeaders().get("custom-header").get(0));
 		assertEquals("custom-type", capt.getValue().getHeaders("custom-request-header")[0].getValue());
+		assertEquals("application/custom-accept", capt.getValue().getHeaders("accept")[0].getValue());
 	}
 
 	@Test
