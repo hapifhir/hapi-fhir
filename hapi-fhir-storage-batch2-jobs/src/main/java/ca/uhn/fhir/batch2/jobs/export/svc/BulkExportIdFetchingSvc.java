@@ -26,6 +26,7 @@ public class BulkExportIdFetchingSvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportIdFetchingSvc.class);
 
+	@SuppressWarnings("rawtypes")
 	@Autowired
 	private IBulkExportProcessor myBulkExportProcessor;
 
@@ -40,7 +41,7 @@ public class BulkExportIdFetchingSvc {
 		List<String> resourceTypes = theProviderParameters.getRequestedResourceTypes();
 
 		int submissionCount = 0;
-		ExportPIDIteratorParameters providerParams = new ExportPIDIteratorParameters(theProviderParameters);
+
 		try {
 			Set<TypedPidJson> submittedBatchResourceIds = new HashSet<>();
 
@@ -61,13 +62,17 @@ public class BulkExportIdFetchingSvc {
 				if (resourceTypesToOmit.contains(resourceType) || !myResourceSupportedSvc.isSupported(resourceType)) {
 					continue;
 				}
+				// clone them because we'll change them before use
+				ExportPIDIteratorParameters providerParams = new ExportPIDIteratorParameters(theProviderParameters);
 				providerParams.setResourceType(resourceType);
 
 				// filters are the filters for searching
 				ourLog.info(
-						"Running FetchResourceIdsStep for resource type: {} with params: {}",
+						"Running FetchIds for resource type: {} with params: {}",
 						resourceType,
 						providerParams);
+
+				@SuppressWarnings({"rawtypes", "unchecked"})
 				Iterator<IResourcePersistentId> pidIterator =
 						myBulkExportProcessor.getResourcePidIterator(providerParams);
 				List<TypedPidJson> idsToSubmit = new ArrayList<>();
@@ -77,6 +82,7 @@ public class BulkExportIdFetchingSvc {
 				if (!pidIterator.hasNext()) {
 					ourLog.debug("Bulk Export generated an iterator with no results!");
 				}
+
 				while (pidIterator.hasNext()) {
 					IResourcePersistentId<?> pid = pidIterator.next();
 
@@ -122,6 +128,7 @@ public class BulkExportIdFetchingSvc {
 				}
 			}
 		} catch (Exception ex) {
+			// any recoverable error presumably
 			ourLog.error(ex.getMessage(), ex);
 
 			throw new JobExecutionFailedException(Msg.code(2239) + " : " + ex.getMessage(), ex);

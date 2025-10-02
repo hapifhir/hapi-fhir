@@ -125,10 +125,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		myStorageSettings.setJobFastTrackingEnabled(false);
 	}
 
-
 	@Nested
 	public class SpecConformanceTests {
-
 
 		@Test
 		public void testBulkExportJobsAreMetaTaggedWithJobIdAndExportId() throws IOException {
@@ -576,7 +574,14 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			// an unmatched patient to verify it isn't included
 			Patient unmatched = new Patient();
 			unmatched.setActive(true);
-			Patient created = (Patient) myPatientDao.create(unmatched, mySrd)
+			unmatched.setId("pat-unmatched");
+			Patient created = (Patient) myPatientDao.update(unmatched, mySrd)
+				.getResource();
+
+			Observation unmatchedObs = new Observation();
+			unmatchedObs.setSubject(new Reference(created.getId()));
+			unmatchedObs.setId("obs-unmatched");
+			Observation createdObs = (Observation) myObservationDao.update(unmatchedObs, mySrd)
 				.getResource();
 
 			// test
@@ -612,6 +617,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			assertFalse(exportedResourcesMap.get("Patient")
 				.stream().anyMatch(p -> p.getIdElement().toUnqualifiedVersionless().getValue().equalsIgnoreCase(created.getIdElement().toUnqualifiedVersionless().getId())));
 			assertEquals(2, exportedResourcesMap.get("Observation").size());
+			assertFalse(exportedResourcesMap.get("Observation")
+				.stream().anyMatch(o -> o.getIdElement().toUnqualifiedVersionless().getValue().equalsIgnoreCase(createdObs.getIdElement().toUnqualifiedVersionless().getId())));
 		}
 
 		/**

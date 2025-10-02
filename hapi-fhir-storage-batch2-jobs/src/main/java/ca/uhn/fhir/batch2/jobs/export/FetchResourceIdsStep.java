@@ -72,7 +72,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 		int submissionCount = 0;
 		try {
-			myBulkExportProcessor.fetchIds(providerParams, theDataSink::accept);
+			submissionCount = myBulkExportProcessor.fetchIds(providerParams, theDataSink::accept);
 		} catch (JobExecutionFailedException ex) {
 			theDataSink.recoveredError(ex.getMessage());
 			// rethrow so it can be properly handled
