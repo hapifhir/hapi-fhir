@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.hl7.fhir.dstu2.model;
+package org.hl7.fhir.instance.model;
 
 /**
  * This interface is a simple marker for anything which is an HL7

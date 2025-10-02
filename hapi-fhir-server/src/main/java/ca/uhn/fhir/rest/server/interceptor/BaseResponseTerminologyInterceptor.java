@@ -52,7 +52,7 @@ public abstract class BaseResponseTerminologyInterceptor {
 	protected List<IBaseResource> toListForProcessing(RequestDetails theRequestDetails, IBaseResource theResource) {
 
 		switch (theRequestDetails.getRestOperationType()) {
-				// Don't apply to these operations
+			// Don't apply to these operations
 			case ADD_TAGS:
 			case DELETE_TAGS:
 			case GET_TAGS:
@@ -74,7 +74,7 @@ public abstract class BaseResponseTerminologyInterceptor {
 			default:
 				return Collections.emptyList();
 
-				// Do apply to these operations
+			// Do apply to these operations
 			case HISTORY_INSTANCE:
 			case HISTORY_SYSTEM:
 			case HISTORY_TYPE:

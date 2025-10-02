@@ -1,22 +1,3 @@
-/*-
- * #%L
- * HAPI FHIR JPA Server
- * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -25,7 +6,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
-import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.Constants;
@@ -52,9 +32,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.search.engine.search.common.BooleanOperator;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
-import org.hibernate.search.engine.search.predicate.dsl.RangePredicateOptionsStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
-import org.hibernate.search.engine.search.predicate.dsl.WildcardPredicateOptionsStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +74,8 @@ public class ExtendedHSearchClauseBuilder {
 	public static final String PATH_JOINER = ".";
 
 	final FhirContext myFhirContext;
-	public final BooleanPredicateClausesStep<?> myRootClause;
+	// Raw type to avoid HS 7.x generic arity changes
+	public final BooleanPredicateClausesStep myRootClause;
 	public final StorageSettings myStorageSettings;
 	final PathContext myRootContext;
 
@@ -106,7 +85,8 @@ public class ExtendedHSearchClauseBuilder {
 	public ExtendedHSearchClauseBuilder(
 			FhirContext myFhirContext,
 			StorageSettings theStorageSettings,
-			BooleanPredicateClausesStep<?> theRootClause,
+			// Raw type to be compatible with HS 7.1.x
+			BooleanPredicateClausesStep theRootClause,
 			SearchPredicateFactory thePredicateFactory) {
 		this.myFhirContext = myFhirContext;
 		this.myStorageSettings = theStorageSettings;
@@ -163,14 +143,6 @@ public class ExtendedHSearchClauseBuilder {
 		return StringUtils.defaultString(value).trim();
 	}
 
-	/**
-	 * String Search params are valid, so are two special params, _content and _text.
-	 *
-	 * @param theSearchParamName The name of the SP
-	 * @param nextOr the or values of the query parameter.
-	 *
-	 * @return a boolean indicating whether we can treat this as a string.
-	 */
 	private static boolean isStringParamOrEquivalent(String theSearchParamName, IQueryParameterType nextOr) {
 		List<String> specialSearchParamsToTreatAsStrings = List.of(Constants.PARAM_TEXT, Constants.PARAM_CONTENT);
 		return (nextOr instanceof StringParam)
@@ -223,10 +195,8 @@ public class ExtendedHSearchClauseBuilder {
 						.matching(token.getValueAsQueryToken(this.myFhirContext));
 			}
 		} else if (orTerm instanceof StringParam) {
-			// MB I don't quite understand why FhirResourceDaoR4SearchNoFtTest.testSearchByIdParamWrongType() uses
-			// String but here we are
-			StringParam string = (StringParam) orTerm;
 			// treat a string as a code with no system (like _id)
+			StringParam string = (StringParam) orTerm;
 			return thePathContext
 					.match()
 					.field(joinPath(pathPrefix, INDEX_TYPE_TOKEN, TOKEN_CODE))
@@ -243,8 +213,6 @@ public class ExtendedHSearchClauseBuilder {
 		}
 		String fieldName;
 		switch (theSearchParamName) {
-				// _content and _text were here first, and don't obey our mapping.
-				// Leave them as-is for backwards compatibility.
 			case Constants.PARAM_CONTENT:
 				fieldName = "myContentText";
 				break;
@@ -267,13 +235,6 @@ public class ExtendedHSearchClauseBuilder {
 		}
 	}
 
-	/**
-	 * This route is used for standard string searches, or `_text` or `_content`. For each term, we build a `simpleQueryString `element which allows hibernate search to search on normalized, analyzed, indexed fields.
-	 *
-	 * @param theSearchParamName The name of the search parameter
-	 * @param nextOrList the list of query parameters
-	 * @param fieldName  the field name in the index document to compare with.
-	 */
 	private void addSimpleQueryMatchClauses(
 			String theSearchParamName, List<? extends IQueryParameterType> nextOrList, String fieldName) {
 		Set<String> orTerms = TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
@@ -284,24 +245,12 @@ public class ExtendedHSearchClauseBuilder {
 					.simpleQueryString()
 					.field(fieldName)
 					.matching(query)
-					.defaultOperator(
-							BooleanOperator.AND)); // term value may contain multiple tokens.  Require all of them to
-			// be
-			// present.
-
+					.defaultOperator(BooleanOperator.AND));
 		} else {
 			ourLog.warn("No Terms found in query parameter {}", nextOrList);
 		}
 	}
 
-	/**
-	 * Note that this `match()` operation is different from out standard behaviour, which uses simpleQueryString(). This `match()` forces a precise string match, Whereas `simpleQueryString()` uses a more nebulous
-	 * and loose check against a collection of terms. We only use this when we see ` _text:contains=` or `_content:contains=` search.
-	 *
-	 * @param theSearchParamName the Name of the search parameter
-	 * @param nextOrList the list of query parameters
-	 * @param fieldName the field name in the index document to compare with.
-	 */
 	private void addPreciseMatchClauses(
 			String theSearchParamName, List<? extends IQueryParameterType> nextOrList, String fieldName) {
 		Set<String> orTerms = TermHelper.makePrefixSearchTerm(extractOrStringParams(theSearchParamName, nextOrList));
@@ -331,7 +280,6 @@ public class ExtendedHSearchClauseBuilder {
 			Set<String> terms = extractOrStringParams(theSearchParamName, nextAnd);
 			ourLog.debug("addStringContainsSearch {} {}", theSearchParamName, terms);
 			List<? extends PredicateFinalStep> orTerms = terms.stream()
-					// wildcard is a term-level query, so queries aren't analyzed.  Do our own normalization first.
 					.map(this::normalize)
 					.map(s -> myRootContext.wildcard().field(fieldPath).matching("*" + s + "*"))
 					.collect(Collectors.toList());
@@ -340,13 +288,6 @@ public class ExtendedHSearchClauseBuilder {
 		}
 	}
 
-	/**
-	 * Normalize the string to match our standardAnalyzer.
-	 * @see HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer#STANDARD_ANALYZER
-	 *
-	 * @param theString the raw string
-	 * @return a case and accent normalized version of the input
-	 */
 	@Nonnull
 	private String normalize(String theString) {
 		return StringUtil.normalizeStringForSearchIndexing(theString).toLowerCase(Locale.ROOT);
@@ -366,7 +307,8 @@ public class ExtendedHSearchClauseBuilder {
 		}
 	}
 
-	private WildcardPredicateOptionsStep<?> buildStringUnmodifiedClause(String theString, PathContext theContext) {
+	// Return PredicateFinalStep instead of WildcardPredicateOptionsStep<?>
+	private PredicateFinalStep buildStringUnmodifiedClause(String theString, PathContext theContext) {
 		return theContext
 				.wildcard()
 				.field(joinPath(theContext.getContextPath(), INDEX_TYPE_STRING, IDX_STRING_NORMALIZED))
@@ -390,81 +332,6 @@ public class ExtendedHSearchClauseBuilder {
 		}
 	}
 
-	/**
-	 * Create date clause from date params. The date lower and upper bounds are taken
-	 * into consideration when generating date query ranges
-	 *
-	 * <p>Example 1 ('eq' prefix/empty): <code>http://fhirserver/Observation?date=eq2020</code>
-	 * would generate the following search clause
-	 * <pre>
-	 * {@code
-	 * {
-	 *  "bool": {
-	 *    "must": [{
-	 *      "range": {
-	 *        "sp.date.dt.lower-ord": { "gte": "20200101" }
-	 *      }
-	 *    }, {
-	 *      "range": {
-	 *        "sp.date.dt.upper-ord": { "lte": "20201231" }
-	 *      }
-	 *    }]
-	 *  }
-	 * }
-	 * }
-	 * </pre>
-	 *
-	 * <p>Example 2 ('gt' prefix): <code>http://fhirserver/Observation?date=gt2020-01-01T08:00:00.000</code>
-	 * <p>No timezone in the query will be taken as localdatetime(for e.g MST/UTC-07:00 in this case) converted to UTC before comparison</p>
-	 * <pre>
-	 * {@code
-	 * {
-	 *   "range":{
-	 *     "sp.date.dt.upper":{ "gt": "2020-01-01T15:00:00.000000000Z" }
-	 *   }
-	 * }
-	 * }
-	 * </pre>
-	 *
-	 * <p>Example 3 between dates: {@code http://fhirserver/Observation?date=ge2010-01-01&date=le2020-01}</p>
-	 * <pre>
-	 * {@code
-	 * {
-	 *   "range":{
-	 *     "sp.date.dt.upper-ord":{ "gte":"20100101" }
-	 *   },
-	 *   "range":{
-	 *     "sp.date.dt.lower-ord":{ "lte":"20200101" }
-	 *   }
-	 * }
-	 * }
-	 * </pre>
-	 *
-	 * <p>Example 4 not equal: {@code http://fhirserver/Observation?date=ne2021}</p>
-	 * <pre>
-	 * {@code
-	 * {
-	 *    "bool": {
-	 *       "should": [{
-	 *          "range": {
-	 *             "sp.date.dt.upper-ord": { "lt": "20210101" }
-	 *          }
-	 *       }, {
-	 *          "range": {
-	 *             "sp.date.dt.lower-ord": { "gt": "20211231" }
-	 *          }
-	 *       }],
-	 *       "minimum_should_match": "1"
-	 *    }
-	 * }
-	 * }
-	 * </pre>
-	 *
-	 * @param theSearchParamName e.g code
-	 * @param theDateAndOrTerms The and/or list of DateParam values
-	 *
-	 * buildDateTermClause(subComponentPath, value);
-	 */
 	public void addDateUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theDateAndOrTerms) {
 		for (List<? extends IQueryParameterType> nextOrList : theDateAndOrTerms) {
 
@@ -494,10 +361,8 @@ public class ExtendedHSearchClauseBuilder {
 		int upperBoundAsOrdinal;
 		ParamPrefixEnum prefix = theDateParam.getPrefix();
 
-		// default when handling 'Day' temporal types
 		lowerBoundAsOrdinal = upperBoundAsOrdinal = DateUtils.convertDateToDayInteger(theDateParam.getValue());
 		TemporalPrecisionEnum precision = theDateParam.getPrecision();
-		// complete the date from 'YYYY' and 'YYYY-MM' temporal types
 		if (precision == TemporalPrecisionEnum.YEAR || precision == TemporalPrecisionEnum.MONTH) {
 			Pair<String, String> completedDate = DateUtils.getCompletedDate(theDateParam.getValueAsString());
 			lowerBoundAsOrdinal = Integer.parseInt(completedDate.getLeft().replace("-", ""));
@@ -505,20 +370,18 @@ public class ExtendedHSearchClauseBuilder {
 		}
 
 		if (Objects.isNull(prefix) || prefix == ParamPrefixEnum.EQUAL) {
-			// For equality prefix we would like the date to fall between the lower and upper bound
 			List<? extends PredicateFinalStep> predicateSteps = Arrays.asList(
 					theSpContext.range().field(lowerOrdinalField).atLeast(lowerBoundAsOrdinal),
 					theSpContext.range().field(upperOrdinalField).atMost(upperBoundAsOrdinal));
-			BooleanPredicateClausesStep<?> booleanStep = theSpContext.bool();
+			// Raw type to absorb HS 7.x generic changes
+			BooleanPredicateClausesStep booleanStep = theSpContext.bool();
 			predicateSteps.forEach(booleanStep::must);
 			return booleanStep;
 		} else if (ParamPrefixEnum.GREATERTHAN == prefix || ParamPrefixEnum.STARTS_AFTER == prefix) {
-			// TODO JB: more fine tuning needed for STARTS_AFTER
 			return theSpContext.range().field(upperOrdinalField).greaterThan(upperBoundAsOrdinal);
 		} else if (ParamPrefixEnum.GREATERTHAN_OR_EQUALS == prefix) {
 			return theSpContext.range().field(upperOrdinalField).atLeast(upperBoundAsOrdinal);
 		} else if (ParamPrefixEnum.LESSTHAN == prefix || ParamPrefixEnum.ENDS_BEFORE == prefix) {
-			// TODO JB: more fine tuning needed for END_BEFORE
 			return theSpContext.range().field(lowerOrdinalField).lessThan(lowerBoundAsOrdinal);
 		} else if (ParamPrefixEnum.LESSTHAN_OR_EQUALS == prefix) {
 			return theSpContext.range().field(lowerOrdinalField).atMost(lowerBoundAsOrdinal);
@@ -526,7 +389,7 @@ public class ExtendedHSearchClauseBuilder {
 			List<? extends PredicateFinalStep> predicateSteps = Arrays.asList(
 					theSpContext.range().field(upperOrdinalField).lessThan(lowerBoundAsOrdinal),
 					theSpContext.range().field(lowerOrdinalField).greaterThan(upperBoundAsOrdinal));
-			BooleanPredicateClausesStep<?> booleanStep = theSpContext.bool();
+			BooleanPredicateClausesStep booleanStep = theSpContext.bool();
 			predicateSteps.forEach(booleanStep::should);
 			booleanStep.minimumShouldMatchNumber(1);
 			return booleanStep;
@@ -543,15 +406,20 @@ public class ExtendedHSearchClauseBuilder {
 		if (ParamPrefixEnum.NOT_EQUAL == prefix) {
 			Instant dateInstant = theDateParam.getValue().toInstant();
 			List<? extends PredicateFinalStep> predicateSteps = Arrays.asList(
-					theSpContext.range().field(upperInstantField).lessThan(dateInstant),
-					theSpContext.range().field(lowerInstantField).greaterThan(dateInstant));
-			BooleanPredicateClausesStep<?> booleanStep = theSpContext.bool();
+					((SearchPredicateFactory) theSpContext)
+							.range()
+							.field(upperInstantField)
+							.lessThan(dateInstant),
+					((SearchPredicateFactory) theSpContext)
+							.range()
+							.field(lowerInstantField)
+							.greaterThan(dateInstant));
+			BooleanPredicateClausesStep booleanStep = ((SearchPredicateFactory) theSpContext).bool();
 			predicateSteps.forEach(booleanStep::should);
 			booleanStep.minimumShouldMatchNumber(1);
 			return booleanStep;
 		}
 
-		// Consider lower and upper bounds for building range predicates
 		DateRangeParam dateRange = new DateRangeParam(theDateParam);
 		Instant lowerBoundAsInstant = Optional.ofNullable(dateRange.getLowerBound())
 				.map(param -> param.getValue().toInstant())
@@ -561,7 +429,6 @@ public class ExtendedHSearchClauseBuilder {
 				.orElse(null);
 
 		if (prefix == ParamPrefixEnum.EQUAL) {
-			// For equality prefix we would like the date to fall between the lower and upper bound
 			List<? extends PredicateFinalStep> predicateSteps = Arrays.asList(
 					((SearchPredicateFactory) theSpContext)
 							.range()
@@ -571,7 +438,7 @@ public class ExtendedHSearchClauseBuilder {
 							.range()
 							.field(upperInstantField)
 							.atMost(upperBoundAsInstant));
-			BooleanPredicateClausesStep<?> booleanStep = ((SearchPredicateFactory) theSpContext).bool();
+			BooleanPredicateClausesStep booleanStep = ((SearchPredicateFactory) theSpContext).bool();
 			predicateSteps.forEach(booleanStep::must);
 			return booleanStep;
 		} else if (ParamPrefixEnum.GREATERTHAN == prefix || ParamPrefixEnum.STARTS_AFTER == prefix) {
@@ -600,19 +467,10 @@ public class ExtendedHSearchClauseBuilder {
 				Msg.code(2256) + "Date search param does not support prefix of type: " + prefix);
 	}
 
-	/**
-	 * Differences with DB search:
-	 *  _ is not all-normalized-or-all-not. Each parameter is applied on quantity or normalized quantity depending on UCUM fitness
-	 *  _ respects ranges for equal and approximate qualifiers
-	 *
-	 * Strategy: For each parameter, if it can be canonicalized, it is, and used against 'normalized-value-quantity' index
-	 * 	otherwise it is applied as-is to 'value-quantity'
-	 */
 	public void addQuantityUnmodifiedSearch(
 			String theSearchParamName, List<List<IQueryParameterType>> theQuantityAndOrTerms) {
 
 		for (List<IQueryParameterType> nextOrList : theQuantityAndOrTerms) {
-			// we build quantity predicates in a nested context so we can match units and systems with values.
 			PredicateFinalStep nestedClause =
 					myRootContext.buildPredicateInNestedContext(theSearchParamName, nextedContext -> {
 						List<PredicateFinalStep> orClauses = nextOrList.stream()
@@ -626,10 +484,10 @@ public class ExtendedHSearchClauseBuilder {
 		}
 	}
 
-	private BooleanPredicateClausesStep<?> buildQuantityTermClause(
+	private BooleanPredicateClausesStep buildQuantityTermClause(
 			IQueryParameterType theQueryParameter, PathContext thePathContext) {
 
-		BooleanPredicateClausesStep<?> quantityClause = ((SearchPredicateFactory) thePathContext).bool();
+		BooleanPredicateClausesStep quantityClause = ((SearchPredicateFactory) thePathContext).bool();
 
 		QuantityParam qtyParam = QuantityParam.toQuantityParam(theQueryParameter);
 		ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
@@ -672,14 +530,6 @@ public class ExtendedHSearchClauseBuilder {
 		return quantityClause;
 	}
 
-	/**
-	 * Shared helper between quantity and number
-	 * @param valueFieldPath The path leading to index node
-	 * @param thePrefix the query prefix (e.g. lt).  Null means eq
-	 * @param theNumberValue the query value
-	 * @param thePathContext HSearch builder
-	 * @return a query predicate applying the prefix to the value
-	 */
 	@Nonnull
 	private PredicateFinalStep buildNumericClause(
 			String valueFieldPath, ParamPrefixEnum thePrefix, BigDecimal theNumberValue, PathContext thePathContext) {
@@ -691,7 +541,6 @@ public class ExtendedHSearchClauseBuilder {
 
 		ParamPrefixEnum activePrefix = thePrefix == null ? ParamPrefixEnum.EQUAL : thePrefix;
 		switch (activePrefix) {
-				//	searches for resource quantity between passed param value +/- 10%
 			case APPROXIMATE:
 				predicate = ((SearchPredicateFactory) thePathContext)
 						.range()
@@ -699,7 +548,6 @@ public class ExtendedHSearchClauseBuilder {
 						.between(value - approxTolerance, value + approxTolerance);
 				break;
 
-				// searches for resource quantity between passed param value +/- 5%
 			case EQUAL:
 				predicate = ((SearchPredicateFactory) thePathContext)
 						.range()
@@ -707,16 +555,14 @@ public class ExtendedHSearchClauseBuilder {
 						.between(range.getLeft().doubleValue(), range.getRight().doubleValue());
 				break;
 
-				// searches for resource quantity > param value
 			case GREATERTHAN:
-			case STARTS_AFTER: // treated as GREATERTHAN because search doesn't handle ranges
+			case STARTS_AFTER:
 				predicate = ((SearchPredicateFactory) thePathContext)
 						.range()
 						.field(valueFieldPath)
 						.greaterThan(value);
 				break;
 
-				// searches for resource quantity not < param value
 			case GREATERTHAN_OR_EQUALS:
 				predicate = ((SearchPredicateFactory) thePathContext)
 						.range()
@@ -724,16 +570,14 @@ public class ExtendedHSearchClauseBuilder {
 						.atLeast(value);
 				break;
 
-				// searches for resource quantity < param value
 			case LESSTHAN:
-			case ENDS_BEFORE: // treated as LESSTHAN because search doesn't handle ranges
+			case ENDS_BEFORE:
 				predicate = ((SearchPredicateFactory) thePathContext)
 						.range()
 						.field(valueFieldPath)
 						.lessThan(value);
 				break;
 
-				// searches for resource quantity not > param value
 			case LESSTHAN_OR_EQUALS:
 				predicate = ((SearchPredicateFactory) thePathContext)
 						.range()
@@ -741,9 +585,9 @@ public class ExtendedHSearchClauseBuilder {
 						.atMost(value);
 				break;
 
-				// NOT_EQUAL: searches for resource quantity not between passed param value +/- 5%
 			case NOT_EQUAL:
-				RangePredicateOptionsStep<?> negRange = ((SearchPredicateFactory) thePathContext)
+				// Avoid RangePredicateOptionsStep<?> type — keep as PredicateFinalStep for compatibility
+				PredicateFinalStep negRange = ((SearchPredicateFactory) thePathContext)
 						.range()
 						.field(valueFieldPath)
 						.between(range.getLeft().doubleValue(), range.getRight().doubleValue());
@@ -803,10 +647,6 @@ public class ExtendedHSearchClauseBuilder {
 			List<List<IQueryParameterType>> theCompositeAndOrTerms) {
 		for (List<IQueryParameterType> nextOrList : theCompositeAndOrTerms) {
 
-			// The index data for each extracted element is stored in a separate nested HSearch document.
-			// Create a nested parent node for all component predicates.
-			// Each can share this nested beacuse all nested docs share a parent id.
-
 			PredicateFinalStep nestedClause =
 					myRootContext.buildPredicateInNestedContext(theSearchParam.getName(), nestedContext -> {
 						List<PredicateFinalStep> orClauses = nextOrList.stream()
@@ -820,14 +660,6 @@ public class ExtendedHSearchClauseBuilder {
 		}
 	}
 
-	/**
-	 * Compute the match clause for all the components of theCompositeQueryParam.
-	 *
-	 * @param theSearchParam The composite SP
-	 * @param theSubSearchParams the composite component SPs
-	 * @param theCompositeQueryParam the query param values
-	 * @param theCompositeContext the root of the nested SP query.
-	 */
 	private PredicateFinalStep computeCompositeTermClause(
 			RuntimeSearchParam theSearchParam,
 			List<RuntimeSearchParam> theSubSearchParams,
@@ -849,10 +681,7 @@ public class ExtendedHSearchClauseBuilder {
 				theSubSearchParams.size(),
 				values.size());
 
-		// The index data for each extracted element is stored in a separate nested HSearch document.
-
-		// Create a nested parent node for all component predicates.
-		BooleanPredicateClausesStep<?> compositeClause = ((SearchPredicateFactory) theCompositeContext).bool();
+		BooleanPredicateClausesStep compositeClause = ((SearchPredicateFactory) theCompositeContext).bool();
 		for (int i = 0; i < theSubSearchParams.size(); i += 1) {
 			RuntimeSearchParam component = theSubSearchParams.get(i);
 			IQueryParameterType value = values.get(i);
@@ -878,7 +707,6 @@ public class ExtendedHSearchClauseBuilder {
 					subMatch = buildNumericClause(value, componentContext);
 					break;
 				case REFERENCE:
-
 				default:
 					break;
 			}

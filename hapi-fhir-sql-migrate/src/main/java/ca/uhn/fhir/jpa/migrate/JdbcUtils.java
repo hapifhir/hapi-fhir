@@ -29,6 +29,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.boot.model.relational.QualifiedSequenceName;
+import org.hibernate.community.dialect.CommunityDialectResolver;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.jdbc.dialect.internal.StandardDialectResolver;
 import org.hibernate.engine.jdbc.dialect.spi.DatabaseMetaDataDialectResolutionInfoAdapter;
@@ -70,8 +71,10 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.sql.DataSource;
 
-public class JdbcUtils {
+public final class JdbcUtils {
 	private static final Logger ourLog = LoggerFactory.getLogger(JdbcUtils.class);
+
+	private JdbcUtils() {}
 
 	/**
 	 * Retrieve all index names
@@ -439,6 +442,13 @@ public class JdbcUtils {
 							Dialect dialect = dialectResolver.resolveDialect(
 									new DatabaseMetaDataDialectResolutionInfoAdapter(connection.getMetaData()));
 
+							// Attempt to use the Community Resolver
+							if (dialect == null) {
+								DialectResolver communityDialectResolver = new CommunityDialectResolver();
+								dialect = communityDialectResolver.resolveDialect(
+										new DatabaseMetaDataDialectResolutionInfoAdapter(connection.getMetaData()));
+							}
+
 							List<SequenceInformation> sequenceInformation = new ArrayList<>();
 							if (dialect.getSequenceSupport().supportsSequences()) {
 
@@ -450,7 +460,7 @@ public class JdbcUtils {
 										sequenceInformationExtractor.extractMetadata(extractionContext);
 
 								return StreamSupport.stream(sequenceInformationIterator.spliterator(), false)
-										.collect(Collectors.toList());
+										.toList();
 							}
 							return sequenceInformation;
 						} catch (SQLException e) {
@@ -700,7 +710,8 @@ public class JdbcUtils {
 
 				@Override
 				public IdentifierHelper getIdentifierHelper() {
-					return new NormalizingIdentifierHelperImpl(this, null, true, true, true, true, null, null, null);
+					return new NormalizingIdentifierHelperImpl(
+							this, null, true, true, true, true, true, null, null, null);
 				}
 
 				@Override

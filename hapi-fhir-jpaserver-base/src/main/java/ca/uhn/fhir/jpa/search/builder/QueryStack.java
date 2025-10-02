@@ -403,13 +403,13 @@ public class QueryStack {
 				mySqlBuilder.addSortDate(datePredicateBuilder.getColumnValueLow(), theAscending, myUseAggregate);
 				return;
 
-				/*
-				 * Note that many of the options below aren't implemented because they
-				 * don't seem useful to me, but they could theoretically be implemented
-				 * if someone ever needed them. I'm not sure why you'd want to do a chained
-				 * sort on a target that was a reference or a quantity, but if someone needed
-				 * that we could implement it here.
-				 */
+			/*
+			 * Note that many of the options below aren't implemented because they
+			 * don't seem useful to me, but they could theoretically be implemented
+			 * if someone ever needed them. I'm not sure why you'd want to do a chained
+			 * sort on a target that was a reference or a quantity, but if someone needed
+			 * that we could implement it here.
+			 */
 			case SPECIAL: {
 				if (LOCATION_POSITION.equals(targetSearchParameter.getPath())) {
 					List<List<IQueryParameterType>> params = theParams.get(theParamName);
@@ -434,7 +434,7 @@ public class QueryStack {
 					return;
 				}
 			}
-				//noinspection fallthrough
+			//noinspection fallthrough
 			case NUMBER:
 			case REFERENCE:
 			case COMPOSITE:

@@ -20,12 +20,12 @@
 package ca.uhn.fhir.jpa.model.dialect;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import org.hibernate.dialect.DerbyDialect;
+import org.hibernate.community.dialect.DerbyDialect;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
 /**
  * Dialect for Derby database.
- * Minimum version: 10.14.2
+ * Minimum version: 10.15.2
  */
 public class HapiFhirDerbyDialect extends DerbyDialect implements IHapiFhirDialect {
 

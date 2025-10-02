@@ -280,7 +280,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 
 		// All HAPI FHIR jobs shouldn't allow concurrent execution
 		@Override
-		public boolean isConcurrentExectionDisallowed() {
+		public boolean isConcurrentExecutionDisallowed() {
 			return true;
 		}
 	}

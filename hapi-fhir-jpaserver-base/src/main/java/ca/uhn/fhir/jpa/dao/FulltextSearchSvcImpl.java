@@ -194,7 +194,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {
 		validateHibernateSearchIsEnabled();
 
-		SearchQueryOptionsStep<?, JpaPid, SearchLoadingOptionsStep, ?, ?> searchQueryOptionsStep =
+		SearchQueryOptionsStep<?, ?, JpaPid, SearchLoadingOptionsStep, ?, ?> searchQueryOptionsStep =
 				getSearchQueryOptionsStep(theResourceType, theParams, null);
 		logQuery(searchQueryOptionsStep, theRequestDetails);
 
@@ -214,7 +214,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		int count = getMaxFetchSize(theParams, theMaxResultsToFetch);
 
 		// perform an offset search instead of a scroll one, which doesn't allow for offset
-		SearchQueryOptionsStep<?, JpaPid, SearchLoadingOptionsStep, ?, ?> searchQueryOptionsStep =
+		SearchQueryOptionsStep<?, ?, JpaPid, SearchLoadingOptionsStep, ?, ?> searchQueryOptionsStep =
 				getSearchQueryOptionsStep(theResourceType, theParams, theReferencingPid);
 		logQuery(searchQueryOptionsStep, theRequestDetails);
 		List<JpaPid> longs = searchQueryOptionsStep.fetchHits(offset, count);
@@ -238,11 +238,11 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private SearchQueryOptionsStep<?, JpaPid, SearchLoadingOptionsStep, ?, ?> getSearchQueryOptionsStep(
+	private SearchQueryOptionsStep<?, ?, JpaPid, SearchLoadingOptionsStep, ?, ?> getSearchQueryOptionsStep(
 			String theResourceType, SearchParameterMap theParams, IResourcePersistentId theReferencingPid) {
 
 		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
-		SearchQueryOptionsStep<?, JpaPid, SearchLoadingOptionsStep, ?, ?> query = getSearchSession()
+		SearchQueryOptionsStep<?, ?, JpaPid, SearchLoadingOptionsStep, ?, ?> query = getSearchSession()
 				.search(ResourceTable.class)
 				// The document id is the PK which is pid.  We use this instead of _myId to avoid fetching the doc body.
 				.select(
@@ -536,7 +536,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Override
 	public long count(String theResourceName, SearchParameterMap theParams) {
-		SearchQueryOptionsStep<?, JpaPid, SearchLoadingOptionsStep, ?, ?> queryOptionsStep =
+		SearchQueryOptionsStep<?, ?, JpaPid, SearchLoadingOptionsStep, ?, ?> queryOptionsStep =
 				getSearchQueryOptionsStep(theResourceName, theParams, null);
 
 		return queryOptionsStep.fetchTotalHitCount();

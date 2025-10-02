@@ -520,29 +520,42 @@
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
 				<version>${project.version}</version>
-				<executions><execution><id>generate-ddl-legacy</id>
-					<phase>process-classes</phase>
-				<goals>
-					<goal>generate-ddl</goal>
-				</goals>
-					<configuration>
-						<databasePartitionMode>false</databasePartitionMode>
-						<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/nonpartitioned</outputDirectory>
-					</configuration>
-				</execution>
-				<execution>
-					<id>generate-ddl-partitioned</id>
-					<phase>process-classes</phase>
-				<goals>
-					<goal>generate-ddl</goal>
-				</goals>
-					<configuration>
-						<databasePartitionMode>true</databasePartitionMode>
-						<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/partitioned</outputDirectory>
-					</configuration>
-				</execution>
+				<executions>
+					<execution>
+						<id>generate-ddl-legacy</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>generate-ddl</goal>
+						</goals>
+						<configuration>
+							<databasePartitionMode>false</databasePartitionMode>
+							<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/nonpartitioned</outputDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate-ddl-partitioned</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>generate-ddl</goal>
+						</goals>
+						<configuration>
+							<databasePartitionMode>true</databasePartitionMode>
+							<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/partitioned</outputDirectory>
+						</configuration>
+					</execution>
 				</executions>
 				<configuration>
+					<fileName/>
+					<package/>
+					<packageName/>
+					<packageName/>
+					<targetDirectory/>
+					<version/>
+					<fhirVersion/>
+					<configPackageBase/>
+					<packageBase/>
+					<targetResourceSpringBeansFile/>
+					<baseResourceNames/>
 					<packageNames>
 						<packageName>ca.uhn.fhir.jpa.entity</packageName>
 						<packageName>ca.uhn.fhir.jpa.model.entity</packageName>
