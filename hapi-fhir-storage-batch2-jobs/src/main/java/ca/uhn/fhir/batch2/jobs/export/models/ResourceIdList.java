@@ -22,6 +22,7 @@ package ca.uhn.fhir.batch2.jobs.export.models;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ResourceIdList extends BulkExportJobBase {
@@ -36,11 +37,18 @@ public class ResourceIdList extends BulkExportJobBase {
 	private String myResourceType;
 
 	public List<TypedPidJson> getIds() {
+		if (myBatchResourceIds == null) {
+			myBatchResourceIds = new ArrayList<>();
+		}
 		return myBatchResourceIds;
 	}
 
 	public void setIds(List<TypedPidJson> theBatchResourceIds) {
 		myBatchResourceIds = theBatchResourceIds;
+	}
+
+	public void addId(TypedPidJson theTypedPidJson) {
+		getIds().add(theTypedPidJson);
 	}
 
 	public String getResourceType() {

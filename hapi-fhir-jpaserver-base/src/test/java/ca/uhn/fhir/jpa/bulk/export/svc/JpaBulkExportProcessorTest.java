@@ -273,8 +273,6 @@ public class JpaBulkExportProcessorTest {
 			pids.add(JpaPid.fromId(type.getIdPartAsLong()));
 		}
 
-
-
 		parameters.setExpandMdm(theMdm); // set mdm expansion
 		parameters.setPartitionId(getPartitionIdFromParams(thePartitioned));
 
@@ -327,7 +325,6 @@ public class JpaBulkExportProcessorTest {
 		} else {
 			assertEquals(RequestPartitionId.allPartitions(), thePartitionId);
 		}
-
 	}
 
 	// source is: "isExpandMdm,(whether or not to test on a specific partition)

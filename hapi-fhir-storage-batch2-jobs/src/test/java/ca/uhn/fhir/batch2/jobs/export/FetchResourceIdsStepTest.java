@@ -6,14 +6,11 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
+import ca.uhn.fhir.batch2.jobs.export.svc.BulkExportIdFetchingSvc;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.rest.api.IResourceSupportedSvc;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -36,13 +33,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -57,20 +53,14 @@ public class FetchResourceIdsStepTest {
 	private ListAppender<ILoggingEvent> myAppender;
 
 	@Mock
-	private IBulkExportProcessor<JpaPid> myBulkExportProcessor;
+	private BulkExportIdFetchingSvc myBulkExportIdFetchingSvc;
 
 	@InjectMocks
 	private FetchResourceIdsStep myFirstStep;
-	@Mock
-	private JpaStorageSettings myStorageSettings;
-
-	@Mock
-	private IResourceSupportedSvc myResourceSupportedSvc;
 
 	@BeforeEach
 	public void init() {
 		ourLog.addAppender(myAppender);
-		myFirstStep.setBulkExportProcessorForUnitTest(myBulkExportProcessor);
 	}
 
 	@AfterEach
@@ -112,31 +102,48 @@ public class FetchResourceIdsStepTest {
 		instance.setInstanceId("1");
 		StepExecutionDetails<BulkExportJobParameters, VoidModel> input = createInput(parameters, instance);
 		ourLog.setLevel(Level.INFO);
-		List<JpaPid> patientIds = new ArrayList<>();
-		List<JpaPid> observationIds = new ArrayList<>();
+//		List<JpaPid> patientIds = new ArrayList<>();
+//		List<JpaPid> observationIds = new ArrayList<>();
+		ResourceIdList patientIds = new ResourceIdList();
+		patientIds.setResourceType("Patient");
+		ResourceIdList observationIds = new ResourceIdList();
+		observationIds.setResourceType("Observation");
 
 		{
-			JpaPid id1 = JpaPid.fromId(123L);
-			JpaPid id2 = JpaPid.fromId(234L);
-			patientIds.add(id1);
-			patientIds.add(id2);
+//			JpaPid id1 = JpaPid.fromId(123L);
+//			JpaPid id2 = JpaPid.fromId(234L);
+//			patientIds.add(id1);
+//			patientIds.add(id2);
+			List<TypedPidJson> pids = new ArrayList<>();
+			pids.add(new TypedPidJson("Patient", null, "123"));
+			pids.add(new TypedPidJson("Patient", null, "234"));
+			patientIds.setIds(pids);
 		}
 		{
-			JpaPid id1 = JpaPid.fromId(345L);
-			JpaPid id2 = JpaPid.fromId(456L);
-			observationIds.add(id1);
-			observationIds.add(id2);
+//			JpaPid id1 = JpaPid.fromId(345L);
+//			JpaPid id2 = JpaPid.fromId(456L);
+//			observationIds.add(id1);
+//			observationIds.add(id2);
+			observationIds.addId(new TypedPidJson("Observation", null, "345"));
+			observationIds.addId(new TypedPidJson("Observation", null, "456"));
 		}
 
 		// when
-		when(myResourceSupportedSvc.isSupported(anyString())).thenReturn(true);
-		when(myBulkExportProcessor.getResourcePidIterator(
-			any(ExportPIDIteratorParameters.class)
-		)).thenReturn(patientIds.iterator())
-			.thenReturn(observationIds.iterator());
+//		when(myResourceSupportedSvc.isSupported(anyString())).thenReturn(true);
+//		when(myBulkExportProcessor.getResourcePidIterator(
+//			any(ExportPIDIteratorParameters.class)
+//		)).thenReturn(patientIds.iterator())
+//			.thenReturn(observationIds.iterator());
+		when(myBulkExportIdFetchingSvc.fetchIds(any(ExportPIDIteratorParameters.class), any(Consumer.class)))
+			.thenAnswer(args -> {
+				Consumer<ResourceIdList> consumer = args.getArgument(1);
+				consumer.accept(patientIds);
+				consumer.accept(observationIds);
+				return parameters.getResourceTypes().size();
+			});
 		int maxFileCapacity = 1000;
-		when(myStorageSettings.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
-		when(myStorageSettings.getBulkExportFileMaximumSize()).thenReturn(10000L);
+//		when(myStorageSettings.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
+//		when(myStorageSettings.getBulkExportFileMaximumSize()).thenReturn(10000L);
 
 		// test
 		RunOutcome outcome = myFirstStep.run(input, sink);
@@ -154,10 +161,10 @@ public class FetchResourceIdsStepTest {
 			assertThat(parameters.getResourceTypes()).contains(resourceType);
 
 			if (resourceType.equals("Patient")) {
-				assertThat(idList.getIds()).hasSize(patientIds.size());
+				assertThat(idList.getIds()).hasSize(patientIds.getIds().size());
 			}
 			else if (resourceType.equals("Observation")) {
-				assertThat(idList.getIds()).hasSize(observationIds.size());
+				assertThat(idList.getIds()).hasSize(observationIds.getIds().size());
 			}
 			else {
 				// we shouldn't have others
@@ -169,17 +176,9 @@ public class FetchResourceIdsStepTest {
 		verify(myAppender, atLeastOnce()).doAppend(logCaptor.capture());
 		List<ILoggingEvent> events = logCaptor.getAllValues();
 		assertThat(events.get(0).getMessage()).contains("Fetching resource IDs for bulk export job instance");
-		assertThat(events.get(1).getMessage()).contains("Running FetchResource");
-		assertThat(events.get(2).getMessage()).contains("Running FetchResource");
-		assertThat(events.get(3).getFormattedMessage()).contains("Submitted "
+		assertThat(events.get(1).getFormattedMessage()).contains("Submitted "
 			+ parameters.getResourceTypes().size()
 			+ " groups of ids for processing");
-
-		ArgumentCaptor<ExportPIDIteratorParameters> mapppedParamsCaptor = ArgumentCaptor.forClass(ExportPIDIteratorParameters.class);
-		verify(myBulkExportProcessor, times(2)).getResourcePidIterator(mapppedParamsCaptor.capture());
-		List<ExportPIDIteratorParameters> capturedParameters = mapppedParamsCaptor.getAllValues();
-		assertEquals(parameters.getPartitionId(), capturedParameters.get(0).getPartitionIdOrAllPartitions());
-		assertEquals(parameters.getPartitionId(), capturedParameters.get(1).getPartitionIdOrAllPartitions());
 	}
 
 	@Test
@@ -192,24 +191,31 @@ public class FetchResourceIdsStepTest {
 		parameters.setResourceTypes(Collections.singletonList("Patient"));
 		StepExecutionDetails<BulkExportJobParameters, VoidModel> input = createInput(parameters, instance);
 		ourLog.setLevel(Level.INFO);
-		List<JpaPid> patientIds = new ArrayList<>();
+//		List<JpaPid> patientIds = new ArrayList<>();
+		List<TypedPidJson> patientIds = new ArrayList<>();
 
 		// when
 		int maxFileCapacity = 5;
-		when(myStorageSettings.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
-		when(myStorageSettings.getBulkExportFileMaximumSize()).thenReturn(10000L);
-		when(myResourceSupportedSvc.isSupported(anyString())).thenReturn(true);
+//		when(myStorageSettings.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
+//		when(myStorageSettings.getBulkExportFileMaximumSize()).thenReturn(10000L);
+//		when(myResourceSupportedSvc.isSupported(anyString())).thenReturn(true);
 
-
+		ResourceIdList list = new ResourceIdList();
+		list.setResourceType("Patient");
 		for (int i = 0; i <= maxFileCapacity; i++) {
-			JpaPid id = JpaPid.fromId((long) i);
-			patientIds.add(id);
+			patientIds.add(new TypedPidJson("Patient", null, Long.toString(i)));
 		}
 
 		// when
-		when(myBulkExportProcessor.getResourcePidIterator(
-			any(ExportPIDIteratorParameters.class)
-		)).thenReturn(patientIds.iterator());
+//		when(myBulkExportProcessor.getResourcePidIterator(
+//			any(ExportPIDIteratorParameters.class)
+//		)).thenReturn(patientIds.iterator());
+		when(myBulkExportIdFetchingSvc.fetchIds(any(ExportPIDIteratorParameters.class), any(Consumer.class)))
+			.thenAnswer(args -> {
+				Consumer<ResourceIdList> consumer = args.getArgument(1);
+				consumer.accept(list);
+				return 1;
+			});
 
 		// test
 		RunOutcome outcome = myFirstStep.run(input, sink);
@@ -218,22 +224,27 @@ public class FetchResourceIdsStepTest {
 		ArgumentCaptor<ResourceIdList> captor = ArgumentCaptor.forClass(ResourceIdList.class);
 		assertEquals(RunOutcome.SUCCESS, outcome);
 
-		verify(sink, times(2))
-			.accept(captor.capture());
-		List<ResourceIdList> listIds = captor.getAllValues();
+		verify(sink).accept(captor.capture());
+		List<ResourceIdList> listids = captor.getAllValues();
+		assertEquals(1, listids.size());
+		assertEquals(list, listids.get(0));
 
-		// verify all submitted ids are there
-		boolean found = false;
-		for (JpaPid pid : patientIds) {
-			TypedPidJson batchResourceId = new TypedPidJson("Patient", pid);
-			for (ResourceIdList idList : listIds) {
-				found = idList.getIds().contains(batchResourceId);
-				if (found) {
-					break;
-				}
-			}
-			assertTrue(found);
-			found = false;
-		}
+//		verify(sink, times(2))
+//			.accept(captor.capture());
+//		List<ResourceIdList> listIds = captor.getAllValues();
+//
+//		// verify all submitted ids are there
+//		boolean found = false;
+//		for (JpaPid pid : patientIds) {
+//			TypedPidJson batchResourceId = new TypedPidJson("Patient", pid);
+//			for (ResourceIdList idList : listIds) {
+//				found = idList.getIds().contains(batchResourceId);
+//				if (found) {
+//					break;
+//				}
+//			}
+//			assertTrue(found);
+//			found = false;
+//		}
 	}
 }
