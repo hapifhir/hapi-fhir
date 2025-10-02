@@ -215,6 +215,10 @@ public class JpaConstants {
 	 * Parameter for the $export operation
 	 */
 	public static final String PARAM_EXPORT_PATIENT = "patient";
+	/**
+	 * Parameter for the $export operation
+	 */
+	public static final String PARAM_EXPORT_INCLUDE_HISTORY = "_includeHistory";
 
 	/**
 	 * Parameter for the $import operation
