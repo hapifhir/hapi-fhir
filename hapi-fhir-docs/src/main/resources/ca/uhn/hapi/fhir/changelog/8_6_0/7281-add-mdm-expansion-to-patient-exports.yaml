@@ -1,0 +1,7 @@
+---
+type: add
+issue: 7281
+title: "Added MDM expansion support to bulk export jobs.
+        The version of the bulk export job has been updated
+        to accommodate this.
+"
