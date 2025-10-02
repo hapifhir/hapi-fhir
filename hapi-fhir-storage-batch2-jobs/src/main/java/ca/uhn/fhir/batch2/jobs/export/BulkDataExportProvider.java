@@ -282,8 +282,7 @@ public class BulkDataExportProvider {
 				theTypePostFetchFilterUrl,
 				patientIds,
 				theMdm,
-				theIncludeHistory
-			);
+				theIncludeHistory);
 	}
 
 	/**
