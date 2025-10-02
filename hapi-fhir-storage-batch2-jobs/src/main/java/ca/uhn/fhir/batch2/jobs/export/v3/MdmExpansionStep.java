@@ -40,8 +40,8 @@ public class MdmExpansionStep implements IFirstJobStepWorker<BulkExportJobParame
 		BulkExportJobParameters jobParameters = theStepExecutionDetails.getParameters();
 
 		ourLog.info(
-			"Doing MDM expansion for bulk export job instance[{}]",
-			theStepExecutionDetails.getInstance().getInstanceId());
+				"Doing MDM expansion for bulk export job instance[{}]",
+				theStepExecutionDetails.getInstance().getInstanceId());
 
 		ExpandPatientIdsParams params = new ExpandPatientIdsParams(jobParameters.getExportStyle());
 		params.setToDoMdmExpansion(jobParameters.isExpandMdm());
@@ -56,14 +56,13 @@ public class MdmExpansionStep implements IFirstJobStepWorker<BulkExportJobParame
 		Set<IResourcePersistentId<?>> resourcePersistentIdSet = myBulkExportProcessor.expandPatientIdList(params);
 
 		MdmExpandedPatientIds expandedPatientIds = new MdmExpandedPatientIds();
-		expandedPatientIds.setExpandedPatientIds(resourcePersistentIdSet.stream()
-			.map(PatientIdAndPidJson::new)
-			.collect(Collectors.toList()));
+		expandedPatientIds.setExpandedPatientIds(
+				resourcePersistentIdSet.stream().map(PatientIdAndPidJson::new).collect(Collectors.toList()));
 		theDataSink.accept(expandedPatientIds);
 
 		ourLog.info(
-			"MDM expansion performed generating {} ids",
-			expandedPatientIds.getExpandedPatientIds().size());
+				"MDM expansion performed generating {} ids",
+				expandedPatientIds.getExpandedPatientIds().size());
 
 		return RunOutcome.SUCCESS;
 	}
