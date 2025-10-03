@@ -431,19 +431,17 @@ public abstract class BaseClient implements IRestfulClient {
 			}
 
 			try (InputStream inputStream = response.readEntity()) {
-				InputStream inputStreamToReturn = inputStream;
+				InputStream inputStreamToReturn;
 
-				if (ourLog.isTraceEnabled() || myKeepResponses || theLogRequestAndResponse) {
-					if (inputStream != null) {
+				if (inputStream != null) {
+					if (ourLog.isTraceEnabled() || myKeepResponses || theLogRequestAndResponse) {
 						String responseString = IOUtils.toString(inputStream, Charsets.UTF_8);
 						keepResponseAndLogIt(theLogRequestAndResponse, response, responseString);
 						inputStreamToReturn = new ByteArrayInputStream(responseString.getBytes(Charsets.UTF_8));
+					} else {
+						inputStreamToReturn = new ByteArrayInputStream(inputStream.readAllBytes());
 					}
 				} else {
-					inputStreamToReturn = new ByteArrayInputStream(inputStream.readAllBytes());
-				}
-
-				if (inputStreamToReturn == null) {
 					inputStreamToReturn = new ByteArrayInputStream(new byte[] {});
 				}
 
