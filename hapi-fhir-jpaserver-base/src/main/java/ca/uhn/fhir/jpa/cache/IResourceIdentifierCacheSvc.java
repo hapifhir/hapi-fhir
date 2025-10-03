@@ -25,11 +25,25 @@ import jakarta.annotation.Nonnull;
 
 import java.util.function.Supplier;
 
+/**
+ * This service manages a partition-independent cache of resource identifiers.
+ *
+ * @since 8.6.0
+ */
 public interface IResourceIdentifierCacheSvc {
 
 	/**
 	 * Retrieves (and creates if necessary) the PID associated with the
 	 * given identifier system URL.
+	 * <p>
+	 * Thread-safety: This method is designed to be thread-safe, including in cases where
+	 * multiple threads are attempting to create a new FHIR ID for the same identifier system.
+	 * It will internally retry automatically if multiple threads attempt to create a new
+	 * identifier system and will not fail in this case.
+	 * </p>
+	 * <p>
+	 * Transactionality: This method will open a new transaction if one is not already open.
+	 * </p>
 	 *
 	 * @param theSystem The <code>Identifier.system</code> value
 	 */
@@ -39,9 +53,16 @@ public interface IResourceIdentifierCacheSvc {
 	/**
 	 * Retrieves the FHIR ID assimilated with the given Patient identifier, creating a new
 	 * record using the given Supplier if no existing record is found. This method enforces
-	 * uniqueness on the identifier using a database constraint, and will therefore only allow
+	 * uniqueness on the identifier using a database constraint and will therefore only allow
 	 * one FHIR ID to be associated with one Identifier. No uniqueness is enforced on the FHIR
 	 * ID.
+	 * <p>
+	 * Thread safety: This method will fail with a constraint error if multiple threads
+	 * attempt to assign a FHIR ID for the same system+value combination concurrently.
+	 * </p>
+	 * <p>
+	 * Transactionality: This method will open a new transaction if one is not already open.
+	 * </p>
 	 *
 	 * @param theSystem        The <code>Identifier.system</code> value
 	 * @param theValue         The <code>Identifier.value</code> value

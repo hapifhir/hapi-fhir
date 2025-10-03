@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.SleepUtil;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.Validate;
@@ -128,6 +129,7 @@ public class ResourceIdentifierCacheSvcImpl implements IResourceIdentifierCacheS
 		return pid;
 	}
 
+	@Nonnull
 	@Override
 	public String getFhirIdAssociatedWithUniquePatientIdentifier(
 			RequestDetails theRequestDetails,
