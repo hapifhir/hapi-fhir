@@ -134,6 +134,8 @@ public class BulkDataExportProvider {
 					List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportId,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_INCLUDE_HISTORY, min = 0, max = 1, typeName = "boolean")
+					IPrimitiveType<Boolean> theIncludeHistory,
 			ServletRequestDetails theRequestDetails) {
 		// JPA export provider
 		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
@@ -147,6 +149,7 @@ public class BulkDataExportProvider {
 				.exportIdentifier(theExportId)
 				.exportStyle(ExportStyle.SYSTEM)
 				.postFetchFilterUrl(theTypePostFetchFilterUrl)
+				.includeHistory(theIncludeHistory)
 				.build();
 
 		getBulkDataExportJobService().startJob(theRequestDetails, bulkExportJobParameters);
@@ -187,6 +190,8 @@ public class BulkDataExportProvider {
 					IPrimitiveType<Boolean> theMdm,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_INCLUDE_HISTORY, min = 0, max = 1, typeName = "boolean")
+					IPrimitiveType<Boolean> theIncludeHistory,
 			ServletRequestDetails theRequestDetails) {
 		ourLog.debug("Received Group Bulk Export Request for Group {}", theIdParam);
 		ourLog.debug("_type={}", theType);
@@ -211,6 +216,7 @@ public class BulkDataExportProvider {
 				.postFetchFilterUrl(theTypePostFetchFilterUrl)
 				.groupId(theIdParam)
 				.expandMdm(theMdm)
+				.includeHistory(theIncludeHistory)
 				.build();
 
 		getBulkDataExportSupport().validateOrDefaultResourceTypesForGroupBulkExport(bulkExportJobParameters);
@@ -256,6 +262,8 @@ public class BulkDataExportProvider {
 					List<IBase> thePatient,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_INCLUDE_HISTORY, min = 0, max = 1, typeName = "boolean")
+					IPrimitiveType<Boolean> theIncludeHistory,
 			ServletRequestDetails theRequestDetails) {
 
 		final List<IPrimitiveType<String>> patientIds =
@@ -270,7 +278,8 @@ public class BulkDataExportProvider {
 				theExportIdentifier,
 				theTypeFilter,
 				theTypePostFetchFilterUrl,
-				patientIds);
+				patientIds,
+				theIncludeHistory);
 	}
 
 	/**
@@ -305,6 +314,8 @@ public class BulkDataExportProvider {
 					List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_INCLUDE_HISTORY, min = 0, max = 1, typeName = "boolean")
+					IPrimitiveType<Boolean> theIncludeHistory,
 			ServletRequestDetails theRequestDetails) {
 
 		// call the type-level export to ensure spec compliance
@@ -317,6 +328,7 @@ public class BulkDataExportProvider {
 				theTypePostFetchFilterUrl,
 				List.of(theIdParam),
 				theExportIdentifier,
+				theIncludeHistory,
 				theRequestDetails);
 	}
 
@@ -358,7 +370,8 @@ public class BulkDataExportProvider {
 			IPrimitiveType<String> theExportIdentifier,
 			List<IPrimitiveType<String>> theTypeFilter,
 			List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
-			List<IPrimitiveType<String>> thePatientIds) {
+			List<IPrimitiveType<String>> thePatientIds,
+			IPrimitiveType<Boolean> theIncludeHistory) {
 		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		getBulkDataExportSupport()
@@ -385,6 +398,7 @@ public class BulkDataExportProvider {
 				.exportStyle(ExportStyle.PATIENT)
 				.postFetchFilterUrl(theTypePostFetchFilterUrl)
 				.patientIds(thePatientIds)
+				.includeHistory(theIncludeHistory)
 				.build();
 
 		getBulkDataExportSupport()

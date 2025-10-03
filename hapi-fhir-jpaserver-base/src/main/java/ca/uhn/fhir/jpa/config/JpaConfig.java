@@ -58,6 +58,7 @@ import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.JpaBulkDataExportHistoryHelper;
 import ca.uhn.fhir.jpa.dao.JpaDaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.JpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
@@ -125,6 +126,7 @@ import ca.uhn.fhir.jpa.sched.HapiSchedulerServiceImpl;
 import ca.uhn.fhir.jpa.search.ISynchronousSearchSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
+import ca.uhn.fhir.jpa.search.PersistedJpaIdSearchBundleProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.search.SearchStrategyFactory;
@@ -198,6 +200,7 @@ import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.replacereferences.UndoReplaceReferencesSvc;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.IBulkDataExportHistoryHelper;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
@@ -209,6 +212,7 @@ import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.IMetaTagSorter;
 import ca.uhn.fhir.util.MetaTagSorterAlphabetical;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
@@ -231,6 +235,7 @@ import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.Date;
+import java.util.List;
 
 @Configuration
 // repositoryFactoryBeanClass: EnversRevisionRepositoryFactoryBean is needed primarily for unit testing
@@ -256,9 +261,11 @@ public class JpaConfig {
 	public static final String GRAPHQL_PROVIDER_NAME = "myGraphQLProvider";
 	public static final String PERSISTED_JPA_BUNDLE_PROVIDER = "PersistedJpaBundleProvider";
 	public static final String PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH = "PersistedJpaBundleProvider_BySearch";
+	public static final String PERSISTED_JPA_ID_SEARCH_BUNDLE_PROVIDER = "PersistedJpaIdSearchBundleProvider";
 	public static final String PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER =
 			"PersistedJpaSearchFirstPageBundleProvider";
 	public static final String HISTORY_BUILDER = "HistoryBuilder";
+	public static final String HISTORY_BUILDER_WITH_IDS = "HistoryBuilderWithIds";
 	public static final String DEFAULT_PROFILE_VALIDATION_SUPPORT = "myDefaultProfileValidationSupport";
 	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
 
@@ -689,10 +696,22 @@ public class JpaConfig {
 	public PersistedJpaSearchFirstPageBundleProvider newPersistedJpaSearchFirstPageBundleProvider(
 			RequestDetails theRequest,
 			SearchTask theSearchTask,
-			ISearchBuilder theSearchBuilder,
+			ISearchBuilder<?> theSearchBuilder,
 			RequestPartitionId theRequestPartitionId) {
 		return new PersistedJpaSearchFirstPageBundleProvider(
 				theSearchTask, theSearchBuilder, theRequest, theRequestPartitionId);
+	}
+
+	@Bean(name = PERSISTED_JPA_ID_SEARCH_BUNDLE_PROVIDER)
+	@Scope("prototype")
+	public PersistedJpaIdSearchBundleProvider newPersistedJpaIdSearchBundleProvider(
+			String theResourceType,
+			List<String> theResourceIds,
+			RequestPartitionId thePartitionId,
+			@Nullable Date theRangeStartInclusive,
+			@Nonnull Date theRangeEndInclusive) {
+		return new PersistedJpaIdSearchBundleProvider(
+				theResourceType, theResourceIds, thePartitionId, theRangeStartInclusive, theRangeEndInclusive);
 	}
 
 	@Bean(name = RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER)
@@ -824,6 +843,16 @@ public class JpaConfig {
 			@Nullable Date theRangeStartInclusive,
 			@Nullable Date theRangeEndInclusive) {
 		return new HistoryBuilder(theResourceType, theResourceId, theRangeStartInclusive, theRangeEndInclusive);
+	}
+
+	@Bean(name = HISTORY_BUILDER_WITH_IDS)
+	@Scope("prototype")
+	public HistoryBuilder newHistoryBuilderWithIds(
+			@Nonnull String theResourceType,
+			@Nonnull List<String> theResourceIds,
+			@Nullable Date theRangeStartInclusive,
+			@Nonnull Date theRangeEndInclusive) {
+		return new HistoryBuilder(theResourceType, theResourceIds, theRangeStartInclusive, theRangeEndInclusive);
 	}
 
 	@Bean
@@ -1077,5 +1106,10 @@ public class JpaConfig {
 			HibernatePropertiesProvider theHibernatePropertiesProvider,
 			PlatformTransactionManager theTxManager) {
 		return new PartitionedIdModeVerificationSvc(thePartitionSettings, theHibernatePropertiesProvider, theTxManager);
+	}
+
+	@Bean
+	public IBulkDataExportHistoryHelper bulkDataExportHistoryHelper() {
+		return new JpaBulkDataExportHistoryHelper();
 	}
 }
