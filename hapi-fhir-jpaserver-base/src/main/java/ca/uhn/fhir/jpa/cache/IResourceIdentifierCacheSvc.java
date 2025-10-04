@@ -51,7 +51,7 @@ public interface IResourceIdentifierCacheSvc {
 			RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, String theSystem);
 
 	/**
-	 * Retrieves the FHIR ID assimilated with the given Patient identifier, creating a new
+	 * Retrieves the FHIR ID associated with the given Patient identifier, creating a new
 	 * record using the given Supplier if no existing record is found. This method enforces
 	 * uniqueness on the identifier using a database constraint and will therefore only allow
 	 * one FHIR ID to be associated with one Identifier. No uniqueness is enforced on the FHIR
