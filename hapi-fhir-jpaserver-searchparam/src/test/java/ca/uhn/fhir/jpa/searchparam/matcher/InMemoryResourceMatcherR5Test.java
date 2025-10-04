@@ -481,8 +481,8 @@ public class InMemoryResourceMatcherR5Test {
 		}
 
 		@Bean
-		MatchUrlService matchUrlService() {
-			return new MatchUrlService();
+		MatchUrlService matchUrlService(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRegistry) {
+			return new MatchUrlService(theFhirContext, theSearchParamRegistry);
 		}
 
 		@Bean

@@ -54,6 +54,8 @@ import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
+import ca.uhn.fhir.jpa.model.entity.ResourceIdentifierPatientUniqueEntity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIdentifierSystemEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
@@ -167,6 +169,8 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 				});
 		counter.addAndGet(
 				expungeEverythingByTypeWithoutPurging(theRequest, Batch2WorkChunkEntity.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
+				theRequest, ResourceIdentifierPatientUniqueEntity.class, requestPartitionId));
 		counter.addAndGet(
 				expungeEverythingByTypeWithoutPurging(theRequest, Batch2JobInstanceEntity.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
@@ -237,6 +241,8 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 						myEntityManager.merge(next);
 					}
 				});
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
+				theRequest, ResourceIdentifierSystemEntity.class, requestPartitionId));
 		counter.addAndGet(
 				expungeEverythingByTypeWithoutPurging(theRequest, TermCodeSystemVersion.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, TermCodeSystem.class, requestPartitionId));

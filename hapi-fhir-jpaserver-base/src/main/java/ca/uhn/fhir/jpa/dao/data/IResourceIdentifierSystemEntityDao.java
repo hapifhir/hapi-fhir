@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA - Search Parameters
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -17,15 +17,17 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.cache;
+package ca.uhn.fhir.jpa.dao.data;
 
-public interface ISearchParamIdentityCacheSvc {
+import ca.uhn.fhir.jpa.model.entity.ResourceIdentifierSystemEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-	/**
-	 * Are any database actions currently pending from this service? This is mostly
-	 * provided as a convenience for unit tests
-	 */
-	boolean hasInFlightTasks();
+import java.util.Optional;
 
-	void findOrCreateSearchParamIdentity(Long theHashIdentity, String theResourceType, String theParamName);
+public interface IResourceIdentifierSystemEntityDao extends JpaRepository<ResourceIdentifierSystemEntity, Long> {
+
+	@Query("SELECT i.myPid FROM ResourceIdentifierSystemEntity i WHERE i.mySystem = :system")
+	Optional<Long> findBySystemUrl(@Param("system") String theSystemUrl);
 }

@@ -28,6 +28,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleUtil;
@@ -59,6 +60,7 @@ import java.util.Map;
 @SuppressWarnings("ClassCanBeRecord")
 public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 
+	public static final Object EMPTY_OBJECT = new Object();
 	private final RequestDetails myRequestDetails;
 	private final boolean myNestedMode;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -89,6 +91,17 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 	 * bundle into partitions, execute each slice, and aggregate the results.
 	 */
 	public BUNDLE execute(BUNDLE theRequest) {
+
+		// Stash a copy of the entries in the bundle before we call the hook, so we
+		// can check later that the hook didn't make any illegal changes
+		IdentityHashMap<IBase, Object> originalEntrySet = new IdentityHashMap<>();
+		FhirTerser terser = myFhirContext.newTerser();
+		List<IBase> originalEntries = terser.getValues(theRequest, "entry");
+		for (IBase theOriginalEntry : originalEntries) {
+			originalEntrySet.put(theOriginalEntry, EMPTY_OBJECT);
+		}
+
+		// Invoke the hook method
 		HookParams hookParams = new HookParams()
 				.add(RequestDetails.class, myRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, myRequestDetails)
@@ -98,10 +111,31 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 						Pointcut.STORAGE_TRANSACTION_PRE_PARTITION, hookParams);
 		Validate.isTrue(
 				partitionResponse != null
-						&& partitionResponse.splitBundles() != null
-						&& !partitionResponse.splitBundles().isEmpty(),
+						&& partitionResponse.getSplitBundles() != null
+						&& !partitionResponse.getSplitBundles().isEmpty(),
 				"Hook for pointcut STORAGE_TRANSACTION_PRE_PARTITION did not return a value");
-		List<IBaseBundle> partitionRequestBundles = partitionResponse.splitBundles();
+		List<IBaseBundle> partitionRequestBundles = partitionResponse.getSplitBundles();
+
+		// Verify that the hook didn't modify the original bundle
+		List<IBase> originalEntriesAfter = terser.getValues(theRequest, "entry");
+		Validate.isTrue(
+				originalEntries.equals(originalEntriesAfter),
+				"Interceptor for Pointcut %s must not make changes to the original bundle",
+				Pointcut.STORAGE_TRANSACTION_PRE_PARTITION);
+
+		// Verify that the output has only entries appropriate to the input
+		for (IBaseBundle outputBundle : partitionRequestBundles) {
+			for (IBase outputBundleEntry : terser.getValues(outputBundle, "entry")) {
+				Validate.isTrue(
+						originalEntrySet.remove(outputBundleEntry) != null,
+						"Interceptor for Pointcut %s must not return Bundles containing duplicates or entries which were not present in the original Bundle",
+						Pointcut.STORAGE_TRANSACTION_PRE_PARTITION);
+			}
+		}
+		Validate.isTrue(
+				originalEntrySet.isEmpty(),
+				"Interceptor for Pointcut %s must include all entries from the original Bundle in the partitioned Bundles",
+				Pointcut.STORAGE_TRANSACTION_PRE_PARTITION);
 
 		return processPartitionedBundles(theRequest, partitionRequestBundles);
 	}
@@ -139,6 +173,7 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 			}
 		}
 
+		TransactionDetails transactionDetails = new TransactionDetails();
 		Map<String, IIdType> idSubstitutions = new HashMap<>();
 		for (IBaseBundle singlePartitionRequest : partitionedRequests) {
 
@@ -155,7 +190,7 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 			}
 
 			IBaseBundle singlePartitionResponse = myTransactionProcessor.processTransactionAsSubRequest(
-					myRequestDetails, singlePartitionRequest, myActionName, myNestedMode);
+					myRequestDetails, transactionDetails, singlePartitionRequest, myActionName, myNestedMode);
 
 			// Capture any placeholder ID substitutions from this partition
 			TransactionUtil.TransactionResponse singlePartitionResponseParsed =
