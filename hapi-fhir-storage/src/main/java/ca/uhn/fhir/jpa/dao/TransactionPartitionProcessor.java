@@ -128,7 +128,7 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 			for (IBase outputBundleEntry : terser.getValues(outputBundle, "entry")) {
 				Validate.isTrue(
 						originalEntrySet.remove(outputBundleEntry) != null,
-						"Interceptor for Pointcut %s must return Bundles containing duplicates or entries which were not present in the original Bundle",
+						"Interceptor for Pointcut %s must not return Bundles containing duplicates or entries which were not present in the original Bundle",
 						Pointcut.STORAGE_TRANSACTION_PRE_PARTITION);
 			}
 		}
