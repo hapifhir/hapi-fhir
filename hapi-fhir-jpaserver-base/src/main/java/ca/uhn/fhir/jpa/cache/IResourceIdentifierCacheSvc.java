@@ -45,7 +45,10 @@ public interface IResourceIdentifierCacheSvc {
 	 * Transactionality: This method will open a new transaction if one is not already open.
 	 * </p>
 	 *
+	 * @param theRequestDetails The request details associated with the current request
+	 * @param theRequestPartitionId The partition ID associated with the current request
 	 * @param theSystem The <code>Identifier.system</code> value
+	 * @return Returns a PID associated with the given identifier system URL.
 	 */
 	long getOrCreateResourceIdentifierSystem(
 			RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, String theSystem);

@@ -46,7 +46,7 @@ public class ResourceIdentifierCacheSvcImpl implements IResourceIdentifierCacheS
 	private final IResourceIdentifierSystemEntityDao myResourceIdentifierSystemEntityDao;
 	private final IResourceIdentifierPatientUniqueEntityDao myResourceIdentifierPatientUniqueEntityDao;
 	private final IHapiTransactionService myTransactionService;
-	private final EntityManager myEntityManaher;
+	private final EntityManager myEntityManager;
 
 	/**
 	 * Constructor
@@ -61,7 +61,7 @@ public class ResourceIdentifierCacheSvcImpl implements IResourceIdentifierCacheS
 		myMemoryCache = theMemoryCache;
 		myResourceIdentifierSystemEntityDao = theResourceIdentifierSystemEntityDao;
 		myResourceIdentifierPatientUniqueEntityDao = theResourceIdentifierPatientUniqueEntityDao;
-		myEntityManaher = theEntityManager;
+		myEntityManager = theEntityManager;
 	}
 
 	@Override
@@ -175,7 +175,7 @@ public class ResourceIdentifierCacheSvcImpl implements IResourceIdentifierCacheS
 						newEntity.setPk(
 								new ResourceIdentifierPatientUniqueEntity.PatientIdentifierPk(theSystem, theValue));
 						newEntity.setFhirId(retVal);
-						myEntityManaher.persist(newEntity);
+						myEntityManager.persist(newEntity);
 					}
 
 					assert retVal != null;
