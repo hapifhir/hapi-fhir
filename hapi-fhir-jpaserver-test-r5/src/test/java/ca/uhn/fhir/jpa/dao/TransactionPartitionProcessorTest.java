@@ -114,7 +114,7 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 
 		// Test / Verify
 		assertThatThrownBy(()->mySvc.execute(request))
-			.hasMessageContaining("Interceptor for Pointcut STORAGE_TRANSACTION_PRE_PARTITION must return Bundles containing duplicates or entries which were not present in the original Bundle");
+			.hasMessageContaining("Interceptor for Pointcut STORAGE_TRANSACTION_PRE_PARTITION must not return Bundles containing duplicates or entries which were not present in the original Bundle");
 	}
 
 	@Test
@@ -140,7 +140,7 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 
 		// Test / Verify
 		assertThatThrownBy(()->mySvc.execute(request))
-			.hasMessageContaining("Interceptor for Pointcut STORAGE_TRANSACTION_PRE_PARTITION must return Bundles containing duplicates or entries which were not present in the original Bundle");
+			.hasMessageContaining("Interceptor for Pointcut STORAGE_TRANSACTION_PRE_PARTITION must not return Bundles containing duplicates or entries which were not present in the original Bundle");
 	}
 
 
