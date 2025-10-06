@@ -4,4 +4,4 @@ issue: 7273
 title: "Add rawHttpRequest() get call to IGenericClient so that non standard FHIR calls can be made while still able to make
 use of the interceptor infrastructure. The methods returns a IRawHttp with upon execution returns an IEntityResult with
 the mime type, status code, headers and an input stream as a representation of the response.
-Example usage of the client: client.rawHttpReqeust().get(\"someurl?param1=value1\").execute()"
+Example usage of the client: client.rawHttpRequest().get(\"someurl?param1=value1\").execute()"
