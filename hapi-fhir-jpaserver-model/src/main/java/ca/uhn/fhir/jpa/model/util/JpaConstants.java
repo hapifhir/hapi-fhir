@@ -34,6 +34,16 @@ public class JpaConstants {
 	 */
 	public static final String RESOURCE_ID_SERVER_ASSIGNED =
 			JpaConstants.class.getName() + "_RESOURCE_ID_SERVER_ASSIGNED";
+
+	/**
+	 * Metadata key which can be used to influence the ID assigned to a resource being
+	 * created (i.e. when the server assigns an ID, it should assign the ID corresponding
+	 * to the value of the given key). The value should be a string which is a valid
+	 * FHIR ID part (i.e. no resource type, slashes, etc)
+	 */
+	public static final String RESOURCE_ID_SERVER_ASSIGNED_VALUE =
+			JpaConstants.class.getName() + "_RESOURCE_ID_SERVER_ASSIGNED_VALUE";
+
 	/**
 	 * Operation name for the $apply-codesystem-delta-add operation
 	 */

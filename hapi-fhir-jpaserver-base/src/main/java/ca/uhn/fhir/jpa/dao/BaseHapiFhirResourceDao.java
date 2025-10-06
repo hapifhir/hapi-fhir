@@ -347,6 +347,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			RequestDetails theRequestDetails,
 			@Nonnull TransactionDetails theTransactionDetails) {
 
+		assignServerAssignedIdFromUserDataIfRequired(theResource);
 		assignServerAssignedUuidIfRequired(theResource);
 
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
@@ -409,6 +410,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				theRequestPartitionId,
 				RestOperationTypeEnum.CREATE,
 				theTransactionDetails);
+	}
+
+	private void assignServerAssignedIdFromUserDataIfRequired(T theResource) {
+		String serverAssignedIdFromMetadata =
+				(String) theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED_VALUE);
+		if (serverAssignedIdFromMetadata != null) {
+			theResource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED, Boolean.TRUE);
+			theResource.setId(serverAssignedIdFromMetadata);
+			verifyResourceIdIsValid(theResource);
+		}
 	}
 
 	private void assignServerAssignedUuidIfRequired(T theResource) {
@@ -2903,7 +2914,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		myIdHelperService = theIdHelperService;
 	}
 
-	private static <T extends IBaseResource> boolean isResourceIdServerAssigned(T theResource) {
+	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
+	public static <T extends IBaseResource> boolean isResourceIdServerAssigned(IBaseResource theResource) {
 		return Boolean.TRUE.equals(theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED));
 	}
 

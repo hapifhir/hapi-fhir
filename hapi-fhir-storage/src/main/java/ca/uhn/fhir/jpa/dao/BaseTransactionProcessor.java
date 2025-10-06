@@ -1809,8 +1809,13 @@ public abstract class BaseTransactionProcessor {
 						}
 						if (match.supported()) {
 							if (!match.matched()) {
-								throw new PreconditionFailedException(Msg.code(539) + "Invalid conditional URL \""
-										+ matchUrl + "\". The given resource is not matched by this URL.");
+								String msg = myContext
+										.getLocalizer()
+										.getMessage(
+												BaseTransactionProcessor.class,
+												"invalidConditionalUrlResourceDoesntMatch",
+												matchUrl);
+								throw new PreconditionFailedException(Msg.code(539) + msg);
 							}
 						}
 					}
