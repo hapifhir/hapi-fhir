@@ -1673,7 +1673,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				Set.of("Patient?name=Simpson"), // filters
 				"mdm-group",
 				true,
-				true);
+				false);
 			Map<String, List<IBaseResource>> exportedResourcesMap = convertJobResultsToResources(bulkExportJobResults);
 
 			assertThat(exportedResourcesMap.keySet()).hasSize(3);
@@ -2023,7 +2023,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			new HashSet<>(), new HashSet<>(),
 			"mdm-group",
 			true,
-			true);
+			false);
 		Map<String, List<IBaseResource>> exportedResourcesMap = convertJobResultsToResources(bulkExportJobResults);
 
 		assertThat(exportedResourcesMap.keySet()).hasSize(3);
