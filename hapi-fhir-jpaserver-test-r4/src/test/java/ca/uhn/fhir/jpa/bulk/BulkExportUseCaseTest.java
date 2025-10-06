@@ -40,15 +40,13 @@ import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nonnull;
-import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.assertj.core.api.AssertionsForClassTypes;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
@@ -100,12 +98,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.mapping;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -797,6 +789,10 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		@AfterEach
 		void tearDown() {
 			restoreMdmSettingsToDefault();
+		}
+
+		private void restoreMdmSettingsToDefault() {
+			myMdmExpandersHolder.setMdmSettings(new MdmSettings(myMdmRulesValidator));
 		}
 
 		@Test
@@ -1671,10 +1667,12 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				.setReference(result.getId().toUnqualifiedVersionless().getValue());
 			myGroupDao.update(updated, mySrd);
 
-			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(
+			BulkExportJobResults bulkExportJobResults = startBulkExportJobAndAwaitCompletion(
+				BulkExportJobParameters.ExportStyle.GROUP,
 				new HashSet<>(),
 				Set.of("Patient?name=Simpson"), // filters
 				"mdm-group",
+				true,
 				true);
 			Map<String, List<IBaseResource>> exportedResourcesMap = convertJobResultsToResources(bulkExportJobResults);
 
@@ -2017,30 +2015,29 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 		createAndSetMdmSettingsForEidMatchOnly();
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
-		void testGroupExportWithMdmEnabled_EidMatchOnly() {
-			createAndSetMdmSettingsForEidMatchOnly();
-			setupForMdmGroupExport();
+		createAndSetMdmSettingsForEidMatchOnly();
+		setupForMdmGroupExport();
 
-			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(new HashSet<>(), new HashSet<>(), "mdm-group", true);
-			Map<String, List<IBaseResource>> exportedResourcesMap = convertJobResultsToResources(bulkExportJobResults);
+		BulkExportJobResults bulkExportJobResults = startBulkExportJobAndAwaitCompletion(
+			BulkExportJobParameters.ExportStyle.GROUP,
+			new HashSet<>(), new HashSet<>(),
+			"mdm-group",
+			true,
+			true);
+		Map<String, List<IBaseResource>> exportedResourcesMap = convertJobResultsToResources(bulkExportJobResults);
 
-			assertThat(exportedResourcesMap.keySet()).hasSize(3);
-			List<IBaseResource> exportedGroups = exportedResourcesMap.get("Group");
-			assertResourcesIds(exportedGroups, "Group/mdm-group");
+		assertThat(exportedResourcesMap.keySet()).hasSize(3);
+		List<IBaseResource> exportedGroups = exportedResourcesMap.get("Group");
+		assertResourcesIds(exportedGroups, "Group/mdm-group");
 
-			List<IBaseResource> exportedPatients = exportedResourcesMap.get("Patient");
-			assertResourcesIds(exportedPatients, "Patient/pat-1", "Patient/pat-2");
+		List<IBaseResource> exportedPatients = exportedResourcesMap.get("Patient");
+		assertResourcesIds(exportedPatients, "Patient/pat-1", "Patient/pat-2");
 
-			List<IBaseResource> exportedObservations = exportedResourcesMap.get("Observation");
-			assertResourcesIds(exportedObservations, "Observation/obs-1", "Observation/obs-2");
-		}
-
-
-		private void restoreMdmSettingsToDefault() {
-			myMdmExpandersHolder.setMdmSettings(new MdmSettings(myMdmRulesValidator));
-		}
+		List<IBaseResource> exportedObservations = exportedResourcesMap.get("Observation");
+		assertResourcesIds(exportedObservations, "Observation/obs-1", "Observation/obs-2");
 
 	}
+
 
 	private GroupExportSetup setupForMdmGroupExport() {
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
