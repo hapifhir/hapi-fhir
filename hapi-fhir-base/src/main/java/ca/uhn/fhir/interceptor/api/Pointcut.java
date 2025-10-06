@@ -1807,6 +1807,7 @@ public enum Pointcut implements IPointcut {
 	 * individually. These sub-transactions will be executed in the order they are
 	 * returned by the interceptor.
 	 * <p>
+	 * The sub-transactions are processed in order, and processing stops at the first failure.
 	 * If any sub-transaction fails, any previous sub-transactions will not be rolled back.
 	 * This means that splitting a transaction with this pointcut can result in
 	 * FHIR transaction processing not actually fully respecting the atomicity specified

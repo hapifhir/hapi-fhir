@@ -79,6 +79,10 @@ public class MemoryCacheService {
 				case HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY:
 					nextCache = CacheFactory.buildEternal(5_000, 50_000);
 					break;
+				case RESOURCE_IDENTIFIER_SYSTEM_TO_PID:
+					nextCache = CacheFactory.buildEternal(250, 1_000);
+					break;
+				case PATIENT_IDENTIFIER_TO_FHIR_ID:
 				case NAME_TO_PARTITION:
 				case ID_TO_PARTITION:
 				case PID_TO_FORCED_ID:
@@ -223,7 +227,9 @@ public class MemoryCacheService {
 		NAME_TO_PARTITION(String.class),
 		ID_TO_PARTITION(Integer.class),
 		HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY(Long.class),
-		RES_TYPE_TO_RES_TYPE_ID(String.class);
+		RES_TYPE_TO_RES_TYPE_ID(String.class),
+		RESOURCE_IDENTIFIER_SYSTEM_TO_PID(String.class),
+		PATIENT_IDENTIFIER_TO_FHIR_ID(IdentifierKey.class);
 
 		private final Class<?> myKeyType;
 
@@ -235,6 +241,8 @@ public class MemoryCacheService {
 			return myKeyType;
 		}
 	}
+
+	public record IdentifierKey(String system, String value) {}
 
 	public static class TagDefinitionCacheKey {
 

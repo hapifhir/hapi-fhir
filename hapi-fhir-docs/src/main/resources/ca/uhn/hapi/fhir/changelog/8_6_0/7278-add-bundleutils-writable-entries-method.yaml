@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7278
+title: "A new method has been added to `BundleUtil` called `toListOfEntriesModifiable`. This method
+   returns a version-independent collection of data accessors for the supplied Bundle, and also allows
+   modification of the entry properties in a version-independent way."

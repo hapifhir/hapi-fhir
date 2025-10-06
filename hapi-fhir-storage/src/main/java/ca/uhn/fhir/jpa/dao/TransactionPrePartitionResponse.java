@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
+import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 import java.util.List;
@@ -30,4 +32,22 @@ import java.util.List;
  * @param splitBundles A collection of Bundles containing the original entries that were passed in.
  * @since 8.6.0
  */
-public record TransactionPrePartitionResponse(List<IBaseBundle> splitBundles) {}
+public class TransactionPrePartitionResponse {
+
+	private List<IBaseBundle> mySplitBundles;
+
+	public List<IBaseBundle> getSplitBundles() {
+		return mySplitBundles;
+	}
+
+	/**
+	 * A collection of Bundles containing all of the <code>Bundle.entry</code> elements from the
+	 * original Bundle, but divided into multiple bundles. All entries from the original Bundle must
+	 * be present, and no entries may be present which were not in the original Bundle.
+	 */
+	public TransactionPrePartitionResponse setSplitBundles(@Nonnull List<IBaseBundle> theSplitBundles) {
+		Validate.isTrue(theSplitBundles != null, "theSplitBundles must not be null");
+		mySplitBundles = theSplitBundles;
+		return this;
+	}
+}

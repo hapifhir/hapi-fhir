@@ -44,9 +44,11 @@ import ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportJobSchedulingHelperImpl;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportHelperService;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.svc.BulkDataImportSvcImpl;
+import ca.uhn.fhir.jpa.cache.IResourceIdentifierCacheSvc;
 import ca.uhn.fhir.jpa.cache.IResourceTypeCacheSvc;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
+import ca.uhn.fhir.jpa.cache.ResourceIdentifierCacheSvcImpl;
 import ca.uhn.fhir.jpa.cache.ResourceTypeCacheSvcImpl;
 import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
 import ca.uhn.fhir.jpa.dao.CacheTagDefinitionDao;
@@ -63,6 +65,8 @@ import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.ResourceHistoryCalculator;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
+import ca.uhn.fhir.jpa.dao.data.IResourceIdentifierPatientUniqueEntityDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIdentifierSystemEntityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamIdentityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
@@ -210,6 +214,7 @@ import ca.uhn.fhir.util.MetaTagSorterAlphabetical;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityManager;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
@@ -529,6 +534,21 @@ public class JpaConfig {
 	@Lazy
 	public DiffProvider diffProvider() {
 		return new DiffProvider();
+	}
+
+	@Bean
+	public IResourceIdentifierCacheSvc resourceIdentifierCacheSvc(
+			IHapiTransactionService theTransactionService,
+			MemoryCacheService theMemoryCache,
+			IResourceIdentifierSystemEntityDao theResourceIdentifierSystemEntityDao,
+			IResourceIdentifierPatientUniqueEntityDao theResourceIdentifierPatientUniqueEntityDao,
+			EntityManager theEntityManager) {
+		return new ResourceIdentifierCacheSvcImpl(
+				theTransactionService,
+				theMemoryCache,
+				theResourceIdentifierSystemEntityDao,
+				theResourceIdentifierPatientUniqueEntityDao,
+				theEntityManager);
 	}
 
 	@Bean
