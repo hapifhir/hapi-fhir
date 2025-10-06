@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse;
 import ca.uhn.fhir.jpa.dao.TransactionUtil;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -60,6 +61,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -77,6 +79,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Test {
 	public static final int ALTERNATE_DEFAULT_ID = -1;
 
+	@Autowired
+	private HapiTransactionService myTransactionService;
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
 	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
@@ -111,6 +115,8 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		myPartitionSettings.setUnnamedPartitionMode(defaultSettings.isUnnamedPartitionMode());
 		myPartitionSettings.setDefaultPartitionId(defaultSettings.getDefaultPartitionId());
 		myPartitionSettings.setAllowReferencesAcrossPartitions(defaultSettings.getAllowReferencesAcrossPartitions());
+
+		myTransactionService.setTransactionPropagationWhenChangingPartitions(HapiTransactionService.DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
 	}
 
 
@@ -496,6 +502,52 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 	}
 
 
+	@Test
+	public void testTransaction_SplitAncillaryAndPatient_NewTransactionPerPartition() {
+		registerInterceptor(new MyTransactionSplitInterceptor());
+		myTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
+
+		String practitionerFullUrl = IdType.newRandomUuid().getValue();
+		String patientFullUrl = IdType.newRandomUuid().getValue();
+		String encounterFullUrl = IdType.newRandomUuid().getValue();
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(
+			buildPractitioner(
+				withIdentifier("http://practitioner", "1")
+			),
+			practitionerFullUrl
+		);
+		bb.addTransactionCreateEntry(
+			buildPatient(
+				withIdentifier("http://patient", "1"),
+				withReference("generalPractitioner", practitionerFullUrl)
+			),
+			patientFullUrl
+		);
+		bb.addTransactionCreateEntry(
+			buildEncounter(
+				withIdentifier("http://encounter", "1"),
+				withSubject(patientFullUrl),
+				withReference("participant.individual", practitionerFullUrl)
+			),
+			encounterFullUrl
+		);
+
+		Bundle request = bb.getBundleTyped();
+
+		// Test
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, request);
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+
+	}
+
+
+
 
 	@Test
 	public void testSearch() throws IOException {
@@ -814,7 +866,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 				bundles.add(patientBundle);
 			}
 
-			return new TransactionPrePartitionResponse(bundles);
+			return new TransactionPrePartitionResponse().setSplitBundles(bundles);
 		}
 
 	}
