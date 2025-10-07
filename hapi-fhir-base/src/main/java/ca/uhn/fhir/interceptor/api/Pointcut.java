@@ -1443,6 +1443,8 @@ public enum Pointcut implements IPointcut {
 	 * <p>
 	 * Hooks should return <code>void</code>.
 	 * </p>
+	 *
+	 * @since 8.6.0
 	 */
 	STORAGE_PRESEARCH_PARTITION_SELECTED(
 			void.class,

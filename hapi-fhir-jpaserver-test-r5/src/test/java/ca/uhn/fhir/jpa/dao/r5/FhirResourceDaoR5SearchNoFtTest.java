@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -16,6 +18,7 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.ClinicalUseDefinition;
@@ -35,6 +38,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Date;
@@ -387,5 +391,50 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
         params.add(Constants.PARAM_LANGUAGE, new TokenParam("en"));
 			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params, mySrd))).containsExactly("Observation/A");
     }
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testInterceptorPreSearch(boolean theSynchronousSearch) {
+
+		class MyInterceptor {
+
+			/**
+			 * Called 1st
+			 */
+			@Hook(Pointcut.STORAGE_PRESEARCH_PARTITION_SELECTED)
+			void preSearchPartitionSelected(SearchParameterMap theParams) {
+				String queryString = theParams.toNormalizedQueryString(myFhirContext);
+				assertEquals("?identifier=http%3A%2F%2Fblah%7C123", queryString);
+				theParams.remove(Patient.SP_IDENTIFIER);
+				theParams.add(IAnyResource.SP_RES_ID, new StringParam("Patient/B"));
+			}
+
+			/**
+			 * Called 2nd
+			 */
+			@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
+			void preSearchRegistered(SearchParameterMap theParams) {
+				String queryString = theParams.toNormalizedQueryString(myFhirContext);
+				assertEquals("?_id=Patient%2FB", queryString);
+				theParams.remove(Patient.SP_RES_ID);
+				theParams.add(IAnyResource.SP_RES_ID, new StringParam("Patient/A"));
+			}
+
+		}
+
+		createPatient(withId("A"), withIdentifier("http://foo", "1"));
+		MyInterceptor interceptor = new MyInterceptor();
+		registerInterceptor(interceptor);
+
+		// Test
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(theSynchronousSearch);
+		params.add(Patient.SP_IDENTIFIER, new TokenParam("http://blah", "123"));
+		List<String> actual = toUnqualifiedVersionlessIdValues(myPatientDao.search(params, newSrd()));
+
+		// Verify
+		assertThat(actual).containsExactly("Patient/A");
+		myInterceptorRegistry.unregisterInterceptor(interceptor);
+	}
 
 }
