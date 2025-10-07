@@ -68,16 +68,13 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 			HttpServletResponse theServletResponse) {
 		updateSearchParamsForLastn(theSearchParameterMap, theRequestDetails);
 
-		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-						theRequestDetails, getResourceName(), theSearchParameterMap);
 		return mySearchCoordinatorSvc.registerSearch(
 				this,
 				theSearchParameterMap,
 				getResourceName(),
 				new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL)),
 				theRequestDetails,
-				requestPartitionId);
+				null);
 	}
 
 	private String getEffectiveParamName() {

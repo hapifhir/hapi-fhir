@@ -40,6 +40,23 @@ public class StorageInterceptorHooksFacade {
 	}
 
 	/**
+	 * Interceptor call: STORAGE_PRESEARCH_PARTITION_SELECTED
+	 */
+	public void callStoragePresearchPartitionSelected(
+			RequestDetails theRequestDetails, SearchParameterMap theParams, ICachedSearchDetails theSearch) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESEARCH_PARTITION_SELECTED)) {
+			HookParams params = new HookParams()
+					.add(ICachedSearchDetails.class, theSearch)
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+					.add(SearchParameterMap.class, theParams);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESEARCH_PARTITION_SELECTED, params);
+		}
+	}
+
+	/**
 	 * Interceptor call: STORAGE_PRESEARCH_REGISTERED
 	 */
 	public void callStoragePresearchRegistered(

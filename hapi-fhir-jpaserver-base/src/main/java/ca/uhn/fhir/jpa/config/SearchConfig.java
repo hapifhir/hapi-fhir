@@ -151,7 +151,8 @@ public class SearchConfig {
 				mySearchParamRegistry,
 				mySearchStrategyFactory,
 				exceptionService(),
-				myBeanFactory);
+				myBeanFactory,
+				myRequestPartitionHelperService);
 	}
 
 	@Bean

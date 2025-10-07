@@ -2146,13 +2146,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			cacheControlDirective.parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL));
 		}
 
-		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-						theRequest, getResourceName(), theParams);
 		IBundleProvider retVal = mySearchCoordinatorSvc.registerSearch(
-				this, theParams, getResourceName(), cacheControlDirective, theRequest, requestPartitionId);
+				this, theParams, getResourceName(), cacheControlDirective, theRequest, null);
 
 		if (retVal instanceof PersistedJpaBundleProvider) {
+			RequestPartitionId requestPartitionId =
+					myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
+							theRequest, getResourceName(), theParams);
+
 			PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) retVal;
 			provider.setRequestPartitionId(requestPartitionId);
 			if (provider.getCacheStatus() == SearchCacheStatusEnum.HIT) {

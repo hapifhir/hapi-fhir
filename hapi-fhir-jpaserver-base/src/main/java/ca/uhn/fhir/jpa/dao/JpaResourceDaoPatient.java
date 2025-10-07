@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -103,9 +102,6 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 			paramMap.setLoadSynchronous(true);
 		}
 
-		RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-				theRequest, getResourceName(), paramMap);
-
 		adjustCount(theRequest, paramMap);
 
 		return mySearchCoordinatorSvc.registerSearch(
@@ -114,7 +110,7 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 				getResourceName(),
 				new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL)),
 				theRequest,
-				requestPartitionId);
+				null);
 	}
 
 	private void adjustCount(RequestDetails theRequest, SearchParameterMap theParamMap) {
