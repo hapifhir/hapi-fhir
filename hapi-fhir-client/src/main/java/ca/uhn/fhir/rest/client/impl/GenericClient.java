@@ -139,7 +139,6 @@ import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -151,9 +150,11 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.jspecify.annotations.NonNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1424,8 +1425,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		private void addParam(String theName, IQueryParameterType theValue) {
-			IPrimitiveType<?> stringType =
-					ParametersUtil.createString(myContext, theValue.getValueAsQueryToken(myContext));
+			IPrimitiveType<?> stringType = ParametersUtil.createString(myContext, theValue.getValueAsQueryToken());
 			addParam(theName, stringType);
 		}
 
@@ -2206,11 +2206,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			Map<String, List<String>> params = getParamMap();
 
 			for (TokenParam next : myTags) {
-				addParam(params, Constants.PARAM_TAG, next.getValueAsQueryToken(myContext));
+				addParam(params, Constants.PARAM_TAG, next.getValueAsQueryToken());
 			}
 
 			for (TokenParam next : mySecurity) {
-				addParam(params, Constants.PARAM_SECURITY, next.getValueAsQueryToken(myContext));
+				addParam(params, Constants.PARAM_SECURITY, next.getValueAsQueryToken());
 			}
 
 			for (Collection<String> profileUris : myProfiles) {
@@ -2281,7 +2281,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			if (myLastUpdated != null) {
 				for (DateParam next : myLastUpdated.getValuesAsQueryTokens()) {
-					addParam(params, Constants.PARAM_LASTUPDATED, next.getValueAsQueryToken(myContext));
+					addParam(params, Constants.PARAM_LASTUPDATED, next.getValueAsQueryToken());
 				}
 			}
 
@@ -2504,7 +2504,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				Map<String, List<String>> theHeaders)
 				throws IOException, BaseServerResponseException {
 
-			String payload = IOUtils.toString(theResponseInputStream, Charsets.UTF_8);
+			String payload = IOUtils.toString(theResponseInputStream, StandardCharsets.UTF_8);
 			return new StringOutcome(theResponseStatusCode, payload, theHeaders);
 		}
 	}
