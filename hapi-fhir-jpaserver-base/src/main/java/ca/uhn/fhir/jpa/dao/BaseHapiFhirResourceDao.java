@@ -347,6 +347,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			RequestDetails theRequestDetails,
 			@Nonnull TransactionDetails theTransactionDetails) {
 
+		validateResourceIsNotNullForClientRequest(theResource);
+
 		assignServerAssignedIdFromUserDataIfRequired(theResource);
 		assignServerAssignedUuidIfRequired(theResource);
 
@@ -381,10 +383,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			TransactionDetails theTransactionDetails,
 			RequestDetails theRequestDetails,
 			RequestPartitionId theRequestPartitionId) {
-		if (theResource == null) {
-			String msg = getContext().getLocalizer().getMessage(BaseStorageDao.class, "missingBody");
-			throw new InvalidRequestException(Msg.code(956) + msg);
-		}
+		validateResourceIsNotNullForClientRequest(theResource);
 
 		if (isNotBlank(theResource.getIdElement().getIdPart()) && !isResourceIdServerAssigned(theResource)) {
 			if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
@@ -410,6 +409,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				theRequestPartitionId,
 				RestOperationTypeEnum.CREATE,
 				theTransactionDetails);
+	}
+
+	/**
+	 * Tests whether a resource is non-null, and throws a {@link PreconditionFailedException}
+	 * with a message explaining that the body must not be missing on a create/update
+	 * request.
+	 */
+	private void validateResourceIsNotNullForClientRequest(T theResource) {
+		if (theResource == null) {
+			String msg = getContext().getLocalizer().getMessage(BaseStorageDao.class, "missingBody");
+			throw new InvalidRequestException(Msg.code(956) + msg);
+		}
 	}
 
 	/**

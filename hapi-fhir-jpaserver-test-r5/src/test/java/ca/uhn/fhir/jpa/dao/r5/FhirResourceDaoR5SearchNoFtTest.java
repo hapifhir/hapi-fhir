@@ -404,7 +404,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 			@Hook(Pointcut.STORAGE_PRESEARCH_PARTITION_SELECTED)
 			void preSearchPartitionSelected(SearchParameterMap theParams) {
 				String queryString = theParams.toNormalizedQueryString(myFhirContext);
-				assertEquals("?identifier=http%3A%2F%2Fblah%7C123", queryString);
+				assertEquals("?identifier=http%3A//blah%7C123", queryString);
 				theParams.remove(Patient.SP_IDENTIFIER);
 				theParams.add(IAnyResource.SP_RES_ID, new StringParam("Patient/B"));
 			}
@@ -415,7 +415,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 			@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
 			void preSearchRegistered(SearchParameterMap theParams) {
 				String queryString = theParams.toNormalizedQueryString(myFhirContext);
-				assertEquals("?_id=Patient%2FB", queryString);
+				assertEquals("?_id=Patient/B", queryString);
 				theParams.remove(Patient.SP_RES_ID);
 				theParams.add(IAnyResource.SP_RES_ID, new StringParam("Patient/A"));
 			}
