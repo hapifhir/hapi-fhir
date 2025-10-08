@@ -40,6 +40,8 @@ public class JpaConstants {
 	 * created (i.e. when the server assigns an ID, it should assign the ID corresponding
 	 * to the value of the given key). The value should be a string which is a valid
 	 * FHIR ID part (i.e. no resource type, slashes, etc)
+	 *
+	 * @since 8.6.0
 	 */
 	public static final String RESOURCE_ID_SERVER_ASSIGNED_VALUE =
 			JpaConstants.class.getName() + "_RESOURCE_ID_SERVER_ASSIGNED_VALUE";

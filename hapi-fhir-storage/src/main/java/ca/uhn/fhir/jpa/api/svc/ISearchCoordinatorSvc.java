@@ -42,13 +42,19 @@ public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 			@Nullable RequestDetails theRequestDetails,
 			RequestPartitionId theRequestPartitionId);
 
+	/**
+	 * @param theRequestPartitionId This parameter should only be provided if a fixed partition should
+	 *                              be used for the search. If set to <code>null</code> (which is generally
+	 *                              the right thing to do), the partition will be determined by the
+	 *                              partition selection interceptor.
+	 */
 	IBundleProvider registerSearch(
 			IFhirResourceDao<?> theCallingDao,
 			SearchParameterMap theParams,
 			String theResourceType,
 			CacheControlDirective theCacheControlDirective,
 			@Nullable RequestDetails theRequestDetails,
-			RequestPartitionId theRequestPartitionId);
+			@Nullable RequestPartitionId theRequestPartitionId);
 
 	/**
 	 * Fetch the total number of search results for the given currently executing search, if one is currently executing and
