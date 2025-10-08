@@ -1,0 +1,6 @@
+---
+type: add
+issue: fixme
+title: "The method `UrlUtil.escapeUrlParam(String)` now has an additional overload which
+   can optionally not escape the slash character. `SearchParameterMap.toNormalizedQueryString(FhirContext)`
+   will now use this method on parameter values, so relative resource URLs will be more readable."

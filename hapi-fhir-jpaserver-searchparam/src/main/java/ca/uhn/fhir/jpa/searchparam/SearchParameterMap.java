@@ -39,12 +39,13 @@ import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.util.UrlUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.annotation.Nonnull;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,7 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
@@ -69,7 +69,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SearchParameterMap implements Serializable {
 	public static final Integer INTEGER_0 = 0;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParameterMap.class);
+
+	@Serial
 	private static final long serialVersionUID = 1L;
+
 	private final HashMap<String, List<List<IQueryParameterType>>> mySearchParameterMap = new LinkedHashMap<>();
 	private Integer myCount;
 	private Integer myOffset;
@@ -106,6 +109,7 @@ public class SearchParameterMap implements Serializable {
 	/**
 	 * Creates and returns a copy of this map
 	 */
+	@SuppressWarnings("MethodDoesntCallSuperMethod")
 	@JsonIgnore
 	@Override
 	public SearchParameterMap clone() {
@@ -182,6 +186,7 @@ public class SearchParameterMap implements Serializable {
 		return this;
 	}
 
+	@SuppressWarnings("unchecked")
 	public SearchParameterMap add(String theName, IQueryParameterOr<?> theOr) {
 		if (theOr == null) {
 			return this;
@@ -260,7 +265,7 @@ public class SearchParameterMap implements Serializable {
 	}
 
 	private void addUrlParamSeparator(StringBuilder theB) {
-		if (theB.length() == 0) {
+		if (theB.isEmpty()) {
 			theB.append('?');
 		} else {
 			theB.append('&');
@@ -434,13 +439,11 @@ public class SearchParameterMap implements Serializable {
 
 			for (List<? extends IQueryParameterType> nextValuesAndIn : nextValuesAndsIn) {
 
-				List<IQueryParameterType> nextValuesOrsOut = new ArrayList<>();
-
-				nextValuesOrsOut.addAll(nextValuesAndIn);
+				List<IQueryParameterType> nextValuesOrsOut = new ArrayList<>(nextValuesAndIn);
 
 				nextValuesOrsOut.sort(new QueryParameterTypeComparator(theCtx));
 
-				if (nextValuesOrsOut.size() > 0) {
+				if (!nextValuesOrsOut.isEmpty()) {
 					nextValuesAndsOut.add(nextValuesOrsOut);
 				}
 			} // for AND
@@ -474,9 +477,9 @@ public class SearchParameterMap implements Serializable {
 					if (i > 0) {
 						b.append(',');
 					}
-					String valueAsQueryToken = nextValueOr.getValueAsQueryToken(theCtx);
+					String valueAsQueryToken = nextValueOr.getValueAsQueryToken();
 					valueAsQueryToken = defaultString(valueAsQueryToken);
-					b.append(UrlUtil.escapeUrlParam(valueAsQueryToken));
+					b.append(UrlUtil.escapeUrlParam(valueAsQueryToken, false));
 				}
 			}
 		} // for keys
@@ -568,7 +571,7 @@ public class SearchParameterMap implements Serializable {
 			b.append(getSearchIncludeDeletedMode().getCode());
 		}
 
-		if (b.length() == 0) {
+		if (b.isEmpty()) {
 			b.append('?');
 		}
 
@@ -625,7 +628,7 @@ public class SearchParameterMap implements Serializable {
 					.filter(nextOr -> nextOr.getMissing() == null)
 					.filter(nextOr -> nextOr instanceof QuantityParam)
 					.filter(nextOr -> isBlank(((QuantityParam) nextOr).getValueAsString()))
-					.collect(Collectors.toList());
+					.toList();
 
 			ourLog.debug("Ignoring empty parameter: {}", theParamName);
 			orList.removeAll(emptyParameters);
@@ -703,7 +706,7 @@ public class SearchParameterMap implements Serializable {
 	 * @return an And/Or List of Query Parameters matching the qualifier.
 	 */
 	public List<List<IQueryParameterType>> removeByNameAndModifier(String theName, String theModifier) {
-		theModifier = StringUtils.defaultString(theModifier, "");
+		theModifier = Objects.toString(theModifier, "");
 
 		List<List<IQueryParameterType>> remainderParameters = new ArrayList<>();
 		List<List<IQueryParameterType>> matchingParameters = new ArrayList<>();
@@ -713,7 +716,7 @@ public class SearchParameterMap implements Serializable {
 		if (andList != null) {
 			for (List<IQueryParameterType> orList : andList) {
 				if (!orList.isEmpty()
-						&& StringUtils.defaultString(orList.get(0).getQueryParameterQualifier(), "")
+						&& Objects.toString(orList.get(0).getQueryParameterQualifier(), "")
 								.equals(theModifier)) {
 					matchingParameters.add(orList);
 				} else {
@@ -746,9 +749,6 @@ public class SearchParameterMap implements Serializable {
 	 * and the remaining search parameters in the map will be:
 	 * <p>
 	 * code -> [[code=123]]
-	 *
-	 * @param theQualifier
-	 * @return
 	 */
 	public Map<String, List<List<IQueryParameterType>>> removeByQualifier(String theQualifier) {
 
@@ -835,7 +835,7 @@ public class SearchParameterMap implements Serializable {
 		b.append(theO1.getMissing(), theO2.getMissing());
 		b.append(theO1.getQueryParameterQualifier(), theO2.getQueryParameterQualifier());
 		if (b.toComparison() == 0) {
-			b.append(theO1.getValueAsQueryToken(theCtx), theO2.getValueAsQueryToken(theCtx));
+			b.append(theO1.getValueAsQueryToken(), theO2.getValueAsQueryToken());
 		}
 
 		return b.toComparison();
@@ -858,12 +858,12 @@ public class SearchParameterMap implements Serializable {
 
 		@Override
 		public int compare(Include theO1, Include theO2) {
-			int retVal = StringUtils.compare(theO1.getParamType(), theO2.getParamType());
+			int retVal = Strings.CS.compare(theO1.getParamType(), theO2.getParamType());
 			if (retVal == 0) {
-				retVal = StringUtils.compare(theO1.getParamName(), theO2.getParamName());
+				retVal = Strings.CS.compare(theO1.getParamName(), theO2.getParamName());
 			}
 			if (retVal == 0) {
-				retVal = StringUtils.compare(theO1.getParamTargetType(), theO2.getParamTargetType());
+				retVal = Strings.CS.compare(theO1.getParamTargetType(), theO2.getParamTargetType());
 			}
 			return retVal;
 		}
