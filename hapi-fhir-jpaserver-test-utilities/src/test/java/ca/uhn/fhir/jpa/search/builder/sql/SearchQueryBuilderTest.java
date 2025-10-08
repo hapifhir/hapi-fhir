@@ -11,10 +11,10 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import com.google.common.collect.Lists;
-import org.hibernate.dialect.DerbyDialect;
-import org.hibernate.dialect.MySQL8Dialect;
+import org.hibernate.community.dialect.DerbyDialect;
+import org.hibernate.community.dialect.SQLServerLegacyDialect;
+import org.hibernate.dialect.MySQLDialect;
 import org.hibernate.dialect.PostgreSQLDialect;
-import org.hibernate.dialect.SQLServer2012Dialect;
 import org.hibernate.dialect.SQLServerDialect;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -109,7 +109,7 @@ public class SearchQueryBuilderTest {
 	public void testRangeSqlServer2012_NoSort() {
 
 		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
-		dialectProvider.setDialectForUnitTest(new SQLServer2012Dialect());
+		dialectProvider.setDialectForUnitTest(new SQLServerLegacyDialect());
 		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myStorageSettings, myPartitionSettings, myRequestPartitionId, "Patient", mySqlBuilderFactory, dialectProvider, false, false);
 		builder.addResourceIdsPredicate(Lists.newArrayList(JpaPid.fromId(500L), JpaPid.fromId(501L)));
 		GeneratedSql generated;
@@ -135,7 +135,7 @@ public class SearchQueryBuilderTest {
 	public void testRangeSqlServer2012_WithSort() {
 
 		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
-		dialectProvider.setDialectForUnitTest(new SQLServer2012Dialect());
+		dialectProvider.setDialectForUnitTest(new SQLServerLegacyDialect());
 		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myStorageSettings, myPartitionSettings, myRequestPartitionId, "Patient", mySqlBuilderFactory, dialectProvider, false, false);
 		builder.addResourceIdsPredicate(Lists.newArrayList(JpaPid.fromId(500L), JpaPid.fromId(501L)));
 		builder.addSortDate(builder.getOrCreateResourceTablePredicateBuilder().getColumnLastUpdated(), true);
@@ -268,7 +268,7 @@ public class SearchQueryBuilderTest {
 	public void testRangeMySQL8_NoSort() {
 
 		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
-		dialectProvider.setDialectForUnitTest(new MySQL8Dialect());
+		dialectProvider.setDialectForUnitTest(new MySQLDialect());
 		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myStorageSettings, myPartitionSettings, myRequestPartitionId, "Patient", mySqlBuilderFactory, dialectProvider, false, false);
 		builder.addResourceIdsPredicate(Lists.newArrayList(JpaPid.fromId(500L), JpaPid.fromId(501L)));
 		GeneratedSql generated;
@@ -294,7 +294,7 @@ public class SearchQueryBuilderTest {
 	public void testRangeMySQL8_WithSort() {
 
 		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
-		dialectProvider.setDialectForUnitTest(new MySQL8Dialect());
+		dialectProvider.setDialectForUnitTest(new MySQLDialect());
 		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myStorageSettings, myPartitionSettings, myRequestPartitionId, "Patient", mySqlBuilderFactory, dialectProvider, false, false);
 		builder.addResourceIdsPredicate(Lists.newArrayList(JpaPid.fromId(500L), JpaPid.fromId(501L)));
 		builder.addSortDate(builder.getOrCreateResourceTablePredicateBuilder().getColumnLastUpdated(), true);

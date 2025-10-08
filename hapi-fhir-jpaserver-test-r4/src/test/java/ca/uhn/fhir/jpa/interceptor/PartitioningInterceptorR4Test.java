@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.interceptor;
 
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.defaultPartition;
+import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionId;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -14,7 +16,6 @@ import ca.uhn.fhir.jpa.dao.r4.BasePartitioningR4Test;
 import ca.uhn.fhir.jpa.interceptor.ex.PartitionInterceptorReadAllPartitions;
 import ca.uhn.fhir.jpa.interceptor.ex.PartitionInterceptorReadPartitionsBasedOnScopes;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -32,7 +33,6 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,7 +46,6 @@ import static ca.uhn.fhir.jpa.dao.r4.PartitioningSqlR4Test.assertLocalDateFromDb
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -105,14 +104,14 @@ public class PartitioningInterceptorR4Test extends BasePartitioningR4Test {
 			assertEquals(2, writeIndex.get());
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(myPartitionInterceptor);
-			myInterceptorRegistry.unregisterInterceptorsIf(t->t instanceof MySubscriptionReadInterceptor);
-			myInterceptorRegistry.unregisterInterceptorsIf(t->t instanceof MySubscriptionWriteInterceptor);
+			myInterceptorRegistry.unregisterInterceptorsIf(MySubscriptionReadInterceptor.class::isInstance);
+			myInterceptorRegistry.unregisterInterceptorsIf(MySubscriptionWriteInterceptor.class::isInstance);
 		}
 	}
 
 	@Test
 	public void testCreateNonPartionableResourceWithPartitionDate() {
-		addNextTargetPartitionForCreate(defaultPartition(LocalDate.of(2021, 2, 22)));
+		addNextTargetPartitionForCreate(fromPartitionId(null, LocalDate.of(2021, 2, 22)));
 
 		StructureDefinition sd = new StructureDefinition();
 		sd.setUrl("http://foo");
@@ -129,7 +128,7 @@ public class PartitioningInterceptorR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreateNonPartionableResourceWithNullPartitionReturned() {
-		addNextTargetPartitionForCreate(RequestPartitionId.defaultPartition());
+		addNextTargetPartitionForCreate(RequestPartitionId.allPartitions());
 
 		StructureDefinition sd = new StructureDefinition();
 		sd.setUrl("http://foo");
@@ -177,7 +176,7 @@ public class PartitioningInterceptorR4Test extends BasePartitioningR4Test {
 		IIdType patientId1 = createPatient(withCreatePartition(1), withActiveTrue());
 		IIdType patientId2 = createPatient(withCreatePartition(2), withActiveTrue());
 
-
+    	ourLog.info("Created patients: {}, {}, {}", patientIdNull, patientId1, patientId2);
 		PartitionInterceptorReadAllPartitions interceptor = new PartitionInterceptorReadAllPartitions();
 		myInterceptorRegistry.registerInterceptor(interceptor);
 		try {

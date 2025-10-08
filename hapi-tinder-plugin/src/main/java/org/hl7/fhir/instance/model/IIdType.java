@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.hl7.fhir.dstu2.model;
+package org.hl7.fhir.instance.model;
 
 public interface IIdType extends IBase {
 

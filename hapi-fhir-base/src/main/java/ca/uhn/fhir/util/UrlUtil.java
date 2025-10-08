@@ -490,10 +490,10 @@ public class UrlUtil {
 
 				char nextChar = theString.charAt(j);
 				switch (nextChar) {
-						/*
-						 * NB: If you add a constant here, you also need to add it
-						 * to isNeedsSanitization()!!
-						 */
+					/*
+					 * NB: If you add a constant here, you also need to add it
+					 * to isNeedsSanitization()!!
+					 */
 					case '\'':
 						buffer.append("&apos;");
 						break;
