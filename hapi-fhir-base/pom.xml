@@ -13,7 +13,7 @@
 	<artifactId>hapi-fhir-base</artifactId>
 	<packaging>bundle</packaging>
 
-	<url>http://jamesagnew.github.io/hapi-fhir/</url>
+	<url>https://hapifhir.io/</url>
 
 	<name>HAPI FHIR - Core Library</name>
 
