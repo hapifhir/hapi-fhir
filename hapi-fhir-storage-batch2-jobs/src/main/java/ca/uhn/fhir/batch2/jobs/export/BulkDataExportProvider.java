@@ -497,6 +497,9 @@ public class BulkDataExportProvider {
 			case ERRORED:
 				if (theRequestDetails.getRequestType() == RequestTypeEnum.DELETE) {
 					handleDeleteRequest(theJobId, response, info.getStatus());
+				} else if (info.isCancelled()) {
+					ourLog.info("{} job instance <{}> is marked cancelled.", info.getStatus(), theJobId);
+					processCancelledJobResponse(response, theJobId);
 				} else {
 					response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
 					String dateString = getTransitionTimeOfJobInfo(info);
@@ -507,20 +510,7 @@ public class BulkDataExportProvider {
 				}
 				break;
 			case CANCELLED:
-				response.setStatus(Constants.STATUS_HTTP_404_NOT_FOUND);
-				IBaseOperationOutcome outcome = OperationOutcomeUtil.newInstance(myFhirContext);
-				OperationOutcomeUtil.addIssue(
-						myFhirContext,
-						outcome,
-						"error",
-						"Job instance <" + theJobId.getValueAsString() + "> was cancelled.  No status to report.",
-						null,
-						null);
-				myFhirContext
-						.newJsonParser()
-						.setPrettyPrint(true)
-						.encodeResourceToWriter(outcome, response.getWriter());
-				response.getWriter().close();
+				processCancelledJobResponse(response, theJobId);
 				break;
 		}
 	}
@@ -622,5 +612,20 @@ public class BulkDataExportProvider {
 					new BulkDataExportSupport(myFhirContext, myDaoRegistry, myRequestPartitionHelperService);
 		}
 		return myBulkDataExportSupport;
+	}
+
+	private void processCancelledJobResponse(HttpServletResponse response, IPrimitiveType<String> theJobId)
+			throws IOException {
+		response.setStatus(Constants.STATUS_HTTP_404_NOT_FOUND);
+		IBaseOperationOutcome outcome = OperationOutcomeUtil.newInstance(myFhirContext);
+		OperationOutcomeUtil.addIssue(
+				myFhirContext,
+				outcome,
+				"error",
+				"Job instance <" + theJobId.getValueAsString() + "> was cancelled.  No status to report.",
+				null,
+				null);
+		myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(outcome, response.getWriter());
+		response.getWriter().close();
 	}
 }
