@@ -30,6 +30,7 @@ class MdmBatchSvcImplIT extends BaseMdmR4Test {
 	public void before() {
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED, afterMdmLatch);
 	}
+
 	@Override
 	@AfterEach
 	public void after() throws IOException {
@@ -41,7 +42,6 @@ class MdmBatchSvcImplIT extends BaseMdmR4Test {
 
 	@Test
 	public void testMdmBatchRunWorksOverMultipleTargetTypes() throws InterruptedException {
-
 		for (int i =0; i < 10; i++) {
 			createPatient(buildJanePatient());
 		}

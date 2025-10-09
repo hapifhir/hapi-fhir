@@ -262,6 +262,8 @@ public class BulkDataExportProvider {
 					List<IBase> thePatient,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean")
+					IPrimitiveType<Boolean> theMdm,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_INCLUDE_HISTORY, min = 0, max = 1, typeName = "boolean")
 					IPrimitiveType<Boolean> theIncludeHistory,
 			ServletRequestDetails theRequestDetails) {
@@ -279,6 +281,7 @@ public class BulkDataExportProvider {
 				theTypeFilter,
 				theTypePostFetchFilterUrl,
 				patientIds,
+				theMdm,
 				theIncludeHistory);
 	}
 
@@ -314,6 +317,8 @@ public class BulkDataExportProvider {
 					List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean")
+					IPrimitiveType<Boolean> theMdm,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_INCLUDE_HISTORY, min = 0, max = 1, typeName = "boolean")
 					IPrimitiveType<Boolean> theIncludeHistory,
 			ServletRequestDetails theRequestDetails) {
@@ -328,6 +333,7 @@ public class BulkDataExportProvider {
 				theTypePostFetchFilterUrl,
 				List.of(theIdParam),
 				theExportIdentifier,
+				theMdm,
 				theIncludeHistory,
 				theRequestDetails);
 	}
@@ -371,6 +377,7 @@ public class BulkDataExportProvider {
 			List<IPrimitiveType<String>> theTypeFilter,
 			List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
 			List<IPrimitiveType<String>> thePatientIds,
+			IPrimitiveType<Boolean> theMdmExpansion,
 			IPrimitiveType<Boolean> theIncludeHistory) {
 		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
@@ -398,6 +405,7 @@ public class BulkDataExportProvider {
 				.exportStyle(ExportStyle.PATIENT)
 				.postFetchFilterUrl(theTypePostFetchFilterUrl)
 				.patientIds(thePatientIds)
+				.expandMdm(theMdmExpansion)
 				.includeHistory(theIncludeHistory)
 				.build();
 
