@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.bulk.config.MdmRulesWithEidMatchOnlyConfig;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
@@ -20,11 +21,13 @@ import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
+import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmModeEnum;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
-import ca.uhn.fhir.mdm.svc.MdmExpandersHolder;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -75,6 +78,9 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -102,14 +108,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-
 public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportUseCaseTest.class);
 
 	private static final  String TEST_PATIENT_EID_SYS = "http://patient-eid-sys";
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
-
 	@Autowired
 	private IJobPersistence myJobPersistence;
 	@Autowired
@@ -123,13 +127,12 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	@Autowired
 	private MdmRuleValidator myMdmRulesValidator;
 	@Autowired
-	private MdmExpandersHolder myMdmExpandersHolder;
+	private IMdmLinkExpandSvc myMdmLinkExpandSvc;
 
 	@BeforeEach
 	public void beforeEach() {
 		myStorageSettings.setJobFastTrackingEnabled(false);
 	}
-
 
 	@Nested
 	public class SpecConformanceTests {
@@ -357,27 +360,6 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			}
 		}
 
-	}
-
-	private String submitBulkExportForTypes(String... theTypes) throws IOException {
-		return submitBulkExportForTypesWithExportId(null, theTypes);
-	}
-
-	private String submitBulkExportForTypesWithExportId(String theExportId, String... theTypes) throws IOException {
-		String typeString = String.join(",", theTypes);
-		String uri = myClient.getServerBase() + "/$export?_type=" + typeString;
-		if (!StringUtils.isBlank(theExportId)) {
-			uri += "&_exportId=" + theExportId;
-		}
-
-		HttpGet httpGet = new HttpGet(uri);
-		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		String pollingLocation;
-		try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
-			Header[] headers = status.getHeaders("Content-Location");
-			pollingLocation = headers[0].getValue();
-		}
-		return pollingLocation;
 	}
 
 	@Nested
@@ -684,12 +666,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 
 	@Nested
+	@ContextConfiguration(classes = {MdmRulesWithEidMatchOnlyConfig.class})
 	public class GroupBulkExportTests {
-
-		@AfterEach
-		void tearDown() {
-			restoreMdmSettingsToDefault();
-		}
 
 		@Test
 		public void testGroupExportSuccessfulyExportsPatientForwardReferences() {
@@ -798,6 +776,58 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			Map<String, List<IBaseResource>> firstMap = convertJobResultsToResources(bulkExportJobResults);
 			assertThat(firstMap.get("Patient")).hasSize(1);
 			assertThat(firstMap.get("Group")).hasSize(1);
+		}
+		@Test
+		void testGroupExportWithMdmEnabled_EidMatchOnly() {
+
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+
+			//In this test, we create two patients with the same Eid value for the eid system specified in mdm rules
+			//and 2 observations referencing one of each of these patients
+			//Create a group that contains one of the patients.
+			//When we export the group, we should get both patients and the 2 observations
+			//in the export as the other patient should be mdm expanded
+			//based on having the same eid value
+			Patient pat1 = new Patient();
+			pat1.setId("pat-1");
+			pat1.addIdentifier(new Identifier().setSystem(TEST_PATIENT_EID_SYS).setValue("the-patient-eid-value"));
+			bb.addTransactionUpdateEntry(pat1);
+
+			Observation obs1 = new Observation();
+			obs1.setId("obs-1");
+			obs1.setSubject(new Reference("Patient/pat-1"));
+			bb.addTransactionUpdateEntry(obs1);
+
+			Patient pat2 = new Patient();
+			pat2.setId("pat-2");
+			pat2.addIdentifier(new Identifier().setSystem(TEST_PATIENT_EID_SYS).setValue("the-patient-eid-value"));
+			bb.addTransactionUpdateEntry(pat2);
+
+			Observation obs2 = new Observation();
+			obs2.setId("obs-2");
+			obs2.setSubject(new Reference("Patient/pat-2"));
+			bb.addTransactionUpdateEntry(obs2);
+
+			Group group = new Group();
+			group.setId("Group/mdm-group");
+			group.setActive(true);
+			group.addMember().getEntity().setReference("Patient/pat-1");
+			bb.addTransactionUpdateEntry(group);
+
+			myClient.transaction().withBundle(bb.getBundle()).execute();
+
+			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletionForMdmExpand(new HashSet<>(), new HashSet<>(), "mdm-group", true);
+			Map<String, List<IBaseResource>> exportedResourcesMap = convertJobResultsToResources(bulkExportJobResults);
+
+			assertThat(exportedResourcesMap.keySet()).hasSize(3);
+			List<IBaseResource> exportedGroups = exportedResourcesMap.get("Group");
+			assertResourcesIds(exportedGroups, "Group/mdm-group");
+
+			List<IBaseResource> exportedPatients = exportedResourcesMap.get("Patient");
+			assertResourcesIds(exportedPatients, "Patient/pat-1", "Patient/pat-2");
+
+			List<IBaseResource> exportedObservations = exportedResourcesMap.get("Observation");
+			assertResourcesIds(exportedObservations, "Observation/obs-1", "Observation/obs-2");
 		}
 
 		@Test
@@ -1676,6 +1706,26 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 	}
 
+	private String submitBulkExportForTypes(String... theTypes) throws IOException {
+		return submitBulkExportForTypesWithExportId(null, theTypes);
+	}
+
+	private String submitBulkExportForTypesWithExportId(String theExportId, String... theTypes) throws IOException {
+		String typeString = String.join(",", theTypes);
+		String uri = myClient.getServerBase() + "/$export?_type=" + typeString;
+		if (!StringUtils.isBlank(theExportId)) {
+			uri += "&_exportId=" + theExportId;
+		}
+
+		HttpGet httpGet = new HttpGet(uri);
+		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		String pollingLocation;
+		try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
+			Header[] headers = status.getHeaders("Content-Location");
+			pollingLocation = headers[0].getValue();
+		}
+		return pollingLocation;
+	}
 
 	private Map<String, Map<String, Set<String>>> convertJobResultsToResourceVersionMap(BulkExportJobResults theBulkExportJobResults) {
 		Map<String, List<IBaseResource>> exportedResourcesByType = convertJobResultsToResources(theBulkExportJobResults);
@@ -1863,77 +1913,10 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		return myPatientDao.create(p, mySrd).getId();
 	}
 
-	@Test
-	void testGroupExportWithMdmEnabled_EidMatchOnly() {
-
-		createAndSetMdmSettingsForEidMatchOnly();
-		BundleBuilder bb = new BundleBuilder(myFhirContext);
-
-		//In this test, we create two patients with the same Eid value for the eid system specified in mdm rules
-		//and 2 observations referencing one of each of these patients
-		//Create a group that contains one of the patients.
-		//When we export the group, we should get both patients and the 2 observations
-		//in the export as the other patient should be mdm expanded
-		//based on having the same eid value
-		Patient pat1 = new Patient();
-		pat1.setId("pat-1");
-		pat1.addIdentifier(new Identifier().setSystem(TEST_PATIENT_EID_SYS).setValue("the-patient-eid-value"));
-		bb.addTransactionUpdateEntry(pat1);
-
-		Observation obs1 = new Observation();
-		obs1.setId("obs-1");
-		obs1.setSubject(new Reference("Patient/pat-1"));
-		bb.addTransactionUpdateEntry(obs1);
-
-		Patient pat2 = new Patient();
-		pat2.setId("pat-2");
-		pat2.addIdentifier(new Identifier().setSystem(TEST_PATIENT_EID_SYS).setValue("the-patient-eid-value"));
-		bb.addTransactionUpdateEntry(pat2);
-
-		Observation obs2 = new Observation();
-		obs2.setId("obs-2");
-		obs2.setSubject(new Reference("Patient/pat-2"));
-		bb.addTransactionUpdateEntry(obs2);
-
-		Group group = new Group();
-		group.setId("Group/mdm-group");
-		group.setActive(true);
-		group.addMember().getEntity().setReference("Patient/pat-1");
-		bb.addTransactionUpdateEntry(group);
-
-		myClient.transaction().withBundle(bb.getBundle()).execute();
-
-		BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletionForMdmExpand(new HashSet<>(), new HashSet<>(), "mdm-group", true);
-		Map<String, List<IBaseResource>> exportedResourcesMap = convertJobResultsToResources(bulkExportJobResults);
-
-		assertThat(exportedResourcesMap.keySet()).hasSize(3);
-		List<IBaseResource> exportedGroups = exportedResourcesMap.get("Group");
-		assertResourcesIds(exportedGroups, "Group/mdm-group");
-
-		List<IBaseResource> exportedPatients = exportedResourcesMap.get("Patient");
-		assertResourcesIds(exportedPatients, "Patient/pat-1", "Patient/pat-2");
-
-		List<IBaseResource> exportedObservations = exportedResourcesMap.get("Observation");
-		assertResourcesIds(exportedObservations, "Observation/obs-1", "Observation/obs-2");
-
-	}
 
 
-	private void createAndSetMdmSettingsForEidMatchOnly() {
-		MdmSettings mdmSettings = new MdmSettings(myMdmRulesValidator);
-		mdmSettings.setEnabled(true);
-		mdmSettings.setMdmMode(MdmModeEnum.MATCH_ONLY);
-		MdmRulesJson rules = new MdmRulesJson();
-		rules.setMdmTypes(List.of("Patient"));
-		rules.addEnterpriseEIDSystem("Patient", TEST_PATIENT_EID_SYS);
-		mdmSettings.setMdmRules(rules);
 
-		myMdmExpandersHolder.setMdmSettings(mdmSettings);
-	}
 
-	private void restoreMdmSettingsToDefault() {
-		myMdmExpandersHolder.setMdmSettings(new MdmSettings(myMdmRulesValidator));
-	}
 
 	private static void assertResourcesIds(List<IBaseResource> theResources, String... theExpectedResourceIds) {
 		assertThat(theResources).hasSize(theExpectedResourceIds.length);
@@ -2178,4 +2161,6 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private BulkExportJobResults startPatientBulkExportJobAndAwaitResults(HashSet<String> theTypes, HashSet<String> theFilters, @SuppressWarnings("SameParameterValue") String thePatientId) {
 		return startBulkExportJobAndAwaitCompletion(BulkExportJobParameters.ExportStyle.PATIENT, theTypes, theFilters, thePatientId, false);
 	}
+
+
 }

@@ -20,6 +20,7 @@
 package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -41,4 +42,15 @@ public interface IMdmLinkExpandSvc {
 			RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theGoldenResourcePid);
 
 	Set<String> expandMdmByGoldenResourceId(RequestPartitionId theRequestPartitionId, IIdType theId);
+
+	/**
+	 * For the Group resource with the given id, returns all the persistent id ofs
+	 * the members of the group + the mdm matched resources to a member in the group
+	 */
+	Set<JpaPid> expandGroup(String groupResourceId, RequestPartitionId requestPartitionId);
+	/**
+	 * annotates the given resource to be exported with the implementation specific extra information if applicable
+	 */
+	void annotateResource(IBaseResource resource);
+
 }

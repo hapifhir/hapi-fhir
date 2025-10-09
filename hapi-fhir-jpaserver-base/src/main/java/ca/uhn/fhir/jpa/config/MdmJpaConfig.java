@@ -30,46 +30,35 @@ import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDaoJpaImpl;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
-import ca.uhn.fhir.mdm.svc.BulkExportMdmEidMatchOnlyResourceExpander;
-import ca.uhn.fhir.mdm.svc.BulkExportMdmResourceExpander;
+import ca.uhn.fhir.mdm.svc.DisabledMdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.svc.MdmEidMatchOnlyExpandSvc;
-import ca.uhn.fhir.mdm.svc.MdmExpandersHolder;
-import ca.uhn.fhir.mdm.svc.MdmExpansionCacheSvc;
 import ca.uhn.fhir.mdm.svc.MdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
+
+import java.util.Optional;
 
 @Configuration
 public class MdmJpaConfig {
 
+	/**
+	 * Based on the rules laid out in the {@link IMdmSettings} file, construct an {@link IMdmLinkExpandSvc} that is suitable
+	 */
+//	FIXME GGG Why are we even loading this whole config file if MDM is disabled?!?!
 	@Bean
-	public MdmExpandersHolder mdmLinkExpandSvcHolder(
-			FhirContext theFhirContext,
-			IMdmLinkExpandSvc theMdmLinkExpandSvc,
-			MdmEidMatchOnlyExpandSvc theMdmEidMatchOnlyLinkExpandSvc,
-			BulkExportMdmEidMatchOnlyResourceExpander theBulkExportMdmEidMatchOnlyResourceExpander,
-			BulkExportMdmResourceExpander theBulkExportMdmResourceExpander) {
-		return new MdmExpandersHolder(
-				theFhirContext,
-				theMdmLinkExpandSvc,
-				theMdmEidMatchOnlyLinkExpandSvc,
-				theBulkExportMdmResourceExpander,
-				theBulkExportMdmEidMatchOnlyResourceExpander);
-	}
-
-	@Bean
-	public MdmEidMatchOnlyExpandSvc mdmEidMatchOnlyLinkExpandSvc(DaoRegistry theDaoRegistry) {
-		return new MdmEidMatchOnlyExpandSvc(theDaoRegistry);
-	}
-
-	@Bean
-	@Primary
-	public IMdmLinkExpandSvc mdmLinkExpandSvc() {
-		return new MdmLinkExpandSvc();
+	public IMdmLinkExpandSvc mdmLinkExpandSvc(Optional<IMdmSettings> theMdmSettings, DaoRegistry theDaoRegistry, FhirContext theFhirContext, IIdHelperService theIdHelperService) {
+		if (theMdmSettings.isPresent()) {
+			if (theMdmSettings.get().supportsLinkBasedExpansion()) {
+				return new MdmLinkExpandSvc();
+			} else if (theMdmSettings.get().supportsEidBasedExpansion()) {
+				return new MdmEidMatchOnlyExpandSvc(theDaoRegistry, theFhirContext, theIdHelperService);
+			}
+		}
+		return new DisabledMdmLinkExpandSvc();
 	}
 
 	@Bean
@@ -83,33 +72,12 @@ public class MdmJpaConfig {
 	}
 
 	@Bean
-	public BulkExportMdmResourceExpander bulkExportMDMResourceExpander(
-			MdmExpansionCacheSvc theMdmExpansionCacheSvc,
-			IMdmLinkDao theMdmLinkDao,
-			IIdHelperService<JpaPid> theIdHelperService,
-			DaoRegistry theDaoRegistry,
-			FhirContext theFhirContext) {
-		return new BulkExportMdmResourceExpander(
-				theMdmExpansionCacheSvc, theMdmLinkDao, theIdHelperService, theDaoRegistry, theFhirContext);
-	}
-
-	@Bean
-	public BulkExportMdmEidMatchOnlyResourceExpander bulkExportMDMEidMatchOnlyResourceExpander(
-			DaoRegistry theDaoRegistry,
-			MdmEidMatchOnlyExpandSvc theMdmEidMatchOnlyLinkExpandSvc,
-			FhirContext theFhirContext,
-			IIdHelperService<JpaPid> theIdHelperService) {
-		return new BulkExportMdmEidMatchOnlyResourceExpander(
-				theDaoRegistry, theMdmEidMatchOnlyLinkExpandSvc, theFhirContext, theIdHelperService);
-	}
-
-	@Bean
 	public IMdmLinkImplFactory<MdmLink> mdmLinkImplFactory() {
 		return new JpaMdmLinkImplFactory();
 	}
 
 	@Bean
-	public IMdmClearHelperSvc<JpaPid> helperSvc(IDeleteExpungeSvc<JpaPid> theDeleteExpungeSvc) {
+	public IMdmClearHelperSvc<JpaPid> mdmClearHelperSvc(IDeleteExpungeSvc<JpaPid> theDeleteExpungeSvc) {
 		return new MdmClearHelperSvcImpl(theDeleteExpungeSvc);
 	}
 }
