@@ -30,15 +30,18 @@ import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDaoJpaImpl;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.MdmModeEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
 import ca.uhn.fhir.mdm.svc.BulkExportMdmEidMatchOnlyResourceExpander;
 import ca.uhn.fhir.mdm.svc.BulkExportMdmResourceExpander;
+import ca.uhn.fhir.mdm.svc.IBulkExportMdmResourceExpander;
 import ca.uhn.fhir.mdm.svc.MdmEidMatchOnlyExpandSvc;
-import ca.uhn.fhir.mdm.svc.MdmExpandersHolder;
 import ca.uhn.fhir.mdm.svc.MdmExpansionCacheSvc;
 import ca.uhn.fhir.mdm.svc.MdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc;
+import ca.uhn.fhir.mdm.util.EIDHelper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -47,29 +50,45 @@ import org.springframework.context.annotation.Primary;
 public class MdmJpaConfig {
 
 	@Bean
-	public MdmExpandersHolder mdmLinkExpandSvcHolder(
-			FhirContext theFhirContext,
-			IMdmLinkExpandSvc theMdmLinkExpandSvc,
-			MdmEidMatchOnlyExpandSvc theMdmEidMatchOnlyLinkExpandSvc,
-			BulkExportMdmEidMatchOnlyResourceExpander theBulkExportMdmEidMatchOnlyResourceExpander,
-			BulkExportMdmResourceExpander theBulkExportMdmResourceExpander) {
-		return new MdmExpandersHolder(
-				theFhirContext,
-				theMdmLinkExpandSvc,
-				theMdmEidMatchOnlyLinkExpandSvc,
-				theBulkExportMdmResourceExpander,
-				theBulkExportMdmEidMatchOnlyResourceExpander);
-	}
-
-	@Bean
-	public MdmEidMatchOnlyExpandSvc mdmEidMatchOnlyLinkExpandSvc(DaoRegistry theDaoRegistry) {
-		return new MdmEidMatchOnlyExpandSvc(theDaoRegistry);
+	public MdmEidMatchOnlyExpandSvc mdmEidMatchOnlyLinkExpandSvc(
+			IMdmSettings theMdmSettings, DaoRegistry theDaoRegistry, FhirContext theFhirContext) {
+		MdmEidMatchOnlyExpandSvc mdmEidMatchOnlyExpandSvc = new MdmEidMatchOnlyExpandSvc(theDaoRegistry);
+		mdmEidMatchOnlyExpandSvc.setMyEidHelper(new EIDHelper(theFhirContext, theMdmSettings));
+		return mdmEidMatchOnlyExpandSvc;
 	}
 
 	@Bean
 	@Primary
-	public IMdmLinkExpandSvc mdmLinkExpandSvc() {
-		return new MdmLinkExpandSvc();
+	public IMdmLinkExpandSvc mdmLinkExpandSvc(
+			IMdmSettings theMdmSettings, DaoRegistry theDaoRegistry, FhirContext theFhirContext) {
+		IMdmLinkExpandSvc res;
+		if (isEidMatchOnly(theMdmSettings)) {
+			res = mdmEidMatchOnlyLinkExpandSvc(theMdmSettings, theDaoRegistry, theFhirContext);
+		} else {
+			res = new MdmLinkExpandSvc();
+		}
+		return res;
+	}
+
+	@Bean
+	public IBulkExportMdmResourceExpander bulkExportMdmResourceExpander(
+			MdmExpansionCacheSvc theMdmExpansionCacheSvc,
+			IMdmLinkDao theMdmLinkDao,
+			IIdHelperService<JpaPid> theIdHelperService,
+			DaoRegistry theDaoRegistry,
+			FhirContext theFhirContext,
+			MdmEidMatchOnlyExpandSvc theMdmEidMatchOnlyLinkExpandSvc,
+			IMdmSettings theMdmSettings) {
+
+		IBulkExportMdmResourceExpander res;
+		if (isEidMatchOnly(theMdmSettings)) {
+			res = new BulkExportMdmEidMatchOnlyResourceExpander(
+					theDaoRegistry, theMdmEidMatchOnlyLinkExpandSvc, theFhirContext, theIdHelperService);
+		} else {
+			res = new BulkExportMdmResourceExpander(
+					theMdmExpansionCacheSvc, theMdmLinkDao, theIdHelperService, theDaoRegistry, theFhirContext);
+		}
+		return res;
 	}
 
 	@Bean
@@ -83,27 +102,6 @@ public class MdmJpaConfig {
 	}
 
 	@Bean
-	public BulkExportMdmResourceExpander bulkExportMDMResourceExpander(
-			MdmExpansionCacheSvc theMdmExpansionCacheSvc,
-			IMdmLinkDao theMdmLinkDao,
-			IIdHelperService<JpaPid> theIdHelperService,
-			DaoRegistry theDaoRegistry,
-			FhirContext theFhirContext) {
-		return new BulkExportMdmResourceExpander(
-				theMdmExpansionCacheSvc, theMdmLinkDao, theIdHelperService, theDaoRegistry, theFhirContext);
-	}
-
-	@Bean
-	public BulkExportMdmEidMatchOnlyResourceExpander bulkExportMDMEidMatchOnlyResourceExpander(
-			DaoRegistry theDaoRegistry,
-			MdmEidMatchOnlyExpandSvc theMdmEidMatchOnlyLinkExpandSvc,
-			FhirContext theFhirContext,
-			IIdHelperService<JpaPid> theIdHelperService) {
-		return new BulkExportMdmEidMatchOnlyResourceExpander(
-				theDaoRegistry, theMdmEidMatchOnlyLinkExpandSvc, theFhirContext, theIdHelperService);
-	}
-
-	@Bean
 	public IMdmLinkImplFactory<MdmLink> mdmLinkImplFactory() {
 		return new JpaMdmLinkImplFactory();
 	}
@@ -111,5 +109,12 @@ public class MdmJpaConfig {
 	@Bean
 	public IMdmClearHelperSvc<JpaPid> helperSvc(IDeleteExpungeSvc<JpaPid> theDeleteExpungeSvc) {
 		return new MdmClearHelperSvcImpl(theDeleteExpungeSvc);
+	}
+
+	private boolean isEidMatchOnly(IMdmSettings theMdmSettings) {
+		return theMdmSettings.getMode() == MdmModeEnum.MATCH_ONLY
+				&& theMdmSettings.getMdmRules() != null
+				&& theMdmSettings.getMdmRules().getEnterpriseEIDSystems() != null
+				&& !theMdmSettings.getMdmRules().getEnterpriseEIDSystems().isEmpty();
 	}
 }

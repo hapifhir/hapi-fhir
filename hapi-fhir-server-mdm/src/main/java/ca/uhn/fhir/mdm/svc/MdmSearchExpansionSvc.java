@@ -58,7 +58,7 @@ public class MdmSearchExpansionSvc {
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Autowired
-	private MdmExpandersHolder myMdmExpandersHolder;
+	private IMdmLinkExpandSvc myMdmLinkExpandSvc;
 
 	/**
 	 * This method looks through all the reference parameters within a {@link SearchParameterMap}
@@ -141,8 +141,6 @@ public class MdmSearchExpansionSvc {
 			IParamTester theParamTester,
 			MdmSearchExpansionResults theResultsToPopulate) {
 
-		IMdmLinkExpandSvc mdmLinkExpandSvc = myMdmExpandersHolder.getLinkExpandSvcInstance();
-
 		List<IQueryParameterType> toRemove = new ArrayList<>();
 		List<IQueryParameterType> toAdd = new ArrayList<>();
 		for (IQueryParameterType iQueryParameterType : orList) {
@@ -153,12 +151,12 @@ public class MdmSearchExpansionSvc {
 					// First, attempt to expand as a source resource.
 					IIdType sourceId = newId(refParam.getValue());
 					Set<String> expandedResourceIds =
-							mdmLinkExpandSvc.expandMdmBySourceResourceId(theRequestPartitionId, sourceId);
+							myMdmLinkExpandSvc.expandMdmBySourceResourceId(theRequestPartitionId, sourceId);
 
 					// If we failed, attempt to expand as a golden resource
 					if (expandedResourceIds.isEmpty()) {
 						expandedResourceIds =
-								mdmLinkExpandSvc.expandMdmByGoldenResourceId(theRequestPartitionId, sourceId);
+								myMdmLinkExpandSvc.expandMdmByGoldenResourceId(theRequestPartitionId, sourceId);
 					}
 
 					// Rebuild the search param list.
@@ -239,11 +237,10 @@ public class MdmSearchExpansionSvc {
 		} else if (mdmExpand) {
 			ourLog.debug("_id parameter must be expanded out from: {}", id.getValue());
 
-			IMdmLinkExpandSvc mdmLinkExpandSvc = myMdmExpandersHolder.getLinkExpandSvcInstance();
-			Set<String> expandedResourceIds = mdmLinkExpandSvc.expandMdmBySourceResourceId(theRequestPartitionId, id);
+			Set<String> expandedResourceIds = myMdmLinkExpandSvc.expandMdmBySourceResourceId(theRequestPartitionId, id);
 
 			if (expandedResourceIds.isEmpty()) {
-				expandedResourceIds = mdmLinkExpandSvc.expandMdmByGoldenResourceId(theRequestPartitionId, id);
+				expandedResourceIds = myMdmLinkExpandSvc.expandMdmByGoldenResourceId(theRequestPartitionId, id);
 			}
 
 			// Rebuild
