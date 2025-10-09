@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.svc.MdmExpandersHolder;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -189,7 +190,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		 */
 		myIdHelperService.fillOutPids(pids, myContext);
 
-		if (theParams.isToDoMdmExpansion()) {
+		if (theParams.isShouldDoMdmExpansion()) {
 			Collection<IIdType> patientIds = pids.stream()
 					.map(IResourcePersistentId::getAssociatedResourceId)
 					.collect(Collectors.toList());
@@ -236,7 +237,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				.map(BaseResourcePersistentId::getAssociatedResourceId)
 				.collect(Collectors.toSet());
 
-		if (theParams.isToDoMdmExpansion()) {
+		if (theParams.isShouldDoMdmExpansion()) {
 			// expand them out and add them to our list
 			Set<JpaPid> jpaPids = myMdmExpandersHolder
 					.getBulkExportMDMResourceExpanderInstance()
@@ -317,38 +318,31 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			String resourceType,
 			String patientSearchParam,
 			SearchParameterMap map) {
-		if (resourceType.equalsIgnoreCase("Patient")) {
-			if (theParams.getExpandedPatientIds() != null) {
-				ReferenceOrListParam referenceOrListParam =
-						makeReferenceOrListParam(theParams.getExpandedPatientIds().stream()
-								.map(f -> {
-									return f.getAssociatedResourceId()
-											.toUnqualifiedVersionless()
-											.getValue();
-								})
-								.collect(Collectors.toList()));
-				map.add(PARAM_ID, referenceOrListParam);
-			} else if (theParams.getPatientIds() != null) {
-				ReferenceOrListParam referenceOrListParam = makeReferenceOrListParam(theParams.getPatientIds());
-				map.add(PARAM_ID, referenceOrListParam);
-			}
-		} else {
-			if (theParams.getExpandedPatientIds() != null) {
-				ReferenceOrListParam referenceOrListParam =
-						makeReferenceOrListParam(theParams.getExpandedPatientIds().stream()
-								.map(f -> {
-									return f.getAssociatedResourceId()
-											.toUnqualifiedVersionless()
-											.getValue();
-								})
-								.collect(Collectors.toList()));
-				map.add(patientSearchParam, referenceOrListParam);
-			} else if (theParams.getPatientIds() != null) {
-				ReferenceOrListParam referenceOrListParam = makeReferenceOrListParam(theParams.getPatientIds());
-				map.add(patientSearchParam, referenceOrListParam);
-			} else {
-				map.add(patientSearchParam, new ReferenceParam().setMissing(false));
-			}
+		boolean isPatientResource = resourceType.equalsIgnoreCase("Patient");
+
+		// construct our patient ids params, depending on if they are expanded or not
+		ReferenceOrListParam patientIdsParams = null;
+		if (theParams.getExpandedPatientIds() != null) {
+			patientIdsParams =
+				makeReferenceOrListParam(theParams.getExpandedPatientIds().stream()
+					.map(f -> {
+						return f.getAssociatedResourceId()
+							.toUnqualifiedVersionless()
+							.getValue();
+					})
+					.collect(Collectors.toList()));
+		} else if (theParams.getPatientIds() != null) {
+			patientIdsParams = makeReferenceOrListParam(theParams.getPatientIds());
+		}
+
+		if (patientIdsParams != null) {
+			// add the patient id filtering
+			String paramName = isPatientResource ? PARAM_ID : patientSearchParam;
+			map.add(paramName, patientIdsParams);
+		} else if (!isPatientResource) {
+			// we only search for resources missing patient references
+			// if we're not searching for patient resources
+			map.add(patientSearchParam, new ReferenceParam().setMissing(true));
 		}
 	}
 

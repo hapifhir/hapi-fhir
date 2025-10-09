@@ -44,7 +44,7 @@ public class MdmExpansionStep implements IFirstJobStepWorker<BulkExportJobParame
 				theStepExecutionDetails.getInstance().getInstanceId());
 
 		ExpandPatientIdsParams params = new ExpandPatientIdsParams(jobParameters.getExportStyle());
-		params.setToDoMdmExpansion(jobParameters.isExpandMdm());
+		params.setShouldDoMdmExpansion(jobParameters.isExpandMdm());
 		params.setGroupId(jobParameters.getGroupId());
 		params.setRequestPartitionId(jobParameters.getPartitionId());
 		params.setFilters(jobParameters.getFilters());

@@ -42,7 +42,7 @@ public class ExpandPatientIdsParams {
 	/**
 	 * Whether or not to do mdm expansion
 	 */
-	private boolean myToDoMdmExpansion;
+	private boolean myShouldDoMdmExpansion;
 
 	public ExpandPatientIdsParams(BulkExportJobParameters.ExportStyle theExportStyle) {
 		myExportStyle = theExportStyle;
@@ -80,12 +80,12 @@ public class ExpandPatientIdsParams {
 		myRequestPartitionId = theRequestPartitionId;
 	}
 
-	public boolean isToDoMdmExpansion() {
-		return myToDoMdmExpansion;
+	public boolean isShouldDoMdmExpansion() {
+		return myShouldDoMdmExpansion;
 	}
 
-	public void setToDoMdmExpansion(boolean theToDoMdmExpansion) {
-		myToDoMdmExpansion = theToDoMdmExpansion;
+	public void setShouldDoMdmExpansion(boolean theShouldDoMdmExpansion) {
+		myShouldDoMdmExpansion = theShouldDoMdmExpansion;
 	}
 
 	public List<String> getFilters() {
