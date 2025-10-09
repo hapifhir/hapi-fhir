@@ -19,7 +19,6 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.mdm.svc.MdmExpandersHolder;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -129,9 +128,6 @@ public class JpaBulkExportProcessorTest {
 
 	@Mock
 	private IIdHelperService<JpaPid> myIdHelperService;
-
-	@Mock
-	private MdmExpandersHolder myMdmExpandersHolder;
 
 	@Mock
 	private IBulkExportMdmResourceExpander myBulkExportMDMResourceExpander;
@@ -298,8 +294,6 @@ public class JpaBulkExportProcessorTest {
 		// mdm expansion stuff
 		final JpaPid mdmExpandedPatientId = JpaPid.fromId(4567L);
 		if (theMdm) {
-
-			when(myMdmExpandersHolder.getBulkExportMDMResourceExpanderInstance()).thenReturn(myBulkExportMDMResourceExpander);
 			// mock the call to expandGroup method of the expander
 			when(myBulkExportMDMResourceExpander.expandGroup(parameters.getGroupId(), getPartitionIdFromParams(thePartitioned)))
 				.thenReturn(Set.of(mdmExpandedPatientId));
@@ -395,7 +389,6 @@ public class JpaBulkExportProcessorTest {
 			.thenReturn(observationResultsIterator);
 
 		if (theMdm) {
-			when(myMdmExpandersHolder.getBulkExportMDMResourceExpanderInstance()).thenReturn(myBulkExportMDMResourceExpander);
 			// mock the call to expandGroup method of the expander
 			when(myBulkExportMDMResourceExpander.expandGroup(parameters.getGroupId(), getPartitionIdFromParams(thePartitioned)))
 				.thenReturn(Collections.emptySet());
