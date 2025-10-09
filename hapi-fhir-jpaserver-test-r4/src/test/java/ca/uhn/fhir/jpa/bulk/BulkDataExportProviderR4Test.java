@@ -1127,7 +1127,7 @@ public class BulkDataExportProviderR4Test {
 
 	@Test
 	public void testGetExportPollStatus_QueuedJobBeingCancelled_return404() throws IOException {
-		// setup
+		// Setup
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId(A_JOB_ID);
 		instance.setCancelled(true);
@@ -1139,17 +1139,17 @@ public class BulkDataExportProviderR4Test {
 
 		when(myJobCoordinator.getInstance(eq(A_JOB_ID))).thenReturn(instance);
 
-		// Execute
 		String url = myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet httpGet = new HttpGet(url);
 
+		// Execute
 		try (CloseableHttpResponse response = myClient.execute(httpGet)) {
 			// Verify
 			ourLog.debug("Response: {}", response);
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusLine().getStatusCode());
-			assertEquals("Not Found", response.getStatusLine().getReasonPhrase());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.SC_NOT_FOUND);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Not Found");
 			assertThat(responseContent).contains("was cancelled.  No status to report.");
 		}
 	}

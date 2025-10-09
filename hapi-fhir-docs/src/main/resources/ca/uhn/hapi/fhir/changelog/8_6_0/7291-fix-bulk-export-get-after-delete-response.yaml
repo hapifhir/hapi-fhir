@@ -3,5 +3,5 @@ type: fix
 issue: 7291
 jira: SMILE-11072, SMILE-11142
 title: "Previously, when a Bulk Export job was created, querying the polling location immediately after a successful
-delete request returned a 202 status instead of the expected 404. This has been fixed to return a 404 status and
+delete request returned a 202 status instead of the expected 404. This has been fixed and the response now contains
 an `OperationOutcome` indicating that the job was cancelled to conform to the FHIR Bulk Data specification."
