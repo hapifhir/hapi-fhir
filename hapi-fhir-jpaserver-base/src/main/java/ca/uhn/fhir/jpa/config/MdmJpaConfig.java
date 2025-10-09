@@ -48,9 +48,13 @@ public class MdmJpaConfig {
 	/**
 	 * Based on the rules laid out in the {@link IMdmSettings} file, construct an {@link IMdmLinkExpandSvc} that is suitable
 	 */
-//	FIXME GGG Why are we even loading this whole config file if MDM is disabled?!?!
+	//	FIXME GGG Why are we even loading this whole config file if MDM is disabled?!?!
 	@Bean
-	public IMdmLinkExpandSvc mdmLinkExpandSvc(Optional<IMdmSettings> theMdmSettings, DaoRegistry theDaoRegistry, FhirContext theFhirContext, IIdHelperService theIdHelperService) {
+	public IMdmLinkExpandSvc mdmLinkExpandSvc(
+			Optional<IMdmSettings> theMdmSettings,
+			DaoRegistry theDaoRegistry,
+			FhirContext theFhirContext,
+			IIdHelperService theIdHelperService) {
 		if (theMdmSettings.isPresent()) {
 			if (theMdmSettings.get().supportsLinkBasedExpansion()) {
 				return new MdmLinkExpandSvc();

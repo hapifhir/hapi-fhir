@@ -52,5 +52,4 @@ public interface IMdmLinkExpandSvc {
 	 * annotates the given resource to be exported with the implementation specific extra information if applicable
 	 */
 	void annotateResource(IBaseResource resource);
-
 }

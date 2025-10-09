@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -65,7 +64,6 @@ import java.util.stream.Collectors;
 @Transactional
 public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
-
 
 	@Autowired
 	private FhirContext myContext;
@@ -213,28 +211,29 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setRequestPartitionId(theRequestPartitionId);
 		IBaseResource group = myDaoRegistry.getResourceDao("Group").read(groupId, requestDetails);
-//		FIXME GGG think more about this cast. How does mongo do this?
+		//		FIXME GGG think more about this cast. How does mongo do this?
 		JpaPid pidOrNull = (JpaPid) myIdHelperService.getPidOrNull(theRequestPartitionId, group);
 		// Attempt to perform MDM Expansion of membership
 		return performMembershipExpansionViaMdmTable(pidOrNull);
-	}@
-		Override
+	}
+
+	@Override
 	public void annotateResource(IBaseResource iBaseResource) {
 		Optional<String> patientReference = getPatientReference(iBaseResource);
 		if (patientReference.isPresent()) {
 			addGoldenResourceExtension(iBaseResource, patientReference.get());
 		} else {
 			ourLog.error(
-				"Failed to find the patient reference information for resource {}. This is a bug, "
-					+ "as all resources which can be exported via Group Bulk Export must reference a patient.",
-				iBaseResource);
+					"Failed to find the patient reference information for resource {}. This is a bug, "
+							+ "as all resources which can be exported via Group Bulk Export must reference a patient.",
+					iBaseResource);
 		}
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private Set<JpaPid> performMembershipExpansionViaMdmTable(JpaPid pidOrNull) {
 		List<MdmPidTuple<JpaPid>> goldenPidTargetPidTuples =
-			myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
+				myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
 
 		Set<JpaPid> uniquePids = new HashSet<>();
 		goldenPidTargetPidTuples.forEach(tuple -> {
@@ -269,29 +268,32 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 		// }
 		Map<String, String> sourceResourceIdToGoldenResourceIdMap = new HashMap<>();
 		goldenResourceToSourcePidMap.forEach((key, value) -> {
-			String goldenResourceId = (String) myIdHelperService.translatePidIdToForcedIdWithCache(key).orElseGet(key::toString);
+			String goldenResourceId = (String)
+					myIdHelperService.translatePidIdToForcedIdWithCache(key).orElseGet(key::toString);
 			PersistentIdToForcedIdMap pidsToForcedIds = myIdHelperService.translatePidsToForcedIds(value);
 
 			Set<String> sourceResourceIds = pidsToForcedIds.getResolvedResourceIds();
 
 			sourceResourceIds.forEach(
-				sourceResourceId -> sourceResourceIdToGoldenResourceIdMap.put(sourceResourceId, goldenResourceId));
+					sourceResourceId -> sourceResourceIdToGoldenResourceIdMap.put(sourceResourceId, goldenResourceId));
 		});
 
 		// Now that we have built our cached expansion, store it.
 		myMdmExpansionCacheSvc.setCacheContents(sourceResourceIdToGoldenResourceIdMap);
 	}
+
 	private void extract(
-		List<MdmPidTuple<JpaPid>> theGoldenPidTargetPidTuples,
-		Map<JpaPid, Set<JpaPid>> theGoldenResourceToSourcePidMap) {
+			List<MdmPidTuple<JpaPid>> theGoldenPidTargetPidTuples,
+			Map<JpaPid, Set<JpaPid>> theGoldenResourceToSourcePidMap) {
 		for (MdmPidTuple<JpaPid> goldenPidTargetPidTuple : theGoldenPidTargetPidTuples) {
 			JpaPid goldenPid = goldenPidTargetPidTuple.getGoldenPid();
 			JpaPid sourcePid = goldenPidTargetPidTuple.getSourcePid();
 			theGoldenResourceToSourcePidMap
-				.computeIfAbsent(goldenPid, key -> new HashSet<>())
-				.add(sourcePid);
+					.computeIfAbsent(goldenPid, key -> new HashSet<>())
+					.add(sourcePid);
 		}
 	}
+
 	private Optional<String> getPatientReference(IBaseResource iBaseResource) {
 		String fhirPath;
 
@@ -302,10 +304,10 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 			return Optional.of(iBaseResource.getIdElement().getIdPart());
 		} else {
 			Optional<IBaseReference> optionalReference =
-				myFhirPath.evaluateFirst(iBaseResource, fhirPath, IBaseReference.class);
+					myFhirPath.evaluateFirst(iBaseResource, fhirPath, IBaseReference.class);
 			if (optionalReference.isPresent()) {
 				return optionalReference.map(theIBaseReference ->
-					theIBaseReference.getReferenceElement().getIdPart());
+						theIBaseReference.getReferenceElement().getIdPart());
 			} else {
 				return Optional.empty();
 			}
@@ -315,7 +317,7 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	private void addGoldenResourceExtension(IBaseResource iBaseResource, String sourceResourceId) {
 		String goldenResourceId = myMdmExpansionCacheSvc.getGoldenResourceId(sourceResourceId);
 		IBaseExtension<?, ?> extension = ExtensionUtil.getOrCreateExtension(
-			iBaseResource, HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
+				iBaseResource, HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
 		if (!StringUtils.isBlank(goldenResourceId)) {
 			ExtensionUtil.setExtension(myContext, extension, "reference", prefixPatient(goldenResourceId));
 		}
@@ -338,11 +340,11 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 
 	private RuntimeSearchParam getRuntimeSearchParam(IBaseResource theResource) {
 		Optional<RuntimeSearchParam> oPatientSearchParam =
-			SearchParameterUtil.getOnlyPatientSearchParamForResourceType(myContext, theResource.fhirType());
+				SearchParameterUtil.getOnlyPatientSearchParamForResourceType(myContext, theResource.fhirType());
 		if (!oPatientSearchParam.isPresent()) {
 			String errorMessage = String.format(
-				"[%s] has  no search parameters that are for patients, so it is invalid for Group Bulk Export!",
-				theResource.fhirType());
+					"[%s] has  no search parameters that are for patients, so it is invalid for Group Bulk Export!",
+					theResource.fhirType());
 			throw new IllegalArgumentException(Msg.code(2242) + errorMessage);
 		} else {
 			return oPatientSearchParam.get();

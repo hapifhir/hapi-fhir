@@ -64,7 +64,8 @@ public interface IMdmSettings {
 	 * EID-Based expansion is supported if MDM is running in MATCH_ONLY mode, and at least one EID system is defined.
 	 */
 	default boolean supportsEidBasedExpansion() {
-		return getMode().equals(MdmModeEnum.MATCH_ONLY) && getMdmRules().getEnterpriseEIDSystems().isEmpty();
+		return getMode().equals(MdmModeEnum.MATCH_ONLY)
+				&& getMdmRules().getEnterpriseEIDSystems().isEmpty();
 	}
 
 	int getCandidateSearchLimit();

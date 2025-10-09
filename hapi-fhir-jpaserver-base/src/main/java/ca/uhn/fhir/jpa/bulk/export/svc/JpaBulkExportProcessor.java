@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -90,16 +91,16 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 	@Autowired
 	public JpaBulkExportProcessor(
-			FhirContext theContext,
-			BulkExportHelperService theBulkExportHelperSvc,
-			JpaStorageSettings theStorageSettings,
-			DaoRegistry theDaoRegistry,
-			SearchBuilderFactory<JpaPid> theSearchBuilderFactory,
-			IIdHelperService<JpaPid> theIdHelperService,
-			EntityManager theEntityManager,
-			IHapiTransactionService theHapiTransactionService,
-			ISearchParamRegistry theSearchParamRegistry
-			) {
+		FhirContext theContext,
+		BulkExportHelperService theBulkExportHelperSvc,
+		JpaStorageSettings theStorageSettings,
+		DaoRegistry theDaoRegistry,
+		SearchBuilderFactory<JpaPid> theSearchBuilderFactory,
+		IIdHelperService<JpaPid> theIdHelperService,
+		EntityManager theEntityManager,
+		IHapiTransactionService theHapiTransactionService,
+		ISearchParamRegistry theSearchParamRegistry,
+		IMdmLinkExpandSvc theMdmLinkExpandSvc) {
 		myContext = theContext;
 		myBulkExportHelperSvc = theBulkExportHelperSvc;
 		myStorageSettings = theStorageSettings;
@@ -109,6 +110,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		myEntityManager = theEntityManager;
 		myHapiTransactionService = theHapiTransactionService;
 		mySearchParamRegistry = theSearchParamRegistry;
+		myMdmLinkExpandSvc = theMdmLinkExpandSvc;
 	}
 
 	@Override

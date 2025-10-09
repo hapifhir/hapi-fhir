@@ -9,7 +9,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Set;
 
-//FIXME GGG unsupportedoperation for all of these.
+// FIXME GGG unsupportedoperation for all of these.
 public class DisabledMdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	@Override
 	public Set<String> expandMdmBySourceResource(RequestPartitionId theRequestPartitionId, IBaseResource theResource) {
@@ -22,17 +22,20 @@ public class DisabledMdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	}
 
 	@Override
-	public Set<String> expandMdmBySourceResourcePid(RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theSourceResourcePid) {
+	public Set<String> expandMdmBySourceResourcePid(
+			RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theSourceResourcePid) {
 		return Set.of();
 	}
 
 	@Override
-	public Set<String> expandMdmByGoldenResourceId(RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theGoldenResourcePid) {
+	public Set<String> expandMdmByGoldenResourceId(
+			RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theGoldenResourcePid) {
 		return Set.of();
 	}
 
 	@Override
-	public Set<String> expandMdmByGoldenResourcePid(RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theGoldenResourcePid) {
+	public Set<String> expandMdmByGoldenResourcePid(
+			RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theGoldenResourcePid) {
 		return Set.of();
 	}
 
@@ -47,7 +50,5 @@ public class DisabledMdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	}
 
 	@Override
-	public void annotateResource(IBaseResource resource) {
-
-	}
+	public void annotateResource(IBaseResource resource) {}
 }

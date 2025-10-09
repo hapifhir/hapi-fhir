@@ -24,7 +24,6 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
-import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -54,7 +53,7 @@ public class MdmSearchExpansionSvc {
 
 	@Autowired
 	private FhirContext myFhirContext;
-	
+
 	@Autowired
 	private IMdmLinkExpandSvc myMdmLinkExpandSvc;
 
@@ -141,7 +140,6 @@ public class MdmSearchExpansionSvc {
 			List<IQueryParameterType> orList,
 			IParamTester theParamTester,
 			MdmSearchExpansionResults theResultsToPopulate) {
-
 
 		List<IQueryParameterType> toRemove = new ArrayList<>();
 		List<IQueryParameterType> toAdd = new ArrayList<>();

@@ -40,8 +40,8 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.*;
 import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * MDM link expansion service that is used when MDM mode is Match-Only and eid systems are defined in Mdm rules.
@@ -57,7 +57,8 @@ public class MdmEidMatchOnlyExpandSvc implements IMdmLinkExpandSvc {
 
 	private FhirContext myFhirContext;
 
-	public MdmEidMatchOnlyExpandSvc(DaoRegistry theDaoRegistry, FhirContext theFhirContext, IIdHelperService theIdHelperService) {
+	public MdmEidMatchOnlyExpandSvc(
+			DaoRegistry theDaoRegistry, FhirContext theFhirContext, IIdHelperService theIdHelperService) {
 		myDaoRegistry = theDaoRegistry;
 		myFhirContext = theFhirContext;
 		myIdHelperService = theIdHelperService;
@@ -159,24 +160,23 @@ public class MdmEidMatchOnlyExpandSvc implements IMdmLinkExpandSvc {
 		FhirTerser terser = myFhirContext.newTerser();
 		// Extract all member.entity references from the Group resource
 		List<IBaseReference> memberEntities =
-			terser.getValues(groupResource, "Group.member.entity", IBaseReference.class);
+				terser.getValues(groupResource, "Group.member.entity", IBaseReference.class);
 		// mdm expand each member based on eid
 		for (IBaseReference entityRef : memberEntities) {
 			if (!entityRef.getReferenceElement().isEmpty()) {
 				IIdType memberId = entityRef.getReferenceElement();
-				Set<String> expanded =
-					this.expandMdmBySourceResourceId(requestPartitionId, memberId);
+				Set<String> expanded = this.expandMdmBySourceResourceId(requestPartitionId, memberId);
 				allResourceIds.addAll(expanded);
 			}
 		}
 		// Convert all resourceIds to IIdType and resolve in batch
 		List<IIdType> idTypes = allResourceIds.stream()
-			.map(id -> myFhirContext.getVersion().newIdType(id))
-			.collect(Collectors.toList());
+				.map(id -> myFhirContext.getVersion().newIdType(id))
+				.collect(Collectors.toList());
 		List<JpaPid> pidList = myIdHelperService.resolveResourcePids(
-			requestPartitionId,
-			idTypes,
-			ResolveIdentityMode.excludeDeleted().cacheOk());
+				requestPartitionId,
+				idTypes,
+				ResolveIdentityMode.excludeDeleted().cacheOk());
 		return new HashSet<>(pidList);
 	}
 
