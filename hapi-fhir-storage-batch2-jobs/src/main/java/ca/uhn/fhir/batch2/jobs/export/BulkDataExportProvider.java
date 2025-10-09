@@ -495,11 +495,11 @@ public class BulkDataExportProvider {
 			case IN_PROGRESS:
 				//noinspection deprecation - we need to support old jobs after upgrade.
 			case ERRORED:
-				if (theRequestDetails.getRequestType() == RequestTypeEnum.DELETE) {
-					handleDeleteRequest(theJobId, response, info.getStatus());
-				} else if (info.isCancelled()) {
-					ourLog.info("{} job instance <{}> is marked cancelled.", info.getStatus(), theJobId);
+				if (info.isCancelled()) {
+					ourLog.info("{} job instance <{}> was marked cancelled.", info.getStatus(), theJobId);
 					processCancelledJobResponse(response, theJobId);
+				} else if (theRequestDetails.getRequestType() == RequestTypeEnum.DELETE) {
+					handleDeleteRequest(theJobId, response, info.getStatus());
 				} else {
 					response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
 					String dateString = getTransitionTimeOfJobInfo(info);
