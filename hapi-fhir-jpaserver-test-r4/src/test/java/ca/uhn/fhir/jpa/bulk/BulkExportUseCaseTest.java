@@ -108,6 +108,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+@ContextConfiguration(classes = {MdmRulesWithEidMatchOnlyConfig.class})
 public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportUseCaseTest.class);
 
@@ -666,7 +667,6 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 
 	@Nested
-	@ContextConfiguration(classes = {MdmRulesWithEidMatchOnlyConfig.class})
 	public class GroupBulkExportTests {
 
 		@Test
@@ -779,6 +779,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 		@Test
 		void testGroupExportWithMdmEnabled_EidMatchOnly() {
+			//FIXME GGG TEST FAILING START HERE.
 
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
 
