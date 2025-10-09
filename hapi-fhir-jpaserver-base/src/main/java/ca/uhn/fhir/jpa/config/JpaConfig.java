@@ -100,12 +100,8 @@ import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
-import ca.uhn.fhir.jpa.packages.JpaPackageCache;
-import ca.uhn.fhir.jpa.packages.NpmJpaValidationSupport;
 import ca.uhn.fhir.jpa.packages.PackageInstallerSvcImpl;
-import ca.uhn.fhir.jpa.packages.util.PackageUtils;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl;
@@ -192,7 +188,6 @@ import ca.uhn.fhir.jpa.util.PartitionedIdModeVerificationSvc;
 import ca.uhn.fhir.jpa.util.PersistenceContextProvider;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
-import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.replacereferences.PreviousResourceVersionRestorer;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
@@ -423,21 +418,6 @@ public class JpaConfig {
 	@Primary
 	public IResourceLinkResolver daoResourceLinkResolver() {
 		return new JpaDaoResourceLinkResolver();
-	}
-
-	@Bean(name = PackageUtils.LOADER_WITH_CACHE)
-	public IHapiPackageCacheManager packageCacheManager() {
-		return new JpaPackageCache();
-	}
-
-	@Bean
-	public NpmJpaValidationSupport npmJpaValidationSupport() {
-		return new NpmJpaValidationSupport();
-	}
-
-	@Bean
-	public ValidationSettings validationSettings() {
-		return new ValidationSettings();
 	}
 
 	@Bean

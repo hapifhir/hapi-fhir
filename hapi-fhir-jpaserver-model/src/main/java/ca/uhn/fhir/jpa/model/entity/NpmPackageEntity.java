@@ -111,4 +111,8 @@ public class NpmPackageEntity {
 	public void setCurrentVersionId(String theCurrentVersionId) {
 		myCurrentVersionId = theCurrentVersionId;
 	}
+
+	public List<NpmPackageVersionEntity> getVersions() {
+		return myVersions;
+	}
 }

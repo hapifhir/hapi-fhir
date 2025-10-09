@@ -90,6 +90,9 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	public void postConstruct() {
 		myWorkerContextValidationSupportAdapter.setValidationSupport(this);
 
+		// FIXME LS - SPOrder
+		//		This ordering is valid for StructureDefinitions
+		//		but not
 		addValidationSupport(myDefaultProfileValidationSupport);
 		addValidationSupport(myJpaValidationSupport);
 		addValidationSupport(myTerminologyService);
