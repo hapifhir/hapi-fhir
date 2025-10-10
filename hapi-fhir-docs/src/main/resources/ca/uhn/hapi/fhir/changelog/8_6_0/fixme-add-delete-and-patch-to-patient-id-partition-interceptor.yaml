@@ -1,0 +1,5 @@
+---
+type: add
+issue: fixme
+title: "The PatientIdPartitionInterceptor now supports the FHIR `delete` and `patch` 
+   operations."
