@@ -52,6 +52,17 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 	}
 
 	@Test
+	public void testTranslateMatchUrl_NoResourceDefinition() {
+		RuntimeResourceDefinition resourceDef = ourCtx.getResourceDefinition(Condition.class);
+		ISearchParamRegistry searchParamRegistry = mock(ISearchParamRegistry.class);
+		when(searchParamRegistry.getActiveSearchParam(any(), eq("patient"), any())).thenReturn(resourceDef.getSearchParam("patient"));
+		SearchParameterMap match = myMatchUrlService.translateMatchUrl("Condition?patient=304&_lastUpdated=>2011-01-01T11:12:21.0000Z", resourceDef);
+		assertEquals("2011-01-01T11:12:21.0000Z", match.getLastUpdated().getLowerBound().getValueAsString());
+		assertEquals(ReferenceParam.class, match.get("patient").get(0).get(0).getClass());
+		assertEquals("304", ((ReferenceParam) match.get("patient").get(0).get(0)).getIdPart());
+	}
+
+	@Test
 	public void testParseNearDistance() {
 		double kmDistance = 123.4;
 

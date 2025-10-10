@@ -313,6 +313,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myRequestPartitionHelperService;
 	}
 
+	@Override
+	protected MatchUrlService getMatchUrlService() {
+		return myMatchUrlService;
+	}
+
 	/**
 	 * @deprecated Use {@link #create(T, RequestDetails)} instead
 	 */

@@ -169,6 +169,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	@Override
 	protected EntriesToProcessMap doTransactionWriteOperations(
 			final RequestDetails theRequest,
+			RequestPartitionId theRequestPartitionId,
 			String theActionName,
 			TransactionDetails theTransactionDetails,
 			Set<IIdType> theAllIds,
@@ -203,15 +204,14 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			myEntityManager.setFlushMode(FlushModeType.COMMIT);
 
 			ITransactionProcessorVersionAdapter<?, ?> versionAdapter = getVersionAdapter();
-			RequestPartitionId requestPartitionId =
-					super.determineRequestPartitionIdForWriteEntries(theRequest, theTransactionDetails, theEntries);
 
-			if (requestPartitionId != null) {
-				preFetch(theRequest, theTransactionDetails, theEntries, versionAdapter, requestPartitionId);
+			if (theRequestPartitionId != null) {
+				preFetch(theRequest, theTransactionDetails, theEntries, versionAdapter, theRequestPartitionId);
 			}
 
 			return super.doTransactionWriteOperations(
 					theRequest,
+					theRequestPartitionId,
 					theActionName,
 					theTransactionDetails,
 					theAllIds,

@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
@@ -10,6 +11,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
@@ -26,11 +28,13 @@ import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.interceptor.ResponseSizeCapturingInterceptor;
+import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -49,7 +53,8 @@ import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -137,8 +142,6 @@ public class TransactionProcessorTest {
 	@MockBean
 	private PartitionSettings myPartitionSettings;
 	@MockBean
-	private MatchUrlService myMatchUrlService;
-	@MockBean
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@MockBean
 	private IResourceVersionSvc myResourceVersionSvc;
@@ -156,6 +159,10 @@ public class TransactionProcessorTest {
 	private ArgumentCaptor<Long> myLongCaptor;
 	@Captor
 	private ArgumentCaptor<Collection<Long>> myLongCollectionCaptor;
+	@Captor
+	private ArgumentCaptor<ReadPartitionIdRequestDetails> myReadPartitionRequestDetailsCaptor;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 
 	@BeforeEach
 	void before() {
@@ -199,6 +206,56 @@ public class TransactionProcessorTest {
 			assertEquals(Msg.code(544) + "Resource MedicationKnowledge is not supported on this server. Supported resource types: [Patient, Practitioner]", e.getMessage());
 		}
 	}
+
+
+	@Test
+	public void testAppropriatePartitionForConditionalDelete() {
+		// Setup
+		when(myPartitionSettings.isPartitioningEnabled()).thenReturn(true);
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequest(any(), any())).thenReturn(RequestPartitionId.fromPartitionId(100));
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionDeleteEntry("Patient?identifier=http://foo|123");
+		Bundle input = bb.getBundleTyped();
+
+		DeleteMethodOutcome value = new DeleteMethodOutcome();
+		value.setDeletedEntities(List.of());
+		when(myPatientDao.deleteByUrl(any(), any(), any(), any())).thenReturn(value);
+
+		// Test
+		myTransactionProcessor.transaction(newSrd(), input, false);
+
+		// Verify
+		verify(myRequestPartitionHelperSvc, times(1)).determineReadPartitionForRequest(any(), myReadPartitionRequestDetailsCaptor.capture());
+		assertEquals(RestOperationTypeEnum.DELETE, myReadPartitionRequestDetailsCaptor.getValue().getRestOperationType());
+		assertEquals("?identifier=http%3A//foo%7C123", myReadPartitionRequestDetailsCaptor.getValue().getSearchParams().toNormalizedQueryString(myFhirContext));
+	}
+
+	@Test
+	public void testAppropriatePartitionForConditionalPatch() {
+		// Setup
+		when(myPartitionSettings.isPartitioningEnabled()).thenReturn(true);
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequest(any(), any())).thenReturn(RequestPartitionId.fromPartitionId(100));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any())).thenReturn(RequestPartitionId.fromPartitionId(100));
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionFhirPatchEntry(new Parameters()).conditional("Patient?identifier=http://foo|123");
+		Bundle input = bb.getBundleTyped();
+
+		DaoMethodOutcome value = new DaoMethodOutcome();
+		value.setId(new IdType("Patient", "123"));
+		value.setCreated(false);
+		when(myPatientDao.patchInTransaction(any(), any(), anyBoolean(), any(), any(), any(), any(), any(), any())).thenReturn(value);
+
+		// Test
+		myTransactionProcessor.transaction(newSrd(), input, false);
+
+		// Verify
+		verify(myRequestPartitionHelperSvc, times(1)).determineReadPartitionForRequest(any(), myReadPartitionRequestDetailsCaptor.capture());
+		assertEquals(RestOperationTypeEnum.PATCH, myReadPartitionRequestDetailsCaptor.getValue().getRestOperationType());
+		assertEquals("?identifier=http%3A//foo%7C123", myReadPartitionRequestDetailsCaptor.getValue().getSearchParams().toNormalizedQueryString(myFhirContext));
+	}
+
 
 
 	@Test
@@ -252,8 +309,6 @@ public class TransactionProcessorTest {
 		bb.addTransactionCreateEntry(new Patient().addGeneralPractitioner(new Reference(PRACTITIONER_MATCH_URL_FOO_123)));
 		Bundle input = bb.getBundleTyped();
 
-		when(myMatchUrlService.translateMatchUrl(eq(PRACTITIONER_MATCH_URL_FOO_123), any())).thenReturn(PRACTITIONER_MATCH_URL_FOO_123_SP_MAP);
-
 		mockPreFetchHashCapture();
 		mockPatientDaoCreate();
 
@@ -284,9 +339,6 @@ public class TransactionProcessorTest {
 		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(any(), any(), eq("Patient"))).thenReturn(RequestPartitionId.fromPartitionId(100));
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_123_SP_MAP))).thenReturn(RequestPartitionId.fromPartitionId(123));
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_456_SP_MAP))).thenReturn(RequestPartitionId.fromPartitionId(456));
-
-		when(myMatchUrlService.translateMatchUrl(eq(PRACTITIONER_MATCH_URL_FOO_123), any())).thenReturn(PRACTITIONER_MATCH_URL_FOO_123_SP_MAP);
-		when(myMatchUrlService.translateMatchUrl(eq(PRACTITIONER_MATCH_URL_FOO_456), any())).thenReturn(PRACTITIONER_MATCH_URL_FOO_456_SP_MAP);
 
 		mockPreFetchHashCapture();
 		mockPatientDaoCreate();
@@ -323,9 +375,6 @@ public class TransactionProcessorTest {
 		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(any(), any(), eq("Patient"))).thenReturn(RequestPartitionId.fromPartitionId(100));
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_123_SP_MAP))).thenReturn(RequestPartitionId.fromPartitionId(123));
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_456_SP_MAP))).thenReturn(RequestPartitionId.fromPartitionId(456));
-
-		when(myMatchUrlService.translateMatchUrl(eq(PRACTITIONER_MATCH_URL_FOO_123), any())).thenReturn(PRACTITIONER_MATCH_URL_FOO_123_SP_MAP);
-		when(myMatchUrlService.translateMatchUrl(eq(PRACTITIONER_MATCH_URL_FOO_456), any())).thenReturn(PRACTITIONER_MATCH_URL_FOO_456_SP_MAP);
 
 		myHapiTransactionService.addNonCompatiblePartition(RequestPartitionId.fromPartitionId(123), RequestPartitionId.fromPartitionId(456));
 
@@ -375,6 +424,16 @@ public class TransactionProcessorTest {
 			DaoRegistry retVal = new DaoRegistry(fhirContext());
 			retVal.setResourceDaos(List.of());
 			return retVal;
+		}
+
+		@Bean
+		public ISearchParamRegistry myISearchParamRegistry(FhirContext theFhirContext) {
+			return new FhirContextSearchParamRegistry(theFhirContext);
+		}
+
+		@Bean
+		public MatchUrlService myMatchUrlService() {
+			return new MatchUrlService();
 		}
 
 		@Bean
