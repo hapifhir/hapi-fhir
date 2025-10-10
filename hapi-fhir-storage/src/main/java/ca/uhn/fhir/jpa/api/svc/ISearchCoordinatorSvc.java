@@ -52,7 +52,8 @@ public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 			String theResourceType,
 			CacheControlDirective theCacheControlDirective,
 			@Nullable RequestDetails theRequestDetails) {
-		return registerSearch(theCallingDao, theParams, theResourceType, theCacheControlDirective, theRequestDetails, null);
+		return registerSearch(
+				theCallingDao, theParams, theResourceType, theCacheControlDirective, theRequestDetails, null);
 	}
 
 	/**
