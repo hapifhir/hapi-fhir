@@ -238,7 +238,7 @@ public class UrlUtil {
 	 *                       Set this to false if you are escaping a query parameter value, since slashes
 	 *                       will be more readable in the URL than the percent-encoded version. If you
 	 *                       aren't sure where the escaped version will appear, always set this to
-	 *                       <code>true</code>, or just call {@link #escapeUrlParam(String)} instead.
+	 *                       <code>false</code>, or just call {@link #escapeUrlParam(String)} instead.
 	 * @since 8.6.0
 	 */
 	public static String escapeUrlParam(String theUnescaped, boolean theEscapeSlash) {

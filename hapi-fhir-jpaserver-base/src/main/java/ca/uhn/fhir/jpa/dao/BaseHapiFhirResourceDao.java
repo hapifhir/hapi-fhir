@@ -417,7 +417,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	/**
-	 * Tests whether a resource is non-null, and throws a {@link PreconditionFailedException}
+	 * Tests whether a resource is non-null, and throws a {@link InvalidRequestException}
 	 * with a message explaining that the body must not be missing on a create/update
 	 * request.
 	 */
