@@ -65,7 +65,7 @@ public interface IMdmSettings {
 	 */
 	default boolean supportsEidBasedExpansion() {
 		return getMode().equals(MdmModeEnum.MATCH_ONLY)
-				&& getMdmRules().getEnterpriseEIDSystems().isEmpty();
+				&& !getMdmRules().getEnterpriseEIDSystems().isEmpty();
 	}
 
 	int getCandidateSearchLimit();
