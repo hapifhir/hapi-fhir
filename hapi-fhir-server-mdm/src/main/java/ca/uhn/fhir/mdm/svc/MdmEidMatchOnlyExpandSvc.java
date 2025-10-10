@@ -58,7 +58,10 @@ public class MdmEidMatchOnlyExpandSvc implements IMdmLinkExpandSvc {
 	private FhirContext myFhirContext;
 
 	public MdmEidMatchOnlyExpandSvc(
-		DaoRegistry theDaoRegistry, FhirContext theFhirContext, IIdHelperService theIdHelperService, EIDHelper theEidHelper) {
+			DaoRegistry theDaoRegistry,
+			FhirContext theFhirContext,
+			IIdHelperService theIdHelperService,
+			EIDHelper theEidHelper) {
 		myDaoRegistry = theDaoRegistry;
 		myFhirContext = theFhirContext;
 		myIdHelperService = theIdHelperService;
