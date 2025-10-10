@@ -1447,7 +1447,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 			assertThat(allSearchUrls).hasSize(2);
 
-			final String resolvedSearchUrl = "Task?identifier=http%3A%2F%2Ftempuri.org%7C1";
+			final String resolvedSearchUrl = "Task?identifier=http%3A//tempuri.org%7C1";
 
 			final ResourceSearchUrlEntity resourceSearchUrlEntity1 = allSearchUrls.get(0);
 			final ResourceSearchUrlEntity resourceSearchUrlEntity2 = allSearchUrls.get(1);

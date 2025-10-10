@@ -183,6 +183,15 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 		return this;
 	}
 
+	/**
+	 * Returns <code>true</code> if this parameter has a chain value (i.e. {@link #getChain()} will not return null or an empty string)
+	 *
+	 * @since 8.6.0
+	 */
+	public boolean hasChain() {
+		return isNotBlank(myChain);
+	}
+
 	public String getChain() {
 		return myChain;
 	}
