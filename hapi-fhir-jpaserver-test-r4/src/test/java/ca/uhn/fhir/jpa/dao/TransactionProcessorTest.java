@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
@@ -50,6 +51,7 @@ import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.MedicationKnowledge;
 import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
@@ -81,12 +83,17 @@ import java.util.List;
 import static ca.uhn.fhir.jpa.test.BaseJpaTest.newSrd;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -325,6 +332,74 @@ public class TransactionProcessorTest {
 	}
 
 	@Test
+	public void testPreFetch_ConditionalCreate_IncludePayloadInPartitionRequest() {
+		// Setup
+		when(myPartitionSettings.isPartitioningEnabled()).thenReturn(true);
+		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(any(), any(), any())).thenReturn(RequestPartitionId.fromPartitionId(100));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any())).thenReturn(RequestPartitionId.fromPartitionId(100));
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(
+			new Patient().setActive(true)
+		).conditional("Patient?identifier=http://foo|123");
+		Bundle input = bb.getBundleTyped();
+
+		when(myInMemoryResourceMatcher.canBeEvaluatedInMemory(any())).thenReturn(InMemoryMatchResult.unsupportedFromReason("Foo"));
+
+		mockPreFetchHashCapture();
+		mockPatientDaoCreate();
+
+		// Test
+
+		myTransactionProcessor.transaction(newSrd(), input, false);
+
+		// Verify
+		verify(myRequestPartitionHelperSvc, times(1)).determineCreatePartitionForRequest(any(), notNull(), eq("Patient"));
+		verify(myRequestPartitionHelperSvc, times(1)).determineReadPartitionForRequestForSearchType(any(), eq("Patient"), any(), notNull());
+		verify(myRequestPartitionHelperSvc, atLeastOnce()).isDefaultPartition(any());
+		verifyNoMoreInteractions(myRequestPartitionHelperSvc);
+
+		// Only 1 pre-fetch covering all 3 URLs
+		verify(myEntityManager, times(1)).createQuery(anyCriteriaQuery());
+		verify(myCriteriaBuilder, times(1)).equal(any(), myLongCaptor.capture());
+		assertEquals(-4132452001562191669L, myLongCaptor.getValue());
+	}
+
+	@Test
+	public void testPreFetch_ConditionalUpdate_IncludePayloadInPartitionRequest() {
+		// Setup
+		when(myPartitionSettings.isPartitioningEnabled()).thenReturn(true);
+		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(any(), any(), any())).thenReturn(RequestPartitionId.fromPartitionId(100));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any())).thenReturn(RequestPartitionId.fromPartitionId(100));
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(
+			new Patient().setActive(true)
+		).conditional("Patient?identifier=http://foo|123");
+		Bundle input = bb.getBundleTyped();
+
+		when(myInMemoryResourceMatcher.canBeEvaluatedInMemory(any())).thenReturn(InMemoryMatchResult.unsupportedFromReason("Foo"));
+
+		mockPreFetchHashCapture();
+		mockPatientDaoUpdate();
+
+		// Test
+
+		myTransactionProcessor.transaction(newSrd(), input, false);
+
+		// Verify
+		verify(myRequestPartitionHelperSvc, times(1)).determineCreatePartitionForRequest(any(), notNull(), eq("Patient"));
+		verify(myRequestPartitionHelperSvc, times(1)).determineReadPartitionForRequestForSearchType(any(), eq("Patient"), any(), notNull());
+		verify(myRequestPartitionHelperSvc, atLeastOnce()).isDefaultPartition(any());
+		verifyNoMoreInteractions(myRequestPartitionHelperSvc);
+
+		// Only 1 pre-fetch covering all 3 URLs
+		verify(myEntityManager, times(1)).createQuery(anyCriteriaQuery());
+		verify(myCriteriaBuilder, times(1)).equal(any(), myLongCaptor.capture());
+		assertEquals(-4132452001562191669L, myLongCaptor.getValue());
+	}
+
+	@Test
 	public void testPreFetch_CollapseDuplicates_MultiplePartitions_CompatiblePartitions() {
 		// Setup
 		when(myPartitionSettings.isPartitioningEnabled()).thenReturn(true);
@@ -409,6 +484,13 @@ public class TransactionProcessorTest {
 		outcome.setId(new IdType("Patient/A"));
 		outcome.setCreated(true);
 		when(myPatientDao.create(any(), any(), anyBoolean(), any(), any())).thenReturn(outcome);
+	}
+
+	private void mockPatientDaoUpdate() {
+		DaoMethodOutcome outcome = new DaoMethodOutcome();
+		outcome.setId(new IdType("Patient/A/_history/1"));
+		outcome.setCreated(true);
+		when(myPatientDao.update(any(), any(), anyBoolean(), anyBoolean(), any(), any())).thenReturn(outcome);
 	}
 
 	private static CriteriaQuery<?> anyCriteriaQuery() {

@@ -58,6 +58,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SetMultimap;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.FlushModeType;
 import jakarta.persistence.PersistenceContext;
@@ -585,9 +586,14 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					resourceType = myFhirContext.getResourceType(resource);
 				}
 				if (("PUT".equals(verb) || "PATCH".equals(verb)) && requestUrl != null && requestUrl.contains("?")) {
+					IBaseResource associatedResource = null;
+					if ("PUT".equals(verb)) {
+						associatedResource = resource;
+					}
 					processConditionalUrlForPreFetching(
 							theRequestPartitionId,
 							resourceType,
+							associatedResource,
 							requestUrl,
 							true,
 							false,
@@ -598,6 +604,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					processConditionalUrlForPreFetching(
 							theRequestPartitionId,
 							resourceType,
+							resource,
 							requestIfNoneExist,
 							false,
 							true,
@@ -618,6 +625,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 							processConditionalUrlForPreFetching(
 									theRequestPartitionId,
 									refResourceType,
+									null,
 									referenceUrl,
 									false,
 									false,
@@ -709,7 +717,10 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			RequestPartitionId partition = RequestPartitionId.allPartitions();
 			if (myPartitionSettings.isPartitioningEnabled()) {
 				partition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-						theRequestDetails, next.myResourceDefinition.getName(), next.myMatchUrlSearchMap);
+						theRequestDetails,
+						next.myResourceDefinition.getName(),
+						next.myMatchUrlSearchMap,
+						next.getAssociatedResource());
 				if (partition.isAllPartitions()) {
 					partition = theOuterRequestPartitionId;
 				}
@@ -1014,6 +1025,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	private void processConditionalUrlForPreFetching(
 			RequestPartitionId thePartitionId,
 			String theResourceType,
+			@Nullable IBaseResource theAssociatedResource,
 			String theRequestUrl,
 			boolean theShouldPreFetchResourceBody,
 			boolean theShouldPreFetchResourceVersion,
@@ -1035,6 +1047,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			assert matchUrlSearchMap != null;
 			theOutputSearchParameterMapsToResolve.add(new MatchUrlToResolve(
 					theRequestUrl,
+					theAssociatedResource,
 					matchUrlSearchMap,
 					resourceDefinition,
 					theShouldPreFetchResourceBody,
@@ -1182,12 +1195,15 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		private final RuntimeResourceDefinition myResourceDefinition;
 		private final boolean myShouldPreFetchResourceBody;
 		private final boolean myShouldPreFetchResourceVersion;
+		private final IBaseResource myAssociatedResource;
+
 		public boolean myResolved;
 		private Long myHashValue;
 		private Long myHashSystemAndValue;
 
 		public MatchUrlToResolve(
 				@Nonnull String theRequestUrl,
+				@Nullable IBaseResource theAssociatedResource,
 				@Nonnull SearchParameterMap theMatchUrlSearchMap,
 				@Nonnull RuntimeResourceDefinition theResourceDefinition,
 				boolean theShouldPreFetchResourceBody,
@@ -1195,11 +1211,16 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			Validate.notNull(theRequestUrl, "theRequestUrl must not be null");
 			Validate.notNull(theMatchUrlSearchMap, "theMatchUrlSearchMap must not be null");
 			Validate.notNull(theResourceDefinition, "theResourceDefinition must not be null");
+			myAssociatedResource = theAssociatedResource;
 			myRequestUrl = theRequestUrl;
 			myMatchUrlSearchMap = theMatchUrlSearchMap;
 			myResourceDefinition = theResourceDefinition;
 			myShouldPreFetchResourceBody = theShouldPreFetchResourceBody;
 			myShouldPreFetchResourceVersion = theShouldPreFetchResourceVersion;
+		}
+
+		public IBaseResource getAssociatedResource() {
+			return myAssociatedResource;
 		}
 
 		public void setResolved(boolean theResolved) {

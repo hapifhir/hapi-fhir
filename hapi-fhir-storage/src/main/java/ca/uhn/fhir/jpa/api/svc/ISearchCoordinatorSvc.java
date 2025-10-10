@@ -43,6 +43,19 @@ public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 			RequestPartitionId theRequestPartitionId);
 
 	/**
+	 * @deprecated Use {@link #registerSearch(IFhirResourceDao, SearchParameterMap, String, CacheControlDirective, RequestDetails, RequestPartitionId)} instead
+	 */
+	@Deprecated(since = "8.6.0", forRemoval = true)
+	default IBundleProvider registerSearch(
+			IFhirResourceDao<?> theCallingDao,
+			SearchParameterMap theParams,
+			String theResourceType,
+			CacheControlDirective theCacheControlDirective,
+			@Nullable RequestDetails theRequestDetails) {
+		return registerSearch(theCallingDao, theParams, theResourceType, theCacheControlDirective, theRequestDetails, null);
+	}
+
+	/**
 	 * @param theRequestPartitionId This parameter should only be provided if a fixed partition should
 	 *                              be used for the search. If set to <code>null</code> (which is generally
 	 *                              the right thing to do), the partition will be determined by the
