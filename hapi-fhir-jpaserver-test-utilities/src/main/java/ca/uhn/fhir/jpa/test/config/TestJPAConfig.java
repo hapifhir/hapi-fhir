@@ -43,9 +43,7 @@ import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookListener
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.util.LoggingEmailSender;
 import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
-import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.system.HapiTestSystemProperties;
 import jakarta.persistence.EntityManagerFactory;
