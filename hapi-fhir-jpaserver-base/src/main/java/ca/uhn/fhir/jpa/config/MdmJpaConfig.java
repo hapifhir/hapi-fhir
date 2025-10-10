@@ -40,8 +40,6 @@ import ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.Optional;
-
 @Configuration
 public class MdmJpaConfig {
 
@@ -55,11 +53,11 @@ public class MdmJpaConfig {
 			DaoRegistry theDaoRegistry,
 			FhirContext theFhirContext,
 			IIdHelperService theIdHelperService) {
-			if (theMdmSettings.supportsLinkBasedExpansion()) {
-				return new MdmLinkExpandSvc();
-			} else if (theMdmSettings.supportsEidBasedExpansion()) {
-				return new MdmEidMatchOnlyExpandSvc(theDaoRegistry, theFhirContext, theIdHelperService);
-			}
+		if (theMdmSettings.supportsLinkBasedExpansion()) {
+			return new MdmLinkExpandSvc();
+		} else if (theMdmSettings.supportsEidBasedExpansion()) {
+			return new MdmEidMatchOnlyExpandSvc(theDaoRegistry, theFhirContext, theIdHelperService);
+		}
 		return new DisabledMdmLinkExpandSvc();
 	}
 

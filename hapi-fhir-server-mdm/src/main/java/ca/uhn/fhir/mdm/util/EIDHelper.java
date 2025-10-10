@@ -26,7 +26,6 @@ import ca.uhn.fhir.mdm.model.CanonicalEID;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;

@@ -39,16 +39,16 @@ import org.springframework.context.annotation.Configuration;
 public class JpaBulkExportConfig {
 	@Bean
 	public IBulkExportProcessor<JpaPid> jpaBulkExportProcessor(
-		FhirContext theFhirContext,
-		BulkExportHelperService theBulkExportHelperService,
-		JpaStorageSettings theJpaStorageSettings,
-		DaoRegistry theDaoRegistry,
-		SearchBuilderFactory<JpaPid> theSearchBuilderFactory,
-		IIdHelperService<JpaPid> theIdHelperService,
-		EntityManager theEntityManager,
-		IHapiTransactionService theHapiTransactionService,
-		ISearchParamRegistry theSearchParamRegistry,
-		IMdmLinkExpandSvc theMdmLinkExpandSvc) {
+			FhirContext theFhirContext,
+			BulkExportHelperService theBulkExportHelperService,
+			JpaStorageSettings theJpaStorageSettings,
+			DaoRegistry theDaoRegistry,
+			SearchBuilderFactory<JpaPid> theSearchBuilderFactory,
+			IIdHelperService<JpaPid> theIdHelperService,
+			EntityManager theEntityManager,
+			IHapiTransactionService theHapiTransactionService,
+			ISearchParamRegistry theSearchParamRegistry,
+			IMdmLinkExpandSvc theMdmLinkExpandSvc) {
 		return new JpaBulkExportProcessor(
 				theFhirContext,
 				theBulkExportHelperService,
