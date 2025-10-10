@@ -1411,7 +1411,7 @@ public enum Pointcut implements IPointcut {
 	 * partition selection.
 	 * <p>
 	 * This hook is called shortly before {@link #STORAGE_PRESEARCH_REGISTERED}. It is not
-	 * called if the search has an explicit partition already selecte.
+	 * called if the search has an explicit partition already selected.
 	 * </p>
 	 * <p>
 	 * Hooks may accept the following parameters:
