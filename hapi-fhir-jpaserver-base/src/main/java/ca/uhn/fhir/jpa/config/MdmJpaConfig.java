@@ -37,29 +37,12 @@ import ca.uhn.fhir.mdm.svc.DisabledMdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.svc.MdmEidMatchOnlyExpandSvc;
 import ca.uhn.fhir.mdm.svc.MdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc;
+import ca.uhn.fhir.mdm.util.EIDHelper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class MdmJpaConfig {
-
-	/**
-	 * Based on the rules laid out in the {@link IMdmSettings} file, construct an {@link IMdmLinkExpandSvc} that is suitable
-	 */
-	//	FIXME GGG Why are we even loading this whole config file if MDM is disabled?!?!
-	@Bean
-	public IMdmLinkExpandSvc mdmLinkExpandSvc(
-			IMdmSettings theMdmSettings,
-			DaoRegistry theDaoRegistry,
-			FhirContext theFhirContext,
-			IIdHelperService theIdHelperService) {
-		if (theMdmSettings.supportsLinkBasedExpansion()) {
-			return new MdmLinkExpandSvc();
-		} else if (theMdmSettings.supportsEidBasedExpansion()) {
-			return new MdmEidMatchOnlyExpandSvc(theDaoRegistry, theFhirContext, theIdHelperService);
-		}
-		return new DisabledMdmLinkExpandSvc();
-	}
 
 	@Bean
 	public MdmSearchExpansionSvc mdmSearchExpansionSvc() {
@@ -74,6 +57,29 @@ public class MdmJpaConfig {
 	@Bean
 	public IMdmLinkImplFactory<MdmLink> mdmLinkImplFactory() {
 		return new JpaMdmLinkImplFactory();
+	}
+	/**
+	 * Based on the rules laid out in the {@link IMdmSettings} file, construct an {@link IMdmLinkExpandSvc} that is suitable
+	 */
+	//	FIXME GGG Why are we even loading this whole config file if MDM is disabled?!?!
+	@Bean
+	public IMdmLinkExpandSvc mdmLinkExpandSvc(
+		EIDHelper theEidHelper,
+		IMdmSettings theMdmSettings,
+		DaoRegistry theDaoRegistry,
+		FhirContext theFhirContext,
+		IIdHelperService theIdHelperService) {
+		if (theMdmSettings.supportsLinkBasedExpansion()) {
+			return new MdmLinkExpandSvc();
+		} else if (theMdmSettings.supportsEidBasedExpansion()) {
+			return new MdmEidMatchOnlyExpandSvc(theDaoRegistry, theFhirContext, theIdHelperService, theEidHelper);
+		}
+		return new DisabledMdmLinkExpandSvc();
+	}
+
+	@Bean
+	EIDHelper eidHelper(FhirContext theFhirContext, IMdmSettings theMdmSettings) {
+		return new EIDHelper(theFhirContext, theMdmSettings);
 	}
 
 	@Bean

@@ -229,6 +229,7 @@ public class MdmConsumerConfig {
 		return new MdmLinkCreateSvcImpl();
 	}
 
+
 	@Bean
 	MdmLoader mdmLoader() {
 		return new MdmLoader();
