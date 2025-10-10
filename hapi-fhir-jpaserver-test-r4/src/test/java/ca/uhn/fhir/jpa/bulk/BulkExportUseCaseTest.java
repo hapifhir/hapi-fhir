@@ -22,12 +22,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
-import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.api.MdmModeEnum;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
-import ca.uhn.fhir.mdm.rules.config.MdmSettings;
-import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -78,8 +73,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
@@ -107,7 +100,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-
+//TODO GGG: we should be splitting out tests that enable MDM, as otherwise I am adding MDM config to all these tests for no reason.
 @ContextConfiguration(classes = {MdmRulesWithEidMatchOnlyConfig.class})
 public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportUseCaseTest.class);
@@ -777,10 +770,9 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			assertThat(firstMap.get("Patient")).hasSize(1);
 			assertThat(firstMap.get("Group")).hasSize(1);
 		}
+
 		@Test
 		void testGroupExportWithMdmEnabled_EidMatchOnly() {
-			//FIXME GGG TEST FAILING START HERE.
-
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
 
 			//In this test, we create two patients with the same Eid value for the eid system specified in mdm rules
