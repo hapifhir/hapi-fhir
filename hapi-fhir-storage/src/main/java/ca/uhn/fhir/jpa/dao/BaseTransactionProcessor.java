@@ -48,6 +48,8 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
@@ -198,6 +200,9 @@ public abstract class BaseTransactionProcessor {
 
 	@Autowired
 	private SearchParamMatcher mySearchParamMatcher;
+
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 
 	@Autowired
 	private ThreadPoolFactory myThreadPoolFactory;
@@ -873,6 +878,9 @@ public abstract class BaseTransactionProcessor {
 					writeOperationsDetails);
 		}
 
+		RequestPartitionId requestPartitionId =
+				determineRequestPartitionIdForWriteEntries(theRequestDetails, theTransactionDetails, theEntries);
+
 		TransactionCallback<EntriesToProcessMap> txCallback = status -> {
 			final Set<IIdType> allIds = new LinkedHashSet<>();
 			final IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
@@ -880,6 +888,7 @@ public abstract class BaseTransactionProcessor {
 
 			EntriesToProcessMap retVal = doTransactionWriteOperations(
 					theRequestDetails,
+					requestPartitionId,
 					theActionName,
 					theTransactionDetails,
 					allIds,
@@ -894,9 +903,6 @@ public abstract class BaseTransactionProcessor {
 			return retVal;
 		};
 		EntriesToProcessMap entriesToProcess;
-
-		RequestPartitionId requestPartitionId =
-				determineRequestPartitionIdForWriteEntries(theRequestDetails, theTransactionDetails, theEntries);
 
 		try {
 			entriesToProcess = myHapiTransactionService
@@ -974,26 +980,52 @@ public abstract class BaseTransactionProcessor {
 				case DELETE: {
 					String requestUrl = myVersionAdapter.getEntryRequestUrl(theEntry);
 					if (isNotBlank(requestUrl)) {
-						IdType id = new IdType(requestUrl);
-						String resourceType = id.getResourceType();
-						ReadPartitionIdRequestDetails details =
-								ReadPartitionIdRequestDetails.forDelete(resourceType, id);
-						nextWriteEntryRequestPartitionId =
-								myRequestPartitionHelperService.determineReadPartitionForRequest(
-										requestDetailsForEntry, details);
+						if (requestUrl.indexOf('?') != -1) {
+							MatchUrlService.ResourceTypeAndSearchParameterMap typeAndParams =
+									myMatchUrlService.parseAndTranslateMatchUrl(requestUrl);
+							SearchParameterMap params = typeAndParams.searchParameterMap();
+							String resourceType =
+									typeAndParams.resourceDefinition().getName();
+							ReadPartitionIdRequestDetails details =
+									ReadPartitionIdRequestDetails.forDelete(resourceType, params);
+							nextWriteEntryRequestPartitionId =
+									myRequestPartitionHelperService.determineReadPartitionForRequest(
+											requestDetailsForEntry, details);
+						} else {
+							IdType id = new IdType(requestUrl);
+							String resourceType = id.getResourceType();
+							ReadPartitionIdRequestDetails details =
+									ReadPartitionIdRequestDetails.forDelete(resourceType, id);
+							nextWriteEntryRequestPartitionId =
+									myRequestPartitionHelperService.determineReadPartitionForRequest(
+											requestDetailsForEntry, details);
+						}
 					}
 					break;
 				}
 				case PATCH: {
 					String requestUrl = myVersionAdapter.getEntryRequestUrl(theEntry);
 					if (isNotBlank(requestUrl)) {
-						IdType id = new IdType(requestUrl);
-						String resourceType = id.getResourceType();
-						ReadPartitionIdRequestDetails details =
-								ReadPartitionIdRequestDetails.forPatch(resourceType, id);
-						nextWriteEntryRequestPartitionId =
-								myRequestPartitionHelperService.determineReadPartitionForRequest(
-										requestDetailsForEntry, details);
+						if (requestUrl.indexOf('?') != -1) {
+							MatchUrlService.ResourceTypeAndSearchParameterMap typeAndParams =
+									myMatchUrlService.parseAndTranslateMatchUrl(requestUrl);
+							SearchParameterMap params = typeAndParams.searchParameterMap();
+							String resourceType =
+									typeAndParams.resourceDefinition().getName();
+							ReadPartitionIdRequestDetails details =
+									ReadPartitionIdRequestDetails.forPatch(resourceType, params);
+							nextWriteEntryRequestPartitionId =
+									myRequestPartitionHelperService.determineReadPartitionForRequest(
+											requestDetailsForEntry, details);
+						} else {
+							IdType id = new IdType(requestUrl);
+							String resourceType = id.getResourceType();
+							ReadPartitionIdRequestDetails details =
+									ReadPartitionIdRequestDetails.forPatch(resourceType, id);
+							nextWriteEntryRequestPartitionId =
+									myRequestPartitionHelperService.determineReadPartitionForRequest(
+											requestDetailsForEntry, details);
+						}
 					}
 					break;
 				}
@@ -1314,6 +1346,7 @@ public abstract class BaseTransactionProcessor {
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	protected EntriesToProcessMap doTransactionWriteOperations(
 			final RequestDetails theRequest,
+			RequestPartitionId theRequestPartitionId,
 			String theActionName,
 			TransactionDetails theTransactionDetails,
 			Set<IIdType> theAllIds,
@@ -1589,7 +1622,8 @@ public abstract class BaseTransactionProcessor {
 								patchBody,
 								patchBodyParameters,
 								requestDetailsForEntry,
-								theTransactionDetails);
+								theTransactionDetails,
+								theRequestPartitionId);
 						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
 						updatedEntities.add(outcome.getEntity());
 						if (outcome.getResource() != null) {

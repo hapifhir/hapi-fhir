@@ -30,6 +30,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Compartment;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -478,10 +479,22 @@ public class SearchParameterUtil {
 
 			if (firstSegment) {
 				firstSegment = false;
+				// The first segment is typically just the resource name, and we assume it is
+				// as long as the first character is upper case.
 				if (Character.isUpperCase(currentSegment.charAt(0))) {
-					// This is just the resource name
+
+					// If we're in forward-include mode, and the first segment is the resource type,
+					// we can ignore any paths where the resource type isn't actually the one
+					// we're matching on
 					if (!theReverse && !theResourceType.equals(currentSegment)) {
 						return false;
+					}
+
+					// Set the working definition to be the resource type specified in the path
+					try {
+						currentDef = theContext.getResourceDefinition(currentSegment);
+					} catch (DataFormatException e) {
+						ourLog.warn("Search parameter path defines an invalid resource type: {}", currentSegment);
 					}
 					continue;
 				}

@@ -905,4 +905,50 @@ public class SearchParameterMap implements Serializable {
 
 		return Collections.unmodifiableList(allChainsInOrder);
 	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (!(theO instanceof SearchParameterMap that)) return false;
+		return myLoadSynchronous == that.myLoadSynchronous
+				&& myLastN == that.myLastN
+				&& myDeleteExpunge == that.myDeleteExpunge
+				&& Objects.equals(mySearchParameterMap, that.mySearchParameterMap)
+				&& Objects.equals(myCount, that.myCount)
+				&& Objects.equals(myOffset, that.myOffset)
+				&& myEverythingMode == that.myEverythingMode
+				&& Objects.equals(myIncludes, that.myIncludes)
+				&& Objects.equals(myLastUpdated, that.myLastUpdated)
+				&& Objects.equals(myLoadSynchronousUpTo, that.myLoadSynchronousUpTo)
+				&& Objects.equals(myRevIncludes, that.myRevIncludes)
+				&& Objects.equals(mySort, that.mySort)
+				&& mySummaryMode == that.mySummaryMode
+				&& mySearchTotalMode == that.mySearchTotalMode
+				&& Objects.equals(myNearDistanceParam, that.myNearDistanceParam)
+				&& Objects.equals(myLastNMax, that.myLastNMax)
+				&& mySearchContainedMode == that.mySearchContainedMode
+				&& mySearchIncludeDeletedMode == that.mySearchIncludeDeletedMode;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(
+				mySearchParameterMap,
+				myCount,
+				myOffset,
+				myEverythingMode,
+				myIncludes,
+				myLastUpdated,
+				myLoadSynchronous,
+				myLoadSynchronousUpTo,
+				myRevIncludes,
+				mySort,
+				mySummaryMode,
+				mySearchTotalMode,
+				myNearDistanceParam,
+				myLastN,
+				myLastNMax,
+				myDeleteExpunge,
+				mySearchContainedMode,
+				mySearchIncludeDeletedMode);
+	}
 }

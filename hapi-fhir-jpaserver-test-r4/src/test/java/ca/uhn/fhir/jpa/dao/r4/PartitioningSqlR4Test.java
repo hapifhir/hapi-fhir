@@ -663,7 +663,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		input.setType(Bundle.BundleType.TRANSACTION);
 
 		// tx requires two calls for pre-fetch and tx boundary
-		addNextTargetPartitionForCreateInTransaction(myPartitionId, myPartitionDate);
+		addNextTargetPartitionForCreateW(myPartitionId, myPartitionDate);
 		Organization org = new Organization();
 		org.setId(IdType.newRandomUuid());
 		org.setName("org");

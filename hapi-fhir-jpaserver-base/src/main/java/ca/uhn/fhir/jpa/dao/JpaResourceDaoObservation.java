@@ -73,8 +73,7 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 				theSearchParameterMap,
 				getResourceName(),
 				new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL)),
-				theRequestDetails,
-				null);
+				theRequestDetails);
 	}
 
 	private String getEffectiveParamName() {

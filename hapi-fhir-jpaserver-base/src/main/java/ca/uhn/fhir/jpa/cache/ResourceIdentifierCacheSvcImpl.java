@@ -24,7 +24,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIdentifierPatientUniqueEntityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIdentifierSystemEntityDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.ResourceIdentifierPatientUniqueEntity;
-import ca.uhn.fhir.jpa.model.entity.ResourceIdentifierSystemEntity;
+import ca.uhn.fhir.jpa.model.entity.ResourceSystemEntity;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -91,7 +91,7 @@ public class ResourceIdentifierCacheSvcImpl implements IResourceIdentifierCacheS
 								Long newPid = lookupResourceIdentifierSystemFromCacheOrDatabase(
 										theRequestDetails, theRequestPartitionId, theSystem);
 								if (newPid == null) {
-									ResourceIdentifierSystemEntity newEntity = new ResourceIdentifierSystemEntity();
+									ResourceSystemEntity newEntity = new ResourceSystemEntity();
 									newEntity.setSystem(theSystem);
 									newEntity = myResourceIdentifierSystemEntityDao.save(newEntity);
 									assert newEntity.getPid() != null;

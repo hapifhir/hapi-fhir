@@ -76,19 +76,19 @@ public class ModifiableBundleEntry {
 		return myBundleEntryParts.getConditionalUrl();
 	}
 
-	public void setRequestIfNoneMatch(FhirContext theFhirContext, String ifNoneMatch) {
-		myBundleEntryMutator.setRequestIfNoneMatch(ifNoneMatch);
+	public void setRequestIfNoneMatch(String theIfNoneMatch) {
+		myBundleEntryMutator.setRequestIfNoneMatch(theIfNoneMatch);
 	}
 
-	public void setRequestIfModifiedSince(FhirContext theFhirContext, Date theModifiedSince) {
+	public void setRequestIfModifiedSince(Date theModifiedSince) {
 		myBundleEntryMutator.setRequestIfModifiedSince(theModifiedSince);
 	}
 
-	public void setRequestIfMatch(FhirContext theFhirContext, String theIfMatch) {
+	public void setRequestIfMatch(String theIfMatch) {
 		myBundleEntryMutator.setRequestIfMatch(theIfMatch);
 	}
 
-	public void setRequestIfNoneExist(FhirContext theFhirContext, String theIfNoneExist) {
+	public void setRequestIfNoneExist(String theIfNoneExist) {
 		myBundleEntryMutator.setRequestIfNoneExist(theIfNoneExist);
 	}
 }

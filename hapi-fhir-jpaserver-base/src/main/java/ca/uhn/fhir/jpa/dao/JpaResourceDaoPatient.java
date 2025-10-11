@@ -109,8 +109,7 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 				paramMap,
 				getResourceName(),
 				new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL)),
-				theRequest,
-				null);
+				theRequest);
 	}
 
 	private void adjustCount(RequestDetails theRequest, SearchParameterMap theParamMap) {
