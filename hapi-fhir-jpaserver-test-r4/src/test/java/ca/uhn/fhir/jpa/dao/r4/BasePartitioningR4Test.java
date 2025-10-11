@@ -299,7 +299,6 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	private void addNextTargetPartitionForUpdateInTxBundle(RequestPartitionId requestPartitionId) {
 		addNextInterceptorReadResult(requestPartitionId);
 		addNextInterceptorCreateResult(requestPartitionId);
-		addNextInterceptorCreateResult(requestPartitionId);
 		addNextTargetPartitionForCreateWithId(requestPartitionId);
 	}
 
