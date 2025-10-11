@@ -84,14 +84,24 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 
 	@ParameterizedTest
 	@CsvSource(textBlock = """
-		123                                , Patient?_id=123                , true
-		123                                , Patient?_id=Patient/123        , true
-		Patient/123                        , Patient?_id=123                , true
-		Patient/123/_history/1             , Patient?_id=123                , true
-		Patient/123/_history/1             , Patient?_id=Patient/123        , true
-		Patient/123/_history/1             , Patient?_id=Encounter/123      , false
-		123                                , Patient?_id=456                , false
-		456                                , Patient?_id=123                , false
+		123                                , Patient?_id=123                      , true
+		123                                , Patient?_id=Patient/123              , true
+		ABC                                , Patient?_id=ABC                      , true
+		ABC                                , Patient?_id=Patient/ABC              , true
+		Patient/123                        , Patient?_id=123                      , true
+		Patient/123/_history/1             , Patient?_id=123                      , true
+		Patient/123/_history/1             , Patient?_id=Patient/123              , true
+		Patient/123/_history/1             , Patient?_id=Patient/123/_history/1   , true
+		# We should ignore the version ID on the _id param, the spec is silent on this
+		# but it feels like there's not much value to respecting it since searches are
+		# always on the most recent version of a resource
+		Patient/123                        , Patient?_id=Patient/123/_history/2   , true
+		Patient/123/_history/1             , Patient?_id=Patient/123/_history/2   , true
+		Patient/123/_history/1             , Patient?_id=Encounter/123            , false
+		123                                , Patient?_id=456                      , false
+		456                                , Patient?_id=123                      , false
+		ABC                                , Patient?_id=123                      , false
+		ABC                                , Patient?_id=abc                      , false
 		""")
 	public void testMatchById(String theResourceId, String theConditionalUrl, boolean theExpectMatch) {
 		Patient patient = new Patient();

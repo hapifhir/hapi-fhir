@@ -58,6 +58,7 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -383,14 +384,16 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			final SearchParameterMap theParams,
 			String theResourceType,
 			CacheControlDirective theCacheControlDirective,
-			RequestDetails theRequestDetails,
-			@Nullable RequestPartitionId theRequestPartitionId) {
+			@Nullable RequestDetails theRequestDetails) {
 		final String searchUuid = UUID.randomUUID().toString();
 
 		final String queryString = theParams.toNormalizedQueryString(myContext);
 		ourLog.debug("Registering new search {}", searchUuid);
 
-		RequestPartitionId requestPartitionId = theRequestPartitionId;
+		RequestPartitionId requestPartitionId = null;
+		if (theRequestDetails instanceof SystemRequestDetails srd) {
+			requestPartitionId = srd.getRequestPartitionId();
+		}
 
 		// If an explicit request partition wasn't provided, calculate the request
 		// partition after invoking STORAGE_PRESEARCH_REGISTERED just in case any interceptors

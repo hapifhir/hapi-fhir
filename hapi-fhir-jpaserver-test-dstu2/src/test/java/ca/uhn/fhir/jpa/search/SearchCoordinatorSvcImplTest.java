@@ -153,7 +153,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		mockSearchTask();
 
 		try {
-			mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
+			mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage()).contains("FAILED");
 			assertThat(e.getMessage()).contains("at ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImplTest");
@@ -195,7 +195,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		// Do all the stubbing before starting any work, since we want to avoid threading issues
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
 		assertEquals(790, result.size());
 
@@ -275,7 +275,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
 		assertEquals(790, result.size());
 
@@ -327,7 +327,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		when(myInterceptorBroadcaster.getInvokersForPointcut(any())).thenReturn(List.of());
 
 		ourLog.info("Registering the first search");
-		new Thread(() -> mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions())).start();
+		new Thread(() -> mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null)).start();
 		await().untilAsserted(() -> assertThat(iter.getCountReturned()).isGreaterThan(0));
 
 		String searchId = mySvc.getActiveSearchIds().iterator().next();
@@ -385,7 +385,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		mockSearchTask();
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
 		assertEquals(790, result.size());
 
@@ -422,7 +422,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
 		assertEquals(90, Objects.requireNonNull(result.size()).intValue());
 
@@ -530,7 +530,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
 
-		mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
+		mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 
 		verify(mySynchronousSearchSvc).executeQuery(any(), any(), any(), any(), any(), any());
 
@@ -545,7 +545,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		params.setOffset(10);
 		params.setCount(10);
 
-		mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
+		mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 
 		verify(mySynchronousSearchSvc).executeQuery(any(), any(), any(), any(), any(), any());
 	}
@@ -558,7 +558,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		SearchParameterMap params = new SearchParameterMap();
 		CacheControlDirective cacheControlDirective = new CacheControlDirective().setMaxResults(loadUpto).setNoStore(true);
 
-		mySvc.registerSearch(myCallingDao, params, "Patient", cacheControlDirective, null, RequestPartitionId.allPartitions());
+		mySvc.registerSearch(myCallingDao, params, "Patient", cacheControlDirective, nul);
 
 		verify(mySynchronousSearchSvc).executeQuery(any(), any(), any(), any(), eq(30), any());
 	}
