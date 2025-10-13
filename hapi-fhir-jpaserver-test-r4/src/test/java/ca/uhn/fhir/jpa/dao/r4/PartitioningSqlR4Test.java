@@ -663,7 +663,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		input.setType(Bundle.BundleType.TRANSACTION);
 
 		// tx requires two calls for pre-fetch and tx boundary
-		addNextTargetPartitionForCreateW(myPartitionId, myPartitionDate);
+		addNextTargetPartitionForCreate(myPartitionId, myPartitionDate);
 		Organization org = new Organization();
 		org.setId(IdType.newRandomUuid());
 		org.setName("org");
@@ -3018,7 +3018,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		// Each PUT in tx needs extra creates
 		// the Patient POST needs 2 reads for tx overhead + the search for match
 		runTimes(5, () -> addNextInterceptorReadResult(fromPartitionId(1)));
-		runTimes(5*4 /* 4 each for PUTs */, () -> addNextInterceptorCreateResult(fromPartitionId(1)));
+		runTimes(5*3 /* 3 each for PUTs */, () -> addNextInterceptorCreateResult(fromPartitionId(1)));
 
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(mySrd, input.get());
@@ -3042,7 +3042,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// After the first run, the conditions all match.
 		runTimes(5, () -> addNextInterceptorReadResult(fromPartitionId(1)));
-		runTimes(16, () -> addNextInterceptorCreateResult(fromPartitionId(1)));
+		runTimes(11, () -> addNextInterceptorCreateResult(fromPartitionId(1)));
 
 
 		myCaptureQueriesListener.clear();
@@ -3068,7 +3068,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myCaptureQueriesListener.clear();
 		// After the first run, the conditions all match.
 		runTimes(5, () -> addNextInterceptorReadResult(fromPartitionId(1)));
-		runTimes(16, () -> addNextInterceptorCreateResult(fromPartitionId(1)));
+		runTimes(11, () -> addNextInterceptorCreateResult(fromPartitionId(1)));
 		outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -3087,7 +3087,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myPartitionInterceptor.assertNoRemainingIds();
 		myCaptureQueriesListener.clear();
 		// After the first run, the conditions all match.
-		runTimes(16, () -> addNextInterceptorCreateResult(fromPartitionId(1)));
+		runTimes(11, () -> addNextInterceptorCreateResult(fromPartitionId(1)));
 		outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();

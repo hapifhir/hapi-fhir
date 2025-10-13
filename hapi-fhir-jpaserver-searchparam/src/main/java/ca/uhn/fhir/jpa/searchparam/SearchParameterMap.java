@@ -417,6 +417,14 @@ public class SearchParameterMap implements Serializable {
 	}
 
 	/**
+	 * @deprecated Use {@link #toNormalizedQueryString()} instead.
+	 */
+	@Deprecated(since = "8.6.0", forRemoval = true)
+	public String toNormalizedQueryString(FhirContext theCtx) {
+		return toNormalizedQueryString();
+	}
+
+	/**
 	 * This method creates a URL query string representation of the parameters in this
 	 * object, excluding the part before the parameters, e.g.
 	 * <p>
@@ -427,7 +435,7 @@ public class SearchParameterMap implements Serializable {
 	 * as it doesn't affect the substance of the results returned
 	 * </p>
 	 */
-	public String toNormalizedQueryString(FhirContext theCtx) {
+	public String toNormalizedQueryString() {
 		StringBuilder b = new StringBuilder();
 
 		ArrayList<String> keys = new ArrayList<>(keySet());
@@ -441,14 +449,14 @@ public class SearchParameterMap implements Serializable {
 
 				List<IQueryParameterType> nextValuesOrsOut = new ArrayList<>(nextValuesAndIn);
 
-				nextValuesOrsOut.sort(new QueryParameterTypeComparator(theCtx));
+				nextValuesOrsOut.sort(new QueryParameterTypeComparator());
 
 				if (!nextValuesOrsOut.isEmpty()) {
 					nextValuesAndsOut.add(nextValuesOrsOut);
 				}
 			} // for AND
 
-			nextValuesAndsOut.sort(new QueryParameterOrComparator(theCtx));
+			nextValuesAndsOut.sort(new QueryParameterOrComparator());
 
 			for (List<IQueryParameterType> nextValuesAnd : nextValuesAndsOut) {
 				addUrlParamSeparator(b);
@@ -830,7 +838,7 @@ public class SearchParameterMap implements Serializable {
 		}
 	}
 
-	static int compare(FhirContext theCtx, IQueryParameterType theO1, IQueryParameterType theO2) {
+	static int compare(IQueryParameterType theO1, IQueryParameterType theO2) {
 		CompareToBuilder b = new CompareToBuilder();
 		b.append(theO1.getMissing(), theO2.getMissing());
 		b.append(theO1.getQueryParameterQualifier(), theO2.getQueryParameterQualifier());
@@ -870,30 +878,33 @@ public class SearchParameterMap implements Serializable {
 	}
 
 	public static class QueryParameterOrComparator implements Comparator<List<IQueryParameterType>> {
-		private final FhirContext myCtx;
 
-		QueryParameterOrComparator(FhirContext theCtx) {
-			myCtx = theCtx;
+		/**
+		 * Constructor
+		 */
+		QueryParameterOrComparator() {
+			super();
 		}
 
 		@Override
 		public int compare(List<IQueryParameterType> theO1, List<IQueryParameterType> theO2) {
 			// These lists will never be empty
-			return SearchParameterMap.compare(myCtx, theO1.get(0), theO2.get(0));
+			return SearchParameterMap.compare(theO1.get(0), theO2.get(0));
 		}
 	}
 
 	public static class QueryParameterTypeComparator implements Comparator<IQueryParameterType> {
 
-		private final FhirContext myCtx;
-
-		QueryParameterTypeComparator(FhirContext theCtx) {
-			myCtx = theCtx;
+		/**
+		 * Constructor
+		 */
+		QueryParameterTypeComparator() {
+			super();
 		}
 
 		@Override
 		public int compare(IQueryParameterType theO1, IQueryParameterType theO2) {
-			return SearchParameterMap.compare(myCtx, theO1, theO2);
+			return SearchParameterMap.compare(theO1, theO2);
 		}
 	}
 
