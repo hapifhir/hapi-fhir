@@ -32,6 +32,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
@@ -78,6 +80,30 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 	@AfterEach
 	public void after() {
 		myStorageSettings.setTreatBaseUrlsAsLocal(new StorageSettings().getTreatBaseUrlsAsLocal());
+	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		123                                , Patient?_id=123                , true
+		123                                , Patient?_id=Patient/123        , true
+		Patient/123                        , Patient?_id=123                , true
+		Patient/123/_history/1             , Patient?_id=123                , true
+		Patient/123/_history/1             , Patient?_id=Patient/123        , true
+		Patient/123/_history/1             , Patient?_id=Encounter/123      , false
+		123                                , Patient?_id=456                , false
+		456                                , Patient?_id=123                , false
+		""")
+	public void testMatchById(String theResourceId, String theConditionalUrl, boolean theExpectMatch) {
+		Patient patient = new Patient();
+		patient.setId(theResourceId);
+		patient.setActive(true);
+
+		if (theExpectMatch) {
+			assertMatched(patient, theConditionalUrl);
+		} else {
+			assertNotMatched(patient, theConditionalUrl);
+		}
+
 	}
 
 	/**

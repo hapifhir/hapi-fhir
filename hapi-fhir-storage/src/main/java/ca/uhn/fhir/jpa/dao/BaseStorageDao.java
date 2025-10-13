@@ -198,7 +198,7 @@ public abstract class BaseStorageDao {
 	/**
 	 * Verify that the resource ID is actually valid according to FHIR's rules
 	 */
-	private void verifyResourceIdIsValid(IBaseResource theResource) {
+	protected void verifyResourceIdIsValid(IBaseResource theResource) {
 		if (theResource.getIdElement().hasResourceType()) {
 			String expectedType = getContext().getResourceType(theResource);
 			if (!expectedType.equals(theResource.getIdElement().getResourceType())) {

@@ -132,7 +132,6 @@ import jakarta.persistence.LockModeType;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.function.TriFunction;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -347,12 +346,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			boolean thePerformIndexing,
 			RequestDetails theRequestDetails,
 			@Nonnull TransactionDetails theTransactionDetails) {
-		// We start with search partition here because some partition interceptors can not
-		// process STORAGE_PARTITION_IDENTIFY_CREATE until after we've assigned the resource id.
-		// We resolve the write target later, after we've resolved the match urls.
-		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-						theRequestDetails, getResourceName());
+
+		validateResourceIsNotNullForClientRequest(theResource);
+
+		assignServerAssignedIdFromUserDataIfRequired(theResource);
+		assignServerAssignedUuidIfRequired(theResource);
+
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
+				theRequestDetails, theResource, getResourceName());
 
 		return myTransactionService
 				.withRequest(theRequestDetails)
@@ -382,12 +383,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			TransactionDetails theTransactionDetails,
 			RequestDetails theRequestDetails,
 			RequestPartitionId theRequestPartitionId) {
-		if (theResource == null) {
-			String msg = getContext().getLocalizer().getMessage(BaseStorageDao.class, "missingBody");
-			throw new InvalidRequestException(Msg.code(956) + msg);
-		}
+		validateResourceIsNotNullForClientRequest(theResource);
 
-		if (isNotBlank(theResource.getIdElement().getIdPart())) {
+		if (isNotBlank(theResource.getIdElement().getIdPart()) && !isResourceIdServerAssigned(theResource)) {
 			if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
 				String message = getMessageSanitized(
 						"failedToCreateWithClientAssignedId",
@@ -400,10 +398,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		if (getStorageSettings().getResourceServerIdStrategy() == JpaStorageSettings.IdStrategyEnum.UUID) {
-			theResource.setId(UUID.randomUUID().toString());
-			theResource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED, Boolean.TRUE);
-		}
+		assignServerAssignedUuidIfRequired(theResource);
 
 		return doCreateForPostOrPut(
 				theRequestDetails,
@@ -414,6 +409,49 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				theRequestPartitionId,
 				RestOperationTypeEnum.CREATE,
 				theTransactionDetails);
+	}
+
+	/**
+	 * Tests whether a resource is non-null, and throws a {@link InvalidRequestException}
+	 * with a message explaining that the body must not be missing on a create/update
+	 * request.
+	 */
+	private void validateResourceIsNotNullForClientRequest(T theResource) {
+		if (theResource == null) {
+			String msg = getContext().getLocalizer().getMessage(BaseStorageDao.class, "missingBody");
+			throw new InvalidRequestException(Msg.code(956) + msg);
+		}
+	}
+
+	/**
+	 * If the resource being created has a UserData value with key
+	 * {@link JpaConstants#RESOURCE_ID_SERVER_ASSIGNED_VALUE}, this value will be
+	 * used as the resource's server-assigned FHIR ID. No duplication checking is
+	 * performed on the ID, so this feature should only be used if you are certain
+	 * that the ID is unique and not previously used for any other resource.
+	 * This feature is not exposed to the FHIR REST client API at all, and is
+	 * only intended for interceptor code that carefully considers the implications
+	 * of its use.
+	 *
+	 * @since 8.6.0
+	 */
+	private void assignServerAssignedIdFromUserDataIfRequired(T theResource) {
+		String serverAssignedIdFromMetadata =
+				(String) theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED_VALUE);
+		if (serverAssignedIdFromMetadata != null) {
+			theResource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED, Boolean.TRUE);
+			theResource.setId(serverAssignedIdFromMetadata);
+			verifyResourceIdIsValid(theResource);
+		}
+	}
+
+	private void assignServerAssignedUuidIfRequired(T theResource) {
+		if (getStorageSettings().getResourceServerIdStrategy() == JpaStorageSettings.IdStrategyEnum.UUID) {
+			if (!isResourceIdServerAssigned(theResource)) {
+				theResource.setId(UUID.randomUUID().toString());
+				theResource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED, Boolean.TRUE);
+			}
+		}
 	}
 
 	/**
@@ -1706,22 +1744,32 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			return retVal;
 		}
 
-		boolean forceReindexSps = false;
-		if (theReindexParameters.getCorrectCurrentVersion() != ReindexParameters.CorrectCurrentVersionModeEnum.NONE) {
-			ResourceTable newEntity = reindexCorrectCurrentVersion(entity);
-			if (newEntity != null) {
-				entity = newEntity;
-				forceReindexSps = true;
+		boolean reindexSearchParameters =
+				theReindexParameters.getReindexSearchParameters() != ReindexParameters.ReindexSearchParametersEnum.NONE;
+		boolean correctCurrentVersion =
+				theReindexParameters.getCorrectCurrentVersion() != ReindexParameters.CorrectCurrentVersionModeEnum.NONE;
+		boolean optimizeStorage =
+				theReindexParameters.getOptimizeStorage() != ReindexParameters.OptimizeStorageModeEnum.NONE;
+
+		if (correctCurrentVersion) {
+			CorrectCurrentVersionResponse outcome =
+					reindexCorrectCurrentVersion(entity, theReindexParameters.getReindexSearchParameters());
+			if (outcome.forceReindexSps()) {
+				reindexSearchParameters = true;
+			}
+			if (outcome.forceReloadResourceEntity() && (reindexSearchParameters || optimizeStorage)) {
+				entity = myEntityManager.find(ResourceTable.class, jpaPid);
+				if (outcome.currentVersion() != null) {
+					entity.setCurrentVersionEntity(outcome.currentVersion());
+				}
 			}
 		}
 
-		if (forceReindexSps
-				|| theReindexParameters.getReindexSearchParameters()
-						== ReindexParameters.ReindexSearchParametersEnum.ALL) {
+		if (reindexSearchParameters) {
 			reindexSearchParameters(entity, retVal, theTransactionDetails);
 		}
 
-		if (theReindexParameters.getOptimizeStorage() != ReindexParameters.OptimizeStorageModeEnum.NONE) {
+		if (optimizeStorage) {
 			reindexOptimizeStorage(entity, theReindexParameters.getOptimizeStorage());
 		}
 
@@ -1731,18 +1779,23 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	/**
 	 * @return Returns an updated copy of the entity if it was modified (returns null otherwise)
 	 */
-	private ResourceTable reindexCorrectCurrentVersion(ResourceTable theEntity) {
-		ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(
-				theEntity.getResourceId().toFk(), theEntity.getVersion());
+	private CorrectCurrentVersionResponse reindexCorrectCurrentVersion(
+			ResourceTable theEntity, ReindexParameters.ReindexSearchParametersEnum theReindexSearchParameters) {
+		ResourceHistoryTable version = theEntity.getCurrentVersionEntity();
 
 		if (version == null) {
-			Optional<ResourceHistoryTable> versions = myResourceHistoryTableDao
+			Optional<ResourceHistoryTable> currentVersionOpt = myResourceHistoryTableDao
 					.findVersionsForResource(
 							SINGLE_RESULT, theEntity.getResourceId().toFk())
 					.findFirst();
 
-			if (versions.isPresent()) {
-				Long newVersion = versions.get().getVersion();
+			if (currentVersionOpt.isPresent()) {
+				Long newVersion = currentVersionOpt.get().getVersion();
+				if (newVersion == theEntity.getVersion()) {
+					// Already have the correct version
+					return null;
+				}
+
 				ourLog.info(
 						"Correcting current version for {}/{} (PID {}) from version {} to version {}",
 						theEntity.getResourceType(),
@@ -1757,12 +1810,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				 * we'll get an optimistic lock failure later.
 				 */
 				myEntityManager.detach(theEntity);
+
 				myResourceTableDao.updateVersionAndLastUpdated(theEntity.getId(), newVersion, new Date());
 
-				/*
-				 * And now reload the record from the database so we have a fresh copy to reindex.
-				 */
-				return myEntityManager.find(ResourceTable.class, theEntity.getId());
+				return new CorrectCurrentVersionResponse(false, true, currentVersionOpt.get());
+
 			} else {
 				ourLog.info(
 						"No versions exist for {}/{} (PID {}), marking resource as deleted",
@@ -1770,12 +1822,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 						theEntity.getFhirId(),
 						theEntity.getResourceId());
 				theEntity.setDeleted(new Date());
-				myEntityManager.merge(theEntity);
-				return theEntity;
+				return new CorrectCurrentVersionResponse(true, false, null);
 			}
 		}
 
-		return null;
+		return new CorrectCurrentVersionResponse(false, false, null);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -2118,14 +2169,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			cacheControlDirective.parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL));
 		}
 
-		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-						theRequest, getResourceName(), theParams);
 		IBundleProvider retVal = mySearchCoordinatorSvc.registerSearch(
-				this, theParams, getResourceName(), cacheControlDirective, theRequest, requestPartitionId);
+				this, theParams, getResourceName(), cacheControlDirective, theRequest, null);
 
-		if (retVal instanceof PersistedJpaBundleProvider) {
-			PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) retVal;
+		if (retVal instanceof PersistedJpaBundleProvider provider) {
+			// Note: we calculate the partition -after- calling registerSearch, since that
+			// method invokes several interceptors that can affect the partition selection.
+			RequestPartitionId requestPartitionId =
+					myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
+							theRequest, getResourceName(), theParams);
+
 			provider.setRequestPartitionId(requestPartitionId);
 			if (provider.getCacheStatus() == SearchCacheStatusEnum.HIT) {
 				if (theServletResponse != null && theRequest != null) {
@@ -2886,6 +2939,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		myIdHelperService = theIdHelperService;
 	}
 
+	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
+	public static <T extends IBaseResource> boolean isResourceIdServerAssigned(IBaseResource theResource) {
+		return Boolean.TRUE.equals(theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED));
+	}
+
 	private static class IdChecker implements IValidatorModule {
 
 		private final ValidationModeEnum myMode;
@@ -2940,8 +2998,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			return;
 		}
 
-		boolean sameResType = StringUtils.equals(theEntity.getResourceType(), theResourceIdType.getResourceType());
-		boolean sameFhirId = StringUtils.equals(theResourceIdType.getIdPart(), theEntity.getFhirId());
+		boolean sameResType = Objects.equals(theEntity.getResourceType(), theResourceIdType.getResourceType());
+		boolean sameFhirId = Objects.equals(theResourceIdType.getIdPart(), theEntity.getFhirId());
 		boolean differentPartition =
 				!theRequestPartitionId.isPartition(theEntity.getPartitionId().getPartitionId());
 
@@ -2957,4 +3015,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new InvalidRequestException(Msg.code(2733) + msg);
 		}
 	}
+
+	/**
+	 * Method return type for {@link #reindexCorrectCurrentVersion(ResourceTable, ReindexParameters.ReindexSearchParametersEnum)}
+	 */
+	private record CorrectCurrentVersionResponse(
+			boolean forceReindexSps, boolean forceReloadResourceEntity, ResourceHistoryTable currentVersion) {}
 }

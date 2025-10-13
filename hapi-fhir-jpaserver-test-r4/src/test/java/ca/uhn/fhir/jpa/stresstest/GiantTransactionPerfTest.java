@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.stresstest;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -124,7 +125,7 @@ public class GiantTransactionPerfTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(GiantTransactionPerfTest.class);
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 	private FhirSystemDaoR4 mySystemDao;
-	private IInterceptorBroadcaster myInterceptorSvc;
+	private IInterceptorService myInterceptorSvc;
 	private TransactionProcessor myTransactionProcessor;
 	private PlatformTransactionManager myTransactionManager;
 	private MockEntityManager myEntityManager;
@@ -208,10 +209,12 @@ public class GiantTransactionPerfTest {
 		myTransactionProcessor.setIdHelperServiceForUnitTest(myIdHelperService);
 		myTransactionProcessor.setFhirContextForUnitTest(ourFhirContext);
 		myTransactionProcessor.setApplicationContextForUnitTest(myAppCtx);
+		myTransactionProcessor.setInterceptorBroadcasterForUnitTest(myInterceptorSvc);
 
 		mySystemDao = new FhirSystemDaoR4();
 		mySystemDao.setTransactionProcessorForUnitTest(myTransactionProcessor);
 		mySystemDao.setStorageSettingsForUnitTest(myStorageSettings);
+		mySystemDao.setInterceptorBroadcasterForUnitTest(myInterceptorSvc);
 
 		when(myAppCtx.getBean(eq(IInstanceValidatorModule.class))).thenReturn(myInstanceValidatorSvc);
 		when(myAppCtx.getBean(eq(IFhirSystemDao.class))).thenReturn(mySystemDao);
@@ -242,6 +245,8 @@ public class GiantTransactionPerfTest {
 		mySearchParamRegistry.setSearchParameterCanonicalizerForUnitTest(new SearchParameterCanonicalizer(ourFhirContext));
 		mySearchParamRegistry.setFhirContext(ourFhirContext);
 		mySearchParamRegistry.setStorageSettings(myStorageSettings);
+		mySearchParamRegistry.setInterceptorServiceForUnitTest(myInterceptorSvc);
+		mySearchParamRegistry.setPartitionSettingsForUnitTest(myPartitionSettings);
 		mySearchParamRegistry.registerListener();
 		mySearchParamRegistry.start();
 
@@ -287,6 +292,7 @@ public class GiantTransactionPerfTest {
 		myEobDao.setMyMetaTagSorter(myMetaTagSorter);
 		myEobDao.setResourceHistoryCalculator(myResourceHistoryCalculator);
 		myEobDao.setResourceTypeCacheSvc(myResourceTypeCacheSvc);
+		myEobDao.setInterceptorBroadcasterForUnitTest(myInterceptorSvc);
 		myEobDao.start();
 
 		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));

@@ -79,6 +79,10 @@ public class MemoryCacheService {
 				case HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY:
 					nextCache = CacheFactory.buildEternal(5_000, 50_000);
 					break;
+				case RESOURCE_IDENTIFIER_SYSTEM_TO_PID:
+					nextCache = CacheFactory.buildEternal(250, 1_000);
+					break;
+				case PATIENT_IDENTIFIER_TO_FHIR_ID:
 				case NAME_TO_PARTITION:
 				case ID_TO_PARTITION:
 				case PID_TO_FORCED_ID:
@@ -125,6 +129,27 @@ public class MemoryCacheService {
 		if (retVal == null) {
 			retVal = theSupplier.apply(theKey);
 			putAfterCommit(theCache, theKey, retVal);
+		}
+		return retVal;
+	}
+
+	/**
+	 * Fetch an item from the cache if it exists and use the loading function to
+	 * obtain it otherwise. If the loading function returns null, the item will not
+	 * be placed in the cache and <code>null</code> will be returned.
+	 * <p>
+	 * This method will put the value into the cache using {@link #putAfterCommit(CacheEnum, Object, Object)}.
+	 *
+	 * @since 8.6.0
+	 */
+	public <K, T> T getThenPutAfterCommitIfNotNull(CacheEnum theCache, K theKey, Function<K, T> theSupplier) {
+		assert theCache.getKeyType().isAssignableFrom(theKey.getClass());
+		T retVal = getIfPresent(theCache, theKey);
+		if (retVal == null) {
+			retVal = theSupplier.apply(theKey);
+			if (retVal != null) {
+				putAfterCommit(theCache, theKey, retVal);
+			}
 		}
 		return retVal;
 	}
@@ -223,7 +248,9 @@ public class MemoryCacheService {
 		NAME_TO_PARTITION(String.class),
 		ID_TO_PARTITION(Integer.class),
 		HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY(Long.class),
-		RES_TYPE_TO_RES_TYPE_ID(String.class);
+		RES_TYPE_TO_RES_TYPE_ID(String.class),
+		RESOURCE_IDENTIFIER_SYSTEM_TO_PID(String.class),
+		PATIENT_IDENTIFIER_TO_FHIR_ID(IdentifierKey.class);
 
 		private final Class<?> myKeyType;
 
@@ -235,6 +262,8 @@ public class MemoryCacheService {
 			return myKeyType;
 		}
 	}
+
+	public record IdentifierKey(String system, String value) {}
 
 	public static class TagDefinitionCacheKey {
 

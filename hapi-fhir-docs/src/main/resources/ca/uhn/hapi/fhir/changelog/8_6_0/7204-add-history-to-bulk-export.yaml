@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7204
+title: "A new request parameter called `_includeHistory` was added to the `$export` operation,
+  allowing to export all historical versions of exported resources."
