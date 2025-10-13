@@ -387,7 +387,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			@Nullable RequestDetails theRequestDetails) {
 		final String searchUuid = UUID.randomUUID().toString();
 
-		final String queryString = theParams.toNormalizedQueryString(myContext);
+		final String queryString = theParams.toNormalizedQueryString();
 		ourLog.debug("Registering new search {}", searchUuid);
 
 		RequestPartitionId requestPartitionId = null;
