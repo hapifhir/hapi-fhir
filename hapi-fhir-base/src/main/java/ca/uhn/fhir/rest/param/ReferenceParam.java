@@ -92,6 +92,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 		}
 	}
 
+	@SuppressWarnings("SizeReplaceableByIsEmpty")
 	private String defaultGetQueryParameterQualifier() {
 		StringBuilder b = new StringBuilder();
 		if (isNotBlank(myChain)) {
@@ -102,7 +103,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 			b.append('.');
 			b.append(myChain);
 		}
-		if (!b.isEmpty()) {
+		if (b.length() > 0) {
 			return b.toString();
 		}
 		return null;
