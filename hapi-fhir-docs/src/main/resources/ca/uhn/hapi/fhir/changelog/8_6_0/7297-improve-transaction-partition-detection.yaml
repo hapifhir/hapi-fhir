@@ -2,6 +2,6 @@
 type: add
 issue: 7297
 title: "The partition interceptor called during FHIR Transaction Bundle processing
-  now include the resource (if one is present in a given entry), and the search
+  now includes the resource (if one is present in a given entry), and the search
   parameters in the case of conditional update and patch operations. This should
   improve the ability of partition interceptors to select the right partition."
