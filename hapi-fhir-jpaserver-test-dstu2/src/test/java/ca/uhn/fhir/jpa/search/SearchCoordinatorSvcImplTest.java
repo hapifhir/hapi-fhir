@@ -558,7 +558,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		SearchParameterMap params = new SearchParameterMap();
 		CacheControlDirective cacheControlDirective = new CacheControlDirective().setMaxResults(loadUpto).setNoStore(true);
 
-		mySvc.registerSearch(myCallingDao, params, "Patient", cacheControlDirective, nul);
+		mySvc.registerSearch(myCallingDao, params, "Patient", cacheControlDirective, null);
 
 		verify(mySynchronousSearchSvc).executeQuery(any(), any(), any(), any(), eq(30), any());
 	}
