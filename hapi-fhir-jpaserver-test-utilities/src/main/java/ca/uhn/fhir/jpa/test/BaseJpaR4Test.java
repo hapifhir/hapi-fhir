@@ -107,8 +107,6 @@ import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
-import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
-import ca.uhn.fhir.mdm.interceptor.MdmStorageInterceptor;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
@@ -560,9 +558,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected IResourceSearchUrlDao myResourceSearchUrlDao;
 	@Autowired
-	private IInterceptorService myInterceptorService;
-	@Autowired(required = false)
-	private MdmStorageInterceptor myMdmStorageInterceptor;
+	protected IInterceptorService myInterceptorService;
 	@Autowired
 	protected TestDaoSearch myTestDaoSearch;
 	@Autowired
@@ -657,28 +653,17 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 			}
 		}
 
-		boolean registeredStorageInterceptor = false;
-		if (myMdmStorageInterceptor != null && !myInterceptorService.getAllRegisteredInterceptors().contains(myMdmStorageInterceptor)) {
-			myInterceptorService.registerInterceptor(myMdmStorageInterceptor);
-			registeredStorageInterceptor = true;
-		}
-		try {
-			runInTransaction(() -> {
-				myMdmLinkDao.ifPresent(IMdmLinkDao::deleteAll);
-				myMdmLinkHistoryDao.deleteAll();
-			});
-			purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 
-			myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
-			runInTransaction(() -> {
-				myWorkChunkRepository.deleteAll();
-				myJobInstanceRepository.deleteAll();
-			});
-		} finally {
-			if (registeredStorageInterceptor) {
-				myInterceptorService.unregisterInterceptor(myMdmStorageInterceptor);
-			}
-		}
+		runInTransaction(() -> {
+			myMdmLinkHistoryDao.deleteAll();
+		});
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
+
+		myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
+		runInTransaction(() -> {
+			myWorkChunkRepository.deleteAll();
+			myJobInstanceRepository.deleteAll();
+		});
 
 		// restart the jobs
 		ourLog.info("Restarting the schedulers");

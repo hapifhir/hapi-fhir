@@ -28,6 +28,7 @@ import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
+import ca.uhn.fhir.mdm.interceptor.MdmStorageInterceptor;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
@@ -92,6 +93,8 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		.setValue("555-555-5555");
 	private static final String NAME_GIVEN_FRANK = "Frank";
 
+	@Autowired(required = false)
+	private MdmStorageInterceptor myMdmStorageInterceptor;
 	@Autowired
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
 	@Autowired
@@ -155,6 +158,25 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	protected GoldenResourceMatchingAssert mdmAssertThat(IAnyResource theResource) {
 		return GoldenResourceMatchingAssert.assertThat(theResource, myIdHelperService, myMdmLinkDaoSvc);
+	}
+
+
+	@Override
+	public void afterPurgeDatabase() {
+		boolean registeredStorageInterceptor = false;
+		if (myMdmStorageInterceptor != null && !myInterceptorService.getAllRegisteredInterceptors().contains(myMdmStorageInterceptor)) {
+			myInterceptorService.registerInterceptor(myMdmStorageInterceptor);
+			registeredStorageInterceptor = true;
+		}
+		runInTransaction(() -> {
+			myMdmLinkDao.deleteAll();
+		});
+		super.afterPurgeDatabase();
+
+		if (registeredStorageInterceptor) {
+			myInterceptorService.unregisterInterceptor(myMdmStorageInterceptor);
+		}
+
 	}
 
 	protected int logAllMdmLinks() {
