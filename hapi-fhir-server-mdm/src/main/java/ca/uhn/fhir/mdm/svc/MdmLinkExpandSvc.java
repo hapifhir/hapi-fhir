@@ -216,7 +216,6 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setRequestPartitionId(theRequestPartitionId);
 		IBaseResource group = myDaoRegistry.getResourceDao("Group").read(groupId, requestDetails);
-		//		FIXME GGG think more about this cast. How does mongo do this?
 		JpaPid pidOrNull = (JpaPid) myIdHelperService.getPidOrNull(theRequestPartitionId, group);
 		// Attempt to perform MDM Expansion of membership
 		return performMembershipExpansionViaMdmTable(pidOrNull);

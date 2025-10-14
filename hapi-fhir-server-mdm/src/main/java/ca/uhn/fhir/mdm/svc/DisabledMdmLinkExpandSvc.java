@@ -9,7 +9,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Set;
 
-// FIXME GGG unsupportedoperation for all of these.
 public class DisabledMdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	@Override
 	public Set<String> expandMdmBySourceResource(RequestPartitionId theRequestPartitionId, IBaseResource theResource) {
