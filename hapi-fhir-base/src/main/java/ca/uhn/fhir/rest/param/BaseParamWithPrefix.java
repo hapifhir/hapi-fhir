@@ -22,6 +22,8 @@ package ca.uhn.fhir.rest.param;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.DataFormatException;
 
+import java.util.Objects;
+
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam {
@@ -115,5 +117,18 @@ public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam
 	public T setPrefix(ParamPrefixEnum thePrefix) {
 		myPrefix = thePrefix;
 		return (T) this;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (!(theO instanceof BaseParamWithPrefix<?> that)) {
+			return false;
+		}
+		return super.equals(theO) && this.myPrefix == that.myPrefix;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.myPrefix, super.hashCode());
 	}
 }

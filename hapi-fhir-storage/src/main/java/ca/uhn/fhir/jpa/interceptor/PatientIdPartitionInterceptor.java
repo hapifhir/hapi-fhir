@@ -188,33 +188,36 @@ public class PatientIdPartitionInterceptor {
 
 		//noinspection EnumSwitchStatementWhichMissesCases
 		switch (theReadDetails.getRestOperationType()) {
+			case DELETE:
+			case PATCH:
 			case READ:
 			case VREAD:
-				if ("Patient".equals(theReadDetails.getResourceType())) {
-					return provideCompartmentMemberInstanceResponse(
-							theRequestDetails,
-							theReadDetails.getReadResourceId().getIdPart());
-				}
-				break;
 			case SEARCH_TYPE:
-				SearchParameterMap params = theReadDetails.getSearchParams();
-				assert params != null;
-				if ("Patient".equals(theReadDetails.getResourceType())) {
-					List<String> idParts = getResourceIdList(params, "_id", "Patient", false);
-					if (idParts.size() == 1) {
-						return provideCompartmentMemberInstanceResponse(theRequestDetails, idParts.get(0));
-					} else {
-						return RequestPartitionId.allPartitions();
-					}
-				} else {
-					for (RuntimeSearchParam nextCompartmentSp : compartmentSps) {
-						List<String> idParts = getResourceIdList(params, nextCompartmentSp.getName(), "Patient", true);
-						if (!idParts.isEmpty()) {
+				if (theReadDetails.getSearchParams() != null) {
+					SearchParameterMap params = theReadDetails.getSearchParams();
+					if ("Patient".equals(theReadDetails.getResourceType())) {
+						List<String> idParts = getResourceIdList(params, "_id", "Patient", false);
+						if (idParts.size() == 1) {
 							return provideCompartmentMemberInstanceResponse(theRequestDetails, idParts.get(0));
+						} else {
+							return RequestPartitionId.allPartitions();
+						}
+					} else {
+						for (RuntimeSearchParam nextCompartmentSp : compartmentSps) {
+							List<String> idParts =
+									getResourceIdList(params, nextCompartmentSp.getName(), "Patient", true);
+							if (!idParts.isEmpty()) {
+								return provideCompartmentMemberInstanceResponse(theRequestDetails, idParts.get(0));
+							}
 						}
 					}
+				} else if (theReadDetails.getReadResourceId() != null) {
+					if ("Patient".equals(theReadDetails.getResourceType())) {
+						return provideCompartmentMemberInstanceResponse(
+								theRequestDetails,
+								theReadDetails.getReadResourceId().getIdPart());
+					}
 				}
-
 				break;
 			case EXTENDED_OPERATION_SERVER:
 				String extendedOp = theReadDetails.getExtendedOperationName();

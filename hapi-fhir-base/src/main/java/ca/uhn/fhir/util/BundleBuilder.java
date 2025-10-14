@@ -368,7 +368,7 @@ public class BundleBuilder {
 		Validate.notBlank(theCondition, "theCondition must not be blank");
 
 		setBundleFieldIfNotAlreadySet("type", "transaction");
-		return addDeleteEntry(theCondition);
+		return addTransactionDeleteEntry(theCondition);
 	}
 
 	/**
@@ -415,7 +415,7 @@ public class BundleBuilder {
 				.withResourceType(theResourceType)
 				.getValue();
 
-		return addDeleteEntry(deleteUrl);
+		return addTransactionDeleteEntry(deleteUrl);
 	}
 
 	/**
@@ -427,11 +427,17 @@ public class BundleBuilder {
 	 */
 	public BaseOperationBuilder addTransactionDeleteEntryConditional(String theMatchUrl) {
 		Validate.notBlank(theMatchUrl, "theMatchUrl must not be null or blank");
-		return addDeleteEntry(theMatchUrl);
+		return addTransactionDeleteEntry(theMatchUrl);
 	}
 
+	/**
+	 * Adds a DELETE entry using only a conditional URL
+	 *
+	 * @since 8.6.0
+	 */
 	@Nonnull
-	private DeleteBuilder addDeleteEntry(String theDeleteUrl) {
+	public DeleteBuilder addTransactionDeleteEntry(String theDeleteUrl) {
+		Validate.notBlank(theDeleteUrl, "theDeleteUrl must not be null or blank");
 		IBase request = addEntryAndReturnRequest();
 
 		// Bundle.entry.request.url

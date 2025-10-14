@@ -19,27 +19,33 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import com.google.common.hash.Hasher;
+import com.google.common.hash.Hashing;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import org.apache.commons.lang3.Validate;
 
+import java.nio.charset.StandardCharsets;
+
+/**
+ * Used for Identifier system values and potentially other system URLs in FHIR
+ */
 @Entity
 @Table(
-		name = "HFJ_RES_IDENTIFIER_SYSTEM",
+		name = "HFJ_RES_SYSTEM",
 		uniqueConstraints = {
 			@UniqueConstraint(
-					name = "IDX_RES_IDENT_SYS",
+					name = "IDX_RESIDENT_SYS",
 					columnNames = {"SYSTEM_URL"})
 		})
-public class ResourceIdentifierSystemEntity {
+public class ResourceSystemEntity {
 
-	@SequenceGenerator(name = "SEQ_RES_IDENTIFIER_SYSTEM", sequenceName = "SEQ_RES_IDENTIFIER_SYSTEM")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RES_IDENTIFIER_SYSTEM")
+	/**
+	 * This column stores a hash of the system URL
+	 */
 	@Column(name = "PID")
 	@Id
 	private Long myPid;
@@ -51,7 +57,14 @@ public class ResourceIdentifierSystemEntity {
 		return myPid;
 	}
 
+	@SuppressWarnings("UnstableApiUsage")
 	public void setSystem(String theSystem) {
+		Validate.notBlank(theSystem, "System URL cannot be blank");
+		Validate.isTrue(theSystem.length() <= 500, "System URL cannot be longer than 500 characters: %s", theSystem);
 		mySystem = theSystem;
+
+		Hasher hasher = Hashing.murmur3_128(0).newHasher();
+		hasher.putBytes(theSystem.getBytes(StandardCharsets.UTF_8));
+		myPid = hasher.hash().asLong();
 	}
 }

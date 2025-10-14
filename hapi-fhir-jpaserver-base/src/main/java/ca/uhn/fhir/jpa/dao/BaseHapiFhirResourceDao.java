@@ -313,6 +313,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myRequestPartitionHelperService;
 	}
 
+	@Override
+	protected MatchUrlService getMatchUrlService() {
+		return myMatchUrlService;
+	}
+
 	/**
 	 * @deprecated Use {@link #create(T, RequestDetails)} instead
 	 */
@@ -2170,7 +2175,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		IBundleProvider retVal = mySearchCoordinatorSvc.registerSearch(
-				this, theParams, getResourceName(), cacheControlDirective, theRequest, null);
+				this, theParams, getResourceName(), cacheControlDirective, theRequest);
 
 		if (retVal instanceof PersistedJpaBundleProvider provider) {
 			// Note: we calculate the partition -after- calling registerSearch, since that

@@ -43,18 +43,16 @@ public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 			RequestPartitionId theRequestPartitionId);
 
 	/**
-	 * @param theRequestPartitionId This parameter should only be provided if a fixed partition should
-	 *                              be used for the search. If set to <code>null</code> (which is generally
-	 *                              the right thing to do), the partition will be determined by the
-	 *                              partition selection interceptor.
+	 * @param theRequestDetails The RequestDetails associated with the request. If you want to supply a fixed
+	 *                          {@link RequestPartitionId} you can use a {@link ca.uhn.fhir.rest.api.server.SystemRequestDetails}
+	 *                          and supply it there.
 	 */
 	IBundleProvider registerSearch(
 			IFhirResourceDao<?> theCallingDao,
 			SearchParameterMap theParams,
 			String theResourceType,
 			CacheControlDirective theCacheControlDirective,
-			@Nullable RequestDetails theRequestDetails,
-			@Nullable RequestPartitionId theRequestPartitionId);
+			@Nullable RequestDetails theRequestDetails);
 
 	/**
 	 * Fetch the total number of search results for the given currently executing search, if one is currently executing and

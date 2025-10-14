@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -31,6 +32,7 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.BulkDataExportProvider;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.FhirPatchBuilder;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MultimapCollector;
 import com.google.common.base.Charsets;
@@ -50,6 +52,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -118,6 +121,26 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 
 		myTransactionService.setTransactionPropagationWhenChangingPartitions(HapiTransactionService.DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
 	}
+
+
+	@Test
+	public void testDeletePatient_InTransaction_ById() {
+		// Setup
+		createPatientA();
+		myMemoryCacheService.invalidateAllCaches();
+
+		// Test
+		myCaptureQueriesListener.clear();
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionDeleteEntry("Patient", "A");
+		mySystemDao.transaction(newSrd(), bb.getBundleTyped());
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true)).contains("rt1_0.PARTITION_ID='65'");
+	}
+
 
 
 	@Test
@@ -208,6 +231,35 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			assertEquals(ALTERNATE_DEFAULT_ID, observation.getPartitionId().getPartitionId().intValue());
 		});
 	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testPatch(boolean theById) {
+		createPatientA();
+
+		Observation obs = new Observation();
+		obs.setId("B");
+		obs.getSubject().setReference("Patient/A");
+		IIdType obsId = myObservationDao.update(obs).getId().toUnqualifiedVersionless();
+
+		// Test
+		FhirPatchBuilder patchBuilder = new FhirPatchBuilder(myFhirContext);
+		patchBuilder
+			.insert()
+			.path("Observation.identifier")
+			.index(0)
+			.value(new Identifier().setSystem("http://foo").setValue("123"));
+		if (theById) {
+			myObservationDao.patch(obsId, null, PatchTypeEnum.FHIR_PATCH_JSON, myFhirContext.newJsonParser().encodeResourceToString(patchBuilder.build()), patchBuilder.build(), newSrd());
+		} else {
+			myObservationDao.patch(null, "Observation?subject=Patient/A", PatchTypeEnum.FHIR_PATCH_JSON, myFhirContext.newJsonParser().encodeResourceToString(patchBuilder.build()), patchBuilder.build(), newSrd());
+		}
+
+		// Verify
+		Observation actual = myObservationDao.read(obsId, mySrd);
+		assertEquals("123", actual.getIdentifier().get(0).getValue());
+	}
+
 
 	@Test
 	public void testCreateGroupWithNoPatientReferenceValueIsInTheDefaultPartition() {

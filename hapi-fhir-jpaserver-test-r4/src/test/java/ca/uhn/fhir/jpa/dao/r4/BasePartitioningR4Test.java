@@ -258,11 +258,6 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		addNextInterceptorCreateResult(requestPartitionId);
 	}
 
-	protected void addNextTargetPartitionForConditionalCreateMatch(RequestPartitionId requestPartitionId) {
-		// only read to find the existing resource
-		addNextInterceptorReadResult(requestPartitionId);
-	}
-
 	// all the create-paths have a read path first for the tx boundary.
 	protected void addNextTargetPartitionForConditionalUpdateNotExist(RequestPartitionId requestPartitionId) {
 		addNextInterceptorReadResult(requestPartitionId);
@@ -299,7 +294,6 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	private void addNextTargetPartitionForUpdateInTxBundle(RequestPartitionId requestPartitionId) {
 		addNextInterceptorReadResult(requestPartitionId);
 		addNextInterceptorCreateResult(requestPartitionId);
-		addNextInterceptorCreateResult(requestPartitionId);
 		addNextTargetPartitionForCreateWithId(requestPartitionId);
 	}
 
@@ -308,20 +302,20 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 	protected void addNextTargetPartitionForCreate(Integer thePartitionId, LocalDate thePartitionDate) {
-		Validate.notNull(thePartitionId);
+		Validate.notNull(thePartitionId, "thePartitionId must not be null");
 		RequestPartitionId requestPartitionId = fromPartitionId(thePartitionId, thePartitionDate);
 		addNextTargetPartitionForCreate(requestPartitionId);
 	}
 
 	protected void addNextTargetPartitionForCreateInTransaction(Integer thePartitionId, LocalDate thePartitionDate) {
-		Validate.notNull(thePartitionId);
+		Validate.notNull(thePartitionId, "thePartitionId must not be null");
 		RequestPartitionId requestPartitionId = fromPartitionId(thePartitionId, thePartitionDate);
 		addNextTargetPartitionForCreate(requestPartitionId);
 		addNextTargetPartitionForCreate(requestPartitionId);
 	}
 
 	protected void addNextTargetPartitionForCreateDefaultPartition() {
-		addNextTargetPartitionForCreate(defaultPartition());
+		addNextTargetPartitionForCreate(defaultPartition(myPartitionSettings));
 	}
 
 	protected void addNextTargetPartitionForCreateDefaultPartition(LocalDate thePartitionDate) {
@@ -339,7 +333,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 	protected void addNextTargetPartitionForCreateWithIdDefaultPartition() {
-		addNextTargetPartitionForCreateWithId(defaultPartition());
+		addNextTargetPartitionForCreateWithId(defaultPartition(myPartitionSettings));
 	}
 
 	protected void addNextTargetPartitionForCreateWithIdDefaultPartition(LocalDate thePartitionDate) {
@@ -358,18 +352,18 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 
 
 	protected void addNextTargetPartitionsForRead(Integer... thePartitionId) {
-		Validate.notNull(thePartitionId);
+		Validate.notNull(thePartitionId, "thePartitionId must not be null");
 		addNextInterceptorReadResult(fromPartitionIds(thePartitionId));
 	}
 
 	protected void addNextTargetPartitionsForRead(String... thePartitionNames) {
-		Validate.notNull(thePartitionNames);
+		Validate.notNull(thePartitionNames, "thePartitionNames must not be null");
 		Validate.isTrue(thePartitionNames.length > 0);
 		addNextInterceptorReadResult(fromPartitionNames(thePartitionNames));
 	}
 
 	protected void addNextTargetPartitionForReadDefaultPartition() {
-		addNextInterceptorReadResult(defaultPartition());
+		addNextInterceptorReadResult(defaultPartition(myPartitionSettings));
 	}
 
 	protected void addNextInterceptorReadResult(RequestPartitionId requestPartitionId) {
@@ -400,18 +394,6 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			if (thePartitionId != null) {
 				addNextTargetPartitionForCreate(thePartitionId, null);
 			} else {
-				addNextTargetPartitionForCreateDefaultPartition();
-			}
-		};
-	}
-
-	protected ICreationArgument withReadWritePartitions(Integer thePartitionId) {
-		return t -> {
-			if (thePartitionId != null) {
-				addNextTargetPartitionsForRead(thePartitionId);
-				addNextTargetPartitionForCreate(thePartitionId, null);
-			} else {
-				addNextTargetPartitionForReadDefaultPartition();
 				addNextTargetPartitionForCreateDefaultPartition();
 			}
 		};
