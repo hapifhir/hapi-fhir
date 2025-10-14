@@ -155,7 +155,8 @@ class SearchParameterMapTest {
 		SearchParameterMap copy = orig.clone();
 
 		// verify that they are not the same
-		assertThat(copy).isNotEqualTo(orig);
+		assertThat(copy).isNotSameAs(orig);
+		assertThat(copy).isEqualTo(orig);
 
 		// ... but that they are equal
 		assertEquals(orig.toNormalizedQueryString(null), copy.toNormalizedQueryString(null));
@@ -178,6 +179,7 @@ class SearchParameterMapTest {
 		// verify changing one does not change the other
 		orig.setOffset(100);
 		assertThat(copy.toNormalizedQueryString(null)).isNotEqualTo(orig.toNormalizedQueryString(null));
+		assertThat(copy).isNotEqualTo(orig);
 	}
 
 	@Test
@@ -201,23 +203,23 @@ class SearchParameterMapTest {
 	@Test
 	public void testCompareParameters() {
 		// Missing
-		assertEquals(0, compare(ourFhirContext, new StringParam().setMissing(true), new StringParam().setMissing(true)));
-		assertEquals(-1, compare(ourFhirContext, new StringParam("A"), new StringParam().setMissing(true)));
-		assertEquals(1, compare(ourFhirContext, new StringParam().setMissing(true), new StringParam("A")));
+		assertEquals(0, compare(new StringParam().setMissing(true), new StringParam().setMissing(true)));
+		assertEquals(-1, compare(new StringParam("A"), new StringParam().setMissing(true)));
+		assertEquals(1, compare(new StringParam().setMissing(true), new StringParam("A")));
 
 		// Qualifier
-		assertEquals(0, compare(ourFhirContext, new StringParam("A").setContains(true), new StringParam("A").setContains(true)));
-		assertEquals(1, compare(ourFhirContext, new StringParam("A").setContains(true), new StringParam("A")));
-		assertEquals(-1, compare(ourFhirContext, new StringParam("A"), new StringParam("A").setContains(true)));
+		assertEquals(0, compare(new StringParam("A").setContains(true), new StringParam("A").setContains(true)));
+		assertEquals(1, compare(new StringParam("A").setContains(true), new StringParam("A")));
+		assertEquals(-1, compare(new StringParam("A"), new StringParam("A").setContains(true)));
 
 		// Value
-		assertEquals(0, compare(ourFhirContext, new StringParam("A"), new StringParam("A")));
-		assertEquals(-1, compare(ourFhirContext, new StringParam("A"), new StringParam("B")));
-		assertEquals(1, compare(ourFhirContext, new StringParam("B"), new StringParam("A")));
+		assertEquals(0, compare(new StringParam("A"), new StringParam("A")));
+		assertEquals(-1, compare(new StringParam("A"), new StringParam("B")));
+		assertEquals(1, compare(new StringParam("B"), new StringParam("A")));
 
 		// Value + Comparator (value should have no effect if comparator is changed)
-		assertEquals(1, compare(ourFhirContext, new StringParam("B").setContains(true), new StringParam("A")));
-		assertEquals(1, compare(ourFhirContext, new StringParam("A").setContains(true), new StringParam("B")));
+		assertEquals(1, compare(new StringParam("B").setContains(true), new StringParam("A")));
+		assertEquals(1, compare(new StringParam("A").setContains(true), new StringParam("B")));
 
 	}
 

@@ -1406,6 +1406,55 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
+	 * Invoked when a search is starting, prior to selecting the partition for the search.
+	 * Hooks may examine the request and potentially modify it if they wish to affect the
+	 * partition selection.
+	 * <p>
+	 * This hook is called shortly before {@link #STORAGE_PRESEARCH_REGISTERED}. It is not
+	 * called if the search has an explicit partition already selected.
+	 * </p>
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.util.ICachedSearchDetails - Contains the details of the search that
+	 * is being created and initialized. Interceptors may use this parameter to modify aspects of the search
+	 * before it is stored and executed.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred. <b>Note that this parameter may be null in contexts where the request is not
+	 * known, such as while processing searches</b>
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.jpa.searchparam.SearchParameterMap - Contains the details of the search being checked. This can be modified.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 *
+	 * @since 8.6.0
+	 */
+	STORAGE_PRESEARCH_PARTITION_SELECTED(
+			void.class,
+			"ca.uhn.fhir.rest.server.util.ICachedSearchDetails",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+			"ca.uhn.fhir.jpa.searchparam.SearchParameterMap"),
+
+	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked when a search is starting, prior to creating a record for the search.
 	 * <p>
 	 * Hooks may accept the following parameters:

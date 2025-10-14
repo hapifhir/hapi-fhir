@@ -24,7 +24,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIdentifierPatientUniqueEntityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIdentifierSystemEntityDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.ResourceIdentifierPatientUniqueEntity;
-import ca.uhn.fhir.jpa.model.entity.ResourceIdentifierSystemEntity;
+import ca.uhn.fhir.jpa.model.entity.ResourceSystemEntity;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -37,8 +37,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class ResourceIdentifierCacheSvcImpl implements IResourceIdentifierCacheSvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceIdentifierCacheSvcImpl.class);
@@ -89,7 +91,7 @@ public class ResourceIdentifierCacheSvcImpl implements IResourceIdentifierCacheS
 								Long newPid = lookupResourceIdentifierSystemFromCacheOrDatabase(
 										theRequestDetails, theRequestPartitionId, theSystem);
 								if (newPid == null) {
-									ResourceIdentifierSystemEntity newEntity = new ResourceIdentifierSystemEntity();
+									ResourceSystemEntity newEntity = new ResourceSystemEntity();
 									newEntity.setSystem(theSystem);
 									newEntity = myResourceIdentifierSystemEntityDao.save(newEntity);
 									assert newEntity.getPid() != null;
@@ -151,13 +153,34 @@ public class ResourceIdentifierCacheSvcImpl implements IResourceIdentifierCacheS
 						theRequestDetails, theRequestPartitionId, identifierSystemPid, theValue, theNewIdSupplier));
 	}
 
+	@Nonnull
+	@Override
+	public Optional<String> getFhirIdAssociatedWithUniquePatientIdentifier(
+			RequestDetails theRequestDetails,
+			RequestPartitionId theRequestPartitionId,
+			String theSystem,
+			String theValue) {
+		Validate.notBlank(theSystem, "theSystem must not be blank");
+		Validate.notBlank(theValue, "theValue must not be blank");
+
+		long identifierSystemPid =
+				getOrCreateResourceIdentifierSystem(theRequestDetails, theRequestPartitionId, theSystem);
+		MemoryCacheService.IdentifierKey key = new MemoryCacheService.IdentifierKey(theSystem, theValue);
+		String fhirId = myMemoryCache.getThenPutAfterCommitIfNotNull(
+				MemoryCacheService.CacheEnum.PATIENT_IDENTIFIER_TO_FHIR_ID,
+				key,
+				t -> lookupResourceFhirIdForPatientIdentifier(
+						theRequestDetails, theRequestPartitionId, identifierSystemPid, theValue, null));
+		return Optional.ofNullable(fhirId);
+	}
+
 	@Nullable
 	private String lookupResourceFhirIdForPatientIdentifier(
 			RequestDetails theRequestDetails,
 			RequestPartitionId theRequestPartitionId,
 			long theSystem,
 			String theValue,
-			Supplier<String> theNewIdSupplier) {
+			@Nullable Supplier<String> theNewIdSupplier) {
 		return myTransactionService
 				.withRequest(theRequestDetails)
 				.withRequestPartitionId(theRequestPartitionId)
@@ -168,8 +191,9 @@ public class ResourceIdentifierCacheSvcImpl implements IResourceIdentifierCacheS
 							.map(ResourceIdentifierPatientUniqueEntity::getFhirId)
 							.orElse(null);
 
-					if (retVal == null) {
+					if (retVal == null && theNewIdSupplier != null) {
 						retVal = theNewIdSupplier.get();
+						assert retVal != null;
 						ourLog.trace("Created FHIR ID [{}] for SystemPid[{}] Value[{}]", retVal, theSystem, theValue);
 						ResourceIdentifierPatientUniqueEntity newEntity = new ResourceIdentifierPatientUniqueEntity();
 						newEntity.setPk(
@@ -178,7 +202,6 @@ public class ResourceIdentifierCacheSvcImpl implements IResourceIdentifierCacheS
 						myEntityManager.persist(newEntity);
 					}
 
-					assert retVal != null;
 					return retVal;
 				});
 	}

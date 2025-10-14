@@ -37,6 +37,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -1120,6 +1121,35 @@ public class BulkDataExportProviderR4Test {
 
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response content: {}", responseContent);
+			assertThat(responseContent).contains("was cancelled.  No status to report.");
+		}
+	}
+
+	@Test
+	public void testGetExportPollStatus_QueuedJobBeingCancelled_return404() throws IOException {
+		// Setup
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId(A_JOB_ID);
+		instance.setCancelled(true);
+		instance.setStatus(StatusEnum.QUEUED);
+		instance.setEndTime(InstantType.now().getValue());
+
+		BulkExportJobParameters parameters = new BulkExportJobParameters();
+		instance.setParameters(parameters);
+
+		when(myJobCoordinator.getInstance(eq(A_JOB_ID))).thenReturn(instance);
+
+		String url = myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
+		HttpGet httpGet = new HttpGet(url);
+
+		// Execute
+		try (CloseableHttpResponse response = myClient.execute(httpGet)) {
+			// Verify
+			ourLog.debug("Response: {}", response);
+			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.SC_NOT_FOUND);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Not Found");
 			assertThat(responseContent).contains("was cancelled.  No status to report.");
 		}
 	}

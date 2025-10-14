@@ -42,13 +42,17 @@ public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 			@Nullable RequestDetails theRequestDetails,
 			RequestPartitionId theRequestPartitionId);
 
+	/**
+	 * @param theRequestDetails The RequestDetails associated with the request. If you want to supply a fixed
+	 *                          {@link RequestPartitionId} you can use a {@link ca.uhn.fhir.rest.api.server.SystemRequestDetails}
+	 *                          and supply it there.
+	 */
 	IBundleProvider registerSearch(
 			IFhirResourceDao<?> theCallingDao,
 			SearchParameterMap theParams,
 			String theResourceType,
 			CacheControlDirective theCacheControlDirective,
-			@Nullable RequestDetails theRequestDetails,
-			RequestPartitionId theRequestPartitionId);
+			@Nullable RequestDetails theRequestDetails);
 
 	/**
 	 * Fetch the total number of search results for the given currently executing search, if one is currently executing and
