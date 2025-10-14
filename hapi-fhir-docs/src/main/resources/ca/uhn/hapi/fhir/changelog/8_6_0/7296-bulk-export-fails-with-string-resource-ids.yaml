@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7296
+jira: SMILE-7961
+title: "Fixed an issue in bulk export with _includeHistory=true where history records failed to export for resources with client-assigned string IDs. History
+   is now gathered using PIDs rather than forced IDs."

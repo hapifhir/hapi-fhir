@@ -222,7 +222,8 @@ public class ExpandResourceAndWriteBinaryStep
 		for (String resourceType : theTypeToIds.keySet()) {
 			List<TypedPidJson> typePidJsonList = theTypeToIds.get(resourceType);
 
-			List<String> idList = convertToStringIds(theRequestPartitionId, resourceType, typePidJsonList);
+			List<String> idList =
+					typePidJsonList.stream().map(TypedPidJson::getPid).toList();
 
 			consumeHistoryInBatches(
 					resourceType, idList, theRequestPartitionId, theJobParameters, theResourceListConsumer);

@@ -1674,6 +1674,57 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			assertFalse(parameters.isIncludeHistory());
 		}
 
+		@Test
+		public void testSystemBulkExportWithHistory_WithClientAssignedIds() {
+			// Given - Create patients with client-assigned IDs (forced IDs) and multiple versions
+			Patient patient1 = new Patient();
+			patient1.setId("Patient/client-assigned-id-1");
+			patient1.addName().setFamily("FamilyV1");
+			myClient.update().resource(patient1).execute();
+
+			// Create version 2
+			patient1.getNameFirstRep().setFamily("FamilyV2");
+			myClient.update().resource(patient1).execute();
+
+			// Create version 3
+			patient1.getNameFirstRep().setFamily("FamilyV3");
+			myClient.update().resource(patient1).execute();
+
+			Patient patient2 = new Patient();
+			patient2.setId("Patient/client-assigned-id-2");
+			patient2.addName().setFamily("SmithV1");
+			myClient.update().resource(patient2).execute();
+
+			// Create version 2
+			patient2.getNameFirstRep().setFamily("SmithV2");
+			myClient.update().resource(patient2).execute();
+
+			// When - Start bulk export with history
+			BulkExportJobParameters options = new BulkExportJobParameters();
+			options.setResourceTypes(Collections.singleton("Patient"));
+			options.setFilters(Collections.emptySet());
+			options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
+			options.setIncludeHistory(true);
+			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+			startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+			startRequest.setParameters(options);
+			Batch2JobStartResponse job = myJobCoordinator.startInstance(mySrd, startRequest);
+			myBatch2JobHelper.awaitJobCompletion(job.getInstanceId(), 60);
+			ourLog.debug("Job status after awaiting - {}", myJobCoordinator.getInstance(job.getInstanceId()).getStatus());
+			waitForCompletion(job);
+
+			// Then - Verify all versions are exported for resources with forced IDs
+			Map<String, Set<String>> exportedPatientVersionsMap = extractExportedResourceVersionsByTypeMap(job).get("Patient");
+
+			assertThat(exportedPatientVersionsMap).containsKey("client-assigned-id-1");
+			assertThat(exportedPatientVersionsMap.get("client-assigned-id-1")).hasSize(3);
+
+			assertThat(exportedPatientVersionsMap).containsKey("client-assigned-id-2");
+			assertThat(exportedPatientVersionsMap.get("client-assigned-id-2")).hasSize(2);
+		}
+
 	}
 
 
@@ -1835,7 +1886,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 		for (Integer theVersionCount : versionCounts) {
 			IIdType id = createPatient();
-				Set<String> patientVersionIds = new HashSet<>();
+			Set<String> patientVersionIds = new HashSet<>();
 			retVal.put(id.getIdPart(), patientVersionIds);
 
 			// create indicated additional versions
