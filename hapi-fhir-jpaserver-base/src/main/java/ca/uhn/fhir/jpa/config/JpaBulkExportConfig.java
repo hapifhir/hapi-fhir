@@ -35,6 +35,8 @@ import jakarta.persistence.EntityManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Optional;
+
 @Configuration
 public class JpaBulkExportConfig {
 	@Bean
@@ -48,7 +50,7 @@ public class JpaBulkExportConfig {
 			EntityManager theEntityManager,
 			IHapiTransactionService theHapiTransactionService,
 			ISearchParamRegistry theSearchParamRegistry,
-			IMdmLinkExpandSvc theMdmLinkExpandSvc) {
+			Optional<IMdmLinkExpandSvc> theMdmLinkExpandSvc) {
 		return new JpaBulkExportProcessor(
 				theFhirContext,
 				theBulkExportHelperService,

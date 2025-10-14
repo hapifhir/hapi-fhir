@@ -35,10 +35,12 @@ import ca.uhn.fhir.mdm.util.EIDHelper;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ConditionalOnBean(IMdmSettings.class)
 public class MdmJpaConfig {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmJpaConfig.class);
 

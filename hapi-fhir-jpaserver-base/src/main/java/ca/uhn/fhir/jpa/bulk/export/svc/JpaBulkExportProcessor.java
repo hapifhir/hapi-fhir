@@ -86,7 +86,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	private EntityManager myEntityManager;
 	private IHapiTransactionService myHapiTransactionService;
 	private ISearchParamRegistry mySearchParamRegistry;
-	private IMdmLinkExpandSvc myMdmLinkExpandSvc;
+	private Optional<IMdmLinkExpandSvc> myMdmLinkExpandSvc;
 
 	@Autowired
 	public JpaBulkExportProcessor(
@@ -99,7 +99,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			EntityManager theEntityManager,
 			IHapiTransactionService theHapiTransactionService,
 			ISearchParamRegistry theSearchParamRegistry,
-			IMdmLinkExpandSvc theMdmLinkExpandSvc) {
+			Optional<IMdmLinkExpandSvc> theMdmLinkExpandSvc) {
 		myContext = theContext;
 		myBulkExportHelperSvc = theBulkExportHelperSvc;
 		myStorageSettings = theStorageSettings;
@@ -347,10 +347,14 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 	@Override
 	public void expandMdmResources(List<IBaseResource> theResources) {
-		for (IBaseResource resource : theResources) {
-			if (!PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(resource.fhirType())) {
-				myMdmLinkExpandSvc.annotateResource(resource);
+		if (myMdmLinkExpandSvc.isPresent()) {
+			for (IBaseResource resource : theResources) {
+				if (!PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(resource.fhirType())) {
+					myMdmLinkExpandSvc.get().annotateResource(resource);
+				}
 			}
+		} else {
+			ourLog.warn("Attempted to perform MDM expansion, but no IMdmLinkExpandSvc was configured. Is MDM configured correctly?");
 		}
 	}
 
@@ -389,7 +393,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	/**
 	 * Given the local myGroupId, perform an expansion to retrieve all resource IDs of member patients.
 	 * if myMdmEnabled is set to true, we also attempt to also expand it into matched
-	 * patients.
+	 * patients, assuming MDM is configured.
 	 *
 	 * @return a Set of Strings representing the resource IDs of all members of a group.
 	 */
@@ -404,8 +408,12 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		LinkedHashSet<JpaPid> patientPidsToExport = new LinkedHashSet<>(members);
 
 		if (theParameters.isExpandMdm()) {
-			RequestPartitionId partitionId = theParameters.getPartitionIdOrAllPartitions();
-			patientPidsToExport.addAll(myMdmLinkExpandSvc.expandGroup(theParameters.getGroupId(), partitionId));
+			if (myMdmLinkExpandSvc.isPresent()) {
+				RequestPartitionId partitionId = theParameters.getPartitionIdOrAllPartitions();
+				patientPidsToExport.addAll(myMdmLinkExpandSvc.get().expandGroup(theParameters.getGroupId(), partitionId));
+			} else {
+				ourLog.warn("Attempted to perform MDM expansion during a group-level export operation, but no IMdmLinkExpandSvc was configured. Is MDM Configured correctly?");
+			}
 		}
 		return patientPidsToExport;
 	}
