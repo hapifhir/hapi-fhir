@@ -85,6 +85,7 @@ public class MdmJpaConfig {
 		}
 		return new DisabledMdmLinkExpandSvc();
 	}
+
 	@Bean
 	EIDHelper eidHelper(FhirContext theFhirContext, @Nullable IMdmSettings theMdmSettings) {
 		if (theMdmSettings == null) {
