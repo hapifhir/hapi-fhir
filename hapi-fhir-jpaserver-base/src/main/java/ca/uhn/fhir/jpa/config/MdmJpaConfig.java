@@ -20,22 +20,16 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
-import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.IMdmClearHelperSvc;
 import ca.uhn.fhir.jpa.bulk.mdm.MdmClearHelperSvcImpl;
 import ca.uhn.fhir.jpa.dao.mdm.JpaMdmLinkImplFactory;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDaoJpaImpl;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
-import ca.uhn.fhir.mdm.svc.DisabledMdmLinkExpandSvc;
-import ca.uhn.fhir.mdm.svc.MdmEidMatchOnlyExpandSvc;
-import ca.uhn.fhir.mdm.svc.MdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import jakarta.annotation.Nullable;
@@ -62,7 +56,6 @@ public class MdmJpaConfig {
 	public IMdmLinkImplFactory<MdmLink> mdmLinkImplFactory() {
 		return new JpaMdmLinkImplFactory();
 	}
-
 
 	@Bean
 	EIDHelper eidHelper(FhirContext theFhirContext, @Nullable IMdmSettings theMdmSettings) {
