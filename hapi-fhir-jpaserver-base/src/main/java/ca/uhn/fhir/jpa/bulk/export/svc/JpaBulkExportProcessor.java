@@ -412,8 +412,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			if (myMdmLinkExpandSvc.isPresent()) {
 				RequestPartitionId partitionId = theParameters.getPartitionIdOrAllPartitions();
 				IMdmLinkExpandSvc iMdmLinkExpandSvc = myMdmLinkExpandSvc.get();
-				patientPidsToExport.addAll(
-						iMdmLinkExpandSvc.expandGroup(theParameters.getGroupId(), partitionId));
+				patientPidsToExport.addAll(iMdmLinkExpandSvc.expandGroup(theParameters.getGroupId(), partitionId));
 			} else {
 				ourLog.warn(
 						"Attempted to perform MDM expansion during a group-level export operation, but no IMdmLinkExpandSvc was configured. Is MDM Configured correctly?");
