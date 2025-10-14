@@ -57,6 +57,7 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -565,6 +566,14 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			return false;
 		}
 
+		if ("CodeSystem".equals(resourceType) && isEmbeddedCodeSystem(theResource)) {
+			return false;
+		}
+
+		if ("ValueSet".equals(resourceType) && isEmbeddedValueSet(theResource)) {
+			return false;
+		}
+
 		if (!isValidResourceStatusForPackageUpload(theResource)) {
 			ourLog.warn(
 					"Failed to validate resource of type {} with ID {} - Error: Resource status not accepted value.",
@@ -574,6 +583,34 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 
 		return true;
+	}
+
+	private final List<String> embeddedCodeSystems = List.of(
+			CommonCodeSystemsTerminologyService.LANGUAGES_CODESYSTEM_URL,
+			CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL,
+			CommonCodeSystemsTerminologyService.CURRENCIES_CODESYSTEM_URL,
+			CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL,
+			CommonCodeSystemsTerminologyService.UCUM_CODESYSTEM_URL,
+			CommonCodeSystemsTerminologyService.USPS_CODESYSTEM_URL);
+
+	private final List<String> embeddedValueSets = List.of(
+			CommonCodeSystemsTerminologyService.LANGUAGES_VALUESET_URL,
+			CommonCodeSystemsTerminologyService.MIMETYPES_VALUESET_URL,
+			CommonCodeSystemsTerminologyService.CURRENCIES_VALUESET_URL,
+			CommonCodeSystemsTerminologyService.UCUM_VALUESET_URL,
+			CommonCodeSystemsTerminologyService.ALL_LANGUAGES_VALUESET_URL,
+			CommonCodeSystemsTerminologyService.USPS_VALUESET_URL);
+
+	private boolean isEmbeddedValueSet(IBaseResource theResource) {
+		org.hl7.fhir.r4.model.ValueSet valueSet = myVersionCanonicalizer.valueSetToCanonical(theResource);
+		if (!valueSet.hasUrl()) return false;
+		return embeddedValueSets.contains(valueSet.getUrl());
+	}
+
+	private boolean isEmbeddedCodeSystem(IBaseResource theResource) {
+		org.hl7.fhir.r4.model.CodeSystem codeSystem = myVersionCanonicalizer.codeSystemToCanonical(theResource);
+		if (!codeSystem.hasUrl()) return false;
+		return embeddedCodeSystems.contains(codeSystem.getUrl());
 	}
 
 	private boolean isValidSearchParameter(IBaseResource theResource) {
