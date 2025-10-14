@@ -52,6 +52,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -129,6 +130,9 @@ public class JpaBulkExportProcessorTest {
 
 	@Mock
 	private IIdHelperService<JpaPid> myIdHelperService;
+
+	@Mock
+	private Optional<IMdmLinkExpandSvc> myOptionalMdmLinkExpanderService;
 
 	@Mock
 	private IMdmLinkExpandSvc myMdmLinkExpanderService;
@@ -297,6 +301,8 @@ public class JpaBulkExportProcessorTest {
 		if (theMdm) {
 
 			// mock the call to expandGroup method of the expander
+			when(myOptionalMdmLinkExpanderService.isPresent()).thenReturn(true);
+			when(myOptionalMdmLinkExpanderService.get()).thenReturn(myMdmLinkExpanderService);
 			when(myMdmLinkExpanderService.expandGroup(parameters.getGroupId(), getPartitionIdFromParams(thePartitioned)))
 				.thenReturn(Set.of(mdmExpandedPatientId));
 		}
@@ -392,6 +398,8 @@ public class JpaBulkExportProcessorTest {
 
 		if (theMdm) {
 			// mock the call to expandGroup method of the expander
+			when(myOptionalMdmLinkExpanderService.isPresent()).thenReturn(true);
+			when(myOptionalMdmLinkExpanderService.get()).thenReturn(myMdmLinkExpanderService);
 			when(myMdmLinkExpanderService.expandGroup(parameters.getGroupId(), getPartitionIdFromParams(thePartitioned)))
 				.thenReturn(Collections.emptySet());
 		}

@@ -39,11 +39,11 @@ public class MdmLinkSlowDeletionSandboxIT  extends BaseMdmR4Test {
 	private final int ourMdmLinksToCreate = 1_000_000;
 	private final int ourLogMdmLinksEach = 1_000;
 
+	/**
+	 * Overridden so we don't purge the DB in between tests.
+	 */
 	@Override
-	public void afterPurgeDatabase() {
-		// keep the generated data!
-//		super.afterPurgeDatabase();
-	}
+	public void afterPurgeDatabase() {}
 
 	@Disabled
 	@Test
@@ -55,7 +55,6 @@ public class MdmLinkSlowDeletionSandboxIT  extends BaseMdmR4Test {
 		assertTrue(totalLinks > 0);
 	}
 	
-
 	private void generatePatientsAndMdmLinks(int theLinkCount) {
 		StopWatch sw = new StopWatch();
 		int totalMdmLinksCreated = 0;
