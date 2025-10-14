@@ -107,6 +107,7 @@ import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
+import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.interceptor.MdmStorageInterceptor;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -235,7 +236,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @ContextConfiguration(classes = {
 	TestR4Config.class,
 	ReplaceReferencesAppCtx.class,  // Batch job
-	MergeAppCtx.class // Batch job
+	MergeAppCtx.class, // Batch job
 })
 public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuilder {
 	public static final String MY_VALUE_SET = "my-value-set";
@@ -550,8 +551,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected ValidationSettings myValidationSettings;
 	@Autowired
-	protected IMdmLinkJpaRepository myMdmLinkRepository;
-	@Autowired
 	protected IMdmLinkJpaRepository myMdmLinkHistoryDao;
 	@Autowired
 	private IValidationSupport myJpaValidationSupportChainR4;
@@ -651,9 +650,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		ourLog.info("Pausing Schedulers");
 		mySchedulerService.pause();
 
-		myTerminologyDeferredStorageSvc.logQueueForUnitTest();
 		if (!myTermDeferredStorageSvc.isStorageQueueEmpty(true)) {
-			ourLog.warn("There is deferred terminology storage stuff still in the queue. Please verify your tests clean up ok.");
+			ourLog.warn("There is deferred terminology storage stuff still in the queue. Please verify your tests clean up ok. Please call myTerminologyDeferredStorageSvc.logQueueForUnitTest() to find out what is in there in your test.");
 			if (myTermDeferredStorageSvc instanceof TermDeferredStorageSvcImpl t) {
 				t.clearDeferred();
 			}
@@ -666,8 +664,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		}
 		try {
 			runInTransaction(() -> {
+				myMdmLinkDao.ifPresent(IMdmLinkDao::deleteAll);
 				myMdmLinkHistoryDao.deleteAll();
-				myMdmLinkDao.deleteAll();
 			});
 			purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 
@@ -685,7 +683,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		// restart the jobs
 		ourLog.info("Restarting the schedulers");
 		mySchedulerService.unpause();
-		ourLog.info("5 - " + getClass().getSimpleName() + ".afterPurgeDatabases");
+		ourLog.info("Finished executing afterPurgeDatabases() for class  " + getClass().getSimpleName());
 	}
 
 	@BeforeEach

@@ -71,10 +71,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
 @Import({
+	TestJPAConfig.class,
 	JpaR4Config.class,
 	PackageLoaderConfig.class,
 	TestHapiJpaConfig.class,
-	TestJPAConfig.class,
 	SubscriptionTopicConfig.class,
 	TestHSearchAddInConfig.DefaultLuceneHeap.class,
 	JpaBatch2Config.class,

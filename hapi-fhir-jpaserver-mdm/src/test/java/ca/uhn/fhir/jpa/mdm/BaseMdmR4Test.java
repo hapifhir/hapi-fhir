@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static java.util.stream.Collectors.joining;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -154,6 +155,18 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	protected GoldenResourceMatchingAssert mdmAssertThat(IAnyResource theResource) {
 		return GoldenResourceMatchingAssert.assertThat(theResource, myIdHelperService, myMdmLinkDaoSvc);
+	}
+
+	protected int logAllMdmLinks() {
+		return runInTransaction(()->{
+			List<MdmLink> links = myMdmLinkDao.findAll();
+			if (links.isEmpty()) {
+				ourLog.info("MDM Links: NONE");
+			} else {
+				ourLog.info("MDM Links:\n * {}", links.stream().map(t -> t.toString()).collect(joining("\n * ")));
+			}
+			return links.size();
+		});
 	}
 	@Nonnull
 	protected Patient createGoldenPatient() {

@@ -40,6 +40,7 @@ import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -47,6 +48,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -83,7 +86,13 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	private IFhirPath myFhirPath;
 
 	public MdmLinkExpandSvc() {
-		myFhirPath = myContext.newFhirPath();
+	}
+
+	private IFhirPath getFhirPath() {
+		if (myFhirPath == null) {
+			myFhirPath = myContext.newFhirPath();
+		}
+		return myFhirPath;
 	}
 
 	/**
@@ -304,7 +313,7 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 			return Optional.of(iBaseResource.getIdElement().getIdPart());
 		} else {
 			Optional<IBaseReference> optionalReference =
-					myFhirPath.evaluateFirst(iBaseResource, fhirPath, IBaseReference.class);
+					getFhirPath().evaluateFirst(iBaseResource, fhirPath, IBaseReference.class);
 			if (optionalReference.isPresent()) {
 				return optionalReference.map(theIBaseReference ->
 						theIBaseReference.getReferenceElement().getIdPart());

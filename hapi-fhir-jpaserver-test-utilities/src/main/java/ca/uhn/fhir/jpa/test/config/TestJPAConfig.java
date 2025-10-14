@@ -43,7 +43,9 @@ import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookListener
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.util.LoggingEmailSender;
 import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
+import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.system.HapiTestSystemProperties;
 import jakarta.persistence.EntityManagerFactory;
@@ -140,5 +142,17 @@ public class TestJPAConfig {
 	@Bean
 	public IMdmRuleValidator mdmRuleValidator(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
 		return new MdmRuleValidator(theFhirContext, theSearchParamRetriever);
+	}
+
+	/**
+	 * N.B GGG: This bean only exists to support our existing busted test infrastructure that smooshes persistence contexts
+	 * together with MDM contexts. In the future, this will be ripped out into mdm-specific JPA config for test. For now,
+	 * if you need to override this MDM behaviour, add @Primary to your IMdmSettings bean definition in your implementing test class.
+	 */
+	@Bean
+	public IMdmSettings mdmSettings(IMdmRuleValidator theMdmRuleValidator) {
+		MdmSettings mdmSettings = new MdmSettings(theMdmRuleValidator);
+		mdmSettings.setEnabled(true);
+		return mdmSettings;
 	}
 }

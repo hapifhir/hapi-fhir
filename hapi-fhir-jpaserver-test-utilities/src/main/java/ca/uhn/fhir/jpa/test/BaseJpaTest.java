@@ -230,7 +230,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected ServletRequestDetails mySrd;
 	protected InterceptorService mySrdInterceptorService;
 	@Autowired
-	protected IMdmLinkDao<JpaPid, MdmLink> myMdmLinkDao;
+	protected Optional<IMdmLinkDao<JpaPid, MdmLink>> myMdmLinkDao;
 	@Autowired
 	protected FhirContext myFhirContext;
 	@Autowired
@@ -590,18 +590,6 @@ public abstract class BaseJpaTest extends BaseTest {
 			IBaseResource next = resources.get(i);
 			ourLog.info("{} #{}:\n{}", type, i, parser.setPrettyPrint(true).encodeResourceToString(next));
 		}
-	}
-
-	protected int logAllMdmLinks() {
-		return runInTransaction(()->{
-			List<MdmLink> links = myMdmLinkDao.findAll();
-			if (links.isEmpty()) {
-				ourLog.info("MDM Links: NONE");
-			} else {
-				ourLog.info("MDM Links:\n * {}", links.stream().map(t -> t.toString()).collect(joining("\n * ")));
-			}
-			return links.size();
-		});
 	}
 
 	public void logAllResourceLinks() {

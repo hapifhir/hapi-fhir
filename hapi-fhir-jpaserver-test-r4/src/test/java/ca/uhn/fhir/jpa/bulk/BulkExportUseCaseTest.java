@@ -72,6 +72,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
@@ -99,8 +100,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-//TODO GGG: we should be splitting out tests that enable MDM, as otherwise I am adding MDM config to all these tests for no reason.
-@ContextConfiguration(classes = {MdmRulesWithEidMatchOnlyConfig.class})
+
+@Import(MdmRulesWithEidMatchOnlyConfig.class)
 public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportUseCaseTest.class);
 
