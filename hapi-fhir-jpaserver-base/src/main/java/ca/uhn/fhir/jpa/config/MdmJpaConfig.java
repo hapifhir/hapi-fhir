@@ -39,7 +39,6 @@ import ca.uhn.fhir.mdm.svc.MdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import jakarta.annotation.Nullable;
-import net.sourceforge.plantuml.classdiagram.command.CommandUrl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -63,27 +62,7 @@ public class MdmJpaConfig {
 	public IMdmLinkImplFactory<MdmLink> mdmLinkImplFactory() {
 		return new JpaMdmLinkImplFactory();
 	}
-	/**
-	 * Based on the rules laid out in the {@link IMdmSettings} file, construct an {@link IMdmLinkExpandSvc} that is suitable
-	 */
-	//	FIXME GGG Why are we even loading this whole config file if MDM is disabled?!?!
-	@Bean
-	public IMdmLinkExpandSvc mdmLinkExpandSvc(
-			EIDHelper theEidHelper,
-			@Nullable IMdmSettings theMdmSettings,
-			DaoRegistry theDaoRegistry,
-			FhirContext theFhirContext,
-			IIdHelperService theIdHelperService) {
-		if (theMdmSettings == null) {
-			return new DisabledMdmLinkExpandSvc();
-		}
-		if (theMdmSettings.supportsLinkBasedExpansion()) {
-			return new MdmLinkExpandSvc();
-		} else if (theMdmSettings.supportsEidBasedExpansion()) {
-			return new MdmEidMatchOnlyExpandSvc(theDaoRegistry, theFhirContext, theIdHelperService, theEidHelper);
-		}
-		return new DisabledMdmLinkExpandSvc();
-	}
+
 
 	@Bean
 	EIDHelper eidHelper(FhirContext theFhirContext, @Nullable IMdmSettings theMdmSettings) {

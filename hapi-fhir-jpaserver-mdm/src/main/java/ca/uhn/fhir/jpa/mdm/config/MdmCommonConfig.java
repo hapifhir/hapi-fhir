@@ -71,4 +71,5 @@ public class MdmCommonConfig {
 			FhirContext theFhirContext, IMdmSettings theSettings, INicknameSvc theNicknameSvc) {
 		return new MdmMatcherFactory(theFhirContext, theSettings, theNicknameSvc);
 	}
+
 }
