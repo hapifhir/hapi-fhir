@@ -20,20 +20,25 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.IMdmClearHelperSvc;
 import ca.uhn.fhir.jpa.bulk.mdm.MdmClearHelperSvcImpl;
 import ca.uhn.fhir.jpa.dao.mdm.JpaMdmLinkImplFactory;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDaoJpaImpl;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
+import ca.uhn.fhir.mdm.svc.DisabledMdmLinkExpandSvc;
+import ca.uhn.fhir.mdm.svc.MdmEidMatchOnlyExpandSvc;
+import ca.uhn.fhir.mdm.svc.MdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import jakarta.annotation.Nullable;
-import net.sourceforge.plantuml.classdiagram.command.CommandUrl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -59,14 +64,14 @@ public class MdmJpaConfig {
 	public IMdmLinkImplFactory<MdmLink> mdmLinkImplFactory() {
 		return new JpaMdmLinkImplFactory();
 	}
-/**
+
+	/**
 	 * Based on the rules laid out in the {@link IMdmSettings} file, construct an {@link IMdmLinkExpandSvc} that is suitable
 	 */
-	//	FIXME GGG Why are we even loading this whole config file if MDM is disabled?!?!
 	@Bean
 	public IMdmLinkExpandSvc mdmLinkExpandSvc(
 			EIDHelper theEidHelper,
-			@Nullable IMdmSettings theMdmSettings,
+			IMdmSettings theMdmSettings,
 			DaoRegistry theDaoRegistry,
 			FhirContext theFhirContext,
 			IIdHelperService theIdHelperService) {

@@ -21,7 +21,6 @@ import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
@@ -120,8 +119,6 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private IInterceptorService myInterceptorService;
 	@Autowired
 	private MdmRuleValidator myMdmRulesValidator;
-	@Autowired
-	private IMdmLinkExpandSvc myMdmLinkExpandSvc;
 
 	@BeforeEach
 	public void beforeEach() {

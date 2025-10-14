@@ -592,10 +592,6 @@ public abstract class BaseJpaTest extends BaseTest {
 		}
 	}
 
-	protected int countAllMdmLinks() {
-		return runInTransaction(()-> myMdmLinkDao.findAll().size());
-	}
-
 	protected int logAllMdmLinks() {
 		return runInTransaction(()->{
 			List<MdmLink> links = myMdmLinkDao.findAll();
