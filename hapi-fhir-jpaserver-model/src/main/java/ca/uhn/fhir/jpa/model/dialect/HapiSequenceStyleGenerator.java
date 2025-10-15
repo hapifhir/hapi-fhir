@@ -109,10 +109,14 @@ public class HapiSequenceStyleGenerator
 		Validate.notBlank(myGeneratorName, "No generator name found");
 
 		Properties props = new Properties(theParams);
+
+		// We start the sequence with an initial value larger than the increment value to avoid
+		// a an interaction between the pooled_lo optimizer and out-of-order sequence reads on AWS limitless
+		// that generate negative values.  We can't switch to pooled_hi in a backwards-compatible way.
 		props.put(OptimizableGenerator.OPT_PARAM, StandardOptimizerDescriptor.POOLED.getExternalName());
-		props.put(OptimizableGenerator.INITIAL_PARAM, "1");
-		props.put(OptimizableGenerator.INCREMENT_PARAM, "50");
-		props.put(GENERATOR_NAME, myGeneratorName);
+		props.put(OptimizableGenerator.INITIAL_PARAM, 1000);
+		props.put(OptimizableGenerator.INCREMENT_PARAM, 100);
+		props.put(IdentifierGenerator.GENERATOR_NAME, myGeneratorName);
 
 		myGen.configure(theType, props, theServiceRegistry);
 
