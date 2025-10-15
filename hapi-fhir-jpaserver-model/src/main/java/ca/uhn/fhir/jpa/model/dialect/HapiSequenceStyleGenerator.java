@@ -115,7 +115,7 @@ public class HapiSequenceStyleGenerator
 		// that generate negative values.  We can't switch to pooled_hi in a backwards-compatible way.
 		props.put(OptimizableGenerator.OPT_PARAM, StandardOptimizerDescriptor.POOLED.getExternalName());
 		props.put(OptimizableGenerator.INITIAL_PARAM, 1000);
-		props.put(OptimizableGenerator.INCREMENT_PARAM, 100);
+		props.put(OptimizableGenerator.INCREMENT_PARAM, 50);
 		props.put(IdentifierGenerator.GENERATOR_NAME, myGeneratorName);
 
 		myGen.configure(theType, props, theServiceRegistry);

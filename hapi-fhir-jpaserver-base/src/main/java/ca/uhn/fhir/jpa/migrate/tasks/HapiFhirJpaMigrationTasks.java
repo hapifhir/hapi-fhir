@@ -2459,7 +2459,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.nullable()
 				.type(ColumnTypeEnum.BOOLEAN);
 
-		version.addIdGenerator("20210720.2", "SEQ_IDXCMBTOKNU_ID", 100);
+		version.addIdGenerator("20210720.2", "SEQ_IDXCMBTOKNU_ID");
 
 		Builder.BuilderAddTableByColumns cmpToks = version.addTableByColumns("20210720.3", "HFJ_IDX_CMB_TOK_NU", "PID");
 		cmpToks.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
@@ -2590,7 +2590,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.withColumns("VALUESET_PID", "SYSTEM_URL", "CODEVAL");
 
 		// -- Add new Table, HFJ_SPIDX_QUANTITY_NRML
-		version.addIdGenerator("20210109.1", "SEQ_SPIDX_QUANTITY_NRML", 100);
+		version.addIdGenerator("20210109.1", "SEQ_SPIDX_QUANTITY_NRML");
 		Builder.BuilderAddTableByColumns pkg =
 				version.addTableByColumns("20210109.2", "HFJ_SPIDX_QUANTITY_NRML", "SP_ID");
 		pkg.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
