@@ -52,7 +52,6 @@ import static ca.uhn.fhir.context.FhirVersionEnum.DSTU3;
 import static ca.uhn.fhir.context.FhirVersionEnum.R4;
 import static ca.uhn.fhir.context.FhirVersionEnum.R5;
 
-@Service
 public class GoldenResourceHelper {
 
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
