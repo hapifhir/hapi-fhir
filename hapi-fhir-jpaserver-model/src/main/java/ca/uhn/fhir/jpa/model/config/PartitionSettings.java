@@ -132,8 +132,8 @@ public class PartitionSettings implements IDefaultPartitionSettings {
 	 *
 	 * @since 5.0.0
 	 */
-	public PartitionSettings setPartitioningEnabled(boolean theMultiTenancyEnabled) {
-		myPartitioningEnabled = theMultiTenancyEnabled;
+	public PartitionSettings setPartitioningEnabled(boolean thePartitioningEnabled) {
+		myPartitioningEnabled = thePartitioningEnabled;
 		return this;
 	}
 

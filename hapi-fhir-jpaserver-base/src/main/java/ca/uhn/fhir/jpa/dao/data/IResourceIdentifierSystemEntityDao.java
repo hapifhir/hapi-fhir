@@ -19,15 +19,15 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.model.entity.ResourceIdentifierSystemEntity;
+import ca.uhn.fhir.jpa.model.entity.ResourceSystemEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface IResourceIdentifierSystemEntityDao extends JpaRepository<ResourceIdentifierSystemEntity, Long> {
+public interface IResourceIdentifierSystemEntityDao extends JpaRepository<ResourceSystemEntity, Long> {
 
-	@Query("SELECT i.myPid FROM ResourceIdentifierSystemEntity i WHERE i.mySystem = :system")
+	@Query("SELECT i.myPid FROM ResourceSystemEntity i WHERE i.mySystem = :system")
 	Optional<Long> findBySystemUrl(@Param("system") String theSystemUrl);
 }

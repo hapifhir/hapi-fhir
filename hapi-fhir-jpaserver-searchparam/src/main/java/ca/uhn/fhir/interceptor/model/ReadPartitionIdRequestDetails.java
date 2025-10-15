@@ -123,12 +123,42 @@ public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 	}
 
 	/**
+	 * @since 8.6.0
+	 */
+	public static ReadPartitionIdRequestDetails forDelete(String theResourceType, SearchParameterMap theParams) {
+		RestOperationTypeEnum op = RestOperationTypeEnum.DELETE;
+		return new ReadPartitionIdRequestDetails(
+				theResourceType,
+				op,
+				null,
+				theParams != null ? theParams : SearchParameterMap.newSynchronous(),
+				null,
+				null,
+				null);
+	}
+
+	/**
 	 * @since 7.4.0
 	 */
 	public static ReadPartitionIdRequestDetails forPatch(String theResourceType, IIdType theId) {
 		RestOperationTypeEnum op = RestOperationTypeEnum.PATCH;
 		return new ReadPartitionIdRequestDetails(
 				theResourceType, op, theId.withResourceType(theResourceType), null, null, null, null);
+	}
+
+	/**
+	 * @since 8.6.0
+	 */
+	public static ReadPartitionIdRequestDetails forPatch(String theResourceType, SearchParameterMap theParams) {
+		RestOperationTypeEnum op = RestOperationTypeEnum.PATCH;
+		return new ReadPartitionIdRequestDetails(
+				theResourceType,
+				op,
+				null,
+				theParams != null ? theParams : SearchParameterMap.newSynchronous(),
+				null,
+				null,
+				null);
 	}
 
 	public static ReadPartitionIdRequestDetails forRead(
