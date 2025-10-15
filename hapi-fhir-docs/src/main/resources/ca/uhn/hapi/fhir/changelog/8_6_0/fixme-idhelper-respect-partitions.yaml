@@ -1,0 +1,6 @@
+---
+type: fix
+issue: fixme
+title: "On the JPA server, the IdHelperService returned results relating to the incorrect
+   partition if it was invoked with a specific partition ID and found results on a different
+   partition. This has been fixed."
