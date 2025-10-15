@@ -120,7 +120,8 @@ public class PackageInstallerSvcImplTest {
 	private PackageResourceParsingSvc myPackageResourceParsingSvc = new PackageResourceParsingSvc(myCtx);
 	@Spy
 	private PartitionSettings myPartitionSettings = new PartitionSettings();
-
+	@Spy
+	private CommonCodeSystemsTerminologyService myCommonCodeSystemsTerminologyService = new CommonCodeSystemsTerminologyService(myCtx);
 
 	@InjectMocks
 	private PackageInstallerSvcImpl mySvc;

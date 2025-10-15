@@ -130,6 +130,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	@Autowired
 	private VersionCanonicalizer myVersionCanonicalizer;
 
+	@Autowired
+	private CommonCodeSystemsTerminologyService myCommonCodeSystemsTerminologyService;
+
 	/**
 	 * Constructor
 	 */
@@ -585,32 +588,17 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		return true;
 	}
 
-	private final List<String> embeddedCodeSystems = List.of(
-			CommonCodeSystemsTerminologyService.LANGUAGES_CODESYSTEM_URL,
-			CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL,
-			CommonCodeSystemsTerminologyService.CURRENCIES_CODESYSTEM_URL,
-			CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL,
-			CommonCodeSystemsTerminologyService.UCUM_CODESYSTEM_URL,
-			CommonCodeSystemsTerminologyService.USPS_CODESYSTEM_URL);
-
-	private final List<String> embeddedValueSets = List.of(
-			CommonCodeSystemsTerminologyService.LANGUAGES_VALUESET_URL,
-			CommonCodeSystemsTerminologyService.MIMETYPES_VALUESET_URL,
-			CommonCodeSystemsTerminologyService.CURRENCIES_VALUESET_URL,
-			CommonCodeSystemsTerminologyService.UCUM_VALUESET_URL,
-			CommonCodeSystemsTerminologyService.ALL_LANGUAGES_VALUESET_URL,
-			CommonCodeSystemsTerminologyService.USPS_VALUESET_URL);
-
 	private boolean isEmbeddedValueSet(IBaseResource theResource) {
 		org.hl7.fhir.r4.model.ValueSet valueSet = myVersionCanonicalizer.valueSetToCanonical(theResource);
 		if (!valueSet.hasUrl()) return false;
-		return embeddedValueSets.contains(valueSet.getUrl());
+		return myCommonCodeSystemsTerminologyService.isValueSetSupported(null, valueSet.getUrl());
 	}
 
 	private boolean isEmbeddedCodeSystem(IBaseResource theResource) {
+
 		org.hl7.fhir.r4.model.CodeSystem codeSystem = myVersionCanonicalizer.codeSystemToCanonical(theResource);
 		if (!codeSystem.hasUrl()) return false;
-		return embeddedCodeSystems.contains(codeSystem.getUrl());
+		return myCommonCodeSystemsTerminologyService.isCodeSystemSupported(null, codeSystem.getUrl());
 	}
 
 	private boolean isValidSearchParameter(IBaseResource theResource) {
