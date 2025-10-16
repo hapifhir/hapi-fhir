@@ -100,7 +100,7 @@ public class MdmEidMatchOnlyExpandSvc implements IMdmLinkExpandSvc {
 	public Set<String> expandMdmByGoldenResourceId(
 			RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theGoldenResourcePid) {
 		// This operation is not applicable when using MDM in MATCH_ONLY mode,
-		// return an emtpy set to rather than an exception to not affect existing code
+		// return an empty set to rather than an exception to not affect existing code
 		return Collections.emptySet();
 	}
 
@@ -108,14 +108,21 @@ public class MdmEidMatchOnlyExpandSvc implements IMdmLinkExpandSvc {
 	public Set<String> expandMdmByGoldenResourcePid(
 			RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theGoldenResourcePid) {
 		// This operation is not applicable when using MDM in MATCH_ONLY mode,
-		// return an emtpy set to rather than an exception to not affect existing code
+		// return an empty set to rather than an exception to not affect existing code
 		return Collections.emptySet();
 	}
 
 	@Override
 	public Set<String> expandMdmByGoldenResourceId(RequestPartitionId theRequestPartitionId, IIdType theId) {
 		// This operation is not applicable when using MDM in MATCH_ONLY mode,
-		// return an emtpy set to rather than an exception to not affect existing code
+		// return an empty set to rather than an exception to not affect existing code
 		return Collections.emptySet();
+	}
+
+	@Override
+	public Map<IIdType, String> getGoldenResourceIdsFromIds(List<IIdType> ids) {
+		// This operation is not applicable when using MDM in MATCH_ONLY mode,
+		// return an empty set to rather than an exception to not affect existing code
+		return Collections.emptyMap();
 	}
 }

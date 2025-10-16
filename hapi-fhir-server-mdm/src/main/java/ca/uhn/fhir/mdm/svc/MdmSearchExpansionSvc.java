@@ -46,7 +46,7 @@ import java.util.Set;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class MdmSearchExpansionSvc {
-	private static final String EXPANSION_RESULTS = MdmSearchExpansionSvc.class.getName() + "_EXPANSION_RESULTS";
+	public static final String EXPANSION_RESULTS = MdmSearchExpansionSvc.class.getName() + "_EXPANSION_RESULTS";
 	private static final String RESOURCE_NAME = MdmSearchExpansionSvc.class.getName() + "_RESOURCE_NAME";
 	private static final String QUERY_STRING = MdmSearchExpansionSvc.class.getName() + "_QUERY_STRING";
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
