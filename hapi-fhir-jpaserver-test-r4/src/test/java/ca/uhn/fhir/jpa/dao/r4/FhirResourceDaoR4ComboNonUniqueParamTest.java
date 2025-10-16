@@ -20,6 +20,8 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -28,6 +30,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r5.model.Extension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -499,6 +502,139 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 INNER JOIN HFJ_SPIDX_STRING t1 ON (t0.RES_ID = t1.RES_ID) WHERE ((t0.HASH_COMPLETE = '822090206952728926') AND ((t1.HASH_NORM_PREFIX = '-3664262414674370905') AND (t1.SP_VALUE_NORMALIZED LIKE 'JONES%'))) fetch first '10000' rows only";
 		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
 
+	}
+
+	/**
+	 * Index document with <code>composition.subject</code> and <code>composition.type</code>
+	 * in a combo param.
+	 */
+	@Test
+	public void testIndexAndSearchDocument() {
+		createCompositionSubjectAndTypeComboSp();
+
+		createPatient(withId("PAT-0"), withActiveTrue());
+
+		Bundle document = new Bundle();
+		document.setId("DOC-0");
+		document.setType(Bundle.BundleType.DOCUMENT);
+		Composition composition = new Composition();
+		composition.getSubject().setReference("Patient/PAT-0");
+		composition.getType().addCoding().setSystem("http://foo").setCode("123");
+		document.addEntry().setResource(composition);
+		myBundleDao.update(document, mySrd);
+
+		logAllNonUniqueIndexes();
+
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add("composition", new ReferenceParam("subject", "Patient/PAT-0"));
+		params.add("composition", new ReferenceParam("type", "http://foo|123"));
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myBundleDao.search(params, mySrd);
+		List<String> actual = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(actual).contains("Bundle/DOC-0");
+
+		String querySql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
+		assertThat(querySql).contains("HFJ_IDX_CMB_TOK_NU t0");
+		assertThat(querySql).contains("t0.HASH_COMPLETE = '-2371971990958459035'");
+	}
+
+	/**
+	 * Index document with <code>composition.subject</code> and <code>composition.type</code>
+	 * in a combo param, and <code>composition.date</code> added to the search URL as well
+	 */
+	@Test
+	public void testIndexAndSearchDocument_ComboPlusExtraSp() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("Bundle-composition-date");
+		sp.setUrl("http://example.org/SearchParameter/Bundle-composition-date");
+		sp.setName("composition.date");
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.setCode("composition.date");
+		sp.addBase("Bundle");
+		sp.setType(Enumerations.SearchParamType.DATE);
+		sp.setExpression("Bundle.where(type = 'document').entry[0].resource.as(Composition).date");
+		mySearchParameterDao.update(sp, mySrd);
+
+		createCompositionSubjectAndTypeComboSp();
+
+		createPatient(withId("PAT-0"), withActiveTrue());
+
+		// Will match
+		Bundle document = new Bundle();
+		document.setId("DOC-0");
+		document.setType(Bundle.BundleType.DOCUMENT);
+		Composition composition = new Composition();
+		composition.getSubject().setReference("Patient/PAT-0");
+		composition.getType().addCoding().setSystem("http://foo").setCode("123");
+		composition.setDateElement(new DateTimeType("2021-02-02"));
+		document.addEntry().setResource(composition);
+		myBundleDao.update(document, mySrd);
+
+		// Won't match, wrong year in the date
+		document = new Bundle();
+		document.setId("DOC-1");
+		document.setType(Bundle.BundleType.DOCUMENT);
+		composition = new Composition();
+		composition.getSubject().setReference("Patient/PAT-0");
+		composition.getType().addCoding().setSystem("http://foo").setCode("123");
+		composition.setDateElement(new DateTimeType("2022-02-02"));
+		document.addEntry().setResource(composition);
+		myBundleDao.update(document, mySrd);
+
+		logAllNonUniqueIndexes();
+
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add("composition", new ReferenceParam("subject", "Patient/PAT-0"));
+		params.add("composition", new ReferenceParam("type", "http://foo|123"));
+		params.add("composition", new ReferenceParam("date", "2021"));
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myBundleDao.search(params, mySrd);
+		List<String> actual = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(actual).contains("Bundle/DOC-0");
+
+		String querySql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
+		assertThat(querySql).contains("HFJ_IDX_CMB_TOK_NU t0");
+		assertThat(querySql).contains("t0.HASH_COMPLETE = '-2371971990958459035'");
+	}
+
+	private void createCompositionSubjectAndTypeComboSp() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("Bundle-composition-subject");
+		sp.setUrl("http://example.org/SearchParameter/Bundle-composition-subject");
+		sp.setName("composition.subject");
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.setCode("composition.subject");
+		sp.addBase("Bundle");
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.setExpression("Bundle.where(type = 'document').entry[0].resource.as(Composition).subject");
+		mySearchParameterDao.update(sp, mySrd);
+
+		sp = new SearchParameter();
+		sp.setId("Bundle-composition-type");
+		sp.setUrl("http://example.org/SearchParameter/Bundle-composition-type");
+		sp.setName("composition.type");
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.setCode("composition.type");
+		sp.addBase("Bundle");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("Bundle.where(type = 'document').entry[0].resource.as(Composition).type");
+		mySearchParameterDao.update(sp, mySrd);
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/Bundle-composition-subject-and-type");
+		sp.addExtension().setUrl("http://hapifhir.io/fhir/StructureDefinition/sp-unique").setValue(new BooleanType(false));
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.setCode("bundle-composition-subject-and-type");
+		sp.addBase("Bundle");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setExpression("Bundle");
+		sp.addComponent(new SearchParameter.SearchParameterComponentComponent().setDefinition("SearchParameter/Bundle-composition-subject").setExpression("Bundle"));
+		sp.addComponent(new SearchParameter.SearchParameterComponentComponent().setDefinition("SearchParameter/Bundle-composition-type").setExpression("Bundle"));
+		mySearchParameterDao.update(sp, mySrd);
+
+		mySearchParamRegistry.forceRefresh();
 	}
 
 

@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
@@ -77,14 +78,13 @@ public class PartitioningAllowedUnqualifiedR4Test extends BasePartitioningR4Test
 		Patient p2 = createPatient("Patient/P");
 
 		// Execute
-		InvalidRequestException exception = assertThrows(
-			InvalidRequestException.class,
+		ResourceVersionConflictException exception = assertThrows(
+			ResourceVersionConflictException.class,
 			() -> myPatientDao.update(p2, mySrd)
 		);
 
 		// Verify
-		assertThat(exception.getMessage()).isEqualTo("HAPI-2733: Failed to create/update resource [Patient/P] " +
-			"in partition PART-2 because a resource of the same type and ID is found in another partition");
+		assertThat(exception.getMessage()).contains("client-assigned ID constraint failure");
 	}
 
 	private Patient createPatient(String theId) {

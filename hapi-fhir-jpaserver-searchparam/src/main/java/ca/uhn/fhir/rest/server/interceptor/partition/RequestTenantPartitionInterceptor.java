@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR - Server Framework
+ * HAPI FHIR JPA - Search Parameters
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -23,19 +23,26 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.tenant.ITenantIdentificationStrategy;
 import jakarta.annotation.Nonnull;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Collection;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * This interceptor uses the request tenant ID (as supplied to the server using
- * {@link ca.uhn.fhir.rest.server.RestfulServer#setTenantIdentificationStrategy(ITenantIdentificationStrategy)}
+ * {@link ca.uhn.fhir.rest.server.RestfulServer#setTenantIdentificationStrategy(ITenantIdentificationStrategy)})
  * to indicate the partition ID. With this interceptor registered, The server treats the tenant name
  * supplied by the {@link ITenantIdentificationStrategy tenant identification strategy} as a partition name.
  * <p>
@@ -47,7 +54,41 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Interceptor
 public class RequestTenantPartitionInterceptor {
 
-	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY)
+	@Autowired
+	private PartitionSettings myPartitionSettings;
+
+	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
+	}
+
+	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
+	public RequestPartitionId partitionIdentifyCreate(
+			RequestDetails theRequestDetails, ReadPartitionIdRequestDetails theReadDetails) {
+		/*
+		 * If we're configured to allow cross-partition references, and we're performing a search with references,
+		 * we'll switch the search to being performed across all partitions.
+		 *
+		 * A potential future enhancement could be to look at the actual references and figure out which tenants they
+		 * refer to. We don't currently allow the tenant to actually be stored in the reference currently, so this
+		 * might or might not be a good idea. More thought is needed.
+		 */
+		if (myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()) {
+			if (theRequestDetails.getRestOperationType() == RestOperationTypeEnum.SEARCH_TYPE
+					&& theReadDetails.getSearchParams() != null) {
+				boolean haveReferences = theReadDetails.getSearchParams().entrySet().stream()
+						.flatMap(t -> t.getValue().stream())
+						.flatMap(Collection::stream)
+						.anyMatch(t -> t instanceof ReferenceParam);
+				if (haveReferences) {
+					return RequestPartitionId.allPartitions();
+				}
+			}
+		}
+
+		return extractPartitionIdFromRequest(theRequestDetails);
+	}
+
+	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 	public RequestPartitionId partitionIdentifyCreate(RequestDetails theRequestDetails) {
 		return extractPartitionIdFromRequest(theRequestDetails);
 	}
@@ -59,12 +100,11 @@ public class RequestTenantPartitionInterceptor {
 		String tenantId = theRequestDetails.getTenantId();
 		if (isBlank(tenantId)) {
 			// this branch is no-op happen when "partitioning.tenant_identification_strategy" is set to URL_BASED
-			if (theRequestDetails instanceof SystemRequestDetails) {
-				SystemRequestDetails requestDetails = (SystemRequestDetails) theRequestDetails;
+			if (theRequestDetails instanceof SystemRequestDetails requestDetails) {
 				if (requestDetails.getRequestPartitionId() != null) {
 					return requestDetails.getRequestPartitionId();
 				}
-				return RequestPartitionId.defaultPartition();
+				return RequestPartitionId.defaultPartition(myPartitionSettings);
 			}
 			throw new InternalErrorException(Msg.code(343) + "No partition ID has been specified");
 		}
