@@ -248,9 +248,6 @@ public class PartitionSettings implements IDefaultPartitionSettings {
 		 */
 		NOT_ALLOWED,
 
-		// FIXME: document
-		ALLOWED,
-
 		/**
 		 * References can cross partition boundaries, with an assumption that boundaries
 		 * will be managed by the database.
