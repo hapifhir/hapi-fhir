@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster.*;
@@ -612,11 +613,14 @@ public enum Pointcut implements IPointcut {
 	 * returned.
 	 * </ul>
 	 * <p>
-	 * Hook methods must return <code>void</code>
+	 * Hook methods must return an instance of <code>Optional</code> which might contain an instance of
+	 * the <code>org.springframework.http.HttpStatus</code> class. An HttpStatus result is to be returned from the
+	 * Interceptor implementation whenever the code wishes to change the default Http Response Code and return a
+	 * different response to the caller when an Exception occurs.
 	 * </p>
 	 */
 	SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME(
-			void.class,
+			Optional.class,
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 			"org.hl7.fhir.instance.model.api.IBaseOperationOutcome"),

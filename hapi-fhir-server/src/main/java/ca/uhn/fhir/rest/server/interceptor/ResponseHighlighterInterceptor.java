@@ -61,6 +61,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,6 +70,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -380,10 +382,10 @@ public class ResponseHighlighterInterceptor {
 		responseDetails.setResponseCode(theException.getStatusCode());
 
 		int statusCode = responseDetails.getResponseCode();
-		int httpResponseCode =
+		Optional<HttpStatus> hookResult =
 				BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(theRequestDetails, oo);
-		if (httpResponseCode > 0) {
-			statusCode = httpResponseCode;
+		if (hookResult.isPresent()) {
+			statusCode = hookResult.get().value();
 		}
 		streamResponse(
 				theRequestDetails,

@@ -14,7 +14,6 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
@@ -31,9 +30,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.opentest4j.AssertionFailedError;
+import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -119,12 +120,13 @@ public class ExceptionHandlingInterceptorTest {
 		httpGet.setHeader("Accept-encoding", "gzip");
 		HttpResponse status = ourClient.execute(httpGet);
 		ourServer.unregisterInterceptor(problemInterceptor);
+		ourServer.unregisterInterceptor(problemInterceptor);
 
 		//Then: This should still return an OperationOutcome, and not explode with an HTML IllegalState response.
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertEquals(404, status.getStatusLine().getStatusCode());
+		assertEquals(HttpStatus.NOT_FOUND.value(), status.getStatusLine().getStatusCode());
 		OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
 		ourLog.debug(ourCtx.newXmlParser().encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Simulated IOException");
@@ -164,10 +166,8 @@ public class ExceptionHandlingInterceptorTest {
 
 	public static class AlterHttpResponseCodeInterceptor {
 		@Hook(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME)
-		public void intercept(RequestDetails theRequestDetails, IBaseOperationOutcome theResponse) throws IOException {
-			if (theResponse != null) {
-				theResponse.setUserData(BaseResourceReturningMethodBinding.HTTP_RESPONSE_CODE, Integer.valueOf(404));
-			}
+		public Optional<HttpStatus> intercept(RequestDetails theRequestDetails, IBaseOperationOutcome theResponse) throws IOException {
+			return Optional.of(HttpStatus.NOT_FOUND);
 		}
 	}
 
