@@ -57,6 +57,10 @@ public class RequestTenantPartitionInterceptor {
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
+	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
+	}
+
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
 	public RequestPartitionId partitionIdentifyCreate(
 			RequestDetails theRequestDetails, ReadPartitionIdRequestDetails theReadDetails) {
