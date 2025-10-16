@@ -346,7 +346,7 @@ public class RuntimeSearchParam {
 		return retVal;
 	}
 
-	public void addUpliftRefchain(@Nonnull String theCode, @Nonnull String theElementName) {
+	public void addUpliftRefchain(@Nonnull String theCode, @Nullable String theElementName) {
 		myUpliftRefchains.put(theCode, theElementName);
 	}
 

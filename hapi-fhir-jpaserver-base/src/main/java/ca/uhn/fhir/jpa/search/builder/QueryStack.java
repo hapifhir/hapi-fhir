@@ -3013,7 +3013,7 @@ public class QueryStack {
 				List<ChainElement> searchParams = Lists.newArrayList();
 				searchParams.add(new ChainElement(theResourceType, theSearchParam.getName(), path));
 				for (IQueryParameterType nextOr : theList) {
-					String targetValue = nextOr.getValueAsQueryToken(myFhirContext);
+					String targetValue = nextOr.getValueAsQueryToken();
 					if (nextOr instanceof ReferenceParam) {
 						ReferenceParam referenceParam = (ReferenceParam) nextOr;
 						if (!isReferenceParamValid(referenceParam)) {

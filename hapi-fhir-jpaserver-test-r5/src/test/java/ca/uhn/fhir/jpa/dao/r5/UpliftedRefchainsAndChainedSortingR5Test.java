@@ -2,17 +2,19 @@ package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -20,13 +22,16 @@ import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.CodeableReference;
 import org.hl7.fhir.r5.model.Composition;
 import org.hl7.fhir.r5.model.DateType;
 import org.hl7.fhir.r5.model.Encounter;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Extension;
+import org.hl7.fhir.r5.model.HealthcareService;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Identifier;
 import org.hl7.fhir.r5.model.Organization;
@@ -972,6 +977,90 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		}
 	}
 
+	@Test
+	void testComboOnRefchains() {
+		SearchParameter sp = new SearchParameter();
+		Extension upliftRefChain = sp.addExtension().setUrl(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
+		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new CodeType("identifier"));
+		sp.setId("SearchParameter/Encounter-subject");
+		sp.setName("subject");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/Encounter-subject");
+		sp.setDescription("The patient or group present at the encounter");
+		sp.setCode("subject");
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.ENCOUNTER);
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.setExpression("Encounter.subject");
+		sp.addTarget(Enumerations.VersionIndependentResourceTypesAll.GROUP);
+		sp.addTarget(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
+		sp.setProcessingMode(SearchParameter.SearchProcessingModeType.NORMAL);
+		createOrUpdateSearchParameter(sp);
+
+		sp = new SearchParameter();
+		upliftRefChain = sp.addExtension().setUrl(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
+		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new CodeType("service-category"));
+		sp.setId("SearchParameter/Encounter-service-category");
+		sp.setName("EncounterServiceType");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setDescription("Enabling search parameter to search by Encounter.serviceType");
+		sp.setCode("service-type");
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.ENCOUNTER);
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.setExpression("Encounter.serviceType");
+		sp.addTarget(Enumerations.VersionIndependentResourceTypesAll.HEALTHCARESERVICE);
+		sp.setProcessingMode(SearchParameter.SearchProcessingModeType.NORMAL);
+		ourLog.info("SP: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+		createOrUpdateSearchParameter(sp);
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/Encounter-subject-identifier-and-service-category");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.ENCOUNTER);
+		sp.addComponent()
+			.setExpression("Encounter")
+			.setDefinition("SearchParameter/Encounter-subject");
+		sp.addComponent()
+			.setExpression("Encounter")
+			.setDefinition("SearchParameter/Encounter-service-category");
+		sp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(false));
+		createOrUpdateSearchParameter(sp);
+
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://patient").setValue("12345");
+		IIdType patientId = myPatientDao.create(patient, newSrd()).getId().toUnqualifiedVersionless();
+
+		HealthcareService hs = new HealthcareService();
+		hs.setId("HCS");
+		hs.addCategory().addCoding().setSystem("http://snomed.info/sct").setCode("123456789");
+		IIdType hsId = myHealthcareServiceDao.update(hs, newSrd()).getId().toUnqualifiedVersionless();
+
+		Encounter enc = new Encounter();
+		enc.addServiceType(new CodeableReference(new Reference(hsId)));
+		enc.setSubject(new Reference(patientId));
+		DaoMethodOutcome encId = myEncounterDao.create(enc, newSrd());
+
+		logAllTokenIndexes();
+
+		SearchParameterMap map = SearchParameterMap
+			.newSynchronous()
+			.add("service-type", new ReferenceParam(null, "service-category", "http://snomed.info/sct|123456789"))
+			.add("subject", new ReferenceParam(null, "identifier", "http://patient|12345"));
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome = myEncounterDao.search(map, mySrd);
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(
+			encId.getId().toUnqualifiedVersionless().getValue()
+		);
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true)).doesNotContainIgnoringCase("JOIN");
+	}
+
+
 	private void createOrganizationO1_SpringfieldHospital() {
 		Organization org = new Organization();
 		org.setId(ORGANIZATION_O1);
@@ -1029,8 +1118,15 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		sp.setExpression(subjectSp.getPath());
 		subjectSp.getBase().forEach(t->sp.addBase(Enumerations.VersionIndependentResourceTypesAll.fromCode(t)));
 		subjectSp.getTargets().forEach(t->sp.addTarget(Enumerations.VersionIndependentResourceTypesAll.fromCode(t)));
-		mySearchParameterDao.create(sp, mySrd);
+		createOrUpdateSearchParameter(sp);
+	}
 
+	private void createOrUpdateSearchParameter(SearchParameter sp) {
+		if (sp.getIdElement().isEmpty()) {
+			mySearchParameterDao.create(sp, newSrd());
+		} else {
+			mySearchParameterDao.update(sp, newSrd());
+		}
 		mySearchParamRegistry.forceRefresh();
 	}
 
