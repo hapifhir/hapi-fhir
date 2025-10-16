@@ -602,7 +602,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		IBundleProvider results = myBundleDao.search(params, mySrd);
 		List<String> actual = toUnqualifiedVersionlessIdValues(results);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(actual).contains("Bundle/DOC-0");
+		assertThat(actual).containsOnly("Bundle/DOC-0");
 
 		String querySql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
 		assertThat(querySql).contains("HFJ_IDX_CMB_TOK_NU t0");
