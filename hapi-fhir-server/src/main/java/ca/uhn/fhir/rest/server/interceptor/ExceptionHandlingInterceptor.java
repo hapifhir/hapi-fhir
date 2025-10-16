@@ -109,7 +109,11 @@ public class ExceptionHandlingInterceptor {
 			}
 		}
 
-		BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(theRequestDetails, oo);
+		int httpResponseCode =
+				BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(theRequestDetails, oo);
+		if (httpResponseCode > 0) {
+			statusCode = httpResponseCode;
+		}
 		try {
 			resetOutputStreamIfPossible(response);
 		} catch (Throwable t) {

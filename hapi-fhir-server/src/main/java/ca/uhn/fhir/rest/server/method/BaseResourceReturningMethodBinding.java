@@ -61,7 +61,7 @@ import java.util.Set;
 
 public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 	protected final ResponseBundleBuilder myResponseBundleBuilder;
-
+	public static final String HTTP_RESPONSE_CODE = "httpResponseCode";
 	private MethodReturnTypeEnum myMethodReturnType;
 	private String myResourceName;
 
@@ -362,7 +362,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		return true;
 	}
 
-	public static void callOutgoingFailureOperationOutcomeHook(
+	public static int callOutgoingFailureOperationOutcomeHook(
 			RequestDetails theRequestDetails, IBaseOperationOutcome theOperationOutcome) {
 		HookParams responseParams = new HookParams();
 		responseParams.add(RequestDetails.class, theRequestDetails);
@@ -373,6 +373,12 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			theRequestDetails
 					.getInterceptorBroadcaster()
 					.callHooks(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, responseParams);
+			Integer httpResponseCode =
+					(Integer) responseParams.get(IBaseOperationOutcome.class).getUserData(HTTP_RESPONSE_CODE);
+			if (httpResponseCode != null && httpResponseCode > 0) {
+				return httpResponseCode;
+			}
 		}
+		return 0;
 	}
 }

@@ -379,14 +379,19 @@ public class ResponseHighlighterInterceptor {
 		responseDetails.setResponseResource(oo);
 		responseDetails.setResponseCode(theException.getStatusCode());
 
-		BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(theRequestDetails, oo);
+		int statusCode = responseDetails.getResponseCode();
+		int httpResponseCode =
+				BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(theRequestDetails, oo);
+		if (httpResponseCode > 0) {
+			statusCode = httpResponseCode;
+		}
 		streamResponse(
 				theRequestDetails,
 				theServletResponse,
 				responseDetails.getResponseResource(),
 				null,
 				theServletRequest,
-				responseDetails.getResponseCode());
+				statusCode);
 
 		return false;
 	}

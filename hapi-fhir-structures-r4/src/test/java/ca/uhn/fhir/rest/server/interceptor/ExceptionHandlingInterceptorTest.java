@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
@@ -21,6 +22,7 @@ import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
@@ -103,6 +105,32 @@ public class ExceptionHandlingInterceptorTest {
 	}
 
 	@Test
+	public void ExceptionHandlingInterceptor_ReturnsHttpResponseCode_WhenExceptionThrown() throws IOException {
+
+		//Given: We have an interceptor which throws an Exception
+		ProblemGeneratingInterceptor problemInterceptor = new ProblemGeneratingInterceptor();
+		ourServer.registerInterceptor(problemInterceptor);
+
+		AlterHttpResponseCodeInterceptor alterHttpResponseCodeInterceptor = new AlterHttpResponseCodeInterceptor();
+		ourServer.registerInterceptor(alterHttpResponseCodeInterceptor);
+
+		//When: We make a request to the server, triggering this exception to be thrown on an otherwise successful request
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?succeed=true");
+		httpGet.setHeader("Accept-encoding", "gzip");
+		HttpResponse status = ourClient.execute(httpGet);
+		ourServer.unregisterInterceptor(problemInterceptor);
+
+		//Then: This should still return an OperationOutcome, and not explode with an HTML IllegalState response.
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(404, status.getStatusLine().getStatusCode());
+		OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
+		ourLog.debug(ourCtx.newXmlParser().encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Simulated IOException");
+	}
+
+	@Test
 	public void testInternalErrorFormatted() throws Exception {
 		{
 			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?throwInternalError=aaa&_format=true");
@@ -132,7 +160,15 @@ public class ExceptionHandlingInterceptorTest {
 				throw new IOException("Simulated IOException");
 			}
 		}
+	}
 
+	public static class AlterHttpResponseCodeInterceptor {
+		@Hook(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME)
+		public void intercept(RequestDetails theRequestDetails, IBaseOperationOutcome theResponse) throws IOException {
+			if (theResponse != null) {
+				theResponse.setUserData(BaseResourceReturningMethodBinding.HTTP_RESPONSE_CODE, Integer.valueOf(404));
+			}
+		}
 	}
 
 	/**
