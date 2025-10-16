@@ -27,6 +27,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -73,7 +74,7 @@ public class PatientCompartmentEnforcingInterceptor {
 
 			if (!StringUtils.equals(patientCompartmentOld, patientCompartmentCurrent)) {
 				// Avoid disclosing compartments in message, which could have security implications
-				throw new InternalErrorException(
+				throw new PreconditionFailedException(
 						Msg.code(2476) + "Resource compartment changed. Was a referenced Patient changed?");
 			}
 
