@@ -206,8 +206,9 @@ public class PartitionSettings implements IDefaultPartitionSettings {
 	 * If enabled the JPA server will allow unqualified cross partition reference
 	 */
 	public boolean isAllowUnqualifiedCrossPartitionReference() {
-		return myAllowReferencesAcrossPartitions.equals(
-				PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		return myPartitioningEnabled
+				&& myAllowReferencesAcrossPartitions.equals(
+						PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 	}
 
 	/**
@@ -246,6 +247,9 @@ public class PartitionSettings implements IDefaultPartitionSettings {
 		 * References between resources are not allowed to cross partition boundaries
 		 */
 		NOT_ALLOWED,
+
+		// FIXME: document
+		ALLOWED,
 
 		/**
 		 * References can cross partition boundaries, with an assumption that boundaries
