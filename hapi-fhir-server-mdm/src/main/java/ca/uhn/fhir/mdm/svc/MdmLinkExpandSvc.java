@@ -147,7 +147,7 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	}
 
 	/***
-	 * Return a id->golden record id map, for those ids that do have one.
+	 * Return an id->golden-record-id map, for those ids that do have one.
 	 * @param ids
 	 * @return
 	 */
