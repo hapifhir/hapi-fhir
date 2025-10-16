@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.IndexedSearchParam;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +79,8 @@ public class JpaSearchParamCache {
 	/**
 	 * Constructor
 	 */
-	public JpaSearchParamCache(PartitionSettings thePartitionSettings) {
+	public JpaSearchParamCache(@Nonnull PartitionSettings thePartitionSettings) {
+		assert thePartitionSettings != null;
 		myPartitionSettings = thePartitionSettings;
 	}
 

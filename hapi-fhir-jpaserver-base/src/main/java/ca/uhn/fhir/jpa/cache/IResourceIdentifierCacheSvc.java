@@ -23,6 +23,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -79,4 +80,25 @@ public interface IResourceIdentifierCacheSvc {
 			String theSystem,
 			String theValue,
 			Supplier<String> theNewIdSupplier);
+
+	/**
+	 * Retrieves the FHIR ID previously associated with the given Patient identifier, if
+	 * one exists, and returns {@link Optional#empty()} otherwise.
+	 * <p>
+	 * Thread safety: This method is always thread safe, as it reads without writing.
+	 * </p>
+	 * <p>
+	 * Transactionality: This method will open a new transaction if one is not already open.
+	 * </p>
+	 *
+	 * @param theSystem        The <code>Identifier.system</code> value
+	 * @param theValue         The <code>Identifier.value</code> value
+	 * @return The FHIR ID associated with this identifier, if one already exists
+	 */
+	@Nonnull
+	Optional<String> getFhirIdAssociatedWithUniquePatientIdentifier(
+			RequestDetails theRequestDetails,
+			RequestPartitionId theRequestPartitionId,
+			String theSystem,
+			String theValue);
 }

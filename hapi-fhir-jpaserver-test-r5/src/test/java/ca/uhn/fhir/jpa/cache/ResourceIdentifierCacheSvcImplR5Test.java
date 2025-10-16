@@ -20,6 +20,7 @@ import java.util.concurrent.Future;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class ResourceIdentifierCacheSvcImplR5Test extends BaseJpaR5Test {
@@ -38,9 +39,9 @@ class ResourceIdentifierCacheSvcImplR5Test extends BaseJpaR5Test {
 	void testAddSystem(boolean theUseCacheForSecondRead) {
 		// First read
 		long foo = myResourceIdentifierCacheSvc.getOrCreateResourceIdentifierSystem(newSrd(), myDefaultPartition, "http://foo");
-		assertThat(foo).isGreaterThan(0);
+		assertEquals(-5303389482335639648L, foo);
 		long bar = myResourceIdentifierCacheSvc.getOrCreateResourceIdentifierSystem(newSrd(), myDefaultPartition, "http://bar");
-		assertThat(bar).isGreaterThan(0);
+		assertEquals(6706433576001826864L, bar);
 		assertNotEquals(foo, bar);
 
 		if (!theUseCacheForSecondRead) {
@@ -98,6 +99,34 @@ class ResourceIdentifierCacheSvcImplR5Test extends BaseJpaR5Test {
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 	}
 
+
+	@Test
+	void testGetFhirIdAssociatedWithUniquePatientIdentifier_NoCreate() {
+		// Setup - Create one entry FOO
+		myResourceIdentifierCacheSvc.getFhirIdAssociatedWithUniquePatientIdentifier(newSrd(), myDefaultPartition, "http://foo", "foo", () -> "FOO");
+
+		// Clear memory cache
+		myMemoryCacheSvc.invalidateAllCaches();
+
+		// Entry FOO shoud be returned
+		assertEquals("FOO", myResourceIdentifierCacheSvc.getFhirIdAssociatedWithUniquePatientIdentifier(newSrd(), myDefaultPartition, "http://foo", "foo").orElseThrow());
+
+		// Entry BAR should not be present
+		assertFalse(myResourceIdentifierCacheSvc.getFhirIdAssociatedWithUniquePatientIdentifier(newSrd(), myDefaultPartition, "http://foo", "bar").isPresent());
+
+		// Entry BAR should still not be present a second time
+		assertFalse(myResourceIdentifierCacheSvc.getFhirIdAssociatedWithUniquePatientIdentifier(newSrd(), myDefaultPartition, "http://foo", "bar").isPresent());
+
+		// Now create a BAR entry
+		assertEquals("BAR", myResourceIdentifierCacheSvc.getFhirIdAssociatedWithUniquePatientIdentifier(newSrd(), myDefaultPartition, "http://foo", "bar", () -> "BAR"));
+
+		// Entry BAR should show up now
+		assertEquals("BAR", myResourceIdentifierCacheSvc.getFhirIdAssociatedWithUniquePatientIdentifier(newSrd(), myDefaultPartition, "http://foo", "bar").orElseThrow());
+
+		// Entry BAR should show up even after cache invalidation
+		myMemoryCacheSvc.invalidateAllCaches();
+		assertEquals("BAR", myResourceIdentifierCacheSvc.getFhirIdAssociatedWithUniquePatientIdentifier(newSrd(), myDefaultPartition, "http://foo", "bar").orElseThrow());
+	}
 
 	@Test
 	void testConcurrentlyCreateIdentifiersWithSameSystem() throws ExecutionException, InterruptedException {

@@ -228,7 +228,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		);
 		ResourceIdListWorkChunkJson workChunk = new ResourceIdListWorkChunkJson(typedPids, RequestPartitionId.fromPartitionId(PARTITION_1));
 		JobInstance jobInstance = new JobInstance();
-		StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson> executionDetails = new StepExecutionDetails<>(params, workChunk, jobInstance, new WorkChunk());
+		StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson> executionDetails = new StepExecutionDetails<>(params, workChunk, jobInstance, new WorkChunk().setId("123"));
 		myDeleteExpungeStep.run(executionDetails, myVoidSink);
 
 		// Verify
@@ -1622,9 +1622,9 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 		sql = myCaptureQueriesListener.getSelectQueries().get(2).getSql(true, false);
 		if (myIncludePartitionIdsInPks) {
-			assertThat(sql).contains("WHERE r.src_path = 'Patient.managingOrganization' AND r.target_resource_id IN ('" + ids.parentOrgPid + "') AND r.target_res_partition_id = '0' AND r.target_resource_type = 'Organization' UNION");
+			assertThat(sql).contains("WHERE r.src_path = 'Patient.managingOrganization' AND r.target_resource_id IN ('" + ids.parentOrgPid + "') AND r.target_res_partition_id = '0' AND r.target_resource_type = 'Organization' fetch first");
 		} else {
-			assertThat(sql).contains("WHERE r.src_path = 'Patient.managingOrganization' AND r.target_resource_id IN ('" + ids.parentOrgPid + "') AND r.target_resource_type = 'Organization' UNION");
+			assertThat(sql).contains("WHERE r.src_path = 'Patient.managingOrganization' AND r.target_resource_id IN ('" + ids.parentOrgPid + "') AND r.target_resource_type = 'Organization' fetch first");
 		}
 
 		// Index 3-6 are just more includes loading

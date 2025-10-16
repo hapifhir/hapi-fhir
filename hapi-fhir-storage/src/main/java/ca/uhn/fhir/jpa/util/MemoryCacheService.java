@@ -133,6 +133,27 @@ public class MemoryCacheService {
 		return retVal;
 	}
 
+	/**
+	 * Fetch an item from the cache if it exists and use the loading function to
+	 * obtain it otherwise. If the loading function returns null, the item will not
+	 * be placed in the cache and <code>null</code> will be returned.
+	 * <p>
+	 * This method will put the value into the cache using {@link #putAfterCommit(CacheEnum, Object, Object)}.
+	 *
+	 * @since 8.6.0
+	 */
+	public <K, T> T getThenPutAfterCommitIfNotNull(CacheEnum theCache, K theKey, Function<K, T> theSupplier) {
+		assert theCache.getKeyType().isAssignableFrom(theKey.getClass());
+		T retVal = getIfPresent(theCache, theKey);
+		if (retVal == null) {
+			retVal = theSupplier.apply(theKey);
+			if (retVal != null) {
+				putAfterCommit(theCache, theKey, retVal);
+			}
+		}
+		return retVal;
+	}
+
 	public <K, V> V getIfPresent(CacheEnum theCache, K theKey) {
 		assert theCache.getKeyType().isAssignableFrom(theKey.getClass());
 		return doGetIfPresent(theCache, theKey);

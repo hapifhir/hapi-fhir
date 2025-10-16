@@ -4,10 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.dao.r5.FhirSystemDaoTransactionPartitionR5Test;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
@@ -113,7 +111,7 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 		myInterceptor.setNextRanges(List.of(0, 2), List.of(0, 1, 2, 3));
 
 		// Test / Verify
-		assertThatThrownBy(()->mySvc.execute(request))
+		assertThatThrownBy(() -> mySvc.execute(request))
 			.hasMessageContaining("Interceptor for Pointcut STORAGE_TRANSACTION_PRE_PARTITION must not return Bundles containing duplicates or entries which were not present in the original Bundle");
 	}
 
@@ -126,7 +124,7 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 		myInterceptor.setNextRanges(List.of(0, 1), List.of(3));
 
 		// Test / Verify
-		assertThatThrownBy(()->mySvc.execute(request))
+		assertThatThrownBy(() -> mySvc.execute(request))
 			.hasMessageContaining("Interceptor for Pointcut STORAGE_TRANSACTION_PRE_PARTITION must include all entries from the original Bundle in the partitioned Bundles");
 	}
 
@@ -139,10 +137,9 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 		myInterceptor.setNextRanges(List.of(0, 1), List.of(-1, 2, 3));
 
 		// Test / Verify
-		assertThatThrownBy(()->mySvc.execute(request))
+		assertThatThrownBy(() -> mySvc.execute(request))
 			.hasMessageContaining("Interceptor for Pointcut STORAGE_TRANSACTION_PRE_PARTITION must not return Bundles containing duplicates or entries which were not present in the original Bundle");
 	}
-
 
 
 	private Bundle createRequest_Obs0_Patient0_Obs1_Patient1() {
