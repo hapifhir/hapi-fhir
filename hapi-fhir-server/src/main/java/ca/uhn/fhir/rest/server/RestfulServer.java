@@ -839,8 +839,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * implementation
 	 *
 	 * @param requestFullPath    the full request path
-	 * @param servletContextPath the servelet context path
-	 * @param servletPath        the servelet path
+	 * @param servletContextPath the servlet context path
+	 * @param servletPath        the servlet path
 	 * @return created resource path
 	 */
 	// NOTE: Don't make this a static method!! People want to override it
