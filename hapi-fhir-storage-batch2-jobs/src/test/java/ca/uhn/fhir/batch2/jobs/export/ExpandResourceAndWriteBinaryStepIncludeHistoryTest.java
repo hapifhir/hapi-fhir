@@ -4,7 +4,6 @@ package ca.uhn.fhir.batch2.jobs.export;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
@@ -31,12 +30,7 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -91,8 +85,6 @@ public class ExpandResourceAndWriteBinaryStepIncludeHistoryTest {
 	@BeforeEach
 	void setUp() {
 		myStorageSettings.setBulkExportFileMaximumCapacity(EXPORT_FILE_MAX_CAPACITY);
-
-		setupIdHelperServiceMock();
 	}
 
 	@Test
@@ -170,25 +162,4 @@ public class ExpandResourceAndWriteBinaryStepIncludeHistoryTest {
 		return IntStream.range(1, theCount+1).mapToObj(i -> new TypedPidJson(theResourceType, 1, String.valueOf(i))).toList();
 	}
 
-	private void setupIdHelperServiceMock() {
-		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), any(), any())).thenAnswer(invocation -> {
-			Integer thePartitionId = invocation.getArgument(0);
-			String thePid = invocation.getArgument(1);
-			String theResourceType = invocation.getArgument(2);
-
-			JpaPid retVal = JpaPid.fromId(Long.parseLong(thePid), thePartitionId);
-			retVal.setResourceType(theResourceType);
-			return retVal;
-		});
-
-		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(invocation -> {
-			Set<JpaPid> theResourceIds = invocation.getArgument(0);
-			Map<JpaPid, Optional<String>> theMap = theResourceIds.stream().collect(Collectors.toMap(
-				Function.identity(),
-				jpaPid -> Optional.of(jpaPid.getResourceType() + jpaPid)
-			));
-
-			return new PersistentIdToForcedIdMap<>(theMap);
-		});
-	}
 }
