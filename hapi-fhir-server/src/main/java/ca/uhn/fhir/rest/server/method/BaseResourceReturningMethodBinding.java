@@ -51,17 +51,19 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Optional;
 import java.util.Set;
 
 public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 	protected final ResponseBundleBuilder myResponseBundleBuilder;
-
+	public static final String HTTP_RESPONSE_CODE = "httpResponseCode";
 	private MethodReturnTypeEnum myMethodReturnType;
 	private String myResourceName;
 
@@ -362,7 +364,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		return true;
 	}
 
-	public static void callOutgoingFailureOperationOutcomeHook(
+	public static Optional<HttpStatus> callOutgoingFailureOperationOutcomeHook(
 			RequestDetails theRequestDetails, IBaseOperationOutcome theOperationOutcome) {
 		HookParams responseParams = new HookParams();
 		responseParams.add(RequestDetails.class, theRequestDetails);
@@ -370,9 +372,13 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		responseParams.add(IBaseOperationOutcome.class, theOperationOutcome);
 
 		if (theRequestDetails.getInterceptorBroadcaster() != null) {
-			theRequestDetails
+			Object hookResult = theRequestDetails
 					.getInterceptorBroadcaster()
-					.callHooks(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, responseParams);
+					.callHooksAndReturnObject(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, responseParams);
+			if (hookResult instanceof Optional<?> optional) {
+				return optional.filter(HttpStatus.class::isInstance).map(HttpStatus.class::cast);
+			}
 		}
+		return Optional.empty();
 	}
 }
