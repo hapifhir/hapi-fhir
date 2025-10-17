@@ -1997,7 +1997,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 										theId.getVersionIdPart(),
 										theId.toUnqualifiedVersionless()));
 			}
-			if (entity.getVersion() != theId.getVersionIdPartAsLong()) {
+			if (entity != null && entity.getVersion() != theId.getVersionIdPartAsLong()) {
 				entity = null;
 			}
 		}
