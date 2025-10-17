@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
@@ -48,6 +49,7 @@ import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTuples;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -131,6 +133,9 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 	@Autowired
 	private MatchUrlService myMatchUrlService;
+
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	/**
 	 * Constructor
@@ -224,6 +229,18 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		List<IIdType> targetIds = new ArrayList<>();
 		List<String> targetQualifiedUrls = new ArrayList<>();
 
+		/*
+		 * If we're allowing cross-partition references, we should first figure out what partition the
+		 * link search should be able to touch
+		 */
+		RequestPartitionId requestPartitionId = theRequestPartitionId;
+		if (myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()) {
+			SearchParameterMap map = new SearchParameterMap();
+			map.addOrList(theParamName, theReferenceOrParamList);
+			requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+					theRequest, theResourceType, map);
+		}
+
 		for (int orIdx = 0; orIdx < theReferenceOrParamList.size(); orIdx++) {
 			IQueryParameterType nextOr = theReferenceOrParamList.get(orIdx);
 
@@ -264,7 +281,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 							theReferenceOrParamList,
 							ref,
 							theRequest,
-							theRequestPartitionId);
+							requestPartitionId);
 				}
 
 			} else {
@@ -288,7 +305,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		}
 
 		List<JpaPid> pids = myIdHelperService.resolveResourcePids(
-				theRequestPartitionId,
+				requestPartitionId,
 				targetIds,
 				ResolveIdentityMode.includeDeleted().cacheOk());
 		List<Long> targetPidList = pids.stream().map(JpaPid::getId).collect(Collectors.toList());
@@ -520,7 +537,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
 
 			for (IQueryParameterType next : theList) {
-				String nextValue = next.getValueAsQueryToken(getFhirContext());
+				String nextValue = next.getValueAsQueryToken();
 				IQueryParameterType chainValue = mapReferenceChainToRawParamType(
 						remainingChain, param, theParamName, qualifier, nextType, chain, isMeta, nextValue);
 				if (chainValue == null) {
@@ -620,11 +637,9 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 				Class<? extends IBaseResource> resourceType =
 						getFhirContext().getResourceDefinition(theResourceName).getImplementingClass();
 				BaseRuntimeChildDefinition def = getFhirContext().newTerser().getDefinition(resourceType, paramPath);
-				if (def instanceof RuntimeChildChoiceDefinition) {
-					RuntimeChildChoiceDefinition choiceDef = (RuntimeChildChoiceDefinition) def;
+				if (def instanceof RuntimeChildChoiceDefinition choiceDef) {
 					resourceTypes.addAll(choiceDef.getResourceTypes());
-				} else if (def instanceof RuntimeChildResourceDefinition) {
-					RuntimeChildResourceDefinition resDef = (RuntimeChildResourceDefinition) def;
+				} else if (def instanceof RuntimeChildResourceDefinition resDef) {
 					resourceTypes.addAll(resDef.getResourceTypes());
 					if (resourceTypes.size() == 1) {
 						if (resourceTypes.get(0).isInterface()) {
@@ -642,8 +657,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 			if (resourceTypes.isEmpty()) {
 				for (BaseRuntimeElementDefinition<?> next : getFhirContext().getElementDefinitions()) {
-					if (next instanceof RuntimeResourceDefinition) {
-						RuntimeResourceDefinition nextResDef = (RuntimeResourceDefinition) next;
+					if (next instanceof RuntimeResourceDefinition nextResDef) {
 						resourceTypes.add(nextResDef.getImplementingClass());
 					}
 				}

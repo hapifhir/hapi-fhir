@@ -69,6 +69,46 @@ class TransactionUtilTest {
 		assertEquals("200 OK", outcomes.get(0).getStatusMessage());
 	}
 
+	/**
+	 * Under normal processing the transaction processor should always return the
+	 * exact number of responses, but it might not if interceptors add additional
+	 * elements to the request.
+	 */
+	@Test
+	public void testParseTransactionResponse_ExtraResponseElements() {
+		Resource requestPatient = new Patient();
+
+		Bundle requestBundle = new Bundle();
+		requestBundle.setType(Bundle.BundleType.TRANSACTION);
+		Bundle.BundleEntryComponent requestEntry = requestBundle.addEntry();
+		requestEntry.setFullUrl(URN_UUID_VALUE);
+		requestEntry.setResource(requestPatient);
+		requestEntry.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Patient");
+
+		StorageResponseCodeEnum storageOutcome = StorageResponseCodeEnum.SUCCESSFUL_CREATE;
+		OperationOutcome oo = newOperationOutcome(storageOutcome);
+
+		Bundle responseBundle = new Bundle();
+		responseBundle.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
+		responseBundle.addEntry().getResponse().setOutcome(oo).setStatus("200 OK").setLocation("http://foo.com/Patient/123");
+		responseBundle.addEntry().getResponse().setOutcome(oo).setStatus("200 OK").setLocation("http://foo.com/Patient/456");
+
+		// Test
+		List<TransactionUtil.StorageOutcome> outcomes = TransactionUtil.parseTransactionResponse(myCtx, requestBundle, responseBundle).getStorageOutcomes();
+
+		// Verify
+		assertEquals(2, outcomes.size());
+		assertEquals(storageOutcome, outcomes.get(0).getStorageResponseCode());
+		assertEquals("Patient/123", outcomes.get(0).getTargetId().getValue());
+		assertEquals(200, outcomes.get(0).getStatusCode());
+		assertEquals("200 OK", outcomes.get(0).getStatusMessage());
+		assertEquals(storageOutcome, outcomes.get(1).getStorageResponseCode());
+		assertEquals("Patient/456", outcomes.get(1).getTargetId().getValue());
+		assertEquals(200, outcomes.get(1).getStatusCode());
+		assertEquals("200 OK", outcomes.get(1).getStatusMessage());
+
+	}
+
 	@Test
 	public void testParseTransactionResponse_FailureCreate() {
 		Resource requestPatient = new Patient();

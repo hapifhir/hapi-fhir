@@ -94,9 +94,11 @@ public class JpaSearchParamCache {
 
 	public List<RuntimeSearchParam> getActiveComboSearchParams(
 			String theResourceName, ComboSearchParamType theParamType) {
-		return getActiveComboSearchParams(theResourceName).stream()
+		List<RuntimeSearchParam> activeComboSearchParams = getActiveComboSearchParams(theResourceName);
+		List<RuntimeSearchParam> retVal = activeComboSearchParams.stream()
 				.filter(param -> Objects.equals(theParamType, param.getComboSearchParamType()))
 				.collect(Collectors.toList());
+		return retVal;
 	}
 
 	public Optional<RuntimeSearchParam> getActiveComboSearchParamById(String theResourceName, IIdType theId) {

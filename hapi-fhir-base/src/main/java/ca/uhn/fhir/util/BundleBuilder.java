@@ -75,12 +75,27 @@ public class BundleBuilder {
 
 	/**
 	 * Constructor
+	 *
+	 * @param theContext The FHIR context appropriate for the Bundle type.
 	 */
-	public BundleBuilder(FhirContext theContext) {
+	public BundleBuilder(@Nonnull FhirContext theContext) {
+		this(theContext, (IBaseBundle)
+				theContext.getResourceDefinition("Bundle").newInstance());
+	}
+
+	/**
+	 * Constructor which accepts an existing Bundle. Any existing entries in the Bundle
+	 * will be preserved, new entries may be added.
+	 *
+	 * @param theContext The FHIR context appropriate for the Bundle type.
+	 * @param theBundle The Bundle to add to.
+	 * @since 8.6.0
+	 */
+	public BundleBuilder(@Nonnull FhirContext theContext, @Nonnull IBaseBundle theBundle) {
+		myBundle = theBundle;
 		myContext = theContext;
 
 		myBundleDef = myContext.getResourceDefinition("Bundle");
-		myBundle = (IBaseBundle) myBundleDef.newInstance();
 
 		myEntryChild = myBundleDef.getChildByName("entry");
 		myEntryDef = myEntryChild.getChildByName("entry");

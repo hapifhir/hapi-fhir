@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.util.UrlUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.CompareToBuilder;
@@ -187,15 +188,28 @@ public class SearchParameterMap implements Serializable {
 	}
 
 	@SuppressWarnings("unchecked")
-	public SearchParameterMap add(String theName, IQueryParameterOr<?> theOr) {
-		if (theOr == null) {
+	@Nonnull
+	public SearchParameterMap add(@Nonnull String theName, @Nullable IQueryParameterOr<?> theOr) {
+		List<IQueryParameterType> orList =
+				theOr != null ? (List<IQueryParameterType>) theOr.getValuesAsQueryTokens() : null;
+		return addOrList(theName, orList);
+	}
+
+	/**
+	 * Adds a list of parameters to the map, treating them as OR predicates
+	 */
+	@SuppressWarnings("unchecked")
+	@Nonnull
+	public SearchParameterMap addOrList(
+			@Nonnull String theName, @Nullable List<? extends IQueryParameterType> theOrList) {
+		if (theOrList == null) {
 			return this;
 		}
 		if (!containsKey(theName)) {
 			put(theName, new ArrayList<>());
 		}
 
-		get(theName).add((List<IQueryParameterType>) theOr.getValuesAsQueryTokens());
+		get(theName).add((List<IQueryParameterType>) theOrList);
 		return this;
 	}
 

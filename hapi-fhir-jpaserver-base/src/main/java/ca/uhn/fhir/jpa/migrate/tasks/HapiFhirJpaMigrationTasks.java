@@ -158,6 +158,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			resSystem.addColumn("SYSTEM_URL").nonNullable().type(ColumnTypeEnum.STRING, 500);
 			resSystem.addIndex("20251011.03", "IDX_RESIDENT_SYS").unique(true).withColumns("SYSTEM_URL");
 		}
+
+		// Make the HFJ_IDX_CMB_TOK_NU (non-unique combo param) string version nullable
+		// in anticipation of dropping it
+		version.onTable("HFJ_IDX_CMB_TOK_NU")
+				.modifyColumn("20251015.01", "IDX_STRING")
+				.nullable()
+				.withType(ColumnTypeEnum.STRING, 500);
 	}
 
 	protected void init840() {
