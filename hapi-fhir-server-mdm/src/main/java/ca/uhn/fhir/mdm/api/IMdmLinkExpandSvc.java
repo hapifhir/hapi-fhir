@@ -24,6 +24,8 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface IMdmLinkExpandSvc {
@@ -41,4 +43,6 @@ public interface IMdmLinkExpandSvc {
 			RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theGoldenResourcePid);
 
 	Set<String> expandMdmByGoldenResourceId(RequestPartitionId theRequestPartitionId, IIdType theId);
+
+	Map<IIdType, String> getGoldenResourceIdsFromIds(List<IIdType> ids);
 }

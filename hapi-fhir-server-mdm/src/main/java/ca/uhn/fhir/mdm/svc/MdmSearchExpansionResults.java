@@ -20,6 +20,7 @@
 package ca.uhn.fhir.mdm.svc;
 
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,5 +65,9 @@ public class MdmSearchExpansionResults {
 				&& theId.hasResourceType()
 				&& theId.hasIdPart()
 				&& theId.getValue().equals(theId.toUnqualifiedVersionless().getValue());
+	}
+
+	public boolean isEmpty() {
+		return myOriginalIdToExpandedId.isEmpty();
 	}
 }
