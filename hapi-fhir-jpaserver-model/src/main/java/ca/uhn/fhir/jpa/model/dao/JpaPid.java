@@ -94,6 +94,12 @@ public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable
 		myId = theId;
 	}
 
+	public JpaPid(Integer thePartitionId, Long theId, Long theVersion) {
+		super(theVersion, null);
+		myPartitionIdValue = thePartitionId;
+		myId = theId;
+	}
+
 	private JpaPid(Long theId, String theResourceType) {
 		super(theResourceType);
 		myId = theId;
@@ -142,7 +148,7 @@ public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable
 			return false;
 		}
 		JpaPid jpaPid = (JpaPid) theO;
-		return Objects.equals(myId, jpaPid.myId) && Objects.equals(myPartitionIdValue, jpaPid.myPartitionIdValue);
+		return Objects.equals(myId, jpaPid.myId);
 	}
 
 	/**
@@ -151,7 +157,7 @@ public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(myId, myPartitionIdValue);
+		return Objects.hash(myId);
 	}
 
 	@Override

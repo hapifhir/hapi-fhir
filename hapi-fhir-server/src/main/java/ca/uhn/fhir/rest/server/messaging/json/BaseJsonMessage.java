@@ -19,18 +19,22 @@
  */
 package ca.uhn.fhir.rest.server.messaging.json;
 
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.messaging.IHasPayloadMessageKey;
+import ca.uhn.fhir.rest.server.messaging.IMessage;
+import ca.uhn.fhir.rest.server.messaging.IMessageDeliveryContext;
+import ca.uhn.fhir.rest.server.messaging.RequestPartitionHeaderUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.annotation.Nullable;
+import jakarta.annotation.Nonnull;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
+import java.util.Map;
+
 import static java.util.Objects.isNull;
-import static org.apache.commons.lang3.StringUtils.defaultString;
 
-public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
-
-	private static final long serialVersionUID = 1L;
+public abstract class BaseJsonMessage<T> implements IMessage<T>, Message<T>, IModelJson, IMessageDeliveryContext {
 
 	@JsonProperty("headers")
 	private HapiMessageHeaders myHeaders;
@@ -49,8 +53,9 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 	}
 
 	@Override
+	@Nonnull
 	public MessageHeaders getHeaders() {
-		return myHeaders.toMessageHeaders();
+		return getHapiHeaders().toMessageHeaders();
 	}
 
 	public HapiMessageHeaders getHapiHeaders() {
@@ -64,34 +69,32 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 		myHeaders = theHeaders;
 	}
 
-	@Deprecated
-	@Nullable
-	public String getMessageKeyOrNull() {
-		return getMessageKey();
-	}
-
-	@Nullable
+	@Override
+	@Nonnull
 	public String getMessageKey() {
-		return null;
+		T payload = getPayload();
+		if (payload instanceof IHasPayloadMessageKey) {
+			String payloadMessageKey = ((IHasPayloadMessageKey) payload).getPayloadMessageKey();
+			if (payloadMessageKey != null) {
+				return payloadMessageKey;
+			}
+		}
+		return IMessage.super.getMessageKey();
 	}
 
-	/**
-	 * Returns {@link #getMessageKey()} or {@link #getMessageKeyDefaultValue()} when {@link #getMessageKey()} returns null.
-	 *
-	 * @return the message key value or default
-	 */
-	@Nullable
-	public String getMessageKeyOrDefault() {
-		return defaultString(getMessageKey(), getMessageKeyDefaultValue());
+	@Override
+	public int getRetryCount() {
+		return getHapiHeaders().getRetryCount();
 	}
 
-	/**
-	 * Provides a fallback value when the value returned by {@link #getMessageKey()} is null.
-	 *
-	 * @return null by default
-	 */
-	@Nullable
-	protected String getMessageKeyDefaultValue() {
-		return null;
+	public T getPayloadWithRequestPartitionIdSetFromHeader(IDefaultPartitionSettings theDefaultPartitionSettings) {
+		RequestPartitionHeaderUtil.setRequestPartitionIdFromHeaderIfNotAlreadySet(this, theDefaultPartitionSettings);
+		return getPayload();
+	}
+
+	public static <P> void addCustomHeaders(IMessage<P> theMessage, Map<String, ?> theCustomHeaders) {
+		if (theMessage instanceof BaseJsonMessage<P> baseJsonMessage) {
+			baseJsonMessage.getHapiHeaders().getCustomHeaders().putAll(theCustomHeaders);
+		}
 	}
 }

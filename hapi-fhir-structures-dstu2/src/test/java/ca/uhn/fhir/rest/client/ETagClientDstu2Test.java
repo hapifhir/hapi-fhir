@@ -186,7 +186,7 @@ public class ETagClientDstu2Test {
 		.execute();
 		//@formatter:on
 		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count).getURI().toString());
-		assertEquals("\"9876\"", capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_MATCH_LC)[0].getValue());
+		assertEquals("W/\"9876\"", capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_MATCH_LC)[0].getValue());
 		count++;
 
 	}
@@ -215,7 +215,7 @@ public class ETagClientDstu2Test {
 		}
 		//@formatter:on
 		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count).getURI().toString());
-		assertEquals("\"9876\"", capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_MATCH_LC)[0].getValue());
+		assertEquals("W/\"9876\"", capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_MATCH_LC)[0].getValue());
 		count++;
 
 		//@formatter:off
@@ -232,7 +232,7 @@ public class ETagClientDstu2Test {
 		}
 		//@formatter:on
 		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count).getURI().toString());
-		assertEquals("\"9876\"", capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_MATCH_LC)[0].getValue());
+		assertEquals("W/\"9876\"", capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_MATCH_LC)[0].getValue());
 		count++;
 	}
 

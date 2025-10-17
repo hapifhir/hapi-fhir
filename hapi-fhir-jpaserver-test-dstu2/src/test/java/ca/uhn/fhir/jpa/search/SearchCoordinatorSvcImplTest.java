@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.search;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -24,12 +23,12 @@ import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.system.HapiSystemProperties;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +42,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 
-import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -57,11 +55,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -76,7 +73,6 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"unchecked"})
@@ -138,12 +134,15 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 			null, // search param registry
 			mySearchStrategyFactory,
 			myExceptionSvc,
-			myBeanFactory
+			myBeanFactory,
+			myPartitionHelperSvc
 		);
+
 	}
 
 	@Test
 	public void testAsyncSearchFailDuringSearchSameCoordinator() {
+		initPartitionHelperSearchType();
 		initSearches();
 		initAsyncSearches();
 
@@ -156,7 +155,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		mockSearchTask();
 
 		try {
-			mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
+			mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage()).contains("FAILED");
 			assertThat(e.getMessage()).contains("at ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImplTest");
@@ -166,6 +165,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 	@Test
 	public void testAsyncSearchLargeResultSetBigCountSameCoordinator() {
+		initPartitionHelperSearchType();
+		initPartitionHelperRead();
 		initSearches();
 		initAsyncSearches();
 
@@ -197,7 +198,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		// Do all the stubbing before starting any work, since we want to avoid threading issues
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
 		assertEquals(790, result.size());
 
@@ -263,8 +264,11 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 	@Test
 	public void testAsyncSearchLargeResultSetSameCoordinator() {
+		initPartitionHelperSearchType();
+		initPartitionHelperRead();
 		initSearches();
 		initAsyncSearches();
+
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
@@ -276,7 +280,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
 		assertEquals(790, result.size());
 
@@ -287,6 +291,14 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("39", resources.get(29).getIdElement().getValueAsString());
 
+	}
+
+	private void initPartitionHelperSearchType() {
+		when(myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any())).thenReturn(RequestPartitionId.allPartitions());
+	}
+
+	private void initPartitionHelperRead() {
+		when(myPartitionHelperSvc.determineReadPartitionForRequest(any(), any())).thenReturn(RequestPartitionId.allPartitions());
 	}
 
 	private void initSearches() {
@@ -304,12 +316,14 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 			retVal.setSearchCoordinatorSvcForUnitTest(mySvc);
 			retVal.setRequestPartitionHelperSvcForUnitTest(myPartitionHelperSvc);
 			retVal.setContext(myContext);
+			retVal.setInterceptorBroadcaster(myInterceptorBroadcaster);
 			return retVal;
 		});
 	}
 
 	@Test
 	public void testCancelActiveSearches() throws InterruptedException {
+		initPartitionHelperSearchType();
 		initSearches();
 
 		SearchParameterMap params = new SearchParameterMap();
@@ -323,7 +337,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		when(myInterceptorBroadcaster.getInvokersForPointcut(any())).thenReturn(List.of());
 
 		ourLog.info("Registering the first search");
-		new Thread(() -> mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions())).start();
+		new Thread(() -> mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null)).start();
 		await().untilAsserted(() -> assertThat(iter.getCountReturned()).isGreaterThan(0));
 
 		String searchId = mySvc.getActiveSearchIds().iterator().next();
@@ -363,6 +377,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	 */
 	@Test
 	public void testAsyncSearchLargeResultSetSecondRequestSameCoordinator() {
+		initPartitionHelperSearchType();
+		initPartitionHelperRead();
 		initSearches();
 		initAsyncSearches();
 
@@ -370,7 +386,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		params.add("name", new StringParam("ANAME"));
 
 		List<JpaPid> pids = createPidSequence(800);
-		IResultIterator iter = new SlowIterator(pids.iterator(), 2);
+		IResultIterator<JpaPid> iter = new SlowIterator(pids.iterator(), 2);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		when(mySearchCacheSvc.save(any(), any())).thenAnswer(t -> {
 			ourLog.info("Saving search");
@@ -380,7 +396,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		mockSearchTask();
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
 		assertEquals(790, result.size());
 
@@ -390,7 +406,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		assertEquals(SearchTypeEnum.SEARCH, search.getSearchType());
 
 		List<IBaseResource> resources;
-		PersistedJpaBundleProvider provider;
 
 		resources = result.getResources(0, 10);
 		assertEquals(790, result.size());
@@ -404,6 +419,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 	@Test
 	public void testAsyncSearchSmallResultSetSameCoordinator() {
+		initPartitionHelperSearchType();
+		initPartitionHelperRead();
 		initSearches();
 		initAsyncSearches();
 
@@ -417,7 +434,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
 		assertEquals(90, Objects.requireNonNull(result.size()).intValue());
 
@@ -463,7 +480,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 			}
 
 			when(mySearchResultCacheSvc.fetchResultPids(any(Search.class), anyInt(), anyInt(), any(), any())).thenAnswer(theInvocation -> {
-				ArrayList<IResourcePersistentId> results = new ArrayList<>();
+				ArrayList<JpaPid> results = new ArrayList<>();
 				for (long i = theInvocation.getArgument(1, Integer.class); i < theInvocation.getArgument(2, Integer.class); i++) {
 					Long nextPid = i + 10L;
 					results.add(JpaPid.fromId(nextPid));
@@ -492,7 +509,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		provider.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
 		provider.setSearchCoordinatorSvcForUnitTest(mySvc);
 		provider.setStorageSettingsForUnitTest(new JpaStorageSettings());
-		provider.setRequestPartitionId(RequestPartitionId.defaultPartition());
+		provider.setRequestPartitionId(RequestPartitionId.allPartitions());
+		provider.setInterceptorBroadcaster(myInterceptorBroadcaster);
 		resources = provider.getResources(20, 40);
 		assertThat(resources).hasSize(20);
 		assertEquals("30", resources.get(0).getIdElement().getValueAsString());
@@ -512,18 +530,20 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		provider.setDaoRegistryForUnitTest(myDaoRegistry);
 		provider.setSearchCoordinatorSvcForUnitTest(mySvc);
 		provider.setStorageSettingsForUnitTest(new JpaStorageSettings());
-		provider.setRequestPartitionId(RequestPartitionId.defaultPartition());
+		provider.setRequestPartitionId(RequestPartitionId.allPartitions());
+		provider.setInterceptorBroadcaster(myInterceptorBroadcaster);
 		return provider;
 	}
 
 	@Test
 	public void testSynchronousSearch() {
+		initPartitionHelperSearchType();
 		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
 
-		mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
+		mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 
 		verify(mySynchronousSearchSvc).executeQuery(any(), any(), any(), any(), any(), any());
 
@@ -532,26 +552,28 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 	@Test
 	public void testSynchronousSearchWithOffset() {
+		initPartitionHelperSearchType();
 		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setOffset(10);
 		params.setCount(10);
 
-		mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
+		mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 
 		verify(mySynchronousSearchSvc).executeQuery(any(), any(), any(), any(), any(), any());
 	}
 
 	@Test
 	public void testSynchronousSearchUpTo() {
+		initPartitionHelperSearchType();
 		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 
 		int loadUpto = 30;
 		SearchParameterMap params = new SearchParameterMap();
 		CacheControlDirective cacheControlDirective = new CacheControlDirective().setMaxResults(loadUpto).setNoStore(true);
 
-		mySvc.registerSearch(myCallingDao, params, "Patient", cacheControlDirective, null, RequestPartitionId.allPartitions());
+		mySvc.registerSearch(myCallingDao, params, "Patient", cacheControlDirective, null);
 
 		verify(mySynchronousSearchSvc).executeQuery(any(), any(), any(), any(), eq(30), any());
 	}
@@ -659,7 +681,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		private final IResultIterator<JpaPid> myWrap;
 		private int myCount;
 
-		FailAfterNIterator(IResultIterator theWrap, int theCount) {
+		FailAfterNIterator(IResultIterator<JpaPid> theWrap, int theCount) {
 			myWrap = theWrap;
 			myCount = theCount;
 		}
@@ -712,20 +734,15 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	public static class SlowIterator extends BaseIterator<JpaPid> implements IResultIterator<JpaPid> {
 
 		private static final Logger ourLog = LoggerFactory.getLogger(SlowIterator.class);
-		private final IResultIterator myResultIteratorWrap;
+		private final IResultIterator<JpaPid> myResultIteratorWrap;
 		private final int myDelay;
 		private final Iterator<JpaPid> myWrap;
-		private final List<IResourcePersistentId> myReturnedValues = new ArrayList<>();
 		private final AtomicInteger myCountReturned = new AtomicInteger(0);
 
 		SlowIterator(Iterator<JpaPid> theWrap, int theDelay) {
 			myWrap = theWrap;
 			myDelay = theDelay;
 			myResultIteratorWrap = null;
-		}
-
-		List<IResourcePersistentId> getReturnedValues() {
-			return myReturnedValues;
 		}
 
 		@Override
@@ -749,7 +766,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 				// ignore
 			}
 			JpaPid retVal = myWrap.next();
-			myReturnedValues.add(retVal);
 			myCountReturned.incrementAndGet();
 			return retVal;
 		}

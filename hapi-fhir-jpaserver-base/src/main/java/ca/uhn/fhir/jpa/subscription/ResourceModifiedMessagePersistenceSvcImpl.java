@@ -111,7 +111,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 			inflatedResourceModifiedMessage = inflatePersistedResourceModifiedMessage(theResourceModifiedMessage);
 		} catch (ResourceNotFoundException e) {
 			IdDt idDt = new IdDt(
-					theResourceModifiedMessage.getPayloadType(myFhirContext),
+					theResourceModifiedMessage.getResourceType(myFhirContext),
 					theResourceModifiedMessage.getPayloadId(),
 					theResourceModifiedMessage.getPayloadVersion());
 
@@ -171,11 +171,11 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		IIdType theMsgId = theMsg.getPayloadId(myFhirContext);
 
 		ResourceModifiedEntity resourceModifiedEntity = new ResourceModifiedEntity();
-		resourceModifiedEntity.setResourceModifiedEntityPK(with(theMsgId.getIdPart(), theMsgId.getVersionIdPart()));
+		resourceModifiedEntity.setResourceModifiedEntityPK(
+				with(theMsgId.getIdPart(), theMsgId.getVersionIdPart(), theMsgId.getResourceType()));
 
 		String partialModifiedMessage = getPayloadLessMessageAsString(theMsg);
 		resourceModifiedEntity.setSummaryResourceModifiedMessage(partialModifiedMessage);
-		resourceModifiedEntity.setResourceType(theMsgId.getResourceType());
 		resourceModifiedEntity.setCreatedTime(new Date());
 
 		return resourceModifiedEntity;
@@ -219,7 +219,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 			setOperationType(theMsg.getOperationType());
 			setPartitionId(theMsg.getPartitionId());
 			setTransactionId(theMsg.getTransactionId());
-			setMessageKey(theMsg.getMessageKeyOrNull());
+			setPayloadMessageKey(theMsg.getPayloadMessageKey());
 			copyAdditionalPropertiesFrom(theMsg);
 		}
 	}

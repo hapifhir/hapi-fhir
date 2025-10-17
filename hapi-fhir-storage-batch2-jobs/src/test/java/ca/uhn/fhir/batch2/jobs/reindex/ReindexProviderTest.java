@@ -8,11 +8,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
@@ -35,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -55,7 +58,7 @@ public class ReindexProviderTest {
 	@RegisterExtension
 	public final RestfulServerExtension myServerExtension = new RestfulServerExtension(myCtx);
 
-	@Mock
+	@Mock(strictness = Mock.Strictness.LENIENT)
 	private IJobCoordinator myJobCoordinator;
 
 	@Mock
@@ -88,16 +91,16 @@ public class ReindexProviderTest {
 
 	@ParameterizedTest
 	@NullSource
-	@ValueSource(strings = {"Observation?status=active", ""})
+	@ValueSource(strings = {"Observation?status=active", "", "Observation?_includeDeleted=exclusive"})
 	public void testReindex_withUrlAndNonDefaultParams(String theUrl) {
 		// setup
 		Parameters input = new Parameters();
-		int batchSize = 2401;
 		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_URL, theUrl);
-		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE, new DecimalType(batchSize));
+		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE, new IntegerType(123));
 		input.addParameter(ReindexJobParameters.REINDEX_SEARCH_PARAMETERS, new CodeType("none"));
 		input.addParameter(ReindexJobParameters.OPTIMISTIC_LOCK, new BooleanType(false));
 		input.addParameter(ReindexJobParameters.OPTIMIZE_STORAGE, new CodeType("current_version"));
+		input.addParameter(ReindexJobParameters.CORRECT_CURRENT_VERSION, new CodeType("ALL"));
 
 		RequestPartitionId partitionId = RequestPartitionId.fromPartitionId(1);
 		final PartitionedUrl partitionedUrl = new PartitionedUrl().setUrl(theUrl).setRequestPartitionId(partitionId);
@@ -128,6 +131,8 @@ public class ReindexProviderTest {
 		assertEquals(ReindexParameters.ReindexSearchParametersEnum.NONE, params.getReindexSearchParameters());
 		assertFalse(params.getOptimisticLock());
 		assertEquals(ReindexParameters.OptimizeStorageModeEnum.CURRENT_VERSION, params.getOptimizeStorage());
+		assertEquals(ReindexParameters.CorrectCurrentVersionModeEnum.ALL, params.getCorrectCurrentVersion());
+		assertEquals(123, params.getBatchSize());
 	}
 
 	@Test
@@ -157,5 +162,27 @@ public class ReindexProviderTest {
 		assertEquals(ReindexParameters.ReindexSearchParametersEnum.ALL, params.getReindexSearchParameters());
 		assertTrue(params.getOptimisticLock());
 		assertEquals(ReindexParameters.OptimizeStorageModeEnum.NONE, params.getOptimizeStorage());
+		assertEquals(ReindexParameters.CorrectCurrentVersionModeEnum.NONE, params.getCorrectCurrentVersion());
+	}
+
+	@Test
+	public void testReindex_invalidRequest_BadCorrectCurrentVersionValue() {
+		// setup
+		Parameters input = new Parameters();
+		input.addParameter(ReindexJobParameters.CORRECT_CURRENT_VERSION, new CodeType("BAD_VALUE"));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+
+		// Execute
+		assertThatThrownBy(()->myServerExtension
+				.getFhirClient()
+				.operation()
+				.onServer()
+				.named(ProviderConstants.OPERATION_REINDEX)
+				.withParameters(input)
+				.execute())
+				// Verify
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("Invalid correctCurrentVersion value: BAD_VALUE");
+
 	}
 }

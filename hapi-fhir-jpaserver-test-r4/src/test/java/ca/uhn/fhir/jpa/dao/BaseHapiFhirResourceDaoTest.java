@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -19,13 +20,19 @@ import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTag;
+import ca.uhn.fhir.jpa.model.entity.TagDefinition;
+import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.svc.MockHapiTransactionService;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -59,6 +66,9 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -67,12 +77,14 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
@@ -83,6 +95,11 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BaseHapiFhirResourceDaoTest {
+	public static final String RESOURCE_TYPE = "Patient";
+	public static final String RESOURCE_ID = "123";
+
+	@Mock
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Mock
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
@@ -134,6 +151,9 @@ class BaseHapiFhirResourceDaoTest {
 	@Mock
 	private ResourceSearchUrlSvc myResourceSearchUrlSvc;
 
+	@Mock
+	private CacheTagDefinitionDao myCacheTagDefinitionDao;
+
 	@Captor
 	private ArgumentCaptor<SearchParameterMap> mySearchParameterMapCaptor;
 
@@ -152,7 +172,9 @@ class BaseHapiFhirResourceDaoTest {
 		// have access to resourcetype/name
 		// the individual tests will have to start
 		// by calling setup themselves
+		mySvc.setResourceType(Patient.class);
 		mySvc.setContext(myFhirContext);
+		mySvc.start();
 		mySpiedSvc = spy(mySvc);
 	}
 
@@ -160,11 +182,44 @@ class BaseHapiFhirResourceDaoTest {
 	 * To be called for tests that require additional
 	 * setup
 	 *
-	 * @param clazz
+	 * @param theClazz
 	 */
-	private void setup(Class clazz) {
-		mySvc.setResourceType(clazz);
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	private void setup(Class theClazz) {
+		mySvc.setResourceType(theClazz);
 		mySvc.start();
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void searchForResources_withNullResourceReturns_doesNotFail() {
+		// setup
+		SearchParameterMap map = new SearchParameterMap();
+		RequestDetails requestDetails = new SystemRequestDetails();
+
+		MockHapiTransactionService myTransactionService = new MockHapiTransactionService();
+		mySvc.setTransactionService(myTransactionService);
+		setup(Patient.class);
+		List<Patient> resourceList = new ArrayList<>();
+		resourceList.add(null);
+		resourceList.add(new Patient());
+
+		// when
+		when(mySearchBuilderFactory.newSearchBuilder(eq("Patient"), eq(Patient.class)))
+			.thenReturn(myISearchBuilder);
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(eq(requestDetails), eq("Patient"), eq(map)))
+			.thenReturn(RequestPartitionId.allPartitions());
+		when(myISearchBuilder.createQueryStream(any(SearchParameterMap.class), any(SearchRuntimeDetails.class), any(RequestDetails.class), any(RequestPartitionId.class)))
+			.thenReturn(Stream.of(JpaPid.fromId(1L), JpaPid.fromId(2L)));
+		when(myISearchBuilder.loadResourcesByPid(any(Collection.class), any(RequestDetails.class)))
+			.thenReturn(resourceList);
+
+		// test
+		List<Patient> resources = mySvc.searchForResources(map, requestDetails);
+
+		// verify
+		// list of 2 in (null, resource), list of 1 out (only resource)
+		assertEquals(1, resources.size());
 	}
 
 	@Test
@@ -201,6 +256,57 @@ class BaseHapiFhirResourceDaoTest {
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(960) + "failedToCreateWithClientAssignedNumericId", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testValidatePartitionIdMatch_validOnMatchedResourceTypeAndIdAndPartition() {
+		// set up
+		IIdType requestId = new IdDt(RESOURCE_TYPE, RESOURCE_ID);
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
+
+		ResourceTable entity = new ResourceTable();
+		entity.setPartitionId(new PartitionablePartitionId(1, LocalDate.now()));
+		entity.setResourceType(RESOURCE_TYPE);
+		entity.setFhirId(RESOURCE_ID);
+
+		// Execute/Verify
+		assertDoesNotThrow(() -> mySvc.validatePartitionIdMatch(requestId, requestPartitionId, entity));
+	}
+
+	@Test
+	public void testValidatePartitionIdMatch_doNothingOnAllPartitions() {
+		// set up
+		IIdType requestId = new IdDt(RESOURCE_TYPE, RESOURCE_ID);
+		RequestPartitionId requestPartitionId = RequestPartitionId.allPartitions();
+		ResourceTable entity = new ResourceTable();
+
+		// Execute
+		assertDoesNotThrow(() -> mySvc.validatePartitionIdMatch(requestId, requestPartitionId, entity));
+	}
+
+	@Test
+	public void testValidatePartitionIdMatch_throwExceptionOnPartitionMismatch() {
+		// set up
+		ResourceTable entity = new ResourceTable();
+		entity.setPartitionId(new PartitionablePartitionId(1, LocalDate.now()));
+		entity.setResourceType(RESOURCE_TYPE);
+		entity.setFhirId(RESOURCE_ID);
+
+		IIdType requestId = new IdDt(RESOURCE_TYPE, RESOURCE_ID);
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionIdAndName(2, "partition2");
+
+		// Execute
+		InvalidRequestException exception = assertThrows(
+			InvalidRequestException.class,
+			() -> mySvc.validatePartitionIdMatch(requestId, requestPartitionId, entity)
+		);
+
+		// Verify
+		assertThat(exception.getMessage()).isEqualTo(
+			("HAPI-2733: Failed to create/update resource [%s/%s] in partition %s because a resource of " +
+				"the same type and ID is found in another partition")
+				.formatted(RESOURCE_TYPE, RESOURCE_ID, requestPartitionId.getFirstPartitionNameOrNull()
+			));
 	}
 
 	@Test
@@ -346,6 +452,42 @@ class BaseHapiFhirResourceDaoTest {
 			Arguments.of(new SearchParameterMap().setLoadSynchronousUpTo(1000), 1000),
 			Arguments.of(new SearchParameterMap(), 5000)
 		);
+	}
+
+	@Test
+	public void testUpdateTags_withDuplicateTags_willNotUpdateEntityTagList(){
+		RequestDetails sysRequest = new SystemRequestDetails();
+		TransactionDetails transactionDetails = new TransactionDetails();
+		TagDefinition duplicateTagDefinition = createTagDefinition(2);
+
+		// given a patient resource with tags stored in the database
+		TagDefinition tagDefinition = createTagDefinition(1);
+		ResourceTable entity = new ResourceTable();
+		entity.setId(new JpaPid(null, 1l));
+		entity.addTag(tagDefinition);
+		entity.setHasTags(true);
+
+		// given a client update request on the patient resource that is stored in the database
+		Patient patient = new Patient();
+		patient.getMeta().addTag(tagDefinition.getSystem(), tagDefinition.getCode(), tagDefinition.getDisplay());
+
+		// when we search the database for existing tags, return a duplicate one.
+		when(myCacheTagDefinitionDao.getTagOrNull(any(), any(), any(), any(), any(), any(), any())).thenReturn(duplicateTagDefinition);
+
+		boolean updated = mySpiedSvc.updateTags(transactionDetails, sysRequest, patient, entity);
+
+		// assert that the entity was not updated with the duplicate tag
+		assertThat(updated).isFalse();
+		Collection<ResourceTag> entityTags = entity.getTags();
+		assertThat(entityTags).hasSize(1);
+		assertThat(entityTags.iterator().next().getTag().getId()).isEqualTo(tagDefinition.getId());
+	}
+
+	private TagDefinition createTagDefinition(int theId) {
+		TagDefinition tagDefinition = new TagDefinition(TagTypeEnum.TAG, "sytem", "code", null);
+		tagDefinition.setId((long) theId);
+
+		return tagDefinition;
 	}
 
 	@Nested

@@ -30,10 +30,11 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 
+import java.io.Serial;
 import java.util.Date;
 import java.util.List;
 
@@ -42,6 +43,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @MappedSuperclass
 public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	static final int MAX_SP_NAME = 100;
+
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@GenericField
@@ -96,7 +99,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	}
 
 	public void setParamName(String theName) {
-		if (!StringUtils.equals(myParamName, theName)) {
+		if (!Strings.CS.equals(myParamName, theName)) {
 			myParamName = theName;
 			clearHashes();
 		}
@@ -112,7 +115,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	}
 
 	/**
-	 * Set SP_NAME, RES_TYPE, SP_UPDATED to null without clearing hashes
+	 * Set SP_NAME, RES_TYPE to null without clearing hashes
 	 */
 	public void optimizeIndexStorage() {
 		if (isNotBlank(myParamName)) {
@@ -120,11 +123,10 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 			myParamName = null;
 		}
 		myResourceType = null;
-		myUpdated = null;
 	}
 
 	public boolean isIndexStorageOptimized() {
-		return myParamName == null || myResourceType == null || myUpdated == null;
+		return myParamName == null || myResourceType == null;
 	}
 
 	// MB pushed these down to the individual SP classes so we could name the FK in the join annotation

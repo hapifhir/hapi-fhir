@@ -1,0 +1,30 @@
+{
+	"resourceType" : "StructureDefinition",
+	"id" : "organization-sample",
+	"url" : "http://mytest/StructureDefinition/organization-sample",
+	"name" : "Organization Sample",
+	"title" : "Sample profile to test extensibility",
+	"status" : "active",
+	"date" : "2022-09-29T10:00:22-05:00",
+	"fhirVersion" : "4.0.1",
+	"kind" : "resource",
+	"abstract" : false,
+	"type" : "Organization",
+	"baseDefinition" : "http://hl7.org/fhir/StructureDefinition/Organization",
+	"derivation" : "constraint",
+	"differential" : {
+		"element" : [{
+			"id" : "Organization",
+			"path" : "Organization"
+		},
+			{
+				"id": "Organization.contact.purpose",
+				"path": "Organization.contact.purpose",
+				"binding": {
+					"strength": "extensible",
+					"description": "The purpose for which you would contact a contact party.",
+					"valueSet": "http://mytest/ValueSet/OrgContactSampleVS"
+				}
+			}]
+	}
+}

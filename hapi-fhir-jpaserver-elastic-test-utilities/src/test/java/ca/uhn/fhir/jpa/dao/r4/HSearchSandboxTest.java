@@ -101,7 +101,8 @@ public class HSearchSandboxTest extends BaseJpaTest {
 	@BeforeEach
 	public void enableContainsAndLucene() {
 		myStorageSettings.setAllowContainsSearches(true);
-		myStorageSettings.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setHibernateSearchIndexSearchParams(true);
+		mySearchParamRegistry.forceRefresh();
 	}
 
 

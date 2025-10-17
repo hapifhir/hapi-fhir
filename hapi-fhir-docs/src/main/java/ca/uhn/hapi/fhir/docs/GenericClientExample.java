@@ -533,6 +533,7 @@ public class GenericClientExample {
 					.onServer()
 					.returnBundle(Bundle.class)
 					.since(new InstantType("2012-01-01T12:22:32.038Z"))
+					.offset(10)
 					.count(100)
 					.execute();
 			// END SNIPPET: historyFeatures

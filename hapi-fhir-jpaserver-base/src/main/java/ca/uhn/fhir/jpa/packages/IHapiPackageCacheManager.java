@@ -35,6 +35,10 @@ public interface IHapiPackageCacheManager extends IPackageCacheManager {
 
 	IBaseResource loadPackageAssetByUrl(FhirVersionEnum theFhirVersion, String theCanonicalUrl);
 
+	List<NpmPackageAssetInfoJson> findPackageAssetInfoByUrl(FhirVersionEnum theFhirVersion, String theCanonicalUrl);
+
+	IBaseResource findPackageAsset(FindPackageAssetRequest theFindPackageAssetRequest);
+
 	NpmPackageMetadataJson loadPackageMetadata(String thePackageId) throws ResourceNotFoundException;
 
 	PackageContents loadPackageContents(String thePackageId, String theVersion);

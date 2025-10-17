@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7280
+title: "Fix rawHttpRequest() get call to IGenericClient so that non accept and additional headers are added correctly.
+Fix the returned input stream so it is not closed."

@@ -90,4 +90,8 @@ public class MultiDelegateConsentService implements IConsentService {
 		return myVoteCombiner.apply(myDelegates.stream()
 				.map(nextDelegate -> nextDelegate.willSeeResource(theRequestDetails, theResource, theContextServices)));
 	}
+
+	public Collection<IConsentService> getDelegates() {
+		return myDelegates;
+	}
 }

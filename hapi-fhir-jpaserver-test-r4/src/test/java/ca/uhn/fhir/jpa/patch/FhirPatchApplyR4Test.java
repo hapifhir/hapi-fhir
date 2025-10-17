@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -12,12 +14,16 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Encounter.EncounterLocationComponent;
+import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
@@ -28,13 +34,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.util.XmlExpectationsHelper;
 
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hl7.fhir.r4.model.Encounter.EncounterLocationStatus.ACTIVE;
+import static org.hl7.fhir.r4.model.Encounter.EncounterLocationStatus.RESERVED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class FhirPatchApplyR4Test {
 
@@ -55,11 +63,8 @@ public class FhirPatchApplyR4Test {
 			.setName("type")
 			.setValue(new CodeType("foo"));
 
-		try {
-			svc.apply(patient, patch);
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1267) + "Unknown patch operation type: foo", e.getMessage());
-		}
+		assertThatThrownBy(() -> svc.apply(patient, patch))
+			.hasMessageContaining("Unknown patch operation type: foo");
 	}
 
 	@Test
@@ -84,11 +89,8 @@ public class FhirPatchApplyR4Test {
 			.setName("index")
 			.setValue(new IntegerType(2));
 
-		try {
-			svc.apply(patient, patch);
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1270) + "Invalid insert index 2 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
-		}
+		assertThatThrownBy(() -> svc.apply(patient, patch))
+			.hasMessageContaining("Invalid insert index 2 for path Patient.identifier - Only have 0 existing entries");
 	}
 
 	@Test
@@ -113,11 +115,8 @@ public class FhirPatchApplyR4Test {
 			.setName("index")
 			.setValue(new IntegerType(-1));
 
-		try {
-			svc.apply(patient, patch);
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1270) + "Invalid insert index -1 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
-		}
+		assertThatThrownBy(() -> svc.apply(patient, patch))
+			.hasMessageContaining("Invalid insert index -1 for path Patient.identifier - Only have 0 existing entries");
 	}
 
 	@Test
@@ -456,26 +455,83 @@ public class FhirPatchApplyR4Test {
 		assertEquals("third-system", patient.getIdentifier().get(0).getSystem());
 		assertEquals("third-value", patient.getIdentifier().get(0).getValue());
 	}
+
 	@Test
-	public void testReplaceToHighCardinalityFieldRemovesAllAndSetsValue() {
+	public void testReplaceAnElementInHighCardinalityFieldByIndex() {
 		FhirPatch svc = new FhirPatch(ourCtx);
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("first-system").setValue("first-value");
 		patient.addIdentifier().setSystem("second-system").setValue("second-value");
 
-		//Given: We create a patch request to add an identifier.
+		//Given: We create a patch to replace the second identifier
 		Identifier theValue = new Identifier().setSystem("third-system").setValue("third-value");
 		Parameters patch = new Parameters();
-		patch.addParameter(createPatchReplaceOperation("Patient.identifier",  theValue));
+		patch.addParameter(createPatchReplaceOperation("Patient.identifier[1]",  theValue));
 
 		//When: We apply the patch
 		svc.apply(patient, patch);
 		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
-		//Then: it applies the new identifier correctly.
-		assertThat(patient.getIdentifier()).hasSize(1);
-		assertEquals("third-system", patient.getIdentifier().get(0).getSystem());
-		assertEquals("third-value", patient.getIdentifier().get(0).getValue());
+		//Then: it replaces the identifier correctly.
+		assertThat(patient.getIdentifier()).hasSize(2);
+		assertThat(patient.getIdentifier().get(0).getSystem()).isEqualTo("first-system");
+		assertThat(patient.getIdentifier().get(0).getValue()).isEqualTo("first-value");
+		assertThat(patient.getIdentifier().get(1).getSystem()).isEqualTo("third-system");
+		assertThat(patient.getIdentifier().get(1).getValue()).isEqualTo("third-value");
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"Patient.identifier.where(system='not-an-existing-system')", //filter for not existing element
+		"Patient.identifier[5]" // index out of bounds for the element
+	})
+	public void testReplaceAnElementInHighCardinalityField_NoMatchingElement_InvalidRequest(String thePath) {
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("first-system").setValue("first-value");
+		patient.addIdentifier().setSystem("second-system").setValue("second-value");
+
+		//Given: We create a patch to replace the second identifier
+		Identifier theValue = new Identifier().setSystem("third-system").setValue("third-value");
+		Parameters patch = new Parameters();
+		patch.addParameter(createPatchReplaceOperation(thePath,	theValue));
+
+		//When: We apply the patch, expect an InvalidRequestException
+		InvalidRequestException ex = assertThrows(InvalidRequestException.class, () -> svc.apply(patient, patch));
+		String expectedMessage = String.format("HAPI-2761: No element matches the specified path: %s", thePath);
+		assertThat(ex.getMessage()).isEqualTo(expectedMessage);
+
+		assertThat(patient.getIdentifier()).hasSize(2);
+		assertThat(patient.getIdentifier().get(0).getSystem()).isEqualTo("first-system");
+		assertThat(patient.getIdentifier().get(0).getValue()).isEqualTo("first-value");
+		assertThat(patient.getIdentifier().get(1).getSystem()).isEqualTo("second-system");
+		assertThat(patient.getIdentifier().get(1).getValue()).isEqualTo("second-value");
+	}
+
+
+	@Test
+	public void testReplaceAnElementInHighCardinalityFieldByFilter_SingleMatch() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("first-system").setValue("first-value");
+		patient.addIdentifier().setSystem("second-system").setValue("second-value");
+
+		//Given: We create a patch to replace the second identifier
+		Identifier theValue = new Identifier().setSystem("third-system").setValue("third-value");
+		Parameters patch = new Parameters();
+		patch.addParameter(createPatchReplaceOperation("Patient.identifier.where(system='second-system')",
+			theValue));
+
+		//When: We apply the patch
+		svc.apply(patient, patch);
+		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		//Then: it replaces the identifier correctly.
+		assertThat(patient.getIdentifier()).hasSize(2);
+		assertThat(patient.getIdentifier().get(0).getSystem()).isEqualTo("first-system");
+		assertThat(patient.getIdentifier().get(0).getValue()).isEqualTo("first-value");
+		assertThat(patient.getIdentifier().get(1).getSystem()).isEqualTo("third-system");
+		assertThat(patient.getIdentifier().get(1).getValue()).isEqualTo("third-value");
 	}
 
 	//TODO: https://github.com/hapifhir/hapi-fhir/issues/3796
@@ -588,11 +644,6 @@ public class FhirPatchApplyR4Test {
 		return createPatchOperation("replace", thePath, null , theValue, null);
 	}
 
-	private Parameters.ParametersParameterComponent createPatchInsertOperation(String thePath, Type theValue) {
-		return createPatchOperation("replace", thePath, null , theValue, null);
-	}
-
-
 	@Nonnull
 	private Parameters.ParametersParameterComponent createPatchOperation(String theType, String thePath, String theName, Type theValue, Integer theIndex) {
 		Parameters.ParametersParameterComponent operation = new Parameters.ParametersParameterComponent();
@@ -625,9 +676,92 @@ public class FhirPatchApplyR4Test {
 		return operation;
 	}
 
+	@Test
+	public void testPatchResource_withEnumerationAsPrimitiveValue() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Encounter encounter = new Encounter();
+
+		encounter.setStatus(Encounter.EncounterStatus.FINISHED);
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("replace"));
+
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Encounter.status"));
+
+		Encounter.EncounterStatusEnumFactory encounterStatusEnumFactory = new Encounter.EncounterStatusEnumFactory();
+		Enumeration<Encounter.EncounterStatus> encounterLocationStatus = new Enumeration<>(encounterStatusEnumFactory, "arrived");
+
+		operation.addPart()
+			.setName("value")
+			.setValue(encounterLocationStatus);
+
+		logResource(patch);
+
+		svc.apply(encounter, patch);
+		assertThat(encounter.getStatus()).isEqualTo(Encounter.EncounterStatus.ARRIVED);
+	}
+
+	@Test
+	public void testPatchResource_withCompositeValues() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Encounter encounter = new Encounter();
+		EncounterLocationComponent encounterLocationComponent = encounter.addLocation();
+		encounterLocationComponent.setStatus(RESERVED);
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("replace"));
+
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Encounter.location"));
+
+		Parameters.ParametersParameterComponent partList = operation.addPart().setName("value");
+
+		Reference expectedReference = new Reference("Location/123");
+		partList.addPart().setName("location").setValue(expectedReference);
+
+		CodeableConcept expectedCodeableConcept = new CodeableConcept(new Coding("some-system", "some-code", null));
+		partList.addPart().setName("physicalType").setValue(expectedCodeableConcept);
+
+		Encounter.EncounterLocationStatusEnumFactory encounterLocationStatusEnumFactory = new Encounter.EncounterLocationStatusEnumFactory();
+		Enumeration<Encounter.EncounterLocationStatus> encounterLocationStatus = new Enumeration<>(encounterLocationStatusEnumFactory, "active");
+		partList.addPart().setName("status").setValue(encounterLocationStatus);
+
+		logResource(patch);
+
+		svc.apply(encounter, patch);
+		logResource(encounter);
+		EncounterLocationComponent locationComponent = encounter.getLocationFirstRep();
+
+		assertThat(locationComponent.getLocation().getReference()).isEqualTo(expectedReference.getReference());
+		assertThat(locationComponent.getPhysicalType().getCodingFirstRep().getSystem()).isEqualTo(expectedCodeableConcept.getCodingFirstRep().getSystem());
+		assertThat(locationComponent.getPhysicalType().getCodingFirstRep().getCode()).isEqualTo(expectedCodeableConcept.getCodingFirstRep().getCode());
+		assertThat(locationComponent.getStatus()).isEqualTo(ACTIVE);
+	}
+
+	public String logResource(IBaseResource theResource) {
+		String resourceAsString = FhirContext.forR4().newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource);
+		ourLog.info(resourceAsString);
+		return resourceAsString;
+	}
+
 	public static String extractPartValuePrimitive(Parameters theDiff, int theIndex, String theParameterName, String thePartName) {
 		Parameters.ParametersParameterComponent component = theDiff.getParameter().stream().filter(t -> t.getName().equals(theParameterName)).collect(Collectors.toList()).get(theIndex);
-		Parameters.ParametersParameterComponent part = component.getPart().stream().filter(t -> t.getName().equals(thePartName)).findFirst().orElseThrow(() -> new IllegalArgumentException());
+		Parameters.ParametersParameterComponent part = component.getPart().stream().filter(t -> t.getName().equals(thePartName)).findFirst().orElseThrow(IllegalArgumentException::new);
 		return ((IPrimitiveType) part.getValue()).getValueAsString();
 	}
 

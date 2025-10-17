@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
@@ -148,7 +149,7 @@ public class AnalyticsInterceptor extends InterceptorAdapter implements IHasSche
 		}
 		details.getUserData().put(getClass().getName(), "");
 
-		String sourceIp = details.getHeader("x-forwarded-for");
+		String sourceIp = details.getHeader(Constants.HEADER_X_FORWARDED_FOR);
 		if (isBlank(sourceIp)) {
 			sourceIp = details.getServletRequest().getRemoteAddr();
 		}

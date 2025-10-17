@@ -1,0 +1,7 @@
+---
+type: add
+issue: 6814
+title: "When parsing a JSON resource, the following fragment caused the
+  parser to abort parsing with an unhelpful error message:
+  `\"extension\": null`. We will now correctly detect this error and pass
+    it to the parser error handler."

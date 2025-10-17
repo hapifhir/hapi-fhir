@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI-FHIR Storage Batch2 Jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.util.ArrayUtil;
 import ca.uhn.fhir.util.DatatypeUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -55,6 +56,7 @@ public class BulkExportJobParametersBuilder {
 	private RequestPartitionId myPartitionId;
 	private String myExportIdentifier;
 	private Set<String> myPostFetchFilterUrls;
+	private boolean myIncludeHistory;
 
 	public BulkExportJobParametersBuilder resourceTypes(IPrimitiveType<String> theResourceTypes) {
 		myResourceTypes = theResourceTypes == null
@@ -95,6 +97,16 @@ public class BulkExportJobParametersBuilder {
 		return this;
 	}
 
+	public BulkExportJobParametersBuilder patientReferences(List<IBaseReference> thePatientReferences) {
+		myPatientIds = thePatientReferences == null
+				? null
+				: thePatientReferences.stream()
+						.map(IBaseReference::getReferenceElement)
+						.map(IIdType::getIdPart)
+						.collect(Collectors.toList());
+		return this;
+	}
+
 	public BulkExportJobParametersBuilder groupId(IIdType theGroupId) {
 		myGroupId = DatatypeUtil.toStringValue(theGroupId);
 		return this;
@@ -121,6 +133,12 @@ public class BulkExportJobParametersBuilder {
 		return this;
 	}
 
+	public BulkExportJobParametersBuilder includeHistory(IPrimitiveType<Boolean> theIncludeHistory) {
+		final Boolean booleanValue = DatatypeUtil.toBooleanValue(theIncludeHistory);
+		myIncludeHistory = booleanValue != null && booleanValue;
+		return this;
+	}
+
 	public BulkExportJobParameters build() {
 		BulkExportJobParameters result = new BulkExportJobParameters();
 		result.setExpandMdm(myExpandMdm);
@@ -135,6 +153,7 @@ public class BulkExportJobParametersBuilder {
 		result.setSince(mySince);
 		result.setUntil(myUntil);
 		result.setPostFetchFilterUrls(myPostFetchFilterUrls);
+		result.setIncludeHistory(myIncludeHistory);
 		return result;
 	}
 

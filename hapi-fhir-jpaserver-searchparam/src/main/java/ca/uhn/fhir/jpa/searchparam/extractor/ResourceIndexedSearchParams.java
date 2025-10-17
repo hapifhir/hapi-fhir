@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.util.ResourceLinkUtils;
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.util.RuntimeSearchParamHelper;
@@ -364,7 +365,13 @@ public final class ResourceIndexedSearchParams {
 	private boolean resourceIdMatches(
 			StorageSettings theStorageSettings, ResourceLink theResourceLink, ReferenceParam theReference) {
 		String baseUrl = theReference.getBaseUrl();
+		// this suggest that we do not expect ot see baseUrl *unless* it's a "treatbaseaslocal"
 		if (isNotBlank(baseUrl)) {
+			// canonical urls are full urls with a base and everything
+			if (ResourceLinkUtils.isTargetCanonicalUrl(theResourceLink)) {
+				// the reference to a canonical url should be that url
+				return theReference.getValue().equals(theResourceLink.getTargetResourceUrl());
+			}
 			if (!theStorageSettings.getTreatBaseUrlsAsLocal().contains(baseUrl)) {
 				return false;
 			}

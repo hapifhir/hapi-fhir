@@ -25,7 +25,9 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -35,6 +37,8 @@ import ca.uhn.fhir.util.bundle.BundleEntryMutator;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import ca.uhn.fhir.util.bundle.EntryListAccumulator;
 import ca.uhn.fhir.util.bundle.ModifiableBundleEntry;
+import ca.uhn.fhir.util.bundle.ModifiableBundleEntryParts;
+import ca.uhn.fhir.util.bundle.PartsConverter;
 import ca.uhn.fhir.util.bundle.SearchBundleEntryParts;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
@@ -42,6 +46,7 @@ import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -71,19 +76,24 @@ import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_PREV;
  */
 public class BundleUtil {
 
-	/** Non instantiable */
-	private BundleUtil() {
-		// nothing
-	}
-
+	public static final String DIFFERENT_LINK_ERROR_MSG =
+			"Mismatching 'previous' and 'prev' links exist. 'previous' " + "is: '$PREVIOUS' and 'prev' is: '$PREV'.";
+	public static final String BUNDLE_TYPE_TRANSACTION_RESPONSE = "transaction-response";
 	private static final Logger ourLog = LoggerFactory.getLogger(BundleUtil.class);
 
 	private static final String PREVIOUS = LINK_PREV;
 	private static final String PREV = "prev";
 	private static final Set<String> previousOrPrev = Sets.newHashSet(PREVIOUS, PREV);
+	static int WHITE = 1;
+	static int GRAY = 2;
+	static int BLACK = 3;
 
-	public static final String DIFFERENT_LINK_ERROR_MSG =
-			"Mismatching 'previous' and 'prev' links exist. 'previous' " + "is: '$PREVIOUS' and 'prev' is: '$PREV'.";
+	/**
+	 * Non instantiable
+	 */
+	private BundleUtil() {
+		// nothing
+	}
 
 	/**
 	 * @return Returns <code>null</code> if the link isn't found or has no value
@@ -199,6 +209,20 @@ public class BundleUtil {
 		return retVal;
 	}
 
+	/**
+	 * Returns true if the resource provided is *not* a BundleEntrySearchModeEnum OUTCOME or INCLUDE
+	 * (ie, if MATCH or null, this will return true)
+	 * @param theResource
+	 * @return
+	 */
+	public static boolean isMatchResource(IBaseResource theResource) {
+		BundleEntrySearchModeEnum matchType = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(theResource);
+		if (matchType == null || matchType == BundleEntrySearchModeEnum.MATCH) {
+			return true;
+		}
+		return false;
+	}
+
 	public static List<Pair<String, IBaseResource>> getBundleEntryUrlsAndResources(
 			FhirContext theContext, IBaseBundle theBundle) {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
@@ -297,9 +321,81 @@ public class BundleUtil {
 		return entryListAccumulator.getList();
 	}
 
-	static int WHITE = 1;
-	static int GRAY = 2;
-	static int BLACK = 3;
+	public static <T> List<T> toListOfEntries(
+			FhirContext theContext, IBaseBundle theBundle, PartsConverter<T> partsConverter) {
+		RuntimeResourceDefinition bundleDef = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChildDef = bundleDef.getChildByName("entry");
+		List<IBase> entries = entryChildDef.getAccessor().getValues(theBundle);
+		return entries.stream().map(partsConverter::fromElement).toList();
+	}
+
+	/**
+	 * Returns a list of entries in the Bundle with a modifiable type that can be used
+	 * to manipulate the entries.
+	 *
+	 * @param theContext The FhirContext associated with the version of FHIR
+	 * @param theBundle The Bundle
+	 * @return A list of modifiable entries
+	 * @since 8.6.0
+	 */
+	public static List<ModifiableBundleEntryParts> toListOfEntriesModifiable(
+			FhirContext theContext, IBaseBundle theBundle) {
+		RuntimeResourceDefinition bundleDef = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChildDef = bundleDef.getChildByName("entry");
+		List<IBase> entries = entryChildDef.getAccessor().getValues(theBundle);
+
+		BaseRuntimeElementCompositeDefinition<?> entryChildContentsDef =
+				(BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
+		BaseRuntimeChildDefinition fullUrlChildDef = entryChildContentsDef.getChildByName("fullUrl");
+		BaseRuntimeChildDefinition resourceChildDef = entryChildContentsDef.getChildByName("resource");
+		BaseRuntimeChildDefinition requestChildDef = entryChildContentsDef.getChildByName("request");
+		BaseRuntimeElementCompositeDefinition<?> requestChildContentsDef =
+				(BaseRuntimeElementCompositeDefinition<?>) requestChildDef.getChildByName("request");
+		BaseRuntimeChildDefinition requestUrlChildDef = requestChildContentsDef.getChildByName("url");
+		BaseRuntimeChildDefinition requestIfNoneExistChildDef = requestChildContentsDef.getChildByName("ifNoneExist");
+		BaseRuntimeChildDefinition methodChildDef = requestChildContentsDef.getChildByName("method");
+
+		List<ModifiableBundleEntryParts> retVal = new ArrayList<>(entries.size());
+		for (IBase nextEntry : entries) {
+			BundleEntryParts parts = getBundleEntryParts(
+					fullUrlChildDef,
+					resourceChildDef,
+					requestChildDef,
+					requestUrlChildDef,
+					requestIfNoneExistChildDef,
+					methodChildDef,
+					nextEntry);
+			/*
+			 * All 3 might be null - That's ok because we still want to know the
+			 * order in the original bundle.
+			 */
+			BundleEntryMutator mutator = new BundleEntryMutator(
+					theContext,
+					nextEntry,
+					requestChildDef,
+					requestChildContentsDef,
+					entryChildContentsDef,
+					methodChildDef);
+			ModifiableBundleEntryParts entry = new ModifiableBundleEntryParts(theContext, parts, mutator);
+			retVal.add(entry);
+		}
+
+		return retVal;
+	}
+
+	/**
+	 * Invokes a consumer for each entry in the Bundle, passing a {@link ModifiableBundleEntryParts}
+	 * which contains a version-independent means of accessing and modifiing each entry
+	 *
+	 * @param theContext The FhirContext for the FHIR version associated with the Bundle
+	 * @param theBundle The Bundle to process
+	 * @param theEntryConsumer A consumer to process each entry
+	 * @since 8.6.0
+	 */
+	public static void processAllEntries(
+			FhirContext theContext, IBaseBundle theBundle, Consumer<ModifiableBundleEntryParts> theEntryConsumer) {
+		toListOfEntriesModifiable(theContext, theBundle).forEach(theEntryConsumer);
+	}
 
 	/**
 	 * Function which will do an in-place sort of a bundles' entries, to the correct processing order, which is:
@@ -315,7 +411,7 @@ public class BundleUtil {
 	 * this function will throw an IllegalStateException.
 	 *
 	 * @param theContext The FhirContext.
-	 * @param theBundle The {@link IBaseBundle} which contains the entries you would like sorted into processing order.
+	 * @param theBundle  The {@link IBaseBundle} which contains the entries you would like sorted into processing order.
 	 */
 	public static void sortEntriesIntoProcessingOrder(FhirContext theContext, IBaseBundle theBundle)
 			throws IllegalStateException {
@@ -367,8 +463,8 @@ public class BundleUtil {
 	 * </ul>
 	 * </p>
 	 *
-	 * @param theContext The FhirContext to use with the bundle
-	 * @param theBundle The Bundle to modify. All resources in the Bundle should have an ID.
+	 * @param theContext         The FhirContext to use with the bundle
+	 * @param theBundle          The Bundle to modify. All resources in the Bundle should have an ID.
 	 * @param thePrefixIdsOrNull If not <code>null</code>, all resource IDs and all references in the Bundle will be
 	 *                           modified to such that their IDs contain the given prefix. For example, for a value
 	 *                           of "A", the resource "Patient/123" will be changed to be "Patient/A123". If set to
@@ -630,10 +726,13 @@ public class BundleUtil {
 
 	/**
 	 * Given a bundle, and a consumer, apply the consumer to each entry in the bundle.
-	 * @param theContext The FHIR Context
-	 * @param theBundle The bundle to have its entries processed.
+	 *
+	 * @param theContext   The FHIR Context
+	 * @param theBundle    The bundle to have its entries processed.
 	 * @param theProcessor a {@link Consumer} which will operate on all the entries of a bundle.
+	 * @deprecated Use {@link #processAllEntries(FhirContext, IBaseBundle, Consumer)} instead
 	 */
+	@Deprecated(since = "8.6.0", forRemoval = true)
 	public static void processEntries(
 			FhirContext theContext, IBaseBundle theBundle, Consumer<ModifiableBundleEntry> theProcessor) {
 		RuntimeResourceDefinition bundleDef = theContext.getResourceDefinition(theBundle);
@@ -665,7 +764,12 @@ public class BundleUtil {
 			 * order in the original bundle.
 			 */
 			BundleEntryMutator mutator = new BundleEntryMutator(
-					theContext, nextEntry, requestChildDef, requestChildContentsDef, entryChildContentsDef);
+					theContext,
+					nextEntry,
+					requestChildDef,
+					requestChildContentsDef,
+					entryChildContentsDef,
+					methodChildDef);
 			ModifiableBundleEntry entry = new ModifiableBundleEntry(parts, mutator);
 			theProcessor.accept(entry);
 		}
@@ -706,23 +810,19 @@ public class BundleUtil {
 			if (requestType != null) {
 				//noinspection EnumSwitchStatementWhichMissesCases
 				switch (requestType) {
-					case PUT:
-					case DELETE:
-					case PATCH:
-						conditionalUrl = url != null && url.contains("?") ? url : null;
-						break;
-					case POST:
+					case PUT, DELETE, PATCH -> conditionalUrl = url != null && url.contains("?") ? url : null;
+					case POST -> {
 						List<IBase> ifNoneExistReps =
 								requestIfNoneExistChildDef.getAccessor().getValues(nextRequest);
-						if (ifNoneExistReps.size() > 0) {
+						if (!ifNoneExistReps.isEmpty()) {
 							IPrimitiveType<?> ifNoneExist = (IPrimitiveType<?>) ifNoneExistReps.get(0);
 							conditionalUrl = ifNoneExist.getValueAsString();
 						}
-						break;
+					}
 				}
 			}
 		}
-		return new BundleEntryParts(fullUrl, requestType, url, resource, conditionalUrl);
+		return new BundleEntryParts(fullUrl, requestType, url, resource, conditionalUrl, requestType);
 	}
 
 	/**
@@ -764,6 +864,24 @@ public class BundleUtil {
 				}
 			}
 		}
+		return retVal;
+	}
+
+	@Nonnull
+	public static List<CanonicalBundleEntry> toListOfCanonicalBundleEntries(
+			FhirContext theContext, IBaseBundle theBundle) {
+		List<CanonicalBundleEntry> retVal = new ArrayList<>();
+
+		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
+		List<IBase> entries = entryChild.getAccessor().getValues(theBundle);
+
+		for (IBase nextEntry : entries) {
+			CanonicalBundleEntry canonicalEntry =
+					CanonicalBundleEntry.fromBundleEntry(theContext, (IBaseBackboneElement) nextEntry);
+			retVal.add(canonicalEntry);
+		}
+
 		return retVal;
 	}
 
@@ -825,9 +943,10 @@ public class BundleUtil {
 
 	/**
 	 * create a new bundle entry and set a value for a single field
-	 * @param theContext     Context holding resource definition
-	 * @param theFieldName   Child field name of the bundle entry to set
-	 * @param theValues      The values to set on the bundle entry child field name
+	 *
+	 * @param theContext   Context holding resource definition
+	 * @param theFieldName Child field name of the bundle entry to set
+	 * @param theValues    The values to set on the bundle entry child field name
 	 * @return the new bundle entry
 	 */
 	public static IBase createNewBundleEntryWithSingleField(
@@ -857,6 +976,7 @@ public class BundleUtil {
 
 	/**
 	 * Get resource from bundle by resource type and reference
+	 *
 	 * @param theContext   FhirContext
 	 * @param theBundle    IBaseBundle
 	 * @param theReference IBaseReference
@@ -881,12 +1001,12 @@ public class BundleUtil {
 			this.myIsLegal = true;
 		}
 
-		private void setLegal(boolean theLegal) {
-			myIsLegal = theLegal;
-		}
-
 		public boolean isLegal() {
 			return myIsLegal;
+		}
+
+		private void setLegal(boolean theLegal) {
+			myIsLegal = theLegal;
 		}
 	}
 }

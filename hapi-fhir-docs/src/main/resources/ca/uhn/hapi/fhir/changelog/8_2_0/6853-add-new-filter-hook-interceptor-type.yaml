@@ -1,0 +1,7 @@
+---
+type: add
+issue: 6853
+title: "A new kind of interceptor has been added called a 'Filter Hook Interceptor'. Filter hook interceptors allow
+implementers to run custom code around a supplied function's execution (similar to Java Servlet Filters).
+See the [Filter Hook Interceptors page](https://hapifhir.io/hapi-fhir/docs/interceptors/filter_hook_interceptors.html)
+for more details."

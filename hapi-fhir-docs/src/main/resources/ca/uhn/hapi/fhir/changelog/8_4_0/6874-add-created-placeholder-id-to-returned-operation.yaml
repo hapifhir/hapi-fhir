@@ -1,0 +1,6 @@
+---
+type: add
+issue: 6874
+title: "When _automatically create placeholder reference targets_ is enabled and a placeholder resource is
+   created, the ID of that resource will be included in an extension on the response OperationOutcome. This
+   extension will have the URL `http://hapifhir.io/fhir/StructureDefinition/oo-placeholder-id`."

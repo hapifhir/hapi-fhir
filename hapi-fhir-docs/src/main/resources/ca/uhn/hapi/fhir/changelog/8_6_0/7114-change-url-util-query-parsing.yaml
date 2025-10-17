@@ -1,0 +1,5 @@
+---
+type: change
+issue: 7114
+title: "The parsing of query URLs in `UrlUtil` has changed such that the '?' character is strictly treated as the delimiter between path and query components. 
+Any additional '?' characters in query strings must be percent-encoded (e.g. `%3F`)."

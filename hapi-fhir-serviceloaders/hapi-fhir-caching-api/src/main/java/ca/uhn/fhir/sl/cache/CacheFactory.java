@@ -57,6 +57,11 @@ public class CacheFactory {
 		return cacheProvider.create(theTimeoutMillis, theMaximumSize);
 	}
 
+	public static <K, V> Cache<K, V> buildEternal(int theMinimumSize, long theMaximumSize) {
+		CacheProvider<Object, Object> cacheProvider = getCacheProvider();
+		return cacheProvider.createEternal(theMinimumSize, theMaximumSize);
+	}
+
 	public static <K, V> LoadingCache<K, V> build(
 			long theTimeoutMillis, long theMaximumSize, CacheLoader<K, V> cacheLoader) {
 		CacheProvider<K, V> cacheProvider = getCacheProvider();

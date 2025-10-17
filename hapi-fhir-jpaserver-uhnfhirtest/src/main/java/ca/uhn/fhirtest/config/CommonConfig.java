@@ -137,6 +137,11 @@ public class CommonConfig {
 		return new FhirTestAutoMigrator();
 	}
 
+	@Bean
+	public SubscriptionExpiryService transactionExpiryService() {
+		return new SubscriptionExpiryService();
+	}
+
 	public static boolean isLocalTestMode() {
 		return "true".equalsIgnoreCase(System.getProperty("testmode.local"));
 	}

@@ -66,6 +66,7 @@ public class GenerateRangeChunksStep<PT extends PartitionedUrlJobParameters>
 		}
 
 		ChunkRangeJson chunkRangeJson = new ChunkRangeJson(start, end);
+
 		sendChunk(chunkRangeJson, theDataSink);
 		return RunOutcome.SUCCESS;
 	}

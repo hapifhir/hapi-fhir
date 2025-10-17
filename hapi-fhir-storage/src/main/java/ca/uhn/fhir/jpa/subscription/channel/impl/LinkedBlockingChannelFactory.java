@@ -19,13 +19,11 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.impl;
 
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelSettings;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
+import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
+import ca.uhn.fhir.broker.api.ChannelProducerSettings;
+import ca.uhn.fhir.broker.api.IChannelNamer;
+import ca.uhn.fhir.broker.api.IChannelSettings;
+import ca.uhn.fhir.broker.jms.ISpringMessagingChannelProducer;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.ThreadPoolUtil;
 import jakarta.annotation.Nonnull;
@@ -36,28 +34,28 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LinkedBlockingChannelFactory implements IChannelFactory {
+public class LinkedBlockingChannelFactory {
 
 	private final IChannelNamer myChannelNamer;
 	private final Map<String, LinkedBlockingChannel> myChannels = Collections.synchronizedMap(new HashMap<>());
 
-	public LinkedBlockingChannelFactory(IChannelNamer theChannelNamer) {
+	protected RetryPolicyProvider myRetryPolicyProvider;
+
+	public LinkedBlockingChannelFactory(IChannelNamer theChannelNamer, RetryPolicyProvider theRetryPolicyProvider) {
 		myChannelNamer = theChannelNamer;
+		myRetryPolicyProvider = theRetryPolicyProvider;
 	}
 
-	@Override
-	public IChannelReceiver getOrCreateReceiver(
-			String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theChannelSettings) {
+	public LinkedBlockingChannel getOrCreateReceiver(
+			String theChannelName, ChannelConsumerSettings theChannelSettings) {
 		return getOrCreateChannel(theChannelName, theChannelSettings.getConcurrentConsumers(), theChannelSettings);
 	}
 
-	@Override
-	public IChannelProducer getOrCreateProducer(
-			String theChannelName, Class<?> theMessageType, ChannelProducerSettings theChannelSettings) {
+	public ISpringMessagingChannelProducer getOrCreateProducer(
+			String theChannelName, ChannelProducerSettings theChannelSettings) {
 		return getOrCreateChannel(theChannelName, theChannelSettings.getConcurrentConsumers(), theChannelSettings);
 	}
 
-	@Override
 	public IChannelNamer getChannelNamer() {
 		return myChannelNamer;
 	}
@@ -72,7 +70,7 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 	}
 
 	@Nonnull
-	private LinkedBlockingChannel buildLinkedBlockingChannel(int theConcurrentConsumers, String theChannelName) {
+	protected LinkedBlockingChannel buildLinkedBlockingChannel(int theConcurrentConsumers, String theChannelName) {
 		String threadNamePrefix = theChannelName + "-";
 		ThreadPoolTaskExecutor threadPoolExecutor = ThreadPoolUtil.newThreadPool(
 				theConcurrentConsumers,
@@ -80,7 +78,8 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 				threadNamePrefix,
 				SubscriptionConstants.DELIVERY_EXECUTOR_QUEUE_SIZE);
 
-		return new LinkedBlockingChannel(theChannelName, threadPoolExecutor, threadPoolExecutor::getQueueSize);
+		return new LinkedBlockingChannel(
+				theChannelName, threadPoolExecutor, threadPoolExecutor::getQueueSize, myRetryPolicyProvider);
 	}
 
 	@PreDestroy

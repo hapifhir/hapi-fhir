@@ -19,40 +19,50 @@
  */
 package ca.uhn.fhir.mdm.svc;
 
+import ca.uhn.fhir.broker.api.ChannelProducerSettings;
+import ca.uhn.fhir.broker.api.IBrokerClient;
+import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.IoUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.MessageChannel;
 
 import static ca.uhn.fhir.mdm.api.IMdmSettings.EMPI_CHANNEL_NAME;
 
 /**
  * This class is responsible for manual submissions of {@link IAnyResource} resources onto the MDM Channel.
  */
-public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
+public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc, AutoCloseable {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
-	private MessageChannel myMdmChannelProducer;
+	private IChannelProducer<ResourceModifiedMessage> myMdmChannelProducer;
 
 	private final FhirContext myFhirContext;
 
-	private final IChannelFactory myChannelFactory;
+	private final IBrokerClient myBrokerClient;
+
+	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Autowired
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	public MdmChannelSubmitterSvcImpl(
+			FhirContext theFhirContext,
+			IBrokerClient theBrokerClient,
+			IInterceptorBroadcaster theInterceptorBroadcaster) {
+		myFhirContext = theFhirContext;
+		myBrokerClient = theBrokerClient;
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
 
 	@Override
 	public void submitResourceToMdmChannel(IBaseResource theResource) {
@@ -70,16 +80,11 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 					new HookParams().add(ResourceModifiedJsonMessage.class, resourceModifiedJsonMessage);
 			myInterceptorBroadcaster.callHooks(Pointcut.MDM_SUBMIT_PRE_MESSAGE_DELIVERY, params);
 		}
-		boolean success = getMdmChannelProducer().send(resourceModifiedJsonMessage);
+		boolean success =
+				getMdmChannelProducer().send(resourceModifiedJsonMessage).isSuccessful();
 		if (!success) {
 			ourLog.error("Failed to submit {} to MDM Channel.", resourceModifiedMessage.getPayloadId());
 		}
-	}
-
-	@Autowired
-	public MdmChannelSubmitterSvcImpl(FhirContext theFhirContext, IChannelFactory theIChannelFactory) {
-		myFhirContext = theFhirContext;
-		myChannelFactory = theIChannelFactory;
 	}
 
 	protected ChannelProducerSettings getChannelProducerSettings() {
@@ -88,14 +93,22 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 
 	private void init() {
 		ChannelProducerSettings channelSettings = getChannelProducerSettings();
-		myMdmChannelProducer = myChannelFactory.getOrCreateProducer(
+		channelSettings.setProducerNameSuffix("mdm-submit");
+		myMdmChannelProducer = myBrokerClient.getOrCreateProducer(
 				EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, channelSettings);
 	}
 
-	private MessageChannel getMdmChannelProducer() {
+	private IChannelProducer<ResourceModifiedMessage> getMdmChannelProducer() {
 		if (myMdmChannelProducer == null) {
 			init();
 		}
 		return myMdmChannelProducer;
+	}
+
+	@Override
+	public void close() throws Exception {
+		if (myMdmChannelProducer instanceof AutoCloseable) {
+			IoUtils.closeQuietly((AutoCloseable) myMdmChannelProducer, ourLog);
+		}
 	}
 }

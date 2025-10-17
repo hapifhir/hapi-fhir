@@ -1,12 +1,16 @@
 package ca.uhn.fhir.jpa.subscription.module.channel;
 
+import ca.uhn.fhir.broker.api.IChannelConsumer;
+import ca.uhn.fhir.broker.api.IChannelProducer;
+import ca.uhn.fhir.broker.impl.MultiplexingListener;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
+import ca.uhn.fhir.jpa.subscription.api.ISubscriptionDeliveryValidator;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryHandlerFactory;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryListenerFactory;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.model.primitive.IdDt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,9 +33,11 @@ public class SubscriptionChannelRegistryTest {
 	SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 
 	@MockBean
-	SubscriptionDeliveryHandlerFactory mySubscriptionDeliveryHandlerFactory;
+	SubscriptionDeliveryListenerFactory mySubscriptionDeliveryListenerFactory;
 	@MockBean
 	SubscriptionChannelFactory mySubscriptionDeliveryChannelFactory;
+	@MockBean
+	ISubscriptionDeliveryValidator mySubscriptionDeliveryValidator;
 	@MockBean
     StorageSettings myStorageSettings;
 
@@ -44,16 +50,19 @@ public class SubscriptionChannelRegistryTest {
 		cansubB.setIdElement(new IdDt("B"));
 		ActiveSubscription activeSubscriptionB = new ActiveSubscription(cansubB, TEST_CHANNEL_NAME);
 
-		when(mySubscriptionDeliveryChannelFactory.newDeliverySendingChannel(any(), any())).thenReturn(mock(IChannelProducer.class));
+		when(mySubscriptionDeliveryChannelFactory.newDeliveryProducer(any(), any())).thenAnswer(t -> mock(IChannelProducer.class));
+		IChannelConsumer<ResourceDeliveryMessage> consumer = mock(IChannelConsumer.class);
+		when(consumer.getMessageListener()).thenReturn(new MultiplexingListener<>(ResourceDeliveryMessage.class));
+		when(mySubscriptionDeliveryChannelFactory.newDeliveryConsumer(any(), any(), any())).thenAnswer(t -> consumer);
 
-		assertNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
+		assertNull(mySubscriptionChannelRegistry.getDeliveryConsumerWithListeners(TEST_CHANNEL_NAME));
 		mySubscriptionChannelRegistry.add(activeSubscriptionA);
-		assertNotNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
+		assertNotNull(mySubscriptionChannelRegistry.getDeliveryConsumerWithListeners(TEST_CHANNEL_NAME));
 		mySubscriptionChannelRegistry.add(activeSubscriptionB);
 		mySubscriptionChannelRegistry.remove(activeSubscriptionB);
-		assertNotNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
+		assertNotNull(mySubscriptionChannelRegistry.getDeliveryConsumerWithListeners(TEST_CHANNEL_NAME));
 		mySubscriptionChannelRegistry.remove(activeSubscriptionA);
-		assertNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
+		assertNull(mySubscriptionChannelRegistry.getDeliveryConsumerWithListeners(TEST_CHANNEL_NAME));
 	}
 
 	@Configuration

@@ -28,10 +28,12 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimaps;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -43,6 +45,7 @@ import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +69,7 @@ public class HistoryBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(HistoryBuilder.class);
 	private final String myResourceType;
 	private final JpaPid myResourceId;
+	private final List<String> myResourceIds;
 	private final Date myRangeStartInclusive;
 	private final Date myRangeEndInclusive;
 
@@ -94,6 +98,22 @@ public class HistoryBuilder {
 			@Nullable Date theRangeEndInclusive) {
 		myResourceType = theResourceType;
 		myResourceId = theResourceId;
+		myResourceIds = null;
+		myRangeStartInclusive = theRangeStartInclusive;
+		myRangeEndInclusive = theRangeEndInclusive;
+	}
+
+	/**
+	 * Constructor for multiple resource IDs
+	 */
+	public HistoryBuilder(
+			@Nonnull String theResourceType,
+			@Nonnull List<String> theResourceIds,
+			@Nullable Date theRangeStartInclusive,
+			@Nonnull Date theRangeEndInclusive) {
+		myResourceType = theResourceType;
+		myResourceIds = theResourceIds;
+		myResourceId = null;
 		myRangeStartInclusive = theRangeStartInclusive;
 		myRangeEndInclusive = theRangeEndInclusive;
 	}
@@ -135,7 +155,12 @@ public class HistoryBuilder {
 		 * IDX_RESVER_TYPE_DATE in the future.
 		 * -JA 2024-04-21
 		 */
-		criteriaQuery.orderBy(cb.desc(from.get("myUpdated")), cb.desc(from.get("myResourceId")));
+
+		if (CollectionUtils.isNotEmpty(myResourceIds)) {
+			criteriaQuery.orderBy(cb.asc(from.get("myResourceId")), cb.desc(from.get("myUpdated")));
+		} else {
+			criteriaQuery.orderBy(cb.desc(from.get("myUpdated")), cb.desc(from.get("myResourceId")));
+		}
 
 		TypedQuery<ResourceHistoryTable> query = myEntityManager.createQuery(criteriaQuery);
 
@@ -191,6 +216,7 @@ public class HistoryBuilder {
 			CriteriaQuery<?> theQuery,
 			Root<ResourceHistoryTable> theFrom,
 			HistorySearchStyleEnum theHistorySearchStyle) {
+		Integer defaultPartitionId = myPartitionSettings.getDefaultPartitionId();
 		List<Predicate> predicates = new ArrayList<>();
 
 		if (myResourceId != null) {
@@ -205,12 +231,16 @@ public class HistoryBuilder {
 				}
 			}
 
+		} else if (CollectionUtils.isNotEmpty(myResourceIds)) {
+
+			addResourceIdsFiltering(myResourceIds, thePartitionId, theFrom, predicates);
+
 		} else {
 
 			if (!thePartitionId.isAllPartitions()) {
-				if (thePartitionId.isDefaultPartition()) {
+				if (thePartitionId.isPartition(defaultPartitionId)) {
 					predicates.add(theCriteriaBuilder.isNull(theFrom.get("myPartitionIdValue")));
-				} else if (thePartitionId.hasDefaultPartitionId()) {
+				} else if (thePartitionId.hasDefaultPartitionId(defaultPartitionId)) {
 					predicates.add(theCriteriaBuilder.or(
 							theCriteriaBuilder.isNull(theFrom.get("myPartitionIdValue")),
 							theFrom.get("myPartitionIdValue").in(thePartitionId.getPartitionIdsWithoutDefault())));
@@ -239,8 +269,30 @@ public class HistoryBuilder {
 			predicates.add(theCriteriaBuilder.lessThanOrEqualTo(theFrom.get("myUpdated"), myRangeEndInclusive));
 		}
 
-		if (predicates.size() > 0) {
+		if (!predicates.isEmpty()) {
 			theQuery.where(toPredicateArray(predicates));
+		}
+	}
+
+	private void addResourceIdsFiltering(
+			@Nonnull List<String> theResourceIds,
+			RequestPartitionId thePartitionId,
+			Root<ResourceHistoryTable> theFrom,
+			List<Predicate> predicates) {
+
+		List<Long> ids = theResourceIds.stream()
+				.map(id -> new IdDt(id).getIdPartAsLong())
+				.toList();
+
+		// Create a predicate to filter by resource IDs
+		if (!ids.isEmpty()) {
+			predicates.add(theFrom.get("myResourceId").in(ids));
+
+			if (myPartitionSettings.isPartitioningEnabled()) {
+				if (thePartitionId != null && thePartitionId.getFirstPartitionIdOrNull() != null) {
+					predicates.add(theFrom.get("myPartitionIdValue").in(thePartitionId.getFirstPartitionIdOrNull()));
+				}
+			}
 		}
 	}
 

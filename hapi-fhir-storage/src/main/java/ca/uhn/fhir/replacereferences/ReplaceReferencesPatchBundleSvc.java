@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import jakarta.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -81,13 +82,16 @@ public class ReplaceReferencesPatchBundleSvc {
 			List<IdDt> theResourceIds,
 			RequestDetails theRequestDetails) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
-
 		theResourceIds.forEach(referencingResourceId -> {
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(referencingResourceId.getResourceType());
 			IBaseResource resource = dao.read(referencingResourceId, theRequestDetails);
 			Parameters patchParams = buildPatchParams(theReplaceReferencesRequest, resource);
-			IIdType resourceId = resource.getIdElement();
-			bundleBuilder.addTransactionFhirPatchEntry(resourceId, patchParams);
+			// the patchParams could be empty if the resource contains only versioned references to the source,
+			// no need to add patch entry in that case
+			if (patchParams.hasParameter()) {
+				IIdType resourceId = resource.getIdElement();
+				bundleBuilder.addTransactionFhirPatchEntry(resourceId, patchParams);
+			}
 		});
 		return bundleBuilder.getBundleTyped();
 	}
@@ -101,18 +105,43 @@ public class ReplaceReferencesPatchBundleSvc {
 						refInfo,
 						theReplaceReferencesRequest.sourceId)) // We only care about references to our source resource
 				.map(refInfo -> createReplaceReferencePatchOperation(
-						referencingResource.fhirType() + "." + refInfo.getName(),
+						getFhirPathForPatch(referencingResource, refInfo),
 						new Reference(theReplaceReferencesRequest.targetId.getValueAsString())))
 				.forEach(params::addParameter); // Add each operation to parameters
 		return params;
 	}
 
 	private static boolean matches(ResourceReferenceInfo refInfo, IIdType theSourceId) {
-		return refInfo.getResourceReference()
-				.getReferenceElement()
-				.toUnqualifiedVersionless()
-				.getValueAsString()
-				.equals(theSourceId.getValueAsString());
+
+		IBaseReference iBaseRef = refInfo.getResourceReference();
+		if (iBaseRef == null || (iBaseRef instanceof Reference ref && !ref.hasReferenceElement())) {
+			// the reference doesn't have a reference element, it is probably just a logical reference (using an
+			// identifier). so this is not a match.
+			return false;
+		}
+		return iBaseRef.getReferenceElement().toUnqualified().getValueAsString().equals(theSourceId.getValueAsString());
+	}
+
+	private String getFhirPathForPatch(IBaseResource theReferencingResource, ResourceReferenceInfo theRefInfo) {
+		// construct the path to the element containing the reference in the resource, e.g. "Observation.subject"
+		String path = theReferencingResource.fhirType() + "." + theRefInfo.getName();
+		// check the allowed cardinality of the element containing the reference
+		int maxCardinality = myFhirContext
+				.newTerser()
+				.getDefinition(theReferencingResource.getClass(), path)
+				.getMax();
+		if (maxCardinality != 1) {
+			// if the element allows high cardinality, specify the exact reference to replace by appending a where
+			// filter to the path. If we don't do this, all the existing references in the element would be lost as a
+			// result of getting replaced with the new reference, and that is not the behaviour we want.
+			// e.g. "Observation.performer.where(reference='Practitioner/123')"
+			return String.format(
+					"%s.where(reference='%s')",
+					path,
+					theRefInfo.getResourceReference().getReferenceElement().getValueAsString());
+		}
+		// the element allows max cardinality of 1, so the whole element can be safely replaced
+		return path;
 	}
 
 	@Nonnull

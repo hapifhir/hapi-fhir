@@ -108,6 +108,7 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 			.setMatcher(matcherJson);
 
 		MdmRulesJson retval = new MdmRulesJson();
+		retval.setVersion("1");
 		retval.addMatchField(nameAnyOrderFieldMatch);
 		retval.setMdmTypes(Arrays.asList("Patient", "Practitioner", "Medication"));
 		retval.putMatchResult(FIELD_EXACT_MATCH_NAME, MdmMatchResultEnum.MATCH);

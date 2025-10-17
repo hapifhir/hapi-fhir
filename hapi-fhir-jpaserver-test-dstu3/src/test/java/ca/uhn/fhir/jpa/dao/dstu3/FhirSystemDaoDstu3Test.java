@@ -6,12 +6,14 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.GZipUtil;
+import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
@@ -231,13 +233,12 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	}
 
 	private Bundle loadBundle(String theFileName) throws IOException {
-		String req = ClasspathUtil.loadResource(theFileName);
-		return myFhirContext.newXmlParser().parseResource(Bundle.class, req);
+		return loadResourceFromClasspath(Bundle.class, theFileName);
 	}
 
 	@Test
 	public void testTransactionWithDuplicateConditionalCreates2() throws IOException {
-		Bundle request = myFhirContext.newJsonParser().parseResource(Bundle.class, IOUtils.toString(FhirSystemDaoR4.class.getResourceAsStream("/dstu3/duplicate-conditional-create.json"), Constants.CHARSET_UTF8));
+		Bundle request = loadResourceFromClasspath(Bundle.class, "/dstu3/duplicate-conditional-create.json");
 
 		Bundle response = mySystemDao.transaction(null, request);
 
@@ -841,6 +842,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionCreateMatchUrlWithOneMatch() {
+		// Setup
 		String methodName = "testTransactionCreateMatchUrlWithOneMatch";
 		Bundle request = new Bundle();
 
@@ -861,7 +863,11 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		o.getSubject().setReference("Patient/" + methodName);
 		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
 
+		// Test
 		Bundle resp = mySystemDao.transaction(mySrd, request);
+		ourLog.info("Response: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+
+		// Verify
 		assertThat(resp.getEntry()).hasSize(2);
 
 		BundleEntryComponent respEntry = resp.getEntry().get(0);
@@ -879,6 +885,13 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
 		assertEquals("1", o.getIdElement().getVersionIdPart());
 
+		// Verify that TransactionUtil can parse the response
+		TransactionUtil.TransactionResponse txResp = TransactionUtil.parseTransactionResponse(myFhirContext, request, resp);
+		assertEquals(2, txResp.getStorageOutcomes().size());
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH, txResp.getStorageOutcomes().get(0).getStorageResponseCode());
+		assertEquals("Patient/testTransactionCreateMatchUrlWithOneMatch/_history/1", txResp.getStorageOutcomes().get(0).getTargetId().getValue());
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CREATE, txResp.getStorageOutcomes().get(1).getStorageResponseCode());
+		assertThat(txResp.getStorageOutcomes().get(1).getTargetId().getValue()).matches("Observation/[0-9]++/_history/1");
 	}
 
 	@Test
@@ -1650,27 +1663,6 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertEquals(createdPatientId.toUnqualifiedVersionless().getValue(), obs.getSubject().getReference());
 		assertEquals(ObservationStatus.FINAL, obs.getStatus());
 
-	}
-
-	@Test
-	public void testTransactionFailsWithDuplicateIds() {
-		Bundle request = new Bundle();
-
-		Patient patient1 = new Patient();
-		patient1.setId(new IdType("Patient/testTransactionFailsWithDusplicateIds"));
-		patient1.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP01");
-		request.addEntry().setResource(patient1).getRequest().setMethod(HTTPVerb.POST);
-
-		Patient patient2 = new Patient();
-		patient2.setId(new IdType("Patient/testTransactionFailsWithDusplicateIds"));
-		patient2.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP02");
-		request.addEntry().setResource(patient2).getRequest().setMethod(HTTPVerb.POST);
-		try {
-			mySystemDao.transaction(mySrd, request);
-			fail("");
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(535) + "Transaction bundle contains multiple resources with ID: Patient/testTransactionFailsWithDusplicateIds", e.getMessage());
-		}
 	}
 
 	@Test

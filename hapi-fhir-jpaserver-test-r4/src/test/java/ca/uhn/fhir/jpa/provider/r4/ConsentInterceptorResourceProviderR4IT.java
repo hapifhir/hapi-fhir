@@ -940,8 +940,6 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
 			// nothing
 		}
-
-
 	}
 
 	private static class ReadingBackResourcesConsentSvc implements  IConsentService {

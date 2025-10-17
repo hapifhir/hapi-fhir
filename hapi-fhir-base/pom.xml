@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>8.1.0-SNAPSHOT</version>
+		<version>8.5.7-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -13,7 +13,7 @@
 	<artifactId>hapi-fhir-base</artifactId>
 	<packaging>bundle</packaging>
 
-	<url>http://jamesagnew.github.io/hapi-fhir/</url>
+	<url>https://hapifhir.io/</url>
 
 	<name>HAPI FHIR - Core Library</name>
 
@@ -62,7 +62,7 @@
 			<optional>true</optional>
 		</dependency>
 
-		<!-- <dependency> <groupId>xerces</groupId> <artifactId>xercesImpl</artifactId> 
+		<!-- <dependency> <groupId>xerces</groupId> <artifactId>xercesImpl</artifactId>
 			<version>2.11.0</version> <optional>true</optional> </dependency> -->
 
 		<!-- General -->

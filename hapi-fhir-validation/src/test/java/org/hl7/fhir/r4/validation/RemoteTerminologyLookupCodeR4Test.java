@@ -133,7 +133,7 @@ public class RemoteTerminologyLookupCodeR4Test implements IRemoteTerminologyLook
 	@ParameterizedTest
 	@MethodSource(value = "getPropertyValueArguments")
 	public void lookupCode_forCodeSystemWithProperty_returnsCorrectProperty(IBaseDatatype thePropertyValue) {
-		verifyLookupWithProperty(List.of(thePropertyValue), List.of());
+		verifyLookupWithProperty(List.of(thePropertyValue), List.of(0));
 	}
 
 	@ParameterizedTest

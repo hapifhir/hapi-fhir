@@ -1,0 +1,4 @@
+---
+type: change
+issue: 6689
+title: "$hapi.fhir.replace-references operation has been changed to not replace versioned references"

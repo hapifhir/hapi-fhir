@@ -30,14 +30,15 @@ import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Compartment;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -62,7 +63,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -392,7 +392,6 @@ class ModelScanner {
 			Class<? extends IBaseResource> theClass, RuntimeResourceDefinition theResourceDef) {
 
 		Map<String, RuntimeSearchParam> nameToParam = new HashMap<>();
-		Map<Field, SearchParamDefinition> compositeFields = new LinkedHashMap<>();
 
 		/*
 		 * Make sure we pick up fields in interfaces too.. This ensures that we
@@ -419,39 +418,8 @@ class ModelScanner {
 					throw new ConfigurationException(Msg.code(1721) + "Search param " + searchParam.name()
 							+ " has an invalid type: " + searchParam.type());
 				}
-				Set<String> providesMembershipInCompartments;
-				providesMembershipInCompartments = new HashSet<>();
-				for (Compartment next : searchParam.providesMembershipIn()) {
-					if (paramType != RestSearchParameterTypeEnum.REFERENCE) {
-						StringBuilder b = new StringBuilder();
-						b.append("Search param ");
-						b.append(searchParam.name());
-						b.append(" on resource type ");
-						b.append(theClass.getName());
-						b.append(" provides compartment membership but is not of type 'reference'");
-						ourLog.warn(b.toString());
-						continue;
-					}
-					String name = next.name();
-
-					// As of 2021-12-28 the R5 structures incorrectly have this prefix
-					if (name.startsWith("Base FHIR compartment definition for ")) {
-						name = name.substring("Base FHIR compartment definition for ".length());
-					}
-					providesMembershipInCompartments.add(name);
-				}
-
-				/**
-				 * In the base FHIR R4 specification, the Device resource is not a part of the Patient compartment.
-				 * However, it is a patient-specific resource that most users expect to be, and several derivative
-				 * specifications including g(10) testing expect it to be, and the fact that it is not has led to many
-				 * bug reports in HAPI FHIR. As of HAPI FHIR 8.0.0 it is being manually added in response to those
-				 * requests.
-				 * See https://github.com/hapifhir/hapi-fhir/issues/6536 for more information.
-				 */
-				if (searchParam.name().equals("patient") && searchParam.path().equals("Device.patient")) {
-					providesMembershipInCompartments.add("Patient");
-				}
+				Set<String> providesMembershipInCompartments =
+						SearchParameterUtil.getMembershipCompartmentsForSearchParameter(theClass, searchParam);
 
 				List<RuntimeSearchParam.Component> components = null;
 				if (paramType == RestSearchParameterTypeEnum.COMPOSITE) {
@@ -487,8 +455,22 @@ class ModelScanner {
 		}
 	}
 
+	/**
+	 * The model classes don't include SearchParameter URLs in them, so
+	 * we do our best to guess them using the pattern they generally
+	 * use (<code>http://hl7.org/fhir/SearchParameter/ResourceType-ParamName</code>).
+	 */
+	@SuppressWarnings("JavadocLinkAsPlainText")
 	private String toCanonicalSearchParameterUri(RuntimeResourceDefinition theResourceDef, String theName) {
-		return "http://hl7.org/fhir/SearchParameter/" + theResourceDef.getName() + "-" + theName;
+		return switch (theName) {
+				// Hard-code a few URLs that we know don't follow the
+				// usual pattern
+			case Constants.PARAM_LANGUAGE -> Constants.PARAM_LANGUAGE_URL;
+			case Constants.PARAM_TEXT -> Constants.PARAM_TEXT_URL;
+			case Constants.PARAM_CONTENT -> Constants.PARAM_CONTENT_URL;
+			case Constants.PARAM_ID -> Constants.PARAM_ID_URL;
+			default -> "http://hl7.org/fhir/SearchParameter/" + theResourceDef.getName() + "-" + theName;
+		};
 	}
 
 	private Set<String> toTargetList(Class<? extends IBaseResource>[] theTarget) {

@@ -24,6 +24,7 @@ import org.hl7.fhir.r5.model.SubscriptionTopic;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -66,5 +67,11 @@ public class ActiveSubscriptionTopicCache {
 
 	public void remove(String theSubscriptionTopicId) {
 		myCache.remove(theSubscriptionTopicId);
+	}
+
+	public Optional<SubscriptionTopic> findSubscriptionTopicByUrl(String theTopicUrl) {
+		return myCache.values().stream()
+				.filter(t -> t.getUrl().equals(theTopicUrl))
+				.findFirst();
 	}
 }

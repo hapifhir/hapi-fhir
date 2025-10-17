@@ -89,7 +89,7 @@ class ResourceCompartmentUtilTest {
 			MethodNotAllowedException thrown = assertThrows(MethodNotAllowedException.class,
 				() -> ResourceCompartmentUtil.getPatientCompartmentIdentity(myResource, myFhirContext, mySearchParamExtractor));
 
-			assertEquals(Msg.code(2475) + "Patient resource IDs must be client-assigned in patient compartment mode", thrown.getMessage());
+			assertThat(thrown).hasMessageStartingWith(Msg.code(2475) + "Patient resource IDs must be client-assigned");
 		}
 
 		@Test
@@ -127,6 +127,13 @@ class ResourceCompartmentUtilTest {
 			assertThat(result).isPresent();
 			assertThat(result).contains("P01");
 //			}
+		}
+
+		@Test
+		void nullResource_shouldNotThrowNPE() {
+			// The input resource may be null when mass ingestion is enabled.
+			Optional<String> result = ResourceCompartmentUtil.getPatientCompartmentIdentity(null, myFhirContext, mySearchParamExtractor);
+			assertThat(result).isEmpty();
 		}
 	}
 

@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dialect.IHapiFhirDialect;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.apache.commons.collections4.SetUtils;
 import org.hibernate.dialect.Dialect;
 import org.slf4j.Logger;
@@ -87,6 +88,11 @@ public class PartitionedIdModeVerificationSvc {
 
 	public static void verifySchemaIsAppropriateForDatabasePartitionMode(
 			DriverTypeEnum.ConnectionProperties cp, boolean expectDatabasePartitionMode) throws SQLException {
+
+		if (HapiSystemProperties.isDisableDatabasePartitionModeSchemaCheck()) {
+			return;
+		}
+
 		Set<String> pkColumns = JdbcUtils.getPrimaryKeyColumns(cp, "HFJ_RESOURCE");
 		if (pkColumns.isEmpty()) {
 			return;

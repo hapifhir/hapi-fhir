@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6821
+jira: SMILE-10029
+title: "Previously, placeholder IDs could fail to resolve when submitting a transaction bundle containing a resource with multiple references if the first reference used a placeholder ID and a subsequent reference used a literal reference. This has now been fixed."

@@ -3,6 +3,7 @@ package ca.uhn.fhir.to.model;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
@@ -180,7 +181,7 @@ public class HomeRequest {
 			@Override
 			public void interceptRequest(IHttpRequest theRequest) {
 				if (isNotBlank(remoteAddr)) {
-					theRequest.addHeader("x-forwarded-for", remoteAddr);
+					theRequest.addHeader(Constants.HEADER_X_FORWARDED_FOR, remoteAddr);
 				}
 			}
 		});

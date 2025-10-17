@@ -23,9 +23,11 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.util.DatabaseSupportUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.MSSQLServerContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,40 +36,69 @@ import java.util.Map;
  * For testing purposes.
  * <br/><br/>
  * Embedded database that uses a {@link ca.uhn.fhir.jpa.migrate.DriverTypeEnum#MSSQL_2012} driver
- * and a dockerized Testcontainer.
+ * and a dockerized Testcontainer with lazy initialization.
  *
  * @see <a href="https://www.testcontainers.org/modules/databases/mssqlserver/">MS SQL Server TestContainer</a>
  */
 public class MsSqlEmbeddedDatabase extends JpaEmbeddedDatabase {
 	private static final Logger ourLog = LoggerFactory.getLogger(MsSqlEmbeddedDatabase.class);
 
-	private final MSSQLServerContainer myContainer;
+	JdbcDatabaseContainer<?> myContainer;
+
+	public MsSqlEmbeddedDatabase(JdbcDatabaseContainer<?> theContainer) {
+		myContainer = theContainer;
+		this.setInitializionSupplier(() -> {
+			ourLog.info("Starting MS SQL Server container initialization...");
+
+			// Set startup timeout to 5 minutes for MS SQL (it can be slow)
+			myContainer.withStartupTimeout(Duration.ofMinutes(5));
+
+			ourLog.info("Starting MS SQL Server container...");
+			long startTime = System.currentTimeMillis();
+			myContainer.start();
+			long endTime = System.currentTimeMillis();
+			ourLog.info("MS SQL Server container started successfully in {} ms", (endTime - startTime));
+
+			return new InitializationData(
+					DriverTypeEnum.MSSQL_2012,
+					myContainer.getJdbcUrl(),
+					myContainer.getUsername(),
+					myContainer.getPassword(),
+					myContainer);
+		});
+	}
 
 	public MsSqlEmbeddedDatabase() {
+		this(determineMsSqlContainerToUse());
+	}
 
+	private static MSSQLServerContainer determineMsSqlContainerToUse() {
 		// azure-sql-edge docker image does not support kernel 6.7+
 		// as a result, mssql container fails to start most of the time
 		// mssql/server:2019 image support kernel 6.7+, so use it for amd64 architecture
 		// See: https://github.com/microsoft/mssql-docker/issues/868
 		if (DatabaseSupportUtil.canUseMsSql2019()) {
-			myContainer = new MSSQLServerContainer("mcr.microsoft.com/mssql/server:2019-latest").acceptLicense();
+			ourLog.info("Using MS SQL Server 2019 image");
+			return new MSSQLServerContainer("mcr.microsoft.com/mssql/server:2019-latest").acceptLicense();
 		} else {
+			ourLog.info("Using Azure SQL Edge image");
 			DockerImageName msSqlImage = DockerImageName.parse("mcr.microsoft.com/azure-sql-edge:latest")
 					.asCompatibleSubstituteFor("mcr.microsoft.com/mssql/server");
-			myContainer = new MSSQLServerContainer(msSqlImage).acceptLicense();
+			return new MSSQLServerContainer(msSqlImage).acceptLicense();
 		}
+	}
 
-		myContainer.start();
-		super.initialize(
-				DriverTypeEnum.MSSQL_2012,
-				myContainer.getJdbcUrl(),
-				myContainer.getUsername(),
-				myContainer.getPassword());
+	@Override
+	public DriverTypeEnum getDriverType() {
+		return DriverTypeEnum.MSSQL_2012;
 	}
 
 	@Override
 	public void stop() {
-		myContainer.stop();
+		MSSQLServerContainer<?> container = (MSSQLServerContainer<?>) getContainerReference();
+		if (container != null && container.isRunning()) {
+			container.stop();
+		}
 	}
 
 	@Override

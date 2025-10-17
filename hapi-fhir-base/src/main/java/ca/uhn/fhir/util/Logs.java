@@ -23,30 +23,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Logs {
-	private static final Logger ourBatchTroubleshootingLog =
-			LoggerFactory.getLogger("ca.uhn.fhir.log.batch_troubleshooting");
-	private static final Logger ourNarrativeGenerationTroubleshootingLog =
-			LoggerFactory.getLogger("ca.uhn.fhir.log.narrative_generation_troubleshooting");
-
-	private static final Logger ourTerminologyTroubleshootingLog =
-			LoggerFactory.getLogger("ca.uhn.fhir.log.terminology_troubleshooting");
-
-	private static final Logger ourSubscriptionTroubleshootingLog =
-			LoggerFactory.getLogger("ca.cdr.log.subscription_troubleshooting");
-
-	private static final Logger ourSubscriptionTopicLog =
-			LoggerFactory.getLogger("ca.uhn.fhir.log.subscription_topic_troubleshooting");
-
 	public static Logger getBatchTroubleshootingLog() {
 		return ourBatchTroubleshootingLog;
 	}
 
 	public static Logger getNarrativeGenerationTroubleshootingLog() {
-		return ourBatchTroubleshootingLog;
+		return ourNarrativeGenerationTroubleshootingLog;
 	}
 
-	public static Logger getTerminologyTroubleshootingLog() {
-		return ourTerminologyTroubleshootingLog;
+	public static Logger getPartitionTroubleshootingLog() {
+		return ourPartitionTroubleshootingLog;
+	}
+
+	public static Logger getRepositoryTroubleshootingLog() {
+		return ourRespositoryTroubleshootingLog;
 	}
 
 	public static Logger getSubscriptionTroubleshootingLog() {
@@ -56,4 +46,40 @@ public class Logs {
 	public static Logger getSubscriptionTopicLog() {
 		return ourSubscriptionTopicLog;
 	}
+
+	public static Logger getTerminologyTroubleshootingLog() {
+		return ourTerminologyTroubleshootingLog;
+	}
+
+	public static final String CA_UHN_FHIR_LOG_BATCH_TROUBLESHOOTING = "ca.uhn.fhir.log.batch_troubleshooting";
+	public static final String CA_UHN_FHIR_LOG_NARRATIVE_GENERATION_TROUBLESHOOTING =
+			"ca.uhn.fhir.log.narrative_generation_troubleshooting";
+	public static final String CA_UHN_FHIR_LOG_PARTITION_TROUBLESHOOTING = "ca.uhn.fhir.log.partition_troubleshooting";
+	public static final String CA_CDR_LOG_REPOSITORY_TROUBLESHOOTING = "ca.cdr.log.repository_troubleshooting";
+	public static final String CA_CDR_LOG_SUBSCRIPTION_TROUBLESHOOTING = "ca.cdr.log.subscription_troubleshooting";
+	public static final String CA_UHN_FHIR_LOG_SUBSCRIPTION_TOPIC_TROUBLESHOOTING =
+			"ca.uhn.fhir.log.subscription_topic_troubleshooting";
+	public static final String CA_UHN_FHIR_LOG_TERMINOLOGY_TROUBLESHOOTING =
+			"ca.uhn.fhir.log.terminology_troubleshooting";
+
+	private static final Logger ourBatchTroubleshootingLog =
+			LoggerFactory.getLogger(CA_UHN_FHIR_LOG_BATCH_TROUBLESHOOTING);
+
+	private static final Logger ourNarrativeGenerationTroubleshootingLog =
+			LoggerFactory.getLogger(CA_UHN_FHIR_LOG_NARRATIVE_GENERATION_TROUBLESHOOTING);
+
+	private static final Logger ourPartitionTroubleshootingLog =
+			LoggerFactory.getLogger(CA_UHN_FHIR_LOG_PARTITION_TROUBLESHOOTING);
+
+	private static final Logger ourSubscriptionTroubleshootingLog =
+			LoggerFactory.getLogger(CA_CDR_LOG_SUBSCRIPTION_TROUBLESHOOTING);
+
+	private static final Logger ourRespositoryTroubleshootingLog =
+			LoggerFactory.getLogger(CA_CDR_LOG_REPOSITORY_TROUBLESHOOTING);
+
+	private static final Logger ourSubscriptionTopicLog =
+			LoggerFactory.getLogger(CA_UHN_FHIR_LOG_SUBSCRIPTION_TOPIC_TROUBLESHOOTING);
+
+	private static final Logger ourTerminologyTroubleshootingLog =
+			LoggerFactory.getLogger(CA_UHN_FHIR_LOG_TERMINOLOGY_TROUBLESHOOTING);
 }

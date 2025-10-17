@@ -4,6 +4,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -14,15 +15,18 @@ import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInter
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static ca.uhn.fhir.jpa.dao.tx.HapiTransactionService.DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -41,6 +45,8 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	private RequestTenantPartitionInterceptor myRequestTenantPartitionInterceptor;
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
+	@Autowired
+	private HapiTransactionService myTransactionService;
 
 	private PatientIdPartitionInterceptor myPatientIdPartitionInterceptor;
 
@@ -50,6 +56,19 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
 		myPartitionSettings.setUnnamedPartitionMode(false);
 		myInterceptorService.unregisterInterceptor(myRequestTenantPartitionInterceptor);
+	}
+
+	@Test
+	public void testPackageWithProfiledDevice() throws IOException {
+		// See https://github.com/hapifhir/hapi-fhir/issues/5834 for details
+		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/cqf-ccc.tgz")) {
+			myPackageCacheManager.addPackageToCache("fhir.cqf.ccc", "0.1.0", stream, "basisprofil.de");
+		}
+
+		NpmPackage pkg;
+
+		pkg = myPackageCacheManager.loadPackage("fhir.cqf.ccc", null);
+		assertEquals("0.1.0", pkg.version());
 	}
 
 	@Test
@@ -162,29 +181,55 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		pkg = myPackageCacheManager.loadPackage("hl7.fhir.us.davinci-cdex", null);
 		assertEquals("0.2.0", pkg.version());
 
-		String expected = "This IG provides detailed guidance that helps implementers use FHIR-based interactions and resources relevant to support specific exchanges of clinical information between provider and payers (or other providers).  What is unique about this guide is that is provides additional technical guidance on two FHIR transaction approaches for requesting information:\n" +
-			"\n" +
-			" - Direct Query\n" +
-			" - Task Based Approach:\n" +
-			"\n" +
-			"The types of clinical data is not limited to FHIR resources, but includes C-CDA documents, pdfs, text file...";
+		String expected = """
+			This IG provides detailed guidance that helps implementers use FHIR-based interactions and resources relevant to support specific exchanges of clinical information between provider and payers (or other providers).  What is unique about this guide is that is provides additional technical guidance on two FHIR transaction approaches for requesting information:
+
+			 - Direct Query
+			 - Task Based Approach:
+
+			The types of clinical data is not limited to FHIR resources, but includes C-CDA documents, pdfs, text file...""";
 		runInTransaction(()-> {
-			assertEquals(expected, myPackageDao.findByPackageId("hl7.fhir.us.davinci-cdex").get().getDescription());
-			assertEquals(expected, myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.us.davinci-cdex", "0.2.0").get().getDescription());
+			assertEquals(expected, myPackageDao.findByPackageId("hl7.fhir.us.davinci-cdex").orElseThrow().getDescription());
+			assertEquals(expected, myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.us.davinci-cdex", "0.2.0").orElseThrow().getDescription());
 		});
 	}
 
 	@Test
-	public void testPackageIdHandlingIsNotCaseSensitive() {
+	public void testPackageIdHandlingIsNotCaseSensitive() throws IOException {
 		String packageNameAllLowercase = "hl7.fhir.us.davinci-cdex";
 		String packageNameUppercase = packageNameAllLowercase.toUpperCase(Locale.ROOT);
-		InputStream stream = JpaPackageCacheTest.class.getResourceAsStream("/packages/package-davinci-cdex-0.2.0.tgz");
+		try (InputStream stream = JpaPackageCacheTest.class.getResourceAsStream("/packages/package-davinci-cdex-0.2.0.tgz")) {
 
-		// The package has the ID in lower-case, so for the test we input the first parameter in upper-case & check that no error is thrown
-		assertDoesNotThrow(() -> myPackageCacheManager.addPackageToCache(packageNameUppercase, "0.2.0", stream, "hl7.fhir.us.davinci-cdex"));
+			// The package has the ID in lower-case, so for the test we input the first parameter in upper-case & check that no error is thrown
+			assertDoesNotThrow(() -> myPackageCacheManager.addPackageToCache(packageNameUppercase, "0.2.0", stream, "hl7.fhir.us.davinci-cdex"));
+		}
 
 		// Ensure uninstalling it also works!
 		assertDoesNotThrow(() -> myPackageCacheManager.uninstallPackage(packageNameUppercase, "0.2.0"));
+	}
+
+	@Nested
+	class RunWithTransactionPropagationWhenChangingPartitionsRequiresNew {
+
+		@BeforeEach
+		void setUp() {
+			myTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
+		}
+
+		@Test
+		public void testSaveAndDeleteWithUnnamedPartitions() throws IOException {
+			testSaveAndDeletePackageUnnamedPartitionsEnabled();
+		}
+
+		@Test
+		public void testSaveAndDelete() throws IOException {
+			testSaveAndDeletePackagePartitionsEnabled();
+		}
+
+		@AfterEach
+		void tearDown() {
+			myTransactionService.setTransactionPropagationWhenChangingPartitions(DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
+		}
 	}
 
 	@Test

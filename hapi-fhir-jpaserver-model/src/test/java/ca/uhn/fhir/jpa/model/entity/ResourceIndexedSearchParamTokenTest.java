@@ -1,12 +1,15 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceIndexedSearchParamTokenTest {
 
@@ -93,5 +96,24 @@ public class ResourceIndexedSearchParamTokenTest {
 		assertNotEquals(param, param2, theMessage);
 		assertNotEquals(param2, param, theMessage);
 		assertNotEquals(param.hashCode(), param2.hashCode(), theMessage);
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"system, value, true",
+		",       value, true",
+		"system, ,      true",
+		"SYSTEM, value, false",
+		"system, VALUE, false",
+		",       VALUE, false",
+		"SYSTEM, ,      false",
+		"diffS,  diffV, false",
+	})
+	public void testMatches(String theSystem, String theValue, boolean theExpected) {
+		ResourceIndexedSearchParamToken param = new ResourceIndexedSearchParamToken(
+			new PartitionSettings(), "Patient", "name", "system", "value");
+
+		TokenParam tokenParam = new TokenParam(theSystem, theValue);
+		assertThat(param.matches(tokenParam)).isEqualTo(theExpected);
 	}
 }

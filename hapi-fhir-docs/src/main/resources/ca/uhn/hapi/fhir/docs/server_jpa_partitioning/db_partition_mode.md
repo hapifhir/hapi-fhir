@@ -37,3 +37,9 @@ It is not yet possible to migrate an existing database schema between these two 
 
 The CLI [Migrator](../server_jpa/upgrading.md) can be used to upgrade the database schema when upgrading HAPI FHIR. It must be configured to use the Database Partition Mode schema by using the `--flags` argument as [described here](../server_jpa/upgrading.md#database-partition-mode).
 
+# Limitations 
+
+As Database Partitioning Mode is being built from the ground up, there are currently some known limitations. 
+
+* MDM does not currently work with Database Partitioning Mode. This will be corrected in a future release
+

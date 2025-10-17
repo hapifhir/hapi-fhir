@@ -68,6 +68,10 @@ public class DelegatingConsentService implements IConsentService {
 		myTarget.completeOperationFailure(theRequestDetails, theException, theContextServices);
 	}
 
+	public IConsentService getTarget() {
+		return myTarget;
+	}
+
 	public void setTarget(IConsentService theTarget) {
 		myTarget = theTarget;
 	}

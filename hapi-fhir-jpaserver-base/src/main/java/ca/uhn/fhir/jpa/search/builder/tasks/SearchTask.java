@@ -119,6 +119,9 @@ public class SearchTask implements Callable<Void> {
 	private int myCountBlockedThisPass = 0;
 	private boolean myAdditionalPrefetchThresholdsRemaining;
 	private List<JpaPid> myPreviouslyAddedResourcePids;
+	// The max number of results that we request from the search
+	// Note that this is set using the configured pre-fetch thresholds, maximum page size, and/or the client provided
+	// _count parameter
 	private Integer myMaxResultsToFetch;
 
 	/**
@@ -595,7 +598,7 @@ public class SearchTask implements Callable<Void> {
 				sb.setMaxResultsToFetch(null);
 				/*
 				 * If we're past the last prefetch threshold then
-				 * we're potentially fetiching unlimited amounts of data.
+				 * we're potentially fetching unlimited amounts of data.
 				 * We'll move responsibility for deduplication to the database in this case
 				 * so that we don't run the risk of blowing out the memory
 				 * in the app server
@@ -605,8 +608,8 @@ public class SearchTask implements Callable<Void> {
 				// we want at least 1 more than our requested amount
 				// so we know that there are other results
 				// (in case we get the exact amount back)
-				myMaxResultsToFetch = Math.max(next, minWanted);
-				sb.setMaxResultsToFetch(myMaxResultsToFetch + 1);
+				myMaxResultsToFetch = Math.max(next, minWanted) + 1;
+				sb.setMaxResultsToFetch(myMaxResultsToFetch);
 			}
 
 			if (iter.hasNext()) {

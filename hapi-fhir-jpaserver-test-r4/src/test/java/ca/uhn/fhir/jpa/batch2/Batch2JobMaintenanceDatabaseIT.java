@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.batch2;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -14,15 +13,15 @@ import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
+import ca.uhn.fhir.broker.api.ChannelProducerSettings;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
+import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
@@ -49,6 +48,7 @@ import java.util.Optional;
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(Batch2JobMaintenanceDatabaseIT.class);
@@ -66,7 +66,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	@Autowired
 	IJobMaintenanceService myJobMaintenanceService;
 	@Autowired
-	private IChannelFactory myChannelFactory;
+	private LinkedBlockingChannelFactory myChannelFactory;
 
 	@Autowired
 	IJobPersistence myJobPersistence;
@@ -86,7 +86,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		myJobInstanceRepository.deleteAll();
 
 		myJobDefinitionRegistry.addJobDefinition(ourJobDef);
-		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateProducer(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelProducerSettings());
+		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateProducer(CHANNEL_NAME, new ChannelProducerSettings());
 		JobMaintenanceServiceImpl jobMaintenanceService = (JobMaintenanceServiceImpl) myJobMaintenanceService;
 		jobMaintenanceService.setMaintenanceJobStartedCallback(() -> {
 			ourLog.info("Batch maintenance job started");
@@ -96,7 +96,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		myTxTemplate = new TransactionTemplate(myTxManager);
 		storeNewInstance(ourJobDef);
 
-		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
+		myWorkChannel = myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, new ChannelConsumerSettings());
 		myChannelInterceptor.clear();
 		myWorkChannel.addInterceptor(myChannelInterceptor);
 	}
@@ -521,7 +521,8 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		@Override
 		public Message<?> preSend(@Nonnull Message<?> message, @Nonnull MessageChannel channel) {
 			ourLog.info("Sending message: {}", message);
-			JobWorkNotification notification = ((JobWorkNotificationJsonMessage) message).getPayload();
+			JobWorkNotificationJsonMessage jsonMessage = (JobWorkNotificationJsonMessage) message;
+			JobWorkNotification notification = jsonMessage.getPayload();
 			myReceivedChunkIds.add(notification.getChunkId());
 			myPointcutLatch.call(message);
 			return message;

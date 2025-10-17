@@ -387,6 +387,10 @@ public class Search implements ICachedSearchDetails, Serializable {
 		mySearchQueryStringHash = mySearchQueryStringVc.hashCode();
 	}
 
+	public Integer getSearchQueryStringHash() {
+		return mySearchQueryStringHash;
+	}
+
 	public SearchTypeEnum getSearchType() {
 		return mySearchType;
 	}

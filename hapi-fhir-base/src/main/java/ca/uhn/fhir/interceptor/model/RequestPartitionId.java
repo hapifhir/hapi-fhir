@@ -20,6 +20,7 @@
 package ca.uhn.fhir.interceptor.model;
 
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -31,6 +32,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -39,6 +41,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -97,6 +100,11 @@ public class RequestPartitionId implements IModelJson {
 		myPartitionNames = null;
 		myPartitionIds = null;
 		myAllPartitions = true;
+	}
+
+	@Nonnull
+	public static Optional<RequestPartitionId> getPartitionIfAssigned(IBaseResource theFromResource) {
+		return Optional.ofNullable((RequestPartitionId) theFromResource.getUserData(Constants.RESOURCE_PARTITION_ID));
 	}
 
 	/**
@@ -169,6 +177,20 @@ public class RequestPartitionId implements IModelJson {
 		return b.build();
 	}
 
+	/**
+	 * Returns true if this partition definition contains the other.
+	 * Compatible with equals: {@code a.contains(b) && b.contains(a) ==> a.equals(b)}.
+	 * We can't implement Comparable because this is only a partial order.
+	 */
+	public boolean contains(RequestPartitionId theOther) {
+		if (this.isAllPartitions()) {
+			return true;
+		} else if (theOther.isAllPartitions()) {
+			return false;
+		}
+		return this.myPartitionIds.containsAll(theOther.myPartitionIds);
+	}
+
 	@Override
 	public boolean equals(Object theO) {
 		if (this == theO) {
@@ -220,14 +242,30 @@ public class RequestPartitionId implements IModelJson {
 
 	/**
 	 * Returns true if this request partition contains only one partition ID and it is the DEFAULT partition ID (null)
+	 *
+	 * @deprecated use {@link #isPartition(Integer)} or {@link IDefaultPartitionSettings#isDefaultPartition(RequestPartitionId)}
+	 * instead
+	 * .
 	 */
+	@Deprecated(since = "2025.02.R01")
 	public boolean isDefaultPartition() {
+		return isPartition(null);
+	}
+
+	/**
+	 * Test whether this request partition is for the given partition ID.
+	 *
+	 * @param thePartitionId is the partition id to be tested against
+	 * @return <code>true</code> if the request partition contains exactly one partition ID and the partition ID is
+	 *         <code>thePartitionId</code>.
+	 */
+	public boolean isPartition(@Nullable Integer thePartitionId) {
 		if (isAllPartitions()) {
 			return false;
 		}
 		return hasPartitionIds()
 				&& getPartitionIds().size() == 1
-				&& getPartitionIds().get(0) == null;
+				&& Objects.equals(getPartitionIds().get(0), thePartitionId);
 	}
 
 	public boolean hasPartitionId(Integer thePartitionId) {
@@ -243,8 +281,34 @@ public class RequestPartitionId implements IModelJson {
 		return myPartitionNames != null;
 	}
 
+	/**
+	 * Verifies that one of the requested partition is the default partition which is assumed to have a default value of
+	 * null.
+	 *
+	 * @return true if one of the requested partition is the default partition(null).
+	 *
+	 * @deprecated use {@link #hasDefaultPartitionId(Integer)} or {@link IDefaultPartitionSettings#hasDefaultPartitionId}
+	 * instead
+	 */
+	@Deprecated(since = "2025.02.R01")
 	public boolean hasDefaultPartitionId() {
-		return getPartitionIds().contains(null);
+		return hasDefaultPartitionId(null);
+	}
+
+	/**
+	 * Test whether this request partition has the default partition as one of its targeted partitions.
+	 *
+	 * This method can be directly invoked on a requestPartition object providing that <code>theDefaultPartitionId</code>
+	 * is known or through {@link IDefaultPartitionSettings#hasDefaultPartitionId} where the implementer of the interface
+	 * will provide the default partition id (see {@link IDefaultPartitionSettings#getDefaultPartitionId}).
+	 *
+	 * @param theDefaultPartitionId is the ID that was given to the default partition.  The default partition ID can be
+	 *                              NULL as per default or specifically assigned another value.
+	 *                              See PartitionSettings#setDefaultPartitionId.
+	 * @return <code>true</code> if the request partition has the default partition as one of the targeted partition.
+	 */
+	public boolean hasDefaultPartitionId(@Nullable Integer theDefaultPartitionId) {
+		return getPartitionIds().contains(theDefaultPartitionId);
 	}
 
 	public List<Integer> getPartitionIdsWithoutDefault() {
@@ -284,12 +348,31 @@ public class RequestPartitionId implements IModelJson {
 		return ALL_PARTITIONS;
 	}
 
+	/**
+	 * @deprecated use {@link RequestPartitionId#defaultPartition(IDefaultPartitionSettings)} instead
+	 */
+	@Deprecated
 	@Nonnull
+	//	TODO GGG: This is a now-bad usage and we should remove it. we cannot assume null means default.
 	public static RequestPartitionId defaultPartition() {
 		return fromPartitionIds(Collections.singletonList(null));
 	}
 
+	/**
+	 * Creates a RequestPartitionId for the default partition using the provided partition settings.
+	 * This method uses the default partition ID from the given settings to create the RequestPartitionId.
+	 *
+	 * @param theDefaultPartitionSettings the partition settings containing the default partition ID
+	 * @return a RequestPartitionId for the default partition
+	 */
 	@Nonnull
+	public static RequestPartitionId defaultPartition(IDefaultPartitionSettings theDefaultPartitionSettings) {
+		return fromPartitionId(theDefaultPartitionSettings.getDefaultPartitionId());
+	}
+
+	@Deprecated
+	@Nonnull
+	//	TODO GGG: This is a now-bad usage and we should remove it. we cannot assume null means default.
 	public static RequestPartitionId defaultPartition(@Nullable LocalDate thePartitionDate) {
 		return fromPartitionIds(Collections.singletonList(null), thePartitionDate);
 	}
@@ -358,14 +441,6 @@ public class RequestPartitionId implements IModelJson {
 	public static RequestPartitionId forPartitionIdsAndNames(
 			List<String> thePartitionNames, List<Integer> thePartitionIds, LocalDate thePartitionDate) {
 		return new RequestPartitionId(thePartitionNames, thePartitionIds, thePartitionDate);
-	}
-
-	public static boolean isDefaultPartition(@Nullable RequestPartitionId thePartitionId) {
-		if (thePartitionId == null) {
-			return false;
-		}
-
-		return thePartitionId.isDefaultPartition();
 	}
 
 	/**

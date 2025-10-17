@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
@@ -36,7 +38,7 @@ public final class SubscriptionUtil {
 	}
 
 	public static void setCriteria(FhirContext theFhirContext, IBaseResource theSubscription, String theCriteria) {
-		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(theFhirContext);
+		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(theFhirContext, new SubscriptionSettings(), new PartitionSettings());
 		CanonicalSubscription canonicalSubscription = canonicalizer.canonicalize(theSubscription);
 		if (canonicalSubscription.isTopicSubscription()) {
 			if (theFhirContext.getVersion().getVersion() == FhirVersionEnum.R5) {

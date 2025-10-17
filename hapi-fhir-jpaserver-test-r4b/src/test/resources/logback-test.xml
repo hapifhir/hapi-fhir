@@ -10,7 +10,7 @@
 		<appender-ref ref="STDOUT" />
 	</root>
 
-	<logger name="ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber" level="info"/>
+	<logger name="ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingListener" level="info"/>
 	<logger name="org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator" level="info"/>
 	<logger name="ca.uhn.fhir.jpa.dao.FhirResourceDaoSubscriptionDstu2" level="info"/>
 	<logger name="org.eclipse.jetty.websocket" level="info"/>

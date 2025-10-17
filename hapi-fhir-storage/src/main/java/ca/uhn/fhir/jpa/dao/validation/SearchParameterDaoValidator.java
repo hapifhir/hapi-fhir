@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -110,7 +111,10 @@ public class SearchParameterDaoValidator {
 
 		} else if (isBlank(searchParameter.getExpression())) {
 
-			throw new UnprocessableEntityException(Msg.code(1114) + "SearchParameter.expression is missing");
+			if (!Constants.PARAM_CONTENT.equals(searchParameter.getCode())
+					&& !Constants.PARAM_TEXT.equals(searchParameter.getCode())) {
+				throw new UnprocessableEntityException(Msg.code(1114) + "SearchParameter.expression is missing");
+			}
 
 		} else {
 

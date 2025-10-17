@@ -255,7 +255,7 @@ public class PackageInstallerSvcImplTest {
 		// Verify
 		verify(myCodeSystemDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertEquals("?url=http%3A%2F%2Fmy-code-system", map.toNormalizedQueryString(myCtx));
+		assertEquals("?url=http%3A//my-code-system", map.toNormalizedQueryString(myCtx));
 
 		verify(myCodeSystemDao, times(1)).update(myCodeSystemCaptor.capture(), any(RequestDetails.class));
 		CodeSystem codeSystem = myCodeSystemCaptor.getValue();

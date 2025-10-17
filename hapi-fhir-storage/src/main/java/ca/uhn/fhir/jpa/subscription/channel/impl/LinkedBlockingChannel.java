@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.impl;
 
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.broker.jms.ISpringMessagingChannelProducer;
+import ca.uhn.fhir.broker.jms.ISpringMessagingChannelReceiver;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
@@ -32,28 +33,38 @@ import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
-public class LinkedBlockingChannel extends ExecutorSubscribableChannel implements IChannelProducer, IChannelReceiver {
+public class LinkedBlockingChannel extends ExecutorSubscribableChannel
+		implements ISpringMessagingChannelProducer, ISpringMessagingChannelReceiver {
 
-	private final String myName;
+	private final String myChannelName;
 	private final Supplier<Integer> myQueueSizeSupplier;
 
-	public LinkedBlockingChannel(String theName, Executor theExecutor, Supplier<Integer> theQueueSizeSupplier) {
+	private final RetryPolicyProvider myRetryPolicyProvider;
+
+	public LinkedBlockingChannel(
+			String theChannelName,
+			Executor theExecutor,
+			Supplier<Integer> theQueueSizeSupplier,
+			RetryPolicyProvider theRetryPolicyProvider) {
 		super(theExecutor);
-		myName = theName;
+		myChannelName = theChannelName;
 		myQueueSizeSupplier = theQueueSizeSupplier;
+		myRetryPolicyProvider = theRetryPolicyProvider;
 	}
 
+	@VisibleForTesting
 	public int getQueueSizeForUnitTest() {
 		return defaultIfNull(myQueueSizeSupplier.get(), 0);
 	}
 
+	@VisibleForTesting
 	public void clearInterceptorsForUnitTest() {
 		setInterceptors(new ArrayList<>());
 	}
 
 	@Override
-	public String getName() {
-		return myName;
+	public String getChannelName() {
+		return myChannelName;
 	}
 
 	@Override
@@ -65,7 +76,7 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel implement
 
 	@Override
 	public boolean subscribe(@Nonnull MessageHandler theHandler) {
-		return super.subscribe(new RetryingMessageHandlerWrapper(theHandler, getName()));
+		return super.subscribe(new RetryingMessageHandlerWrapper(theHandler, getChannelName(), myRetryPolicyProvider));
 	}
 
 	@Override
@@ -84,9 +95,10 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel implement
 	}
 
 	/**
-	 * Creates a synchronous channel, mostly intended for testing
+	 * Creates a synchronous channel for testing
 	 */
-	public static LinkedBlockingChannel newSynchronous(String theName) {
-		return new LinkedBlockingChannel(theName, null, () -> 0);
+	@VisibleForTesting
+	public static LinkedBlockingChannel newSynchronous(String theName, RetryPolicyProvider theRetryPolicyProvider) {
+		return new LinkedBlockingChannel(theName, null, () -> 0, theRetryPolicyProvider);
 	}
 }

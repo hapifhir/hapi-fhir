@@ -1,0 +1,6 @@
+---
+type: add
+issue: 6904
+title: "The in-memory ValueSet expander, used for validation outside of JPA, and for validation
+  of ad-hoc and not pre-expanded ValueSets, now supports filtered inclusion/exclusion with a
+  similar scope to the JPA pre-expander. Thanks to Ibrahim Tallouzi for the contribution!"

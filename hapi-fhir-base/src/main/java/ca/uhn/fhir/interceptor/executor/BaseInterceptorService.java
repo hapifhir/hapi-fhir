@@ -573,6 +573,11 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 					.toString();
 		}
 
+		@Override
+		public String getHookDescription() {
+			return getInterceptor().getClass().getName() + "." + myMethod.getName();
+		}
+
 		public POINTCUT getPointcut() {
 			return myPointcut;
 		}
@@ -600,8 +605,12 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 				return invokeMethod(args);
 			} catch (InvocationTargetException e) {
 				Throwable targetException = e.getTargetException();
+				ourLog.error(
+						"Exception thrown by interceptor for pointcut {}: {}",
+						getPointcut(),
+						targetException.toString(),
+						targetException);
 				if (myPointcut.isShouldLogAndSwallowException(targetException)) {
-					ourLog.error("Exception thrown by interceptor: " + targetException.toString(), targetException);
 					return null;
 				}
 

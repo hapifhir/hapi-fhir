@@ -13,10 +13,9 @@ import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
+import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
+import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.config.Batch2FastSchedulerConfig;
@@ -72,7 +71,7 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 	@Autowired
 	Batch2JobHelper myBatch2JobHelper;
 	@Autowired
-	private IChannelFactory myChannelFactory;
+	private LinkedBlockingChannelFactory myChannelFactory;
 
 	@Autowired
 	IJobPersistence myJobPersistence;
@@ -92,7 +91,7 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 	public void before() {
 		myStorageSettings.setJobFastTrackingEnabled(true);
 		myCompletionHandler = details -> {};
-		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
+		myWorkChannel = myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, new ChannelConsumerSettings());
 		JobMaintenanceServiceImpl jobMaintenanceService = (JobMaintenanceServiceImpl) myJobMaintenanceService;
 		jobMaintenanceService.setMaintenanceJobStartedCallback(() -> {
 			ourLog.info("Batch maintenance job started");

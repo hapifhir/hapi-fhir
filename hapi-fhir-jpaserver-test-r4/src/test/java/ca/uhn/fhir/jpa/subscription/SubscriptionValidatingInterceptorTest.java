@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
@@ -29,12 +30,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RestHookChannelValidator.IEndpointUrlValidationStrategy;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -63,6 +66,8 @@ public class SubscriptionValidatingInterceptorTest {
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Mock
 	private SubscriptionSettings mySubscriptionSettings;
+	@Spy
+	private PartitionSettings myPartitionSettings = new PartitionSettings();
 
 	private SubscriptionChannelTypeValidatorFactory mySubscriptionChannelTypeValidatorFactory;
 
@@ -71,7 +76,7 @@ public class SubscriptionValidatingInterceptorTest {
 	@BeforeEach
 	public void before() {
 		mySvc = new SubscriptionValidatingInterceptor();
-		mySubscriptionCanonicalizer = spy(new SubscriptionCanonicalizer(myCtx, new SubscriptionSettings()));
+		mySubscriptionCanonicalizer = 	spy(new SubscriptionCanonicalizer(myCtx, new SubscriptionSettings(), myPartitionSettings));
 		mySvc.setSubscriptionCanonicalizerForUnitTest(mySubscriptionCanonicalizer);
 		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
 		mySvc.setSubscriptionStrategyEvaluatorForUnitTest(mySubscriptionStrategyEvaluator);
@@ -108,7 +113,7 @@ public class SubscriptionValidatingInterceptorTest {
 		subscription.getChannel().setPayload("application/fhir+json");
 		subscription.getChannel().setEndpoint("http://foo");
 
-		mySvc.resourcePreCreate(subscription, null, null);
+		assertThatNoException().isThrownBy(() -> mySvc.resourcePreCreate(subscription, null, null));
 	}
 
 	@Test
@@ -196,7 +201,7 @@ public class SubscriptionValidatingInterceptorTest {
 		subscription.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		subscription.getChannel().setEndpoint("http://foo");
 
-		mySvc.resourcePreCreate(subscription, null, null);
+		assertThatNoException().isThrownBy(() -> mySvc.resourcePreCreate(subscription, null, null));
 	}
 
 	@Test
@@ -220,6 +225,7 @@ public class SubscriptionValidatingInterceptorTest {
 		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(true);
 		when(mySubscriptionSettings.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
 		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"))).thenReturn(RequestPartitionId.defaultPartition());
+		when(myRequestPartitionHelperSvc.isDefaultPartition(any())).thenReturn(true);
 
 		Subscription subscription = new Subscription();
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);

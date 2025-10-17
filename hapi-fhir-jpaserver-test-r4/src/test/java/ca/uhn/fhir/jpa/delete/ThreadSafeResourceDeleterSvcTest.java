@@ -1,8 +1,6 @@
 package ca.uhn.fhir.jpa.delete;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -14,8 +12,11 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import ca.uhn.test.concurrency.IPointcutLatch;
-import ca.uhn.test.concurrency.PointcutLatch;
+import ca.uhn.test.concurrency.LockstepEnumPhaser;
+import ca.uhn.test.util.LogbackTestExtension;
+import ca.uhn.test.util.LogbackTestExtensionAssert;
+import jakarta.annotation.Nullable;
+import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.HumanName;
@@ -23,26 +24,26 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import jakarta.annotation.Nullable;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 	private static final String PATIENT1_ID = "a1";
 	private static final String PATIENT2_ID = "a2";
 
-	private final PointcutLatch myPointcutLatch = new PointcutLatch(Pointcut.STORAGE_CASCADE_DELETE);
-
-	private final MyCascadeDeleteInterceptor myCascadeDeleteInterceptor = new MyCascadeDeleteInterceptor();
-
 	private ThreadSafeResourceDeleterSvc myThreadSafeResourceDeleterSvc;
+
+	@RegisterExtension
+	final LogbackTestExtension mySqlExceptionHelperLog = new LogbackTestExtension(SqlExceptionHelper.class);
+
 	@Autowired
 	IInterceptorBroadcaster myIdInterceptorBroadcaster;
 
@@ -62,9 +63,7 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 
 	@AfterEach
 	void tearDown() {
-		myInterceptorService.unregisterInterceptor(myPointcutLatch);
-		myInterceptorService.unregisterInterceptor(myCascadeDeleteInterceptor);
-		myCascadeDeleteInterceptor.clear();
+		myInterceptorService.unregisterAllInterceptors();
 	}
 
 	@Test
@@ -91,9 +90,13 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 		assertEquals(1, countOrganizations());
 	}
 
+	enum DeleteSteps {BOTH_STARTED, DAO_BEFORE_DELETE_PATIENT, DEL_BEFORE_FIRST_PATIENT_DELETE, BOTH_COMPLETE}
+
 	@Test
 	void delete_delete_retryTest() throws ExecutionException, InterruptedException {
-		myInterceptorService.registerInterceptor(myCascadeDeleteInterceptor);
+		LockstepEnumPhaser<DeleteSteps> phaser = new LockstepEnumPhaser<>(2, DeleteSteps.class);
+		MyCascadeDeleteInterceptor<DeleteSteps> cascadeDeleteInterceptor = new MyCascadeDeleteInterceptor<>(phaser, DeleteSteps.values());
+		myInterceptorService.registerInterceptor(cascadeDeleteInterceptor);
 
 		DeleteConflictList conflictList = new DeleteConflictList();
 		IIdType orgId = createOrganization();
@@ -106,20 +109,24 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 		assertEquals(2, countPatients());
 		final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-		myCascadeDeleteInterceptor.setExpectedCount(1);
 		ourLog.info("Start background delete");
-		final Future<Integer> future = executorService.submit(() ->
-			myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> myThreadSafeResourceDeleterSvc.delete(mySrd, conflictList, myTransactionDetails)));
+		final Future<Integer> future = executorService.submit(() -> {
+			phaser.arriveAndAwaitSharedEndOf(DeleteSteps.BOTH_STARTED);
+			return myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> myThreadSafeResourceDeleterSvc.delete(mySrd, conflictList, myTransactionDetails));
+		});
+
+		phaser.arriveAndAwaitSharedEndOf(DeleteSteps.BOTH_STARTED);
 
 		// We are paused before deleting the first patient.
-		myCascadeDeleteInterceptor.awaitExpected();
+		phaser.arriveAndAwaitSharedEndOf(DeleteSteps.DAO_BEFORE_DELETE_PATIENT);
 
 		//   Let's delete the second patient from under its nose.
 		ourLog.info("delete patient 2");
 		myPatientDao.delete(patient2Id);
 
 		// Unpause and delete the first patient
-		myCascadeDeleteInterceptor.release("first");
+		phaser.arriveAndAwaitSharedEndOf(DeleteSteps.DEL_BEFORE_FIRST_PATIENT_DELETE);
+		phaser.assertInPhase(DeleteSteps.BOTH_COMPLETE);
 
 		// future.get() returns total number of resources deleted, which in this case is 1
 		assertEquals(1, future.get());
@@ -128,9 +135,13 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 		assertEquals(1, countOrganizations());
 	}
 
+	enum UpdateSteps {BOTH_STARTED, DEL_BEFORE_FIRST_PATIENT_DELETE, DAO_BEFORE_UPDATE_PATIENT, DEL_BEFORE_SECOND_PATIENT_DELETE_FAIL, DEL_BEFORE_SECOND_PATIENT_DELETE_SUCCEED, BOTH_COMPLETE}
+
 	@Test
 	void delete_update_retryTest() throws ExecutionException, InterruptedException {
-		myInterceptorService.registerInterceptor(myCascadeDeleteInterceptor);
+		LockstepEnumPhaser<UpdateSteps> phaser = new LockstepEnumPhaser<>(2, UpdateSteps.class);
+		MyCascadeDeleteInterceptor<UpdateSteps> cascadeDeleteInterceptor = new MyCascadeDeleteInterceptor<>(phaser, UpdateSteps.values());
+		myInterceptorService.registerInterceptor(cascadeDeleteInterceptor);
 
 		DeleteConflictList conflictList = new DeleteConflictList();
 		IIdType orgId = createOrganization();
@@ -143,32 +154,31 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 		assertEquals(2, countPatients());
 		final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-		myCascadeDeleteInterceptor.setExpectedCount(1);
-		final Future<Integer> future = executorService.submit(() ->
-			myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> myThreadSafeResourceDeleterSvc.delete(mySrd, conflictList, myTransactionDetails)));
+		final Future<Integer> future = executorService.submit(() -> {
+			phaser.arriveAndAwaitSharedEndOf(UpdateSteps.BOTH_STARTED);
+			return myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> myThreadSafeResourceDeleterSvc.delete(mySrd, conflictList, myTransactionDetails));
+		});
+		phaser.arriveAndAwaitSharedEndOf(UpdateSteps.BOTH_STARTED);
 
 		// Patient 1 We are paused after reading the version but before deleting the first patient.
-		myCascadeDeleteInterceptor.awaitExpected();
-
 
 		// Unpause and delete the first patient
-		myCascadeDeleteInterceptor.setExpectedCount(1);
-		myCascadeDeleteInterceptor.release("first");
+		phaser.arriveAndAwaitSharedEndOf(UpdateSteps.DEL_BEFORE_FIRST_PATIENT_DELETE);
 
 		// Patient 2 We are paused after reading the version but before deleting the second patient.
-		myCascadeDeleteInterceptor.awaitExpected();
+		phaser.arriveAndAwaitSharedEndOf(UpdateSteps.DAO_BEFORE_UPDATE_PATIENT);
 
 		updatePatient(patient2Id);
 
 		// Unpause and fail to delete the second patient
-		myCascadeDeleteInterceptor.setExpectedCount(1);
-		myCascadeDeleteInterceptor.release("second");
-
-		// Red Green: If you delete the updatePatient above, it will timeout here
-		myCascadeDeleteInterceptor.awaitExpected();
+		phaser.arriveAndAwaitSharedEndOf(UpdateSteps.DEL_BEFORE_SECOND_PATIENT_DELETE_FAIL);
 
 		// Unpause and succeed in deleting the second patient because we will get the correct version now
-		myCascadeDeleteInterceptor.release("third");
+		// Red Green: If you delete the updatePatient above, it will timeout here
+		phaser.arriveAndAwaitSharedEndOf(UpdateSteps.DEL_BEFORE_SECOND_PATIENT_DELETE_SUCCEED);
+		LogbackTestExtensionAssert.assertThat(mySqlExceptionHelperLog).hasErrorMessage("Unique index or primary key violation");
+
+		phaser.assertInPhase(UpdateSteps.BOTH_COMPLETE);
 
 		// future.get() returns total number of resources deleted, which in this case is 2
 		assertEquals(2, future.get());
@@ -212,42 +222,32 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 		return new DeleteConflict(new IdDt(thePatient1Id), "managingOrganization", new IdDt(theOrgId));
 	}
 
-	private static class MyCascadeDeleteInterceptor implements IPointcutLatch {
-		private final PointcutLatch myCalledLatch = new PointcutLatch("Called");
-		private final PointcutLatch myWaitLatch = new PointcutLatch("Wait");
+	private static class MyCascadeDeleteInterceptor<E extends Enum<E>> {
 
-		MyCascadeDeleteInterceptor() {
-			myWaitLatch.setExpectedCount(1);
+		private final LockstepEnumPhaser<E> myPhaser;
+		private final E[] myEnumValues;
+		private int myStep = 0;
+		AtomicInteger myCounter = new AtomicInteger();
+
+		MyCascadeDeleteInterceptor(LockstepEnumPhaser<E> thePhaser, E[] theEnumValues) {
+			myEnumValues = theEnumValues;
+			myPhaser = thePhaser;
 		}
 
 		@Hook(Pointcut.STORAGE_CASCADE_DELETE)
 		public void cascadeDelete(RequestDetails theRequestDetails, DeleteConflictList theConflictList, IBaseResource theResource) throws InterruptedException {
-			myCalledLatch.call(theResource);
-			ourLog.info("Waiting to proceed with delete");
-			List<HookParams> hookParams = myWaitLatch.awaitExpected();
-			ourLog.info("Cascade Delete proceeding: {}", PointcutLatch.getLatchInvocationParameter(hookParams));
-			myWaitLatch.setExpectedCount(1);
-		}
+			int deleteNumber = myCounter.incrementAndGet();
+			ourLog.info("Waiting to proceed with delete item {}: {}", deleteNumber, theResource.getIdElement());
 
-		void release(String theMessage) {
-			ourLog.info("Releasing {}", theMessage);
-			myWaitLatch.call(theMessage);
-		}
+			// Keep progressing through the steps until we hit the next one that starts with "DEL_"
+			E nextValue;
+			do {
+				++myStep;
+				nextValue = myEnumValues[myStep];
+				myPhaser.arriveAndAwaitSharedEndOf(nextValue);
+			} while (!nextValue.name().startsWith("DEL_"));
 
-		@Override
-		public void clear() {
-			myCalledLatch.clear();
-			myWaitLatch.clear();
-		}
-
-		@Override
-		public void setExpectedCount(int count) {
-			myCalledLatch.setExpectedCount(count);
-		}
-
-		@Override
-		public List<HookParams> awaitExpected() throws InterruptedException {
-			return myCalledLatch.awaitExpected();
+			ourLog.info("Cascade Delete proceeding for item {}: {}", deleteNumber, theResource.getIdElement());
 		}
 	}
 }

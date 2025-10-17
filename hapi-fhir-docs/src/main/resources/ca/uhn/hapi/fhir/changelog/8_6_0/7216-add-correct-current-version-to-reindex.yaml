@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7216
+title: "The `$reindex` operation now supports an additional operation called `correctCurrentVersion`. This type of reindexing
+   searches for resources that have a current version pointer to a version that no longer exists (typically because the
+   database has been manually modified)."

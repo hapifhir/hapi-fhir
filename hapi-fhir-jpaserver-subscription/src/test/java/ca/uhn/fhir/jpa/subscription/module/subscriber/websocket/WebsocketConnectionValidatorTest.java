@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
@@ -65,6 +66,8 @@ public class WebsocketConnectionValidatorTest {
 	InMemoryResourceMatcher myInMemoryResourceMatcher;
 	@MockBean
 	SubscriptionRegistry mySubscriptionRegistry;
+	@MockBean
+	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@MockBean
 	ISearchParamRegistry mySearchParamRegistry;
 	@MockBean

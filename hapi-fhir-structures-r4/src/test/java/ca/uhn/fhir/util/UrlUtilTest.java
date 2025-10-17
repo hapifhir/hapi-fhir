@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.apache.http.message.BasicNameValuePair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -113,27 +112,6 @@ public class UrlUtilTest {
 		assertEquals(" &#10; ", UrlUtil.sanitizeUrlPart(" \n "));
 		assertEquals(" &#13; ", UrlUtil.sanitizeUrlPart(" \r "));
 		assertEquals("  ", UrlUtil.sanitizeUrlPart(" \0 "));
-	}
-
-	@Test
-	public void testTranslateMatchUrl_UrlWithSpaces() {
-		// %20 is an encoded space character
-		assertThat(UrlUtil.translateMatchUrl("Observation?names=homer%20simpson")).containsExactlyInAnyOrder(new BasicNameValuePair("names", "homer simpson"));
-
-		// + is also an encoded space character
-		assertThat(UrlUtil.translateMatchUrl("Observation?names=homer+simpson")).containsExactlyInAnyOrder(new BasicNameValuePair("names", "homer simpson"));
-	}
-
-	@Test
-	public void testTranslateMatchUrl_UrlWithPlusSign() {
-		// %2B is an encoded plus sign
-		assertThat(UrlUtil.translateMatchUrl("Observation?names=homer%2Bsimpson")).containsExactlyInAnyOrder(new BasicNameValuePair("names", "homer+simpson"));
-	}
-
-	@Test
-	public void testTranslateMatchUrl_UrlWithPipe() {
-		// Real space
-		assertThat(UrlUtil.translateMatchUrl("Observation?names=homer|simpson")).containsExactlyInAnyOrder(new BasicNameValuePair("names", "homer|simpson"));
 	}
 
 	@ParameterizedTest

@@ -25,7 +25,9 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.HapiExtensions;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -84,6 +86,11 @@ public class StorageSettings {
 	protected static final String DEFAULT_PERIOD_INDEX_END_OF_TIME = "9000-01-01";
 	private static final Integer DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE = null;
 	/**
+	 * @since 5.5.0
+	 */
+	public static final TagStorageModeEnum DEFAULT_TAG_STORAGE_MODE = TagStorageModeEnum.VERSIONED;
+
+	/**
 	 * update setter javadoc if default changes
 	 */
 	private boolean myAllowContainsSearches = false;
@@ -97,6 +104,15 @@ public class StorageSettings {
 	private Integer myBundleBatchMaxPoolSize = DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE;
 	private boolean myMassIngestionMode;
 	private Integer myMaximumTransactionBundleSize = DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE;
+	private TagStorageModeEnum myTagStorageMode = DEFAULT_TAG_STORAGE_MODE;
+	/**
+	 * Activates hibernate search indexing of fulltext data from resources, which
+	 * is used to support the {@literal _text} and {@literal _content} Search Parameters.
+	 *
+	 * @since 8.0.0
+	 */
+	private boolean myHibernateSearchIndexFullText = false;
+
 	private boolean myNormalizeTerminologyForBulkExportJobs = false;
 	/**
 	 * Update setter javadoc if default changes.
@@ -136,7 +152,7 @@ public class StorageSettings {
 	private boolean myValidateResourceStatusForPackageUpload = true;
 
 	/**
-	 * If set to <code>true</code>, the server will not write data to the <code>SP_NAME, RES_TYPE, SP_UPDATED</code>
+	 * If set to <code>true</code>, the server will not write data to the <code>SP_NAME, RES_TYPE</code>
 	 * columns for all HFJ_SPIDX tables.
 	 *
 	 * @since 7.4.0
@@ -258,6 +274,32 @@ public class StorageSettings {
 	}
 
 	/**
+	 * Is hibernate search indexing of fulltext data from resources enabled?
+	 * This setting activates hibernate search indexing of fulltext data from resources, which
+	 * is used to support the {@literal _text} and {@literal _content} Search Parameters.
+	 *
+	 * @since 8.0.0
+	 */
+	public boolean isHibernateSearchIndexFullText() {
+		return myHibernateSearchIndexFullText;
+	}
+
+	/**
+	 * Activates hibernate search indexing of fulltext data from resources, which
+	 * is used to support the {@literal _text} and {@literal _content} Search Parameters.
+	 * <p>
+	 * Note that if you enable this setting at runtime (i.e. on an already running server), you
+	 * may need to also invoke {@link ISearchParamRegistry#forceRefresh()} in order to ensure
+	 * that the implicit search parameters needed for this feature get inserted into the registry.
+	 * </p>
+	 *
+	 * @since 8.0.0
+	 */
+	public void setHibernateSearchIndexFullText(boolean theHibernateSearchIndexFullText) {
+		myHibernateSearchIndexFullText = theHibernateSearchIndexFullText;
+	}
+
+	/**
 	 * If set to {@link IndexEnabledEnum#DISABLED} (default is {@link IndexEnabledEnum#DISABLED})
 	 * the server will not create search indexes for search parameters with no values in resources.
 	 * <p>
@@ -288,7 +330,7 @@ public class StorageSettings {
 
 	/**
 	 * If set to <code>true</code> (default is false), the server will not write data
-	 * to the <code>SP_NAME, RES_TYPE, SP_UPDATED</code> columns for all HFJ_SPIDX tables.
+	 * to the <code>SP_NAME, RES_TYPE</code> columns for all HFJ_SPIDX tables.
 	 * <p>
 	 * This feature may be enabled on servers where HFJ_SPIDX tables are expected
 	 * to have a large amount of data (millions of rows) in order to reduce overall storage size.
@@ -314,7 +356,7 @@ public class StorageSettings {
 
 	/**
 	 * If set to <code>true</code> (default is false), the server will not write data
-	 * to the <code>SP_NAME, RES_TYPE, SP_UPDATED</code> columns for all HFJ_SPIDX tables.
+	 * to the <code>SP_NAME, RES_TYPE</code> columns for all HFJ_SPIDX tables.
 	 * <p>
 	 * This feature may be enabled on servers where HFJ_SPIDX tables are expected
 	 * to have a large amount of data (millions of rows) in order to reduce overall storage size.
@@ -328,7 +370,7 @@ public class StorageSettings {
 	 * If this setting is enabled, {@link PartitionSettings#isIncludePartitionInSearchHashes()} should be set to <code>false</code>.
 	 * </p>
 	 * <p>
-	 * If {@link StorageSettings#getIndexMissingFields()} ()} is enabled, the following index may need to be added
+	 * If {@link StorageSettings#getIndexMissingFields()} is enabled, the following index may need to be added
 	 * into the HFJ_SPIDX tables to improve the search performance: <code>HASH_IDENTITY, SP_MISSING, RES_ID, PARTITION_ID</code>
 	 * </p>
 	 *
@@ -436,6 +478,26 @@ public class StorageSettings {
 	public void setSequenceValueMassagerClass(Class<? extends ISequenceValueMassager> theSequenceValueMassagerClass) {
 		Validate.notNull(theSequenceValueMassagerClass, "theSequenceValueMassagerClass must not be null");
 		mySequenceValueMassagerClass = theSequenceValueMassagerClass;
+	}
+
+	/**
+	 * Sets the tag storage mode for the server. Default is {@link TagStorageModeEnum#VERSIONED}.
+	 *
+	 * @since 5.5.0
+	 */
+	@Nonnull
+	public TagStorageModeEnum getTagStorageMode() {
+		return myTagStorageMode;
+	}
+
+	/**
+	 * Sets the tag storage mode for the server. Default is {@link TagStorageModeEnum#VERSIONED}.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setTagStorageMode(@Nonnull TagStorageModeEnum theTagStorageMode) {
+		Validate.notNull(theTagStorageMode, "theTagStorageMode must not be null");
+		myTagStorageMode = theTagStorageMode;
 	}
 
 	/**
@@ -1144,7 +1206,7 @@ public class StorageSettings {
 	/**
 	 * If this is disabled by setting this to {@literal false} (default is {@literal true}),
 	 * the server will not automatically implement and support search parameters that
-	 * are not explcitly created in the repository.
+	 * are not explicitly created in the repository.
 	 * <p>
 	 * Disabling this can have a dramatic improvement on performance (especially write performance)
 	 * in servers that only need to support a small number of search parameters, or no search parameters at all.
@@ -1158,7 +1220,7 @@ public class StorageSettings {
 	}
 
 	/**
-	 * @return Should the {@literal _lamguage} SearchParameter be supported on this server? Defaults to {@literal false}.
+	 * @return Should the {@literal _language} SearchParameter be supported on this server? Defaults to {@literal false}.
 	 * @since 7.0.0
 	 */
 	public boolean isLanguageSearchParameterEnabled() {
@@ -1166,7 +1228,7 @@ public class StorageSettings {
 	}
 
 	/**
-	 * Should the {@literal _lamguage} SearchParameter be supported on this server? Defaults to {@literal false}.
+	 * Should the {@literal _language} SearchParameter be supported on this server? Defaults to {@literal false}.
 	 *
 	 * @since 7.0.0
 	 */
@@ -1205,5 +1267,25 @@ public class StorageSettings {
 	public enum IndexEnabledEnum {
 		ENABLED,
 		DISABLED
+	}
+
+	public enum TagStorageModeEnum {
+
+		/**
+		 * A separate set of tags is stored for each resource version
+		 */
+		VERSIONED,
+
+		/**
+		 * A single set of tags is shared by all resource versions
+		 */
+		NON_VERSIONED,
+
+		/**
+		 * Tags are stored directly in the resource body (in the {@literal ResourceHistoryTable}
+		 * entry for the resource, meaning that they are not indexed separately, and are versioned with the rest
+		 * of the resource.
+		 */
+		INLINE
 	}
 }

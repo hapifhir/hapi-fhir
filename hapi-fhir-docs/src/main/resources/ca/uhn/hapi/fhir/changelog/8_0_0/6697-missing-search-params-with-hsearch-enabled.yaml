@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6697
+title: "Previously, operation $apply-codesystem-delta-add issued with Hibernate Search enabled and default search params option turned off resulted in an invalid sort specification error. This has been fixed."

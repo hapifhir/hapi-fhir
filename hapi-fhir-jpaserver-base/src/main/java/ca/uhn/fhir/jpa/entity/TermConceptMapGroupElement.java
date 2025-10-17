@@ -37,6 +37,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -71,19 +72,22 @@ public class TermConceptMapGroupElement extends BasePartitionable implements Ser
 			value = {
 				@JoinColumn(
 						name = "CONCEPT_MAP_GROUP_PID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false,
 						referencedColumnName = "PID"),
 				@JoinColumn(
 						name = "PARTITION_ID",
 						referencedColumnName = "PARTITION_ID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TCMGELEMENT_GROUP"))
 	private TermConceptMapGroup myConceptMapGroup;
+
+	@Column(name = "CONCEPT_MAP_GROUP_PID", nullable = false)
+	private Long myConceptMapGroupPid;
 
 	@Column(name = "SOURCE_CODE", nullable = false, length = TermConcept.MAX_CODE_LENGTH)
 	private String myCode;
@@ -126,6 +130,8 @@ public class TermConceptMapGroupElement extends BasePartitionable implements Ser
 
 	public TermConceptMapGroupElement setConceptMapGroup(TermConceptMapGroup theTermConceptMapGroup) {
 		myConceptMapGroup = theTermConceptMapGroup;
+		myConceptMapGroupPid = theTermConceptMapGroup.getId();
+		Validate.notNull(myConceptMapGroupPid, "ConceptMapGroupPid must not be null");
 		setPartitionId(theTermConceptMapGroup.getPartitionId());
 		return this;
 	}

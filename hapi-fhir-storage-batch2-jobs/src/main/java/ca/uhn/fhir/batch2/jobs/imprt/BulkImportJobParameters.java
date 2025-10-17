@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI-FHIR Storage Batch2 Jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -60,6 +60,20 @@ public class BulkImportJobParameters implements IModelJson {
 	@JsonProperty(value = "partitionId", required = false)
 	@Nullable
 	private RequestPartitionId myPartitionId;
+
+	@JsonProperty(value = "chunkByCompartmentName", required = false)
+	@Nullable
+	private String myChunkByCompartmentName;
+
+	@Nullable
+	public String getChunkByCompartmentName() {
+		return myChunkByCompartmentName;
+	}
+
+	public BulkImportJobParameters setChunkByCompartmentName(@Nullable String theChunkByCompartmentName) {
+		myChunkByCompartmentName = theChunkByCompartmentName;
+		return this;
+	}
 
 	public List<String> getNdJsonUrls() {
 		if (myNdJsonUrls == null) {

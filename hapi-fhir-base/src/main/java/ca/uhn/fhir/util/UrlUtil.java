@@ -31,17 +31,14 @@ import com.google.common.net.PercentEscaper;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.message.BasicNameValuePair;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -64,6 +61,8 @@ public class UrlUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UrlUtil.class);
 
 	private static final String URL_FORM_PARAMETER_OTHER_SAFE_CHARS = "-_.*";
+	private static final Escaper PARAMETER_ESCAPER_NO_SLASH =
+			new PercentEscaper(URL_FORM_PARAMETER_OTHER_SAFE_CHARS + "/", false);
 	private static final Escaper PARAMETER_ESCAPER = new PercentEscaper(URL_FORM_PARAMETER_OTHER_SAFE_CHARS, false);
 
 	/**
@@ -206,7 +205,8 @@ public class UrlUtil {
 	}
 
 	/**
-	 * URL encode a value according to RFC 3986
+	 * URL encode a value according to RFC 3986, except for the following
+	 * characters: <code>-_.*</code>.
 	 * <p>
 	 * This method is intended to be applied to an individual parameter
 	 * name or value. For example, if you are creating the URL
@@ -214,13 +214,42 @@ public class UrlUtil {
 	 * it would be appropriate to pass the string "føø" to this method,
 	 * but not appropriate to pass the entire URL since characters
 	 * such as "/" and "?" would also be escaped.
-	 * </P>
+	 * </p>
+	 *
+	 * @see #escapeUrlParam(String, boolean)
 	 */
 	public static String escapeUrlParam(String theUnescaped) {
+		return escapeUrlParam(theUnescaped, true);
+	}
+
+	/**
+	 * URL encode a value according to RFC 3986, except for the following
+	 * characters: <code>-_.*</code>, and optionally <code>/</code>.
+	 * <p>
+	 * This method is intended to be applied to an individual parameter
+	 * name or value. For example, if you are creating the URL
+	 * <code>http://example.com/fhir/Patient?key=føø</code>
+	 * it would be appropriate to pass the string "føø" to this method,
+	 * but not appropriate to pass the entire URL since characters
+	 * such as "?" and possibly "/" would also be escaped.
+	 * </p>
+	 *
+	 * @param theEscapeSlash If <code>true</code>, the slash character will be percent-escaped.
+	 *                       Set this to false if you are escaping a query parameter value, since slashes
+	 *                       will be more readable in the URL than the percent-encoded version. If you
+	 *                       aren't sure where the escaped version will appear, always set this to
+	 *                       <code>false</code>, or just call {@link #escapeUrlParam(String)} instead.
+	 * @since 8.6.0
+	 */
+	public static String escapeUrlParam(String theUnescaped, boolean theEscapeSlash) {
 		if (theUnescaped == null) {
 			return null;
 		}
-		return PARAMETER_ESCAPER.escape(theUnescaped);
+		if (theEscapeSlash) {
+			return PARAMETER_ESCAPER.escape(theUnescaped);
+		} else {
+			return PARAMETER_ESCAPER_NO_SLASH.escape(theUnescaped);
+		}
 	}
 
 	/**
@@ -324,8 +353,10 @@ public class UrlUtil {
 
 	private static void parseQueryString(String theQueryString, HashMap<String, List<String>> map) {
 		String query = defaultString(theQueryString);
-		if (query.startsWith("?")) {
-			query = query.substring(1);
+
+		int questionMarkIdx = query.indexOf('?');
+		if (questionMarkIdx != -1) {
+			query = query.substring(questionMarkIdx + 1);
 		}
 
 		StringTokenizer tok = new StringTokenizer(query, "&");
@@ -560,49 +591,10 @@ public class UrlUtil {
 		for (int i = 0; i < theString.length(); i++) {
 			char nextChar = theString.charAt(i);
 			if (nextChar == '%' || (nextChar == '+' && shouldEscapePlus)) {
-				try {
-					// Yes it would be nice to not use a string "UTF-8" but the equivalent
-					// method that takes Charset is JDK10+ only... sigh....
-					return URLDecoder.decode(theString, "UTF-8");
-				} catch (UnsupportedEncodingException e) {
-					throw new Error(Msg.code(1743) + "UTF-8 not supported, this shouldn't happen", e);
-				}
+				return URLDecoder.decode(theString, StandardCharsets.UTF_8);
 			}
 		}
 		return theString;
-	}
-
-	public static List<NameValuePair> translateMatchUrl(String theMatchUrl) {
-		List<NameValuePair> parameters;
-		String matchUrl = theMatchUrl;
-		int questionMarkIndex = matchUrl.indexOf('?');
-		if (questionMarkIndex != -1) {
-			matchUrl = matchUrl.substring(questionMarkIndex + 1);
-		}
-
-		final String[] searchList = new String[] {"|", "=>=", "=<=", "=>", "=<"};
-		final String[] replacementList = new String[] {"%7C", "=%3E%3D", "=%3C%3D", "=%3E", "=%3C"};
-		matchUrl = StringUtils.replaceEach(matchUrl, searchList, replacementList);
-		if (matchUrl.contains(" ")) {
-			throw new InvalidRequestException(Msg.code(1744) + "Failed to parse match URL[" + theMatchUrl
-					+ "] - URL is invalid (must not contain spaces)");
-		}
-
-		parameters = URLEncodedUtils.parse((matchUrl), Constants.CHARSET_UTF8, '&');
-
-		// One issue that has happened before is people putting a "+" sign into an email address in a match URL
-		// and having that turn into a " ". Since spaces are never appropriate for email addresses, let's just
-		// assume they really meant "+".
-		for (int i = 0; i < parameters.size(); i++) {
-			NameValuePair next = parameters.get(i);
-			if (next.getName().equals("email") && next.getValue().contains(" ")) {
-				BasicNameValuePair newPair =
-						new BasicNameValuePair(next.getName(), next.getValue().replace(' ', '+'));
-				parameters.set(i, newPair);
-			}
-		}
-
-		return parameters;
 	}
 
 	/**

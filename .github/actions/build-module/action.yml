@@ -39,6 +39,14 @@ runs:
 
     - name: Restore Maven Cache
       uses: ./.github/actions/caching-handler
+      with:
+        key: ${{ github.ref_name }}-maven-${{ hashFiles('**/pom.xml') }}
+
+    - name: Restore HAPI Cache
+      uses: ./.github/actions/caching-handler
+      with:
+        path: "$HOME/.m2/repository/ca/uhn/"
+        key: ${{ github.ref_name }}-hapi-${{ github.run_id }}
 
     - name: Build Maven Module
       shell: bash

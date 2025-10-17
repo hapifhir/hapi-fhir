@@ -102,6 +102,7 @@ public abstract class BaseSourceSearchParameterTestCases implements ITestDataBui
 				pt2id);
 	}
 
+	@EnabledIf("isRequestIdSupported")
 	@Test
 	public void testSearchSource_whenSameSourceForMultipleResourceTypes_willMatchSearchResourceTypeOnly() {
 		String sourceUrn = "http://host/0";
@@ -111,11 +112,12 @@ public abstract class BaseSourceSearchParameterTestCases implements ITestDataBui
 		IIdType ob0id = createObservation(withSource(sourceUrn), withStatus("final"));
 
 		myTestDaoSearch.assertSearchFinds(
-				"search source URI for Patient finds", "Patient?_source=http://host/0", pt0id);
+				"search source URI for Patient finds", "Patient?_source=http://host/0#a_request_id", pt0id);
 		myTestDaoSearch.assertSearchNotFound(
 				"search source URI for Patient - Observation not found", "Patient?_source=http://host/0", ob0id);
 	}
 
+	@EnabledIf("isRequestIdSupported")
 	@Test
 	public void testSearchSource_withOrJoinedParameter_returnsUnionResultBundle() {
 		myTestDataBuilder.setRequestId("a_request_id");
@@ -125,7 +127,10 @@ public abstract class BaseSourceSearchParameterTestCases implements ITestDataBui
 		createPatient(withSource("http://host/2"), withActiveTrue());
 
 		myTestDaoSearch.assertSearchFinds(
-				"search source URI with union", "Patient?_source=http://host/0,http://host/1", pt0id, pt1id);
+				"search source URI with union",
+				"Patient?_source=http://host/0#a_request_id,http://host/1#a_request_id",
+				pt0id,
+				pt1id);
 	}
 
 	@EnabledIf("isRequestIdSupported")

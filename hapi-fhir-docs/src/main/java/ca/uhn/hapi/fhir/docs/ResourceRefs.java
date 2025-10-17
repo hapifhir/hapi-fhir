@@ -20,12 +20,11 @@
 package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Reference;
 
 public class ResourceRefs {
-
-	private static FhirContext ourCtx = FhirContext.forDstu2();
 
 	public static void main(String[] args) {
 		manualContained();
@@ -33,21 +32,25 @@ public class ResourceRefs {
 
 	public static void manualContained() {
 		// START SNIPPET: manualContained
-		// Create an organization, and give it a local ID
-		Organization org = new Organization();
-		org.setId("#localOrganization");
-		org.getNameElement().setValue("Contained Test Organization");
+		// Create a practitioner resource, and give it a local ID. This ID must be
+		// unique within the containing resource, but does not need to be otherwise
+		// unique.
+		Practitioner pract = new Practitioner();
+		pract.setId("my-practitioner");
+		pract.addName().setFamily("Smith").addGiven("Juanita");
+		pract.addTelecom().setValue("+1 (289) 555-1234");
 
 		// Create a patient
 		Patient patient = new Patient();
 		patient.setId("Patient/1333");
-		patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
+		patient.addIdentifier().setSystem("http://example.com/mrns").setValue("253345");
 
 		// Set the reference, and manually add the contained resource
-		patient.getManagingOrganization().setReference("#localOrganization");
-		patient.getContained().add(org);
+		patient.addGeneralPractitioner(new Reference("#my-practitioner"));
+		patient.getContained().add(pract);
 
-		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		String encoded =
+				FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
 		System.out.println(encoded);
 		// END SNIPPET: manualContained
 	}

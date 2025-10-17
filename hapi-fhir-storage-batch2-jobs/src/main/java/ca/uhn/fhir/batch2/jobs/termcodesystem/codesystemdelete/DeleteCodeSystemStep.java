@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI-FHIR Storage Batch2 Jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -72,5 +72,11 @@ public class DeleteCodeSystemStep
 		 * Thus, we don't need to "consume" anything
 		 */
 		return ChunkOutcome.SUCCESS();
+	}
+
+	@Override
+	public IReductionStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult, VoidModel>
+			newInstance() {
+		return new DeleteCodeSystemStep(myITermCodeSystemSvc);
 	}
 }

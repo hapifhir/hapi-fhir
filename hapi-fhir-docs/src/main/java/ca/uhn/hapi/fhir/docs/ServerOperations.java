@@ -24,6 +24,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -48,10 +49,13 @@ public class ServerOperations {
 
 	// START SNIPPET: manualInputAndOutput
 	@Operation(name = "$manualInputAndOutput", manualResponse = true, manualRequest = true)
-	public void manualInputAndOutput(HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
+	public void manualInputAndOutput(
+			HttpServletRequest theServletRequest, RequestDetails theRequest, HttpServletResponse theServletResponse)
 			throws IOException {
 		String contentType = theServletRequest.getContentType();
-		byte[] bytes = IOUtils.toByteArray(theServletRequest.getInputStream());
+		// Warning - don't use the theServletRequest.getInputStream().  It may have been consumed by the FHIR server.
+		// The RequestDetails keeps a copy of the input stream for you to use.
+		byte[] bytes = IOUtils.toByteArray(theRequest.getInputStream());
 
 		ourLog.info("Received call with content type {} and {} bytes", contentType, bytes.length);
 

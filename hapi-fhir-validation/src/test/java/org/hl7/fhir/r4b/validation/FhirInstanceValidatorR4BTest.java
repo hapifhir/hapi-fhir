@@ -59,7 +59,6 @@ import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPolicy;
-import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterAll;
@@ -75,6 +74,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.TreeSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -86,6 +86,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -523,8 +524,8 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 		String input = IOUtils.toString(FhirInstanceValidatorR4BTest.class.getResourceAsStream("/r4/diagnosticreport-example-gingival-mass.json"), Constants.CHARSET_UTF8);
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> messages = logResultsAndReturnAll(output);
-		assertThat(messages).hasSize(1);
-		assertEquals("Base64 encoded values SHOULD not contain any whitespace (per RFC 4648). Note that non-validating readers are encouraged to accept whitespace anyway", messages.get(0).getMessage());
+		assertThat(messages).hasSize(2);
+		assertEquals("Base64 encoded values SHOULD not contain any whitespace (per RFC 4648). Note that non-validating readers are encouraged to accept whitespace anyway", messages.get(1).getMessage());
 	}
 
 	@Test
@@ -1022,9 +1023,12 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
-		assertThat(errors).hasSize(1);
-		assertEquals("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found", errors.get(0).getMessage());
-		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
+		assertThat(errors).hasSize(2);
+		assertThat(errors.stream())
+			.anyMatch(r ->
+				(r.getSeverity() == ResultSeverityEnum.ERROR) &&
+					(r.getMessage().equals("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found")) );
+
 	}
 
 	@Test
@@ -1200,10 +1204,14 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 
 		ValidationResult output = myFhirValidator.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertThat(all).hasSize(1);
-		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
-		assertThat(all.get(0).getMessage()).contains("None of the codings provided are in the value set 'IdentifierType'");
+		assertThat(all).hasSize(2);
+
+		assertThat(all.get(0).getMessage()).contains("CodeSystem is unknown and can't be validated: http://example.com/foo/bar for 'http://example.com/foo/bar#bar'");
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
+
+		assertEquals("Patient.identifier[0].type", all.get(1).getLocationString());
+		assertThat(all.get(1).getMessage()).contains("None of the codings provided are in the value set 'IdentifierType'");
+		assertEquals(ResultSeverityEnum.WARNING, all.get(1).getSeverity());
 
 	}
 
@@ -1223,19 +1231,26 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 		input.getValueQuantity().setCode("Heck");
 		output = myFhirValidator.validateWithResult(input);
 		all = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(all).hasSize(3);
+		assertThat(all).hasSize(4);
 		// validate first error, in R4B (as opposed to R4) Observation.value.ofType(Quantity) has ValueSet binding,
 		// so first error has `Unknown code for ValueSet` error message
-		assertThat(all.get(0).getMessage()).contains("The Coding provided (http://unitsofmeasure.org#Heck) was not found in the value set 'Vital Signs Units' " +
+		Optional<SingleValidationMessage> notFoundInVitalSignsUnitsMessage = all.stream().filter(m -> m.getMessage().contains("The Coding provided (http://unitsofmeasure.org#Heck) was not found in the value set 'Vital Signs Units' " +
 			"(http://hl7.org/fhir/ValueSet/ucum-vitals-common|4.3.0), and a code should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable). " +
-			" (error message = Unknown code 'http://unitsofmeasure.org#Heck' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/ucum-vitals-common'");
-		assertThat(all.get(0).getLocationString()).contains("Observation.value.ofType(Quantity)");
-		// validate second error
-		assertThat(all.get(1).getMessage()).contains("Error processing unit 'Heck': The unit 'Heck' is unknown' at position 0 (for 'http://unitsofmeasure.org#Heck')");
-		assertThat(all.get(1).getLocationString()).contains("Observation.value.ofType(Quantity).code");
-		// validate third error
-		assertThat(all.get(2).getMessage()).contains("The value provided ('Heck') was not found in the value set 'Body Temperature Units'");
-		assertThat(all.get(2).getLocationString()).contains("Observation.value.ofType(Quantity).code");
+			" (error message = Unknown code 'http://unitsofmeasure.org#Heck' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/ucum-vitals-common'")).findFirst();
+		assertThat(notFoundInVitalSignsUnitsMessage.isPresent()).isTrue();
+		assertThat(notFoundInVitalSignsUnitsMessage.get().getLocationString()).contains("Observation.value.ofType(Quantity)");
+
+		// Ensure there's a 'Heck is unknown' error. Note that there may be multiple of these in validation logic, but all should be rooted at path `Observation.value.ofType(Quantity)`
+		Optional<SingleValidationMessage> heckIsUnknownMessage = all.stream().filter(m ->
+		m.getMessage().contains("Error processing unit 'Heck': The unit 'Heck' is unknown' at position 0 (for 'http://unitsofmeasure.org#Heck')")).findFirst();
+		assertThat(heckIsUnknownMessage.isPresent()).isTrue();
+		assertThat(heckIsUnknownMessage.get().getLocationString()).contains("Observation.value.ofType(Quantity)");
+
+		// Ensure there's a ('Heck') was not found in the value set 'Body Temperature Units' error.
+		Optional<SingleValidationMessage> notFoundInBodyTemperatureUnitsMessage = all.stream().filter(m ->
+			m.getMessage().contains("The value provided ('Heck') was not found in the value set 'Body Temperature Units'")).findFirst();
+		assertThat(notFoundInBodyTemperatureUnitsMessage.isPresent()).isTrue();
+		assertThat(notFoundInBodyTemperatureUnitsMessage.get().getLocationString()).contains("Observation.value.ofType(Quantity).code");
 	}
 
 	@Test
@@ -1285,7 +1300,7 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 		myFhirValidator.validateWithResult(encoded);
 
-		verify(resourceFetcher, times(12)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean());
+		verify(resourceFetcher, times(12)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean(), anyList());
 		verify(policyAdvisor, times(12)).policyForContained(any(), any(), any(), any(), any(), any(), any(), any(), any());
 	}
 

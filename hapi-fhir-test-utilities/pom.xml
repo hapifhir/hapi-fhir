@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>8.1.0-SNAPSHOT</version>
+		<version>8.5.7-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -13,7 +13,7 @@
 	<artifactId>hapi-fhir-test-utilities</artifactId>
 	<packaging>jar</packaging>
 	<name>HAPI FHIR Test Utilities</name>
-	<url>http://jamesagnew.github.io/hapi-fhir/</url>
+	<url>https://hapifhir.io/</url>
 
 	<properties>
 		<!-- this is a test jar, so use our test settings -->

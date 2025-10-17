@@ -27,12 +27,12 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
-public class MethodOutcome {
+public class MethodOutcome implements IHasHeaders {
 
 	private Boolean myCreated;
 	private IIdType myId;
@@ -192,7 +192,7 @@ public class MethodOutcome {
 	 */
 	public Map<String, List<String>> getResponseHeaders() {
 		if (myResponseHeaders == null) {
-			myResponseHeaders = new HashMap<>();
+			myResponseHeaders = new TreeMap<>(String.CASE_INSENSITIVE_ORDER); // HTTP Headers are case-insensitive.
 		}
 		return myResponseHeaders;
 	}
@@ -201,7 +201,8 @@ public class MethodOutcome {
 	 * Sets the headers for the HTTP response
 	 */
 	public void setResponseHeaders(Map<String, List<String>> theResponseHeaders) {
-		myResponseHeaders = theResponseHeaders;
+		myResponseHeaders = new TreeMap<>(String.CASE_INSENSITIVE_ORDER); // HTTP Headers are case-insensitive.
+		myResponseHeaders.putAll(theResponseHeaders);
 	}
 
 	public Optional<String> getFirstResponseHeader(String theHeader) {
@@ -238,7 +239,7 @@ public class MethodOutcome {
 	 */
 	public void fireResourceViewCallbacks() {
 		if (myResourceViewCallbacks != null) {
-			myResourceViewCallbacks.forEach(t -> t.run());
+			myResourceViewCallbacks.forEach(Runnable::run);
 			myResourceViewCallbacks.clear();
 		}
 	}

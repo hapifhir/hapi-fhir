@@ -20,15 +20,20 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IJpaDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.patch.FhirPatch;
 import ca.uhn.fhir.jpa.patch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.patch.XmlPatchUtils;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.update.UpdateParameters;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
@@ -73,6 +78,12 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 	@Autowired
 	protected abstract IDeleteExpungeJobSubmitter getDeleteExpungeJobSubmitter();
 
+	@Autowired
+	protected abstract IRequestPartitionHelperSvc getRequestPartitionHelperService();
+
+	@Autowired
+	protected abstract MatchUrlService getMatchUrlService();
+
 	@Override
 	public DaoMethodOutcome patch(
 			IIdType theId,
@@ -81,20 +92,34 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 			String thePatchBody,
 			IBaseParameters theFhirPatchBody,
 			RequestDetails theRequestDetails) {
+
+		ReadPartitionIdRequestDetails details;
+		if (isNotBlank(theConditionalUrl)) {
+			MatchUrlService.ResourceTypeAndSearchParameterMap parsed =
+					getMatchUrlService().parseAndTranslateMatchUrl(theConditionalUrl);
+			details = ReadPartitionIdRequestDetails.forPatch(
+					parsed.resourceDefinition().getName(), parsed.searchParameterMap());
+		} else {
+			details = ReadPartitionIdRequestDetails.forPatch(getResourceName(), theId);
+		}
+		RequestPartitionId requestPartitionId =
+				getRequestPartitionHelperService().determineReadPartitionForRequest(theRequestDetails, details);
+
 		TransactionDetails transactionDetails = new TransactionDetails();
 		return getTransactionService()
-				.execute(
+				.withRequest(theRequestDetails)
+				.withTransactionDetails(transactionDetails)
+				.withRequestPartitionId(requestPartitionId)
+				.execute(tx -> patchInTransaction(
+						theId,
+						theConditionalUrl,
+						true,
+						thePatchType,
+						thePatchBody,
+						theFhirPatchBody,
 						theRequestDetails,
 						transactionDetails,
-						tx -> patchInTransaction(
-								theId,
-								theConditionalUrl,
-								true,
-								thePatchType,
-								thePatchBody,
-								theFhirPatchBody,
-								theRequestDetails,
-								transactionDetails));
+						requestPartitionId));
 	}
 
 	@Override
@@ -106,53 +131,38 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 			String thePatchBody,
 			IBaseParameters theFhirPatchBody,
 			RequestDetails theRequestDetails,
-			TransactionDetails theTransactionDetails) {
+			TransactionDetails theTransactionDetails,
+			RequestPartitionId theRequestPartitionId) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
+
+		boolean isHistoryRewrite = myStorageSettings.isUpdateWithHistoryRewriteEnabled()
+				&& theRequestDetails != null
+				&& theRequestDetails.isRewriteHistory();
+
+		if (isHistoryRewrite && !theId.hasVersionIdPart()) {
+			throw new InvalidRequestException(
+					Msg.code(2717) + "Invalid resource ID for rewrite history: ID must contain a history version");
+		}
 
 		IBasePersistedResource entityToUpdate;
 		IIdType resourceId;
 		if (isNotBlank(theConditionalUrl)) {
-
-			Set<IResourcePersistentId> match = getMatchResourceUrlService()
-					.processMatchUrl(theConditionalUrl, getResourceType(), theTransactionDetails, theRequestDetails);
-			if (match.size() > 1) {
-				String msg = getContext()
-						.getLocalizer()
-						.getMessageSanitized(
-								BaseStorageDao.class,
-								"transactionOperationWithMultipleMatchFailure",
-								"PATCH",
-								getResourceName(),
-								theConditionalUrl,
-								match.size());
-				throw new PreconditionFailedException(Msg.code(972) + msg);
-			} else if (match.size() == 1) {
-				IResourcePersistentId pid = match.iterator().next();
-				entityToUpdate = readEntityLatestVersion(pid, theRequestDetails, theTransactionDetails);
-				resourceId = entityToUpdate.getIdDt();
-			} else {
-				String msg = getContext()
-						.getLocalizer()
-						.getMessageSanitized(BaseStorageDao.class, "invalidMatchUrlNoMatches", theConditionalUrl);
-				throw new ResourceNotFoundException(Msg.code(973) + msg);
-			}
-
+			entityToUpdate = getEntityToPatchWithMatchUrlCache(
+					theConditionalUrl, theRequestDetails, theTransactionDetails, theRequestPartitionId);
+			resourceId = entityToUpdate.getIdDt();
 		} else {
 			resourceId = theId;
-			entityToUpdate = readEntityLatestVersion(theId, theRequestDetails, theTransactionDetails);
-			if (theId.hasVersionIdPart()) {
-				if (theId.getVersionIdPartAsLong() != entityToUpdate.getVersion()) {
-					throw new ResourceVersionConflictException(Msg.code(974) + "Version " + theId.getVersionIdPart()
-							+ " is not the most recent version of this resource, unable to apply patch");
-				}
+
+			if (isHistoryRewrite) {
+				entityToUpdate = readEntity(theId, theRequestDetails);
+			} else {
+				entityToUpdate = readEntityLatestVersion(theId, theRequestDetails, theTransactionDetails);
+				validateIsCurrentVersionOrThrow(theId, entityToUpdate);
 			}
 		}
 
+		validateResourceIsNotDeletedOrThrow(entityToUpdate);
 		validateResourceType(entityToUpdate, getResourceName());
-
-		if (entityToUpdate.isDeleted()) {
-			throw createResourceGoneException(entityToUpdate);
-		}
 
 		IBaseResource resourceToUpdate = getStorageResourceParser().toResource(entityToUpdate, false);
 		if (resourceToUpdate == null) {
@@ -162,42 +172,123 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 			resourceToUpdate = theTransactionDetails.getResolvedResource(resourceId);
 		}
 
+		IBaseResource destination =
+				applyPatchToResource(thePatchType, thePatchBody, theFhirPatchBody, resourceToUpdate);
+		@SuppressWarnings("unchecked")
+		T destinationCasted = (T) destination;
+
+		preProcessResourceForStorage(destinationCasted, theRequestDetails, theTransactionDetails, true);
+
+		if (isHistoryRewrite) {
+			return getTransactionService()
+					.withRequest(theRequestDetails)
+					.withTransactionDetails(theTransactionDetails)
+					.execute(tx -> doUpdateWithHistoryRewrite(
+							destinationCasted,
+							theRequestDetails,
+							theTransactionDetails,
+							theRequestPartitionId,
+							RestOperationTypeEnum.PATCH));
+		}
+
+		UpdateParameters updateParameters = new UpdateParameters<>()
+				.setRequestDetails(theRequestDetails)
+				.setResourceIdToUpdate(resourceId)
+				.setMatchUrl(theConditionalUrl)
+				.setShouldPerformIndexing(thePerformIndexing)
+				.setShouldForceUpdateVersion(false)
+				.setResource(destinationCasted)
+				.setEntity(entityToUpdate)
+				.setOperationType(RestOperationTypeEnum.PATCH)
+				.setTransactionDetails(theTransactionDetails)
+				.setShouldForcePopulateOldResourceForProcessing(false);
+
+		return doUpdateForUpdateOrPatch(updateParameters);
+	}
+
+	private static void validateIsCurrentVersionOrThrow(IIdType theId, IBasePersistedResource theEntityToUpdate) {
+		if (theId.hasVersionIdPart() && theId.getVersionIdPartAsLong() != theEntityToUpdate.getVersion()) {
+			throw new ResourceVersionConflictException(Msg.code(974) + "Version " + theId.getVersionIdPart()
+					+ " is not the most recent version of this resource, unable to apply patch");
+		}
+	}
+
+	DaoMethodOutcome doUpdateWithHistoryRewrite(
+			T theResource,
+			RequestDetails theRequest,
+			TransactionDetails theTransactionDetails,
+			RequestPartitionId theRequestPartitionId,
+			RestOperationTypeEnum theRestOperationType) {
+
+		throw new UnsupportedOperationException(Msg.code(2718) + "Patch with history rewrite is unsupported.");
+	}
+
+	private void validateResourceIsNotDeletedOrThrow(IBasePersistedResource theEntityToUpdate) {
+		if (theEntityToUpdate.isDeleted()) {
+			throw createResourceGoneException(theEntityToUpdate);
+		}
+	}
+
+	private IBaseResource applyPatchToResource(
+			PatchTypeEnum thePatchType,
+			String thePatchBody,
+			IBaseParameters theFhirPatchBody,
+			IBaseResource theResourceToUpdate) {
 		IBaseResource destination;
 		switch (thePatchType) {
 			case JSON_PATCH:
-				destination = JsonPatchUtils.apply(getContext(), resourceToUpdate, thePatchBody);
+				destination = JsonPatchUtils.apply(getContext(), theResourceToUpdate, thePatchBody);
 				break;
 			case XML_PATCH:
-				destination = XmlPatchUtils.apply(getContext(), resourceToUpdate, thePatchBody);
+				destination = XmlPatchUtils.apply(getContext(), theResourceToUpdate, thePatchBody);
 				break;
 			case FHIR_PATCH_XML:
 			case FHIR_PATCH_JSON:
 			default:
 				IBaseParameters fhirPatchJson = theFhirPatchBody;
-				new FhirPatch(getContext()).apply(resourceToUpdate, fhirPatchJson);
-				destination = resourceToUpdate;
+				new FhirPatch(getContext()).apply(theResourceToUpdate, fhirPatchJson);
+				destination = theResourceToUpdate;
 				break;
 		}
+		return destination;
+	}
 
-		@SuppressWarnings("unchecked")
-		T destinationCasted = (T) destination;
-		myFhirContext
-				.newJsonParser()
-				.setParserErrorHandler(STRICT_ERROR_HANDLER)
-				.encodeResourceToString(destinationCasted);
+	private IBasePersistedResource getEntityToPatchWithMatchUrlCache(
+			String theConditionalUrl,
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails,
+			RequestPartitionId theRequestPartitionId) {
+		IBasePersistedResource theEntityToUpdate;
 
-		preProcessResourceForStorage(destinationCasted, theRequestDetails, theTransactionDetails, true);
+		Set<IResourcePersistentId> match = getMatchResourceUrlService()
+				.processMatchUrl(
+						theConditionalUrl,
+						getResourceType(),
+						theTransactionDetails,
+						theRequestDetails,
+						theRequestPartitionId);
+		if (match.size() > 1) {
+			String msg = getContext()
+					.getLocalizer()
+					.getMessageSanitized(
+							BaseStorageDao.class,
+							"transactionOperationWithMultipleMatchFailure",
+							"PATCH",
+							getResourceName(),
+							theConditionalUrl,
+							match.size());
+			throw new PreconditionFailedException(Msg.code(972) + msg);
+		} else if (match.size() == 1) {
+			IResourcePersistentId pid = match.iterator().next();
+			theEntityToUpdate = readEntityLatestVersion(pid, theRequestDetails, theTransactionDetails);
 
-		return doUpdateForUpdateOrPatch(
-				theRequestDetails,
-				resourceId,
-				theConditionalUrl,
-				thePerformIndexing,
-				false,
-				destinationCasted,
-				entityToUpdate,
-				RestOperationTypeEnum.PATCH,
-				theTransactionDetails);
+		} else {
+			String msg = getContext()
+					.getLocalizer()
+					.getMessageSanitized(BaseStorageDao.class, "invalidMatchUrlNoMatches", theConditionalUrl);
+			throw new ResourceNotFoundException(Msg.code(973) + msg);
+		}
+		return theEntityToUpdate;
 	}
 
 	@Override
@@ -216,33 +307,32 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 	protected abstract IBasePersistedResource readEntityLatestVersion(
 			IIdType theId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
 
-	protected DaoMethodOutcome doUpdateForUpdateOrPatch(
-			RequestDetails theRequest,
-			IIdType theResourceId,
-			String theMatchUrl,
-			boolean thePerformIndexing,
-			boolean theForceUpdateVersion,
-			T theResource,
-			IBasePersistedResource theEntity,
-			RestOperationTypeEnum theOperationType,
-			TransactionDetails theTransactionDetails) {
-		if (theResourceId.hasVersionIdPart()
-				&& Long.parseLong(theResourceId.getVersionIdPart()) != theEntity.getVersion()) {
-			throw new ResourceVersionConflictException(
-					Msg.code(989) + "Trying to update " + theResourceId + " but this is not the current version");
+	protected DaoMethodOutcome doUpdateForUpdateOrPatch(UpdateParameters<T> theUpdateParameters) {
+
+		if (theUpdateParameters.getResourceIdToUpdate().hasVersionIdPart()
+				&& Long.parseLong(theUpdateParameters.getResourceIdToUpdate().getVersionIdPart())
+						!= theUpdateParameters.getEntity().getVersion()) {
+			throw new ResourceVersionConflictException(Msg.code(989) + "Trying to update "
+					+ theUpdateParameters.getResourceIdToUpdate() + " but this is not the current version");
 		}
 
-		if (theResourceId.hasResourceType() && !theResourceId.getResourceType().equals(getResourceName())) {
+		if (theUpdateParameters.getResourceIdToUpdate().hasResourceType()
+				&& !theUpdateParameters
+						.getResourceIdToUpdate()
+						.getResourceType()
+						.equals(getResourceName())) {
 			throw new UnprocessableEntityException(Msg.code(990) + "Invalid resource ID["
-					+ theEntity.getIdDt().toUnqualifiedVersionless() + "] of type[" + theEntity.getResourceType()
+					+ theUpdateParameters.getEntity().getIdDt().toUnqualifiedVersionless() + "] of type["
+					+ theUpdateParameters.getEntity().getResourceType()
 					+ "] - Does not match expected [" + getResourceName() + "]");
 		}
 
 		IBaseResource oldResource;
-		if (getStorageSettings().isMassIngestionMode()) {
+		if (getStorageSettings().isMassIngestionMode()
+				&& !theUpdateParameters.shouldForcePopulateOldResourceForProcessing()) {
 			oldResource = null;
 		} else {
-			oldResource = getStorageResourceParser().toResource(theEntity, false);
+			oldResource = getStorageResourceParser().toResource(theUpdateParameters.getEntity(), false);
 		}
 
 		/*
@@ -256,8 +346,8 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		 * See SystemProviderR4Test#testTransactionReSavesPreviouslyDeletedResources
 		 * for a test that needs this.
 		 */
-		boolean wasDeleted = theEntity.isDeleted();
-		theEntity.setNotDeleted();
+		boolean wasDeleted = theUpdateParameters.getEntity().isDeleted();
+		theUpdateParameters.getEntity().setNotDeleted();
 
 		/*
 		 * If we aren't indexing, that means we're doing this inside a transaction.
@@ -265,10 +355,16 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		 * after placeholder IDs have been replaced, by calling {@link #updateInternal}
 		 * directly. So we just bail now.
 		 */
-		if (!thePerformIndexing) {
-			theResource.setId(theEntity.getIdDt().getValue());
+		if (!theUpdateParameters.shouldPerformIndexing()) {
+			theUpdateParameters
+					.getResource()
+					.setId(theUpdateParameters.getEntity().getIdDt().getValue());
 			DaoMethodOutcome outcome = toMethodOutcome(
-							theRequest, theEntity, theResource, theMatchUrl, theOperationType)
+							theUpdateParameters.getRequest(),
+							theUpdateParameters.getEntity(),
+							theUpdateParameters.getResource(),
+							theUpdateParameters.getMatchUrl(),
+							theUpdateParameters.getOperationType())
 					.setCreated(wasDeleted);
 			outcome.setPreviousResource(oldResource);
 			if (!outcome.isNop()) {
@@ -284,16 +380,16 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		 * Otherwise, we're not in a transaction
 		 */
 		return updateInternal(
-				theRequest,
-				theResource,
-				theMatchUrl,
-				thePerformIndexing,
-				theForceUpdateVersion,
-				theEntity,
-				theResourceId,
+				theUpdateParameters.getRequest(),
+				theUpdateParameters.getResource(),
+				theUpdateParameters.getMatchUrl(),
+				theUpdateParameters.shouldPerformIndexing(),
+				theUpdateParameters.shouldForceUpdateVersion(),
+				theUpdateParameters.getEntity(),
+				theUpdateParameters.getResourceIdToUpdate(),
 				oldResource,
-				theOperationType,
-				theTransactionDetails);
+				theUpdateParameters.getOperationType(),
+				theUpdateParameters.getTransactionDetails());
 	}
 
 	public static void validateResourceType(IBasePersistedResource<?> theEntity, String theResourceName) {

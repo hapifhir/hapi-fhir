@@ -25,8 +25,24 @@ import org.apache.commons.lang3.Validate;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.util.concurrent.RejectedExecutionHandler;
+
 public final class ThreadPoolUtil {
 	private ThreadPoolUtil() {}
+
+	/**
+	 * Creates a fixed-size thread pool with {@literal thePoolSize} threads
+	 * and an unlimited-length work queue.
+	 *
+	 * @param thePoolSize The number of threads in the pool
+	 * @param theThreadNamePrefix Threads in the pool will be named with this prefix followed by a dash and a number
+	 *
+	 * @since 8.4.0
+	 */
+	@Nonnull
+	public static ThreadPoolTaskExecutor newThreadPool(int thePoolSize, String theThreadNamePrefix) {
+		return newThreadPool(thePoolSize, thePoolSize, theThreadNamePrefix, 0);
+	}
 
 	@Nonnull
 	public static ThreadPoolTaskExecutor newThreadPool(
@@ -37,7 +53,8 @@ public final class ThreadPoolUtil {
 	@Nonnull
 	public static ThreadPoolTaskExecutor newThreadPool(
 			int theCorePoolSize, int theMaxPoolSize, String theThreadNamePrefix, int theQueueCapacity) {
-		return newThreadPool(theCorePoolSize, theMaxPoolSize, theThreadNamePrefix, theQueueCapacity, null);
+		return newThreadPool(
+				theCorePoolSize, theMaxPoolSize, theThreadNamePrefix, theQueueCapacity, null, new BlockPolicy());
 	}
 
 	@Nonnull
@@ -46,18 +63,39 @@ public final class ThreadPoolUtil {
 			int theMaxPoolSize,
 			String theThreadNamePrefix,
 			int theQueueCapacity,
-			TaskDecorator taskDecorator) {
+			RejectedExecutionHandler theRejectedExecutionHandler) {
+		return newThreadPool(
+				theCorePoolSize,
+				theMaxPoolSize,
+				theThreadNamePrefix,
+				theQueueCapacity,
+				null,
+				theRejectedExecutionHandler);
+	}
+
+	@Nonnull
+	public static ThreadPoolTaskExecutor newThreadPool(
+			int theCorePoolSize,
+			int theMaxPoolSize,
+			String theThreadNamePrefix,
+			int theQueueCapacity,
+			TaskDecorator taskDecorator,
+			RejectedExecutionHandler theRejectedExecutionHandler) {
 		Validate.isTrue(
 				theCorePoolSize == theMaxPoolSize || theQueueCapacity == 0,
 				"If the queue capacity is greater than 0, core pool size needs to match max pool size or the system won't grow the queue");
-		Validate.isTrue(theThreadNamePrefix.endsWith("-"), "Thread pool prefix name must end with a hyphen");
+		Validate.notBlank(theThreadNamePrefix, "Thread name prefix must not be blank");
+		String threadNamePrefix = theThreadNamePrefix;
+		if (!threadNamePrefix.endsWith("-")) {
+			threadNamePrefix = threadNamePrefix + "-";
+		}
 		ThreadPoolTaskExecutor asyncTaskExecutor = new ThreadPoolTaskExecutor();
 		asyncTaskExecutor.setCorePoolSize(theCorePoolSize);
 		asyncTaskExecutor.setMaxPoolSize(theMaxPoolSize);
 		asyncTaskExecutor.setQueueCapacity(theQueueCapacity);
 		asyncTaskExecutor.setAllowCoreThreadTimeOut(true);
-		asyncTaskExecutor.setThreadNamePrefix(theThreadNamePrefix);
-		asyncTaskExecutor.setRejectedExecutionHandler(new BlockPolicy());
+		asyncTaskExecutor.setThreadNamePrefix(threadNamePrefix);
+		asyncTaskExecutor.setRejectedExecutionHandler(theRejectedExecutionHandler);
 		asyncTaskExecutor.setTaskDecorator(taskDecorator);
 		asyncTaskExecutor.initialize();
 		return asyncTaskExecutor;

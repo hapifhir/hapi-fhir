@@ -130,15 +130,7 @@ public class TestDstu3Config {
 		retVal.setUsername("");
 		retVal.setPassword("");
 
-		/*
-		 * We use a randomized number of maximum threads in order to try
-		 * and catch any potential deadlocks caused by database connection
-		 * starvation.
-		 *
-		 * We need a minimum of 2 for most transactions, so 2 is added
-		 */
-		int maxThreads = (int) (Math.random() * 6.0) + 2;
-
+		int maxThreads = 6;
 		if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
 			maxThreads = 1;
 		}

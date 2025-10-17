@@ -15,7 +15,7 @@
       }, {
         "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
         "valueReference": {
-          "reference": "#cqf-tooling"
+          "reference": "cqf-tooling"
         }
       } ],
       "url": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM104",

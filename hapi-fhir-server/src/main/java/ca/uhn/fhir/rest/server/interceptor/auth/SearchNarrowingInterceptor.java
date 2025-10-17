@@ -41,7 +41,7 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
-import ca.uhn.fhir.util.bundle.ModifiableBundleEntry;
+import ca.uhn.fhir.util.bundle.ModifiableBundleEntryParts;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 import jakarta.annotation.Nonnull;
@@ -73,11 +73,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * <p>
  * For example, this interceptor
  * could be used to restrict a user to only viewing data belonging to Patient/123 (i.e. data
- * in the <code>Patient/123</code> compartment). In this case, a user performing a search
+ * in the Patient/123 compartment). In this case, a user performing a search
  * for<br/>
- * <code>http://baseurl/Observation?category=laboratory</code><br/>
+ * {@code http://baseurl/Observation?category=laboratory}<br/>
  * would receive results as though they had requested<br/>
- * <code>http://baseurl/Observation?subject=Patient/123&category=laboratory</code>
+ * {@code http://baseurl/Observation?subject=Patient/123&category=laboratory}
  * </p>
  * <p>
  * Note that this interceptor should be used in combination with {@link AuthorizationInterceptor}
@@ -198,7 +198,7 @@ public class SearchNarrowingInterceptor {
 					IBaseBundle bundle = (IBaseBundle) theRequestDetails.getResource();
 					FhirContext ctx = theRequestDetails.getFhirContext();
 					BundleEntryUrlProcessor processor = new BundleEntryUrlProcessor(ctx, theRequestDetails);
-					BundleUtil.processEntries(ctx, bundle, processor);
+					BundleUtil.processAllEntries(ctx, bundle, processor);
 					break;
 			}
 		}
@@ -703,17 +703,17 @@ public class SearchNarrowingInterceptor {
 		List<AllowedCodeInValueSet> retVal = getPostFilteringListOrNull(theRequestDetails);
 		if (retVal == null) {
 			retVal = new ArrayList<>();
-			theRequestDetails.setAttribute(POST_FILTERING_LIST_ATTRIBUTE_NAME, retVal);
+			theRequestDetails.getUserData().put(POST_FILTERING_LIST_ATTRIBUTE_NAME, retVal);
 		}
 		return retVal;
 	}
 
 	@SuppressWarnings("unchecked")
 	static List<AllowedCodeInValueSet> getPostFilteringListOrNull(RequestDetails theRequestDetails) {
-		return (List<AllowedCodeInValueSet>) theRequestDetails.getAttribute(POST_FILTERING_LIST_ATTRIBUTE_NAME);
+		return (List<AllowedCodeInValueSet>) theRequestDetails.getUserData().get(POST_FILTERING_LIST_ATTRIBUTE_NAME);
 	}
 
-	private class BundleEntryUrlProcessor implements Consumer<ModifiableBundleEntry> {
+	private class BundleEntryUrlProcessor implements Consumer<ModifiableBundleEntryParts> {
 		private final FhirContext myFhirContext;
 		private final ServletRequestDetails myRequestDetails;
 		private final AuthorizedList myAuthorizedList;
@@ -726,25 +726,25 @@ public class SearchNarrowingInterceptor {
 
 		@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 		@Override
-		public void accept(ModifiableBundleEntry theModifiableBundleEntry) {
+		public void accept(ModifiableBundleEntryParts theModifiableBundleEntry) {
 			if (myAuthorizedList == null) {
 				return;
 			}
 
-			RequestTypeEnum method = theModifiableBundleEntry.getRequestMethod();
-			String requestUrl = theModifiableBundleEntry.getRequestUrl();
+			RequestTypeEnum method = theModifiableBundleEntry.getMethod();
+			String requestUrl = theModifiableBundleEntry.getUrl();
 			if (method != null && isNotBlank(requestUrl)) {
 
 				String resourceType = UrlUtil.parseUrl(requestUrl).getResourceType();
 
 				switch (method) {
 					case GET: {
-						String existingRequestUrl = theModifiableBundleEntry.getRequestUrl();
+						String existingRequestUrl = theModifiableBundleEntry.getUrl();
 						String newConditionalUrl = narrowConditionalUrl(
 								myRequestDetails, existingRequestUrl, false, resourceType, true, myAuthorizedList);
 						if (isNotBlank(newConditionalUrl)) {
 							newConditionalUrl = resourceType + "?" + newConditionalUrl;
-							theModifiableBundleEntry.setRequestUrl(myFhirContext, newConditionalUrl);
+							theModifiableBundleEntry.setRequestUrl(newConditionalUrl);
 						}
 						break;
 					}
@@ -760,7 +760,7 @@ public class SearchNarrowingInterceptor {
 										false,
 										myAuthorizedList);
 								if (isNotBlank(newConditionalUrl)) {
-									theModifiableBundleEntry.setRequestIfNoneExist(myFhirContext, newConditionalUrl);
+									theModifiableBundleEntry.setRequestIfNoneExist(newConditionalUrl);
 								}
 							}
 						}
@@ -780,7 +780,7 @@ public class SearchNarrowingInterceptor {
 										false,
 										myAuthorizedList);
 								if (isNotBlank(newConditionalUrl)) {
-									theModifiableBundleEntry.setRequestUrl(myFhirContext, newConditionalUrl);
+									theModifiableBundleEntry.setRequestUrl(newConditionalUrl);
 								}
 							}
 						}

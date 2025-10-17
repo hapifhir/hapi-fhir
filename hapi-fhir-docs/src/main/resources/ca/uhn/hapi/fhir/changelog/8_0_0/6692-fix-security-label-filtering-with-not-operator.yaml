@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 6692
+jira: SMILE-9736
+title: "Previously, when the in-memory matcher was used to match resources with a `_security` label filter 
+and a `:not` operator (i.e. `_security:not=http://terminology.hl7.org/CodeSystem/v3-ActCode|NODSCLCD`), 
+resources with no security labels at all were not matched. This has been fixed."

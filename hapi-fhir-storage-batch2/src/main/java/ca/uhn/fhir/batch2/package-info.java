@@ -34,7 +34,7 @@
  *
  * Job instances and work chunks are stored in the database.  Work is distributed to workers via queues.
  * The queue message is just the ids of the chunk (chunk id, step id, instance id, job definition id, etc.).
- * The worker receives the notification from Spring Messaging ({@link ca.uhn.fhir.batch2.coordinator.WorkChannelMessageHandler#handleMessage}),
+ * The worker receives the notification from Spring Messaging ({@link ca.uhn.fhir.broker.api.IMessageListener#handleMessage}),
  * fetches the data from the store and processes the data using the handler defined in for the step.
  * The worker updates chunk state as appropriate.  It may also update the job instance state.
  *
@@ -46,7 +46,7 @@
  *
  * </p><p>
  *
- * Job and chunk processing follow state machines described {@link hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md}
+ * Job and chunk processing follow state machines described in the batch2_states.md documentation.
  * Chunks have a simple {@link ca.uhn.fhir.batch2.model.WorkChunkStatusEnum state system} with states
  * READY, QUEUED, IN_PROGRESS, ERRORED, FAILED, COMPLETED.
  * The initial state is READY, and the final states are FAILED, and COMPLETED.
@@ -108,7 +108,7 @@
  *        {@link ca.uhn.fhir.batch2.coordinator.JobCoordinatorImpl#startInstance}
  *        </li>
  *    <li> When workers dequeue a chunk, they trigger a QUEUED->IN_PROGRESS transition to report status.
- *        {@link ca.uhn.fhir.batch2.coordinator.WorkChannelMessageHandler.MessageProcess#updateAndValidateJobStatus}
+ *        {@link ca.uhn.fhir.batch2.coordinator.WorkChannelMessageListener.MessageProcess#updateAndValidateJobStatus()}
  *        </li>
  *    <li> As a special case, if the first chunk produces no children, the job advances IN_PROGRESS->COMPLETE
  *         {@link ca.uhn.fhir.batch2.coordinator.JobStepExecutor#executeStep()}

@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 6686
+title: "With partitioning selection mode set to 'PATIENT_ID', attempting to create a cross-partition subscription 
+would fail if the default partition ID was assigned a value different than the default value(null). This issue is fixed."
+
+

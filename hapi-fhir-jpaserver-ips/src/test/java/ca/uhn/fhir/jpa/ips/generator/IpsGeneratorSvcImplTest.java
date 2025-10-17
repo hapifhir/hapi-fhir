@@ -617,6 +617,46 @@ public class IpsGeneratorSvcImplTest {
 		assertEquals(1, illnessHistorySection.getEntry().size());
 	}
 
+	/**
+	 * While resources not in the Bundle have their references removed, contained resources should retain their references. They are still included information despite not technically being in the Bundle.
+	 */
+	@Test
+	public void testContainedResourceReferenceNotRemoved() {
+		// Setup Patient
+		initializeGenerationStrategy(
+			List.of(t->Section.newBuilder(t).withNoInfoGenerator(null).build())
+		);
+		registerPatientDaoWithRead();
+
+		// Setup MedicationStatement with contained Medication
+		Medication medication = createSecondaryMedication(MEDICATION_ID);
+		MedicationStatement medicationStatement = createPrimaryMedicationStatement(MEDICATION_ID, MEDICATION_STATEMENT_ID);
+		medicationStatement.addContained(medication);
+		medicationStatement.getMedicationReference().setReference("#" + MEDICATION_ID);
+		IFhirResourceDao<MedicationStatement> medicationStatementDao = registerResourceDaoWithNoData(MedicationStatement.class);
+		when(medicationStatementDao.search(any(), any())).thenReturn(new SimpleBundleProvider(Lists.newArrayList(medicationStatement)));
+
+		Patient patient = new Patient();
+		patient.setId(PATIENT_ID);
+		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(patient, BundleEntrySearchModeEnum.INCLUDE);
+
+		registerRemainingResourceDaos();
+
+		// Test
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID), null);
+
+		MedicationStatement result = (MedicationStatement) outcome
+			.getEntry()
+			.stream()
+			.filter(t -> medicationStatement.fhirType().equals(t.getResource().getResourceType().name()))
+			.map(Bundle.BundleEntryComponent::getResource)
+			.findFirst().orElseThrow();
+		
+		assert(result.hasMedicationReference());
+		assert(result.getMedicationReference().hasReference());
+		assertEquals(result.getMedicationReference().getReference(), "#" + MEDICATION_ID);
+	}
+
 	@Test
 	public void testPatientIsReturnedAsAnIncludeResource() {
 		// Setup Patient

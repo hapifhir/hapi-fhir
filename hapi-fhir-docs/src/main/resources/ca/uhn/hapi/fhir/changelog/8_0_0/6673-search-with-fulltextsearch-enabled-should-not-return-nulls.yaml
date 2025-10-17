@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 6673
+title: "When attempting to search for resources while both `AdvancedHSearchIndexing`
+        and `StoreResourcesInHibernateSearchIndex` are enabled, returned lists
+        could sometimes contain null entries.
+        This has been fixed.
+"

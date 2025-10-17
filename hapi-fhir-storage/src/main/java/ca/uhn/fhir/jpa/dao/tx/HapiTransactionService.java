@@ -61,6 +61,7 @@ import org.springframework.transaction.support.TransactionOperations;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 
@@ -183,11 +184,11 @@ public class HapiTransactionService implements IHapiTransactionService {
 		return execute(theRequestDetails, theTransactionDetails, theCallback, theOnRollback, null, null);
 	}
 
-	@SuppressWarnings("ConstantConditions")
 	/**
 	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
 	 */
 	@Deprecated
+	@SuppressWarnings("ConstantConditions")
 	public <T> T execute(
 			@Nullable RequestDetails theRequestDetails,
 			@Nullable TransactionDetails theTransactionDetails,
@@ -249,7 +250,15 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 	@Nullable
 	protected <T> T doExecute(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
-		final RequestPartitionId requestPartitionId = theExecutionBuilder.getEffectiveRequestPartitionId();
+		RequestPartitionId effectiveRequestPartitionId = theExecutionBuilder.getEffectiveRequestPartitionId();
+		final RequestPartitionId requestPartitionId;
+		if (effectiveRequestPartitionId != null
+				&& myPartitionSettings.isDefaultPartition(effectiveRequestPartitionId)) {
+			requestPartitionId = myPartitionSettings.getDefaultRequestPartitionId();
+		} else {
+			requestPartitionId = effectiveRequestPartitionId;
+		}
+
 		RequestPartitionId previousRequestPartitionId = null;
 		if (requestPartitionId != null) {
 			previousRequestPartitionId = ourRequestPartitionThreadLocal.get();
@@ -335,91 +344,38 @@ public class HapiTransactionService implements IHapiTransactionService {
 			RequestPartitionId previousRequestPartitionId) {
 		ourLog.trace("doExecuteInTransaction");
 		try {
+			// retry loop
 			for (int i = 0; ; i++) {
 				try {
 
 					return doExecuteCallback(theExecutionBuilder, theCallback);
 
 				} catch (Exception e) {
-					if (!isRetriable(e)) {
+					int retriesRemaining = 0;
+					int maxRetries = 0;
+					boolean exceptionIsRetriable = isRetriable(e);
+					if (exceptionIsRetriable) {
+						maxRetries = calculateMaxRetries(theExecutionBuilder.myRequestDetails, e);
+						retriesRemaining = maxRetries - i;
+					}
+
+					// we roll back on all exceptions.
+					theExecutionBuilder.rollbackTransactionProcessingChanges(retriesRemaining > 0);
+
+					if (!exceptionIsRetriable) {
 						ourLog.debug("Unexpected transaction exception. Will not be retried.", e);
 						throw e;
 					} else {
-
+						// We have several exceptions that we consider retriable, call all of them "version conflicts"
 						ourLog.debug("Version conflict detected", e);
 
-						if (theExecutionBuilder.myOnRollback != null) {
-							theExecutionBuilder.myOnRollback.run();
+						// should we retry?
+						if (retriesRemaining > 0) {
+							// We are retrying.
+							sleepForRetry(i);
+						} else {
+							throwResourceVersionConflictException(i, maxRetries, e);
 						}
-
-						int maxRetries = 0;
-
-						/*
-						 * If two client threads both concurrently try to add the same tag that isn't
-						 * known to the system already, they'll both try to create a row in HFJ_TAG_DEF,
-						 * which is the tag definition table. In that case, a constraint error will be
-						 * thrown by one of the client threads, so we auto-retry in order to avoid
-						 * annoying spurious failures for the client.
-						 */
-						if (DaoFailureUtil.isTagStorageFailure(e)) {
-							maxRetries = 3;
-						}
-
-						if (maxRetries == 0) {
-							IInterceptorBroadcaster compositeBroadcaster =
-									CompositeInterceptorBroadcaster.newCompositeBroadcaster(
-											myInterceptorBroadcaster, theExecutionBuilder.myRequestDetails);
-							if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_VERSION_CONFLICT)) {
-								HookParams params = new HookParams()
-										.add(RequestDetails.class, theExecutionBuilder.myRequestDetails)
-										.addIfMatchesType(
-												ServletRequestDetails.class, theExecutionBuilder.myRequestDetails);
-								ResourceVersionConflictResolutionStrategy conflictResolutionStrategy =
-										(ResourceVersionConflictResolutionStrategy)
-												compositeBroadcaster.callHooksAndReturnObject(
-														Pointcut.STORAGE_VERSION_CONFLICT, params);
-								if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
-									maxRetries = conflictResolutionStrategy.getMaxRetries();
-								}
-							}
-						}
-
-						if (i < maxRetries) {
-							if (theExecutionBuilder.myTransactionDetails != null) {
-								theExecutionBuilder
-										.myTransactionDetails
-										.getRollbackUndoActions()
-										.forEach(Runnable::run);
-								theExecutionBuilder.myTransactionDetails.clearRollbackUndoActions();
-								theExecutionBuilder.myTransactionDetails.clearResolvedItems();
-								theExecutionBuilder.myTransactionDetails.clearUserData(
-										XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
-								theExecutionBuilder.myTransactionDetails.clearUserData(
-										XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
-							}
-							double sleepAmount = (250.0d * i) * Math.random();
-							long sleepAmountLong = (long) sleepAmount;
-							mySleepUtil.sleepAtLeast(sleepAmountLong, false);
-
-							ourLog.info(
-									"About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.",
-									sleepAmountLong);
-							continue;
-						}
-
-						IBaseOperationOutcome oo = null;
-						if (e instanceof ResourceVersionConflictException) {
-							oo = ((ResourceVersionConflictException) e).getOperationOutcome();
-						}
-
-						if (maxRetries > 0) {
-							String msg =
-									"Max retries (" + maxRetries + ") exceeded for version conflict: " + e.getMessage();
-							ourLog.info(msg, maxRetries);
-							throw new ResourceVersionConflictException(Msg.code(549) + msg);
-						}
-
-						throw new ResourceVersionConflictException(Msg.code(550) + e.getMessage(), e, oo);
 					}
 				}
 			}
@@ -428,6 +384,36 @@ public class HapiTransactionService implements IHapiTransactionService {
 				ourRequestPartitionThreadLocal.set(previousRequestPartitionId);
 			}
 		}
+	}
+
+	private static void throwResourceVersionConflictException(
+			int theAttemptIndex, int theMaxRetries, Exception theCause) {
+		IBaseOperationOutcome oo = null;
+		if (theCause instanceof ResourceVersionConflictException) {
+			oo = ((ResourceVersionConflictException) theCause).getOperationOutcome();
+		}
+
+		if (theAttemptIndex > 0) {
+			// log if we tried to retry, but still failed
+			String msg = "Max retries (" + theMaxRetries + ") exceeded for version conflict: " + theCause.getMessage();
+			ourLog.info(msg);
+			throw new ResourceVersionConflictException(Msg.code(549) + msg, theCause, oo);
+		}
+
+		throw new ResourceVersionConflictException(Msg.code(550) + theCause.getMessage(), theCause, oo);
+	}
+
+	/**
+	 * Sleep a bit more each time, with 0 sleep on first retry and some random dither.
+	 * @param theAttemptIndex 0-index for the first attempt, 1 for second, etc.
+	 */
+	private void sleepForRetry(int theAttemptIndex) {
+		double sleepAmount = (250.0d * theAttemptIndex) * Math.random();
+		long sleepAmountLong = (long) sleepAmount;
+		ourLog.info(
+				"About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.",
+				sleepAmountLong);
+		mySleepUtil.sleepAtLeast(sleepAmountLong, false);
 	}
 
 	public void setTransactionPropagationWhenChangingPartitions(
@@ -465,7 +451,42 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 	}
 
-	protected class ExecutionBuilder implements IExecutionBuilder, TransactionOperations {
+	private int calculateMaxRetries(RequestDetails theRequestDetails, Exception e) {
+		int maxRetries = 0;
+
+		/*
+		 * If two client threads both concurrently try to add the same tag that isn't
+		 * known to the system already, they'll both try to create a row in HFJ_TAG_DEF,
+		 * which is the tag definition table. In that case, a constraint error will be
+		 * thrown by one of the client threads, so we auto-retry in order to avoid
+		 * annoying spurious failures for the client.
+		 */
+		if (DaoFailureUtil.isTagStorageFailure(e)) {
+			maxRetries = 3;
+		}
+
+		// Our default policy is no-retry.
+		// But we often register UserRequestRetryVersionConflictsInterceptor, which supports a retry header
+		// and retry settings on RequestDetails.
+		if (maxRetries == 0) {
+			IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+					this.myInterceptorBroadcaster, theRequestDetails);
+			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_VERSION_CONFLICT)) {
+				HookParams params = new HookParams()
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+				ResourceVersionConflictResolutionStrategy conflictResolutionStrategy =
+						(ResourceVersionConflictResolutionStrategy) compositeBroadcaster.callHooksAndReturnObject(
+								Pointcut.STORAGE_VERSION_CONFLICT, params);
+				if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
+					maxRetries = conflictResolutionStrategy.getMaxRetries();
+				}
+			}
+		}
+		return maxRetries;
+	}
+
+	protected class ExecutionBuilder implements IExecutionBuilder, TransactionOperations, Cloneable {
 		private final RequestDetails myRequestDetails;
 		private Isolation myIsolation;
 		private Propagation myPropagation;
@@ -564,6 +585,48 @@ public class HapiTransactionService implements IHapiTransactionService {
 				requestPartitionId = null;
 			}
 			return requestPartitionId;
+		}
+
+		/**
+		 * This method is called when a transaction has failed, and we need to rollback any changes made to the
+		 * state of our objects in RAM.
+		 * <p>
+		 * This is used to undo any changes made during transaction resolution, such as conditional references,
+		 * placeholders, etc.
+		 *
+		 * @param theWillRetry Should be <code>true</code> if the transaction is about to be automatically retried
+		 *                     by the transaction service.
+		 */
+		void rollbackTransactionProcessingChanges(boolean theWillRetry) {
+			if (myOnRollback != null) {
+				myOnRollback.run();
+			}
+
+			if (myTransactionDetails != null) {
+				/*
+				 * Loop through the rollback undo actions in reverse order so we leave things in the correct
+				 * initial state. E.g., the resource ID may get modified twice if a resource is being modified
+				 * within a FHIR transaction: first the TransactionProcessor sets a new ID and adds a rollback
+				 * item, and then the Resource DAO touches the ID a second time and adds a second rollback item.
+				 */
+				List<Runnable> rollbackUndoActions = myTransactionDetails.getRollbackUndoActions();
+				for (int i = rollbackUndoActions.size() - 1; i >= 0; i--) {
+					Runnable rollbackUndoAction = rollbackUndoActions.get(i);
+					rollbackUndoAction.run();
+				}
+
+				/*
+				 * If we're about to retry the transaction, we shouldn't clear the rollback undo actions
+				 * because we need to re-execute them if the transaction fails a second time.
+				 */
+				if (!theWillRetry) {
+					myTransactionDetails.clearRollbackUndoActions();
+				}
+
+				myTransactionDetails.clearResolvedItems();
+				myTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
+				myTransactionDetails.clearUserData(XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
+			}
 		}
 	}
 

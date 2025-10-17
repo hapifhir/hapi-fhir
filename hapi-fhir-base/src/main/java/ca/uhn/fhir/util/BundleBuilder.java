@@ -27,6 +27,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.primitive.IdDt;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -38,6 +39,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.Date;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * This class can be used to build a Bundle resource to be used as a FHIR transaction. Convenience methods provide
@@ -125,6 +127,20 @@ public class BundleBuilder {
 		return this;
 	}
 
+	private void setBundleFieldIfNotAlreadySet(String theFieldName, String theFieldValue) {
+		BaseRuntimeChildDefinition typeChild = myBundleDef.getChildByName(theFieldName);
+		Validate.notNull(typeChild, "Unable to find field %s", theFieldName);
+		Optional<IBase> firstValue = typeChild.getAccessor().getFirstValueOrNull(myBundle);
+		if (firstValue.isPresent()) {
+			IPrimitiveType<?> value = (IPrimitiveType<?>) firstValue.get();
+			if (!value.isEmpty()) {
+				return;
+			}
+		}
+
+		setBundleField(theFieldName, theFieldValue);
+	}
+
 	/**
 	 * Sets the specified primitive field on the search entry with the value provided.
 	 *
@@ -194,15 +210,45 @@ public class BundleBuilder {
 	 * @param theResource The resource to update
 	 */
 	public UpdateBuilder addTransactionUpdateEntry(IBaseResource theResource) {
+		return addTransactionUpdateEntry(theResource, null);
+	}
+
+	/**
+	 * Adds an entry containing an update (PUT) request.
+	 * Also sets the Bundle.type value to "transaction" if it is not already set.
+	 *
+	 * @param theResource The resource to update
+	 * @param theRequestUrl The url to attach to the Bundle.entry.request.url. If null, will default to the resource ID.
+	 */
+	public UpdateBuilder addTransactionUpdateEntry(IBaseResource theResource, String theRequestUrl) {
+		String fullUrl = null;
+		return addTransactionUpdateEntry(theResource, theRequestUrl, fullUrl);
+	}
+
+	/**
+	 * Adds an entry containing an update (PUT) request.
+	 * Also sets the Bundle.type value to "transaction" if it is not already set.
+	 *
+	 * @param theResource The resource to update
+	 * @param theRequestUrl The url to attach to the Bundle.entry.request.url. If null, will default to the resource ID.
+	 * @param theFullUrl The fullUrl to attach to the entry in {@literal Bundle.entry.fullUrl}.  If null, will default to the resource ID.
+	 * @since 8.6.0
+	 */
+	@Nonnull
+	public UpdateBuilder addTransactionUpdateEntry(IBaseResource theResource, String theRequestUrl, String theFullUrl) {
 		Validate.notNull(theResource, "theResource must not be null");
 
 		IIdType id = getIdTypeForUpdate(theResource);
+		if (theFullUrl == null) {
+			theFullUrl = id.toVersionless().getValue();
+		}
 
-		String requestUrl = id.toUnqualifiedVersionless().getValue();
-		String fullUrl = id.getValue();
 		String verb = "PUT";
+		String requestUrl = StringUtils.isBlank(theRequestUrl)
+				? id.toUnqualifiedVersionless().getValue()
+				: theRequestUrl;
 
-		IPrimitiveType<?> url = addAndPopulateTransactionBundleEntryRequest(theResource, fullUrl, requestUrl, verb);
+		IPrimitiveType<?> url = addAndPopulateTransactionBundleEntryRequest(theResource, theFullUrl, requestUrl, verb);
 
 		return new UpdateBuilder(url);
 	}
@@ -210,15 +256,12 @@ public class BundleBuilder {
 	@Nonnull
 	private IPrimitiveType<?> addAndPopulateTransactionBundleEntryRequest(
 			IBaseResource theResource, String theFullUrl, String theRequestUrl, String theHttpVerb) {
-		setBundleField("type", "transaction");
+		setBundleFieldIfNotAlreadySet("type", "transaction");
 
 		IBase request = addEntryAndReturnRequest(theResource, theFullUrl);
 
 		// Bundle.entry.request.url
-		IPrimitiveType<?> url =
-				(IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
-		url.setValueAsString(theRequestUrl);
-		myEntryRequestUrlChild.getMutator().setValue(request, url);
+		IPrimitiveType<?> url = addRequestUrl(request, theRequestUrl);
 
 		// Bundle.entry.request.method
 		addRequestMethod(request, theHttpVerb);
@@ -232,13 +275,13 @@ public class BundleBuilder {
 	 * @param theResource The resource to update.
 	 */
 	public void addTransactionUpdateIdOnlyEntry(IBaseResource theResource) {
-		setBundleField("type", "transaction");
+		setBundleFieldIfNotAlreadySet("type", "transaction");
 
 		Validate.notNull(theResource, "theResource must not be null");
 
 		IIdType id = getIdTypeForUpdate(theResource);
 		String requestUrl = id.toUnqualifiedVersionless().getValue();
-		String fullUrl = id.getValue();
+		String fullUrl = id.toVersionless().getValue();
 		String httpMethod = "PUT";
 
 		addIdOnlyEntry(requestUrl, httpMethod, fullUrl);
@@ -262,7 +305,7 @@ public class BundleBuilder {
 	 * @param theFullUrl The fullUrl to attach to the entry.  If null, will default to the resource ID.
 	 */
 	public CreateBuilder addTransactionCreateEntry(IBaseResource theResource, @Nullable String theFullUrl) {
-		setBundleField("type", "transaction");
+		setBundleFieldIfNotAlreadySet("type", "transaction");
 
 		IBase request = addEntryAndReturnRequest(
 				theResource,
@@ -286,7 +329,7 @@ public class BundleBuilder {
 	 * @param theResource The resource to create
 	 */
 	public void addTransactionCreateEntryIdOnly(IBaseResource theResource) {
-		setBundleField("type", "transaction");
+		setBundleFieldIfNotAlreadySet("type", "transaction");
 
 		String requestUrl = myContext.getResourceType(theResource);
 		String fullUrl = theResource.getIdElement().getValue();
@@ -324,8 +367,8 @@ public class BundleBuilder {
 	public DeleteBuilder addTransactionDeleteConditionalEntry(String theCondition) {
 		Validate.notBlank(theCondition, "theCondition must not be blank");
 
-		setBundleField("type", "transaction");
-		return addDeleteEntry(theCondition);
+		setBundleFieldIfNotAlreadySet("type", "transaction");
+		return addTransactionDeleteEntry(theCondition);
 	}
 
 	/**
@@ -365,14 +408,14 @@ public class BundleBuilder {
 	 * @param theIdPart       the ID of the resource to delete.
 	 */
 	public DeleteBuilder addTransactionDeleteEntry(String theResourceType, String theIdPart) {
-		setBundleField("type", "transaction");
+		setBundleFieldIfNotAlreadySet("type", "transaction");
 		IdDt idDt = new IdDt(theIdPart);
 
 		String deleteUrl = idDt.toUnqualifiedVersionless()
 				.withResourceType(theResourceType)
 				.getValue();
 
-		return addDeleteEntry(deleteUrl);
+		return addTransactionDeleteEntry(deleteUrl);
 	}
 
 	/**
@@ -384,11 +427,17 @@ public class BundleBuilder {
 	 */
 	public BaseOperationBuilder addTransactionDeleteEntryConditional(String theMatchUrl) {
 		Validate.notBlank(theMatchUrl, "theMatchUrl must not be null or blank");
-		return addDeleteEntry(theMatchUrl);
+		return addTransactionDeleteEntry(theMatchUrl);
 	}
 
+	/**
+	 * Adds a DELETE entry using only a conditional URL
+	 *
+	 * @since 8.6.0
+	 */
 	@Nonnull
-	private DeleteBuilder addDeleteEntry(String theDeleteUrl) {
+	public DeleteBuilder addTransactionDeleteEntry(String theDeleteUrl) {
+		Validate.notBlank(theDeleteUrl, "theDeleteUrl must not be null or blank");
 		IBase request = addEntryAndReturnRequest();
 
 		// Bundle.entry.request.url
@@ -409,18 +458,19 @@ public class BundleBuilder {
 		return id;
 	}
 
-	private void addFullUrl(IBase theEntry, String theFullUrl) {
+	public void addFullUrl(IBase theEntry, String theFullUrl) {
 		IPrimitiveType<?> fullUrl =
 				(IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
 		fullUrl.setValueAsString(theFullUrl);
 		myEntryFullUrlChild.getMutator().setValue(theEntry, fullUrl);
 	}
 
-	private void addRequestUrl(IBase request, String theRequestUrl) {
+	private IPrimitiveType<?> addRequestUrl(IBase request, String theRequestUrl) {
 		IPrimitiveType<?> url =
 				(IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
 		url.setValueAsString(theRequestUrl);
 		myEntryRequestUrlChild.getMutator().setValue(request, url);
+		return url;
 	}
 
 	private void addRequestMethod(IBase theRequest, String theMethod) {
@@ -446,15 +496,51 @@ public class BundleBuilder {
 		addEntryAndReturnRequest(theResource);
 	}
 
+	public void addDocumentEntry(IBaseResource theResource, String theFullUrl) {
+		setType("document");
+		addEntryAndReturnRequest(theResource, theFullUrl);
+	}
+
+	/**
+	 * Adds an entry for a Message bundle type
+	 *
+	 * @since 8.4.0
+	 */
+	public void addMessageEntry(IBaseResource theResource) {
+		setType("message");
+		addEntryAndReturnRequest(theResource);
+	}
+
 	/**
 	 * Creates new entry and adds it to the bundle
 	 *
 	 * @return Returns the new entry.
 	 */
 	public IBase addEntry() {
-		IBase entry = myEntryDef.newInstance();
-		myEntryChild.getMutator().addValue(myBundle, entry);
-		return entry;
+		return addEntry(myEntryDef.newInstance());
+	}
+
+	/**
+	 * Add an entry to the bundle.
+	 *
+	 * @param theEntry the entry to add to the bundle.
+	 * @return theEntry
+	 */
+	public IBase addEntry(IBase theEntry) {
+		myEntryChild.getMutator().addValue(myBundle, theEntry);
+		return theEntry;
+	}
+
+	/**
+	 * Add an entry to the bundle.
+	 *
+	 * @param theEntry the canonical entry to add to the bundle. It will be converted to a FHIR version specific entry before adding.
+	 * @return
+	 */
+	public IBase addEntry(CanonicalBundleEntry theEntry) {
+		IBase bundleEntry = theEntry.toBundleEntry(myContext, myEntryDef.getImplementingClass());
+		addEntry(bundleEntry);
+		return bundleEntry;
 	}
 
 	/**
@@ -634,6 +720,19 @@ public class BundleBuilder {
 	public void addProfile(String theProfile) {
 		FhirTerser terser = myContext.newTerser();
 		terser.addElement(myBundle, "Bundle.meta.profile", theProfile);
+	}
+
+	public IBase addSearchMatchEntry(IBaseResource theResource) {
+		setType("searchset");
+
+		IBase entry = addEntry();
+		// Bundle.entry.resource
+		myEntryResourceChild.getMutator().setValue(entry, theResource);
+		// Bundle.entry.search
+		IBase search = addSearch(entry);
+		setSearchField(search, "mode", "match");
+
+		return entry;
 	}
 
 	public class DeleteBuilder extends BaseOperationBuilder {

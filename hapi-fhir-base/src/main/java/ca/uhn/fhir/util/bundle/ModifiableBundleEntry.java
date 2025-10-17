@@ -21,8 +21,16 @@ package ca.uhn.fhir.util.bundle;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.util.Date;
+import java.util.function.Consumer;
+
+/**
+ * @deprecated Use {@link ca.uhn.fhir.util.BundleUtil#processAllEntries(FhirContext, IBaseBundle, Consumer)} instead
+ */
+@Deprecated(since = "8.6.0", forRemoval = true)
 public class ModifiableBundleEntry {
 	private final BundleEntryParts myBundleEntryParts;
 	private final BundleEntryMutator myBundleEntryMutator;
@@ -37,7 +45,7 @@ public class ModifiableBundleEntry {
 	}
 
 	public void setRequestUrl(FhirContext theFhirContext, String theRequestUrl) {
-		myBundleEntryMutator.setRequestUrl(theFhirContext, theRequestUrl);
+		myBundleEntryMutator.setRequestUrl(theRequestUrl);
 	}
 
 	public String getFullUrl() {
@@ -68,7 +76,19 @@ public class ModifiableBundleEntry {
 		return myBundleEntryParts.getConditionalUrl();
 	}
 
-	public void setRequestIfNoneExist(FhirContext theFhirContext, String theIfNoneExist) {
-		myBundleEntryMutator.setRequestIfNoneExist(theFhirContext, theIfNoneExist);
+	public void setRequestIfNoneMatch(String theIfNoneMatch) {
+		myBundleEntryMutator.setRequestIfNoneMatch(theIfNoneMatch);
+	}
+
+	public void setRequestIfModifiedSince(Date theModifiedSince) {
+		myBundleEntryMutator.setRequestIfModifiedSince(theModifiedSince);
+	}
+
+	public void setRequestIfMatch(String theIfMatch) {
+		myBundleEntryMutator.setRequestIfMatch(theIfMatch);
+	}
+
+	public void setRequestIfNoneExist(String theIfNoneExist) {
+		myBundleEntryMutator.setRequestIfNoneExist(theIfNoneExist);
 	}
 }

@@ -72,6 +72,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams.isMatchSearchParam;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -183,7 +184,7 @@ public class InMemoryResourceMatcher {
 		if (theIndexedSearchParams != null) {
 			relevantSearchParams = theIndexedSearchParams;
 		} else if (theResource != null) {
-			// Don't index search params we don't actully need for the given criteria
+			// Don't index search params we don't actually need for the given criteria
 			ISearchParamExtractor.ISearchParamFilter filter = theSearchParams -> theSearchParams.stream()
 					.filter(t -> searchParameterMap.containsKey(t.getName()))
 					.collect(Collectors.toList());
@@ -438,6 +439,10 @@ public class InMemoryResourceMatcher {
 		}
 
 		if (param.getModifier() == TokenParamModifier.NOT) {
+			// :not filters for security labels / tags should always match resources with no security labels / tags
+			if (isEmpty(list)) {
+				return true;
+			}
 			haveMatch = !haveMatch;
 		}
 
@@ -458,7 +463,14 @@ public class InMemoryResourceMatcher {
 	}
 
 	private boolean matchId(String theValue, IIdType theId) {
-		return theValue.equals(theId.getValue()) || theValue.equals(theId.getIdPart());
+		IIdType parsedId = myFhirContext.getVersion().newIdType(theValue);
+		if (parsedId.hasResourceType() && theId.hasResourceType()) {
+			if (!parsedId.getResourceType().equals(theId.getResourceType())) {
+				return false;
+			}
+		}
+
+		return parsedId.getIdPart().equals(theId.getIdPart());
 	}
 
 	private InMemoryMatchResult matchResourceParam(
