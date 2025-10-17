@@ -241,7 +241,7 @@ public class SubscriptionTopicPayloadBuilder {
 			BundleBuilder theBundleBuilder) {
 
 		org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent content =
-				ObjectUtils.defaultIfNull(theCanonicalSubscription.getContent(), FULLRESOURCE);
+				ObjectUtils.getIfNull(theCanonicalSubscription.getContent(), FULLRESOURCE);
 
 		switch (content) {
 			case IDONLY:

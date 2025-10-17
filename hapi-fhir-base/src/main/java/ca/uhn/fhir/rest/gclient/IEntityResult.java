@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.InputStream;
 import java.util.List;
