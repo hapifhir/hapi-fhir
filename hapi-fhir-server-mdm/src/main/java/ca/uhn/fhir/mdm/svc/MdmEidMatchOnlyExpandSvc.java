@@ -27,14 +27,23 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.util.EIDHelper;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * MDM link expansion service that is used when MDM mode is Match-Only and eid systems are defined in Mdm rules.
@@ -85,6 +94,59 @@ public class MdmEidMatchOnlyExpandSvc implements IMdmLinkExpandSvc {
 	}
 
 	@Override
+	public Set<String> expandMdmBySourceResourceIdsForSingleResourceType(
+			RequestPartitionId theRequestPartitionId, Collection<IIdType> theIds) {
+		Set<String> resourceTypes =
+				theIds.stream().map(IIdType::getResourceType).collect(Collectors.toSet());
+		Validate.isTrue(
+				resourceTypes.size() == 1,
+				"Expected only single resource type; found " + resourceTypes.size() + "."
+						+ (resourceTypes.isEmpty()
+								? ""
+								: " Found resource Types: " + String.join(", ", resourceTypes)));
+
+		@SuppressWarnings("OptionalGetWithoutIsPresent")
+		String resourceType = resourceTypes.stream().findFirst().get();
+		SystemRequestDetails srd = SystemRequestDetails.forRequestPartitionId(theRequestPartitionId);
+
+		@SuppressWarnings("unchecked")
+		IFhirResourceDao<IBaseResource> resourceDao = myDaoRegistry.getResourceDao(resourceType);
+
+		SearchParameterMap map;
+		{
+			map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			if (!theIds.isEmpty()) {
+				ReferenceOrListParam idsParam = new ReferenceOrListParam();
+				theIds.forEach(id -> idsParam.add(new ReferenceParam(id)));
+				map.add("_id", idsParam);
+			}
+		}
+
+		IBundleProvider bundleProvider = resourceDao.search(map, srd);
+
+		Set<CanonicalEID> eids = new HashSet<>();
+		for (IBaseResource resource : bundleProvider.getAllResources()) {
+			eids.addAll(myEidHelper.getExternalEid(resource));
+		}
+
+		// construct a new search for the eids
+		{
+			map = new SearchParameterMap();
+			final TokenOrListParam tokenOrListParam = new TokenOrListParam();
+			eids.forEach(eid -> tokenOrListParam.addOr(new TokenParam(eid.getSystem(), eid.getValue())));
+			map.add("identifier", tokenOrListParam);
+		}
+		List<IIdType> ids = resourceDao.searchForResourceIds(map, srd);
+
+		Set<String> result = new HashSet<>();
+		for (IIdType id : ids) {
+			result.add(id.toUnqualifiedVersionless().getValue());
+		}
+		return result;
+	}
+
+	@Override
 	public Set<String> expandMdmBySourceResource(RequestPartitionId theRequestPartitionId, IBaseResource theResource) {
 		return expandMdmBySourceResourceId(theRequestPartitionId, theResource.getIdElement());
 	}
@@ -100,7 +162,7 @@ public class MdmEidMatchOnlyExpandSvc implements IMdmLinkExpandSvc {
 	public Set<String> expandMdmByGoldenResourceId(
 			RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theGoldenResourcePid) {
 		// This operation is not applicable when using MDM in MATCH_ONLY mode,
-		// return an emtpy set to rather than an exception to not affect existing code
+		// return an empty set to rather than an exception to not affect existing code
 		return Collections.emptySet();
 	}
 

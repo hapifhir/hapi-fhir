@@ -22,7 +22,9 @@ package ca.uhn.fhir.mdm.svc;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -35,6 +37,15 @@ public interface IBulkExportMdmResourceExpander {
 	 * the members of the group + the mdm matched resources to a member in the group
 	 */
 	Set<JpaPid> expandGroup(String groupResourceId, RequestPartitionId requestPartitionId);
+
+	/**
+	 * For the provided list of patient ids, return the entire set of PIDs (including the linked
+	 * resource ids)
+	 * @param thePatientIds
+	 * @param theRequestPartitionId
+	 * @return
+	 */
+	Set<JpaPid> expandPatients(Collection<IIdType> thePatientIds, RequestPartitionId theRequestPartitionId);
 
 	/**
 	 * annotates the given resource to be exported with the implementation specific extra information if applicable
