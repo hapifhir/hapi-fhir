@@ -531,7 +531,7 @@ public class ExpandResourceAndWriteBinaryStep
 					}
 				} else {
 					ourLog.warn(
-						"Attempted to annotate a resource with an extension identifying it's associated golden resource, but no IMdmLinkExpandSvc was configured. Is MDM configured correctly?");
+							"Attempted to annotate a resource with an extension identifying it's associated golden resource, but no IMdmLinkExpandSvc was configured. Is MDM configured correctly?");
 				}
 			}
 
