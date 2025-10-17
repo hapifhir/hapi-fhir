@@ -25,6 +25,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
@@ -171,7 +172,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 		Verdict verdict = null;
 		for (IAuthRule nextRule : rules) {
-			ourLog.trace("Rule being applied - {}", nextRule);
+			ourLog.trace("Rule being applied - {}", nextRule);//todo jdjd 1007 does bulk export not go through here?
 			verdict = nextRule.applyRule(
 					theOperation,
 					theRequestDetails,
@@ -461,7 +462,11 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		if (theRequestDetails != null) {
 			theRequestDetails.getUserData().put(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, theBulkExportOptions);
 		}
-		applyRulesAndFailIfDeny(restOperationType, theRequestDetails, null, null, null, thePointcut);
+		//todo jdjd figure out what to do if we want to export patients, and patient is a list of ids in the bulk export options. so do you have to pass them in one by one? or how do we do this for other bulk operations?
+//		is this rule currently evaluated one  by one for each patient included in the options?
+		// how do you do this? maybe a davinci export? https://smilecdr.com/docs/davinci_data_exchange/davinci_data_exchange.html#request-parameters
+		// or maybe with post w/ parameters resource and patient parameter in list of params? JpaConstants.PARAM_EXPORT_PATIENT and BulkDataExportProviderR4Test#testInitiatePatientExportRequest()
+		applyRulesAndFailIfDeny(restOperationType, theRequestDetails, null, new IdDt(theBulkExportOptions.getGroupId()), null, thePointcut);
 	}
 
 	/**
