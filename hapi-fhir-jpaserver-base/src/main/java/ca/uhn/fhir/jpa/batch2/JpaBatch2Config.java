@@ -34,11 +34,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class JpaBatch2Config extends BaseBatch2Config {
 
-	//FIXME GGG move this to a specific job definition
-	@Bean
-	public MdmExpansionCacheSvc mdmExpansionCacheSvc() {
-		return new MdmExpansionCacheSvc();
-	}
 
 	@Bean
 	public IJobPersistence batch2JobInstancePersister(

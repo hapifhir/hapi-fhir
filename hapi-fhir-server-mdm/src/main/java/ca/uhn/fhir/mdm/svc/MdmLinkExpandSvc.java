@@ -60,7 +60,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Service
 @Transactional
 public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
@@ -77,12 +76,13 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
-	@Autowired
-	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
-
 	private IFhirPath myFhirPath;
 
-	public MdmLinkExpandSvc() {}
+	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
+
+	public MdmLinkExpandSvc() {
+		myMdmExpansionCacheSvc = new MdmExpansionCacheSvc();
+	}
 
 	private IFhirPath getFhirPath() {
 		if (myFhirPath == null) {
