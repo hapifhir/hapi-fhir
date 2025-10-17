@@ -77,10 +77,8 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 
 	private IFhirPath myFhirPath;
 
-	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
 
 	public MdmLinkExpandSvc() {
-		myMdmExpansionCacheSvc = new MdmExpansionCacheSvc();
 	}
 
 	private IFhirPath getFhirPath() {
@@ -243,58 +241,7 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 			uniquePids.add(tuple.getGoldenPid());
 			uniquePids.add(tuple.getSourcePid());
 		});
-		populateMdmResourceCache(goldenPidTargetPidTuples);
 		return uniquePids;
-	}
-	/**
-	 * @param thePidTuples
-	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	private void populateMdmResourceCache(List<MdmPidTuple<JpaPid>> thePidTuples) {
-		if (myMdmExpansionCacheSvc.hasBeenPopulated()) {
-			return;
-		}
-		// First, convert this zipped set of tuples to a map of
-		// {
-		//   patient/gold-1 -> [patient/1, patient/2]
-		//   patient/gold-2 -> [patient/3, patient/4]
-		// }
-		Map<JpaPid, Set<JpaPid>> goldenResourceToSourcePidMap = new HashMap<>();
-		extract(thePidTuples, goldenResourceToSourcePidMap);
-
-		// Next, lets convert it to an inverted index for fast lookup
-		// {
-		//   patient/1 -> patient/gold-1
-		//   patient/2 -> patient/gold-1
-		//   patient/3 -> patient/gold-2
-		//   patient/4 -> patient/gold-2
-		// }
-		Map<String, String> sourceResourceIdToGoldenResourceIdMap = new HashMap<>();
-		goldenResourceToSourcePidMap.forEach((key, value) -> {
-			String goldenResourceId = (String)
-					myIdHelperService.translatePidIdToForcedIdWithCache(key).orElseGet(key::toString);
-			PersistentIdToForcedIdMap pidsToForcedIds = myIdHelperService.translatePidsToForcedIds(value);
-
-			Set<String> sourceResourceIds = pidsToForcedIds.getResolvedResourceIds();
-
-			sourceResourceIds.forEach(
-					sourceResourceId -> sourceResourceIdToGoldenResourceIdMap.put(sourceResourceId, goldenResourceId));
-		});
-
-		// Now that we have built our cached expansion, store it.
-		myMdmExpansionCacheSvc.setCacheContents(sourceResourceIdToGoldenResourceIdMap);
-	}
-
-	private void extract(
-			List<MdmPidTuple<JpaPid>> theGoldenPidTargetPidTuples,
-			Map<JpaPid, Set<JpaPid>> theGoldenResourceToSourcePidMap) {
-		for (MdmPidTuple<JpaPid> goldenPidTargetPidTuple : theGoldenPidTargetPidTuples) {
-			JpaPid goldenPid = goldenPidTargetPidTuple.getGoldenPid();
-			JpaPid sourcePid = goldenPidTargetPidTuple.getSourcePid();
-			theGoldenResourceToSourcePidMap
-					.computeIfAbsent(goldenPid, key -> new HashSet<>())
-					.add(sourcePid);
-		}
 	}
 
 	private Optional<String> getPatientReference(IBaseResource iBaseResource) {
@@ -318,10 +265,11 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	}
 
 	private void addGoldenResourceExtension(IBaseResource iBaseResource, String sourceResourceId) {
-		String goldenResourceId = myMdmExpansionCacheSvc.getGoldenResourceId(sourceResourceId);
-		IBaseExtension<?, ?> extension = ExtensionUtil.getOrCreateExtension(
-				iBaseResource, HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
+        // TODO, reimplement this, it is currently completely broken given the distributed nature of the job.
+		String goldenResourceId = "";//TODO we must be able to fetch this, for now, will be no-op
 		if (!StringUtils.isBlank(goldenResourceId)) {
+			IBaseExtension<?, ?> extension = ExtensionUtil.getOrCreateExtension(
+				iBaseResource, HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
 			ExtensionUtil.setExtension(myContext, extension, "reference", prefixPatient(goldenResourceId));
 		}
 	}
