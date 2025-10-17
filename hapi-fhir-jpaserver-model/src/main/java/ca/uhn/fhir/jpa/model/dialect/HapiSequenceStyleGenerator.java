@@ -90,7 +90,7 @@ public class HapiSequenceStyleGenerator
 		if (NO_MORE_PID.equals(nextVal)) {
 			// fail if we're stuck here.
 			throw new InternalErrorException(
-				Msg.code(2791) + "Resource ID generator provided illegal value: " + nextVal + " / " + nextVal);
+					Msg.code(2791) + "Resource ID generator provided illegal value: " + nextVal + " / " + nextVal);
 		}
 		return nextVal;
 	}
