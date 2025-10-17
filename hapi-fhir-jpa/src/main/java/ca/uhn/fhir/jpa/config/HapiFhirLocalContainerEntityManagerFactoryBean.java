@@ -27,11 +27,13 @@ import jakarta.persistence.spi.PersistenceUnitInfo;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.boot.registry.classloading.spi.ClassLoaderService;
 import org.hibernate.boot.spi.AdditionalMappingContributor;
+import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.BatchSettings;
 import org.hibernate.cfg.JdbcSettings;
 import org.hibernate.cfg.ManagedBeanSettings;
 import org.hibernate.cfg.QuerySettings;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.id.SequenceMismatchStrategy;
 import org.hibernate.query.criteria.ValueHandlingMode;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -64,47 +66,32 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 		Map<String, Object> retVal = super.getJpaPropertyMap();
 
 		// SOMEDAY these defaults can be set in the constructor.  setJpaProperties does a merge.
-		if (!retVal.containsKey(QuerySettings.CRITERIA_VALUE_HANDLING_MODE)) {
-			retVal.put(QuerySettings.CRITERIA_VALUE_HANDLING_MODE, ValueHandlingMode.BIND);
-		}
+		retVal.putIfAbsent(QuerySettings.CRITERIA_VALUE_HANDLING_MODE, ValueHandlingMode.BIND);
 
-		if (!retVal.containsKey(JdbcSettings.CONNECTION_HANDLING)) {
-			retVal.put(
-					JdbcSettings.CONNECTION_HANDLING,
-					PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_RELEASE_AFTER_TRANSACTION);
-		}
+		retVal.putIfAbsent(
+				JdbcSettings.CONNECTION_HANDLING,
+				PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_RELEASE_AFTER_TRANSACTION);
+
+		// allow migrations and dbas to tune sequence increment
+		retVal.putIfAbsent(AvailableSettings.SEQUENCE_INCREMENT_SIZE_MISMATCH_STRATEGY, SequenceMismatchStrategy.FIX);
 
 		/*
 		 * Set some performance options
 		 */
-
-		if (!retVal.containsKey(BatchSettings.STATEMENT_BATCH_SIZE)) {
-			retVal.put(BatchSettings.STATEMENT_BATCH_SIZE, "30");
-		}
-
-		if (!retVal.containsKey(BatchSettings.ORDER_INSERTS)) {
-			retVal.put(BatchSettings.ORDER_INSERTS, "true");
-		}
-
-		if (!retVal.containsKey(BatchSettings.ORDER_UPDATES)) {
-			retVal.put(BatchSettings.ORDER_UPDATES, "true");
-		}
-
-		if (!retVal.containsKey(BatchSettings.BATCH_VERSIONED_DATA)) {
-			retVal.put(BatchSettings.BATCH_VERSIONED_DATA, "true");
-		}
+		retVal.putIfAbsent(BatchSettings.STATEMENT_BATCH_SIZE, "30");
+		retVal.putIfAbsent(BatchSettings.ORDER_INSERTS, "true");
+		retVal.putIfAbsent(BatchSettings.ORDER_UPDATES, "true");
+		retVal.putIfAbsent(BatchSettings.BATCH_VERSIONED_DATA, "true");
 		// Why is this here, you ask? LocalContainerEntityManagerFactoryBean actually clobbers the setting hibernate
 		// needs in order to be able to resolve beans, so we add it back in manually here
-		if (!retVal.containsKey(ManagedBeanSettings.BEAN_CONTAINER)) {
-			retVal.put(ManagedBeanSettings.BEAN_CONTAINER, new SpringBeanContainer(myConfigurableListableBeanFactory));
-		}
+		retVal.putIfAbsent(
+				ManagedBeanSettings.BEAN_CONTAINER, new SpringBeanContainer(myConfigurableListableBeanFactory));
 
 		return retVal;
 	}
 
 	/**
 	 * Helper to add hook to property.
-	 *
 	 * Listener properties are comma-separated lists, so we can't just overwrite or default it.
 	 */
 	void addHibernateHook(String thePropertyName, String theHookFQCN) {

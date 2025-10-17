@@ -48,6 +48,8 @@ import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -240,6 +242,8 @@ public class TestHSearchAddInConfig {
 		@Bean
 		public ElasticsearchContainer elasticContainer() {
 			ElasticsearchContainer embeddedElasticSearch = TestElasticsearchContainerHelper.getEmbeddedElasticSearch();
+			// we have some slow runners sometimes.
+			embeddedElasticSearch.withStartupTimeout(Duration.of(2, ChronoUnit.MINUTES));
 			embeddedElasticSearch.start();
 			return embeddedElasticSearch;
 		}

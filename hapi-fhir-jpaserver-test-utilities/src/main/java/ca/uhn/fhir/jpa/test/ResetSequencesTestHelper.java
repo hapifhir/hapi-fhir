@@ -62,7 +62,7 @@ public class ResetSequencesTestHelper implements AfterEachCallback {
 
 		txTemplate.executeWithoutResult(t -> {
 			entityManager.createNativeQuery("drop sequence if exists SEQ_RESOURCE_ID").executeUpdate();
-			entityManager.createNativeQuery("create sequence SEQ_RESOURCE_ID minvalue 1 start with 1 increment by 50").executeUpdate();
+			entityManager.createNativeQuery("create sequence SEQ_RESOURCE_ID minvalue 1 start with 100 increment by 50").executeUpdate();
 		});
 
 		/*

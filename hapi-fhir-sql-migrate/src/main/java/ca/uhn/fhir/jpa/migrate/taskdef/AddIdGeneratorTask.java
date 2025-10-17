@@ -86,7 +86,7 @@ public class AddIdGeneratorTask extends BaseTask {
 				break;
 			case COCKROACHDB_21_1:
 			case POSTGRES_9_4:
-				sql = "create sequence " + myGeneratorName + " start 1 increment " + myIncrement;
+				sql = "create sequence " + myGeneratorName + " start 1000 increment " + myIncrement;
 				break;
 			default:
 				throw new IllegalStateException(Msg.code(63));

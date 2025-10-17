@@ -5,7 +5,6 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IDao;
-import ca.uhn.fhir.jpa.api.dao.ReindexOutcome;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.dao.JpaStorageResourceParser;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -45,7 +44,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -69,7 +67,9 @@ public class DeletedDatabaseRowsR5Test extends BaseJpaR5Test {
 	private ArgumentCaptor<HookParams> myHookParamsCaptor;
 
 	@BeforeEach
-	public void before() {
+	@Override
+	public void before() throws Exception {
+		super.before();
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_WARNING, myMockInterceptor);
 		myLogbackTestExtension.clearEvents();
 	}
@@ -258,22 +258,15 @@ public class DeletedDatabaseRowsR5Test extends BaseJpaR5Test {
 
 		for (int i = 0; i < 200; i++) {
 			IIdType id;
-			try {
-				ourLog.info("Creating resource index {}", i);
-				id = createPatient(withActiveTrue(), withFamily("FAMILY-" + i));
-				ourLog.info("Created resource with ID: {}", id);
-			} catch (InternalErrorException e) {
-				assertEquals("HAPI-2791: Resource ID generator provided illegal value: -1 / -1", e.getMessage());
-				assertDoesntExist(new IdType("Patient/P" + i));
-				continue;
-			}
+			ourLog.info("Creating resource index {}", i);
+			id = createPatient(withActiveTrue(), withFamily("FAMILY-" + i));
+			ourLog.info("Created resource with ID: {}", id);
 
 			Patient patient = myPatientDao.read(id, newSrd());
 			JpaPid pid = (JpaPid) patient.getUserData(IDao.RESOURCE_PID_KEY);
 			ourLog.info("Created resource with PID: {}", pid);
 			assertNotEquals(JpaConstants.NO_MORE, pid);
 		}
-
 	}
 
 
@@ -462,7 +455,7 @@ public class DeletedDatabaseRowsR5Test extends BaseJpaR5Test {
 		return theOutcome
 			.getResources(0, 100)
 			.stream()
-			.filter(t -> t instanceof Patient)
+			.filter(Patient.class::isInstance)
 			.map(t -> (Patient) t)
 			.findFirst()
 			.orElseThrow();
