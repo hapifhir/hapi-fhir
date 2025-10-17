@@ -25,7 +25,6 @@ import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
@@ -51,10 +50,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -77,9 +74,7 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 
 	private IFhirPath myFhirPath;
 
-
-	public MdmLinkExpandSvc() {
-	}
+	public MdmLinkExpandSvc() {}
 
 	private IFhirPath getFhirPath() {
 		if (myFhirPath == null) {
@@ -265,11 +260,11 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	}
 
 	private void addGoldenResourceExtension(IBaseResource iBaseResource, String sourceResourceId) {
-        // TODO, reimplement this, it is currently completely broken given the distributed nature of the job.
-		String goldenResourceId = "";//TODO we must be able to fetch this, for now, will be no-op
+		// TODO, reimplement this, it is currently completely broken given the distributed nature of the job.
+		String goldenResourceId = ""; // TODO we must be able to fetch this, for now, will be no-op
 		if (!StringUtils.isBlank(goldenResourceId)) {
 			IBaseExtension<?, ?> extension = ExtensionUtil.getOrCreateExtension(
-				iBaseResource, HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
+					iBaseResource, HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
 			ExtensionUtil.setExtension(myContext, extension, "reference", prefixPatient(goldenResourceId));
 		}
 	}
