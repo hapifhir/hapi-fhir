@@ -1,5 +1,5 @@
 ---
-type: fix
+type: add
 issue: 7302
 title: "Combo Search Params can now include uplift chained search parameters. This means that a
   combo search parameter for document searching could (for example) include search parameters which

@@ -62,7 +62,7 @@ public class RequestTenantPartitionInterceptor {
 	}
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
-	public RequestPartitionId partitionIdentifyCreate(
+	public RequestPartitionId partitionIdentifyRead(
 			RequestDetails theRequestDetails, ReadPartitionIdRequestDetails theReadDetails) {
 		/*
 		 * If we're configured to allow cross-partition references, and we're performing a search with references,
@@ -78,7 +78,9 @@ public class RequestTenantPartitionInterceptor {
 				boolean haveReferences = theReadDetails.getSearchParams().entrySet().stream()
 						.flatMap(t -> t.getValue().stream())
 						.flatMap(Collection::stream)
-						.anyMatch(t -> t instanceof ReferenceParam);
+						.filter(t -> t instanceof ReferenceParam)
+						.map(t -> (ReferenceParam) t)
+						.anyMatch(t -> t.getChain() == null);
 				if (haveReferences) {
 					return RequestPartitionId.allPartitions();
 				}

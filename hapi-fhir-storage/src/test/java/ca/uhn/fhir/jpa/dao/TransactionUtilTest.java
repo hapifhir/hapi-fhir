@@ -69,6 +69,11 @@ class TransactionUtilTest {
 		assertEquals("200 OK", outcomes.get(0).getStatusMessage());
 	}
 
+	/**
+	 * Under normal processing the transaction processor should always return the
+	 * exact number of responses, but it might not if interceptors add additional
+	 * elements to the request.
+	 */
 	@Test
 	public void testParseTransactionResponse_ExtraResponseElements() {
 		Resource requestPatient = new Patient();

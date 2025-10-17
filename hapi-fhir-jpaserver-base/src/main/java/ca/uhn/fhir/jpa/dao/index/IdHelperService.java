@@ -416,7 +416,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 	/**
 	 * Return optional predicate for searching on forcedId
-	 * 1. If is
+	 * 1. If the request partition is "all partitions", don't include a predicate.
 	 * 2. If it is default partition and default partition id is null, then return predicate for null partition.
 	 * 3. If the requested partition search is not all partition, return the request partition as predicate.
 	 */

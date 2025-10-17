@@ -523,6 +523,16 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		document.addEntry().setResource(composition);
 		myBundleDao.update(document, mySrd);
 
+		// Non-matching
+		document = new Bundle();
+		document.setId("DOC-1");
+		document.setType(Bundle.BundleType.DOCUMENT);
+		composition = new Composition();
+		composition.getSubject().setReference("Patient/PAT-0");
+		composition.getType().addCoding().setSystem("http://foo").setCode("456");
+		document.addEntry().setResource(composition);
+		myBundleDao.update(document, mySrd);
+
 		logAllNonUniqueIndexes();
 
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
@@ -532,7 +542,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		IBundleProvider results = myBundleDao.search(params, mySrd);
 		List<String> actual = toUnqualifiedVersionlessIdValues(results);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(actual).contains("Bundle/DOC-0");
+		assertThat(actual).containsOnly("Bundle/DOC-0");
 
 		String querySql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
 		assertThat(querySql).contains("HFJ_IDX_CMB_TOK_NU t0");
@@ -592,7 +602,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		IBundleProvider results = myBundleDao.search(params, mySrd);
 		List<String> actual = toUnqualifiedVersionlessIdValues(results);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(actual).contains("Bundle/DOC-0");
+		assertThat(actual).containsOnly("Bundle/DOC-0");
 
 		String querySql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
 		assertThat(querySql).contains("HFJ_IDX_CMB_TOK_NU t0");

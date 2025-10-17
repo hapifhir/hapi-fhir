@@ -2438,34 +2438,32 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 								.collect(Collectors.toList());
 
 				boolean allMatch = true;
-				if (!allMatch) {
-					for (String next : nextCandidateParamNames) {
-						int dotIdx = next.indexOf('.');
-						if (dotIdx == -1) {
-							allMatch &= theParams.containsKey(next);
-						} else {
-							String firstPart = next.substring(0, dotIdx);
-							String remaining = next.substring(dotIdx + 1);
-							if (theParams.containsKey(firstPart)) {
-								List<List<IQueryParameterType>> paramsAndList = theParams.get(firstPart);
-								boolean found = false;
-								for (List<IQueryParameterType> nextOrList : paramsAndList) {
-									for (IQueryParameterType nextParam : nextOrList) {
-										if (nextParam instanceof ReferenceParam nextParamRef) {
-											if (nextParamRef.hasChain()
-													&& nextParamRef.getChain().equals(remaining)) {
-												found = true;
-												break;
-											}
+				for (String next : nextCandidateParamNames) {
+					int dotIdx = next.indexOf('.');
+					if (dotIdx == -1) {
+						allMatch &= theParams.containsKey(next);
+					} else {
+						String firstPart = next.substring(0, dotIdx);
+						String remaining = next.substring(dotIdx + 1);
+						if (theParams.containsKey(firstPart)) {
+							List<List<IQueryParameterType>> paramsAndList = theParams.get(firstPart);
+							boolean found = false;
+							for (List<IQueryParameterType> nextOrList : paramsAndList) {
+								for (IQueryParameterType nextParam : nextOrList) {
+									if (nextParam instanceof ReferenceParam nextParamRef) {
+										if (nextParamRef.hasChain()
+												&& nextParamRef.getChain().equals(remaining)) {
+											found = true;
+											break;
 										}
 									}
 								}
-								allMatch &= found;
 							}
+							allMatch &= found;
 						}
-						if (!allMatch) {
-							break;
-						}
+					}
+					if (!allMatch) {
+						break;
 					}
 				}
 
@@ -2609,7 +2607,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		for (String nextParamName : theComboParamNames) {
 
 			int dotIdx = nextParamName.indexOf('.');
-			String nextChain = null;
 			if (dotIdx != -1) {
 				String chain = nextParamName.substring(dotIdx + 1);
 				String paramName = nextParamName.substring(0, dotIdx);
