@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
 import java.util.Date;
@@ -35,9 +36,22 @@ public interface IHapiPackageCacheManager extends IPackageCacheManager {
 
 	IBaseResource loadPackageAssetByUrl(FhirVersionEnum theFhirVersion, String theCanonicalUrl);
 
+	/**
+	 * Returns all possible resources by the provided url and fhir version.
+	 */
+	List<IBaseResource> loadPackageAssetsByUrl(
+			FhirVersionEnum theFhirVersionEnum, String theCanonicalUrl, PageRequest thePageRequest);
+
 	List<NpmPackageAssetInfoJson> findPackageAssetInfoByUrl(FhirVersionEnum theFhirVersion, String theCanonicalUrl);
 
 	IBaseResource findPackageAsset(FindPackageAssetRequest theFindPackageAssetRequest);
+
+	/**
+	 * Returns all package assets matching the request object.
+	 * @param theRequest the request object
+	 * @return a list of package assets
+	 */
+	List<IBaseResource> findPackageAssets(FindPackageAssetRequest theRequest);
 
 	NpmPackageMetadataJson loadPackageMetadata(String thePackageId) throws ResourceNotFoundException;
 

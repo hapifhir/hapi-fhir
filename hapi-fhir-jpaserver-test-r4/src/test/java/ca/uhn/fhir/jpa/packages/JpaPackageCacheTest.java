@@ -239,5 +239,4 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 			assertThatExceptionOfType(InvalidRequestException.class).isThrownBy(() -> myPackageCacheManager.addPackageToCache(incorrectPackageName, "0.2.0", stream, "hl7.fhir.us.davinci-cdex"));
 		}
 	}
-
 }
