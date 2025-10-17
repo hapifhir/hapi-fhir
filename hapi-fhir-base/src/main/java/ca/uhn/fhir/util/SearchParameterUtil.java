@@ -302,7 +302,7 @@ public class SearchParameterUtil {
 		return getAllPatientCompartmentRuntimeSearchParams(runtimeResourceDefinition);
 	}
 
-	public static List<RuntimeSearchParam> getAllPatientCompartmenRuntimeSearchParams(FhirContext theFhirContext) {
+	public static List<RuntimeSearchParam> getAllPatientCompartmentRuntimeSearchParams(FhirContext theFhirContext) {
 		return theFhirContext.getResourceTypes().stream()
 				.flatMap(type ->
 						getAllPatientCompartmentRuntimeSearchParamsForResourceType(theFhirContext, type).stream())
@@ -419,6 +419,22 @@ public class SearchParameterUtil {
 		int open = StringUtils.countMatches(thePaths, "(");
 		int close = StringUtils.countMatches(thePaths, ")");
 		return open == close;
+	}
+
+	/**
+	 * Retrieves the first value in the provided field, or null or no such field exists or isn't populated.
+	 * @param theTerser
+	 * @param theSP
+	 * @param theField
+	 * @return
+	 */
+	public static IBase getFirstFieldValueOrNull(FhirTerser theTerser, IBaseResource theSP, String theField) {
+		List<IBase> fieldValues = theTerser.getValues(theSP, theField);
+
+		if (fieldValues != null && !fieldValues.isEmpty()) {
+			return fieldValues.get(0);
+		}
+		return null;
 	}
 
 	/**

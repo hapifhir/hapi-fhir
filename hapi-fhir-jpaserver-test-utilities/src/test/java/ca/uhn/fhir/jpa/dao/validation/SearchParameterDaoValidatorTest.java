@@ -4,8 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.r5.model.BooleanType;
@@ -19,12 +21,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,6 +44,7 @@ import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.TOKEN;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.URI;
 import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.OBSERVATION;
 import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.PATIENT;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -85,6 +91,9 @@ public class SearchParameterDaoValidatorTest {
     @Test
     public void testValidateSubscription() {
         SearchParameter sp = new SearchParameter();
+		sp.setName("name");
+		sp.setDescription("description");
+		sp.setCode("name");
         sp.setId("SearchParameter/patient-eyecolour");
         sp.setUrl("http://example.org/SearchParameter/patient-eyecolour");
         sp.addBase(PATIENT);
@@ -98,6 +107,157 @@ public class SearchParameterDaoValidatorTest {
         mySvc.validate(canonicalSp);
     }
 
+	@Test
+	public void validate_overridingAllowed_doesNotThrow() {
+		// setup
+		boolean allowOverriding = myStorageSettings.isDefaultSearchParamsCanBeOverridden();
+		try {
+			myStorageSettings.setDefaultSearchParamsCanBeOverridden(false);
+
+			runOverrideBuiltInSPTest(new SearchParameterDaoValidator.SPValidatorOptions().setAllowOverriding(true));
+
+			// good
+			assertTrue(true);
+		} finally {
+			myStorageSettings.setDefaultSearchParamsCanBeOverridden(allowOverriding);
+		}
+	}
+
+	@Test
+	public void validate_noOverridingAllowed_throws() {
+		// setup
+		boolean allowOverriding = myStorageSettings.isDefaultSearchParamsCanBeOverridden();
+		try {
+			myStorageSettings.setDefaultSearchParamsCanBeOverridden(false);
+
+			runOverrideBuiltInSPTest(new SearchParameterDaoValidator.SPValidatorOptions().setAllowOverriding(false));
+			fail();
+		} catch (UnprocessableEntityException ex) {
+			assertTrue(ex.getMessage().contains("Can not override built-in search parameter"));
+		} finally {
+			myStorageSettings.setDefaultSearchParamsCanBeOverridden(allowOverriding);
+		}
+	}
+
+	@ParameterizedTest
+	@EnumSource(SearchParameterDaoValidator.RequisiteFields.class)
+	public void validate_noOmittedFields_throwsIfNotThere(SearchParameterDaoValidator.RequisiteFields theFieldToOmit) {
+		// setup
+		SearchParameter sp = new SearchParameter();
+		sp.setName("name");
+		sp.setCode("code");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/SearchParameter/name");
+		sp.addBase(PATIENT);
+		sp.setType(TOKEN);
+		sp.setStatus(ACTIVE);
+		sp.setExpression("Patient.extension('http://foo')");
+		sp.addTarget(PATIENT);
+
+		switch (theFieldToOmit) {
+			case URL -> {
+				sp.setUrl(null);
+			}
+			case CODE -> {
+				sp.setCode(null);
+			}
+			case NAME -> {
+				sp.setName(null);
+			}
+			case DESCRIPTION -> {
+				sp.setDescription(null);
+			}
+		}
+
+		// test
+		try {
+			SearchParameterDaoValidator.SPValidatorOptions options = new SearchParameterDaoValidator.SPValidatorOptions();
+			for (SearchParameterDaoValidator.RequisiteFields f : SearchParameterDaoValidator.RequisiteFields.values()) {
+				if (f != theFieldToOmit) {
+					options.addOmittedField(f);
+				}
+			}
+			mySvc.validate(sp, options);
+		} catch (UnprocessableEntityException ex) {
+			assertTrue(
+				ex.getLocalizedMessage().contains("SearchParameter." + theFieldToOmit.getFieldName() + " is missing")
+			);
+		}
+	}
+
+	@ParameterizedTest
+	@EnumSource(SearchParameterDaoValidator.RequisiteFields.class)
+	public void validate_withAllowedOmitFields_works(SearchParameterDaoValidator.RequisiteFields theFieldToOmit) {
+		SearchParameter sp = new SearchParameter();
+		sp.setName("name");
+		sp.setCode("code");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/SearchParameter/name");
+		sp.addBase(PATIENT);
+		sp.setType(TOKEN);
+		sp.setStatus(ACTIVE);
+		sp.setExpression("Patient.extension('http://foo')");
+		sp.addTarget(PATIENT);
+
+		switch (theFieldToOmit) {
+			case URL -> {
+				sp.setUrl(null);
+			}
+			case CODE -> {
+				sp.setCode(null);
+			}
+			case NAME -> {
+				sp.setName(null);
+			}
+			case DESCRIPTION -> {
+				sp.setDescription(null);
+			}
+		}
+
+		// test
+		SearchParameterDaoValidator.SPValidatorOptions options = new SearchParameterDaoValidator.SPValidatorOptions();
+		options.addOmittedField(theFieldToOmit);
+		mySvc.validate(sp, options);
+
+		// validate - we should get here
+		assertTrue(true);
+	}
+
+	private void runOverrideBuiltInSPTest(SearchParameterDaoValidator.SPValidatorOptions theOptions) {
+		SearchParameter sp = new SearchParameter();
+		sp.setName("name");
+		sp.setDescription("description");
+		sp.setCode("name");
+		sp.setId("SearchParameter/given-name");
+		sp.setUrl("http://example.org/SearchParameter/patient-eyecolour");
+		sp.addBase(PATIENT);
+		sp.setCode("eyecolour");
+		sp.setType(TOKEN);
+		sp.setStatus(ACTIVE);
+		sp.setExpression("Patient.extension('http://foo')");
+		sp.addTarget(PATIENT);
+
+		RuntimeSearchParam rsp = new RuntimeSearchParam(
+			null,
+			"url",
+			"name",
+			"descriptoin",
+			"Patient.name",
+			RestSearchParameterTypeEnum.STRING,
+			null,
+			Set.of("Patient"),
+			RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE,
+			Set.of("Patient")
+		);
+
+		// when; lenient because we might not call if overriding is allowed
+		lenient().when(mySearchParamRegistry.getActiveSearchParam("Patient", sp.getCode(), ISearchParamRegistry.SearchParamLookupContextEnum.ALL))
+			.thenReturn(rsp);
+
+		SearchParameter canonicalSp = myVersionCanonicalizer.searchParameterToCanonical(sp);
+		mySvc.validate(canonicalSp, theOptions);
+	}
+
     @Test
     public void testValidateSubscriptionWithCustomType() {
         SearchParameter sp = new SearchParameter();
@@ -106,9 +266,12 @@ public class SearchParameterDaoValidatorTest {
         sp.addExtension(new Extension(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE).setValue(new StringType("Meal")));
         sp.addExtension(new Extension(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE).setValue(new StringType("Chef")));
         sp.setCode("chef");
+		sp.setName("chef");
+		sp.setDescription("a chef thing");
         sp.setType(REFERENCE);
         sp.setStatus(ACTIVE);
         sp.setExpression("Meal.chef");
+		sp.addBase(PATIENT);
 
         SearchParameter canonicalSp = myVersionCanonicalizer.searchParameterToCanonical(sp);
         mySvc.validate(canonicalSp);
@@ -131,6 +294,25 @@ public class SearchParameterDaoValidatorTest {
 					assertThat(ex.getMessage()).contains("Invalid component search parameter type: REFERENCE in component.definition: http://example.org/SearchParameter/observation-patient");
         }
     }
+
+	@ParameterizedTest
+	@ValueSource(strings = { "name", "code", "url", "description", "base" })
+	public void validate_missingRequisiteField_throws(String theFieldToOmit) {
+		// setup
+		SearchParameter sp = createSearchParameter(STRING, "SearchParameter/sp", "patient-code", "Observation");
+
+		FhirTerser terser = myFhirContext.newTerser();
+		terser.setElement(sp, theFieldToOmit, null);
+
+		// test
+		try {
+			mySvc.validate(sp, new SearchParameterDaoValidator.SPValidatorOptions());
+			fail("SP missing requisite field " + theFieldToOmit + " still passes validation when it shouldn't.");
+		} catch (UnprocessableEntityException ex) {
+			assertTrue(ex.getMessage().contains(
+				String.format("SearchParameter.%s is missing", theFieldToOmit)));
+		}
+	}
 
     @Test
     public void testMethodValidate_uniqueComboSearchParamWithComponentOfTypeReference_isValid() {
@@ -193,8 +375,10 @@ public class SearchParameterDaoValidatorTest {
     }
 
     private static SearchParameter createSearchParameter(Enumerations.SearchParamType theType, String theId, String theCodeValue, String theExpression) {
-
         SearchParameter retVal = new SearchParameter();
+		retVal.setName("Name");
+		retVal.setCode("Name");
+		retVal.setDescription("description of sp");
         retVal.setId(theId);
         retVal.setUrl("http://example.org/" + theId);
         retVal.addBase(OBSERVATION);

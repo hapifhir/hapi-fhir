@@ -107,7 +107,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @SuppressWarnings({"unchecked", "ConstantConditions", "SqlNoDataSourceInspection"})
-
 public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitioningSqlR4Test.class);
 
@@ -146,6 +145,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.setCode("extpatorg");
 		sp.setName("extpatorg");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/extpatorg");
 		sp.setExpression("Patient.extension('http://patext').value.as(Reference)");
 		Long id = mySearchParameterDao.create(sp, mySrd).getId().getIdPartAsLong();
 
@@ -323,6 +324,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.setCode("extpatorg");
 		sp.setName("extpatorg");
+		sp.setDescription("description");
+		sp.setUrl("http://localhost/SearchParameter/extoatorg");
 		sp.setExpression("Patient.extension('http://patext').value.as(Reference)");
 		Long id = mySearchParameterDao.create(sp, mySrd).getId().getIdPartAsLong();
 

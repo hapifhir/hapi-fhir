@@ -35,6 +35,7 @@ import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.SearchParameter;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -49,9 +50,74 @@ import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.TOKEN;
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.URI;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+/**
+ * Validates SP to make sure they have all the requisite fields needed
+ * refer to <a href="https://hl7.org/fhir/R4/searchparameter.html">the spec</a>
+ */
 public class SearchParameterDaoValidator {
 
+	/**
+	 * These are fields that are required on a SearchParameter resource.
+	 * But due to backwards compatibility, some checks were not ensuring these
+	 * were populated. So they can be optionally omitted.
+	 */
+	public enum RequisiteFields {
+		NAME("name"),
+		DESCRIPTION("description"),
+		URL("url"),
+		CODE("code");
+
+		private final String myFieldName;
+
+		RequisiteFields(String theFieldName) {
+			myFieldName = theFieldName;
+		}
+
+		public String getFieldName() {
+			return myFieldName;
+		}
+	}
+
+	public static class SPValidatorOptions {
+
+		public static SPValidatorOptions defaultOptions() {
+			SPValidatorOptions options = new SPValidatorOptions();
+			for (RequisiteFields f : RequisiteFields.values()) {
+				options.addOmittedField(f);
+			}
+			return options;
+		}
+
+		private boolean myAllowOverriding = false;
+
+		/**
+		 * Collection of fields that should be omitted during validation.
+		 * These are fields that are, otherwise, required on earchParameter
+		 * resources (ie, have a cardinality >= 1)
+		 */
+		private final Set<RequisiteFields> myOmittedFields = new HashSet<>();
+
+		public boolean allowOverriding() {
+			return myAllowOverriding;
+		}
+
+		public SPValidatorOptions setAllowOverriding(boolean theAllowOverriding) {
+			myAllowOverriding = theAllowOverriding;
+			return this;
+		}
+
+		public void addOmittedField(RequisiteFields theField) {
+			myOmittedFields.add(theField);
+		}
+
+		public Set<RequisiteFields> getOmittedFields() {
+			return myOmittedFields;
+		}
+	}
+
 	private static final Pattern REGEX_SP_EXPRESSION_HAS_PATH = Pattern.compile("[( ]*([A-Z][a-zA-Z]+\\.)?[a-z].*");
+
+	private static final String SP_FIELD_IS_MISSING = "SearchParameter.%s is missing.";
 
 	private final FhirContext myFhirContext;
 	private final JpaStorageSettings myStorageSettings;
@@ -66,12 +132,16 @@ public class SearchParameterDaoValidator {
 		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
-	public void validate(SearchParameter searchParameter) {
+	public void validate(SearchParameter theSearchParameter) {
+		validate(theSearchParameter, SPValidatorOptions.defaultOptions());
+	}
+
+	public void validate(SearchParameter searchParameter, SPValidatorOptions theOptions) {
 		/*
 		 * If overriding built-in SPs is disabled on this server, make sure we aren't
 		 * doing that
 		 */
-		if (myStorageSettings.isDefaultSearchParamsCanBeOverridden() == false) {
+		if (!theOptions.allowOverriding() && !myStorageSettings.isDefaultSearchParamsCanBeOverridden()) {
 			for (IPrimitiveType<?> nextBaseType : searchParameter.getBase()) {
 				String nextBase = nextBaseType.getValueAsString();
 				RuntimeSearchParam existingSearchParam = mySearchParamRegistry.getActiveSearchParam(
@@ -97,6 +167,25 @@ public class SearchParameterDaoValidator {
 		}
 		if (!searchParameter.getStatus().name().equals("ACTIVE")) {
 			return;
+		}
+
+		// requisite fields: base, name, description, status, url, code
+
+		if (!theOptions.getOmittedFields().contains(RequisiteFields.NAME) && isBlank(searchParameter.getName())) {
+			throw new UnprocessableEntityException(Msg.code(2798) + String.format(SP_FIELD_IS_MISSING, "name"));
+		}
+
+		if (!theOptions.getOmittedFields().contains(RequisiteFields.DESCRIPTION)
+				&& isBlank(searchParameter.getDescription())) {
+			throw new UnprocessableEntityException(Msg.code(2799) + String.format(SP_FIELD_IS_MISSING, "description"));
+		}
+
+		if (!theOptions.getOmittedFields().contains(RequisiteFields.URL) && isBlank(searchParameter.getUrl())) {
+			throw new UnprocessableEntityException(Msg.code(2800) + String.format(SP_FIELD_IS_MISSING, "url"));
+		}
+
+		if (!theOptions.getOmittedFields().contains(RequisiteFields.CODE) && isBlank(searchParameter.getCode())) {
+			throw new UnprocessableEntityException(Msg.code(2801) + String.format(SP_FIELD_IS_MISSING, "code"));
 		}
 
 		// Search parameters must have a base

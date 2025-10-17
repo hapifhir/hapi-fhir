@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceSource;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.i18n.Msg;
@@ -68,9 +69,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.isAllowedForContext;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchParamRegistryImpl
@@ -121,6 +124,12 @@ public class SearchParamRegistryImpl
 	private volatile RuntimeSearchParamCache myActiveSearchParams;
 	private boolean myPrePopulateSearchParamIdentities = true;
 
+	/**
+	 * Our local cache for search parameters stored in the system, that
+	 * are not saved into the DB.
+	 */
+	private final RuntimeSearchParamCache myLocalSPCache = new RuntimeSearchParamCache();
+
 	@VisibleForTesting
 	public void setPopulateSearchParamIdentities(boolean myPrePopulateSearchParamIdentities) {
 		this.myPrePopulateSearchParamIdentities = myPrePopulateSearchParamIdentities;
@@ -158,6 +167,10 @@ public class SearchParamRegistryImpl
 					return param;
 				}
 			}
+		}
+
+		if (theContext == SearchParamLookupContextEnum.ALL) {
+			return myLocalSPCache.get(theResourceName, theParamName);
 		}
 
 		return null;
@@ -212,7 +225,32 @@ public class SearchParamRegistryImpl
 				return param;
 			}
 		}
+
+		if (theContext == SearchParamLookupContextEnum.ALL) {
+			return myLocalSPCache.getByUrl(theUrl);
+		}
+
 		return null;
+	}
+
+	@Override
+	public void addActiveSearchParameterToLocalCache(@Nonnull RuntimeSearchParam theSearchParam) {
+		assert !isBlank(theSearchParam.getName());
+		assert theSearchParam.getBase() != null && !theSearchParam.getBase().isEmpty();
+		assert theSearchParam.getSource() != null;
+
+		if (theSearchParam.getSource().getOriginatingSource() == RuntimeResourceSource.SourceType.UNKNOWN) {
+			ourLog.warn("SearchParameter added with unknown source.");
+		}
+
+		for (String rt : theSearchParam.getBase()) {
+			myLocalSPCache.add(rt, theSearchParam.getName(), theSearchParam, true);
+		}
+	}
+
+	@Override
+	public void clearLocalSearchParameterCache() {
+		myLocalSPCache.clear();
 	}
 
 	@Override
@@ -248,9 +286,20 @@ public class SearchParamRegistryImpl
 	private void initializeActiveSearchParams(Collection<IBaseResource> theJpaSearchParams) {
 		StopWatch sw = new StopWatch();
 
+		// add built-in SPs
 		ReadOnlySearchParamCache builtInSearchParams = getBuiltInSearchParams();
 		RuntimeSearchParamCache searchParams =
 				RuntimeSearchParamCache.fromReadOnlySearchParamCache(builtInSearchParams);
+
+		// add the local cache search params
+		myLocalSPCache.getSearchParamStream().forEach(sp -> {
+			for (String rt : sp.getBase()) {
+				// we will allow local cache SPs to override existing ones
+				searchParams.add(rt, sp.getName(), sp, true);
+			}
+		});
+
+		// add / override with SPs from the DB (these should always come last)
 		long overriddenCount = overrideBuiltinSearchParamsWithActiveJpaSearchParams(searchParams, theJpaSearchParams);
 		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
 
@@ -299,7 +348,9 @@ public class SearchParamRegistryImpl
 
 	private void unregisterImplicitSearchParam(RuntimeSearchParamCache theSearchParams, String theParamName) {
 		for (String resourceType : theSearchParams.getResourceNameKeys()) {
-			theSearchParams.remove(resourceType, theParamName);
+			RuntimeSearchParam rsp = theSearchParams.get(resourceType, theParamName);
+			String uri = rsp == null ? null : rsp.getUri();
+			theSearchParams.remove(resourceType, theParamName, uri);
 		}
 	}
 
@@ -387,8 +438,12 @@ public class SearchParamRegistryImpl
 		}
 
 		long retval = 0;
+		Function<IBaseResource, RuntimeSearchParam> conversion = (spResource) -> {
+			RuntimeSearchParam rtsp = mySearchParameterCanonicalizer.canonicalizeSearchParameter(spResource);
+			return rtsp;
+		};
 		for (IBaseResource searchParam : theSearchParams) {
-			retval += overrideSearchParam(theSearchParamCache, searchParam);
+			retval += overrideSearchParam(theSearchParamCache, searchParam, conversion);
 		}
 		return retval;
 	}
@@ -400,13 +455,19 @@ public class SearchParamRegistryImpl
 	 *
 	 * @param theSearchParams The cache to populate
 	 * @param theSearchParameter The SearchParameter to insert into the cache and potentially replace existing params
+	 * @param theConvertFn A function used to convert an IBaseResource SearchParameter resource into a RuntimeSearchParameter
+	 *                     to be added to the cache.
 	 */
-	private long overrideSearchParam(RuntimeSearchParamCache theSearchParams, IBaseResource theSearchParameter) {
+	private long overrideSearchParam(
+			RuntimeSearchParamCache theSearchParams,
+			IBaseResource theSearchParameter,
+			Function<IBaseResource, RuntimeSearchParam> theConvertFn) {
 		if (theSearchParameter == null) {
 			return 0;
 		}
 
-		RuntimeSearchParam runtimeSp = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theSearchParameter);
+		// convert the SP into a RuntimeSearchParameter
+		RuntimeSearchParam runtimeSp = theConvertFn.apply(theSearchParameter);
 		if (runtimeSp == null) {
 			return 0;
 		}
@@ -440,7 +501,7 @@ public class SearchParamRegistryImpl
 			} else {
 				Set<String> expandedBases = expandBaseList(existingParam.getBase());
 				for (String base : expandedBases) {
-					theSearchParams.remove(base, existingParam.getName());
+					theSearchParams.remove(base, existingParam.getName(), existingParam.getUri());
 				}
 			}
 		}
@@ -450,6 +511,7 @@ public class SearchParamRegistryImpl
 				expandBaseList(SearchParameterUtil.getBaseAsStrings(myFhirContext, theSearchParameter))) {
 			String name = runtimeSp.getName();
 			theSearchParams.add(nextBaseName, name, runtimeSp);
+
 			ourLog.debug(
 					"Adding search parameter {}.{} to SearchParamRegistry",
 					nextBaseName,

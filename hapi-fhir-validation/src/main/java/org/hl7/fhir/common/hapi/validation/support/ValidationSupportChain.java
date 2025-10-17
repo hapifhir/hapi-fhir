@@ -647,6 +647,13 @@ public class ValidationSupportChain implements IValidationSupport {
 	@Nullable
 	@Override
 	public <T extends IBaseResource> List<T> fetchAllSearchParameters() {
+		// FIXME LS - SPOrder
+		//  this is not a good order for SPs.
+		//  The ordering (set forth in {@link JpaValidationSupportChain}) has
+		//  fhir context first, and DB last (the exact opposite of what we want).
+		//  We might want to throw an exception here and require
+		//  callers use the correct validation support chain impl,
+		//  as is the case in {@link ReadOnlySearchParamCache}
 		FetchAllKey key = new FetchAllKey(FetchAllKey.TypeEnum.ALL_SEARCHPARAMETERS);
 		Supplier<List<IBaseResource>> loader =
 				() -> doFetchStructureDefinitions(IValidationSupport::fetchAllSearchParameters);
@@ -662,6 +669,7 @@ public class ValidationSupportChain implements IValidationSupport {
 			if (allStructureDefinitions != null) {
 				for (IBaseResource next : allStructureDefinitions) {
 
+					// TODO - ask why first in wins?
 					IPrimitiveType<?> urlType =
 							getFhirContext().newTerser().getSingleValueOrNull(next, "url", IPrimitiveType.class);
 					if (urlType == null

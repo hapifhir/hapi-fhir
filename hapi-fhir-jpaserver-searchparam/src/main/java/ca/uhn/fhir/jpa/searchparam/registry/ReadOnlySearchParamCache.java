@@ -21,10 +21,12 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeResourceSource;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -35,8 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
-
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class ReadOnlySearchParamCache {
 
@@ -102,11 +102,12 @@ public class ReadOnlySearchParamCache {
 				FhirContext.forCached(theFhirContext.getVersion().getVersion());
 		List<IBaseResource> searchParams = cachedCtx.getValidationSupport().fetchAllSearchParameters();
 
-		searchParams = defaultIfNull(searchParams, Collections.emptyList());
+		searchParams = ObjectUtils.getIfNull(searchParams, Collections.emptyList());
 		for (IBaseResource next : searchParams) {
 			RuntimeSearchParam nextCanonical = theCanonicalizer.canonicalizeSearchParameter(next);
 
 			if (nextCanonical != null) {
+				RuntimeResourceSource source = nextCanonical.getSource();
 
 				// Force status to ACTIVE - For whatever reason the R5 draft SPs ship with
 				// a status of DRAFT which means the server doesn't actually apply them.
@@ -124,6 +125,7 @@ public class ReadOnlySearchParamCache {
 						nextCanonical.getComboSearchParamType(),
 						nextCanonical.getComponents(),
 						nextCanonical.getBase());
+				nextCanonical.setSource(source);
 
 				Collection<String> base = nextCanonical.getBase();
 				if (base.contains("Resource") || base.contains("DomainResource")) {

@@ -20,8 +20,13 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
+import ca.uhn.fhir.jpa.packages.JpaPackageCache;
+import ca.uhn.fhir.jpa.packages.NpmJpaValidationSupport;
 import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
 import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
+import ca.uhn.fhir.jpa.validation.ValidationSettings;
+import ca.uhn.fhir.util.NpmPackageUtils;
 import org.hl7.fhir.utilities.npm.PackageServer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,5 +46,20 @@ public class PackageLoaderConfig {
 	@Bean
 	public PackageResourceParsingSvc resourceParsingSvc(FhirContext theContext) {
 		return new PackageResourceParsingSvc(theContext);
+	}
+
+	@Bean(name = NpmPackageUtils.LOADER_WITH_CACHE)
+	public IHapiPackageCacheManager packageCacheManager() {
+		return new JpaPackageCache();
+	}
+
+	@Bean
+	public NpmJpaValidationSupport npmJpaValidationSupport() {
+		return new NpmJpaValidationSupport();
+	}
+
+	@Bean
+	public ValidationSettings validationSettings() {
+		return new ValidationSettings();
 	}
 }

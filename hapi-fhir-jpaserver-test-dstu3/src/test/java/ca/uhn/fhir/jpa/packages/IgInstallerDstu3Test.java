@@ -1,16 +1,15 @@
 package ca.uhn.fhir.jpa.packages;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
-import ca.uhn.fhir.jpa.packages.util.PackageUtils;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
+import ca.uhn.fhir.util.NpmPackageUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.npm.PackageServer;
@@ -28,9 +27,10 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.ClasspathUtil.loadResourceAsByteArray;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 
@@ -38,7 +38,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 	@Autowired
 	private PackageInstallerSvcImpl igInstaller;
 	@Autowired
-	@Qualifier(PackageUtils.LOADER_WITH_CACHE)
+	@Qualifier(NpmPackageUtils.LOADER_WITH_CACHE)
 	private IHapiPackageCacheManager myPackageCacheManager;
 	@Autowired
 	private INpmPackageVersionDao myPackageVersionDao;

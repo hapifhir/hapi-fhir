@@ -15,6 +15,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
 import java.util.List;
@@ -23,6 +24,9 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -81,6 +85,19 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY)
 			.setVersion(VERSION_0_5)
 			.setPackageUrl("classpath://packages/simple-alpha-dupe.tgz"));
+	}
+
+	@Test
+	public void findPackageAssetsByUrl_withDuplicateResources_returnsAll() {
+		// test
+		List<IBaseResource> resources = myPackageCacheManager.loadPackageAssetsByUrl(FhirVersionEnum.R4, MEASURE_URL, PageRequest.of(0, 10));
+
+		// validation
+		assertNotNull(resources);
+		assertEquals(2, resources.size());
+		for (IBaseResource resource : resources) {
+			assertTrue(resource instanceof Measure);
+		}
 	}
 
 	@Test
@@ -224,6 +241,22 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 		}
 	}
 
+	@Test
+	void findPackageAssets_duplicateResources() {
+		// test
+		FindPackageAssetRequest request =
+			FindPackageAssetRequest.withVersion(
+				FhirVersionEnum.R4,
+				MEASURE_URL,
+				null,
+				null);
+		List<IBaseResource> resources = myPackageCacheManager.findPackageAssets(request);
+
+		// validate
+		assertNotNull(resources);
+		assertEquals(2, resources.size());
+	}
+
 	private static Stream<Arguments> findPackageAsset_duplicateResources_badInputParams() {
 		return Stream.of(
 			Arguments.of(
@@ -277,7 +310,7 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 
 		assertThatExceptionOfType(ResourceNotFoundException.class)
 			.isThrownBy(() -> myPackageCacheManager.findPackageAsset(request))
-			.withMessage("HAPI-2644:  Could not find asset for FHIR version: R4, canonical URL: %s, package ID: %s and package version: %s"
+			.withMessage("HAPI-2644:  Could not find assets for FHIR version: R4, canonical URL: %s, package ID: %s and package version: %s"
 				.formatted(theCanonicalUrl, thePackageId, Optional.ofNullable(theVersionId).orElse("[none]")));
 	}
 }

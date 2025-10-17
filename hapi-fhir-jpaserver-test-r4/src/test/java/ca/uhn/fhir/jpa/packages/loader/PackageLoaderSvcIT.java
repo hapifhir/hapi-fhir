@@ -1,12 +1,10 @@
 package ca.uhn.fhir.jpa.packages.loader;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.packages.FakeNpmServlet;
-import ca.uhn.fhir.jpa.packages.util.PackageUtils;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.NpmPackageUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.npm.PackageServer;
@@ -22,7 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -66,7 +65,7 @@ public class PackageLoaderSvcIT {
 
 		// test parse resources
 		List<IBaseResource> resources = new ArrayList<>();
-		List<String> resourcesToParse = PackageUtils.DEFAULT_INSTALL_TYPES;
+		List<String> resourcesToParse = NpmPackageUtils.DEFAULT_INSTALL_TYPES;
 		for (String resourceType : resourcesToParse) {
 			resources.addAll(
 				myResourceParsingSvc.parseResourcesOfType(resourceType, npmPackage)

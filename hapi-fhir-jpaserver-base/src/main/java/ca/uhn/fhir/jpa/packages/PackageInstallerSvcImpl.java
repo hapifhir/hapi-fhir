@@ -77,7 +77,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
-import static ca.uhn.fhir.jpa.packages.util.PackageUtils.DEFAULT_INSTALL_TYPES;
+import static ca.uhn.fhir.util.NpmPackageUtils.DEFAULT_INSTALL_TYPES;
 import static ca.uhn.fhir.util.SearchParameterUtil.getBaseAsStrings;
 
 /**
