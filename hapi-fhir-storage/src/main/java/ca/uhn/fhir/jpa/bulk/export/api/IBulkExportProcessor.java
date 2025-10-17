@@ -34,10 +34,4 @@ public interface IBulkExportProcessor<T extends IResourcePersistentId> {
 	 * @return
 	 */
 	Iterator<T> getResourcePidIterator(ExportPIDIteratorParameters theParams);
-
-	/**
-	 * Does the MDM expansion of resources if necessary
-	 * @param theResources - the list of resources to expand
-	 */
-	void expandMdmResources(List<IBaseResource> theResources);
 }

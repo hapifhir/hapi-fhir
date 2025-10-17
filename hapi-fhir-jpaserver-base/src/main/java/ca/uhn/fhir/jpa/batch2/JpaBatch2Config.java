@@ -22,19 +22,23 @@ package ca.uhn.fhir.jpa.batch2;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.config.BaseBatch2Config;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkMetadataViewRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.mdm.svc.MdmExpansionCacheSvc;
 import jakarta.persistence.EntityManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({BulkExportJobConfig.class})
 public class JpaBatch2Config extends BaseBatch2Config {
+
+	//FIXME GGG move this to a specific job definition
+	@Bean
+	public MdmExpansionCacheSvc mdmExpansionCacheSvc() {
+		return new MdmExpansionCacheSvc();
+	}
 
 	@Bean
 	public IJobPersistence batch2JobInstancePersister(

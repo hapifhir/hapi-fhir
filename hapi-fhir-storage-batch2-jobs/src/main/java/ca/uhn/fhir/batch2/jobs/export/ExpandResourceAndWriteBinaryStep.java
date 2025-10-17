@@ -48,6 +48,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.util.RandomTextUtils;
+import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -91,6 +92,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.batch2.jobs.export.BulkDataExportUtil.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES;
 import static ca.uhn.fhir.batch2.jobs.imprt.BulkImportAppCtx.PARAM_MAXIMUM_BATCH_SIZE_DEFAULT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -132,6 +134,9 @@ public class ExpandResourceAndWriteBinaryStep
 
 	@Autowired
 	private IBulkDataExportHistoryHelper myExportHelper;
+
+	@Autowired(required = false)
+	private Optional<IMdmLinkExpandSvc> myMdmLinkExpandSvc;
 
 	private volatile ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
@@ -518,7 +523,16 @@ public class ExpandResourceAndWriteBinaryStep
 
 			// if necessary, expand resources
 			if (parameters.isExpandMdm()) {
-				myBulkExportProcessor.expandMdmResources(theResources);
+				if (myMdmLinkExpandSvc.isPresent()) {
+					for (IBaseResource resource : theResources) {
+						if (!PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(resource.fhirType())) {
+							myMdmLinkExpandSvc.get().annotateResource(resource);
+						}
+					}
+				} else {
+					ourLog.warn(
+						"Attempted to annotate a resource with an extension identifying it's associated golden resource, but no IMdmLinkExpandSvc was configured. Is MDM configured correctly?");
+				}
 			}
 
 			// Normalize terminology

@@ -48,6 +48,7 @@ public interface IMdmLinkExpandSvc {
 	 * the members of the group + the mdm matched resources to a member in the group
 	 */
 	Set<JpaPid> expandGroup(String groupResourceId, RequestPartitionId requestPartitionId);
+
 	/**
 	 * annotates the given resource to be exported with the implementation specific extra information if applicable
 	 */

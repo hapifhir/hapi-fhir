@@ -345,20 +345,6 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		return searchParam;
 	}
 
-	@Override
-	public void expandMdmResources(List<IBaseResource> theResources) {
-		if (myMdmLinkExpandSvc.isPresent()) {
-			for (IBaseResource resource : theResources) {
-				if (!PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(resource.fhirType())) {
-					myMdmLinkExpandSvc.get().annotateResource(resource);
-				}
-			}
-		} else {
-			ourLog.warn(
-					"Attempted to perform MDM expansion, but no IMdmLinkExpandSvc was configured. Is MDM configured correctly?");
-		}
-	}
-
 	/**
 	 * For Patient
 	 **/
