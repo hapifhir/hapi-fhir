@@ -113,21 +113,35 @@ public class ExceptionHandlingInterceptorTest {
 		ourServer.registerInterceptor(problemInterceptor);
 
 		AlterHttpResponseCodeInterceptor alterHttpResponseCodeInterceptor = new AlterHttpResponseCodeInterceptor();
-		ourServer.registerInterceptor(alterHttpResponseCodeInterceptor);
 
 		//When: We make a request to the server, triggering this exception to be thrown on an otherwise successful request
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?succeed=true");
 		httpGet.setHeader("Accept-encoding", "gzip");
 		HttpResponse status = ourClient.execute(httpGet);
-		ourServer.unregisterInterceptor(problemInterceptor);
-		ourServer.unregisterInterceptor(problemInterceptor);
 
 		//Then: This should still return an OperationOutcome, and not explode with an HTML IllegalState response.
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertEquals(HttpStatus.NOT_FOUND.value(), status.getStatusLine().getStatusCode());
+		assertEquals(500, status.getStatusLine().getStatusCode());
 		OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
+		ourLog.debug(ourCtx.newXmlParser().encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Simulated IOException");
+
+		//When: We add an Interceptor which will return an alternate Http Response Code, it gets returned to the caller
+		ourServer.registerInterceptor(alterHttpResponseCodeInterceptor);
+		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?succeed=true");
+		httpGet.setHeader("Accept-encoding", "gzip");
+		status = ourClient.execute(httpGet);
+		ourServer.unregisterInterceptor(problemInterceptor);
+		ourServer.unregisterInterceptor(alterHttpResponseCodeInterceptor);
+
+		//Then: This should still return an OperationOutcome, and not explode with an HTML IllegalState response.
+		responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(HttpStatus.NOT_FOUND.value(), status.getStatusLine().getStatusCode());
+		oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
 		ourLog.debug(ourCtx.newXmlParser().encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Simulated IOException");
 	}
