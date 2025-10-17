@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
+import net.sf.saxon.trans.SymbolicName;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -259,7 +260,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		private final String myRuleName;
 		private RuleBuilderRuleOp myReadRuleBuilder;
 		private RuleBuilderRuleOp myWriteRuleBuilder;
-		private RuleBuilderBulkExport ruleBuilderBulkExport;
+		private RuleBuilderBulkExport myRuleBuilderBulkExport;
 
 		RuleBuilderRule(PolicyEnum theRuleMode, String theRuleName) {
 			myRuleMode = theRuleMode;
@@ -341,10 +342,10 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		@Override
 		public IAuthRuleBuilderRuleBulkExport bulkExport() {
-			if (ruleBuilderBulkExport == null) {
-				ruleBuilderBulkExport = new RuleBuilderBulkExport();
+			if (myRuleBuilderBulkExport == null) {
+				myRuleBuilderBulkExport = new RuleBuilderBulkExport();
 			}
-			return ruleBuilderBulkExport;
+			return myRuleBuilderBulkExport;
 		}
 
 		@Override
@@ -901,6 +902,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 			@Override
 			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnAllPatients() {
+				//todo JDJD 1008 it's this ==null that is problematic, it prevents duplicate bulkExportRuleImpl
 				if (myRuleBulkExport == null) {
 					RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
 					rule.setMode(myRuleMode);
@@ -938,6 +940,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			@Override
 			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatientStrings(
 					@Nonnull Collection<String> theFocusResourceIds) {
+				//todo JDJD 1008 it's this ==null that is problematic, it prevents duplicate bulkExportRuleImpl
 				if (myRuleBulkExport == null) {
 					RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
 					rule.setAppliesToPatientExport(theFocusResourceIds);

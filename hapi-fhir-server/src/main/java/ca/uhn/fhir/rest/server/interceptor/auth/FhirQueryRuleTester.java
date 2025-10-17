@@ -82,6 +82,10 @@ public class FhirQueryRuleTester implements IAuthRuleTester {
 		}
 	}
 
+	public String getQueryParameters() {
+		return myQueryParameters;
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
