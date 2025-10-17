@@ -613,8 +613,8 @@ public enum Pointcut implements IPointcut {
 	 * returned.
 	 * </ul>
 	 * <p>
-	 * Hook methods must return an instance of <code>Optional</code> which might contain an instance of
-	 * the <code>org.springframework.http.HttpStatus</code> class. An HttpStatus result is to be returned from the
+	 * Hook methods must return an instance of {@link java.util.Optional} which may contain an enum value from the
+	 * {@link org.springframework.http.HttpStatus} class. An HttpStatus enum result is to be returned from the
 	 * Interceptor implementation whenever the code wishes to change the default Http Response Code and return a
 	 * different response to the caller when an Exception occurs.
 	 * </p>
