@@ -69,7 +69,7 @@ public class MdmJpaConfig {
 	@Bean
 	public IMdmLinkExpandSvc mdmLinkExpandSvc(
 			EIDHelper theEidHelper,
-			IMdmSettings theMdmSettings,
+			@Nullable IMdmSettings theMdmSettings,
 			DaoRegistry theDaoRegistry,
 			FhirContext theFhirContext,
 			IIdHelperService theIdHelperService) {
