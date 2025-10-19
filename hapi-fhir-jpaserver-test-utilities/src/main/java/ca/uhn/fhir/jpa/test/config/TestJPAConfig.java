@@ -143,4 +143,16 @@ public class TestJPAConfig {
 	public IMdmRuleValidator mdmRuleValidator(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
 		return new MdmRuleValidator(theFhirContext, theSearchParamRetriever);
 	}
+
+	/**
+	 * N.B GGG: This bean only exists to support our existing busted test infrastructure that smooshes persistence contexts
+	 * together with MDM contexts. In the future, this will be ripped out into mdm-specific JPA config for test. For now,
+	 * if you need to override this MDM behaviour, add @Primary to your IMdmSettings bean definition in your implementing test class.
+	 */
+	@Bean
+	public IMdmSettings mdmSettings(IMdmRuleValidator theMdmRuleValidator) {
+		MdmSettings mdmSettings = new MdmSettings(theMdmRuleValidator);
+		mdmSettings.setEnabled(true);
+		return mdmSettings;
+	}
 }

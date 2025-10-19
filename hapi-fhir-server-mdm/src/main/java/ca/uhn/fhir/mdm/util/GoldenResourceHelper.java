@@ -40,7 +40,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +51,6 @@ import static ca.uhn.fhir.context.FhirVersionEnum.DSTU3;
 import static ca.uhn.fhir.context.FhirVersionEnum.R4;
 import static ca.uhn.fhir.context.FhirVersionEnum.R5;
 
-@Service
 public class GoldenResourceHelper {
 
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
