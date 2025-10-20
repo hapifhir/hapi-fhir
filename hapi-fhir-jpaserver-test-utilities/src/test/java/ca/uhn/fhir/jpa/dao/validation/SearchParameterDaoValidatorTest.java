@@ -28,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hl7.fhir.r5.model.Enumerations.PublicationStatus.ACTIVE;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.COMPOSITE;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.DATE;
@@ -39,6 +40,7 @@ import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.TOKEN;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.URI;
 import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.OBSERVATION;
 import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.PATIENT;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -114,6 +116,9 @@ public class SearchParameterDaoValidatorTest {
         mySvc.validate(canonicalSp);
     }
 
+	/**
+	 * References are allowed in combo SPs but not in composite SPs.
+	 */
     @ParameterizedTest
     @MethodSource("extensionProvider")
     public void testMethodValidate_nonUniqueComboAndCompositeSearchParamWithComponentOfTypeReference_isNotAllowed(Extension theExtension) {
@@ -123,13 +128,14 @@ public class SearchParameterDaoValidatorTest {
         sp.addComponent(new SearchParameterComponentComponent().setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN));
         sp.addComponent(new SearchParameterComponentComponent().setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_REFERENCE));
 
-        try {
-            mySvc.validate(sp);
-			fail("");
-        } catch (UnprocessableEntityException ex) {
-					assertThat(ex.getMessage()).startsWith("HAPI-2347: ");
-					assertThat(ex.getMessage()).contains("Invalid component search parameter type: REFERENCE in component.definition: http://example.org/SearchParameter/observation-patient");
-        }
+		if (theExtension == null) {
+			assertThatThrownBy(()->mySvc.validate(sp))
+				.isInstanceOf(UnprocessableEntityException.class)
+				.hasMessageContaining("HAPI-2347")
+				.hasMessageContaining("Invalid component search parameter type: REFERENCE in component.definition");
+		} else {
+			assertDoesNotThrow(()->mySvc.validate(sp));
+		}
     }
 
     @Test

@@ -858,7 +858,13 @@ public class 	MultitenantServerR4Test extends BaseMultitenantResourceProviderR4T
 	public void testIncludeInTenantWithAssignedID() {
 		IIdType idA = createResource("Patient", withTenant(JpaConstants.DEFAULT_PARTITION_NAME), withId("test"), withFamily("Smith"), withActiveTrue());
 		createConditionWithAllowedUnqualified(idA);
+
+		logAllResources();
+		logAllResourceLinks();
+
+		myCaptureQueriesListener.clear();
 		Bundle response = myClient.search().byUrl(myClient.getServerBase() + "/" + TENANT_A + "/Condition?subject=Patient/" + idA.getIdPart() + "&_include=Condition:subject").returnBundle(Bundle.class).execute();
+		myCaptureQueriesListener.logSelectQueries();
 		assertThat(response.getEntry()).hasSize(2);
 	}
 
