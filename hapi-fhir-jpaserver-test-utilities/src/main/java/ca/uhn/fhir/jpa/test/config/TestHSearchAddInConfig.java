@@ -54,9 +54,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Configurations for Hibernate Search: off, lucene in-memory, lucene on file system or elastic.
- *
+ * <p></p>
  * We use {@link DefaultLuceneHeap} by default in our JPA test configs.
  * Turn off by adding {@link NoFT} to the test Contexts.
  * Use Elasticsearch instead via docker by adding {@link Elasticsearch} to the test Contexts;
@@ -181,7 +183,6 @@ public class TestHSearchAddInConfig {
 
 	/**
 	 * Enable our Fulltext search with an Elasticsearch container instead of our default Lucene heap.
-	 *
 	 * Make sure you add {@link RequiresDocker} annotation to any uses.
 	 */
 	@Configuration
@@ -244,6 +245,7 @@ public class TestHSearchAddInConfig {
 			ElasticsearchContainer embeddedElasticSearch = TestElasticsearchContainerHelper.getEmbeddedElasticSearch();
 			// we have some slow runners sometimes.
 			embeddedElasticSearch.withStartupTimeout(Duration.of(2, ChronoUnit.MINUTES));
+			embeddedElasticSearch.withCreateContainerCmdModifier(c-> requireNonNull(c.getHostConfig()).withMemory(1_000_000_000L));
 			embeddedElasticSearch.start();
 			return embeddedElasticSearch;
 		}
