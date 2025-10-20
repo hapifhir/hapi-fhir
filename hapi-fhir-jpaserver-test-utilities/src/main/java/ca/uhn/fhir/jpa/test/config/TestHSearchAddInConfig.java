@@ -48,13 +48,9 @@ import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * Configurations for Hibernate Search: off, lucene in-memory, lucene on file system or elastic.
@@ -243,9 +239,6 @@ public class TestHSearchAddInConfig {
 		@Bean
 		public ElasticsearchContainer elasticContainer() {
 			ElasticsearchContainer embeddedElasticSearch = TestElasticsearchContainerHelper.getEmbeddedElasticSearch();
-			// we have some slow runners sometimes.
-			embeddedElasticSearch.withStartupTimeout(Duration.of(4, ChronoUnit.MINUTES));
-			embeddedElasticSearch.withCreateContainerCmdModifier(c-> requireNonNull(c.getHostConfig()).withMemory(500_000_000L));
 			embeddedElasticSearch.start();
 			return embeddedElasticSearch;
 		}
