@@ -129,7 +129,7 @@ public class RuleBulkExportImpl extends BaseRule {
 			// TODO jdjd you can actually resolve the ID from getting it from request details user data BulkDataExportOptions
 			IIdType theResourceToQuery = theInputResourceId != null ? theInputResourceId : getIdFromRequest(theRequestDetails);
 			if (theInputResourceId != null) {
-				theInputResource = theRuleApplier.getAuthResourceResolver().resolveCompartmentById(theInputResourceId);
+				theInputResource = theRuleApplier.getAuthResourceResolver().resolveCompartmentById(theResourceToQuery);
 				ruleUsesQueryToDetermineCompartment = true;
 			}
 
@@ -227,6 +227,10 @@ public class RuleBulkExportImpl extends BaseRule {
 
 				if (allAllowed) {
 					return new AuthorizationInterceptor.Verdict(PolicyEnum.ALLOW, this);
+				} else {
+					//TODO JDJD should it be DENY or abstain?
+					// you have all the patients, not all of them match the matcher. Deny?
+					return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
 				}
 			}
 		}
