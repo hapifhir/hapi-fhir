@@ -267,7 +267,7 @@ public class SearchParameterDaoValidator {
 		} else if (hasAnyExtensionUniqueSetTo(theSearchParameter, false)
 				|| // combo non-unique search parameter
 				myStorageSettings.isAdvancedHSearchIndexing()) { // composite Search Parameter with HSearch indexing
-			return Set.of(STRING, TOKEN, DATE, QUANTITY, URI, NUMBER);
+			return Set.of(STRING, TOKEN, DATE, QUANTITY, URI, NUMBER, REFERENCE);
 		} else { // composite Search Parameter (JPA only)
 			return Set.of(STRING, TOKEN, DATE, QUANTITY);
 		}
