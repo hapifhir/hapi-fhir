@@ -24,6 +24,7 @@ import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import java.time.Duration;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
+import static java.util.Objects.requireNonNull;
 
 public class TestElasticsearchContainerHelper {
 
@@ -40,7 +41,9 @@ public class TestElasticsearchContainerHelper {
 			.withEnv("xpack.security.enabled", "false")
 			// turn off machine learning (we don't need it in tests anyways)
 			.withEnv("xpack.ml.enabled", "false")
-			.withStartupTimeout(Duration.of(300, SECONDS));
+			.withStartupTimeout(Duration.of(300, SECONDS))
+			// Limit container memory to prevent OOM in CI environments
+			.withCreateContainerCmdModifier(c -> requireNonNull(c.getHostConfig()).withMemory(700_000_000L));
 	}
 
 }
