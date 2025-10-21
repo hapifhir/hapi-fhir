@@ -586,8 +586,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		// The other APIs are newer and were introduced with newer NPM functionality in mind, including more refined
 		// handling of duplicate canonical URLs across packages
 		final List<NpmPackageVersionResourceEntity> npmPackageVersionResourceEntities =
-				loadPackageInfoByCanonicalUrlCurrentVersionOnly(
-						theFhirVersion, theCanonicalUrl, PageRequest.of(0, 2));
+				loadPackageInfoByCanonicalUrlCurrentVersionOnly(theFhirVersion, theCanonicalUrl, PageRequest.of(0, 2));
 
 		final List<IBaseResource> resources = npmPackageVersionResourceEntities.stream()
 				.map(this::loadPackageEntity)
@@ -681,10 +680,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	// We want to load the packages marked as current version true only
 	private List<NpmPackageVersionResourceEntity> loadPackageInfoByCanonicalUrlCurrentVersionOnly(
-		FhirVersionEnum theFhirVersion,
-		String theCanonicalUrl,
-		PageRequest thePageRequest) {
-		return loadPackageInfoByCanonicalUrl(theFhirVersion,  theCanonicalUrl, thePageRequest, null, null, true);
+			FhirVersionEnum theFhirVersion, String theCanonicalUrl, PageRequest thePageRequest) {
+		return loadPackageInfoByCanonicalUrl(theFhirVersion, theCanonicalUrl, thePageRequest, null, null, true);
 	}
 
 	// We want to load the packages whether they're marked as current version or not
@@ -694,7 +691,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			PageRequest thePageRequest,
 			@Nullable String thePackageId,
 			@Nullable String theVersionId) {
-		return loadPackageInfoByCanonicalUrl(theFhirVersion,  theCanonicalUrl, thePageRequest, thePackageId, theVersionId, null);
+		return loadPackageInfoByCanonicalUrl(
+				theFhirVersion, theCanonicalUrl, thePageRequest, thePackageId, theVersionId, null);
 	}
 
 	private List<NpmPackageVersionResourceEntity> loadPackageInfoByCanonicalUrl(
@@ -716,28 +714,44 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			if (thePackageId != null) {
 				if (theVersionId != null) {
 					slice = myPackageVersionResourceDao.findByCanonicalUrlAndVersionAndPackageIdAndVersion(
-						thePageRequest, theFhirVersion, canonicalUrl, canonicalVersion, thePackageId, theVersionId, theIsCurrentVersion);
+							thePageRequest,
+							theFhirVersion,
+							canonicalUrl,
+							canonicalVersion,
+							thePackageId,
+							theVersionId,
+							theIsCurrentVersion);
 				} else {
 					slice = myPackageVersionResourceDao.findByCanonicalUrlAndVersionAndPackageId(
-						thePageRequest, theFhirVersion, canonicalUrl, canonicalVersion, thePackageId, theIsCurrentVersion);
+							thePageRequest,
+							theFhirVersion,
+							canonicalUrl,
+							canonicalVersion,
+							thePackageId,
+							theIsCurrentVersion);
 				}
 			} else {
 				slice = myPackageVersionResourceDao.findByCanonicalUrlAndVersion(
-					thePageRequest, theFhirVersion, canonicalUrl, canonicalVersion, theIsCurrentVersion);
+						thePageRequest, theFhirVersion, canonicalUrl, canonicalVersion, theIsCurrentVersion);
 			}
 
 		} else {
 			if (thePackageId != null) {
 				if (theVersionId != null) {
 					slice = myPackageVersionResourceDao.findByCanonicalUrlAndPackageIdAndVersion(
-						thePageRequest, theFhirVersion, canonicalUrl, thePackageId, theVersionId, theIsCurrentVersion);
+							thePageRequest,
+							theFhirVersion,
+							canonicalUrl,
+							thePackageId,
+							theVersionId,
+							theIsCurrentVersion);
 				} else {
 					slice = myPackageVersionResourceDao.findByCanonicalUrlAndPackageId(
-						thePageRequest, theFhirVersion, canonicalUrl, thePackageId, theIsCurrentVersion);
+							thePageRequest, theFhirVersion, canonicalUrl, thePackageId, theIsCurrentVersion);
 				}
 			} else {
 				slice = myPackageVersionResourceDao.findByCanonicalUrl(
-					thePageRequest, theFhirVersion, canonicalUrl, theIsCurrentVersion);
+						thePageRequest, theFhirVersion, canonicalUrl, theIsCurrentVersion);
 			}
 		}
 
