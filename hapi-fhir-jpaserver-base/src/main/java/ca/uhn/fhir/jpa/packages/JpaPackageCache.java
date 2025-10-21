@@ -581,9 +581,13 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Override
 	@Transactional(readOnly = true)
 	public IBaseResource loadPackageAssetByUrl(FhirVersionEnum theFhirVersion, String theCanonicalUrl) {
+		// This is the only API where we're loading by "currentVersion = true" because that's the current behaviour
+		// in production and this is a widely used APIs
+		// The other APIs are newer and were introduced with newer NPM functionality in mind, including more refined
+		// handling of duplicate canonical URLs across packages
 		final List<NpmPackageVersionResourceEntity> npmPackageVersionResourceEntities =
-				loadPackageInfoByCanonicalUrlCurrentVersion(
-						theFhirVersion, theCanonicalUrl, PageRequest.of(0, 2), null, null);
+				loadPackageInfoByCanonicalUrlCurrentVersionOnly(
+						theFhirVersion, theCanonicalUrl, PageRequest.of(0, 2));
 
 		final List<IBaseResource> resources = npmPackageVersionResourceEntities.stream()
 				.map(this::loadPackageEntity)
@@ -676,61 +680,11 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	// We want to load the packages marked as current version true only
-	private List<NpmPackageVersionResourceEntity> loadPackageInfoByCanonicalUrlCurrentVersion(
-			FhirVersionEnum theFhirVersion,
-			String theCanonicalUrl,
-			PageRequest thePageRequest,
-			@Nullable String thePackageId,
-			@Nullable String theVersionId) {
-		String canonicalUrl = theCanonicalUrl;
-
-		int versionSeparator = canonicalUrl.lastIndexOf('|');
-		Slice<NpmPackageVersionResourceEntity> slice;
-
-		if (versionSeparator != -1) {
-			String canonicalVersion = canonicalUrl.substring(versionSeparator + 1);
-			canonicalUrl = canonicalUrl.substring(0, versionSeparator);
-
-			if (thePackageId != null) {
-				if (theVersionId != null) {
-					slice =
-							myPackageVersionResourceDao
-									.findCurrentVersionByCanonicalUrlAndVersionAndPackageIdAndVersion(
-											thePageRequest,
-											theFhirVersion,
-											canonicalUrl,
-											canonicalVersion,
-											thePackageId,
-											theVersionId);
-				} else {
-					slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndVersionAndPackageId(
-							thePageRequest, theFhirVersion, canonicalUrl, canonicalVersion, thePackageId);
-				}
-			} else {
-				slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndVersion(
-						thePageRequest, theFhirVersion, canonicalUrl, canonicalVersion);
-			}
-
-		} else {
-			if (thePackageId != null) {
-				if (theVersionId != null) {
-					slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndPackageIdAndVersion(
-							thePageRequest, theFhirVersion, canonicalUrl, thePackageId, theVersionId);
-				} else {
-					slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndPackageId(
-							thePageRequest, theFhirVersion, canonicalUrl, thePackageId);
-				}
-			} else {
-				slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(
-						thePageRequest, theFhirVersion, canonicalUrl);
-			}
-		}
-
-		if (slice.isEmpty()) {
-			return List.of();
-		} else {
-			return slice.getContent();
-		}
+	private List<NpmPackageVersionResourceEntity> loadPackageInfoByCanonicalUrlCurrentVersionOnly(
+		FhirVersionEnum theFhirVersion,
+		String theCanonicalUrl,
+		PageRequest thePageRequest) {
+		return loadPackageInfoByCanonicalUrl(theFhirVersion,  theCanonicalUrl, thePageRequest, null, null, true);
 	}
 
 	// We want to load the packages whether they're marked as current version or not
@@ -740,6 +694,16 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			PageRequest thePageRequest,
 			@Nullable String thePackageId,
 			@Nullable String theVersionId) {
+		return loadPackageInfoByCanonicalUrl(theFhirVersion,  theCanonicalUrl, thePageRequest, thePackageId, theVersionId, null);
+	}
+
+	private List<NpmPackageVersionResourceEntity> loadPackageInfoByCanonicalUrl(
+			FhirVersionEnum theFhirVersion,
+			String theCanonicalUrl,
+			PageRequest thePageRequest,
+			@Nullable String thePackageId,
+			@Nullable String theVersionId,
+			Boolean theIsCurrentVersion) {
 		String canonicalUrl = theCanonicalUrl;
 
 		int versionSeparator = canonicalUrl.lastIndexOf('|');
@@ -751,29 +715,29 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 			if (thePackageId != null) {
 				if (theVersionId != null) {
-					slice = myPackageVersionResourceDao.findAnyVersionByCanonicalUrlAndVersionAndPackageIdAndVersion(
-							thePageRequest, theFhirVersion, canonicalUrl, canonicalVersion, thePackageId, theVersionId);
+					slice = myPackageVersionResourceDao.findByCanonicalUrlAndVersionAndPackageIdAndVersion(
+						thePageRequest, theFhirVersion, canonicalUrl, canonicalVersion, thePackageId, theVersionId, theIsCurrentVersion);
 				} else {
-					slice = myPackageVersionResourceDao.findAnyVersionByCanonicalUrlAndVersionAndPackageId(
-							thePageRequest, theFhirVersion, canonicalUrl, canonicalVersion, thePackageId);
+					slice = myPackageVersionResourceDao.findByCanonicalUrlAndVersionAndPackageId(
+						thePageRequest, theFhirVersion, canonicalUrl, canonicalVersion, thePackageId, theIsCurrentVersion);
 				}
 			} else {
-				slice = myPackageVersionResourceDao.findAnyVersionByCanonicalUrlAndVersion(
-						thePageRequest, theFhirVersion, canonicalUrl, canonicalVersion);
+				slice = myPackageVersionResourceDao.findByCanonicalUrlAndVersion(
+					thePageRequest, theFhirVersion, canonicalUrl, canonicalVersion, theIsCurrentVersion);
 			}
 
 		} else {
 			if (thePackageId != null) {
 				if (theVersionId != null) {
-					slice = myPackageVersionResourceDao.findAnyVersionByCanonicalUrlAndPackageIdAndVersion(
-							thePageRequest, theFhirVersion, canonicalUrl, thePackageId, theVersionId);
+					slice = myPackageVersionResourceDao.findByCanonicalUrlAndPackageIdAndVersion(
+						thePageRequest, theFhirVersion, canonicalUrl, thePackageId, theVersionId, theIsCurrentVersion);
 				} else {
-					slice = myPackageVersionResourceDao.findAnyVersionByCanonicalUrlAndPackageId(
-							thePageRequest, theFhirVersion, canonicalUrl, thePackageId);
+					slice = myPackageVersionResourceDao.findByCanonicalUrlAndPackageId(
+						thePageRequest, theFhirVersion, canonicalUrl, thePackageId, theIsCurrentVersion);
 				}
 			} else {
-				slice = myPackageVersionResourceDao.findAnyVersionByCanonicalUrl(
-						thePageRequest, theFhirVersion, canonicalUrl);
+				slice = myPackageVersionResourceDao.findByCanonicalUrl(
+					thePageRequest, theFhirVersion, canonicalUrl, theIsCurrentVersion);
 			}
 		}
 
@@ -987,8 +951,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Override
 	@Transactional
 	public List<IBaseResource> loadPackageAssetsByType(FhirVersionEnum theFhirVersion, String theResourceType) {
-		Slice<NpmPackageVersionResourceEntity> outcome = myPackageVersionResourceDao.findCurrentVersionByResourceType(
-				PageRequest.of(0, 1000), theFhirVersion, theResourceType);
+		Slice<NpmPackageVersionResourceEntity> outcome = myPackageVersionResourceDao.findByResourceType(
+				PageRequest.of(0, 1000), theFhirVersion, theResourceType, true);
 		return outcome.stream().map(this::loadPackageEntity).collect(Collectors.toList());
 	}
 
