@@ -19,13 +19,11 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Tester that a resource matches any query filter in a list.
@@ -36,14 +34,14 @@ public class FhirQueriesRuleTester implements IAuthRuleTester {
 
 	public FhirQueriesRuleTester(List<String> theQueries, String theResourceType) {
 		myFilters = theQueries.stream()
-			.map(query -> query.contains("?") ? query.substring(query.indexOf("?") + 1) : query)
-			.map(FhirQueryRuleTester::new)
-			.collect(Collectors.toList());
+				.map(query -> query.contains("?") ? query.substring(query.indexOf("?") + 1) : query)
+				.map(FhirQueryRuleTester::new)
+				.collect(Collectors.toList());
 		myResourceType = theResourceType;
 	}
 
 	public void addFilter(FhirQueriesRuleTester theOtherRuleTester) {
-		//todo jdjd can i add to list?
+		// todo jdjd can i add to list?
 		if (theOtherRuleTester.getResourceType().equals(myResourceType)) {
 			myFilters.addAll(theOtherRuleTester.getFilters());
 		}
@@ -54,7 +52,9 @@ public class FhirQueriesRuleTester implements IAuthRuleTester {
 	}
 
 	public List<String> getFiltersAsString() {
-		return myFilters.stream().map(param -> myResourceType + '?' + param.getQueryParameters()).toList();
+		return myFilters.stream()
+				.map(param -> myResourceType + '?' + param.getQueryParameters())
+				.toList();
 	}
 
 	public String getResourceType() {
@@ -71,13 +71,11 @@ public class FhirQueriesRuleTester implements IAuthRuleTester {
 		return myFilters.stream().anyMatch(t -> t.matches(theRuleTestRequest));
 	}
 
-	//todo jdjds what is to string used for and what should the implementation look like for a list of queries
+	// todo jdjds what is to string used for and what should the implementation look like for a list of queries
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("filter", myFilters)
-			.toString();
+				.append("filter", myFilters)
+				.toString();
 	}
-
-
 }

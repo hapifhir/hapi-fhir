@@ -24,24 +24,22 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
-
-import static ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS;
-
 import com.google.common.annotations.VisibleForTesting;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.stream.Collectors;
+import java.util.*;
+
+import static ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+
 public class RuleGroupBulkExportByCompartmentMatcherImpl extends BaseRule {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RuleGroupBulkExportByCompartmentMatcherImpl.class);
-	private static final BulkExportJobParameters.ExportStyle OUR_EXPORT_STYLE = BulkExportJobParameters.ExportStyle.GROUP;
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(RuleGroupBulkExportByCompartmentMatcherImpl.class);
+	private static final BulkExportJobParameters.ExportStyle OUR_EXPORT_STYLE =
+			BulkExportJobParameters.ExportStyle.GROUP;
 	private String myGroupMatcherFilter;
 	private Collection<String> myResourceTypes;
 
@@ -67,15 +65,13 @@ public class RuleGroupBulkExportByCompartmentMatcherImpl extends BaseRule {
 			return null;
 		}
 
-		BulkExportJobParameters inboundBulkExportRequestOptions = (BulkExportJobParameters) theRequestDetails
-				.getUserData()
-				.get(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS);
+		BulkExportJobParameters inboundBulkExportRequestOptions = (BulkExportJobParameters)
+				theRequestDetails.getUserData().get(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS);
 
 		if (inboundBulkExportRequestOptions.getExportStyle() != OUR_EXPORT_STYLE) {
 			// If the requested export style is not for a GROUP, then abstain
 			return null;
 		}
-
 
 		// Do we only authorize some types?  If so, make sure requested types are a subset
 		if (isNotEmpty(myResourceTypes)) {
@@ -89,9 +85,12 @@ public class RuleGroupBulkExportByCompartmentMatcherImpl extends BaseRule {
 			}
 		}
 
-		IBaseResource theGroupResource = theRuleApplier.getAuthResourceResolver().resolveCompartmentById(new IdDt(inboundBulkExportRequestOptions.getGroupId()));
+		IBaseResource theGroupResource = theRuleApplier
+				.getAuthResourceResolver()
+				.resolveCompartmentById(new IdDt(inboundBulkExportRequestOptions.getGroupId()));
 
-		// Apply the FhirQueryTester (which contains a inMemoryResourceMatcher) to the found Group compartment resource, and return the verdict
+		// Apply the FhirQueryTester (which contains a inMemoryResourceMatcher) to the found Group compartment resource,
+		// and return the verdict
 		return newVerdict(
 				theOperation,
 				theRequestDetails,
@@ -104,8 +103,11 @@ public class RuleGroupBulkExportByCompartmentMatcherImpl extends BaseRule {
 	private static IdDt getIdFromRequest(RequestDetails theRequestDetails) {
 		// TODO JDJD modify based on group/patient export
 		// also how do you handle patient list??
-		// might also want to use export style (from bulk export params) intead of the resource type (from request details)
-		return new IdDt(((BulkExportJobParameters) theRequestDetails.getUserData().get(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS)).getGroupId());
+		// might also want to use export style (from bulk export params) intead of the resource type (from request
+		// details)
+		return new IdDt(((BulkExportJobParameters)
+						theRequestDetails.getUserData().get(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS))
+				.getGroupId());
 	}
 
 	private Set<String> sanitizeIds(Collection<String> myPatientIds) {
