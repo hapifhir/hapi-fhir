@@ -669,10 +669,20 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		return JpaPid.fromId((Long) thePid, thePartitionId);
 	}
 
+	/**
+	 * Creates a new JpaPid from string ID and resource name.
+	 * This method also populates the associated resource ID on the returned JpaPid.
+	 *
+	 * @param thePartitionId The partition ID
+	 * @param thePid The persistent ID as a string
+	 * @param theResourceName The resource type name
+	 * @return A JpaPid with the associated resource ID populated
+	 */
 	@Override
 	public JpaPid newPidFromStringIdAndResourceName(Integer thePartitionId, String thePid, String theResourceName) {
 		JpaPid retVal = JpaPid.fromId(Long.parseLong(thePid), thePartitionId);
 		retVal.setResourceType(theResourceName);
+		populateAssociatedResourceId(theResourceName, thePid, retVal);
 		return retVal;
 	}
 

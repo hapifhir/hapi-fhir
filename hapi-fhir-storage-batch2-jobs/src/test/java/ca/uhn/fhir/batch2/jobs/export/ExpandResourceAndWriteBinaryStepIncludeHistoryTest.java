@@ -73,8 +73,16 @@ public class ExpandResourceAndWriteBinaryStepIncludeHistoryTest {
 	private final BulkExportJobParameters myJobParams = new BulkExportJobParameters();
 
 	@BeforeEach
-	public void init() {
+	void init() {
 		myJobStep.setIdHelperServiceForUnitTest(myIdHelperService);
+
+		// Mock the ID helper service to convert TypedPidJson to IResourcePersistentId
+		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), any(), any())).thenAnswer(invocation -> {
+			String pid = invocation.getArgument(1);
+			String resourceType = invocation.getArgument(2);
+			Long pidAsLong = Long.parseLong(pid);
+			return JpaPid.fromIdAndResourceType(pidAsLong, resourceType);
+		});
 	}
 
 	private ArrayListMultimap<String, TypedPidJson> myTypeToIdsMap;
@@ -115,15 +123,17 @@ public class ExpandResourceAndWriteBinaryStepIncludeHistoryTest {
 
 	private void setupExportHelperResultsMock(Consumer<List<IBaseResource>> theResourceVersionConsumer) {
 		when(myExportHelper.fetchHistoryForResourceIds(eq("Patient"), any(), any(), any(), any())).thenAnswer(invocation -> {
-			List<String> theResourceIdList = invocation.getArgument(1);
-			List<IBaseResource> resourceList = getHistoryResourcesForResourceIds("Patient", theResourceIdList, PATIENT_RESOURCE_VERSIONS_COUNT);
+			List<JpaPid> theResourceIdList = invocation.getArgument(1);
+			List<String> resourceIdStrings = theResourceIdList.stream().map(JpaPid::toString).toList();
+			List<IBaseResource> resourceList = getHistoryResourcesForResourceIds("Patient", resourceIdStrings, PATIENT_RESOURCE_VERSIONS_COUNT);
 			theResourceVersionConsumer.accept(resourceList);
 			return new SimpleBundleProvider(resourceList);
 		});
 
 		when(myExportHelper.fetchHistoryForResourceIds(eq("Observation"), any(), any(), any(), any())).thenAnswer(invocation -> {
-			List<String> theResourceIdList = invocation.getArgument(1);
-			List<IBaseResource> resourceList = getHistoryResourcesForResourceIds("Observation", theResourceIdList, OBSERVATION_RESOURCE_VERSIONS_COUNT);
+			List<JpaPid> theResourceIdList = invocation.getArgument(1);
+			List<String> resourceIdStrings = theResourceIdList.stream().map(JpaPid::toString).toList();
+			List<IBaseResource> resourceList = getHistoryResourcesForResourceIds("Observation", resourceIdStrings, OBSERVATION_RESOURCE_VERSIONS_COUNT);
 			theResourceVersionConsumer.accept(resourceList);
 			return new SimpleBundleProvider(resourceList);
 		});
