@@ -57,7 +57,7 @@ public interface IAuthRuleFinished {
 	 */
 	IAuthRuleFinished withFilterTester(String theQueryParameters);
 
-	//todo jdjd docs
+	// todo jdjd docs
 	default IAuthRuleFinished withFilterOnExistingTester(String theQueryParameters) {
 		return this;
 	}

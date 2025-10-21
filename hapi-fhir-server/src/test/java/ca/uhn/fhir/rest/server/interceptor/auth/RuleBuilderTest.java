@@ -84,6 +84,37 @@ public class RuleBuilderTest {
 
 	}
 
+	@ParameterizedTest
+	@MethodSource("groupMatcherBulkExportParams")
+	public void testBulkExportByGroupMatcher(String theCompartmentMatcherFilter, Collection<String> theResourceTypes) {
+		// Given
+		RuleBuilder builder = new RuleBuilder();
+		List<String> resourceTypes = new ArrayList<>(theResourceTypes);
+
+		// When
+		builder.allow().bulkExportGroupCompartmentMatcher().groupExportOnGroup(theCompartmentMatcherFilter).withResourceTypes(resourceTypes);
+		final List<IAuthRule> rules = builder.build();
+
+		// Then
+		assertEquals(1, rules.size());
+		final IAuthRule authRule = rules.get(0);
+		assertInstanceOf(RuleGroupBulkExportByCompartmentMatcherImpl.class, authRule);
+
+		final RuleGroupBulkExportByCompartmentMatcherImpl ruleGroupBulkExport = (RuleGroupBulkExportByCompartmentMatcherImpl) authRule;
+		assertEquals(theCompartmentMatcherFilter, ruleGroupBulkExport.getGroupMatcherFilter());
+		assertEquals(theResourceTypes, ruleGroupBulkExport.getResourceTypes());
+		assertEquals(PolicyEnum.ALLOW, ruleGroupBulkExport.getMode());
+	}
+
+	private static Stream<Arguments> groupMatcherBulkExportParams() {
+		return Stream.of(
+			Arguments.of("?identifier=foo|bar", List.of()),
+			Arguments.of("?identifier=foo|bar", List.of("Patient", "Observation"))
+		);
+	}
+
+
+
 	@Test
 	public void testBulkExport_PatientExportOnPatient_MultiplePatientsSingleRule() {
 		RuleBuilder builder = new RuleBuilder();
@@ -126,6 +157,7 @@ public class RuleBuilderTest {
 		assertEquals(theExpectedResourceTypes, ruleBulkExport.getResourceTypes());
 		assertEquals(thePolicyEnum, ruleBulkExport.getMode());
 	}
+	//todo jdjd test like above
 
 	public static Stream<Arguments> owners() {
 		return Stream.of(

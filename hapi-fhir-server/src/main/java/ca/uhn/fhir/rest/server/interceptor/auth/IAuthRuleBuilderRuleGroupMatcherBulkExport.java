@@ -19,13 +19,16 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
+import jakarta.annotation.Nonnull;
 
-import java.util.List;
-
-public interface IAuthResourceResolver {
-	IBaseResource resolveCompartmentById(IIdType theCompartmentId);
-
-	List<IBaseResource> resolveCompartmentByIds(List<String> theCompartmentId, String theResourceType);
+/**
+ * @since 8.5.0
+ */
+public interface IAuthRuleBuilderRuleGroupMatcherBulkExport {
+	/**
+	 * Allow/deny <b>group-level</b> export rule applies to the Group with the given resource ID, e.g. <code>Group/123</code>
+	 *
+	 * @since 8.5.0
+	 */
+	IAuthRuleBuilderRuleBulkExportWithTarget groupExportOnGroup(@Nonnull String theCompartmentFilterMatcher);
 }
