@@ -54,7 +54,7 @@ import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
- * Just a sandbox. Never intended to run by pipes
+ * Just a sandbox. Never intended to run by build pipelines
  */
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
@@ -66,7 +66,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 	})
 })
 @Disabled
-public class HSearchSandboxTest extends BaseJpaTest {
+@SuppressWarnings({"java:S3577", "NewClassNamingConvention"})
+class HSearchSandbox extends BaseJpaTest {
 
 	@Autowired
 	private EntityManager myEntityManager;
@@ -77,21 +78,9 @@ public class HSearchSandboxTest extends BaseJpaTest {
 	@Autowired
 	private ITestDataBuilder myTestDataBuilder;
 
-	@Autowired
-	private IResourceReindexingSvc myResourceReindexingSvc;
-
-	@Autowired
-	@Qualifier("mySystemDaoR4")
-	private IFhirSystemDao<Bundle, Meta> mySystemDao;
-
-	@Autowired
-	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
 
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
-
-	@Autowired
-	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
 
 	@Autowired
 	@Qualifier("myObservationDaoR4")
