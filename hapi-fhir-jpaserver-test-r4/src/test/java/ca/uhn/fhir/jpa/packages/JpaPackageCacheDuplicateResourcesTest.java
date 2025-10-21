@@ -176,7 +176,20 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 
 		assertThat(duplicatePackageAssets).isNotNull().isNotEmpty().hasSize(2);
 
-		// LUKETODO:  assertions
+		final IBaseResource resource1 = duplicatePackageAssets.get(0);
+		final IBaseResource resource2 = duplicatePackageAssets.get(1);
+
+		assertThat(resource1).isInstanceOf(Measure.class);
+
+		if ((resource1 instanceof Measure measure1) &&
+			(resource2 instanceof Measure measure2)) {
+			assertThat(measure1.getUrl()).isEqualTo(MEASURE_URL);
+			assertThat(measure1.getIdElement().getIdPart()).isEqualTo(SIMPLE_ALPHA_PACKAGE);
+			assertThat(measure1.getVersion()).isEqualTo(VERSION_0_1);
+			assertThat(measure2.getUrl()).isEqualTo(MEASURE_URL);
+			assertThat(measure2.getIdElement().getIdPart()).isEqualTo(SIMPLE_ALPHA_PACKAGE);
+			assertThat(measure2.getVersion()).isEqualTo(VERSION_0_2);
+		}
 	}
 
 	@Test
@@ -191,7 +204,15 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 
 		assertThat(packageAssets).isNotNull().isNotEmpty().hasSize(1);
 
-		// LUKETODO:  assertions
+		final IBaseResource resource1 = packageAssets.get(0);
+
+		assertThat(resource1).isInstanceOf(Measure.class);
+
+		if ((resource1 instanceof Measure measure1)) {
+			assertThat(measure1.getUrl()).isEqualTo(MEASURE_URL);
+			assertThat(measure1.getIdElement().getIdPart()).isEqualTo(SIMPLE_ALPHA_PACKAGE);
+			assertThat(measure1.getVersion()).isEqualTo(VERSION_0_2);
+		}
 	}
 
 	private static Stream<Arguments> findPackageAsset_duplicateResourcesParams() {

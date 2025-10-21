@@ -33,7 +33,7 @@ import java.util.StringJoiner;
 public class FindPackageAssetRequest {
 
 	private static final int DEFAULT_PAGE_NUMBER = 0;
-	private static final int DEFAULT_PAGE_SIZE = 10;
+	private static final int DEFAULT_PAGE_SIZE = 50;
 
 	private final FhirVersionEnum myFhirVersion;
 	private final String myCanonicalUrl;
