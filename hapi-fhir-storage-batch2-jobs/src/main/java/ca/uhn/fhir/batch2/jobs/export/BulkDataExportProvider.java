@@ -56,6 +56,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -479,7 +480,13 @@ public class BulkDataExportProvider {
 				// Create an OperationOutcome response
 				IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
 
-				OperationOutcomeUtil.addIssue(myFhirContext, oo, "error", info.getErrorMessage(), null, null);
+				OperationOutcomeUtil.addIssue(
+						myFhirContext,
+						oo,
+						"error",
+						info.getErrorMessage(),
+						null,
+						OperationOutcome.IssueType.PROCESSING.toCode());
 				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(oo, response.getWriter());
 				response.getWriter().close();
 				break;
@@ -557,7 +564,7 @@ public class BulkDataExportProvider {
 					"Job instance <" + theJobId.getValueAsString()
 							+ "> was already cancelled or has completed.  Nothing to do.",
 					null,
-					null);
+					OperationOutcome.IssueType.NOTFOUND.toCode());
 		} else {
 			response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
 			OperationOutcomeUtil.addIssue(
@@ -624,7 +631,7 @@ public class BulkDataExportProvider {
 				"error",
 				"Job instance <" + theJobId.getValueAsString() + "> was cancelled.  No status to report.",
 				null,
-				null);
+				OperationOutcome.IssueType.NOTFOUND.toCode());
 		myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(outcome, response.getWriter());
 		response.getWriter().close();
 	}

@@ -416,15 +416,13 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 	/**
 	 * Return optional predicate for searching on forcedId
-	 * 1. If the partition mode is ALLOWED_UNQUALIFIED, the return optional predicate will be empty, so search is across all partitions.
+	 * 1. If the request partition is "all partitions", don't include a predicate.
 	 * 2. If it is default partition and default partition id is null, then return predicate for null partition.
 	 * 3. If the requested partition search is not all partition, return the request partition as predicate.
 	 */
 	private Optional<Predicate> getOptionalPartitionPredicate(
 			RequestPartitionId theRequestPartitionId, CriteriaBuilder cb, Root<ResourceTable> from) {
-		if (myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()) {
-			return Optional.empty();
-		} else if (theRequestPartitionId.isAllPartitions()) {
+		if (theRequestPartitionId.isAllPartitions()) {
 			return Optional.empty();
 		} else {
 			List<Integer> partitionIds = theRequestPartitionId.getPartitionIds();

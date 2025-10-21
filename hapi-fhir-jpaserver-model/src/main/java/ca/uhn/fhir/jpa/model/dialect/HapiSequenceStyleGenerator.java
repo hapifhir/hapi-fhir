@@ -76,21 +76,31 @@ public class HapiSequenceStyleGenerator
 	@Override
 	public Serializable generate(SharedSessionContractImplementor theSession, Object theObject)
 			throws HibernateException {
+		Long nextVal = doGenerate(theSession, theObject);
+		/*
+		 * This should never happen since the sequence starts at 1, but if someone ever manually messes with sequences
+		 * or the sequence otherwise gets messed up, we don't want to end up with a resource using this PID which has
+		 * a special meaning to HAPI.
+		 */
+		if (NO_MORE_PID.equals(nextVal)) {
+			// retry once
+			nextVal = doGenerate(theSession, theObject);
+		}
+
+		if (NO_MORE_PID.equals(nextVal)) {
+			// fail if we're stuck here.
+			throw new InternalErrorException(
+					Msg.code(2791) + "Resource ID generator provided illegal value: " + nextVal + " / " + nextVal);
+		}
+		return nextVal;
+	}
+
+	private Long doGenerate(SharedSessionContractImplementor theSession, Object theObject) {
 		Long retVal = myIdMassager != null ? myIdMassager.generate(myGeneratorName) : null;
 		if (retVal == null) {
 			Long next = (Long) myGen.generate(theSession, theObject);
 
 			retVal = myIdMassager.massage(myGeneratorName, next);
-
-			/*
-			 * This should never happen since the sequence starts at 1, but if someone ever manually messes with sequences
-			 * or the sequence otherwise gets messed up, we don't want to end up with a resource using this PID which has
-			 * a special meaning to HAPI.
-			 */
-			if (NO_MORE_PID.equals(next) || NO_MORE_PID.equals(retVal)) {
-				throw new InternalErrorException(
-						Msg.code(2791) + "Resource ID generator provided illegal value: " + next + " / " + retVal);
-			}
 		}
 		return retVal;
 	}
@@ -109,10 +119,14 @@ public class HapiSequenceStyleGenerator
 		Validate.notBlank(myGeneratorName, "No generator name found");
 
 		Properties props = new Properties(theParams);
+
+		// We start the sequence with an initial value larger than the increment value to avoid
+		// a an interaction between the pooled_lo optimizer and out-of-order sequence reads on AWS limitless
+		// that generate negative values.  We can't switch to pooled_hi in a backwards-compatible way.
 		props.put(OptimizableGenerator.OPT_PARAM, StandardOptimizerDescriptor.POOLED.getExternalName());
-		props.put(OptimizableGenerator.INITIAL_PARAM, "1");
-		props.put(OptimizableGenerator.INCREMENT_PARAM, "50");
-		props.put(GENERATOR_NAME, myGeneratorName);
+		props.put(OptimizableGenerator.INITIAL_PARAM, 1000);
+		props.put(OptimizableGenerator.INCREMENT_PARAM, 50);
+		props.put(IdentifierGenerator.GENERATOR_NAME, myGeneratorName);
 
 		myGen.configure(theType, props, theServiceRegistry);
 
