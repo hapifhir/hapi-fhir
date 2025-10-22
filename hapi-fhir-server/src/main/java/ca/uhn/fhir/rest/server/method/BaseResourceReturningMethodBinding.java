@@ -380,14 +380,15 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		// Call hooks if there is an interceptor broadcaster
 		if (theRequestDetails.getInterceptorBroadcaster() != null) {
 			theRequestDetails
-				.getInterceptorBroadcaster()
-				.callHooks(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, responseParams);
+					.getInterceptorBroadcaster()
+					.callHooks(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, responseParams);
 		}
 
-		// Retrieve the potentially updated & validated Status Code from the AtomicInteger container OR use the original value
+		// Retrieve the potentially updated & validated Status Code from the AtomicInteger container OR use the original
+		// value
 		theHttpStatusCode = Optional.ofNullable(HttpStatus.resolve(mutableStatusCode.get()))
-			.map(HttpStatus::value)
-			.orElse(theHttpStatusCode);
+				.map(HttpStatus::value)
+				.orElse(theHttpStatusCode);
 
 		return theHttpStatusCode;
 	}

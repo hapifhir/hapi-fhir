@@ -380,7 +380,7 @@ public class ResponseHighlighterInterceptor {
 		responseDetails.setResponseCode(theException.getStatusCode());
 
 		int statusCode = BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(
-			theRequestDetails, oo, responseDetails.getResponseCode());
+				theRequestDetails, oo, responseDetails.getResponseCode());
 
 		streamResponse(
 				theRequestDetails,

@@ -108,7 +108,7 @@ public class ExceptionHandlingInterceptor {
 		}
 
 		int statusCode = BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(
-			theRequestDetails, oo, theException.getStatusCode());
+				theRequestDetails, oo, theException.getStatusCode());
 		try {
 			resetOutputStreamIfPossible(response);
 		} catch (Throwable t) {
