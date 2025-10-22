@@ -60,6 +60,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 	protected final ResponseBundleBuilder myResponseBundleBuilder;
@@ -364,21 +365,31 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		return true;
 	}
 
-	public static Optional<HttpStatus> callOutgoingFailureOperationOutcomeHook(
-			RequestDetails theRequestDetails, IBaseOperationOutcome theOperationOutcome) {
+	public static int callOutgoingFailureOperationOutcomeHook(
+			RequestDetails theRequestDetails, IBaseOperationOutcome theOperationOutcome, Integer theHttpStatusCode) {
+
+		// Wrap the status code in a mutable container so it can be updated by an Interceptor Hook method
+		AtomicInteger mutableStatusCode = new AtomicInteger(theHttpStatusCode);
+
+		// Prepare hook parameters
 		HookParams responseParams = new HookParams();
 		responseParams.add(RequestDetails.class, theRequestDetails);
 		responseParams.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 		responseParams.add(IBaseOperationOutcome.class, theOperationOutcome);
+		responseParams.add(AtomicInteger.class, mutableStatusCode);
 
+		// Call hooks if there is an interceptor broadcaster
 		if (theRequestDetails.getInterceptorBroadcaster() != null) {
-			Object hookResult = theRequestDetails
-					.getInterceptorBroadcaster()
-					.callHooksAndReturnObject(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, responseParams);
-			if (hookResult instanceof Optional<?> optional) {
-				return optional.filter(HttpStatus.class::isInstance).map(HttpStatus.class::cast);
-			}
+			theRequestDetails
+				.getInterceptorBroadcaster()
+				.callHooks(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, responseParams);
 		}
-		return Optional.empty();
+
+		// Retrieve the potentially updated & validated Status Code from the AtomicInteger container OR use the original value
+		theHttpStatusCode = Optional.ofNullable(HttpStatus.resolve(mutableStatusCode.get()))
+			.map(HttpStatus::value)
+			.orElse(theHttpStatusCode);
+
+		return theHttpStatusCode;
 	}
 }

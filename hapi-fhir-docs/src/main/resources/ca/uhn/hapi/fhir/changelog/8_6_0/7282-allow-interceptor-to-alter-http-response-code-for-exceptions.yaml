@@ -1,6 +1,6 @@
 ---
 type: add
 issue: 7282
-title: "Added a new capability to the SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME Pointcut so that an Interceptor can alter 
-   the HTTP Response Code during Exception handling. Currently, it will only respond with a 500 Server ERROR when an 
+title: "Added a new capability to the SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME Pointcut so that an Interceptor can provide 
+   an HTTP Response Code during Exception handling. Currently, it will only respond with a 500 Server ERROR when an 
    Exception occurs."

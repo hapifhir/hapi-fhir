@@ -35,6 +35,7 @@ import org.springframework.http.HttpStatus;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -112,8 +113,10 @@ public class ExceptionHandlingInterceptorTest {
 		ProblemGeneratingInterceptor problemInterceptor = new ProblemGeneratingInterceptor();
 		ourServer.registerInterceptor(problemInterceptor);
 
-		AlterHttpResponseCodeInterceptor alterHttpResponseCodeInterceptor = new AlterHttpResponseCodeInterceptor();
-
+		AlterHttpResponseCodeInterceptorToValid404Value alterHttpResponseCodeInterceptorToValid404Value =
+			 new AlterHttpResponseCodeInterceptorToValid404Value();
+		AlterHttpResponseCodeInterceptorToInvalid999Value alterHttpResponseCodeInterceptorToInvalid999Value =
+			 new AlterHttpResponseCodeInterceptorToInvalid999Value();
 		//When: We make a request to the server, triggering this exception to be thrown on an otherwise successful request
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?succeed=true");
 		httpGet.setHeader("Accept-encoding", "gzip");
@@ -129,18 +132,34 @@ public class ExceptionHandlingInterceptorTest {
 		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Simulated IOException");
 
 		//When: We add an Interceptor which will return an alternate Http Response Code, it gets returned to the caller
-		ourServer.registerInterceptor(alterHttpResponseCodeInterceptor);
+		ourServer.registerInterceptor(alterHttpResponseCodeInterceptorToValid404Value);
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?succeed=true");
 		httpGet.setHeader("Accept-encoding", "gzip");
 		status = ourClient.execute(httpGet);
-		ourServer.unregisterInterceptor(problemInterceptor);
-		ourServer.unregisterInterceptor(alterHttpResponseCodeInterceptor);
+		ourServer.unregisterInterceptor(alterHttpResponseCodeInterceptorToValid404Value);
 
 		//Then: This should still return an OperationOutcome, and not explode with an HTML IllegalState response.
 		responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(HttpStatus.NOT_FOUND.value(), status.getStatusLine().getStatusCode());
+		oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
+		ourLog.debug(ourCtx.newXmlParser().encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Simulated IOException");
+
+		//When: We add an Interceptor which will return an invalid Http Response Code, the original value is returned to the caller
+		ourServer.registerInterceptor(alterHttpResponseCodeInterceptorToInvalid999Value);
+		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?succeed=true");
+		httpGet.setHeader("Accept-encoding", "gzip");
+		status = ourClient.execute(httpGet);
+		ourServer.unregisterInterceptor(problemInterceptor);
+		ourServer.unregisterInterceptor(alterHttpResponseCodeInterceptorToInvalid999Value);
+
+		//Then: This should still return an OperationOutcome, and not explode with an HTML IllegalState response.
+		responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(500, status.getStatusLine().getStatusCode());
 		oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
 		ourLog.debug(ourCtx.newXmlParser().encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Simulated IOException");
@@ -178,10 +197,17 @@ public class ExceptionHandlingInterceptorTest {
 		}
 	}
 
-	public static class AlterHttpResponseCodeInterceptor {
+	public static class AlterHttpResponseCodeInterceptorToValid404Value {
 		@Hook(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME)
-		public Optional<HttpStatus> intercept(RequestDetails theRequestDetails, IBaseOperationOutcome theResponse) throws IOException {
-			return Optional.of(HttpStatus.NOT_FOUND);
+		public void intercept(RequestDetails theRequestDetails, IBaseOperationOutcome theResponse, AtomicInteger theStatusCode) throws IOException {
+			theStatusCode.set(HttpStatus.NOT_FOUND.value());
+		}
+	}
+
+	public static class AlterHttpResponseCodeInterceptorToInvalid999Value {
+		@Hook(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME)
+		public void intercept(RequestDetails theRequestDetails, IBaseOperationOutcome theResponse, AtomicInteger theStatusCode) throws IOException {
+			theStatusCode.set(999);
 		}
 	}
 

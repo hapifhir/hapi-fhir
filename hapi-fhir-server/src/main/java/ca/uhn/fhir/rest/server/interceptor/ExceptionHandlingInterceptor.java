@@ -43,7 +43,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -51,7 +50,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -88,8 +86,6 @@ public class ExceptionHandlingInterceptor {
 			oo = createOperationOutcome(theException, ctx);
 		}
 
-		int statusCode = theException.getStatusCode();
-
 		// Add headers associated with the specific error code
 		if (theException.hasResponseHeaders()) {
 			Map<String, List<String>> additional = theException.getResponseHeaders();
@@ -111,11 +107,8 @@ public class ExceptionHandlingInterceptor {
 			}
 		}
 
-		Optional<HttpStatus> hookResult =
-				BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(theRequestDetails, oo);
-		if (hookResult.isPresent()) {
-			statusCode = hookResult.get().value();
-		}
+		int statusCode = BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(
+			theRequestDetails, oo, theException.getStatusCode());
 		try {
 			resetOutputStreamIfPossible(response);
 		} catch (Throwable t) {

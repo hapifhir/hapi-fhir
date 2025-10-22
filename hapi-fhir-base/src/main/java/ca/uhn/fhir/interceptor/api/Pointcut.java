@@ -34,7 +34,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster.*;
@@ -609,21 +608,24 @@ public enum Pointcut implements IPointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
-	 * org.hl7.fhir.instance.model.api.IBaseOperationOutcome - The OperationOutcome resource that will be
-	 * returned.
+	 * org.hl7.fhir.instance.model.api.IBaseOperationOutcome - The OperationOutcome resource that will be returned.
+	 * </ul>
+	 * <li>
+	 * <code>java.util.concurrent.atomic.AtomicInteger</code> - If provided, a valid Http Status Code that will be used
+	 * in the response to the caller. Any value being returned from this Pointcut will be validated before it is used.
+	 * Otherwise, a <b>500 Internal Server Error</b> will be returned by default to the caller, based on the Exception
+	 * being handled.
 	 * </ul>
 	 * <p>
-	 * Hook methods must return an instance of {@link java.util.Optional} which may contain an enum value from the
-	 * {@link org.springframework.http.HttpStatus} class. An HttpStatus enum result is to be returned from the
-	 * Interceptor implementation whenever the code wishes to change the default Http Response Code and return a
-	 * different response to the caller when an Exception occurs.
+	 * Hook methods must return <code>void</code>
 	 * </p>
 	 */
 	SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME(
-			Optional.class,
+			void.class,
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"org.hl7.fhir.instance.model.api.IBaseOperationOutcome"),
+			"org.hl7.fhir.instance.model.api.IBaseOperationOutcome",
+			"java.util.concurrent.atomic.AtomicInteger"),
 
 	/**
 	 * <b>Server Hook:</b>
