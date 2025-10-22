@@ -1,6 +1,7 @@
 ---
 type: fix
 issue: 7249
+backport: 8.2.2
 title: "A bug was fixed in IdHelperService which caused an exception if
    `resolveResourceIdentities` was called with duplicate IDs in the collection
    of IDs passed in. Thanks to Tue Toft Nørgård for the contribution!"
