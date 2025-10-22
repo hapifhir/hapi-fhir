@@ -64,7 +64,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 	protected final ResponseBundleBuilder myResponseBundleBuilder;
-	public static final String HTTP_RESPONSE_CODE = "httpResponseCode";
 	private MethodReturnTypeEnum myMethodReturnType;
 	private String myResourceName;
 
