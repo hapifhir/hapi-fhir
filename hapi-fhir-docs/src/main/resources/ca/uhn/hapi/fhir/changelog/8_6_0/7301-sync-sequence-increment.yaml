@@ -1,0 +1,4 @@
+---
+type: perf
+issue: 7301
+title: "Internal processing now synchronizes sequence increment size with the value declared in the database on startup to allow tuning by DBAs."

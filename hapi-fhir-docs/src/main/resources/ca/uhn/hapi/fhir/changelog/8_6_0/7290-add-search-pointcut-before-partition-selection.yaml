@@ -1,0 +1,7 @@
+---
+type: add
+issue: 7290
+title: "A new interceptor pointcut called `STORAGE_PRESEARCH_PARTITION_SELECTED` has been added that can be used to modify parsed
+   FHIR search URLs before the search partition is resolved. This can be useful if
+   your partition selection is based on search parameters and you want to programmatically
+   influence those search parameters."

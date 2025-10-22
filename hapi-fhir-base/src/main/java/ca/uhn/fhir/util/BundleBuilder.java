@@ -75,12 +75,27 @@ public class BundleBuilder {
 
 	/**
 	 * Constructor
+	 *
+	 * @param theContext The FHIR context appropriate for the Bundle type.
 	 */
-	public BundleBuilder(FhirContext theContext) {
+	public BundleBuilder(@Nonnull FhirContext theContext) {
+		this(theContext, (IBaseBundle)
+				theContext.getResourceDefinition("Bundle").newInstance());
+	}
+
+	/**
+	 * Constructor which accepts an existing Bundle. Any existing entries in the Bundle
+	 * will be preserved, new entries may be added.
+	 *
+	 * @param theContext The FHIR context appropriate for the Bundle type.
+	 * @param theBundle The Bundle to add to.
+	 * @since 8.6.0
+	 */
+	public BundleBuilder(@Nonnull FhirContext theContext, @Nonnull IBaseBundle theBundle) {
+		myBundle = theBundle;
 		myContext = theContext;
 
 		myBundleDef = myContext.getResourceDefinition("Bundle");
-		myBundle = (IBaseBundle) myBundleDef.newInstance();
 
 		myEntryChild = myBundleDef.getChildByName("entry");
 		myEntryDef = myEntryChild.getChildByName("entry");
@@ -221,17 +236,34 @@ public class BundleBuilder {
 	 * @param theRequestUrl The url to attach to the Bundle.entry.request.url. If null, will default to the resource ID.
 	 */
 	public UpdateBuilder addTransactionUpdateEntry(IBaseResource theResource, String theRequestUrl) {
+		String fullUrl = null;
+		return addTransactionUpdateEntry(theResource, theRequestUrl, fullUrl);
+	}
+
+	/**
+	 * Adds an entry containing an update (PUT) request.
+	 * Also sets the Bundle.type value to "transaction" if it is not already set.
+	 *
+	 * @param theResource The resource to update
+	 * @param theRequestUrl The url to attach to the Bundle.entry.request.url. If null, will default to the resource ID.
+	 * @param theFullUrl The fullUrl to attach to the entry in {@literal Bundle.entry.fullUrl}.  If null, will default to the resource ID.
+	 * @since 8.6.0
+	 */
+	@Nonnull
+	public UpdateBuilder addTransactionUpdateEntry(IBaseResource theResource, String theRequestUrl, String theFullUrl) {
 		Validate.notNull(theResource, "theResource must not be null");
 
 		IIdType id = getIdTypeForUpdate(theResource);
+		if (theFullUrl == null) {
+			theFullUrl = id.toVersionless().getValue();
+		}
 
-		String fullUrl = id.toVersionless().getValue();
 		String verb = "PUT";
 		String requestUrl = StringUtils.isBlank(theRequestUrl)
 				? id.toUnqualifiedVersionless().getValue()
 				: theRequestUrl;
 
-		IPrimitiveType<?> url = addAndPopulateTransactionBundleEntryRequest(theResource, fullUrl, requestUrl, verb);
+		IPrimitiveType<?> url = addAndPopulateTransactionBundleEntryRequest(theResource, theFullUrl, requestUrl, verb);
 
 		return new UpdateBuilder(url);
 	}
@@ -351,7 +383,7 @@ public class BundleBuilder {
 		Validate.notBlank(theCondition, "theCondition must not be blank");
 
 		setBundleFieldIfNotAlreadySet("type", "transaction");
-		return addDeleteEntry(theCondition);
+		return addTransactionDeleteEntry(theCondition);
 	}
 
 	/**
@@ -398,7 +430,7 @@ public class BundleBuilder {
 				.withResourceType(theResourceType)
 				.getValue();
 
-		return addDeleteEntry(deleteUrl);
+		return addTransactionDeleteEntry(deleteUrl);
 	}
 
 	/**
@@ -410,11 +442,17 @@ public class BundleBuilder {
 	 */
 	public BaseOperationBuilder addTransactionDeleteEntryConditional(String theMatchUrl) {
 		Validate.notBlank(theMatchUrl, "theMatchUrl must not be null or blank");
-		return addDeleteEntry(theMatchUrl);
+		return addTransactionDeleteEntry(theMatchUrl);
 	}
 
+	/**
+	 * Adds a DELETE entry using only a conditional URL
+	 *
+	 * @since 8.6.0
+	 */
 	@Nonnull
-	private DeleteBuilder addDeleteEntry(String theDeleteUrl) {
+	public DeleteBuilder addTransactionDeleteEntry(String theDeleteUrl) {
+		Validate.notBlank(theDeleteUrl, "theDeleteUrl must not be null or blank");
 		IBase request = addEntryAndReturnRequest();
 
 		// Bundle.entry.request.url

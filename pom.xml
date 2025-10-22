@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>8.5.6-SNAPSHOT</version>
+	<version>8.5.8-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -1414,7 +1414,7 @@
 			<dependency>
 				<groupId>org.hl7.fhir.testcases</groupId>
 				<artifactId>fhir-test-cases</artifactId>
-				<version>1.5.15</version>
+				<version>1.7.37</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jdom</groupId>

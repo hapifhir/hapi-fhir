@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
@@ -15,6 +16,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -65,25 +67,31 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 	@ValueSource(booleans = {true, false})
 	public void testUpdateResource_whenCrossingPatientCompartment_throws(boolean theMassIngestionEnabled) {
 		myStorageSettings.setMassIngestionMode(theMassIngestionEnabled);
-		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 		createPatientA();
-		createPatientB();
+
+		// Create a second resource that lands in the same partition as Patient/A
+		int patientAPartition = Math.abs("A".hashCode() % 15000);
+		int count = 0;
+		String otherId;
+		do {
+			otherId = "A" + ++count;
+		} while (patientAPartition != Math.abs(otherId.hashCode() % 15000));
+		Patient patient = new Patient();
+		patient.setId("Patient/" + otherId);
+		patient.setActive(true);
+		myPatientDao.update(patient, new SystemRequestDetails());
 
 		Observation obs = new Observation();
+		obs.setId("O");
 		obs.getSubject().setReference("Patient/A");
-		String obsId = myObservationDao.create(obs, new SystemRequestDetails()).getId().getIdPart();
+		myObservationDao.update(obs, new SystemRequestDetails()).getId().getIdPart();
 
 		// try updating observation's patient, which would cross partition boundaries
-		obs.getSubject().setReference("Patient/B");
+		obs.getSubject().setReference("Patient/" + otherId);
 
-		InvalidRequestException thrown = assertThrows(
-			InvalidRequestException.class,
-			() -> myObservationDao.update(obs, new SystemRequestDetails())
-		);
-		assertEquals("HAPI-2733: Failed to create/update resource [Observation/" + obsId + "] " +
-				"in partition B because a resource of the same type and ID is found in another partition",
-			thrown.getMessage()
-		);
+		assertThatThrownBy(() -> myObservationDao.update(obs, new SystemRequestDetails()))
+			.isInstanceOf(PreconditionFailedException.class)
+			.hasMessageContaining("HAPI-2476: Resource compartment changed. Was a referenced Patient changed?");
 	}
 
 	@ParameterizedTest

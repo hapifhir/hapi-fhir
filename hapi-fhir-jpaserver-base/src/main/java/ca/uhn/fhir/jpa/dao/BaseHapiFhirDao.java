@@ -263,6 +263,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		myResourceHistoryCalculator = theResourceHistoryCalculator;
 	}
 
+	@VisibleForTesting
+	public void setInterceptorBroadcasterForUnitTest(IInterceptorBroadcaster theInterceptorBroadcaster) {
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
+
 	@Override
 	protected IInterceptorBroadcaster getInterceptorBroadcaster() {
 		return myInterceptorBroadcaster;

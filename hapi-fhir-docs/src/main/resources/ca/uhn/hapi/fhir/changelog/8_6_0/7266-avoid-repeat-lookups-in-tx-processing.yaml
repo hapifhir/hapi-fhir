@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 7266
+title: "When performing a FHIR transaction containing multiple references to the same pre-existing resource,
+   the server will now avoid performing multiple lookups for the same resource, reducing the number of
+   database queries."

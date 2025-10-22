@@ -79,12 +79,14 @@ import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -373,7 +375,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 * parameters all have no modifiers.
 	 */
 	private boolean isCompositeUniqueSpCandidate() {
-		return myStorageSettings.isUniqueIndexesEnabled() && myParams.getEverythingMode() == null;
+		return myStorageSettings.isUniqueIndexesEnabled()
+				&& myParams.getEverythingMode() == null
+				&& myResourceName != null;
 	}
 
 	@SuppressWarnings("ConstantConditions")
@@ -736,8 +740,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				|| theParams.getSort() != null
 				|| theParams.keySet().contains(Constants.PARAM_HAS)
 				|| isPotentiallyContainedReferenceParameterExistsAtRoot(theParams)) {
-			List<RuntimeSearchParam> activeComboParams = mySearchParamRegistry.getActiveComboSearchParams(
-					myResourceName, theParams.keySet(), ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
+			List<RuntimeSearchParam> activeComboParams = List.of();
+			if (myResourceName != null) {
+				activeComboParams = mySearchParamRegistry.getActiveComboSearchParams(
+						myResourceName, theParams.keySet(), ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
+			}
 			if (activeComboParams.isEmpty()) {
 				sqlBuilder.setNeedResourceTableRoot(true);
 			}
@@ -2429,7 +2436,38 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, nextCandidate).stream()
 								.map(RuntimeSearchParam::getName)
 								.collect(Collectors.toList());
-				if (theParams.keySet().containsAll(nextCandidateParamNames)) {
+
+				boolean allMatch = true;
+				for (String next : nextCandidateParamNames) {
+					int dotIdx = next.indexOf('.');
+					if (dotIdx == -1) {
+						allMatch &= theParams.containsKey(next);
+					} else {
+						String firstPart = next.substring(0, dotIdx);
+						String remaining = next.substring(dotIdx + 1);
+						if (theParams.containsKey(firstPart)) {
+							List<List<IQueryParameterType>> paramsAndList = theParams.get(firstPart);
+							boolean found = false;
+							for (List<IQueryParameterType> nextOrList : paramsAndList) {
+								for (IQueryParameterType nextParam : nextOrList) {
+									if (nextParam instanceof ReferenceParam nextParamRef) {
+										if (nextParamRef.hasChain()
+												&& nextParamRef.getChain().equals(remaining)) {
+											found = true;
+											break;
+										}
+									}
+								}
+							}
+							allMatch &= found;
+						}
+					}
+					if (!allMatch) {
+						break;
+					}
+				}
+
+				if (allMatch) {
 					comboParam = nextCandidate;
 					comboParamNames = nextCandidateParamNames;
 					break;
@@ -2567,6 +2605,40 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		List<List<IQueryParameterType>> paramOrValues = new ArrayList<>(theComboParamNames.size());
 
 		for (String nextParamName : theComboParamNames) {
+
+			int dotIdx = nextParamName.indexOf('.');
+			if (dotIdx != -1) {
+				String chain = nextParamName.substring(dotIdx + 1);
+				String paramName = nextParamName.substring(0, dotIdx);
+
+				RuntimeSearchParam upliftedSearchParam = mySearchParamRegistry.getActiveSearchParam(
+						getResourceName(), nextParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
+				if (upliftedSearchParam != null) {
+
+					List<List<IQueryParameterType>> nextValuesAnd = theParams.get(paramName);
+					List<QualifiedParamList> values = new ArrayList<>();
+					for (int andIdx = 0; andIdx < nextValuesAnd.size(); andIdx++) {
+						List<IQueryParameterType> nextValuesOr = nextValuesAnd.get(andIdx);
+						if (nextValuesOr.size() > 0) {
+							ReferenceParam nextOr = (ReferenceParam) nextValuesOr.get(0);
+							if (nextOr.hasChain() && nextOr.getChain().equals(chain)) {
+								QualifiedParamList qualifiedParamList = new QualifiedParamList();
+								nextValuesOr.forEach(t -> qualifiedParamList.add(t.getValueAsQueryToken()));
+								values.add(qualifiedParamList);
+								nextValuesAnd.remove(andIdx);
+								andIdx--;
+							}
+						}
+					}
+
+					if (values.size() > 0) {
+						IQueryParameterAnd<?> consolidatedParams = JpaParamUtil.parseQueryParams(
+								mySearchParamRegistry, myContext, upliftedSearchParam, nextParamName, values);
+						theParams.add(nextParamName, consolidatedParams);
+					}
+				}
+			}
+
 			List<List<IQueryParameterType>> nextValues = theParams.get(nextParamName);
 
 			if (nextValues == null || nextValues.isEmpty()) {

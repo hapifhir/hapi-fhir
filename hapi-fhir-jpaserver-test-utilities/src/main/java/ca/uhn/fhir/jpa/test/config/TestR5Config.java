@@ -74,6 +74,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class TestR5Config {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestR5Config.class);
+
+	/**
+	 * When we're counting SQL select statements, we ignore sequence calls because
+	 * they happen at arbitrary times when a test is executed as a part of the broader
+	 * suite and make the counts completely non-deterministic.
+	 */
 	public static final Predicate<String> SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES = CircularQueueCaptureQueriesListener.DEFAULT_SELECT_INCLUSION_CRITERIA.and(t -> !t.toLowerCase(Locale.US).startsWith("select next value"));
 	public static Integer ourMaxThreads;
 

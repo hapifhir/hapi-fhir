@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7266
+title: "When performing a FHIR transaction directly by calling the DAO API, the transaction request Bundle
+   was sometimes inadvertently changed by reordering its entries during processing. This has been fixed."

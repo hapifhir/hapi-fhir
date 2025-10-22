@@ -6,7 +6,6 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.XmlUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
@@ -22,45 +21,52 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@Disabled
 public class FhirPatchCoreTest extends BaseTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirPatchCoreTest.class);
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("parameters")
-	public void testApply(String myName, String myMode, IBaseResource myInput, IBaseResource myPatch, IBaseResource myOutput, FhirContext theContext) {
-		ourLog.info("Testing diff in {} mode: {}", myMode, myName);
+	public void testApply(TestCase theTestCase) {
 
-		if (myMode.equals("both") || myMode.equals("forwards")) {
+		ourLog.info("Testing diff {} in {} mode", theTestCase.name(), theTestCase.mode());
 
-			FhirPatch patch = new FhirPatch(theContext);
-			patch.apply(myInput, myPatch);
+		if (theTestCase.mode().equals("both") || theTestCase.mode().equals("forwards")) {
 
-			String expected = theContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(myOutput);
-			String actual = theContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(myInput);
-			assertEquals(expected, actual);
+			FhirPatch patch = new FhirPatch(theTestCase.theFhirContext());
+
+			if (theTestCase.error() != null) {
+				assertThatThrownBy(() -> patch.apply(theTestCase.input(), theTestCase.diff()))
+					.hasMessageContaining(theTestCase.error());
+			} else {
+				patch.apply(theTestCase.input(), theTestCase.diff());
+				String expected = theTestCase.theFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(theTestCase.output());
+				String actual = theTestCase.theFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(theTestCase.input());
+				assertEquals(expected, actual);
+			}
 
 		} else {
-			fail("Unknown mode: " + myMode);
+			fail("Unknown mode: " + theTestCase.mode());
 		}
 
 	}
 
-	public static List<Object[]> parameters() throws TransformerException, SAXException, IOException {
-		String testSpecR4 = "/org/hl7/fhir/testcases/r4/patch/fhir-path-tests.xml";
+	public static List<TestCase> parameters() throws TransformerException, SAXException, IOException {
+		String testSpecR4 = "/org/hl7/fhir/testcases/r4/patch/fhir-patch-tests.xml";
 		// the above file is missing an <output></output> section on line 1413 due to a processing error during file generation
 		// as per the error statement found in the file.
-		Collection<Object[]> retValR4 = loadTestSpec(FhirContext.forR4Cached(), testSpecR4);
+		Collection<TestCase> retValR4 = loadTestSpec(FhirContext.forR4Cached(), testSpecR4);
 
-		String testSpecR5 = "/org/hl7/fhir/testcases/r5/patch/fhir-path-tests.xml";
+		String testSpecR5 = "/org/hl7/fhir/testcases/r5/patch/fhir-patch-tests.xml";
 		// The above file his missing xml closing tag '/>' on line 241 and 245
-		Collection<Object[]> retValR5 = loadTestSpec(FhirContext.forR5Cached(), testSpecR5);
+		Collection<TestCase> retValR5 = loadTestSpec(FhirContext.forR5Cached(), testSpecR5);
 
-		ArrayList<Object[]> retVal = new ArrayList<>();
+		ArrayList<TestCase> retVal = new ArrayList<>();
 		retVal.addAll(retValR4);
 		retVal.addAll(retValR5);
 
@@ -69,8 +75,8 @@ public class FhirPatchCoreTest extends BaseTest {
 
 
 	@Nonnull
-	public static Collection<Object[]> loadTestSpec(FhirContext theContext, String theTestSpec) throws IOException, SAXException, TransformerException {
-		List<Object[]> retVal = new ArrayList<>();
+	public static Collection<TestCase> loadTestSpec(FhirContext theContext, String theTestSpec) throws IOException, SAXException, TransformerException {
+		List<TestCase> retVal = new ArrayList<>();
 
 		String testsString = ClasspathUtil.loadResource(theTestSpec);
 		Document doc = XmlUtil.parseDocument(testsString);
@@ -93,12 +99,25 @@ public class FhirPatchCoreTest extends BaseTest {
 			String inputEncoded = XmlUtil.encodeDocument(inputResourceElement);
 			IBaseResource input = theContext.newXmlParser().parseResource(inputEncoded);
 
-			Element outputElement = (Element) next.getElementsByTagName("output").item(0);
-			Element outputResourceElement = getFirstChildElement(outputElement);
-			String outputEncoded = XmlUtil.encodeDocument(outputResourceElement);
-			IBaseResource output = theContext.newXmlParser().parseResource(outputEncoded);
+			String error = null;
+			Element errorElement = (Element) next.getElementsByTagName("error").item(0);
+			if (errorElement != null) {
+				error = errorElement.getAttribute("msg");
+				assertThat(error).isNotBlank();
+			}
 
-			retVal.add(new Object[]{name, mode, input, diff, output, theContext});
+			Element outputElement = (Element) next.getElementsByTagName("output").item(0);
+			if (outputElement == null && error == null) {
+				fail("Unable to parse case: " + XmlUtil.encodeDocument(next, true));
+			}
+			IBaseResource output = null;
+			if (outputElement != null) {
+				Element outputResourceElement = getFirstChildElement(outputElement);
+				String outputEncoded = XmlUtil.encodeDocument(outputResourceElement);
+				output = theContext.newXmlParser().parseResource(outputEncoded);
+			}
+
+			retVal.add(new TestCase(name, mode, input, diff, output, error, theContext));
 
 		}
 
@@ -113,5 +132,14 @@ public class FhirPatchCoreTest extends BaseTest {
 		}
 		fail("No child of type Element");
 		throw new Error();
+	}
+
+	public record TestCase(String name, String mode, IBaseResource input, IBaseResource diff, IBaseResource output,
+						   String error, FhirContext theFhirContext) {
+		@Nonnull
+		@Override
+		public String toString() {
+			return theFhirContext.getVersion().getVersion().name() + " " + name;
+		}
 	}
 }

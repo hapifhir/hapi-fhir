@@ -31,6 +31,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
+import ca.uhn.fhir.rest.api.IResourceSupportedSvc;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.util.SearchParameterUtil;
@@ -50,10 +51,13 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsStep.class);
 
 	@Autowired
-	private IBulkExportProcessor myBulkExportProcessor;
+	private IBulkExportProcessor<?> myBulkExportProcessor;
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
+
+	@Autowired
+	private IResourceSupportedSvc myResourceSupportedSvc;
 
 	@Nonnull
 	@Override
@@ -77,6 +81,8 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		providerParams.setPatientIds(params.getPatientIds());
 		providerParams.setExpandMdm(params.isExpandMdm());
 		providerParams.setPartitionId(params.getPartitionId());
+		// This step doesn't use this param. Included here for logging purpose
+		providerParams.setIncludeHistory(params.isIncludeHistory());
 
 		/*
 		 * we set all the requested resource types here so that
@@ -106,7 +112,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 			 * We will fetch ids for each resource type in the ResourceTypes (_type filter).
 			 */
 			for (String resourceType : params.getResourceTypes()) {
-				if (resourceTypesToOmit.contains(resourceType)) {
+				if (resourceTypesToOmit.contains(resourceType) || !myResourceSupportedSvc.isSupported(resourceType)) {
 					continue;
 				}
 				providerParams.setResourceType(resourceType);
@@ -116,7 +122,8 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 						"Running FetchResourceIdsStep for resource type: {} with params: {}",
 						resourceType,
 						providerParams);
-				Iterator<IResourcePersistentId> pidIterator =
+				@SuppressWarnings("unchecked")
+				Iterator<IResourcePersistentId<?>> pidIterator = (Iterator<IResourcePersistentId<?>>)
 						myBulkExportProcessor.getResourcePidIterator(providerParams);
 				List<TypedPidJson> idsToSubmit = new ArrayList<>();
 
@@ -187,7 +194,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 	}
 
 	@VisibleForTesting
-	public void setBulkExportProcessorForUnitTest(IBulkExportProcessor theBulkExportProcessor) {
+	public void setBulkExportProcessorForUnitTest(IBulkExportProcessor<?> theBulkExportProcessor) {
 		myBulkExportProcessor = theBulkExportProcessor;
 	}
 }

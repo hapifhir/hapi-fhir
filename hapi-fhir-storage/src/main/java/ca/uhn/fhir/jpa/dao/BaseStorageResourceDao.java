@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IJpaDao;
@@ -31,6 +32,7 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.patch.FhirPatch;
 import ca.uhn.fhir.jpa.patch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.patch.XmlPatchUtils;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.update.UpdateParameters;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
@@ -79,6 +81,9 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 	@Autowired
 	protected abstract IRequestPartitionHelperSvc getRequestPartitionHelperService();
 
+	@Autowired
+	protected abstract MatchUrlService getMatchUrlService();
+
 	@Override
 	public DaoMethodOutcome patch(
 			IIdType theId,
@@ -87,10 +92,24 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 			String thePatchBody,
 			IBaseParameters theFhirPatchBody,
 			RequestDetails theRequestDetails) {
+
+		ReadPartitionIdRequestDetails details;
+		if (isNotBlank(theConditionalUrl)) {
+			MatchUrlService.ResourceTypeAndSearchParameterMap parsed =
+					getMatchUrlService().parseAndTranslateMatchUrl(theConditionalUrl);
+			details = ReadPartitionIdRequestDetails.forPatch(
+					parsed.resourceDefinition().getName(), parsed.searchParameterMap());
+		} else {
+			details = ReadPartitionIdRequestDetails.forPatch(getResourceName(), theId);
+		}
+		RequestPartitionId requestPartitionId =
+				getRequestPartitionHelperService().determineReadPartitionForRequest(theRequestDetails, details);
+
 		TransactionDetails transactionDetails = new TransactionDetails();
 		return getTransactionService()
 				.withRequest(theRequestDetails)
 				.withTransactionDetails(transactionDetails)
+				.withRequestPartitionId(requestPartitionId)
 				.execute(tx -> patchInTransaction(
 						theId,
 						theConditionalUrl,
@@ -99,7 +118,8 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 						thePatchBody,
 						theFhirPatchBody,
 						theRequestDetails,
-						transactionDetails));
+						transactionDetails,
+						requestPartitionId));
 	}
 
 	@Override
@@ -111,7 +131,8 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 			String thePatchBody,
 			IBaseParameters theFhirPatchBody,
 			RequestDetails theRequestDetails,
-			TransactionDetails theTransactionDetails) {
+			TransactionDetails theTransactionDetails,
+			RequestPartitionId theRequestPartitionId) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		boolean isHistoryRewrite = myStorageSettings.isUpdateWithHistoryRewriteEnabled()
@@ -122,9 +143,6 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 			throw new InvalidRequestException(
 					Msg.code(2717) + "Invalid resource ID for rewrite history: ID must contain a history version");
 		}
-
-		RequestPartitionId theRequestPartitionId = getRequestPartitionHelperService()
-				.determineReadPartitionForRequestForSearchType(theRequestDetails, getResourceName());
 
 		IBasePersistedResource entityToUpdate;
 		IIdType resourceId;

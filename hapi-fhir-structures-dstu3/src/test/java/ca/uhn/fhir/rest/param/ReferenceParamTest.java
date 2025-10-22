@@ -69,6 +69,7 @@ public class ReferenceParamTest {
 		assertEquals("FOO", rp.getIdPart());
 		assertEquals("FOO", rp.getValue());
 		assertEquals(".name", rp.getQueryParameterQualifier());
+		assertTrue(rp.hasChain());
 		assertEquals("name", rp.getChain());
 
 	}
