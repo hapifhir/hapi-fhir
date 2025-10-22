@@ -153,6 +153,72 @@ public class ComboNonUniqueOnUpliftedRefchainR5Test extends BaseJpaR5Test {
 	}
 
 	/**
+	 * A combo is declared on 5 parameters, but then the search only includes 4 of them.
+	 * We should still use the uplifted refchains, but we can't use the combo param.
+	 */
+	@Test
+	public void testSearchNotCoveringAllParameters() {
+		createSpCoveragePatientWithChains("family", "given", "gender", "address-postalcode", "birthdate");
+		createSpComboForCoveragePatient(
+			"SearchParameter/Coverage-patient.family",
+			"SearchParameter/Coverage-patient.given",
+			"SearchParameter/Coverage-patient.gender",
+			"SearchParameter/Coverage-patient.address-postalcode",
+			"SearchParameter/Coverage-patient.birthdate"
+		);
+
+		// This patient/coverage will match
+		Patient patient = new Patient();
+		patient.addName().setFamily("Simpson").addGiven("Homer");
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+		patient.addAddress().setPostalCode("90701");
+		patient.setBirthDateElement(new DateType("1966-01-02"));
+		IIdType patientId = myPatientDao.create(patient, newSrd()).getId().toUnqualifiedVersionless();
+
+		Coverage hs = new Coverage();
+		hs.setId("COV");
+		hs.setBeneficiary(new Reference(patientId));
+		IIdType covId = myCoverageDao.update(hs, newSrd()).getId().toUnqualifiedVersionless();
+
+		// Create a mon-matching patient/coverage
+		// Only the given name is different from the first one
+		Patient nonMatchingPatient = new Patient();
+		nonMatchingPatient.addName().setFamily("Flanders").addGiven("Ned");
+		nonMatchingPatient.setGender(Enumerations.AdministrativeGender.MALE);
+		nonMatchingPatient.addAddress().setPostalCode("90701");
+		nonMatchingPatient.setBirthDateElement(new DateType("1966-01-02"));
+		IIdType nonMatchingPatientId = myPatientDao.create(nonMatchingPatient, newSrd()).getId().toUnqualifiedVersionless();
+
+		Coverage nonMatchingCoverage = new Coverage();
+		nonMatchingCoverage.setBeneficiary(new Reference(nonMatchingPatientId));
+		myCoverageDao.create(nonMatchingCoverage, newSrd()).getId().toUnqualifiedVersionless();
+
+		// Test
+
+		// Gender isn't in the query so we can't use the combo param
+		SearchParameterMap map = SearchParameterMap
+			.newSynchronous()
+			.add("patient", new ReferenceParam(null, "address-postalcode", "90701"))
+			.add("patient", new ReferenceParam(null, "birthdate", "1966-01-02"))
+			.add("patient", new ReferenceParam(null, "family", "Simpson"))
+			.add("patient", new ReferenceParam(null, "gender", "male"))
+			;
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome = myCoverageDao.search(map, mySrd);
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(
+			covId.toUnqualifiedVersionless().getValue()
+		);
+
+		// Verify 2 - Ensure that we actually use the combo index
+
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		assertThat(searchSql).doesNotContainIgnoringCase(ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU);
+	}
+
+	/**
 	 * Two different chains on the same parameter (Encounter.subject in this case)
 	 */
 	@ParameterizedTest

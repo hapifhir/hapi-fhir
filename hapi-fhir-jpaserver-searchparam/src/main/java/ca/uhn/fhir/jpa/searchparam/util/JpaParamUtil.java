@@ -200,8 +200,12 @@ public enum JpaParamUtil {
 		}
 	}
 
-	// FIXME: document
-	public static RestSearchParameterTypeEnum getParameterTypeForComposite(ISearchParamRegistry theSearchParamRegistry, RuntimeSearchParam theParam, ComponentAndCorrespondingParam theComponentAndParam) {
+
+	/**
+	 * Given a component for a composite or combo SearchParameter (as returned by {@link #resolveCompositeComponents(ISearchParamRegistry, RuntimeSearchParam)})
+	 * determines the type associated with the target parameter.
+	 */
+	public static RestSearchParameterTypeEnum getParameterTypeForComposite(ISearchParamRegistry theSearchParamRegistry, ComponentAndCorrespondingParam theComponentAndParam) {
 		String chain = theComponentAndParam.getComponent().getComboUpliftChain();
 		if (chain != null) {
 			RuntimeSearchParam targetParameter = theComponentAndParam.getComponentParameter();

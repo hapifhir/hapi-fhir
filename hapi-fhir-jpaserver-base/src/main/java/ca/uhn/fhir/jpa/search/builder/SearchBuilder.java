@@ -2545,19 +2545,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				}
 			}
 
-			// FIXME: move validation here, also only remove if we actually have all matches
-
 			if (!foundMatch) {
 				return false;
 			}
 		}
-
-		// FIXME: remove
-//		for (int i = 0; i < containingLists.size(); i++) {
-//			List<List<IQueryParameterType>> andList = containingLists.get(i);
-//			int andListIndex = containingListIndexes.get(i);
-//			inputs.add(andList.get(andListIndex));
-//		}
 
 		if (CartesianProductUtil.calculateCartesianProductSize(inputs) > 500) {
 			ourLog.debug(
@@ -2582,7 +2573,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				// As a result, we strip the prefix if present.
 				String nextOrValue = stripStart(nextOr.getValueAsQueryToken(), EQUAL.getValue());
 
-				RestSearchParameterTypeEnum paramType = JpaParamUtil.getParameterTypeForComposite(mySearchParamRegistry, theComboParam, componentAndCorrespondingParam);
+				RestSearchParameterTypeEnum paramType = JpaParamUtil.getParameterTypeForComposite(mySearchParamRegistry, componentAndCorrespondingParam);
 				if (theComboParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE) {
 					if (paramType == RestSearchParameterTypeEnum.STRING) {
 						nextOrValue = StringUtil.normalizeStringForSearchIndexing(nextOrValue);

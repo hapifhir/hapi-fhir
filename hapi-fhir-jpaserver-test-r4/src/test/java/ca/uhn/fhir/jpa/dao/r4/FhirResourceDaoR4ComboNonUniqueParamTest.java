@@ -310,7 +310,10 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	public void testStringAndToken_MultipleAnd() {
 		createStringAndTokenCombo_NameAndGender();
 
-		IIdType id1 = createPatient(withFamily("SIMPSON"), withGiven("HOMER"), withGiven("JAY"), withGender("male"));
+		Patient patient = new Patient();
+		patient.addName().setFamily("Simpson").addGiven("Homer").addGiven("Jay");
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+		IIdType id1 = myPatientDao.create(patient, newSrd()).getId().toUnqualifiedVersionless();
 		assertNotNull(id1);
 
 		logAllNonUniqueIndexes();
@@ -328,11 +331,11 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		assertThat(actual).containsExactlyInAnyOrder(id1.toUnqualifiedVersionless().getValue());
 
 		String sql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
-		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 INNER JOIN HFJ_SPIDX_STRING t1 ON (t0.RES_ID = t1.RES_ID) WHERE ((t0.HASH_COMPLETE = '7545664593829342272') AND ((t1.HASH_NORM_PREFIX = '6206712800146298788') AND (t1.SP_VALUE_NORMALIZED LIKE 'JAY%'))) fetch first '10000' rows only";
+		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 INNER JOIN HFJ_SPIDX_STRING t1 ON (t0.RES_ID = t1.RES_ID) WHERE ((t0.HASH_COMPLETE = '2215689319713414397') AND ((t1.HASH_NORM_PREFIX = '6206712800146298788') AND (t1.SP_VALUE_NORMALIZED LIKE 'JAY%'))) fetch first '10000' rows only";
 		assertEquals(expected, sql);
 
 		logCapturedMessages();
-		assertThat(myMessages.toString()).contains("Using NON_UNIQUE index(es) for query for search: Patient?family=SIMPSON&gender=male&given=HOMER");
+		assertThat(myMessages.toString()).contains("Using NON_UNIQUE index(es) for query for search: Patient?family=SIMPSON&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=HOMER");
 		myMessages.clear();
 
 	}
