@@ -50,10 +50,10 @@ import ca.uhn.fhir.rest.param.binder.QueryParameterAndBinder;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public enum JpaParamUtil {
@@ -120,7 +120,7 @@ public enum JpaParamUtil {
 
 		if (paramType == RestSearchParameterTypeEnum.COMPOSITE) {
 
-			List<RuntimeSearchParam> compositeList = resolveComponentParameters(theSearchParamRegistry, theParamDef);
+			List<ComponentAndCorrespondingParam> compositeList = resolveCompositeComponents(theSearchParamRegistry, theParamDef);
 
 			if (compositeList.size() != 2) {
 				throw new ConfigurationException(Msg.code(498) + "Search parameter of type " + theUnqualifiedParamName
@@ -128,8 +128,8 @@ public enum JpaParamUtil {
 						+ compositeList.size());
 			}
 
-			RuntimeSearchParam left = compositeList.get(0);
-			RuntimeSearchParam right = compositeList.get(1);
+			RuntimeSearchParam left = compositeList.get(0).getComponentParameter();
+			RuntimeSearchParam right = compositeList.get(1).getComponentParameter();
 
 			@SuppressWarnings({"unchecked", "rawtypes"})
 			CompositeAndListParam<IQueryParameterType, IQueryParameterType> cp = new CompositeAndListParam(
@@ -144,23 +144,20 @@ public enum JpaParamUtil {
 		}
 	}
 
+	/**
+	 * Given a composite or combo SearchParameter, this method will resolve the components
+	 * in the order they appear in the composite parameter definition. The return objects
+	 * are a record containing both the component from the composite parameter definition,
+	 * but also the corresponding SearchParameter definition for the target of the component.
+	 *
+	 * @param theSearchParamRegistry The active SearchParameter registry
+	 * @param theCompositeParameter The composite search parameter
+	 */
 	@Nonnull
-	public static List<RuntimeSearchParam> resolveComponentParameters(
-			ISearchParamRegistry theSearchParamRegistry, RuntimeSearchParam theParamDef) {
-		List<RuntimeSearchParam> compositeList =
-				resolveCompositeComponentsDeclaredOrder(theSearchParamRegistry, theParamDef);
-
-		// todo mb why is this sorted?  Is the param order flipped too during query-time?
-		compositeList.sort((Comparator.comparing(RuntimeSearchParam::getName)));
-
-		return compositeList;
-	}
-
-	@Nonnull
-	public static List<RuntimeSearchParam> resolveCompositeComponentsDeclaredOrder(
-			ISearchParamRegistry theSearchParamRegistry, RuntimeSearchParam theParamDef) {
-		List<RuntimeSearchParam> compositeList = new ArrayList<>();
-		List<RuntimeSearchParam.Component> components = theParamDef.getComponents();
+	public static List<ComponentAndCorrespondingParam> resolveCompositeComponents(
+			ISearchParamRegistry theSearchParamRegistry, RuntimeSearchParam theCompositeParameter) {
+		List<ComponentAndCorrespondingParam> compositeList = new ArrayList<>();
+		List<RuntimeSearchParam.Component> components = theCompositeParameter.getComponents();
 		for (RuntimeSearchParam.Component next : components) {
 			String url = next.getReference();
 			RuntimeSearchParam componentParam = theSearchParamRegistry.getActiveSearchParamByUrl(
@@ -168,7 +165,7 @@ public enum JpaParamUtil {
 			if (componentParam == null) {
 				throw new InternalErrorException(Msg.code(499) + "Can not find SearchParameter: " + url);
 			}
-			compositeList.add(componentParam);
+			compositeList.add(new ComponentAndCorrespondingParam(next, componentParam));
 		}
 		return compositeList;
 	}
@@ -202,4 +199,112 @@ public enum JpaParamUtil {
 						+ "' has type " + paramType + " which is currently not supported.");
 		}
 	}
+
+	// FIXME: document
+	public static RestSearchParameterTypeEnum getParameterTypeForComposite(ISearchParamRegistry theSearchParamRegistry, RuntimeSearchParam theParam, ComponentAndCorrespondingParam theComponentAndParam) {
+		String chain = theComponentAndParam.getComponent().getComboUpliftChain();
+		if (chain != null) {
+			RuntimeSearchParam targetParameter = theComponentAndParam.getComponentParameter();
+			for (String target : targetParameter.getTargets()) {
+				RuntimeSearchParam chainTargetParam = theSearchParamRegistry.getActiveSearchParam(target, chain, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
+				if (chainTargetParam != null) {
+					return chainTargetParam.getParamType();
+				}
+			}
+			// Fallback if we can't find a chain target
+			return RestSearchParameterTypeEnum.TOKEN;
+		} else {
+			return theComponentAndParam.getComponentParameter().getParamType();
+		}
+	}
+
+	// FIXME: document
+	public static String getParameterNameForComposite(ComponentAndCorrespondingParam theComponentAndParam) {
+		if (theComponentAndParam.getComponent().getComboUpliftChain() != null) {
+			return theComponentAndParam.getComponentParameter().getName() + "." + theComponentAndParam.getComponent().getComboUpliftChain();
+		} else {
+			return theComponentAndParam.getComponentParameter().getName();
+		}
+	}
+
+	/**
+	 * Return type for {@link #resolveCompositeComponents(ISearchParamRegistry, RuntimeSearchParam)}
+	 *
+	 * @since 8.6.0
+	 */
+	public static class ComponentAndCorrespondingParam {
+
+		private final String myCombinedParamName;
+		private final RuntimeSearchParam.Component myComponent;
+		private final RuntimeSearchParam myComponentParameter;
+		private final String myParamName;
+		private final String myChain;
+
+		/**
+		 * Constructor
+		 */
+		ComponentAndCorrespondingParam(@Nonnull RuntimeSearchParam.Component theComponent, @Nonnull RuntimeSearchParam theComponentParameter) {
+			this.myComponent = theComponent;
+			this.myComponentParameter = theComponentParameter;
+
+			int dotIdx = theComponentParameter.getName().indexOf(".");
+			if (dotIdx != -1) {
+				myParamName = theComponentParameter.getName().substring(0, dotIdx);
+				myChain = theComponentParameter.getName().substring(dotIdx + 1);
+				this.myCombinedParamName = theComponentParameter.getName();
+			} else {
+				myParamName = theComponentParameter.getName();
+				myChain = theComponent.getComboUpliftChain();
+				if (myChain != null) {
+					myCombinedParamName = myParamName + "." + myChain;
+				} else {
+					myCombinedParamName = myParamName;
+				}
+			}
+
+		}
+
+		/**
+		 * The component definition in the source composite SearchParameter
+		 */
+		@Nonnull
+		public RuntimeSearchParam.Component getComponent() {
+			return myComponent;
+		}
+
+		/**
+		 * The target definition referred to by the {@link #getComponent() component} in the source composite SearchParameter
+		 */
+		@Nonnull
+		public RuntimeSearchParam getComponentParameter() {
+			return myComponentParameter;
+		}
+
+		/**
+		 * The parameter name, without any chained parameter names
+		 */
+		@Nonnull
+		public String getParamName() {
+			return myParamName;
+		}
+
+		/**
+		 * The chain portion of the component parameter if any, or <code>null</code> if not. Excludes
+		 * the leading period, so if the component parameter is "subject.name", this will return "name".
+		 */
+		@Nullable
+		public String getChain() {
+			return myChain;
+		}
+
+		/**
+		 * The combined parameter name, including any chained parameter names, e.g. "subject.name"
+		 */
+		@Nonnull
+		public String getCombinedParamName() {
+			return myCombinedParamName;
+		}
+
+	}
+
 }

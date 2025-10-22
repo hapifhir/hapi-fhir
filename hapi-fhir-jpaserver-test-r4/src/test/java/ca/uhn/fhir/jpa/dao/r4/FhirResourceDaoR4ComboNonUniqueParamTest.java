@@ -137,6 +137,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 
 	@Test
+
 	public void testStringAndToken_Create() {
 		createStringAndTokenCombo_NameAndGender();
 
@@ -432,7 +433,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		assertThat(sql).contains("SP_VALUE_NORMALIZED LIKE 'FAMILY1%'");
 		assertThat(sql).contains("t1.TARGET_RESOURCE_ID");
 
-		assertThat(myMessages.get(0)).contains("This search uses an unqualified resource");
+		assertThat(myMessages.get(0)).contains("Search is not a candidate for unique combo searching - Reference with no type specified for parameter 'organization'");
 	}
 
 
@@ -534,6 +535,13 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		myBundleDao.update(document, mySrd);
 
 		logAllNonUniqueIndexes();
+		runInTransaction(()->{
+			List<String> indexStrings = myResourceIndexedComboTokensNonUniqueDao.findAll().stream().map(t -> t.getIndexString()).toList();
+			assertThat(indexStrings).containsExactlyInAnyOrder(
+				"Bundle?composition.subject=Patient%2FPAT-0&composition.type=http%3A%2F%2Ffoo%7C123",
+				"Bundle?composition.subject=Patient%2FPAT-0&composition.type=http%3A%2F%2Ffoo%7C456"
+			);
+		});
 
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
 		params.add("composition", new ReferenceParam("subject", "Patient/PAT-0"));
