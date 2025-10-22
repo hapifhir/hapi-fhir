@@ -224,16 +224,6 @@ public enum JpaParamUtil {
 		}
 	}
 
-	// FIXME: document
-	public static String getParameterNameForComposite(ComponentAndCorrespondingParam theComponentAndParam) {
-		if (theComponentAndParam.getComponent().getComboUpliftChain() != null) {
-			return theComponentAndParam.getComponentParameter().getName() + "."
-					+ theComponentAndParam.getComponent().getComboUpliftChain();
-		} else {
-			return theComponentAndParam.getComponentParameter().getName();
-		}
-	}
-
 	/**
 	 * Return type for {@link #resolveCompositeComponents(ISearchParamRegistry, RuntimeSearchParam)}
 	 *

@@ -432,9 +432,9 @@ public class SearchParameterCanonicalizer {
 
 			String comboUpliftChain = null;
 			List<? extends IBaseExtension<?, ?>> componentExtensions = ((IBaseHasExtensions) next).getExtension();
-			// FIXME: add SP validator for format here - also make sure it's not present for unique combos
 			for (IBaseExtension<?, ?> nextComponentExtension : componentExtensions) {
-				if (HapiExtensions.EXT_SP_COMBO_UPLIFT_CHAIN.equals(nextComponentExtension.getUrl())) {
+				if (HapiExtensions.EXT_SP_COMBO_UPLIFT_CHAIN.equals(nextComponentExtension.getUrl())
+						&& unique == ComboSearchParamType.NON_UNIQUE) {
 					IPrimitiveType<String> upliftChainValue =
 							(IPrimitiveType<String>) nextComponentExtension.getValue();
 					comboUpliftChain = upliftChainValue.getValueAsString();
