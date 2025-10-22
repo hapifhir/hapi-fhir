@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 7320
+title: "Previously, due to the asynchronicity of how cancelling a
+      batch2 job works, it was possible to cancel a job and then start
+      a new one (with the same parameters and allowing cache to be used)
+      and this new job would use the old job id (which would then be cancelled).
+      This has been fixed.
+"

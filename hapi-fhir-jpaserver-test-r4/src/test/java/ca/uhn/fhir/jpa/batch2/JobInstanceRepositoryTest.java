@@ -10,6 +10,8 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
@@ -32,26 +34,30 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchByJobParamsAndStatuses_SingleStatus() {
+		createInstancesForSomeTests();
 		Set<StatusEnum> statuses = Set.of(StatusEnum.IN_PROGRESS);
-		List<Batch2JobInstanceEntity> instancesByJobIdParamsAndStatus = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(JOB_DEFINITION_ID, PARAMS, statuses, PageRequest.of(0, 10)));
+		List<Batch2JobInstanceEntity> instancesByJobIdParamsAndStatus = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(JOB_DEFINITION_ID, PARAMS, statuses, null, PageRequest.of(0, 10)));
 		assertThat(instancesByJobIdParamsAndStatus).hasSize(1);
 	}
 
 	@Test
 	public void testSearchByJobParamsAndStatuses_MultiStatus() {
+		createInstancesForSomeTests();
 		Set<StatusEnum> statuses = Set.of(StatusEnum.IN_PROGRESS, StatusEnum.COMPLETED);
-		List<Batch2JobInstanceEntity> instances = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(JOB_DEFINITION_ID, PARAMS, statuses, PageRequest.of(0, 10)));
+		List<Batch2JobInstanceEntity> instances = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(JOB_DEFINITION_ID, PARAMS, statuses, null, PageRequest.of(0, 10)));
 		assertThat(instances).hasSize(2);
 	}
 
 	@Test
 	public void testSearchByJobParamsWithoutStatuses() {
+		createInstancesForSomeTests();
 		List<Batch2JobInstanceEntity> instances = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdAndParams(JOB_DEFINITION_ID, PARAMS, PageRequest.of(0, 10)));
 		assertThat(instances).hasSize(4);
 	}
 
 	@Test
 	public void testServiceLogicIsCorrectWhenNoStatusesAreUsed() {
+		createInstancesForSomeTests();
 		FetchJobInstancesRequest request = new FetchJobInstancesRequest(JOB_DEFINITION_ID, PARAMS);
 		List<JobInstance> jobInstances = myJobPersistenceSvc.fetchInstances(request, 0, 1000);
 		assertThat(jobInstances).hasSize(4);
@@ -60,6 +66,7 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 	@Test
 	public void testServiceLogicIsCorrectWithStatuses() {
 		//Given
+		createInstancesForSomeTests();
 		FetchJobInstancesRequest request = new FetchJobInstancesRequest(JOB_DEFINITION_ID, PARAMS, StatusEnum.IN_PROGRESS, StatusEnum.COMPLETED);
 
 		//When
@@ -71,16 +78,22 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 
 	@Test
 	public void testPersistInitiatingUsernameAndClientId() {
+		createInstancesForSomeTests();
 		Set<StatusEnum> statuses = Set.of(StatusEnum.IN_PROGRESS);
-		List<Batch2JobInstanceEntity> instancesByJobIdParamsAndStatus = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(JOB_DEFINITION_ID, PARAMS, statuses, PageRequest.of(0, 10)));
+		List<Batch2JobInstanceEntity> instancesByJobIdParamsAndStatus = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(JOB_DEFINITION_ID, PARAMS, statuses, null, PageRequest.of(0, 10)));
 		assertThat(instancesByJobIdParamsAndStatus).hasSize(1);
 		Batch2JobInstanceEntity batch2JobInstanceEntity = instancesByJobIdParamsAndStatus.get(0);
 		assertEquals(batch2JobInstanceEntity.getTriggeringUsername(), TRIGGERING_USER_NAME);
 		assertEquals(batch2JobInstanceEntity.getTriggeringClientId(), TRIGGERING_CLIENT_ID);
 	}
 
-	@BeforeEach
-	public void beforeEach() {
+	@ParameterizedTest
+	@ValueSource
+	public void findInstancesByJobIdParamsAndStatus_withCancelledBoolean_returnsAsExpected() {
+
+	}
+
+	private void createInstancesForSomeTests() {
 		//Create in-progress job.
 		Batch2JobInstanceEntity instance= new Batch2JobInstanceEntity();
 		instance.setId(INSTANCE_ID);

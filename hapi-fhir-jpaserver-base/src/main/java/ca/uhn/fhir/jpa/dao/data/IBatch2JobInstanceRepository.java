@@ -57,11 +57,16 @@ public interface IBatch2JobInstanceRepository
 	int updateWorkChunksPurgedTrue(@Param("id") String theInstanceId);
 
 	@Query(
-			"SELECT b from Batch2JobInstanceEntity b WHERE b.myDefinitionId = :defId AND (b.myParamsJson = :params OR b.myParamsJsonVc = :params) AND b.myStatus IN( :stats )")
+			"SELECT b from Batch2JobInstanceEntity b "
+			+ "WHERE b.myDefinitionId = :defId AND (b.myParamsJson = :params OR b.myParamsJsonVc = :params) "
+			+ "AND b.myStatus IN (:stats) "
+			+ "AND (:cancelled IS NULL OR b.myCancelled = :cancelled)"
+	)
 	List<Batch2JobInstanceEntity> findInstancesByJobIdParamsAndStatus(
 			@Param("defId") String theDefinitionId,
 			@Param("params") String theParams,
 			@Param("stats") Set<StatusEnum> theStatus,
+			@Param("cancelled") Boolean theIsCancelledBoolean,
 			Pageable thePageable);
 
 	@Query(
