@@ -2428,59 +2428,59 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private void attemptComboSearchParameterProcessing(
 			QueryStack theQueryStack, @Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
 
-			List<RuntimeSearchParam> candidateComboParams = mySearchParamRegistry.getActiveComboSearchParams(
-					myResourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
-			for (RuntimeSearchParam nextCandidate : candidateComboParams) {
+		List<RuntimeSearchParam> candidateComboParams = mySearchParamRegistry.getActiveComboSearchParams(
+				myResourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
+		for (RuntimeSearchParam nextCandidate : candidateComboParams) {
 
-				List<JpaParamUtil.ComponentAndCorrespondingParam> nextCandidateComponents =
+			List<JpaParamUtil.ComponentAndCorrespondingParam> nextCandidateComponents =
 					JpaParamUtil.resolveCompositeComponents(mySearchParamRegistry, nextCandidate);
 
-				/*
-				 * First, a quick and dirty check to see if we have a parameter in the current search
-				 * that contains all the parameters for the candidate combo search parameter. We do
-				 * a more nuanced check later to make sure that the parameters have appropriate values,
-				 * modifiers, etc. so this doesn't need to be perfect in terms of rejecting bad matches.
-				 * It just needs to fail fast if the search couldn't possibly be a match for the
-				 * candidate so we can move on quickly.
-				 */
-				boolean noMatch = false;
-				for (JpaParamUtil.ComponentAndCorrespondingParam nextComponent : nextCandidateComponents) {
-					if (!theParams.containsKey(nextComponent.getParamName()) && !theParams.containsKey(nextComponent.getCombinedParamName())) {
-						noMatch = true;
-						break;
-					}
+			/*
+			 * First, a quick and dirty check to see if we have a parameter in the current search
+			 * that contains all the parameters for the candidate combo search parameter. We do
+			 * a more nuanced check later to make sure that the parameters have appropriate values,
+			 * modifiers, etc. so this doesn't need to be perfect in terms of rejecting bad matches.
+			 * It just needs to fail fast if the search couldn't possibly be a match for the
+			 * candidate so we can move on quickly.
+			 */
+			boolean noMatch = false;
+			for (JpaParamUtil.ComponentAndCorrespondingParam nextComponent : nextCandidateComponents) {
+				if (!theParams.containsKey(nextComponent.getParamName())
+						&& !theParams.containsKey(nextComponent.getCombinedParamName())) {
+					noMatch = true;
+					break;
 				}
-				if (noMatch) {
-					continue;
-				}
-
-				for (JpaParamUtil.ComponentAndCorrespondingParam nextComponent : nextCandidateComponents) {
-					ensureSubListsAreWritable(theParams.get(nextComponent.getParamName()));
-					ensureSubListsAreWritable(theParams.get(nextComponent.getCombinedParamName()));
-				}
-
-				/*
-				 * Apply search against the combo param index in a loop:
-				 *
-				 * 1. First we check whether the actual parameter values in the
-				 * parameter map are actually usable for searching against the combo
-				 * param index. E.g. no search modifiers, date comparators, etc.,
-				 * since these mean you can't use the combo index.
-				 *
-				 * 2. Apply and create the join SQl. We remove parameter values from
-				 * the map as we apply them, so any parameter values remaining in the
-				 * map after each loop haven't yet been factored into the SQL.
-				 *
-				 * The loop allows us to create multiple combo index joins if there
-				 * are multiple AND expressions for the related parameters.
-				 */
-				boolean matched;
-				do {
-					matched = applyComboSearchParamIfAppropriate(theRequest, theQueryStack, theParams, nextCandidate, nextCandidateComponents);
-				} while (matched);
-
+			}
+			if (noMatch) {
+				continue;
 			}
 
+			for (JpaParamUtil.ComponentAndCorrespondingParam nextComponent : nextCandidateComponents) {
+				ensureSubListsAreWritable(theParams.get(nextComponent.getParamName()));
+				ensureSubListsAreWritable(theParams.get(nextComponent.getCombinedParamName()));
+			}
+
+			/*
+			 * Apply search against the combo param index in a loop:
+			 *
+			 * 1. First we check whether the actual parameter values in the
+			 * parameter map are actually usable for searching against the combo
+			 * param index. E.g. no search modifiers, date comparators, etc.,
+			 * since these mean you can't use the combo index.
+			 *
+			 * 2. Apply and create the join SQl. We remove parameter values from
+			 * the map as we apply them, so any parameter values remaining in the
+			 * map after each loop haven't yet been factored into the SQL.
+			 *
+			 * The loop allows us to create multiple combo index joins if there
+			 * are multiple AND expressions for the related parameters.
+			 */
+			boolean matched;
+			do {
+				matched = applyComboSearchParamIfAppropriate(
+						theRequest, theQueryStack, theParams, nextCandidate, nextCandidateComponents);
+			} while (matched);
+		}
 	}
 
 	/**
@@ -2496,9 +2496,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 * @return Returns <code>true</code> if the Combo SearchParameter was applied successfully.
 	 */
 	private boolean applyComboSearchParamIfAppropriate(
-		RequestDetails theRequest, QueryStack theQueryStack,
-		@Nonnull SearchParameterMap theParams,
-		RuntimeSearchParam theComboParam, List<JpaParamUtil.ComponentAndCorrespondingParam> theComboParamComponents) {
+			RequestDetails theRequest,
+			QueryStack theQueryStack,
+			@Nonnull SearchParameterMap theParams,
+			RuntimeSearchParam theComboParam,
+			List<JpaParamUtil.ComponentAndCorrespondingParam> theComboParamComponents) {
 
 		List<List<IQueryParameterType>> inputs = new ArrayList<>();
 		List<Runnable> runnableRemoveInputsFromParams = new ArrayList<>(theComboParamComponents.size());
@@ -2517,28 +2519,38 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						}
 					}
 
-					if (!validateParamValuesAreValidForComboParam(theRequest, theParams, theComboParam, nextComponent, sameNameParametersOrList)) {
+					if (!validateParamValuesAreValidForComboParam(
+							theRequest, theParams, theComboParam, nextComponent, sameNameParametersOrList)) {
 						continue;
 					}
 
 					inputs.add(sameNameParametersOrList);
-					runnableRemoveInputsFromParams.add(() -> sameNameParametersAndList.remove(sameNameParametersOrList));
+					runnableRemoveInputsFromParams.add(
+							() -> sameNameParametersAndList.remove(sameNameParametersOrList));
 					foundMatch = true;
 					break;
 				}
 			} else {
-				List<List<IQueryParameterType>> combinedNameParametersAndList = theParams.get(nextComponent.getCombinedParamName());
+				List<List<IQueryParameterType>> combinedNameParametersAndList =
+						theParams.get(nextComponent.getCombinedParamName());
 				if (combinedNameParametersAndList != null) {
 					for (int andIndex = 0; andIndex < combinedNameParametersAndList.size(); andIndex++) {
-						List<IQueryParameterType> combinedNameParametersOrList = combinedNameParametersAndList.get(andIndex);
+						List<IQueryParameterType> combinedNameParametersOrList =
+								combinedNameParametersAndList.get(andIndex);
 						if (!combinedNameParametersOrList.isEmpty()) {
 
-							if (!validateParamValuesAreValidForComboParam(theRequest, theParams, theComboParam, nextComponent, combinedNameParametersOrList)) {
+							if (!validateParamValuesAreValidForComboParam(
+									theRequest,
+									theParams,
+									theComboParam,
+									nextComponent,
+									combinedNameParametersOrList)) {
 								continue;
 							}
 
 							inputs.add(combinedNameParametersOrList);
-							runnableRemoveInputsFromParams.add(() -> combinedNameParametersAndList.remove(combinedNameParametersOrList));
+							runnableRemoveInputsFromParams.add(
+									() -> combinedNameParametersAndList.remove(combinedNameParametersOrList));
 							foundMatch = true;
 						}
 					}
@@ -2552,7 +2564,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		if (CartesianProductUtil.calculateCartesianProductSize(inputs) > 500) {
 			ourLog.debug(
-				"Search is not a candidate for unique combo searching - Too many OR values would result in too many permutations");
+					"Search is not a candidate for unique combo searching - Too many OR values would result in too many permutations");
 			return false;
 		}
 
@@ -2565,7 +2577,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			List<String> parameters = new ArrayList<>();
 			for (int paramIndex = 0; paramIndex < theComboParamComponents.size(); paramIndex++) {
 
-				JpaParamUtil.ComponentAndCorrespondingParam componentAndCorrespondingParam = theComboParamComponents.get(paramIndex);
+				JpaParamUtil.ComponentAndCorrespondingParam componentAndCorrespondingParam =
+						theComboParamComponents.get(paramIndex);
 				String nextParamName = componentAndCorrespondingParam.getCombinedParamName();
 				IQueryParameterType nextOr = nextPermutation.get(paramIndex);
 
@@ -2573,7 +2586,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				// As a result, we strip the prefix if present.
 				String nextOrValue = stripStart(nextOr.getValueAsQueryToken(), EQUAL.getValue());
 
-				RestSearchParameterTypeEnum paramType = JpaParamUtil.getParameterTypeForComposite(mySearchParamRegistry, componentAndCorrespondingParam);
+				RestSearchParameterTypeEnum paramType = JpaParamUtil.getParameterTypeForComposite(
+						mySearchParamRegistry, componentAndCorrespondingParam);
 				if (theComboParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE) {
 					if (paramType == RestSearchParameterTypeEnum.STRING) {
 						nextOrValue = StringUtil.normalizeStringForSearchIndexing(nextOrValue);
@@ -2587,7 +2601,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					 * infer the codesystem just to be friendly to clients who don't provide it
 					 * in the search.
 					 */
-					if ("gender".equals(componentAndCorrespondingParam.getParamName()) || "gender".equals(componentAndCorrespondingParam.getChain())) {
+					if ("gender".equals(componentAndCorrespondingParam.getParamName())
+							|| "gender".equals(componentAndCorrespondingParam.getChain())) {
 						if (!nextOrValue.contains("|")) {
 							nextOrValue = "http://hl7.org/fhir/administrative-gender|" + nextOrValue;
 						}
@@ -2663,73 +2678,77 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 * (e.g. <code>?date=gt2024-02-01</code>), etc.
 	 */
 	private boolean validateParamValuesAreValidForComboParam(
-		RequestDetails theRequest,
-		@Nonnull SearchParameterMap theParams,
-		RuntimeSearchParam theComboParam, JpaParamUtil.ComponentAndCorrespondingParam theComboComponent,
-		List<IQueryParameterType> theValues) {
+			RequestDetails theRequest,
+			@Nonnull SearchParameterMap theParams,
+			RuntimeSearchParam theComboParam,
+			JpaParamUtil.ComponentAndCorrespondingParam theComboComponent,
+			List<IQueryParameterType> theValues) {
 
-			for (IQueryParameterType nextOrValue : theValues) {
-				if (nextOrValue instanceof DateParam dateParam) {
-					if (dateParam.getPrecision() != TemporalPrecisionEnum.DAY) {
-						String message = "Search with params " + describeParams(theParams)
-								+ " is not a candidate for combo searching - Date search with non-DAY precision for parameter '"
-								+ theComboComponent.getCombinedParamName() + "'";
-						firePerformanceInfo(theRequest, message);
-						return false;
-					}
-				}
-
-				if (nextOrValue instanceof BaseParamWithPrefix<?> paramWithPrefix) {
-					ParamPrefixEnum prefix = paramWithPrefix.getPrefix();
-					// A parameter with the 'eq' prefix is the only accepted prefix when combo searching since
-					// birthdate=2025-01-01 and birthdate=eq2025-01-01 are equivalent searches.
-					if (prefix != null && prefix != EQUAL) {
-						String message = "Search with params " + describeParams(theParams)
-								+ " is not a candidate for combo searching - Parameter '" + theComboComponent.getCombinedParamName()
-								+ "' has prefix: '"
-								+ paramWithPrefix.getPrefix().getValue() + "'";
-						firePerformanceInfo(theRequest, message);
-						return false;
-					}
-				}
-
-				// Reference params are only eligible for using a composite index if they
-				// are qualified
-				boolean haveChain = false;
-				if (nextOrValue instanceof ReferenceParam refParam) {
-					haveChain = refParam.hasChain();
-					if (theComboComponent.getChain() == null && isBlank(refParam.getResourceType())) {
-						String message = "Search is not a candidate for unique combo searching - Reference with no type specified for parameter '" + theComboComponent.getCombinedParamName() + "'";
-						firePerformanceInfo(theRequest, message);
-						return false;
-					}
-				}
-
-				// Qualifiers such as :missing can't be resolved by a combo param
-				if (!haveChain && isNotBlank(nextOrValue.getQueryParameterQualifier())) {
+		for (IQueryParameterType nextOrValue : theValues) {
+			if (nextOrValue instanceof DateParam dateParam) {
+				if (dateParam.getPrecision() != TemporalPrecisionEnum.DAY) {
 					String message = "Search with params " + describeParams(theParams)
-						+ " is not a candidate for combo searching - Parameter '" + theComboComponent.getCombinedParamName()
-						+ "' has modifier: '" + nextOrValue.getQueryParameterQualifier() + "'";
+							+ " is not a candidate for combo searching - Date search with non-DAY precision for parameter '"
+							+ theComboComponent.getCombinedParamName() + "'";
 					firePerformanceInfo(theRequest, message);
 					return false;
 				}
-
-				// Date params are not eligible for using composite unique index
-				// as index could contain date with different precision (e.g. DAY, SECOND)
-				if (theComboParam.getComboSearchParamType() == ComboSearchParamType.UNIQUE) {
-					if (nextOrValue instanceof DateParam) {
-						ourLog.debug(
-							"Search with params {} is not a candidate for combo searching - "
-								+ "Unique combo search parameter '{}' has DATE type",
-							describeParams(theParams),
-							theComboComponent);
-						return false;
-					}
-				}
-
 			}
 
-			return true;
+			if (nextOrValue instanceof BaseParamWithPrefix<?> paramWithPrefix) {
+				ParamPrefixEnum prefix = paramWithPrefix.getPrefix();
+				// A parameter with the 'eq' prefix is the only accepted prefix when combo searching since
+				// birthdate=2025-01-01 and birthdate=eq2025-01-01 are equivalent searches.
+				if (prefix != null && prefix != EQUAL) {
+					String message = "Search with params " + describeParams(theParams)
+							+ " is not a candidate for combo searching - Parameter '"
+							+ theComboComponent.getCombinedParamName()
+							+ "' has prefix: '"
+							+ paramWithPrefix.getPrefix().getValue() + "'";
+					firePerformanceInfo(theRequest, message);
+					return false;
+				}
+			}
+
+			// Reference params are only eligible for using a composite index if they
+			// are qualified
+			boolean haveChain = false;
+			if (nextOrValue instanceof ReferenceParam refParam) {
+				haveChain = refParam.hasChain();
+				if (theComboComponent.getChain() == null && isBlank(refParam.getResourceType())) {
+					String message =
+							"Search is not a candidate for unique combo searching - Reference with no type specified for parameter '"
+									+ theComboComponent.getCombinedParamName() + "'";
+					firePerformanceInfo(theRequest, message);
+					return false;
+				}
+			}
+
+			// Qualifiers such as :missing can't be resolved by a combo param
+			if (!haveChain && isNotBlank(nextOrValue.getQueryParameterQualifier())) {
+				String message = "Search with params " + describeParams(theParams)
+						+ " is not a candidate for combo searching - Parameter '"
+						+ theComboComponent.getCombinedParamName()
+						+ "' has modifier: '" + nextOrValue.getQueryParameterQualifier() + "'";
+				firePerformanceInfo(theRequest, message);
+				return false;
+			}
+
+			// Date params are not eligible for using composite unique index
+			// as index could contain date with different precision (e.g. DAY, SECOND)
+			if (theComboParam.getComboSearchParamType() == ComboSearchParamType.UNIQUE) {
+				if (nextOrValue instanceof DateParam) {
+					ourLog.debug(
+							"Search with params {} is not a candidate for combo searching - "
+									+ "Unique combo search parameter '{}' has DATE type",
+							describeParams(theParams),
+							theComboComponent);
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	@Nonnull

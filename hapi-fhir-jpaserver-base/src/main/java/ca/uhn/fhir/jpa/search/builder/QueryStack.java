@@ -1158,8 +1158,7 @@ public class QueryStack {
 				String qualifier = paramName.substring(4);
 				for (IQueryParameterType next : nextOrList) {
 					HasParam nextHasParam = new HasParam();
-					nextHasParam.setValueAsQueryToken(
-							myFhirContext, PARAM_HAS, qualifier, next.getValueAsQueryToken());
+					nextHasParam.setValueAsQueryToken(myFhirContext, PARAM_HAS, qualifier, next.getValueAsQueryToken());
 					orValues.add(nextHasParam);
 				}
 
@@ -1809,78 +1808,78 @@ public class QueryStack {
 
 		return switch (theParamDefinition.getParamType()) {
 			case DATE -> createPredicateDate(
-				theSourceJoinColumn,
-				theResourceName,
-				theSpnamePrefix,
-				theParamDefinition,
-				theOrValues,
-				theOperation,
-				theRequestPartitionId,
-				theSqlBuilder);
+					theSourceJoinColumn,
+					theResourceName,
+					theSpnamePrefix,
+					theParamDefinition,
+					theOrValues,
+					theOperation,
+					theRequestPartitionId,
+					theSqlBuilder);
 			case NUMBER -> createPredicateNumber(
-				theSourceJoinColumn,
-				theResourceName,
-				theSpnamePrefix,
-				theParamDefinition,
-				theOrValues,
-				theOperation,
-				theRequestPartitionId,
-				theSqlBuilder);
+					theSourceJoinColumn,
+					theResourceName,
+					theSpnamePrefix,
+					theParamDefinition,
+					theOrValues,
+					theOperation,
+					theRequestPartitionId,
+					theSqlBuilder);
 			case QUANTITY -> createPredicateQuantity(
-				theSourceJoinColumn,
-				theResourceName,
-				theSpnamePrefix,
-				theParamDefinition,
-				theOrValues,
-				theOperation,
-				theRequestPartitionId,
-				theSqlBuilder);
+					theSourceJoinColumn,
+					theResourceName,
+					theSpnamePrefix,
+					theParamDefinition,
+					theOrValues,
+					theOperation,
+					theRequestPartitionId,
+					theSqlBuilder);
 			case STRING -> createPredicateString(
-				theSourceJoinColumn,
-				theResourceName,
-				theSpnamePrefix,
-				theParamDefinition,
-				theOrValues,
-				theOperation,
-				theRequestPartitionId,
-				theSqlBuilder);
+					theSourceJoinColumn,
+					theResourceName,
+					theSpnamePrefix,
+					theParamDefinition,
+					theOrValues,
+					theOperation,
+					theRequestPartitionId,
+					theSqlBuilder);
 			case TOKEN -> createPredicateToken(
-				theSourceJoinColumn,
-				theResourceName,
-				theSpnamePrefix,
-				theParamDefinition,
-				theOrValues,
-				theOperation,
-				theRequestPartitionId,
-				theSqlBuilder);
+					theSourceJoinColumn,
+					theResourceName,
+					theSpnamePrefix,
+					theParamDefinition,
+					theOrValues,
+					theOperation,
+					theRequestPartitionId,
+					theSqlBuilder);
 			case COMPOSITE -> createPredicateComposite(
-				theSourceJoinColumn,
-				theResourceName,
-				theSpnamePrefix,
-				theParamDefinition,
-				theOrValues,
-				theRequestPartitionId,
-				theSqlBuilder);
+					theSourceJoinColumn,
+					theResourceName,
+					theSpnamePrefix,
+					theParamDefinition,
+					theOrValues,
+					theRequestPartitionId,
+					theSqlBuilder);
 			case URI -> createPredicateUri(
-				theSourceJoinColumn,
-				theResourceName,
-				theSpnamePrefix,
-				theParamDefinition,
-				theOrValues,
-				theOperation,
-				theRequestPartitionId,
-				theSqlBuilder);
+					theSourceJoinColumn,
+					theResourceName,
+					theSpnamePrefix,
+					theParamDefinition,
+					theOrValues,
+					theOperation,
+					theRequestPartitionId,
+					theSqlBuilder);
 			case REFERENCE -> createPredicateReference(
-				theSourceJoinColumn,
-				theResourceName,
-				isBlank(theSpnamePrefix) ? theParamName : theSpnamePrefix + "." + theParamName,
-				theQualifiers,
-				theOrValues,
-				theOperation,
-				theRequestPartitionId,
-				theSqlBuilder);
+					theSourceJoinColumn,
+					theResourceName,
+					isBlank(theSpnamePrefix) ? theParamName : theSpnamePrefix + "." + theParamName,
+					theQualifiers,
+					theOrValues,
+					theOperation,
+					theRequestPartitionId,
+					theSqlBuilder);
 			default -> throw new InvalidRequestException(
-				Msg.code(1215) + "The search type:" + theParamDefinition.getParamType() + " is not supported.");
+					Msg.code(1215) + "The search type:" + theParamDefinition.getParamType() + " is not supported.");
 		};
 	}
 
@@ -2877,8 +2876,10 @@ public class QueryStack {
 					throw new InternalErrorException(Msg.code(1224) + "Parameter " + theParam.getName() + " has "
 							+ compositeOf.size() + " composite parts. Don't know how handlt this.");
 				}
-				IQueryParameterType leftParam = newParameterInstance(compositeOf.get(0).getComponentParameter());
-				IQueryParameterType rightParam = newParameterInstance(compositeOf.get(1).getComponentParameter());
+				IQueryParameterType leftParam =
+						newParameterInstance(compositeOf.get(0).getComponentParameter());
+				IQueryParameterType rightParam =
+						newParameterInstance(compositeOf.get(1).getComponentParameter());
 				qp = new CompositeParam<>(leftParam, rightParam);
 				break;
 			case URI:

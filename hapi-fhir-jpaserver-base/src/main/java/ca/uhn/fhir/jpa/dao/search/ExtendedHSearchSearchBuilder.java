@@ -309,10 +309,9 @@ public class ExtendedHSearchSearchBuilder {
 					// ISearchParamRegistry
 					List<JpaParamUtil.ComponentAndCorrespondingParam> subSearchParamParts =
 							JpaParamUtil.resolveCompositeComponents(searchParamRegistry, activeParam);
-					List<RuntimeSearchParam> subSearchParams = subSearchParamParts
-						.stream()
-						.map(JpaParamUtil.ComponentAndCorrespondingParam::getComponentParameter)
-						.toList();
+					List<RuntimeSearchParam> subSearchParams = subSearchParamParts.stream()
+							.map(JpaParamUtil.ComponentAndCorrespondingParam::getComponentParameter)
+							.toList();
 
 					theBuilder.addCompositeUnmodifiedSearch(activeParam, subSearchParams, compositeAndOrTerms);
 					break;

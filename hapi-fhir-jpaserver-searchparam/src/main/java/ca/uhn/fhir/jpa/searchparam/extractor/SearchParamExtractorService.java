@@ -437,7 +437,9 @@ public class SearchParamExtractorService {
 
 			// 3.2 find the target resource
 			IBaseResource targetResource = theTargetIndexingStrategy.fetchResourceAtPath(nextPathAndRef);
-			if (targetResource == null) {continue;}
+			if (targetResource == null) {
+				continue;
+			}
 
 			// 3.2.1 if we've already processed this resource upstream, do not process it again, to prevent infinite
 			// loops

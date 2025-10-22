@@ -61,7 +61,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import static org.apache.commons.lang3.StringUtils.compare;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class ResourceIndexedSearchParams {

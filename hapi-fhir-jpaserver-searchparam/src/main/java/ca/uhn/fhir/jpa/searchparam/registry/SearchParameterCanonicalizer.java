@@ -58,7 +58,6 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.startsWith;
 
 @Service
 public class SearchParameterCanonicalizer {
@@ -314,7 +313,8 @@ public class SearchParameterCanonicalizer {
 					next.getDefinition()
 							.getReferenceElement()
 							.toUnqualifiedVersionless()
-							.getValue(), null));
+							.getValue(),
+					null));
 		}
 
 		return new RuntimeSearchParam(
@@ -435,7 +435,8 @@ public class SearchParameterCanonicalizer {
 			// FIXME: add SP validator for format here - also make sure it's not present for unique combos
 			for (IBaseExtension<?, ?> nextComponentExtension : componentExtensions) {
 				if (HapiExtensions.EXT_SP_COMBO_UPLIFT_CHAIN.equals(nextComponentExtension.getUrl())) {
-					IPrimitiveType<String> upliftChainValue = (IPrimitiveType<String>) nextComponentExtension.getValue();
+					IPrimitiveType<String> upliftChainValue =
+							(IPrimitiveType<String>) nextComponentExtension.getValue();
 					comboUpliftChain = upliftChainValue.getValueAsString();
 				}
 			}

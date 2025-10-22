@@ -116,7 +116,8 @@ public class HapiExtensions {
 
 	public static final String EXT_SP_UNIQUE = "http://hapifhir.io/fhir/StructureDefinition/sp-unique";
 
-	public static final String EXT_SP_COMBO_UPLIFT_CHAIN = "http://hapifhir.io/fhir/StructureDefinition/sp-combo-uplift-chain";
+	public static final String EXT_SP_COMBO_UPLIFT_CHAIN =
+			"http://hapifhir.io/fhir/StructureDefinition/sp-combo-uplift-chain";
 
 	/**
 	 * URL for extension on a Search Parameter which determines whether it should be enabled for searching for resources

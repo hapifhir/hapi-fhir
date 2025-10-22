@@ -522,14 +522,15 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		List<List<String>> partsChoices = new ArrayList<>();
 
 		List<JpaParamUtil.ComponentAndCorrespondingParam> compositeComponents =
-			JpaParamUtil.resolveCompositeComponents(mySearchParamRegistry, theParam);
+				JpaParamUtil.resolveCompositeComponents(mySearchParamRegistry, theParam);
 		for (JpaParamUtil.ComponentAndCorrespondingParam next : compositeComponents) {
 			RuntimeSearchParam nextComponentParameter = next.getComponentParameter();
 			Collection<? extends BaseResourceIndexedSearchParam> paramsListForCompositePart =
 					findParameterIndexes(theIndexes, next);
 
 			Collection<ResourceLink> linksForCompositePart = null;
-			RestSearchParameterTypeEnum paramType = JpaParamUtil.getParameterTypeForComposite(mySearchParamRegistry, next);
+			RestSearchParameterTypeEnum paramType =
+					JpaParamUtil.getParameterTypeForComposite(mySearchParamRegistry, next);
 
 			switch (paramType) {
 				case REFERENCE:
@@ -615,10 +616,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Nullable
 	private Collection<? extends BaseResourceIndexedSearchParam> findParameterIndexes(
-		ResourceIndexedSearchParams theParams, JpaParamUtil.ComponentAndCorrespondingParam theComponentAndParam) {
+			ResourceIndexedSearchParams theParams, JpaParamUtil.ComponentAndCorrespondingParam theComponentAndParam) {
 
 		String paramName = theComponentAndParam.getCombinedParamName();
-		RestSearchParameterTypeEnum paramType = JpaParamUtil.getParameterTypeForComposite(mySearchParamRegistry, theComponentAndParam);
+		RestSearchParameterTypeEnum paramType =
+				JpaParamUtil.getParameterTypeForComposite(mySearchParamRegistry, theComponentAndParam);
 		Collection<? extends BaseResourceIndexedSearchParam> paramsListForCompositePart = null;
 		switch (paramType) {
 			case NUMBER:

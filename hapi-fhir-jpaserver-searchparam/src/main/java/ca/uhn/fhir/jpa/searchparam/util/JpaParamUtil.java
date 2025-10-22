@@ -120,7 +120,8 @@ public enum JpaParamUtil {
 
 		if (paramType == RestSearchParameterTypeEnum.COMPOSITE) {
 
-			List<ComponentAndCorrespondingParam> compositeList = resolveCompositeComponents(theSearchParamRegistry, theParamDef);
+			List<ComponentAndCorrespondingParam> compositeList =
+					resolveCompositeComponents(theSearchParamRegistry, theParamDef);
 
 			if (compositeList.size() != 2) {
 				throw new ConfigurationException(Msg.code(498) + "Search parameter of type " + theUnqualifiedParamName
@@ -200,17 +201,18 @@ public enum JpaParamUtil {
 		}
 	}
 
-
 	/**
 	 * Given a component for a composite or combo SearchParameter (as returned by {@link #resolveCompositeComponents(ISearchParamRegistry, RuntimeSearchParam)})
 	 * determines the type associated with the target parameter.
 	 */
-	public static RestSearchParameterTypeEnum getParameterTypeForComposite(ISearchParamRegistry theSearchParamRegistry, ComponentAndCorrespondingParam theComponentAndParam) {
+	public static RestSearchParameterTypeEnum getParameterTypeForComposite(
+			ISearchParamRegistry theSearchParamRegistry, ComponentAndCorrespondingParam theComponentAndParam) {
 		String chain = theComponentAndParam.getComponent().getComboUpliftChain();
 		if (chain != null) {
 			RuntimeSearchParam targetParameter = theComponentAndParam.getComponentParameter();
 			for (String target : targetParameter.getTargets()) {
-				RuntimeSearchParam chainTargetParam = theSearchParamRegistry.getActiveSearchParam(target, chain, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
+				RuntimeSearchParam chainTargetParam = theSearchParamRegistry.getActiveSearchParam(
+						target, chain, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 				if (chainTargetParam != null) {
 					return chainTargetParam.getParamType();
 				}
@@ -225,7 +227,8 @@ public enum JpaParamUtil {
 	// FIXME: document
 	public static String getParameterNameForComposite(ComponentAndCorrespondingParam theComponentAndParam) {
 		if (theComponentAndParam.getComponent().getComboUpliftChain() != null) {
-			return theComponentAndParam.getComponentParameter().getName() + "." + theComponentAndParam.getComponent().getComboUpliftChain();
+			return theComponentAndParam.getComponentParameter().getName() + "."
+					+ theComponentAndParam.getComponent().getComboUpliftChain();
 		} else {
 			return theComponentAndParam.getComponentParameter().getName();
 		}
@@ -247,7 +250,8 @@ public enum JpaParamUtil {
 		/**
 		 * Constructor
 		 */
-		ComponentAndCorrespondingParam(@Nonnull RuntimeSearchParam.Component theComponent, @Nonnull RuntimeSearchParam theComponentParameter) {
+		ComponentAndCorrespondingParam(
+				@Nonnull RuntimeSearchParam.Component theComponent, @Nonnull RuntimeSearchParam theComponentParameter) {
 			this.myComponent = theComponent;
 			this.myComponentParameter = theComponentParameter;
 
@@ -265,7 +269,6 @@ public enum JpaParamUtil {
 					myCombinedParamName = myParamName;
 				}
 			}
-
 		}
 
 		/**
@@ -308,7 +311,5 @@ public enum JpaParamUtil {
 		public String getCombinedParamName() {
 			return myCombinedParamName;
 		}
-
 	}
-
 }
