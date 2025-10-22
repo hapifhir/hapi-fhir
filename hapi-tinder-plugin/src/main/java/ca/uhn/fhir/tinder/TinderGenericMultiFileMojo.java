@@ -33,7 +33,7 @@ import java.util.List;
  * </p>
  *
  * <table border="1">
-*    <caption>Configuration Properties</caption>
+ *    <caption>Configuration Properties</caption>
  *   <tr>
  *     <td><b>Attribute</b></td>
  *     <td><b>Description</b></td>
