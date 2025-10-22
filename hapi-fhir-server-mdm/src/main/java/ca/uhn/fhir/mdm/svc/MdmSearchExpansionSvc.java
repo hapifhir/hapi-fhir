@@ -147,7 +147,7 @@ public class MdmSearchExpansionSvc {
 		List<IQueryParameterType> toAdd = new ArrayList<>();
 		for (IQueryParameterType iQueryParameterType : orList) {
 			if (iQueryParameterType instanceof ReferenceParam refParam) {
-				if (!refParam.hasChain() && theParamTester.shouldExpand(theParamName, refParam)) {
+				if (theParamTester.shouldExpand(theParamName, refParam)) {
 					ourLog.debug("Found a reference parameter to expand: {}", refParam);
 					// First, attempt to expand as a source resource.
 					IIdType sourceId = newId(refParam.getValue());
