@@ -137,7 +137,6 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 
 	@Test
-
 	public void testStringAndToken_Create() {
 		createStringAndTokenCombo_NameAndGender();
 

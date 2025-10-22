@@ -19,13 +19,19 @@
  */
 package ca.uhn.fhir.jpa.test.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 import java.time.Duration;
 
-import static java.time.temporal.ChronoUnit.SECONDS;
+import static java.time.temporal.ChronoUnit.MINUTES;
+import static java.util.Objects.requireNonNull;
 
 public class TestElasticsearchContainerHelper {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(TestElasticsearchContainerHelper.class);
 
 
 	public static final String ELASTICSEARCH_VERSION = "7.17.3";
@@ -33,14 +39,19 @@ public class TestElasticsearchContainerHelper {
 
 	public static ElasticsearchContainer getEmbeddedElasticSearch() {
 
-		return new ElasticsearchContainer(ELASTICSEARCH_IMAGE)
+		ElasticsearchContainer elasticsearchContainer = new ElasticsearchContainer(ELASTICSEARCH_IMAGE)
 			// the default is 4GB which is too much for our little tests
 			.withEnv("ES_JAVA_OPTS", "-Xms512m -Xmx512m")
 			// turn off security warnings
 			.withEnv("xpack.security.enabled", "false")
 			// turn off machine learning (we don't need it in tests anyways)
 			.withEnv("xpack.ml.enabled", "false")
-			.withStartupTimeout(Duration.of(300, SECONDS));
+			// we have some slow runners sometimes.
+			.withStartupTimeout(Duration.of(4, MINUTES))
+			.withCreateContainerCmdModifier(c -> requireNonNull(c.getHostConfig()).withMemory(700_000_000L))
+			.withLogConsumer(new Slf4jLogConsumer(ourLog));
+
+		return elasticsearchContainer;
 	}
 
 }

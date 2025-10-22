@@ -44,6 +44,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
@@ -391,6 +392,7 @@ public class BulkDataExportProviderR4Test {
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response content: {}", responseContent);
 			assertThat(responseContent).contains("\"diagnostics\": \"Some Error Message\"");
+			assertThat(responseContent).contains(OperationOutcome.IssueType.PROCESSING.toCode());
 		}
 	}
 
@@ -1091,6 +1093,7 @@ public class BulkDataExportProviderR4Test {
 			// content would be blank, since the job is cancelled, so no
 			ourLog.info("Response content: {}", responseContent);
 			assertThat(responseContent).contains("was already cancelled or has completed.");
+			assertThat(responseContent).contains(OperationOutcome.IssueType.NOTFOUND.toCode());
 		}
 	}
 
@@ -1122,6 +1125,7 @@ public class BulkDataExportProviderR4Test {
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response content: {}", responseContent);
 			assertThat(responseContent).contains("was cancelled.  No status to report.");
+			assertThat(responseContent).contains(OperationOutcome.IssueType.NOTFOUND.toCode());
 		}
 	}
 
@@ -1146,10 +1150,11 @@ public class BulkDataExportProviderR4Test {
 		// Execute
 		try (CloseableHttpResponse response = myClient.execute(httpGet)) {
 			// Verify
-			ourLog.debug("Response: {}", response);
+			ourLog.debug("Response: {}", response.getEntity());
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.SC_NOT_FOUND);
 			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Not Found");
+			assertThat(responseContent).contains(OperationOutcome.IssueType.NOTFOUND.toCode());
 			assertThat(responseContent).contains("was cancelled.  No status to report.");
 		}
 	}
