@@ -203,12 +203,12 @@ public class UrlUtilTest {
 		// %2B -> '+' and '+' -> ' ' when decoded by URLDecoder
 		Map<String, String[]> map = UrlUtil.parseQueryString("key=sunny%2Bwarm+beach");
 		assertThat(map).hasSize(1);
-		assertEquals("sunny+warm beach", map.get("key")[0]);
+		assertThat(map.get("key")[0]).isEqualTo("sunny+warm beach");
 
 		// values should be unescaped
 		map = UrlUtil.parseQueryString("key=nice%20day");
 		assertThat(map).hasSize(1);
-		assertTrue(map.containsKey("key"));
-		assertArrayEquals(new String[]{"nice day"}, map.get("key"));
+		assertThat(map.containsKey("key")).isTrue();
+		assertThat(map.get("key")).contains("nice day");
 	}
 }
