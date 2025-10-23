@@ -82,7 +82,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	private static final AtomicInteger ourInstanceCount = new AtomicInteger(0);
 	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptor.class);
 	private static final Set<BundleTypeEnum> STANDALONE_BUNDLE_RESOURCE_TYPES =
-			Set.of(BundleTypeEnum.DOCUMENT, BundleTypeEnum.MESSAGE);
+			Set.of(BundleTypeEnum.DOCUMENT, BundleTypeEnum.MESSAGE, BundleTypeEnum.COLLECTION);
 
 	private final int myInstanceIndex = ourInstanceCount.incrementAndGet();
 	private final String myRequestSeenResourcesKey =
