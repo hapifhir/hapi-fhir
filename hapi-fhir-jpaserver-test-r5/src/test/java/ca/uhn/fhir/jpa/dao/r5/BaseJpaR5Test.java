@@ -498,6 +498,16 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 	}
 
+	protected void createOrUpdateSearchParameter(SearchParameter theSearchParameter) {
+		ourLog.info("Creating Search Param: {}", myFhirCtx.newJsonParser().encodeResourceToString(theSearchParameter));
+		if (theSearchParameter.getIdElement().isEmpty()) {
+			mySearchParameterDao.create(theSearchParameter, newSrd());
+		} else {
+			mySearchParameterDao.update(theSearchParameter, newSrd());
+		}
+		mySearchParamRegistry.forceRefresh();
+	}
+
 	@Override
 	protected PlatformTransactionManager getTxManager() {
 		return myTxManager;
