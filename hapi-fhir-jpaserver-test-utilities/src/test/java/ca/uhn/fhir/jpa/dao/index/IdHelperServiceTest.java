@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.svc.MockHapiTransactionService;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -16,12 +17,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import org.hibernate.sql.results.internal.TupleImpl;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Patient;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -30,8 +29,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
-
-import static org.mockito.ArgumentMatchers.anyBoolean;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -46,14 +43,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.eq;
@@ -73,6 +68,9 @@ public class IdHelperServiceTest {
 
 	@Spy
 	private FhirContext myFhirCtx = FhirContext.forR4Cached();
+
+	@Spy
+	private MockHapiTransactionService myTransactionService = new MockHapiTransactionService();
 
 	@Spy
 	private MemoryCacheService myMemoryCacheService = new MemoryCacheService(new JpaStorageSettings());

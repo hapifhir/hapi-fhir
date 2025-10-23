@@ -21,5 +21,11 @@ package ca.uhn.fhir.jpa.cache;
 
 public interface ISearchParamIdentityCacheSvc {
 
+	/**
+	 * Are any database actions currently pending from this service? This is mostly
+	 * provided as a convenience for unit tests
+	 */
+	boolean hasInFlightTasks();
+
 	void findOrCreateSearchParamIdentity(Long theHashIdentity, String theResourceType, String theParamName);
 }

@@ -21,15 +21,19 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
@@ -51,7 +55,10 @@ import ca.uhn.fhir.util.TaskChunker;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.SetMultimap;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.FlushModeType;
 import jakarta.persistence.PersistenceContext;
@@ -64,6 +71,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -83,6 +91,7 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
@@ -161,6 +170,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	@Override
 	protected EntriesToProcessMap doTransactionWriteOperations(
 			final RequestDetails theRequest,
+			RequestPartitionId theRequestPartitionId,
 			String theActionName,
 			TransactionDetails theTransactionDetails,
 			Set<IIdType> theAllIds,
@@ -195,15 +205,14 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			myEntityManager.setFlushMode(FlushModeType.COMMIT);
 
 			ITransactionProcessorVersionAdapter<?, ?> versionAdapter = getVersionAdapter();
-			RequestPartitionId requestPartitionId =
-					super.determineRequestPartitionIdForWriteEntries(theRequest, theEntries);
 
-			if (requestPartitionId != null) {
-				preFetch(theRequest, theTransactionDetails, theEntries, versionAdapter, requestPartitionId);
+			if (theRequestPartitionId != null) {
+				preFetch(theRequest, theTransactionDetails, theEntries, versionAdapter, theRequestPartitionId);
 			}
 
 			return super.doTransactionWriteOperations(
 					theRequest,
+					theRequestPartitionId,
 					theActionName,
 					theTransactionDetails,
 					theAllIds,
@@ -225,20 +234,20 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			List<IBase> theEntries,
 			ITransactionProcessorVersionAdapter theVersionAdapter,
 			RequestPartitionId theRequestPartitionId) {
-		Set<String> foundIds = new HashSet<>();
 		Set<JpaPid> idsToPreFetchBodiesFor = new HashSet<>();
 		Set<JpaPid> idsToPreFetchVersionsFor = new HashSet<>();
+		Set<JpaPid> idsToPreFetchFhirIdsFor = new HashSet<>();
 
 		/*
 		 * Pre-Fetch any resources that are referred to normally by ID, e.g.
 		 * regular FHIR updates within the transaction.
 		 */
 		preFetchResourcesById(
+				theRequestDetails,
 				theTransactionDetails,
 				theEntries,
 				theVersionAdapter,
 				theRequestPartitionId,
-				foundIds,
 				idsToPreFetchBodiesFor);
 
 		/*
@@ -251,7 +260,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				theVersionAdapter,
 				theRequestPartitionId,
 				idsToPreFetchBodiesFor,
-				idsToPreFetchVersionsFor);
+				idsToPreFetchVersionsFor,
+				idsToPreFetchFhirIdsFor);
 
 		/*
 		 * Pre-Fetch Resource Bodies (this will happen for any resources we are potentially
@@ -266,6 +276,21 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		 * the ID and version)
 		 */
 		preFetchResourceVersions(idsToPreFetchVersionsFor);
+
+		preFetchFhirIds(idsToPreFetchFhirIdsFor, theTransactionDetails);
+	}
+
+	private void preFetchFhirIds(Set<JpaPid> theIdsToPreFetchFhirIdsFor, TransactionDetails theTransactionDetails) {
+		PersistentIdToForcedIdMap<JpaPid> forcedIds =
+				myIdHelperService.translatePidsToForcedIds(theIdsToPreFetchFhirIdsFor);
+		for (JpaPid nextId : theIdsToPreFetchFhirIdsFor) {
+			Optional<String> fhirIdOpt = forcedIds.get(nextId);
+			if (fhirIdOpt.isPresent()) {
+				String fhirIdString = fhirIdOpt.get();
+				IIdType fhirId = myFhirContext.getVersion().newIdType(fhirIdString);
+				theTransactionDetails.addResolvedResourceId(fhirId, nextId);
+			}
+		}
 	}
 
 	/**
@@ -321,31 +346,15 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	private void preFetchResourcesById(
+			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails,
 			List<IBase> theEntries,
 			ITransactionProcessorVersionAdapter theVersionAdapter,
 			RequestPartitionId theRequestPartitionId,
-			Set<String> foundIds,
 			Set<JpaPid> theIdsToPreFetchBodiesFor) {
 
 		FhirTerser terser = myFhirContext.newTerser();
 
-		enum PrefetchReasonEnum {
-			/**
-			 * The ID is being prefetched because it is the ID in a resource reference
-			 * within a resource being updated. In this case, we care whether the resource
-			 * is deleted (since you can't reference a deleted resource), but we don't
-			 * need to fetch the body since we don't actually care about its contents.
-			 */
-			REFERENCE_TARGET,
-			/**
-			 * The ID is being prefetched because it is the ID of a resource being
-			 * updated directly by the transaction. In this case we don't care if it's
-			 * deleted (since it's fine to update a deleted resource), and we do need
-			 * to prefetch the current body so we can tell how it has changed.
-			 */
-			DIRECT_TARGET
-		}
 		Map<IIdType, PrefetchReasonEnum> idsToPreResolve = new HashMap<>(theEntries.size() * 3);
 
 		for (IBase nextEntry : theEntries) {
@@ -414,20 +423,116 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				? ResolveIdentityMode.includeDeleted().noCacheUnlessDeletesDisabled()
 				: ResolveIdentityMode.includeDeleted().cacheOk();
 
-		Map<IIdType, IResourceLookup<JpaPid>> outcomes = myIdHelperService.resolveResourceIdentities(
-				theRequestPartitionId, idsToPreResolve.keySet(), resolveMode);
+		SetMultimap<RequestPartitionId, IIdType> partitionToIds = null;
+		Set<IIdType> referenceTargetIds = new HashSet<>(idsToPreResolve.keySet());
+		RequestPartitionId requestPartitionId = theRequestPartitionId;
+
+		/*
+		 * If specific resources are on different non-compatible partitions, we will pre-fetch them separately
+		 * in a separate transaction that is scoped to the appropriate partition.
+		 */
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			for (Iterator<IIdType> iterator = referenceTargetIds.iterator(); iterator.hasNext(); ) {
+				IIdType nextId = iterator.next();
+				RequestPartitionId partition = theTransactionDetails.getResolvedPartition(nextId.getValue());
+				if (partition == null) {
+					ReadPartitionIdRequestDetails readDetails = ReadPartitionIdRequestDetails.forRead(nextId);
+					partition = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
+							theRequestDetails, readDetails);
+				}
+				if (!partition.isAllPartitions()
+						&& !myHapiTransactionService.isCompatiblePartition(theRequestPartitionId, partition)) {
+					iterator.remove();
+					if (partitionToIds == null) {
+						partitionToIds =
+								MultimapBuilder.hashKeys().hashSetValues().build();
+					}
+					partitionToIds.put(partition, nextId);
+				} else {
+					requestPartitionId = requestPartitionId.mergeIds(partition);
+				}
+			}
+		}
+
+		doPreFetchResourcesById(
+				theTransactionDetails,
+				requestPartitionId,
+				referenceTargetIds,
+				idsToPreResolve,
+				resolveMode,
+				theIdsToPreFetchBodiesFor);
+
+		if (partitionToIds != null) {
+			for (RequestPartitionId nextPartition : partitionToIds.keySet()) {
+				Set<IIdType> ids = partitionToIds.get(nextPartition);
+				doPreFetchResourcesById(
+						theTransactionDetails,
+						nextPartition,
+						ids,
+						idsToPreResolve,
+						resolveMode,
+						theIdsToPreFetchBodiesFor);
+			}
+		}
+	}
+
+	private void doPreFetchResourcesById(
+			TransactionDetails theTransactionDetails,
+			RequestPartitionId theRequestPartitionId,
+			Set<IIdType> theInputIdsToPreFetch,
+			Map<IIdType, PrefetchReasonEnum> theInputIdsToPreResolve,
+			ResolveIdentityMode theResolveMode,
+			Set<JpaPid> theOutputIdsToPreFetchBodiesFor) {
+
+		Set<String> foundIds = new HashSet<>();
+
+		// If any of the IDs are already resolved in the TransactionDetails, just
+		// use the resolution from there
+		Map<IIdType, IResourceLookup<JpaPid>> outcomesFromTransactionDetails = null;
+		if (theRequestPartitionId.hasPartitionIds()
+				&& theRequestPartitionId.getPartitionIds().size() == 1) {
+			for (IIdType inputIdToResult : theInputIdsToPreFetch) {
+				JpaPid pidResolvedInTransaction = (JpaPid) theTransactionDetails.getResolvedResourceId(inputIdToResult);
+				if (pidResolvedInTransaction != null) {
+					if (outcomesFromTransactionDetails == null) {
+						outcomesFromTransactionDetails = new HashMap<>();
+					}
+					JpaResourceLookup resourceLookup = new JpaResourceLookup(
+							inputIdToResult.getResourceType(),
+							inputIdToResult.getIdPart(),
+							pidResolvedInTransaction,
+							null,
+							PartitionablePartitionId.with(theRequestPartitionId.getFirstPartitionIdOrNull(), null));
+					outcomesFromTransactionDetails.put(inputIdToResult, resourceLookup);
+				}
+			}
+		}
+
+		Set<IIdType> inputIdsToPreFetch = theInputIdsToPreFetch;
+		if (outcomesFromTransactionDetails != null) {
+			inputIdsToPreFetch = new HashSet<>(theInputIdsToPreFetch);
+			inputIdsToPreFetch.removeAll(outcomesFromTransactionDetails.keySet());
+		}
+
+		Map<IIdType, IResourceLookup<JpaPid>> outcomes =
+				myIdHelperService.resolveResourceIdentities(theRequestPartitionId, inputIdsToPreFetch, theResolveMode);
+
+		if (outcomesFromTransactionDetails != null) {
+			outcomes.putAll(outcomesFromTransactionDetails);
+		}
+
 		for (Iterator<Map.Entry<IIdType, IResourceLookup<JpaPid>>> iterator =
 						outcomes.entrySet().iterator();
 				iterator.hasNext(); ) {
 			Map.Entry<IIdType, IResourceLookup<JpaPid>> entry = iterator.next();
 			JpaPid next = entry.getValue().getPersistentId();
 			IIdType unqualifiedVersionlessId = entry.getKey();
-			switch (idsToPreResolve.get(unqualifiedVersionlessId)) {
+			switch (theInputIdsToPreResolve.get(unqualifiedVersionlessId)) {
 				case DIRECT_TARGET -> {
 					if (myStorageSettings.getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY
 							|| (next.getAssociatedResourceId() != null
 									&& !next.getAssociatedResourceId().isIdPartValidLong())) {
-						theIdsToPreFetchBodiesFor.add(next);
+						theOutputIdsToPreFetchBodiesFor.add(next);
 					}
 				}
 				case REFERENCE_TARGET -> {
@@ -444,7 +549,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 		// Any IDs that could not be resolved are presumably not there, so
 		// cache that fact so we don't look again later
-		for (IIdType next : idsToPreResolve.keySet()) {
+		for (IIdType next : theInputIdsToPreFetch) {
 			if (!foundIds.contains(next.getValue())) {
 				theTransactionDetails.addResolvedResourceId(next.toUnqualifiedVersionless(), null);
 			}
@@ -466,7 +571,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			ITransactionProcessorVersionAdapter theVersionAdapter,
 			RequestPartitionId theRequestPartitionId,
 			Set<JpaPid> theIdsToPreFetchBodiesFor,
-			Set<JpaPid> theIdsToPreFetchVersionsFor) {
+			Set<JpaPid> theIdsToPreFetchVersionsFor,
+			Set<JpaPid> theIdsToPreFetchFhirIdsFor) {
 
 		List<MatchUrlToResolve> searchParameterMapsToResolve = new ArrayList<>();
 		for (IBase nextEntry : theEntries) {
@@ -480,22 +586,30 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					resourceType = myFhirContext.getResourceType(resource);
 				}
 				if (("PUT".equals(verb) || "PATCH".equals(verb)) && requestUrl != null && requestUrl.contains("?")) {
+					IBaseResource associatedResource = null;
+					if ("PUT".equals(verb)) {
+						associatedResource = resource;
+					}
 					processConditionalUrlForPreFetching(
 							theRequestPartitionId,
 							resourceType,
+							associatedResource,
 							requestUrl,
 							true,
 							false,
 							theIdsToPreFetchBodiesFor,
+							theIdsToPreFetchFhirIdsFor,
 							searchParameterMapsToResolve);
 				} else if ("POST".equals(verb) && requestIfNoneExist != null && requestIfNoneExist.contains("?")) {
 					processConditionalUrlForPreFetching(
 							theRequestPartitionId,
 							resourceType,
+							resource,
 							requestIfNoneExist,
 							false,
 							true,
 							theIdsToPreFetchBodiesFor,
+							theIdsToPreFetchFhirIdsFor,
 							searchParameterMapsToResolve);
 				}
 
@@ -511,10 +625,12 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 							processConditionalUrlForPreFetching(
 									theRequestPartitionId,
 									refResourceType,
+									null,
 									referenceUrl,
 									false,
 									false,
 									theIdsToPreFetchBodiesFor,
+									theIdsToPreFetchFhirIdsFor,
 									searchParameterMapsToResolve);
 						}
 					}
@@ -529,28 +645,136 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				return new MatchTarget(r.myRequestUrl, r.myResourceDefinition.getName());
 			}
 		}
-		Map<MatchTarget, List<MatchUrlToResolve>> byMatchUrl =
-				searchParameterMapsToResolve.stream().collect(groupingBy(MatchTarget::getMatchTarget));
 
-		// Chunk references into query-friendly sizes to resolve in batches.
-		// Note: we can have 1000s of references all using the same url.
-		// E.g. Organization references in big patient bundles.
-		// So we build batches by url, not by reference.
-		// todo - if we are using partitioned tables, we want to also chunk these by target table partition.  Can we use
-		// isCompatiblePartition() to do this?
-		TaskChunker.chunk(byMatchUrl.entrySet(), CONDITIONAL_URL_FETCH_CHUNK_SIZE, nextUrlChunk -> {
-			// combine all resolve entries under this chunk of urls.
-			List<MatchUrlToResolve> combinedChunk =
-					nextUrlChunk.stream().flatMap(cc -> cc.getValue().stream()).toList();
+		ListMultimap<RequestPartitionId, MatchUrlToResolve> partitionToMatchUrls = groupMatchTargetListByPartitionId(
+				theRequestDetails, searchParameterMapsToResolve, theRequestPartitionId);
+		for (RequestPartitionId partitionId : partitionToMatchUrls.keySet()) {
+			myHapiTransactionService
+					.withRequest(theRequestDetails)
+					.withRequestPartitionId(partitionId)
+					.execute(() -> {
+						List<MatchUrlToResolve> matchUrls = partitionToMatchUrls.get(partitionId);
 
-			preFetchSearchParameterMaps(
-					theRequestDetails,
-					theTransactionDetails,
-					theRequestPartitionId,
-					combinedChunk,
-					theIdsToPreFetchBodiesFor,
-					theIdsToPreFetchVersionsFor);
-		});
+						/*
+						 * Chunk references into query-friendly sizes to resolve in batches.
+						 * Note: we can have 1000s of references all using the same url.
+						 * E.g. Organization references in big patient bundles. But if
+						 * these are scattered among other different URLs within the Bundle,
+						 * we don't want to end up resolving the same URL over and over.
+						 * So we build batches by url, not by reference.
+						 */
+						Map<MatchTarget, List<MatchUrlToResolve>> byMatchUrl =
+								matchUrls.stream().collect(groupingBy(MatchTarget::getMatchTarget));
+
+						TaskChunker.chunk(byMatchUrl.entrySet(), CONDITIONAL_URL_FETCH_CHUNK_SIZE, nextUrlChunk -> {
+
+							/*
+							 * Combine all resolve entries under this chunk of urls. If we have several entries with
+							 * the exact same URL, that means we'll have several entries in the following list, but
+							 * preFetchSearchParameterMaps(..) will only add one parameter to the SQL it generates for
+							 * each URL's SP hash value.
+							 */
+							List<MatchUrlToResolve> combinedChunk = nextUrlChunk.stream()
+									.flatMap(cc -> cc.getValue().stream())
+									.toList();
+
+							preFetchSearchParameterMaps(
+									theRequestDetails,
+									theTransactionDetails,
+									partitionId,
+									combinedChunk,
+									theIdsToPreFetchBodiesFor,
+									theIdsToPreFetchVersionsFor);
+						});
+					});
+		}
+	}
+
+	/**
+	 * Given a collection of {@link MatchUrlToResolve} objects, calculates the read
+	 * {@link RequestPartitionId} associated with each one and returns a
+	 * map of the partition ID to the list of associated match URLs.
+	 * <p>
+	 * If two different {@link RequestPartitionId} are considered compatible per the
+	 * {@link ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService#isCompatiblePartition(RequestPartitionId, RequestPartitionId)}
+	 * method, the two partitions are combined into a single {@link RequestPartitionId} object and all
+	 * match URLs associated with both will be returned in a single list associated with the
+	 * combined {@link RequestPartitionId}.
+	 * </p>
+	 */
+	@Nonnull
+	private ListMultimap<RequestPartitionId, MatchUrlToResolve> groupMatchTargetListByPartitionId(
+			RequestDetails theRequestDetails,
+			List<MatchUrlToResolve> theMatchUrls,
+			RequestPartitionId theOuterRequestPartitionId) {
+		ListMultimap<RequestPartitionId, MatchUrlToResolve> retVal =
+				MultimapBuilder.hashKeys().arrayListValues().build();
+
+		/*
+		 * For each Match URL, calculate the request partition and populate a Multimap
+		 */
+		for (MatchUrlToResolve next : theMatchUrls) {
+			RequestPartitionId partition = RequestPartitionId.allPartitions();
+			if (myPartitionSettings.isPartitioningEnabled()) {
+				partition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+						theRequestDetails,
+						next.myResourceDefinition.getName(),
+						next.myMatchUrlSearchMap,
+						next.getAssociatedResource());
+				if (partition.isAllPartitions()) {
+					partition = theOuterRequestPartitionId;
+				}
+			}
+
+			retVal.put(partition, next);
+		}
+
+		/*
+		 * Try to combine any request partitions which are considered compatible by the
+		 * transaction service. We're just using a brute force way to determine this, which
+		 * could probably be optimized some, but it's not expected that we'll typically have
+		 * many different partitions in the same transaction so it probably doesn't matter
+		 * too much.
+		 */
+		while (true) {
+			boolean changes = false;
+
+			List<RequestPartitionId> partitionUds = new ArrayList<>(retVal.keySet());
+			for (int indexA = 0; indexA < partitionUds.size(); indexA++) {
+				for (int indexB = 0; indexB < partitionUds.size(); indexB++) {
+					if (indexA == indexB) {
+						continue;
+					}
+
+					RequestPartitionId partitionA = partitionUds.get(indexA);
+					RequestPartitionId partitionB = partitionUds.get(indexB);
+					if (partitionA == null
+							|| partitionA.isAllPartitions()
+							|| partitionB == null
+							|| partitionB.isAllPartitions()) {
+						continue;
+					}
+
+					if (myHapiTransactionService.isCompatiblePartition(partitionA, partitionB)) {
+						changes = true;
+						List<MatchUrlToResolve> matchUrlsA = retVal.removeAll(partitionA);
+						List<MatchUrlToResolve> matchUrlsB = retVal.removeAll(partitionB);
+
+						RequestPartitionId partitionBoth = partitionA.mergeIds(partitionB);
+						List<MatchUrlToResolve> matchUrlsBoth = ListUtils.union(matchUrlsA, matchUrlsB);
+
+						retVal.putAll(partitionBoth, matchUrlsBoth);
+						partitionUds.set(indexA, null);
+						partitionUds.set(indexB, null);
+					}
+				}
+			}
+
+			if (!changes) {
+				break;
+			}
+		}
+		return retVal;
 	}
 
 	/**
@@ -795,28 +1019,35 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 * @param theRequestUrl                         The actual match URL, which could be as simple as just parameters or could include the resource type too
 	 * @param theShouldPreFetchResourceBody         Should we also fetch the actual resource body, or just figure out the PID associated with it? See the method javadoc above for some context.
 	 * @param theOutputIdsToPreFetchBodiesFor       This will be populated with any resource PIDs that need to be pre-fetched
+	 * @param theOutputIdsToPreFetchFhirIdsFor
 	 * @param theOutputSearchParameterMapsToResolve This will be populated with any {@link SearchParameterMap} instances corresponding to match URLs we need to resolve
 	 */
 	private void processConditionalUrlForPreFetching(
 			RequestPartitionId thePartitionId,
 			String theResourceType,
+			@Nullable IBaseResource theAssociatedResource,
 			String theRequestUrl,
 			boolean theShouldPreFetchResourceBody,
 			boolean theShouldPreFetchResourceVersion,
 			Set<JpaPid> theOutputIdsToPreFetchBodiesFor,
+			Set<JpaPid> theOutputIdsToPreFetchFhirIdsFor,
 			List<MatchUrlToResolve> theOutputSearchParameterMapsToResolve) {
 		JpaPid cachedId =
 				myMatchResourceUrlService.processMatchUrlUsingCacheOnly(theResourceType, theRequestUrl, thePartitionId);
 		if (cachedId != null) {
 			if (theShouldPreFetchResourceBody) {
 				theOutputIdsToPreFetchBodiesFor.add(cachedId);
+			} else {
+				theOutputIdsToPreFetchFhirIdsFor.add(cachedId);
 			}
 		} else if (MATCH_URL_PATTERN.matcher(theRequestUrl).find()) {
 			RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
 			SearchParameterMap matchUrlSearchMap =
 					myMatchUrlService.translateMatchUrl(theRequestUrl, resourceDefinition);
+			assert matchUrlSearchMap != null;
 			theOutputSearchParameterMapsToResolve.add(new MatchUrlToResolve(
 					theRequestUrl,
+					theAssociatedResource,
 					matchUrlSearchMap,
 					resourceDefinition,
 					theShouldPreFetchResourceBody,
@@ -964,16 +1195,23 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		private final RuntimeResourceDefinition myResourceDefinition;
 		private final boolean myShouldPreFetchResourceBody;
 		private final boolean myShouldPreFetchResourceVersion;
+		private final IBaseResource myAssociatedResource;
+
 		public boolean myResolved;
 		private Long myHashValue;
 		private Long myHashSystemAndValue;
 
 		public MatchUrlToResolve(
-				String theRequestUrl,
-				SearchParameterMap theMatchUrlSearchMap,
-				RuntimeResourceDefinition theResourceDefinition,
+				@Nonnull String theRequestUrl,
+				@Nullable IBaseResource theAssociatedResource,
+				@Nonnull SearchParameterMap theMatchUrlSearchMap,
+				@Nonnull RuntimeResourceDefinition theResourceDefinition,
 				boolean theShouldPreFetchResourceBody,
 				boolean theShouldPreFetchResourceVersion) {
+			Validate.notNull(theRequestUrl, "theRequestUrl must not be null");
+			Validate.notNull(theMatchUrlSearchMap, "theMatchUrlSearchMap must not be null");
+			Validate.notNull(theResourceDefinition, "theResourceDefinition must not be null");
+			myAssociatedResource = theAssociatedResource;
 			myRequestUrl = theRequestUrl;
 			myMatchUrlSearchMap = theMatchUrlSearchMap;
 			myResourceDefinition = theResourceDefinition;
@@ -981,8 +1219,29 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			myShouldPreFetchResourceVersion = theShouldPreFetchResourceVersion;
 		}
 
+		public IBaseResource getAssociatedResource() {
+			return myAssociatedResource;
+		}
+
 		public void setResolved(boolean theResolved) {
 			myResolved = theResolved;
 		}
+	}
+
+	enum PrefetchReasonEnum {
+		/**
+		 * The ID is being prefetched because it is the ID in a resource reference
+		 * within a resource being updated. In this case, we care whether the resource
+		 * is deleted (since you can't reference a deleted resource), but we don't
+		 * need to fetch the body since we don't actually care about its contents.
+		 */
+		REFERENCE_TARGET,
+		/**
+		 * The ID is being prefetched because it is the ID of a resource being
+		 * updated directly by the transaction. In this case we don't care if it's
+		 * deleted (since it's fine to update a deleted resource), and we do need
+		 * to prefetch the current body so we can tell how it has changed.
+		 */
+		DIRECT_TARGET
 	}
 }

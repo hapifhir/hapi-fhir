@@ -247,6 +247,10 @@ public interface ITestDataBuilder {
 		return t -> ((IBaseResource)t).getMeta().setLastUpdated(new InstantType(theIsoDate).getValue());
 	}
 
+	default IBaseResource buildEncounter(ICreationArgument... theModifiers) {
+		return buildResource("Encounter", theModifiers);
+	}
+
 	default IIdType createEncounter(ICreationArgument... theModifiers) {
 		return createResource("Encounter", theModifiers);
 	}
@@ -289,6 +293,10 @@ public interface ITestDataBuilder {
 
 	default IIdType createPractitioner(ICreationArgument... theModifiers) {
 		return createResource("Practitioner", theModifiers);
+	}
+
+	default IBaseResource buildPractitioner(ICreationArgument... theModifiers) {
+		return buildResource("Practitioner", theModifiers);
 	}
 
 	default void deleteResource(IIdType theIIdType){
@@ -371,17 +379,18 @@ public interface ITestDataBuilder {
 		return withReference(theReferenceName, getFhirContext().getVersion().newIdType(theReferenceValue));
 	}
 
+	/**
+	 * @param theReferenceName The path to a reference, e.g. "managingOrganization" or "participant.individual"
+	 * @param theReferenceValue A reference to set, or <code>null</code>
+	 */
 	@Nonnull
 	default ICreationArgument withReference(String theReferenceName, @Nullable IIdType theReferenceValue) {
-		return t -> {
-			if (theReferenceValue != null && theReferenceValue.getValue() != null) {
-				IBaseReference reference = (IBaseReference) getFhirContext().getElementDefinition("Reference").newInstance();
+		return withElementAt(theReferenceName, t -> {
+			IBaseReference reference = (IBaseReference) t;
+			if (theReferenceValue != null) {
 				reference.setReference(theReferenceValue.getValue());
-
-				BaseRuntimeElementDefinition<?> resourceDef = getFhirContext().getElementDefinition(t.getClass());
-				resourceDef.getChildByName(theReferenceName).getMutator().addValue(t, reference);
 			}
-		};
+		});
 	}
 
 	default Consumer<IBase> withPrimitiveAttribute(String thePath, Object theValue) {
@@ -471,6 +480,14 @@ public interface ITestDataBuilder {
 
 	default ICreationArgument withObservationHasMember(@Nullable IIdType theHasMember) {
 		return withReference("hasMember", theHasMember);
+	}
+
+	/**
+	 * Sets the <code>managingOrganization</code> element on a Patient
+	 */
+	default ICreationArgument withOrganization(@Nullable String theHasMember) {
+		IIdType id = theHasMember != null ? getFhirContext().getVersion().newIdType(theHasMember) : null;
+		return withReference("managingOrganization", id);
 	}
 
 	default ICreationArgument withOrganization(@Nullable IIdType theHasMember) {

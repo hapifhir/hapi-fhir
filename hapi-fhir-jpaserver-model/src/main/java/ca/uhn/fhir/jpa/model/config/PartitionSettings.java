@@ -132,8 +132,8 @@ public class PartitionSettings implements IDefaultPartitionSettings {
 	 *
 	 * @since 5.0.0
 	 */
-	public PartitionSettings setPartitioningEnabled(boolean theMultiTenancyEnabled) {
-		myPartitioningEnabled = theMultiTenancyEnabled;
+	public PartitionSettings setPartitioningEnabled(boolean thePartitioningEnabled) {
+		myPartitioningEnabled = thePartitioningEnabled;
 		return this;
 	}
 
@@ -206,8 +206,9 @@ public class PartitionSettings implements IDefaultPartitionSettings {
 	 * If enabled the JPA server will allow unqualified cross partition reference
 	 */
 	public boolean isAllowUnqualifiedCrossPartitionReference() {
-		return myAllowReferencesAcrossPartitions.equals(
-				PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		return myPartitioningEnabled
+				&& myAllowReferencesAcrossPartitions.equals(
+						PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 	}
 
 	/**

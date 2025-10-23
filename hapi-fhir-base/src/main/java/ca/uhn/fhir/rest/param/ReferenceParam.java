@@ -29,6 +29,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 import static ca.uhn.fhir.model.primitive.IdDt.isValidLong;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -91,6 +92,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 		}
 	}
 
+	@SuppressWarnings("SizeReplaceableByIsEmpty")
 	private String defaultGetQueryParameterQualifier() {
 		StringBuilder b = new StringBuilder();
 		if (isNotBlank(myChain)) {
@@ -101,7 +103,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 			b.append('.');
 			b.append(myChain);
 		}
-		if (b.length() != 0) {
+		if (b.length() > 0) {
 			return b.toString();
 		}
 		return null;
@@ -181,6 +183,15 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	public ReferenceParam setMdmExpand(boolean theMdmExpand) {
 		myMdmExpand = theMdmExpand;
 		return this;
+	}
+
+	/**
+	 * Returns <code>true</code> if this parameter has a chain value (i.e. {@link #getChain()} will not return null or an empty string)
+	 *
+	 * @since 8.6.0
+	 */
+	public boolean hasChain() {
+		return isNotBlank(myChain);
 	}
 
 	public String getChain() {
@@ -265,7 +276,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	 */
 	public DateParam toDateParam(FhirContext theContext) {
 		DateParam retVal = new DateParam();
-		retVal.setValueAsQueryToken(theContext, null, null, getValueAsQueryToken(theContext));
+		retVal.setValueAsQueryToken(theContext, null, null, getValueAsQueryToken());
 		return retVal;
 	}
 
@@ -280,7 +291,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	 */
 	public NumberParam toNumberParam(FhirContext theContext) {
 		NumberParam retVal = new NumberParam();
-		retVal.setValueAsQueryToken(theContext, null, null, getValueAsQueryToken(theContext));
+		retVal.setValueAsQueryToken(theContext, null, null, getValueAsQueryToken());
 		return retVal;
 	}
 
@@ -295,7 +306,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	 */
 	public QuantityParam toQuantityParam(FhirContext theContext) {
 		QuantityParam retVal = new QuantityParam();
-		retVal.setValueAsQueryToken(theContext, null, null, getValueAsQueryToken(theContext));
+		retVal.setValueAsQueryToken(theContext, null, null, getValueAsQueryToken());
 		return retVal;
 	}
 
@@ -320,7 +331,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	 */
 	public StringParam toStringParam(FhirContext theContext) {
 		StringParam retVal = new StringParam();
-		retVal.setValueAsQueryToken(theContext, null, null, getValueAsQueryToken(theContext));
+		retVal.setValueAsQueryToken(theContext, null, null, getValueAsQueryToken());
 		return retVal;
 	}
 
@@ -335,11 +346,32 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	 */
 	public TokenParam toTokenParam(FhirContext theContext) {
 		TokenParam retVal = new TokenParam();
-		retVal.setValueAsQueryToken(theContext, null, null, getValueAsQueryToken(theContext));
+		retVal.setValueAsQueryToken(theContext, null, null, getValueAsQueryToken());
 		return retVal;
 	}
 
 	public boolean isIdPartValidLong() {
 		return isValidLong(getIdPart());
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (!(theO instanceof ReferenceParam that)) {
+			return false;
+		}
+		if (!super.equals(theO)) {
+			return false;
+		}
+		return Objects.equals(myChain, that.myChain)
+				&& Objects.equals(myResourceType, that.myResourceType)
+				&& Objects.equals(myBaseUrl, that.myBaseUrl)
+				&& Objects.equals(myValue, that.myValue)
+				&& Objects.equals(myIdPart, that.myIdPart)
+				&& Objects.equals(myMdmExpand, that.myMdmExpand);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), myChain, myResourceType, myBaseUrl, myValue, myIdPart, myMdmExpand);
 	}
 }

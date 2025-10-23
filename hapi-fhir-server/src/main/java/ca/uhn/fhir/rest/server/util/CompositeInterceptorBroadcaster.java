@@ -33,9 +33,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 /**
  * This is an {@link IInterceptorBroadcaster} which combines multiple interceptor
@@ -50,7 +51,7 @@ public class CompositeInterceptorBroadcaster implements IInterceptorBroadcaster 
 	 * Constructor
 	 */
 	private CompositeInterceptorBroadcaster(Collection<IInterceptorBroadcaster> theServices) {
-		myServices = theServices.stream().filter(t -> t != null).collect(Collectors.toList());
+		myServices = theServices.stream().filter(Objects::nonNull).collect(Collectors.toList());
 	}
 
 	@Override
@@ -61,7 +62,7 @@ public class CompositeInterceptorBroadcaster implements IInterceptorBroadcaster 
 
 		List<IInvoker> invokers = getInvokersForPointcut(thePointcut);
 		Object retVal = BaseInterceptorService.callInvokers(thePointcut, theParams, invokers);
-		retVal = defaultIfNull(retVal, true);
+		retVal = getIfNull(retVal, true);
 		return (Boolean) retVal;
 	}
 
@@ -111,6 +112,7 @@ public class CompositeInterceptorBroadcaster implements IInterceptorBroadcaster 
 	 */
 	public static IInterceptorBroadcaster newCompositeBroadcaster(
 			@Nonnull IInterceptorBroadcaster theInterceptorBroadcaster, @Nullable RequestDetails theRequestDetails) {
+		assert theInterceptorBroadcaster != null;
 		if (theRequestDetails != null) {
 			IInterceptorBroadcaster requestBroadcaster = theRequestDetails.getInterceptorBroadcaster();
 			if (requestBroadcaster != null) {

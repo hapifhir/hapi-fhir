@@ -13,7 +13,7 @@ create sequence SEQ_HISTORYTAG_ID start with 1 increment by 50;
 create sequence SEQ_IDXCMPSTRUNIQ_ID start with 1 increment by 50;
 create sequence SEQ_RESLINK_ID start with 1 increment by 50;
 create sequence SEQ_RESOURCE_HISTORY_ID start with 1 increment by 50;
-create sequence SEQ_RESOURCE_ID start with 1 increment by 50;
+create sequence SEQ_RESOURCE_ID start with 100 increment by 50;
 create sequence SEQ_RESPARMPRESENT_ID start with 1 increment by 50;
 create sequence SEQ_RESTAG_ID start with 1 increment by 50;
 create sequence SEQ_SEARCH start with 1 increment by 50;

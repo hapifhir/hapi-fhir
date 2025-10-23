@@ -143,6 +143,28 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.withColumns("SRC_PATH, TARGET_RESOURCE_URL, PARTITION_ID, SRC_RESOURCE_ID")
 					.heavyweightSkipByDefault();
 		}
+
+		// Add HFJ_RES_SYSTEM and HFJ_RES_IDENTIFIER_PT_UNIQ
+		{
+			Builder.BuilderAddTableByColumns resIdentifierPatient = version.addTableByColumns(
+					"20250927.04", "HFJ_RES_IDENTIFIER_PT_UNIQ", "IDENT_SYSTEM_PID", "IDENT_VALUE");
+			resIdentifierPatient.addColumn("IDENT_SYSTEM_PID").nonNullable().type(ColumnTypeEnum.LONG);
+			resIdentifierPatient.addColumn("IDENT_VALUE").nonNullable().type(ColumnTypeEnum.STRING, 500);
+			resIdentifierPatient.addColumn("FHIR_ID").nonNullable().type(ColumnTypeEnum.STRING, 64);
+
+			Builder.BuilderAddTableByColumns resSystem =
+					version.addTableByColumns("20251011.02", "HFJ_RES_SYSTEM", "PID");
+			resSystem.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+			resSystem.addColumn("SYSTEM_URL").nonNullable().type(ColumnTypeEnum.STRING, 500);
+			resSystem.addIndex("20251011.03", "IDX_RESIDENT_SYS").unique(true).withColumns("SYSTEM_URL");
+		}
+
+		// Make the HFJ_IDX_CMB_TOK_NU (non-unique combo param) string version nullable
+		// in anticipation of dropping it
+		version.onTable("HFJ_IDX_CMB_TOK_NU")
+				.modifyColumn("20251015.01", "IDX_STRING")
+				.nullable()
+				.withType(ColumnTypeEnum.STRING, 500);
 	}
 
 	protected void init840() {

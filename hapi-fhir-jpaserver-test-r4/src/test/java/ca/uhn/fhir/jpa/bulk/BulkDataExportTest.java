@@ -70,6 +70,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Spy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1213,6 +1214,32 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		}
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {Constants.CT_FHIR_NDJSON, Constants.CT_APP_NDJSON, Constants.CT_NDJSON})
+	public void testBulkExportWithDifferentOutputFormat(String outputFormat) {
+		// Set up a group with two patients
+		Patient patient1 = buildResource("Patient", withId("P1"), withActiveTrue());
+		myClient.update().resource(patient1).execute();
+
+		Patient patient2 = buildResource("Patient", withId("P2"), withActiveTrue());
+		myClient.update().resource(patient2).execute();
+
+		Group group = buildResource("Group", withId("Gp"), withActiveTrue());
+		group.addMember().getEntity().setReference("Patient/P1");
+		group.addMember().getEntity().setReference("Patient/P2");
+		myClient.update().resource(group).execute();
+
+		// export options
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setResourceTypes(Sets.newHashSet("Patient"));
+		options.setGroupId("Group/Gp");
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+		options.setOutputFormat(outputFormat);
+
+		// verify
+		verifyBulkExportResults(options, List.of("Patient/P1", "Patient/P2"), Collections.emptyList());
+	}
+
 
 	private JobInstance verifyBulkExportResults(BulkExportJobParameters theOptions, List<String> theContainedList, List<String> theExcludedList) {
 		Batch2JobStartResponse startResponse = startNewJob(theOptions);
@@ -1236,7 +1263,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 				assertThat(nextBinaryIdPart).matches("[a-zA-Z0-9]{32}");
 
 				Binary binary = myBinaryDao.read(new IdType(nextBinaryId));
-				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
+				assertEquals(theOptions.getOutputFormat(), binary.getContentType());
 
 				String nextNdJsonFileContent = new String(binary.getContent(), Constants.CHARSET_UTF8);
 				try (var iter = new LineIterator(new StringReader(nextNdJsonFileContent))) {

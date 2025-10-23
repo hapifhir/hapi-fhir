@@ -26,6 +26,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Represents values for <a href="http://hl7.org/implement/standards/fhir/search.html#sort">sorting</a> resources
@@ -50,8 +51,7 @@ public class SortSpec implements Serializable {
 	/**
 	 * Constructor
 	 *
-	 * @param theParamName
-	 *            The search name to sort on. See {@link #setParamName(String)} for more information.
+	 * @param theParamName The search name to sort on. See {@link #setParamName(String)} for more information.
 	 */
 	public SortSpec(String theParamName) {
 		super();
@@ -61,10 +61,8 @@ public class SortSpec implements Serializable {
 	/**
 	 * Constructor
 	 *
-	 * @param theParamName
-	 *            The search name to sort on. See {@link #setParamName(String)} for more information.
-	 * @param theOrder
-	 *            The order, or <code>null</code>. See {@link #setOrder(SortOrderEnum)} for more information.
+	 * @param theParamName The search name to sort on. See {@link #setParamName(String)} for more information.
+	 * @param theOrder     The order, or <code>null</code>. See {@link #setOrder(SortOrderEnum)} for more information.
 	 */
 	public SortSpec(String theParamName, SortOrderEnum theOrder) {
 		super();
@@ -75,13 +73,10 @@ public class SortSpec implements Serializable {
 	/**
 	 * Constructor
 	 *
-	 * @param theParamName
-	 *            The search name to sort on. See {@link #setParamName(String)} for more information.
-	 * @param theOrder
-	 *            The order, or <code>null</code>. See {@link #setOrder(SortOrderEnum)} for more information.
-	 * @param theChain
-	 *            The next sorting spec, to be applied only when this spec makes two entries equal. See
-	 *            {@link #setChain(SortSpec)} for more information.
+	 * @param theParamName The search name to sort on. See {@link #setParamName(String)} for more information.
+	 * @param theOrder     The order, or <code>null</code>. See {@link #setOrder(SortOrderEnum)} for more information.
+	 * @param theChain     The next sorting spec, to be applied only when this spec makes two entries equal. See
+	 *                     {@link #setChain(SortSpec)} for more information.
 	 */
 	public SortSpec(String theParamName, SortOrderEnum theOrder, SortSpec theChain) {
 		super();
@@ -99,22 +94,6 @@ public class SortSpec implements Serializable {
 	}
 
 	/**
-	 * Returns the actual name of the search param to sort by
-	 */
-	public String getParamName() {
-		return myParamName;
-	}
-
-	/**
-	 * Returns the sort order specified by this parameter, or <code>null</code> if none is explicitly provided (which
-	 * means {@link SortOrderEnum#ASC} according to the <a
-	 * href="http://hl7.org/implement/standards/fhir/search.html#sort">FHIR specification</a>)
-	 */
-	public SortOrderEnum getOrder() {
-		return myOrder;
-	}
-
-	/**
 	 * Sets the chained sort specification, or <code>null</code> if none. If multiple sort parameters are chained
 	 * (indicating a sub-sort), the second level sort is chained via this property.
 	 */
@@ -127,11 +106,27 @@ public class SortSpec implements Serializable {
 	}
 
 	/**
+	 * Returns the actual name of the search param to sort by
+	 */
+	public String getParamName() {
+		return myParamName;
+	}
+
+	/**
 	 * Sets the actual name of the search param to sort by
 	 */
 	public SortSpec setParamName(String theFieldName) {
 		myParamName = theFieldName;
 		return this;
+	}
+
+	/**
+	 * Returns the sort order specified by this parameter, or <code>null</code> if none is explicitly provided (which
+	 * means {@link SortOrderEnum#ASC} according to the <a
+	 * href="http://hl7.org/implement/standards/fhir/search.html#sort">FHIR specification</a>)
+	 */
+	public SortOrderEnum getOrder() {
+		return myOrder;
 	}
 
 	/**
@@ -145,50 +140,30 @@ public class SortSpec implements Serializable {
 	}
 
 	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder();
+		b.append(getParamName());
+		if (getOrder() != null) {
+			b.append('(').append(getOrder()).append(')');
+		}
+		if (myChain != null) {
+			b.append(',').append(myChain);
+		}
+		return b.toString();
+	}
+
+	@Override
 	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (!(theO instanceof SortSpec sortSpec)) return false;
-
-		return new EqualsBuilder()
-				.append(myChain, sortSpec.myChain)
-				.append(myParamName, sortSpec.myParamName)
-				.append(myOrder, sortSpec.myOrder)
-				.isEquals();
+		if (!(theO instanceof SortSpec sortSpec)) {
+			return false;
+		}
+		return Objects.equals(myChain, sortSpec.myChain)
+				&& Objects.equals(myParamName, sortSpec.myParamName)
+				&& myOrder == sortSpec.myOrder;
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-				.append(myChain)
-				.append(myParamName)
-				.append(myOrder)
-				.toHashCode();
-	}
-
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this)
-				.append("myParamName", myParamName)
-				.append("myOrder", myOrder)
-				.append("myChain", myChain)
-				.toString();
-	}
-
-	/**
-	 * Convert strings like "-date" into a SortSpec object.
-	 * Note: this does not account for DSTU2-style sort modifiers like "date:desc" or "date:asc"
-	 * since those are on the parameter name, not the value.
-	 *
-	 * @param theParamValue a string like "-date" or "date"
-	 * @return a parsed SortSpec object
-	 */
-	public static SortSpec fromR3OrLaterParameterValue(String theParamValue) {
-		SortOrderEnum direction = SortOrderEnum.ASC;
-		if (theParamValue.startsWith("-")) {
-			direction = SortOrderEnum.DESC;
-			theParamValue = theParamValue.substring(1);
-		}
-		return new SortSpec(theParamValue, direction);
+		return Objects.hash(myChain, myParamName, myOrder);
 	}
 }
