@@ -310,7 +310,10 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	public void testStringAndToken_MultipleAnd() {
 		createStringAndTokenCombo_NameAndGender();
 
-		IIdType id1 = createPatient(withFamily("SIMPSON"), withGiven("HOMER"), withGiven("JAY"), withGender("male"));
+		Patient patient = new Patient();
+		patient.addName().setFamily("Simpson").addGiven("Homer").addGiven("Jay");
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+		IIdType id1 = myPatientDao.create(patient, newSrd()).getId().toUnqualifiedVersionless();
 		assertNotNull(id1);
 
 		logAllNonUniqueIndexes();
@@ -328,11 +331,11 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		assertThat(actual).containsExactlyInAnyOrder(id1.toUnqualifiedVersionless().getValue());
 
 		String sql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
-		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 INNER JOIN HFJ_SPIDX_STRING t1 ON (t0.RES_ID = t1.RES_ID) WHERE ((t0.HASH_COMPLETE = '7545664593829342272') AND ((t1.HASH_NORM_PREFIX = '6206712800146298788') AND (t1.SP_VALUE_NORMALIZED LIKE 'JAY%'))) fetch first '10000' rows only";
+		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 INNER JOIN HFJ_SPIDX_STRING t1 ON (t0.RES_ID = t1.RES_ID) WHERE ((t0.HASH_COMPLETE = '2215689319713414397') AND ((t1.HASH_NORM_PREFIX = '6206712800146298788') AND (t1.SP_VALUE_NORMALIZED LIKE 'JAY%'))) fetch first '10000' rows only";
 		assertEquals(expected, sql);
 
 		logCapturedMessages();
-		assertThat(myMessages.toString()).contains("Using NON_UNIQUE index(es) for query for search: Patient?family=SIMPSON&gender=male&given=HOMER");
+		assertThat(myMessages.toString()).contains("Using NON_UNIQUE index(es) for query for search: Patient?family=SIMPSON&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=HOMER");
 		myMessages.clear();
 
 	}
@@ -432,7 +435,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		assertThat(sql).contains("SP_VALUE_NORMALIZED LIKE 'FAMILY1%'");
 		assertThat(sql).contains("t1.TARGET_RESOURCE_ID");
 
-		assertThat(myMessages.get(0)).contains("This search uses an unqualified resource");
+		assertThat(myMessages.get(0)).contains("Search is not a candidate for unique combo searching - Reference with no type specified for parameter 'organization'");
 	}
 
 
@@ -534,6 +537,13 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		myBundleDao.update(document, mySrd);
 
 		logAllNonUniqueIndexes();
+		runInTransaction(()->{
+			List<String> indexStrings = myResourceIndexedComboTokensNonUniqueDao.findAll().stream().map(t -> t.getIndexString()).toList();
+			assertThat(indexStrings).containsExactlyInAnyOrder(
+				"Bundle?composition.subject=Patient%2FPAT-0&composition.type=http%3A%2F%2Ffoo%7C123",
+				"Bundle?composition.subject=Patient%2FPAT-0&composition.type=http%3A%2F%2Ffoo%7C456"
+			);
+		});
 
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
 		params.add("composition", new ReferenceParam("subject", "Patient/PAT-0"));
@@ -658,18 +668,18 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
 		params.add("patient", new ReferenceParam("Patient/PAT"));
-		params.add("status", new TokenOrListParam(null, "preliminary", "final", "amended"));
+		params.add("status", new TokenOrListParam("http://hl7.org/fhir/observation-status", "preliminary", "final", "amended"));
 		myCaptureQueriesListener.clear();
 		IBundleProvider results = myObservationDao.search(params, mySrd);
 		List<String> actual = toUnqualifiedVersionlessIdValues(results);
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(actual).contains("Observation/O1");
 
-		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE IN ('2445648980345828396','-6884698528022589694','-8034948665712960724') ) fetch first '10000' rows only";
+		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE IN ('-8398039560302268601','-8321617344753007996','8635278213650709883') ) fetch first '10000' rows only";
 		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
 
 		logCapturedMessages();
-		assertThat(myMessages.toString()).contains("Observation?patient=Patient%2FPAT&status=amended", "Observation?patient=Patient%2FPAT&status=final", "Observation?patient=Patient%2FPAT&status=preliminary");
+		assertThat(myMessages.toString()).contains("Observation?patient=Patient%2FPAT&status=http%3A%2F%2Fhl7.org%2Ffhir%2Fobservation-status%7Camended", "Observation?patient=Patient%2FPAT&status=http%3A%2F%2Fhl7.org%2Ffhir%2Fobservation-status%7Cfinal", "Observation?patient=Patient%2FPAT&status=http%3A%2F%2Fhl7.org%2Ffhir%2Fobservation-status%7Cpreliminary");
 		myMessages.clear();
 
 	}

@@ -1159,6 +1159,41 @@ public class BulkDataExportProviderR4Test {
 		}
 	}
 
+	@Test
+	public void testGetBulkExportByGroupId_urlParamNotEncoded_resultShouldBeFilteredByCriteria() throws IOException {
+		// Setup
+		when(myJobCoordinator.startInstance(isNotNull(), any())).thenReturn(createJobStartResponse(G_JOB_ID));
+
+		String url = myServer.getBaseUrl() + "/" + GROUP_ID + "/" + ProviderConstants.OPERATION_EXPORT
+			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + Constants.CT_FHIR_NDJSON
+			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=Patient,Observation"
+			+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=Patient?gender=male"
+			+ "&" + JpaConstants.PARAM_EXPORT_MDM + "=true";
+
+		HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		ourLog.info("Request: {}", url);
+
+		// Execute
+		try (CloseableHttpResponse response = myClient.execute(get)) {
+			ourLog.info("Response: {}", response.toString());
+
+			// Verify
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.SC_ACCEPTED);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+			assertThat(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue())
+				.isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID);
+
+			BulkExportJobParameters params = verifyJobStartAndReturnParameters();
+			assertThat(params.getGroupId()).isEqualTo(GROUP_ID);
+			assertThat(params.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
+			assertThat(params.getResourceTypes()).containsExactlyInAnyOrder("Patient", "Observation");
+			assertThat(params.getFilters()).contains("Patient?gender=male");
+			assertThat(params.isExpandMdm()).isTrue();
+		}
+	}
+
+
 	@ParameterizedTest
 	@ValueSource(strings = {
 		"$export",
