@@ -3,13 +3,13 @@ package ca.uhn.fhir.rest.server.interceptor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.OutgoingFailureResponse;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -22,7 +22,6 @@ import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
@@ -35,7 +34,6 @@ import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -115,8 +113,6 @@ public class ExceptionHandlingInterceptorTest {
 
 		AlterHttpResponseCodeInterceptorToValid404Value alterHttpResponseCodeInterceptorToValid404Value =
 			 new AlterHttpResponseCodeInterceptorToValid404Value();
-		AlterHttpResponseCodeInterceptorToInvalid999Value alterHttpResponseCodeInterceptorToInvalid999Value =
-			 new AlterHttpResponseCodeInterceptorToInvalid999Value();
 		//When: We make a request to the server, triggering this exception to be thrown on an otherwise successful request
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?succeed=true");
 		httpGet.setHeader("Accept-encoding", "gzip");
@@ -147,22 +143,6 @@ public class ExceptionHandlingInterceptorTest {
 		ourLog.debug(ourCtx.newXmlParser().encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Simulated IOException");
 
-		//When: We add an Interceptor which will return an invalid Http Response Code, the original value is returned to the caller
-		ourServer.registerInterceptor(alterHttpResponseCodeInterceptorToInvalid999Value);
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?succeed=true");
-		httpGet.setHeader("Accept-encoding", "gzip");
-		status = ourClient.execute(httpGet);
-		ourServer.unregisterInterceptor(problemInterceptor);
-		ourServer.unregisterInterceptor(alterHttpResponseCodeInterceptorToInvalid999Value);
-
-		//Then: This should still return an OperationOutcome, and not explode with an HTML IllegalState response.
-		responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		ourLog.info(responseContent);
-		assertEquals(500, status.getStatusLine().getStatusCode());
-		oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
-		ourLog.debug(ourCtx.newXmlParser().encodeResourceToString(oo));
-		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Simulated IOException");
 	}
 
 	@Test
@@ -199,15 +179,8 @@ public class ExceptionHandlingInterceptorTest {
 
 	public static class AlterHttpResponseCodeInterceptorToValid404Value {
 		@Hook(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME)
-		public void intercept(RequestDetails theRequestDetails, IBaseOperationOutcome theResponse, OutgoingFailureResponse theOutgoingFailureResponse) throws IOException {
-			theOutgoingFailureResponse.setStatusCode(HttpStatus.NOT_FOUND.value());
-		}
-	}
-
-	public static class AlterHttpResponseCodeInterceptorToInvalid999Value {
-		@Hook(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME)
-		public void intercept(RequestDetails theRequestDetails, IBaseOperationOutcome theResponse, OutgoingFailureResponse theOutgoingFailureResponse) throws IOException {
-			theOutgoingFailureResponse.setStatusCode(999);
+		public void intercept(RequestDetails theRequestDetails, ResponseDetails theOutgoingFailureResponse) {
+			theOutgoingFailureResponse.setResponseCode(HttpStatus.NOT_FOUND.value());
 		}
 	}
 

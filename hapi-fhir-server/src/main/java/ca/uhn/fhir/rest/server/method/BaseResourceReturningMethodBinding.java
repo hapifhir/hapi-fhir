@@ -25,7 +25,6 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.OutgoingFailureResponse;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -52,16 +51,13 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 	protected final ResponseBundleBuilder myResponseBundleBuilder;
@@ -291,15 +287,12 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		}
 
 		if (response == null) {
-			ResponseDetails responseDetails = new ResponseDetails();
-			responseDetails.setResponseCode(responseCode);
+			ResponseDetails responseDetails = new ResponseDetails(responseCode, null);
 			callOutgoingResponseHook(theRequest, responseDetails);
 			return null;
 		} else {
 			Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
-			ResponseDetails responseDetails = new ResponseDetails();
-			responseDetails.setResponseResource(response);
-			responseDetails.setResponseCode(responseCode);
+			ResponseDetails responseDetails = new ResponseDetails(responseCode, response);
 
 			if (!callOutgoingResponseHook(theRequest, responseDetails)) {
 				return null;
@@ -365,20 +358,20 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		return true;
 	}
 
-	public static OutgoingFailureResponse callOutgoingFailureOperationOutcomeHook(
-			RequestDetails theRequestDetails, IBaseOperationOutcome theOperationOutcome, BaseServerResponseException theException) {
+	public static ResponseDetails callOutgoingFailureOperationOutcomeHook(
+			RequestDetails theRequestDetails,
+			IBaseOperationOutcome theOperationOutcome,
+			BaseServerResponseException theException) {
 
 		// Wrap the status code in a mutable container so it can be updated by an Interceptor Hook method
-		OutgoingFailureResponse outgoingFailureResponse = new OutgoingFailureResponse();
-		outgoingFailureResponse.setStatusCode(theException.getStatusCode());
-		outgoingFailureResponse.setBaseOperationOutcome(theOperationOutcome);
+		ResponseDetails responseDetails = new ResponseDetails(theException.getStatusCode(), theOperationOutcome);
 
 		// Prepare hook parameters
 		HookParams responseParams = new HookParams();
 		responseParams.add(RequestDetails.class, theRequestDetails);
 		responseParams.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 		responseParams.add(IBaseOperationOutcome.class, theOperationOutcome);
-		responseParams.add(OutgoingFailureResponse.class, outgoingFailureResponse);
+		responseParams.add(ResponseDetails.class, responseDetails);
 
 		// Call hooks if there is an interceptor broadcaster
 		if (theRequestDetails.getInterceptorBroadcaster() != null) {
@@ -387,11 +380,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 					.callHooks(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, responseParams);
 		}
 
-		outgoingFailureResponse = responseParams.get(OutgoingFailureResponse.class);
-		int httpStatusCode = Optional.ofNullable(HttpStatus.resolve(outgoingFailureResponse.getStatusCode()))
-			.map(HttpStatus::value)
-			.orElse(theException.getStatusCode());
-		outgoingFailureResponse.setStatusCode(httpStatusCode);
-		return outgoingFailureResponse;
+		return responseDetails;
 	}
 }

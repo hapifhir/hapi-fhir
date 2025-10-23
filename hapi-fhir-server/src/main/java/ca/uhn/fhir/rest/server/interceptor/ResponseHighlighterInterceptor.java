@@ -25,7 +25,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.OutgoingFailureResponse;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -376,11 +375,7 @@ public class ResponseHighlighterInterceptor {
 			return true;
 		}
 
-		ResponseDetails responseDetails = new ResponseDetails();
-		responseDetails.setResponseResource(oo);
-		responseDetails.setResponseCode(theException.getStatusCode());
-
-		OutgoingFailureResponse outgoingFailureResponse = BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(
+		ResponseDetails responseDetails = BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(
 				theRequestDetails, oo, theException);
 
 		streamResponse(
@@ -389,7 +384,7 @@ public class ResponseHighlighterInterceptor {
 				responseDetails.getResponseResource(),
 				null,
 				theServletRequest,
-			outgoingFailureResponse.getStatusCode());
+				responseDetails.getResponseCode());
 
 		return false;
 	}
