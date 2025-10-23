@@ -668,18 +668,18 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
 		params.add("patient", new ReferenceParam("Patient/PAT"));
-		params.add("status", new TokenOrListParam(null, "preliminary", "final", "amended"));
+		params.add("status", new TokenOrListParam("http://hl7.org/fhir/observation-status", "preliminary", "final", "amended"));
 		myCaptureQueriesListener.clear();
 		IBundleProvider results = myObservationDao.search(params, mySrd);
 		List<String> actual = toUnqualifiedVersionlessIdValues(results);
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(actual).contains("Observation/O1");
 
-		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE IN ('2445648980345828396','-6884698528022589694','-8034948665712960724') ) fetch first '10000' rows only";
+		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE IN ('-8398039560302268601','-8321617344753007996','8635278213650709883') ) fetch first '10000' rows only";
 		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
 
 		logCapturedMessages();
-		assertThat(myMessages.toString()).contains("Observation?patient=Patient%2FPAT&status=amended", "Observation?patient=Patient%2FPAT&status=final", "Observation?patient=Patient%2FPAT&status=preliminary");
+		assertThat(myMessages.toString()).contains("Observation?patient=Patient%2FPAT&status=http%3A%2F%2Fhl7.org%2Ffhir%2Fobservation-status%7Camended", "Observation?patient=Patient%2FPAT&status=http%3A%2F%2Fhl7.org%2Ffhir%2Fobservation-status%7Cfinal", "Observation?patient=Patient%2FPAT&status=http%3A%2F%2Fhl7.org%2Ffhir%2Fobservation-status%7Cpreliminary");
 		myMessages.clear();
 
 	}
