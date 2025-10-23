@@ -294,13 +294,18 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		List<Batch2JobInstanceEntity> instanceEntities;
 
 		if (statuses != null && !statuses.isEmpty()) {
+			// if we're not looking for cancelled jobs, we don't want jobs that
+			// are in the process of being cancelled
+			// (cancelling isn't instantaneous, but uses this flag)
+			boolean isCancelled = statuses.contains(StatusEnum.CANCELLED);
+
 			if (Batch2JobDefinitionConstants.BULK_EXPORT.equals(definitionId)) {
 				if (originalRequestUrlTruncation(params) != null) {
 					params = originalRequestUrlTruncation(params);
 				}
 			}
 			instanceEntities = myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(
-					definitionId, params, statuses, pageable);
+					definitionId, params, statuses, isCancelled, pageable);
 		} else {
 			instanceEntities = myJobInstanceRepository.findInstancesByJobIdAndParams(definitionId, params, pageable);
 		}
