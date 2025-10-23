@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.OutgoingFailureResponse;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -364,18 +365,20 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		return true;
 	}
 
-	public static int callOutgoingFailureOperationOutcomeHook(
-			RequestDetails theRequestDetails, IBaseOperationOutcome theOperationOutcome, Integer theHttpStatusCode) {
+	public static OutgoingFailureResponse callOutgoingFailureOperationOutcomeHook(
+			RequestDetails theRequestDetails, IBaseOperationOutcome theOperationOutcome, BaseServerResponseException theException) {
 
 		// Wrap the status code in a mutable container so it can be updated by an Interceptor Hook method
-		AtomicInteger mutableStatusCode = new AtomicInteger(theHttpStatusCode);
+		OutgoingFailureResponse outgoingFailureResponse = new OutgoingFailureResponse();
+		outgoingFailureResponse.setStatusCode(theException.getStatusCode());
+		outgoingFailureResponse.setBaseOperationOutcome(theOperationOutcome);
 
 		// Prepare hook parameters
 		HookParams responseParams = new HookParams();
 		responseParams.add(RequestDetails.class, theRequestDetails);
 		responseParams.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 		responseParams.add(IBaseOperationOutcome.class, theOperationOutcome);
-		responseParams.add(AtomicInteger.class, mutableStatusCode);
+		responseParams.add(OutgoingFailureResponse.class, outgoingFailureResponse);
 
 		// Call hooks if there is an interceptor broadcaster
 		if (theRequestDetails.getInterceptorBroadcaster() != null) {
@@ -384,12 +387,11 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 					.callHooks(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, responseParams);
 		}
 
-		// Retrieve the potentially updated & validated Status Code from the AtomicInteger container OR use the original
-		// value
-		theHttpStatusCode = Optional.ofNullable(HttpStatus.resolve(mutableStatusCode.get()))
-				.map(HttpStatus::value)
-				.orElse(theHttpStatusCode);
-
-		return theHttpStatusCode;
+		outgoingFailureResponse = responseParams.get(OutgoingFailureResponse.class);
+		int httpStatusCode = Optional.ofNullable(HttpStatus.resolve(outgoingFailureResponse.getStatusCode()))
+			.map(HttpStatus::value)
+			.orElse(theException.getStatusCode());
+		outgoingFailureResponse.setStatusCode(httpStatusCode);
+		return outgoingFailureResponse;
 	}
 }

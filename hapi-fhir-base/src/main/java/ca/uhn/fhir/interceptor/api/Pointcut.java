@@ -611,10 +611,10 @@ public enum Pointcut implements IPointcut {
 	 * org.hl7.fhir.instance.model.api.IBaseOperationOutcome - The OperationOutcome resource that will be returned.
 	 * </ul>
 	 * <li>
-	 * <code>java.util.concurrent.atomic.AtomicInteger</code> - If provided, a valid Http Status Code that will be used
-	 * in the response to the caller. Any value being returned from this Pointcut will be validated before it is used.
-	 * Otherwise, a <b>500 Internal Server Error</b> will be returned by default to the caller, based on the Exception
-	 * being handled.
+	 * <code>ca.uhn.fhir.interceptor.model.OutgoingOutcomeStatusCode</code> - A wrapper around a valid Http Status Code
+	 * that will be used in the response to the caller. The Pointcut may decide to change this value from the default
+	 * value of <b>500</b> representing an <b>Internal Server Error</b>, since the <code>IBaseOperationOutcome</code>
+	 * is also being provided to the Interceptor's Hook method and if circumstances warrant it being changed.
 	 * </ul>
 	 * <p>
 	 * Hook methods must return <code>void</code>
@@ -625,7 +625,7 @@ public enum Pointcut implements IPointcut {
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 			"org.hl7.fhir.instance.model.api.IBaseOperationOutcome",
-			"java.util.concurrent.atomic.AtomicInteger"),
+			"ca.uhn.fhir.interceptor.model.OutgoingFailureResponse"),
 
 	/**
 	 * <b>Server Hook:</b>

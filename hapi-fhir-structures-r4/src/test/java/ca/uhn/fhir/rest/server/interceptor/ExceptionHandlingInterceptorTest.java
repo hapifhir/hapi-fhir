@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.server.interceptor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.OutgoingFailureResponse;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -198,15 +199,15 @@ public class ExceptionHandlingInterceptorTest {
 
 	public static class AlterHttpResponseCodeInterceptorToValid404Value {
 		@Hook(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME)
-		public void intercept(RequestDetails theRequestDetails, IBaseOperationOutcome theResponse, AtomicInteger theStatusCode) throws IOException {
-			theStatusCode.set(HttpStatus.NOT_FOUND.value());
+		public void intercept(RequestDetails theRequestDetails, IBaseOperationOutcome theResponse, OutgoingFailureResponse theOutgoingFailureResponse) throws IOException {
+			theOutgoingFailureResponse.setStatusCode(HttpStatus.NOT_FOUND.value());
 		}
 	}
 
 	public static class AlterHttpResponseCodeInterceptorToInvalid999Value {
 		@Hook(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME)
-		public void intercept(RequestDetails theRequestDetails, IBaseOperationOutcome theResponse, AtomicInteger theStatusCode) throws IOException {
-			theStatusCode.set(999);
+		public void intercept(RequestDetails theRequestDetails, IBaseOperationOutcome theResponse, OutgoingFailureResponse theOutgoingFailureResponse) throws IOException {
+			theOutgoingFailureResponse.setStatusCode(999);
 		}
 	}
 

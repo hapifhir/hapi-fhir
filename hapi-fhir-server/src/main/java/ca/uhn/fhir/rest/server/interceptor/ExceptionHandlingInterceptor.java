@@ -24,6 +24,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.OutgoingFailureResponse;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SummaryEnum;
@@ -107,8 +108,8 @@ public class ExceptionHandlingInterceptor {
 			}
 		}
 
-		int statusCode = BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(
-				theRequestDetails, oo, theException.getStatusCode());
+		OutgoingFailureResponse outgoingFailureResponse = BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(
+				theRequestDetails, oo, theException);
 		try {
 			resetOutputStreamIfPossible(response);
 		} catch (Throwable t) {
@@ -121,7 +122,7 @@ public class ExceptionHandlingInterceptor {
 				theRequestDetails.getServer(),
 				oo,
 				SUMMARY_MODE,
-				statusCode,
+			outgoingFailureResponse.getStatusCode(),
 				false,
 				false,
 				theRequestDetails,
