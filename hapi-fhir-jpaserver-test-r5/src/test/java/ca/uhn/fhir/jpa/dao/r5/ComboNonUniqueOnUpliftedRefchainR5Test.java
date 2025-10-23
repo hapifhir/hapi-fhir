@@ -9,8 +9,10 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.BooleanType;
+import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.CodeableReference;
+import org.hl7.fhir.r5.model.Composition;
 import org.hl7.fhir.r5.model.Coverage;
 import org.hl7.fhir.r5.model.DateType;
 import org.hl7.fhir.r5.model.Encounter;
@@ -48,7 +50,8 @@ public class ComboNonUniqueOnUpliftedRefchainR5Test extends BaseJpaR5Test {
 		// Setup
 		createSpEncounterSubjectWithChains("identifier");
 		createSpEncounterServiceTypeWithChains("service-category");
-		createSpComboForEncounterSubject(
+		createComboSpForChainedParams(
+			"Encounter",
 			"SearchParameter/Encounter-subject.identifier",
 			"SearchParameter/Encounter-service-type.service-category"
 		);
@@ -98,7 +101,8 @@ public class ComboNonUniqueOnUpliftedRefchainR5Test extends BaseJpaR5Test {
 	@Test
 	public void testIndexAndSearch_ReferenceOnStringTokenDate() {
 		createSpCoveragePatientWithChains("family", "given", "gender", "address-postalcode", "birthdate");
-		createSpComboForCoveragePatient(
+		createComboSpForChainedParams(
+			"Coverage",
 			"SearchParameter/Coverage-patient.family",
 			"SearchParameter/Coverage-patient.given",
 			"SearchParameter/Coverage-patient.gender",
@@ -124,7 +128,7 @@ public class ComboNonUniqueOnUpliftedRefchainR5Test extends BaseJpaR5Test {
 
 		assertIndexStringsExactly(
 			"Coverage?patient.address-postalcode=90701&patient.birthdate=1966-01-02&patient.family=SIMPSON&patient.gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&patient.given=HOMER"
-			);
+		);
 
 		// Test 2 - Perform a search which should leverage the index
 
@@ -134,8 +138,7 @@ public class ComboNonUniqueOnUpliftedRefchainR5Test extends BaseJpaR5Test {
 			.add("patient", new ReferenceParam(null, "birthdate", "1966-01-02"))
 			.add("patient", new ReferenceParam(null, "family", "Simpson"))
 			.add("patient", new ReferenceParam(null, "given", "Homer"))
-			.add("patient", new ReferenceParam(null, "gender", "male"))
-			;
+			.add("patient", new ReferenceParam(null, "gender", "male"));
 
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myCoverageDao.search(map, mySrd);
@@ -159,7 +162,8 @@ public class ComboNonUniqueOnUpliftedRefchainR5Test extends BaseJpaR5Test {
 	@Test
 	public void testSearchNotCoveringAllParameters() {
 		createSpCoveragePatientWithChains("family", "given", "gender", "address-postalcode", "birthdate");
-		createSpComboForCoveragePatient(
+		createComboSpForChainedParams(
+			"Coverage",
 			"SearchParameter/Coverage-patient.family",
 			"SearchParameter/Coverage-patient.given",
 			"SearchParameter/Coverage-patient.gender",
@@ -201,8 +205,7 @@ public class ComboNonUniqueOnUpliftedRefchainR5Test extends BaseJpaR5Test {
 			.add("patient", new ReferenceParam(null, "address-postalcode", "90701"))
 			.add("patient", new ReferenceParam(null, "birthdate", "1966-01-02"))
 			.add("patient", new ReferenceParam(null, "family", "Simpson"))
-			.add("patient", new ReferenceParam(null, "gender", "male"))
-			;
+			.add("patient", new ReferenceParam(null, "gender", "male"));
 
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myCoverageDao.search(map, mySrd);
@@ -225,7 +228,8 @@ public class ComboNonUniqueOnUpliftedRefchainR5Test extends BaseJpaR5Test {
 	@ValueSource(booleans = {true, false})
 	public void testTwoRefchainsOnSameParameter(boolean theUseChainedParamNameOnSearch) {
 		createSpEncounterSubjectWithChains("identifier", "language");
-		createSpComboForEncounterSubject(
+		createComboSpForChainedParams(
+			"Encounter",
 			"SearchParameter/Encounter-subject.identifier",
 			"SearchParameter/Encounter-subject.language"
 		);
@@ -271,11 +275,187 @@ public class ComboNonUniqueOnUpliftedRefchainR5Test extends BaseJpaR5Test {
 
 	}
 
+	@Test
+	public void testComboOfPreChainedParameters() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/Bundle-composition-patient-identifier");
+		sp.setCode("composition.patient.identifier");
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.BUNDLE);
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("Bundle.entry[0].resource.as(Composition).subject.resolve().as(Patient).identifier");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		createOrUpdateSearchParameter(sp);
 
-		private void assertIndexStringsExactly(String expectedIndexString) {
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/Bundle-composition-patient-gender");
+		sp.setCode("composition.patient.gender");
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.BUNDLE);
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("Bundle.entry[0].resource.as(Composition).subject.resolve().as(Patient).gender");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		createOrUpdateSearchParameter(sp);
+
+		createComboSpForChainedParams(
+			"Bundle",
+			"SearchParameter/Bundle-composition-patient-identifier",
+			"SearchParameter/Bundle-composition-patient-gender"
+		);
+
+		// Create non-matching resources
+		{
+			String patientId = "Patient/A";
+			Bundle document = new Bundle();
+			document.setType(Bundle.BundleType.DOCUMENT);
+			Composition composition = new Composition();
+			composition.addSubject(new Reference(patientId));
+			document.addEntry().setResource(composition);
+			Patient patient = new Patient();
+			patient.setId(patientId);
+			patient.addIdentifier().setSystem("http://patient").setValue("123");
+			patient.setGender(Enumerations.AdministrativeGender.MALE);
+			document.addEntry().setResource(patient);
+			myBundleDao.create(document, newSrd());
+		}
+		{
+			String patientId = "Patient/B";
+			Bundle document = new Bundle();
+			document.setType(Bundle.BundleType.DOCUMENT);
+			Composition composition = new Composition();
+			composition.addSubject(new Reference(patientId));
+			document.addEntry().setResource(composition);
+			Patient patient = new Patient();
+			patient.setId(patientId);
+			patient.addIdentifier().setSystem("http://patient").setValue("456");
+			patient.setGender(Enumerations.AdministrativeGender.MALE);
+			document.addEntry().setResource(patient);
+			myBundleDao.create(document, newSrd());
+		}
+		// Matching resource
+		String patientId = "Patient/A";
+		Bundle document = new Bundle();
+		document.setType(Bundle.BundleType.DOCUMENT);
+		Composition composition = new Composition();
+		composition.addSubject(new Reference(patientId));
+		document.addEntry().setResource(composition);
+		Patient patient = new Patient();
+		patient.setId(patientId);
+		patient.addIdentifier().setSystem("http://patient").setValue("123");
+		patient.addIdentifier().setSystem("http://patient").setValue("789");
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+		document.addEntry().setResource(patient);
+		IIdType documentId = myBundleDao.create(document, newSrd()).getId().toUnqualifiedVersionless();
+
+		assertIndexStringsExactly(
+			"Bundle?composition.patient.gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&composition.patient.identifier=http%3A%2F%2Fpatient%7C123",
+			"Bundle?composition.patient.gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&composition.patient.identifier=http%3A%2F%2Fpatient%7C456",
+			"Bundle?composition.patient.gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&composition.patient.identifier=http%3A%2F%2Fpatient%7C789",
+			"Bundle?composition.patient.gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&composition.patient.identifier=http%3A%2F%2Fpatient%7C123"
+		);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add("composition.patient.identifier", new TokenParam("http://patient", "789"));
+		map.add("composition.patient.identifier", new TokenParam("http://patient", "123"));
+		map.add("composition.patient.gender", new TokenParam(Enumerations.AdministrativeGender.MALE.getSystem(), "male"));
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome = myBundleDao.search(map, mySrd);
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(
+			documentId.getValue()
+		);
+
+		// Verify 2 - Ensure that we actually use the combo index
+
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		assertThat(searchSql).contains(ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU);
+
+	}
+
+
+	/**
+	 * Two different chains on the same parameter (Encounter.subject in this case)
+	 */
+	@Test
+	public void testTwoANDsOfSameParameter() {
+		createSpEncounterSubjectWithChains("identifier", "language");
+		createComboSpForChainedParams(
+			"Encounter",
+			"SearchParameter/Encounter-subject.identifier",
+			"SearchParameter/Encounter-subject.language"
+		);
+
+		// Test 1 - Create a matching resource and ensure that the right index gets created
+
+		// Non-matching resources
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("http://patient").setValue("123");
+			patient.addCommunication().getLanguage().addCoding().setSystem("http://language").setCode("ABC");
+			IIdType patientId = myPatientDao.create(patient, newSrd()).getId().toUnqualifiedVersionless();
+
+			Encounter enc = new Encounter();
+			enc.setSubject(new Reference(patientId));
+			DaoMethodOutcome encId = myEncounterDao.create(enc, newSrd());
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("http://patient").setValue("456");
+			patient.addCommunication().getLanguage().addCoding().setSystem("http://language").setCode("ABC");
+			IIdType patientId = myPatientDao.create(patient, newSrd()).getId().toUnqualifiedVersionless();
+
+			Encounter enc = new Encounter();
+			enc.setSubject(new Reference(patientId));
+			DaoMethodOutcome encId = myEncounterDao.create(enc, newSrd());
+		}
+
+		// Matching resources
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://patient").setValue("123");
+		patient.addIdentifier().setSystem("http://patient").setValue("456");
+		patient.addCommunication().getLanguage().addCoding().setSystem("http://language").setCode("ABC");
+		IIdType patientId = myPatientDao.create(patient, newSrd()).getId().toUnqualifiedVersionless();
+
+		Encounter enc = new Encounter();
+		enc.setSubject(new Reference(patientId));
+		DaoMethodOutcome encId = myEncounterDao.create(enc, newSrd());
+
+		// Verify 1 - Ensure that the right combo index is created
+
+		assertIndexStringsExactly(
+			"Encounter?subject.identifier=http%3A%2F%2Fpatient%7C123&subject.language=http%3A%2F%2Flanguage%7CABC",
+			"Encounter?subject.identifier=http%3A%2F%2Fpatient%7C456&subject.language=http%3A%2F%2Flanguage%7CABC",
+			"Encounter?subject.identifier=http%3A%2F%2Fpatient%7C456&subject.language=http%3A%2F%2Flanguage%7CABC",
+			"Encounter?subject.identifier=http%3A%2F%2Fpatient%7C123&subject.language=http%3A%2F%2Flanguage%7CABC"
+		);
+
+		// Test 2 - Perform a search which should leverage the index
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add("subject", new ReferenceParam(null, "language", "http://language|ABC"));
+		map.add("subject", new ReferenceParam(null, "identifier", "http://patient|123"));
+		map.add("subject", new ReferenceParam(null, "identifier", "http://patient|456"));
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome = myEncounterDao.search(map, mySrd);
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(
+			encId.getId().toUnqualifiedVersionless().getValue()
+		);
+
+		// Verify 2 - Ensure that we actually use the combo index
+
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		assertThat(searchSql).contains(ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU);
+
+	}
+
+	private void assertIndexStringsExactly(String... expectedIndexString) {
 		logAllTokenIndexes();
 		logAllNonUniqueIndexes();
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			List<ResourceIndexedComboTokenNonUnique> nonUniqueIndexes = myResourceIndexedComboTokensNonUniqueDao.findAll();
 			assertThat(nonUniqueIndexes.stream().map(ResourceIndexedComboTokenNonUnique::getIndexString).toList()).containsExactlyInAnyOrder(
 				expectedIndexString
@@ -287,12 +467,12 @@ public class ComboNonUniqueOnUpliftedRefchainR5Test extends BaseJpaR5Test {
 	/**
 	 * @param theParams Format is "SearchParameterReference.chainName" or just "SearchParameterReference" if no chain
 	 */
-	private void createSpComboForEncounterSubject(String... theParams) {
+	private void createComboSpForChainedParams(String theBaseName, String... theParams) {
 		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/Encounter-subject-identifier-and-service-category");
+		sp.setId("SearchParameter/" + theBaseName + "-combo");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.ENCOUNTER);
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.fromCode(theBaseName));
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(false));
@@ -300,39 +480,7 @@ public class ComboNonUniqueOnUpliftedRefchainR5Test extends BaseJpaR5Test {
 		for (String param : theParams) {
 
 			SearchParameter.SearchParameterComponentComponent component = sp.addComponent();
-			component.setExpression("Encounter");
-
-			if (param.contains(".")) {
-				component.setDefinition(param.substring(0, param.indexOf(".")));
-				String upliftRefChainParamCode = param.substring(param.indexOf(".") + 1);
-				assert upliftRefChainParamCode.matches("^[a-zA-Z-]+$");
-				component.addExtension(HapiExtensions.EXT_SP_COMBO_UPLIFT_CHAIN, new CodeType(upliftRefChainParamCode));
-			} else {
-				component.setDefinition(param);
-			}
-
-		}
-
-		createOrUpdateSearchParameter(sp);
-	}
-
-	/**
-	 * @param theParams Format is "SearchParameterReference.chainName" or just "SearchParameterReference" if no chain
-	 */
-	private void createSpComboForCoveragePatient(String... theParams) {
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/Coverage-patient-combo");
-		sp.setType(Enumerations.SearchParamType.COMPOSITE);
-		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.COVERAGE);
-		sp.addExtension()
-			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
-			.setValue(new BooleanType(false));
-
-		for (String param : theParams) {
-
-			SearchParameter.SearchParameterComponentComponent component = sp.addComponent();
-			component.setExpression("Coverage");
+			component.setExpression(theBaseName);
 
 			if (param.contains(".")) {
 				component.setDefinition(param.substring(0, param.indexOf(".")));

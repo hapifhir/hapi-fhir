@@ -2502,13 +2502,26 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			RuntimeSearchParam theComboParam,
 			List<JpaParamUtil.ComponentAndCorrespondingParam> theComboParamComponents) {
 
-		List<List<IQueryParameterType>> inputs = new ArrayList<>();
-		List<Runnable> runnableRemoveInputsFromParams = new ArrayList<>(theComboParamComponents.size());
+		List<List<IQueryParameterType>> inputs = new ArrayList<>(theComboParamComponents.size());
+		List<Runnable> searchParameterConsumerTasks = new ArrayList<>(theComboParamComponents.size());
 		for (JpaParamUtil.ComponentAndCorrespondingParam nextComponent : theComboParamComponents) {
 			boolean foundMatch = false;
 
+			/*
+			 * The following List<List<IQueryParameterType>> is a list of query parameters where the
+			 * outer list contains AND combinations, and the inner lists contain OR combinations.
+			 * For each component in the Combo SearchParameter, we need to find a list of OR parameters
+			 * (i.e. the inner List) which is appropriate for the given component.
+			 *
+			 * We can only use a combo param when the query parameter is fairly basic
+			 * (no modifiers such as :missing or :below, references are qualified with
+			 * a resource type, etc.) Once we've confirmed that we have a parameter for
+			 * each component, we remove the components from the source SearchParameterMap
+			 * since we're going to consume them and add a predicate to the SQL builder.
+			 */
 			List<List<IQueryParameterType>> sameNameParametersAndList = theParams.get(nextComponent.getParamName());
 			if (sameNameParametersAndList != null) {
+				boolean parameterIsChained = false;
 				for (int andIndex = 0; andIndex < sameNameParametersAndList.size(); andIndex++) {
 					List<IQueryParameterType> sameNameParametersOrList = sameNameParametersAndList.get(andIndex);
 					IQueryParameterType firstValue = sameNameParametersOrList.get(0);
@@ -2525,12 +2538,18 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					}
 
 					inputs.add(sameNameParametersOrList);
-					runnableRemoveInputsFromParams.add(
-							() -> sameNameParametersAndList.remove(sameNameParametersOrList));
+					searchParameterConsumerTasks.add(() -> sameNameParametersAndList.remove(sameNameParametersOrList));
 					foundMatch = true;
 					break;
 				}
-			} else {
+			} else if (!nextComponent.getParamName().equals(nextComponent.getCombinedParamName())) {
+
+				/*
+				 * If we didn't find any parameters for the parameter name (e.g. "patient") and
+				 * we're looking for a chained parameter (e.g. "patient.identifier"), check if
+				 * there are any matches for the full combined parameter name
+				 * (e.g. "patient.identifier").
+				 */
 				List<List<IQueryParameterType>> combinedNameParametersAndList =
 						theParams.get(nextComponent.getCombinedParamName());
 				if (combinedNameParametersAndList != null) {
@@ -2549,9 +2568,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							}
 
 							inputs.add(combinedNameParametersOrList);
-							runnableRemoveInputsFromParams.add(
+							searchParameterConsumerTasks.add(
 									() -> combinedNameParametersAndList.remove(combinedNameParametersOrList));
 							foundMatch = true;
+							break;
 						}
 					}
 				}
@@ -2568,7 +2588,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			return false;
 		}
 
-		runnableRemoveInputsFromParams.forEach(Runnable::run);
+		searchParameterConsumerTasks.forEach(Runnable::run);
 
 		List<List<IQueryParameterType>> inputPermutations = Lists.cartesianProduct(inputs);
 		List<String> indexStrings = new ArrayList<>(CartesianProductUtil.calculateCartesianProductSize(inputs));
