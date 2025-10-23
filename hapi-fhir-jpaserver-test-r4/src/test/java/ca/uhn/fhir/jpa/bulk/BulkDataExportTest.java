@@ -1363,7 +1363,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void exportWithCache_withSameParametersAsCancelledJob_shouldNotResuseCancelledJob() throws IOException {
+	public void xportWithCache_withSameParametersAsCancelledJob_shouldNotReuseCancelledJob() throws IOException {
 		// setup
 		BulkExportJobParameters exportJobParameters = new BulkExportJobParameters();
 		exportJobParameters.setOutputFormat(Constants.CT_FHIR_NDJSON);
