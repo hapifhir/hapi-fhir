@@ -252,7 +252,7 @@ public class JpaSearchParamCache {
 			}
 			// handle Uplifted Ref Chain Search Parameters
 			theRuntimeSearchParam.getUpliftRefchainCodes().stream()
-					.map(urCode -> String.format("%s.%s", theRuntimeSearchParam.getName(), urCode))
+					.map(urCode -> theRuntimeSearchParam.getName() + "." + urCode)
 					.forEach(urSpName ->
 							addIndexedSearchParam(theResourceName, theHashIdentityToIndexedSearchParams, urSpName));
 		}
