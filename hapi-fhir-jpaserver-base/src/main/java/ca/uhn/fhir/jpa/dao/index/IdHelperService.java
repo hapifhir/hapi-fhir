@@ -680,7 +680,6 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	public JpaPid newPidFromStringIdAndResourceName(Integer thePartitionId, String thePid, String theResourceName) {
 		JpaPid retVal = JpaPid.fromId(Long.parseLong(thePid), thePartitionId);
 		retVal.setResourceType(theResourceName);
-		populateAssociatedResourceId(theResourceName, thePid, retVal);
 		return retVal;
 	}
 
