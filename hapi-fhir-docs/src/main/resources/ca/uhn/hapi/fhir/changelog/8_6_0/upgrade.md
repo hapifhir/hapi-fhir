@@ -1,7 +1,3 @@
-## Breaking Changes
-
-* The parsing of query URLs has changed such that the '?' character should strictly be treated as the delimiter between path and query components. Any additional '?' characters within the query string must be percent-encoded (e.g. `%3F`). URLs containing unescaped '?' characters in the query portion may cause failures or unexpected behaviour.
-
 ## Changes to package installation
 
 A change has been made to package installation where any client-assigned ID included in the resource being installed will be ignored and replaced with a server-assigned ID.

@@ -353,10 +353,8 @@ public class UrlUtil {
 
 	private static void parseQueryString(String theQueryString, HashMap<String, List<String>> map) {
 		String query = defaultString(theQueryString);
-
-		int questionMarkIdx = query.indexOf('?');
-		if (questionMarkIdx != -1) {
-			query = query.substring(questionMarkIdx + 1);
+		if (query.startsWith("?")) {
+			query = query.substring(1);
 		}
 
 		StringTokenizer tok = new StringTokenizer(query, "&");
