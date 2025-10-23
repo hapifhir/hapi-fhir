@@ -80,14 +80,14 @@ class RuleGroupBulkExportByCompartmentMatcherImplTest {
 			when(mySearchParamMatcher.match("Group?identifier=foo|bar", myResource)).thenReturn(theSearchParamMatcherMatchResult);
 		}
 
+		AuthorizationInterceptor.Verdict verdict = rule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
 		if (theExpectedVerdict != null) {
 			// Expect a decision
-			AuthorizationInterceptor.Verdict verdict = rule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 			Assertions.assertNotNull(verdict, "Expected " + theExpectedVerdict + " but got abstain - " + theMessage);
 			assertEquals(theExpectedVerdict, verdict.getDecision(), "Expected " + theExpectedVerdict + " but got " + verdict.getDecision() + " - " + theMessage);
 		} else {
 			// Expect abstain
-			AuthorizationInterceptor.Verdict verdict = rule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 			assertNull(verdict, "Expected abstain - " + theMessage);
 		}
 	}
