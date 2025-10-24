@@ -26,7 +26,6 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
@@ -76,7 +75,6 @@ import org.mockito.Spy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -98,7 +96,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -1360,38 +1357,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		assertThat(outputMap).containsKeys("Observation", "Patient")
 			.doesNotContainKeys("Group", "List");
-	}
-
-	@Test
-	public void xportWithCache_withSameParametersAsCancelledJob_shouldNotReuseCancelledJob() throws IOException {
-		// setup
-		BulkExportJobParameters exportJobParameters = new BulkExportJobParameters();
-		exportJobParameters.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		exportJobParameters.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
-		exportJobParameters.setResourceTypes(List.of("Patient"));
-
-		// test
-		// start first job
-		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
-		startRequest.setUseCache(true);
-		startRequest.setParameters(exportJobParameters);
-		Batch2JobStartResponse firstJob = myJobCoordinator.startInstance(mySrd, startRequest);
-		String instanceId1 = firstJob.getInstanceId();
-
-		// cancel it
-		ServletRequestDetails details = new ServletRequestDetails();
-		details.setRequestType(RequestTypeEnum.DELETE);
-		details.setServer(myServer.getRestfulServer());
-		details.setServletResponse(new MockHttpServletResponse());
-		myBulkDataExportProvider.exportPollStatus(new StringType(instanceId1), details);
-
-		// start a second one with the exact same parameters
-		Batch2JobStartResponse secondJob = myJobCoordinator.startInstance(mySrd, startRequest);
-		String instanceId2 = secondJob.getInstanceId();
-
-		// verify it's a new job
-		assertNotEquals(instanceId1, instanceId2, "Cancelled job id is being reused");
 	}
 
 	private BulkExportJobResults getBulkExportJobResults(String theInstanceId) {
