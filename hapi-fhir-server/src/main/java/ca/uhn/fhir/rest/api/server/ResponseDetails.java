@@ -22,6 +22,9 @@ package ca.uhn.fhir.rest.api.server;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
+ * The body and status code of a FHIR response.
+ * Both the status code and response resource are mutable.
+ * The resource may be replaced entirely.
  * @see ca.uhn.fhir.rest.server.interceptor.IServerInterceptor
  */
 public class ResponseDetails {
@@ -30,10 +33,17 @@ public class ResponseDetails {
 	private int myResponseCode;
 
 	/**
-	 * Constructor
+	 * empty constructor left for backwards compatibility.
+	 * @deprecated Use the two-arg constructor to initialize the fields.
 	 */
+	@Deprecated
 	public ResponseDetails() {
-		super();
+		// empty
+	}
+
+	public ResponseDetails(int theStatusCode, IBaseResource theResponseResource) {
+		myResponseResource = theResponseResource;
+		myResponseCode = theStatusCode;
 	}
 
 	/**
