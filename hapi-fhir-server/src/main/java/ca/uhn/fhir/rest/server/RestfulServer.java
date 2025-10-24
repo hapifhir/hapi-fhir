@@ -403,6 +403,11 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			}
 		}
 		if (resourceMethod == null) {
+			if (requestDetails.getParameters().containsKey(Constants.PARAM_PAGINGACTION)) {
+				// request for _getpages when no PageProvider registered
+				throwUnknownFhirOperationException(requestDetails, requestPath, requestType);
+			}
+
 			if (isBlank(requestPath)) {
 				throw new InvalidRequestException(
 						Msg.code(287) + myFhirContext.getLocalizer().getMessage(RestfulServer.class, "rootRequest"));
@@ -1419,8 +1424,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 			Object confProvider;
 			try {
-				ourLog.info("Initializing HAPI FHIR restful server running in "
-						+ getFhirContext().getVersion().getVersion().name() + " mode");
+				ourLog.info("Initializing HAPI FHIR restful server running in {} mode",
+					getFhirContext().getVersion().getVersion().name());
 
 				Collection<IResourceProvider> resourceProvider = getResourceProviders();
 				// 'true' tells registerProviders() that
