@@ -668,8 +668,9 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	}
 
 	/**
-	 * Creates a new JpaPid from string ID and resource name.
-	 * This method also populates the associated resource ID on the returned JpaPid.
+	 * Creates a new JpaPid from partition, PK, and resource name. 
+	 * The PK is passed as a String here, but this must parse as a long.  Do not mistake this for the FHIR Id 
+	 * - aka forced-id/client-assigned-id.
 	 *
 	 * @param thePartitionId The partition ID
 	 * @param thePid The persistent ID as a string
