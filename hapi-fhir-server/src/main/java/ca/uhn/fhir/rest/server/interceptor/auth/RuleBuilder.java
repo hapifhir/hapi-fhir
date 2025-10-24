@@ -261,6 +261,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		private RuleBuilderRuleOp myWriteRuleBuilder;
 		private RuleBuilderBulkExport myRuleBuilderBulkExport;
 		private RuleBuilderGroupMatcherBulkExport myRuleBuilderGroupMatcherBulkExport;
+		private RuleBuilderPatientMatcherBulkExport myRuleBuilderPatientMatcherBulkExport;
 
 		RuleBuilderRule(PolicyEnum theRuleMode, String theRuleName) {
 			myRuleMode = theRuleMode;
@@ -354,6 +355,14 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				myRuleBuilderGroupMatcherBulkExport = new RuleBuilderGroupMatcherBulkExport();
 			}
 			return myRuleBuilderGroupMatcherBulkExport;
+		}
+
+		@Override
+		public IAuthRuleBuilderRulePatientMatcherBulkExport bulkExportPatientCompartmentMatcher() {
+			if (myRuleBuilderPatientMatcherBulkExport == null) {
+				myRuleBuilderPatientMatcherBulkExport = new RuleBuilderPatientMatcherBulkExport();
+			}
+			return myRuleBuilderPatientMatcherBulkExport;
 		}
 
 		@Override
@@ -1044,6 +1053,50 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				private final RuleGroupBulkExportByCompartmentMatcherImpl myRule;
 
 				private RuleBuilderBulkExportWithTarget(RuleGroupBulkExportByCompartmentMatcherImpl theRule) {
+					super(theRule);
+					myRule = theRule;
+				}
+
+				@Override
+				public IAuthRuleBuilderRuleBulkExportWithTarget withResourceTypes(Collection<String> theResourceTypes) {
+					myRule.setResourceTypes(theResourceTypes);
+					return this;
+				}
+			}
+		}
+
+		private class RuleBuilderPatientMatcherBulkExport implements IAuthRuleBuilderRulePatientMatcherBulkExport {
+			private RulePatientBulkExportByCompartmentMatcherImpl myRulePatientBulkExportByCompartmentMatcher;
+
+			@Override
+			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatient(
+				@Nonnull String theCompartmentFilterMatcher) {//todo jdjd change to list
+				if (myRulePatientBulkExportByCompartmentMatcher == null) {
+					RulePatientBulkExportByCompartmentMatcherImpl rule =
+						new RulePatientBulkExportByCompartmentMatcherImpl(myRuleName);
+
+					rule.addAppliesToPatientExportOnPatient(theCompartmentFilterMatcher);
+					rule.setMode(myRuleMode);
+					myRulePatientBulkExportByCompartmentMatcher = rule;
+				} else {
+					myRulePatientBulkExportByCompartmentMatcher.addAppliesToPatientExportOnPatient(
+						theCompartmentFilterMatcher);
+				}
+
+				// prevent duplicate rules being added
+				if (!myRules.contains(myRulePatientBulkExportByCompartmentMatcher)) {
+					myRules.add(myRulePatientBulkExportByCompartmentMatcher);
+				}
+
+				return new RuleBuilderPatientMatcherBulkExport.RuleBuilderBulkExportWithTarget(
+					myRulePatientBulkExportByCompartmentMatcher);
+			}
+
+			private class RuleBuilderBulkExportWithTarget extends RuleBuilderFinished
+				implements IAuthRuleBuilderRuleBulkExportWithTarget {
+				private final RulePatientBulkExportByCompartmentMatcherImpl myRule;
+
+				private RuleBuilderBulkExportWithTarget(RulePatientBulkExportByCompartmentMatcherImpl theRule) {
 					super(theRule);
 					myRule = theRule;
 				}
