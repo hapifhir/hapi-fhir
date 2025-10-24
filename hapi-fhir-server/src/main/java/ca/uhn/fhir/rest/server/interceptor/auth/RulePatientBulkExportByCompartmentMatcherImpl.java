@@ -25,16 +25,13 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import com.google.common.annotations.VisibleForTesting;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import java.util.Objects;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -110,9 +107,9 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
 			if (patientIdOptions.isEmpty()) {
 				// This is a type-level export with a _typeFilter
 				// All filters must be permitted to return an ALLOW verdict
-				return allFiltersMatch ?
-					new AuthorizationInterceptor.Verdict(PolicyEnum.ALLOW, this) :
-					new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
+				return allFiltersMatch
+						? new AuthorizationInterceptor.Verdict(PolicyEnum.ALLOW, this)
+						: new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
 			} else if (!allFiltersMatch) {
 				// This is an instance-level export with a _typeFilter
 				// Where at least one filter didn't match the permitted filters
@@ -120,22 +117,22 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
 			}
 		}
 
-		List<IBaseResource> thePatientResources = theRuleApplier
-				.getAuthResourceResolver()
-				.resolveCompartmentByIds(patientIdOptions, "Patient");
+		List<IBaseResource> thePatientResources =
+				theRuleApplier.getAuthResourceResolver().resolveCompartmentByIds(patientIdOptions, "Patient");
 
-		// Apply the FhirQueryTester (which contains a inMemoryResourceMatcher) to the found Patient compartment resource,
+		// Apply the FhirQueryTester (which contains a inMemoryResourceMatcher) to the found Patient compartment
+		// resource,
 		// and return the verdict
 		// All requested Patient IDs must be permitted to return an ALLOW verdict.
 		List<AuthorizationInterceptor.Verdict> verdicts = thePatientResources.stream()
-			.map(patient -> newVerdict(
-				theOperation,
-				theRequestDetails,
-				patient,
-				theInputResourceId, // todo jdjd should this be patient.id?
-				theOutputResource,
-				theRuleApplier))
-			.toList();
+				.map(patient -> newVerdict(
+						theOperation,
+						theRequestDetails,
+						patient,
+						theInputResourceId, // todo jdjd should this be patient.id?
+						theOutputResource,
+						theRuleApplier))
+				.toList();
 
 		if (verdicts.stream().allMatch(t -> t != null && t.getDecision().equals(PolicyEnum.ALLOW))) {
 			// All the resources match at least 1 permission query filter --> ALLOW
@@ -221,17 +218,16 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
 	 *                                So this filter should start with a "?"
 	 */
 	public void addAppliesToPatientExportOnPatient(String thePatientMatcherFilter) {
-		//todo jdjd what does the string look like here? should i have a ? or resource type?
-		if (myPatientMatcherFilter == null){
+		// todo jdjd what does the string look like here? should i have a ? or resource type?
+		if (myPatientMatcherFilter == null) {
 			myPatientMatcherFilter = new ArrayList<>();
 		}
 		myPatientMatcherFilter.add(sanitizeQueryFilter(thePatientMatcherFilter));
 
-		if (myTokenizedPatientMatcherFilter == null){
+		if (myTokenizedPatientMatcherFilter == null) {
 			myTokenizedPatientMatcherFilter = new ArrayList<>();
 		}
 		myTokenizedPatientMatcherFilter.add(Set.of(thePatientMatcherFilter.split("&")));
-
 
 		addTester(new FhirQueryRuleTester(thePatientMatcherFilter));
 	}
