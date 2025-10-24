@@ -43,7 +43,7 @@ class SearchParameterMapQueryBuilderTest {
 		SearchParameterMap result = SearchParameterMapRepositoryRestQueryBuilder.buildFromQueryContributor(queryContributor);
 
 		// then
-		assertThat(result.toNormalizedQueryString(myFhirContext)).isEqualTo("?_count=123");
+		assertThat(result.toNormalizedQueryString()).isEqualTo("?_count=123");
 	}
 
 	@Test
@@ -177,8 +177,21 @@ class SearchParameterMapQueryBuilderTest {
 		assertThat(myResult.getRevIncludes()).contains(new Include("Patient:general-practitioner", true));
 	}
 
+	@Test
+	void testTokenSystem() {
+	    // given
+		TokenParam tokenParam = new TokenParam();
+
+		// when
+		tokenParam.setValueAsQueryToken(myFhirContext, "code", null, "value");
+
+	    // then
+	    assertThat(tokenParam.getSystem()).isNull();
+	    assertThat(tokenParam.getValue()).isEqualTo("value");
+	}
+
 	private void assertConvertsTo(String expected) {
 		myResult = myBuilder.build();
-		assertThat(myResult.toNormalizedQueryString(myFhirContext)).isEqualTo(expected);
+		assertThat(myResult.toNormalizedQueryString()).isEqualTo(expected);
 	}
 }

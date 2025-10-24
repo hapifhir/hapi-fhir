@@ -62,8 +62,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import static ca.uhn.fhir.rest.api.Constants.PARAM_COUNT;
-import static ca.uhn.fhir.rest.api.Constants.PARAM_INCLUDE;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
@@ -193,8 +191,6 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 		return mySearchParameterMap.computeIfAbsent(theName, k -> new ArrayList<>());
 	}
 
-	public SearchParameterMap add(String theName, IQueryParameterOr<?> theOr) {
-		if (theOr == null) {
 	@SuppressWarnings("unchecked")
 	@Nonnull
 	public SearchParameterMap add(@Nonnull String theName, @Nullable IQueryParameterOr<?> theOr) {
@@ -213,24 +209,8 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 		if (theOrList == null) {
 			return this;
 		}
-		return addOrList(theName, (List<IQueryParameterType>) theOr.getValuesAsQueryTokens());
-	}
 
-	@SuppressWarnings("unchecked")
-	@Nonnull
-	public SearchParameterMap add(@Nonnull String theName, @Nullable IQueryParameterOr<?> theOr) {
-		List<IQueryParameterType> orList =
-			theOr != null ? (List<IQueryParameterType>) theOr.getValuesAsQueryTokens() : null;
-		return addOrList(theName, orList);
-	}
-
-	@Nonnull
-	public SearchParameterMap addOrList(String theName, @Nonnull List<IQueryParameterType> theOrValues) {
-		if (theOrValues.isEmpty()) {
-			return this;
-		}
-
-		getOrCreate(theName).add(theOrValues);
+		getOrCreate(theName).add((List<IQueryParameterType>) theOrList);
 
 		return this;
 	}
@@ -549,7 +529,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 		}
 
 		if (hasIncludes()) {
-			addUrlIncludeParams(b, PARAM_INCLUDE, getIncludes());
+			addUrlIncludeParams(b, Constants.PARAM_INCLUDE, getIncludes());
 		}
 		addUrlIncludeParams(b, Constants.PARAM_REVINCLUDE, getRevIncludes());
 
@@ -567,7 +547,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 
 		if (getCount() != null) {
 			addUrlParamSeparator(b);
-			b.append(PARAM_COUNT);
+			b.append(Constants.PARAM_COUNT);
 			b.append('=');
 			b.append(getCount());
 		}

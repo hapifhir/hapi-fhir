@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.repository.searchparam;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.repository.IRepository.IRepositoryRestQueryContributor;
 import ca.uhn.fhir.repository.IRepositoryRestQueryBuilder;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
@@ -67,7 +67,7 @@ public class SearchParameterMapRepositoryRestQueryBuilder implements IRepository
 	 * @param theQueryContributor the query callback to convert
 	 * @return a SearchParameterMap for use with JPA repositories
 	 */
-	public static SearchParameterMap buildFromQueryContributor(IRepository.IRepositoryRestQueryContributor theQueryContributor) {
+	public static SearchParameterMap buildFromQueryContributor(IRepositoryRestQueryContributor theQueryContributor) {
 		SearchParameterMap searchParameterMap;
 		// If the contributor is already a SearchParameterMap, use it directly.
 		// This allows pass-though of stuff like $everything that isn't part of the main rest-query syntax.

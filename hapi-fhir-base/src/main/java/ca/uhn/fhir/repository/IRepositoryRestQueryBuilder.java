@@ -37,5 +37,4 @@ public interface IRepositoryRestQueryBuilder {
 		theSearchParameters.forEach(this::addOrList);
 		return this;
 	}
-
 }

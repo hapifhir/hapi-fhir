@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MultiMapRepositoryRestQueryBuilderTest {
@@ -47,6 +48,23 @@ class MultiMapRepositoryRestQueryBuilderTest {
 		// use a set for comparison.
 		var actualAsSetMultiMap = LinkedHashMultimap.create(myBuilder.toMultiMap());
 		assertEquals(Multimaps.forMap(map), actualAsSetMultiMap);
+	}
+
+	@Test
+	void testFlattenConvertsValuesToStrings() {
+	    // given
+		Multimap<String, List<IQueryParameterType>> map = ArrayListMultimap.create();
+		map.put("param1", List.of(new TokenParam("value1"), new TokenParam("value2")));
+		map.put("param1", List.of(new TokenParam("value3")));
+		map.put("param2", List.of(new TokenParam("value4")));
+
+	    // when
+		Map<String, String[]> flattenedMap = MultiMapRepositoryRestQueryBuilder.flattenMultimap(map);
+
+		// then
+	    assertThat(flattenedMap)
+	            .containsEntry("param1", new String[]{"value1,value2", "value3"})
+	            .containsEntry("param2", new String[]{"value4"});
 	}
 
 }

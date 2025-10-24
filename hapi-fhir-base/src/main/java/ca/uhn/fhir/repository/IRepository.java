@@ -329,6 +329,7 @@ public interface IRepository {
 				MultiMapRepositoryRestQueryBuilder.contributorToMultimap(theQueryContributor),
 				theHeaders);
 	}
+
 	/**
 	 * Searches this repository
 	 *
