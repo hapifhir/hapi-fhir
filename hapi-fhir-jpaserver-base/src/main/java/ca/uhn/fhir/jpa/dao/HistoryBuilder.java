@@ -280,7 +280,9 @@ public class HistoryBuilder {
 			Root<ResourceHistoryTable> theFrom,
 			List<Predicate> predicates) {
 
-		List<Long> ids = theResourceIds.stream().map(id -> (Long) id.getId()).toList();
+		List<Long> ids = theResourceIds.stream()
+				.map(id -> id.getAssociatedResourceId().getIdPartAsLong())
+				.toList();
 
 		// Create a predicate to filter by resource IDs
 		if (!ids.isEmpty()) {
