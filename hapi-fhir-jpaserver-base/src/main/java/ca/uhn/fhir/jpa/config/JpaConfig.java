@@ -706,7 +706,7 @@ public class JpaConfig {
 	@Scope("prototype")
 	public PersistedJpaIdSearchBundleProvider newPersistedJpaIdSearchBundleProvider(
 			String theResourceType,
-			List<String> theResourceIds,
+			List<IResourcePersistentId<?>> theResourceIds,
 			RequestPartitionId thePartitionId,
 			@Nullable Date theRangeStartInclusive,
 			@Nonnull Date theRangeEndInclusive) {
@@ -849,7 +849,7 @@ public class JpaConfig {
 	@Scope("prototype")
 	public HistoryBuilder newHistoryBuilderWithIds(
 			@Nonnull String theResourceType,
-			@Nonnull List<String> theResourceIds,
+			@Nonnull List<IResourcePersistentId<?>> theResourceIds,
 			@Nullable Date theRangeStartInclusive,
 			@Nonnull Date theRangeEndInclusive) {
 		return new HistoryBuilder(theResourceType, theResourceIds, theRangeStartInclusive, theRangeEndInclusive);

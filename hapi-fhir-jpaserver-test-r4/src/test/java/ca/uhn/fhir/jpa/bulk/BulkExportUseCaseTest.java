@@ -103,7 +103,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
-public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
+class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportUseCaseTest.class);
 
 	private static final  String TEST_PATIENT_EID_SYS = "http://patient-eid-sys";
@@ -126,16 +126,16 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private MdmExpandersHolder myMdmExpandersHolder;
 
 	@BeforeEach
-	public void beforeEach() {
+	void beforeEach() {
 		myStorageSettings.setJobFastTrackingEnabled(false);
 	}
 
 
 	@Nested
-	public class SpecConformanceTests {
+	class SpecConformanceTests {
 
 		@Test
-		public void testBulkExportJobsAreMetaTaggedWithJobIdAndExportId() throws IOException {
+		void testBulkExportJobsAreMetaTaggedWithJobIdAndExportId() throws IOException {
 			//Given a patient exists
 			Patient p = new Patient();
 			p.setId("Pat-1");
@@ -159,8 +159,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
 				assertEquals(expectedOriginalUrl, result.getRequest());
 				assertThat(result.getOutput()).isNotEmpty();
-				String binary_url = result.getOutput().get(0).getUrl();
-				Binary binaryResource = myClient.read().resource(Binary.class).withUrl(binary_url).execute();
+				String binaryUrl = result.getOutput().get(0).getUrl();
+				Binary binaryResource = myClient.read().resource(Binary.class).withUrl(binaryUrl).execute();
 
 				List<Extension> extension = binaryResource.getMeta().getExtension();
 				assertThat(extension).hasSize(3);
@@ -177,7 +177,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testBatchJobsAreOnlyReusedIfInProgress() throws IOException {
+		void testBatchJobsAreOnlyReusedIfInProgress() throws IOException {
 			//Given a patient exists
 			Patient p = new Patient();
 			p.setId("Pat-1");
@@ -200,7 +200,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testPollingLocationContainsAllRequiredAttributesUponCompletion() throws IOException {
+		void testPollingLocationContainsAllRequiredAttributesUponCompletion() throws IOException {
 
 			//Given a patient exists
 			Patient p = new Patient();
@@ -237,7 +237,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void export_shouldExportPatientResource_whenTypeParameterOmitted() throws IOException {
+		void export_shouldExportPatientResource_whenTypeParameterOmitted() throws IOException {
 
 			//Given a patient exists
 			Patient p = new Patient();
@@ -277,7 +277,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void export_shouldExportPatientAndObservationAndEncounterResources_whenTypeParameterOmitted() throws IOException {
+		void export_shouldExportPatientAndObservationAndEncounterResources_whenTypeParameterOmitted() throws IOException {
 
 			Patient patient = new Patient();
 			patient.setId("Pat-1");
@@ -320,7 +320,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void export_shouldNotExportBinaryResource_whenTypeParameterOmitted() throws IOException {
+		void export_shouldNotExportBinaryResource_whenTypeParameterOmitted() throws IOException {
 
 			Patient patient = new Patient();
 			patient.setId("Pat-1");
@@ -381,10 +381,10 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	}
 
 	@Nested
-	public class SystemBulkExportTests {
+	class SystemBulkExportTests {
 
 		@Test
-		public void testBinariesAreStreamedWithRespectToAcceptHeader() throws IOException {
+		void testBinariesAreStreamedWithRespectToAcceptHeader() throws IOException {
 			int patientCount = 5;
 			for (int i = 0; i < patientCount; i++) {
 				Patient patient = new Patient();
@@ -449,7 +449,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testResourceCountIsCorrect() {
+		void testResourceCountIsCorrect() {
 			int patientCount = 5;
 			for (int i = 0; i < patientCount; i++) {
 				Patient patient = new Patient();
@@ -505,7 +505,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testEmptyExport() {
+		void testEmptyExport() {
 			BulkExportJobParameters options = new BulkExportJobParameters();
 			options.setResourceTypes(Collections.singleton("Patient"));
 			options.setFilters(Collections.emptySet());
@@ -556,15 +556,15 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 
 	@Nested
-	public class PatientBulkExportTests {
+	class PatientBulkExportTests {
 
 		@BeforeEach
-		public void before() {
+		void before() {
 			myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		}
 
 		@AfterEach
-		public void after() {
+		void after() {
 			myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 			myStorageSettings.setBulkExportFileMaximumCapacity(JpaStorageSettings.DEFAULT_BULK_EXPORT_FILE_MAXIMUM_CAPACITY);
 		}
@@ -573,7 +573,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		// Reenable when bulk exports that return no results work as expected
 		@Disabled
 		@Test
-		public void testPatientExportIgnoresResourcesNotInPatientCompartment() {
+		void testPatientExportIgnoresResourcesNotInPatientCompartment() {
 			Patient patient = new Patient();
 			patient.setId("pat-1");
 			myPatientDao.update(patient, mySrd);
@@ -600,7 +600,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testBulkExportWithLowMaxFileCapacity() {
+		void testBulkExportWithLowMaxFileCapacity() {
 			final int numPatients = 250;
 			myStorageSettings.setBulkExportFileMaximumCapacity(1);
 			myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
@@ -654,7 +654,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testExportEmptyResult() {
+		void testExportEmptyResult() {
 			BulkExportJobParameters options = new BulkExportJobParameters();
 			options.setResourceTypes(Sets.newHashSet("Patient"));
 			options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
@@ -684,7 +684,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 
 	@Nested
-	public class GroupBulkExportTests {
+	class GroupBulkExportTests {
 
 		@AfterEach
 		void tearDown() {
@@ -692,7 +692,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testGroupExportSuccessfulyExportsPatientForwardReferences() {
+		void testGroupExportSuccessfulyExportsPatientForwardReferences() {
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
 
 			Group group = new Group();
@@ -732,7 +732,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testVeryLargeGroup() {
+		void testVeryLargeGroup() {
 
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
 
@@ -767,7 +767,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testGroupBulkExportMembershipShouldNotExpandIntoOtherGroups() {
+		void testGroupBulkExportMembershipShouldNotExpandIntoOtherGroups() {
 			Patient patient = new Patient();
 			patient.setId("PING1");
 			patient.setGender(Enumerations.AdministrativeGender.FEMALE);
@@ -801,7 +801,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testDifferentTypesDoNotUseCachedResults() {
+		void testDifferentTypesDoNotUseCachedResults() {
 			Patient patient = new Patient();
 			patient.setId("PING1");
 			patient.setGender(Enumerations.AdministrativeGender.FEMALE);
@@ -846,7 +846,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 
 		@Test
-		public void testGroupBulkExportNotInGroup_DoeNotShowUp() {
+		void testGroupBulkExportNotInGroup_DoeNotShowUp() {
 			// Create some resources
 			Patient patient = new Patient();
 			patient.setId("PING1");
@@ -877,7 +877,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testTwoConsecutiveBulkExports() {
+		void testTwoConsecutiveBulkExports() {
 
 			// Create some resources
 			Patient patient = new Patient();
@@ -905,7 +905,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testGroupExport_includesObservationsAndEncountersOfPatientsInExportedGroup_whenLuceneIdexingEnabled() {
+		void testGroupExport_includesObservationsAndEncountersOfPatientsInExportedGroup_whenLuceneIdexingEnabled() {
 
 			// Enable Lucene indexing
 			myStorageSettings.setAllowContainsSearches(true);
@@ -988,7 +988,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 
 		@Test
-		public void testGroupExportPatientAndOtherResources() {
+		void testGroupExportPatientAndOtherResources() {
 			Patient patient = new Patient();
 			patient.setId("PING1");
 			patient.setGender(Enumerations.AdministrativeGender.FEMALE);
@@ -1032,9 +1032,54 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			assertThat(typeToContents.get("Observation")).contains("obs-included");
 			assertThat(typeToContents.get("Observation")).doesNotContain("obs-excluded");
 		}
+		@Test
+		void testGroupExportPatientAndOtherResources_withHistory() {
+			Patient patient = new Patient();
+			patient.setId("PING1");
+			patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+			patient.setActive(true);
+			myClient.update().resource(patient).execute();
+
+			//Other patient not in group
+			Patient patient2 = new Patient();
+			patient2.setId("POG2");
+			patient2.setGender(Enumerations.AdministrativeGender.FEMALE);
+			patient2.setActive(true);
+			myClient.update().resource(patient2).execute();
+
+			Group group = new Group();
+			group.setId("Group/G2");
+			group.setActive(true);
+			group.addMember().getEntity().setReference("Patient/PING1");
+			myClient.update().resource(group).execute();
+
+			Observation o = new Observation();
+			o.setSubject(new Reference("Patient/PING1"));
+			o.setId("obs-included");
+			myClient.update().resource(o).execute();
+
+			Observation o2 = new Observation();
+			o2.setSubject(new Reference("Patient/POG2"));
+			o2.setId("obs-excluded");
+			myClient.update().resource(o2).execute();
+
+			HashSet<String> resourceTypes = Sets.newHashSet("Observation", "Patient");
+			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobWithHistoryAndAwaitCompletion(resourceTypes, new HashSet<>(), "G2");
+
+			Map<String, List<IBaseResource>> typeToResources = convertJobResultsToResources(bulkExportJobResults);
+			assertThat(typeToResources.get("Patient")).hasSize(1);
+			assertThat(typeToResources.get("Observation")).hasSize(1);
+
+			Map<String, String> typeToContents = convertJobResultsToStringContents(bulkExportJobResults);
+			assertThat(typeToContents.get("Patient")).contains("PING1");
+			assertThat(typeToContents.get("Patient")).doesNotContain("POG2");
+
+			assertThat(typeToContents.get("Observation")).contains("obs-included");
+			assertThat(typeToContents.get("Observation")).doesNotContain("obs-excluded");
+		}
 
 		@Test
-		public void testGroupBulkExportWithTypeFilter_ReturnsOnlyResourcesInTypeFilter() {
+		void testGroupBulkExportWithTypeFilter_ReturnsOnlyResourcesInTypeFilter() {
 			// setup
 			IParser parser = myFhirContext.newJsonParser();
 			{
@@ -1184,7 +1229,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testGroupBulkExportWithTypeFilter() {
+		void testGroupBulkExportWithTypeFilter() {
 			// Create some resources
 			Group g = createGroupWithPatients();
 			String groupId = g.getIdPart();
@@ -1215,7 +1260,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testGroupExportOmitResourceTypesFetchesAll() {
+		void testGroupExportOmitResourceTypesFetchesAll() {
 			// Create some resources
 			Patient patient = new Patient();
 			patient.setId("PF");
@@ -1269,7 +1314,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testGroupExportPatientOnly() {
+		void testGroupExportPatientOnly() {
 			Patient patient = new Patient();
 			patient.setId("PING1");
 			patient.setGender(Enumerations.AdministrativeGender.FEMALE);
@@ -1301,7 +1346,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testExportEmptyResult() {
+		void testExportEmptyResult() {
 			Group group = new Group();
 			group.setId("Group/G-empty");
 			group.setActive(true);
@@ -1316,7 +1361,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testGroupBulkExportMultipleResourceTypes() {
+		void testGroupBulkExportMultipleResourceTypes() {
 			Patient patient = new Patient();
 			patient.setId("PING1");
 			patient.setGender(Enumerations.AdministrativeGender.FEMALE);
@@ -1359,7 +1404,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testGroupBulkExportOverLargeDataset() {
+		void testGroupBulkExportOverLargeDataset() {
 			Patient patient = new Patient();
 			patient.setId("PING1");
 			patient.setGender(Enumerations.AdministrativeGender.FEMALE);
@@ -1404,7 +1449,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Nested
-		public class WithClientIdStrategyEnumANYTest {
+		class WithClientIdStrategyEnumANYTest {
 
 			@BeforeEach
 			void setUp() {
@@ -1417,7 +1462,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			}
 
 			@Test
-			public void testGroupExportPatientOnly() {
+			void testGroupExportPatientOnly() {
 				Patient patient = new Patient();
 				patient.setId("PING1");
 				patient.setGender(Enumerations.AdministrativeGender.FEMALE);
@@ -1454,7 +1499,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	class IncludeHistoryTests {
 
 		@Test
-		public void testPatientBulkExport() {
+		void testPatientBulkExport() {
 			myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 
 			// versions list size indicate number of patients to create
@@ -1479,7 +1524,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testGroupBulkExportMultipleResourceTypes() {
+		void testGroupBulkExportMultipleResourceTypes() {
 			Patient patient = new Patient();
 			patient.setId("PING1");
 			patient.setGender(Enumerations.AdministrativeGender.FEMALE);
@@ -1512,12 +1557,12 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletionForHistory(resourceTypes, new HashSet<>(), "G2", true);
 
 			Map<String, Map<String, Set<String>>> typeToResourceVersionsMap = convertJobResultsToResourceVersionMap(bulkExportJobResults);
-			assertThat(typeToResourceVersionsMap.get("Observation")).isEqualTo(observationVersionsMap);
-			assertThat(typeToResourceVersionsMap.get("Coverage")).isEqualTo(coverageVersionsMap);
+			assertThat(typeToResourceVersionsMap).containsEntry("Observation", observationVersionsMap)
+				.containsEntry("Coverage", coverageVersionsMap);
 		}
 
 		@Test
-		public void testSystemBulkExport() {
+		void testSystemBulkExport() {
 			// versions list size indicate number of patients to create
 			Map<String, Set<String>> patientVersionsMap = createPatientsWithHistory(List.of(3, 5, 2, 1, 2));
 
@@ -1541,7 +1586,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testSystemBulkExport_withResourcesExceedingPageSizes() {
+		void testSystemBulkExport_withResourcesExceedingPageSizes() {
 			// given
 
 			int exportFileMaxCapacity = 27;
@@ -1590,7 +1635,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testShouldIncludeOnlyCurrentVersions() {
+		void testShouldIncludeOnlyCurrentVersions() {
 			// Given - Create a patient with multiple versions
 			Patient patient = new Patient();
 			patient.setId("Patient-NoHistory-Test");
@@ -1672,6 +1717,57 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			// Then
 			assertFalse(parameters.isIncludeHistory());
+		}
+
+		@Test
+		void testSystemBulkExportWithHistory_WithClientAssignedIds() {
+			// Given - Create patients with client-assigned IDs (forced IDs) and multiple versions
+			Patient patient1 = new Patient();
+			patient1.setId("Patient/client-assigned-id-1");
+			patient1.addName().setFamily("FamilyV1");
+			myClient.update().resource(patient1).execute();
+
+			// Create version 2
+			patient1.getNameFirstRep().setFamily("FamilyV2");
+			myClient.update().resource(patient1).execute();
+
+			// Create version 3
+			patient1.getNameFirstRep().setFamily("FamilyV3");
+			myClient.update().resource(patient1).execute();
+
+			Patient patient2 = new Patient();
+			patient2.setId("Patient/client-assigned-id-2");
+			patient2.addName().setFamily("SmithV1");
+			myClient.update().resource(patient2).execute();
+
+			// Create version 2
+			patient2.getNameFirstRep().setFamily("SmithV2");
+			myClient.update().resource(patient2).execute();
+
+			// When - Start bulk export with history
+			BulkExportJobParameters options = new BulkExportJobParameters();
+			options.setResourceTypes(Collections.singleton("Patient"));
+			options.setFilters(Collections.emptySet());
+			options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
+			options.setIncludeHistory(true);
+			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+			startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+			startRequest.setParameters(options);
+			Batch2JobStartResponse job = myJobCoordinator.startInstance(mySrd, startRequest);
+			myBatch2JobHelper.awaitJobCompletion(job.getInstanceId(), 60);
+			ourLog.debug("Job status after awaiting - {}", myJobCoordinator.getInstance(job.getInstanceId()).getStatus());
+			waitForCompletion(job);
+
+			// Then - Verify all versions are exported for resources with forced IDs
+			Map<String, Set<String>> exportedPatientVersionsMap = extractExportedResourceVersionsByTypeMap(job).get("Patient");
+
+			assertThat(exportedPatientVersionsMap).containsKey("client-assigned-id-1");
+			assertThat(exportedPatientVersionsMap.get("client-assigned-id-1")).hasSize(3);
+
+			assertThat(exportedPatientVersionsMap).containsKey("client-assigned-id-2");
+			assertThat(exportedPatientVersionsMap.get("client-assigned-id-2")).hasSize(2);
 		}
 
 	}
@@ -1832,10 +1928,12 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 	private Map<String, Set<String>> createPatientsWithHistory(List<Integer> versionCounts) {
 			Map<String, Set<String>> retVal = new HashMap<>();
+		for (int i = 0; i < versionCounts.size(); i++) {
 
-		for (Integer theVersionCount : versionCounts) {
-			IIdType id = createPatient();
-				Set<String> patientVersionIds = new HashSet<>();
+
+		Integer theVersionCount = versionCounts.get(i);
+			IIdType id = createPatient(i);
+			Set<String> patientVersionIds = new HashSet<>();
 			retVal.put(id.getIdPart(), patientVersionIds);
 
 			// create indicated additional versions
@@ -1855,8 +1953,9 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		return retVal;
 	}
 
-	private IIdType createPatient() {
+	private IIdType createPatient(int i) {
 		Patient p = new Patient();
+		p.setId("pat-"+ i);
 		p.addName()
 			.setGiven(List.of(new StringType("given")))
 			.setFamily("lastname");
@@ -2019,7 +2118,9 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	BulkExportJobResults startGroupBulkExportJobAndAwaitCompletion(HashSet<String> theResourceTypes, HashSet<String> theFilters, String theGroupId) {
 		return startBulkExportJobAndAwaitCompletion(BulkExportJobParameters.ExportStyle.GROUP, theResourceTypes, theFilters, theGroupId, false, false);
 	}
-
+	BulkExportJobResults startGroupBulkExportJobWithHistoryAndAwaitCompletion(HashSet<String> theResourceTypes, HashSet<String> theFilters, String theGroupId) {
+		return startBulkExportJobAndAwaitCompletion(BulkExportJobParameters.ExportStyle.GROUP, theResourceTypes, theFilters, theGroupId, false, true);
+	}
 	BulkExportJobResults startSystemBulkExportJobAndAwaitCompletion(Set<String> theResourceTypes, Set<String> theFilters) {
 		return startBulkExportJobAndAwaitCompletion(BulkExportJobParameters.ExportStyle.SYSTEM, theResourceTypes, theFilters, null, false, false);
 	}

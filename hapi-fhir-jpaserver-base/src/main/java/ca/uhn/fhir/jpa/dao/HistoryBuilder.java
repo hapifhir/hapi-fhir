@@ -28,7 +28,7 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
-import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.ImmutableListMultimap;
@@ -69,7 +69,7 @@ public class HistoryBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(HistoryBuilder.class);
 	private final String myResourceType;
 	private final JpaPid myResourceId;
-	private final List<String> myResourceIds;
+	private final List<IResourcePersistentId<?>> myResourceIds;
 	private final Date myRangeStartInclusive;
 	private final Date myRangeEndInclusive;
 
@@ -108,7 +108,7 @@ public class HistoryBuilder {
 	 */
 	public HistoryBuilder(
 			@Nonnull String theResourceType,
-			@Nonnull List<String> theResourceIds,
+			@Nonnull List<IResourcePersistentId<?>> theResourceIds,
 			@Nullable Date theRangeStartInclusive,
 			@Nonnull Date theRangeEndInclusive) {
 		myResourceType = theResourceType;
@@ -275,14 +275,12 @@ public class HistoryBuilder {
 	}
 
 	private void addResourceIdsFiltering(
-			@Nonnull List<String> theResourceIds,
+			@Nonnull List<IResourcePersistentId<?>> theResourceIds,
 			RequestPartitionId thePartitionId,
 			Root<ResourceHistoryTable> theFrom,
 			List<Predicate> predicates) {
 
-		List<Long> ids = theResourceIds.stream()
-				.map(id -> new IdDt(id).getIdPartAsLong())
-				.toList();
+		List<Long> ids = theResourceIds.stream().map(id -> (Long) id.getId()).toList();
 
 		// Create a predicate to filter by resource IDs
 		if (!ids.isEmpty()) {

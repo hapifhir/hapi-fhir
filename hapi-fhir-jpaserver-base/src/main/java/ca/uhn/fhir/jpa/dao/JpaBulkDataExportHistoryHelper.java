@@ -23,6 +23,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.bulk.IBulkDataExportHistoryHelper;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ public class JpaBulkDataExportHistoryHelper implements IBulkDataExportHistoryHel
 	@Override
 	public IBundleProvider fetchHistoryForResourceIds(
 			@Nonnull String theResourceType,
-			@Nonnull List<String> theIdList,
+			@Nonnull List<IResourcePersistentId<?>> theIdList,
 			RequestPartitionId theRequestPartitionId,
 			@Nullable Date theRangeStartInclusive,
 			@Nonnull Date theRangeEndInclusive) {
