@@ -220,12 +220,11 @@ public class ExtendedHSearchClauseBuilder {
 				return thePathContext
 						.match()
 						.field(joinPath(pathPrefix, INDEX_TYPE_TOKEN, TOKEN_SYSTEM_CODE))
-						.matching(token.getValueAsQueryToken(this.myFhirContext));
+						.matching(token.getValueAsQueryToken());
 			}
-		} else if (orTerm instanceof StringParam) {
+		} else if (orTerm instanceof StringParam string) {
 			// MB I don't quite understand why FhirResourceDaoR4SearchNoFtTest.testSearchByIdParamWrongType() uses
 			// String but here we are
-			StringParam string = (StringParam) orTerm;
 			// treat a string as a code with no system (like _id)
 			return thePathContext
 					.match()
@@ -863,7 +862,7 @@ public class ExtendedHSearchClauseBuilder {
 					subMatch = buildDateTermClause(value, componentContext);
 					break;
 				case STRING:
-					subMatch = buildStringUnmodifiedClause(value.getValueAsQueryToken(myFhirContext), componentContext);
+					subMatch = buildStringUnmodifiedClause(value.getValueAsQueryToken(), componentContext);
 					break;
 				case TOKEN:
 					subMatch = buildTokenUnmodifiedMatchOn(value, componentContext);
