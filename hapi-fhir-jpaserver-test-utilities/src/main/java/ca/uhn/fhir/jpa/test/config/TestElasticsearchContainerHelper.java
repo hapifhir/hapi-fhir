@@ -48,7 +48,7 @@ public class TestElasticsearchContainerHelper {
 			.withEnv("xpack.ml.enabled", "false")
 			// we have some slow runners sometimes.
 			.withStartupTimeout(Duration.of(4, MINUTES))
-			.withCreateContainerCmdModifier(c -> requireNonNull(c.getHostConfig()).withMemory(700_000_000L))
+			.withCreateContainerCmdModifier(c -> requireNonNull(c.getHostConfig()).withMemory(1_000_000_000L))
 			.withLogConsumer(new Slf4jLogConsumer(ourLog));
 
 		return elasticsearchContainer;
