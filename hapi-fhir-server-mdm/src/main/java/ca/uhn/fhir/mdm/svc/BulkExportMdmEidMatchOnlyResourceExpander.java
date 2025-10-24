@@ -32,6 +32,7 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -113,6 +114,18 @@ public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdm
 				idTypes,
 				ResolveIdentityMode.excludeDeleted().cacheOk());
 		return new HashSet<>(pidList);
+	}
+
+	@Override
+	public Set<JpaPid> expandPatients(Collection<IIdType> thePatientIds, RequestPartitionId theRequestPartitionId) {
+		Set<String> ids = myMdmEidMatchOnlyLinkExpandSvc.expandMdmBySourceResourceIdsForSingleResourceType(
+				theRequestPartitionId, thePatientIds);
+
+		List<JpaPid> pids = myIdHelperService.resolveResourcePids(
+				theRequestPartitionId,
+				ids.stream().map(id -> myFhirContext.getVersion().newIdType(id)).collect(Collectors.toList()),
+				ResolveIdentityMode.excludeDeleted().cacheOk());
+		return new HashSet<>(pids);
 	}
 
 	@Override

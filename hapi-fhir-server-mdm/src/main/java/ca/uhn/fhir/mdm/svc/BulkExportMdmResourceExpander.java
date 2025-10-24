@@ -27,6 +27,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
@@ -40,10 +41,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of MDM resource expansion for bulk export operations.
@@ -83,7 +92,23 @@ public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpa
 		return performMembershipExpansionViaMdmTable(pidOrNull);
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@Override
+	public Set<JpaPid> expandPatients(Collection<IIdType> thePatientIds, RequestPartitionId theRequestPartitionId) {
+		List<JpaPid> resolvedPids = myIdHelperService.resolveResourcePids(
+				theRequestPartitionId,
+				thePatientIds.stream().map(IdDt::new).collect(Collectors.toList()),
+				ResolveIdentityMode.excludeDeleted().cacheOk());
+		Set<JpaPid> pids = new HashSet<>();
+
+		Collection<MdmPidTuple<JpaPid>> matchedGoldenAndSourceIds = myMdmLinkDao.resolveGoldenResources(resolvedPids);
+		matchedGoldenAndSourceIds.forEach(set -> {
+			pids.add(set.getGoldenPid());
+			pids.add(set.getSourcePid());
+		});
+		return pids;
+	}
+
+	@SuppressWarnings({"unchecked"})
 	private Set<JpaPid> performMembershipExpansionViaMdmTable(JpaPid pidOrNull) {
 		List<MdmPidTuple<JpaPid>> goldenPidTargetPidTuples =
 				myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
