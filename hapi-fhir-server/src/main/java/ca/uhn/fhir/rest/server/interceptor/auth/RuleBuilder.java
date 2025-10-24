@@ -259,7 +259,9 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		private final String myRuleName;
 		private RuleBuilderRuleOp myReadRuleBuilder;
 		private RuleBuilderRuleOp myWriteRuleBuilder;
-		private RuleBuilderBulkExport ruleBuilderBulkExport;
+		private RuleBuilderBulkExport myRuleBuilderBulkExport;
+		private RuleBuilderGroupMatcherBulkExport myRuleBuilderGroupMatcherBulkExport;
+		private RuleBuilderPatientMatcherBulkExport myRuleBuilderPatientMatcherBulkExport;
 
 		RuleBuilderRule(PolicyEnum theRuleMode, String theRuleName) {
 			myRuleMode = theRuleMode;
@@ -341,10 +343,26 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		@Override
 		public IAuthRuleBuilderRuleBulkExport bulkExport() {
-			if (ruleBuilderBulkExport == null) {
-				ruleBuilderBulkExport = new RuleBuilderBulkExport();
+			if (myRuleBuilderBulkExport == null) {
+				myRuleBuilderBulkExport = new RuleBuilderBulkExport();
 			}
-			return ruleBuilderBulkExport;
+			return myRuleBuilderBulkExport;
+		}
+
+		@Override
+		public IAuthRuleBuilderRuleGroupMatcherBulkExport bulkExportGroupCompartmentMatcher() {
+			if (myRuleBuilderGroupMatcherBulkExport == null) {
+				myRuleBuilderGroupMatcherBulkExport = new RuleBuilderGroupMatcherBulkExport();
+			}
+			return myRuleBuilderGroupMatcherBulkExport;
+		}
+
+		@Override
+		public IAuthRuleBuilderRulePatientMatcherBulkExport bulkExportPatientCompartmentMatcher() {
+			if (myRuleBuilderPatientMatcherBulkExport == null) {
+				myRuleBuilderPatientMatcherBulkExport = new RuleBuilderPatientMatcherBulkExport();
+			}
+			return myRuleBuilderPatientMatcherBulkExport;
 		}
 
 		@Override
@@ -901,6 +919,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 			@Override
 			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnAllPatients() {
+				// todo JDJD 1008 it's this ==null that is problematic, it prevents duplicate bulkExportRuleImpl
 				if (myRuleBulkExport == null) {
 					RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
 					rule.setMode(myRuleMode);
@@ -938,6 +957,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			@Override
 			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatientStrings(
 					@Nonnull Collection<String> theFocusResourceIds) {
+				// todo JDJD 1008 it's this ==null that is problematic, it prevents duplicate bulkExportRuleImpl
 				if (myRuleBulkExport == null) {
 					RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
 					rule.setAppliesToPatientExport(theFocusResourceIds);
@@ -990,6 +1010,93 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				private final RuleBulkExportImpl myRule;
 
 				private RuleBuilderBulkExportWithTarget(RuleBulkExportImpl theRule) {
+					super(theRule);
+					myRule = theRule;
+				}
+
+				@Override
+				public IAuthRuleBuilderRuleBulkExportWithTarget withResourceTypes(Collection<String> theResourceTypes) {
+					myRule.setResourceTypes(theResourceTypes);
+					return this;
+				}
+			}
+		}
+
+		private class RuleBuilderGroupMatcherBulkExport implements IAuthRuleBuilderRuleGroupMatcherBulkExport {
+			private RuleGroupBulkExportByCompartmentMatcherImpl myRuleGroupBulkExportByCompartmentMatcher;
+
+			@Override
+			public IAuthRuleBuilderRuleBulkExportWithTarget groupExportOnGroup(
+					@Nonnull String theCompartmentFilterMatcher) {
+				if (myRuleGroupBulkExportByCompartmentMatcher == null) {
+					RuleGroupBulkExportByCompartmentMatcherImpl rule =
+							new RuleGroupBulkExportByCompartmentMatcherImpl(myRuleName);
+					rule.setAppliesToGroupExportOnGroup(theCompartmentFilterMatcher);
+					rule.setMode(myRuleMode);
+					myRuleGroupBulkExportByCompartmentMatcher = rule;
+				} else {
+					myRuleGroupBulkExportByCompartmentMatcher.setAppliesToGroupExportOnGroup(
+							theCompartmentFilterMatcher);
+				}
+
+				// prevent duplicate rules being added
+				if (!myRules.contains(myRuleGroupBulkExportByCompartmentMatcher)) {
+					myRules.add(myRuleGroupBulkExportByCompartmentMatcher);
+				}
+
+				return new RuleBuilderGroupMatcherBulkExport.RuleBuilderBulkExportWithTarget(
+						myRuleGroupBulkExportByCompartmentMatcher);
+			}
+
+			private class RuleBuilderBulkExportWithTarget extends RuleBuilderFinished
+					implements IAuthRuleBuilderRuleBulkExportWithTarget {
+				private final RuleGroupBulkExportByCompartmentMatcherImpl myRule;
+
+				private RuleBuilderBulkExportWithTarget(RuleGroupBulkExportByCompartmentMatcherImpl theRule) {
+					super(theRule);
+					myRule = theRule;
+				}
+
+				@Override
+				public IAuthRuleBuilderRuleBulkExportWithTarget withResourceTypes(Collection<String> theResourceTypes) {
+					myRule.setResourceTypes(theResourceTypes);
+					return this;
+				}
+			}
+		}
+
+		private class RuleBuilderPatientMatcherBulkExport implements IAuthRuleBuilderRulePatientMatcherBulkExport {
+			private RulePatientBulkExportByCompartmentMatcherImpl myRulePatientBulkExportByCompartmentMatcher;
+
+			@Override
+			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatient(
+					@Nonnull String theCompartmentFilterMatcher) { // todo jdjd change to list
+				if (myRulePatientBulkExportByCompartmentMatcher == null) {
+					RulePatientBulkExportByCompartmentMatcherImpl rule =
+							new RulePatientBulkExportByCompartmentMatcherImpl(myRuleName);
+
+					rule.addAppliesToPatientExportOnPatient(theCompartmentFilterMatcher);
+					rule.setMode(myRuleMode);
+					myRulePatientBulkExportByCompartmentMatcher = rule;
+				} else {
+					myRulePatientBulkExportByCompartmentMatcher.addAppliesToPatientExportOnPatient(
+							theCompartmentFilterMatcher);
+				}
+
+				// prevent duplicate rules being added
+				if (!myRules.contains(myRulePatientBulkExportByCompartmentMatcher)) {
+					myRules.add(myRulePatientBulkExportByCompartmentMatcher);
+				}
+
+				return new RuleBuilderPatientMatcherBulkExport.RuleBuilderBulkExportWithTarget(
+						myRulePatientBulkExportByCompartmentMatcher);
+			}
+
+			private class RuleBuilderBulkExportWithTarget extends RuleBuilderFinished
+					implements IAuthRuleBuilderRuleBulkExportWithTarget {
+				private final RulePatientBulkExportByCompartmentMatcherImpl myRule;
+
+				private RuleBuilderBulkExportWithTarget(RulePatientBulkExportByCompartmentMatcherImpl theRule) {
 					super(theRule);
 					myRule = theRule;
 				}

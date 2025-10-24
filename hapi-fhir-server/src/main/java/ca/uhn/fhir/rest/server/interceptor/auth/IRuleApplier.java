@@ -50,5 +50,8 @@ public interface IRuleApplier {
 	default IAuthorizationSearchParamMatcher getSearchParamMatcher() {
 		return null;
 	}
-	;
+
+	default IAuthResourceResolver getAuthResourceResolver() {
+		return null;
+	}
 }
