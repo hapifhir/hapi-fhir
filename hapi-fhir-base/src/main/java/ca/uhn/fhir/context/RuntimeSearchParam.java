@@ -346,7 +346,7 @@ public class RuntimeSearchParam {
 		return retVal;
 	}
 
-	public void addUpliftRefchain(@Nonnull String theCode, @Nonnull String theElementName) {
+	public void addUpliftRefchain(@Nonnull String theCode, @Nullable String theElementName) {
 		myUpliftRefchains.put(theCode, theElementName);
 	}
 
@@ -435,13 +435,15 @@ public class RuntimeSearchParam {
 	public static class Component {
 		private final String myExpression;
 		private final String myReference;
+		private final String myComboUpliftChain;
 
 		/**
 		 * Constructor
 		 */
-		public Component(String theExpression, String theReference) {
+		public Component(String theExpression, String theReference, String theComboUpliftChain) {
 			myExpression = theExpression;
 			myReference = theReference;
+			myComboUpliftChain = theComboUpliftChain;
 		}
 
 		@Override
@@ -449,6 +451,7 @@ public class RuntimeSearchParam {
 			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 					.append("expression", myExpression)
 					.append("reference", myReference)
+					.append("chain", myComboUpliftChain)
 					.toString();
 		}
 
@@ -458,6 +461,10 @@ public class RuntimeSearchParam {
 
 		public String getReference() {
 			return myReference;
+		}
+
+		public String getComboUpliftChain() {
+			return myComboUpliftChain;
 		}
 	}
 }

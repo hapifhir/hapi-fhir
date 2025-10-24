@@ -50,6 +50,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,7 +61,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import static org.apache.commons.lang3.StringUtils.compare;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class ResourceIndexedSearchParams {
@@ -583,16 +583,26 @@ public final class ResourceIndexedSearchParams {
 			return Collections.emptySet();
 		}
 
+		/*
+		 * We need to make sure parameters are in a consistent order. If we have indexed
+		 *    Patient?name=Simpson&gender=male
+		 * we won't be able to match if we later look up
+		 *    Patient?gender=male&name=Simpson
+		 * The list we're sorting is a list-of-lists, where each outer list is all the
+		 * parameter values for a given search parameter. We only really care about sorting
+		 * by parameter name, so sorting based on the first entry in each list is good
+		 * enough.
+		 */
 		thePartsChoices.sort((o1, o2) -> {
 			String str1 = null;
 			String str2 = null;
-			if (o1.size() > 0) {
+			if (!o1.isEmpty()) {
 				str1 = o1.get(0);
 			}
-			if (o2.size() > 0) {
+			if (!o2.isEmpty()) {
 				str2 = o2.get(0);
 			}
-			return compare(str1, str2);
+			return Strings.CS.compare(str1, str2);
 		});
 
 		List<String> values = new ArrayList<>();

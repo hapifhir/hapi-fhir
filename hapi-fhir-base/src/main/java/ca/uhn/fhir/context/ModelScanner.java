@@ -426,7 +426,7 @@ class ModelScanner {
 					components = new ArrayList<>();
 					for (String name : searchParam.compositeOf()) {
 						String ref = toCanonicalSearchParameterUri(theResourceDef, name);
-						components.add(new RuntimeSearchParam.Component(null, ref));
+						components.add(new RuntimeSearchParam.Component(null, ref, null));
 					}
 				}
 

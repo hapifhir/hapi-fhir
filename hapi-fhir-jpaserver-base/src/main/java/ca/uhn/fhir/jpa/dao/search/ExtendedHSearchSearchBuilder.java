@@ -307,8 +307,12 @@ public class ExtendedHSearchSearchBuilder {
 							searchParameterMap.removeByNameUnmodified(nextParam);
 					// RuntimeSearchParam only points to the subs by reference.  Resolve here while we have
 					// ISearchParamRegistry
-					List<RuntimeSearchParam> subSearchParams =
-							JpaParamUtil.resolveCompositeComponentsDeclaredOrder(searchParamRegistry, activeParam);
+					List<JpaParamUtil.ComponentAndCorrespondingParam> subSearchParamParts =
+							JpaParamUtil.resolveCompositeComponents(searchParamRegistry, activeParam);
+					List<RuntimeSearchParam> subSearchParams = subSearchParamParts.stream()
+							.map(JpaParamUtil.ComponentAndCorrespondingParam::getComponentParameter)
+							.toList();
+
 					theBuilder.addCompositeUnmodifiedSearch(activeParam, subSearchParams, compositeAndOrTerms);
 					break;
 

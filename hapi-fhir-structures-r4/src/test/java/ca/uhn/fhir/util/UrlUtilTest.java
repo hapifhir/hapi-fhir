@@ -10,9 +10,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -176,5 +178,37 @@ public class UrlUtilTest {
 			fail();		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(2419) + "Provided URI is not valid: " + theUri, e.getMessage());
 		}
+	}
+
+	@Test
+	public void testParseQueryString_leadingQuestionMark() {
+		Map<String, String[]> map = UrlUtil.parseQueryString("?key1=value1&key2=value2");
+		assertThat(map).hasSize(2);
+		assertThat(map.get("key1")).containsExactly("value1");
+		assertThat(map.get("key2")).containsExactly("value2");
+	}
+
+	@Test
+	public void testParseQueryString_questionMarkInValue() {
+		Map<String, String[]> map = UrlUtil.parseQueryString(
+			 "_type=Patient,Observation,Group&_typeFilter=Patient?gender=female&_outputFormat=application/fhir+ndjson");
+		assertThat(map).hasSize(3);
+		assertThat(map.get("_type")).containsExactly("Patient,Observation,Group");
+		assertThat(map.get("_typeFilter")).containsExactly("Patient?gender=female");
+		assertThat(map.get("_outputFormat")).containsExactly("application/fhir+ndjson");
+	}
+
+	@Test
+	public void testParseQueryString_urlDecoding() {
+		// %2B -> '+' and '+' -> ' ' when decoded by URLDecoder
+		Map<String, String[]> map = UrlUtil.parseQueryString("key=sunny%2Bwarm+beach");
+		assertThat(map).hasSize(1);
+		assertThat(map.get("key")[0]).isEqualTo("sunny+warm beach");
+
+		// values should be unescaped
+		map = UrlUtil.parseQueryString("key=nice%20day");
+		assertThat(map).hasSize(1);
+		assertThat(map.containsKey("key")).isTrue();
+		assertThat(map.get("key")).contains("nice day");
 	}
 }

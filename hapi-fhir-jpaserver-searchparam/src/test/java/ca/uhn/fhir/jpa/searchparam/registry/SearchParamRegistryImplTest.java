@@ -96,7 +96,7 @@ public class SearchParamRegistryImplTest {
 	}
 
 	@RegisterExtension
-	private LogbackTestExtension myLogbackExtension = new LogbackTestExtension(SearchParamRegistryImpl.class);
+	private final LogbackTestExtension myLogbackExtension = new LogbackTestExtension(SearchParamRegistryImpl.class);
 
 	@Autowired
 	SearchParamRegistryImpl mySearchParamRegistry;
@@ -153,7 +153,7 @@ public class SearchParamRegistryImplTest {
 
 	@Test
 	void handleInit() {
-		assertEquals(31, mySearchParamRegistry.getActiveSearchParams("Patient", null).size());
+		assertEquals(31, mySearchParamRegistry.getActiveSearchParams("Patient", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).size());
 
 		IdDt idBad = new IdDt("SearchParameter/bad");
 		when(mySearchParamProvider.read(idBad)).thenThrow(new ResourceNotFoundException("id bad"));
@@ -166,7 +166,7 @@ public class SearchParamRegistryImplTest {
 		idList.add(idBad);
 		idList.add(idGood);
 		mySearchParamRegistry.handleInit(idList);
-		assertEquals(32, mySearchParamRegistry.getActiveSearchParams("Patient", null).size());
+		assertEquals(32, mySearchParamRegistry.getActiveSearchParams("Patient", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).size());
 	}
 
 	@Test
@@ -241,7 +241,7 @@ public class SearchParamRegistryImplTest {
 	}
 
 	private void assertPatientSearchParamSize(int theExpectedSize) {
-		assertEquals(theExpectedSize, mySearchParamRegistry.getActiveSearchParams("Patient", null).size());
+		assertEquals(theExpectedSize, mySearchParamRegistry.getActiveSearchParams("Patient", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).size());
 	}
 
 	private void assertResult(ResourceChangeResult theResult, long theExpectedAdded, long theExpectedUpdated, long theExpectedRemoved) {
@@ -293,19 +293,19 @@ public class SearchParamRegistryImplTest {
 
 	@Test
 	public void testGetActiveUniqueSearchParams_Empty() {
-		assertThat(mySearchParamRegistry.getActiveComboSearchParams("Patient", null)).isEmpty();
+		assertThat(mySearchParamRegistry.getActiveComboSearchParams("Patient", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX)).isEmpty();
 	}
 
 	@Test
 	public void testGetActiveSearchParamByUrl_whenSPExists_returnsActiveSp() {
-		RuntimeSearchParam patientLanguageSp = mySearchParamRegistry.getActiveSearchParamByUrl("SearchParameter/Patient-language", null);
+		RuntimeSearchParam patientLanguageSp = mySearchParamRegistry.getActiveSearchParamByUrl("SearchParameter/Patient-language", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 		assertNotNull(patientLanguageSp);
-		assertEquals(patientLanguageSp.getId().getIdPart(), "Patient-language");
+		assertEquals("Patient-language", patientLanguageSp.getId().getIdPart());
 	}
 
 	@Test
 	public void testGetActiveSearchParamByUrl_whenSPNotExist_returnsNull() {
-		RuntimeSearchParam nonExistingSp = mySearchParamRegistry.getActiveSearchParamByUrl("SearchParameter/nonExistingSp", null);
+		RuntimeSearchParam nonExistingSp = mySearchParamRegistry.getActiveSearchParamByUrl("SearchParameter/nonExistingSp", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 		assertNull(nonExistingSp);
 	}
 
@@ -324,7 +324,7 @@ public class SearchParamRegistryImplTest {
 
 		assertFalse(retried.get());
 		mySearchParamRegistry.forceRefresh();
-		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Patient", null);
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Patient", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 		assertTrue(retried.get());
 		assertEquals(ourBuiltInSearchParams.getSearchParamMap("Patient").size(), activeSearchParams.size());
 	}
@@ -337,7 +337,7 @@ public class SearchParamRegistryImplTest {
 		resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.ACTIVE);
 
 		mySearchParamRegistry.forceRefresh();
-		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Patient", null);
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Patient", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 
 		RuntimeSearchParam converted = activeSearchParams.get("foo");
 		assertNotNull(converted);
@@ -372,7 +372,7 @@ public class SearchParamRegistryImplTest {
 
 		mySearchParamRegistry.forceRefresh();
 
-		RuntimeSearchParam canonicalSp = mySearchParamRegistry.getRuntimeSearchParam("Encounter", "subject", null);
+		RuntimeSearchParam canonicalSp = mySearchParamRegistry.getRuntimeSearchParam("Encounter", "subject", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 		assertEquals("Modified Subject", canonicalSp.getDescription());
 		assertTrue(canonicalSp.hasUpliftRefchain("name1"));
 		assertFalse(canonicalSp.hasUpliftRefchain("name99"));
