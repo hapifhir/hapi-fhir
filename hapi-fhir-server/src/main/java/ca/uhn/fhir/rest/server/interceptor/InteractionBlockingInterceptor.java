@@ -98,11 +98,14 @@ public class InteractionBlockingInterceptor {
 
 	private final Set<String> myAllowedKeys;
 
+	private final FhirContext myFhirContext;
+
 	/**
 	 * Constructor
 	 */
-	private InteractionBlockingInterceptor(@Nonnull Builder theBuilder) {
+	private InteractionBlockingInterceptor(@Nonnull Builder theBuilder, FhirContext theFhirContext) {
 		myAllowedKeys = theBuilder.myAllowedKeys;
+		myFhirContext = theFhirContext;
 	}
 
 	@Hook(Pointcut.SERVER_PROVIDER_METHOD_BOUND)
@@ -123,6 +126,29 @@ public class InteractionBlockingInterceptor {
 				}
 				break;
 			}
+			case GET_PAGE:
+				/*
+				 * PageProvider is registered without type;
+				 * we need to verify each page individually
+				 */
+				for (String resourceType : myFhirContext.getResourceTypes()) {
+					String key = toKey(resourceType, RestOperationTypeEnum.SEARCH_TYPE);
+					/*
+					 * We allow PageProvider to be registered if *any*
+					 * resource:search is registered.
+					 *
+					 * This won't cause any security leaks because
+					 * in order to get a second page, you must first get the first
+					 * page (ie, resource:search must be allowed).
+					 *
+					 * So any _getpages we receive must necessarily also be allowed.
+					 */
+					allowed = myAllowedKeys.contains(key);
+					if (allowed) {
+						break;
+					}
+				}
+				break;
 			default: {
 				if (restOperationType == RestOperationTypeEnum.VREAD) {
 					restOperationType = RestOperationTypeEnum.READ;
@@ -244,7 +270,7 @@ public class InteractionBlockingInterceptor {
 		}
 
 		public InteractionBlockingInterceptor build() {
-			return new InteractionBlockingInterceptor(this);
+			return new InteractionBlockingInterceptor(this, myCtx);
 		}
 	}
 }
