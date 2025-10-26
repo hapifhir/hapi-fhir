@@ -182,10 +182,19 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		IdType id = new IdType(theUri);
 		boolean localReference = id.hasBaseUrl() == false && id.hasIdPart() == true;
 
+		/*
+		 * This method is used to fetch conformance resources that are needed by
+		 * the validator by canonical URL. The general pattern here is to allow
+		 * both unversioned URLs (http://foo) and versioned URLs (http://foo|1.2.3).
+		 * For historical reasons and to reflect patterns that are still common
+		 * in real-world use, we also allow local and fetch references
+		 * (e.g. Questionnaire/foo) for some types.
+		 */
+
 		String resourceName = myFhirContext.getResourceType(theClass);
 		IBundleProvider search;
 		switch (resourceName) {
-			case "ValueSet":
+			case "ValueSet" -> {
 				if (localReference) {
 					SearchParameterMap params = new SearchParameterMap();
 					params.setLoadSynchronousUpTo(1);
@@ -198,14 +207,17 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 						search = myDaoRegistry.getResourceDao(resourceName).search(params, new SystemRequestDetails());
 					}
 				} else {
-					int versionSeparator = theUri.lastIndexOf('|');
 					SearchParameterMap params = createSearchParameterMapForCanonicalUrl(theUri);
 					search = myDaoRegistry.getResourceDao(resourceName).search(params, new SystemRequestDetails());
 
+					/*
+					 * The ValueSet#url parameter was called "system" in older FHIR
+					 */
 					if (search.isEmpty()
 							&& myFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
 						params = new SearchParameterMap();
 						params.setLoadSynchronousUpTo(1);
+						int versionSeparator = theUri.lastIndexOf('|');
 						if (versionSeparator != -1) {
 							params.add(ValueSet.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
 							params.add(
@@ -218,8 +230,8 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 						search = myDaoRegistry.getResourceDao(resourceName).search(params, new SystemRequestDetails());
 					}
 				}
-				break;
-			case "StructureDefinition": {
+			}
+			case "StructureDefinition" -> {
 				// Don't allow the core FHIR definitions to be overwritten
 				if (theUri.startsWith(URL_PREFIX_STRUCTURE_DEFINITION)) {
 					String typeName = theUri.substring(URL_PREFIX_STRUCTURE_DEFINITION.length());
@@ -229,27 +241,21 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				}
 				SearchParameterMap params = createSearchParameterMapForCanonicalUrl(theUri);
 				search = myDaoRegistry.getResourceDao("StructureDefinition").search(params, new SystemRequestDetails());
-				break;
 			}
-			case "Questionnaire": {
+			case "Questionnaire" -> {
 				SearchParameterMap params;
 				if (localReference || myFhirContext.getVersion().getVersion().isEquivalentTo(FhirVersionEnum.DSTU2)) {
 					params = new SearchParameterMap();
 					params.setLoadSynchronousUpTo(1);
-					params.add(IAnyResource.SP_RES_ID, new StringParam(id.getIdPart()));
+					params.add(IAnyResource.SP_RES_ID, new StringParam("Questionnaire/" + id.getIdPart()));
 				} else {
 					params = createSearchParameterMapForCanonicalUrl(theUri);
 				}
 				search = myDaoRegistry.getResourceDao("Questionnaire").search(params, new SystemRequestDetails());
-				break;
 			}
-			case "CodeSystem":
-			case "ImplementationGuide":
-			case "SearchParameter":
-			default: {
+			default -> {
 				SearchParameterMap params = createSearchParameterMapForCanonicalUrl(theUri);
 				search = myDaoRegistry.getResourceDao(resourceName).search(params, new SystemRequestDetails());
-				break;
 			}
 		}
 
