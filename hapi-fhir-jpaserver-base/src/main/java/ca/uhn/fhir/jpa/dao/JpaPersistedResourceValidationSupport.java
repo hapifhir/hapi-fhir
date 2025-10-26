@@ -33,16 +33,14 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.ImplementationGuide;
-import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
@@ -201,15 +199,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 					}
 				} else {
 					int versionSeparator = theUri.lastIndexOf('|');
-					SearchParameterMap params = new SearchParameterMap();
-					params.setLoadSynchronousUpTo(1);
-					if (versionSeparator != -1) {
-						params.add(ValueSet.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
-						params.add(ValueSet.SP_URL, new UriParam(theUri.substring(0, versionSeparator)));
-					} else {
-						params.add(ValueSet.SP_URL, new UriParam(theUri));
-					}
-					params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));
+					SearchParameterMap params = createSearchParameterMapForCanonicalUrl(theUri);
 					search = myDaoRegistry.getResourceDao(resourceName).search(params, new SystemRequestDetails());
 
 					if (search.isEmpty()
@@ -237,61 +227,30 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 						return null;
 					}
 				}
-				SearchParameterMap params = new SearchParameterMap();
-				params.setLoadSynchronousUpTo(1);
-				int versionSeparator = theUri.lastIndexOf('|');
-				if (versionSeparator != -1) {
-					params.add(StructureDefinition.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
-					params.add(StructureDefinition.SP_URL, new UriParam(theUri.substring(0, versionSeparator)));
-				} else {
-					params.add(StructureDefinition.SP_URL, new UriParam(theUri));
-					// When no version is specified, we will take the most recently updated resource as the current
-					// version
-					params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));
-				}
+				SearchParameterMap params = createSearchParameterMapForCanonicalUrl(theUri);
 				search = myDaoRegistry.getResourceDao("StructureDefinition").search(params, new SystemRequestDetails());
 				break;
 			}
 			case "Questionnaire": {
-				SearchParameterMap params = new SearchParameterMap();
-				params.setLoadSynchronousUpTo(1);
+				SearchParameterMap params;
 				if (localReference || myFhirContext.getVersion().getVersion().isEquivalentTo(FhirVersionEnum.DSTU2)) {
+					params = new SearchParameterMap();
+					params.setLoadSynchronousUpTo(1);
 					params.add(IAnyResource.SP_RES_ID, new StringParam(id.getIdPart()));
 				} else {
-					params.add(Questionnaire.SP_URL, new UriParam(id.getValue()));
+					params = createSearchParameterMapForCanonicalUrl(theUri);
 				}
 				search = myDaoRegistry.getResourceDao("Questionnaire").search(params, new SystemRequestDetails());
 				break;
 			}
-			case "CodeSystem": {
-				int versionSeparator = theUri.lastIndexOf('|');
-				SearchParameterMap params = new SearchParameterMap();
-				params.setLoadSynchronousUpTo(1);
-				if (versionSeparator != -1) {
-					params.add(CodeSystem.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
-					params.add(CodeSystem.SP_URL, new UriParam(theUri.substring(0, versionSeparator)));
-				} else {
-					params.add(CodeSystem.SP_URL, new UriParam(theUri));
-				}
-				params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));
-				search = myDaoRegistry.getResourceDao(resourceName).search(params, new SystemRequestDetails());
-				break;
-			}
+			case "CodeSystem":
 			case "ImplementationGuide":
-			case "SearchParameter": {
-				SearchParameterMap params = new SearchParameterMap();
-				params.setLoadSynchronousUpTo(1);
-				params.add(ImplementationGuide.SP_URL, new UriParam(theUri));
+			case "SearchParameter":
+			default: {
+				SearchParameterMap params = createSearchParameterMapForCanonicalUrl(theUri);
 				search = myDaoRegistry.getResourceDao(resourceName).search(params, new SystemRequestDetails());
 				break;
 			}
-			default:
-				// N.B.: this code assumes that we are searching by canonical URL and that the CanonicalType in question
-				// has a URL
-				SearchParameterMap params = new SearchParameterMap();
-				params.setLoadSynchronousUpTo(1);
-				params.add("url", new UriParam(theUri));
-				search = myDaoRegistry.getResourceDao(resourceName).search(params, new SystemRequestDetails());
 		}
 
 		Integer size = search.size();
@@ -322,5 +281,26 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		} else {
 			myCodeSystemType = myFhirContext.getResourceDefinition("ValueSet").getImplementingClass();
 		}
+	}
+
+	/**
+	 * Creates a {@link SearchParameterMap} for a canonical URL, which can be either
+	 * unversioned (<code>http://foo</code>) or versioned (<code>http://foo|1.2.3</code>).
+	 */
+	@Nonnull
+	private static SearchParameterMap createSearchParameterMapForCanonicalUrl(String theUri) {
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronousUpTo(1);
+		int versionSeparator = theUri.lastIndexOf('|');
+		if (versionSeparator != -1) {
+			params.add(StructureDefinition.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
+			params.add(StructureDefinition.SP_URL, new UriParam(theUri.substring(0, versionSeparator)));
+		} else {
+			params.add(StructureDefinition.SP_URL, new UriParam(theUri));
+			// When no version is specified, we will take the most recently updated resource as the current
+			// version
+			params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));
+		}
+		return params;
 	}
 }
