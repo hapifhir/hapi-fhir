@@ -1424,8 +1424,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 			Object confProvider;
 			try {
-				ourLog.info("Initializing HAPI FHIR restful server running in {} mode",
-					getFhirContext().getVersion().getVersion().name());
+				ourLog.info(
+						"Initializing HAPI FHIR restful server running in {} mode",
+						getFhirContext().getVersion().getVersion().name());
 
 				Collection<IResourceProvider> resourceProvider = getResourceProviders();
 				// 'true' tells registerProviders() that
