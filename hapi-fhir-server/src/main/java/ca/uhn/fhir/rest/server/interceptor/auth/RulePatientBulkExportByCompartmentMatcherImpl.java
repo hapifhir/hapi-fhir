@@ -124,24 +124,25 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
 		// resource,
 		// and return the verdict
 		// All requested Patient IDs must be permitted to return an ALLOW verdict.
-		List<AuthorizationInterceptor.Verdict> verdicts = thePatientResources.stream()
-				.map(patient -> newVerdict(
+		List<Boolean> verdicts = thePatientResources.stream()
+				.map(patient -> applyTestersAtLeastOneMatch(
 						theOperation,
 						theRequestDetails,
 						patient,
-						theInputResourceId, // todo jdjd should this be patient.id?
-						theOutputResource,
 						theRuleApplier))
 				.toList();
 
-		if (verdicts.stream().allMatch(t -> t != null && t.getDecision().equals(PolicyEnum.ALLOW))) {
+		if (verdicts.stream().allMatch(Boolean::booleanValue)) {
+			// Then the testers evaluated to true on all Patients
 			// All the resources match at least 1 permission query filter --> ALLOW
 			return new AuthorizationInterceptor.Verdict(PolicyEnum.ALLOW, this);
-		} else if (verdicts.stream().allMatch(Objects::isNull)) {
+		} else if (verdicts.stream().noneMatch(Boolean::booleanValue)) {
+			// Then the testers evaluated to false on all Patients
 			// All the resources do not match any permission query filters
 			// This rule must not apply --> abstain
 			return null;
 		} else {
+			// Then the testers evaluated to true on some Patients, and false on others.
 			// We have a mixture of ALLOW and abstain
 			// Default to DENY
 			return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
@@ -183,8 +184,7 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
 	 */
 	private static String sanitizeQueryFilter(String theFilter) {
 		if (theFilter.contains("?")) {
-
-			return theFilter.substring(theFilter.indexOf("?"));
+			return theFilter.substring(theFilter.indexOf("?") + 1);
 		}
 		return theFilter;
 	}

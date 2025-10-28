@@ -93,6 +93,27 @@ abstract class BaseRule implements IAuthRule {
 		return retVal;
 	}
 
+	boolean applyTestersAtLeastOneMatch(
+		RestOperationTypeEnum theOperation,
+		RequestDetails theRequestDetails,
+		IBaseResource theInputResource,
+		IRuleApplier theRuleApplier) {
+
+		boolean retVal = false;
+
+		IAuthRuleTester.RuleTestRequest inputRequest = new IAuthRuleTester.RuleTestRequest(
+			myMode, theOperation, theRequestDetails, null, theInputResource, theRuleApplier);
+
+		for (IAuthRuleTester next : getTesters()) {
+			if (next.matches(inputRequest)) {
+				retVal = true;
+				break;
+			}
+		}
+
+		return retVal;
+	}
+
 	PolicyEnum getMode() {
 		return myMode;
 	}
