@@ -31,7 +31,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -125,11 +124,7 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
 		// and return the verdict
 		// All requested Patient IDs must be permitted to return an ALLOW verdict.
 		List<Boolean> verdicts = thePatientResources.stream()
-				.map(patient -> applyTestersAtLeastOneMatch(
-						theOperation,
-						theRequestDetails,
-						patient,
-						theRuleApplier))
+				.map(patient -> applyTestersAtLeastOneMatch(theOperation, theRequestDetails, patient, theRuleApplier))
 				.toList();
 
 		if (verdicts.stream().allMatch(Boolean::booleanValue)) {
