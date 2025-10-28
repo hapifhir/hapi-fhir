@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7332
+title: "When in partition mode with the MDM module enabled, requesting `$mdm-query-links` returned a 404 Not Found 
+error when both the source and golden resources existed in the database. This has been fixed."
