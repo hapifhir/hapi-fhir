@@ -142,29 +142,30 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			}
 		}
 
-		// FIXME: EHP -> the next block from the if to the end of the else should be removed.  it is there only to be added and
+		// FIXME: EHP -> the next block from the if to the end of the else should be removed.  it is there only to be
+		// added and
 		// commented out in troubleshooting efforts
-//		if (requestDetails instanceof SystemRequestDetails
-//			&& systemRequestHasExplicitPartition((SystemRequestDetails) requestDetails)
-//			&& !nonPartitionableResource) {
-//			requestPartitionId = getSystemRequestPartitionId((SystemRequestDetails) requestDetails, false);
-//			logRequestDetailsResolution((SystemRequestDetails) requestDetails);
-//
-//		} else if ((requestDetails instanceof SystemRequestDetails) && nonPartitionableResource) {
-//			requestPartitionId = myPartitionSettings.getDefaultRequestPartitionId();
-//			logRequestDetailsResolution((SystemRequestDetails) requestDetails);
-//			logNonPartitionableType(resourceType);
-//		} else {
-//			// TODO mb: why is this path different than create?
-//			//  Here, a non-partitionable resource is still delivered to the pointcuts.
-//			IInterceptorBroadcaster compositeBroadcaster =
-//				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, requestDetails);
-//			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY)) {
-//				requestPartitionId = callAnyPointcut(compositeBroadcaster, requestDetails);
-//			} else if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)) {
-//				requestPartitionId = callReadPointcut(compositeBroadcaster, requestDetails, theDetails);
-//			}
-//		}
+		//		if (requestDetails instanceof SystemRequestDetails
+		//			&& systemRequestHasExplicitPartition((SystemRequestDetails) requestDetails)
+		//			&& !nonPartitionableResource) {
+		//			requestPartitionId = getSystemRequestPartitionId((SystemRequestDetails) requestDetails, false);
+		//			logRequestDetailsResolution((SystemRequestDetails) requestDetails);
+		//
+		//		} else if ((requestDetails instanceof SystemRequestDetails) && nonPartitionableResource) {
+		//			requestPartitionId = myPartitionSettings.getDefaultRequestPartitionId();
+		//			logRequestDetailsResolution((SystemRequestDetails) requestDetails);
+		//			logNonPartitionableType(resourceType);
+		//		} else {
+		//			// TODO mb: why is this path different than create?
+		//			//  Here, a non-partitionable resource is still delivered to the pointcuts.
+		//			IInterceptorBroadcaster compositeBroadcaster =
+		//				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, requestDetails);
+		//			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY)) {
+		//				requestPartitionId = callAnyPointcut(compositeBroadcaster, requestDetails);
+		//			} else if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)) {
+		//				requestPartitionId = callReadPointcut(compositeBroadcaster, requestDetails, theDetails);
+		//			}
+		//		}
 		validateRequestPartitionNotNull(
 				requestPartitionId, Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, Pointcut.STORAGE_PARTITION_IDENTIFY_READ);
 
