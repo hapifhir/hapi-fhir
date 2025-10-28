@@ -277,10 +277,6 @@ public class RequestPartitionId implements IModelJson {
 		return myPartitionIds != null;
 	}
 
-	public boolean hasNonNullPartitionIds() {
-		return hasPartitionIds() && !myPartitionIds.contains(null);
-	}
-
 	public boolean hasPartitionNames() {
 		return myPartitionNames != null;
 	}
