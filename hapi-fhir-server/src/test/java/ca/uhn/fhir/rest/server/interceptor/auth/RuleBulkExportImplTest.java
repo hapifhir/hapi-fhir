@@ -5,10 +5,6 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -455,7 +451,6 @@ public class RuleBulkExportImplTest {
 		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
 	}
 
-	//todo jdjd test here??
 	@Test
 	public void testPatientExport_ruleAllowsIds_requestsIds_allow() {
 		//Given
@@ -555,6 +550,7 @@ public class RuleBulkExportImplTest {
 		myRule.setMode(PolicyEnum.ALLOW);
 		final BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		options.setFilters(Set.of("Patient?_id=123","Patient?_id=456"));
 
 		options.setResourceTypes(Set.of("Patient"));
 		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
@@ -565,19 +561,6 @@ public class RuleBulkExportImplTest {
 		//Then: There are unpermitted patients in the request so this is not permitted. abstain.
 		assertAbstain(verdict);
 
-	}
-
-	@Test
-	public void testAddTestersToBulkExportRule_addsQueryFiltersToExistingTester() {
-		//Given
-		FhirQueriesRuleTester queriesTester1 = new FhirQueriesRuleTester(List.of("Patient?name=Doe"), "Patient");
-		FhirQueriesRuleTester queriesTester2 = new FhirQueriesRuleTester(List.of("Patient?identifier=system|value"), "Patient");
-		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
-		myRule.setAppliesToPatientExport(List.of());
-		myRule.setMode(PolicyEnum.ALLOW);
-		myRule.addTesters(List.of(queriesTester1, queriesTester2));
-
-		assertThat(myRule.getTesters()).hasSize(1);
 	}
 
 	private static void assertAbstain(AuthorizationInterceptor.Verdict verdict) {

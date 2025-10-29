@@ -82,11 +82,6 @@ public class FhirQueryRuleTester implements IAuthRuleTester {
 		}
 	}
 
-	//	TODO JDJD 1028 likely remove this method
-	public String getQueryParameters() {
-		return myQueryParameters;
-	}
-
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
