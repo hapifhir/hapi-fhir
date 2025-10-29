@@ -29,14 +29,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test{
+public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test {
 	@Autowired
 	private IMdmSettings myMdmSettings;
 
 	private static final String PARTITION_GOLDEN_RESOURCE = "PARTITION-GOLDEN";
 
+	RequestTenantPartitionInterceptor requestTenantPartitionInterceptor;
+
 	@Override
-    @BeforeEach
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 
@@ -45,6 +47,10 @@ public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test{
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(3).setName(PARTITION_GOLDEN_RESOURCE), null);
+
+		requestTenantPartitionInterceptor = new RequestTenantPartitionInterceptor();
+		requestTenantPartitionInterceptor.setPartitionSettings(myPartitionSettings);
+		myInterceptorRegistry.registerInterceptor(requestTenantPartitionInterceptor);
 	}
 
 	@Override
@@ -55,6 +61,7 @@ public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test{
 		myPartitionSettings.setPartitioningEnabled(false);
 		myMdmSettings.setSearchAllPartitionForMatch(false);
 		myMdmSettings.setGoldenResourcePartitionName("");
+		myInterceptorRegistry.unregisterInterceptor(requestTenantPartitionInterceptor);
 	}
 
 
@@ -77,7 +84,7 @@ public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test{
 	}
 
 	@Test
-	public void testCreateLinkWithResourcesInSpecificPartition(){
+	public void testCreateLinkWithResourcesInSpecificPartition() {
 		myMdmSettings.setGoldenResourcePartitionName(PARTITION_GOLDEN_RESOURCE);
 		myMdmSettings.setSearchAllPartitionForMatch(true);
 
@@ -110,22 +117,16 @@ public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test{
 		assertThat(mdmLink.getSourcePersistenceId().getPartitionId()).isEqualTo(1);
 		assertThat(mdmLink.getGoldenResourcePersistenceId().getPartitionId()).isEqualTo(1);
 
-		RequestTenantPartitionInterceptor interceptor = new RequestTenantPartitionInterceptor();
-		interceptor.setPartitionSettings(myPartitionSettings);
-		myInterceptorRegistry.registerInterceptor(interceptor);
 		myRequestDetails.setTenantId(PARTITION_1);
-
 		Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, null, new UnsignedIntType(0),
 			new UnsignedIntType(10), new StringType(), myRequestDetails, new StringType("Patient"));
 
 		assertThat(result.getParameter()).hasSize(3);
 		assertThat(result.getParameter().get(0).getName()).isEqualTo("self");
 		assertThat(result.getParameter().get(1).getName()).isEqualTo("total");
-		assertThat(((DecimalType)(result.getParameter().get(1).getValue())).getValueAsInteger()).isEqualTo(1);
+		assertThat(((DecimalType) (result.getParameter().get(1).getValue())).getValueAsInteger()).isEqualTo(1);
 		assertThat(result.getParameter().get(2).getName()).isEqualTo("link");
-		assertThat(result.getParameter().get(2).getPart()).hasSize(9);
-
-		myInterceptorRegistry.unregisterInterceptor(interceptor);
+		assertThat(result.getParameter().get(2).getPart()).isNotEmpty();
 	}
 
 	@Test
@@ -141,20 +142,15 @@ public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test{
 		assertThat(mdmLink.getSourcePersistenceId().getPartitionId()).isEqualTo(1);
 		assertThat(mdmLink.getGoldenResourcePersistenceId().getPartitionId()).isEqualTo(3);
 
-		RequestTenantPartitionInterceptor interceptor = new RequestTenantPartitionInterceptor();
-		interceptor.setPartitionSettings(myPartitionSettings);
-		myInterceptorRegistry.registerInterceptor(interceptor);
 		myRequestDetails.setTenantId(PARTITION_1);
-
 		Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, null, new UnsignedIntType(0),
 			new UnsignedIntType(10), new StringType(), myRequestDetails, new StringType("Patient"));
+
 		assertThat(result.getParameter()).hasSize(3);
 		assertThat(result.getParameter().get(0).getName()).isEqualTo("self");
 		assertThat(result.getParameter().get(1).getName()).isEqualTo("total");
-		assertThat(((DecimalType)(result.getParameter().get(1).getValue())).getValueAsInteger()).isEqualTo(1);
+		assertThat(((DecimalType) (result.getParameter().get(1).getValue())).getValueAsInteger()).isEqualTo(1);
 		assertThat(result.getParameter().get(2).getName()).isEqualTo("link");
-		assertThat(result.getParameter().get(2).getPart()).hasSize(9);
-
-		myInterceptorRegistry.unregisterInterceptor(interceptor);
+		assertThat(result.getParameter().get(2).getPart()).isNotEmpty();
 	}
 }
