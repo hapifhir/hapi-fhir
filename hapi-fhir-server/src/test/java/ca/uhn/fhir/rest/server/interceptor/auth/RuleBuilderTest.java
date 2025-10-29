@@ -190,7 +190,6 @@ public class RuleBuilderTest {
 		assertEquals(theExpectedResourceTypes, ruleBulkExport.getResourceTypes());
 		assertEquals(thePolicyEnum, ruleBulkExport.getMode());
 	}
-	//todo jdjd test like above
 
 	public static Stream<Arguments> owners() {
 		return Stream.of(
