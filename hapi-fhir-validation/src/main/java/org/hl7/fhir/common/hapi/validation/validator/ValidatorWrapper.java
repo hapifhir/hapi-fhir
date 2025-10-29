@@ -236,7 +236,7 @@ class ValidatorWrapper {
 		return messages;
 	}
 
-	private InstanceValidator getInstanceValidator(IWorkerContext theWorkerContext) {
+	private InstanceValidator buildInstanceValidator(IWorkerContext theWorkerContext) {
 
 		final IHostApplicationServices hostApplicationServices =
 				Objects.requireNonNullElseGet(this.evaluationContext, FhirInstanceValidator.NullEvaluationContext::new);
