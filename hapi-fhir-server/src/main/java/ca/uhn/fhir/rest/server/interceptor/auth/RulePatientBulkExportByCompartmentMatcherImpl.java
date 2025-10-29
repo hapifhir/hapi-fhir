@@ -196,12 +196,17 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
 		myTokenizedPatientMatcherFilter.add(Set.of(thePatientMatcherFilter.split("&")));
 	}
 
-	List<String> getPatientMatcherFilter() {
+	public List<String> getPatientMatcherFilters() {
 		return myPatientMatcherFilter;
 	}
 
 	@VisibleForTesting
 	Collection<String> getResourceTypes() {
 		return myResourceTypes;
+	}
+
+	@VisibleForTesting
+	public List<Set<String>> getTokenizedPatientMatcherFilter() {
+		return myTokenizedPatientMatcherFilter;
 	}
 }

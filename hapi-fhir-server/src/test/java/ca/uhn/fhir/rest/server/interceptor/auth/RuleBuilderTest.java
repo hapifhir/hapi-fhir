@@ -132,7 +132,7 @@ public class RuleBuilderTest {
 		assertInstanceOf(RulePatientBulkExportByCompartmentMatcherImpl.class, authRule);
 
 		final RulePatientBulkExportByCompartmentMatcherImpl rulePatientExport = (RulePatientBulkExportByCompartmentMatcherImpl) authRule;
-		assertThat(rulePatientExport.getPatientMatcherFilter()).containsExactlyInAnyOrderElementsOf(theCompartmentMatcherFilter);
+		assertThat(rulePatientExport.getPatientMatcherFilters()).containsExactlyInAnyOrderElementsOf(theCompartmentMatcherFilter);
 		assertEquals(theResourceTypes, rulePatientExport.getResourceTypes());
 		assertEquals(PolicyEnum.ALLOW, rulePatientExport.getMode());
 	}

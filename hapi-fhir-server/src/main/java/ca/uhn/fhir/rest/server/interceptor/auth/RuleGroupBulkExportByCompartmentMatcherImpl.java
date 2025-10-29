@@ -107,7 +107,7 @@ public class RuleGroupBulkExportByCompartmentMatcherImpl extends BaseRule {
 		addTester(new FhirQueryRuleTester(sanitizedFilter));
 	}
 
-	String getGroupMatcherFilter() {
+	public String getGroupMatcherFilter() {
 		return myGroupMatcherFilter;
 	}
 
