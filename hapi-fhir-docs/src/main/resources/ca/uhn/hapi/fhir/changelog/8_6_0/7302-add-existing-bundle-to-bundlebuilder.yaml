@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7302
+title: "The `BundleBuilder` utility can now optionally be passed an existing Bundle resource
+  which will be added to."

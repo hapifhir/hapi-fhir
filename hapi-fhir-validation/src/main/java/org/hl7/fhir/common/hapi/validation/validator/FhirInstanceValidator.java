@@ -13,12 +13,14 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.r5.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.r5.fhirpath.FHIRPathUtilityClasses.FunctionDetails;
+import org.hl7.fhir.r5.fhirpath.IHostApplicationServices;
 import org.hl7.fhir.r5.fhirpath.TypeDetails;
 import org.hl7.fhir.r5.model.Base;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
+import org.hl7.fhir.utilities.fhirpath.FHIRPathConstantEvaluationMode;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 
 import java.util.Arrays;
@@ -331,18 +333,18 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		return myAllowExamples;
 	}
 
-	public static class NullEvaluationContext implements FHIRPathEngine.IEvaluationContext {
+	public static class NullEvaluationContext implements IHostApplicationServices {
 
 		@Override
 		public List<Base> resolveConstant(
-				FHIRPathEngine engine, Object appContext, String name, boolean beforeContext, boolean explicitConstant)
+				FHIRPathEngine engine, Object appContext, String name, FHIRPathConstantEvaluationMode mode)
 				throws PathEngineException {
 			return Collections.emptyList();
 		}
 
 		@Override
 		public TypeDetails resolveConstantType(
-				FHIRPathEngine engine, Object appContext, String name, boolean explicitConstant)
+				FHIRPathEngine engine, Object appContext, String name, FHIRPathConstantEvaluationMode mode)
 				throws PathEngineException {
 			return null;
 		}

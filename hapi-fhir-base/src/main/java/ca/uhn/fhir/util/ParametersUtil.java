@@ -27,6 +27,8 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.StringDt;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -46,10 +48,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
@@ -137,27 +140,54 @@ public class ParametersUtil {
 				.findFirst();
 	}
 
+	/**
+	 * Returns a map containing all of the named parameters in a Parameters resource. The key will be the
+	 * <code>Parameters.parameter.name</code> value (or an empty string <code>""</code> if no name is present)
+	 * and the value will be the <code>Parameters.parameter</code> repetition.
+	 *
+	 * @param theCtx The FhirContext instance appropriate for the input
+	 * @param theParameters The Parameters resource to examine
+	 * @return A map containing named parameters
+	 * @since 8.4.0
+	 */
+	public static Multimap<String, IBase> getNamedParameters(FhirContext theCtx, IBaseResource theParameters) {
+		Multimap<String, IBase> retVal =
+				MultimapBuilder.hashKeys().arrayListValues().build();
+		BiConsumer<String, IBase> consumer = (paramName, part) -> {
+			paramName = defaultString(paramName);
+			retVal.put(paramName, part);
+		};
+
+		getNamedParameters(theCtx, theParameters, consumer);
+
+		return retVal;
+	}
+
 	public static List<IBase> getNamedParameters(
 			FhirContext theCtx, IBaseResource theParameters, String theParameterName) {
-		Validate.notNull(theParameters, "theParameters must not be null");
-		RuntimeResourceDefinition resDef = theCtx.getResourceDefinition(theParameters.getClass());
-		BaseRuntimeChildDefinition parameterChild = resDef.getChildByName("parameter");
-		List<IBase> parameterReps = parameterChild.getAccessor().getValues(theParameters);
+		List<IBase> retVal = new ArrayList<>();
+		BiConsumer<String, IBase> consumer = (paramName, part) -> {
+			if (theParameterName.equals(paramName)) {
+				retVal.add(part);
+			}
+		};
 
-		return parameterReps.stream()
-				.filter(param -> {
-					BaseRuntimeElementCompositeDefinition<?> nextParameterDef =
-							(BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(param.getClass());
-					BaseRuntimeChildDefinition nameChild = nextParameterDef.getChildByName("name");
-					List<IBase> nameValues = nameChild.getAccessor().getValues(param);
-					Optional<? extends IPrimitiveType<?>> nameValue = nameValues.stream()
-							.filter(t -> t instanceof IPrimitiveType<?>)
-							.map(t -> ((IPrimitiveType<?>) t))
-							.findFirst();
-					return nameValue.isPresent()
-							&& theParameterName.equals(nameValue.get().getValueAsString());
-				})
-				.collect(Collectors.toList());
+		getNamedParameters(theCtx, theParameters, consumer);
+
+		return retVal;
+	}
+
+	private static void getNamedParameters(
+			FhirContext theCtx, IBaseResource theParameters, BiConsumer<String, IBase> theConsumer) {
+		Validate.notNull(theParameters, "theParameters must not be null");
+
+		FhirTerser terser = theCtx.newTerser();
+		List<IBase> parameterReps = terser.getValues(theParameters, "parameter");
+
+		for (IBase parameter : parameterReps) {
+			String name = terser.getSinglePrimitiveValueOrNull(parameter, "name");
+			theConsumer.accept(name, parameter);
+		}
 	}
 
 	public static Optional<IBase> getParameterPart(FhirContext theCtx, IBase theParameter, String theParameterName) {
@@ -202,6 +232,19 @@ public class ParametersUtil {
 				.map(IPrimitiveType::getValue)
 				.filter(t -> Integer.class.isAssignableFrom(t.getClass()))
 				.map(t -> (Integer) t);
+	}
+
+	/**
+	 * @since 8.6.0
+	 */
+	public static Optional<Boolean> getParameterPartValueAsBoolean(
+			FhirContext theCtx, IBase theParameter, String theParameterName) {
+		return getParameterPartValue(theCtx, theParameter, theParameterName)
+				.filter(t -> IPrimitiveType.class.isAssignableFrom(t.getClass()))
+				.map(t -> (IPrimitiveType<?>) t)
+				.map(IPrimitiveType::getValue)
+				.filter(t -> Boolean.class.isAssignableFrom(t.getClass()))
+				.map(t -> (Boolean) t);
 	}
 
 	private static <T> List<T> extractNamedParameterValues(
@@ -451,8 +494,11 @@ public class ParametersUtil {
 		addPart(theContext, theParameter, theName, value);
 	}
 
-	public static void addPartBoolean(FhirContext theContext, IBase theParameter, String theName, Boolean theValue) {
-		addPart(theContext, theParameter, theName, theContext.newPrimitiveBoolean(theValue));
+	/**
+	 * @return Returns the added part
+	 */
+	public static IBase addPartBoolean(FhirContext theContext, IBase theParameter, String theName, Boolean theValue) {
+		return addPart(theContext, theParameter, theName, theContext.newPrimitiveBoolean(theValue));
 	}
 
 	public static void addPartDecimal(FhirContext theContext, IBase theParameter, String theName, Double theValue) {

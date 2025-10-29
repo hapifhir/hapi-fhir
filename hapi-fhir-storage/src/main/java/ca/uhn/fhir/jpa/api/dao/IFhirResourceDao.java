@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.api.dao;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
@@ -176,6 +177,15 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	<P extends IResourcePersistentId> void expunge(Collection<P> theResourceIds, RequestDetails theRequest);
 
+	/**
+	 * Given a collection of resource IDs, return a stream of resource IDs with the versions populated. For example, if the
+	 * input contains two different resource IDs and each of those IDs corresponds to a resource
+	 * with 2 versions, then the response will include 4 objects, 2 for each input ID.
+	 *
+	 */
+	Stream<IResourcePersistentId> fetchAllVersionsOfResources(
+			RequestDetails theRequestDetails, Collection<IResourcePersistentId> theIds);
+
 	ExpungeOutcome forceExpungeInExistingTransaction(
 			IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest);
 
@@ -246,7 +256,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 			String thePatchBody,
 			IBaseParameters theFhirPatchBody,
 			RequestDetails theRequestDetails,
-			TransactionDetails theTransactionDetails);
+			TransactionDetails theTransactionDetails,
+			RequestPartitionId theRequestPartitionId);
 
 	/**
 	 * Read a resource - Note that this variant of the method does not take in a {@link RequestDetails} and

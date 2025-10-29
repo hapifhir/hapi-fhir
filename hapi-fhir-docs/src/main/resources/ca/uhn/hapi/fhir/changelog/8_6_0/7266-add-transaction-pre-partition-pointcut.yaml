@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7266
+title: "A new Pointcut has been added called `STORAGE_TRANSACTION_PRE_PARTITION`. This can be used to
+   divide FHIR transactions up into a set of sub-transactions that will be executed in sequence."

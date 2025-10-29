@@ -16,14 +16,15 @@ import org.apache.commons.io.input.ReaderInputStream;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.elementmodel.Manager;
-import org.hl7.fhir.r5.fhirpath.FHIRPathEngine;
+import org.hl7.fhir.r5.fhirpath.IHostApplicationServices;
 import org.hl7.fhir.r5.model.StructureDefinition;
-import org.hl7.fhir.r5.utils.XVerExtensionManager;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
 import org.hl7.fhir.r5.utils.validation.ValidatorSession;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.hl7.fhir.r5.utils.validation.constants.IdStatus;
+import org.hl7.fhir.r5.utils.xver.XVerExtensionManager;
+import org.hl7.fhir.r5.utils.xver.XVerExtensionManagerOld;
 import org.hl7.fhir.utilities.i18n.I18nConstants;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.validation.ValidatorSettings;
@@ -131,6 +132,7 @@ class ValidatorWrapper {
 
 	public List<ValidationMessage> validate(
 			IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
+
 		InstanceValidator v = getInstanceValidator(theWorkerContext);
 
 		v.setAssumeValidRestReferences(isAssumeValidRestReferences());
@@ -241,10 +243,11 @@ class ValidatorWrapper {
 		if (evaluationContext != null) {
 			evaluationCtx = evaluationContext;
 		}
-		XVerExtensionManager xverManager = new XVerExtensionManager(theWorkerContext);
+		IHostApplicationServices evaluationCtx = new FhirInstanceValidator.NullEvaluationContext();
+		XVerExtensionManager xverManager = new XVerExtensionManagerOld(theWorkerContext);
 		try {
 			v = new InstanceValidator(
-					theWorkerContext, evaluationCtx, xverManager, new ValidatorSession(), new ValidatorSettings());
+				theWorkerContext, evaluationCtx, xverManager, new ValidatorSession(), new ValidatorSettings());
 		} catch (Exception e) {
 			throw new ConfigurationException(Msg.code(648) + e.getMessage(), e);
 		}

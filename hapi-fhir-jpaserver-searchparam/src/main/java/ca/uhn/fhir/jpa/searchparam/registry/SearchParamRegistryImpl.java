@@ -104,7 +104,7 @@ public class SearchParamRegistryImpl
 	private SearchParameterCanonicalizer mySearchParameterCanonicalizer;
 
 	@Autowired
-	private IInterceptorService myInterceptorBroadcaster;
+	private IInterceptorService myInterceptorService;
 
 	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
@@ -124,6 +124,11 @@ public class SearchParamRegistryImpl
 	@VisibleForTesting
 	public void setPopulateSearchParamIdentities(boolean myPrePopulateSearchParamIdentities) {
 		this.myPrePopulateSearchParamIdentities = myPrePopulateSearchParamIdentities;
+	}
+
+	@VisibleForTesting
+	public void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	/**
@@ -203,7 +208,7 @@ public class SearchParamRegistryImpl
 			@Nonnull String theUrl, @Nonnull SearchParamLookupContextEnum theContext) {
 		if (myActiveSearchParams != null) {
 			RuntimeSearchParam param = myActiveSearchParams.getByUrl(theUrl);
-			if (isAllowedForContext(param, theContext)) {
+			if (param != null && isAllowedForContext(param, theContext)) {
 				return param;
 			}
 		}
@@ -287,8 +292,7 @@ public class SearchParamRegistryImpl
 
 		setActiveSearchParams(searchParams);
 
-		myJpaSearchParamCache.populateActiveSearchParams(
-				myInterceptorBroadcaster, myPhoneticEncoder, myActiveSearchParams);
+		myJpaSearchParamCache.populateActiveSearchParams(myInterceptorService, myPhoneticEncoder, myActiveSearchParams);
 		updateSearchParameterIdentityCache();
 		ourLog.debug("Refreshed search parameter cache in {}ms", sw.getMillis());
 	}
@@ -609,6 +613,10 @@ public class SearchParamRegistryImpl
 	public void setSearchParameterCanonicalizerForUnitTest(
 			SearchParameterCanonicalizer theSearchParameterCanonicalizerForUnitTest) {
 		mySearchParameterCanonicalizer = theSearchParameterCanonicalizerForUnitTest;
+	}
+
+	public void setInterceptorServiceForUnitTest(IInterceptorService theInterceptorService) {
+		myInterceptorService = theInterceptorService;
 	}
 
 	private static List<RuntimeSearchParam> filteredForContext(

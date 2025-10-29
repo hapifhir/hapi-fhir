@@ -14,7 +14,7 @@ import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.elementmodel.Element;
-import org.hl7.fhir.r5.utils.XVerExtensionManager;
+import org.hl7.fhir.r5.utils.xver.XVerExtensionManagerOld;
 import org.hl7.fhir.r5.utils.validation.ValidatorSession;
 import org.hl7.fhir.validation.ValidatorSettings;
 import org.hl7.fhir.validation.instance.InstanceValidator;
@@ -59,7 +59,7 @@ public class ValidatorResourceFetcherTest extends BaseTest {
         new InstanceValidator(
             wrappedWorkerContext,
             new FhirInstanceValidator.NullEvaluationContext(),
-            new XVerExtensionManager(null),
+            new XVerExtensionManagerOld(null),
             new ValidatorSession(),
 			new ValidatorSettings());
     RequestDetails r = new SystemRequestDetails();

@@ -33,12 +33,14 @@ import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.config.SearchConfig;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.NonPersistedSearch;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.builder.StorageInterceptorHooksFacade;
 import ca.uhn.fhir.jpa.search.builder.tasks.SearchContinuationTask;
 import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
@@ -56,6 +58,7 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -78,6 +81,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -97,6 +101,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCoordinatorSvcImpl.class);
+	public static final int SEARCH_EXPIRY_OFFSET_MINUTES = 10;
 
 	private final FhirContext myContext;
 	private final JpaStorageSettings myStorageSettings;
@@ -112,6 +117,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	private final SearchStrategyFactory mySearchStrategyFactory;
 	private final ExceptionService myExceptionSvc;
 	private final BeanFactory myBeanFactory;
+	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	private ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<>();
 
 	private final Consumer<String> myOnRemoveSearchTask = myIdToSearchTask::remove;
@@ -139,7 +145,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			ISearchParamRegistry theSearchParamRegistry,
 			SearchStrategyFactory theSearchStrategyFactory,
 			ExceptionService theExceptionSvc,
-			BeanFactory theBeanFactory) {
+			BeanFactory theBeanFactory,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		super();
 		myContext = theContext;
 		myStorageSettings = theStorageSettings;
@@ -155,6 +162,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		mySearchStrategyFactory = theSearchStrategyFactory;
 		myExceptionSvc = theExceptionSvc;
 		myBeanFactory = theBeanFactory;
+		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 
 		myStorageInterceptorHooks = new StorageInterceptorHooksFacade(myInterceptorBroadcaster);
 	}
@@ -332,6 +340,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 		List<JpaPid> pids = fetchResultPids(theUuid, theFrom, theTo, theRequestDetails, search, theRequestPartitionId);
 
+		updateSearchExpiryOrNull(search, theRequestPartitionId);
+
 		ourLog.trace("Fetched {} results", pids.size());
 
 		return pids;
@@ -353,25 +363,59 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		return pids;
 	}
 
+	private void updateSearchExpiryOrNull(Search theSearch, RequestPartitionId theRequestPartitionId) {
+		// The created time may be null in some unit tests
+		if (theSearch.getCreated() != null) {
+			// start tracking last-access-time for this search when it is more than halfway to expire by created time
+			// we do this to avoid generating excessive write traffic on busy cached searches.
+			long expireAfterMillis = myStorageSettings.getExpireSearchResultsAfterMillis();
+			long createdCutoff = theSearch.getCreated().getTime() + expireAfterMillis;
+			if (createdCutoff - System.currentTimeMillis() < expireAfterMillis / 2) {
+				theSearch.setExpiryOrNull(DateUtils.addMinutes(new Date(), SEARCH_EXPIRY_OFFSET_MINUTES));
+				// TODO: A nice future enhancement might be to make this flush be asynchronous
+				mySearchCacheSvc.save(theSearch, theRequestPartitionId);
+			}
+		}
+	}
+
 	@Override
 	public IBundleProvider registerSearch(
 			final IFhirResourceDao<?> theCallingDao,
 			final SearchParameterMap theParams,
 			String theResourceType,
 			CacheControlDirective theCacheControlDirective,
-			RequestDetails theRequestDetails,
-			RequestPartitionId theRequestPartitionId) {
+			@Nullable RequestDetails theRequestDetails) {
 		final String searchUuid = UUID.randomUUID().toString();
 
-		final String queryString = theParams.toNormalizedQueryString(myContext);
+		final String queryString = theParams.toNormalizedQueryString();
 		ourLog.debug("Registering new search {}", searchUuid);
+
+		RequestPartitionId requestPartitionId = null;
+		if (theRequestDetails instanceof SystemRequestDetails srd) {
+			requestPartitionId = srd.getRequestPartitionId();
+		}
+
+		// If an explicit request partition wasn't provided, calculate the request
+		// partition after invoking STORAGE_PRESEARCH_REGISTERED just in case any interceptors
+		// made changes which could affect the calculated partition
+		if (requestPartitionId == null) {
+
+			// Invoke any STORAGE_PRESEARCH_PARTITION_SELECTED interceptor hooks
+			NonPersistedSearch search = new NonPersistedSearch(theResourceType);
+			search.setUuid(searchUuid);
+			myStorageInterceptorHooks.callStoragePresearchPartitionSelected(theRequestDetails, theParams, search);
+
+			requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+					theRequestDetails, theResourceType, theParams);
+		}
 
 		Search search = new Search();
 		QueryParameterUtils.populateSearchEntity(
-				theParams, theResourceType, searchUuid, queryString, search, theRequestPartitionId);
+				theParams, theResourceType, searchUuid, queryString, search, requestPartitionId);
 
+		// Invoke any STORAGE_PRESEARCH_REGISTERED interceptor hooks
 		myStorageInterceptorHooks.callStoragePresearchRegistered(
-				theRequestDetails, theParams, search, theRequestPartitionId);
+				theRequestDetails, theParams, search, requestPartitionId);
 
 		validateSearch(theParams);
 
@@ -412,7 +456,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);
 			return mySynchronousSearchSvc.executeQuery(
-					theParams, theRequestDetails, searchUuid, sb, loadSynchronousUpTo, theRequestPartitionId);
+					theParams, theRequestDetails, searchUuid, sb, loadSynchronousUpTo, requestPartitionId);
 		}
 
 		/*
@@ -428,7 +472,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			if (theParams.getEverythingMode() == null) {
 				if (myStorageSettings.getReuseCachedSearchResultsForMillis() != null) {
 					PersistedJpaBundleProvider foundSearchProvider = findCachedQuery(
-							theParams, theResourceType, theRequestDetails, queryString, theRequestPartitionId);
+							theParams, theResourceType, theRequestDetails, queryString, requestPartitionId);
 					if (foundSearchProvider != null) {
 						foundSearchProvider.setCacheStatus(SearchCacheStatusEnum.HIT);
 						return foundSearchProvider;
@@ -438,14 +482,14 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		}
 
 		PersistedJpaSearchFirstPageBundleProvider retVal = submitSearch(
-				theCallingDao, theParams, theResourceType, theRequestDetails, sb, theRequestPartitionId, search);
+				theCallingDao, theParams, theResourceType, theRequestDetails, sb, requestPartitionId, search);
 		retVal.setCacheStatus(cacheStatus);
 		return retVal;
 	}
 
 	/**
-	 * 	The max results to return if this is a synchronous search.
-	 *
+	 * The max results to return if this is a synchronous search.
+	 * <p>
 	 * We'll look in this order:
 	 * * load synchronous up to (on params)
 	 * * param count (+ offset)

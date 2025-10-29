@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.stresstest;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -108,6 +109,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -123,7 +125,7 @@ public class GiantTransactionPerfTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(GiantTransactionPerfTest.class);
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 	private FhirSystemDaoR4 mySystemDao;
-	private IInterceptorBroadcaster myInterceptorSvc;
+	private IInterceptorService myInterceptorSvc;
 	private TransactionProcessor myTransactionProcessor;
 	private PlatformTransactionManager myTransactionManager;
 	private MockEntityManager myEntityManager;
@@ -207,10 +209,12 @@ public class GiantTransactionPerfTest {
 		myTransactionProcessor.setIdHelperServiceForUnitTest(myIdHelperService);
 		myTransactionProcessor.setFhirContextForUnitTest(ourFhirContext);
 		myTransactionProcessor.setApplicationContextForUnitTest(myAppCtx);
+		myTransactionProcessor.setInterceptorBroadcasterForUnitTest(myInterceptorSvc);
 
 		mySystemDao = new FhirSystemDaoR4();
 		mySystemDao.setTransactionProcessorForUnitTest(myTransactionProcessor);
 		mySystemDao.setStorageSettingsForUnitTest(myStorageSettings);
+		mySystemDao.setInterceptorBroadcasterForUnitTest(myInterceptorSvc);
 
 		when(myAppCtx.getBean(eq(IInstanceValidatorModule.class))).thenReturn(myInstanceValidatorSvc);
 		when(myAppCtx.getBean(eq(IFhirSystemDao.class))).thenReturn(mySystemDao);
@@ -241,6 +245,8 @@ public class GiantTransactionPerfTest {
 		mySearchParamRegistry.setSearchParameterCanonicalizerForUnitTest(new SearchParameterCanonicalizer(ourFhirContext));
 		mySearchParamRegistry.setFhirContext(ourFhirContext);
 		mySearchParamRegistry.setStorageSettings(myStorageSettings);
+		mySearchParamRegistry.setInterceptorServiceForUnitTest(myInterceptorSvc);
+		mySearchParamRegistry.setPartitionSettingsForUnitTest(myPartitionSettings);
 		mySearchParamRegistry.registerListener();
 		mySearchParamRegistry.start();
 
@@ -286,6 +292,7 @@ public class GiantTransactionPerfTest {
 		myEobDao.setMyMetaTagSorter(myMetaTagSorter);
 		myEobDao.setResourceHistoryCalculator(myResourceHistoryCalculator);
 		myEobDao.setResourceTypeCacheSvc(myResourceTypeCacheSvc);
+		myEobDao.setInterceptorBroadcasterForUnitTest(myInterceptorSvc);
 		myEobDao.start();
 
 		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));
@@ -425,6 +432,16 @@ public class GiantTransactionPerfTest {
 
 		@Override
 		public List<ResourceHistoryTable> findCurrentVersionsByResourcePidsAndFetchResourceTable(List<JpaPidFk> theVersionlessPids) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Stream<ResourceHistoryTable> findVersionsForResource(Pageable thePage, JpaPidFk theFk) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Stream<JpaPid> findVersionPidsForResources(Pageable thePage, List<JpaPidFk> theIds) {
 			throw new UnsupportedOperationException();
 		}
 

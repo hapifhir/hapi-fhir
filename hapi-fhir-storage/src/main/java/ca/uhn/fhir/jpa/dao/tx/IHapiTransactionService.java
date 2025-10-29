@@ -115,8 +115,29 @@ public interface IHapiTransactionService {
 
 		IExecutionBuilder withRequestPartitionId(RequestPartitionId theRequestPartitionId);
 
+		/**
+		 * Mark the transaction as read-only.
+		 */
 		IExecutionBuilder readOnly();
 
+		/**
+		 * Mark the transaction as read-only, if {@literal theReadOnly} is true.
+		 *
+		 * @since 8.6.0
+		 */
+		default IExecutionBuilder readOnly(boolean theReadOnly) {
+			if (theReadOnly) {
+				return readOnly();
+			} else {
+				return this;
+			}
+		}
+		;
+
+		/**
+		 * @deprecated Use {@link TransactionDetails#addRollbackUndoAction(Runnable)} instead
+		 */
+		@Deprecated(since = "8.6", forRemoval = true)
 		IExecutionBuilder onRollback(Runnable theOnRollback);
 
 		void execute(Runnable theTask);

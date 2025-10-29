@@ -5,6 +5,8 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport.BaseConceptProperty;
+import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssue;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -702,7 +704,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	@Override
-	public <T extends Resource> boolean hasResource(Class<T> class_, String uri, FhirPublication fhirVersion) {
+	public <T extends Resource> boolean hasResource(Class<T> class_, String uri, String fhirVersion) {
 		return false;
 	}
 
@@ -744,6 +746,16 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	@Override
 	public boolean supportsSystem(String system, FhirPublication fhirVersion) throws TerminologyServiceException {
 		return supportsSystem(system);
+	}
+
+	@Override
+	public SystemSupportInformation getTxSupportInfo(String system, String version) {
+		return null;
+	}
+
+	@Override
+	public SystemSupportInformation getTxSupportInfo(String system) {
+		return null;
 	}
 
 	@Override
@@ -805,19 +817,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 
 	@Override
 	public void validateCodeBatch(
-			ValidationOptions options, List<? extends CodingValidationRequest> codes, ValueSet vs) {
-		for (CodingValidationRequest next : codes) {
-			ValidationResult outcome = validateCode(options, next.getCoding(), vs);
-			next.setResult(outcome);
-		}
-	}
-
-	@Override
-	public void validateCodeBatchByRef(
-			ValidationOptions validationOptions, List<? extends CodingValidationRequest> list, String s) {
-		ValueSet valueSet = fetchResource(ValueSet.class, s);
-		validateCodeBatch(validationOptions, list, valueSet);
-	}
+			ValidationOptions options, List<? extends CodingValidationRequest> codes, ValueSet vs, boolean passVS) {}
 
 	@Nonnull
 	private ValidationResult doValidation(
@@ -898,6 +898,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			final boolean valueSetResultContainsInvalidDisplay = result.getIssues().stream()
 					.anyMatch(WorkerContextValidationSupportAdapter::hasInvalidDisplayDetailCode);
 			if (codeSystemResult != null) {
+				result = copyCodeValidationResult(result);
 				for (IValidationSupport.CodeValidationIssue codeValidationIssue : codeSystemResult.getIssues()) {
 					/* Value set validation should already have checked the display name. If we get INVALID_DISPLAY
 					issues from code system validation, they will only repeat what was already caught.
@@ -909,6 +910,33 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			}
 		}
 		return result;
+	}
+
+	private IValidationSupport.CodeValidationResult copyCodeValidationResult(
+			IValidationSupport.CodeValidationResult toCopy) {
+		IValidationSupport.CodeValidationResult result = new IValidationSupport.CodeValidationResult();
+
+		List<CodeValidationIssue> issues = toCopy.getIssues();
+		List<BaseConceptProperty> properties = toCopy.getProperties();
+
+		result.setCode(toCopy.getCode())
+				.setCodeSystemName(toCopy.getCodeSystemName())
+				.setCodeSystemVersion(toCopy.getCodeSystemVersion())
+				.setDisplay(toCopy.getDisplay())
+				.setIssues(copyList(issues))
+				.setMessage(toCopy.getMessage())
+				.setSeverity(toCopy.getSeverity())
+				.setSourceDetails(toCopy.getSourceDetails())
+				.setProperties(copyList(properties));
+		return result;
+	}
+
+	private <T> List<T> copyList(List<T> issues) {
+		if (issues == null) {
+			return null;
+		} else {
+			return new ArrayList<>(issues);
+		}
 	}
 
 	@Nonnull
@@ -974,6 +1002,12 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			return (List<T>) allStructureDefinitions();
 		}
 		throw new UnsupportedOperationException(Msg.code(650) + "Unable to fetch resources of type: " + theClass);
+	}
+
+	@Override
+	public <T extends Resource> List<T> fetchResourceVersionsByTypeAndUrl(Class<T> class_, String url) {
+		throw new UnsupportedOperationException(
+				Msg.code(2797) + "Can't fetch all resources of type : " + class_ + " and url: " + url);
 	}
 
 	@Override

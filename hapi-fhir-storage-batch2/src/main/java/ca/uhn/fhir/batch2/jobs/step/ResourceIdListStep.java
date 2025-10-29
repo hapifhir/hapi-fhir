@@ -40,13 +40,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.util.StreamUtil.partition;
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 public class ResourceIdListStep<PT extends PartitionedUrlJobParameters>
 		implements IJobStepWorker<PT, ChunkRangeJson, ResourceIdListWorkChunkJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
-	protected static final int MAX_BATCH_OF_IDS = 500;
+	public static final int MAX_BATCH_OF_IDS = 500;
 
 	private final IIdChunkProducer<ChunkRangeJson> myIdChunkProducer;
 
@@ -64,7 +64,8 @@ public class ResourceIdListStep<PT extends PartitionedUrlJobParameters>
 
 		Date start = data.getStart();
 		Date end = data.getEnd();
-		Integer batchSize = theStepExecutionDetails.getParameters().getBatchSize();
+		PT parameters = theStepExecutionDetails.getParameters();
+		Integer batchSize = parameters.getBatchSize();
 
 		ourLog.trace(
 				"Beginning to submit chunks in range {} to {} for url {} and partitionId {}",
@@ -73,7 +74,8 @@ public class ResourceIdListStep<PT extends PartitionedUrlJobParameters>
 				data.getUrl(),
 				data.getPartitionId());
 
-		int chunkSize = Math.min(defaultIfNull(batchSize, MAX_BATCH_OF_IDS), MAX_BATCH_OF_IDS);
+		// Guard against invalid values
+		int chunkSize = Math.max(1, Math.min(getIfNull(batchSize, MAX_BATCH_OF_IDS), MAX_BATCH_OF_IDS));
 
 		final IResourcePidStream searchResult =
 				myIdChunkProducer.fetchResourceIdStream(theStepExecutionDetails.getData());
@@ -83,6 +85,11 @@ public class ResourceIdListStep<PT extends PartitionedUrlJobParameters>
 			AtomicInteger chunkCount = new AtomicInteger();
 
 			Stream<TypedPidJson> jsonStream = typedResourcePidStream.map(TypedPidJson::new);
+
+			Integer limitResourceCount = parameters.getLimitResourceCount();
+			if (limitResourceCount != null) {
+				jsonStream = jsonStream.limit(limitResourceCount);
+			}
 
 			// chunk by size maxBatchId and submit the batches
 			partition(jsonStream, chunkSize).forEach(idBatch -> {

@@ -43,6 +43,7 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -55,6 +56,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,9 +135,11 @@ public class BulkDataExportProvider {
 					List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportId,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_INCLUDE_HISTORY, min = 0, max = 1, typeName = "boolean")
+					IPrimitiveType<Boolean> theIncludeHistory,
 			ServletRequestDetails theRequestDetails) {
 		// JPA export provider
-		BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
+		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		BulkExportJobParameters bulkExportJobParameters = new BulkExportJobParametersBuilder()
 				.outputFormat(theOutputFormat)
@@ -146,6 +150,7 @@ public class BulkDataExportProvider {
 				.exportIdentifier(theExportId)
 				.exportStyle(ExportStyle.SYSTEM)
 				.postFetchFilterUrl(theTypePostFetchFilterUrl)
+				.includeHistory(theIncludeHistory)
 				.build();
 
 		getBulkDataExportJobService().startJob(theRequestDetails, bulkExportJobParameters);
@@ -186,15 +191,17 @@ public class BulkDataExportProvider {
 					IPrimitiveType<Boolean> theMdm,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_INCLUDE_HISTORY, min = 0, max = 1, typeName = "boolean")
+					IPrimitiveType<Boolean> theIncludeHistory,
 			ServletRequestDetails theRequestDetails) {
 		ourLog.debug("Received Group Bulk Export Request for Group {}", theIdParam);
 		ourLog.debug("_type={}", theType);
 		ourLog.debug("_since={}", theSince);
-		ourLog.debug("_until{}", theUntil);
+		ourLog.debug("_until={}", theUntil);
 		ourLog.debug("_typeFilter={}", theTypeFilter);
 		ourLog.debug("_mdm={}", theMdm);
 
-		BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
+		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		// verify the Group exists before starting the job
 		getBulkDataExportSupport().validateTargetsExists(theRequestDetails, "Group", List.of(theIdParam));
@@ -210,6 +217,7 @@ public class BulkDataExportProvider {
 				.postFetchFilterUrl(theTypePostFetchFilterUrl)
 				.groupId(theIdParam)
 				.expandMdm(theMdm)
+				.includeHistory(theIncludeHistory)
 				.build();
 
 		getBulkDataExportSupport().validateOrDefaultResourceTypesForGroupBulkExport(bulkExportJobParameters);
@@ -255,6 +263,8 @@ public class BulkDataExportProvider {
 					List<IBase> thePatient,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_INCLUDE_HISTORY, min = 0, max = 1, typeName = "boolean")
+					IPrimitiveType<Boolean> theIncludeHistory,
 			ServletRequestDetails theRequestDetails) {
 
 		final List<IPrimitiveType<String>> patientIds =
@@ -269,7 +279,8 @@ public class BulkDataExportProvider {
 				theExportIdentifier,
 				theTypeFilter,
 				theTypePostFetchFilterUrl,
-				patientIds);
+				patientIds,
+				theIncludeHistory);
 	}
 
 	/**
@@ -304,6 +315,8 @@ public class BulkDataExportProvider {
 					List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_INCLUDE_HISTORY, min = 0, max = 1, typeName = "boolean")
+					IPrimitiveType<Boolean> theIncludeHistory,
 			ServletRequestDetails theRequestDetails) {
 
 		// call the type-level export to ensure spec compliance
@@ -316,6 +329,7 @@ public class BulkDataExportProvider {
 				theTypePostFetchFilterUrl,
 				List.of(theIdParam),
 				theExportIdentifier,
+				theIncludeHistory,
 				theRequestDetails);
 	}
 
@@ -357,8 +371,9 @@ public class BulkDataExportProvider {
 			IPrimitiveType<String> theExportIdentifier,
 			List<IPrimitiveType<String>> theTypeFilter,
 			List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
-			List<IPrimitiveType<String>> thePatientIds) {
-		BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
+			List<IPrimitiveType<String>> thePatientIds,
+			IPrimitiveType<Boolean> theIncludeHistory) {
+		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
 		getBulkDataExportSupport()
 				.validateTargetsExists(
@@ -384,6 +399,7 @@ public class BulkDataExportProvider {
 				.exportStyle(ExportStyle.PATIENT)
 				.postFetchFilterUrl(theTypePostFetchFilterUrl)
 				.patientIds(thePatientIds)
+				.includeHistory(theIncludeHistory)
 				.build();
 
 		getBulkDataExportSupport()
@@ -464,7 +480,13 @@ public class BulkDataExportProvider {
 				// Create an OperationOutcome response
 				IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
 
-				OperationOutcomeUtil.addIssue(myFhirContext, oo, "error", info.getErrorMessage(), null, null);
+				OperationOutcomeUtil.addIssue(
+						myFhirContext,
+						oo,
+						"error",
+						info.getErrorMessage(),
+						null,
+						OperationOutcome.IssueType.PROCESSING.toCode());
 				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(oo, response.getWriter());
 				response.getWriter().close();
 				break;
@@ -478,10 +500,12 @@ public class BulkDataExportProvider {
 			case FINALIZE:
 			case QUEUED:
 			case IN_PROGRESS:
-			case CANCELLED:
 				//noinspection deprecation - we need to support old jobs after upgrade.
 			case ERRORED:
-				if (theRequestDetails.getRequestType() == RequestTypeEnum.DELETE) {
+				if (info.isCancelled()) {
+					ourLog.info("{} job instance <{}> was marked cancelled.", info.getStatus(), theJobId);
+					processCancelledJobResponse(response, theJobId);
+				} else if (theRequestDetails.getRequestType() == RequestTypeEnum.DELETE) {
 					handleDeleteRequest(theJobId, response, info.getStatus());
 				} else {
 					response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
@@ -491,6 +515,9 @@ public class BulkDataExportProvider {
 							"Build in progress - Status set to " + info.getStatus() + " at " + dateString);
 					response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
 				}
+				break;
+			case CANCELLED:
+				processCancelledJobResponse(response, theJobId);
 				break;
 		}
 	}
@@ -537,7 +564,7 @@ public class BulkDataExportProvider {
 					"Job instance <" + theJobId.getValueAsString()
 							+ "> was already cancelled or has completed.  Nothing to do.",
 					null,
-					null);
+					OperationOutcome.IssueType.NOTFOUND.toCode());
 		} else {
 			response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
 			OperationOutcomeUtil.addIssue(
@@ -592,5 +619,20 @@ public class BulkDataExportProvider {
 					new BulkDataExportSupport(myFhirContext, myDaoRegistry, myRequestPartitionHelperService);
 		}
 		return myBulkDataExportSupport;
+	}
+
+	private void processCancelledJobResponse(HttpServletResponse response, IPrimitiveType<String> theJobId)
+			throws IOException {
+		response.setStatus(Constants.STATUS_HTTP_404_NOT_FOUND);
+		IBaseOperationOutcome outcome = OperationOutcomeUtil.newInstance(myFhirContext);
+		OperationOutcomeUtil.addIssue(
+				myFhirContext,
+				outcome,
+				"error",
+				"Job instance <" + theJobId.getValueAsString() + "> was cancelled.  No status to report.",
+				null,
+				OperationOutcome.IssueType.NOTFOUND.toCode());
+		myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(outcome, response.getWriter());
+		response.getWriter().close();
 	}
 }

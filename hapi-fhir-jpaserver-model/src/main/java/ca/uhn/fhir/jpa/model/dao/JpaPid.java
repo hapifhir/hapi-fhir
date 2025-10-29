@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.dao;
 
+import ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
@@ -51,7 +52,7 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 @Embeddable
 public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable<JpaPid> {
 
-	@GenericGenerator(name = "SEQ_RESOURCE_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
+	@GenericGenerator(name = "SEQ_RESOURCE_ID", type = HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_ID")
 	@Column(name = "RES_ID", nullable = false)
 	@GenericField(projectable = Projectable.YES)
@@ -91,6 +92,12 @@ public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable
 
 	private JpaPid(Long theId, Long theVersion) {
 		super(theVersion, null);
+		myId = theId;
+	}
+
+	public JpaPid(Integer thePartitionId, Long theId, Long theVersion) {
+		super(theVersion, null);
+		myPartitionIdValue = thePartitionId;
 		myId = theId;
 	}
 

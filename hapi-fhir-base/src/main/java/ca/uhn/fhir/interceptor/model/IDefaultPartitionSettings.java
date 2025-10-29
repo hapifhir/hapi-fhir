@@ -39,10 +39,10 @@ public interface IDefaultPartitionSettings {
 	 * partition is provided by {@link #getDefaultPartitionId()}.
 	 *
 	 * @param theRequestPartitionId to perform the evaluation upon.
-	 * @return true if the <code>theRequestPartitionId</code> is for the default partition only.
+	 * @return true if the <code>theRequestPartitionId</code> is for the default partition, or is <code>null</code>
 	 */
 	default boolean isDefaultPartition(@Nonnull RequestPartitionId theRequestPartitionId) {
-		return theRequestPartitionId.isPartition(getDefaultPartitionId());
+		return theRequestPartitionId.isPartition(getDefaultPartitionId()) || theRequestPartitionId.isPartition(null);
 	}
 
 	/**

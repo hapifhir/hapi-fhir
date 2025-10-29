@@ -263,6 +263,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		myResourceHistoryCalculator = theResourceHistoryCalculator;
 	}
 
+	@VisibleForTesting
+	public void setInterceptorBroadcasterForUnitTest(IInterceptorBroadcaster theInterceptorBroadcaster) {
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
+
 	@Override
 	protected IInterceptorBroadcaster getInterceptorBroadcaster() {
 		return myInterceptorBroadcaster;
@@ -851,15 +856,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				myInMemoryResourceMatcher.match(theIfNoneExist, theResource, theParams, theRequestDetails);
 
 		if (outcome.supported() && !outcome.matched()) {
-			String errorMsg = getConditionalCreateOrUpdateErrorMsg(theCreateOrUpdate);
+			String errorMsg =
+					getConditionalCreateOrUpdateErrorMsg(theCreateOrUpdate, theIfNoneExist, theResource.fhirType());
 			throw new InvalidRequestException(Msg.code(929) + errorMsg);
 		}
 	}
 
-	private String getConditionalCreateOrUpdateErrorMsg(CreateOrUpdateByMatch theCreateOrUpdate) {
+	private String getConditionalCreateOrUpdateErrorMsg(
+			CreateOrUpdateByMatch theCreateOrUpdate, String url, String resourceType) {
 		return String.format(
-				"Failed to process conditional %s. " + "The supplied resource did not satisfy the conditional URL.",
-				theCreateOrUpdate.name().toLowerCase());
+				"Failed to process conditional %s. "
+						+ "The supplied resource %s of type %s did not satisfy the conditional URL.",
+				theCreateOrUpdate.name().toLowerCase(), url, resourceType);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1356,7 +1364,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		String requestId = getRequestId(theRequest, source);
-		source = MetaUtil.cleanProvenanceSourceUriOrEmpty(source);
+		source = MetaUtil.extractSourceUriOrEmpty(source);
 
 		boolean shouldStoreSource =
 				myStorageSettings.getStoreMetaSourceInformation().isStoreSourceUri();
