@@ -197,7 +197,7 @@ public class BulkDataExportProvider {
 		ourLog.debug("Received Group Bulk Export Request for Group {}", theIdParam);
 		ourLog.debug("_type={}", theType);
 		ourLog.debug("_since={}", theSince);
-		ourLog.debug("_until{}", theUntil);
+		ourLog.debug("_until={}", theUntil);
 		ourLog.debug("_typeFilter={}", theTypeFilter);
 		ourLog.debug("_mdm={}", theMdm);
 

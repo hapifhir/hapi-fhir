@@ -21,8 +21,10 @@ package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import jakarta.annotation.Nullable;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
@@ -30,29 +32,60 @@ import java.util.StringJoiner;
  */
 public class FindPackageAssetRequest {
 
+	private static final int DEFAULT_PAGE_NUMBER = 0;
+	private static final int DEFAULT_PAGE_SIZE = 50;
+
 	private final FhirVersionEnum myFhirVersion;
 	private final String myCanonicalUrl;
 	private final String myPackageId;
+	private final PageRequest myPageRequest;
 
 	@Nullable
 	private final String myVersion;
 
 	public static FindPackageAssetRequest withVersion(
 			FhirVersionEnum theFhirVersion, String theCanonicalUrl, String thePackageId, String theVersion) {
-		return new FindPackageAssetRequest(theFhirVersion, theCanonicalUrl, thePackageId, theVersion);
+		return new FindPackageAssetRequest(theFhirVersion, theCanonicalUrl, thePackageId, theVersion, null);
+	}
+
+	public static FindPackageAssetRequest withVersion(
+			FhirVersionEnum theFhirVersion,
+			String theCanonicalUrl,
+			String thePackageId,
+			String theVersion,
+			int thePageNumber,
+			int thePageSize) {
+		return new FindPackageAssetRequest(
+				theFhirVersion, theCanonicalUrl, thePackageId, theVersion, PageRequest.of(thePageNumber, thePageSize));
 	}
 
 	public static FindPackageAssetRequest noVersion(
 			FhirVersionEnum theFhirVersion, String theCanonicalUrl, String thePackageId) {
-		return new FindPackageAssetRequest(theFhirVersion, theCanonicalUrl, thePackageId, null);
+		return new FindPackageAssetRequest(theFhirVersion, theCanonicalUrl, thePackageId, null, null);
+	}
+
+	public static FindPackageAssetRequest noVersion(
+			FhirVersionEnum theFhirVersion,
+			String theCanonicalUrl,
+			String thePackageId,
+			int thePageNumber,
+			int thePageSize) {
+		return new FindPackageAssetRequest(
+				theFhirVersion, theCanonicalUrl, thePackageId, null, PageRequest.of(thePageNumber, thePageSize));
 	}
 
 	private FindPackageAssetRequest(
-			FhirVersionEnum myFhirVersion, String myCanonicalUrl, String myPackageId, @Nullable String myVersion) {
-		this.myFhirVersion = myFhirVersion;
-		this.myCanonicalUrl = myCanonicalUrl;
-		this.myPackageId = myPackageId;
-		this.myVersion = myVersion;
+			FhirVersionEnum theFhirVersion,
+			String theCanonicalUrl,
+			String thePackageId,
+			@Nullable String theVersion,
+			@Nullable PageRequest thePageRequest) {
+		this.myFhirVersion = theFhirVersion;
+		this.myCanonicalUrl = theCanonicalUrl;
+		this.myPackageId = thePackageId;
+		this.myVersion = theVersion;
+		this.myPageRequest =
+				Optional.ofNullable(thePageRequest).orElse(PageRequest.of(DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
 	}
 
 	public FhirVersionEnum getFhirVersion() {
@@ -70,6 +103,10 @@ public class FindPackageAssetRequest {
 	@Nullable
 	public String getVersion() {
 		return myVersion;
+	}
+
+	public PageRequest getPageRequest() {
+		return myPageRequest;
 	}
 
 	@Override
@@ -95,6 +132,7 @@ public class FindPackageAssetRequest {
 				.add("myFhirVersion=" + myFhirVersion)
 				.add("myCanonicalUrl='" + myCanonicalUrl + "'")
 				.add("myPackageId='" + myPackageId + "'")
+				.add("myPageRequest=" + myPageRequest)
 				.add("myVersion='" + myVersion + "'")
 				.toString();
 	}

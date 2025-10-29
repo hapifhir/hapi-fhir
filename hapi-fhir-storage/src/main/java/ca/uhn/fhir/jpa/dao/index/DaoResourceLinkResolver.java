@@ -505,6 +505,9 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 	 * @param theValue Part of the URL to extract identifiers from
 	 */
 	protected List<CanonicalIdentifier> extractIdentifierFromUrl(String theValue) {
+		if (theValue.contains("?")) {
+			theValue = theValue.substring(theValue.indexOf("?") + 1);
+		}
 		Map<String, String[]> parsedQuery = UrlUtil.parseQueryString(theValue);
 
 		ArrayList<CanonicalIdentifier> retVal = new ArrayList<>(2);
