@@ -67,6 +67,7 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 	private final String myActionName;
 	private final FhirContext myFhirContext;
 	private final BaseTransactionProcessor myTransactionProcessor;
+	private final TransactionDetails myTransactionDetails;
 
 	/**
 	 * Constructor
@@ -77,13 +78,15 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 			RequestDetails theRequestDetails,
 			boolean theNestedMode,
 			IInterceptorBroadcaster theCompositeBroadcaster,
-			String theActionName) {
+			String theActionName,
+			TransactionDetails theTransactionDetails) {
 		myTransactionProcessor = theTransactionProcessor;
 		myFhirContext = theFhirContext;
 		myRequestDetails = theRequestDetails;
 		myNestedMode = theNestedMode;
 		myInterceptorBroadcaster = theCompositeBroadcaster;
 		myActionName = theActionName;
+		myTransactionDetails = theTransactionDetails;
 	}
 
 	/**
@@ -105,7 +108,8 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 		HookParams hookParams = new HookParams()
 				.add(RequestDetails.class, myRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, myRequestDetails)
-				.add(IBaseBundle.class, theRequest);
+				.add(IBaseBundle.class, theRequest)
+				.add(TransactionDetails.class, myTransactionDetails);
 		TransactionPrePartitionResponse partitionResponse =
 				(TransactionPrePartitionResponse) myInterceptorBroadcaster.callHooksAndReturnObject(
 						Pointcut.STORAGE_TRANSACTION_PRE_PARTITION, hookParams);
@@ -173,7 +177,6 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 			}
 		}
 
-		TransactionDetails transactionDetails = new TransactionDetails();
 		Map<String, IIdType> idSubstitutions = new HashMap<>();
 		for (IBaseBundle singlePartitionRequest : partitionedRequests) {
 
@@ -190,7 +193,7 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 			}
 
 			IBaseBundle singlePartitionResponse = myTransactionProcessor.processTransactionAsSubRequest(
-					myRequestDetails, transactionDetails, singlePartitionRequest, myActionName, myNestedMode);
+					myRequestDetails, myTransactionDetails, singlePartitionRequest, myActionName, myNestedMode);
 
 			// Capture any placeholder ID substitutions from this partition
 			TransactionUtil.TransactionResponse singlePartitionResponseParsed =
