@@ -1,5 +1,6 @@
 ---
 type: fix
 issue: 7332
-title: "When in partition mode with the MDM module enabled, requesting `$mdm-query-links` returned a 404 Not Found 
-error when both the source and golden resources existed in the database. This has been fixed."
+title: "In partition mode, the FHIR endpoint GET `$mdm-query-links` and the admin JSON endpoint GET 
+'{module_id}/query-link` returned a 404 Not Found error when source and golden resources existed in the partition.
+This has now been fixed."
