@@ -36,8 +36,6 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 public class RuleGroupBulkExportByCompartmentMatcherImpl extends BaseRule {
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(RuleGroupBulkExportByCompartmentMatcherImpl.class);
 	private static final BulkExportJobParameters.ExportStyle OUR_EXPORT_STYLE =
 			BulkExportJobParameters.ExportStyle.GROUP;
 	private String myGroupMatcherFilter;
@@ -100,39 +98,29 @@ public class RuleGroupBulkExportByCompartmentMatcherImpl extends BaseRule {
 				theRuleApplier);
 	}
 
-	private static IdDt getIdFromRequest(RequestDetails theRequestDetails) {
-		// TODO JDJD modify based on group/patient export
-		// also how do you handle patient list??
-		// might also want to use export style (from bulk export params) intead of the resource type (from request
-		// details)
-		return new IdDt(((BulkExportJobParameters)
-						theRequestDetails.getUserData().get(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS))
-				.getGroupId());
-	}
-
-	private Set<String> sanitizeIds(Collection<String> myPatientIds) {
-		return myPatientIds.stream()
-				.map(id -> new IdDt(id).toUnqualifiedVersionless().getValue())
-				.collect(Collectors.toSet());
-	}
-
 	public void setResourceTypes(Collection<String> theResourceTypes) {
 		myResourceTypes = theResourceTypes;
 	}
 
-	// TODO jdjd do we need to clear the testers since we are replacing the filter string?
-	// but testers is not modifiable i think?
 	public void setAppliesToGroupExportOnGroup(String theGroupMatcherFilter) {
-		myGroupMatcherFilter = theGroupMatcherFilter;
-		addTester(new FhirQueryRuleTester(theGroupMatcherFilter));
+		String sanitizedFilter = sanitizeQueryFilter(theGroupMatcherFilter);
+		myGroupMatcherFilter = sanitizedFilter;
+		addTester(new FhirQueryRuleTester(sanitizedFilter));
 	}
 
 	String getGroupMatcherFilter() {
 		return myGroupMatcherFilter;
 	}
 
-	BulkExportJobParameters.ExportStyle getWantExportStyle() {
-		return OUR_EXPORT_STYLE;
+	/**
+	 * Remove the resource type and "?" prefix, if present
+	 * since resource type is implied for the rule based on the permission (Patient in this case)
+	 */
+	private static String sanitizeQueryFilter(String theFilter) {
+		if (theFilter.contains("?")) {
+			return theFilter.substring(theFilter.indexOf("?") + 1);
+		}
+		return theFilter;
 	}
 
 	@VisibleForTesting

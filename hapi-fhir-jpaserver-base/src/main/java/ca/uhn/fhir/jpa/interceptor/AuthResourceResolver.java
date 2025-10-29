@@ -31,6 +31,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Small service class to inject DB access into an interceptor
+ * For example, used in bulk export security to allow querying for resource to match against permission argument filters
+ */
 @Service
 public class AuthResourceResolver implements IAuthResourceResolver {
 	private final DaoRegistry myDaoRegistry;
@@ -39,19 +43,17 @@ public class AuthResourceResolver implements IAuthResourceResolver {
 		this.myDaoRegistry = myDaoRegistry;
 	}
 
-	public IBaseResource resolveCompartmentById(IIdType theCompartmentId) {
+	public IBaseResource resolveCompartmentById(IIdType theResourceId) {
 		return myDaoRegistry
-				.getResourceDao(theCompartmentId.getResourceType())
-				.read(theCompartmentId, new SystemRequestDetails());
+				.getResourceDao(theResourceId.getResourceType())
+				.read(theResourceId, new SystemRequestDetails());
 	}
 
-	public List<IBaseResource> resolveCompartmentByIds(List<String> theCompartmentId, String theResourceType) {
-		TokenOrListParam t = new TokenOrListParam(null, theCompartmentId.toArray(String[]::new));
+	public List<IBaseResource> resolveCompartmentByIds(List<String> theResourceIds, String theResourceType) {
+		TokenOrListParam t = new TokenOrListParam(null, theResourceIds.toArray(String[]::new));
 
 		SearchParameterMap m = new SearchParameterMap();
 		m.add(Constants.PARAM_ID, t);
 		return myDaoRegistry.getResourceDao(theResourceType).searchForResources(m, new SystemRequestDetails());
 	}
-	// translateMatchUrl
-
 }

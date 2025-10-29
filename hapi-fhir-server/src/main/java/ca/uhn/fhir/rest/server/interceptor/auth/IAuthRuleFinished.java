@@ -56,9 +56,4 @@ public interface IAuthRuleFinished {
 	 * @param theQueryParameters a FHIR query parameter string.  E.g. {@code category=laboratory&date=ge2021}
 	 */
 	IAuthRuleFinished withFilterTester(String theQueryParameters);
-
-	// todo jdjd docs
-	default IAuthRuleFinished withFilterOnExistingTester(String theQueryParameters) {
-		return this;
-	}
 }

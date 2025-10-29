@@ -22,13 +22,13 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import jakarta.annotation.Nonnull;
 
 /**
- * @since 8.5.0
+ * @since 8.6.0
  */
 public interface IAuthRuleBuilderRuleGroupMatcherBulkExport {
 	/**
 	 * Allow/deny <b>group-level</b> export rule applies to the Group with the given resource ID, e.g. <code>Group/123</code>
 	 *
-	 * @since 8.5.0
+	 * @since 8.6.0
 	 */
 	IAuthRuleBuilderRuleBulkExportWithTarget groupExportOnGroup(@Nonnull String theCompartmentFilterMatcher);
 }

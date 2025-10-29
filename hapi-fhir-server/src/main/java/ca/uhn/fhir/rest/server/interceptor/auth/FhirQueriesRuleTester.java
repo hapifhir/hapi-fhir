@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * TODO JDJD 1028 likely remove this class
  * Tester that a resource matches any query filter in a list.
  */
 public class FhirQueriesRuleTester implements IAuthRuleTester {

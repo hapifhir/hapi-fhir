@@ -127,28 +127,6 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 	@JsonProperty("includeHistory")
 	private boolean myIncludeHistory;
 
-	/**
-	 * This flag is set to true when the system has added narrowing filters to the bulk export parameters
-	 * based on the permissions that the user has.
-	 *
-	 * For example, if a bulk export is performed with `_typeFilter=Patient?active=true`
-	 * and a user has permissions for `Patient?_lastUpdated=gt2025
-	 * than the system will modify the filters in the parameters to Patient?active=true&_lastUpdated=gt2025
-	 * and this flag will be set to true
-	 *
-	 * See TODO JDJD add issue for more information.
-	 */
-	@JsonProperty(value = "systemAddedNarrowingFilters", access = JsonProperty.Access.READ_ONLY)
-	private boolean mySystemAddedNarrowingFilters;
-
-	public boolean hasSystemAddedNarrowingFilters() {
-		return mySystemAddedNarrowingFilters;
-	}
-
-	public void setSystemAddedNarrowingFilters(boolean theSystemAddedNarrowingFilters) {
-		this.mySystemAddedNarrowingFilters = theSystemAddedNarrowingFilters;
-	}
-
 	public String getExportIdentifier() {
 		return myExportId;
 	}

@@ -39,8 +39,6 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(RulePatientBulkExportByCompartmentMatcherImpl.class);
 	private static final BulkExportJobParameters.ExportStyle OUR_EXPORT_STYLE =
 			BulkExportJobParameters.ExportStyle.PATIENT;
 	private List<String> myPatientMatcherFilter;
@@ -88,13 +86,6 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
 				return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
 			}
 		}
-
-		// TODO JDJD you need to handle
-		// export with list of ids
-		// export with list of ids (matching on filter)
-		// export with list of ids (non-matching on filter)
-		// export at type with no list of ids (matcher by type filter)
-		// permission contains OR
 
 		List<String> patientIdOptions = inboundBulkExportRequestOptions.getPatientIds();
 		List<String> filterOptions = inboundBulkExportRequestOptions.getFilters();
@@ -174,8 +165,7 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
 
 	/**
 	 * Remove the resource type and "?" prefix, if present
-	 * @param theFilter
-	 * @return
+	 * since resource type is implied for the rule based on the permission (Patient in this case)
 	 */
 	private static String sanitizeQueryFilter(String theFilter) {
 		if (theFilter.contains("?")) {
@@ -184,55 +174,32 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
 		return theFilter;
 	}
 
-	private static IdDt getIdFromRequest(RequestDetails theRequestDetails) {
-		// TODO JDJD modify based on group/patient export
-		// also how do you handle patient list??
-		// might also want to use export style (from bulk export params) intead of the resource type (from request
-		// details)
-		return new IdDt(((BulkExportJobParameters)
-						theRequestDetails.getUserData().get(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS))
-				.getGroupId());
-	}
-
-	private Set<String> sanitizeIds(Collection<String> myPatientIds) {
-		return myPatientIds.stream()
-				.map(id -> new IdDt(id).toUnqualifiedVersionless().getValue())
-				.collect(Collectors.toSet());
-	}
-
 	public void setResourceTypes(Collection<String> theResourceTypes) {
 		myResourceTypes = theResourceTypes;
 	}
 
-	// TODO jdjd do we need to clear the testers since we are replacing the filter string?
-	// but testers is not modifiable i think?
-
 	/**
 	 * @param thePatientMatcherFilter the matcher filter for the permitted Patient
-	 *                                Note that resource type is implied as this queries for the compartment
-	 *                                So this filter should start with a "?"
 	 */
 	public void addAppliesToPatientExportOnPatient(String thePatientMatcherFilter) {
-		// todo jdjd what does the string look like here? should i have a ? or resource type?
+
 		if (myPatientMatcherFilter == null) {
 			myPatientMatcherFilter = new ArrayList<>();
 		}
-		myPatientMatcherFilter.add(sanitizeQueryFilter(thePatientMatcherFilter));
+
+		String sanitizedFilter = sanitizeQueryFilter(thePatientMatcherFilter);
+		myPatientMatcherFilter.add(sanitizedFilter);
+		addTester(new FhirQueryRuleTester(sanitizedFilter));
 
 		if (myTokenizedPatientMatcherFilter == null) {
 			myTokenizedPatientMatcherFilter = new ArrayList<>();
 		}
-		myTokenizedPatientMatcherFilter.add(Set.of(thePatientMatcherFilter.split("&")));
 
-		addTester(new FhirQueryRuleTester(thePatientMatcherFilter));
+		myTokenizedPatientMatcherFilter.add(Set.of(thePatientMatcherFilter.split("&")));
 	}
 
 	List<String> getPatientMatcherFilter() {
 		return myPatientMatcherFilter;
-	}
-
-	BulkExportJobParameters.ExportStyle getWantExportStyle() {
-		return OUR_EXPORT_STYLE;
 	}
 
 	@VisibleForTesting

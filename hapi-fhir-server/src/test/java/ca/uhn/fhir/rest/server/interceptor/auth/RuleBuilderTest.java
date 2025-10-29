@@ -92,7 +92,7 @@ public class RuleBuilderTest {
 		List<String> resourceTypes = new ArrayList<>(theResourceTypes);
 
 		// When
-		builder.allow().bulkExportGroupCompartmentMatcher().groupExportOnGroup(theCompartmentMatcherFilter).withResourceTypes(resourceTypes);
+		builder.allow().bulkExportGroupCompartmentMatcher().groupExportOnGroup("?" + theCompartmentMatcherFilter).withResourceTypes(resourceTypes);
 		final List<IAuthRule> rules = builder.build();
 
 		// Then
@@ -108,8 +108,8 @@ public class RuleBuilderTest {
 
 	private static Stream<Arguments> groupMatcherBulkExportParams() {
 		return Stream.of(
-			Arguments.of("?identifier=foo|bar", List.of()),
-			Arguments.of("?identifier=foo|bar", List.of("Patient", "Observation"))
+			Arguments.of("identifier=foo|bar", List.of()),
+			Arguments.of("identifier=foo|bar", List.of("Patient", "Observation"))
 		);
 	}
 
@@ -122,9 +122,8 @@ public class RuleBuilderTest {
 
 		// When
 		for (String filter : theCompartmentMatcherFilter) {
-			builder.allow().bulkExportPatientCompartmentMatcher().patientExportOnPatient(filter).withResourceTypes(resourceTypes);
+			builder.allow().bulkExportPatientCompartmentMatcher().patientExportOnPatient("?" + filter).withResourceTypes(resourceTypes);
 		}
-
 		final List<IAuthRule> rules = builder.build();
 
 		// Then
@@ -140,10 +139,12 @@ public class RuleBuilderTest {
 
 	private static Stream<Arguments> patientMatcherBulkExportParams() {
 		return Stream.of(
-			Arguments.of(List.of("?identifier=foo|bar"), List.of()),
-			Arguments.of(List.of("?identifier=foo|bar"), List.of("Patient", "Observation")),
-			Arguments.of(List.of("?identifier=foo|bar", "?name=Doe"), List.of()),
-			Arguments.of(List.of("?identifier=foo|bar", "?name=Doe&active=true"), List.of("Patient", "Observation"))
+			Arguments.of(List.of("identifier=foo|bar"), List.of()),
+			Arguments.of(List.of("identifier=foo|bar"), List.of("Patient", "Observation")),
+			// Multiple arguments may be added to the filter when multiple FHIR_OP_INITIATE_BULK_DATA_EXPORT_PATIENTS_MATCHING permissions
+			// are added to the same user, even when the permission does not accept multiple (a list of) arguments by itself.
+			Arguments.of(List.of("identifier=foo|bar", "name=Doe"), List.of()),
+			Arguments.of(List.of("identifier=foo|bar", "name=Doe&active=true"), List.of("Patient", "Observation"))
 		);
 	}
 

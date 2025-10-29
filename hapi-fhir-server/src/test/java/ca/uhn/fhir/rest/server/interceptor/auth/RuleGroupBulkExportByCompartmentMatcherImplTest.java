@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Assertions;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 
@@ -53,9 +52,6 @@ class RuleGroupBulkExportByCompartmentMatcherImplTest {
 	private RequestDetails myRequestDetails;
 	@Mock
 	private Set<AuthorizationFlagsEnum> myFlags;
-
-
-
 
 	@ParameterizedTest
 	@MethodSource("params")
@@ -104,7 +100,7 @@ class RuleGroupBulkExportByCompartmentMatcherImplTest {
 			Arguments.of(match, List.of("Patient", "Observation"), ExportStyle.GROUP, List.of("Patient"), PolicyEnum.ALLOW, "Allow request for subset of allowable types"),
 			Arguments.of(noMatch, List.of("Patient", "Observation"), ExportStyle.GROUP, List.of("Patient", "Observation"), null, "Abstain when requesting some resource types, but no resources match the permission query"),
 			Arguments.of(noMatch, List.of(), ExportStyle.GROUP, List.of(), null, "Abstain when requesting all resource types, but no resources match the permission query"),
-			// TODO jdjd, below is the narrowing case. Narrowing should happen at the SecurityInterceptor layer
+			// The case below is the narrowing case. Narrowing should happen at the SecurityInterceptor layer
 			Arguments.of(null, List.of("Patient", "Observation"), ExportStyle.GROUP, List.of(), PolicyEnum.DENY, "Deny request for all types when allowing some types"),
 			Arguments.of(null, List.of("Patient", "Observation"), ExportStyle.GROUP, List.of("Patient", "Observation", "Encounter"), PolicyEnum.DENY, "Deny request for superset of allowable types"),
 			Arguments.of(null, List.of("Patient", "Observation"), ExportStyle.PATIENT, List.of(), null, "Abstain when export style is not Group")

@@ -919,7 +919,6 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 			@Override
 			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnAllPatients() {
-				// todo JDJD 1008 it's this ==null that is problematic, it prevents duplicate bulkExportRuleImpl
 				if (myRuleBulkExport == null) {
 					RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
 					rule.setMode(myRuleMode);
@@ -957,7 +956,6 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			@Override
 			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatientStrings(
 					@Nonnull Collection<String> theFocusResourceIds) {
-				// todo JDJD 1008 it's this ==null that is problematic, it prevents duplicate bulkExportRuleImpl
 				if (myRuleBulkExport == null) {
 					RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
 					rule.setAppliesToPatientExport(theFocusResourceIds);
@@ -1039,7 +1037,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 							theCompartmentFilterMatcher);
 				}
 
-				// prevent duplicate rules being added
+				// prevent duplicate rules from being added
 				if (!myRules.contains(myRuleGroupBulkExportByCompartmentMatcher)) {
 					myRules.add(myRuleGroupBulkExportByCompartmentMatcher);
 				}
@@ -1070,7 +1068,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 			@Override
 			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatient(
-					@Nonnull String theCompartmentFilterMatcher) { // todo jdjd change to list
+					@Nonnull String theCompartmentFilterMatcher) {
 				if (myRulePatientBulkExportByCompartmentMatcher == null) {
 					RulePatientBulkExportByCompartmentMatcherImpl rule =
 							new RulePatientBulkExportByCompartmentMatcherImpl(myRuleName);
@@ -1083,7 +1081,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 							theCompartmentFilterMatcher);
 				}
 
-				// prevent duplicate rules being added
+				// prevent duplicate rules from being added
 				if (!myRules.contains(myRulePatientBulkExportByCompartmentMatcher)) {
 					myRules.add(myRulePatientBulkExportByCompartmentMatcher);
 				}
