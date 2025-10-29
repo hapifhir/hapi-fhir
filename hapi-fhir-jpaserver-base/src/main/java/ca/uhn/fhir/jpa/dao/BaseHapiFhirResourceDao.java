@@ -122,6 +122,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.annotations.VisibleForTesting;
@@ -142,6 +143,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.utilities.i18n.I18nConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -2887,6 +2889,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			result = validator.validateWithResult(theRawResource, options);
 		} else {
 			result = validator.validateWithResult(theResource, options);
+		}
+
+		if (isNotBlank(theProfile)) {
+			// The $validate operation SHALL return error if the server cannot validate against the nominated profile.
+			// See https://www.hl7.org/fhir/resource-operation-validate.html
+			// even if FhirInstanceValidator.setErrorForUnknownProfiles(false) has been set
+			result.getMessages().stream()
+					.filter(m -> I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN.equals(m.getMessageId())
+							&& m.getSeverity() != ResultSeverityEnum.ERROR
+							&& m.getSeverity() != ResultSeverityEnum.FATAL)
+					.forEach(m -> m.setSeverity(ResultSeverityEnum.ERROR));
 		}
 
 		MethodOutcome retVal = new MethodOutcome();
