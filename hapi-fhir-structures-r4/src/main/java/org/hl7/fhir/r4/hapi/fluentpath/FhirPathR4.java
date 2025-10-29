@@ -101,8 +101,17 @@ public class FhirPathR4 implements IFhirPath {
 			public List<Base> resolveConstant(
 					FHIRPathEngine engine, Object appContext, String name, FHIRPathConstantEvaluationMode mode)
 					throws PathEngineException {
+
+				IFhirPathEvaluationContext.ConstantEvaluationMode hapiConstantEvaluationMode =
+						switch (mode) {
+							case EXPLICIT -> IFhirPathEvaluationContext.ConstantEvaluationMode.EXPLICIT;
+							case NOVALUE -> IFhirPathEvaluationContext.ConstantEvaluationMode.NOVALUE;
+							case IMPLICIT_BEFORE -> IFhirPathEvaluationContext.ConstantEvaluationMode.IMPLICIT_BEFORE;
+							case IMPLICIT_AFTER -> IFhirPathEvaluationContext.ConstantEvaluationMode.IMPLICIT_AFTER;
+						};
+
 				return Collections.unmodifiableList(
-						theEvaluationContext.resolveConstant(appContext, name, beforeContext).stream()
+						theEvaluationContext.resolveConstant(appContext, name, hapiConstantEvaluationMode).stream()
 								.map(Base.class::cast)
 								.collect(Collectors.toList()));
 			}

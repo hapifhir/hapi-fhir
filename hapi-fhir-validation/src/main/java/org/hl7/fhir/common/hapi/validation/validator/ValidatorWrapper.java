@@ -134,7 +134,7 @@ class ValidatorWrapper {
 	public List<ValidationMessage> validate(
 			IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
 
-		InstanceValidator v = getInstanceValidator(theWorkerContext);
+		InstanceValidator v = buildInstanceValidator(theWorkerContext);
 
 		v.setAssumeValidRestReferences(isAssumeValidRestReferences());
 		v.setBestPracticeWarningLevel(myBestPracticeWarningLevel);
