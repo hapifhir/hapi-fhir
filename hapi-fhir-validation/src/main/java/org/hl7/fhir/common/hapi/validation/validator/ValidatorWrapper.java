@@ -40,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 class ValidatorWrapper {
@@ -56,7 +57,7 @@ class ValidatorWrapper {
 	private Collection<? extends String> myExtensionDomains;
 	private IValidatorResourceFetcher myValidatorResourceFetcher;
 	private IValidationPolicyAdvisor myValidationPolicyAdvisor;
-	private FHIRPathEngine.IEvaluationContext evaluationContext;
+	private IHostApplicationServices evaluationContext;
 	private boolean myAllowExamples;
 
 	/**
@@ -125,7 +126,7 @@ class ValidatorWrapper {
 		return this;
 	}
 
-	public ValidatorWrapper setEvaluationContext(FHIRPathEngine.IEvaluationContext evaluationContext) {
+	public ValidatorWrapper setEvaluationContext(IHostApplicationServices evaluationContext) {
 		this.evaluationContext = evaluationContext;
 		return this;
 	}
@@ -236,22 +237,15 @@ class ValidatorWrapper {
 	}
 
 	private InstanceValidator getInstanceValidator(IWorkerContext theWorkerContext) {
-		InstanceValidator v;
-		FHIRPathEngine.IEvaluationContext evaluationCtx;
-		if (evaluationContext == null) {}
-		evaluationCtx = new FhirInstanceValidator.NullEvaluationContext();
-		if (evaluationContext != null) {
-			evaluationCtx = evaluationContext;
-		}
-		IHostApplicationServices evaluationCtx = new FhirInstanceValidator.NullEvaluationContext();
+
+		final IHostApplicationServices hostApplicationServices = Objects.requireNonNullElseGet(this.evaluationContext, FhirInstanceValidator.NullEvaluationContext::new);
 		XVerExtensionManager xverManager = new XVerExtensionManagerOld(theWorkerContext);
 		try {
-			v = new InstanceValidator(
-				theWorkerContext, evaluationCtx, xverManager, new ValidatorSession(), new ValidatorSettings());
+			return new InstanceValidator(
+				theWorkerContext, hostApplicationServices, xverManager, new ValidatorSession(), new ValidatorSettings());
 		} catch (Exception e) {
 			throw new ConfigurationException(Msg.code(648) + e.getMessage(), e);
 		}
-		return v;
 	}
 
 	private ReaderInputStream constructNewReaderInputStream(Reader theReader) {
