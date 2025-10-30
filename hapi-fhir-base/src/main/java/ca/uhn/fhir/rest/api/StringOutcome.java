@@ -47,7 +47,7 @@ public class StringOutcome implements IHasHeaders {
 	/**
 	 * Returns the {@link String} payload to return to the client or <code>null</code> if none.
 	 *
-	 * @return This method <b>will return null</b>, unlike many methods in the API.
+	 * @return This method <b>may return null</b>, unlike many methods in the API.
 	 */
 	public String getPayload() {
 		return myPayload;

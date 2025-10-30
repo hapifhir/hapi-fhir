@@ -31,7 +31,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
+import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
@@ -52,7 +52,7 @@ import java.util.Set;
 
 /**
  * Please note that this bean is not currently used as part of the $validate operation.
- * The FHIR Core validation library uses {@link VersionSpecificWorkerContextWrapper} to retrieve validation resources.
+ * The FHIR Core validation library uses {@link WorkerContextValidationSupportAdapter} to retrieve validation resources.
  */
 public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 
@@ -60,14 +60,14 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 
 	private final FhirContext myFhirContext;
 	private final DaoRegistry myDaoRegistry;
-	private final VersionSpecificWorkerContextWrapper myVersionSpecificContextWrapper;
+	private final WorkerContextValidationSupportAdapter myVersionSpecificContextWrapper;
 
 	public ValidatorResourceFetcher(
 			FhirContext theFhirContext, IValidationSupport theValidationSupport, DaoRegistry theDaoRegistry) {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
 		myVersionSpecificContextWrapper =
-				VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(theValidationSupport);
+				WorkerContextValidationSupportAdapter.newVersionSpecificWorkerContextWrapper(theValidationSupport);
 	}
 
 	@Override

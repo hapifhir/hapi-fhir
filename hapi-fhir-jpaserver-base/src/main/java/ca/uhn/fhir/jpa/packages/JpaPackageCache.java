@@ -23,7 +23,6 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
@@ -32,6 +31,7 @@ import ca.uhn.fhir.jpa.binary.svc.NullBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
@@ -140,6 +140,9 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Autowired(required = false) // It is possible that some implementers will not create such a bean.
 	private IBinaryStorageSvc myBinaryStorageSvc;
 
+	@Autowired
+	private HapiTransactionService myTransactionService;
+
 	@Override
 	public void addPackageServer(@Nonnull PackageServer thePackageServer) {
 		assert myPackageLoaderSvc != null;
@@ -149,11 +152,6 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Override
 	public String getPackageId(String theS) throws IOException {
 		return myPackageLoaderSvc.getPackageId(theS);
-	}
-
-	@Override
-	public void setSilent(boolean silent) {
-		myPackageLoaderSvc.setSilent(silent);
 	}
 
 	@Override
@@ -246,8 +244,6 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	 * the bean is unavailable, fallback to assuming we are using an embedded base64 in the data element.
 	 * @param theBinary the Binary who's `data` blob you want to retrieve
 	 * @return a byte array containing the blob.
-	 *
-	 * @throws IOException
 	 */
 	private byte[] fetchBlobFromBinary(IBaseBinary theBinary) throws IOException {
 		if (myBinaryStorageSvc != null && !(myBinaryStorageSvc instanceof NullBinaryStorageSvcImpl)) {
@@ -343,7 +339,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 			String dirName = "package";
 			NpmPackage.NpmPackageFolder packageFolder = npmPackage.getFolders().get(dirName);
-			Map<String, List<String>> packageFolderTypes = null;
+			Map<String, List<String>> packageFolderTypes;
 			try {
 				packageFolderTypes = packageFolder.getTypes();
 			} catch (IOException e) {
@@ -418,8 +414,6 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 							version = String.valueOf(myCtx.newFhirPath()
 									.evaluateFirst(resourceVersion.get(), "value", IPrimitiveType.class)
 									.orElse(null));
-						} else {
-							version = null;
 						}
 						resourceEntity.setCanonicalVersion(version);
 					}
@@ -455,8 +449,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			SystemRequestDetails requestDetails = new SystemRequestDetails();
 			if (myPartitionSettings.isUnnamedPartitionMode() && myPartitionSettings.getDefaultPartitionId() != null) {
-				requestDetails.setRequestPartitionId(
-						RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId()));
+				requestDetails.setRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId());
 			} else {
 				requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
 			}
@@ -580,7 +573,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			try {
 				return loadPackageInner(theInstallationSpec.getName(), theInstallationSpec.getVersion());
 			} catch (IOException e) {
-				throw new InternalErrorException(Msg.code(1302) + e);
+				throw new InternalErrorException(Msg.code(1302) + e, e);
 			}
 		});
 	}
@@ -588,38 +581,72 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Override
 	@Transactional(readOnly = true)
 	public IBaseResource loadPackageAssetByUrl(FhirVersionEnum theFhirVersion, String theCanonicalUrl) {
-
+		// This is the only API where we're loading by "currentVersion = true" because that's the current behaviour
+		// in production and this is a widely used APIs
+		// The other APIs are newer and were introduced with newer NPM functionality in mind, including more refined
+		// handling of duplicate canonical URLs across packages
 		final List<NpmPackageVersionResourceEntity> npmPackageVersionResourceEntities =
-				loadPackageInfoByCanonicalUrl(theFhirVersion, theCanonicalUrl, 2, null, null);
+				loadPackageInfoByCanonicalUrlCurrentVersionOnly(theFhirVersion, theCanonicalUrl, PageRequest.of(0, 2));
+
+		final List<IBaseResource> resources = npmPackageVersionResourceEntities.stream()
+				.map(this::loadPackageEntity)
+				.toList();
+
+		if (resources.size() > 1) {
+			ourLog.warn(
+					"Found multiple package versions for FHIR version: {} and canonical URL: {}",
+					theFhirVersion,
+					theCanonicalUrl);
+		} else if (resources.isEmpty()) {
+			return null;
+		}
+		return resources.get(0);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<IBaseResource> loadPackageAssetsByUrl(
+			FhirVersionEnum theFhirVersion, String theCanonicalUrl, PageRequest thePageRequest) {
+		final List<NpmPackageVersionResourceEntity> npmPackageVersionResourceEntities =
+				loadPackageInfoByCanonicalUrlAnyVersion(theFhirVersion, theCanonicalUrl, thePageRequest, null, null);
 
 		if (npmPackageVersionResourceEntities.isEmpty()) {
-			return null;
+			return List.of();
 		} else {
-			if (npmPackageVersionResourceEntities.size() > 1) {
-				ourLog.warn(
-						"Found multiple package versions for FHIR version: {} and canonical URL: {}",
-						theFhirVersion,
-						theCanonicalUrl);
-			}
-			final NpmPackageVersionResourceEntity contents = npmPackageVersionResourceEntities.get(0);
-			return loadPackageEntity(contents);
+			return npmPackageVersionResourceEntities.stream()
+					.map(this::loadPackageEntity)
+					.collect(Collectors.toList());
 		}
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public IBaseResource findPackageAsset(FindPackageAssetRequest theRequest) {
+		List<IBaseResource> assets = findPackageAssets(theRequest);
+		if (assets.size() > 1) {
+			ourLog.warn(
+					"Found multiple package versions for FHIR version: {} and canonical URL: {}",
+					theRequest.getFhirVersion(),
+					theRequest.getCanonicalUrl());
+		}
+		// assets will always have a single element because findPackageAssets throws if nothing is found
+		return assets.get(0);
+	}
 
-		final List<NpmPackageVersionResourceEntity> npmPackageVersionResourceEntities = loadPackageInfoByCanonicalUrl(
-				theRequest.getFhirVersion(),
-				theRequest.getCanonicalUrl(),
-				2, // We set it to 2 so that if we get more than one we can warn
-				theRequest.getPackageId(),
-				theRequest.getVersion());
+	@Override
+	@Transactional(readOnly = true)
+	public List<IBaseResource> findPackageAssets(FindPackageAssetRequest theRequest) {
+		final List<NpmPackageVersionResourceEntity> npmPackageVersionResourceEntities =
+				loadPackageInfoByCanonicalUrlAnyVersion(
+						theRequest.getFhirVersion(),
+						theRequest.getCanonicalUrl(),
+						theRequest.getPageRequest(),
+						theRequest.getPackageId(),
+						theRequest.getVersion());
 
 		if (npmPackageVersionResourceEntities.isEmpty()) {
 			throw new ResourceNotFoundException(
-					"%s Could not find asset for FHIR version: %s, canonical URL: %s, package ID: %s and package version: %s"
+					"%s Could not find asset(s) for FHIR version: %s, canonical URL: %s, package ID: %s and package version: %s"
 							.formatted(
 									Msg.code(2644),
 									theRequest.getFhirVersion(),
@@ -627,14 +654,9 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 									theRequest.getPackageId(),
 									Optional.ofNullable(theRequest.getVersion()).orElse("[none]")));
 		} else {
-			if (npmPackageVersionResourceEntities.size() > 1) {
-				ourLog.warn(
-						"Found multiple package versions for FHIR version: {} and canonical URL: {}",
-						theRequest.getFhirVersion(),
-						theRequest.getCanonicalUrl());
-			}
-			final NpmPackageVersionResourceEntity contents = npmPackageVersionResourceEntities.get(0);
-			return loadPackageEntity(contents);
+			return npmPackageVersionResourceEntities.stream()
+					.map(this::loadPackageEntity)
+					.collect(Collectors.toList());
 		}
 	}
 
@@ -643,7 +665,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	public List<NpmPackageAssetInfoJson> findPackageAssetInfoByUrl(
 			FhirVersionEnum theFhirVersion, String theCanonicalUrl) {
 		final List<NpmPackageVersionResourceEntity> npmPackageVersionResourceEntities =
-				loadPackageInfoByCanonicalUrl(theFhirVersion, theCanonicalUrl, 20, null, null);
+				loadPackageInfoByCanonicalUrlAnyVersion(
+						theFhirVersion, theCanonicalUrl, PageRequest.of(0, 20), null, null);
 
 		return npmPackageVersionResourceEntities.stream()
 				.map(entity -> new NpmPackageAssetInfoJson(
@@ -652,21 +675,37 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 						entity.getFhirVersion(),
 						entity.getPackageId(),
 						entity.getPackageVersion()))
-				.collect(Collectors.toUnmodifiableList());
+				.toList();
+	}
+
+	// We want to load the packages marked as current version true only
+	private List<NpmPackageVersionResourceEntity> loadPackageInfoByCanonicalUrlCurrentVersionOnly(
+			FhirVersionEnum theFhirVersion, String theCanonicalUrl, PageRequest thePageRequest) {
+		return loadPackageInfoByCanonicalUrl(theFhirVersion, theCanonicalUrl, thePageRequest, null, null, true);
+	}
+
+	// We want to load the packages whether they're marked as current version or not
+	private List<NpmPackageVersionResourceEntity> loadPackageInfoByCanonicalUrlAnyVersion(
+			FhirVersionEnum theFhirVersion,
+			String theCanonicalUrl,
+			PageRequest thePageRequest,
+			@Nullable String thePackageId,
+			@Nullable String theVersionId) {
+		return loadPackageInfoByCanonicalUrl(
+				theFhirVersion, theCanonicalUrl, thePageRequest, thePackageId, theVersionId, null);
 	}
 
 	private List<NpmPackageVersionResourceEntity> loadPackageInfoByCanonicalUrl(
 			FhirVersionEnum theFhirVersion,
 			String theCanonicalUrl,
-			int thePageSize,
+			PageRequest thePageRequest,
 			@Nullable String thePackageId,
-			@Nullable String theVersionId) {
+			@Nullable String theVersionId,
+			Boolean theIsCurrentVersion) {
 		String canonicalUrl = theCanonicalUrl;
 
 		int versionSeparator = canonicalUrl.lastIndexOf('|');
 		Slice<NpmPackageVersionResourceEntity> slice;
-
-		final PageRequest pageRequest = PageRequest.of(0, thePageSize);
 
 		if (versionSeparator != -1) {
 			String canonicalVersion = canonicalUrl.substring(versionSeparator + 1);
@@ -674,36 +713,45 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 			if (thePackageId != null) {
 				if (theVersionId != null) {
-					slice =
-							myPackageVersionResourceDao
-									.findCurrentVersionByCanonicalUrlAndVersionAndPackageIdAndVersion(
-											pageRequest,
-											theFhirVersion,
-											canonicalUrl,
-											canonicalVersion,
-											thePackageId,
-											theVersionId);
+					slice = myPackageVersionResourceDao.findByCanonicalUrlAndVersionAndPackageIdAndVersion(
+							thePageRequest,
+							theFhirVersion,
+							canonicalUrl,
+							canonicalVersion,
+							thePackageId,
+							theVersionId,
+							theIsCurrentVersion);
 				} else {
-					slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndVersionAndPackageId(
-							pageRequest, theFhirVersion, canonicalUrl, canonicalVersion, thePackageId);
+					slice = myPackageVersionResourceDao.findByCanonicalUrlAndVersionAndPackageId(
+							thePageRequest,
+							theFhirVersion,
+							canonicalUrl,
+							canonicalVersion,
+							thePackageId,
+							theIsCurrentVersion);
 				}
 			} else {
-				slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndVersion(
-						pageRequest, theFhirVersion, canonicalUrl, canonicalVersion);
+				slice = myPackageVersionResourceDao.findByCanonicalUrlAndVersion(
+						thePageRequest, theFhirVersion, canonicalUrl, canonicalVersion, theIsCurrentVersion);
 			}
 
 		} else {
 			if (thePackageId != null) {
 				if (theVersionId != null) {
-					slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndPackageIdAndVersion(
-							pageRequest, theFhirVersion, canonicalUrl, thePackageId, theVersionId);
+					slice = myPackageVersionResourceDao.findByCanonicalUrlAndPackageIdAndVersion(
+							thePageRequest,
+							theFhirVersion,
+							canonicalUrl,
+							thePackageId,
+							theVersionId,
+							theIsCurrentVersion);
 				} else {
-					slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndPackageId(
-							pageRequest, theFhirVersion, canonicalUrl, thePackageId);
+					slice = myPackageVersionResourceDao.findByCanonicalUrlAndPackageId(
+							thePageRequest, theFhirVersion, canonicalUrl, thePackageId, theIsCurrentVersion);
 				}
 			} else {
-				slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(
-						pageRequest, theFhirVersion, canonicalUrl);
+				slice = myPackageVersionResourceDao.findByCanonicalUrl(
+						thePageRequest, theFhirVersion, canonicalUrl, theIsCurrentVersion);
 			}
 		}
 
@@ -743,7 +791,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		NpmPackageMetadataJson retVal = new NpmPackageMetadataJson();
 
 		Optional<NpmPackageEntity> pkg = myPackageDao.findByPackageId(thePackageId);
-		if (!pkg.isPresent()) {
+		if (pkg.isEmpty()) {
 			throw new ResourceNotFoundException(Msg.code(1306) + "Unknown package ID: " + thePackageId);
 		}
 
@@ -844,8 +892,15 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	@Override
-	@Transactional
 	public PackageDeleteOutcomeJson uninstallPackage(String thePackageId, String theVersion) {
+		SystemRequestDetails requestDetails =
+				new SystemRequestDetails().setRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId());
+		return myTransactionService
+				.withRequest(requestDetails)
+				.execute(() -> doUninstallPackage(thePackageId, theVersion));
+	}
+
+	private PackageDeleteOutcomeJson doUninstallPackage(String thePackageId, String theVersion) {
 		PackageDeleteOutcomeJson retVal = new PackageDeleteOutcomeJson();
 
 		Optional<NpmPackageVersionEntity> packageVersion =
@@ -888,7 +943,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 				List<NpmPackageVersionEntity> versions = remainingVersions.stream()
 						.sorted((o1, o2) ->
 								PackageVersionComparator.INSTANCE.compare(o1.getVersionId(), o2.getVersionId()))
-						.collect(Collectors.toList());
+						.toList();
 				for (int i = 0; i < versions.size(); i++) {
 					boolean isCurrent = i == versions.size() - 1;
 					if (isCurrent != versions.get(i).isCurrentVersion()) {
@@ -910,14 +965,17 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Override
 	@Transactional
 	public List<IBaseResource> loadPackageAssetsByType(FhirVersionEnum theFhirVersion, String theResourceType) {
-		Slice<NpmPackageVersionResourceEntity> outcome = myPackageVersionResourceDao.findCurrentVersionByResourceType(
-				PageRequest.of(0, 1000), theFhirVersion, theResourceType);
+		Slice<NpmPackageVersionResourceEntity> outcome = myPackageVersionResourceDao.findByResourceType(
+				PageRequest.of(0, 1000), theFhirVersion, theResourceType, true);
 		return outcome.stream().map(this::loadPackageEntity).collect(Collectors.toList());
 	}
 
 	private void deleteAndExpungeResourceBinary(IIdType theResourceBinaryId, ExpungeOptions theOptions) {
-		getBinaryDao().delete(theResourceBinaryId, new SystemRequestDetails()).getEntity();
-		getBinaryDao().forceExpungeInExistingTransaction(theResourceBinaryId, theOptions, new SystemRequestDetails());
+		SystemRequestDetails requestDetails = new SystemRequestDetails()
+				.setRequestPartitionId(HapiTransactionService.getRequestPartitionAssociatedWithThread());
+
+		getBinaryDao().delete(theResourceBinaryId, requestDetails);
+		getBinaryDao().forceExpungeInExistingTransaction(theResourceBinaryId, theOptions, requestDetails);
 	}
 
 	@Nonnull

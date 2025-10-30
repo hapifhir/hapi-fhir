@@ -30,19 +30,26 @@ class PartitionedIdModeVerificationSvcTest {
 
 	private static final String MIGRATION_TABLE_NAME = "hapi_migrator";
 
-	private DriverTypeEnum.ConnectionProperties myConnectionProperties = newConnection();
+	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
 
 	@Mock
 	private HibernatePropertiesProvider myHibernatePropertiesProvider;
 
 	@ParameterizedTest
-	@CsvSource({
-		"true,  true",
-		"true,  false",
-		"false, true",
-		"false, false"
-	})
-	void testPartitionedIdDatabase_WantPartitionedIdDatabase(boolean thePartitionedIdModeForSchema, boolean thePartitionedIdModeForSettings) {
+	@CsvSource(textBlock =
+		// Partitioned Schema, Partitioned Settings, Uppercase Identifiers
+		"""
+			true,              true,                 true
+			true,              false,                true
+			false,             true,                 true
+			false,             false,                true
+			true,              true,                 false
+			false,             false,                false
+			"""
+	)
+	void testPartitionedIdDatabase_WantPartitionedIdDatabase(boolean thePartitionedIdModeForSchema, boolean thePartitionedIdModeForSettings, boolean theCapitalizedIdentifers) {
+		myConnectionProperties = newConnection(theCapitalizedIdentifers);
+
 		Set<String> commandLineValue = thePartitionedIdModeForSchema ? Set.of(HapiFhirJpaMigrationTasks.FlagEnum.DB_PARTITION_MODE.getCommandLineValue()) : Set.of();
 		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(commandLineValue);
 
@@ -73,6 +80,8 @@ class PartitionedIdModeVerificationSvcTest {
 	 */
 	@Test
 	void testEmptyDatabaseDoesNotFail() {
+		myConnectionProperties = newConnection(true);
+
 		PlatformTransactionManager txManager = new DataSourceTransactionManager(myConnectionProperties.getDataSource());
 		when(myHibernatePropertiesProvider.getDataSource()).thenReturn(myConnectionProperties.getDataSource());
 		when(myHibernatePropertiesProvider.getDialect()).thenReturn(new HapiFhirH2Dialect());
@@ -86,8 +95,15 @@ class PartitionedIdModeVerificationSvcTest {
 	/**
 	 * Create a new connection to a randomized H2 database for testing
 	 */
-	private DriverTypeEnum.ConnectionProperties newConnection() {
-		String url = "jdbc:h2:mem:test_migration-" + UUID.randomUUID() + ";CASE_INSENSITIVE_IDENTIFIERS=TRUE;";
+	private DriverTypeEnum.ConnectionProperties newConnection(boolean theCapitalizedIdentifiers) {
+		String url = "jdbc:h2:mem:test_migration-" + UUID.randomUUID();
+		if (theCapitalizedIdentifiers) {
+			url += ";CASE_INSENSITIVE_IDENTIFIERS=TRUE;DATABASE_TO_UPPER=TRUE;DATABASE_TO_LOWER=FALSE;";
+		} else {
+			url += ";CASE_INSENSITIVE_IDENTIFIERS=TRUE;DATABASE_TO_LOWER=TRUE;DATABASE_TO_UPPER=FALSE;";
+		}
+
+		//+ ";CASE_INSENSITIVE_IDENTIFIERS=TRUE;";
 		return DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "SA", "SA");
 	}
 }

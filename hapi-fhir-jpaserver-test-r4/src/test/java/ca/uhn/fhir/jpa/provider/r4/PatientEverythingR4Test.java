@@ -37,7 +37,7 @@ import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SuppressWarnings("Duplicates")
+@SuppressWarnings({"Duplicates", "LoggingSimilarMessage"})
 public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PatientEverythingR4Test.class);
@@ -128,12 +128,12 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 
 		Patient p = new Patient();
 		p.setManagingOrganization(new Reference("http://example.com/Organization/123"));
-		String patientId = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+		String patientId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		Observation obs = new Observation();
 		obs.getSubject().setReference(patientId);
 		obs.getEncounter().setReference("http://example.com/Encounter/999");
-		String observationId = myObservationDao.create(obs).getId().toUnqualifiedVersionless().getValue();
+		String observationId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		// Normal call
 		Bundle bundle = fetchBundle(myServerBase + "/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);

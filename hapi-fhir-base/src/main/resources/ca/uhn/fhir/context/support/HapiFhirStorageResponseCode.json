@@ -59,5 +59,8 @@
   }, {
     "code": "AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE",
     "display": "Automatically created placeholder resource."
+  }, {
+    "code": "FAILURE",
+    "display": "Failed to process resource."
   } ]
 }

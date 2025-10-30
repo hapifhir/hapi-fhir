@@ -36,7 +36,7 @@ if not target_cdr_branch:
 # Prepare data for Robogary request
 request_data = {
     "github_pr": github_pr,
-    "github_repo": "HAPI-FHIR",
+    "github_repo": "hapifhir/hapi-fhir",
     "github_requester": github_requester,
     "hapi_branch": current_hapi_branch,
     "cdr_branch": target_cdr_branch
@@ -58,11 +58,13 @@ if result.status_code > 399:
     sys.exit(1)
 
 trigger_json = result.json()
+
+# Abort early if we have skipped the pipeline generation
+if trigger_json["skipped"] == True:
+    print("Job skipped, as we have detected that this pull request contains a pom.xml version bump.")
+    sys.exit(0)
+
 pipeline_id = trigger_json["pipeline_id"]
-
-
-
-
 print(f"Generated pipeline. [pipeline_id={pipeline_id}]")
 if "web_url" in trigger_json:
     print(f"Pipeline URL: {trigger_json['web_url']}")

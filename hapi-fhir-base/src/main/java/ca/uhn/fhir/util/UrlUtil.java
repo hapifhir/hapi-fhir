@@ -33,12 +33,12 @@ import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -61,6 +61,8 @@ public class UrlUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UrlUtil.class);
 
 	private static final String URL_FORM_PARAMETER_OTHER_SAFE_CHARS = "-_.*";
+	private static final Escaper PARAMETER_ESCAPER_NO_SLASH =
+			new PercentEscaper(URL_FORM_PARAMETER_OTHER_SAFE_CHARS + "/", false);
 	private static final Escaper PARAMETER_ESCAPER = new PercentEscaper(URL_FORM_PARAMETER_OTHER_SAFE_CHARS, false);
 
 	/**
@@ -203,7 +205,8 @@ public class UrlUtil {
 	}
 
 	/**
-	 * URL encode a value according to RFC 3986
+	 * URL encode a value according to RFC 3986, except for the following
+	 * characters: <code>-_.*</code>.
 	 * <p>
 	 * This method is intended to be applied to an individual parameter
 	 * name or value. For example, if you are creating the URL
@@ -211,13 +214,42 @@ public class UrlUtil {
 	 * it would be appropriate to pass the string "føø" to this method,
 	 * but not appropriate to pass the entire URL since characters
 	 * such as "/" and "?" would also be escaped.
-	 * </P>
+	 * </p>
+	 *
+	 * @see #escapeUrlParam(String, boolean)
 	 */
 	public static String escapeUrlParam(String theUnescaped) {
+		return escapeUrlParam(theUnescaped, true);
+	}
+
+	/**
+	 * URL encode a value according to RFC 3986, except for the following
+	 * characters: <code>-_.*</code>, and optionally <code>/</code>.
+	 * <p>
+	 * This method is intended to be applied to an individual parameter
+	 * name or value. For example, if you are creating the URL
+	 * <code>http://example.com/fhir/Patient?key=føø</code>
+	 * it would be appropriate to pass the string "føø" to this method,
+	 * but not appropriate to pass the entire URL since characters
+	 * such as "?" and possibly "/" would also be escaped.
+	 * </p>
+	 *
+	 * @param theEscapeSlash If <code>true</code>, the slash character will be percent-escaped.
+	 *                       Set this to false if you are escaping a query parameter value, since slashes
+	 *                       will be more readable in the URL than the percent-encoded version. If you
+	 *                       aren't sure where the escaped version will appear, always set this to
+	 *                       <code>false</code>, or just call {@link #escapeUrlParam(String)} instead.
+	 * @since 8.6.0
+	 */
+	public static String escapeUrlParam(String theUnescaped, boolean theEscapeSlash) {
 		if (theUnescaped == null) {
 			return null;
 		}
-		return PARAMETER_ESCAPER.escape(theUnescaped);
+		if (theEscapeSlash) {
+			return PARAMETER_ESCAPER.escape(theUnescaped);
+		} else {
+			return PARAMETER_ESCAPER_NO_SLASH.escape(theUnescaped);
+		}
 	}
 
 	/**
@@ -557,13 +589,7 @@ public class UrlUtil {
 		for (int i = 0; i < theString.length(); i++) {
 			char nextChar = theString.charAt(i);
 			if (nextChar == '%' || (nextChar == '+' && shouldEscapePlus)) {
-				try {
-					// Yes it would be nice to not use a string "UTF-8" but the equivalent
-					// method that takes Charset is JDK10+ only... sigh....
-					return URLDecoder.decode(theString, "UTF-8");
-				} catch (UnsupportedEncodingException e) {
-					throw new Error(Msg.code(1743) + "UTF-8 not supported, this shouldn't happen", e);
-				}
+				return URLDecoder.decode(theString, StandardCharsets.UTF_8);
 			}
 		}
 		return theString;

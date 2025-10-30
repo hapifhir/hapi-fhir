@@ -57,6 +57,9 @@ public class ${className}ResourceProvider extends
 			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_TEXT)
 			StringAndListParam theFtText, 
 
+## The _tag, _security and _profile parameters are added to the "${searchParams}"
+## list on DSTU3+, so we don't need to manually add them here
+#if ( $version == 'dstu2' )
 			@Description(shortDefinition="Search for resources which have the given tag")
 			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_TAG)
 			TokenAndListParam theSearchForTag, 
@@ -68,6 +71,7 @@ public class ${className}ResourceProvider extends
 			@Description(shortDefinition="Search for resources which have the given profile")
 			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_PROFILE)
 			UriAndListParam theSearchForProfile,
+#end
 
 			@Description(shortDefinition="Search the contents of the resource's data using a list")
 			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_LIST)
@@ -156,9 +160,11 @@ public class ${className}ResourceProvider extends
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_FILTER, theFtFilter);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_CONTENT, theFtContent);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_TEXT, theFtText);
+#if ( $version == 'dstu2' )
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_TAG, theSearchForTag);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_SECURITY, theSearchForSecurity);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_PROFILE, theSearchForProfile);
+#end
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE, theSearchForSource);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_LIST, theList);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_LANGUAGE, theResourceLanguage);

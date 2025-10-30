@@ -91,7 +91,7 @@ public class JdbcUtils {
 							metadata.getPrimaryKeys(connection.getCatalog(), connection.getSchema(), theTableName)) {
 						while (results.next()) {
 							String columnName = results.getString("COLUMN_NAME");
-							retVal.add(columnName);
+							retVal.add(columnName.toUpperCase(Locale.US));
 						}
 					}
 
@@ -261,6 +261,8 @@ public class JdbcUtils {
 									return new ColumnType(ColumnTypeEnum.FLOAT, length);
 								case Types.TINYINT:
 									return new ColumnType(ColumnTypeEnum.TINYINT, length);
+								case Types.SMALLINT:
+									return new ColumnType(ColumnTypeEnum.SMALLINT, length);
 								default:
 									throw new IllegalArgumentException(
 											Msg.code(34) + "Don't know how to handle datatype " + dataType

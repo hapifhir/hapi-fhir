@@ -33,6 +33,7 @@ import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchUrlJobMaintenanceSvc;
@@ -43,8 +44,12 @@ import ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportJobSchedulingHelperImpl;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportHelperService;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.svc.BulkDataImportSvcImpl;
+import ca.uhn.fhir.jpa.cache.IResourceIdentifierCacheSvc;
+import ca.uhn.fhir.jpa.cache.IResourceTypeCacheSvc;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
+import ca.uhn.fhir.jpa.cache.ResourceIdentifierCacheSvcImpl;
+import ca.uhn.fhir.jpa.cache.ResourceTypeCacheSvcImpl;
 import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
 import ca.uhn.fhir.jpa.dao.CacheTagDefinitionDao;
 import ca.uhn.fhir.jpa.dao.DaoSearchParamProvider;
@@ -53,15 +58,20 @@ import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.JpaBulkDataExportHistoryHelper;
+import ca.uhn.fhir.jpa.dao.JpaDaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.JpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.ResourceHistoryCalculator;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
+import ca.uhn.fhir.jpa.dao.data.IResourceIdentifierPatientUniqueEntityDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIdentifierSystemEntityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamIdentityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTypeDao;
 import ca.uhn.fhir.jpa.dao.data.ITagDefinitionDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
@@ -70,11 +80,11 @@ import ca.uhn.fhir.jpa.dao.expunge.IExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.IResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.JpaResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
-import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.jpa.delete.DeleteConflictFinderService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
@@ -101,6 +111,7 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl;
 import ca.uhn.fhir.jpa.partition.PartitionManagementProvider;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.provider.ConceptMapAddAndRemoveMappingProvider;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.InstanceReindexProvider;
@@ -115,6 +126,7 @@ import ca.uhn.fhir.jpa.sched.HapiSchedulerServiceImpl;
 import ca.uhn.fhir.jpa.search.ISynchronousSearchSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
+import ca.uhn.fhir.jpa.search.PersistedJpaIdSearchBundleProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.search.SearchStrategyFactory;
@@ -182,8 +194,13 @@ import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
+import ca.uhn.fhir.replacereferences.PreviousResourceVersionRestorer;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
+import ca.uhn.fhir.replacereferences.UndoReplaceReferencesSvc;
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.IBulkDataExportHistoryHelper;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
@@ -195,9 +212,12 @@ import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.IMetaTagSorter;
 import ca.uhn.fhir.util.MetaTagSorterAlphabetical;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityManager;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -215,6 +235,7 @@ import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.Date;
+import java.util.List;
 
 @Configuration
 // repositoryFactoryBeanClass: EnversRevisionRepositoryFactoryBean is needed primarily for unit testing
@@ -240,14 +261,19 @@ public class JpaConfig {
 	public static final String GRAPHQL_PROVIDER_NAME = "myGraphQLProvider";
 	public static final String PERSISTED_JPA_BUNDLE_PROVIDER = "PersistedJpaBundleProvider";
 	public static final String PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH = "PersistedJpaBundleProvider_BySearch";
+	public static final String PERSISTED_JPA_ID_SEARCH_BUNDLE_PROVIDER = "PersistedJpaIdSearchBundleProvider";
 	public static final String PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER =
 			"PersistedJpaSearchFirstPageBundleProvider";
 	public static final String HISTORY_BUILDER = "HistoryBuilder";
+	public static final String HISTORY_BUILDER_WITH_IDS = "HistoryBuilderWithIds";
 	public static final String DEFAULT_PROFILE_VALIDATION_SUPPORT = "myDefaultProfileValidationSupport";
 	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
 
 	@Autowired
 	public JpaStorageSettings myStorageSettings;
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -257,10 +283,34 @@ public class JpaConfig {
 		return ValidationSupportChain.CacheConfiguration.defaultValues();
 	}
 
+	/**
+	 * Note, there is a circular dependency between {@link WorkerContextValidationSupportAdapter}
+	 * and {@link JpaValidationSupportChain}. The WorkerContextValidationSupportAdapter wraps
+	 * an instance of {@link IValidationSupport} (which is what JpaValidationSupportChain is)
+	 * but we also need to pass in the WorkerContextValidationSupportAdapter instance to the
+	 * snapshot generator which is created within the {@literal @PostConstruct} method within
+	 * JpaValidationSupportChain.
+	 * <p>
+	 * In order to allow the circular dependency to be created (since Spring doesn't like
+	 * these), JpaValidationSupportChain calls {@link WorkerContextValidationSupportAdapter#setValidationSupport(IValidationSupport)}
+	 * to pass itself in.
+	 * </p>
+	 * <p>
+	 * This is obviously not ideal, but is the best we can do since the corelib
+	 * tools all use {@link org.hl7.fhir.r5.context.IWorkerContext} interface as their
+	 * input. See {@link WorkerContextValidationSupportAdapter} for more info.
+	 * </p>
+	 */
+	@Bean
+	public WorkerContextValidationSupportAdapter workerContextValidationSupportAdapter() {
+		return new WorkerContextValidationSupportAdapter();
+	}
+
 	@Bean(name = JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
 	@Primary
 	public IValidationSupport jpaValidationSupportChain() {
-		return new JpaValidationSupportChain(myFhirContext, validationSupportChainCacheConfiguration());
+		return new JpaValidationSupportChain(
+				myFhirContext, validationSupportChainCacheConfiguration(), workerContextValidationSupportAdapter());
 	}
 
 	@Bean("myDaoRegistry")
@@ -372,7 +422,7 @@ public class JpaConfig {
 	@Bean
 	@Primary
 	public IResourceLinkResolver daoResourceLinkResolver() {
-		return new DaoResourceLinkResolver<JpaPid>();
+		return new JpaDaoResourceLinkResolver();
 	}
 
 	@Bean(name = PackageUtils.LOADER_WITH_CACHE)
@@ -487,6 +537,28 @@ public class JpaConfig {
 	}
 
 	@Bean
+	public IResourceIdentifierCacheSvc resourceIdentifierCacheSvc(
+			IHapiTransactionService theTransactionService,
+			MemoryCacheService theMemoryCache,
+			IResourceIdentifierSystemEntityDao theResourceIdentifierSystemEntityDao,
+			IResourceIdentifierPatientUniqueEntityDao theResourceIdentifierPatientUniqueEntityDao,
+			EntityManager theEntityManager) {
+		return new ResourceIdentifierCacheSvcImpl(
+				theTransactionService,
+				theMemoryCache,
+				theResourceIdentifierSystemEntityDao,
+				theResourceIdentifierPatientUniqueEntityDao,
+				theEntityManager);
+	}
+
+	@Bean
+	@Lazy
+	public ConceptMapAddAndRemoveMappingProvider conceptMapAddAndRemoveMappingProvider(
+			IFhirResourceDaoConceptMap<?> theConceptMapDao) {
+		return new ConceptMapAddAndRemoveMappingProvider(theConceptMapDao);
+	}
+
+	@Bean
 	@Lazy
 	public IPartitionLookupSvc partitionConfigSvc() {
 		return new PartitionLookupSvcImpl();
@@ -561,8 +633,8 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public SearchBuilderFactory searchBuilderFactory() {
-		return new SearchBuilderFactory();
+	public SearchBuilderFactory<JpaPid> searchBuilderFactory() {
+		return new SearchBuilderFactory<>();
 	}
 
 	@Bean
@@ -594,6 +666,14 @@ public class JpaConfig {
 				myStorageSettings, theResourceIndexedSearchParamIdentityDao, theTxManager, theMemoryCacheService);
 	}
 
+	@Bean
+	public IResourceTypeCacheSvc resourceTypeCacheSvc(
+			@Autowired IHapiTransactionService theHapiTransactionService,
+			@Autowired IResourceTypeDao theResourceTypeDao,
+			@Autowired MemoryCacheService theMemoryCacheService) {
+		return new ResourceTypeCacheSvcImpl(theHapiTransactionService, theResourceTypeDao, theMemoryCacheService);
+	}
+
 	/* **************************************************************** *
 	 * Prototype Beans Below                                            *
 	 * **************************************************************** */
@@ -616,10 +696,22 @@ public class JpaConfig {
 	public PersistedJpaSearchFirstPageBundleProvider newPersistedJpaSearchFirstPageBundleProvider(
 			RequestDetails theRequest,
 			SearchTask theSearchTask,
-			ISearchBuilder theSearchBuilder,
+			ISearchBuilder<?> theSearchBuilder,
 			RequestPartitionId theRequestPartitionId) {
 		return new PersistedJpaSearchFirstPageBundleProvider(
 				theSearchTask, theSearchBuilder, theRequest, theRequestPartitionId);
+	}
+
+	@Bean(name = PERSISTED_JPA_ID_SEARCH_BUNDLE_PROVIDER)
+	@Scope("prototype")
+	public PersistedJpaIdSearchBundleProvider newPersistedJpaIdSearchBundleProvider(
+			String theResourceType,
+			List<String> theResourceIds,
+			RequestPartitionId thePartitionId,
+			@Nullable Date theRangeStartInclusive,
+			@Nonnull Date theRangeEndInclusive) {
+		return new PersistedJpaIdSearchBundleProvider(
+				theResourceType, theResourceIds, thePartitionId, theRangeStartInclusive, theRangeEndInclusive);
 	}
 
 	@Bean(name = RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER)
@@ -682,8 +774,9 @@ public class JpaConfig {
 
 	@Bean
 	@Scope("prototype")
-	public ResourceTablePredicateBuilder newResourceTablePredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new ResourceTablePredicateBuilder(theSearchBuilder);
+	public ResourceTablePredicateBuilder newResourceTablePredicateBuilder(
+			SearchQueryBuilder theSearchBuilder, SearchIncludeDeletedEnum theSearchIncludeDeleted) {
+		return new ResourceTablePredicateBuilder(theSearchBuilder, theSearchIncludeDeleted);
 	}
 
 	@Bean
@@ -750,6 +843,16 @@ public class JpaConfig {
 			@Nullable Date theRangeStartInclusive,
 			@Nullable Date theRangeEndInclusive) {
 		return new HistoryBuilder(theResourceType, theResourceId, theRangeStartInclusive, theRangeEndInclusive);
+	}
+
+	@Bean(name = HISTORY_BUILDER_WITH_IDS)
+	@Scope("prototype")
+	public HistoryBuilder newHistoryBuilderWithIds(
+			@Nonnull String theResourceType,
+			@Nonnull List<String> theResourceIds,
+			@Nullable Date theRangeStartInclusive,
+			@Nonnull Date theRangeEndInclusive) {
+		return new HistoryBuilder(theResourceType, theResourceIds, theRangeStartInclusive, theRangeEndInclusive);
 	}
 
 	@Bean
@@ -959,7 +1062,8 @@ public class JpaConfig {
 			IJobCoordinator theJobCoordinator,
 			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundle,
 			Batch2TaskHelper theBatch2TaskHelper,
-			JpaStorageSettings theStorageSettings) {
+			JpaStorageSettings theStorageSettings,
+			ReplaceReferencesProvenanceSvc theProvenanceSvc) {
 		return new ReplaceReferencesSvcImpl(
 				theDaoRegistry,
 				theHapiTransactionService,
@@ -967,7 +1071,14 @@ public class JpaConfig {
 				theJobCoordinator,
 				theReplaceReferencesPatchBundle,
 				theBatch2TaskHelper,
-				theStorageSettings);
+				theStorageSettings,
+				theProvenanceSvc);
+	}
+
+	@Primary
+	@Bean
+	public ReplaceReferencesProvenanceSvc replaceReferencesProvenanceSvc(DaoRegistry theDaoRegistry) {
+		return new ReplaceReferencesProvenanceSvc(theDaoRegistry);
 	}
 
 	@Bean
@@ -976,10 +1087,29 @@ public class JpaConfig {
 	}
 
 	@Bean
+	public PreviousResourceVersionRestorer resourceVersionRestorer(
+			DaoRegistry theDaoRegistry, HapiTransactionService theHapiTransactionService) {
+		return new PreviousResourceVersionRestorer(theDaoRegistry, theHapiTransactionService);
+	}
+
+	@Bean
+	public UndoReplaceReferencesSvc getUndoReplaceReferencesSvc(
+			DaoRegistry theDaoRegistry,
+			ReplaceReferencesProvenanceSvc theProvenanceSvc,
+			PreviousResourceVersionRestorer theResourceVersionRestorer) {
+		return new UndoReplaceReferencesSvc(theDaoRegistry, theProvenanceSvc, theResourceVersionRestorer);
+	}
+
+	@Bean
 	public PartitionedIdModeVerificationSvc partitionedIdModeVerificationSvc(
 			PartitionSettings thePartitionSettings,
 			HibernatePropertiesProvider theHibernatePropertiesProvider,
 			PlatformTransactionManager theTxManager) {
 		return new PartitionedIdModeVerificationSvc(thePartitionSettings, theHibernatePropertiesProvider, theTxManager);
+	}
+
+	@Bean
+	public IBulkDataExportHistoryHelper bulkDataExportHistoryHelper() {
+		return new JpaBulkDataExportHistoryHelper();
 	}
 }

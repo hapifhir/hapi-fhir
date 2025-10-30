@@ -1,4 +1,4 @@
 ---
 type: add
 issue: 6719
-title: "Added a troubleshooting log for request partition routing."
+title: "Added a troubleshooting log for request partition routing. It can be fetched by calling `Logs.getPartitionTroubleshootingLog()`"

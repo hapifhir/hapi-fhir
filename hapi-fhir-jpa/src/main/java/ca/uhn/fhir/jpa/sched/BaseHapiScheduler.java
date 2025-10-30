@@ -24,6 +24,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
@@ -142,7 +143,11 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 			return;
 		}
 		try {
-			myScheduler.shutdown(true);
+			if (HapiSystemProperties.isUnitTestModeEnabled()) {
+				myScheduler.shutdown(false);
+			} else {
+				myScheduler.shutdown(true);
+			}
 		} catch (SchedulerException e) {
 			ourLog.error("Failed to shut down scheduler", e);
 			throw new ConfigurationException(Msg.code(1636) + "Failed to shut down scheduler", e);

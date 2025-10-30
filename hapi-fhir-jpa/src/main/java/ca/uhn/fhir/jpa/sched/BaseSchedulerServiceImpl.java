@@ -147,14 +147,17 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 	@EventListener(ContextRefreshedEvent.class)
 	public void start() {
 
+		myStopping.set(false);
+
+		if (isSchedulingDisabled()) {
+			return;
+		}
 		// Jobs are scheduled first to avoid a race condition that occurs if jobs are scheduled
 		// after the scheduler starts for the first time. This race condition results in duplicate
 		// TRIGGER_ACCESS entries being added to the QRTZ_LOCKS table.
 		// Note - Scheduling jobs before the scheduler has started is supported by Quartz
 		// http://www.quartz-scheduler.org/documentation/quartz-2.3.0/cookbook/CreateScheduler.html
 		scheduleJobs();
-
-		myStopping.set(false);
 
 		try {
 			ourLog.info("Starting task schedulers for context {}", myApplicationContext.getId());

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.data;
 import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -55,12 +56,15 @@ public interface IBatch2JobInstanceRepository
 	@Query("UPDATE Batch2JobInstanceEntity e SET e.myWorkChunksPurged = true WHERE e.myId = :id")
 	int updateWorkChunksPurgedTrue(@Param("id") String theInstanceId);
 
-	@Query(
-			"SELECT b from Batch2JobInstanceEntity b WHERE b.myDefinitionId = :defId AND (b.myParamsJson = :params OR b.myParamsJsonVc = :params) AND b.myStatus IN( :stats )")
+	@Query("SELECT b from Batch2JobInstanceEntity b "
+			+ "WHERE b.myDefinitionId = :defId AND (b.myParamsJson = :params OR b.myParamsJsonVc = :params) "
+			+ "AND b.myStatus IN (:stats) "
+			+ "AND (:cancelled IS NULL OR b.myCancelled = :cancelled)")
 	List<Batch2JobInstanceEntity> findInstancesByJobIdParamsAndStatus(
 			@Param("defId") String theDefinitionId,
 			@Param("params") String theParams,
 			@Param("stats") Set<StatusEnum> theStatus,
+			@Param("cancelled") Boolean theIsCancelledBoolean,
 			Pageable thePageable);
 
 	@Query(
@@ -68,11 +72,19 @@ public interface IBatch2JobInstanceRepository
 	List<Batch2JobInstanceEntity> findInstancesByJobIdAndParams(
 			@Param("defId") String theDefinitionId, @Param("params") String theParams, Pageable thePageable);
 
-	@Query("SELECT b from Batch2JobInstanceEntity b WHERE b.myStatus = :status")
-	List<Batch2JobInstanceEntity> findInstancesByJobStatus(@Param("status") StatusEnum theState, Pageable thePageable);
-
-	@Query("SELECT count(b) from Batch2JobInstanceEntity b WHERE b.myStatus = :status")
-	Integer findTotalJobsOfStatus(@Param("status") StatusEnum theState);
+	@Query("SELECT b from Batch2JobInstanceEntity b "
+			+ "WHERE (:definitionId IS NULL OR b.myDefinitionId = :definitionId) "
+			+ "AND (:status IS NULL OR b.myStatus = :status) "
+			+ "AND (:jobId IS NULL OR b.myId = :jobId) "
+			+ "AND (cast(:from as date) IS NULL OR b.myCreateTime >= :from) "
+			+ "AND (cast(:to as date) IS NULL OR b.myCreateTime <= :to)")
+	Page<Batch2JobInstanceEntity> findByJobDefinitionIdOrStatusOrIdOrCreateTime(
+			@Param("definitionId") String theDefinitionId,
+			@Param("status") StatusEnum theStatus,
+			@Param("jobId") String theJobId,
+			@Param("from") Date theFrom,
+			@Param("to") Date theTo,
+			Pageable thePageable);
 
 	@Query(
 			"SELECT b from Batch2JobInstanceEntity b WHERE b.myDefinitionId = :defId  AND b.myStatus IN( :stats ) AND b.myEndTime < :cutoff")

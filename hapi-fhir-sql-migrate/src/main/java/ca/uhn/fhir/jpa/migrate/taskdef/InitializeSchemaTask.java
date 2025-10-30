@@ -46,6 +46,8 @@ public class InitializeSchemaTask extends BaseTask {
 		mySchemaInitializationProvider = theSchemaInitializationProvider;
 		setDescription(DESCRIPTION_PREFIX + mySchemaInitializationProvider.getSchemaDescription());
 		addFlag(TaskFlagEnum.RUN_DURING_SCHEMA_INITIALIZATION);
+		// Some schema initialization statements (e.g. system settings) may not support transactions
+		setTransactional(false);
 	}
 
 	@Override
@@ -65,6 +67,9 @@ public class InitializeSchemaTask extends BaseTask {
 					"The table {} already exists.  Skipping schema initialization for {}",
 					schemaExistsIndicatorTable,
 					driverType);
+			if (mySchemaInitializationProvider.canInitializeSchema()) {
+				myInitializedSchema = true;
+			}
 			return;
 		}
 

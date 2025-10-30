@@ -24,10 +24,12 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MetaUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -35,6 +37,7 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
@@ -62,7 +65,7 @@ public interface ITestDataBuilder {
 		BaseRuntimeElementCompositeDefinition def = (BaseRuntimeElementCompositeDefinition) theFhirContext.getElementDefinition(theTarget.getClass());
 		BaseRuntimeChildDefinition activeChild = def.getChildByName(theElementName);
 
-		IPrimitiveType<?> booleanType = (IPrimitiveType<?>) activeChild.getChildByName(theElementName).newInstance();
+		IPrimitiveType<?> booleanType = (IPrimitiveType<?>) activeChild.getChildByName(theElementName).newInstance(activeChild.getInstanceConstructorArguments());
 		booleanType.setValueAsString(theValue);
 		activeChild.getMutator().addValue(theTarget, booleanType);
 	}
@@ -203,6 +206,23 @@ public interface ITestDataBuilder {
 		};
 	}
 
+	/**
+	 * Resource.text.div
+	 */
+	default ICreationArgument withNarrative(String theDiv) {
+		return t->{
+			INarrative narrative = (INarrative) getFhirContext().getElementDefinition("Narrative").newInstance();
+			try {
+				narrative.setDivAsString(theDiv);
+			} catch (Exception e) {
+				throw new InternalErrorException(e);
+			}
+
+			BaseRuntimeChildDefinition textChild = getFhirContext().getResourceDefinition((IBaseResource) t).getChildByName("text");
+			textChild.getMutator().setValue(t, narrative);
+		};
+	}
+
 	default ICreationArgument withSecurity(String theSystem, String theCode) {
 		return t -> ((IBaseResource)t).getMeta().addSecurity().setSystem(theSystem).setCode(theCode);
 	}
@@ -227,6 +247,10 @@ public interface ITestDataBuilder {
 		return t -> ((IBaseResource)t).getMeta().setLastUpdated(new InstantType(theIsoDate).getValue());
 	}
 
+	default IBaseResource buildEncounter(ICreationArgument... theModifiers) {
+		return buildResource("Encounter", theModifiers);
+	}
+
 	default IIdType createEncounter(ICreationArgument... theModifiers) {
 		return createResource("Encounter", theModifiers);
 	}
@@ -237,6 +261,10 @@ public interface ITestDataBuilder {
 
 	default IIdType createObservation(ICreationArgument... theModifiers) {
 		return createResource("Observation", theModifiers);
+	}
+
+	default IBaseResource buildObservation(ICreationArgument... theModifiers) {
+		return buildResource("Observation", theModifiers);
 	}
 
 	default IIdType createObservation(Collection<ICreationArgument> theModifiers) {
@@ -255,12 +283,24 @@ public interface ITestDataBuilder {
 		return createResource("Patient", theModifiers);
 	}
 
+	default IIdType createCoverage(ICreationArgument... theModifiers) {
+		return createResource("Coverage", theModifiers);
+	}
+
 	default IIdType createOrganization(ICreationArgument... theModifiers) {
 		return createResource("Organization", theModifiers);
 	}
 
 	default IIdType createPractitioner(ICreationArgument... theModifiers) {
 		return createResource("Practitioner", theModifiers);
+	}
+
+	default IBaseResource buildPractitioner(ICreationArgument... theModifiers) {
+		return buildResource("Practitioner", theModifiers);
+	}
+
+	default void deleteResource(IIdType theIIdType){
+		doDeleteResource(theIIdType);
 	}
 
 	default IIdType createResource(String theResourceType, ICreationArgument... theModifiers) {
@@ -290,6 +330,10 @@ public interface ITestDataBuilder {
 		} else {
 			return doCreateResource(resource);
 		}
+	}
+
+	default <T extends IBaseResource> T buildResource(Class<T> theResourceType, ICreationArgument... theModifiers) {
+		return buildResource(getFhirContext().getResourceType(theResourceType), theModifiers);
 	}
 
 	default <T extends IBaseResource> T buildResource(String theResourceType, ICreationArgument... theModifiers) {
@@ -331,16 +375,22 @@ public interface ITestDataBuilder {
 	}
 
 	@Nonnull
-	default ICreationArgument withReference(String theReferenceName, @Nullable IIdType theReferenceValue) {
-		return t -> {
-			if (theReferenceValue != null && theReferenceValue.getValue() != null) {
-				IBaseReference reference = (IBaseReference) getFhirContext().getElementDefinition("Reference").newInstance();
-				reference.setReference(theReferenceValue.getValue());
+	default ICreationArgument withReference(String theReferenceName, @Nullable String theReferenceValue) {
+		return withReference(theReferenceName, getFhirContext().getVersion().newIdType(theReferenceValue));
+	}
 
-				BaseRuntimeElementDefinition<?> resourceDef = getFhirContext().getElementDefinition(t.getClass());
-				resourceDef.getChildByName(theReferenceName).getMutator().addValue(t, reference);
+	/**
+	 * @param theReferenceName The path to a reference, e.g. "managingOrganization" or "participant.individual"
+	 * @param theReferenceValue A reference to set, or <code>null</code>
+	 */
+	@Nonnull
+	default ICreationArgument withReference(String theReferenceName, @Nullable IIdType theReferenceValue) {
+		return withElementAt(theReferenceName, t -> {
+			IBaseReference reference = (IBaseReference) t;
+			if (theReferenceValue != null) {
+				reference.setReference(theReferenceValue.getValue());
 			}
-		};
+		});
 	}
 
 	default Consumer<IBase> withPrimitiveAttribute(String thePath, Object theValue) {
@@ -400,6 +450,18 @@ public interface ITestDataBuilder {
 		return withCodingAt("code.coding", theSystem, theCode, theDisplay);
 	}
 
+	default ICreationArgument withObservationCategory(@Nullable String theSystem, @Nullable String theCode, @Nullable String theDisplay) {
+		return withCodingAt("category.coding", theSystem, theCode, theDisplay);
+	}
+
+	default ICreationArgument withObservationValueString(@Nullable String theValue) {
+		return t -> {
+			IBase value = getFhirContext().getElementDefinition("string").newInstance(theValue);
+			BaseRuntimeElementDefinition<?> resourceDef = getFhirContext().getElementDefinition(t.getClass());
+			resourceDef.getChildByName("value[x]").getMutator().addValue(t, value);
+		};
+	}
+
 	default <T extends IBase> ICreationArgument withCodingAt(String thePath, @Nullable String theSystem, @Nullable String theValue) {
 		return withCodingAt(thePath, theSystem, theValue, null);
 	}
@@ -420,6 +482,14 @@ public interface ITestDataBuilder {
 		return withReference("hasMember", theHasMember);
 	}
 
+	/**
+	 * Sets the <code>managingOrganization</code> element on a Patient
+	 */
+	default ICreationArgument withOrganization(@Nullable String theHasMember) {
+		IIdType id = theHasMember != null ? getFhirContext().getVersion().newIdType(theHasMember) : null;
+		return withReference("managingOrganization", id);
+	}
+
 	default ICreationArgument withOrganization(@Nullable IIdType theHasMember) {
 		return withReference("managingOrganization", theHasMember);
 	}
@@ -433,6 +503,10 @@ public interface ITestDataBuilder {
 	 * Users of this API must implement this method
 	 */
 	IIdType doUpdateResource(IBaseResource theResource);
+
+	default void doDeleteResource(IIdType theIIdType){
+		throw new NotImplementedException("Not implemented");
+	}
 
 	/**
 	 * Users of this API must implement this method

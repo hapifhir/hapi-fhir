@@ -51,6 +51,7 @@
 
 	<!-- <logger name="ca.uhn.fhir.log.terminology_troubleshooting" level="TRACE"/> -->
 	 <logger name="ca.uhn.fhir.log.partition_troubleshooting" level="info"/>
+	<logger name="ca.uhn.fhir.batch2" level="debug"/>
 
 
 </configuration>

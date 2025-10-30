@@ -109,7 +109,7 @@ public class NpmPackageValidationSupportTest extends BaseValidationTestWithInlin
 		String bundle = loadResource("/r4/mhd_minimal_provide_document_bundle.json");
 		ValidationResult validationResult = validator.validateWithResult(bundle);
 
-		assertEquals(3, validationResult.getMessages().size());
+		assertEquals(4, validationResult.getMessages().size());
 
 		assertTrue(validationResult.isSuccessful());
 

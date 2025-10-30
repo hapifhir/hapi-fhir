@@ -1,23 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static ca.uhn.fhir.test.utilities.UuidUtils.HASH_UUID_PATTERN;
-
-import ca.uhn.fhir.jpa.dao.TransactionUtil;
-import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
-import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
-import org.hl7.fhir.r4.model.MessageHeader;
-import org.hl7.fhir.r4.model.RequestGroup;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
@@ -28,8 +16,11 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.r4.SystemProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -55,6 +46,8 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.Id;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -114,7 +107,6 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -125,17 +117,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static ca.uhn.fhir.test.utilities.UuidUtils.HASH_UUID_PATTERN;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -279,6 +275,26 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		fail();
 		return null;
 	}
+
+	@Test
+	public void testCreateWithIdSuppliedInMetadata() {
+		Patient patient =  new Patient();
+		patient.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED_VALUE, "PT0");
+		patient.setActive(true);
+
+		// Test
+		DaoMethodOutcome outcome = myPatientDao.create(patient, newSrd());
+
+		// Verify
+		assertTrue(outcome.getCreated());
+		assertEquals("Patient/PT0/_history/1", outcome.getId().getValue());
+
+		Patient actualPatient = myPatientDao.read(new IdType("Patient/PT0"), newSrd());
+		assertTrue(actualPatient.getActive());
+		assertEquals("Patient/PT0/_history/1", actualPatient.getId());
+	}
+
+
 
 	@Test
 	public void testTransactionReSavesPreviouslyDeletedResources() {
@@ -706,7 +722,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testReindexingSingleStringHashValueIsDeleted() {
-		myStorageSettings.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setHibernateSearchIndexSearchParams(false);
 		Patient p = new Patient();
 		p.addName().setFamily("family1");
 		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
@@ -889,7 +905,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			assertEquals(Msg.code(530) + "Can not invoke read operation on nested transaction", e.getMessage());
 		}
 	}
-
 
 	@Test
 	public void testTransactionBatchWithFailingRead() {

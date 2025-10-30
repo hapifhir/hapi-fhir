@@ -23,7 +23,6 @@ import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.DiagnosticReport;
@@ -80,8 +79,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -1488,6 +1489,38 @@ public class JsonParserR4Test extends BaseTest {
 
 		final String patientStringXML = ourCtx.newXmlParser().encodeResourceToString(patient);
 		assertThat(patientStringXML).containsOnlyOnce("<modifierExtension");
+	}
+
+	// this test is to ensure contained resources that are referenced by the
+	// entire resource will still be able to be processed in a transaction
+	@Test
+	public void encodeResourceToString_withContainedResource_shouldAddContainedReferenceIdEvenIfNotPresent() {
+		// setup
+		Patient patient = new Patient();
+		{
+			Practitioner practitioner = new Practitioner();
+			practitioner.addName()
+				 .setFamily("Hibert");
+			patient.addName()
+				 .setFamily("Simpson");
+			patient.getContained().add(practitioner);
+			patient.addGeneralPractitioner(new Reference(practitioner));
+		}
+
+		IParser parser = ourCtx.newJsonParser();
+
+		// test
+		String encoded = parser.encodeResourceToString(patient);
+		ourLog.info(encoded);
+
+		// verify
+		assertNotNull(encoded);
+		assertTrue(isNotBlank(encoded));
+		assertFalse(patient.getGeneralPractitioner().isEmpty());
+		Reference ref = patient.getGeneralPractitioner().get(0);
+		assertNotNull(ref.getResource());
+		assertNotNull(ref.getReference());
+		assertEquals("#" + ref.getResource().getIdElement().getValue(), ref.getReference());
 	}
 
 	static List<String> patientStrs() {

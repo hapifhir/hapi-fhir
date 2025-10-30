@@ -81,7 +81,7 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String getValueAsQueryToken(FhirContext theContext) {
+	public String getValueAsQueryToken() {
 		if (getSystemElement().getValueAsString() != null) {
 			return ParameterUtil.escape(
 							StringUtils.defaultString(getSystemElement().getValueAsString()))

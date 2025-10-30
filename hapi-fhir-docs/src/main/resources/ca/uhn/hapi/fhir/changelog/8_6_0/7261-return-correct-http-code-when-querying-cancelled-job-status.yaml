@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 7261
+jira: SMILE-11023
+title: "Querying the status of a cancelled bulk export job was returning a 
+    HTTP 202 instead of a HTTP 404 as required by the spec 
+    (https://hl7.org/fhir/uv/bulkdata/STU2/export.html#bulk-data-delete-request). This has been fixed."

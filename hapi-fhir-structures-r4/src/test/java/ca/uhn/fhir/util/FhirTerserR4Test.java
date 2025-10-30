@@ -21,6 +21,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -38,6 +39,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Patient.LinkType;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Provenance;
@@ -640,6 +642,26 @@ public class FhirTerserR4Test {
 		assertInstanceOf(Extension.class, values.get(0));
 		assertEquals("http://acme.org/childExtension", ((Extension) values.get(0)).getUrl());
 		assertEquals("nestedValue", ((StringType) ((Extension) values.get(0)).getValue()).getValueAsString());
+	}
+
+	@Test
+	public void testGetValues_withChoiceNode() {
+		// set up
+		Observation o1 = new Observation();
+		o1.setEffective(new DateTimeType("2025-05-06T15:47:30-04:00"));
+
+		Observation o2 = new Observation();
+		o2.setEffective(new Period().setStartElement(new DateTimeType("2025-05-06T16:05:34-04:00")));
+
+		// execute
+		List<IBase> values1 = myCtx.newTerser().getValues(o1, "Observation.effectivePeriod.start");
+		List<IBase> values2 = myCtx.newTerser().getValues(o2, "Observation.effectivePeriod.start");
+
+		//validate
+		assertThat(values1).isNotNull().isEmpty();
+		assertThat(values2).isNotNull().hasSize(1);
+		assertThat(values2.get(0)).isInstanceOf(DateTimeType.class);
+		assertThat(((DateTimeType)values2.get(0)).getValueAsString()).isEqualTo("2025-05-06T16:05:34-04:00");
 	}
 
 	@Test
@@ -1579,6 +1601,13 @@ public class FhirTerserR4Test {
 		String stringifiedCopy = FhirContext.forR4Cached().newJsonParser().encodeResourceToString(copy);
 		Library parsedCopy = (Library) parser.parseResource(stringifiedCopy);
 		assertEquals(1, parsedCopy.getContained().size());
+	}
+
+	@Test
+	void testFieldExists() {
+		final FhirTerser fhirTerser = myCtx.newTerser();
+		assertThat(fhirTerser.fieldExists("identifier", new Patient())).isTrue();
+		assertThat(fhirTerser.fieldExists("identifier", new Provenance())).isFalse();
 	}
 
 	/**

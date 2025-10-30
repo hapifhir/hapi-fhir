@@ -175,9 +175,9 @@ public class FhirInstanceValidatorDstu3Test extends BaseTest {
 			ValidationResult result = val.validateWithResult(p);
 			assertFalse(result.isSuccessful());
 			List<SingleValidationMessage> all = logResultsAndReturnAll(result);
-			assertThat(all).hasSize(2);
-			assertEquals(ResultSeverityEnum.ERROR, all.get(0).getSeverity());
-			assertEquals("Unknown code 'urn:iso:std:iso:3166#QQ'", all.get(0).getMessage());
+			assertThat(all).hasSize(3);
+			assertEquals(ResultSeverityEnum.ERROR, all.get(1).getSeverity());
+			assertEquals("Unknown code 'urn:iso:std:iso:3166#QQ'", all.get(1).getMessage());
 		}
 	}
 
@@ -612,8 +612,8 @@ public class FhirInstanceValidatorDstu3Test extends BaseTest {
 
 		ValidationResult results = myVal.validateWithResult(is);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome).hasSize(1);
-		assertThat(outcome.get(0).getMessage()).startsWith("The Coding provided (http://dicom.nema.org/resources/ontology/DCM#BAR) was not found in the value set 'Acquisition Modality Codes' (http://hl7.org/fhir/ValueSet/dicom-cid29|20121129)");
+		assertThat(outcome).hasSize(2);
+		assertThat(outcome.get(1).getMessage()).startsWith("The Coding provided (http://dicom.nema.org/resources/ontology/DCM#BAR) was not found in the value set 'Acquisition Modality Codes' (http://hl7.org/fhir/ValueSet/dicom-cid29|20121129)");
 	}
 
 	/**
@@ -1205,10 +1205,14 @@ public class FhirInstanceValidatorDstu3Test extends BaseTest {
 
 		ValidationResult output = myVal.validateWithResult(patient);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertThat(all).hasSize(1);
-		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
-		assertThat(all.get(0).getMessage()).contains("None of the codings provided are in the value set 'Identifier Type Codes'");
+		assertThat(all).hasSize(2);
+
+		assertThat(all.get(0).getMessage()).contains("CodeSystem is unknown and can't be validated: http://example.com/foo/bar for 'http://example.com/foo/bar#bar'");
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
+
+		assertEquals("Patient.identifier[0].type", all.get(1).getLocationString());
+		assertThat(all.get(1).getMessage()).contains("None of the codings provided are in the value set 'Identifier Type Codes'");
+		assertEquals(ResultSeverityEnum.WARNING, all.get(1).getSeverity());
 
 	}
 
@@ -1249,7 +1253,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseTest {
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 		myVal.validateWithResult(input);
 
-		verify(fetcher, times(3)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean(), anyList());
+		verify(fetcher, times(2)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean(), anyList());
 		verify(policyAdvisor, times(4)).policyForReference(any(), any(), anyString(), anyString(), any());
 		verify(fetcher, times(4)).fetch(any(), any(), anyString());
 	}

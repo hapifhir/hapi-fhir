@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7323
+title: "It is now possible to define a Combo SearchParameter which indexes one or more uplifted refchains. This means
+   that a single index can be defined and searched against for multiple chained search parameters, which can 
+   traditionally be a slow and expensive kind of search."

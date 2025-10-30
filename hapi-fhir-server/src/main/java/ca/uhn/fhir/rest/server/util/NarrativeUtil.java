@@ -43,7 +43,7 @@ public class NarrativeUtil {
 	 *    <li>Tables are allowed</li>
 	 *    <li>Basic styles are allowed but any styles considered unsafe are removed from the document (e.g. any style declarations that could be used to load external content)</li>
 	 *    <li>Attributes considered safe are allowed</li>
-	 *    <li>Any links (&lta href="....") are removed although any text inside the link is retained</li>
+	 *    <li>Any links ({@code <a href="...">}) are removed although any text inside the link is retained</li>
 	 *    <li>All other elements and attributes are removed</li>
 	 * </ul>
 	 */
@@ -69,7 +69,7 @@ public class NarrativeUtil {
 	 *    <li>Tables are allowed</li>
 	 *    <li>Basic styles are allowed but any styles considered unsafe are removed from the document (e.g. any style declarations that could be used to load external content)</li>
 	 *    <li>Attributes considered safe are allowed</li>
-	 *    <li>Any links (&lta href="....") are removed although any text inside the link is retained</li>
+	 *    <li>Any links ({@code <a href="...">}) are removed although any text inside the link is retained</li>
 	 *    <li>All other elements and attributes are removed</li>
 	 * </ul>
 	 */

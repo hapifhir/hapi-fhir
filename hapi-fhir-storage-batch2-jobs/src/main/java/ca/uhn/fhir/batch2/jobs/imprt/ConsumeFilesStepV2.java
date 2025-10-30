@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI-FHIR Storage Batch2 Jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -84,7 +84,7 @@ public class ConsumeFilesStepV2
 				try {
 					parsed = jsonParser.parseResource(next);
 				} catch (DataFormatException e) {
-					throw new JobExecutionFailedException(Msg.code(2052) + "Failed to parse resource: " + e, e);
+					throw new JobExecutionFailedException(Msg.code(2674) + "Failed to parse resource: " + e, e);
 				}
 				resources.add(parsed);
 			}

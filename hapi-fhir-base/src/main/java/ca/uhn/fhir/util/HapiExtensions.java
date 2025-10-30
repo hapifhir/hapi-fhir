@@ -82,6 +82,12 @@ public class HapiExtensions {
 			"http://hapifhir.io/fhir/StructureDefinition/externalized-binary-id";
 
 	/**
+	 * Extension ID for the SHA-256 hash of external binary content
+	 */
+	public static final String EXT_EXTERNALIZED_BINARY_HASH_SHA_256 =
+			"http://hapifhir.io/fhir/StructureDefinition/externalized-binary-hash-sha256";
+
+	/**
 	 * For subscription, deliver a bundle containing a search result instead of just a single resource
 	 */
 	public static final String EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA =
@@ -109,6 +115,9 @@ public class HapiExtensions {
 	public static final String EXT_META_SOURCE = "http://hapifhir.io/fhir/StructureDefinition/resource-meta-source";
 
 	public static final String EXT_SP_UNIQUE = "http://hapifhir.io/fhir/StructureDefinition/sp-unique";
+
+	public static final String EXT_SP_COMBO_UPLIFT_CHAIN =
+			"http://hapifhir.io/fhir/StructureDefinition/sp-combo-uplift-chain";
 
 	/**
 	 * URL for extension on a Search Parameter which determines whether it should be enabled for searching for resources

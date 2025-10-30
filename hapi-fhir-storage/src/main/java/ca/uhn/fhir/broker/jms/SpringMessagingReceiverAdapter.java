@@ -56,7 +56,7 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 	public void subscribe(MessageHandler theMessageHandler) {
 		checkState();
 		if (myMessageHandler != null) {
-			throw new IllegalArgumentException("Only one subscriber allowed");
+			throw new IllegalArgumentException(Msg.code(2666) + "Only one subscriber allowed");
 		}
 		myMessageHandler = theMessageHandler;
 		mySpringMessagingChannelReceiver.subscribe(theMessageHandler);

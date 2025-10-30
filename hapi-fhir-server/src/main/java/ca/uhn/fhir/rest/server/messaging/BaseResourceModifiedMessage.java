@@ -221,10 +221,12 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		setPayloadId(payloadIdType);
 	}
 
+	@Override
 	public RequestPartitionId getPartitionId() {
 		return myPartitionId;
 	}
 
+	@Override
 	public void setPartitionId(RequestPartitionId thePartitionId) {
 		myPartitionId = thePartitionId;
 	}

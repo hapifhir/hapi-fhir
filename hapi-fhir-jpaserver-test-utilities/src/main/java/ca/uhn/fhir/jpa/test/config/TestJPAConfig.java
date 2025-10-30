@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.test.config;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
@@ -41,6 +42,11 @@ import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookListener;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.util.LoggingEmailSender;
+import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
+import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.system.HapiTestSystemProperties;
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -131,5 +137,10 @@ public class TestJPAConfig {
 	@Bean
 	public IEmailSender emailSender(){
 		return new LoggingEmailSender();
+	}
+
+	@Bean
+	public IMdmRuleValidator mdmRuleValidator(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
+		return new MdmRuleValidator(theFhirContext, theSearchParamRetriever);
 	}
 }

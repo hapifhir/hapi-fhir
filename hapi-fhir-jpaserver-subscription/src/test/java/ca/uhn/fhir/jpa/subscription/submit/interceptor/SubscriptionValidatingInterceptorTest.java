@@ -7,6 +7,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -82,6 +83,7 @@ public class SubscriptionValidatingInterceptorTest {
 	private IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
 	private FhirContext myFhirContext;
 
+	private PartitionSettings myPartitionSettings = new PartitionSettings();
 	@SpyBean
 	private SubscriptionChannelTypeValidatorFactory mySubscriptionChannelTypeValidatorFactory;
 
@@ -317,7 +319,7 @@ public class SubscriptionValidatingInterceptorTest {
 	private void setFhirContext(FhirVersionEnum fhirVersion) {
 		myFhirContext = FhirContext.forCached(fhirVersion);
 		mySubscriptionValidatingInterceptor.setFhirContext(myFhirContext);
-		mySubscriptionValidatingInterceptor.setSubscriptionCanonicalizerForUnitTest(new SubscriptionCanonicalizer(myFhirContext, mySubscriptionSettings));
+		mySubscriptionValidatingInterceptor.setSubscriptionCanonicalizerForUnitTest(new SubscriptionCanonicalizer(myFhirContext, mySubscriptionSettings, myPartitionSettings));
 	}
 
 	private static @Nonnull Stream<IBaseResource> subscriptionByFhirVersion(boolean theIncludeR5) {
@@ -349,7 +351,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 		@Bean
 		SubscriptionCanonicalizer subscriptionCanonicalizer(FhirContext theFhirContext) {
-			return new SubscriptionCanonicalizer(theFhirContext, new SubscriptionSettings());
+			return new SubscriptionCanonicalizer(theFhirContext, new SubscriptionSettings(), new PartitionSettings());
 		}
 
 		@Bean

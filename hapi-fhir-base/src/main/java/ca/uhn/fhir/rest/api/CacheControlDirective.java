@@ -67,7 +67,7 @@ public class CacheControlDirective {
 	}
 
 	/**
-	 * If <code>true<</code>, adds the <code>no-cache</code> directive to the
+	 * If <code>true</code>, adds the <code>no-cache</code> directive to the
 	 * request. This directive indicates that the cache should not be used to
 	 * serve this request.
 	 */
@@ -76,7 +76,7 @@ public class CacheControlDirective {
 	}
 
 	/**
-	 * If <code>true<</code>, adds the <code>no-cache</code> directive to the
+	 * If <code>true</code>, adds the <code>no-cache</code> directive to the
 	 * request. This directive indicates that the cache should not be used to
 	 * serve this request.
 	 */

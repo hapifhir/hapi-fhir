@@ -1,0 +1,5 @@
+---
+type: change
+issue: 7342
+title: "Fix concurrency issues in StructureDefinition snapshot generation by
+    updating its elements collection in an atomic way."

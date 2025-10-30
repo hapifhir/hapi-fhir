@@ -1,10 +1,8 @@
 package ca.uhn.fhir.jpa.bulk;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.jobs.export.BulkDataExportSupport;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -16,7 +14,9 @@ import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.JpaJobPersistenceImpl;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
@@ -48,6 +49,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.MedicationAdministration;
 import org.hl7.fhir.r4.model.Observation;
@@ -69,10 +71,12 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Spy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -91,8 +95,12 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsInlineTest.createSearchParameterForInlineSecurity;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -105,6 +113,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	private IBatch2WorkChunkRepository myWorkChunkRepository;
 	@Autowired
 	private IJobPersistence myJobPersistence;
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	private JpaJobPersistenceImpl myJobPersistenceImpl;
 
 	@AfterEach
@@ -792,6 +802,120 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		verifyBulkExportResults(options, List.of("Observation/C", "Group/B"), List.of("Patient/A"));
 	}
 
+	@Test
+	public void testGroupBulkExport_MultipleQualifiedSubResourcesOfUnqualifiedPatientShouldShowUp() throws InterruptedException {
+
+		// Patient with lastUpdated before _since
+		Patient patient = new Patient();
+		patient.setId("P1");
+		myClient.update().resource(patient).execute();
+
+		// Sleep for 1 sec
+		ourLog.info("Patient lastUpdated: " + InstantType.withCurrentTime().getValueAsString());
+		Thread.sleep(1000);
+
+		// LastUpdated since now
+		Date since = InstantType.now().getValue();
+		ourLog.info(since.toString());
+
+		// Group references to Patient/A
+		Group group = new Group();
+		group.setId("G1");
+		group.addMember().getEntity().setReference("Patient/P1");
+		myClient.update().resource(group).execute();
+
+		// Observation references to Patient/A
+		Observation observation = new Observation();
+		observation.setId("O1");
+		observation.setSubject(new Reference("Patient/P1"));
+		myClient.update().resource(observation).execute();
+
+		// Observation references to Patient/A
+		Observation observation2 = new Observation();
+		observation2.setId("O2");
+		observation2.setSubject(new Reference("Patient/P1"));
+		myClient.update().resource(observation2).execute();
+
+		// Observation references to Patient/A
+		Observation observation3 = new Observation();
+		observation3.setId("O3");
+		observation3.setSubject(new Reference("Patient/P1"));
+		myClient.update().resource(observation3).execute();
+
+		// Set the export options
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "Group"));
+		options.setGroupId("Group/G1");
+		options.setFilters(new HashSet<>());
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+		options.setSince(since);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+		// Should get the sub-resource (Observations) even the patient hasn't been updated after the _since param
+		verifyBulkExportResults(options, List.of("Observation/O1", "Group/G1", "Observation/O2", "Observation/O3"), List.of("Patient/P1"));
+	}
+
+	@Test
+	public void testGroupBulkExport_QualifiedSubResourcesOfUnqualifiedPatientShouldShowUp_FiltersOnSinceAndUntil() throws InterruptedException {
+
+		// Patient with lastUpdated before _since
+		Patient patient = new Patient();
+		patient.setId("P1");
+		myClient.update().resource(patient).execute();
+
+		// Sleep for 1 sec
+		ourLog.info("Patient lastUpdated: " + InstantType.withCurrentTime().getValueAsString());
+		Thread.sleep(1000);
+
+		// LastUpdated since now
+		Date since = InstantType.now().getValue();
+		ourLog.info(since.toString());
+
+		// Group references to Patient/P1
+		Group group = new Group();
+		group.setId("G1");
+		group.addMember().getEntity().setReference("Patient/P1");
+		myClient.update().resource(group).execute();
+
+		// Observation references to Patient/P1
+		Observation observation = new Observation();
+		observation.setId("O1");
+		observation.setSubject(new Reference("Patient/P1"));
+		myClient.update().resource(observation).execute();
+
+		// LastUpdated until now
+		Date until = InstantType.now().getValue();
+		ourLog.info(until.toString());
+
+		Thread.sleep(1000);
+
+		// Observation references to Patient/P1
+		Observation observation2 = new Observation();
+		observation2.setId("O2");
+		observation2.setSubject(new Reference("Patient/P1"));
+		myClient.update().resource(observation2).execute();
+
+		// Observation references to Patient/P1
+		Observation observation3 = new Observation();
+		observation3.setId("O3");
+		observation3.setSubject(new Reference("Patient/P1"));
+		myClient.update().resource(observation3).execute();
+
+		// Set the export options
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "Group"));
+		options.setGroupId("Group/G1");
+		options.setFilters(new HashSet<>());
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+		options.setSince(since);
+		options.setUntil(until);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+		// Should get the sub-resource (Observation) even the patient hasn't been updated after the _since param
+		// and excludes Observation/O2 & Observation/O3 which were created after the _until param
+		verifyBulkExportResults(options, List.of("Observation/O1", "Group/G1"), List.of("Patient/P1", "Observation/O2", "Observation/O3"));
+	}
+
 	/**
 	* This interceptor was needed so that similar GET and POST export requests return the same jobID
 	* The test testBulkExportReuse_withGetAndPost_expectSameJobIds() tests this functionality
@@ -1093,6 +1217,32 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		}
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {Constants.CT_FHIR_NDJSON, Constants.CT_APP_NDJSON, Constants.CT_NDJSON})
+	public void testBulkExportWithDifferentOutputFormat(String outputFormat) {
+		// Set up a group with two patients
+		Patient patient1 = buildResource("Patient", withId("P1"), withActiveTrue());
+		myClient.update().resource(patient1).execute();
+
+		Patient patient2 = buildResource("Patient", withId("P2"), withActiveTrue());
+		myClient.update().resource(patient2).execute();
+
+		Group group = buildResource("Group", withId("Gp"), withActiveTrue());
+		group.addMember().getEntity().setReference("Patient/P1");
+		group.addMember().getEntity().setReference("Patient/P2");
+		myClient.update().resource(group).execute();
+
+		// export options
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setResourceTypes(Sets.newHashSet("Patient"));
+		options.setGroupId("Group/Gp");
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+		options.setOutputFormat(outputFormat);
+
+		// verify
+		verifyBulkExportResults(options, List.of("Patient/P1", "Patient/P2"), Collections.emptyList());
+	}
+
 
 	private JobInstance verifyBulkExportResults(BulkExportJobParameters theOptions, List<String> theContainedList, List<String> theExcludedList) {
 		Batch2JobStartResponse startResponse = startNewJob(theOptions);
@@ -1101,15 +1251,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		assertFalse(startResponse.isUsesCachedResult());
 
 		// Run a scheduled pass to build the export
-		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId(), 120);
-
-		await()
-			.atMost(200, TimeUnit.SECONDS)
-			.until(() -> myJobCoordinator.getInstance(startResponse.getInstanceId()).getStatus() == StatusEnum.COMPLETED);
-
-		await()
-			.atMost(200, TimeUnit.SECONDS)
-			.until(() -> myJobCoordinator.getInstance(startResponse.getInstanceId()).getReport() != null);
+		JobInstance jobInstance = awaitExportComplete(startResponse.getInstanceId());
 
 		// Iterate over the files
 		String report = myJobCoordinator.getInstance(startResponse.getInstanceId()).getReport();
@@ -1124,7 +1266,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 				assertThat(nextBinaryIdPart).matches("[a-zA-Z0-9]{32}");
 
 				Binary binary = myBinaryDao.read(new IdType(nextBinaryId));
-				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
+				assertEquals(theOptions.getOutputFormat(), binary.getContentType());
 
 				String nextNdJsonFileContent = new String(binary.getContent(), Constants.CHARSET_UTF8);
 				try (var iter = new LineIterator(new StringReader(nextNdJsonFileContent))) {
@@ -1158,6 +1300,118 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		return jobInstance;
 	}
 
+	@Test
+	public void bulkExport_withOmittedResourcesInPatientCompartment_works() {
+		// setup
+		RequestDetails rd = new SystemRequestDetails();
+
+		Patient patient = new Patient();
+		patient.setId("pat-1");
+		myPatientDao.update(patient, rd);
+
+		Reference patientRef = new Reference("Patient/pat-1");
+
+		Observation obs = new Observation();
+		obs.setId("obs-included");
+		obs.setSubject(patientRef);
+		myObservationDao.update(obs, rd);
+
+		Group group = new Group();
+		group.setId("my-group");
+		group.setType(Group.GroupType.PERSON);
+		group.addMember()
+			.setEntity(patientRef);
+		myGroupDao.update(group, rd);
+
+		ListResource listResource = new ListResource();
+		listResource.setSubject(patientRef);
+		myListDao.create(listResource, rd);
+
+		BulkDataExportSupport support = new BulkDataExportSupport(
+			myFhirContext,
+			myDaoRegistry,
+			myRequestPartitionHelperSvc
+		);
+
+		// test
+		StorageSettings.IndexEnabledEnum currentIndexSetting = myStorageSettings.getIndexMissingFields();
+
+		// set enabled because bulk export requires it:
+		// error: "HAPI-0797: You attempted to start a Patient Bulk Export, but the system has `Index Missing Fields` disabled. It must be enabled for Patient Bulk Export"
+		myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
+
+		// set the export options
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		options.setPatientIds(Set.of(patientRef.getReference()));
+
+		// use Group to get Group and List resources
+		options.setResourceTypes(support.getPatientCompartmentResources(BulkExportJobParameters.ExportStyle.GROUP));
+		Batch2JobStartResponse results = startNewJob(options);
+
+		// verify
+		awaitExportComplete(results.getInstanceId());
+
+		BulkExportJobResults response = getBulkExportJobResults(results.getInstanceId());
+
+		Map<String, List<String>> outputMap = response.getResourceTypeToBinaryIds();
+		ourLog.info("Resource Types returned: " + String.join(", ", outputMap.keySet()));
+
+		assertThat(outputMap).containsKeys("Observation", "Patient")
+			.doesNotContainKeys("Group", "List");
+	}
+
+	@Test
+	public void xportWithCache_withSameParametersAsCancelledJob_shouldNotReuseCancelledJob() throws IOException {
+		// setup
+		BulkExportJobParameters exportJobParameters = new BulkExportJobParameters();
+		exportJobParameters.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		exportJobParameters.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		exportJobParameters.setResourceTypes(List.of("Patient"));
+
+		// test
+		// start first job
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+		startRequest.setUseCache(true);
+		startRequest.setParameters(exportJobParameters);
+		Batch2JobStartResponse firstJob = myJobCoordinator.startInstance(mySrd, startRequest);
+		String instanceId1 = firstJob.getInstanceId();
+
+		// cancel it
+		ServletRequestDetails details = new ServletRequestDetails();
+		details.setRequestType(RequestTypeEnum.DELETE);
+		details.setServer(myServer.getRestfulServer());
+		details.setServletResponse(new MockHttpServletResponse());
+		myBulkDataExportProvider.exportPollStatus(new StringType(instanceId1), details);
+
+		// start a second one with the exact same parameters
+		Batch2JobStartResponse secondJob = myJobCoordinator.startInstance(mySrd, startRequest);
+		String instanceId2 = secondJob.getInstanceId();
+
+		// verify it's a new job
+		assertNotEquals(instanceId1, instanceId2, "Cancelled job id is being reused");
+	}
+
+	private BulkExportJobResults getBulkExportJobResults(String theInstanceId) {
+		String report = myJobCoordinator.getInstance(theInstanceId).getReport();
+		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
+		return results;
+	}
+
+	private JobInstance awaitExportComplete(String theInstanceId) {
+		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(theInstanceId, 120);
+
+		await()
+			.atMost(200, TimeUnit.SECONDS)
+			.until(() -> myJobCoordinator.getInstance(theInstanceId).getStatus() == StatusEnum.COMPLETED);
+
+		await()
+			.atMost(200, TimeUnit.SECONDS)
+			.until(() -> myJobCoordinator.getInstance(theInstanceId).getReport() != null);
+		return jobInstance;
+	}
 
 	@Test
 	public void testValidateParameters_InvalidPostFetch_NoParams() {

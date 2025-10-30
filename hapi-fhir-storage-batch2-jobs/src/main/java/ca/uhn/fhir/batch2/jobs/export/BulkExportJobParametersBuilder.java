@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI-FHIR Storage Batch2 Jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -56,6 +56,7 @@ public class BulkExportJobParametersBuilder {
 	private RequestPartitionId myPartitionId;
 	private String myExportIdentifier;
 	private Set<String> myPostFetchFilterUrls;
+	private boolean myIncludeHistory;
 
 	public BulkExportJobParametersBuilder resourceTypes(IPrimitiveType<String> theResourceTypes) {
 		myResourceTypes = theResourceTypes == null
@@ -132,6 +133,12 @@ public class BulkExportJobParametersBuilder {
 		return this;
 	}
 
+	public BulkExportJobParametersBuilder includeHistory(IPrimitiveType<Boolean> theIncludeHistory) {
+		final Boolean booleanValue = DatatypeUtil.toBooleanValue(theIncludeHistory);
+		myIncludeHistory = booleanValue != null && booleanValue;
+		return this;
+	}
+
 	public BulkExportJobParameters build() {
 		BulkExportJobParameters result = new BulkExportJobParameters();
 		result.setExpandMdm(myExpandMdm);
@@ -146,6 +153,7 @@ public class BulkExportJobParametersBuilder {
 		result.setSince(mySince);
 		result.setUntil(myUntil);
 		result.setPostFetchFilterUrls(myPostFetchFilterUrls);
+		result.setIncludeHistory(myIncludeHistory);
 		return result;
 	}
 

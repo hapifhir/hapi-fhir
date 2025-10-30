@@ -90,6 +90,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		myInterceptorRegistry.registerInterceptor(myCrossPartitionReferencesDetectedInterceptor);
 
 		myTransactionSvc.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
+		initResourceTypeCacheFromConfig();
 	}
 
 	@AfterEach
@@ -188,7 +189,9 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		IIdType observationId = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
 
 		// Verify
-		assertEquals(2, myCaptureQueriesListener.countCommits());
+		// 3 commits because we look up the xref twice for Patient/1 (once for subject, once for patient). This
+		// could probably be better optimized, but it's currrently needed for megascale to work
+		assertEquals(3, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {
@@ -196,7 +199,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 			assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
 
-		verify(myCrossPartitionReferencesDetectedInterceptor, times(1)).handle(eq(Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE), myCrossPartitionReferenceDetailsCaptor.capture());
+		verify(myCrossPartitionReferencesDetectedInterceptor, times(2)).handle(eq(Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE), myCrossPartitionReferenceDetailsCaptor.capture());
 		CrossPartitionReferenceDetails referenceDetails = myCrossPartitionReferenceDetailsCaptor.getValue();
 		assertEquals(PARTITION_OBSERVATION, referenceDetails.getSourceResourcePartitionId());
 		assertEquals(patientId.getValue(), referenceDetails.getPathAndRef().getRef().getReferenceElement().getValue());
@@ -229,7 +232,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 
 		// Verify
 		// 3 queries: Search to resolve PID from Match URL, search to resolve reference, create the resource
-		assertEquals(3, myCaptureQueriesListener.countCommits());
+		assertEquals(4, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {
@@ -237,7 +240,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 			assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
 
-		verify(myCrossPartitionReferencesDetectedInterceptor, times(1)).handle(eq(Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE), myCrossPartitionReferenceDetailsCaptor.capture());
+		verify(myCrossPartitionReferencesDetectedInterceptor, times(2)).handle(eq(Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE), myCrossPartitionReferenceDetailsCaptor.capture());
 		CrossPartitionReferenceDetails referenceDetails = myCrossPartitionReferenceDetailsCaptor.getValue();
 		assertEquals(PARTITION_OBSERVATION, referenceDetails.getSourceResourcePartitionId());
 		assertEquals(patientId.getValue(), referenceDetails.getPathAndRef().getRef().getReferenceElement().getValue());
@@ -256,7 +259,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		IIdType observationId2 = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
 
 		// Verify
-		assertEquals(2, myCaptureQueriesListener.countCommits());
+		assertEquals(3, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {

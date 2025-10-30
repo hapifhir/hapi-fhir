@@ -30,8 +30,8 @@ This interceptor will then produce output similar to the following:
 
 If the JPA server has [partitioning](/docs/server_jpa_partitioning/partitioning.html) enabled, the RequestTenantPartitionInterceptor can be used in combination with a [Tenant Identification Strategy](/docs/server_plain/multitenancy.html) in order to achieve a multitenant solution. See [JPA Server Partitioning](/docs/server_jpa_partitioning/partitioning.html) for more information on partitioning.
 
-* [RequestTenantPartitionInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/partition/RequestTenantPartitionInterceptor.html)
-* [RequestTenantPartitionInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/partition/RequestTenantPartitionInterceptor.java)
+* [RequestTenantPartitionInterceptor JavaDoc](/apidocs/hapi-fhir-jpaserver-searchparam/ca/uhn/fhir/rest/server/interceptor/partition/RequestTenantPartitionInterceptor.html)
+* [RequestTenantPartitionInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-searchparam/src/main/java/ca/uhn/fhir/rest/server/interceptor/partition/RequestTenantPartitionInterceptor.java)
 
 
 # Response Customizing: Syntax Highlighting
@@ -325,6 +325,13 @@ If the JPA server has [partitioning](/docs/server_jpa_partitioning/partitioning.
 # JPA Server: Retry on Version Conflicts
 
 The UserRequestRetryVersionConflictsInterceptor allows clients to request that the server avoid version conflicts (HTTP 409) when two concurrent client requests attempt to modify the same resource. See [Version Conflicts](/docs/server_jpa/configuration.html#retry-on-version-conflict) for more information. 
+
+# JPA Server: Selective Auto-Create Placeholder Reference Targets
+
+The `AutoCreatePlaceholderReferenceEnabledByTypeInterceptor` can be used in combination with [Auto-Create Placeholder Reference Targets](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#setAutoCreatePlaceholderReferenceTargets(boolean)) in order to specify that only reference targets with specific resource types should be created.
+
+* [AutoCreatePlaceholderReferenceEnabledByTypeInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-storage/src/main/java/ca/uhn/fhir/storage/interceptor/AutoCreatePlaceholderReferenceEnabledByTypeInterceptor.java)
+
 
 # JPA Server: Validate Data Being Stored
 

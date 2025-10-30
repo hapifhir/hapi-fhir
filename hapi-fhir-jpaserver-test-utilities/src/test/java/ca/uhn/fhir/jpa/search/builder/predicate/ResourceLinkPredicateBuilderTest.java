@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -38,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -47,6 +49,7 @@ public class ResourceLinkPredicateBuilderTest {
 	private static final String PLACEHOLDER_BASE = UUID.randomUUID().toString();
 
 	private ResourceLinkPredicateBuilder myResourceLinkPredicateBuilder;
+	private PartitionSettings myPartitionSettings = new PartitionSettings();
 
 	@Mock
 	private SearchQueryBuilder mySearchQueryBuilder;
@@ -63,6 +66,7 @@ public class ResourceLinkPredicateBuilderTest {
 		DbSchema schema = new DbSchema(spec, "schema");
 		DbTable table = new DbTable(schema, "table");
 		when(mySearchQueryBuilder.addTable(Mockito.anyString())).thenReturn(table);
+		when(mySearchQueryBuilder.getPartitionSettings()).thenReturn(myPartitionSettings);
 		myResourceLinkPredicateBuilder = new ResourceLinkPredicateBuilder(null, mySearchQueryBuilder, false);
 		myResourceLinkPredicateBuilder.setSearchParamRegistryForUnitTest(mySearchParamRegistry);
 		myResourceLinkPredicateBuilder.setIdHelperServiceForUnitTest(myIdHelperService);
@@ -84,6 +88,8 @@ public class ResourceLinkPredicateBuilderTest {
 
 	@Test
 	public void createEverythingPredicate_withNoPids_returnsBinaryCondition() {
+		when(mySearchQueryBuilder.generatePlaceholder(nullable(Object.class))).thenReturn("A");
+
 		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), new JpaPid[0]);
 		assertEquals(BinaryCondition.class, condition.getClass());
 	}

@@ -2,17 +2,20 @@ package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -20,13 +23,16 @@ import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.CodeableReference;
 import org.hl7.fhir.r5.model.Composition;
 import org.hl7.fhir.r5.model.DateType;
 import org.hl7.fhir.r5.model.Encounter;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Extension;
+import org.hl7.fhir.r5.model.HealthcareService;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Identifier;
 import org.hl7.fhir.r5.model.Organization;
@@ -76,6 +82,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 
 		myStorageSettings.setIndexOnUpliftedRefchains(true);
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
+		initResourceTypeCacheFromConfig();
 	}
 
 	@Override
@@ -971,6 +978,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		}
 	}
 
+
 	private void createOrganizationO1_SpringfieldHospital() {
 		Organization org = new Organization();
 		org.setId(ORGANIZATION_O1);
@@ -1028,9 +1036,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		sp.setExpression(subjectSp.getPath());
 		subjectSp.getBase().forEach(t->sp.addBase(Enumerations.VersionIndependentResourceTypesAll.fromCode(t)));
 		subjectSp.getTargets().forEach(t->sp.addTarget(Enumerations.VersionIndependentResourceTypesAll.fromCode(t)));
-		mySearchParameterDao.create(sp, mySrd);
-
-		mySearchParamRegistry.forceRefresh();
+		createOrUpdateSearchParameter(sp);
 	}
 
 	@Nonnull

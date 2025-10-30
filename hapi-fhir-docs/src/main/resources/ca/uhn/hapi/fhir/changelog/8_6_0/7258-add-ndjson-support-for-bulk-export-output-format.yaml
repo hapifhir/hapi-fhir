@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7258
+jira: SMILE-11001
+title: "Allow `application/ndjson` in addition to `application/fhir+ndjson` as a Bulk Export output format to conform to the FHIR specification"

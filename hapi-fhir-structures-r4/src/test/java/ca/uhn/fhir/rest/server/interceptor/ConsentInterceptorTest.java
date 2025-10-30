@@ -50,6 +50,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -72,7 +74,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -203,8 +204,9 @@ public class ConsentInterceptorTest {
 		}
 	}
 
-	@Test
-	public void testSummaryModeIgnoredTotalForConsentQueries() throws IOException {
+	@ParameterizedTest
+	@ValueSource(strings = {"NONE", "PROCEED", "AUTHORIZED"})
+	public void testSummaryModeIgnoredTotalForConsentQueries(String theConsentSvcResponse) throws IOException {
 		Patient patientA = new Patient();
 		patientA.setId("Patient/A");
 		patientA.setActive(true);
@@ -221,34 +223,39 @@ public class ConsentInterceptorTest {
 
 		HttpGet httpGet;
 
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_summary=count");
-		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertEquals(400, status.getStatusLine().getStatusCode());
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent).contains(Msg.code(2038) + "_summary=count is not permitted on this server");
+		switch (theConsentSvcResponse) {
+			case "NONE"->{
+				httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_summary=count");
+				try (CloseableHttpResponse status = myClient.execute(httpGet)) {
+					assertEquals(400, status.getStatusLine().getStatusCode());
+					String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+					ourLog.info("Response: {}", responseContent);
+					assertThat(responseContent).contains(Msg.code(2038) + "_summary=count is not permitted on this server");
+				}
+			}
+			case "PROCEED" -> {
+				when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+				when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+				when(myConsentSvc.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+				httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_summary=data");
+				try (CloseableHttpResponse status = myClient.execute(httpGet)) {
+					assertEquals(200, status.getStatusLine().getStatusCode());
+					String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+					ourLog.info("Response: {}", responseContent);
+					assertThat(responseContent).doesNotContain("\"total\"");
+				}
+			}
+			case "AUTHORIZED" -> {
+				when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.AUTHORIZED);
+				httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_summary=data");
+				try (CloseableHttpResponse status = myClient.execute(httpGet)) {
+					assertEquals(200, status.getStatusLine().getStatusCode());
+					String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+					ourLog.info("Response: {}", responseContent);
+					assertThat(responseContent).contains("\"total\"");
+				}
+			}
 		}
-
-		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_summary=data");
-		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent).doesNotContain("\"total\"");
-		}
-
-		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.AUTHORIZED);
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_summary=data");
-		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent).contains("\"total\"");
-		}
-
 	}
 
 	@Test

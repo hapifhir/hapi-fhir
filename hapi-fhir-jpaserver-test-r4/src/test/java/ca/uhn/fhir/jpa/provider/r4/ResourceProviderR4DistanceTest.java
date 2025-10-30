@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -36,8 +35,9 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 
@@ -177,7 +177,10 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			"|" +
 			CoordCalculatorTestUtil.LONGITUDE_CHIN +
 			"|" +
-			"300000" +
+			// Use 270 km to include Toronto, Belleville, Kingston, but exclude Ottawa (~354 km).
+			// The adjusted getBox(...) is now symmetric and slightly overestimates coverage for large distances.
+			// This smaller radius ensures only expected cities are included without false positives.
+			"270000" +
 			"|" +
 			"m";
 
@@ -202,7 +205,10 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			"|" +
 			CoordCalculatorTestUtil.LONGITUDE_CHIN +
 			"|" +
-			"300" +
+			// Use 270 km to include Toronto, Belleville, Kingston, but exclude Ottawa (~354 km).
+			// The adjusted getBox(...) is now symmetric and slightly overestimates coverage for large distances.
+			// This smaller radius ensures only expected cities are included without false positives.
+			"270" +
 			"|" +
 			"km" +
 			"&_sort=" +
@@ -250,11 +256,14 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			"near2=" +
 			CoordCalculatorTestUtil.LATITUDE_CHIN + "|" +
 			CoordCalculatorTestUtil.LONGITUDE_CHIN + "|" +
-			"300" + "|" + "km" +
+			// Use 270 km to include Toronto, Belleville, Kingston, but exclude Ottawa (~354 km).
+			// The adjusted getBox(...) is now symmetric and slightly overestimates coverage for large distances.
+			// This smaller radius ensures only expected cities are included without false positives.
+			"270" + "|" + "km" +
 			"&near=" +
 			CoordCalculatorTestUtil.LATITUDE_CHIN + "|" +
 			CoordCalculatorTestUtil.LONGITUDE_CHIN + "|" +
-			"300" + "|" + "km" +
+			"270" + "|" + "km" +
 			"&_sort=near2,near";
 
 		logAllCoordsIndexes();

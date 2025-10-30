@@ -50,7 +50,7 @@ public class SearchPreferHandlingInterceptorJpaTest extends BaseResourceProvider
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).contains("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]");
+			assertThat(e.getMessage()).contains("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, _profile, _security, _source, _tag, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]");
 		}
 
 	}
@@ -69,7 +69,7 @@ public class SearchPreferHandlingInterceptorJpaTest extends BaseResourceProvider
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).contains("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]");
+			assertThat(e.getMessage()).contains("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, _profile, _security, _source, _tag, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]");
 		}
 
 	}
@@ -88,7 +88,7 @@ public class SearchPreferHandlingInterceptorJpaTest extends BaseResourceProvider
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).contains("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]");
+			assertThat(e.getMessage()).contains("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, _profile, _security, _source, _tag, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]");
 		}
 
 	}
@@ -124,7 +124,7 @@ public class SearchPreferHandlingInterceptorJpaTest extends BaseResourceProvider
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).contains("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]");
+			assertThat(e.getMessage()).contains("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, _profile, _security, _source, _tag, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]");
 		}
 
 	}

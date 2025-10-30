@@ -1,0 +1,9 @@
+---
+type: add
+issue: 6983
+jira: SMILE-9574
+title: "FullText indexing via the `_content` and `_text` Search Parameters is now more configurable:
+  Two new pointcuts have been added which can be used to customize the text which is indexed from
+  resources. Also, it is possible to select which resource types each SearchParameter indexes by
+  storing a custom SearchParameter with the appropriate URL. Examples of both of these approaches
+  can be found in the documentation."

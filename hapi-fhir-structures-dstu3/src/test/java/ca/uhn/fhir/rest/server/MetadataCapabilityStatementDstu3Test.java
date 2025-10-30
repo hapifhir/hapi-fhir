@@ -1,12 +1,12 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Validate;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MetadataCapabilityStatementDstu3Test {
 
@@ -86,8 +87,8 @@ public class MetadataCapabilityStatementDstu3Test {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(output).contains("<CapabilityStatement");
-			assertThat(status.getFirstHeader("X-Powered-By").getValue()).contains("HAPI FHIR " + VersionUtil.getVersion());
-			assertThat(status.getFirstHeader("X-Powered-By").getValue()).contains("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")");
+			assertThat(status.getFirstHeader(Constants.HEADER_POWERED_BY).getValue()).contains("HAPI FHIR " + VersionUtil.getVersion());
+			assertThat(status.getFirstHeader(Constants.HEADER_POWERED_BY).getValue()).contains("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}

@@ -23,7 +23,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.Constants;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -78,7 +77,7 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 	}
 
 	@Override
-	String doGetValueAsQueryToken(FhirContext theContext) {
+	String doGetValueAsQueryToken() {
 		return ParameterUtil.escape(myValue);
 	}
 
@@ -202,10 +201,6 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 			setMissing(null);
 		}
 		return this;
-	}
-
-	public boolean isEmpty() {
-		return StringUtils.isEmpty(myValue);
 	}
 
 	public boolean isExact() {

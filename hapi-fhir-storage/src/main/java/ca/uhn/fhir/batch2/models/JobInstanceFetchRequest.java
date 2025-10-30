@@ -21,6 +21,8 @@ package ca.uhn.fhir.batch2.models;
 
 import org.springframework.data.domain.Sort;
 
+import java.util.Date;
+
 public class JobInstanceFetchRequest {
 
 	/**
@@ -36,6 +38,14 @@ public class JobInstanceFetchRequest {
 	private Sort mySort;
 
 	private String myJobStatus;
+
+	private String myJobDefinitionId;
+
+	private String myJobId;
+
+	private Date myJobCreateTimeFrom;
+
+	private Date myJobCreateTimeTo;
 
 	public int getPageStart() {
 		return myPageStart;
@@ -67,5 +77,37 @@ public class JobInstanceFetchRequest {
 
 	public void setJobStatus(String theJobStatus) {
 		myJobStatus = theJobStatus;
+	}
+
+	public String getJobDefinitionId() {
+		return myJobDefinitionId;
+	}
+
+	public void setJobDefinitionId(String theJobDefinitionId) {
+		this.myJobDefinitionId = theJobDefinitionId;
+	}
+
+	public String getJobId() {
+		return myJobId;
+	}
+
+	public void setJobId(String theJobId) {
+		this.myJobId = theJobId;
+	}
+
+	public Date getJobCreateTimeFrom() {
+		return myJobCreateTimeFrom;
+	}
+
+	public void setJobCreateTimeFrom(Date theJobCreateTimeFrom) {
+		this.myJobCreateTimeFrom = theJobCreateTimeFrom;
+	}
+
+	public Date getJobCreateTimeTo() {
+		return myJobCreateTimeTo;
+	}
+
+	public void setJobCreateTimeTo(Date theJobCreateTimeTo) {
+		this.myJobCreateTimeTo = theJobCreateTimeTo;
 	}
 }

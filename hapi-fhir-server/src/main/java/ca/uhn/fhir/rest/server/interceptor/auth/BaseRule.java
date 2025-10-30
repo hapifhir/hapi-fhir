@@ -34,7 +34,7 @@ import java.util.Collections;
 import java.util.List;
 
 abstract class BaseRule implements IAuthRule {
-	private String myName;
+	private final String myName;
 	private PolicyEnum myMode;
 	private List<IAuthRuleTester> myTesters;
 

@@ -1,0 +1,4 @@
+---
+type: add
+issue: 7003
+title: "Inject narrative generator to jpa server Fhir context to ensure narrative can be added to resources."

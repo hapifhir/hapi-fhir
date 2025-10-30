@@ -152,18 +152,18 @@ class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 		Organization organization = new Organization();
 		organization.setName("Test Organization");
 		IIdType orgId = createResource(organization, false);
-		
+
 		Patient patient = new Patient();
 		patient.setManagingOrganization(new Reference(orgId));
 		IIdType patientId = createResource(patient, false);
-		
+
 		// Create multiple observations linked to the patient
 		Observation obs1 = new Observation();
 		obs1.setSubject(new Reference(patientId));
 		obs1.setStatus(Observation.ObservationStatus.FINAL);
 		obs1.getCode().setText("Observation 1");
 		IIdType obs1Id = createResource(obs1, false);
-		
+
 		Observation obs2 = new Observation();
 		obs2.setSubject(new Reference(patientId));
 		obs2.setStatus(Observation.ObservationStatus.FINAL);
@@ -207,10 +207,10 @@ class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 		Bundle receivedBundle = ourTestSystemProvider.getLastInput();
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(receivedBundle));
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, receivedBundle);
-		
+
 		// Should have 5 resources: Parameters + Patient + Organization + 2 Observations
 		assertThat(resources).hasSize(5);
-		
+
 		// First resource should be the Parameters
 		Parameters parameters = (Parameters) resources.get(0);
 		validateSubscriptionStatus(subscription, patient, parameters);

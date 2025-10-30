@@ -42,6 +42,10 @@ import org.hl7.fhir.r4.model.Meta;
 
 import java.util.Map;
 
+import static ca.uhn.fhir.rest.api.Constants.PARAM_CONTENT;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_FILTER;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_LANGUAGE;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_TEXT;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -50,6 +54,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class JpaCapabilityStatementProvider extends ServerCapabilityStatementProvider {
 
 	private final FhirContext myContext;
+	private final ISearchParamRegistry mySearchParamRegistry;
 	private JpaStorageSettings myStorageSettings;
 	private String myImplementationDescription;
 	private boolean myIncludeResourceCounts;
@@ -66,14 +71,16 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 			IValidationSupport theValidationSupport) {
 		super(theRestfulServer, theSearchParamRegistry, theValidationSupport);
 
-		Validate.notNull(theRestfulServer);
-		Validate.notNull(theSystemDao);
-		Validate.notNull(theStorageSettings);
-		Validate.notNull(theSearchParamRegistry);
+		Validate.notNull(theRestfulServer, "theRestfulServer must not be null");
+		Validate.notNull(theSystemDao, "theSystemDao must not be null");
+		Validate.notNull(theStorageSettings, "theStorageSettings must not be null");
+		Validate.notNull(theSearchParamRegistry, "theSearchParamRegistry must not be null");
 
 		myContext = theRestfulServer.getFhirContext();
 		mySystemDao = theSystemDao;
 		myStorageSettings = theStorageSettings;
+		mySearchParamRegistry = theSearchParamRegistry;
+
 		setIncludeResourceCounts(true);
 	}
 
@@ -143,7 +150,12 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 	}
 
 	@Override
-	protected boolean searchParamEnabled(String theSearchParam) {
-		return !Constants.PARAM_FILTER.equals(theSearchParam) || myStorageSettings.isFilterParameterEnabled();
+	protected boolean searchParamEnabled(String theResourceName, String theSearchParam) {
+		return switch (theSearchParam) {
+			case PARAM_FILTER -> myStorageSettings.isFilterParameterEnabled();
+			case PARAM_CONTENT, PARAM_TEXT, PARAM_LANGUAGE -> mySearchParamRegistry.hasActiveSearchParam(
+					theResourceName, theSearchParam, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
+			default -> true;
+		};
 	}
 }

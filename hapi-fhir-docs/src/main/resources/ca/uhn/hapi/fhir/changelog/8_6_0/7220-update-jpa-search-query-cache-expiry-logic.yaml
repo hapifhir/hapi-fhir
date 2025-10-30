@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7220
+title: "JPA search results are now purged only if both the configured expiry time since creation has passed 
+and at least ten minutes have elapsed since the last access, ensuring active searches are not removed prematurely."

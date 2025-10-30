@@ -399,7 +399,7 @@ public abstract class BaseClient implements IRestfulClient {
 						try {
 							// TODO: handle if something other than OO comes back
 							oo = (IBaseOperationOutcome) p.parseResource(body);
-							String details = OperationOutcomeUtil.getFirstIssueDetails(getFhirContext(), oo);
+							String details = OperationOutcomeUtil.getFirstIssueDiagnostics(getFhirContext(), oo);
 							if (isNotBlank(details)) {
 								message = message + ": " + details;
 							}
@@ -431,17 +431,17 @@ public abstract class BaseClient implements IRestfulClient {
 			}
 
 			try (InputStream inputStream = response.readEntity()) {
-				InputStream inputStreamToReturn = inputStream;
+				InputStream inputStreamToReturn;
 
-				if (ourLog.isTraceEnabled() || myKeepResponses || theLogRequestAndResponse) {
-					if (inputStream != null) {
+				if (inputStream != null) {
+					if (ourLog.isTraceEnabled() || myKeepResponses || theLogRequestAndResponse) {
 						String responseString = IOUtils.toString(inputStream, Charsets.UTF_8);
 						keepResponseAndLogIt(theLogRequestAndResponse, response, responseString);
 						inputStreamToReturn = new ByteArrayInputStream(responseString.getBytes(Charsets.UTF_8));
+					} else {
+						inputStreamToReturn = new ByteArrayInputStream(inputStream.readAllBytes());
 					}
-				}
-
-				if (inputStreamToReturn == null) {
+				} else {
 					inputStreamToReturn = new ByteArrayInputStream(new byte[] {});
 				}
 

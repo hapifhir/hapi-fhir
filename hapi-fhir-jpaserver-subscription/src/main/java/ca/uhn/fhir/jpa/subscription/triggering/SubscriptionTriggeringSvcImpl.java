@@ -298,13 +298,12 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			IFhirResourceDao<?> callingDao = myDaoRegistry.getResourceDao(resourceType);
 
 			ourLog.info("Triggering job[{}] is starting a search for {}", theJobDetails.getJobId(), nextSearchUrl);
+
+			SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+			systemRequestDetails.setRequestPartitionId(theJobDetails.getRequestPartitionId());
+
 			search = mySearchCoordinatorSvc.registerSearch(
-					callingDao,
-					params,
-					resourceType,
-					new CacheControlDirective(),
-					null,
-					theJobDetails.getRequestPartitionId());
+					callingDao, params, resourceType, new CacheControlDirective(), systemRequestDetails);
 
 			if (isNull(search.getUuid())) {
 				// we don't have a search uuid i.e. we're setting up for synchronous processing
@@ -370,7 +369,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			allResourceIds = mySearchCoordinatorSvc.getResources(
 					theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, null, requestPartitionId);
 		} catch (ResourceGoneException e) {
-			ourLog.trace("Search has expired, submission is done.");
+			ourLog.debug("Search has expired, submission is done with error: {}", e.getMessage());
 			allResourceIds = new ArrayList<>();
 		}
 

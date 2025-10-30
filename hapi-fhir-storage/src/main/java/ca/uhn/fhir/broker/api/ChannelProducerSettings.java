@@ -19,16 +19,22 @@
  */
 package ca.uhn.fhir.broker.api;
 
+import jakarta.annotation.Nonnull;
+
 public class ChannelProducerSettings extends BaseChannelSettings {
 	public static final Integer DEFAULT_CHANNEL_CONSUMERS = 2;
 
 	private Integer myConcurrentConsumers = DEFAULT_CHANNEL_CONSUMERS;
+
+	@Nonnull
+	private String myProducerSuffix;
 
 	/**
 	 * Constructor
 	 */
 	public ChannelProducerSettings() {
 		super();
+		myProducerSuffix = "";
 	}
 
 	public Integer getConcurrentConsumers() {
@@ -39,6 +45,24 @@ public class ChannelProducerSettings extends BaseChannelSettings {
 	// also creates a consumer. This is why the producer has a concurrent consumer setting.
 	public ChannelProducerSettings setConcurrentConsumers(int theConcurrentConsumers) {
 		myConcurrentConsumers = theConcurrentConsumers;
+		return this;
+	}
+
+	/**
+	 * 	In the case where the Message Broker adds a suffix to the channel name to define the producer name, this allows
+	 * 	control of the suffix used.
+	 */
+	@Nonnull
+	public String getProducerNameSuffix() {
+		return myProducerSuffix;
+	}
+
+	/**
+	 * 	In the case where the Message Broker adds a suffix to the channel name to define the producer name, this allows
+	 * 	control of the suffix used.
+	 */
+	public ChannelProducerSettings setProducerNameSuffix(@Nonnull String theProducerNameSuffix) {
+		myProducerSuffix = theProducerNameSuffix;
 		return this;
 	}
 }

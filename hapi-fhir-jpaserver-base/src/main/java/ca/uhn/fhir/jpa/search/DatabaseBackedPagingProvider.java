@@ -76,6 +76,7 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider {
 		if (!theBundleProvider.ensureSearchEntityLoaded()) {
 			return null;
 		}
+
 		return theBundleProvider;
 	}
 

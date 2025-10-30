@@ -15,22 +15,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
-import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
-import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
-import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_43_50;
-import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
-import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
-import org.hl7.fhir.convertors.factory.VersionConvertorFactory_43_50;
 import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
-import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent;
 import org.slf4j.Logger;
 
@@ -41,6 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -74,7 +69,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	private static final Map<String, String> ISO_4217_CODES = Collections.unmodifiableMap(buildIso4217Codes());
 	private static final Map<String, String> ISO_3166_CODES = Collections.unmodifiableMap(buildIso3166Codes());
 	private final FhirContext myFhirContext;
-	private final VersionCanonicalizer myVersionCanonicalizer;
+	private VersionCanonicalizer myVersionCanonicalizer;
 	private volatile org.hl7.fhir.r5.model.ValueSet myLanguagesVs;
 	private volatile Map<String, String> myLanguagesLanugageMap;
 	private volatile Map<String, String> myLanguagesRegionMap;
@@ -86,6 +81,11 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		Objects.requireNonNull(theFhirContext);
 		myFhirContext = theFhirContext;
 		myVersionCanonicalizer = new VersionCanonicalizer(theFhirContext);
+	}
+
+	@VisibleForTesting
+	public void setVersionCanonicalizer(VersionCanonicalizer theVersionCanonicalizer) {
+		myVersionCanonicalizer = theVersionCanonicalizer;
 	}
 
 	@Override
@@ -443,29 +443,14 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			retVal.addConcept().setCode(nextEntry.getKey()).setDisplay(nextEntry.getValue());
 		}
 
-		IBaseResource normalized = null;
-		switch (getFhirContext().getVersion().getVersion()) {
-			case DSTU2:
-			case DSTU2_HL7ORG:
-			case DSTU2_1:
-				return null;
-			case DSTU3:
-				normalized = VersionConvertorFactory_30_40.convertResource(retVal, new BaseAdvisor_30_40(false));
-				break;
-			case R4:
-				normalized = retVal;
-				break;
-			case R4B:
-				Resource normalized50 =
-						VersionConvertorFactory_40_50.convertResource(retVal, new BaseAdvisor_40_50(false));
-				normalized = VersionConvertorFactory_43_50.convertResource(normalized50, new BaseAdvisor_43_50());
-				break;
-			case R5:
-				normalized = VersionConvertorFactory_40_50.convertResource(retVal, new BaseAdvisor_40_50(false));
-				break;
+		IBaseResource normalized = myVersionCanonicalizer.codeSystemFromCanonical(retVal);
+		Set<FhirVersionEnum> nullableVersions =
+				Set.of(FhirVersionEnum.DSTU2, FhirVersionEnum.DSTU2_HL7ORG, FhirVersionEnum.DSTU2_1);
+		boolean isNullableVersion =
+				nullableVersions.contains(getFhirContext().getVersion().getVersion());
+		if (!isNullableVersion) {
+			Objects.requireNonNull(normalized);
 		}
-
-		Objects.requireNonNull(normalized);
 
 		return normalized;
 	}

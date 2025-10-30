@@ -225,7 +225,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	public void addHeadersToResponse(HttpServletResponse theHttpResponse) {
 		String poweredByHeader = createPoweredByHeader();
 		if (isNotBlank(poweredByHeader)) {
-			theHttpResponse.addHeader(Constants.POWERED_BY_HEADER, poweredByHeader);
+			theHttpResponse.addHeader(Constants.HEADER_POWERED_BY, poweredByHeader);
 		}
 	}
 

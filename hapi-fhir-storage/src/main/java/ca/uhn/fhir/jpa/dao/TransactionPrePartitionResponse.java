@@ -1,0 +1,53 @@
+/*-
+ * #%L
+ * HAPI FHIR Storage api
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package ca.uhn.fhir.jpa.dao;
+
+import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+
+import java.util.List;
+
+/**
+ * Response object for interceptor hook methods implementing the
+ * {@link ca.uhn.fhir.interceptor.api.Pointcut#STORAGE_TRANSACTION_PRE_PARTITION} pointcut.
+ *
+ * @param splitBundles A collection of Bundles containing the original entries that were passed in.
+ * @since 8.6.0
+ */
+public class TransactionPrePartitionResponse {
+
+	private List<IBaseBundle> mySplitBundles;
+
+	public List<IBaseBundle> getSplitBundles() {
+		return mySplitBundles;
+	}
+
+	/**
+	 * A collection of Bundles containing all of the <code>Bundle.entry</code> elements from the
+	 * original Bundle, but divided into multiple bundles. All entries from the original Bundle must
+	 * be present, and no entries may be present which were not in the original Bundle.
+	 */
+	public TransactionPrePartitionResponse setSplitBundles(@Nonnull List<IBaseBundle> theSplitBundles) {
+		Validate.isTrue(theSplitBundles != null, "theSplitBundles must not be null");
+		mySplitBundles = theSplitBundles;
+		return this;
+	}
+}

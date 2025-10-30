@@ -236,6 +236,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			}
 			myRequestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(myRequest, details);
 		}
+		assert myRequestPartitionId != null;
 		return myRequestPartitionId;
 	}
 
