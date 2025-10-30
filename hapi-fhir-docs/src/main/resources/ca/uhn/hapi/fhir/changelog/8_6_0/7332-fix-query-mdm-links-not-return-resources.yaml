@@ -1,4 +1,6 @@
+---
 type: fix
 issue: 7332
 title: "In partition mode, the FHIR endpoint GET `$mdm-query-links` returned a 404 Not Found error when both source
 and golden resources existed in the partition. This has now been fixed."
+
