@@ -134,7 +134,7 @@ import jakarta.persistence.TypedQuery;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.function.TriFunction;
-import org.hibernate.exception.SQLGrammarException;
+import org.hibernate.JDBCException;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -2180,10 +2180,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			retVal = mySearchCoordinatorSvc.registerSearch(
 					this, theParams, getResourceName(), cacheControlDirective, theRequest);
 
-		} catch (SQLGrammarException e) {
+		} catch (JDBCException e) {
 			String trackingUUID = UUID.randomUUID().toString();
-			ourLog.error("SQLGrammarException during search, tracking uuid: {}", trackingUUID, e);
-			throw new InternalErrorException("SQLGrammarException during search, tracking uuid: " + trackingUUID);
+			ourLog.error("JDBCException during search, tracking uuid: {}", trackingUUID, e);
+			throw new InternalErrorException("JDBCException during search, tracking uuid: " + trackingUUID);
 		}
 		if (retVal instanceof PersistedJpaBundleProvider provider) {
 			// Note: we calculate the partition -after- calling registerSearch, since that
