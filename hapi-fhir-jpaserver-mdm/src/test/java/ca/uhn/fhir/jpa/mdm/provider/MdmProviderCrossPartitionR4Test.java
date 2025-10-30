@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DecimalType;
@@ -21,6 +20,8 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -35,7 +36,7 @@ public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test {
 
 	private static final String PARTITION_GOLDEN_RESOURCE = "PARTITION-GOLDEN";
 
-	RequestTenantPartitionInterceptor requestTenantPartitionInterceptor;
+	private RequestTenantPartitionInterceptor requestTenantPartitionInterceptor;
 
 	@Override
 	@BeforeEach
@@ -104,10 +105,14 @@ public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test {
 		assertTrue(MdmResourceUtil.isGoldenRecord(searchResult.getAllResources().get(0)));
 	}
 
-	@Test
-	void testQueryMdmLink_goldenResourceInSamePartition() {
-		myMdmSettings.setSearchAllPartitionForMatch(false);
-		myMdmSettings.setGoldenResourcePartitionName(StringUtils.EMPTY);
+	@ParameterizedTest
+	@CsvSource(value = {
+		"false,    '',	                  1",  // Golden resource in same partition as source
+		"true,     PARTITION-GOLDEN,      3"   // Golden resource in different partition than source
+	})
+	void testQueryMdmLinkWithPartition(boolean theSearchAllPartitions, String theGoldenResPartitionName, int theGoldenResPartitionId) {
+		myMdmSettings.setSearchAllPartitionForMatch(theSearchAllPartitions);
+		myMdmSettings.setGoldenResourcePartitionName(theGoldenResPartitionName);
 
 		Patient jane = createPatientOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
 		MdmTransactionContext mdmContext =
@@ -115,32 +120,7 @@ public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test {
 
 		MdmLink mdmLink = (MdmLink) mdmContext.getMdmLinks().get(0);
 		assertThat(mdmLink.getSourcePersistenceId().getPartitionId()).isEqualTo(1);
-		assertThat(mdmLink.getGoldenResourcePersistenceId().getPartitionId()).isEqualTo(1);
-
-		myRequestDetails.setTenantId(PARTITION_1);
-		Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, null, new UnsignedIntType(0),
-			new UnsignedIntType(10), new StringType(), myRequestDetails, new StringType("Patient"));
-
-		assertThat(result.getParameter()).hasSize(3);
-		assertThat(result.getParameter().get(0).getName()).isEqualTo("self");
-		assertThat(result.getParameter().get(1).getName()).isEqualTo("total");
-		assertThat(((DecimalType) (result.getParameter().get(1).getValue())).getValueAsInteger()).isEqualTo(1);
-		assertThat(result.getParameter().get(2).getName()).isEqualTo("link");
-		assertThat(result.getParameter().get(2).getPart()).isNotEmpty();
-	}
-
-	@Test
-	void testQueryMdmLink_goldenResourceInDifferentPartitions() {
-		myMdmSettings.setSearchAllPartitionForMatch(true);
-		myMdmSettings.setGoldenResourcePartitionName(PARTITION_GOLDEN_RESOURCE);
-
-		Patient jane = createPatientOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
-		MdmTransactionContext mdmContext =
-			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(jane, createContextForCreate("Patient"));
-
-		MdmLink mdmLink = (MdmLink) mdmContext.getMdmLinks().get(0);
-		assertThat(mdmLink.getSourcePersistenceId().getPartitionId()).isEqualTo(1);
-		assertThat(mdmLink.getGoldenResourcePersistenceId().getPartitionId()).isEqualTo(3);
+		assertThat(mdmLink.getGoldenResourcePersistenceId().getPartitionId()).isEqualTo(theGoldenResPartitionId);
 
 		myRequestDetails.setTenantId(PARTITION_1);
 		Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, null, new UnsignedIntType(0),
