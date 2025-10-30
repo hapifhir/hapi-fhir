@@ -2180,18 +2180,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			retVal = mySearchCoordinatorSvc.registerSearch(
 					this, theParams, getResourceName(), cacheControlDirective, theRequest);
 
+		} catch (SQLGrammarException e) {
+			String trackingUUID = UUID.randomUUID().toString();
+			ourLog.error("SQLGrammarException during search, tracking uuid: {}", trackingUUID, e);
+			throw new InternalErrorException("SQLGrammarException during search, tracking uuid: " + trackingUUID);
+		}
 		if (retVal instanceof PersistedJpaBundleProvider provider) {
 			// Note: we calculate the partition -after- calling registerSearch, since that
 			// method invokes several interceptors that can affect the partition selection.
 			RequestPartitionId requestPartitionId =
 					myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
 							theRequest, getResourceName(), theParams);
-		} catch (SQLGrammarException e) {
-			String trackingUUID = UUID.randomUUID().toString();
-			ourLog.error("SQLGrammarException during search, tracking uuid: {}", trackingUUID, e);
-			throw new InternalErrorException("SQLGrammarException during search, tracking uuid: " + trackingUUID);
-		}
-
 			provider.setRequestPartitionId(requestPartitionId);
 			if (provider.getCacheStatus() == SearchCacheStatusEnum.HIT) {
 				if (theServletResponse != null && theRequest != null) {
