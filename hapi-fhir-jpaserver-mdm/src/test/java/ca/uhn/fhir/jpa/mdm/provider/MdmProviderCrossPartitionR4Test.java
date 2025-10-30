@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test{
+public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test {
 	@Autowired
 	private IMdmSettings myMdmSettings;
 
@@ -39,7 +39,7 @@ public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test{
 	private RequestTenantPartitionInterceptor requestTenantPartitionInterceptor;
 
 	@Override
-    @BeforeEach
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 
