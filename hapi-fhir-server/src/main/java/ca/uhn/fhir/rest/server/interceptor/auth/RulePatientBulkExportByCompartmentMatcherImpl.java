@@ -23,25 +23,20 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
-
-import static ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum.ALLOW;
-
-import static ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum.DENY;
-
 import com.google.common.annotations.VisibleForTesting;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS;
+import static ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum.ALLOW;
+import static ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum.DENY;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
@@ -131,7 +126,8 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
 			counts.put(applies, counts.get(applies) + 1);
 
 			if (counts.get(applies) > 0 && counts.get(!applies) > 0) {
-				// Then the testers evaluated to true on some Patients, and false on others - no need to evaluate the rest
+				// Then the testers evaluated to true on some Patients, and false on others - no need to evaluate the
+				// rest
 				// We have a mixture of ALLOW and abstain
 				// Default to DENY
 				return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
