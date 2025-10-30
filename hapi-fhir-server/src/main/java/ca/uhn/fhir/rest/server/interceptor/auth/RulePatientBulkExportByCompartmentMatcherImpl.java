@@ -28,7 +28,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,18 +36,13 @@ import java.util.Set;
 import static ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS;
 import static ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum.ALLOW;
 import static ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum.DENY;
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
-public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
-	private static final BulkExportJobParameters.ExportStyle OUR_EXPORT_STYLE =
-			BulkExportJobParameters.ExportStyle.PATIENT;
+public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRuleBulkExportByCompartmentMatcher {
 	private List<String> myPatientMatcherFilter;
 	private List<Set<String>> myTokenizedPatientMatcherFilter;
-	private Collection<String> myResourceTypes;
 
 	RulePatientBulkExportByCompartmentMatcherImpl(String theRuleName) {
-		super(theRuleName);
+		super(theRuleName, BulkExportJobParameters.ExportStyle.PATIENT);
 	}
 
 	@Override
@@ -61,33 +55,15 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
 			IRuleApplier theRuleApplier,
 			Set<AuthorizationFlagsEnum> theFlags,
 			Pointcut thePointcut) {
-		if (thePointcut != Pointcut.STORAGE_INITIATE_BULK_EXPORT) {
-			return null;
-		}
-
-		if (theRequestDetails == null) {
-			return null;
+		// Apply the base checks for invalid inputs, requested resource types
+		AuthorizationInterceptor.Verdict result = super.applyRule(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier, theFlags, thePointcut);
+		if (result == null || result.getDecision().equals(PolicyEnum.DENY)) {
+			// The base checks have already decided we should abstain, or deny
+			return result;
 		}
 
 		BulkExportJobParameters inboundBulkExportRequestOptions = (BulkExportJobParameters)
-				theRequestDetails.getUserData().get(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS);
-
-		if (inboundBulkExportRequestOptions.getExportStyle() != OUR_EXPORT_STYLE) {
-			// If the requested export style is not for a PATIENT, then abstain
-			return null;
-		}
-
-		// Do we only authorize some types?  If so, make sure requested types are a subset
-		if (isNotEmpty(myResourceTypes)) {
-			if (isEmpty(inboundBulkExportRequestOptions.getResourceTypes())) {
-				// Attempting an export on ALL resource types, but this rule restricts on a set of resource types
-				return new AuthorizationInterceptor.Verdict(DENY, this);
-			}
-			if (!myResourceTypes.containsAll(inboundBulkExportRequestOptions.getResourceTypes())) {
-				// The requested resource types is not a subset of the permitted resource types
-				return new AuthorizationInterceptor.Verdict(DENY, this);
-			}
-		}
+			theRequestDetails.getUserData().get(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS);
 
 		List<String> patientIdOptions = inboundBulkExportRequestOptions.getPatientIds();
 		List<String> filterOptions = inboundBulkExportRequestOptions.getFilters();
@@ -168,21 +144,6 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
 	}
 
 	/**
-	 * Remove the resource type and "?" prefix, if present
-	 * since resource type is implied for the rule based on the permission (Patient in this case)
-	 */
-	private static String sanitizeQueryFilter(String theFilter) {
-		if (theFilter.contains("?")) {
-			return theFilter.substring(theFilter.indexOf("?") + 1);
-		}
-		return theFilter;
-	}
-
-	public void setResourceTypes(Collection<String> theResourceTypes) {
-		myResourceTypes = theResourceTypes;
-	}
-
-	/**
 	 * @param thePatientMatcherFilter the matcher filter for the permitted Patient
 	 */
 	public void addAppliesToPatientExportOnPatient(String thePatientMatcherFilter) {
@@ -204,11 +165,6 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
 
 	public List<String> getPatientMatcherFilters() {
 		return myPatientMatcherFilter;
-	}
-
-	@VisibleForTesting
-	Collection<String> getResourceTypes() {
-		return myResourceTypes;
 	}
 
 	@VisibleForTesting
