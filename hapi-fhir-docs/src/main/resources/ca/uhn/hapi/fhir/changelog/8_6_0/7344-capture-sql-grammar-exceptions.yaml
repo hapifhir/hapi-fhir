@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7344
+title: "Prevented exposure of raw SQLGrammarException details to clients (CWE-209).
+Such exceptions are now caught and replaced with an InternalErrorException containing a UUID.
+The same UUID appears in the server logs to allow internal tracing without revealing sensitive SQL information."
