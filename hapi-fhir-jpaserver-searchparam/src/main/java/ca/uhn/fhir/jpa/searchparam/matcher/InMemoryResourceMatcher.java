@@ -184,7 +184,7 @@ public class InMemoryResourceMatcher {
 		if (theIndexedSearchParams != null) {
 			relevantSearchParams = theIndexedSearchParams;
 		} else if (theResource != null) {
-			// Don't index search params we don't actully need for the given criteria
+			// Don't index search params we don't actually need for the given criteria
 			ISearchParamExtractor.ISearchParamFilter filter = theSearchParams -> theSearchParams.stream()
 					.filter(t -> searchParameterMap.containsKey(t.getName()))
 					.collect(Collectors.toList());
@@ -463,7 +463,14 @@ public class InMemoryResourceMatcher {
 	}
 
 	private boolean matchId(String theValue, IIdType theId) {
-		return theValue.equals(theId.getValue()) || theValue.equals(theId.getIdPart());
+		IIdType parsedId = myFhirContext.getVersion().newIdType(theValue);
+		if (parsedId.hasResourceType() && theId.hasResourceType()) {
+			if (!parsedId.getResourceType().equals(theId.getResourceType())) {
+				return false;
+			}
+		}
+
+		return parsedId.getIdPart().equals(theId.getIdPart());
 	}
 
 	private InMemoryMatchResult matchResourceParam(

@@ -70,10 +70,10 @@ import java.util.TreeSet;
 public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseMethodBinding.class);
-	private FhirContext myContext;
-	private Method myMethod;
+	private final FhirContext myContext;
+	private final Method myMethod;
 	private List<IParameter> myParameters;
-	private Object myProvider;
+	private final Object myProvider;
 	private boolean mySupportsConditional;
 	private boolean mySupportsConditionalMultiple;
 
@@ -343,8 +343,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		} else if (history != null) {
 			return new HistoryMethodBinding(theMethod, theContext, theProvider);
 		} else if (validate != null) {
-			return new ValidateMethodBindingDstu2Plus(
-					returnType, returnTypeFromRp, theMethod, theContext, theProvider, validate);
+			return new ValidateMethodBindingDstu2Plus(returnTypeFromRp, theMethod, theContext, theProvider, validate);
 		} else if (transaction != null) {
 			return new TransactionMethodBinding(theMethod, theContext, theProvider);
 		} else if (operation != null) {

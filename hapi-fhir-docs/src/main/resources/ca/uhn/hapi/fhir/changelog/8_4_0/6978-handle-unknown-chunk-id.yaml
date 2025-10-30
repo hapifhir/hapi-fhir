@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 6978
+jira: SMILE-10153
+title: "If the batch framework received a message
+        for a non-existent work chunk (for example,
+        when ingesting a replayed messages), it would
+        result in an error and job retry.
+        This has now been fixed.
+"

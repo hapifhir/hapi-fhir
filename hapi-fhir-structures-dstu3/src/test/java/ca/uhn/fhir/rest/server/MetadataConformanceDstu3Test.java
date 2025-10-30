@@ -1,12 +1,12 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Validate;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -17,6 +17,7 @@ import ca.uhn.fhir.util.VersionUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpOptions;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -29,6 +30,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class MetadataConformanceDstu3Test {
 
@@ -104,8 +107,8 @@ public class MetadataConformanceDstu3Test {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(output).contains("<CapabilityStatement");
-			assertThat(status.getFirstHeader("X-Powered-By").getValue()).contains("HAPI FHIR " + VersionUtil.getVersion());
-			assertThat(status.getFirstHeader("X-Powered-By").getValue()).contains("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")");
+			assertThat(status.getFirstHeader(Constants.HEADER_POWERED_BY).getValue()).contains("HAPI FHIR " + VersionUtil.getVersion());
+			assertThat(status.getFirstHeader(Constants.HEADER_POWERED_BY).getValue()).contains("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")");
 		}
 
 		httpOperation = new HttpOptions(ourServer.getBaseUrl());
@@ -113,15 +116,21 @@ public class MetadataConformanceDstu3Test {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(output).contains("<CapabilityStatement");
-			assertThat(status.getFirstHeader("X-Powered-By").getValue()).contains("HAPI FHIR " + VersionUtil.getVersion());
-			assertThat(status.getFirstHeader("X-Powered-By").getValue()).contains("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")");
+			assertThat(status.getFirstHeader(Constants.HEADER_POWERED_BY).getValue()).contains("HAPI FHIR " + VersionUtil.getVersion());
+			assertThat(status.getFirstHeader(Constants.HEADER_POWERED_BY).getValue()).contains("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")");
 		}
 
 		httpOperation = new HttpPost(ourServer.getBaseUrl() + "/metadata");
 		try (CloseableHttpResponse status = ourClient.execute(httpOperation)) {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(405, status.getStatusLine().getStatusCode());
-			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(388) + "/metadata request must use HTTP GET\"/></issue></OperationOutcome>", output);
+			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(388) + "/metadata request must use HTTP GET or HTTP HEAD\"/></issue></OperationOutcome>", output);
+		}
+
+		httpOperation = new HttpHead(ourServer.getBaseUrl() + "/metadata");
+		try (CloseableHttpResponse status = ourClient.execute(httpOperation)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertNull(status.getEntity());
 		}
 
 		/*

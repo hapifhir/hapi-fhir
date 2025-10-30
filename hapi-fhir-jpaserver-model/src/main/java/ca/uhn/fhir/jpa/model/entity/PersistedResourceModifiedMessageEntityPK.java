@@ -35,6 +35,9 @@ public class PersistedResourceModifiedMessageEntityPK implements IPersistedResou
 	@Column(name = "RES_VER", length = 8, nullable = false)
 	private String myResourceVersion;
 
+	@Column(name = "RESOURCE_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
+	private String myResourceType;
+
 	public String getResourcePid() {
 		return myResourcePid;
 	}
@@ -53,10 +56,21 @@ public class PersistedResourceModifiedMessageEntityPK implements IPersistedResou
 		return this;
 	}
 
-	public static PersistedResourceModifiedMessageEntityPK with(String theResourcePid, String theResourceVersion) {
+	public String getResourceType() {
+		return myResourceType;
+	}
+
+	public PersistedResourceModifiedMessageEntityPK setResourceType(String theResourceType) {
+		myResourceType = theResourceType;
+		return this;
+	}
+
+	public static PersistedResourceModifiedMessageEntityPK with(
+			String theResourcePid, String theResourceVersion, String theResourceType) {
 		return new PersistedResourceModifiedMessageEntityPK()
 				.setResourcePid(theResourcePid)
-				.setResourceVersion(theResourceVersion);
+				.setResourceVersion(theResourceVersion)
+				.setResourceType(theResourceType);
 	}
 
 	@Override
@@ -64,16 +78,18 @@ public class PersistedResourceModifiedMessageEntityPK implements IPersistedResou
 		if (this == theO) return true;
 		if (theO == null || getClass() != theO.getClass()) return false;
 		PersistedResourceModifiedMessageEntityPK that = (PersistedResourceModifiedMessageEntityPK) theO;
-		return myResourcePid.equals(that.myResourcePid) && myResourceVersion.equals(that.myResourceVersion);
+		return myResourcePid.equals(that.myResourcePid)
+				&& myResourceVersion.equals(that.myResourceVersion)
+				&& myResourceType.equals(that.myResourceType);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(myResourcePid, myResourceVersion);
+		return Objects.hash(myResourcePid, myResourceVersion, myResourceType);
 	}
 
 	@Override
 	public String toString() {
-		return myResourcePid + "/" + myResourceVersion;
+		return myResourceType + "/" + myResourcePid + "/" + myResourceVersion;
 	}
 }

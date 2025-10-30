@@ -102,7 +102,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	void enqueueWorkChunkForProcessing(String theChunkId, Consumer<Integer> theCallback);
 
 	/**
-	 * Updates all Work Chunks in POLL_WAITING if their nextPollTime <= now
+	 * Updates all Work Chunks in POLL_WAITING if their nextPollTime {@code <=} now
 	 * for the given Job Instance.
 	 * @param theInstanceId the instance id
 	 * @return the number of updated chunks
@@ -128,12 +128,11 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart);
 
 	/**
-	 * Fetches all job instances based on the JobFetchRequest
+	 * Fetches job instances based on the JobFetchRequest
 	 *
 	 * @param theRequest - the job fetch request
 	 * @return - a page of job instances
 	 */
-	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest);
 
 	/**

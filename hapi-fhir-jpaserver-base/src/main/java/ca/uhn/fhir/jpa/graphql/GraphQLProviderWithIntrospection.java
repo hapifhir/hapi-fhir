@@ -54,7 +54,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
+import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.SearchParameter;
@@ -75,14 +75,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.util.MessageSupplier.msg;
-
 public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(GraphQLProviderWithIntrospection.class);
 	private final Supplier<GraphQLSchemaGenerator> myGenerator;
 	private final ISearchParamRegistry mySearchParamRegistry;
-	private final VersionSpecificWorkerContextWrapper myContext;
+	private final WorkerContextValidationSupportAdapter myContext;
 	private final IDaoRegistry myDaoRegistry;
 	private final Gson myGson;
 
@@ -100,7 +98,7 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 		mySearchParamRegistry = theSearchParamRegistry;
 		myDaoRegistry = theDaoRegistry;
 
-		myContext = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(theValidationSupport);
+		myContext = WorkerContextValidationSupportAdapter.newVersionSpecificWorkerContextWrapper(theValidationSupport);
 
 		GsonBuilder gsonBuilder = new GsonBuilder();
 		gsonBuilder.registerTypeAdapter(Collections.emptyList().getClass(), (JsonSerializer<Object>)
@@ -209,11 +207,21 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 			throw new InternalErrorException(Msg.code(2036) + e.getMessage(), e);
 		}
 
-		String schema = schemaBuilder.toString().replace("\r", "");
+		String schema = schemaBuilder
+				.toString()
+				// Use UNIX line endings in the output
+				.replace("\r", "")
+				// Make sure we consistently use the same datatype for all IDs - The
+				// corelib GraphQL generator uses "ID" sometimes and "String" in others
+				// and the GraphQL tooling doesn't like that
+				.replace(" id: ID\n", " id: String\n");
 
 		// Set these to INFO if you're testing, then set back before committing
 		ourLog.debug("Schema generated: {} chars", schema.length());
-		ourLog.debug("Schema generated: {}", msg(() -> StringUtil.prependLineNumbers(schema)));
+		ourLog.atDebug()
+				.setMessage("Schema generated:\n{}")
+				.addArgument(() -> StringUtil.prependLineNumbers(schema))
+				.log();
 
 		SchemaParser schemaParser = new SchemaParser();
 		TypeDefinitionRegistry typeDefinitionRegistry = schemaParser.parse(schema);

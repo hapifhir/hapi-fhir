@@ -83,7 +83,13 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 
 	public void clearDatabases() {
 		for (JpaEmbeddedDatabase database : getAllEmbeddedDatabases()) {
-			database.clearDatabase();
+			// Only clear databases that are actually initialized
+			if (database.isInitialized()) {
+				ourLog.debug("Clearing database: {}", database.getDriverType());
+				database.clearDatabase();
+			} else {
+				ourLog.debug("Skipping clear for uninitialized database: {}", database.getDriverType());
+			}
 		}
 	}
 

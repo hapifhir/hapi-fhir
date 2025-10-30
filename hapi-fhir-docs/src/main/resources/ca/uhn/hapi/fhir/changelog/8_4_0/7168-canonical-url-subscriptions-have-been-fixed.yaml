@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7168
+title: "Previously, subscription matching on canonical references (ie, full urls)
+      did not work. This has been fixed.
+"

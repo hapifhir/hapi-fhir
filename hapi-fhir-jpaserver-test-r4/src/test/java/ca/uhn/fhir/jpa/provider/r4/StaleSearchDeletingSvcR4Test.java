@@ -199,5 +199,38 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	@Test
+	public void testSearchDeletedOnlyAfterConfiguredExpiryTimeAndLastAccessedExpiryTime() {
+		// Config the search to expire after one second
+		myStorageSettings.setExpireSearchResultsAfterMillis(1000L);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(0L);
+		runInTransaction(() -> {
+			Search search = new Search();
 
+			// Set the field expiryOrNull to two seconds
+			search.setExpiryOrNull(DateUtils.addMilliseconds(new Date(), 2000));
+
+			search.setStatus(SearchStatusEnum.FINISHED);
+			search.setUuid(UUID.randomUUID().toString());
+			search.setCreated(new Date());
+			search.setSearchType(SearchTypeEnum.SEARCH);
+			search.setResourceType("Patient");
+			mySearchEntityDao.save(search);
+		});
+
+		// Should not delete right now
+		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
+		sleepAtLeast(1100);
+
+		// One second past creation but expiryOrNull hasn't passed yet
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
+		sleepAtLeast(1100);
+
+		// Delete now that expiryOrNull has also passed
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
+	}
 }

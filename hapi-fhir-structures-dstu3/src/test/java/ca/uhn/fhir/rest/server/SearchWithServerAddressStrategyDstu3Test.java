@@ -1,8 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchWithServerAddressStrategyDstu3Test {
 
@@ -66,7 +67,7 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		
 		ourServer.setServerAddressStrategy(new ApacheProxyAddressStrategy(false));
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
-		httpGet.addHeader("x-forwarded-host", "foo.com");
+		httpGet.addHeader(Constants.HEADER_X_FORWARDED_HOST, "foo.com");
 		status = ourClient.execute(httpGet);
 		responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -77,7 +78,7 @@ public class SearchWithServerAddressStrategyDstu3Test {
 
 		ourServer.setServerAddressStrategy(ApacheProxyAddressStrategy.forHttps());
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
-		httpGet.addHeader("x-forwarded-host", "foo.com");
+		httpGet.addHeader(Constants.HEADER_X_FORWARDED_HOST, "foo.com");
 		status = ourClient.execute(httpGet);
 		responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -88,8 +89,8 @@ public class SearchWithServerAddressStrategyDstu3Test {
 
 		ourServer.setServerAddressStrategy(new ApacheProxyAddressStrategy(false));
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
-		httpGet.addHeader("x-forwarded-host", "foo.com");
-		httpGet.addHeader("x-forwarded-proto", "https");
+		httpGet.addHeader(Constants.HEADER_X_FORWARDED_HOST, "foo.com");
+		httpGet.addHeader(Constants.HEADER_X_FORWARDED_PROTO, "https");
 		status = ourClient.execute(httpGet);
 		responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());

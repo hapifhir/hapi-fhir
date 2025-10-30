@@ -28,40 +28,40 @@ outputs:
     value: ${{ steps.restore-cache.outputs.cache-hit }}
 
 runs:
- using: "composite"
- steps:
-  - name: Debug save input
-    shell: bash
-    run: |
-     echo "Input -> Save: ${{ inputs.save }}"
+  using: "composite"
+  steps:
+    - name: Debug save input
+      shell: bash
+      run: |
+        echo "Input -> Save: ${{ inputs.save }}"
 
-  - name: Restore Cache
-    id: restore-cache
-    if: ${{ inputs.save == 'false' }}
-    uses: actions/cache/restore@v4
-    with:
-     path: ${{ inputs.path }}
-     key: ${{ inputs.key }}
+    - name: Restore Cache
+      id: restore-cache
+      if: ${{ inputs.save == 'false' }}
+      uses: actions/cache/restore@v4
+      with:
+        path: ${{ inputs.path }}
+        key: ${{ inputs.key }}
 
-  - name: Exclude Directories from Cache
-    if: ${{ inputs.save == 'true' }}
-    shell: bash
-    run: |
-      cache_path="${{ inputs.path }}"
-      exclude_dirs="${{ inputs.exclude }}"
-     
-      if [ -n "$exclude_dirs" ]; then
-        IFS=',' read -ra dirs <<< "$exclude_dirs"
-        for dir in "${dirs[@]}"; do
-          echo "Excluding directory: $dir"
-          rm -rf "${cache_path}/$dir"
-        done
-      fi
+    - name: Exclude Directories from Cache
+      if: ${{ inputs.save == 'true' }}
+      shell: bash
+      run: |
+        cache_path="${{ inputs.path }}"
+        exclude_dirs="${{ inputs.exclude }}"
+        
+        if [ -n "$exclude_dirs" ]; then
+          IFS=',' read -ra dirs <<< "$exclude_dirs"
+          for dir in "${dirs[@]}"; do
+            echo "Excluding directory: $dir"
+            rm -rf "${cache_path}/$dir"
+          done
+        fi
 
-  - name: Save Cache
-    id: save-cache
-    if: ${{ inputs.save == 'true' }}
-    uses: actions/cache/save@v4
-    with:
-      path: ${{ inputs.path }}
-      key: ${{ inputs.key }}
+    - name: Save Cache
+      id: save-cache
+      if: ${{ inputs.save == 'true' }}
+      uses: actions/cache/save@v4
+      with:
+        path: ${{ inputs.path }}
+        key: ${{ inputs.key }}

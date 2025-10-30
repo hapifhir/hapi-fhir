@@ -34,6 +34,8 @@ import java.util.Objects;
  * Most of this class has been moved to ResourceModifiedMessage in the hapi-fhir-server project, for a reusable channel ResourceModifiedMessage
  * that doesn't require knowledge of subscriptions.
  */
+// TODO KHS rename classes like this to ResourceModifiedPayload so they're not confused with the actual message wrapper
+// class
 public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 
 	/**
@@ -50,11 +52,16 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 		super();
 	}
 
-	public ResourceModifiedMessage(IIdType theIdType, OperationTypeEnum theOperationType) {
+	public ResourceModifiedMessage(
+			IIdType theIdType, OperationTypeEnum theOperationType, RequestPartitionId theRequestPartitionId) {
 		super(theIdType, theOperationType);
-		setPartitionId(RequestPartitionId.defaultPartition());
+		setPartitionId(theRequestPartitionId);
 	}
 
+	/**
+	 * @deprecated use {@link ResourceModifiedMessage#ResourceModifiedMessage(FhirContext, IBaseResource, OperationTypeEnum, RequestDetails, RequestPartitionId)} instead
+	 */
+	@Deprecated
 	public ResourceModifiedMessage(
 			FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
 		super(theFhirContext, theResource, theOperationType);
@@ -68,15 +75,6 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 			RequestPartitionId theRequestPartitionId) {
 		super(theFhirContext, theResource, theOperationType);
 		setPartitionId(theRequestPartitionId);
-	}
-
-	public ResourceModifiedMessage(
-			FhirContext theFhirContext,
-			IBaseResource theNewResource,
-			OperationTypeEnum theOperationType,
-			RequestDetails theRequest) {
-		super(theFhirContext, theNewResource, theOperationType, theRequest);
-		setPartitionId(RequestPartitionId.defaultPartition());
 	}
 
 	public ResourceModifiedMessage(

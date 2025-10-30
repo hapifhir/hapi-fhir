@@ -25,6 +25,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -35,7 +36,6 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import ca.uhn.fhir.rest.server.interceptor.auth.AdditionalCompartmentSearchParameters;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizedList;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
@@ -249,19 +249,36 @@ public class AuthorizationInterceptors {
 		new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				AdditionalCompartmentSearchParameters additionalSearchParams =
-						new AdditionalCompartmentSearchParameters();
-				additionalSearchParams.addSearchParameters("device:patient", "device:subject");
+				CompartmentSearchParameterModifications additionalSearchParams =
+						new CompartmentSearchParameterModifications();
+				additionalSearchParams.addSPToIncludeInCompartment("Device", "patient");
+				additionalSearchParams.addSPToIncludeInCompartment("Device", "subject");
 				return new RuleBuilder()
 						.allow()
 						.read()
 						.allResources()
-						.inCompartmentWithAdditionalSearchParams(
-								"Patient", new IdType("Patient/123"), additionalSearchParams)
+						.inModifiedCompartment("Patient", new IdType("Patient/123"), additionalSearchParams)
 						.build();
 			}
 		};
 		// END SNIPPET: advancedCompartment
+
+		// START SNIPPET: advancedCompartmentOmission
+		new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				CompartmentSearchParameterModifications additionalSearchParams =
+						new CompartmentSearchParameterModifications();
+				additionalSearchParams.addSPToOmitFromCompartment("Group", "member");
+				return new RuleBuilder()
+						.allow()
+						.read()
+						.allResources()
+						.inModifiedCompartment("Patient", new IdType("Patient/123"), additionalSearchParams)
+						.build();
+			}
+		};
+		// END SNIPPET: advancedCompartmentOmission
 	}
 
 	@SuppressWarnings("InnerClassMayBeStatic")

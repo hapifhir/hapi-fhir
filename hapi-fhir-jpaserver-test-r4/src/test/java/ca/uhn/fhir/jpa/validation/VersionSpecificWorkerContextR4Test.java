@@ -5,7 +5,7 @@ import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
+import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ElementDefinition;
@@ -52,11 +52,11 @@ public class VersionSpecificWorkerContextR4Test extends BaseResourceProviderR4Te
 
 	@Nested
 	public class FetchTests {
-		private VersionSpecificWorkerContextWrapper myWorkerContext;
+		private WorkerContextValidationSupportAdapter myWorkerContext;
 
 		@BeforeEach
 		public void before() {
-			myWorkerContext = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(myValidationSupport);
+			myWorkerContext = WorkerContextValidationSupportAdapter.newVersionSpecificWorkerContextWrapper(myValidationSupport);
 		}
 
 		@Test

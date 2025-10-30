@@ -34,7 +34,7 @@ class SubscriptionTopicPayloadBuilderR5Test {
 
     @BeforeEach
     void before() {
-        myStPayloadBuilder = new SubscriptionTopicPayloadBuilder(ourFhirContext);
+        myStPayloadBuilder = new SubscriptionTopicPayloadBuilder(ourFhirContext, null, null, null);
         myEncounter = new Encounter();
         myEncounter.setId("Encounter/1");
         myCanonicalSubscription = new CanonicalSubscription();

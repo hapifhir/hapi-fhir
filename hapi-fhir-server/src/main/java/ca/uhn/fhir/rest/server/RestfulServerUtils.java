@@ -51,6 +51,7 @@ import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -78,7 +79,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
@@ -99,8 +99,9 @@ public class RestfulServerUtils {
 
 	private static final HashSet<String> TEXT_ENCODE_ELEMENTS =
 			new HashSet<>(Arrays.asList("*.text", "*.id", "*.meta", "*.(mandatory)"));
-	private static Map<FhirVersionEnum, FhirContext> myFhirContextMap = Collections.synchronizedMap(new HashMap<>());
-	private static EnumSet<RestOperationTypeEnum> ourOperationsWhichAllowPreferHeader =
+	private static final Map<FhirVersionEnum, FhirContext> myFhirContextMap =
+			Collections.synchronizedMap(new HashMap<>());
+	private static final EnumSet<RestOperationTypeEnum> ourOperationsWhichAllowPreferHeader =
 			EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE, RestOperationTypeEnum.PATCH);
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
@@ -901,6 +902,31 @@ public class RestfulServerUtils {
 			IIdType theOperationResourceId,
 			IPrimitiveType<Date> theOperationResourceLastUpdated)
 			throws IOException {
+		return streamResponseAsResource(
+				theServer,
+				theResource,
+				theSummaryMode,
+				theStatusCode,
+				null,
+				theAddContentLocationHeader,
+				respondGzip,
+				theRequestDetails,
+				theOperationResourceId,
+				theOperationResourceLastUpdated);
+	}
+
+	public static Object streamResponseAsResource(
+			IRestfulServerDefaults theServer,
+			IBaseResource theResource,
+			Set<SummaryEnum> theSummaryMode,
+			int theStatusCode,
+			Multimap<String, String> theAdditionalResponseHeaders,
+			boolean theAddContentLocationHeader,
+			boolean respondGzip,
+			RequestDetails theRequestDetails,
+			IIdType theOperationResourceId,
+			IPrimitiveType<Date> theOperationResourceLastUpdated)
+			throws IOException {
 		IRestfulResponse response = theRequestDetails.getResponse();
 
 		// Determine response encoding
@@ -923,6 +949,12 @@ public class RestfulServerUtils {
 				response.addHeader(Constants.HEADER_LOCATION, fullId.getValue());
 			}
 			response.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId.getValue());
+		}
+
+		if (theAdditionalResponseHeaders != null) {
+			for (Map.Entry<String, String> next : theAdditionalResponseHeaders.entries()) {
+				response.addHeader(next.getKey(), next.getValue());
+			}
 		}
 
 		if (theServer.getETagSupport() == ETagSupportEnum.ENABLED) {
@@ -1078,30 +1110,31 @@ public class RestfulServerUtils {
 	 * Determines whether we should stream out Binary resource content based on the content-type. Logic is:
 	 * - If the binary was externalized and has not been reinflated upstream, return false.
 	 * - If they request octet-stream, return true;
+	 * - If they request a FHIR content-type, return false (as per the specification);
 	 * - If the content-type happens to be a match, return true.
-	 * <p>
-	 * - Construct an EncodingEnum out of the contentType. If this matches the responseEncoding, return true.
 	 * - Otherwise, return false.
 	 *
 	 * @param theResponseEncoding the requested {@link EncodingEnum} determined by the incoming Content-Type header.
 	 * @param theBinary           the {@link IBaseBinary} resource to be streamed out.
 	 * @return True if response can be streamed as the requested encoding type, false otherwise.
 	 */
-	private static boolean shouldStreamContents(ResponseEncoding theResponseEncoding, IBaseBinary theBinary) {
-		String contentType = theBinary.getContentType();
+	static boolean shouldStreamContents(ResponseEncoding theResponseEncoding, IBaseBinary theBinary) {
+		final String binaryContentType = theBinary.getContentType();
 		if (theBinary.getContent() == null) {
 			return false;
-		}
-		if (theResponseEncoding == null) {
+		} else if (theResponseEncoding == null) {
 			return true;
-		}
-		if (isBlank(contentType)) {
+		} else if (isBlank(binaryContentType)) {
 			return Constants.CT_OCTET_STREAM.equals(theResponseEncoding.getContentType());
-		} else if (contentType.equalsIgnoreCase(theResponseEncoding.getContentType())) {
-			return true;
-		} else {
-			return Objects.equals(EncodingEnum.forContentType(contentType), theResponseEncoding.getEncoding());
 		}
+
+		EncodingEnum fhirContentType = EncodingEnum.forContentTypeStrict(theResponseEncoding.getContentType());
+		if (fhirContentType != null && fhirContentType != EncodingEnum.NDJSON) {
+			// If a FHIR content-type is explicitly requested, the Binary resource shall be returned
+			return false;
+		}
+
+		return binaryContentType.equalsIgnoreCase(theResponseEncoding.getContentType());
 	}
 
 	public static String createEtag(String theVersionId) {

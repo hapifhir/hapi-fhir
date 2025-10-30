@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI-FHIR Storage Batch2 Jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -71,8 +71,9 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		}
 
 		// validate the output format
-		if (!Constants.CT_FHIR_NDJSON.equalsIgnoreCase(theParameters.getOutputFormat())) {
-			errorMsgs.add("The only allowed format for Bulk Export is currently " + Constants.CT_FHIR_NDJSON);
+		if (!isSupportedOutputFormat(theParameters.getOutputFormat())) {
+			errorMsgs.add("The allowed formats for Bulk Export are %s, %s and %s"
+					.formatted(Constants.CT_FHIR_NDJSON, Constants.CT_APP_NDJSON, Constants.CT_NDJSON));
 		}
 		// validate the exportId
 		if (!StringUtils.isBlank(theParameters.getExportIdentifier())) {
@@ -127,5 +128,11 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		}
 
 		return errorMsgs;
+	}
+
+	private boolean isSupportedOutputFormat(String theOutputFormat) {
+		return Constants.CT_FHIR_NDJSON.equalsIgnoreCase(theOutputFormat)
+				|| Constants.CT_APP_NDJSON.equalsIgnoreCase(theOutputFormat)
+				|| Constants.CT_NDJSON.equalsIgnoreCase(theOutputFormat);
 	}
 }

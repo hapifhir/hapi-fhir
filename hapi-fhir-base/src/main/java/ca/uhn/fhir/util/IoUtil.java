@@ -34,4 +34,10 @@ public class IoUtil {
 			// ignore
 		}
 	}
+
+	public static void runTimes(int theTimes, Runnable theRunnable) {
+		for (int i = 0; i < theTimes; i++) {
+			theRunnable.run();
+		}
+	}
 }

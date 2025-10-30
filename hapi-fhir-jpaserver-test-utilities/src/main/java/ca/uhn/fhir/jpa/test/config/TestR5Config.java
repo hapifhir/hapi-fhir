@@ -74,6 +74,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class TestR5Config {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestR5Config.class);
+
+	/**
+	 * When we're counting SQL select statements, we ignore sequence calls because
+	 * they happen at arbitrary times when a test is executed as a part of the broader
+	 * suite and make the counts completely non-deterministic.
+	 */
 	public static final Predicate<String> SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES = CircularQueueCaptureQueriesListener.DEFAULT_SELECT_INCLUSION_CRITERIA.and(t -> !t.toLowerCase(Locale.US).startsWith("select next value"));
 	public static Integer ourMaxThreads;
 
@@ -82,15 +88,11 @@ public class TestR5Config {
 
 	static {
 		/*
-		 * We use a randomized number of maximum threads in order to try
-		 * and catch any potential deadlocks caused by database connection
-		 * starvation
-		 *
-		 * A minimum of 3 is necessary for most transactions,
-		 * so 3 will be our minimum
+		 * Set a reasonable number of maximum connections so that anything that
+		 * runs away demanding large numbers of connections causes a failure.
 		 */
 		if (ourMaxThreads == null) {
-			ourMaxThreads = (int) (Math.random() * 6.0) + 3;
+			ourMaxThreads = 8;
 
 			if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
 				ourMaxThreads = 1;

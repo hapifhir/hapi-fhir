@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI-FHIR Storage Batch2 Jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
+import ca.uhn.fhir.batch2.jobs.step.ResourceIdListStep;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
@@ -87,6 +88,25 @@ public class ReindexProvider {
 									+ ReindexParameters.OPTIMISTIC_LOCK_DEFAULT + ")")
 					@OperationParam(name = ReindexJobParameters.OPTIMISTIC_LOCK, typeName = "boolean", min = 0, max = 1)
 					IPrimitiveType<Boolean> theOptimisticLock,
+			@Description(
+							"Should the indexer check and correct resources with an invalid current version pointer (default: "
+									+ ReindexParameters.CORRECT_CURRENT_VERSION_DEFAULT_STRING + ")")
+					@OperationParam(
+							name = ReindexJobParameters.CORRECT_CURRENT_VERSION,
+							typeName = "code",
+							min = 0,
+							max = 1)
+					IPrimitiveType<String> theCorrectCurrentVersion,
+			@Description(
+							"How many resources should be reindexed in a single batch. This can be reduced if you need to reindex large resources and therefore need to reduce memory footprint. Values larger than "
+									+ ResourceIdListStep.MAX_BATCH_OF_IDS + " or less than 1 will be ignored (default: "
+									+ ResourceIdListStep.MAX_BATCH_OF_IDS + ")")
+					@OperationParam(
+							name = ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE,
+							typeName = "integer",
+							min = 0,
+							max = 1)
+					IPrimitiveType<Integer> theBatchSize,
 			RequestDetails theRequestDetails) {
 
 		ReindexJobParameters params = new ReindexJobParameters();
@@ -97,8 +117,8 @@ public class ReindexProvider {
 				value = Ascii.toUpperCase(value);
 				ValidateUtil.isTrueOrThrowInvalidRequest(
 						EnumUtils.isValidEnum(ReindexParameters.ReindexSearchParametersEnum.class, value),
-						"Invalid " + REINDEX_SEARCH_PARAMETERS + " value: "
-								+ UrlUtil.sanitizeUrlPart(theReindexSearchParameters.getValue()));
+						"Invalid " + REINDEX_SEARCH_PARAMETERS + " value: %s",
+						UrlUtil.sanitizeUrlPart(theReindexSearchParameters.getValue()));
 				params.setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.valueOf(value));
 			}
 		}
@@ -108,13 +128,27 @@ public class ReindexProvider {
 				value = Ascii.toUpperCase(value);
 				ValidateUtil.isTrueOrThrowInvalidRequest(
 						EnumUtils.isValidEnum(ReindexParameters.OptimizeStorageModeEnum.class, value),
-						"Invalid " + OPTIMIZE_STORAGE + " value: "
-								+ UrlUtil.sanitizeUrlPart(theOptimizeStorage.getValue()));
+						"Invalid " + OPTIMIZE_STORAGE + " value: %s",
+						UrlUtil.sanitizeUrlPart(theOptimizeStorage.getValue()));
 				params.setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum.valueOf(value));
 			}
 		}
+
 		if (theOptimisticLock != null && theOptimisticLock.getValue() != null) {
 			params.setOptimisticLock(theOptimisticLock.getValue());
+		}
+
+		if (theCorrectCurrentVersion != null && theCorrectCurrentVersion.getValue() != null) {
+			String value = Ascii.toUpperCase(theCorrectCurrentVersion.getValueAsString());
+			ValidateUtil.isTrueOrThrowInvalidRequest(
+					EnumUtils.isValidEnum(ReindexParameters.CorrectCurrentVersionModeEnum.class, value),
+					"Invalid " + ReindexJobParameters.CORRECT_CURRENT_VERSION + " value: %s",
+					UrlUtil.sanitizeUrlPart(theCorrectCurrentVersion.getValueAsString()));
+			params.setCorrectCurrentVersion(ReindexParameters.CorrectCurrentVersionModeEnum.valueOf(value));
+
+			if (theOptimisticLock == null || theOptimisticLock.getValue() == null) {
+				params.setOptimisticLock(false);
+			}
 		}
 
 		List<String> urls = List.of();
@@ -123,6 +157,14 @@ public class ReindexProvider {
 					.map(IPrimitiveType::getValue)
 					.filter(StringUtils::isNotBlank)
 					.collect(Collectors.toList());
+		}
+
+		if (theBatchSize != null && theBatchSize.getValue() != null) {
+			int value = theBatchSize.getValue();
+			// Ignore invalid values
+			value = Math.min(value, ResourceIdListStep.MAX_BATCH_OF_IDS);
+			value = Math.max(value, 1);
+			params.setBatchSize(value);
 		}
 
 		myJobPartitionProvider.getPartitionedUrls(theRequestDetails, urls).forEach(params::addPartitionedUrl);

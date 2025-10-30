@@ -48,9 +48,23 @@ public class MetaUtil {
 		// non-instantiable
 	}
 
-	public static String cleanProvenanceSourceUriOrEmpty(String theProvenanceSourceUri) {
+	/**
+	 * Resource.meta.source may include a request ID in the format sourceURI#requestID
+	 * This method extracts the source URI component from the meta.source string
+	 *
+	 * @param theProvenanceSourceUri the meta.source string
+	 * @return the source URI component, or a blank String if empty/null
+	 */
+	public static String extractSourceUriOrEmpty(String theProvenanceSourceUri) {
 		String sanitizedProvenance = defaultString(theProvenanceSourceUri);
 		return StringUtils.substringBefore(sanitizedProvenance, "#");
+	}
+
+	/**
+	 * @since 8.2.0
+	 */
+	public static String getSource(FhirContext theContext, IBaseResource theResource) {
+		return getSource(theContext, theResource.getMeta());
 	}
 
 	public static String getSource(FhirContext theContext, IBaseMetaType theMeta) {
@@ -94,7 +108,8 @@ public class MetaUtil {
 
 	public static <R extends IBaseResource> void populateResourceSource(
 			FhirContext theFhirContext, String theProvenanceSourceUri, String theProvenanceRequestId, R theRetVal) {
-		String sourceString = cleanProvenanceSourceUriOrEmpty(theProvenanceSourceUri);
+		String sourceString = extractSourceUriOrEmpty(theProvenanceSourceUri);
+
 		if (isNotBlank(theProvenanceRequestId)) {
 			sourceString = sourceString + "#" + theProvenanceRequestId;
 		}

@@ -32,6 +32,7 @@ import ca.uhn.fhir.context.RuntimeExtensionDtDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -55,6 +56,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,10 +77,13 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.function.Consumers.nop;
 
 public class FhirTerser {
 
@@ -88,6 +94,7 @@ public class FhirTerser {
 			FhirTerser.class.getName() + "_CONTAIN_RESOURCES_COMPLETED";
 
 	private final FhirContext myContext;
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirTerser.class);
 
 	/**
 	 * This comparator sorts IBaseReferences, and places any that are missing an ID at the end. Those with an ID go to the front.
@@ -697,16 +704,20 @@ public class FhirTerser {
 			}
 		} else {
 			for (IBase nextElement : values) {
-				BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>)
-						myContext.getElementDefinition(nextElement.getClass());
-				List<T> foundValues = getValues(
-						nextChildDef,
-						nextElement,
-						theSubList.subList(1, theSubList.size()),
-						theWantedClass,
-						theCreate,
-						theAddExtension);
-				retVal.addAll(foundValues);
+				// We can only continue iterating if the current element is composite.
+				// If we haven't reached the end of the path, and we have already reached an element
+				// with a primitive data type, we did not find a match.
+				if (myContext.getElementDefinition(nextElement.getClass())
+						instanceof BaseRuntimeElementCompositeDefinition<?> nextChildDef) {
+					List<T> foundValues = getValues(
+							nextChildDef,
+							nextElement,
+							theSubList.subList(1, theSubList.size()),
+							theWantedClass,
+							theCreate,
+							theAddExtension);
+					retVal.addAll(foundValues);
+				}
 			}
 		}
 		return retVal;
@@ -864,7 +875,23 @@ public class FhirTerser {
 	 */
 	public boolean isSourceInCompartmentForTarget(
 			String theCompartmentName, IBaseResource theSource, IIdType theTarget) {
-		return isSourceInCompartmentForTarget(theCompartmentName, theSource, theTarget, null);
+		return isSourceInCompartmentForTarget(
+				theCompartmentName, theSource, theTarget, new CompartmentSearchParameterModifications());
+	}
+
+	@Deprecated
+	public boolean isSourceInCompartmentForTarget(
+			String theCompartmentName,
+			IBaseResource theSource,
+			IIdType theTarget,
+			@Nullable Set<String> theAdditionalCompartmentParamNames) {
+		return isSourceInCompartmentForTarget(
+				theCompartmentName,
+				theSource,
+				theTarget,
+				CompartmentSearchParameterModifications.fromAdditionalCompartmentParamNames(
+						myContext.getResourceType(theSource),
+						theAdditionalCompartmentParamNames == null ? Set.of() : theAdditionalCompartmentParamNames));
 	}
 
 	/**
@@ -874,7 +901,7 @@ public class FhirTerser {
 	 * @param theCompartmentName                 The name of the compartment
 	 * @param theSource                          The potential member of the compartment
 	 * @param theTarget                          The owner of the compartment. Note that both the resource type and ID must be filled in on this IIdType or the method will throw an {@link IllegalArgumentException}
-	 * @param theAdditionalCompartmentParamNames If provided, search param names provided here will be considered as included in the given compartment for this comparison.
+	 * @param theModifications If provided, SP modifications to the compartment
 	 * @return <code>true</code> if <code>theSource</code> is in the compartment or one of the additional parameters matched.
 	 * @throws IllegalArgumentException If theTarget does not contain both a resource type and ID
 	 */
@@ -882,7 +909,7 @@ public class FhirTerser {
 			String theCompartmentName,
 			IBaseResource theSource,
 			IIdType theTarget,
-			Set<String> theAdditionalCompartmentParamNames) {
+			CompartmentSearchParameterModifications theModifications) {
 		Validate.notBlank(theCompartmentName, "theCompartmentName must not be null or blank");
 		Validate.notNull(theSource, "theSource must not be null");
 		Validate.notNull(theTarget, "theTarget must not be null");
@@ -928,8 +955,20 @@ public class FhirTerser {
 		}
 
 		CompartmentOwnerVisitor consumer = new CompartmentOwnerVisitor(wantRef);
-		visitCompartmentOwnersForResource(theCompartmentName, theSource, theAdditionalCompartmentParamNames, consumer);
+		visitCompartmentOwnersForResource(theCompartmentName, theSource, theModifications, consumer);
 		return consumer.isFound();
+	}
+
+	public List<IIdType> getCompartmentOwnersForResource(
+			String theCompartmentName,
+			IBaseResource theSource,
+			@Nullable Set<String> theAdditionalCompartmentParamNames) {
+		return getCompartmentOwnersForResource(
+				theCompartmentName,
+				theSource,
+				CompartmentSearchParameterModifications.fromAdditionalCompartmentParamNames(
+						myContext.getResourceType(theCompartmentName),
+						theAdditionalCompartmentParamNames == null ? Set.of() : theAdditionalCompartmentParamNames));
 	}
 
 	/**
@@ -937,11 +976,13 @@ public class FhirTerser {
 	 *
 	 * @param theCompartmentName                 The name of the compartment
 	 * @param theSource                          The potential member of the compartment
-	 * @param theAdditionalCompartmentParamNames If provided, search param names provided here will be considered as included in the given compartment for this comparison.
+	 * @param theModifications If provided, defines compartment modifications to be considered
 	 */
 	@Nonnull
 	public List<IIdType> getCompartmentOwnersForResource(
-			String theCompartmentName, IBaseResource theSource, Set<String> theAdditionalCompartmentParamNames) {
+			String theCompartmentName,
+			IBaseResource theSource,
+			CompartmentSearchParameterModifications theModifications) {
 		Validate.notBlank(theCompartmentName, "theCompartmentName must not be null or blank");
 		Validate.notNull(theSource, "theSource must not be null");
 
@@ -964,58 +1005,102 @@ public class FhirTerser {
 		}
 
 		CompartmentOwnerVisitor consumer = new CompartmentOwnerVisitor();
-		visitCompartmentOwnersForResource(theCompartmentName, theSource, theAdditionalCompartmentParamNames, consumer);
+		visitCompartmentOwnersForResource(theCompartmentName, theSource, theModifications, consumer);
 		return consumer.getOwners();
+	}
+
+	public Stream<IBaseReference> getCompartmentReferencesForResource(
+			String theCompartmentName,
+			IBaseResource theSource,
+			@Nullable Set<String> theAdditionalCompartmentParamNames) {
+		return getCompartmentReferencesForResource(
+				theCompartmentName,
+				theSource,
+				CompartmentSearchParameterModifications.fromAdditionalCompartmentParamNames(
+						myContext.getResourceType(theCompartmentName),
+						theAdditionalCompartmentParamNames == null ? Set.of() : theAdditionalCompartmentParamNames));
+	}
+
+	@Nonnull
+	public Stream<IBaseReference> getCompartmentReferencesForResource(
+			String theCompartmentName,
+			IBaseResource theSource,
+			@Nullable CompartmentSearchParameterModifications theModifications) {
+		Validate.notBlank(theCompartmentName, "theCompartmentName must not be null or blank");
+		Validate.notNull(theSource, "theSource must not be null");
+		Set<String> additionalSPNames;
+		Set<String> omittedSPNames;
+		if (theModifications != null) {
+			String resourceType = myContext.getResourceType(theSource);
+			additionalSPNames = theModifications.getAdditionalSearchParamNamesForResourceType(resourceType);
+			omittedSPNames = theModifications.getOmittedSPNamesForResourceType(resourceType);
+		} else {
+			additionalSPNames = new HashSet<>();
+			omittedSPNames = new HashSet<>();
+		}
+
+		RuntimeResourceDefinition sourceDef = myContext.getResourceDefinition(theSource);
+		List<RuntimeSearchParam> params = sourceDef.getSearchParamsForCompartmentName(theCompartmentName).stream()
+				.filter(p -> !omittedSPNames.contains(p.getName()))
+				.collect(Collectors.toList());
+
+		additionalSPNames.stream()
+				.map(sourceDef::getSearchParam)
+				.filter(Objects::nonNull)
+				.forEach(params::add);
+
+		return params.stream()
+				.flatMap(nextParam -> nextParam.getPathsSplit().stream())
+				.filter(StringUtils::isNotBlank)
+				.flatMap(nextPath -> {
+
+					/*
+					 * DSTU3 and before just defined compartments as being (e.g.) named
+					 * Patient with a path like CarePlan.subject
+					 *
+					 * R4 uses a fancier format like CarePlan.subject.where(resolve() is Patient)
+					 *
+					 * The following Regex is a hack to make that efficient at runtime.
+					 */
+					String wantType;
+					Matcher matcher = COMPARTMENT_MATCHER_PATH.matcher(nextPath);
+					if (matcher.matches()) {
+						nextPath = matcher.group(1);
+						wantType = matcher.group(2);
+					} else {
+						wantType = null;
+					}
+
+					return getValues(theSource, nextPath, IBaseReference.class).stream()
+							.filter(nextValue -> isEmpty(wantType) || wantType.equals(getTypeFromReference(nextValue)));
+				});
+	}
+
+	private String getTypeFromReference(IBaseReference theReference) {
+
+		IIdType nextTargetId = theReference.getReferenceElement().toUnqualifiedVersionless();
+
+		if (isNotBlank(nextTargetId.getResourceType())) {
+			return nextTargetId.getResourceType();
+		} else if (theReference.getResource() != null) {
+			/*
+			 * If the reference isn't an explicit resource ID, but instead is just
+			 * a resource object, we'll use that type.
+			 */
+			return myContext.getResourceType(theReference.getResource());
+		} else {
+			return "No type on reference";
+		}
 	}
 
 	private void visitCompartmentOwnersForResource(
 			String theCompartmentName,
 			IBaseResource theSource,
-			Set<String> theAdditionalCompartmentParamNames,
+			CompartmentSearchParameterModifications theCompartmentModifications,
 			ICompartmentOwnerVisitor theConsumer) {
-		Validate.notBlank(theCompartmentName, "theCompartmentName must not be null or blank");
-		Validate.notNull(theSource, "theSource must not be null");
 
-		RuntimeResourceDefinition sourceDef = myContext.getResourceDefinition(theSource);
-		List<RuntimeSearchParam> params = sourceDef.getSearchParamsForCompartmentName(theCompartmentName);
-
-		// If passed an additional set of searchparameter names, add them for comparison purposes.
-		if (theAdditionalCompartmentParamNames != null) {
-			List<RuntimeSearchParam> additionalParams = theAdditionalCompartmentParamNames.stream()
-					.map(sourceDef::getSearchParam)
-					.filter(Objects::nonNull)
-					.collect(Collectors.toList());
-			if (params == null || params.isEmpty()) {
-				params = additionalParams;
-			} else {
-				List<RuntimeSearchParam> existingParams = params;
-				params = new ArrayList<>(existingParams.size() + additionalParams.size());
-				params.addAll(existingParams);
-				params.addAll(additionalParams);
-			}
-		}
-
-		for (RuntimeSearchParam nextParam : params) {
-			for (String nextPath : nextParam.getPathsSplit()) {
-
-				/*
-				 * DSTU3 and before just defined compartments as being (e.g.) named
-				 * Patient with a path like CarePlan.subject
-				 *
-				 * R4 uses a fancier format like CarePlan.subject.where(resolve() is Patient)
-				 *
-				 * The following Regex is a hack to make that efficient at runtime.
-				 */
-				String wantType = null;
-				Pattern pattern = COMPARTMENT_MATCHER_PATH;
-				Matcher matcher = pattern.matcher(nextPath);
-				if (matcher.matches()) {
-					nextPath = matcher.group(1);
-					wantType = matcher.group(2);
-				}
-
-				List<IBaseReference> values = getValues(theSource, nextPath, IBaseReference.class);
-				for (IBaseReference nextValue : values) {
+		getCompartmentReferencesForResource(theCompartmentName, theSource, theCompartmentModifications)
+				.flatMap(nextValue -> {
 					IIdType nextTargetId = nextValue.getReferenceElement().toUnqualifiedVersionless();
 
 					/*
@@ -1031,23 +1116,14 @@ public class FhirTerser {
 							nextTargetId.setParts(null, resourceType, nextTargetId.getIdPart(), null);
 						}
 					}
-
-					if (isNotBlank(wantType)) {
-						String nextTargetIdResourceType = nextTargetId.getResourceType();
-						if (nextTargetIdResourceType == null || !nextTargetIdResourceType.equals(wantType)) {
-							continue;
-						}
-					}
-
 					if (isNotBlank(nextTargetId.getValue())) {
-						boolean shouldContinue = theConsumer.consume(nextTargetId);
-						if (!shouldContinue) {
-							return;
-						}
+						return Stream.of(nextTargetId);
+					} else {
+						return Stream.empty();
 					}
-				}
-			}
-		}
+				})
+				.takeWhile(theConsumer::consume)
+				.forEach(nop());
 	}
 
 	private void visit(
@@ -1399,37 +1475,30 @@ public class FhirTerser {
 	}
 
 	/**
-	 * Clear all content on a resource
+	 * Clear all content on an element
+	 *
+	 * @return Returns <code>true</code> if any content was actually cleared
+	 * @since 8.6.0
 	 */
-	public void clear(IBaseResource theInput) {
-		visit(theInput, new IModelVisitor2() {
-			@Override
-			public boolean acceptElement(
-					IBase theElement,
-					List<IBase> theContainingElementPath,
-					List<BaseRuntimeChildDefinition> theChildDefinitionPath,
-					List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
-				if (theElement instanceof IPrimitiveType) {
-					((IPrimitiveType) theElement).setValueAsString(null);
-				}
-				return true;
-			}
-
-			@Override
-			public boolean acceptUndeclaredExtension(
-					IBaseExtension<?, ?> theNextExt,
-					List<IBase> theContainingElementPath,
-					List<BaseRuntimeChildDefinition> theChildDefinitionPath,
-					List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
-				theNextExt.setUrl(null);
-				theNextExt.setValue(null);
-				return true;
-			}
-		});
+	public boolean clear(IBase theInput) {
+		ClearingModelVisitor visitor = new ClearingModelVisitor();
+		visit(theInput, visitor);
+		return visitor.myFoundContent;
 	}
 
-	private void containResourcesForEncoding(
-			ContainedResources theContained, IBaseResource theResource, boolean theModifyResource) {
+	/**
+	 * Clear all content on a resource.
+	 *
+	 * @return Returns <code>true</code> if any content was actually cleared
+	 * @see #clear(IBase) This method is a synonym for {@link #clear(IBase)}, provided for historical reasons.
+	 */
+	public boolean clear(IBaseResource theInput) {
+		ClearingModelVisitor visitor = new ClearingModelVisitor();
+		visit(theInput, visitor);
+		return visitor.myFoundContent;
+	}
+
+	private void containResourcesForEncoding(ContainedResources theContained, IBaseResource theResource) {
 		List<IBaseReference> allReferences = getAllPopulatedChildElementsOfType(theResource, IBaseReference.class);
 
 		// Note that we process all contained resources that have arrived here with an ID contained resources first, so
@@ -1447,7 +1516,7 @@ public class FhirTerser {
 							.remove(next.getReferenceElement().getValue());
 					if (potentialTarget != null) {
 						theContained.addContained(next.getReferenceElement(), potentialTarget);
-						containResourcesForEncoding(theContained, potentialTarget, theModifyResource);
+						containResourcesForEncoding(theContained, potentialTarget);
 					}
 				}
 			}
@@ -1462,14 +1531,27 @@ public class FhirTerser {
 					if (id == null) {
 						continue;
 					}
-					if (theModifyResource) {
-						getContainedResourceList(theResource).add(resource);
-						next.setReference(id.getValue());
+					getContainedResourceList(theResource).add(resource);
+
+					String idString = id.getValue();
+					if (!idString.startsWith("#")) {
+						idString = "#" + idString;
 					}
+
+					next.setReference(idString);
+					next.setResource(null);
 					if (resource.getIdElement().isLocal() && theContained.hasExistingIdToContainedResource()) {
 						theContained
 								.getExistingIdToContainedResource()
 								.remove(resource.getIdElement().getValue());
+					}
+				} else {
+					IIdType previouslyContainedResourceId = theContained.getPreviouslyContainedResourceId(resource);
+					if (previouslyContainedResourceId != null) {
+						if (theContained.getResourceId(resource) == null) {
+							theContained.addContained(previouslyContainedResourceId, resource);
+							getContainedResourceList(theResource).add(resource);
+						}
 					}
 				}
 			}
@@ -1483,21 +1565,10 @@ public class FhirTerser {
 	 *
 	 * @since 5.4.0
 	 */
-	public ContainedResources containResources(IBaseResource theResource, OptionsEnum... theOptions) {
-		boolean storeAndReuse = false;
-		boolean modifyResource = false;
-		for (OptionsEnum next : theOptions) {
-			switch (next) {
-				case MODIFY_RESOURCE:
-					modifyResource = true;
-					break;
-				case STORE_AND_REUSE_RESULTS:
-					storeAndReuse = true;
-					break;
-			}
-		}
+	public ContainedResources containResources(
+			IBaseResource theResource, ContainedResources theParentContainedResources, boolean theStoreResults) {
 
-		if (storeAndReuse) {
+		if (theStoreResults) {
 			Object cachedValue = theResource.getUserData(USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED);
 			if (cachedValue != null) {
 				return (ContainedResources) cachedValue;
@@ -1510,8 +1581,11 @@ public class FhirTerser {
 		for (IBaseResource next : containedResources) {
 			String nextId = next.getIdElement().getValue();
 			if (StringUtils.isNotBlank(nextId)) {
-				if (!nextId.startsWith("#")) {
-					nextId = '#' + nextId;
+				while (nextId.startsWith("#")) {
+					ourLog.warn(
+							"Found contained resource with ID starting with # character ({}). This form of ID is deprecated and will be dropped in a future release, preventing the current code from working correctly.",
+							nextId);
+					nextId = nextId.substring(1);
 				}
 				next.getIdElement().setValue(nextId);
 			}
@@ -1519,10 +1593,23 @@ public class FhirTerser {
 		}
 
 		if (myContext.getParserOptions().isAutoContainReferenceTargetsWithNoId()) {
-			containResourcesForEncoding(contained, theResource, modifyResource);
+			if (theParentContainedResources != null) {
+				if (theParentContainedResources.hasResourceToIdValues()) {
+					contained
+							.getPreviouslyContainedResourceToIdMap()
+							.putAll(theParentContainedResources.getResourceToIdMap());
+				}
+				if (theParentContainedResources.hasPreviouslyContainedResourceToIdValues()) {
+					contained
+							.getPreviouslyContainedResourceToIdMap()
+							.putAll(theParentContainedResources.getPreviouslyContainedResourceToIdMap());
+				}
+			}
+
+			containResourcesForEncoding(contained, theResource);
 		}
 
-		if (storeAndReuse) {
+		if (theStoreResults) {
 			theResource.setUserData(USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED, contained);
 		}
 
@@ -1743,6 +1830,17 @@ public class FhirTerser {
 	}
 
 	/**
+	 * Checks if the field exists on the resource
+	 *
+	 * @param theFieldName   Name of the field to check
+	 * @param theResource    Resource instance to check
+	 * @return Returns true if resource definition has a child with the specified name and false otherwise
+	 */
+	public boolean fieldExists(String theFieldName, IBaseResource theResource) {
+		return myContext.getResourceDefinition(theResource).getChildByName(theFieldName) != null;
+	}
+
+	/**
 	 * Clones a resource object, copying all data elements from theSource into a new copy of the same type.
 	 * <p>
 	 * Note that:
@@ -1763,21 +1861,6 @@ public class FhirTerser {
 		return target;
 	}
 
-	public enum OptionsEnum {
-
-		/**
-		 * Should we modify the resource in the case that contained resource IDs are assigned
-		 * during a {@link #containResources(IBaseResource, OptionsEnum...)} pass.
-		 */
-		MODIFY_RESOURCE,
-
-		/**
-		 * Store the results of the operation in the resource metadata and reuse them if
-		 * subsequent calls are made.
-		 */
-		STORE_AND_REUSE_RESULTS
-	}
-
 	@FunctionalInterface
 	private interface ICompartmentOwnerVisitor {
 
@@ -1790,13 +1873,26 @@ public class FhirTerser {
 	public static class ContainedResources {
 		private List<IBaseResource> myResourceList;
 		private IdentityHashMap<IBaseResource, IIdType> myResourceToIdMap;
+		private IdentityHashMap<IBaseResource, IIdType> myPreviouslyContainedResourceToIdMap;
 		private Map<String, IBaseResource> myExistingIdToContainedResourceMap;
+
+		public ContainedResources() {
+			super();
+		}
 
 		public Map<String, IBaseResource> getExistingIdToContainedResource() {
 			if (myExistingIdToContainedResourceMap == null) {
 				myExistingIdToContainedResourceMap = new HashMap<>();
 			}
 			return myExistingIdToContainedResourceMap;
+		}
+
+		public boolean referenceMatchesAContainedResource(IIdType theRefId) {
+			assert theRefId.getValue().startsWith("#");
+
+			String expectedResourceId = theRefId.getValue().substring(1);
+			return this.getContainedResources().stream()
+					.anyMatch(res -> res.getIdElement().getIdPart().equals(expectedResourceId));
 		}
 
 		public IIdType addContained(IBaseResource theResource) {
@@ -1812,7 +1908,9 @@ public class FhirTerser {
 
 			IIdType newId = theResource.getIdElement();
 			if (isBlank(newId.getValue())) {
-				newId.setValue("#" + UUID.randomUUID());
+				newId.setValue(UUID.randomUUID().toString());
+			} else if (newId.getValue().startsWith("#")) {
+				newId.setValue(newId.getValueAsString().substring(1));
 			}
 
 			getResourceToIdMap().put(theResource, newId);
@@ -1859,6 +1957,10 @@ public class FhirTerser {
 			return myResourceList;
 		}
 
+		private boolean hasResourceToIdValues() {
+			return myResourceToIdMap != null && !myResourceToIdMap.isEmpty();
+		}
+
 		private IdentityHashMap<IBaseResource, IIdType> getResourceToIdMap() {
 			if (myResourceToIdMap == null) {
 				myResourceToIdMap = new IdentityHashMap<>();
@@ -1875,6 +1977,65 @@ public class FhirTerser {
 
 		public boolean hasExistingIdToContainedResource() {
 			return myExistingIdToContainedResourceMap != null;
+		}
+
+		public IdentityHashMap<IBaseResource, IIdType> getPreviouslyContainedResourceToIdMap() {
+			if (myPreviouslyContainedResourceToIdMap == null) {
+				myPreviouslyContainedResourceToIdMap = new IdentityHashMap<>();
+			}
+			return myPreviouslyContainedResourceToIdMap;
+		}
+
+		public boolean hasPreviouslyContainedResourceToIdValues() {
+			return myPreviouslyContainedResourceToIdMap != null && !myPreviouslyContainedResourceToIdMap.isEmpty();
+		}
+
+		public IIdType getPreviouslyContainedResourceId(IBaseResource theResource) {
+			if (hasPreviouslyContainedResourceToIdValues()) {
+				return getPreviouslyContainedResourceToIdMap().get(theResource);
+			}
+			return null;
+		}
+	}
+
+	private static class ClearingModelVisitor implements IModelVisitor2 {
+
+		private boolean myFoundContent;
+
+		@Override
+		public boolean acceptElement(
+				IBase theElement,
+				List<IBase> theContainingElementPath,
+				List<BaseRuntimeChildDefinition> theChildDefinitionPath,
+				List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+			if (theElement instanceof IPrimitiveType<?> type) {
+				if (type.getValueAsString() != null) {
+					myFoundContent = true;
+					type.setValueAsString(null);
+				}
+			}
+			return true;
+		}
+
+		@Override
+		public boolean acceptUndeclaredExtension(
+				IBaseExtension<?, ?> theNextExt,
+				List<IBase> theContainingElementPath,
+				List<BaseRuntimeChildDefinition> theChildDefinitionPath,
+				List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+			if (theNextExt.getUrl() != null) {
+				theNextExt.setUrl(null);
+				myFoundContent = true;
+			}
+			if (theNextExt.getValue() != null) {
+				myFoundContent = true;
+				theNextExt.setValue(null);
+			}
+			if (!theNextExt.getExtension().isEmpty()) {
+				theNextExt.getExtension().clear();
+				myFoundContent = true;
+			}
+			return true;
 		}
 	}
 }

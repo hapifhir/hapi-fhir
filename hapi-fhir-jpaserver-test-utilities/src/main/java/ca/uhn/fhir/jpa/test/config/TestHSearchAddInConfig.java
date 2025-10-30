@@ -43,6 +43,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 import java.io.IOException;
@@ -54,7 +55,7 @@ import java.util.Properties;
 
 /**
  * Configurations for Hibernate Search: off, lucene in-memory, lucene on file system or elastic.
- *
+ * <p></p>
  * We use {@link DefaultLuceneHeap} by default in our JPA test configs.
  * Turn off by adding {@link NoFT} to the test Contexts.
  * Use Elasticsearch instead via docker by adding {@link Elasticsearch} to the test Contexts;
@@ -179,7 +180,6 @@ public class TestHSearchAddInConfig {
 
 	/**
 	 * Enable our Fulltext search with an Elasticsearch container instead of our default Lucene heap.
-	 *
 	 * Make sure you add {@link RequiresDocker} annotation to any uses.
 	 */
 	@Configuration

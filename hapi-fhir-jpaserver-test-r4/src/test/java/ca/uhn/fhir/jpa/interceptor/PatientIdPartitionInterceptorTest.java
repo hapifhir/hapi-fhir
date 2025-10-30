@@ -1,11 +1,16 @@
 package ca.uhn.fhir.jpa.interceptor;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse;
+import ca.uhn.fhir.jpa.dao.TransactionUtil;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -13,7 +18,9 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -25,41 +32,58 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.BulkDataExportProvider;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.FhirPatchBuilder;
+import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MultimapCollector;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Test {
 	public static final int ALTERNATE_DEFAULT_ID = -1;
 
+	@Autowired
+	private HapiTransactionService myTransactionService;
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
 	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
@@ -78,6 +102,8 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
 		myPartitionSettings.setDefaultPartitionId(ALTERNATE_DEFAULT_ID);
+
+		initResourceTypeCacheFromConfig();
 	}
 
 	@Override
@@ -87,10 +113,34 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		myInterceptorRegistry.unregisterInterceptor(mySvc);
 		myInterceptorRegistry.unregisterInterceptor(myForceOffsetSearchModeInterceptor);
 
-		myPartitionSettings.setPartitioningEnabled(false);
-		myPartitionSettings.setUnnamedPartitionMode(new PartitionSettings().isUnnamedPartitionMode());
-		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
+		PartitionSettings defaultSettings = new PartitionSettings();
+		myPartitionSettings.setPartitioningEnabled(defaultSettings.isPartitioningEnabled());
+		myPartitionSettings.setUnnamedPartitionMode(defaultSettings.isUnnamedPartitionMode());
+		myPartitionSettings.setDefaultPartitionId(defaultSettings.getDefaultPartitionId());
+		myPartitionSettings.setAllowReferencesAcrossPartitions(defaultSettings.getAllowReferencesAcrossPartitions());
+
+		myTransactionService.setTransactionPropagationWhenChangingPartitions(HapiTransactionService.DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
 	}
+
+
+	@Test
+	public void testDeletePatient_InTransaction_ById() {
+		// Setup
+		createPatientA();
+		myMemoryCacheService.invalidateAllCaches();
+
+		// Test
+		myCaptureQueriesListener.clear();
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionDeleteEntry("Patient", "A");
+		mySystemDao.transaction(newSrd(), bb.getBundleTyped());
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true)).contains("rt1_0.PARTITION_ID='65'");
+	}
+
 
 
 	@Test
@@ -129,7 +179,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			myPatientDao.create(patient);
 			fail();
 		} catch (MethodNotAllowedException e) {
-			assertEquals(Msg.code(1321) + "Patient resource IDs must be client-assigned in patient compartment mode", e.getMessage());
+			assertEquals(Msg.code(1321) + "Patient resource IDs must be client-assigned in patient compartment mode, or server id strategy must be UUID", e.getMessage());
 		}
 	}
 
@@ -179,6 +229,50 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			ResourceTable observation = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
 			assertEquals("Organization", observation.getResourceType());
 			assertEquals(ALTERNATE_DEFAULT_ID, observation.getPartitionId().getPartitionId().intValue());
+		});
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testPatch(boolean theById) {
+		createPatientA();
+
+		Observation obs = new Observation();
+		obs.setId("B");
+		obs.getSubject().setReference("Patient/A");
+		IIdType obsId = myObservationDao.update(obs).getId().toUnqualifiedVersionless();
+
+		// Test
+		FhirPatchBuilder patchBuilder = new FhirPatchBuilder(myFhirContext);
+		patchBuilder
+			.insert()
+			.path("Observation.identifier")
+			.index(0)
+			.value(new Identifier().setSystem("http://foo").setValue("123"));
+		if (theById) {
+			myObservationDao.patch(obsId, null, PatchTypeEnum.FHIR_PATCH_JSON, myFhirContext.newJsonParser().encodeResourceToString(patchBuilder.build()), patchBuilder.build(), newSrd());
+		} else {
+			myObservationDao.patch(null, "Observation?subject=Patient/A", PatchTypeEnum.FHIR_PATCH_JSON, myFhirContext.newJsonParser().encodeResourceToString(patchBuilder.build()), patchBuilder.build(), newSrd());
+		}
+
+		// Verify
+		Observation actual = myObservationDao.read(obsId, mySrd);
+		assertEquals("123", actual.getIdentifier().get(0).getValue());
+	}
+
+
+	@Test
+	public void testCreateGroupWithNoPatientReferenceValueIsInTheDefaultPartition() {
+		//Given: A Group resource with no members
+		Group group = new Group();
+		group.setActual(false);
+
+		Long id =  myGroupDao.create(group, mySrd).getId().getIdPartAsLong();
+		//Verify: Group is successfully created and put in the default partition
+		runInTransaction(() -> {
+			ResourceTable table = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
+			assertEquals("Group", table.getResourceType());
+			assertEquals(ALTERNATE_DEFAULT_ID, table.getPartitionId().getPartitionId().intValue());
 		});
 	}
 
@@ -361,6 +455,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testTransaction_NoRequestDetails() throws IOException {
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 		Bundle input = loadResourceFromClasspath(Bundle.class, "/r4/load_bundle.json");
 
 		// Maybe in the future we'll make request details mandatory and if that
@@ -454,14 +549,62 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			mySystemDao.transaction(mySrd, (Bundle) tx.getBundle());
 			fail();
 		} catch (MethodNotAllowedException e) {
-			assertEquals("HAPI-1321: Patient resource IDs must be client-assigned in patient compartment mode", e.getMessage());
+			assertEquals("HAPI-1321: Patient resource IDs must be client-assigned in patient compartment mode, or server id strategy must be UUID", e.getMessage());
 		}
 	}
+
+
+	@Test
+	public void testTransaction_SplitAncillaryAndPatient_NewTransactionPerPartition() {
+		registerInterceptor(new MyTransactionSplitInterceptor());
+		myTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
+
+		String practitionerFullUrl = IdType.newRandomUuid().getValue();
+		String patientFullUrl = IdType.newRandomUuid().getValue();
+		String encounterFullUrl = IdType.newRandomUuid().getValue();
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(
+			buildPractitioner(
+				withIdentifier("http://practitioner", "1")
+			),
+			practitionerFullUrl
+		);
+		bb.addTransactionCreateEntry(
+			buildPatient(
+				withIdentifier("http://patient", "1"),
+				withReference("generalPractitioner", practitionerFullUrl)
+			),
+			patientFullUrl
+		);
+		bb.addTransactionCreateEntry(
+			buildEncounter(
+				withIdentifier("http://encounter", "1"),
+				withSubject(patientFullUrl),
+				withReference("participant.individual", practitionerFullUrl)
+			),
+			encounterFullUrl
+		);
+
+		Bundle request = bb.getBundleTyped();
+
+		// Test
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, request);
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+
+	}
+
 
 
 
 	@Test
 	public void testSearch() throws IOException {
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+
 		Bundle input = loadResourceFromClasspath(Bundle.class, "/r4/load_bundle.json");
 		Bundle outcome = mySystemDao.transaction(new SystemRequestDetails(), input);
 
@@ -597,6 +740,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			assertEquals(202, postResponse.getStatusLine().getStatusCode());
 		}
 	}
+
 	@Test
 	public void testSystemOperation_withNoResourceType_success() throws IOException {
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
@@ -608,4 +752,175 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
 		}
 	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testSyntheaLoad(boolean theSplitTransaction) throws IOException {
+
+		if (theSplitTransaction) {
+			registerInterceptor(new MyTransactionSplitInterceptor());
+		}
+
+	    // given
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+
+		// Load the Synthea supporting bundles
+		TransactionUtil.TransactionResponse hospitalParsedResponse;
+		hospitalParsedResponse = performTransactionAndParseResponse(loadResourceFromClasspath(Bundle.class, "transaction-bundles/synthea/hospitalInformation1743689610792.json"));
+		IIdType locationId = hospitalParsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Location")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
+		TransactionUtil.TransactionResponse practitionerParsedResponse = performTransactionAndParseResponse(loadResourceFromClasspath(Bundle.class, "transaction-bundles/synthea/practitionerInformation1743689610792.json"));
+		IIdType practitionerId = practitionerParsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Practitioner")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
+
+		// when
+		myCaptureQueriesListener.clear();
+		TransactionUtil.TransactionResponse mainParsedResponse = performTransactionAndParseResponse(loadResourceFromClasspath(Bundle.class, "transaction-bundles/synthea/Sherise735_Zofia65_Swaniawski813_e0f7758e-a749-4357-858c-53e1db808e37.json"));
+
+		// verify
+        // This bundle contains 517 resources.
+        assertEquals(27, myCaptureQueriesListener.countSelectQueries());
+        // this is so high because we limit Hibernate to batches of 30 rows.
+        if (theSplitTransaction) {
+			assertEquals(328, myCaptureQueriesListener.getInsertQueries().size());
+			assertEquals(9379, myCaptureQueriesListener.countInsertQueries());
+			assertEquals(36, myCaptureQueriesListener.getUpdateQueries().size());
+			assertEquals(1016, myCaptureQueriesListener.countUpdateQueries());
+			assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+			assertEquals(2, myCaptureQueriesListener.countCommits());
+		} else {
+			assertEquals(322, myCaptureQueriesListener.getInsertQueries().size());
+			assertEquals(9379, myCaptureQueriesListener.countInsertQueries());
+			assertEquals(35, myCaptureQueriesListener.getUpdateQueries().size());
+			assertEquals(1016, myCaptureQueriesListener.countUpdateQueries());
+			assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+			assertEquals(1, myCaptureQueriesListener.countCommits());
+		}
+
+		IIdType patientId = mainParsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Patient")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
+		IIdType encounterId = mainParsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Encounter")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
+		IIdType observationId = mainParsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Observation")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
+		IIdType medicationId = mainParsedResponse.getStorageOutcomes().stream().filter(t -> t.getTargetId().getResourceType().equals("Medication")).findFirst().orElseThrow().getTargetId().toUnqualifiedVersionless();
+
+		int patientPartition = getResourcePartition(patientId);
+		assertThat(patientPartition).isGreaterThan(0);
+		assertResourceIsInPartition(patientPartition, encounterId);
+		assertResourceIsInPartition(patientPartition, observationId);
+		assertResourceIsInPartition(-1, medicationId);
+		assertResourceIsInPartition(-1, locationId);
+		assertResourceIsInPartition(-1, practitionerId);
+	}
+
+	private void assertResourceIsInPartition(int theExpectedPartitionId, IIdType theResourceId) {
+		runInTransaction(()->{
+			ResourceTable entity = myResourceTableDao.findByTypeAndFhirId(theResourceId.getResourceType(), theResourceId.getIdPart()).orElseThrow();
+			assertEquals(theExpectedPartitionId, entity.getPartitionId().getPartitionId());
+		});
+	}
+
+	private int getResourcePartition(IIdType theResourceId) {
+		return runInTransaction(()->{
+			ResourceTable entity = myResourceTableDao.findByTypeAndFhirId(theResourceId.getResourceType(), theResourceId.getIdPart()).orElseThrow();
+			return entity.getPartitionId().getPartitionId();
+		});
+	}
+
+	@Nonnull
+	private TransactionUtil.TransactionResponse performTransactionAndParseResponse(Bundle request) {
+		Bundle response = assertDoesNotThrow(() -> myServer.getFhirClient().transaction().withBundle(request).execute());
+		return TransactionUtil.parseTransactionResponse(myFhirContext, request, response);
+	}
+
+	@Test
+	void testIdReferenceToDefaultPartition_resolvesWithoutError() {
+	    // given
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		IIdType practitionerId = createPractitioner();
+		Patient patient = buildResource(Patient.class,
+			withReference("generalPractitioner", practitionerId));
+
+		// when
+		assertDoesNotThrow(() -> myServer.getFhirClient().create().resource(patient).execute());
+	}
+
+
+	@Test
+	void testLoadBundle_resourceInCompartmentReferencesExistingNonCompartmentResource() {
+		// given
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		IParser parser = myFhirContext.newJsonParser();
+
+		// an organization
+		IIdType orgId = createOrganization(withIdentifier("https://example.com/ns", "123"));
+		logAllResources();
+
+		// and a bundle with a Patient and linked Encounter
+		Patient patient = buildResource(
+			Patient.class,
+			withIdentifier("https://example.com/ns", "456"));
+		Encounter encounter = buildResource(
+			Encounter.class,
+			withSubject("urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea"),
+			// that refers to the existing organization
+			withReference("serviceProvider", orgId)
+		);
+
+		Bundle bundle = new BundleBuilder(myFhirContext)
+			.addTransactionCreateEntry(patient, "urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea").andThen()
+			.addTransactionCreateEntry(encounter).andThen()
+			.getBundleTyped();
+
+		// when processed
+		// Warning: this is weird.
+		// It works going through the server, but not through the dao without this parser dance.
+		// The parser is stitching the resources into the references during parsing, and we need this to allow a server-assigned UUID.
+		bundle = parser.parseResource(Bundle.class, parser.encodeResourceToString(bundle));
+		Bundle outcomes = mySystemDao.transaction(mySrd, bundle);
+
+		// then
+		String patientId = outcomes.getEntry().get(0).getId();
+		//
+		Bundle search = myServer.getFhirClient().search().forResource("Encounter").where(Encounter.PATIENT.hasId(patientId)).and(Encounter.SERVICE_PROVIDER.hasId(orgId)).returnBundle(Bundle.class).execute();
+		assertEquals(1, search.getEntry().size(), "we find the Encounter linked to the organization and the patient");
+	}
+
+
+	@Interceptor
+	public class MyTransactionSplitInterceptor {
+
+		@Hook(Pointcut.STORAGE_TRANSACTION_PRE_PARTITION)
+		public TransactionPrePartitionResponse transactionPartition(IBaseBundle theInput) {
+			List<IBaseBundle> bundles = new ArrayList<>();
+			FhirTerser terser = myFhirContext.newTerser();
+
+			Bundle patientBundle = new Bundle();
+			patientBundle.setType(Bundle.BundleType.TRANSACTION);
+			Bundle nonPatientBundle = new Bundle();
+			nonPatientBundle.setType(Bundle.BundleType.TRANSACTION);
+
+			List<Bundle.BundleEntryComponent> entries = terser.getValues(theInput, "entry", Bundle.BundleEntryComponent.class);
+			for (Bundle.BundleEntryComponent entry : entries) {
+				Resource resource = entry.getResource();
+				switch (resource.getResourceType()) {
+					case Medication, Practitioner, Location -> {
+						nonPatientBundle.addEntry(entry);
+					}
+					default -> {
+						patientBundle.addEntry(entry);
+					}
+				}
+			}
+
+			if (!nonPatientBundle.getEntry().isEmpty()) {
+				bundles.add(nonPatientBundle);
+			}
+			if (!patientBundle.getEntry().isEmpty()) {
+				bundles.add(patientBundle);
+			}
+
+			return new TransactionPrePartitionResponse().setSplitBundles(bundles);
+		}
+
+	}
+
 }

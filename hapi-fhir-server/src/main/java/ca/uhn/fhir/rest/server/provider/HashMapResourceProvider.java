@@ -404,7 +404,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			}
 		}
 
-		ourLog.info("Storing resource with ID: {}", id.getValue());
+		ourLog.info("Storing{}resource with ID: {}", theDeleted ? " deleted " : " ", id.getValue());
 
 		if (theRequestDetails != null && theRequestDetails.getInterceptorBroadcaster() != null) {
 			IInterceptorBroadcaster interceptorBroadcaster = theRequestDetails.getInterceptorBroadcaster();
@@ -506,6 +506,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 				isBlank(theConditional), "This server doesn't support conditional update");
 
 		boolean created = updateInternal(theResource, theRequestDetails, transactionDetails);
+		ourLog.info("Updating resource with ID: {}", theResource.getIdElement());
 		myUpdateCount.incrementAndGet();
 
 		return new MethodOutcome().setCreated(created).setResource(theResource).setId(theResource.getIdElement());

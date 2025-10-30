@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7123
+title: "The Bulk $export batch job now supports the use of the `_until`
+   parameter. Thanks Mads Swensson for the contribution!"

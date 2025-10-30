@@ -1,8 +1,10 @@
 package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.TestFhirResource;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -12,12 +14,15 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Method;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
@@ -106,13 +111,28 @@ public class ConformanceMethodBindingTest {
 		verify(provider, times(2)).getServerConformance(any(), any());
 	}
 
+
+	@ParameterizedTest
+	@EnumSource(
+		value = RequestTypeEnum.class,
+		names = {"GET", "HEAD"})
+	public void invokeServer_metadata(RequestTypeEnum requestTypeEnum) throws NoSuchMethodException {
+		init(new TestResourceProvider());
+
+		RequestDetails requestDetails = mySrd;
+		when(requestDetails.getOperation()).thenReturn("metadata");
+		when(requestDetails.getRequestType()).thenReturn(requestTypeEnum);
+		assertEquals(conformanceMethodBinding.incomingServerRequestMatchesMethod(requestDetails), MethodMatchEnum.EXACT);
+
+	}
+
 	@SuppressWarnings("unused")
 	static class TestResourceProvider {
 
 		@Metadata
 		public IBaseConformance getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
 
-			return mock(IBaseConformance.class, RETURNS_DEEP_STUBS);
+			return new TestBaseConformance();
 		}
 	}
 
@@ -122,7 +142,7 @@ public class ConformanceMethodBindingTest {
 		@Metadata(cacheMillis = 10)
 		public IBaseConformance getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
 
-			return mock(IBaseConformance.class, RETURNS_DEEP_STUBS);
+			return new TestBaseConformance();
 		}
 	}
 
@@ -132,7 +152,7 @@ public class ConformanceMethodBindingTest {
 		@Metadata(cacheMillis = 0)
 		public IBaseConformance getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
 
-			return mock(IBaseConformance.class, RETURNS_DEEP_STUBS);
+			return new TestBaseConformance();
 		}
 
 	}
@@ -143,8 +163,12 @@ public class ConformanceMethodBindingTest {
 		// No @Metadata
 		@Override
 		public IBaseConformance getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
-			return mock(IBaseConformance.class, RETURNS_DEEP_STUBS);
+			return new TestBaseConformance();
 		}
+
+	}
+
+	private static class TestBaseConformance extends TestFhirResource implements IBaseConformance {
 
 	}
 

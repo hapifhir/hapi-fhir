@@ -18,6 +18,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Patient;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -317,6 +318,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
 				Search search1 = mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid1).orElseThrow(() -> new InternalErrorException("Search doesn't exist"));
+				assertNotNull(search1);
 				Search search3 = mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid3).orElseThrow(() -> new InternalErrorException("Search doesn't exist"));
 				assertNotNull(search3);
 				search1timestamp.set(search1.getCreated().getTime());
@@ -406,6 +408,71 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			}
 		});
 
+	}
+
+	@Test
+	public void testExpirePagesOnlyAfterExpiryOnBothCreationAndLastAccessTime() {
+		Patient patient = new Patient();
+		patient.addName().setFamily("EXPIRE");
+		IIdType pid = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		TestUtil.sleepAtLeast(10);
+
+		final StopWatch sw = new StopWatch();
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
+		final IBundleProvider bundleProvider = myPatientDao.search(params);
+		assertThat(toUnqualifiedVersionlessIds(bundleProvider)).hasSize(1).contains(pid);
+
+		final String uuid = bundleProvider.getUuid();
+		waitForSearchToSave(uuid);
+
+		int expireSearchResultsAfterMillis = 500;
+		myStorageSettings.setExpireSearchResultsAfterMillis(expireSearchResultsAfterMillis);
+		int expireAfterLastAccessMillis = 1000;
+
+		final AtomicLong start = new AtomicLong();
+		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+		txTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(@NotNull TransactionStatus theArg) {
+				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(
+					() -> new InternalErrorException("Search doesn't exist"));
+				assertNotNull(search, "Failed after " + sw);
+				search.setExpiryOrNull(DateUtils.addMilliseconds(search.getCreated(), expireAfterLastAccessMillis));
+				start.set(search.getCreated().getTime());
+			}
+		});
+
+		// Just before expiry based on creation time
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(start.get() + expireSearchResultsAfterMillis - 1);
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+		txTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(@NotNull TransactionStatus theArg) {
+				assertNotNull(mySearchEntityDao.findByUuidAndFetchIncludes(bundleProvider.getUuid()));
+			}
+		});
+
+		// Right after expiry based on creation time but before expiry based on last access time
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(start.get() + expireSearchResultsAfterMillis + 1);
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+		txTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(@NotNull TransactionStatus theArg) {
+				assertNotNull(mySearchEntityDao.findByUuidAndFetchIncludes(bundleProvider.getUuid()));
+			}
+		});
+
+		// Past both expiry time based on creation and last access
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(start.get() + expireAfterLastAccessMillis + 1);
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+		txTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(@NotNull TransactionStatus theArg) {
+				assertFalse(mySearchEntityDao.findByUuidAndFetchIncludes(bundleProvider.getUuid()).isPresent());
+			}
+		});
 	}
 
 	private void waitForSearchToSave(final String theUuid) {

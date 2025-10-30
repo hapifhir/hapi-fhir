@@ -1,0 +1,68 @@
+{
+	"resourceType": "StructureDefinition",
+	"id": "TestProcedure",
+	"url": "http://example.org/fhir/StructureDefinition/TestProcedure",
+	"version": "1.0.0",
+	"name": "TestProcedure",
+	"status": "active",
+	"fhirVersion": "4.0.1",
+	"kind": "resource",
+	"abstract": false,
+	"type": "Procedure",
+	"baseDefinition": "http://hl7.org/fhir/StructureDefinition/Procedure",
+	"derivation": "constraint",
+	"differential": {
+		"element":  [
+			{
+				"id": "Procedure.code",
+				"path": "Procedure.code",
+				"definition": "Identification of the procedure or recording of \"absence of relevant procedures\" or of \"procedures unknown\".",
+				"min": 1,
+				"mustSupport": true,
+				"binding": {
+					"strength": "required",
+					"valueSet": "http://acme.org/ValueSet/valueset-combined"
+				}
+			},
+			{
+				"id": "Procedure.code.coding",
+				"path": "Procedure.code.coding",
+				"slicing": {
+					"discriminator":  [
+						{
+							"type": "pattern",
+							"path": "$this"
+						}
+					],
+					"description": "Discriminated by the bound value set",
+					"rules": "open"
+				},
+				"mustSupport": true
+			},
+			{
+				"id": "Procedure.code.coding:slice1",
+				"path": "Procedure.code.coding",
+				"sliceName": "slice1",
+				"short": "Slice for Value Set One codes",
+				"mustSupport": true,
+				"binding": {
+					"strength": "required",
+					"description": "Value Set One Codes",
+					"valueSet": "http://acme.org/ValueSet/valueset-1"
+				}
+			},
+			{
+				"id": "Procedure.code.coding:slice2",
+				"path": "Procedure.code.coding",
+				"sliceName": "slice2",
+				"short": "Slice for Value Set Two codes",
+				"mustSupport": true,
+				"binding": {
+					"strength": "required",
+					"description": "Value Set Two Codes",
+					"valueSet": "http://acme.org/ValueSet/valueset-2"
+				}
+			}
+		]
+	}
+}

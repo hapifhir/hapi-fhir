@@ -6,11 +6,13 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -40,7 +42,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		myStorageSettings.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setHibernateSearchIndexSearchParams(false);
 
 		myInterceptorRegistry.registerInterceptor(new MyPartitionInterceptor());
 	}
@@ -272,6 +274,33 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 			assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_SYS_AND_VALUE = '-2780914544385068076') fetch first '10000' rows only", myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false));
 		}
 	}
+
+	/**
+	 * Including on a reference parameter like Encounter.patient shouldn't perform a
+	 * token/canonical search because that parameter doesn't resolve to a canonical
+	 */
+	@Test
+	public void testSearchByPatientReference_NoUnion() {
+		createPatient(withId("PAT-0"));
+		createEncounter(withId("ENC-0"), withPatient("Patient/PAT-0"));
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap params = SearchParameterMap
+			.newSynchronous(IAnyResource.SP_RES_ID, new TokenParam("Patient/PAT-0"))
+			.addRevInclude(Encounter.INCLUDE_PATIENT);
+		IBundleProvider outcome = myPatientDao.search(params, mySrd);
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(
+			"Patient/PAT-0", "Encounter/ENC-0"
+		);
+		myCaptureQueriesListener.logSelectQueries();
+
+		String fetchIncludeSql = myCaptureQueriesListener.getCapturedQueries().get(1).getSql(true, true);
+		assertThat(fetchIncludeSql).contains("r.src_path = 'Encounter.subject.where(resolve() is Patient)'");
+		assertThat(fetchIncludeSql).doesNotContain("UNION");
+		assertThat(fetchIncludeSql).doesNotContain("union");
+	}
+
+
 
 	public static class MyPartitionInterceptor {
 

@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7016
+title: "New interfaces and utilities have been added to convert the X-Request-Partition-IDs header into a
+RequestPartitionId. Also a new IDefaultPartitionSettings interface has been added to provide default partition
+details to assist in converting X-Request-Partition-IDs=DEFAULT into a default partition id."

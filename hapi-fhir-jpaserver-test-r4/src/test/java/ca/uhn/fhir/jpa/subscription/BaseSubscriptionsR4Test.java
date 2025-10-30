@@ -1,10 +1,15 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -14,7 +19,11 @@ import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.test.utilities.server.TransactionCapturingProviderExtension;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.test.concurrency.PointcutLatch;
 import com.apicatalog.jsonld.StringUtils;
+import com.google.common.base.Strings;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
 import net.ttddyy.dsproxy.QueryCount;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -27,7 +36,6 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Subscription;
-import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,10 +43,11 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSubscriptionsR4Test.class);
@@ -72,6 +81,9 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	protected List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 	@Autowired
 	private SingleQueryCountHolder myCountHolder;
+
+	protected final PointcutLatch mySubscriptionTopicsCheckedLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED);
+	protected final PointcutLatch mySubscriptionDeliveredLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY);
 
 	@AfterEach
 	public void afterUnregisterRestHookListener() {
@@ -109,13 +121,13 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 			waitForActivatedSubscriptionCount(0);
 		}
 
-		LinkedBlockingChannel processingChannel = (LinkedBlockingChannel) myResourceModifiedSubmitterSvc.getProcessingChannelForUnitTest();
-		if (processingChannel != null) {
-			processingChannel.clearInterceptorsForUnitTest();
+		LinkedBlockingChannel matchingChannel = mySubscriptionTestUtil.getMatchingChannel();
+		if (matchingChannel != null) {
+			matchingChannel.clearInterceptorsForUnitTest();
 		}
 		myCountingInterceptor = new CountingInterceptor();
-		if (processingChannel != null) {
-			processingChannel.addInterceptor(myCountingInterceptor);
+		if (matchingChannel != null) {
+			matchingChannel.addInterceptor(myCountingInterceptor);
 		}
 	}
 
@@ -185,7 +197,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	}
 
 	protected Observation sendObservation(String theCode, String theSystem, String theSource, String theRequestId) {
-		Observation observation = createBaseObservation(theCode, theSystem);
+		Observation observation = buildBaseObservation(theCode, theSystem);
 		if (StringUtils.isNotBlank(theSource)) {
 			observation.getMeta().setSource(theSource);
 		}
@@ -199,7 +211,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		return observation;
 	}
 
-	protected Observation createBaseObservation(String theCode, String theSystem) {
+	protected Observation buildBaseObservation(String theCode, String theSystem) {
 		Observation observation = new Observation();
 		CodeableConcept codeableConcept = new CodeableConcept();
 		observation.setCode(codeableConcept);
@@ -213,21 +225,45 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	}
 
 	protected Patient sendPatient() {
+		return sendPatient(null);
+	}
+
+	protected Patient sendPatient(String thePatientId) {
 		Patient patient = new Patient();
+		if(!Strings.isNullOrEmpty(thePatientId)) {
+			patient.setId(thePatientId);
+		}
+
+		DaoMethodOutcome outcome;
+		if(Strings.isNullOrEmpty(thePatientId)) {
+			outcome = myPatientDao.create(patient);
+			patient.setId( outcome.getId());
+		} else {
+			myPatientDao.update(patient);
+		}
+
 		patient.setActive(true);
-
-		IIdType id = myPatientDao.create(patient).getId();
-		patient.setId(id);
-
 		return patient;
 	}
 
 	protected Organization sendOrganization() {
-		Organization org = new Organization();
-		org.setName("ORG");
+		return sendOrganization(null);
+	}
 
-		IIdType id = myOrganizationDao.create(org).getId();
-		org.setId(id);
+	protected Organization sendOrganization( String theOrgId) {
+		Organization org = new Organization();
+		org.setName("ORG" + (theOrgId == null ? "" : theOrgId));
+		if(!Strings.isNullOrEmpty(theOrgId)) {
+			org.setId(theOrgId);
+		}
+
+		DaoMethodOutcome outcome;
+		if(Strings.isNullOrEmpty(theOrgId)) {
+			outcome = myOrganizationDao.create(org);
+			org.setId(outcome.getId());
+		} else {
+			myOrganizationDao.update(org);
+		}
 
 		return org;
 	}
@@ -240,5 +276,44 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	private static QueryCount getQueryCount() {
 		return ourCountHolder.getQueryCountMap().get("");
 	}
+
+	protected IIdType createResource(IBaseResource theResource, boolean theExpectDelivery) throws InterruptedException {
+		return createResource(theResource, theExpectDelivery, 1);
+	}
+
+	// TODO KHS consolidate with lambda
+	protected IIdType createResource(IBaseResource theResource, boolean theExpectDelivery, int theCount) throws InterruptedException {
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
+		if (theExpectDelivery) {
+			mySubscriptionDeliveredLatch.setExpectedCount(theCount);
+		}
+		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
+		IIdType id = dao.create(theResource, mySrd).getId();
+		mySubscriptionTopicsCheckedLatch.awaitExpected();
+		if (theExpectDelivery) {
+			mySubscriptionDeliveredLatch.awaitExpected();
+		}
+		theResource.setId(id);
+		return id;
+	}
+
+	protected DaoMethodOutcome updateResource(IBaseResource theResource, boolean theExpectDelivery) throws InterruptedException {
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
+		if (theExpectDelivery) {
+			mySubscriptionDeliveredLatch.setExpectedCount(1);
+		}
+		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
+		DaoMethodOutcome retval = dao.update(theResource, mySrd);
+
+		List<HookParams> hookParams = mySubscriptionTopicsCheckedLatch.awaitExpected();
+		ResourceModifiedMessage lastMessage = PointcutLatch.getInvocationParameterOfType(hookParams, ResourceModifiedMessage.class);
+		assertEquals(theResource.getIdElement().toVersionless().toString(), lastMessage.getPayloadId());
+
+		if (theExpectDelivery) {
+			mySubscriptionDeliveredLatch.awaitExpected();
+		}
+		return retval;
+	}
+
 
 }

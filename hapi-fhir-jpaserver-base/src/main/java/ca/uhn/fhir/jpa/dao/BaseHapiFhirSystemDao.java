@@ -368,6 +368,11 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 		return myInterceptorBroadcaster;
 	}
 
+	@VisibleForTesting
+	public void setInterceptorBroadcasterForUnitTest(IInterceptorBroadcaster theInterceptorBroadcaster) {
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
+
 	@Override
 	protected JpaStorageSettings getStorageSettings() {
 		return myStorageSettings;

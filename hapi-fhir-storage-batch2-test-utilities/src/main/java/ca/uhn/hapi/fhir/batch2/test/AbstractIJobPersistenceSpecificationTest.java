@@ -117,6 +117,11 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 					return ChunkOutcome.SUCCESS();
 				}
 
+				@Override
+				public IReductionStepWorker<TestJobParameters, TestJobStep3InputType, VoidModel> newInstance() {
+					return this;
+				}
+
 				@Nonnull
 				@Override
 				public RunOutcome run(@Nonnull StepExecutionDetails<TestJobParameters, TestJobStep3InputType> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {

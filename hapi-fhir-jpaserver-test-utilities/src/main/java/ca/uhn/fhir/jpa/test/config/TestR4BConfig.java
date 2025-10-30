@@ -79,12 +79,11 @@ public class TestR4BConfig {
 
 	static {
 		/*
-		 * We use a randomized number of maximum threads in order to try
-		 * and catch any potential deadlocks caused by database connection
-		 * starvation
+		 * Set a reasonable number of maximum connections so that anything that
+		 * runs away demanding large numbers of connections causes a failure.
 		 */
 		if (ourMaxThreads == null) {
-			ourMaxThreads = (int) (Math.random() * 6.0) + 3;
+			ourMaxThreads = 8;
 
 			if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
 				ourMaxThreads = 1;

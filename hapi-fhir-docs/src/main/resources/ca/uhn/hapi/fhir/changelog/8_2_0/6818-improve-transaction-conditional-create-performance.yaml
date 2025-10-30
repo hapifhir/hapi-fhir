@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 6818
+title: "When executing a FHIR transaction containing multiple conditional create operations,
+   a series of SQL resource version lookups have been collapsed into a single query for
+   better performance."

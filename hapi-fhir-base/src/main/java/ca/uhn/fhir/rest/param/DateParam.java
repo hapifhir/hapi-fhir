@@ -111,7 +111,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam>
 	}
 
 	@Override
-	String doGetValueAsQueryToken(FhirContext theContext) {
+	String doGetValueAsQueryToken() {
 		StringBuilder b = new StringBuilder();
 		if (getPrefix() != null) {
 			b.append(ParameterUtil.escapeWithDefault(getPrefix().getValue()));
@@ -149,7 +149,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam>
 	 * QualifiedDateParam with only a comparator and no date/time is considered empty.
 	 */
 	public boolean isEmpty() {
-		return myValue.isEmpty();
+		return getMissing() == null && myValue.isEmpty();
 	}
 
 	/**

@@ -24,6 +24,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
@@ -37,16 +38,19 @@ public abstract class BasePredicateBuilder {
 
 	private final SearchQueryBuilder mySearchSqlBuilder;
 
+	protected final PartitionSettings myPartitionSettings;
+
 	public BasePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		mySearchSqlBuilder = theSearchSqlBuilder;
+		myPartitionSettings = mySearchSqlBuilder.getPartitionSettings();
 	}
 
 	protected SearchQueryBuilder getSearchQueryBuilder() {
 		return mySearchSqlBuilder;
 	}
 
-	PartitionSettings getPartitionSettings() {
-		return mySearchSqlBuilder.getPartitionSettings();
+	protected PartitionSettings getPartitionSettings() {
+		return myPartitionSettings;
 	}
 
 	RequestPartitionId getRequestPartitionId() {
@@ -85,7 +89,11 @@ public abstract class BasePredicateBuilder {
 	}
 
 	protected BaseJoiningPredicateBuilder getOrCreateQueryRootTable(boolean theIncludeResourceTypeAndNonDeletedFlag) {
-		return mySearchSqlBuilder.getOrCreateFirstPredicateBuilder(theIncludeResourceTypeAndNonDeletedFlag);
+		return mySearchSqlBuilder.getOrCreateFirstPredicateBuilder(theIncludeResourceTypeAndNonDeletedFlag, null);
+	}
+
+	protected BaseJoiningPredicateBuilder getOrCreateQueryRootTable(SearchIncludeDeletedEnum theIncludeDeletedFlag) {
+		return mySearchSqlBuilder.getOrCreateFirstPredicateBuilder(true, theIncludeDeletedFlag);
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn[] theFromColumn, DbColumn[] theToColumn) {

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6847
+jira: SMILE-9884
+title: "Previously, when performing chained searches, the exact qualifier was not honoured if the `Index Contained 
+Resources' feature was enabled. This has now been fixed."

@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.util.ResourceLinkUtils;
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.util.RuntimeSearchParamHelper;
@@ -49,6 +50,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,7 +61,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import static org.apache.commons.lang3.StringUtils.compare;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class ResourceIndexedSearchParams {
@@ -364,7 +365,13 @@ public final class ResourceIndexedSearchParams {
 	private boolean resourceIdMatches(
 			StorageSettings theStorageSettings, ResourceLink theResourceLink, ReferenceParam theReference) {
 		String baseUrl = theReference.getBaseUrl();
+		// this suggest that we do not expect ot see baseUrl *unless* it's a "treatbaseaslocal"
 		if (isNotBlank(baseUrl)) {
+			// canonical urls are full urls with a base and everything
+			if (ResourceLinkUtils.isTargetCanonicalUrl(theResourceLink)) {
+				// the reference to a canonical url should be that url
+				return theReference.getValue().equals(theResourceLink.getTargetResourceUrl());
+			}
 			if (!theStorageSettings.getTreatBaseUrlsAsLocal().contains(baseUrl)) {
 				return false;
 			}
@@ -576,16 +583,26 @@ public final class ResourceIndexedSearchParams {
 			return Collections.emptySet();
 		}
 
+		/*
+		 * We need to make sure parameters are in a consistent order. If we have indexed
+		 *    Patient?name=Simpson&gender=male
+		 * we won't be able to match if we later look up
+		 *    Patient?gender=male&name=Simpson
+		 * The list we're sorting is a list-of-lists, where each outer list is all the
+		 * parameter values for a given search parameter. We only really care about sorting
+		 * by parameter name, so sorting based on the first entry in each list is good
+		 * enough.
+		 */
 		thePartsChoices.sort((o1, o2) -> {
 			String str1 = null;
 			String str2 = null;
-			if (o1.size() > 0) {
+			if (!o1.isEmpty()) {
 				str1 = o1.get(0);
 			}
-			if (o2.size() > 0) {
+			if (!o2.isEmpty()) {
 				str2 = o2.get(0);
 			}
-			return compare(str1, str2);
+			return Strings.CS.compare(str1, str2);
 		});
 
 		List<String> values = new ArrayList<>();

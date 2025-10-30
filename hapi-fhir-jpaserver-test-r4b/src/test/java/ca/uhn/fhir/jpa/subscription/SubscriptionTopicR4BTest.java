@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.subscription;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -31,8 +29,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
+class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	public static final String SUBSCRIPTION_TOPIC_TEST_URL = "https://example.com/topic/test";
 
 	@Autowired
@@ -71,12 +71,12 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	}
 
 	@Test
-	public void testSubscriptionTopicRegistryBean() {
+	void testSubscriptionTopicRegistryBean() {
 		assertNotNull(mySubscriptionTopicRegistry);
 	}
 
 	@Test
-	public void testCreate() throws Exception {
+	void testCreate() throws Exception {
 		// WIP SR4B test update, delete, etc
 		createEncounterSubscriptionTopic(SubscriptionTopic.InteractionTrigger.CREATE);
 		mySubscriptionTopicLoader.doSyncResourcesForUnitTest();
@@ -103,7 +103,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	}
 
 	@Test
-	public void testUpdate() throws Exception {
+	void testUpdate() throws Exception {
 		// WIP SR4B test update, delete, etc
 		createEncounterSubscriptionTopic(SubscriptionTopic.InteractionTrigger.CREATE, SubscriptionTopic.InteractionTrigger.UPDATE);
 		mySubscriptionTopicLoader.doSyncResourcesForUnitTest();

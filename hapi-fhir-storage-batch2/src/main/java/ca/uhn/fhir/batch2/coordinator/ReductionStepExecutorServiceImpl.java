@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
+import ca.uhn.fhir.batch2.api.ReductionStepFailureException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
@@ -35,6 +36,7 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
@@ -43,6 +45,7 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.annotation.Nonnull;
@@ -67,6 +70,7 @@ import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
@@ -83,6 +87,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	private final Map<String, JobWorkCursor> myInstanceIdToJobWorkCursor =
 			Collections.synchronizedMap(new LinkedHashMap<>());
 	private final ExecutorService myReducerExecutor;
+	private final ExecutorService myReducerChunkExecutor;
 	private final IJobPersistence myJobPersistence;
 	private final IHapiTransactionService myTransactionService;
 	private final Semaphore myCurrentlyExecuting = new Semaphore(1);
@@ -104,6 +109,12 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
 
 		myReducerExecutor = Executors.newSingleThreadExecutor(new CustomizableThreadFactory("batch2-reducer"));
+
+		// This is a single thread executor because there are no guarantees that the chunk
+		// processing is actually thread safe. Be careful if you think you want to add more
+		// threads here.
+		myReducerChunkExecutor =
+				Executors.newSingleThreadExecutor(new CustomizableThreadFactory("batch2-reducer-chunk"));
 	}
 
 	@EventListener(ContextRefreshedEvent.class)
@@ -225,8 +236,12 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 		PT parameters =
 				instance.getParameters(theJobWorkCursor.getJobDefinition().getParametersType());
+
 		IReductionStepWorker<PT, IT, OT> reductionStepWorker =
 				(IReductionStepWorker<PT, IT, OT>) step.getJobStepWorker();
+
+		// Clone the worker so that we start with no built-up state
+		reductionStepWorker = reductionStepWorker.newInstance();
 
 		instance.setStatus(FINALIZE);
 
@@ -268,8 +283,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 			executeInTransactionWithSynchronization(() -> {
 				try (Stream<WorkChunk> chunkIterator =
 						myJobPersistence.fetchAllWorkChunksForStepStream(instance.getInstanceId(), step.getStepId())) {
-					chunkIterator.forEach(chunk ->
-							processChunk(chunk, instance, parameters, reductionStepWorker, response, theJobWorkCursor));
+					chunkIterator.forEach(chunk -> executeInNoTransaction(() -> processChunk(
+							chunk, instance, parameters, reductionStepWorker, response, theJobWorkCursor)));
 				}
 				return null;
 			});
@@ -287,11 +302,25 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 						StepExecutionDetails.createReductionStepDetails(parameters, null, instance);
 
 				if (response.isSuccessful()) {
-					reductionStepWorker.run(chunkDetails, dataSink);
+					try {
+						executeInNoTransaction(() -> reductionStepWorker.run(chunkDetails, dataSink));
+						// the ReductionStepDataSink will update the job status to COMPLETED
+						// we should update instance here to keep it consistent with the newest version in persistence
+						instance.setStatus(COMPLETED);
+					} catch (ReductionStepFailureException e) {
 
-					// the ReductionStepDataSink will update the job status to COMPLETED
-					// we should update instance here to keep it consistent with the newest version in persistence
-					instance.setStatus(COMPLETED);
+						myJobPersistence.updateInstance(instance.getInstanceId(), i -> {
+							i.setErrorMessage(e.getMessage());
+							i.setEndTime(new Date());
+							i.setStatus(StatusEnum.FAILED);
+
+							if (e.getReportMsg() != null) {
+								i.setReport(JsonUtil.serialize(e.getReportMsg()));
+							}
+
+							return true;
+						});
+					}
 				}
 
 				if (response.hasSuccessfulChunksIds()) {
@@ -326,6 +355,24 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 				return null;
 			});
+		}
+	}
+
+	/**
+	 * We need to keep a long transaction here to keep our ResultSet Stream open for the duration.
+	 * But we don't want to expose this transaction to the user.  We use a new thread here so that
+	 * the individual chunks get processed in their own dedicated transactions separate from the
+	 * main chunk-loading transaction.
+	 */
+	private void executeInNoTransaction(Runnable theRunnable) {
+		Future<?> future = myReducerChunkExecutor.submit(theRunnable);
+		try {
+			future.get();
+		} catch (Exception e) {
+			if (e.getCause() instanceof RuntimeException re) {
+				throw re;
+			}
+			throw new InternalErrorException(Msg.code(2721) + e.getMessage(), e);
 		}
 	}
 

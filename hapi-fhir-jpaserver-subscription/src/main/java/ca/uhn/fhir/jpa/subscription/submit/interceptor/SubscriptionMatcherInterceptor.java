@@ -138,7 +138,7 @@ public class SubscriptionMatcherInterceptor {
 		// If enabled in {@link JpaStorageSettings} the subscription will be handled immediately.
 
 		if (mySubscriptionSettings.isSubscriptionChangeQueuedImmediately()
-				&& theResourceModifiedMessage.hasPayloadType(myFhirContext, "Subscription")) {
+				&& theResourceModifiedMessage.hasResourceType(myFhirContext, "Subscription")) {
 			try {
 				myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
 				return;

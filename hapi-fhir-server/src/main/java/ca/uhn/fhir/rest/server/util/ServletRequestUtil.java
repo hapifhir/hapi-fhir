@@ -19,7 +19,12 @@
  */
 package ca.uhn.fhir.rest.server.util;
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
 import com.google.common.collect.ArrayListMultimap;
@@ -32,11 +37,15 @@ import java.util.Map;
 
 public class ServletRequestUtil {
 	public static ServletSubRequestDetails getServletSubRequestDetails(
-			ServletRequestDetails theRequestDetails, String url, ArrayListMultimap<String, String> theParamValues) {
+			ServletRequestDetails theRequestDetails,
+			String url,
+			String theVerb,
+			ArrayListMultimap<String, String> theParamValues) {
 		ServletSubRequestDetails requestDetails = new ServletSubRequestDetails(theRequestDetails);
 		requestDetails.setServletRequest(theRequestDetails.getServletRequest());
-		requestDetails.setRequestType(RequestTypeEnum.GET);
+		requestDetails.setRequestType(RequestTypeEnum.valueOf(theVerb));
 		requestDetails.setServer(theRequestDetails.getServer());
+		requestDetails.setRestOperationType(theRequestDetails.getRestOperationType());
 
 		int qIndex = url.indexOf('?');
 		requestDetails.setParameters(new HashMap<>());
@@ -66,5 +75,21 @@ public class ServletRequestUtil {
 
 		theRequestDetails.getServer().populateRequestDetailsFromRequestPath(requestDetails, url);
 		return requestDetails;
+	}
+
+	/**
+	 * Validates that the request contains a <code>Prefer: respond-async</code> request header, and
+	 * throws an {@link InvalidRequestException} if not.
+	 *
+	 * @param theRequestDetails The incoming request details
+	 * @param theOperationName The name of the FHIR operation being invoked (e.g. <code>$export</code>)
+	 * @since 8.6.0
+	 */
+	public static void validatePreferAsyncHeader(ServletRequestDetails theRequestDetails, String theOperationName) {
+		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
+		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
+		if (!prefer.getRespondAsync()) {
+			throw new InvalidRequestException(Msg.code(513) + "Must request async processing for " + theOperationName);
+		}
 	}
 }

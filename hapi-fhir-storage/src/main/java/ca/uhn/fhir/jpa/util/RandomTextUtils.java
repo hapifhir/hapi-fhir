@@ -38,4 +38,42 @@ public class RandomTextUtils {
 		}
 		return b.toString();
 	}
+
+	/**
+	 * Finds the matching ")" for a "(" at the given starting index.
+	 * @param theStartIndex the index of the "(" being matched
+	 * @param theStr the string to find matches in
+	 * @return the index of the matching closing brace, or -1 if none found
+	 */
+	public static int findMatchingClosingBrace(int theStartIndex, String theStr) {
+		return findMatchingClosingBrace(theStartIndex, theStr, '(', ')');
+	}
+
+	/**
+	 * Finds the matching "closing" value given both the index of the "opening" value and what the value is.
+	 * -
+	 * If none found, it will return -1.
+	 */
+	public static int findMatchingClosingBrace(
+			int theStartIndex, String theStr, char theOpenBrace, char theClosingBrace) {
+		int len = theStr.length();
+		assert theStartIndex >= 0;
+		assert theStartIndex < len;
+
+		int balance = 0;
+		for (int i = theStartIndex; i < len; i++) {
+			char next = theStr.charAt(i);
+			if (next == theClosingBrace) {
+				balance--;
+			} else if (next == theOpenBrace) {
+				balance++;
+			}
+
+			if (balance == 0) {
+				return i;
+			}
+		}
+		// no closing brace found to match
+		return -1;
+	}
 }

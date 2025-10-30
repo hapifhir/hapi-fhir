@@ -141,17 +141,10 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		ValidationSupportContext ctx = new ValidationSupportContext(myValidationSupport);
 		ConceptValidationOptions options = new ConceptValidationOptions();
 
-		// In memory - Hierarchy in existing CS
-
-		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "child10", null, "http://vs");
-		assertNotNull(outcome);
-		assertTrue(outcome.isOk());
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getSourceDetails());
-
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs#childX' for in-memory expansion of ValueSet 'http://vs'");
+		assertThat(outcome.getMessage()).contains("cannot apply filters");
 
 		// In memory - Enumerated in non-present CS
 
@@ -248,13 +241,13 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "child10", null, "http://vs");
 		assertNotNull(outcome);
-		assertTrue(outcome.isOk());
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getSourceDetails());
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getMessage()).contains("cannot apply filters");
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs#childX' for in-memory expansion of ValueSet 'http://vs'");
+		assertThat(outcome.getMessage()).contains("cannot apply filters");
 
 		// In memory - Enumerated in non-present CS
 

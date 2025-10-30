@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 7118
+title: "The List and Group resources will no longer be included in Patient instance/type
+        `$export` and `$everything` operations. This is a deviation from the
+        definition of the (patient compartment)[https://build.fhir.org/compartmentdefinition-patient.html]
+        for security reasons.
+        
+        This is a breaking change.
+"

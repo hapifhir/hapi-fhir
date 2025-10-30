@@ -21,11 +21,15 @@ package ca.uhn.fhir.util.bundle;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import java.util.Date;
 
 public class BundleEntryMutator {
 	private final IBase myEntry;
@@ -33,23 +37,26 @@ public class BundleEntryMutator {
 	private final BaseRuntimeElementCompositeDefinition<?> myRequestChildContentsDef;
 	private final FhirContext myFhirContext;
 	private final BaseRuntimeElementCompositeDefinition<?> myEntryDefinition;
+	private final BaseRuntimeChildDefinition myMethodChildDef;
 
 	public BundleEntryMutator(
 			FhirContext theFhirContext,
 			IBase theEntry,
 			BaseRuntimeChildDefinition theRequestChildDef,
 			BaseRuntimeElementCompositeDefinition<?> theChildContentsDef,
-			BaseRuntimeElementCompositeDefinition<?> theEntryDefinition) {
+			BaseRuntimeElementCompositeDefinition<?> theEntryDefinition,
+			BaseRuntimeChildDefinition theMethodChildDef) {
 		myFhirContext = theFhirContext;
 		myEntry = theEntry;
 		myRequestChildDef = theRequestChildDef;
 		myRequestChildContentsDef = theChildContentsDef;
+		myMethodChildDef = theMethodChildDef;
 		myEntryDefinition = theEntryDefinition;
 	}
 
-	void setRequestUrl(FhirContext theFhirContext, String theRequestUrl) {
+	void setRequestUrl(String theRequestUrl) {
 		BaseRuntimeChildDefinition requestUrlChildDef = myRequestChildContentsDef.getChildByName("url");
-		IPrimitiveType<?> url = ParametersUtil.createUri(theFhirContext, theRequestUrl);
+		IPrimitiveType<?> url = ParametersUtil.createUri(myFhirContext, theRequestUrl);
 		for (IBase nextRequest : myRequestChildDef.getAccessor().getValues(myEntry)) {
 			requestUrlChildDef.getMutator().addValue(nextRequest, url);
 		}
@@ -70,11 +77,47 @@ public class BundleEntryMutator {
 		resourceChild.getMutator().setValue(myEntry, theUpdatedResource);
 	}
 
-	public void setRequestIfNoneExist(FhirContext theFhirContext, String theIfNoneExist) {
-		BaseRuntimeChildDefinition requestUrlChildDef = myRequestChildContentsDef.getChildByName("ifNoneExist");
-		IPrimitiveType<?> url = ParametersUtil.createString(theFhirContext, theIfNoneExist);
+	public void setRequestIfNoneMatch(String theIfNoneMatch) {
+		BaseRuntimeChildDefinition requestUrlChildDef = myRequestChildContentsDef.getChildByName("ifNoneMatch");
+		IPrimitiveType<?> url = ParametersUtil.createString(myFhirContext, theIfNoneMatch);
 		for (IBase nextRequest : myRequestChildDef.getAccessor().getValues(myEntry)) {
 			requestUrlChildDef.getMutator().addValue(nextRequest, url);
+		}
+	}
+
+	public void setRequestIfModifiedSince(Date theIfModifiedSince) {
+		BaseRuntimeChildDefinition requestUrlChildDef = myRequestChildContentsDef.getChildByName("ifModifiedSince");
+		IPrimitiveType<?> url = ParametersUtil.createInstant(myFhirContext, theIfModifiedSince);
+		for (IBase nextRequest : myRequestChildDef.getAccessor().getValues(myEntry)) {
+			requestUrlChildDef.getMutator().addValue(nextRequest, url);
+		}
+	}
+
+	public void setRequestIfMatch(String theIfMatch) {
+		BaseRuntimeChildDefinition requestUrlChildDef = myRequestChildContentsDef.getChildByName("ifMatch");
+		IPrimitiveType<?> url = ParametersUtil.createString(myFhirContext, theIfMatch);
+		for (IBase nextRequest : myRequestChildDef.getAccessor().getValues(myEntry)) {
+			requestUrlChildDef.getMutator().addValue(nextRequest, url);
+		}
+	}
+
+	public void setRequestIfNoneExist(String theIfNoneExist) {
+		BaseRuntimeChildDefinition requestUrlChildDef = myRequestChildContentsDef.getChildByName("ifNoneExist");
+		IPrimitiveType<?> url = ParametersUtil.createString(myFhirContext, theIfNoneExist);
+		for (IBase nextRequest : myRequestChildDef.getAccessor().getValues(myEntry)) {
+			requestUrlChildDef.getMutator().addValue(nextRequest, url);
+		}
+	}
+
+	public void setMethod(RequestTypeEnum theMethod) {
+		BaseRuntimeChildDefinition methodChildDef = myRequestChildContentsDef.getChildByName("method");
+		BaseRuntimeElementDefinition<?> methodElement = methodChildDef.getChildByName("method");
+		IPrimitiveType<?> newValue =
+				(IPrimitiveType<?>) methodElement.newInstance(methodChildDef.getInstanceConstructorArguments());
+		newValue.setValueAsString(theMethod.name());
+
+		for (IBase nextRequest : myRequestChildDef.getAccessor().getValues(myEntry)) {
+			methodChildDef.getMutator().setValue(nextRequest, newValue);
 		}
 	}
 }

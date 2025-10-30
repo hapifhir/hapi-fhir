@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.IndexedSearchParam;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +79,8 @@ public class JpaSearchParamCache {
 	/**
 	 * Constructor
 	 */
-	public JpaSearchParamCache(PartitionSettings thePartitionSettings) {
+	public JpaSearchParamCache(@Nonnull PartitionSettings thePartitionSettings) {
+		assert thePartitionSettings != null;
 		myPartitionSettings = thePartitionSettings;
 	}
 
@@ -92,9 +94,11 @@ public class JpaSearchParamCache {
 
 	public List<RuntimeSearchParam> getActiveComboSearchParams(
 			String theResourceName, ComboSearchParamType theParamType) {
-		return getActiveComboSearchParams(theResourceName).stream()
+		List<RuntimeSearchParam> activeComboSearchParams = getActiveComboSearchParams(theResourceName);
+		List<RuntimeSearchParam> retVal = activeComboSearchParams.stream()
 				.filter(param -> Objects.equals(theParamType, param.getComboSearchParamType()))
 				.collect(Collectors.toList());
+		return retVal;
 	}
 
 	public Optional<RuntimeSearchParam> getActiveComboSearchParamById(String theResourceName, IIdType theId) {
@@ -118,8 +122,8 @@ public class JpaSearchParamCache {
 		return Collections.unmodifiableList(retVal);
 	}
 
-	public Optional<IndexedSearchParam> getIndexedSearchParamByHashIdentity(Long theHashIdentity) {
-		return Optional.ofNullable(myHashIdentityToIndexedSearchParams.get(theHashIdentity));
+	public Map<Long, IndexedSearchParam> getHashIdentityToIndexedSearchParamMap() {
+		return myHashIdentityToIndexedSearchParams;
 	}
 
 	void populateActiveSearchParams(
@@ -213,7 +217,7 @@ public class JpaSearchParamCache {
 			}
 		}
 
-		ourLog.info("Have {} unique search params", activeParamNamesToComboSearchParams.size());
+		ourLog.debug("Have {} unique search params", activeParamNamesToComboSearchParams.size());
 
 		myActiveComboSearchParams = resourceNameToComboSearchParams;
 		myActiveParamNamesToComboSearchParams = activeParamNamesToComboSearchParams;
@@ -248,7 +252,7 @@ public class JpaSearchParamCache {
 			}
 			// handle Uplifted Ref Chain Search Parameters
 			theRuntimeSearchParam.getUpliftRefchainCodes().stream()
-					.map(urCode -> String.format("%s.%s", theRuntimeSearchParam.getName(), urCode))
+					.map(urCode -> theRuntimeSearchParam.getName() + "." + urCode)
 					.forEach(urSpName ->
 							addIndexedSearchParam(theResourceName, theHashIdentityToIndexedSearchParams, urSpName));
 		}

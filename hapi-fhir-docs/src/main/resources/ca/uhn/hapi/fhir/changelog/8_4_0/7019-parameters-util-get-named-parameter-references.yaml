@@ -1,0 +1,4 @@
+---
+type: add
+issue: 7019
+title: "Added `getNamedParameterReferences` method to `ParametersUtil`."

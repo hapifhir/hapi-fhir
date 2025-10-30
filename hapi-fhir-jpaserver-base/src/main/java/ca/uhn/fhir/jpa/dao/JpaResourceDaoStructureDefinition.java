@@ -22,6 +22,10 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoStructureDefinition;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,5 +42,27 @@ public class JpaResourceDaoStructureDefinition<T extends IBaseResource> extends 
 				new ValidationSupportContext(myValidationSupport), theInput, theUrl, theWebUrl, theName);
 		Validate.notNull(output);
 		return output;
+	}
+
+	@Override
+	public DaoMethodOutcome update(
+			T theResource,
+			String theMatchUrl,
+			boolean thePerformIndexing,
+			boolean theForceUpdateVersion,
+			RequestDetails theRequest,
+			@Nonnull TransactionDetails theTransactionDetails) {
+		DaoMethodOutcome retVal = super.update(
+				theResource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theRequest, theTransactionDetails);
+
+		if (!retVal.isNop()) {
+			// We store StructureDefinitions in a non-expiring cache/map
+			// In the event that a StructureDefinition changes, we should invalidate the cache
+			// This is particularly helpful with multi-versioned profiles (e.g. multiple StructureDefinition.version)
+			// We generally assume StructureDefinitions don't change over the IValidationSupport lifetime so this
+			// really shouldn't be happening too often.
+			myValidationSupport.invalidateCaches();
+		}
+		return retVal;
 	}
 }

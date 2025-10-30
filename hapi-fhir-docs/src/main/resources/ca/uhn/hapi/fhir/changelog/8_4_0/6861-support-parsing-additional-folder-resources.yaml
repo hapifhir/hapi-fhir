@@ -1,0 +1,5 @@
+---
+type: add
+issue: 6861
+title: "Added support for parsing additional folder resources in IG packages as utility function.
+  This allows an easier way API-wise of adding e.g. test resources."

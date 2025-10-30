@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI-FHIR Storage Batch2 Jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -38,5 +38,12 @@ import org.springframework.context.annotation.Import;
 	BulkExportAppCtx.class,
 	TermCodeSystemJobConfig.class,
 	BulkImportPullConfig.class
+
+	/*
+	 * Note: Bulk Patch and Bulk Patch Rewrite History are not included here
+	 * because we don't want to load them unless they're actually used, and
+	 * because we use overridden versions of these in Smile.
+	 */
+
 })
 public class Batch2JobsConfig {}

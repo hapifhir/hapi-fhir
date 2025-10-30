@@ -21,13 +21,16 @@ package ca.uhn.fhir.jpa.partition;
 
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.Objects;
 import java.util.Set;
 
 public interface IRequestPartitionHelperSvc {
@@ -202,7 +205,7 @@ public interface IRequestPartitionHelperSvc {
 	 * @return true if the <code>theRequestPartitionId</code> is for the default partition only.
 	 */
 	default boolean isDefaultPartition(@Nonnull RequestPartitionId theRequestPartitionId) {
-		return theRequestPartitionId.isDefaultPartition(getDefaultPartitionId());
+		return theRequestPartitionId.isPartition(getDefaultPartitionId());
 	}
 
 	/**
@@ -214,5 +217,27 @@ public interface IRequestPartitionHelperSvc {
 	 */
 	default boolean hasDefaultPartitionId(@Nonnull RequestPartitionId theRequestPartitionId) {
 		return theRequestPartitionId.hasDefaultPartitionId(getDefaultPartitionId());
+	}
+
+	/**
+	 * Given a request partition (which might be "all partitions" or a selection of partitions),
+	 * checks if the partition ID in a {@link JpaPid} is within the request partition's range.
+	 *
+	 * @param theRequestPartitionId The request partition
+	 * @param thePid The PID to check for suitability in the request partition
+	 */
+	default boolean isPidPartitionWithinRequestPartition(
+			@Nullable RequestPartitionId theRequestPartitionId, @Nonnull IResourcePersistentId<?> thePid) {
+		if (theRequestPartitionId == null) {
+			return true;
+		}
+		if (theRequestPartitionId.isAllPartitions()) {
+			return true;
+		}
+		if (isDefaultPartition(theRequestPartitionId)) {
+			return Objects.equals(thePid.getPartitionId(), getDefaultPartitionId());
+		}
+		return !theRequestPartitionId.hasPartitionIds()
+				|| theRequestPartitionId.getPartitionIds().contains(thePid.getPartitionId());
 	}
 }

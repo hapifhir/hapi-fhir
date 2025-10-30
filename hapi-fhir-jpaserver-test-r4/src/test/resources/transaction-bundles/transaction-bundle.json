@@ -1,0 +1,44 @@
+{
+	"resourceType": "Bundle",
+	"type": "transaction",
+	"entry": [
+		{
+			"fullUrl": "urn:uuid:a6017be3-a75c-40d2-bf31-42037df175a7",
+			"resource": {
+				"resourceType": "RequestGroup"
+			},
+			"request": {
+				"method": "POST",
+				"url": "RequestGroup"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:aa3ed9c6-21f0-4904-b101-08f7efd638b7",
+			"resource": {
+				"resourceType": "MessageHeader",
+				"meta": {
+					"extension": [
+						{
+							"url": "http://hapifhir.io/fhir/StructureDefinition/auto-version-references-at-path",
+							"valueString": "focus"
+						}
+					]
+				},
+				"focus": [
+					{
+						"reference": "urn:uuid:a6017be3-a75c-40d2-bf31-42037df175a7",
+						"type": "RequestGroup"
+					},
+					{
+						"reference": "Patient/A123",
+						"type": "Patient"
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "MessageHeader"
+			}
+		}
+	]
+}

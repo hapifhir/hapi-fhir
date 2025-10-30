@@ -76,6 +76,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -174,9 +175,9 @@ public class FhirInstanceValidatorDstu3Test extends BaseTest {
 			ValidationResult result = val.validateWithResult(p);
 			assertFalse(result.isSuccessful());
 			List<SingleValidationMessage> all = logResultsAndReturnAll(result);
-			assertThat(all).hasSize(2);
-			assertEquals(ResultSeverityEnum.ERROR, all.get(0).getSeverity());
-			assertEquals("Unknown code 'urn:iso:std:iso:3166#QQ'", all.get(0).getMessage());
+			assertThat(all).hasSize(3);
+			assertEquals(ResultSeverityEnum.ERROR, all.get(1).getSeverity());
+			assertEquals("Unknown code 'urn:iso:std:iso:3166#QQ'", all.get(1).getMessage());
 		}
 	}
 
@@ -523,7 +524,13 @@ public class FhirInstanceValidatorDstu3Test extends BaseTest {
 						//DSTU3 resources will not pass validation with this new business rule (2024-09-17) https://github.com/hapifhir/org.hl7.fhir.core/commit/7d05d38509895ddf8614b35ffb51b1f5363f394c
 					) {
 						return false;
-					} else if (t.getSeverity() == ResultSeverityEnum.WARNING
+					} else if(t.getMessage().contains("The constraint key 'inv-1' already exists at the location 'http://hl7.org/fhir/StructureDefinition/TestScript' with a different expression")) {
+						return false;
+					} else if(t.getMessage().contains("The element slicing is prohibited on the element DomainResource.extension") || t.getMessage().contains("The element slicing is prohibited on the element DomainResource.modifierExtension")) {
+						// Core 6.5.15 contains this new validation that let the test fail
+						return false;
+					}
+					else if (t.getSeverity() == ResultSeverityEnum.WARNING
 						&& ( "VALIDATION_HL7_PUBLISHER_MISMATCH".equals(t.getMessageId())
 						|| "VALIDATION_HL7_PUBLISHER_MISMATCH2".equals(t.getMessageId())
 						|| "VALIDATION_HL7_WG_URL".equals(t.getMessageId())
@@ -605,8 +612,8 @@ public class FhirInstanceValidatorDstu3Test extends BaseTest {
 
 		ValidationResult results = myVal.validateWithResult(is);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome).hasSize(1);
-		assertThat(outcome.get(0).getMessage()).startsWith("The Coding provided (http://dicom.nema.org/resources/ontology/DCM#BAR) was not found in the value set 'Acquisition Modality Codes' (http://hl7.org/fhir/ValueSet/dicom-cid29|20121129)");
+		assertThat(outcome).hasSize(2);
+		assertThat(outcome.get(1).getMessage()).startsWith("The Coding provided (http://dicom.nema.org/resources/ontology/DCM#BAR) was not found in the value set 'Acquisition Modality Codes' (http://hl7.org/fhir/ValueSet/dicom-cid29|20121129)");
 	}
 
 	/**
@@ -1198,10 +1205,14 @@ public class FhirInstanceValidatorDstu3Test extends BaseTest {
 
 		ValidationResult output = myVal.validateWithResult(patient);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertThat(all).hasSize(1);
-		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
-		assertThat(all.get(0).getMessage()).contains("None of the codings provided are in the value set 'Identifier Type Codes'");
+		assertThat(all).hasSize(2);
+
+		assertThat(all.get(0).getMessage()).contains("CodeSystem is unknown and can't be validated: http://example.com/foo/bar for 'http://example.com/foo/bar#bar'");
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
+
+		assertEquals("Patient.identifier[0].type", all.get(1).getLocationString());
+		assertThat(all.get(1).getMessage()).contains("None of the codings provided are in the value set 'Identifier Type Codes'");
+		assertEquals(ResultSeverityEnum.WARNING, all.get(1).getSeverity());
 
 	}
 
@@ -1236,14 +1247,14 @@ public class FhirInstanceValidatorDstu3Test extends BaseTest {
 		when(policyAdvisor.policyForCodedContent(any(),any(),any(),any(),any(),any(),any(),any(),any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.CodedContentValidationAction.class));
 
 
-		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
-		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
+		when(policyAdvisor.policyForReference(any(), any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
+		when(policyAdvisor.policyForReference(any(), any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
 		myInstanceVal.setValidatorResourceFetcher(fetcher);
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 		myVal.validateWithResult(input);
 
-		verify(fetcher, times(3)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean());
-		verify(policyAdvisor, times(4)).policyForReference(any(), any(), anyString(), anyString());
+		verify(fetcher, times(2)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean(), anyList());
+		verify(policyAdvisor, times(4)).policyForReference(any(), any(), anyString(), anyString(), any());
 		verify(fetcher, times(4)).fetch(any(), any(), anyString());
 	}
 

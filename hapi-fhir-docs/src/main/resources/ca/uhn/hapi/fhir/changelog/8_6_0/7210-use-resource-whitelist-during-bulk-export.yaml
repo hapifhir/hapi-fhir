@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7210
+jira: SMILE-9866
+title: "Previously, bulk exports were not using the resource whitelist nor the search parameter 
+    enable/disable patterns. This has been fixed."

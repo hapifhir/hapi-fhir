@@ -5,15 +5,12 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
-import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.test.concurrency.PointcutLatch;
-import ca.uhn.test.util.LogbackTestExtension;
-import ch.qos.logback.classic.Logger;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Medication;
@@ -25,7 +22,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -51,9 +47,6 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 	protected StringType myMedicationId;
 	protected IAnyResource myGoldenMedication;
 	protected StringType myGoldenMedicationId;
-
-	@RegisterExtension
-	private LogbackTestExtension myLogCapture = new LogbackTestExtension((Logger) Logs.getMdmTroubleshootingLog());
 
 	@Autowired
 	private IInterceptorService myInterceptorService;

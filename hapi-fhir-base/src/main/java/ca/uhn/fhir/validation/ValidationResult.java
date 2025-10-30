@@ -28,7 +28,6 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import java.util.Collections;
 import java.util.List;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -109,8 +108,8 @@ public class ValidationResult {
 
 	/**
 	 * @deprecated Use {@link #toOperationOutcome()} instead since this method returns a view.
-	 * {@link #toOperationOutcome()} is identical to this method, but has a more suitable name so this method
-	 * will be removed at some point.
+	 *    {@link #toOperationOutcome()} is identical to this method, but has a more suitable name so this method
+	 * 	will be removed at some point.
 	 */
 	@Deprecated
 	public IBaseOperationOutcome getOperationOutcome() {
@@ -118,7 +117,7 @@ public class ValidationResult {
 	}
 
 	/**
-	 * Create an OperationOutcome resource which contains all of the messages found as a result of this validation
+	 * Create an OperationOutcome resource which contains all the messages found as a result of this validation
 	 */
 	public IBaseOperationOutcome toOperationOutcome() {
 		IBaseOperationOutcome oo = (IBaseOperationOutcome)
@@ -169,30 +168,46 @@ public class ValidationResult {
 		}
 	}
 
+	/**
+	 * Adds a repetition of <code>OperationOutcome.issue</code> to an
+	 * <code>OperationOutcome</code> instance.
+	 *
+	 * @param theOperationOutcome   The OperationOutcome to add to
+	 * @param theLocationExpression The FHIRPath expression describing where the issue was found
+	 * @param theLocationLine       The line number in the source where the issue was found
+	 * @param theLocationCol        The column number in the source where the issue was found
+	 * @param theIssueSeverity      The severity code (must be a valid value for <code>OperationOutcome.issue.severity</code>
+	 * @param theMessage            The validation message
+	 * @param theMessageId          The java validator message ID
+	 */
 	private void addIssueToOperationOutcome(
 			IBaseOperationOutcome theOperationOutcome,
-			String location,
-			Integer locationLine,
-			Integer locationCol,
-			ResultSeverityEnum issueSeverity,
-			String message,
-			String messageId) {
-		if (isBlank(location) && locationLine != null && locationCol != null) {
-			location = "Line[" + locationLine + "] Col[" + locationCol + "]";
-		}
-		String severity = issueSeverity != null ? issueSeverity.getCode() : null;
-		IBase issue = OperationOutcomeUtil.addIssueWithMessageId(
-				myCtx, theOperationOutcome, severity, message, messageId, location, Constants.OO_INFOSTATUS_PROCESSING);
+			String theLocationExpression,
+			Integer theLocationLine,
+			Integer theLocationCol,
+			ResultSeverityEnum theIssueSeverity,
+			String theMessage,
+			String theMessageId) {
 
-		if (locationLine != null || locationCol != null) {
+		String severity = theIssueSeverity != null ? theIssueSeverity.getCode() : null;
+		IBase issue = OperationOutcomeUtil.addIssueWithMessageId(
+				myCtx,
+				theOperationOutcome,
+				severity,
+				theMessage,
+				theMessageId,
+				theLocationExpression,
+				Constants.OO_INFOSTATUS_PROCESSING);
+
+		if (theLocationLine != null || theLocationCol != null) {
 			String unknown = UNKNOWN;
 			String line = unknown;
-			if (locationLine != null && locationLine != -1) {
-				line = locationLine.toString();
+			if (theLocationLine != null && theLocationLine != -1) {
+				line = theLocationLine.toString();
 			}
 			String col = unknown;
-			if (locationCol != null && locationCol != -1) {
-				col = locationCol.toString();
+			if (theLocationCol != null && theLocationCol != -1) {
+				col = theLocationCol.toString();
 			}
 			if (!unknown.equals(line) || !unknown.equals(col)) {
 				OperationOutcomeUtil.addIssueLineExtensionToIssue(myCtx, issue, line);
@@ -202,8 +217,12 @@ public class ValidationResult {
 			}
 		}
 
-		if (isNotBlank(messageId)) {
-			OperationOutcomeUtil.addMessageIdExtensionToIssue(myCtx, issue, messageId);
+		if (isNotBlank(theLocationExpression)) {
+			OperationOutcomeUtil.addExpressionToIssue(myCtx, issue, theLocationExpression);
+		}
+
+		if (isNotBlank(theMessageId)) {
+			OperationOutcomeUtil.addMessageIdExtensionToIssue(myCtx, issue, theMessageId);
 		}
 	}
 
