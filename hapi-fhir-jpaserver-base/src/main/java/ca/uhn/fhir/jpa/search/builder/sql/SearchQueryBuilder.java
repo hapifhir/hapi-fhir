@@ -1000,14 +1000,6 @@ public class SearchQueryBuilder {
 		String columnName = "MHD" + (myNextNearnessColumnId++);
 		mySelect.addAliasedColumn(sum, columnName);
 		mySelect.addCustomOrderings(columnName + ordering);
-		/**
-		 * Workaround for a bug in {@code com.healthmarketscience.sqlbuilder}.
-		 * <p>
-		 * Normally, the SQL builder should automatically include the necessary
-		 * grouping in the generated statement. Because of the defect in the
-		 * library, the grouping has to be added explicitly here to ensure
-		 * correct SQL generation.
-		 */
 		if (mySelect.toString().contains("GROUP BY")) {
 			mySelect.addCustomGroupings(columnName);
 		}
