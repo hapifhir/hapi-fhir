@@ -23,7 +23,16 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+
+import static ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum.ALLOW;
+
+import static ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum.DENY;
+
 import com.google.common.annotations.VisibleForTesting;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -69,7 +78,7 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
 				theRequestDetails.getUserData().get(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS);
 
 		if (inboundBulkExportRequestOptions.getExportStyle() != OUR_EXPORT_STYLE) {
-			// If the requested export style is not for a GROUP, then abstain
+			// If the requested export style is not for a PATIENT, then abstain
 			return null;
 		}
 
@@ -77,11 +86,11 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
 		if (isNotEmpty(myResourceTypes)) {
 			if (isEmpty(inboundBulkExportRequestOptions.getResourceTypes())) {
 				// Attempting an export on ALL resource types, but this rule restricts on a set of resource types
-				return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
+				return new AuthorizationInterceptor.Verdict(DENY, this);
 			}
 			if (!myResourceTypes.containsAll(inboundBulkExportRequestOptions.getResourceTypes())) {
 				// The requested resource types is not a subset of the permitted resource types
-				return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
+				return new AuthorizationInterceptor.Verdict(DENY, this);
 			}
 		}
 
@@ -96,12 +105,12 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
 				// This is a type-level export with a _typeFilter
 				// All filters must be permitted to return an ALLOW verdict
 				return allFiltersMatch
-						? new AuthorizationInterceptor.Verdict(PolicyEnum.ALLOW, this)
-						: new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
+						? new AuthorizationInterceptor.Verdict(ALLOW, this)
+						: new AuthorizationInterceptor.Verdict(DENY, this);
 			} else if (!allFiltersMatch) {
 				// This is an instance-level export with a _typeFilter
 				// Where at least one filter didn't match the permitted filters
-				return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
+				return new AuthorizationInterceptor.Verdict(DENY, this);
 			}
 		}
 
@@ -112,25 +121,26 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
 		// resource,
 		// and return the verdict
 		// All requested Patient IDs must be permitted to return an ALLOW verdict.
-		List<Boolean> verdicts = thePatientResources.stream()
-				.map(patient -> applyTestersAtLeastOneMatch(theOperation, theRequestDetails, patient, theRuleApplier))
-				.toList();
+		Map<Boolean, Integer> counts = new HashMap<>();
+		counts.put(true, 0);
+		counts.put(false, 0);
 
-		if (verdicts.stream().allMatch(Boolean::booleanValue)) {
-			// Then the testers evaluated to true on all Patients
-			// All the resources match at least 1 permission query filter --> ALLOW
-			return new AuthorizationInterceptor.Verdict(PolicyEnum.ALLOW, this);
-		} else if (verdicts.stream().noneMatch(Boolean::booleanValue)) {
-			// Then the testers evaluated to false on all Patients
-			// All the resources do not match any permission query filters
-			// This rule must not apply --> abstain
-			return null;
-		} else {
-			// Then the testers evaluated to true on some Patients, and false on others.
-			// We have a mixture of ALLOW and abstain
-			// Default to DENY
-			return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
+		for (IBaseResource patient : thePatientResources) {
+			boolean applies = applyTestersAtLeastOneMatch(theOperation, theRequestDetails, patient, theRuleApplier);
+
+			counts.put(applies, counts.get(applies) + 1);
+
+			if (counts.get(applies) > 0 && counts.get(!applies) > 0) {
+				// Then the testers evaluated to true on some Patients, and false on others - no need to evaluate the rest
+				// We have a mixture of ALLOW and abstain
+				// Default to DENY
+				return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
+			}
 		}
+
+		// If all testers evaluated to match, then ALLOW. If they all evaluated to false, then abstain.
+		// It's impossible to have a mixture due to the early-return in the for loop
+		return counts.get(true) > 0 ? new AuthorizationInterceptor.Verdict(PolicyEnum.ALLOW, this) : null;
 	}
 
 	/**

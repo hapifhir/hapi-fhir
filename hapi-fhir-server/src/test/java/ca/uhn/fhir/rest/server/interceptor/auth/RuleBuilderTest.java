@@ -144,7 +144,8 @@ public class RuleBuilderTest {
 			// Multiple arguments may be added to the filter when multiple FHIR_OP_INITIATE_BULK_DATA_EXPORT_PATIENTS_MATCHING permissions
 			// are added to the same user, even when the permission does not accept multiple (a list of) arguments by itself.
 			Arguments.of(List.of("identifier=foo|bar", "name=Doe"), List.of()),
-			Arguments.of(List.of("identifier=foo|bar", "name=Doe&active=true"), List.of("Patient", "Observation"))
+			Arguments.of(List.of("identifier=foo|bar", "name=Doe&active=true"), List.of("Patient", "Observation")),
+			Arguments.of(List.of("identifier=foo|bar", "active=true&name=Doe"), List.of("Patient", "Observation"))
 		);
 	}
 

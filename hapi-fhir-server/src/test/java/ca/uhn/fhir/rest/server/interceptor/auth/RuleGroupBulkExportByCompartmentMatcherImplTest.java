@@ -36,10 +36,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class RuleGroupBulkExportByCompartmentMatcherImplTest {
-
-	private final RestOperationTypeEnum myOperation = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
-	private final Pointcut myPointcut = Pointcut.STORAGE_INITIATE_BULK_EXPORT;
-
 	@Mock
 	private IRuleApplier myRuleApplier;
 	@Mock
@@ -50,8 +46,6 @@ class RuleGroupBulkExportByCompartmentMatcherImplTest {
 	private IAuthorizationSearchParamMatcher mySearchParamMatcher;
 	@Mock
 	private RequestDetails myRequestDetails;
-	@Mock
-	private Set<AuthorizationFlagsEnum> myFlags;
 
 	@ParameterizedTest
 	@MethodSource("params")
@@ -76,7 +70,7 @@ class RuleGroupBulkExportByCompartmentMatcherImplTest {
 			when(mySearchParamMatcher.match("Group?identifier=foo|bar", myResource)).thenReturn(theSearchParamMatcherMatchResult);
 		}
 
-		AuthorizationInterceptor.Verdict verdict = rule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+		AuthorizationInterceptor.Verdict verdict = rule.applyRule(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, myRequestDetails, null, null, null, myRuleApplier, Set.of(), Pointcut.STORAGE_INITIATE_BULK_EXPORT);
 
 		if (theExpectedVerdict != null) {
 			// Expect a decision

@@ -35,10 +35,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class RulePatientBulkExportByCompartmentMatcherImplTest {
-
-	private final RestOperationTypeEnum myOperation = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
-	private final Pointcut myPointcut = Pointcut.STORAGE_INITIATE_BULK_EXPORT;
-
 	@Mock
 	private IRuleApplier myRuleApplier;
 	@Mock
@@ -51,8 +47,6 @@ class RulePatientBulkExportByCompartmentMatcherImplTest {
 	private IAuthorizationSearchParamMatcher mySearchParamMatcher;
 	@Mock
 	private RequestDetails myRequestDetails;
-	@Mock
-	private Set<AuthorizationFlagsEnum> myFlags;
 
 
 	@ParameterizedTest
@@ -83,7 +77,7 @@ class RulePatientBulkExportByCompartmentMatcherImplTest {
 			when(mySearchParamMatcher.match("Patient?identifier=foo|bar", myResource)).thenReturn(theSearchParamMatcherMatchResults.get(0));
 		}
 
-		AuthorizationInterceptor.Verdict verdict = rule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+		AuthorizationInterceptor.Verdict verdict = rule.applyRule(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, myRequestDetails, null, null, null, myRuleApplier, Set.of(), Pointcut.STORAGE_INITIATE_BULK_EXPORT);
 
 		if (theExpectedVerdict != null) {
 			// Expect a decision
@@ -145,7 +139,7 @@ class RulePatientBulkExportByCompartmentMatcherImplTest {
 
 		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, theBulkExportJobParams));
 
-		AuthorizationInterceptor.Verdict verdict = rule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+		AuthorizationInterceptor.Verdict verdict = rule.applyRule(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, myRequestDetails, null, null, null, myRuleApplier, Set.of(), Pointcut.STORAGE_INITIATE_BULK_EXPORT);
 
 		if (theExpectedVerdict != null) {
 			// Expect a decision
