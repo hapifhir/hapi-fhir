@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 7348
+title: "The PatientIdPartitionInterceptor allows searching for Encounters by patient but not by subject. This has been corrected."
