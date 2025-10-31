@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.svc.MdmSearchExpansionResults;
@@ -42,8 +43,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -102,6 +105,9 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 	@Autowired
 	private MdmSearchExpansionSvc myMdmSearchExpansionSvc;
 
+	@Autowired
+	private IMdmLinkExpandSvc mdmLinkExpandSvc;
+
 	@Hook(
 			value = Pointcut.STORAGE_PRESEARCH_REGISTERED,
 			order = MdmConstants.ORDER_PRESEARCH_REGISTERED_MDM_READ_VIRTUALIZATION_INTERCEPTOR)
@@ -139,10 +145,12 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
 	public void preShowResources(RequestDetails theRequestDetails, IPreResourceShowDetails theDetails) {
 		MdmSearchExpansionResults expansionResults = MdmSearchExpansionSvc.getCachedExpansionResults(theRequestDetails);
-		if (expansionResults == null) {
-			// This means the PRESEARCH hook didn't save anything, which probably means
-			// no RequestDetails is available
-			return;
+		boolean isExpansionResults = expansionResults != null && !expansionResults.isEmpty();
+		if (!isExpansionResults) {
+			ourMdmTroubleshootingLog
+					.atDebug()
+					.setMessage("No expansion results found.")
+					.log();
 		}
 
 		if (theRequestDetails.getUserData().get(CURRENTLY_PROCESSING_FLAG) != null) {
@@ -155,26 +163,29 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 		 * we'll replace that resource with the originally requested resource,
 		 * making sure to avoid adding duplicates to the results.
 		 */
-		Set<IIdType> resourcesInBundle = new HashSet<>();
-		for (int resourceIdx = 0; resourceIdx < theDetails.size(); resourceIdx++) {
-			IBaseResource resource = theDetails.getResource(resourceIdx);
-			IIdType id = resource.getIdElement().toUnqualifiedVersionless();
-			Optional<IIdType> originalIdOpt = expansionResults.getOriginalIdForExpandedId(id);
-			if (originalIdOpt.isPresent()) {
-				IIdType originalId = originalIdOpt.get();
-				if (resourcesInBundle.add(originalId)) {
-					IBaseResource originalResource = fetchResourceFromRepository(theRequestDetails, originalId);
-					theDetails.setResource(resourceIdx, originalResource);
+		if (isExpansionResults) {
+			Set<IIdType> resourcesInBundle = new HashSet<>();
+			for (int resourceIdx = 0; resourceIdx < theDetails.size(); resourceIdx++) {
+				IBaseResource resource = theDetails.getResource(resourceIdx);
+				IIdType id = resource.getIdElement().toUnqualifiedVersionless();
+				Optional<IIdType> originalIdOpt = expansionResults.getOriginalIdForExpandedId(id);
+				if (originalIdOpt.isPresent()) {
+					IIdType originalId = originalIdOpt.get();
+					if (resourcesInBundle.add(originalId)) {
+						IBaseResource originalResource = fetchResourceFromRepository(theRequestDetails, originalId);
+						theDetails.setResource(resourceIdx, originalResource);
+					} else {
+						theDetails.setResource(resourceIdx, null);
+					}
 				} else {
-					theDetails.setResource(resourceIdx, null);
-				}
-			} else {
-				if (!resourcesInBundle.add(id)) {
-					theDetails.setResource(resourceIdx, null);
+					if (!resourcesInBundle.add(id)) {
+						theDetails.setResource(resourceIdx, null);
+					}
 				}
 			}
 		}
 
+		HashMap<IIdType, ResourceReferenceInfo> refIdToRefInfoMap = new HashMap<>();
 		FhirTerser terser = myFhirContext.newTerser();
 		for (int resourceIdx = 0; resourceIdx < theDetails.size(); resourceIdx++) {
 			IBaseResource resource = theDetails.getResource(resourceIdx);
@@ -192,7 +203,10 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 							&& referenceId.hasIdPart()
 							&& !referenceId.isLocal()
 							&& !referenceId.isUuid()) {
-						Optional<IIdType> nonExpandedId = expansionResults.getOriginalIdForExpandedId(referenceId);
+
+						Optional<IIdType> nonExpandedId = isExpansionResults
+								? expansionResults.getOriginalIdForExpandedId(referenceId)
+								: Optional.empty();
 						if (nonExpandedId != null && nonExpandedId.isPresent()) {
 							ourMdmTroubleshootingLog.debug(
 									"MDM virtualization is replacing reference at {} value {} with {}",
@@ -202,8 +216,17 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 							referenceInfo
 									.getResourceReference()
 									.setReference(nonExpandedId.get().getValue());
+						} else if (!isExpansionResults) {
+							// If there are no expansion results, this means that the search parameters didn't include
+							// anything that needed mdm expanding. According to the documentation
+							// (https://smilecdr.com/docs/mdm/mdm_virtualized_endpoint.html), references will still need
+							// to point to the golden record. We save those here to be processed later.
+							refIdToRefInfoMap.put(referenceId, referenceInfo);
 						}
 					}
+				}
+				if (!refIdToRefInfoMap.isEmpty()) {
+					mapReferencesToGoldenResources(refIdToRefInfoMap);
 				}
 			}
 		}
@@ -216,6 +239,15 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 						.sorted()
 						.collect(Collectors.toList()))
 				.log();
+	}
+
+	private void mapReferencesToGoldenResources(HashMap<IIdType, ResourceReferenceInfo> refIdToRefInfoMap) {
+		List<IIdType> targetIds = refIdToRefInfoMap.keySet().stream().toList();
+		Map<IIdType, String> goldenIdMap = mdmLinkExpandSvc.getGoldenResourceIdsFromIds(targetIds);
+		for (IIdType targetId : targetIds) {
+			if (goldenIdMap.containsKey(targetId))
+				refIdToRefInfoMap.get(targetId).getResourceReference().setReference(goldenIdMap.get(targetId));
+		}
 	}
 
 	private IBaseResource fetchResourceFromRepository(RequestDetails theRequestDetails, IIdType originalId) {

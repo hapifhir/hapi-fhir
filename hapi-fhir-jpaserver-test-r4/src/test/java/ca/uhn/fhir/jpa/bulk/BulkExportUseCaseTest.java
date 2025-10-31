@@ -24,7 +24,6 @@ import ca.uhn.fhir.mdm.api.MdmModeEnum;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
-import ca.uhn.fhir.mdm.svc.MdmExpandersHolder;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -75,6 +74,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -102,11 +102,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-
+@ContextConfiguration(classes = {BulkExportUseCaseTestConfig.class})
 public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportUseCaseTest.class);
 
-	private static final  String TEST_PATIENT_EID_SYS = "http://patient-eid-sys";
+	static final  String TEST_PATIENT_EID_SYS = "http://patient-eid-sys";
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
 
@@ -120,10 +120,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private IBatch2WorkChunkRepository myWorkChunkRepository;
 	@Autowired
 	private IInterceptorService myInterceptorService;
-	@Autowired
-	private MdmRuleValidator myMdmRulesValidator;
-	@Autowired
-	private MdmExpandersHolder myMdmExpandersHolder;
+
 
 	@BeforeEach
 	public void beforeEach() {
@@ -685,12 +682,6 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 	@Nested
 	public class GroupBulkExportTests {
-
-		@AfterEach
-		void tearDown() {
-			restoreMdmSettingsToDefault();
-		}
-
 		@Test
 		public void testGroupExportSuccessfulyExportsPatientForwardReferences() {
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
@@ -1865,8 +1856,6 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 	@Test
 	void testGroupExportWithMdmEnabled_EidMatchOnly() {
-
-		createAndSetMdmSettingsForEidMatchOnly();
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 
 		//In this test, we create two patients with the same Eid value for the eid system specified in mdm rules
@@ -1916,23 +1905,6 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		List<IBaseResource> exportedObservations = exportedResourcesMap.get("Observation");
 		assertResourcesIds(exportedObservations, "Observation/obs-1", "Observation/obs-2");
 
-	}
-
-
-	private void createAndSetMdmSettingsForEidMatchOnly() {
-		MdmSettings mdmSettings = new MdmSettings(myMdmRulesValidator);
-		mdmSettings.setEnabled(true);
-		mdmSettings.setMdmMode(MdmModeEnum.MATCH_ONLY);
-		MdmRulesJson rules = new MdmRulesJson();
-		rules.setMdmTypes(List.of("Patient"));
-		rules.addEnterpriseEIDSystem("Patient", TEST_PATIENT_EID_SYS);
-		mdmSettings.setMdmRules(rules);
-
-		myMdmExpandersHolder.setMdmSettings(mdmSettings);
-	}
-
-	private void restoreMdmSettingsToDefault() {
-		myMdmExpandersHolder.setMdmSettings(new MdmSettings(myMdmRulesValidator));
 	}
 
 	private static void assertResourcesIds(List<IBaseResource> theResources, String... theExpectedResourceIds) {

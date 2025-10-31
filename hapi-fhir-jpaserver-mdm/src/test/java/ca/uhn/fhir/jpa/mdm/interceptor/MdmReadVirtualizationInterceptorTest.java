@@ -9,9 +9,7 @@ import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMLinkResults;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMState;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.interceptor.MdmReadVirtualizationInterceptor;
-import ca.uhn.fhir.mdm.svc.MdmExpandersHolder;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -130,7 +128,7 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 		Observation obs = myObservationDao.read(myObservationReferencingSourcePatientA0Id, mySrd);
 
 		// Verify
-		assertEquals(mySourcePatientA0Id.getValue(), obs.getSubject().getReference());
+		assertEquals(myGoldenResourcePatientAId.getValue(), obs.getSubject().getReference());
 	}
 
 	/**
