@@ -24,15 +24,12 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
-import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.*;
 
 import static ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS;
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 public class RuleGroupBulkExportByCompartmentMatcherImpl extends BaseRuleBulkExportByCompartmentMatcher {
 	private String myGroupMatcherFilter;
@@ -52,14 +49,22 @@ public class RuleGroupBulkExportByCompartmentMatcherImpl extends BaseRuleBulkExp
 			Set<AuthorizationFlagsEnum> theFlags,
 			Pointcut thePointcut) {
 		// Apply the base checks for invalid inputs, requested resource types
-		AuthorizationInterceptor.Verdict result = super.applyRule(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier, theFlags, thePointcut);
+		AuthorizationInterceptor.Verdict result = super.applyRule(
+				theOperation,
+				theRequestDetails,
+				theInputResource,
+				theInputResourceId,
+				theOutputResource,
+				theRuleApplier,
+				theFlags,
+				thePointcut);
 		if (result == null || result.getDecision().equals(PolicyEnum.DENY)) {
 			// The base checks have already decided we should abstain, or deny
 			return result;
 		}
 
 		BulkExportJobParameters inboundBulkExportRequestOptions = (BulkExportJobParameters)
-			theRequestDetails.getUserData().get(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS);
+				theRequestDetails.getUserData().get(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS);
 
 		IBaseResource theGroupResource = theRuleApplier
 				.getAuthResourceResolver()

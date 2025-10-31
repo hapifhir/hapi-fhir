@@ -56,14 +56,22 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRuleBulkE
 			Set<AuthorizationFlagsEnum> theFlags,
 			Pointcut thePointcut) {
 		// Apply the base checks for invalid inputs, requested resource types
-		AuthorizationInterceptor.Verdict result = super.applyRule(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier, theFlags, thePointcut);
+		AuthorizationInterceptor.Verdict result = super.applyRule(
+				theOperation,
+				theRequestDetails,
+				theInputResource,
+				theInputResourceId,
+				theOutputResource,
+				theRuleApplier,
+				theFlags,
+				thePointcut);
 		if (result == null || result.getDecision().equals(PolicyEnum.DENY)) {
 			// The base checks have already decided we should abstain, or deny
 			return result;
 		}
 
 		BulkExportJobParameters inboundBulkExportRequestOptions = (BulkExportJobParameters)
-			theRequestDetails.getUserData().get(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS);
+				theRequestDetails.getUserData().get(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS);
 
 		List<String> patientIdOptions = inboundBulkExportRequestOptions.getPatientIds();
 		List<String> filterOptions = inboundBulkExportRequestOptions.getFilters();
