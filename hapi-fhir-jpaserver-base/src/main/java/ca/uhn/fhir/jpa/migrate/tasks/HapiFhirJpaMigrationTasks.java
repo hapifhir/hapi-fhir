@@ -167,6 +167,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.nullable()
 					.type(ColumnTypeEnum.TEXT);
 		}
+
+		// Add IDX_RESVER_ID_SRC_URI required for sane performance on _source:contains queries
+		{
+			version.onTable("HFJ_RES_VER")
+					.addIndex("20250503.01", "IDX_RESVER_ID_SRC_URI")
+					.unique(false)
+					.withColumns("RES_ID, SOURCE_URI");
+		}
 	}
 
 	protected void init780() {

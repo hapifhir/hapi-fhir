@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7393
+title: "Fix performance issue when querying using `_source:contains` parameter by adding index for 
+    `ResourceHistoryTable.sourceUri` field."
