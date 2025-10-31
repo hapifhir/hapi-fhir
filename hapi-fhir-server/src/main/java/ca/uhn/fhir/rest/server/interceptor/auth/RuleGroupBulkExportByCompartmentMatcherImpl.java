@@ -34,11 +34,14 @@ import static ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
-public class RuleGroupBulkExportByCompartmentMatcherImpl extends BaseRuleBulkExportByCompartmentMatcher {
+public class RuleGroupBulkExportByCompartmentMatcherImpl extends BaseRule {
+	private static final BulkExportJobParameters.ExportStyle OUR_EXPORT_STYLE =
+			BulkExportJobParameters.ExportStyle.GROUP;
 	private String myGroupMatcherFilter;
+	private Collection<String> myResourceTypes;
 
 	RuleGroupBulkExportByCompartmentMatcherImpl(String theRuleName) {
-		super(theRuleName, BulkExportJobParameters.ExportStyle.GROUP);
+		super(theRuleName);
 	}
 
 	@Override
@@ -51,15 +54,33 @@ public class RuleGroupBulkExportByCompartmentMatcherImpl extends BaseRuleBulkExp
 			IRuleApplier theRuleApplier,
 			Set<AuthorizationFlagsEnum> theFlags,
 			Pointcut thePointcut) {
-		// Apply the base checks for invalid inputs, requested resource types
-		AuthorizationInterceptor.Verdict result = super.applyRule(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier, theFlags, thePointcut);
-		if (result == null || result.getDecision().equals(PolicyEnum.DENY)) {
-			// The base checks have already decided we should abstain, or deny
-			return result;
+		if (thePointcut != Pointcut.STORAGE_INITIATE_BULK_EXPORT) {
+			return null;
+		}
+
+		if (theRequestDetails == null) {
+			return null;
 		}
 
 		BulkExportJobParameters inboundBulkExportRequestOptions = (BulkExportJobParameters)
-			theRequestDetails.getUserData().get(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS);
+				theRequestDetails.getUserData().get(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS);
+
+		if (inboundBulkExportRequestOptions.getExportStyle() != OUR_EXPORT_STYLE) {
+			// If the requested export style is not for a GROUP, then abstain
+			return null;
+		}
+
+		// Do we only authorize some types?  If so, make sure requested types are a subset
+		if (isNotEmpty(myResourceTypes)) {
+			if (isEmpty(inboundBulkExportRequestOptions.getResourceTypes())) {
+				// Attempting an export on ALL resource types, but this rule restricts on a set of resource types
+				return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
+			}
+			if (!myResourceTypes.containsAll(inboundBulkExportRequestOptions.getResourceTypes())) {
+				// The requested resource types is not a subset of the permitted resource types
+				return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
+			}
+		}
 
 		IBaseResource theGroupResource = theRuleApplier
 				.getAuthResourceResolver()
@@ -76,6 +97,10 @@ public class RuleGroupBulkExportByCompartmentMatcherImpl extends BaseRuleBulkExp
 				theRuleApplier);
 	}
 
+	public void setResourceTypes(Collection<String> theResourceTypes) {
+		myResourceTypes = theResourceTypes;
+	}
+
 	public void setAppliesToGroupExportOnGroup(String theGroupMatcherFilter) {
 		String sanitizedFilter = sanitizeQueryFilter(theGroupMatcherFilter);
 		myGroupMatcherFilter = sanitizedFilter;
@@ -84,5 +109,21 @@ public class RuleGroupBulkExportByCompartmentMatcherImpl extends BaseRuleBulkExp
 
 	public String getGroupMatcherFilter() {
 		return myGroupMatcherFilter;
+	}
+
+	/**
+	 * Remove the resource type and "?" prefix, if present
+	 * since resource type is implied for the rule based on the permission (Patient in this case)
+	 */
+	private static String sanitizeQueryFilter(String theFilter) {
+		if (theFilter.contains("?")) {
+			return theFilter.substring(theFilter.indexOf("?") + 1);
+		}
+		return theFilter;
+	}
+
+	@VisibleForTesting
+	Collection<String> getResourceTypes() {
+		return myResourceTypes;
 	}
 }
