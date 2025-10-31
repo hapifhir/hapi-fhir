@@ -38,7 +38,6 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 
 	public RequestPartitionHelperSvc() {}
 
-
 	@Override
 	public RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
 		List<String> names = null;
@@ -116,15 +115,14 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 			PartitionEntity partition = null;
 			if (partitionName != null) {
 				try {
-					partition = myPartitionConfigSvc.getPartitionByName(
-						partitionName);
+					partition = myPartitionConfigSvc.getPartitionByName(partitionName);
 				} catch (IllegalArgumentException e) {
 					String msg = myFhirContext
-						.getLocalizer()
-						.getMessage(
-							BaseRequestPartitionHelperSvc.class,
-							"unknownPartitionName",
-							theRequestPartitionId.getPartitionNames().get(i));
+							.getLocalizer()
+							.getMessage(
+									BaseRequestPartitionHelperSvc.class,
+									"unknownPartitionName",
+									theRequestPartitionId.getPartitionNames().get(i));
 					throw new ResourceNotFoundException(Msg.code(1317) + msg);
 				}
 			}
