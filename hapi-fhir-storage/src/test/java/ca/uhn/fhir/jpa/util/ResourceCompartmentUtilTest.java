@@ -75,7 +75,7 @@ class ResourceCompartmentUtilTest {
 		false , Encounter   , patient
 		true  , Encounter   , patient subject
 		false , Coverage    , beneficiary payor policy-holder subscriber
-		true  , Coverage    , beneficiary payor policy-holder subscriber}
+		true  , Coverage    , beneficiary payor policy-holder subscriber
 		""")
 	void getPatientCompartmentSearchParams_IncludeSupersets(boolean theIncludeSupersets, String theResourceType, String theExpectedParamNames) {
 		RuntimeResourceDefinition runtimeResourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
