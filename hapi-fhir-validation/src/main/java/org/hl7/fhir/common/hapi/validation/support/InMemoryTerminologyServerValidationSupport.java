@@ -52,6 +52,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	private final FhirContext myCtx;
 	private VersionCanonicalizer myVersionCanonicalizer;
 	private IssueSeverity myIssueSeverityForCodeDisplayMismatch = IssueSeverity.WARNING;
+	private IssueSeverity myIssueSeverityForUnknownCodeSystem = IssueSeverity.ERROR;
 
 	/**
 	 * Constructor
@@ -105,6 +106,30 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		Validate.notNull(
 				theIssueSeverityForCodeDisplayMismatch, "theIssueSeverityForCodeDisplayMismatch must not be null");
 		myIssueSeverityForCodeDisplayMismatch = theIssueSeverityForCodeDisplayMismatch;
+	}
+
+	/**
+	 * This setting controls the validation issue severity to report when a code validation
+	 * finds that the CodeSystem being validated is not known.
+	 * Defaults to {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#ERROR}.
+	 *
+	 * @since 8.6.0
+	 */
+	public IssueSeverity getIssueSeverityForUnknownCodeSystem() {
+		return myIssueSeverityForUnknownCodeSystem;
+	}
+
+	/**
+	 * This setting controls the validation issue severity to report when a code validation
+	 * finds that the CodeSystem being validated is not known.
+	 * Defaults to {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#ERROR}.
+	 *
+	 * @param theIssueSeverityForUnknownCodeSystem The severity. Must not be {@literal null}.
+	 * @since 8.6.0
+	 */
+	public void setIssueSeverityForUnknownCodeSystem(@Nonnull IssueSeverity theIssueSeverityForUnknownCodeSystem) {
+		Validate.notNull(theIssueSeverityForUnknownCodeSystem, "theIssueSeverityForUnknownCodeSystem must not be null");
+		myIssueSeverityForUnknownCodeSystem = theIssueSeverityForUnknownCodeSystem;
 	}
 
 	@Override
@@ -166,7 +191,12 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 					theValidationSupportContext, theValueSet, theCodeSystemUrlAndVersion, theCode);
 		} catch (ExpansionCouldNotBeCompletedInternallyException e) {
 			CodeValidationResult codeValidationResult = new CodeValidationResult();
-			codeValidationResult.setSeverity(IssueSeverity.ERROR);
+			if (e.getCodeValidationIssue() != null && e.getCodeValidationIssue().getSeverity() != null) {
+				// preserve the severity from the original issue by assigning it to the result
+				codeValidationResult.setSeverity(e.getCodeValidationIssue().getSeverity());
+			} else {
+				codeValidationResult.setSeverity(IssueSeverity.ERROR);
+			}
 
 			String msg = "Failed to expand ValueSet '" + vsUrl + "' (in-memory). Could not validate code "
 					+ theCodeSystemUrlAndVersion + "#" + theCode;
@@ -859,7 +889,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 
 			boolean ableToHandleCode = false;
-			String failureMessage = null;
+			MessageWithSeverity failureMessage = null;
 
 			boolean isIncludeCodeSystemIgnored = includeOrExcludeSystemResource != null
 					&& includeOrExcludeSystemResource.getContent() == Enumerations.CodeSystemContentMode.NOTPRESENT;
@@ -991,15 +1021,15 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 						failureMessage = getFailureMessageForMissingOrUnusableCodeSystem(
 								includeOrExcludeSystemResource, loadedCodeSystemUrl);
 					} else {
-						failureMessage = "Unable to expand value set";
+						failureMessage = new MessageWithSeverity("Unable to expand value set", IssueSeverity.ERROR);
 					}
 				}
 
 				throw new ExpansionCouldNotBeCompletedInternallyException(
-						Msg.code(702) + failureMessage,
+						Msg.code(702) + failureMessage.message,
 						new CodeValidationIssue(
-								failureMessage,
-								IssueSeverity.ERROR,
+								failureMessage.message,
+								failureMessage.severity,
 								CodeValidationIssueCode.NOT_FOUND,
 								CodeValidationIssueCoding.NOT_FOUND));
 			}
@@ -1102,18 +1132,22 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		}
 	}
 
-	private String getFailureMessageForMissingOrUnusableCodeSystem(
+	private record MessageWithSeverity(String message, IssueSeverity severity) {}
+
+	private MessageWithSeverity getFailureMessageForMissingOrUnusableCodeSystem(
 			CodeSystem includeOrExcludeSystemResource, String loadedCodeSystemUrl) {
+		IssueSeverity severity = IssueSeverity.ERROR;
 		String failureMessage;
 		if (includeOrExcludeSystemResource == null) {
 			failureMessage = "Unable to expand ValueSet because CodeSystem could not be found: " + loadedCodeSystemUrl;
+			severity = myIssueSeverityForUnknownCodeSystem;
 		} else {
 			assert includeOrExcludeSystemResource.getContent() == Enumerations.CodeSystemContentMode.NOTPRESENT;
 			failureMessage =
 					"Unable to expand ValueSet because CodeSystem has CodeSystem.content=not-present but contents were not found: "
 							+ loadedCodeSystemUrl;
 		}
-		return failureMessage;
+		return new MessageWithSeverity(failureMessage, severity);
 	}
 
 	private void addCodes(
