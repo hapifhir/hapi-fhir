@@ -2156,7 +2156,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					List<IQueryParameterType> orList = new ArrayList<>();
 					for (IQueryParameterType value : orValues) {
 						orList.add(new HasParam(
-								"List", ListResource.SP_ITEM, BaseResource.SP_RES_ID, value.getValueAsQueryToken(myFhirContext)));
+								"List",
+								ListResource.SP_ITEM,
+								BaseResource.SP_RES_ID,
+								value.getValueAsQueryToken(myFhirContext)));
 					}
 					hasParamValues.add(orList);
 				}
