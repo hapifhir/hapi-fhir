@@ -79,7 +79,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Test {
+public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4Test {
 	public static final int ALTERNATE_DEFAULT_ID = -1;
 
 	@Autowired
@@ -358,6 +358,15 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(2);
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("SELECT t0.PARTITION_ID,t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.PARTITION_ID = ?)");
+
+		// superset parameter
+		myCaptureQueriesListener.clear();
+		outcome = myObservationDao.search(SearchParameterMap.newSynchronous("patient", new ReferenceParam("Patient/A")), mySrd);
+		assertEquals(1, outcome.size());
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(2);
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("SELECT t0.PARTITION_ID,t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.PARTITION_ID = ?)");
+
 	}
 
 	@Test
