@@ -24,12 +24,22 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.Collection;
 import java.util.Set;
 
 public interface IMdmLinkExpandSvc {
 	Set<String> expandMdmBySourceResource(RequestPartitionId theRequestPartitionId, IBaseResource theResource);
 
 	Set<String> expandMdmBySourceResourceId(RequestPartitionId theRequestPartitionId, IIdType theId);
+
+	/**
+	 * Does the mdm expansion of a list of ids for a single resource type
+	 * @param theRequestPartitionId the request partition to use
+	 * @param theIds the list of patient ids to expand
+	 * @return the mdm expanded set of patient ids (should include the original set as well as any linked patient ids)
+	 */
+	Set<String> expandMdmBySourceResourceIdsForSingleResourceType(
+			RequestPartitionId theRequestPartitionId, Collection<IIdType> theIds);
 
 	Set<String> expandMdmBySourceResourcePid(
 			RequestPartitionId theRequestPartitionId, IResourcePersistentId<?> theSourceResourcePid);

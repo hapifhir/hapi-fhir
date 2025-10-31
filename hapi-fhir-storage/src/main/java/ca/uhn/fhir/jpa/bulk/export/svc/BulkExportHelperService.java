@@ -54,16 +54,26 @@ public class BulkExportHelperService {
 	 */
 	public List<SearchParameterMap> createSearchParameterMapsForResourceType(
 			RuntimeResourceDefinition theDef, ExportPIDIteratorParameters theParams, boolean theConsiderDateRange) {
-		String resourceType = theDef.getName();
+
 		List<String> typeFilters = theParams.getFilters();
+		return createSearchParameterMapsForResourcetype(
+				theDef, typeFilters, theParams.getStartDate(), theParams.getEndDate(), theConsiderDateRange);
+	}
+
+	public List<SearchParameterMap> createSearchParameterMapsForResourcetype(
+			RuntimeResourceDefinition theDef,
+			List<String> theFilters,
+			Date theStartDate,
+			Date theEndDate,
+			boolean theConsiderDateRange) {
+		String resourceType = theDef.getName();
 		List<SearchParameterMap> spMaps = null;
-		spMaps = typeFilters.stream()
+		spMaps = theFilters.stream()
 				.filter(typeFilter -> typeFilter.startsWith(resourceType + "?"))
-				.map(filter -> buildSearchParameterMapForTypeFilter(
-						filter, theDef, theParams.getStartDate(), theParams.getEndDate()))
+				.map(filter -> buildSearchParameterMapForTypeFilter(filter, theDef, theStartDate, theEndDate))
 				.collect(Collectors.toList());
 
-		typeFilters.stream().filter(filter -> !filter.contains("?")).forEach(filter -> {
+		theFilters.stream().filter(filter -> !filter.contains("?")).forEach(filter -> {
 			ourLog.warn(
 					"Found a strange _typeFilter that we could not process: {}. _typeFilters should follow the format ResourceType?searchparameter=value .",
 					filter);
@@ -73,7 +83,7 @@ public class BulkExportHelperService {
 		if (spMaps.isEmpty()) {
 			SearchParameterMap defaultMap = new SearchParameterMap();
 			if (theConsiderDateRange) {
-				addLastUpdatedFilter(defaultMap, theParams.getStartDate(), theParams.getEndDate());
+				addLastUpdatedFilter(defaultMap, theStartDate, theEndDate);
 			}
 			spMaps = Collections.singletonList(defaultMap);
 		}

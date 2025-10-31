@@ -102,7 +102,7 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	 */
 	default List<T> resolveResourcePids(
 			RequestPartitionId theRequestPartitionId,
-			List<IIdType> theTargetIds,
+			Collection<IIdType> theTargetIds,
 			ResolveIdentityMode theResolveIdentityMode) {
 		return resolveResourceIdentities(theRequestPartitionId, theTargetIds, theResolveIdentityMode).values().stream()
 				.map(IResourceLookup::getPersistentId)
@@ -176,6 +176,22 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	 * @return A Set of strings representing the FHIR IDs of the pids.
 	 */
 	Set<String> translatePidsToFhirResourceIds(Set<T> thePids);
+
+	/**
+	 * This takes PIDs and, if they do not have the associated resource id added,
+	 * pulls it from the db and adds it.
+	 * @param thePids
+	 */
+	default void fillOutPids(Set<T> thePids, FhirContext theContext) {
+		PersistentIdToForcedIdMap<T> pidToForcedIdMap = translatePidsToForcedIds(thePids);
+
+		thePids.forEach(pid -> {
+			Optional<String> val = pidToForcedIdMap.get(pid);
+			val.ifPresent(id -> {
+				pid.setAssociatedResourceId(theContext.getVersion().newIdType(id));
+			});
+		});
+	}
 
 	/**
 	 * @deprecated Use {@link #newPid(Object, Integer)}

@@ -45,6 +45,10 @@ public class EIDHelper {
 		myMdmSettings = theMdmSettings;
 	}
 
+	public IMdmSettings getMdmSettings() {
+		return myMdmSettings;
+	}
+
 	public CanonicalEID createHapiEid() {
 		return new CanonicalEID(
 				MdmConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM,
