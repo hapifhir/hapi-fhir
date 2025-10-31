@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -90,7 +89,11 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 		ServletRequestDetails servletRequestDetails = new ServletRequestDetails();
 		servletRequestDetails.setTenantId(partition1.getName());
 
-		testDetermineReadPartitionRequest_whenResourceIsNonPartitionable_returnsDefaultPartition(servletRequestDetails);
+		// execute
+		RequestPartitionId result = mySvc.determineReadPartitionForRequestForSearchType(servletRequestDetails, "Library");
+
+		// verify
+		assertThat(result.hasDefaultPartitionId(DEFAULT_PARTITION_ID)).isTrue();
 	}
 
 	@Test
@@ -100,12 +103,8 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 		srd.setTenantId(partitionEntity.getName());
 		srd.setRequestPartitionId(RequestPartitionId.fromPartitionId(partitionEntity.getId()));
 
-		testDetermineReadPartitionRequest_whenResourceIsNonPartitionable_returnsDefaultPartition(srd);
-	}
-
-	public void testDetermineReadPartitionRequest_whenResourceIsNonPartitionable_returnsDefaultPartition(RequestDetails theDetails) {
 		// execute
-		RequestPartitionId result = mySvc.determineReadPartitionForRequestForSearchType(theDetails, "Library");
+		RequestPartitionId result = mySvc.determineReadPartitionForRequestForSearchType(srd, "Library");
 
 		// verify
 		assertThat(result.hasDefaultPartitionId(DEFAULT_PARTITION_ID)).isTrue();

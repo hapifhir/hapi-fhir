@@ -89,17 +89,6 @@ public class GenerateRangeChunksStep<PT extends PartitionedUrlJobParameters>
 	}
 
 	private RequestPartitionId getRequestPartitionIdForUrl(PartitionedUrl theUrl) {
-		if (theUrl.getRequestPartitionId() != null
-				&& !myIDefaultPartitionSettings.isDefaultPartition(theUrl.getRequestPartitionId())) {
-			// a valid partition id
-			return theUrl.getRequestPartitionId();
-		} else if (theUrl.getRequestPartitionId() != null
-				&& myIDefaultPartitionSettings.isDefaultPartition(theUrl.getRequestPartitionId())) {
-			// default id
-			return myIDefaultPartitionSettings.getDefaultRequestPartitionId();
-		}
-
-		// this resource is not a partitioned resource; use all partitions
-		return RequestPartitionId.allPartitions();
+		return theUrl.getRequestPartitionId();
 	}
 }
