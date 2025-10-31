@@ -2492,7 +2492,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				IQueryParameterType nextOr = nextPermutation.get(paramIndex);
 				// The only prefix accepted when combo searching is 'eq' (see validateParamValuesAreValidForComboParam).
 				// As a result, we strip the prefix if present.
-				String nextOrValue = stripStart(nextOr.getValueAsQueryToken(), EQUAL.getValue());
+				String nextOrValue = stripStart(nextOr.getValueAsQueryToken(myContext), EQUAL.getValue());
 
 				RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(
 						myResourceName, nextParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
@@ -2704,7 +2704,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					if (myParams.containsKey(Constants.PARAM_TYPE)) {
 						for (List<IQueryParameterType> typeList : myParams.get(Constants.PARAM_TYPE)) {
 							for (IQueryParameterType type : typeList) {
-								String queryString = ParameterUtil.unescape(type.getValueAsQueryToken());
+								String queryString = ParameterUtil.unescape(type.getValueAsQueryToken(myContext));
 								for (String resourceType : queryString.split(",")) {
 									String rt = resourceType.trim();
 									if (isNotBlank(rt)) {
