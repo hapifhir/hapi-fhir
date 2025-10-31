@@ -110,7 +110,7 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
 		}
 
 		List<IBaseResource> thePatientResources =
-				theRuleApplier.getAuthResourceResolver().resolveCompartmentByIds(patientIdOptions, "Patient");
+				theRuleApplier.getAuthResourceResolver().resolveResourcesByIds(patientIdOptions, "Patient");
 
 		// Apply the FhirQueryTester (which contains a inMemoryResourceMatcher) to the found Patient compartment
 		// resource,
@@ -121,7 +121,7 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRule {
 		counts.put(false, 0);
 
 		for (IBaseResource patient : thePatientResources) {
-			boolean applies = applyTestersAtLeastOneMatch(theOperation, theRequestDetails, patient, theRuleApplier);
+			boolean applies = atLeastOneTesterMatches(theOperation, theRequestDetails, patient, theRuleApplier);
 
 			counts.put(applies, counts.get(applies) + 1);
 

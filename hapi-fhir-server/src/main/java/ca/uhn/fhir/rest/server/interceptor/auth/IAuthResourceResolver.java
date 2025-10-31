@@ -29,7 +29,7 @@ import java.util.List;
  * For example, used in bulk export security to allow querying for resource to match against permission argument filters
  */
 public interface IAuthResourceResolver {
-	IBaseResource resolveCompartmentById(IIdType theResourceId);
+	IBaseResource resolveResourceById(IIdType theResourceId);
 
 	/**
 	 * Resolve a list of resources by ID. All resources should be the same type.
@@ -37,5 +37,5 @@ public interface IAuthResourceResolver {
 	 * @param theResourceType the type of resource
 	 * @return A list of resources resolved by ID
 	 */
-	List<IBaseResource> resolveCompartmentByIds(List<String> theResourceIds, String theResourceType);
+	List<IBaseResource> resolveResourcesByIds(List<String> theResourceIds, String theResourceType);
 }

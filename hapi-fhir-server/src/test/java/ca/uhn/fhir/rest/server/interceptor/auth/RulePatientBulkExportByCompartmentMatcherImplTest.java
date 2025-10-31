@@ -66,9 +66,9 @@ class RulePatientBulkExportByCompartmentMatcherImplTest {
 		if (theSearchParamMatcherMatchResults != null) {
 			when(myRuleApplier.getAuthResourceResolver()).thenReturn(myAuthResourceResolver);
 			if (theSearchParamMatcherMatchResults.size() == 1) {
-				when(myAuthResourceResolver.resolveCompartmentByIds(any(), eq("Patient"))).thenReturn(List.of(myResource));
+				when(myAuthResourceResolver.resolveResourcesByIds(any(), eq("Patient"))).thenReturn(List.of(myResource));
 			} else if (theSearchParamMatcherMatchResults.size() == 2) {
-				when(myAuthResourceResolver.resolveCompartmentByIds(any(), eq("Patient"))).thenReturn(List.of(myResource, myResource2));
+				when(myAuthResourceResolver.resolveResourcesByIds(any(), eq("Patient"))).thenReturn(List.of(myResource, myResource2));
 				when(myResource2.fhirType()).thenReturn("Patient");
 				when(mySearchParamMatcher.match("Patient?identifier=foo|bar", myResource2)).thenReturn(theSearchParamMatcherMatchResults.get(1));
 			}

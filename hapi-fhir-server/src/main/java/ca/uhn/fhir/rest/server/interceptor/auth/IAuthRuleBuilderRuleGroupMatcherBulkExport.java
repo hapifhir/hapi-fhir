@@ -26,7 +26,9 @@ import jakarta.annotation.Nonnull;
  */
 public interface IAuthRuleBuilderRuleGroupMatcherBulkExport {
 	/**
-	 * Allow/deny <b>group-level</b> export rule applies to the Group with the given resource ID, e.g. <code>Group/123</code>
+	 * Allow/deny <b>group-level</b> export rule applies to the Group by matching on the provided FHIR query filter,
+	 * e.g. <code>?identifier=foo|bar</code>
+	 * Note that resource type is implied to be Group
 	 *
 	 * @since 8.6.0
 	 */

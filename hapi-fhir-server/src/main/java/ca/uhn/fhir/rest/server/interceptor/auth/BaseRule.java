@@ -97,7 +97,7 @@ abstract class BaseRule implements IAuthRule {
 	 * Apply testers, and return true if at least 1 tester matches.
 	 * Returns false if all testers do not match.
 	 */
-	boolean applyTestersAtLeastOneMatch(
+	boolean atLeastOneTesterMatches(
 			RestOperationTypeEnum theOperation,
 			RequestDetails theRequestDetails,
 			IBaseResource theInputResource,

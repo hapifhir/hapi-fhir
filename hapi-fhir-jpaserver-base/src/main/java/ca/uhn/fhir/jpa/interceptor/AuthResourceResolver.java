@@ -35,7 +35,6 @@ import java.util.List;
  * Small service class to inject DB access into an interceptor
  * For example, used in bulk export security to allow querying for resource to match against permission argument filters
  */
-@Service
 public class AuthResourceResolver implements IAuthResourceResolver {
 	private final DaoRegistry myDaoRegistry;
 
@@ -43,13 +42,13 @@ public class AuthResourceResolver implements IAuthResourceResolver {
 		this.myDaoRegistry = myDaoRegistry;
 	}
 
-	public IBaseResource resolveCompartmentById(IIdType theResourceId) {
+	public IBaseResource resolveResourceById(IIdType theResourceId) {
 		return myDaoRegistry
 				.getResourceDao(theResourceId.getResourceType())
 				.read(theResourceId, new SystemRequestDetails());
 	}
 
-	public List<IBaseResource> resolveCompartmentByIds(List<String> theResourceIds, String theResourceType) {
+	public List<IBaseResource> resolveResourcesByIds(List<String> theResourceIds, String theResourceType) {
 		TokenOrListParam t = new TokenOrListParam(null, theResourceIds.toArray(String[]::new));
 
 		SearchParameterMap m = new SearchParameterMap();
