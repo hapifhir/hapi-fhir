@@ -124,10 +124,12 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		T persistentId = null;
 		if (theTransactionDetails != null) {
 			T resolvedResourceId = (T) theTransactionDetails.getResolvedResourceId(targetResourceId);
-			if (resolvedResourceId != null
-					&& resolvedResourceId.getId() != null
-					&& resolvedResourceId.getAssociatedResourceId() != null) {
+			if (resolvedResourceId != null && resolvedResourceId.getId() != null) {
 				persistentId = resolvedResourceId;
+
+				if (resolvedResourceId.getAssociatedResourceId() == null) {
+					resolvedResourceId.setAssociatedResourceId(targetResourceId);
+				}
 			}
 		}
 
@@ -140,7 +142,8 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 				// looking it up again
 				if (theTransactionDetails != null
 						&& theTransactionDetails.hasNullResolvedResourceId(targetResourceId)) {
-					throw new ResourceNotFoundException(Msg.code(2602));
+					throw new ResourceNotFoundException(Msg.code(2602) + "Resource " + resourceType + "/" + idPart
+							+ " previously cached in transaction as not-found, specified in path: " + sourcePath);
 				}
 
 				resolvedResource = myIdHelperService.resolveResourceIdentity(
@@ -502,6 +505,9 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 	 * @param theValue Part of the URL to extract identifiers from
 	 */
 	protected List<CanonicalIdentifier> extractIdentifierFromUrl(String theValue) {
+		if (theValue.contains("?")) {
+			theValue = theValue.substring(theValue.indexOf("?") + 1);
+		}
 		Map<String, String[]> parsedQuery = UrlUtil.parseQueryString(theValue);
 
 		ArrayList<CanonicalIdentifier> retVal = new ArrayList<>(2);

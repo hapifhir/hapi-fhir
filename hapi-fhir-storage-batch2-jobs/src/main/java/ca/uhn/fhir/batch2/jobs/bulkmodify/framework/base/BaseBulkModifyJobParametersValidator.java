@@ -36,6 +36,8 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 public abstract class BaseBulkModifyJobParametersValidator<PT extends BaseBulkModifyJobParameters>
 		implements IJobParametersValidator<PT> {
 	private static final Pattern URL_PATTERN = Pattern.compile("([A-Z][a-zA-Z0-9]+)\\?.*");
+	public static final int DEFAULT_DRY_RUN_LIMIT_RESOURCE_COUNT = 5;
+	public static final int DEFAULT_DRY_RUN_LIMIT_RESOURCE_VERSION_COUNT = 5;
 
 	private final IDaoRegistry myDaoRegistry;
 
@@ -53,8 +55,18 @@ public abstract class BaseBulkModifyJobParametersValidator<PT extends BaseBulkMo
 
 		validateUrls(theParameters, retVal);
 		validateJobSpecificParameters(theParameters, retVal);
+		validateDryRun(theParameters, retVal);
+		validateAndSetLimitDefaults(theParameters, retVal);
 
 		return retVal;
+	}
+
+	protected void validateDryRun(PT theParameters, List<String> theIssueListToPopulate) {
+		if (theParameters.isDryRun()) {
+			if (theParameters.getDryRunMode() == null) {
+				theIssueListToPopulate.add("Dry run mode must be specified");
+			}
+		}
 	}
 
 	protected void validateUrls(@Nonnull PT theParameters, List<String> theIssueListToPopulate) {
@@ -79,4 +91,22 @@ public abstract class BaseBulkModifyJobParametersValidator<PT extends BaseBulkMo
 	}
 
 	protected abstract void validateJobSpecificParameters(PT theParameters, List<String> theIssueListToPopulate);
+
+	protected void validateAndSetLimitDefaults(@Nonnull PT theParameters, List<String> retVal) {
+		if (theParameters.isDryRun()
+				&& theParameters.getDryRunMode() == BaseBulkModifyJobParameters.DryRunMode.COLLECT_CHANGED) {
+			if (theParameters.getLimitResourceCount() == null) {
+				theParameters.setLimitResourceCount(DEFAULT_DRY_RUN_LIMIT_RESOURCE_COUNT);
+			}
+			if (theParameters.getLimitResourceVersionCount() == null) {
+				theParameters.setLimitResourceVersionCount(DEFAULT_DRY_RUN_LIMIT_RESOURCE_VERSION_COUNT);
+			}
+		}
+		if (theParameters.getLimitResourceCount() != null && theParameters.getLimitResourceCount() < 1) {
+			retVal.add("Limit resource count must be greater than 0");
+		}
+		if (theParameters.getLimitResourceVersionCount() != null && theParameters.getLimitResourceVersionCount() < 1) {
+			retVal.add("Limit resource version count must be greater than 0");
+		}
+	}
 }

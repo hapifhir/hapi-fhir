@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI-FHIR Storage Batch2 Jobs
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -17,9 +17,17 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
+package ca.uhn.fhir.jpa.dao.data;
 
-/**
- * Base class for bulk rewrite job parameters objects
- */
-public abstract class BaseBulkRewriteJobParameters extends BaseBulkModifyJobAppCtx {}
+import ca.uhn.fhir.jpa.model.entity.ResourceSystemEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.Optional;
+
+public interface IResourceIdentifierSystemEntityDao extends JpaRepository<ResourceSystemEntity, Long> {
+
+	@Query("SELECT i.myPid FROM ResourceSystemEntity i WHERE i.mySystem = :system")
+	Optional<Long> findBySystemUrl(@Param("system") String theSystemUrl);
+}

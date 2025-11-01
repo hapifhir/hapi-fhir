@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -100,6 +101,9 @@ import static org.mockito.Mockito.when;
 class BaseHapiFhirResourceDaoTest {
 	public static final String RESOURCE_TYPE = "Patient";
 	public static final String RESOURCE_ID = "123";
+
+	@Mock
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Mock
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;

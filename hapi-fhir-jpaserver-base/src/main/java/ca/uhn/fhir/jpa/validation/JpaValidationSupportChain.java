@@ -30,7 +30,6 @@ import jakarta.annotation.PreDestroy;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,9 +56,6 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 
 	@Autowired
 	private ITermConceptMappingSvc myConceptMappingSvc;
-
-	@Autowired
-	private UnknownCodeSystemWarningValidationSupport myUnknownCodeSystemWarningValidationSupport;
 
 	@Autowired
 	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
@@ -103,8 +99,5 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 		addValidationSupport(myNpmJpaValidationSupport);
 		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
 		addValidationSupport(myConceptMappingSvc);
-
-		// This needs to be last in the chain, it was designed for that
-		addValidationSupport(myUnknownCodeSystemWarningValidationSupport);
 	}
 }

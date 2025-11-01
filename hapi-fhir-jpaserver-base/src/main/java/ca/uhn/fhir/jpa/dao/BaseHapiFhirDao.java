@@ -263,6 +263,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		myResourceHistoryCalculator = theResourceHistoryCalculator;
 	}
 
+	@VisibleForTesting
+	public void setInterceptorBroadcasterForUnitTest(IInterceptorBroadcaster theInterceptorBroadcaster) {
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
+
 	@Override
 	protected IInterceptorBroadcaster getInterceptorBroadcaster() {
 		return myInterceptorBroadcaster;
@@ -1359,7 +1364,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		String requestId = getRequestId(theRequest, source);
-		source = MetaUtil.cleanProvenanceSourceUriOrEmpty(source);
+		source = MetaUtil.extractSourceUriOrEmpty(source);
 
 		boolean shouldStoreSource =
 				myStorageSettings.getStoreMetaSourceInformation().isStoreSourceUri();

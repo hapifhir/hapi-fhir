@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7304
+title: "When sending GET requests for bulk export with _typeFilter, the server did not filter resources
+   based on the provided type filter criteria. This has been fixed."

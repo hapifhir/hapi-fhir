@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7278
+title: "A new pair of non-partitioned tables has been added to the HAPI FHIR JPA table schema. These
+   will be used in future features to enforce uniqueness in patient identifiers across partitions."

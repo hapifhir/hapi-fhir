@@ -66,11 +66,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -115,15 +117,18 @@ public class ExpandResourceAndWriteBinaryStepTest {
 	@Mock
 	IIdHelperService<JpaPid> myIdHelperService;
 
+	@SuppressWarnings("unused")
 	@Spy
 	private InterceptorService myInterceptorService = new InterceptorService();
 
+	@SuppressWarnings("unused")
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	@Spy
 	private JpaStorageSettings myStorageSettings = new JpaStorageSettings();
 
+	@SuppressWarnings("unused")
 	@Spy
 	private IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
 
@@ -220,6 +225,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 			return JpaPid.fromId(Long.parseLong(fhirId));
 		});
 		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
+			@SuppressWarnings("unchecked")
 			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
 			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
 			for (var next : inputSet) {
@@ -286,6 +292,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 			return JpaPid.fromId(Long.parseLong(fhirId));
 		});
 		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
+			@SuppressWarnings("unchecked")
 			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
 			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
 			for (var next : inputSet) {
@@ -359,6 +366,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resources));
 		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
 		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
+			@SuppressWarnings("unchecked")
 			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
 			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
 			for (var next : inputSet) {
@@ -438,6 +446,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resources));
 		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
 		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
+			@SuppressWarnings("unchecked")
 			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
 			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
 			for (var next : inputSet) {
@@ -472,4 +481,5 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		verify(sink, never())
 			.accept(any(BulkExportBinaryFileId.class));
 	}
+
 }

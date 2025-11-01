@@ -29,7 +29,7 @@ import java.util.Date;
 /**
  * A resource pid list where all pids have the same resource type
  */
-public class HomogeneousResourcePidList<T extends IResourcePersistentId<T>> extends BaseResourcePidList<T> {
+public class HomogeneousResourcePidList<T extends IResourcePersistentId<?>> extends BaseResourcePidList<T> {
 	@Nonnull
 	final String myResourceType;
 

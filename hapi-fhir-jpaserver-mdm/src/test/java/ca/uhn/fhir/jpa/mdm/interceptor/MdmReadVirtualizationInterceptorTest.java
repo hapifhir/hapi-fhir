@@ -9,12 +9,13 @@ import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMLinkResults;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMState;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.interceptor.MdmReadVirtualizationInterceptor;
+import ca.uhn.fhir.mdm.svc.MdmExpandersHolder;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import jakarta.annotation.Nonnull;
@@ -22,6 +23,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
@@ -336,6 +338,38 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 			myObservationReferencingSourcePatientA0Id.getValue(),
 			myObservationReferencingSourcePatientA1Id.getValue(),
 			myObservationReferencingSourcePatientA2Id.getValue()
+		);
+
+	}
+
+	@Test
+	public void testSearch_Observation_chainReferencesAreLeftAlone() {
+		// Setup
+		HumanName name  = new HumanName();
+		name.addGiven("Firstname").setFamily("Lastname");
+		Patient patient = createPatient(new Patient().setActive(true).addName(name));
+		IIdType patientId = patient.getIdElement();
+
+		registerVirtualizationInterceptor();
+		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.SEARCH_TYPE);
+
+		IIdType obsId = createObservation(withSubject(patientId), withObservationCode("http://foo", "code0")).toUnqualifiedVersionless();
+		Observation obs = myObservationDao.read(obsId, mySrd);
+
+		logAllResourceLinks();
+
+		// Test
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		//  ReferenceParam(String theChain, String theValue)
+		params.add(Observation.SP_SUBJECT, new ReferenceParam("name", name.getFamily()));
+		params.addInclude(Observation.INCLUDE_PATIENT);
+		IBundleProvider outcome = myObservationDao.search(params, mySrd);
+
+		// Verify
+		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
+		assertThat(ids).asList().containsExactlyInAnyOrder(
+			patientId.toUnqualifiedVersionless().getValue(),
+			obsId.getValue()
 		);
 
 	}

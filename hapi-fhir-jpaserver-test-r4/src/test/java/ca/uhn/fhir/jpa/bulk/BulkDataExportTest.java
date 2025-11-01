@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
@@ -70,10 +71,12 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Spy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -95,6 +98,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -1213,6 +1217,32 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		}
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {Constants.CT_FHIR_NDJSON, Constants.CT_APP_NDJSON, Constants.CT_NDJSON})
+	public void testBulkExportWithDifferentOutputFormat(String outputFormat) {
+		// Set up a group with two patients
+		Patient patient1 = buildResource("Patient", withId("P1"), withActiveTrue());
+		myClient.update().resource(patient1).execute();
+
+		Patient patient2 = buildResource("Patient", withId("P2"), withActiveTrue());
+		myClient.update().resource(patient2).execute();
+
+		Group group = buildResource("Group", withId("Gp"), withActiveTrue());
+		group.addMember().getEntity().setReference("Patient/P1");
+		group.addMember().getEntity().setReference("Patient/P2");
+		myClient.update().resource(group).execute();
+
+		// export options
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setResourceTypes(Sets.newHashSet("Patient"));
+		options.setGroupId("Group/Gp");
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+		options.setOutputFormat(outputFormat);
+
+		// verify
+		verifyBulkExportResults(options, List.of("Patient/P1", "Patient/P2"), Collections.emptyList());
+	}
+
 
 	private JobInstance verifyBulkExportResults(BulkExportJobParameters theOptions, List<String> theContainedList, List<String> theExcludedList) {
 		Batch2JobStartResponse startResponse = startNewJob(theOptions);
@@ -1236,7 +1266,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 				assertThat(nextBinaryIdPart).matches("[a-zA-Z0-9]{32}");
 
 				Binary binary = myBinaryDao.read(new IdType(nextBinaryId));
-				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
+				assertEquals(theOptions.getOutputFormat(), binary.getContentType());
 
 				String nextNdJsonFileContent = new String(binary.getContent(), Constants.CHARSET_UTF8);
 				try (var iter = new LineIterator(new StringReader(nextNdJsonFileContent))) {
@@ -1330,6 +1360,38 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		assertThat(outputMap).containsKeys("Observation", "Patient")
 			.doesNotContainKeys("Group", "List");
+	}
+
+	@Test
+	public void xportWithCache_withSameParametersAsCancelledJob_shouldNotReuseCancelledJob() throws IOException {
+		// setup
+		BulkExportJobParameters exportJobParameters = new BulkExportJobParameters();
+		exportJobParameters.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		exportJobParameters.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		exportJobParameters.setResourceTypes(List.of("Patient"));
+
+		// test
+		// start first job
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+		startRequest.setUseCache(true);
+		startRequest.setParameters(exportJobParameters);
+		Batch2JobStartResponse firstJob = myJobCoordinator.startInstance(mySrd, startRequest);
+		String instanceId1 = firstJob.getInstanceId();
+
+		// cancel it
+		ServletRequestDetails details = new ServletRequestDetails();
+		details.setRequestType(RequestTypeEnum.DELETE);
+		details.setServer(myServer.getRestfulServer());
+		details.setServletResponse(new MockHttpServletResponse());
+		myBulkDataExportProvider.exportPollStatus(new StringType(instanceId1), details);
+
+		// start a second one with the exact same parameters
+		Batch2JobStartResponse secondJob = myJobCoordinator.startInstance(mySrd, startRequest);
+		String instanceId2 = secondJob.getInstanceId();
+
+		// verify it's a new job
+		assertNotEquals(instanceId1, instanceId2, "Cancelled job id is being reused");
 	}
 
 	private BulkExportJobResults getBulkExportJobResults(String theInstanceId) {

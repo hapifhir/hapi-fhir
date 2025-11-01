@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import com.google.common.collect.ArrayListMultimap;
@@ -32,6 +33,8 @@ import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,11 +61,16 @@ import java.util.function.Supplier;
  */
 public class TransactionDetails {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(TransactionDetails.class);
 	public static final IResourcePersistentId NOT_FOUND = IResourcePersistentId.NOT_FOUND;
 
 	private final Date myTransactionDate;
 	private List<Runnable> myRollbackUndoActions = Collections.emptyList();
+	private Map<String, RequestPartitionId> myResolvedPartitions = Collections.emptyMap();
 	private Map<String, IResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
+	/** The reverse of myResolvedResourceIds. Safe since id:pid is 1:1. */
+	private Map<IResourcePersistentId, IIdType> myReverseResolvedResourceIds = Collections.emptyMap();
+
 	private Map<String, IResourcePersistentId> myResolvedMatchUrls = Collections.emptyMap();
 	private Map<String, Supplier<IBaseResource>> myResolvedResources = Collections.emptyMap();
 	private Set<IResourcePersistentId> myDeletedResourceIds = Collections.emptySet();
@@ -183,6 +191,26 @@ public class TransactionDetails {
 	}
 
 	/**
+	 * If a resource has been resolved within the current transaction to a specific partition, we
+	 * cache it here to avoid repeated lookups.
+	 */
+	public void addResolvedPartition(String theId, RequestPartitionId thePartitionId) {
+		Validate.notBlank(theId, "theId must not be blank");
+		if (myResolvedPartitions.isEmpty()) {
+			myResolvedPartitions = new HashMap<>();
+		}
+		myResolvedPartitions.put(theId, thePartitionId);
+	}
+
+	/**
+	 * If a resource has been resolved within the current transaction to a specific partition, we
+	 * cache it here to avoid repeated lookups.
+	 */
+	public RequestPartitionId getResolvedPartition(String theId) {
+		return myResolvedPartitions.get(theId);
+	}
+
+	/**
 	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
 	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
 	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
@@ -258,8 +286,11 @@ public class TransactionDetails {
 
 		if (myResolvedResourceIds.isEmpty()) {
 			myResolvedResourceIds = new HashMap<>();
+			myReverseResolvedResourceIds = new HashMap<>();
 		}
-		myResolvedResourceIds.put(theResourceId.toVersionless().getValue(), thePersistentId);
+		String fhirId = theResourceId.toVersionless().getValue();
+		myResolvedResourceIds.put(fhirId, thePersistentId);
+		myReverseResolvedResourceIds.put(thePersistentId, theResourceId);
 	}
 
 	/**
@@ -275,7 +306,8 @@ public class TransactionDetails {
 		if (myResolvedResources.isEmpty()) {
 			myResolvedResources = new HashMap<>();
 		}
-		myResolvedResources.put(theResourceId.toVersionless().getValue(), theResource);
+		IIdType versionless = theResourceId.toVersionless();
+		myResolvedResources.put(versionless.getValue(), theResource);
 	}
 
 	/**
@@ -448,6 +480,7 @@ public class TransactionDetails {
 
 	public void clearResolvedItems() {
 		myResolvedResourceIds.clear();
+		myReverseResolvedResourceIds.clear();
 		myResolvedMatchUrls.clear();
 	}
 
@@ -477,5 +510,9 @@ public class TransactionDetails {
 			myAutoCreatedPlaceholderResources = Collections.emptyList();
 		}
 		return retVal;
+	}
+
+	public <T extends IResourcePersistentId<?>> IIdType getReverseResolvedId(T thePid) {
+		return myReverseResolvedResourceIds.get(thePid);
 	}
 }

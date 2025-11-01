@@ -25,6 +25,9 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
+import java.io.Serial;
+import java.util.Objects;
+
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 /**
@@ -32,6 +35,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  */
 public class HasParam extends BaseParam implements IQueryParameterType {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String myReferenceFieldName;
@@ -96,6 +100,26 @@ public class HasParam extends BaseParam implements IQueryParameterType {
 
 	public String getTargetResourceType() {
 		return myTargetResourceType;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (!(theO instanceof HasParam hasParam)) {
+			return false;
+		}
+		if (!super.equals(theO)) {
+			return false;
+		}
+		return Objects.equals(myReferenceFieldName, hasParam.myReferenceFieldName)
+				&& Objects.equals(myParameterName, hasParam.myParameterName)
+				&& Objects.equals(myParameterValue, hasParam.myParameterValue)
+				&& Objects.equals(myTargetResourceType, hasParam.myTargetResourceType);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(
+				super.hashCode(), myReferenceFieldName, myParameterName, myParameterValue, myTargetResourceType);
 	}
 
 	private static void validateColon(String theParameterName, int colonIndex) {

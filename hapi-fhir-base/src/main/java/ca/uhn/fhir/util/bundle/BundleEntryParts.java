@@ -23,13 +23,16 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class BundleEntryParts {
-	private final RequestTypeEnum myRequestType;
-	private final IBaseResource myResource;
-	private final String myUrl;
-	private final String myConditionalUrl;
-	private final String myFullUrl;
-	private final RequestTypeEnum myMethod;
+	protected RequestTypeEnum myRequestType;
+	protected IBaseResource myResource;
+	protected String myUrl;
+	protected String myConditionalUrl;
+	protected String myFullUrl;
+	protected RequestTypeEnum myMethod;
 
+	/**
+	 * Constructor
+	 */
 	public BundleEntryParts(
 			String theFullUrl,
 			RequestTypeEnum theRequestType,
@@ -46,6 +49,22 @@ public class BundleEntryParts {
 		myMethod = theMethod;
 	}
 
+	/**
+	 * Copy Constructor
+	 */
+	public BundleEntryParts(BundleEntryParts theBundleEntryParts) {
+		this(
+				theBundleEntryParts.getFullUrl(),
+				theBundleEntryParts.getRequestType(),
+				theBundleEntryParts.getUrl(),
+				theBundleEntryParts.getResource(),
+				theBundleEntryParts.getConditionalUrl(),
+				theBundleEntryParts.getMethod());
+	}
+
+	/**
+	 * Returns the <code>Bundle.entry.fulUrl</code> value
+	 */
 	public String getFullUrl() {
 		return myFullUrl;
 	}
@@ -58,10 +77,30 @@ public class BundleEntryParts {
 		return myResource;
 	}
 
+	/**
+	 * Returns the conditional URL associated with this request, if any.
+	 * <ul>
+	 * <li>
+	 * If the {@link #getMethod() method} is <code>PUT</code>, <code>PATCH</code>, or
+	 * <code>DELETE</code>, and the {@link #getUrl() request URL}
+	 * contains <code>'?'</code>, returns the {@link #getUrl() request URL}
+	 * </li>
+	 * <li>
+	 * If the {@link #getMethod() method} is <code>POST</code>, and the
+	 * <code>Bundle.entry.request.ifNoneExist</code>
+	 * contains <code>'?'</code>, returns the <codd>ifNoneExist</codd>
+	 * value.
+	 * </li>
+	 * </ul>
+	 * Returns the <code>Bundle.entry.request.url</code> value
+	 */
 	public String getConditionalUrl() {
 		return myConditionalUrl;
 	}
 
+	/**
+	 * Returns the <code>Bundle.entry.request.url</code> value
+	 */
 	public String getUrl() {
 		return myUrl;
 	}

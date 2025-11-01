@@ -67,9 +67,10 @@ public class ReindexJobParameters extends PartitionedUrlJobParameters {
 		return getIfNull(myCorrectCurrentVersion, ReindexParameters.CORRECT_CURRENT_VERSION_DEFAULT);
 	}
 
-	public void setCorrectCurrentVersion(
+	public ReindexJobParameters setCorrectCurrentVersion(
 			@Nullable ReindexParameters.CorrectCurrentVersionModeEnum theCorrectCurrentVersion) {
 		myCorrectCurrentVersion = theCorrectCurrentVersion;
+		return this;
 	}
 
 	public boolean getOptimisticLock() {

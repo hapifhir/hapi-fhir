@@ -19,15 +19,21 @@
  */
 package ca.uhn.test.util;
 
+import ca.uhn.fhir.rest.api.Constants;
 import com.google.common.collect.Multimap;
+import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public record ParsedHttpResponse(int statusCode, String statusReason, Multimap<String, String> headers, String body) {
 
 	@Override
+	@Nonnull
 	public String toString() {
 		StringBuilder logBuilder = new StringBuilder();
 
@@ -47,5 +53,33 @@ public record ParsedHttpResponse(int statusCode, String statusReason, Multimap<S
 		}
 
 		return logBuilder.toString();
+	}
+
+	public Optional<String> header(String theName) {
+		return headers()
+			.entries()
+			.stream()
+			.filter(t -> t.getValue() != null)
+			.filter(t -> t.getKey() != null)
+			.filter(t -> t.getKey().equalsIgnoreCase(theName))
+			.map(Map.Entry::getValue)
+			.findFirst();
+	}
+
+	/**
+	 * Returns the {@literal Content-Type} header value with any additional parameters
+	 * (e.g. {@literal charset} parameter) stripped off. Throws an exception if no
+	 * Content-Type header is found.
+	 *
+	 * @return the content type header value
+	 */
+	@Nonnull
+	public String contentType() {
+		String retVal = headers().get(Constants.HEADER_CONTENT_TYPE).stream().findFirst().orElse(null);
+		Validate.notNull(retVal, "No Content-Type header found");
+		if (retVal.contains(";")) {
+			retVal = retVal.substring(0, retVal.indexOf(';'));
+		}
+		return trim(retVal);
 	}
 }

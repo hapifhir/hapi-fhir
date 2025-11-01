@@ -25,6 +25,8 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
+import java.util.Objects;
+
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -50,6 +52,19 @@ public abstract class BaseParam implements IQueryParameterType {
 		return myMissing;
 	}
 
+	/**
+	 * If set to non-null value, indicates that this parameter has been populated
+	 * with a "[name]:missing=true" or "[name]:missing=false" value instead of a
+	 * normal value
+	 *
+	 * @return Returns a reference to <code>this</code> for easier method chaining
+	 */
+	@Override
+	public BaseParam setMissing(Boolean theMissing) {
+		myMissing = theMissing;
+		return this;
+	}
+
 	@Override
 	public final String getQueryParameterQualifier() {
 		if (myMissing != null) {
@@ -71,19 +86,6 @@ public abstract class BaseParam implements IQueryParameterType {
 	 */
 	protected boolean isSupportsChain() {
 		return false;
-	}
-
-	/**
-	 * If set to non-null value, indicates that this parameter has been populated
-	 * with a "[name]:missing=true" or "[name]:missing=false" value instead of a
-	 * normal value
-	 *
-	 * @return Returns a reference to <code>this</code> for easier method chaining
-	 */
-	@Override
-	public BaseParam setMissing(Boolean theMissing) {
-		myMissing = theMissing;
-		return this;
 	}
 
 	@Override
@@ -116,5 +118,19 @@ public abstract class BaseParam implements IQueryParameterType {
 	 */
 	public boolean isEmpty() {
 		return isBlank(getValueAsQueryToken()) && getMissing() == null;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (!(theO instanceof BaseParam baseParam)) {
+			return false;
+		}
+		return Objects.equals(this.getValueAsQueryToken(), baseParam.getValueAsQueryToken())
+				&& Objects.equals(myMissing, baseParam.myMissing);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(getValueAsQueryToken(), myMissing);
 	}
 }
