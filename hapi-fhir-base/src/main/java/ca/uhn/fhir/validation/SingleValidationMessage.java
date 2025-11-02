@@ -24,6 +24,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -43,6 +44,19 @@ public class SingleValidationMessage {
 	 */
 	public SingleValidationMessage() {
 		super();
+	}
+
+	/**
+	 * Copy constructor
+	 */
+	public SingleValidationMessage(SingleValidationMessage theMessage) {
+		this.myLocationCol = theMessage.myLocationCol;
+		this.myLocationLine = theMessage.myLocationLine;
+		this.myLocationString = theMessage.myLocationString;
+		this.myMessage = theMessage.myMessage;
+		this.myMessageId = theMessage.myMessageId;
+		this.mySeverity = theMessage.mySeverity;
+		this.mySliceMessages = theMessage.mySliceMessages == null ? null : new ArrayList<>(theMessage.mySliceMessages);
 	}
 
 	@Override
