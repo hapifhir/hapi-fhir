@@ -69,6 +69,11 @@ class ValidationMessageSuppressingInterceptorSliceMessageTest {
 		myInterceptor.addMessageSuppressionPatterns("slice-message-1");
 		ValidationResult handled = myInterceptor.handle(original);
 		assertThat(handled.getMessages()).isEmpty();
+
+		// Verify original ValidationResult is unchanged
+		assertThat(original.getMessages()).hasSize(1);
+		assertThat(original.getMessages().get(0).getSliceMessages()).hasSize(1);
+		assertThat(original.getMessages().get(0).getSliceMessages().get(0)).isEqualTo("slice-message-1");
 	}
 
 	@Test
@@ -101,6 +106,11 @@ class ValidationMessageSuppressingInterceptorSliceMessageTest {
 		assertThat(handled.getMessages().get(0).getMessage()).isEqualTo("message");
 		assertThat(handled.getMessages().get(0).getSliceMessages()).hasSize(1);
 		assertThat(handled.getMessages().get(0).getSliceMessages().get(0)).isEqualTo("slice-message-2");
+
+		// Verify original ValidationResult is unchanged (still has 2 slice messages)
+		assertThat(original.getMessages()).hasSize(1);
+		assertThat(original.getMessages().get(0).getSliceMessages()).hasSize(2);
+		assertThat(original.getMessages().get(0).getSliceMessages()).containsExactly("slice-message-1", "slice-message-2");
 	}
 
 	@Test
@@ -111,6 +121,11 @@ class ValidationMessageSuppressingInterceptorSliceMessageTest {
 		myInterceptor.addMessageSuppressionPatterns("slice-message-1", "slice-message-2");
 		ValidationResult handled = myInterceptor.handle(original);
 		assertThat(handled.getMessages()).isEmpty();
+
+		// Verify original ValidationResult is unchanged (still has 2 slice messages)
+		assertThat(original.getMessages()).hasSize(1);
+		assertThat(original.getMessages().get(0).getSliceMessages()).hasSize(2);
+		assertThat(original.getMessages().get(0).getSliceMessages()).containsExactly("slice-message-1", "slice-message-2");
 	}
 
 	private SingleValidationMessage createSingleMessage(String theMessage){
