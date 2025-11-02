@@ -26,6 +26,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.List;
 
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+
 public class SingleValidationMessage {
 
 	private Integer myLocationCol;
@@ -154,5 +156,9 @@ public class SingleValidationMessage {
 
 	public List<String> getSliceMessages() {
 		return mySliceMessages;
+	}
+
+	public boolean hasSliceMessages() {
+		return isNotEmpty(mySliceMessages);
 	}
 }

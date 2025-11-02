@@ -24,12 +24,15 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
+import jakarta.annotation.Nonnull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Interceptor
@@ -79,16 +82,35 @@ public class ValidationMessageSuppressingInterceptor {
 	@Hook(Pointcut.VALIDATION_COMPLETED)
 	public ValidationResult handle(ValidationResult theResult) {
 
-		List<SingleValidationMessage> newMessages =
-				new ArrayList<>(theResult.getMessages().size());
-		for (SingleValidationMessage next : theResult.getMessages()) {
+		List<SingleValidationMessage> originalMessages = theResult.getMessages();
+		List<SingleValidationMessage> newMessages = new ArrayList<>(originalMessages.size());
 
-			String nextMessage = next.getMessage();
+		boolean sliceMessagesChanged = false;
+		for (SingleValidationMessage next : originalMessages) {
 			boolean suppress = false;
+
 			for (Pattern nextSuppressPattern : mySuppressPatterns) {
-				if (nextSuppressPattern.matcher(nextMessage).find()) {
-					suppress = true;
-					break;
+
+				if (next.hasSliceMessages()) {
+					List<String> sliceMessages = next.getSliceMessages();
+					List<String> filteredSliceMessages = filterSliceMessages(nextSuppressPattern, sliceMessages);
+
+					if (sliceMessages.size() != filteredSliceMessages.size()) {
+						next.setSliceMessages(filteredSliceMessages);
+						sliceMessagesChanged = true;
+					}
+
+					if (isEmpty(filteredSliceMessages)) {
+						// all slice messages were suppressed, we should suppress the entire SingleValidationMessage
+						suppress = true;
+						break;
+					}
+				} else {
+					String nextMessage = next.getMessage();
+					if (nextSuppressPattern.matcher(nextMessage).find()) {
+						suppress = true;
+						break;
+					}
 				}
 			}
 
@@ -97,10 +119,29 @@ public class ValidationMessageSuppressingInterceptor {
 			}
 		}
 
-		if (newMessages.size() == theResult.getMessages().size()) {
+		boolean wasChanged = originalMessages.size() != newMessages.size() || sliceMessagesChanged;
+
+		if (!wasChanged) {
 			return null;
 		}
 
 		return new ValidationResult(theResult.getContext(), newMessages);
+	}
+
+	private List<String> filterSliceMessages(
+			@Nonnull Pattern thePattern, @Nonnull List<String> theOriginalSliceMessages) {
+		if (isEmpty(theOriginalSliceMessages)) {
+			return Collections.emptyList();
+		}
+
+		List<String> filteredSliceMessages = new ArrayList<>();
+		for (String sliceMessage : theOriginalSliceMessages) {
+			boolean shouldSuppress = thePattern.matcher(sliceMessage).find();
+			if (!shouldSuppress) {
+				filteredSliceMessages.add(sliceMessage);
+			}
+		}
+
+		return filteredSliceMessages;
 	}
 }
