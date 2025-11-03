@@ -4340,7 +4340,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 	}
 
 	@ParameterizedTest
-	@EnumSource(value = Bundle.BundleType.class, names = {"DOCUMENT", "MESSAGE"})
+	@EnumSource(value = Bundle.BundleType.class, names = {"DOCUMENT", "MESSAGE", "COLLECTION"})
 	public void testShouldExamineBundleResources_withBundleRequestAndStandAloneBundleType_returnsFalse(Bundle.BundleType theBundleType) {
 		Bundle bundle = new Bundle();
 		bundle.setType(theBundleType);
