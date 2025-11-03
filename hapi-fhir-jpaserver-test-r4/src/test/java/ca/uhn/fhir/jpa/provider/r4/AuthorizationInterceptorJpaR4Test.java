@@ -432,12 +432,12 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			// Get next page
 			if (responseBundle != null) {
 				Bundle.BundleLinkComponent next = responseBundle.getLink("next");
-				if (next != null) {
-					bundle = new Bundle();
-					bundle.setType(Bundle.BundleType.TRANSACTION);
-					bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("/Bundle?" + Constants.PARAM_PAGINGACTION + next.getUrl());
-					assertTransactionAllowed(bundle, theShouldAllow);
-				}
+				assertNotNull(next);
+
+				bundle = new Bundle();
+				bundle.setType(Bundle.BundleType.TRANSACTION);
+				bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("/Bundle?" + Constants.PARAM_PAGINGACTION + next.getUrl());
+				assertTransactionAllowed(bundle, theShouldAllow);
 			}
 		} finally {
 			myClient.unregisterInterceptor(interceptor);
@@ -1934,14 +1934,17 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		interceptor.setAuthorizationSearchParamMatcher(new AuthorizationSearchParamMatcher(mySearchParamMatcher));
 		myServer.getRestfulServer().registerInterceptor(interceptor);
 
-		// Search for bundles with TEST-TAG-1 should return both COLLECTION bundles
+		// Search for bundles with TEST-TAG-1 should return TEST-TAG-1 COLLECTION
 		Bundle searchResults = assertSearchAllowed("/Bundle?_tag=http//myserver.ca/provider-1|TEST-TAG-1", true);
 
 		assertThat(searchResults).isNotNull();
-		assertThat(searchResults.getEntry()).as("Should find both COLLECTION and DOCUMENT bundles with TEST-TAG-1").hasSize(1);
+		assertThat(searchResults.getEntry()).as("Should find COLLECTION tagged TEST-TAG-1").hasSize(1);
 
 		// Search for bundles with TEST-TAG-2 should fail (no authorization)
 		assertSearchFailsWith403Forbidden("/Bundle?_tag=http//myserver.ca/provider-1|TEST-TAG-2");
+
+		// Search for bundles with no tag should fail (no authorization)
+		assertSearchFailsWith403Forbidden("/Bundle");
 	}
 
 	@Test
