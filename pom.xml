@@ -1094,7 +1094,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<elastic_apm_version>1.52.0</elastic_apm_version>
-		<elasticsearch_version>8.15.3</elasticsearch_version>
+		<elasticsearch_version>8.16.0</elasticsearch_version>
 		<ucum_version>1.0.9</ucum_version>
 
 		<!-- Site properties -->
@@ -1526,7 +1526,7 @@
 			<dependency>
 				<groupId>com.microsoft.sqlserver</groupId>
 				<artifactId>mssql-jdbc</artifactId>
-				<version>12.4.2.jre11</version>
+				<version>12.4.3.jre11</version>
 			</dependency>
 			<dependency>
 				<!--
