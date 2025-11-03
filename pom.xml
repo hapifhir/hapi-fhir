@@ -1094,7 +1094,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<elastic_apm_version>1.52.0</elastic_apm_version>
-		<elasticsearch_version>8.16.0</elasticsearch_version>
+		<elasticsearch_version>8.16.2</elasticsearch_version>
 		<ucum_version>1.0.9</ucum_version>
 
 		<!-- Site properties -->
@@ -1256,6 +1256,12 @@
 				<groupId>jakarta.mail</groupId>
 				<artifactId>jakarta.mail-api</artifactId>
 				<version>2.1.3</version>
+			</dependency>
+			<!-- Pinned for CVE-2025-5222, used by org.hl7.fhir.utilities -->
+			<dependency>
+				<groupId>com.ibm.icu</groupId>
+				<artifactId>icu4j</artifactId>
+				<version>78.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.icegreen</groupId>
@@ -1507,6 +1513,18 @@
 				<groupId>co.elastic.clients</groupId>
 				<artifactId>elasticsearch-java</artifactId>
 				<version>${elasticsearch_version}</version>
+			</dependency>
+			<!-- Pinned for CVE-2024-52979, used by hibernate_search v7.2.1 -->
+			<dependency>
+				<groupId>org.elasticsearch.client</groupId>
+				<artifactId>elasticsearch-rest-client</artifactId>
+				<version>8.16.2</version>
+			</dependency>
+			<!-- Pinned for CVE-2024-52979, used by hibernate_search v7.2.1 -->
+			<dependency>
+				<groupId>org.elasticsearch.client</groupId>
+				<artifactId>elasticsearch-rest-client-sniffer</artifactId>
+				<version>8.16.2</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
