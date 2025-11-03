@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -381,15 +382,32 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 	@Test
-	public void testSearchObservation_MultipleCompartmentMembership() {
+	public void testSearchObservation_ChainedSubjectParameter() {
 		createPatientA();
 		createObservationB();
 
 		// Multiple ANDs
 		try {
 			myObservationDao.search(SearchParameterMap.newSynchronous()
-					.add("subject", new TokenParam("http://foo", "1"))
-					.add("subject", new TokenParam("http://foo", "2"))
+					.add("subject", new ReferenceParam("identifier", "http://patient|1"))
+				, mySrd);
+		} catch (MethodNotAllowedException e) {
+			assertEquals(Msg.code(1322) + "The parameter subject.identifier is not supported in patient compartment mode", e.getMessage());
+		}
+
+	}
+
+	@Test
+	public void testSearchObservation_MultipleCompartmentMembership() {
+		createPatientA();
+		createPatient(withId("B"), withActiveTrue());
+		createObservationB();
+
+		// Multiple ANDs
+		try {
+			myObservationDao.search(SearchParameterMap.newSynchronous()
+					.add("subject", new ReferenceParam("Patient/A"))
+					.add("subject", new ReferenceParam("Patient/B"))
 				, mySrd);
 		} catch (MethodNotAllowedException e) {
 			assertEquals(Msg.code(1324) + "Multiple values for parameter subject is not supported in patient compartment mode", e.getMessage());
@@ -399,7 +417,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		try {
 			myObservationDao.search(SearchParameterMap.newSynchronous()
 				.add(
-					"subject", new TokenOrListParam("http://foo", "1", "2")
+					"subject", new ReferenceOrListParam().add(new ReferenceParam("Patient/A")).add(new ReferenceParam("Patient/B"))
 				), mySrd);
 		} catch (MethodNotAllowedException e) {
 			assertEquals(Msg.code(1324) + "Multiple values for parameter subject is not supported in patient compartment mode", e.getMessage());
