@@ -41,6 +41,11 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class CacheTagDefinitionDao {
 	private static final Logger ourLog = LoggerFactory.getLogger(CacheTagDefinitionDao.class);
 
+	/**
+	 * Userdata key on the {@link TransactionDetails}
+	 */
+	public static final String RESOLVED_TAG_DEFINITIONS = CacheTagDefinitionDao.class.getName() + "_resolvedTagDefinitions";
+
 	private final ITagDefinitionDao tagDefinitionDao;
 	private final MemoryCacheService memoryCacheService;
 
@@ -71,7 +76,7 @@ public class CacheTagDefinitionDao {
 
 		if (tagDefinition == null) {
 			HashMap<MemoryCacheService.TagDefinitionCacheKey, TagDefinition> resolvedTagDefinitions =
-					transactionDetails.getOrCreateUserData("resolvedTagDefinitions", HashMap::new);
+					transactionDetails.getOrCreateUserData(RESOLVED_TAG_DEFINITIONS, HashMap::new);
 
 			tagDefinition = resolvedTagDefinitions.get(key);
 
