@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +50,7 @@ public class HistoryBuilderFactory {
 
 	public HistoryBuilder newHistoryBuilder(
 			@Nonnull String theResourceType,
-			@Nonnull List<String> theResourceIds,
+			@Nonnull List<IResourcePersistentId<?>> theResourceIds,
 			@Nullable Date theRangeStartInclusive,
 			@Nonnull Date theRangeEndInclusive) {
 		return (HistoryBuilder) myApplicationContext.getBean(

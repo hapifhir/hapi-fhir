@@ -4,52 +4,56 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
-import org.mockito.Mock;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.testcontainers.shaded.org.bouncycastle.util.Strings;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceCompartmentUtilTest {
 
-	@Mock
-	private RuntimeResourceDefinition myRuntimeResourceDefinition;
-	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
-	private IBaseResource myResource;
-	@Mock
-	private FhirContext myFhirContext;
-	private List<RuntimeSearchParam> myCompartmentSearchParams;
-	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
+	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 	private ISearchParamExtractor mySearchParamExtractor;
+
+	@BeforeEach
+	public void beforeEach() {
+		ISearchParamRegistry searchParamRegistry = new FhirContextSearchParamRegistry(myFhirContext);
+		mySearchParamExtractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), myFhirContext, searchParamRegistry);
+	}
 
 	@Test
 	void getResourceCompartment() {
-		myCompartmentSearchParams = getMockSearchParams(true);
-		when(mySearchParamExtractor.getPathValueExtractor(myResource, "Observation.subject"))
-			.thenReturn(() -> List.of(new Reference("Patient/P01")));
+		Observation resource = new Observation().setSubject(new Reference("Patient/P01"));
+
+		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition("Observation");
+		List<RuntimeSearchParam> myCompartmentSearchParams = ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
 
 		Optional<String> oCompartment = ResourceCompartmentUtil.getResourceCompartment("Patient",
-			myResource, myCompartmentSearchParams, mySearchParamExtractor);
+			resource, myCompartmentSearchParams, mySearchParamExtractor);
 
 		assertThat(oCompartment).isPresent();
 		assertThat(oCompartment).contains("P01");
@@ -57,50 +61,59 @@ class ResourceCompartmentUtilTest {
 
 	@Test
 	void getPatientCompartmentSearchParams() {
-		myCompartmentSearchParams = getMockSearchParams(true);
-		when(myRuntimeResourceDefinition.getSearchParams()).thenReturn(myCompartmentSearchParams);
+		RuntimeResourceDefinition runtimeResourceDefinition = myFhirContext.getResourceDefinition("Observation");
 
-		List<RuntimeSearchParam> result = ResourceCompartmentUtil.getPatientCompartmentSearchParams(myRuntimeResourceDefinition);
+		List<RuntimeSearchParam> result = ResourceCompartmentUtil.getPatientCompartmentSearchParams(runtimeResourceDefinition);
 
-		assertThat(result).hasSize(2);
+		assertThat(result.stream().map(RuntimeSearchParam::getName).toList()).containsExactlyInAnyOrder("performer", "subject");
+	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		false , Observation , performer subject
+		true  , Observation , performer patient subject
+		false , Encounter   , patient
+		true  , Encounter   , patient subject
+		false , Coverage    , beneficiary payor policy-holder subscriber
+		true  , Coverage    , beneficiary payor policy-holder subscriber
+		""")
+	void getPatientCompartmentSearchParams_IncludeSupersets(boolean theIncludeSupersets, String theResourceType, String theExpectedParamNames) {
+		RuntimeResourceDefinition runtimeResourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
+
+		List<RuntimeSearchParam> result = ResourceCompartmentUtil.getPatientCompartmentSearchParams(runtimeResourceDefinition, theIncludeSupersets);
+
+		// Verify
+		List<String> paramNames = result.stream().map(RuntimeSearchParam::getName).toList();
+		String[] expected = theExpectedParamNames.split(" ");
+		assertThat(paramNames).containsExactlyInAnyOrder(expected);
 	}
 
 	@Nested
 	public class TestGetPatientCompartmentIdentity {
 		@Test
 		void whenNoPatientCompartmentsReturnsEmpty() {
-			myCompartmentSearchParams = getMockSearchParams(false);
-			when(myFhirContext.getResourceDefinition(myResource)).thenReturn(myRuntimeResourceDefinition);
-			when(myRuntimeResourceDefinition.getSearchParams()).thenReturn(myCompartmentSearchParams);
+			ValueSet resource = new ValueSet();
 
-			Optional<String> result = ResourceCompartmentUtil.getPatientCompartmentIdentity(myResource, myFhirContext, mySearchParamExtractor);
+			Optional<String> result = ResourceCompartmentUtil.getPatientCompartmentIdentity(resource, myFhirContext, mySearchParamExtractor);
 
 			assertTrue(result.isEmpty());
 		}
 
 		@Test
 		void whenPatientResource_andNoId_throws() {
-			myCompartmentSearchParams = getMockSearchParams(true);
-			when(myFhirContext.getResourceDefinition(myResource)).thenReturn(myRuntimeResourceDefinition);
-			when(myRuntimeResourceDefinition.getSearchParams()).thenReturn(myCompartmentSearchParams);
-			when(myRuntimeResourceDefinition.getName()).thenReturn("Patient");
-			when(myResource.getIdElement().getIdPart()).thenReturn(null);
+			// No ID assigned to the patient
+			Patient resource = new Patient();
 
-			MethodNotAllowedException thrown = assertThrows(MethodNotAllowedException.class,
-				() -> ResourceCompartmentUtil.getPatientCompartmentIdentity(myResource, myFhirContext, mySearchParamExtractor));
-
-			assertThat(thrown).hasMessageStartingWith(Msg.code(2475) + "Patient resource IDs must be client-assigned");
+			assertThatThrownBy(() -> ResourceCompartmentUtil.getPatientCompartmentIdentity(resource, myFhirContext, mySearchParamExtractor))
+				.isInstanceOf(MethodNotAllowedException.class)
+				.hasMessageStartingWith(Msg.code(2475) + "Patient resource IDs must be client-assigned");
 		}
 
 		@Test
 		void whenPatientResource_whichHasId_returnsId() {
-			myCompartmentSearchParams = getMockSearchParams(true);
-			when(myFhirContext.getResourceDefinition(myResource)).thenReturn(myRuntimeResourceDefinition);
-			when(myRuntimeResourceDefinition.getSearchParams()).thenReturn(myCompartmentSearchParams);
-			when(myRuntimeResourceDefinition.getName()).thenReturn("Patient");
-			when(myResource.getIdElement().getIdPart()).thenReturn("Abc");
+			Resource resource = new Patient().setId("Patient/Abc");
 
-			Optional<String> result = ResourceCompartmentUtil.getPatientCompartmentIdentity(myResource, myFhirContext, mySearchParamExtractor);
+			Optional<String> result = ResourceCompartmentUtil.getPatientCompartmentIdentity(resource, myFhirContext, mySearchParamExtractor);
 
 			assertThat(result).isPresent();
 			assertThat(result).contains("Abc");
@@ -108,25 +121,14 @@ class ResourceCompartmentUtilTest {
 
 		@Test
 		void whenNoPatientResource_returnsPatientCompartment() {
-			// getResourceCompartment is tested independently, so here it is just (static) mocked
+			Observation resource = new Observation().setSubject(new Reference("Patient/P01"));
 
-			myCompartmentSearchParams = getMockSearchParams(true);
-			when(myFhirContext.getResourceDefinition(myResource)).thenReturn(myRuntimeResourceDefinition);
-			when(myRuntimeResourceDefinition.getSearchParams()).thenReturn(myCompartmentSearchParams);
-			when(myRuntimeResourceDefinition.getName()).thenReturn("Observation");
-			when(mySearchParamExtractor.getPathValueExtractor(myResource, "Observation.subject"))
-				.thenReturn(() -> List.of(new Reference("Patient/P01")));
+			// execute
+			Optional<String> result = ResourceCompartmentUtil.getPatientCompartmentIdentity(resource, myFhirContext, mySearchParamExtractor);
 
-//			try (MockedStatic<ResourceCompartmentUtil> mockedUtil = Mockito.mockStatic(ResourceCompartmentUtil.class)) {
-//				mockedUtil.when(() -> ResourceCompartmentUtil.getResourceCompartment(
-//					myResource, myCompartmentSearchParams, mySearchParamExtractor)).thenReturn(Optional.of("P01"));
-
-				// execute
-				Optional<String> result = ResourceCompartmentUtil.getPatientCompartmentIdentity(myResource, myFhirContext, mySearchParamExtractor);
-
+			// Verify
 			assertThat(result).isPresent();
 			assertThat(result).contains("P01");
-//			}
 		}
 
 		@Test
@@ -137,34 +139,4 @@ class ResourceCompartmentUtilTest {
 		}
 	}
 
-	private List<RuntimeSearchParam> getMockSearchParams(boolean providePatientCompartment) {
-		return List.of(
-			getMockSearchParam("subject", "Observation.subject", providePatientCompartment),
-			getMockSearchParam("performer", "Observation.performer", providePatientCompartment));
-	}
-
-	private RuntimeSearchParam getMockSearchParam(String theName, String thePath, boolean providePatientCompartment) {
-		RuntimeSearchParam rsp = mock(RuntimeSearchParam.class);
-		lenient().when(rsp.getParamType()).thenReturn(RestSearchParameterTypeEnum.REFERENCE);
-		lenient().when(rsp.getProvidesMembershipInCompartments()).thenReturn(getCompartmentsForParam(theName, providePatientCompartment));
-		lenient().when(rsp.getName()).thenReturn(theName);
-		lenient().when(rsp.getPath()).thenReturn(thePath);
-		return rsp;
-	}
-
-	private Set<String> getCompartmentsForParam(String theName, boolean theProvidePatientCompartment) {
-		if (theProvidePatientCompartment) {
-			return switch (theName) {
-				case "subject" -> Set.of("Device", "Patient");
-				case "performer" -> Set.of("Practitioner", "Patient", "RelatedPerson");
-				default -> Collections.emptySet();
-			};
-		} else {
-			return switch (theName) {
-				case "subject" -> Set.of("Device");
-				case "performer" -> Set.of("Practitioner", "RelatedPerson");
-				default -> Collections.emptySet();
-			};
-		}
-    }
 }
