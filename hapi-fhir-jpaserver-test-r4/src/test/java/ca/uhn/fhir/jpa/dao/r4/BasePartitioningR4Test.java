@@ -63,7 +63,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	private boolean myRegisteredSearchParamValidatingInterceptor;
 
 	@AfterEach
-	public void after() {
+	protected void after() {
 		assertNoRemainingPartitionIds();
 
 		PartitionSettings defaultPartitionSettings = new PartitionSettings();
@@ -92,7 +92,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 
 	@Override
 	@BeforeEach
-	public void before() throws Exception {
+	protected void before() throws Exception {
 		super.before();
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
@@ -141,6 +141,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Override
+	@AfterEach
 	public void afterPurgeDatabase() {
 		super.afterPurgeDatabase();
 
