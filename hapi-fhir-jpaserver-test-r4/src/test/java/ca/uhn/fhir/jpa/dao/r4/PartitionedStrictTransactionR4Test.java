@@ -21,6 +21,8 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -39,6 +41,7 @@ public class PartitionedStrictTransactionR4Test extends BasePartitioningR4Test {
 	private HapiTransactionService myTransactionService;
 
 	@Override
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 		myTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
@@ -46,6 +49,7 @@ public class PartitionedStrictTransactionR4Test extends BasePartitioningR4Test {
 	}
 
 	@Override
+	@AfterEach
 	public void after() {
 		super.after();
 		myTransactionService.setTransactionPropagationWhenChangingPartitions(HapiTransactionService.DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
