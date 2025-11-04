@@ -33,10 +33,12 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.util.ObjectUtil.castIfInstanceof;
@@ -120,15 +122,68 @@ public class ResourceCompartmentUtil {
 	 * Returns a {@code RuntimeSearchParam} list with the parameters extracted from the received
 	 * {@code RuntimeResourceDefinition}, which are of type REFERENCE and have a membership compartment
 	 * for "Patient" resource
-	 * @param resourceDef the RuntimeResourceDefinition providing the RuntimeSearchParam list
+	 *
+	 * @param theResourceDef the RuntimeResourceDefinition providing the RuntimeSearchParam list
 	 * @return the RuntimeSearchParam filtered list
 	 */
 	@Nonnull
-	public static List<RuntimeSearchParam> getPatientCompartmentSearchParams(RuntimeResourceDefinition resourceDef) {
-		return resourceDef.getSearchParams().stream()
-				.filter(param -> param.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
-				.filter(param -> param.getProvidesMembershipInCompartments() != null
-						&& param.getProvidesMembershipInCompartments().contains("Patient"))
-				.collect(Collectors.toList());
+	public static List<RuntimeSearchParam> getPatientCompartmentSearchParams(
+			@Nonnull RuntimeResourceDefinition theResourceDef) {
+		return getPatientCompartmentSearchParams(theResourceDef, false);
+	}
+
+	/**
+	 * Returns a {@code RuntimeSearchParam} list with the parameters extracted from the received
+	 * {@code RuntimeResourceDefinition}, which are of type REFERENCE and have a membership compartment
+	 * for "Patient" resource
+	 *
+	 * @param theResourceDef      the RuntimeResourceDefinition providing the RuntimeSearchParam list
+	 * @param theIncludeSupersets If <code>false</code>, include only the parameters explicitly defined as being a part
+	 *                            of the Patient compartment. If <code>true</code>, include other parameters whose path
+	 *                            would include the same resources. For example, for the <code>Observation</code> resource
+	 *                            type, the superset would include both the <code>subject</code> and <code>patient</code>
+	 *                            parameters, where the non-superset would include only the <code>patient</code> parameter.
+	 * @return the RuntimeSearchParam filtered list
+	 * @since 8.6.0
+	 */
+	@Nonnull
+	public static List<RuntimeSearchParam> getPatientCompartmentSearchParams(
+			@Nonnull RuntimeResourceDefinition theResourceDef, boolean theIncludeSupersets) {
+		List<RuntimeSearchParam> retVal = new ArrayList<>(3);
+		for (RuntimeSearchParam param : theResourceDef.getSearchParams()) {
+			if (param.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
+				if (param.getProvidesMembershipInCompartments() != null
+						&& param.getProvidesMembershipInCompartments().contains("Patient")) {
+					retVal.add(param);
+				}
+			}
+		}
+
+		if (theIncludeSupersets) {
+			Set<String> compartmentPaths = new HashSet<>(retVal.size());
+			for (RuntimeSearchParam param : retVal) {
+				compartmentPaths.add(param.getPath());
+			}
+
+			for (RuntimeSearchParam candidateParam : theResourceDef.getSearchParams()) {
+				if (candidateParam.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
+					if (!compartmentPaths.contains(candidateParam.getPath())) {
+						for (String path : compartmentPaths) {
+							/*
+							 * We check both directions because parameters are inconsistently defined in FHIR:
+							 * Observation uses subject (less precise than patient)
+							 * Encounter uses patient (more precise than subject)
+							 */
+							if (candidateParam.getPath().startsWith(path)
+									|| path.startsWith(candidateParam.getPath())) {
+								retVal.add(candidateParam);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return retVal;
 	}
 }

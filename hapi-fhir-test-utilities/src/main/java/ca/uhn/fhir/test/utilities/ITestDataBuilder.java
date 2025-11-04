@@ -275,6 +275,10 @@ public interface ITestDataBuilder {
 		return buildResource("Patient", theModifiers);
 	}
 
+	default IBaseResource buildProvenance(ICreationArgument... theModifiers) {
+		return buildResource("Provenance", theModifiers);
+	}
+
 	default IIdType createList(ICreationArgument... theModifiers) {
 		return createResource("List", theModifiers);
 	}
@@ -355,7 +359,15 @@ public interface ITestDataBuilder {
 	}
 
 	default ICreationArgument withPatient(@Nullable String theSubject) {
-		return withSubject(new IdType(theSubject));
+		return withReference("patient", theSubject);
+	}
+
+	default ICreationArgument withProvenanceTarget(@Nullable String theTarget) {
+		return withReference("target", theTarget);
+	}
+
+	default ICreationArgument withProvenanceTarget(@Nullable IIdType theTarget) {
+		return withReference("target", theTarget);
 	}
 
 	default ICreationArgument withGroupMember(@Nullable IIdType theMember) {
