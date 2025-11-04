@@ -18,7 +18,6 @@ import ca.uhn.fhir.system.HapiSystemProperties;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
@@ -163,7 +162,6 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation", null).getSearchParamNames());
 		logAllTokenIndexes();
 
-
 		// validate
 		runInTransaction(() -> {
 			long indexedSps = myResourceIndexedSearchParamTokenDao
@@ -201,12 +199,12 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		logAllTokenIndexes();
 
 		runInTransaction(() -> {
-			long indexedSps = myResourceIndexedSearchParamTokenDao
+			List<ResourceIndexedSearchParamToken> indexedSps = myResourceIndexedSearchParamTokenDao
 				.findAll()
 				.stream()
 				.filter(t -> t.getParamName().equals("alleleName"))
-				.count();
-			assertEquals(2, indexedSps, () -> "Resources:\n * " + myResourceTableDao.findAll().stream().map(ResourceTable::toString).collect(Collectors.joining("\n * ")));
+				.toList();
+			assertEquals(2, indexedSps.size(), () -> "Resources:\n * " + myResourceTableDao.findAll().stream().map(ResourceTable::toString).collect(Collectors.joining("\n * ")));
 		});
 
 		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
