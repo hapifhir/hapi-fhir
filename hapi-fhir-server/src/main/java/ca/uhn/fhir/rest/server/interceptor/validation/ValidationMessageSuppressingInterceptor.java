@@ -79,7 +79,8 @@ public class ValidationMessageSuppressingInterceptor {
 	@Hook(Pointcut.VALIDATION_COMPLETED)
 	public ValidationResult handle(ValidationResult theResult) {
 
-		List<SingleValidationMessage> newMessages = new ArrayList<>(theResult.getMessages().size());
+		List<SingleValidationMessage> newMessages =
+				new ArrayList<>(theResult.getMessages().size());
 		for (SingleValidationMessage next : theResult.getMessages()) {
 
 			String nextMessage = next.getMessage();
