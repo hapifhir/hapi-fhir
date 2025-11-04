@@ -55,7 +55,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.Base64Utils;
 
 import java.io.BufferedReader;
 import java.io.Console;
@@ -68,6 +67,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -363,7 +363,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			}
 
 			byte[] basicAuth = optionValue.getBytes();
-			String base64EncodedBasicAuth = Base64Utils.encodeToString(basicAuth);
+			String base64EncodedBasicAuth = Base64.getEncoder().encodeToString(basicAuth);
 			basicAuthHeaderValue = Constants.HEADER_AUTHORIZATION_VALPREFIX_BASIC + base64EncodedBasicAuth;
 		}
 		return basicAuthHeaderValue;
