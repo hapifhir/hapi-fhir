@@ -42,7 +42,7 @@ public class ValidationResult {
 	private static final String ourNewLine = System.getProperty("line.separator");
 	private final FhirContext myCtx;
 	private final boolean myIsSuccessful;
-	private final List<SingleValidationMessage> myMessages;
+	private List<SingleValidationMessage> myMessages;
 	private int myErrorDisplayLimit = ERROR_DISPLAY_LIMIT_DEFAULT;
 
 	public ValidationResult(FhirContext theCtx, List<SingleValidationMessage> theMessages) {
@@ -60,6 +60,10 @@ public class ValidationResult {
 
 	public List<SingleValidationMessage> getMessages() {
 		return Collections.unmodifiableList(myMessages);
+	}
+
+	public void setMessages(List<SingleValidationMessage> theMessages) {
+		myMessages = theMessages;
 	}
 
 	/**
