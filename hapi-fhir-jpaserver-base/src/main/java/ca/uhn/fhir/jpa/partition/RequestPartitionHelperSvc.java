@@ -37,7 +37,6 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 	private IPartitionLookupSvc myPartitionConfigSvc;
 
 	public RequestPartitionHelperSvc() {}
-	;
 
 	@Override
 	public RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
@@ -111,19 +110,21 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 	public RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId) {
 		List<Integer> ids = null;
 		for (int i = 0; i < theRequestPartitionId.getPartitionNames().size(); i++) {
+			String partitionName = theRequestPartitionId.getPartitionNames().get(i);
 
-			PartitionEntity partition;
-			try {
-				partition = myPartitionConfigSvc.getPartitionByName(
-						theRequestPartitionId.getPartitionNames().get(i));
-			} catch (IllegalArgumentException e) {
-				String msg = myFhirContext
-						.getLocalizer()
-						.getMessage(
-								BaseRequestPartitionHelperSvc.class,
-								"unknownPartitionName",
-								theRequestPartitionId.getPartitionNames().get(i));
-				throw new ResourceNotFoundException(Msg.code(1317) + msg);
+			PartitionEntity partition = null;
+			if (partitionName != null) {
+				try {
+					partition = myPartitionConfigSvc.getPartitionByName(partitionName);
+				} catch (IllegalArgumentException e) {
+					String msg = myFhirContext
+							.getLocalizer()
+							.getMessage(
+									BaseRequestPartitionHelperSvc.class,
+									"unknownPartitionName",
+									theRequestPartitionId.getPartitionNames().get(i));
+					throw new ResourceNotFoundException(Msg.code(1317) + msg);
+				}
 			}
 
 			if (theRequestPartitionId.hasPartitionIds()) {

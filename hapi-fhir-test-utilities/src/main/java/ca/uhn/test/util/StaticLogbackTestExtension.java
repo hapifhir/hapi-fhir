@@ -20,7 +20,6 @@
 package ca.uhn.test.util;
 
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.filter.ThresholdFilter;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
