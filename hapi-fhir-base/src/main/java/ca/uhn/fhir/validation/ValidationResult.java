@@ -22,6 +22,7 @@ package ca.uhn.fhir.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
@@ -63,6 +64,7 @@ public class ValidationResult {
 	}
 
 	public void setMessages(List<SingleValidationMessage> theMessages) {
+		Validate.notNull(theMessages, "theMessages must not be null");
 		myMessages = theMessages;
 	}
 
