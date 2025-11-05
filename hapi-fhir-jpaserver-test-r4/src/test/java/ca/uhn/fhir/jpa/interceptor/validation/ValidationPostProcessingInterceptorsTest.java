@@ -50,7 +50,8 @@ public class ValidationPostProcessingInterceptorsTest extends BaseResourceProvid
 	public void before() throws Exception {
 		super.before();
 
-		myFhirContext.getRestfulClientFactory().setSocketTimeout((int) TimeUnit.MINUTES.toMillis(10));
+//		for debugging
+//		myFhirContext.getRestfulClientFactory().setSocketTimeout((int) TimeUnit.MINUTES.toMillis(10));
 
 		mySuppressingInterceptor = new ValidationMessageSuppressingInterceptor();
 		mySuppressingInterceptor.addMessageSuppressionPatterns(SUPPRESSION_MESSAGE);
@@ -98,7 +99,7 @@ public class ValidationPostProcessingInterceptorsTest extends BaseResourceProvid
 	private Observation buildObservation() {
 		Observation observation = new Observation();
 
-		// issue handled mySuppressingInterceptor
+		// issue handled by mySuppressingInterceptor
 		observation.addPerformer(null);
 
 		// issue handled by myUnknownCodeSystemInterceptor
