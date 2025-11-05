@@ -45,9 +45,6 @@ public class GenerateRangeChunksStep<PT extends PartitionedUrlJobParameters>
 		implements IFirstJobStepWorker<PT, ChunkRangeJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
-	@Autowired
-	private IDefaultPartitionSettings myIDefaultPartitionSettings;
-
 	@Nonnull
 	@Override
 	public RunOutcome run(
