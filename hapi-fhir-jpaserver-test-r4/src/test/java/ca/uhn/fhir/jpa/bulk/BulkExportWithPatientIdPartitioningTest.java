@@ -40,6 +40,7 @@ public class BulkExportWithPatientIdPartitioningTest extends BaseResourceProvide
 	}
 
 	@AfterEach
+	@Override
 	public void after() {
 		myInterceptorRegistry.unregisterInterceptor(myPatientIdPartitionInterceptor);
 		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
