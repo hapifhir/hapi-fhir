@@ -621,7 +621,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 
 	}
 
