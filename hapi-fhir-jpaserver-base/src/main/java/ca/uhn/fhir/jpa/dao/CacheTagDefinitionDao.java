@@ -44,7 +44,8 @@ public class CacheTagDefinitionDao {
 	/**
 	 * Userdata key on the {@link TransactionDetails}
 	 */
-	public static final String RESOLVED_TAG_DEFINITIONS = CacheTagDefinitionDao.class.getName() + "_resolvedTagDefinitions";
+	public static final String RESOLVED_TAG_DEFINITIONS =
+			CacheTagDefinitionDao.class.getName() + "_resolvedTagDefinitions";
 
 	private final ITagDefinitionDao tagDefinitionDao;
 	private final MemoryCacheService memoryCacheService;
