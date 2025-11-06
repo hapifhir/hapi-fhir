@@ -2183,7 +2183,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		} catch (JDBCException e) {
 			String trackingUUID = UUID.randomUUID().toString();
 			ourLog.error("JDBCException during search, tracking uuid: {}", trackingUUID, e);
-			throw new InternalErrorException("JDBCException during search, tracking uuid: " + trackingUUID);
+			throw new InternalErrorException(Msg.code(2819) + "JDBCException during search, tracking uuid: " + trackingUUID);
 		}
 		if (retVal instanceof PersistedJpaBundleProvider provider) {
 			// Note: we calculate the partition -after- calling registerSearch, since that
