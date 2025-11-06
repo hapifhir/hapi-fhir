@@ -173,9 +173,16 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 			}
 		}
 
-		TransactionDetails transactionDetails = new TransactionDetails();
 		Map<String, IIdType> idSubstitutions = new HashMap<>();
 		for (IBaseBundle singlePartitionRequest : partitionedRequests) {
+
+			/*
+			 * We create a new TransactionDetails for each sub-transaction. It's tempting to
+			 * reuse this across sub-transactions because we can leverage pre-resolved IDs
+			 * and that kind of thing, but there is other state in there that shouldn't be
+			 * preserved, such as tag definitions and rollback items
+			 */
+			TransactionDetails transactionDetails = new TransactionDetails();
 
 			// Apply any placeholder ID substitutions from previous partition executions
 			for (IBaseResource resource : terser.getAllEmbeddedResources(singlePartitionRequest, true)) {
