@@ -122,13 +122,9 @@ public class ValidationMessageSuppressingInterceptor {
 			}
 		}
 
-		boolean wasChanged = originalMessages.size() != newMessages.size() || sliceMessagesChanged;
+		theResult.setMessages(newMessages);
 
-		if (!wasChanged) {
-			return null;
-		}
-
-		return new ValidationResult(theResult.getContext(), newMessages);
+		return null; // keep processing
 	}
 
 	private List<String> filterSliceMessages(
