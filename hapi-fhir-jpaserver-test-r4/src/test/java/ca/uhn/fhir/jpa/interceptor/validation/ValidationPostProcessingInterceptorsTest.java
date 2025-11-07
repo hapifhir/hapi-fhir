@@ -191,16 +191,7 @@ public class ValidationPostProcessingInterceptorsTest extends BaseResourceProvid
 
 			List<SingleValidationMessage> retVal = new ArrayList<>();
 			for (SingleValidationMessage message : theMessages) {
-				SingleValidationMessage copy = new SingleValidationMessage();
-				copy.setLocationCol(message.getLocationCol());
-				copy.setLocationLine(message.getLocationLine());
-				copy.setLocationString(message.getLocationString());
-				copy.setMessage(message.getMessage());
-				copy.setMessageId(message.getMessageId());
-				copy.setSeverity(message.getSeverity());
-				if (isNotEmpty(message.getSliceMessages())){
-					copy.setSliceMessages(new ArrayList<>(message.getSliceMessages()));
-				}
+				SingleValidationMessage copy = new SingleValidationMessage(message);
 				retVal.add(copy);
 			}
 			return retVal;
