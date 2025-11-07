@@ -85,23 +85,15 @@ public class ValidationMessageSuppressingInterceptor {
 		List<SingleValidationMessage> originalMessages = theResult.getMessages();
 		List<SingleValidationMessage> newMessages = new ArrayList<>(originalMessages.size());
 
-		boolean sliceMessagesChanged = false;
-		for (SingleValidationMessage originalSliceMessage : originalMessages) {
-			// each SingleValidationMessage is copied because we need to filter out slice messages,
-			// but we don't want to modify the original ValidationResult
-			SingleValidationMessage copiedSingleMessage = new SingleValidationMessage(originalSliceMessage);
+		for (SingleValidationMessage message : originalMessages) {
 			boolean shouldSuppress = false;
 
 			for (Pattern nextSuppressPattern : mySuppressPatterns) {
 
-				if (copiedSingleMessage.hasSliceMessages()) {
-					List<String> sliceMessages = copiedSingleMessage.getSliceMessages();
+				if (message.hasSliceMessages()) {
+					List<String> sliceMessages = message.getSliceMessages();
 					List<String> filteredSliceMessages = filterSliceMessages(nextSuppressPattern, sliceMessages);
-
-					if (sliceMessages.size() != filteredSliceMessages.size()) {
-						copiedSingleMessage.setSliceMessages(filteredSliceMessages);
-						sliceMessagesChanged = true;
-					}
+					message.setSliceMessages(filteredSliceMessages);
 
 					if (isEmpty(filteredSliceMessages)) {
 						// all slice messages were suppressed, we should suppress the entire SingleValidationMessage
@@ -109,7 +101,7 @@ public class ValidationMessageSuppressingInterceptor {
 						break;
 					}
 				} else {
-					String nextMessage = copiedSingleMessage.getMessage();
+					String nextMessage = message.getMessage();
 					if (nextSuppressPattern.matcher(nextMessage).find()) {
 						shouldSuppress = true;
 						break;
@@ -118,7 +110,7 @@ public class ValidationMessageSuppressingInterceptor {
 			}
 
 			if (!shouldSuppress) {
-				newMessages.add(copiedSingleMessage);
+				newMessages.add(message);
 			}
 		}
 
