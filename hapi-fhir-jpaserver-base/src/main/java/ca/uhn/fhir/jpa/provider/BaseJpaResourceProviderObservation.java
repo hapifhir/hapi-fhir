@@ -90,7 +90,7 @@ public abstract class BaseJpaResourceProviderObservation<T extends IBaseResource
 				 * has the "Observation" resource class defined. For this resource, the max parameter
 				 * is not supported and thus has to be removed before the use of "translateRawParameters".
 				 */
-				theAdditionalRawParams.remove("max");
+				if (theAdditionalRawParams != null) theAdditionalRawParams.remove("max");
 			}
 			if (theCount != null) {
 				paramMap.setCount(theCount.getValue());
