@@ -97,10 +97,8 @@ public class ValidationMessageSuppressingInterceptor {
 			}
 		}
 
-		if (newMessages.size() == theResult.getMessages().size()) {
-			return null;
-		}
+		theResult.setMessages(newMessages);
 
-		return new ValidationResult(theResult.getContext(), newMessages);
+		return null; // keep processing
 	}
 }
