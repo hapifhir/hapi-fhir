@@ -49,4 +49,16 @@ public interface IJobPartitionProvider {
 	default List<PartitionedUrl> getPartitionedUrls(RequestDetails theRequestDetails, List<String> theUrls) {
 		return theUrls.stream().map(url -> new PartitionedUrl().setUrl(url)).collect(Collectors.toList());
 	}
+
+	/**
+	 * Returns a collection of partitions representing "all partitions" for each shard
+	 */
+	List<RequestPartitionId> getAllPartitions();
+
+	/**
+	 * Groups the partitions within a given partition ID by shard
+	 */
+	default List<RequestPartitionId> splitPartitionByShards(RequestPartitionId theRequestPartitionId) {
+		return List.of(theRequestPartitionId);
+	}
 }

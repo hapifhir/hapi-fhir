@@ -97,7 +97,8 @@ public class ResourceIdListStep<PT extends PartitionedUrlJobParameters>
 				chunkCount.getAndIncrement();
 				submitWorkChunk(idBatch, searchResult.getRequestPartitionId(), theDataSink);
 			});
-			ourLog.trace(
+			// FIXME: make trace
+			ourLog.info(
 					"Submitted {} chunks with {} resource IDs for url {} and partitionId {}",
 					chunkCount,
 					totalIdsFound,

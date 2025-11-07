@@ -76,7 +76,15 @@ public class BulkPatchRewriteProvider extends BaseBulkModifyOrRewriteProvider {
 			@OperationParam(
 							name = JpaConstants.OPERATION_BULK_PATCH_PARAM_LIMIT_RESOURCE_VERSION_COUNT,
 							typeName = "integer")
-					IPrimitiveType<Integer> theLimitResourceVersionCount)
+					IPrimitiveType<Integer> theLimitResourceVersionCount,
+			// FIXME: document this
+			// partitionIds
+			@OperationParam(
+							name = JpaConstants.OPERATION_BULK_PATCH_PARAM_PARTITION_ID,
+							typeName = "string",
+							min = 0,
+							max = OperationParam.MAX_UNLIMITED)
+					List<IPrimitiveType<String>> thePartitionIds)
 			throws IOException {
 		BulkPatchRewriteJobParameters jobParameters = new BulkPatchRewriteJobParameters();
 		jobParameters.setFhirPatch(myContext, thePatch);
@@ -89,6 +97,7 @@ public class BulkPatchRewriteProvider extends BaseBulkModifyOrRewriteProvider {
 				theBatchSize,
 				theLimitResourceCount,
 				theLimitResourceVersionCount,
+				thePartitionIds,
 				jobParameters);
 	}
 
