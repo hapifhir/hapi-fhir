@@ -1,7 +1,7 @@
 ---
 type: fix
 issue: 7367
-title: "Previously, when Remote Terminology Service is enabled and its base URL is set to 
+title: "Previously, when Remote Terminology Service was enabled and its base URL was set to 
 [https://r4.ontoserver.csiro.au/fhir/](https://r4.ontoserver.csiro.au/fhir/), sending a `$validate` request returned 
 a 404 Not Found error, and the OperationOutcome in the response contained error messages indicating that some value sets 
 could not be found. This has now been fixed."
