@@ -123,7 +123,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 
 		// Verify 1
 		Assertions.assertEquals(2, myCaptureQueriesListener.countGetConnections());
-		assertThat(ourValueSetProvider.mySearchUrls).asList().containsExactlyInAnyOrder(
+		assertThat(ourValueSetProvider.mySearchParams).asList().containsExactlyInAnyOrder(
 			"http://hl7.org/fhir/ValueSet/administrative-gender", "4.0.1",
 			"http://hl7.org/fhir/ValueSet/administrative-gender","http://hl7.org/fhir/ValueSet/administrative-gender"
 		);
@@ -141,7 +141,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 
 		// Verify 2
 		Assertions.assertEquals(0, myCaptureQueriesListener.countGetConnections());
-		assertThat(ourValueSetProvider.mySearchUrls).asList().isEmpty();
+		assertThat(ourValueSetProvider.mySearchParams).asList().isEmpty();
 		assertThat(ourCodeSystemProvider.mySearchUrls).asList().isEmpty();
 
 	}
@@ -162,7 +162,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 
 		// Verify 1
 		Assertions.assertEquals(0, myCaptureQueriesListener.countGetConnections());
-		assertThat(ourValueSetProvider.mySearchUrls).asList().containsExactlyInAnyOrder(
+		assertThat(ourValueSetProvider.mySearchParams).asList().containsExactlyInAnyOrder(
 			"http://hl7.org/fhir/ValueSet/administrative-gender", "4.0.1",
 			"http://hl7.org/fhir/ValueSet/administrative-gender"
 		);
@@ -185,7 +185,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 
 		// Verify 2
 		Assertions.assertEquals(0, myCaptureQueriesListener.countGetConnections());
-		assertThat(ourValueSetProvider.mySearchUrls).asList().isEmpty();
+		assertThat(ourValueSetProvider.mySearchParams).asList().isEmpty();
 		assertThat(ourValueSetProvider.myValidatedCodes).asList().isEmpty();
 		assertThat(ourCodeSystemProvider.mySearchUrls).asList().isEmpty();
 		assertThat(ourCodeSystemProvider.myValidatedCodes).asList().isEmpty();
@@ -215,7 +215,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 
 		// Verify 1
 		Assertions.assertEquals(0, myCaptureQueriesListener.countGetConnections());
-		assertThat(ourValueSetProvider.mySearchUrls).asList().containsExactlyInAnyOrder(
+		assertThat(ourValueSetProvider.mySearchParams).asList().containsExactlyInAnyOrder(
 			"http://hl7.org/fhir/ValueSet/administrative-gender", "4.0.1",
 			"http://hl7.org/fhir/ValueSet/administrative-gender"
 		);
@@ -234,7 +234,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 
 		// Verify 2
 		Assertions.assertEquals(0, myCaptureQueriesListener.countGetConnections());
-		assertThat(ourValueSetProvider.mySearchUrls).asList().isEmpty();
+		assertThat(ourValueSetProvider.mySearchParams).asList().isEmpty();
 		assertThat(ourValueSetProvider.myValidatedCodes).asList().isEmpty();
 		assertThat(ourCodeSystemProvider.mySearchUrls).asList().isEmpty();
 		assertThat(ourCodeSystemProvider.myValidatedCodes).asList().isEmpty();
@@ -259,7 +259,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 		// Verify 1
 		myCaptureQueriesListener.logSelectQueries();
 		Assertions.assertEquals(3, myCaptureQueriesListener.countGetConnections());
-		assertThat(ourValueSetProvider.mySearchUrls).asList().isEmpty();
+		assertThat(ourValueSetProvider.mySearchParams).asList().isEmpty();
 		assertThat(ourCodeSystemProvider.mySearchUrls).asList().isEmpty();
 
 		// Test 2 (should rely on caches)
@@ -271,7 +271,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 
 		// Verify 2
 		Assertions.assertEquals(0, myCaptureQueriesListener.countGetConnections());
-		assertThat(ourValueSetProvider.mySearchUrls).asList().isEmpty();
+		assertThat(ourValueSetProvider.mySearchParams).asList().isEmpty();
 		assertThat(ourCodeSystemProvider.mySearchUrls).asList().isEmpty();
 
 	}
@@ -307,7 +307,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 
 		// Verify 1
 		Assertions.assertEquals(2, myCaptureQueriesListener.countGetConnections());
-		assertThat(ourValueSetProvider.mySearchUrls).asList().containsExactlyInAnyOrder(
+		assertThat(ourValueSetProvider.mySearchParams).asList().containsExactlyInAnyOrder(
 			"http://hl7.org/fhir/ValueSet/identifier-type",
 			"http://hl7.org/fhir/ValueSet/identifier-type"
 		);
@@ -326,7 +326,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 
 		// Verify 2
 		Assertions.assertEquals(0, myCaptureQueriesListener.countGetConnections());
-		assertThat(ourValueSetProvider.mySearchUrls).asList().isEmpty();
+		assertThat(ourValueSetProvider.mySearchParams).asList().isEmpty();
 		assertThat(ourCodeSystemProvider.mySearchUrls).asList().isEmpty();
 		assertEquals(0, ourValueSetProvider.myValidatedCodes.size());
 		assertEquals(0, ourCodeSystemProvider.myValidatedCodes.size());
@@ -440,7 +440,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 	private static class MyValueSetProvider implements IResourceProvider {
 
 		private final ListMultimap<String, ValueSet> myUrlToValueSets = MultimapBuilder.hashKeys().arrayListValues().build();
-		private final List<String> mySearchUrls = new ArrayList<>();
+		private final List<String> mySearchParams = new ArrayList<>();
 		private final List<String> myValidatedCodes = new ArrayList<>();
 
 		public void clearAll() {
@@ -449,7 +449,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 		}
 
 		public void clearCalls() {
-			mySearchUrls.clear();
+			mySearchParams.clear();
 			myValidatedCodes.clear();
 		}
 
@@ -477,10 +477,10 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 		public List<ValueSet> find(@OptionalParam(name = "url") UriParam theUrlParam,
 								   @OptionalParam(name = "version") TokenParam theVersion) {
 			String url = theUrlParam != null ? theUrlParam.getValue() : null;
-			mySearchUrls.add(url);
+			mySearchParams.add(url);
 
 			if (theVersion != null) {
-				mySearchUrls.add(theVersion.getValue());
+				mySearchParams.add(theVersion.getValue());
 			}
 			List<ValueSet> retVal = myUrlToValueSets.get(defaultString(url));
 			ourLog.info("Remote terminology fetch ValueSet[{}] - Found: {}", url, !retVal.isEmpty());
