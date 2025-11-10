@@ -22,7 +22,7 @@ package ca.uhn.fhir.test.utilities.validation;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -137,8 +137,8 @@ public interface IValidationProvidersR4 {
 		}
 
 		@Search
-		public List<ValueSet> find(@RequiredParam(name = "url") UriParam theUrlParam,
-								   @RequiredParam(name = "version") TokenParam theVersionParam) {
+		public List<ValueSet> find(@OptionalParam(name = "url") UriParam theUrlParam,
+								   @OptionalParam(name = "version") TokenParam theVersionParam) {
 			ValueSet valueSet = getTerminologyResource(theUrlParam);
 			String version = theVersionParam.getValue();
 			if (valueSet != null && StringUtils.isNotEmpty(version)) {
