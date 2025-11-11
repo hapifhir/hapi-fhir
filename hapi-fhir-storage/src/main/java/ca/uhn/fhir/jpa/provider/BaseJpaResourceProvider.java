@@ -386,12 +386,9 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	public IBaseParameters mergeResource(
 			@OperationParam(name = "source-resource", min = 0, max = 1) IBaseReference theSourceResource,
 			@OperationParam(name = "target-resource", min = 0, max = 1) IBaseReference theTargetResource,
-			@OperationParam(
-							name = "source-resource-identifier",
-							typeName = "Identifier")
+			@OperationParam(name = "source-resource-identifier", typeName = "Identifier")
 					List<IBase> theSourceResourceIdentifier,
-			@OperationParam(name = "target-resource-identifier",
-							typeName = "Identifier")
+			@OperationParam(name = "target-resource-identifier", typeName = "Identifier")
 					List<IBase> theTargetResourceIdentifier,
 			@OperationParam(name = "result-resource", min = 0, max = 1) IBaseResource theResultResource,
 			@OperationParam(name = "preview", typeName = "boolean", min = 0, max = 1)

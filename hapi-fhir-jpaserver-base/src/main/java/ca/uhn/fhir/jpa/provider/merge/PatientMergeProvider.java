@@ -73,9 +73,13 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 			HttpServletRequest theServletRequest,
 			HttpServletResponse theServletResponse,
 			ServletRequestDetails theRequestDetails,
-			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER, typeName = "Identifier")
+			@OperationParam(
+							name = ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER,
+							typeName = "Identifier")
 					List<IBase> theSourcePatientIdentifier,
-			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER, typeName = "Identifier")
+			@OperationParam(
+							name = ProviderConstants.OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER,
+							typeName = "Identifier")
 					List<IBase> theTargetPatientIdentifier,
 			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_PATIENT, max = 1)
 					IBaseReference theSourcePatient,
@@ -90,18 +94,18 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_BATCH_SIZE, typeName = "unsignedInt")
 					IPrimitiveType<Integer> theResourceLimit) {
 
-			return myMergeOperationProviderSvc.merge(
-					theSourcePatientIdentifier,
-					theTargetPatientIdentifier,
-					theSourcePatient,
-					theTargetPatient,
-					thePreview,
-					theDeleteSource,
-					theResultPatient,
-					theResourceLimit,
-					theRequestDetails,
-					theServletRequest,
-					theServletResponse);
+		return myMergeOperationProviderSvc.merge(
+				theSourcePatientIdentifier,
+				theTargetPatientIdentifier,
+				theSourcePatient,
+				theTargetPatient,
+				thePreview,
+				theDeleteSource,
+				theResultPatient,
+				theResourceLimit,
+				theRequestDetails,
+				theServletRequest,
+				theServletResponse);
 	}
 
 	/**
