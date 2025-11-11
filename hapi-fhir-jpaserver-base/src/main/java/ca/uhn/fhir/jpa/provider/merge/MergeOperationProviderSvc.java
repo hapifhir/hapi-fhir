@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.interceptor.ProvenanceAgentsPointcutUtil;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -67,8 +66,6 @@ public class MergeOperationProviderSvc {
 		myStorageSettings = theStorageSettings;
 	}
 
-
-
 	/**
 	 * Executes a merge operation for any resource type.
 	 *
@@ -85,42 +82,43 @@ public class MergeOperationProviderSvc {
 	 * @return MergeResult containing output parameters and HTTP status code
 	 */
 	public IBaseParameters merge(
-		List<IBase> theSourceIdentifiers,
-		List<IBase> theTargetIdentifiers,
-		IBaseReference theSourceReference,
-		IBaseReference theTargetReference,
-		IPrimitiveType<Boolean> thePreview,
-		IPrimitiveType<Boolean> theDeleteSource,
-		IBaseResource theResultResource,
-		IPrimitiveType<Integer> theResourceLimit,
-		ServletRequestDetails theRequestDetails,
-		HttpServletRequest theServletRequest,
-		HttpServletResponse theServletResponse) {
+			List<IBase> theSourceIdentifiers,
+			List<IBase> theTargetIdentifiers,
+			IBaseReference theSourceReference,
+			IBaseReference theTargetReference,
+			IPrimitiveType<Boolean> thePreview,
+			IPrimitiveType<Boolean> theDeleteSource,
+			IBaseResource theResultResource,
+			IPrimitiveType<Integer> theResourceLimit,
+			ServletRequestDetails theRequestDetails,
+			HttpServletRequest theServletRequest,
+			HttpServletResponse theServletResponse) {
 
 		startRequest(theServletRequest);
 		try {
 			int resourceLimit = MergeResourceHelper.setResourceLimitFromParameter(myStorageSettings, theResourceLimit);
 
 			List<IProvenanceAgent> provenanceAgents =
-				ProvenanceAgentsPointcutUtil.ifHasCallHooks(theRequestDetails, myInterceptorBroadcaster);
+					ProvenanceAgentsPointcutUtil.ifHasCallHooks(theRequestDetails, myInterceptorBroadcaster);
 
 			FhirTerser terser = myFhirContext.newTerser();
 			IBaseResource resultResourceCopy = theResultResource != null ? terser.clone(theResultResource) : null;
 			IBaseResource originalParametersCopy = terser.clone(theRequestDetails.getResource());
 
 			MergeOperationInputParameters mergeOperationParameters = MergeOperationInputParameters.from(
-				theSourceIdentifiers,
-				theTargetIdentifiers,
-				theSourceReference,
-				theTargetReference,
-				thePreview,
-				theDeleteSource,
-				resultResourceCopy,
-				resourceLimit,
-				provenanceAgents,
-				originalParametersCopy);
+					theSourceIdentifiers,
+					theTargetIdentifiers,
+					theSourceReference,
+					theTargetReference,
+					thePreview,
+					theDeleteSource,
+					resultResourceCopy,
+					resourceLimit,
+					provenanceAgents,
+					originalParametersCopy);
 
-			MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, theRequestDetails);
+			MergeOperationOutcome mergeOutcome =
+					myResourceMergeService.merge(mergeOperationParameters, theRequestDetails);
 			theServletResponse.setStatus(mergeOutcome.getHttpStatusCode());
 			return buildMergeOperationOutputParameters(mergeOutcome, theRequestDetails.getResource());
 		} finally {
@@ -146,7 +144,10 @@ public class MergeOperationProviderSvc {
 
 		if (theMergeOutcome.getUpdatedTargetResource() != null) {
 			ParametersUtil.addParameterToParameters(
-					myFhirContext, retVal, OPERATION_MERGE_OUTPUT_PARAM_RESULT, theMergeOutcome.getUpdatedTargetResource());
+					myFhirContext,
+					retVal,
+					OPERATION_MERGE_OUTPUT_PARAM_RESULT,
+					theMergeOutcome.getUpdatedTargetResource());
 		}
 
 		if (theMergeOutcome.getTask() != null) {
