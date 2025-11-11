@@ -1,6 +1,5 @@
 package ca.uhn.fhir.implementationguide;
 
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.FhirTerser;
@@ -34,7 +33,7 @@ public class ImplementationGuideCreator {
 
 	@Language("JSON")
 	private static final String PACKAGE_JSON_BASE =
-		"""
+			"""
 	{
 	"name": "test.fhir.ca.com",
 	"version": "1.2.3",
@@ -84,13 +83,13 @@ public class ImplementationGuideCreator {
 	}
 
 	public ImplementationGuideCreator(
-		@Nonnull FhirContext theFhirContext, String thePackageName, String thePackageVersion)
-		throws JsonProcessingException {
+			@Nonnull FhirContext theFhirContext, String thePackageName, String thePackageVersion)
+			throws JsonProcessingException {
 		this(
-			theFhirContext,
-			theFhirContext.getVersion().getVersion().getFhirVersionString(),
-			thePackageName,
-			thePackageVersion);
+				theFhirContext,
+				theFhirContext.getVersion().getVersion().getFhirVersionString(),
+				thePackageName,
+				thePackageVersion);
 	}
 
 	/**
@@ -102,8 +101,8 @@ public class ImplementationGuideCreator {
 	 */
 	@SuppressWarnings("unchecked")
 	public ImplementationGuideCreator(
-		@Nonnull FhirContext theFhirContext, String theFhirVersion, String theName, String theVersion)
-		throws JsonProcessingException {
+			@Nonnull FhirContext theFhirContext, String theFhirVersion, String theName, String theVersion)
+			throws JsonProcessingException {
 		myFhirContext = theFhirContext;
 		myTerser = myFhirContext.newTerser();
 		myParser = myFhirContext.newJsonParser();
@@ -174,7 +173,10 @@ public class ImplementationGuideCreator {
 		// add search parameters
 		int index = 0;
 		for (Map.Entry<String, IBaseResource> nameAndResource : myResourcesToInclude.entrySet()) {
-			addFileToDir(myParser.encodeResourceToString(nameAndResource.getValue()), nameAndResource.getKey() + ".json", sourceDir);
+			addFileToDir(
+					myParser.encodeResourceToString(nameAndResource.getValue()),
+					nameAndResource.getKey() + ".json",
+					sourceDir);
 			index++;
 		}
 
