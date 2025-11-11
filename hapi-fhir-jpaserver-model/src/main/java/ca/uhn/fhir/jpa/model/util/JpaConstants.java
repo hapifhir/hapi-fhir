@@ -191,6 +191,11 @@ public class JpaConstants {
 	public static final String OPERATION_MEMBER_MATCH = "$member-match";
 
 	/**
+	 * Operation name for the $hapi-fhir-merge operation
+	 */
+	public static final String OPERATION_HAPI_FHIR_MERGE = "$hapi-fhir-merge";
+
+	/**
 	 * Parameter for the $export operation
 	 */
 	public static final String PARAM_EXPORT_POLL_STATUS_JOB_ID = "_jobId";

@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
+import ca.uhn.fhir.jpa.api.svc.IGenericResourceMergeService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.At;
@@ -55,13 +56,17 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
+import java.util.List;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_ADD;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_DELETE;
@@ -69,6 +74,11 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_META;
 
 public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends BaseJpaProvider
 		implements IResourceProvider {
+
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaResourceProvider.class);
+
+	@Autowired(required = false)
+	private IGenericResourceMergeService myGenericResourceMergeService;
 
 	private IFhirResourceDao<T> myDao;
 
@@ -108,6 +118,10 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 
 	public void setDao(IFhirResourceDao<T> theDao) {
 		myDao = theDao;
+	}
+
+	protected IGenericResourceMergeService getGenericResourceMergeService() {
+		return myGenericResourceMergeService;
 	}
 
 	@History
@@ -366,5 +380,42 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 			RequestDetails theRequestDetails) {
 		return getDao().validate(
 						theResource, theId, theRawResource, theEncoding, theMode, theProfile, theRequestDetails);
+	}
+
+	@Operation(name = JpaConstants.OPERATION_HAPI_FHIR_MERGE, idempotent = false)
+	public IBaseParameters mergeResource(
+			@OperationParam(name = "source-resource", min = 0, max = 1) IBaseReference theSourceResource,
+			@OperationParam(name = "target-resource", min = 0, max = 1) IBaseReference theTargetResource,
+			@OperationParam(
+							name = "source-resource-identifier",
+							typeName = "Identifier")
+					List<IBase> theSourceResourceIdentifier,
+			@OperationParam(name = "target-resource-identifier",
+							typeName = "Identifier")
+					List<IBase> theTargetResourceIdentifier,
+			@OperationParam(name = "result-resource", min = 0, max = 1) IBaseResource theResultResource,
+			@OperationParam(name = "preview", typeName = "boolean", min = 0, max = 1)
+					IPrimitiveType<Boolean> thePreview,
+			@OperationParam(name = "delete-source", typeName = "boolean", min = 0, max = 1)
+					IPrimitiveType<Boolean> theDeleteSource,
+			@OperationParam(name = "batch-size", typeName = "integer", min = 0, max = 1)
+					IPrimitiveType<Integer> theBatchSize,
+			RequestDetails theRequestDetails) {
+		// TODO: Implement merge logic
+		// Log received parameters for testing
+		if (theSourceResourceIdentifier != null && !theSourceResourceIdentifier.isEmpty()) {
+			ourLog.info("Received {} source-resource-identifier parameter(s)", theSourceResourceIdentifier.size());
+		}
+		if (theTargetResourceIdentifier != null && !theTargetResourceIdentifier.isEmpty()) {
+			ourLog.info("Received {} target-resource-identifier parameter(s)", theTargetResourceIdentifier.size());
+		}
+
+		// Verify dependency injection works
+		if (getGenericResourceMergeService() != null) {
+			ourLog.info("IGenericResourceMergeService successfully injected!");
+		} else {
+			ourLog.warn("IGenericResourceMergeService NOT injected - autowiring may not be working");
+		}
+		return ParametersUtil.newInstance(getContext());
 	}
 }

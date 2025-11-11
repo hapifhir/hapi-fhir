@@ -20,9 +20,11 @@
 package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.util.CanonicalIdentifier;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  *  Class for input parameters used in both $merge and $hapi.fhir.undo-merge operations.
@@ -80,5 +82,37 @@ public class MergeOperationsCommonInputParameters {
 
 	public int getResourceLimit() {
 		return myResourceLimit;
+	}
+
+	/**
+	 * Static utility method to set common merge operation parameters.
+	 * Converts version-specific identifier types to version-agnostic CanonicalIdentifier.
+	 *
+	 * @param theParameters The parameter object to populate
+	 * @param theSourceIdentifiers List of source resource identifiers (IBase to support all FHIR versions)
+	 * @param theTargetIdentifiers List of target resource identifiers (IBase to support all FHIR versions)
+	 * @param theSourceResource Reference to the source resource
+	 * @param theTargetResource Reference to the target resource
+	 */
+	public static void setParameters(
+			MergeOperationsCommonInputParameters theParameters,
+			List<IBase> theSourceIdentifiers,
+			List<IBase> theTargetIdentifiers,
+			IBaseReference theSourceResource,
+			IBaseReference theTargetResource) {
+		if (theSourceIdentifiers != null) {
+			List<CanonicalIdentifier> sourceResourceIdentifiers = theSourceIdentifiers.stream()
+					.map(CanonicalIdentifier::fromIdentifier)
+					.collect(Collectors.toList());
+			theParameters.setSourceResourceIdentifiers(sourceResourceIdentifiers);
+		}
+		if (theTargetIdentifiers != null) {
+			List<CanonicalIdentifier> targetResourceIdentifiers = theTargetIdentifiers.stream()
+					.map(CanonicalIdentifier::fromIdentifier)
+					.collect(Collectors.toList());
+			theParameters.setTargetResourceIdentifiers(targetResourceIdentifiers);
+		}
+		theParameters.setSourceResource(theSourceResource);
+		theParameters.setTargetResource(theTargetResource);
 	}
 }

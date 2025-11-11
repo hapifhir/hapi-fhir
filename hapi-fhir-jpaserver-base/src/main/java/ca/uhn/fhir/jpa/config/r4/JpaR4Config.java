@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
+import ca.uhn.fhir.jpa.provider.merge.MergeOperationProviderSvc;
 import ca.uhn.fhir.jpa.provider.merge.MergeValidationService;
 import ca.uhn.fhir.jpa.provider.merge.PatientMergeProvider;
 import ca.uhn.fhir.jpa.provider.merge.ResourceMergeService;
@@ -161,18 +162,24 @@ public class JpaR4Config {
 	}
 
 	@Bean
+	public MergeOperationProviderSvc mergeOperationProviderSvc(
+			FhirContext theFhirContext,
+			ResourceMergeService theResourceMergeService,
+			IInterceptorBroadcaster theInterceptorBroadcaster,
+			JpaStorageSettings theStorageSettings) {
+
+		return new MergeOperationProviderSvc(
+				theFhirContext, theResourceMergeService, theInterceptorBroadcaster, theStorageSettings);
+	}
+
+	@Bean
 	public PatientMergeProvider patientMergeProvider(
 			FhirContext theFhirContext,
 			DaoRegistry theDaoRegistry,
-			ResourceMergeService theResourceMergeService,
-			ResourceUndoMergeService theResourceUndoMergeService,
-			IInterceptorBroadcaster theInterceptorBroadcaster) {
+			MergeOperationProviderSvc theMergeOperationProviderSvc,
+			ResourceUndoMergeService theResourceUndoMergeService) {
 
 		return new PatientMergeProvider(
-				theFhirContext,
-				theDaoRegistry,
-				theResourceMergeService,
-				theResourceUndoMergeService,
-				theInterceptorBroadcaster);
+				theFhirContext, theDaoRegistry, theMergeOperationProviderSvc, theResourceUndoMergeService);
 	}
 }

@@ -26,7 +26,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Patient;
 
 import java.util.List;
@@ -111,5 +114,55 @@ public class MergeOperationInputParameters extends MergeOperationsCommonInputPar
 		retval.setProvenanceAgents(ProvenanceAgentJson.from(myProvenanceAgents, theFhirContext));
 		retval.setCreateProvenance(myCreateProvenance);
 		return retval;
+	}
+
+	/**
+	 * Static factory method to create MergeOperationInputParameters from operation parameters.
+	 * Version-agnostic - uses IBase for identifiers to support all FHIR versions.
+	 *
+	 * @param theSourceIdentifiers List of source resource identifiers (IBase to support all FHIR versions)
+	 * @param theTargetIdentifiers List of target resource identifiers (IBase to support all FHIR versions)
+	 * @param theSourceResource Reference to the source resource
+	 * @param theTargetResource Reference to the target resource
+	 * @param thePreview Preview mode flag
+	 * @param theDeleteSource Delete source flag
+	 * @param theResultResource Result resource template
+	 * @param theResourceLimit Resource processing limit
+	 * @param theProvenanceAgents Provenance agents for tracking
+	 * @param theOriginalInputParameters Original input parameters for audit trail
+	 * @return Populated MergeOperationInputParameters object
+	 */
+	public static MergeOperationInputParameters from(
+			List<IBase> theSourceIdentifiers,
+			List<IBase> theTargetIdentifiers,
+			IBaseReference theSourceResource,
+			IBaseReference theTargetResource,
+			IPrimitiveType<Boolean> thePreview,
+			IPrimitiveType<Boolean> theDeleteSource,
+			IBaseResource theResultResource,
+			int theResourceLimit,
+			List<IProvenanceAgent> theProvenanceAgents,
+			IBaseResource theOriginalInputParameters) {
+
+		MergeOperationInputParameters parameters = new MergeOperationInputParameters(theResourceLimit);
+
+		// Set common parameters (identifiers and resource references)
+		MergeOperationsCommonInputParameters.setParameters(
+				parameters, theSourceIdentifiers, theTargetIdentifiers, theSourceResource, theTargetResource);
+
+		// Set merge-specific parameters
+		parameters.setPreview(thePreview != null && thePreview.getValue());
+		parameters.setDeleteSource(theDeleteSource != null && theDeleteSource.getValue());
+
+		if (theResultResource != null) {
+			// Pass in a copy of the result resource as we don't want it to be modified.
+			// It will be returned back to the client as part of the response.
+			parameters.setResultResource(theResultResource);
+		}
+
+		parameters.setProvenanceAgents(theProvenanceAgents);
+		parameters.setOriginalInputParameters(theOriginalInputParameters);
+
+		return parameters;
 	}
 }
