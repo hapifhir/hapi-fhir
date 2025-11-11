@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.svc.IGenericResourceMergeService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
@@ -61,7 +62,7 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLA
 /**
  * Service for the FHIR $merge operation. Currently only supports Patient/$merge. The plan is to expand to other resource types.
  */
-public class ResourceMergeService {
+public class ResourceMergeService implements IGenericResourceMergeService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceMergeService.class);
 
 	private final FhirContext myFhirContext;
