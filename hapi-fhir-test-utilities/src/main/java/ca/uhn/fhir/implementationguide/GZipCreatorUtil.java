@@ -22,15 +22,15 @@ public class GZipCreatorUtil {
 	 */
 	public static void createTarGz(Path theSource, Path theOutput) throws IOException {
 		try (OutputStream fos = Files.newOutputStream(theOutput);
-			 BufferedOutputStream bos = new BufferedOutputStream(fos);
-			 GzipCompressorOutputStream gzos = new GzipCompressorOutputStream(bos);
-			 TarArchiveOutputStream taos = new TarArchiveOutputStream(gzos)) {
+				BufferedOutputStream bos = new BufferedOutputStream(fos);
+				GzipCompressorOutputStream gzos = new GzipCompressorOutputStream(bos);
+				TarArchiveOutputStream taos = new TarArchiveOutputStream(gzos)) {
 			addFilesToTarGz(theSource, "", taos);
 		}
 	}
 
 	private static void addFilesToTarGz(Path thePath, String theParent, TarArchiveOutputStream theTarballOutputStream)
-		throws IOException {
+			throws IOException {
 		String entryName = theParent + thePath.getFileName().toString();
 		TarArchiveEntry entry = new TarArchiveEntry(thePath.toFile(), entryName);
 		theTarballOutputStream.putArchiveEntry(entry);
