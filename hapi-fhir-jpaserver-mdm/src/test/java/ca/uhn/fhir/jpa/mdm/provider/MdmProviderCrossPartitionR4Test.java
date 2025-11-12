@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
