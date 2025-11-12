@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7341
+title: "When processing a FHIR transaction, the TransactionDetails object
+   is now created earlier and made available to interceptor hooks."
