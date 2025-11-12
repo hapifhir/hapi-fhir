@@ -891,7 +891,6 @@ public class 	MultitenantServerR4Test extends BaseMultitenantResourceProviderR4T
 		when(request.getId()).thenReturn(new IdType("Measure", "123"));
 		when(request.getTenantId()).thenReturn(TENANT_A);
 		RequestPartitionId result = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(request);
-		// Strengthen this into an assert on an actual value. Will need to mock some method calls on request to get a value back
 		assertThat(result).isNotNull();
 		assertThat(result.getPartitionIds()).contains(1);
 		assertThat(result.getPartitionNames()).contains(TENANT_A);
