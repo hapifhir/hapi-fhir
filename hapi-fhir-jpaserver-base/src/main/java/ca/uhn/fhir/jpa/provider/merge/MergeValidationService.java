@@ -52,12 +52,12 @@ import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTIT
  */
 public class MergeValidationService {
 	private final FhirContext myFhirContext;
-	private final IFhirResourceDao<Patient> myPatientDao;
+	private final DaoRegistry myDaoRegistry;
 	private final MergeOperationInputParameterNames myInputParamNames;
 
 	public MergeValidationService(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
 		myFhirContext = theFhirContext;
-		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);
+		myDaoRegistry = theDaoRegistry;
 		myInputParamNames = new MergeOperationInputParameterNames();
 	}
 
@@ -406,7 +406,11 @@ public class MergeValidationService {
 		searchParameterMap.add("identifier", tokenAndListParam);
 		searchParameterMap.setCount(2);
 
-		IBundleProvider bundle = myPatientDao.search(searchParameterMap, theRequestDetails);
+		// Get the resource type from the request and dynamically fetch the appropriate DAO
+		String resourceType = theRequestDetails.getResourceName();
+		IFhirResourceDao<IBaseResource> resourceDao = myDaoRegistry.getResourceDao(resourceType);
+
+		IBundleProvider bundle = resourceDao.search(searchParameterMap, theRequestDetails);
 		List<IBaseResource> resources = bundle.getAllResources();
 		if (resources.isEmpty()) {
 			String msg = String.format(
@@ -434,9 +438,14 @@ public class MergeValidationService {
 		Reference r4ref = (Reference) theReference;
 
 		IIdType theResourceId = new IdType(r4ref.getReferenceElement().getValue());
+
+		// Get the resource type from the reference and dynamically fetch the appropriate DAO
+		String resourceType = theResourceId.getResourceType();
+		IFhirResourceDao<IBaseResource> resourceDao = myDaoRegistry.getResourceDao(resourceType);
+
 		IBaseResource resource;
 		try {
-			resource = myPatientDao.read(theResourceId.toVersionless(), theRequestDetails);
+			resource = resourceDao.read(theResourceId.toVersionless(), theRequestDetails);
 		} catch (ResourceNotFoundException e) {
 			String msg = String.format(
 					"Resource not found for the reference specified in '%s' parameter", theOperationParameterName);
