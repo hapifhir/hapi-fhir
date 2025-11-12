@@ -24,7 +24,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
-import ca.uhn.fhir.jpa.api.svc.IGenericResourceMergeService;
+import ca.uhn.fhir.jpa.api.svc.IMergeOperationProviderSvc;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.At;
@@ -53,6 +53,7 @@ import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -78,7 +79,7 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaResourceProvider.class);
 
 	@Autowired(required = false)
-	private IGenericResourceMergeService myGenericResourceMergeService;
+	private IMergeOperationProviderSvc myMergeOperationProviderSvc;
 
 	private IFhirResourceDao<T> myDao;
 
@@ -120,8 +121,8 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		myDao = theDao;
 	}
 
-	protected IGenericResourceMergeService getGenericResourceMergeService() {
-		return myGenericResourceMergeService;
+	protected IMergeOperationProviderSvc getMergeOperationProviderSvc() {
+		return myMergeOperationProviderSvc;
 	}
 
 	@History
@@ -397,22 +398,23 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 					IPrimitiveType<Boolean> theDeleteSource,
 			@OperationParam(name = "batch-size", typeName = "integer", min = 0, max = 1)
 					IPrimitiveType<Integer> theBatchSize,
-			RequestDetails theRequestDetails) {
-		// TODO: Implement merge logic
-		// Log received parameters for testing
-		if (theSourceResourceIdentifier != null && !theSourceResourceIdentifier.isEmpty()) {
-			ourLog.info("Received {} source-resource-identifier parameter(s)", theSourceResourceIdentifier.size());
-		}
-		if (theTargetResourceIdentifier != null && !theTargetResourceIdentifier.isEmpty()) {
-			ourLog.info("Received {} target-resource-identifier parameter(s)", theTargetResourceIdentifier.size());
+			ServletRequestDetails theRequestDetails) {
+
+		if (getMergeOperationProviderSvc() == null) {
+			throw new InvalidRequestException(
+					Msg.code(2572) + "Merge operation is not supported on this server - service not configured");
 		}
 
-		// Verify dependency injection works
-		if (getGenericResourceMergeService() != null) {
-			ourLog.info("IGenericResourceMergeService successfully injected!");
-		} else {
-			ourLog.warn("IGenericResourceMergeService NOT injected - autowiring may not be working");
-		}
-		return ParametersUtil.newInstance(getContext());
+		return getMergeOperationProviderSvc()
+				.merge(
+						theSourceResourceIdentifier,
+						theTargetResourceIdentifier,
+						theSourceResource,
+						theTargetResource,
+						thePreview,
+						theDeleteSource,
+						theResultResource,
+						theBatchSize,
+						theRequestDetails);
 	}
 }

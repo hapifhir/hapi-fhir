@@ -2,6 +2,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
@@ -30,12 +31,20 @@ public class GenericMergeR4Test extends BaseResourceProviderR4Test {
 		inParams.addParameter("target-resource", new Reference(targetPractitioner.getIdElement().toVersionless()));
 
 		// execute
-		Parameters outParams = myClient
-			.operation()
-			.onType(Practitioner.class)
-			.named("$hapi-fhir-merge")
-			.withParameters(inParams)
-			.execute();
+		Parameters outParams;
+		try {
+			outParams = myClient
+				.operation()
+				.onType(Practitioner.class)
+				.named("$hapi-fhir-merge")
+				.withParameters(inParams)
+				.execute();
+		} catch (BaseServerResponseException e) {
+			ourLog.error("Generic merge operation failed with HTTP {}: {}", e.getStatusCode(), e.getMessage());
+			ourLog.error("Response body: {}", e.getResponseBody());
+			ourLog.error("Operation outcome: {}", e.getOperationOutcome());
+			throw e;
+		}
 
 		// validate
 		assertThat(getLastHttpStatusCode()).isEqualTo(HttpServletResponse.SC_OK);
@@ -66,12 +75,20 @@ public class GenericMergeR4Test extends BaseResourceProviderR4Test {
 		inParams.addParameter("target-resource-identifier", targetId);
 
 		// execute
-		Parameters outParams = myClient
-			.operation()
-			.onType(Practitioner.class)
-			.named("$hapi-fhir-merge")
-			.withParameters(inParams)
-			.execute();
+		Parameters outParams;
+		try {
+			outParams = myClient
+				.operation()
+				.onType(Practitioner.class)
+				.named("$hapi-fhir-merge")
+				.withParameters(inParams)
+				.execute();
+		} catch (BaseServerResponseException e) {
+			ourLog.error("Generic merge operation with identifiers failed with HTTP {}: {}", e.getStatusCode(), e.getMessage());
+			ourLog.error("Response body: {}", e.getResponseBody());
+			ourLog.error("Operation outcome: {}", e.getOperationOutcome());
+			throw e;
+		}
 
 		// validate
 		assertThat(getLastHttpStatusCode()).isEqualTo(HttpServletResponse.SC_OK);

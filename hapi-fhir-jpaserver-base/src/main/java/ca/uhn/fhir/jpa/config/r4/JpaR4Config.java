@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.svc.IMergeOperationProviderSvc;
 import ca.uhn.fhir.jpa.config.GeneratedDaoAndResourceProviderConfigR4;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
@@ -162,7 +163,7 @@ public class JpaR4Config {
 	}
 
 	@Bean
-	public MergeOperationProviderSvc mergeOperationProviderSvc(
+	public IMergeOperationProviderSvc mergeOperationProviderSvc(
 			FhirContext theFhirContext,
 			ResourceMergeService theResourceMergeService,
 			IInterceptorBroadcaster theInterceptorBroadcaster,
@@ -176,7 +177,7 @@ public class JpaR4Config {
 	public PatientMergeProvider patientMergeProvider(
 			FhirContext theFhirContext,
 			DaoRegistry theDaoRegistry,
-			MergeOperationProviderSvc theMergeOperationProviderSvc,
+			IMergeOperationProviderSvc theMergeOperationProviderSvc,
 			ResourceUndoMergeService theResourceUndoMergeService) {
 
 		return new PatientMergeProvider(

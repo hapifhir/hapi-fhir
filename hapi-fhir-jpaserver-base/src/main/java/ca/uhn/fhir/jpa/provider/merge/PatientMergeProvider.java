@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.provider.merge;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.svc.IMergeOperationProviderSvc;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -43,13 +44,13 @@ import java.util.List;
 public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 
 	private final FhirContext myFhirContext;
-	private final MergeOperationProviderSvc myMergeOperationProviderSvc;
+	private final IMergeOperationProviderSvc myMergeOperationProviderSvc;
 	private final ResourceUndoMergeService myResourceUndoMergeService;
 
 	public PatientMergeProvider(
 			FhirContext theFhirContext,
 			DaoRegistry theDaoRegistry,
-			MergeOperationProviderSvc theMergeOperationProviderSvc,
+			IMergeOperationProviderSvc theMergeOperationProviderSvc,
 			ResourceUndoMergeService theResourceUndoMergeService) {
 		super(theDaoRegistry.getResourceDao("Patient"));
 		myFhirContext = theFhirContext;
@@ -70,8 +71,6 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 			name = ProviderConstants.OPERATION_MERGE,
 			canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-merge")
 	public IBaseParameters patientMerge(
-			HttpServletRequest theServletRequest,
-			HttpServletResponse theServletResponse,
 			ServletRequestDetails theRequestDetails,
 			@OperationParam(
 							name = ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER,
@@ -103,9 +102,7 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 				theDeleteSource,
 				theResultPatient,
 				theResourceLimit,
-				theRequestDetails,
-				theServletRequest,
-				theServletResponse);
+				theRequestDetails);
 	}
 
 	/**
