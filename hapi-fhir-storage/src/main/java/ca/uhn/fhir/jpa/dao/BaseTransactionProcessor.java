@@ -247,7 +247,7 @@ public abstract class BaseTransactionProcessor {
 		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING)) {
 			HookParams params = new HookParams()
 					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 					.add(IBaseBundle.class, theRequest);
 			compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING, params);
 		}
