@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.svc.IMergeOperationProviderSvc;
 import ca.uhn.fhir.jpa.interceptor.ProvenanceAgentsPointcutUtil;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -48,7 +49,7 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE
  * This service extracts the shared merge operation logic that was previously duplicated
  * in resource-specific providers.
  */
-public class MergeOperationProviderSvc {
+public class MergeOperationProviderSvc implements IMergeOperationProviderSvc {
 
 	private final FhirContext myFhirContext;
 	private final ResourceMergeService myResourceMergeService;
@@ -77,10 +78,10 @@ public class MergeOperationProviderSvc {
 	 * @param theDeleteSource      Delete source flag
 	 * @param theResultResource    Optional result resource provided by client
 	 * @param theResourceLimit     Optional batch size limit
-	 * @param theRequestDetails    Request details for interceptors and provenance
-	 * @param theServletResponse
-	 * @return MergeResult containing output parameters and HTTP status code
+	 * @param theRequestDetails    Servlet request details containing HTTP request/response and context
+	 * @return Parameters resource containing merge operation results
 	 */
+	@Override
 	public IBaseParameters merge(
 			List<IBase> theSourceIdentifiers,
 			List<IBase> theTargetIdentifiers,
@@ -90,11 +91,12 @@ public class MergeOperationProviderSvc {
 			IPrimitiveType<Boolean> theDeleteSource,
 			IBaseResource theResultResource,
 			IPrimitiveType<Integer> theResourceLimit,
-			ServletRequestDetails theRequestDetails,
-			HttpServletRequest theServletRequest,
-			HttpServletResponse theServletResponse) {
+			ServletRequestDetails theRequestDetails) {
 
-		startRequest(theServletRequest);
+		HttpServletRequest servletRequest = theRequestDetails.getServletRequest();
+		HttpServletResponse servletResponse = theRequestDetails.getServletResponse();
+
+		startRequest(servletRequest);
 		try {
 			int resourceLimit = MergeResourceHelper.setResourceLimitFromParameter(myStorageSettings, theResourceLimit);
 
@@ -119,10 +121,10 @@ public class MergeOperationProviderSvc {
 
 			MergeOperationOutcome mergeOutcome =
 					myResourceMergeService.merge(mergeOperationParameters, theRequestDetails);
-			theServletResponse.setStatus(mergeOutcome.getHttpStatusCode());
+			servletResponse.setStatus(mergeOutcome.getHttpStatusCode());
 			return buildMergeOperationOutputParameters(mergeOutcome, theRequestDetails.getResource());
 		} finally {
-			endRequest(theServletRequest);
+			endRequest(servletRequest);
 		}
 	}
 
