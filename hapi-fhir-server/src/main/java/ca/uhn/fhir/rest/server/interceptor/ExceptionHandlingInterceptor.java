@@ -29,11 +29,11 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRestfulResponse;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
@@ -86,8 +86,6 @@ public class ExceptionHandlingInterceptor {
 			oo = createOperationOutcome(theException, ctx);
 		}
 
-		int statusCode = theException.getStatusCode();
-
 		// Add headers associated with the specific error code
 		if (theException.hasResponseHeaders()) {
 			Map<String, List<String>> additional = theException.getResponseHeaders();
@@ -101,15 +99,8 @@ public class ExceptionHandlingInterceptor {
 			}
 		}
 
-		String statusMessage = null;
-		if (theException instanceof UnclassifiedServerFailureException) {
-			String sm = theException.getMessage();
-			if (isNotBlank(sm) && sm.indexOf('\n') == -1) {
-				statusMessage = sm;
-			}
-		}
-
-		BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(theRequestDetails, oo);
+		ResponseDetails responseDetails = BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(
+				theRequestDetails, oo, theException);
 		try {
 			resetOutputStreamIfPossible(response);
 		} catch (Throwable t) {
@@ -120,9 +111,9 @@ public class ExceptionHandlingInterceptor {
 
 		return RestfulServerUtils.streamResponseAsResource(
 				theRequestDetails.getServer(),
-				oo,
+				responseDetails.getResponseResource(),
 				SUMMARY_MODE,
-				statusCode,
+				responseDetails.getResponseCode(),
 				false,
 				false,
 				theRequestDetails,
@@ -149,11 +140,8 @@ public class ExceptionHandlingInterceptor {
 			servletResponse.reset();
 			oldHeaders.entrySet().stream()
 					.filter(entry -> !entry.getKey().equals(CONTENT_ENCODING))
-					.forEach(entry -> {
-						entry.getValue().stream().forEach(value -> {
-							servletResponse.addHeader(entry.getKey(), value);
-						});
-					});
+					.forEach(entry -> entry.getValue().stream()
+							.forEach(value -> servletResponse.addHeader(entry.getKey(), value)));
 		}
 	}
 

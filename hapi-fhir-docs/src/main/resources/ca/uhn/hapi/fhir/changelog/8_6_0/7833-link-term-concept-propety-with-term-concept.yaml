@@ -1,0 +1,4 @@
+type: fix
+issue: 7833
+title: "When creating external code systems, some element relationships weren't kept in the database. 
+This has been fixed."
