@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.implementationguide.ImplementationGuideCreator;
+import ca.uhn.fhir.jpa.api.svc.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.test.util.LogbackTestExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;

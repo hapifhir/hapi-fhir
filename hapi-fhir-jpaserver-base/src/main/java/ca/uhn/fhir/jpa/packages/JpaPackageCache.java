@@ -428,7 +428,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			}
 
 			getProcessingMessages(npmPackage)
-					.add("Successfully added package " + npmPackage.id() + "#" + npmPackage.version() + " to registry");
+				.add(String.format(NpmPackageUtils.SUCCESSFULLY_INSTALLED_MSG_TEMPLATE, npmPackage.id(), npmPackage.version()));
+//					.add("Successfully added package " + npmPackage.id() + "#" + npmPackage.version() + " to registry");
 
 			return npmPackage;
 		});
