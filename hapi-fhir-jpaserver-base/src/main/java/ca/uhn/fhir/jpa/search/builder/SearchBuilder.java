@@ -3098,7 +3098,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		private Integer calculateMaxResultsToFetch() {
-			if (myParams.getLoadSynchronousUpTo() != null) {
+			if (myParams.isLoadSynchronous()) {
+				// this might be null - we support this for streaming.
 				return myParams.getLoadSynchronousUpTo();
 			} else if (myParams.getOffset() != null && myParams.getCount() != null) {
 				return myParams.getEverythingMode() != null
