@@ -217,7 +217,8 @@ public abstract class BaseTask {
 		} catch (DataAccessException e) {
 			if (myFlags.contains(TaskFlagEnum.FAILURE_ALLOWED)) {
 				ourLog.info(
-						"Task {} did not exit successfully on doExecuteSql(), but task is allowed to fail",
+						"Task {} running sql \"{}\"did not exit successfully on doExecuteSql(), but task is allowed to fail",
+						theSql,
 						getMigrationVersion());
 				ourLog.debug("Error was: {}", e.getMessage(), e);
 				myExecutionResult = MigrationTaskExecutionResultEnum.NOT_APPLIED_ALLOWED_FAILURE;
