@@ -23,7 +23,7 @@ class PatientNativeLinkServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		myService = new PatientNativeLinkService(FhirContext.forR4());
+		myService = new PatientNativeLinkService();
 	}
 
 	@Test

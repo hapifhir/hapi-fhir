@@ -39,9 +39,12 @@ import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
+import ca.uhn.fhir.jpa.provider.merge.ExtensionBasedLinkService;
 import ca.uhn.fhir.jpa.provider.merge.MergeOperationProviderSvc;
 import ca.uhn.fhir.jpa.provider.merge.MergeValidationService;
 import ca.uhn.fhir.jpa.provider.merge.PatientMergeProvider;
+import ca.uhn.fhir.jpa.provider.merge.PatientNativeLinkService;
+import ca.uhn.fhir.jpa.provider.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.jpa.provider.merge.ResourceMergeService;
 import ca.uhn.fhir.jpa.provider.merge.ResourceUndoMergeService;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
@@ -114,13 +117,32 @@ public class JpaR4Config {
 	}
 
 	@Bean
-	public MergeValidationService mergeValidationService(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
-		return new MergeValidationService(theFhirContext, theDaoRegistry);
+	public MergeValidationService mergeValidationService(
+			FhirContext theFhirContext,
+			DaoRegistry theDaoRegistry,
+			ResourceLinkServiceFactory theResourceLinkServiceFactory) {
+		return new MergeValidationService(theFhirContext, theDaoRegistry, theResourceLinkServiceFactory);
 	}
 
 	@Bean
 	public MergeProvenanceSvc mergeProvenanceSvc(DaoRegistry theDaoRegistry) {
 		return new MergeProvenanceSvc(theDaoRegistry);
+	}
+
+	@Bean
+	public PatientNativeLinkService patientNativeLinkService() {
+		return new PatientNativeLinkService();
+	}
+
+	@Bean
+	public ExtensionBasedLinkService extensionBasedLinkService() {
+		return new ExtensionBasedLinkService();
+	}
+
+	@Bean
+	public ResourceLinkServiceFactory resourceLinkServiceFactory(
+			PatientNativeLinkService thePatientService, ExtensionBasedLinkService theExtensionService) {
+		return new ResourceLinkServiceFactory(thePatientService, theExtensionService);
 	}
 
 	@Bean
@@ -133,7 +155,8 @@ public class JpaR4Config {
 			Batch2TaskHelper theBatch2TaskHelper,
 			JpaStorageSettings theStorageSettings,
 			MergeValidationService theMergeValidationService,
-			MergeProvenanceSvc theMergeProvenanceSvc) {
+			MergeProvenanceSvc theMergeProvenanceSvc,
+			ResourceLinkServiceFactory theResourceLinkServiceFactory) {
 
 		return new ResourceMergeService(
 				theStorageSettings,
@@ -144,7 +167,8 @@ public class JpaR4Config {
 				theJobCoordinator,
 				theBatch2TaskHelper,
 				theMergeValidationService,
-				theMergeProvenanceSvc);
+				theMergeProvenanceSvc,
+				theResourceLinkServiceFactory);
 	}
 
 	@Bean

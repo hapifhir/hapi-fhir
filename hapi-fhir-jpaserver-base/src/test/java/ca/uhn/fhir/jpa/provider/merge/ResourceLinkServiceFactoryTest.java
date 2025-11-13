@@ -1,7 +1,6 @@
 // Created by claude-sonnet-4-5
 package ca.uhn.fhir.jpa.provider.merge;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
@@ -25,8 +24,7 @@ class ResourceLinkServiceFactoryTest {
 
 	@BeforeEach
 	void setUp() {
-		FhirContext fhirContext = FhirContext.forR4();
-		myPatientService = new PatientNativeLinkService(fhirContext);
+		myPatientService = new PatientNativeLinkService();
 		myExtensionService = new ExtensionBasedLinkService();
 		myFactory = new ResourceLinkServiceFactory(myPatientService, myExtensionService);
 	}
