@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7361
+title: "A bug was fixed where chained search parameters with invalid values (e.g.,
+   `Observation?subject.birthdate=invaliddate` or `DiagnosticReport?result.value-quantity=invalidquantity`)
+   incorrectly returned HTTP 500 Internal Server Error instead of HTTP 400 Bad Request."
