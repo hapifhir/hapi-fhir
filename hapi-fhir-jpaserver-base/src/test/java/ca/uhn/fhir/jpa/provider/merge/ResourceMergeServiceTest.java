@@ -58,6 +58,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -135,11 +136,19 @@ public class ResourceMergeServiceTest {
 	@BeforeEach
 	void setup() {
 		when(myDaoRegistryMock.getResourceDao(Patient.class)).thenReturn(myPatientDaoMock);
+		lenient().when(myDaoRegistryMock.getResourceDao("Patient")).thenReturn(myPatientDaoMock);
 		when(myDaoRegistryMock.getResourceDao(Task.class)).thenReturn(myTaskDaoMock);
 		when(myDaoRegistryMock.getResourceDao("Provenance")).thenReturn(myProvenanceDaoMock);
 		when(myPatientDaoMock.getContext()).thenReturn(myFhirContext);
-		MergeValidationService myMergeValidationService = new MergeValidationService(myFhirContext, myDaoRegistryMock);
+		lenient().when(myRequestDetailsMock.getResourceName()).thenReturn("Patient");
+
+		PatientNativeLinkService patientNativeLinkService = new PatientNativeLinkService();
+		ExtensionBasedLinkService extensionBasedLinkService = new ExtensionBasedLinkService();
+		ResourceLinkServiceFactory resourceLinkServiceFactory = new ResourceLinkServiceFactory(patientNativeLinkService, extensionBasedLinkService);
+
+		MergeValidationService myMergeValidationService = new MergeValidationService(myFhirContext, myDaoRegistryMock, resourceLinkServiceFactory);
 		MergeProvenanceSvc myMergeProvenanceService = new MergeProvenanceSvc(myDaoRegistryMock);
+
 		myResourceMergeService = new ResourceMergeService(
 			myStorageSettingsMock,
 			myDaoRegistryMock,
@@ -149,7 +158,8 @@ public class ResourceMergeServiceTest {
 			myJobCoordinatorMock,
 			myBatch2TaskHelperMock,
 			myMergeValidationService,
-			myMergeProvenanceService);
+			myMergeProvenanceService,
+			resourceLinkServiceFactory);
 	}
 
 	// SUCCESS CASES

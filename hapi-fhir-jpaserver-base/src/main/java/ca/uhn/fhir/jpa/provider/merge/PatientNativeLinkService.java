@@ -1,7 +1,6 @@
 // Created by claude-sonnet-4-5
 package ca.uhn.fhir.jpa.provider.merge;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -28,11 +27,7 @@ public class PatientNativeLinkService implements IResourceLinkService {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PatientNativeLinkService.class);
 
-	private final FhirContext myFhirContext;
-
-	public PatientNativeLinkService(FhirContext theFhirContext) {
-		myFhirContext = theFhirContext;
-	}
+	public PatientNativeLinkService() {}
 
 	@Override
 	public void addReplacesLink(IBaseResource theTarget, IBaseReference theSourceRef) {

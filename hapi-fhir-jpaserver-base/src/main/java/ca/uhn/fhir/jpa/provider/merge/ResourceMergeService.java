@@ -77,6 +77,7 @@ public class ResourceMergeService implements IGenericResourceMergeService {
 	private final Batch2TaskHelper myBatch2TaskHelper;
 	private final MergeValidationService myMergeValidationService;
 	private final MergeProvenanceSvc myMergeProvenanceSvc;
+	private final ResourceLinkServiceFactory myResourceLinkServiceFactory;
 
 	public ResourceMergeService(
 			JpaStorageSettings theStorageSettings,
@@ -87,7 +88,8 @@ public class ResourceMergeService implements IGenericResourceMergeService {
 			IJobCoordinator theJobCoordinator,
 			Batch2TaskHelper theBatch2TaskHelper,
 			MergeValidationService theMergeValidationService,
-			MergeProvenanceSvc theMergeProvenanceSvc) {
+			MergeProvenanceSvc theMergeProvenanceSvc,
+			ResourceLinkServiceFactory theResourceLinkServiceFactory) {
 		myStorageSettings = theStorageSettings;
 
 		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);
@@ -101,6 +103,7 @@ public class ResourceMergeService implements IGenericResourceMergeService {
 		myMergeProvenanceSvc = theMergeProvenanceSvc;
 		myMergeResourceHelper = new MergeResourceHelper(theDaoRegistry, myMergeProvenanceSvc);
 		myMergeValidationService = theMergeValidationService;
+		myResourceLinkServiceFactory = theResourceLinkServiceFactory;
 	}
 
 	/**
