@@ -41,7 +41,6 @@ import org.hl7.fhir.r4.model.Reference;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper.addErrorToOperationOutcome;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_400_BAD_REQUEST;
@@ -180,9 +179,9 @@ public class MergeValidationService {
 			String theResultResourceParameterName,
 			boolean theDeleteSource,
 			IBaseOperationOutcome theOperationOutcome) {
-		// the result resource must have the replaces link set to the source resource
-		List<Reference> replacesLinkToSourceResource = getLinksToResource(
-				theResultResource, Patient.LinkType.REPLACES, theResolvedSourceResource.getIdElement());
+		// Use IResourceLinkService to get replaces links to the source resource
+		List<IBaseReference> replacesLinkToSourceResource =
+				getReplacesLinksTo(theResultResource, theResolvedSourceResource.getIdElement());
 
 		if (theDeleteSource) {
 			if (!replacesLinkToSourceResource.isEmpty()) {
@@ -213,24 +212,34 @@ public class MergeValidationService {
 		return true;
 	}
 
-	private List<Reference> getLinksToResource(
-			Patient theResource, Patient.LinkType theLinkType, IIdType theResourceId) {
-		List<Reference> links = getLinksOfTypeWithNonNullReference(theResource, theLinkType);
-		return links.stream()
-				.filter(r -> theResourceId.toVersionless().getValue().equals(r.getReference()))
-				.collect(Collectors.toList());
-	}
+	/**
+	 * Helper method to get all "replaces" links from a resource that point to a specific target resource.
+	 *
+	 * @param theResource the resource to check
+	 * @param theTargetId the target resource ID to look for
+	 * @return list of references to the target resource (typically 0 or 1)
+	 */
+	private List<IBaseReference> getReplacesLinksTo(IBaseResource theResource, IIdType theTargetId) {
+		IResourceLinkService linkService = myResourceLinkServiceFactory.getServiceForResource(theResource);
+		List<IBaseReference> replacesLinks = linkService.getReplacesLinks(theResource);
+		List<IBaseReference> matchingLinks = new ArrayList<>();
 
-	private List<Reference> getLinksOfTypeWithNonNullReference(Patient theResource, Patient.LinkType theLinkType) {
-		List<Reference> links = new ArrayList<>();
-		if (theResource.hasLink()) {
-			for (Patient.PatientLinkComponent link : theResource.getLink()) {
-				if (theLinkType.equals(link.getType()) && link.hasOther()) {
-					links.add(link.getOther());
-				}
+		String targetIdValue = theTargetId.toUnqualifiedVersionless().getValue();
+
+		for (IBaseReference link : replacesLinks) {
+			IIdType linkRefElement = link.getReferenceElement();
+			if (linkRefElement == null) {
+				continue;
+			}
+
+			String linkIdValue = linkRefElement.toUnqualifiedVersionless().getValue();
+
+			if (targetIdValue.equals(linkIdValue)) {
+				matchingLinks.add(link);
 			}
 		}
-		return links;
+
+		return matchingLinks;
 	}
 
 	private boolean validateSourceAndTargetAreSuitableForMerge(
@@ -249,10 +258,11 @@ public class MergeValidationService {
 			return false;
 		}
 
-		List<Reference> replacedByLinksInTarget =
-				getLinksOfTypeWithNonNullReference(theTargetResource, Patient.LinkType.REPLACEDBY);
+		// Use IResourceLinkService to check for replaced-by links
+		IResourceLinkService linkService = myResourceLinkServiceFactory.getServiceForResource(theTargetResource);
+		List<IBaseReference> replacedByLinksInTarget = linkService.getReplacedByLinks(theTargetResource);
 		if (!replacedByLinksInTarget.isEmpty()) {
-			String ref = replacedByLinksInTarget.get(0).getReference();
+			String ref = replacedByLinksInTarget.get(0).getReferenceElement().getValue();
 			String msg = String.format(
 					"Target resource was previously replaced by a resource with reference '%s', it "
 							+ "is not a suitable target for merging.",
@@ -261,10 +271,9 @@ public class MergeValidationService {
 			return false;
 		}
 
-		List<Reference> replacedByLinksInSource =
-				getLinksOfTypeWithNonNullReference(theSourceResource, Patient.LinkType.REPLACEDBY);
+		List<IBaseReference> replacedByLinksInSource = linkService.getReplacedByLinks(theSourceResource);
 		if (!replacedByLinksInSource.isEmpty()) {
-			String ref = replacedByLinksInSource.get(0).getReference();
+			String ref = replacedByLinksInSource.get(0).getReferenceElement().getValue();
 			String msg = String.format(
 					"Source resource was previously replaced by a resource with reference '%s', it "
 							+ "is not a suitable source for merging.",
