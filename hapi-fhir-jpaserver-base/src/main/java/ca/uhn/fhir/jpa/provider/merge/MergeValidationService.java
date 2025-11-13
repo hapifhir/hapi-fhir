@@ -54,10 +54,15 @@ public class MergeValidationService {
 	private final FhirContext myFhirContext;
 	private final DaoRegistry myDaoRegistry;
 	private final MergeOperationInputParameterNames myInputParamNames;
+	private final ResourceLinkServiceFactory myResourceLinkServiceFactory;
 
-	public MergeValidationService(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
+	public MergeValidationService(
+			FhirContext theFhirContext,
+			DaoRegistry theDaoRegistry,
+			ResourceLinkServiceFactory theResourceLinkServiceFactory) {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
+		myResourceLinkServiceFactory = theResourceLinkServiceFactory;
 		myInputParamNames = new MergeOperationInputParameterNames();
 	}
 
