@@ -26,77 +26,39 @@ import java.util.List;
  * - Replaces: http://hapifhir.io/fhir/StructureDefinition/replaces
  * - Replaced-by: http://hapifhir.io/fhir/StructureDefinition/replaced-by
  */
-public class ExtensionBasedLinkService {
+public class ExtensionBasedLinkService implements IResourceLinkService {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ExtensionBasedLinkService.class);
 
-	/**
-	 * Add a "replaces" link from target to source.
-	 * Creates an extension with URL http://hapifhir.io/fhir/StructureDefinition/replaces
-	 * and a Reference value pointing to the source resource.
-	 *
-	 * @param theTarget the resource that replaces another
-	 * @param theSourceRef reference to the resource being replaced
-	 */
+	@Override
 	public void addReplacesLink(IBaseResource theTarget, IBaseReference theSourceRef) {
 		IBaseExtension<?, ?> extension = ExtensionUtil.addExtension(theTarget, HapiExtensions.EXTENSION_REPLACES);
 		extension.setValue(theSourceRef);
 	}
 
-	/**
-	 * Add a "replaced-by" link from source to target.
-	 * Creates an extension with URL http://hapifhir.io/fhir/StructureDefinition/replaced-by
-	 * and a Reference value pointing to the target resource.
-	 *
-	 * @param theSource the resource that was replaced
-	 * @param theTargetRef reference to the replacement resource
-	 */
+	@Override
 	public void addReplacedByLink(IBaseResource theSource, IBaseReference theTargetRef) {
 		IBaseExtension<?, ?> extension = ExtensionUtil.addExtension(theSource, HapiExtensions.EXTENSION_REPLACED_BY);
 		extension.setValue(theTargetRef);
 	}
 
-	/**
-	 * Get all "replaces" links from a resource.
-	 *
-	 * @param theResource the resource to check
-	 * @return list of references to resources that this resource replaces
-	 */
+	@Override
 	public List<IBaseReference> getReplacesLinks(IBaseResource theResource) {
 		return getLinksWithExtensionUrl(theResource, HapiExtensions.EXTENSION_REPLACES);
 	}
 
-	/**
-	 * Get all "replaced-by" links from a resource.
-	 *
-	 * @param theResource the resource to check
-	 * @return list of references to resources that replaced this resource
-	 */
+	@Override
 	public List<IBaseReference> getReplacedByLinks(IBaseResource theResource) {
 		return getLinksWithExtensionUrl(theResource, HapiExtensions.EXTENSION_REPLACED_BY);
 	}
 
-	/**
-	 * Check if resource has any "replaced-by" links.
-	 * Used to determine if resource was already merged.
-	 *
-	 * @param theResource the resource to check
-	 * @return true if resource has been replaced
-	 */
+	@Override
 	public boolean hasReplacedByLink(IBaseResource theResource) {
 		List<IBaseReference> links = getReplacedByLinks(theResource);
 		return !links.isEmpty();
 	}
 
-	/**
-	 * Check if resource has a specific "replaces" link to target.
-	 * Used to validate result resource has correct link to source.
-	 * Compares IDs without version for flexibility.
-	 *
-	 * @param theResource the resource to check
-	 * @param theTargetId the target resource ID to look for
-	 * @return true if resource has a replaces link to the target
-	 */
+	@Override
 	public boolean hasReplacesLinkTo(IBaseResource theResource, IIdType theTargetId) {
 		List<IBaseReference> replacesLinks = getReplacesLinks(theResource);
 
@@ -104,6 +66,9 @@ public class ExtensionBasedLinkService {
 
 		for (IBaseReference link : replacesLinks) {
 			IIdType linkRefElement = link.getReferenceElement();
+			if (linkRefElement == null) {
+				continue;
+			}
 
 			String linkIdValue = linkRefElement.toUnqualifiedVersionless().getValue();
 
@@ -132,11 +97,6 @@ public class ExtensionBasedLinkService {
 			IBase value = extension.getValue();
 			if (value instanceof IBaseReference) {
 				references.add((IBaseReference) value);
-			} else {
-				ourLog.warn(
-						"Extension {} has non-Reference value type: {}",
-						theExtensionUrl,
-						value != null ? value.getClass().getName() : "null");
 			}
 		}
 

@@ -233,11 +233,11 @@ class ExtensionBasedLinkServiceTest {
 	}
 
 	@Test
-	void hasReplacesLinkTo_shouldHandleNullReferenceElement() {
+	void hasReplacesLinkTo_shouldHandleEmptyReferenceElement() {
 		// Given
 		Observation target = new Observation();
 
-		// Manually add an extension with an empty Reference (getReferenceElement() returns null)
+		// Manually add an extension with an empty Reference
 		Reference emptyRef = new Reference();
 		target.addExtension()
 			.setUrl(REPLACES_EXTENSION_URL)
