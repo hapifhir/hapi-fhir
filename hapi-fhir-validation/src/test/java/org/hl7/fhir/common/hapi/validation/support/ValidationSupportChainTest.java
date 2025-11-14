@@ -20,6 +20,7 @@ import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -609,8 +610,12 @@ public class ValidationSupportChainTest extends BaseTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	public void testTranslateCode(boolean theUseCache) {
+	@CsvSource({
+		"false, false",
+		"false, true",
+		"true, true",
+		"true, false"})
+	public void testTranslateCode(boolean theUseCache, boolean theWithCodingInInput) {
 		// Setup
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(theUseCache), myValidationSupport0, myValidationSupport1, myValidationSupport2);
@@ -628,7 +633,8 @@ public class ValidationSupportChainTest extends BaseTest {
 		when(myValidationSupport2.translateConcept(any())).thenReturn(backingResult2);
 
 		// Test
-		TranslateConceptResults result = chain.translateConcept(new IValidationSupport.TranslateCodeRequest(List.of(), CODE_SYSTEM_URL_0));
+
+		TranslateConceptResults result = chain.translateConcept(createTranslateCodeRequest(theWithCodingInInput));
 
 		// Verify
 		assertEquals("Message 1", result.getMessage());
@@ -638,8 +644,8 @@ public class ValidationSupportChainTest extends BaseTest {
 		verify(myValidationSupport1, times(1)).translateConcept(any());
 		verify(myValidationSupport2, times(1)).translateConcept(any());
 
-		// Test again (should use cache)
-		TranslateConceptResults result2 = chain.translateConcept(new IValidationSupport.TranslateCodeRequest(List.of(), CODE_SYSTEM_URL_0));
+		// Test again
+		TranslateConceptResults result2 = chain.translateConcept(createTranslateCodeRequest(theWithCodingInInput));
 
 		// Verify
 		if (theUseCache) {
@@ -653,6 +659,21 @@ public class ValidationSupportChainTest extends BaseTest {
 			verify(myValidationSupport1, times(2)).translateConcept(any());
 			verify(myValidationSupport2, times(2)).translateConcept(any());
 		}
+	}
+
+	private  IValidationSupport.TranslateCodeRequest createTranslateCodeRequest(boolean theWithCodingInInput) {
+		IValidationSupport.TranslateCodeRequest request;
+		if (theWithCodingInInput) {
+			Coding coding = new Coding()
+				.setSystem("coding_system")
+				.setCode("coding_code");
+
+			request = new IValidationSupport.TranslateCodeRequest(List.of(coding), CODE_SYSTEM_URL_0);
+		}
+		else {
+			request = new IValidationSupport.TranslateCodeRequest(List.of(), CODE_SYSTEM_URL_0);
+		}
+		return request;
 	}
 
 	/**
