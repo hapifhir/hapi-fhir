@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.provider.merge;
 
+import ca.uhn.fhir.batch2.jobs.merge.IResourceLinkService;
+import ca.uhn.fhir.batch2.jobs.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
