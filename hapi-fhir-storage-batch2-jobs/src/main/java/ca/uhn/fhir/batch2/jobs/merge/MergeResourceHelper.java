@@ -53,10 +53,15 @@ public class MergeResourceHelper {
 
 	private final IFhirResourceDao<Patient> myPatientDao;
 	private final MergeProvenanceSvc myProvenanceSvc;
+	private final ResourceLinkServiceFactory myResourceLinkServiceFactory;
 
-	public MergeResourceHelper(DaoRegistry theDaoRegistry, MergeProvenanceSvc theMergeProvenanceSvc) {
+	public MergeResourceHelper(
+			DaoRegistry theDaoRegistry,
+			MergeProvenanceSvc theMergeProvenanceSvc,
+			ResourceLinkServiceFactory theResourceLinkServiceFactory) {
 		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);
 		myProvenanceSvc = theMergeProvenanceSvc;
+		myResourceLinkServiceFactory = theResourceLinkServiceFactory;
 	}
 
 	public static int setResourceLimitFromParameter(
@@ -148,10 +153,9 @@ public class MergeResourceHelper {
 		// client did not provide a result resource, we should update the target resource,
 		// add the replaces link to the target resource, if the source resource is not to be deleted
 		if (!theIsDeleteSource) {
-			theTargetResource
-					.addLink()
-					.setType(Patient.LinkType.REPLACES)
-					.setOther(new Reference(theSourceResource.getIdElement().toVersionless()));
+			IResourceLinkService linkService = myResourceLinkServiceFactory.getServiceForResource(theTargetResource);
+			Reference sourceRef = new Reference(theSourceResource.getIdElement().toVersionless());
+			linkService.addReplacesLink(theTargetResource, sourceRef);
 		}
 
 		// copy all identifiers from the source to the target
@@ -162,10 +166,9 @@ public class MergeResourceHelper {
 
 	private void prepareSourcePatientForUpdate(Patient theSourceResource, Patient theTargetResource) {
 		theSourceResource.setActive(false);
-		theSourceResource
-				.addLink()
-				.setType(Patient.LinkType.REPLACEDBY)
-				.setOther(new Reference(theTargetResource.getIdElement().toVersionless()));
+		IResourceLinkService linkService = myResourceLinkServiceFactory.getServiceForResource(theSourceResource);
+		Reference targetRef = new Reference(theTargetResource.getIdElement().toVersionless());
+		linkService.addReplacedByLink(theSourceResource, targetRef);
 	}
 
 	/**

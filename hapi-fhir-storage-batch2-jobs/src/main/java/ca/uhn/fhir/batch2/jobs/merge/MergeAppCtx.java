@@ -87,18 +87,6 @@ public class MergeAppCtx {
 	}
 
 	@Bean
-	public MergeProvenanceSvc mergeProvenanceSvc(DaoRegistry theDaoRegistry) {
-		return new MergeProvenanceSvc(theDaoRegistry);
-	}
-
-	@Bean
-	public MergeResourceHelper mergeResourceHelper(
-			DaoRegistry theDaoRegistry, MergeProvenanceSvc theMergeProvenanceSvc) {
-
-		return new MergeResourceHelper(theDaoRegistry, theMergeProvenanceSvc);
-	}
-
-	@Bean
 	public MergeUpdateTaskReducerStep mergeUpdateTaskStep(
 			DaoRegistry theDaoRegistry,
 			IHapiTransactionService theHapiTransactionService,

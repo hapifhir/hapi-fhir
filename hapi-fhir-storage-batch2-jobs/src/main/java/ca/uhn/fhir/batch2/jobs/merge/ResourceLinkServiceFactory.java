@@ -1,7 +1,7 @@
 // Created by claude-sonnet-4-5
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI-FHIR Storage Batch2 Jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -18,7 +18,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.provider.merge;
+package ca.uhn.fhir.batch2.jobs.merge;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 

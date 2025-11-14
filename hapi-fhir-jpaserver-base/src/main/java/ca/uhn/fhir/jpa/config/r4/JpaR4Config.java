@@ -20,6 +20,10 @@
 package ca.uhn.fhir.jpa.config.r4;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.merge.ExtensionBasedLinkService;
+import ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper;
+import ca.uhn.fhir.batch2.jobs.merge.PatientNativeLinkService;
+import ca.uhn.fhir.batch2.jobs.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -39,12 +43,9 @@ import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
-import ca.uhn.fhir.jpa.provider.merge.ExtensionBasedLinkService;
 import ca.uhn.fhir.jpa.provider.merge.MergeOperationProviderSvc;
 import ca.uhn.fhir.jpa.provider.merge.MergeValidationService;
 import ca.uhn.fhir.jpa.provider.merge.PatientMergeProvider;
-import ca.uhn.fhir.jpa.provider.merge.PatientNativeLinkService;
-import ca.uhn.fhir.jpa.provider.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.jpa.provider.merge.ResourceMergeService;
 import ca.uhn.fhir.jpa.provider.merge.ResourceUndoMergeService;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
@@ -146,6 +147,14 @@ public class JpaR4Config {
 	}
 
 	@Bean
+	public MergeResourceHelper mergeResourceHelper(
+			DaoRegistry theDaoRegistry,
+			MergeProvenanceSvc theMergeProvenanceSvc,
+			ResourceLinkServiceFactory theResourceLinkServiceFactory) {
+		return new MergeResourceHelper(theDaoRegistry, theMergeProvenanceSvc, theResourceLinkServiceFactory);
+	}
+
+	@Bean
 	public ResourceMergeService resourceMergeService(
 			DaoRegistry theDaoRegistry,
 			IReplaceReferencesSvc theReplaceReferencesSvc,
@@ -156,7 +165,7 @@ public class JpaR4Config {
 			JpaStorageSettings theStorageSettings,
 			MergeValidationService theMergeValidationService,
 			MergeProvenanceSvc theMergeProvenanceSvc,
-			ResourceLinkServiceFactory theResourceLinkServiceFactory) {
+			MergeResourceHelper theMergeResourceHelper) {
 
 		return new ResourceMergeService(
 				theStorageSettings,
@@ -168,7 +177,7 @@ public class JpaR4Config {
 				theBatch2TaskHelper,
 				theMergeValidationService,
 				theMergeProvenanceSvc,
-				theResourceLinkServiceFactory);
+				theMergeResourceHelper);
 	}
 
 	@Bean
