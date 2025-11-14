@@ -4,6 +4,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import jakarta.servlet.http.HttpServletResponse;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -94,5 +95,42 @@ public class GenericMergeR4Test extends BaseResourceProviderR4Test {
 		assertThat(getLastHttpStatusCode()).isEqualTo(HttpServletResponse.SC_OK);
 		assertThat(outParams).isNotNull();
 		ourLog.info("Generic merge endpoint with identifiers returned successfully");
+	}
+
+	@Test
+	void testGenericMergeEndpoint_WithIdentifier_OnResourceWithoutIdentifierSearchParam_ShouldFail() {
+		// Setup - Bundle doesn't have identifier search parameter
+		Identifier sourceId = new Identifier();
+		sourceId.setSystem("http://example.com/bundles");
+		sourceId.setValue("BUNDLE-SOURCE-001");
+
+		Identifier targetId = new Identifier();
+		targetId.setSystem("http://example.com/bundles");
+		targetId.setValue("BUNDLE-TARGET-001");
+
+		// Create parameters with identifier lookups on Bundle resource type
+		Parameters inParams = new Parameters();
+		inParams.addParameter("source-resource-identifier", sourceId);
+		inParams.addParameter("target-resource-identifier", targetId);
+
+		// Execute and catch exception to log behavior
+		try {
+			myClient
+				.operation()
+				.onType(Bundle.class)
+				.named("$hapi-fhir-merge")
+				.withParameters(inParams)
+				.execute();
+			ourLog.info("Unexpectedly succeeded - operation should have failed");
+		} catch (BaseServerResponseException e) {
+			ourLog.info("Merge operation failed as expected");
+			ourLog.info("Exception type: {}", e.getClass().getName());
+			ourLog.info("HTTP Status Code: {}", e.getStatusCode());
+			ourLog.info("Error Message: {}", e.getMessage());
+			ourLog.info("Response Body: {}", e.getResponseBody());
+			if (e.getOperationOutcome() != null) {
+				ourLog.info("Operation Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			}
+		}
 	}
 }
