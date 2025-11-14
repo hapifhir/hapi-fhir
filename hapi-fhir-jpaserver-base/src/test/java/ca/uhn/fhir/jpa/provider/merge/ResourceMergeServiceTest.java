@@ -1,7 +1,11 @@
 package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.merge.ExtensionBasedLinkService;
 import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
+import ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper;
+import ca.uhn.fhir.batch2.jobs.merge.PatientNativeLinkService;
+import ca.uhn.fhir.batch2.jobs.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.batch2.jobs.parameters.BatchJobParametersWithTaskId;
 import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
@@ -148,6 +152,7 @@ public class ResourceMergeServiceTest {
 
 		MergeValidationService myMergeValidationService = new MergeValidationService(myFhirContext, myDaoRegistryMock, resourceLinkServiceFactory);
 		MergeProvenanceSvc myMergeProvenanceService = new MergeProvenanceSvc(myDaoRegistryMock);
+		MergeResourceHelper myMergeResourceHelper = new MergeResourceHelper(myDaoRegistryMock, myMergeProvenanceService, resourceLinkServiceFactory);
 
 		myResourceMergeService = new ResourceMergeService(
 			myStorageSettingsMock,
@@ -159,7 +164,7 @@ public class ResourceMergeServiceTest {
 			myBatch2TaskHelperMock,
 			myMergeValidationService,
 			myMergeProvenanceService,
-			resourceLinkServiceFactory);
+			myMergeResourceHelper);
 	}
 
 	// SUCCESS CASES

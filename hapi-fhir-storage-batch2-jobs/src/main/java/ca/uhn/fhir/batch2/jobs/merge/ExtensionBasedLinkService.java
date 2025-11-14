@@ -1,5 +1,5 @@
 // Created by claude-sonnet-4-5
-package ca.uhn.fhir.jpa.provider.merge;
+package ca.uhn.fhir.batch2.jobs.merge;
 
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.HapiExtensions;
