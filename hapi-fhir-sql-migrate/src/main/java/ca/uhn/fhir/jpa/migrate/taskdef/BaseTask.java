@@ -217,8 +217,9 @@ public abstract class BaseTask {
 		} catch (DataAccessException e) {
 			if (myFlags.contains(TaskFlagEnum.FAILURE_ALLOWED)) {
 				ourLog.info(
-						"Task {} did not exit successfully on doExecuteSql(), but task is allowed to fail",
-						getMigrationVersion());
+						"Task {} running sql \"{}\"did not exit successfully on doExecuteSql(), but task is allowed to fail",
+						getMigrationVersion(),
+						theSql);
 				ourLog.debug("Error was: {}", e.getMessage(), e);
 				myExecutionResult = MigrationTaskExecutionResultEnum.NOT_APPLIED_ALLOWED_FAILURE;
 				return 0;
@@ -334,7 +335,7 @@ public abstract class BaseTask {
 
 	@Override
 	public final boolean equals(Object theObject) {
-		if (theObject == null || getClass().equals(theObject.getClass()) == false) {
+		if (theObject == null || !getClass().equals(theObject.getClass())) {
 			return false;
 		}
 		BaseTask otherObject = (BaseTask) theObject;
