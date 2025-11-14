@@ -28,7 +28,9 @@ import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
+import ca.uhn.fhir.util.TerserUtil;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -36,7 +38,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 
@@ -51,17 +52,23 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
  */
 public class MergeResourceHelper {
 
+	private final DaoRegistry myDaoRegistry;
 	private final IFhirResourceDao<Patient> myPatientDao;
 	private final MergeProvenanceSvc myProvenanceSvc;
 	private final ResourceLinkServiceFactory myResourceLinkServiceFactory;
+	private final FhirContext myFhirContext;
+	private final FhirTerser myFhirTerser;
 
 	public MergeResourceHelper(
 			DaoRegistry theDaoRegistry,
 			MergeProvenanceSvc theMergeProvenanceSvc,
 			ResourceLinkServiceFactory theResourceLinkServiceFactory) {
+		myDaoRegistry = theDaoRegistry;
 		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);
 		myProvenanceSvc = theMergeProvenanceSvc;
 		myResourceLinkServiceFactory = theResourceLinkServiceFactory;
+		myFhirContext = theDaoRegistry.getFhirContext();
+		myFhirTerser = myFhirContext.newTerser();
 	}
 
 	public static int setResourceLimitFromParameter(
@@ -174,34 +181,48 @@ public class MergeResourceHelper {
 	/**
 	 * Copies each identifier from theSourceResource to theTargetResource, after checking that theTargetResource does
 	 * not already contain the source identifier. Marks the copied identifiers marked as old.
+	 * <p>
+	 * This method works generically with any resource type that has an identifier element. For resources without
+	 * identifiers (like Bundle), this method silently does nothing.
 	 *
 	 * @param theSourceResource the source resource to copy identifiers from
 	 * @param theTargetResource the target resource to copy identifiers to
 	 */
-	private void copyIdentifiersAndMarkOld(Patient theSourceResource, Patient theTargetResource) {
-		if (theSourceResource.hasIdentifier()) {
-			List<Identifier> sourceIdentifiers = theSourceResource.getIdentifier();
-			List<Identifier> targetIdentifiers = theTargetResource.getIdentifier();
-			for (Identifier sourceIdentifier : sourceIdentifiers) {
-				if (!containsIdentifier(targetIdentifiers, sourceIdentifier)) {
-					Identifier copyOfSrcIdentifier = sourceIdentifier.copy();
-					copyOfSrcIdentifier.setUse(Identifier.IdentifierUse.OLD);
-					theTargetResource.addIdentifier(copyOfSrcIdentifier);
-				}
+	private void copyIdentifiersAndMarkOld(IBaseResource theSourceResource, IBaseResource theTargetResource) {
+		// Get source identifiers (returns empty list if path doesn't exist or resource has no identifiers)
+		List<IBase> sourceIdentifiers = myFhirTerser.getValues(theSourceResource, "identifier");
+
+		if (sourceIdentifiers.isEmpty()) {
+			// Resource doesn't have identifiers or has none set - skip
+			return;
+		}
+
+		// Get target identifiers
+		List<IBase> targetIdentifiers = myFhirTerser.getValues(theTargetResource, "identifier");
+
+		// Copy each source identifier if not already in target
+		for (IBase sourceIdentifier : sourceIdentifiers) {
+			if (!containsIdentifier(targetIdentifiers, sourceIdentifier)) {
+				// Add a new identifier to target and clone source data into it
+				IBase newIdentifierAddedToTarget = myFhirTerser.addElement(theTargetResource, "identifier");
+				myFhirTerser.cloneInto(sourceIdentifier, newIdentifierAddedToTarget, false);
+
+				// Set use to OLD
+				myFhirTerser.setElement(newIdentifierAddedToTarget, "use", "old");
 			}
 		}
 	}
 
 	/**
-	 * Checks if theIdentifiers contains theIdentifier using equalsDeep
+	 * Checks if theIdentifiers contains theIdentifier using deep equality comparison
 	 *
 	 * @param theIdentifiers the list of identifiers
 	 * @param theIdentifier  the identifier to check
 	 * @return true if theIdentifiers contains theIdentifier, false otherwise
 	 */
-	private boolean containsIdentifier(List<Identifier> theIdentifiers, Identifier theIdentifier) {
-		for (Identifier identifier : theIdentifiers) {
-			if (identifier.equalsDeep(theIdentifier)) {
+	private boolean containsIdentifier(List<IBase> theIdentifiers, IBase theIdentifier) {
+		for (IBase identifier : theIdentifiers) {
+			if (TerserUtil.equals(identifier, theIdentifier)) {
 				return true;
 			}
 		}
