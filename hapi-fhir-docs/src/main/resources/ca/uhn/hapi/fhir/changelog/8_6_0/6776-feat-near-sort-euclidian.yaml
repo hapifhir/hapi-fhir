@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6776
+title: "Fixed incorrect sorting behavior for _sort=near queries.
+The previous implementation used Manhattan distance, which led to unexpected result ordering.
+Sorting now correctly uses Euclidean distance, ensuring results are ordered by true proximity."
