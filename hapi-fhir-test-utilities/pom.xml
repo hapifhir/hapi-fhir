@@ -209,6 +209,13 @@
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
 		</dependency>
+		<!-- Apache compres: https://commons.apache.org/proper/commons-compress/ -->
+		<!-- Apache license -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>1.28.0</version>
+		</dependency>
 </dependencies>
 
 <build>
