@@ -149,8 +149,9 @@ public class ResourceMergeService implements IGenericResourceMergeService {
 				myMergeValidationService.validate(theMergeOperationParameters, theRequestDetails, theMergeOutcome);
 
 		if (mergeValidationResult.isValid) {
-			Patient sourceResource = mergeValidationResult.sourceResource;
-			Patient targetResource = mergeValidationResult.targetResource;
+			// TODO: Remove these casts once handlePreview, doMerge, and their downstream methods accept IBaseResource
+			Patient sourceResource = (Patient) mergeValidationResult.sourceResource;
+			Patient targetResource = (Patient) mergeValidationResult.targetResource;
 
 			if (theMergeOperationParameters.getPreview()) {
 				handlePreview(
