@@ -44,7 +44,6 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +66,7 @@ public class ResourceMergeService implements IGenericResourceMergeService {
 
 	private final FhirContext myFhirContext;
 	private final JpaStorageSettings myStorageSettings;
-	private final IFhirResourceDao<Patient> myPatientDao;
+	private final DaoRegistry myDaoRegistry;
 	private final IReplaceReferencesSvc myReplaceReferencesSvc;
 	private final IHapiTransactionService myHapiTransactionService;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
@@ -90,14 +89,14 @@ public class ResourceMergeService implements IGenericResourceMergeService {
 			MergeProvenanceSvc theMergeProvenanceSvc,
 			MergeResourceHelper theMergeResourceHelper) {
 		myStorageSettings = theStorageSettings;
+		myDaoRegistry = theDaoRegistry;
 
-		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);
 		myTaskDao = theDaoRegistry.getResourceDao(Task.class);
 		myReplaceReferencesSvc = theReplaceReferencesSvc;
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 		myJobCoordinator = theJobCoordinator;
 		myBatch2TaskHelper = theBatch2TaskHelper;
-		myFhirContext = myPatientDao.getContext();
+		myFhirContext = theDaoRegistry.getFhirContext();
 		myHapiTransactionService = theHapiTransactionService;
 		myMergeProvenanceSvc = theMergeProvenanceSvc;
 		myMergeResourceHelper = theMergeResourceHelper;
@@ -149,9 +148,8 @@ public class ResourceMergeService implements IGenericResourceMergeService {
 				myMergeValidationService.validate(theMergeOperationParameters, theRequestDetails, theMergeOutcome);
 
 		if (mergeValidationResult.isValid) {
-			// TODO: Remove these casts once handlePreview, doMerge, and their downstream methods accept IBaseResource
-			Patient sourceResource = (Patient) mergeValidationResult.sourceResource;
-			Patient targetResource = (Patient) mergeValidationResult.targetResource;
+			IBaseResource sourceResource = mergeValidationResult.sourceResource;
+			IBaseResource targetResource = mergeValidationResult.targetResource;
 
 			if (theMergeOperationParameters.getPreview()) {
 				handlePreview(
@@ -174,8 +172,8 @@ public class ResourceMergeService implements IGenericResourceMergeService {
 	}
 
 	private void handlePreview(
-			Patient theSourceResource,
-			Patient theTargetResource,
+			IBaseResource theSourceResource,
+			IBaseResource theTargetResource,
 			MergeOperationInputParameters theMergeOperationParameters,
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome) {
@@ -197,8 +195,8 @@ public class ResourceMergeService implements IGenericResourceMergeService {
 
 	private void doMerge(
 			MergeOperationInputParameters theMergeOperationParameters,
-			Patient theSourceResource,
-			Patient theTargetResource,
+			IBaseResource theSourceResource,
+			IBaseResource theTargetResource,
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome) {
 
@@ -226,8 +224,8 @@ public class ResourceMergeService implements IGenericResourceMergeService {
 
 	private void doMergeSync(
 			MergeOperationInputParameters theMergeOperationParameters,
-			Patient theSourceResource,
-			Patient theTargetResource,
+			IBaseResource theSourceResource,
+			IBaseResource theTargetResource,
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome,
 			RequestPartitionId partitionId) {
@@ -285,7 +283,9 @@ public class ResourceMergeService implements IGenericResourceMergeService {
 					if (theMergeOperationParameters.getDeleteSource()) {
 						// by using an id with versionId, the delete fails if
 						// the resource was updated since we last read it
-						myPatientDao.delete(theSourceResource.getIdElement(), theRequestDetails);
+						IFhirResourceDao<IBaseResource> dao =
+								myDaoRegistry.getResourceDao(theSourceResource.fhirType());
+						dao.delete(theSourceResource.getIdElement(), theRequestDetails);
 					}
 				});
 
@@ -295,8 +295,8 @@ public class ResourceMergeService implements IGenericResourceMergeService {
 
 	private void doMergeAsync(
 			MergeOperationInputParameters theMergeOperationParameters,
-			Patient theSourceResource,
-			Patient theTargetResource,
+			IBaseResource theSourceResource,
+			IBaseResource theTargetResource,
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome,
 			RequestPartitionId thePartitionId) {
