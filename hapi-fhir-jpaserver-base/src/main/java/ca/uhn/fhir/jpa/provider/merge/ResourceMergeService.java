@@ -183,8 +183,8 @@ public class ResourceMergeService implements IGenericResourceMergeService {
 				theSourceResource.getIdElement().toVersionless(), theRequestDetails);
 
 		// in preview mode, we should also return what the target would look like
-		Patient theResultResource = (Patient) theMergeOperationParameters.getResultResource();
-		Patient targetPatientAsIfUpdated = (Patient) myMergeResourceHelper.prepareTargetResourceForUpdate(
+		IBaseResource theResultResource = theMergeOperationParameters.getResultResource();
+		IBaseResource targetPatientAsIfUpdated = myMergeResourceHelper.prepareTargetResourceForUpdate(
 				theTargetResource, theSourceResource, theResultResource, theMergeOperationParameters.getDeleteSource());
 		theMergeOutcome.setUpdatedTargetResource(targetPatientAsIfUpdated);
 
@@ -256,11 +256,11 @@ public class ResourceMergeService implements IGenericResourceMergeService {
 					DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
 							theSourceResource,
 							theTargetResource,
-							(Patient) theMergeOperationParameters.getResultResource(),
+							theMergeOperationParameters.getResultResource(),
 							theMergeOperationParameters.getDeleteSource(),
 							theRequestDetails);
 
-					Patient updatedTargetResource = (Patient) outcome.getResource();
+					IBaseResource updatedTargetResource = outcome.getResource();
 					theMergeOutcome.setUpdatedTargetResource(updatedTargetResource);
 
 					if (theMergeOperationParameters.getCreateProvenance()) {
