@@ -30,7 +30,6 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Patient;
 
 import java.util.List;
 
@@ -101,8 +100,8 @@ public class MergeOperationInputParameters extends MergeOperationsCommonInputPar
 	public MergeJobParameters asMergeJobParameters(
 			FhirContext theFhirContext,
 			JpaStorageSettings theStorageSettings,
-			Patient theSourceResource,
-			Patient theTargetResource,
+			IBaseResource theSourceResource,
+			IBaseResource theTargetResource,
 			RequestPartitionId thePartitionId) {
 		MergeJobParameters retval = new MergeJobParameters();
 		retval.setOriginalInputParameters(
