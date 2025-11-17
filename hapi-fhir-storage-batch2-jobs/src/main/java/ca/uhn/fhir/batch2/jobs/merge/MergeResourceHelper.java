@@ -38,7 +38,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 
 import java.util.Date;
@@ -53,7 +52,6 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 public class MergeResourceHelper {
 
 	private final DaoRegistry myDaoRegistry;
-	private final IFhirResourceDao<Patient> myPatientDao;
 	private final MergeProvenanceSvc myProvenanceSvc;
 	private final ResourceLinkServiceFactory myResourceLinkServiceFactory;
 	private final FhirContext myFhirContext;
@@ -64,7 +62,6 @@ public class MergeResourceHelper {
 			MergeProvenanceSvc theMergeProvenanceSvc,
 			ResourceLinkServiceFactory theResourceLinkServiceFactory) {
 		myDaoRegistry = theDaoRegistry;
-		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);
 		myProvenanceSvc = theMergeProvenanceSvc;
 		myResourceLinkServiceFactory = theResourceLinkServiceFactory;
 		myFhirContext = theDaoRegistry.getFhirContext();
@@ -98,19 +95,20 @@ public class MergeResourceHelper {
 	}
 
 	public DaoMethodOutcome updateMergedResourcesAfterReferencesReplaced(
-			Patient theSourceResource,
-			Patient theTargetResource,
-			@Nullable Patient theResultResource,
+			IBaseResource theSourceResource,
+			IBaseResource theTargetResource,
+			@Nullable IBaseResource theResultResource,
 			boolean theIsDeleteSource,
 			RequestDetails theRequestDetails) {
 
 		IBaseResource targetToUpdate = prepareTargetResourceForUpdate(
 				theTargetResource, theSourceResource, theResultResource, theIsDeleteSource);
 
-		DaoMethodOutcome targetOutcome = myPatientDao.update((Patient) targetToUpdate, theRequestDetails);
+		IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(theTargetResource.fhirType());
+		DaoMethodOutcome targetOutcome = dao.update(targetToUpdate, theRequestDetails);
 		if (!theIsDeleteSource) {
 			prepareSourceResourceForUpdate(theSourceResource, theTargetResource);
-			myPatientDao.update(theSourceResource, theRequestDetails);
+			dao.update(theSourceResource, theRequestDetails);
 		}
 
 		return targetOutcome;
