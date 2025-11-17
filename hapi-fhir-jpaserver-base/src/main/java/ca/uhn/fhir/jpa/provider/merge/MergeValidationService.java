@@ -105,7 +105,7 @@ public class MergeValidationService {
 				theMergeOperationParameters, (Patient) targetResource, (Patient) sourceResource, operationOutcome)) {
 			return MergeValidationResult.invalidResult(STATUS_HTTP_400_BAD_REQUEST);
 		}
-		return MergeValidationResult.validResult((Patient) sourceResource, (Patient) targetResource);
+		return MergeValidationResult.validResult(sourceResource, targetResource);
 	}
 
 	private boolean validateResultResourceIfExists(
