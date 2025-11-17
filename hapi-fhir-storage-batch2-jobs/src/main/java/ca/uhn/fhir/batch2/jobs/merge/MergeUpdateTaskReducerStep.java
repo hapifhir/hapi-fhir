@@ -101,14 +101,14 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 		}
 
 		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
-			Patient sourceResource =
+			IBaseResource sourceResource =
 					myPatientDao.read(mergeJobParameters.getSourceId().asIdDt(), theRequestDetails);
-			Patient targetResource =
+			IBaseResource targetResource =
 					myPatientDao.read(mergeJobParameters.getTargetId().asIdDt(), theRequestDetails);
 
 			DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
 					sourceResource, targetResource, resultResource, deleteSource, theRequestDetails);
-			Patient updatedTargetResource = (Patient) outcome.getResource();
+			IBaseResource updatedTargetResource = outcome.getResource();
 
 			String sourceVersionForProvenance = sourceResource.getIdElement().getVersionIdPart();
 			if (deleteSource) {
