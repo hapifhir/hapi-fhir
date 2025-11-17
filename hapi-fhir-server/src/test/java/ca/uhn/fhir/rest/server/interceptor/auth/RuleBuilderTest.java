@@ -92,7 +92,7 @@ public class RuleBuilderTest {
 		List<String> resourceTypes = new ArrayList<>(theResourceTypes);
 
 		// When
-		builder.allow().bulkExportGroupCompartmentMatcher().groupExportOnGroup("?" + theCompartmentMatcherFilter).withResourceTypes(resourceTypes);
+		builder.allow().bulkExport().groupExportOnFilter("?" + theCompartmentMatcherFilter).withResourceTypes(resourceTypes);
 		final List<IAuthRule> rules = builder.build();
 
 		// Then
@@ -122,7 +122,7 @@ public class RuleBuilderTest {
 
 		// When
 		for (String filter : theCompartmentMatcherFilter) {
-			builder.allow().bulkExportPatientCompartmentMatcher().patientExportOnPatient("?" + filter).withResourceTypes(resourceTypes);
+			builder.allow().bulkExport().patientExportOnFilter("?" + filter).withResourceTypes(resourceTypes);
 		}
 		final List<IAuthRule> rules = builder.build();
 

@@ -128,22 +128,6 @@ public interface IAuthRuleBuilderRule {
 	IAuthRuleBuilderRuleBulkExport bulkExport();
 
 	/**
-	 * This rule permits the user to initiate a FHIR bulk export
-	 * by providing a filter matcher on Group compartment(s).
-	 *
-	 * @since 8.6.0
-	 */
-	IAuthRuleBuilderRuleGroupMatcherBulkExport bulkExportGroupCompartmentMatcher();
-
-	/**
-	 * This rule permits the user to initiate a FHIR bulk export
-	 * by providing a filter matcher on Patient compartment(s).
-	 *
-	 * @since 8.6.0
-	 */
-	IAuthRuleBuilderRulePatientMatcherBulkExport bulkExportPatientCompartmentMatcher();
-
-	/**
 	 * This rule specifically allows a user to perform a FHIR update on the historical version of a resource
 	 *
 	 * @since 6.1.0
