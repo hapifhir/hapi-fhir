@@ -61,7 +61,6 @@ import java.util.Set;
 
 public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 	protected final ResponseBundleBuilder myResponseBundleBuilder;
-
 	private MethodReturnTypeEnum myMethodReturnType;
 	private String myResourceName;
 
@@ -288,15 +287,12 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		}
 
 		if (response == null) {
-			ResponseDetails responseDetails = new ResponseDetails();
-			responseDetails.setResponseCode(responseCode);
+			ResponseDetails responseDetails = new ResponseDetails(responseCode, null);
 			callOutgoingResponseHook(theRequest, responseDetails);
 			return null;
 		} else {
 			Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
-			ResponseDetails responseDetails = new ResponseDetails();
-			responseDetails.setResponseResource(response);
-			responseDetails.setResponseCode(responseCode);
+			ResponseDetails responseDetails = new ResponseDetails(responseCode, response);
 
 			if (!callOutgoingResponseHook(theRequest, responseDetails)) {
 				return null;
@@ -362,17 +358,28 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		return true;
 	}
 
-	public static void callOutgoingFailureOperationOutcomeHook(
-			RequestDetails theRequestDetails, IBaseOperationOutcome theOperationOutcome) {
+	public static ResponseDetails callOutgoingFailureOperationOutcomeHook(
+			RequestDetails theRequestDetails,
+			IBaseOperationOutcome theOperationOutcome,
+			BaseServerResponseException theException) {
+
+		// Wrap the status code in a mutable container so it can be updated by an Interceptor Hook method
+		ResponseDetails responseDetails = new ResponseDetails(theException.getStatusCode(), theOperationOutcome);
+
+		// Prepare hook parameters
 		HookParams responseParams = new HookParams();
 		responseParams.add(RequestDetails.class, theRequestDetails);
 		responseParams.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 		responseParams.add(IBaseOperationOutcome.class, theOperationOutcome);
+		responseParams.add(ResponseDetails.class, responseDetails);
 
+		// Call hooks if there is an interceptor broadcaster
 		if (theRequestDetails.getInterceptorBroadcaster() != null) {
 			theRequestDetails
 					.getInterceptorBroadcaster()
 					.callHooks(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, responseParams);
 		}
+
+		return responseDetails;
 	}
 }
