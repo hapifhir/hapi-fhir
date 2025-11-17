@@ -32,10 +32,13 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.CanonicalIdentifier;
+import ca.uhn.fhir.util.FhirTerser;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
@@ -56,6 +59,7 @@ public class MergeValidationService {
 	private final DaoRegistry myDaoRegistry;
 	private final MergeOperationInputParameterNames myInputParamNames;
 	private final ResourceLinkServiceFactory myResourceLinkServiceFactory;
+	private final FhirTerser myFhirTerser;
 
 	public MergeValidationService(
 			FhirContext theFhirContext,
@@ -65,6 +69,7 @@ public class MergeValidationService {
 		myDaoRegistry = theDaoRegistry;
 		myResourceLinkServiceFactory = theResourceLinkServiceFactory;
 		myInputParamNames = new MergeOperationInputParameterNames();
+		myFhirTerser = myFhirContext.newTerser();
 	}
 
 	MergeValidationResult validate(
@@ -78,17 +83,15 @@ public class MergeValidationService {
 			return MergeValidationResult.invalidResult(STATUS_HTTP_400_BAD_REQUEST);
 		}
 
-		// cast to Patient, since we only support merging Patient resources for now
-		Patient sourceResource =
-				(Patient) resolveSourceResource(theMergeOperationParameters, theRequestDetails, operationOutcome);
+		IBaseResource sourceResource =
+				resolveSourceResource(theMergeOperationParameters, theRequestDetails, operationOutcome);
 
 		if (sourceResource == null) {
 			return MergeValidationResult.invalidResult(STATUS_HTTP_422_UNPROCESSABLE_ENTITY);
 		}
 
-		// cast to Patient, since we only support merging Patient resources for now
-		Patient targetResource =
-				(Patient) resolveTargetResource(theMergeOperationParameters, theRequestDetails, operationOutcome);
+		IBaseResource targetResource =
+				resolveTargetResource(theMergeOperationParameters, theRequestDetails, operationOutcome);
 
 		if (targetResource == null) {
 			return MergeValidationResult.invalidResult(STATUS_HTTP_422_UNPROCESSABLE_ENTITY);
@@ -99,10 +102,10 @@ public class MergeValidationService {
 		}
 
 		if (!validateResultResourceIfExists(
-				theMergeOperationParameters, targetResource, sourceResource, operationOutcome)) {
+				theMergeOperationParameters, (Patient) targetResource, (Patient) sourceResource, operationOutcome)) {
 			return MergeValidationResult.invalidResult(STATUS_HTTP_400_BAD_REQUEST);
 		}
-		return MergeValidationResult.validResult(sourceResource, targetResource);
+		return MergeValidationResult.validResult((Patient) sourceResource, (Patient) targetResource);
 	}
 
 	private boolean validateResultResourceIfExists(
@@ -245,19 +248,27 @@ public class MergeValidationService {
 	}
 
 	private boolean validateSourceAndTargetAreSuitableForMerge(
-			Patient theSourceResource, Patient theTargetResource, IBaseOperationOutcome outcome) {
+			IBaseResource theSourceResource, IBaseResource theTargetResource, IBaseOperationOutcome outcome) {
 
-		if (theSourceResource.getId().equalsIgnoreCase(theTargetResource.getId())) {
+		if (theSourceResource
+				.getIdElement()
+				.getValue()
+				.equalsIgnoreCase(theTargetResource.getIdElement().getValue())) {
 			String msg = "Source and target resources are the same resource.";
 			// What is the right code to use in these cases?
 			addErrorToOperationOutcome(myFhirContext, outcome, msg, "invalid");
 			return false;
 		}
 
-		if (theTargetResource.hasActive() && !theTargetResource.getActive()) {
-			String msg = "Target resource is not active, it must be active to be the target of a merge operation.";
-			addErrorToOperationOutcome(myFhirContext, outcome, msg, "invalid");
-			return false;
+		// Check if target resource has an active field and if it's set to false
+		List<IBase> activeValues = myFhirTerser.getValues(theTargetResource, "active");
+		if (!activeValues.isEmpty()) {
+			IPrimitiveType<?> activePrimitive = (IPrimitiveType<?>) activeValues.get(0);
+			if (Boolean.FALSE.equals(activePrimitive.getValue())) {
+				String msg = "Target resource is not active, it must be active to be the target of a merge operation.";
+				addErrorToOperationOutcome(myFhirContext, outcome, msg, "invalid");
+				return false;
+			}
 		}
 
 		// Use IResourceLinkService to check for replaced-by links
