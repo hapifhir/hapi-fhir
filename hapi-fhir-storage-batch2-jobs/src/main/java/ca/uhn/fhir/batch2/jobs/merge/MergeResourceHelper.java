@@ -104,10 +104,10 @@ public class MergeResourceHelper {
 			boolean theIsDeleteSource,
 			RequestDetails theRequestDetails) {
 
-		Patient targetToUpdate = prepareTargetPatientForUpdate(
+		IBaseResource targetToUpdate = prepareTargetResourceForUpdate(
 				theTargetResource, theSourceResource, theResultResource, theIsDeleteSource);
 
-		DaoMethodOutcome targetOutcome = myPatientDao.update(targetToUpdate, theRequestDetails);
+		DaoMethodOutcome targetOutcome = myPatientDao.update((Patient) targetToUpdate, theRequestDetails);
 		if (!theIsDeleteSource) {
 			prepareSourceResourceForUpdate(theSourceResource, theTargetResource);
 			myPatientDao.update(theSourceResource, theRequestDetails);
@@ -146,10 +146,25 @@ public class MergeResourceHelper {
 				theContainedResources);
 	}
 
-	public Patient prepareTargetPatientForUpdate(
-			Patient theTargetResource,
-			Patient theSourceResource,
-			@Nullable Patient theResultResource,
+	/**
+	 * Prepares the target resource for update after merge by:
+	 * 1. Using the provided result resource if supplied by the client
+	 * 2. Adding a "replaces" link from target to source (if source is not being deleted)
+	 * 3. Copying all identifiers from source to target and marking them as "old"
+	 * <p>
+	 * This method works generically with any resource type. Resources without an identifier field
+	 * (like Bundle) will have the identifier copy step silently skipped.
+	 *
+	 * @param theTargetResource the target resource that will survive the merge
+	 * @param theSourceResource the source resource being merged into the target
+	 * @param theResultResource optional result resource provided by the client (may be null)
+	 * @param theIsDeleteSource whether the source resource will be deleted after merge
+	 * @return the resource to be updated (either the provided result resource or the modified target resource)
+	 */
+	public IBaseResource prepareTargetResourceForUpdate(
+			IBaseResource theTargetResource,
+			IBaseResource theSourceResource,
+			@Nullable IBaseResource theResultResource,
 			boolean theIsDeleteSource) {
 
 		// if the client provided a result resource as input then use it to update the target resource

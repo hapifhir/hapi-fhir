@@ -184,7 +184,7 @@ public class ResourceMergeService implements IGenericResourceMergeService {
 
 		// in preview mode, we should also return what the target would look like
 		Patient theResultResource = (Patient) theMergeOperationParameters.getResultResource();
-		Patient targetPatientAsIfUpdated = myMergeResourceHelper.prepareTargetPatientForUpdate(
+		Patient targetPatientAsIfUpdated = (Patient) myMergeResourceHelper.prepareTargetResourceForUpdate(
 				theTargetResource, theSourceResource, theResultResource, theMergeOperationParameters.getDeleteSource());
 		theMergeOutcome.setUpdatedTargetResource(targetPatientAsIfUpdated);
 
