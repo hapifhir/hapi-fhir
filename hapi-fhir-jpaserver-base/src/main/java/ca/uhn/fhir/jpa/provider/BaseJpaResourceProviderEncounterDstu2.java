@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 
 public abstract class BaseJpaResourceProviderEncounterDstu2 extends BaseJpaResourceProvider<Encounter> {
@@ -57,13 +58,20 @@ public abstract class BaseJpaResourceProviderEncounterDstu2 extends BaseJpaResou
 									"Only return resources which were last updated as specified by the given range")
 					@OperationParam(name = Constants.PARAM_LASTUPDATED, min = 0, max = 1)
 					DateRangeParam theLastUpdated,
-			@Sort SortSpec theSortSpec) {
+			@Sort SortSpec theSortSpec,
+			RequestDetails theRequestDetails) {
 
 		startRequest(theServletRequest);
 		try {
 			return ((IFhirResourceDaoEncounter<Encounter>) getDao())
 					.encounterInstanceEverything(
-							theServletRequest, theId, theCount, theOffset, theLastUpdated, theSortSpec);
+							theServletRequest,
+							theRequestDetails,
+							theId,
+							theCount,
+							theOffset,
+							theLastUpdated,
+							theSortSpec);
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -90,12 +98,14 @@ public abstract class BaseJpaResourceProviderEncounterDstu2 extends BaseJpaResou
 									"Only return resources which were last updated as specified by the given range")
 					@OperationParam(name = Constants.PARAM_LASTUPDATED, min = 0, max = 1)
 					DateRangeParam theLastUpdated,
-			@Sort SortSpec theSortSpec) {
+			@Sort SortSpec theSortSpec,
+			RequestDetails theRequestDetails) {
 
 		startRequest(theServletRequest);
 		try {
 			return ((IFhirResourceDaoEncounter<Encounter>) getDao())
-					.encounterTypeEverything(theServletRequest, theCount, theOffset, theLastUpdated, theSortSpec);
+					.encounterTypeEverything(
+							theServletRequest, theRequestDetails, theCount, theOffset, theLastUpdated, theSortSpec);
 		} finally {
 			endRequest(theServletRequest);
 		}

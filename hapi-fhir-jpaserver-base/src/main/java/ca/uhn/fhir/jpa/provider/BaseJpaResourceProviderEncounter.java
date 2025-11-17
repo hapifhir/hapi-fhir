@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -59,13 +60,20 @@ public abstract class BaseJpaResourceProviderEncounter<T extends IBaseResource> 
 									"Only return resources which were last updated as specified by the given range")
 					@OperationParam(name = Constants.PARAM_LASTUPDATED, min = 0, max = 1)
 					DateRangeParam theLastUpdated,
-			@Sort SortSpec theSortSpec) {
+			@Sort SortSpec theSortSpec,
+			RequestDetails theRequestDetails) {
 
 		startRequest(theServletRequest);
 		try {
 			return ((IFhirResourceDaoEncounter<?>) getDao())
 					.encounterInstanceEverything(
-							theServletRequest, theId, theCount, theOffset, theLastUpdated, theSortSpec);
+							theServletRequest,
+							theRequestDetails,
+							theId,
+							theCount,
+							theOffset,
+							theLastUpdated,
+							theSortSpec);
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -92,12 +100,14 @@ public abstract class BaseJpaResourceProviderEncounter<T extends IBaseResource> 
 									"Only return resources which were last updated as specified by the given range")
 					@OperationParam(name = Constants.PARAM_LASTUPDATED, min = 0, max = 1)
 					DateRangeParam theLastUpdated,
-			@Sort SortSpec theSortSpec) {
+			@Sort SortSpec theSortSpec,
+			RequestDetails theRequestDetails) {
 
 		startRequest(theServletRequest);
 		try {
 			return ((IFhirResourceDaoEncounter<?>) getDao())
-					.encounterTypeEverything(theServletRequest, theCount, theOffset, theLastUpdated, theSortSpec);
+					.encounterTypeEverything(
+							theServletRequest, theRequestDetails, theCount, theOffset, theLastUpdated, theSortSpec);
 		} finally {
 			endRequest(theServletRequest);
 		}

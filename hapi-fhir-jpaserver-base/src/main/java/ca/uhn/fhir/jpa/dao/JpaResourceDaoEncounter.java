@@ -23,8 +23,11 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoEncounter;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,6 +43,7 @@ public class JpaResourceDaoEncounter<T extends IBaseResource> extends BaseHapiFh
 	@Override
 	public IBundleProvider encounterInstanceEverything(
 			HttpServletRequest theServletRequest,
+			RequestDetails theRequest,
 			IIdType theId,
 			IPrimitiveType<Integer> theCount,
 			IPrimitiveType<Integer> theOffset,
@@ -63,17 +67,28 @@ public class JpaResourceDaoEncounter<T extends IBaseResource> extends BaseHapiFh
 		if (theId != null) {
 			paramMap.add("_id", new StringParam(theId.getIdPart()));
 		}
-		IBundleProvider retVal = search(paramMap);
-		return retVal;
+
+		if (!isPagingProviderDatabaseBacked(theRequest)) {
+			paramMap.setLoadSynchronous(true);
+		}
+
+		return mySearchCoordinatorSvc.registerSearch(
+				this,
+				paramMap,
+				getResourceName(),
+				new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL)),
+				theRequest);
 	}
 
 	@Override
 	public IBundleProvider encounterTypeEverything(
 			HttpServletRequest theServletRequest,
+			RequestDetails theRequest,
 			IPrimitiveType<Integer> theCount,
 			IPrimitiveType<Integer> theOffset,
 			DateRangeParam theLastUpdated,
 			SortSpec theSort) {
-		return encounterInstanceEverything(theServletRequest, null, theCount, theOffset, theLastUpdated, theSort);
+		return encounterInstanceEverything(
+				theServletRequest, theRequest, null, theCount, theOffset, theLastUpdated, theSort);
 	}
 }
