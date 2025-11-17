@@ -40,12 +40,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper.addErrorToOperationOutcome;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_400_BAD_REQUEST;
@@ -162,20 +162,18 @@ public class MergeValidationService {
 		return retval;
 	}
 
-	private boolean hasAllIdentifiers(Patient theResource, List<CanonicalIdentifier> theIdentifiers) {
+	private boolean hasAllIdentifiers(IBaseResource theResource, List<CanonicalIdentifier> theIdentifiers) {
 
-		List<Identifier> identifiersInResource = theResource.getIdentifier();
-		for (CanonicalIdentifier identifier : theIdentifiers) {
-			boolean identifierFound = identifiersInResource.stream()
-					.anyMatch(i -> i.getSystem()
-									.equals(identifier.getSystemElement().getValueAsString())
-							&& i.getValue().equals(identifier.getValueElement().getValueAsString()));
+		// Get identifiers using FhirTerser (works for any FHIR version)
+		List<IBase> identifiersInResource = myFhirTerser.getValues(theResource, "identifier");
 
-			if (!identifierFound) {
-				return false;
-			}
-		}
-		return true;
+		// Convert to CanonicalIdentifier for comparison (standard pattern in codebase)
+		List<CanonicalIdentifier> resourceIdentifiers = identifiersInResource.stream()
+				.map(CanonicalIdentifier::fromIdentifier)
+				.collect(Collectors.toList());
+
+		// Check if resource contains all required identifiers
+		return resourceIdentifiers.containsAll(theIdentifiers);
 	}
 
 	private boolean validateResultResourceReplacesLinkToSourceResource(
