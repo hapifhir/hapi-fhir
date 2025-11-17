@@ -109,7 +109,7 @@ public class MergeResourceHelper {
 
 		DaoMethodOutcome targetOutcome = myPatientDao.update(targetToUpdate, theRequestDetails);
 		if (!theIsDeleteSource) {
-			prepareSourcePatientForUpdate(theSourceResource, theTargetResource);
+			prepareSourceResourceForUpdate(theSourceResource, theTargetResource);
 			myPatientDao.update(theSourceResource, theRequestDetails);
 		}
 
@@ -171,8 +171,25 @@ public class MergeResourceHelper {
 		return theTargetResource;
 	}
 
-	private void prepareSourcePatientForUpdate(Patient theSourceResource, Patient theTargetResource) {
-		theSourceResource.setActive(false);
+	/**
+	 * Prepares the source resource for update after merge by:
+	 * 1. Setting active=false if the resource has an active field (e.g., Patient, Practitioner, Organization)
+	 * 2. Adding a "replaced-by" link to the target resource
+	 * <p>
+	 * This method works generically with any resource type. For resources without an active field
+	 * (like Observation), the active field setting is silently skipped.
+	 *
+	 * @param theSourceResource the source resource being merged (to be marked as inactive/replaced)
+	 * @param theTargetResource the target resource that replaces the source
+	 */
+	private void prepareSourceResourceForUpdate(IBaseResource theSourceResource, IBaseResource theTargetResource) {
+		// Set active=false if the resource has an active field
+		List<IBase> activeValues = myFhirTerser.getValues(theSourceResource, "active");
+		if (!activeValues.isEmpty()) {
+			myFhirTerser.setElement(theSourceResource, "active", "false");
+		}
+
+		// Add replaced-by link using appropriate strategy (native Patient.link or extension-based)
 		IResourceLinkService linkService = myResourceLinkServiceFactory.getServiceForResource(theSourceResource);
 		Reference targetRef = new Reference(theTargetResource.getIdElement().toVersionless());
 		linkService.addReplacedByLink(theSourceResource, targetRef);
