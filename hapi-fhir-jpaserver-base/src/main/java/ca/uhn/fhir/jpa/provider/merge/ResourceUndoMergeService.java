@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.merge.MergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
+import ca.uhn.fhir.merge.PatientMergeOperationInputParameterNames;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.replacereferences.PreviousResourceVersionRestorer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -92,7 +93,9 @@ public class ResourceUndoMergeService {
 		myFhirContext = theDaoRegistry.getFhirContext();
 		myMergeValidationService = theMergeValidationService;
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
-		myInputParamNames = new MergeOperationInputParameterNames();
+		// Currently undo-merge only supports Patient undo-merge operations
+		// we will need to change this when generic undo-merge operation is implemented
+		myInputParamNames = new PatientMergeOperationInputParameterNames();
 	}
 
 	public OperationOutcomeWithStatusCode undoMerge(
@@ -122,13 +125,14 @@ public class ResourceUndoMergeService {
 
 		IBaseOperationOutcome opOutcome = undoMergeOutcome.getOperationOutcome();
 
-		if (!myMergeValidationService.validateCommonMergeOperationParameters(inputParameters, opOutcome)) {
+		if (!myMergeValidationService.validateCommonMergeOperationParameters(
+				inputParameters, opOutcome, myInputParamNames)) {
 			undoMergeOutcome.setHttpStatusCode(STATUS_HTTP_400_BAD_REQUEST);
 			return undoMergeOutcome;
 		}
 
-		Patient targetPatient =
-				(Patient) myMergeValidationService.resolveTargetResource(inputParameters, theRequestDetails, opOutcome);
+		Patient targetPatient = (Patient) myMergeValidationService.resolveTargetResource(
+				inputParameters, theRequestDetails, opOutcome, myInputParamNames);
 		IIdType targetId = targetPatient.getIdElement();
 
 		Provenance provenance = null;

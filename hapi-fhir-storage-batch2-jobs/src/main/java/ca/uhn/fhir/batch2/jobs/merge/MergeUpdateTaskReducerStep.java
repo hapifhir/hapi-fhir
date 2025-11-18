@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.merge.MergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Parameters;
@@ -44,7 +45,6 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 	private final MergeResourceHelper myMergeResourceHelper;
 	private final MergeProvenanceSvc myMergeProvenanceSvc;
 	private final IFhirResourceDao<Patient> myPatientDao;
-	private final MergeOperationInputParameterNames myMergeOperationInputParameterNames;
 
 	public MergeUpdateTaskReducerStep(
 			DaoRegistry theDaoRegistry,
@@ -56,7 +56,6 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 		myMergeResourceHelper = theMergeResourceHelper;
 		myMergeProvenanceSvc = theMergeProvenanceSvc;
 		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);
-		myMergeOperationInputParameterNames = new MergeOperationInputParameterNames();
 	}
 
 	@Override
@@ -72,6 +71,16 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 			RequestDetails theRequestDetails) {
 		MergeJobParameters mergeJobParameters = theStepExecutionDetails.getParameters();
 
+		// Initialize parameter names based on operation type
+		String operationName = mergeJobParameters.getOperationName();
+		if (operationName == null) {
+			// Backward compatibility: old jobs (pre-8.7) don't have operationName field
+			// Default to Patient merge parameter names
+			operationName = ProviderConstants.OPERATION_MERGE;
+		}
+		MergeOperationInputParameterNames parameterNames =
+				MergeOperationInputParameterNames.forOperation(operationName);
+
 		Patient resultResource;
 		boolean deleteSource;
 
@@ -84,8 +93,8 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 			originalInputParameters = myFhirContext
 					.newJsonParser()
 					.parseResource(Parameters.class, mergeJobParameters.getOriginalInputParameters());
-			resultResource = getResultResource(originalInputParameters);
-			deleteSource = isDeleteSource(originalInputParameters);
+			resultResource = getResultResource(originalInputParameters, parameterNames);
+			deleteSource = isDeleteSource(originalInputParameters, parameterNames);
 			containedResourcesForProvenance.add(originalInputParameters);
 		} else {
 			// This else part is just for backward compatibility in case there were jobs in-flight during upgrade
@@ -128,18 +137,20 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 		});
 	}
 
-	private boolean isDeleteSource(Parameters originalInputParameters) {
+	private boolean isDeleteSource(
+			Parameters originalInputParameters, MergeOperationInputParameterNames theParameterNames) {
 		boolean deleteSource = false;
-		String deleteSourceParamName = myMergeOperationInputParameterNames.getDeleteSourceParameterName();
+		String deleteSourceParamName = theParameterNames.getDeleteSourceParameterName();
 		if (originalInputParameters.hasParameter(deleteSourceParamName)) {
 			deleteSource = originalInputParameters.getParameterBool(deleteSourceParamName);
 		}
 		return deleteSource;
 	}
 
-	private @Nonnull Patient getResultResource(Parameters theOriginalInputParameters) {
+	private @Nonnull Patient getResultResource(
+			Parameters theOriginalInputParameters, MergeOperationInputParameterNames theParameterNames) {
 		Patient resultResource = null;
-		String resultResourceParamName = myMergeOperationInputParameterNames.getResultResourceParameterName();
+		String resultResourceParamName = theParameterNames.getResultResourceParameterName();
 		if (theOriginalInputParameters.hasParameter(resultResourceParamName)) {
 			resultResource = (Patient) theOriginalInputParameters
 					.getParameter(resultResourceParamName)
