@@ -292,14 +292,27 @@ public class ProviderConstants {
 	 */
 	public static final String OPERATION_MERGE = "$merge";
 	/**
-	 * Patient $merge operation parameters
+	 * Patient $merge operation parameters (specific to Patient/$merge)
 	 */
 	public static final String OPERATION_MERGE_PARAM_SOURCE_PATIENT = "source-patient";
-
 	public static final String OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER = "source-patient-identifier";
 	public static final String OPERATION_MERGE_PARAM_TARGET_PATIENT = "target-patient";
 	public static final String OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER = "target-patient-identifier";
 	public static final String OPERATION_MERGE_PARAM_RESULT_PATIENT = "result-patient";
+
+	/**
+	 * Generic resource $hapi-fhir-merge operation parameters (resource-agnostic)
+	 */
+	public static final String OPERATION_MERGE_PARAM_SOURCE_RESOURCE = "source-resource";
+
+	public static final String OPERATION_MERGE_PARAM_SOURCE_RESOURCE_IDENTIFIER = "source-resource-identifier";
+	public static final String OPERATION_MERGE_PARAM_TARGET_RESOURCE = "target-resource";
+	public static final String OPERATION_MERGE_PARAM_TARGET_RESOURCE_IDENTIFIER = "target-resource-identifier";
+	public static final String OPERATION_MERGE_PARAM_RESULT_RESOURCE = "result-resource";
+
+	/**
+	 * The following are common to Patient/$merge and  $hapi-fhir-merge (resource agnostic merge)
+	 */
 	public static final String OPERATION_MERGE_PARAM_BATCH_SIZE = "batch-size";
 	public static final String OPERATION_MERGE_PARAM_PREVIEW = "preview";
 	public static final String OPERATION_MERGE_PARAM_DELETE_SOURCE = "delete-source";

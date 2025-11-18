@@ -1,6 +1,7 @@
 // Created by claude-sonnet-4-5
 package ca.uhn.fhir.jpa.provider.r5;
 
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.r5.model.Identifier;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Practitioner;
@@ -24,8 +25,8 @@ public class GenericMergeR5Test extends BaseResourceProviderR5Test {
 		targetPractitioner = (Practitioner) myPractitionerDao.create(targetPractitioner, mySrd).getResource();
 
 		Parameters inParams = new Parameters();
-		inParams.addParameter("source-resource", new Reference(sourcePractitioner.getIdElement().toVersionless()));
-		inParams.addParameter("target-resource", new Reference(targetPractitioner.getIdElement().toVersionless()));
+		inParams.addParameter(ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_RESOURCE, new Reference(sourcePractitioner.getIdElement().toVersionless()));
+		inParams.addParameter(ProviderConstants.OPERATION_MERGE_PARAM_TARGET_RESOURCE, new Reference(targetPractitioner.getIdElement().toVersionless()));
 
 		// execute
 		Parameters outParams = myClient
@@ -59,8 +60,8 @@ public class GenericMergeR5Test extends BaseResourceProviderR5Test {
 
 		// Create parameters with identifier lookups
 		Parameters inParams = new Parameters();
-		inParams.addParameter("source-resource-identifier", sourceId);
-		inParams.addParameter("target-resource-identifier", targetId);
+		inParams.addParameter(ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_RESOURCE_IDENTIFIER, sourceId);
+		inParams.addParameter(ProviderConstants.OPERATION_MERGE_PARAM_TARGET_RESOURCE_IDENTIFIER, targetId);
 
 		// execute
 		Parameters outParams = myClient
