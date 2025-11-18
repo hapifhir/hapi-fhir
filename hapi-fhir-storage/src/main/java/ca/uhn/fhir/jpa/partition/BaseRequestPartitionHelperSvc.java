@@ -221,6 +221,9 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 					myInterceptorBroadcaster, theRequestDetails);
 			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY)) {
 				requestPartitionId = callAnyPointcut(compositeBroadcaster, theRequestDetails);
+			} else if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)) {
+				ReadPartitionIdRequestDetails readDetails = ReadPartitionIdRequestDetails.forGeneric(theRequestDetails);
+				requestPartitionId = callReadPointcut(compositeBroadcaster, theRequestDetails, readDetails);
 			}
 		}
 

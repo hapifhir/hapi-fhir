@@ -5,6 +5,7 @@ import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
@@ -16,9 +17,11 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
@@ -66,6 +69,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 
@@ -110,6 +114,9 @@ public class 	MultitenantServerR4Test extends BaseMultitenantResourceProviderR4T
 	private ArgumentCaptor<JpaPid> myMatchUrlCacheValueCaptor;
 	@SpyBean
 	private MemoryCacheService myMemoryCacheService;
+
+	@Autowired
+	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Override
 	@AfterEach
@@ -874,6 +881,19 @@ public class 	MultitenantServerR4Test extends BaseMultitenantResourceProviderR4T
 		createConditionWithAllowedUnqualified(idA);
 		Bundle response = myClient.search().byUrl(myClient.getServerBase() + "/" + TENANT_A + "/Condition?subject=Patient/" + idA.getIdPart() + "&_include=Condition:subject").returnBundle(Bundle.class).execute();
 		assertThat(response.getEntry()).hasSize(2);
+	}
+
+	@Test
+	public void testDetermineGenericPartitionForRequest() {
+		ServletRequestDetails request = mock(ServletRequestDetails.class);
+		when(request.getResourceName()).thenReturn("MeasureReport");
+		when(request.getRestOperationType()).thenReturn(RestOperationTypeEnum.CREATE);
+		when(request.getId()).thenReturn(new IdType("Measure", "123"));
+		when(request.getTenantId()).thenReturn(TENANT_A);
+		RequestPartitionId result = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(request);
+		assertThat(result).isNotNull();
+		assertThat(result.getPartitionIds()).contains(1);
+		assertThat(result.getPartitionNames()).contains(TENANT_A);
 	}
 
 	private void createConditionWithAllowedUnqualified(IIdType idA) {
