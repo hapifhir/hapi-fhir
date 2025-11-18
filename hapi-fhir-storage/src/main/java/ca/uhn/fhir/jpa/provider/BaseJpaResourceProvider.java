@@ -385,18 +385,37 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 
 	@Operation(name = JpaConstants.OPERATION_HAPI_FHIR_MERGE, idempotent = false)
 	public IBaseParameters mergeResource(
-			@OperationParam(name = "source-resource", min = 0, max = 1) IBaseReference theSourceResource,
-			@OperationParam(name = "target-resource", min = 0, max = 1) IBaseReference theTargetResource,
-			@OperationParam(name = "source-resource-identifier", typeName = "Identifier")
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_RESOURCE, min = 0, max = 1)
+					IBaseReference theSourceResource,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_TARGET_RESOURCE, min = 0, max = 1)
+					IBaseReference theTargetResource,
+			@OperationParam(
+							name = ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_RESOURCE_IDENTIFIER,
+							typeName = "Identifier")
 					List<IBase> theSourceResourceIdentifier,
-			@OperationParam(name = "target-resource-identifier", typeName = "Identifier")
+			@OperationParam(
+							name = ProviderConstants.OPERATION_MERGE_PARAM_TARGET_RESOURCE_IDENTIFIER,
+							typeName = "Identifier")
 					List<IBase> theTargetResourceIdentifier,
-			@OperationParam(name = "result-resource", min = 0, max = 1) IBaseResource theResultResource,
-			@OperationParam(name = "preview", typeName = "boolean", min = 0, max = 1)
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_RESULT_RESOURCE, min = 0, max = 1)
+					IBaseResource theResultResource,
+			@OperationParam(
+							name = ProviderConstants.OPERATION_MERGE_PARAM_PREVIEW,
+							typeName = "boolean",
+							min = 0,
+							max = 1)
 					IPrimitiveType<Boolean> thePreview,
-			@OperationParam(name = "delete-source", typeName = "boolean", min = 0, max = 1)
+			@OperationParam(
+							name = ProviderConstants.OPERATION_MERGE_PARAM_DELETE_SOURCE,
+							typeName = "boolean",
+							min = 0,
+							max = 1)
 					IPrimitiveType<Boolean> theDeleteSource,
-			@OperationParam(name = "batch-size", typeName = "integer", min = 0, max = 1)
+			@OperationParam(
+							name = ProviderConstants.OPERATION_MERGE_PARAM_BATCH_SIZE,
+							typeName = "integer",
+							min = 0,
+							max = 1)
 					IPrimitiveType<Integer> theBatchSize,
 			ServletRequestDetails theRequestDetails) {
 
