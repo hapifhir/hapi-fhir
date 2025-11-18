@@ -98,7 +98,8 @@ public class Icd10CmLoader {
 
 		// If this concept has no children, apply the seventh character definitions.
 		// Otherwise create the children.
-		if (mySevenChrDef != null && XmlUtil.getChildrenByTagName(theDiagElement, DIAG).isEmpty()) {
+		if (mySevenChrDef != null
+				&& XmlUtil.getChildrenByTagName(theDiagElement, DIAG).isEmpty()) {
 			if (theParentConcept == null) {
 				// This is a root concept. Add the extensions as children of the current concept.
 				extractExtension(mySevenChrDef, theDiagElement, concept, true);
@@ -115,7 +116,11 @@ public class Icd10CmLoader {
 		myConceptCount++;
 	}
 
-	private void extractExtension(List<Element> theSevenChrDefElement, Element theChildDiag, TermConcept theParentConcept, boolean isRootCode) {
+	private void extractExtension(
+			List<Element> theSevenChrDefElement,
+			Element theChildDiag,
+			TermConcept theParentConcept,
+			boolean isRootCode) {
 		for (Element nextChrNote : theSevenChrDefElement) {
 			for (Element nextExtension : XmlUtil.getChildrenByTagName(nextChrNote, EXTENSION)) {
 				String baseCode =
