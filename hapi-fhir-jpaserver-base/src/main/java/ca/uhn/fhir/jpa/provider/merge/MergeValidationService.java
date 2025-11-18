@@ -40,7 +40,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 
 import java.util.ArrayList;
@@ -104,11 +103,7 @@ public class MergeValidationService {
 		}
 
 		if (!validateResultResourceIfExists(
-				theMergeOperationParameters,
-				(Patient) targetResource,
-				(Patient) sourceResource,
-				operationOutcome,
-				parameterNames)) {
+				theMergeOperationParameters, targetResource, sourceResource, operationOutcome, parameterNames)) {
 			return MergeValidationResult.invalidResult(STATUS_HTTP_400_BAD_REQUEST);
 		}
 		return MergeValidationResult.validResult(sourceResource, targetResource);
@@ -116,8 +111,8 @@ public class MergeValidationService {
 
 	private boolean validateResultResourceIfExists(
 			MergeOperationInputParameters theMergeOperationParameters,
-			Patient theResolvedTargetResource,
-			Patient theResolvedSourceResource,
+			IBaseResource theResolvedTargetResource,
+			IBaseResource theResolvedSourceResource,
 			IBaseOperationOutcome theOperationOutcome,
 			MergeOperationInputParameterNames theParameterNames) {
 
@@ -128,7 +123,7 @@ public class MergeValidationService {
 
 		boolean retval = true;
 
-		Patient theResultResource = (Patient) theMergeOperationParameters.getResultResource();
+		IBaseResource theResultResource = theMergeOperationParameters.getResultResource();
 
 		// validate the result resource's  id as same as the target resource
 		if (!theResolvedTargetResource.getIdElement().toVersionless().equals(theResultResource.getIdElement())) {
@@ -184,8 +179,8 @@ public class MergeValidationService {
 	}
 
 	private boolean validateResultResourceReplacesLinkToSourceResource(
-			Patient theResultResource,
-			Patient theResolvedSourceResource,
+			IBaseResource theResultResource,
+			IBaseResource theResolvedSourceResource,
 			String theResultResourceParameterName,
 			boolean theDeleteSource,
 			IBaseOperationOutcome theOperationOutcome) {
