@@ -77,7 +77,7 @@ public class Icd10CmLoader {
 	private void extractCode(Element theDiagElement, TermConcept theParentConcept, List<Element> theParentSevenChrDef) {
 		String code = theDiagElement.getElementsByTagName(NAME).item(0).getTextContent();
 		String display = theDiagElement.getElementsByTagName(DESC).item(0).getTextContent();
-		List<Element> myParentSevenChrDef = null;
+		List<Element> mySevenChrDef = null;
 		TermConcept concept;
 		if (theParentConcept == null) {
 			concept = myCodeSystemVersion.addConcept();
@@ -88,39 +88,34 @@ public class Icd10CmLoader {
 		concept.setCode(code);
 		concept.setDisplay(display);
 
+		// Check for a seventh character definitions. If one does not exist at this level,
+		// use seventh character definitions inherited from parent level.
 		if (!XmlUtil.getChildrenByTagName(theDiagElement, SEVEN_CHR_DEF).isEmpty()) {
-			// If a child code has seventh character definition, this should override the parent definition for this
-			// code
-			// and any of its children.
-			myParentSevenChrDef = XmlUtil.getChildrenByTagName(theDiagElement, SEVEN_CHR_DEF);
+			mySevenChrDef = XmlUtil.getChildrenByTagName(theDiagElement, SEVEN_CHR_DEF);
 		} else if (theParentSevenChrDef != null) {
-			myParentSevenChrDef = theParentSevenChrDef.stream().toList();
+			mySevenChrDef = theParentSevenChrDef.stream().toList();
 		}
 
-		if (myParentSevenChrDef != null
-				&& XmlUtil.getChildrenByTagName(theDiagElement, DIAG).isEmpty()) {
+		// If this concept has no children, apply the seventh character definitions.
+		// Otherwise create the children.
+		if (mySevenChrDef != null && XmlUtil.getChildrenByTagName(theDiagElement, DIAG).isEmpty()) {
 			if (theParentConcept == null) {
 				// This is a root concept. Add the extensions as children of the current concept.
-				extractExtension(myParentSevenChrDef, theDiagElement, concept, true);
+				extractExtension(mySevenChrDef, theDiagElement, concept, true);
 			} else {
 				// This is a child concept. Add the extensions as siblings of the current concept
-				extractExtension(myParentSevenChrDef, theDiagElement, theParentConcept, false);
+				extractExtension(mySevenChrDef, theDiagElement, theParentConcept, false);
 			}
 		} else {
-			// Otherwise process the children
 			for (Element nextChildDiag : XmlUtil.getChildrenByTagName(theDiagElement, DIAG)) {
-				extractCode(nextChildDiag, concept, myParentSevenChrDef);
+				extractCode(nextChildDiag, concept, mySevenChrDef);
 			}
 		}
 
 		myConceptCount++;
 	}
 
-	private void extractExtension(
-			List<Element> theSevenChrDefElement,
-			Element theChildDiag,
-			TermConcept theParentConcept,
-			boolean isRootCode) {
+	private void extractExtension(List<Element> theSevenChrDefElement, Element theChildDiag, TermConcept theParentConcept, boolean isRootCode) {
 		for (Element nextChrNote : theSevenChrDefElement) {
 			for (Element nextExtension : XmlUtil.getChildrenByTagName(nextChrNote, EXTENSION)) {
 				String baseCode =
