@@ -29,8 +29,8 @@ public class GenericMergeR4Test extends BaseResourceProviderR4Test {
 		targetPractitioner = (Practitioner) myPractitionerDao.create(targetPractitioner, mySrd).getResource();
 
 		Parameters inParams = new Parameters();
-		inParams.addParameter(ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_RESOURCE, new Reference(sourcePractitioner.getIdElement().toVersionless()));
-		inParams.addParameter(ProviderConstants.OPERATION_MERGE_PARAM_TARGET_RESOURCE, new Reference(targetPractitioner.getIdElement().toVersionless()));
+		inParams.addParameter("source-resource", new Reference(sourcePractitioner.getIdElement().toVersionless()));
+		inParams.addParameter("target-resource", new Reference(targetPractitioner.getIdElement().toVersionless()));
 
 		// execute
 		Parameters outParams;
