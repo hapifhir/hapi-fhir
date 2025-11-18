@@ -40,6 +40,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ServerExceptionDstu3Test {
@@ -187,22 +188,35 @@ public class ServerExceptionDstu3Test {
 	}
 
 
+	/**
+	 * When AuthenticationException <b>HTTP 401 Client Unauthorized</b> is thrown an OperationOutcome must be included
+	 * in the response body to satisfy ONC Inferno SMART v2 Certification requirements.
+	 * For details, see: <a href="https://github.com/hapifhir/hapi-fhir/issues/7385">#7385</a>
+	 */
 	@Test
 	public void testAuthorize() throws Exception {
-
+		// setup
 		OperationOutcome operationOutcome = new OperationOutcome();
 		operationOutcome.addIssue().setCode(IssueType.BUSINESSRULE);
-
 		ourException = new AuthenticationException().addAuthenticateHeaderForRealm("REALM");
 
+		// execute
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
 
+			// validate
 			assertEquals(401, status.getStatusLine().getStatusCode());
 			assertEquals("Basic realm=\"REALM\"", status.getFirstHeader("WWW-Authenticate").getValue());
+			OperationOutcome outcome = assertDoesNotThrow(() ->
+				 ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent));
+			assertThat(outcome.getIssue()).hasSize(1);
+			OperationOutcome.OperationOutcomeIssueComponent issue = outcome.getIssueFirstRep();
+			assertEquals(OperationOutcome.IssueSeverity.ERROR, issue.getSeverity());
+			assertEquals(OperationOutcome.IssueType.PROCESSING, issue.getCode());
+			assertEquals("Client unauthorized", issue.getDiagnostics());
 		}
 
 	}
