@@ -29,6 +29,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -79,7 +80,7 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 	}
 
 	@Override
-	@BeforeEach
+	@AfterEach
 	public void after() throws IOException {
 		super.after();
 		myInterceptorRegistry.unregisterInterceptor(myInterceptor);

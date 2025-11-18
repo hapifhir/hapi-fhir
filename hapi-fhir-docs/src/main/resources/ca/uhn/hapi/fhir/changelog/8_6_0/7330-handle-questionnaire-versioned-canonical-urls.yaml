@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7330
+title: "When performing validation against a JPA server, Questionnaire URLs with versions were not handled correctly and
+   couldn't be found by the validator. This has been corrected."

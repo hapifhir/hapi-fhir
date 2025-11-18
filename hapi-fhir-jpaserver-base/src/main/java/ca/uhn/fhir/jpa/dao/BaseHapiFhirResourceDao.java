@@ -474,7 +474,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			TransactionDetails theTransactionDetails) {
 		StopWatch w = new StopWatch();
 
-		preProcessResourceForStorage(theResource);
 		preProcessResourceForStorage(theResource, theRequest, theTransactionDetails, thePerformIndexing);
 
 		ResourceTable entity = new ResourceTable();

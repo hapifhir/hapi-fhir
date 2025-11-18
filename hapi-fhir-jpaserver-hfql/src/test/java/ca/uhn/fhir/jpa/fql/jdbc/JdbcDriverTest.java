@@ -25,7 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.util.Base64Utils;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -36,6 +35,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -115,7 +115,7 @@ public class JdbcDriverTest {
 		List<Map<String, Object>> outcome = jdbcTemplate.query(input, new ColumnMapRowMapper());
 		assertThat(outcome).hasSize(2);
 
-		String expectedAuthHeader = Constants.HEADER_AUTHORIZATION_VALPREFIX_BASIC + Base64Utils.encodeToString((SOME_USERNAME + ":" + SOME_PASSWORD).getBytes(StandardCharsets.UTF_8));
+		String expectedAuthHeader = Constants.HEADER_AUTHORIZATION_VALPREFIX_BASIC + Base64.getEncoder().encodeToString((SOME_USERNAME + ":" + SOME_PASSWORD).getBytes(StandardCharsets.UTF_8));
 		String actual = ourHeaderCaptureInterceptor.getCapturedHeaders().get(0).get(Constants.HEADER_AUTHORIZATION).get(0);
 		assertEquals(expectedAuthHeader, actual);
 	}

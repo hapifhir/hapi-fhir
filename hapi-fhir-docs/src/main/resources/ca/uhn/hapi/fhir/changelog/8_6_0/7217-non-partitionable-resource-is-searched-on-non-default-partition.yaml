@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7217
+title: "Previously, searches for non-partitionable resources (e.g. a Library) could be executed against a partition that
+is not the default partition. This has been corrected."
