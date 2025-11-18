@@ -189,8 +189,16 @@ public class ServerExceptionDstu3Test {
 
 
 	/**
-	 * When AuthenticationException <b>HTTP 401 Client Unauthorized</b> is thrown an OperationOutcome must be included
-	 * in the response body to satisfy ONC Inferno SMART v2 Certification requirements.
+	 * Ensures that when an {@link ca.uhn.fhir.rest.server.exceptions.AuthenticationException} is handled and
+	 * an <b>HTTP 401 Unauthorized</b> response is generated, the server returns a FHIR
+	 * {@code OperationOutcome} rather than plain text. This prevents JSON parse failures in
+	 * ONC Inferno’s SMART v2 tests.
+	 * <p>
+	 * These parse failures were observed in the <b>Granular Scopes 2</b> section, specifically in:
+	 * <ul>
+	 * <li>Server filters results for Condition reads based on granular scopes</li>
+	 * <li>Server filters results for Observation reads based on granular scopes</li>
+	 * </ul>
 	 * For details, see: <a href="https://github.com/hapifhir/hapi-fhir/issues/7385">#7385</a>
 	 */
 	@Test
