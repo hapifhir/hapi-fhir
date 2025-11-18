@@ -77,7 +77,6 @@ public class BulkPatchRewriteProvider extends BaseBulkModifyOrRewriteProvider {
 							name = JpaConstants.OPERATION_BULK_PATCH_PARAM_LIMIT_RESOURCE_VERSION_COUNT,
 							typeName = "integer")
 					IPrimitiveType<Integer> theLimitResourceVersionCount,
-			// FIXME: document this
 			// partitionIds
 			@OperationParam(
 							name = JpaConstants.OPERATION_BULK_PATCH_PARAM_PARTITION_ID,

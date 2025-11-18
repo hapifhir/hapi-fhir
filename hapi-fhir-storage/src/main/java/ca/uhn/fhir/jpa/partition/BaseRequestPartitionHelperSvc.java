@@ -29,6 +29,7 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -288,6 +289,12 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 
 		if (!myPartitionSettings.isPartitioningEnabled()) {
 			return RequestPartitionId.allPartitions();
+		}
+
+		RequestPartitionId existingPartitionId =
+				(RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+		if (existingPartitionId != null) {
+			return existingPartitionId;
 		}
 
 		RequestDetails requestDetails = theRequest;

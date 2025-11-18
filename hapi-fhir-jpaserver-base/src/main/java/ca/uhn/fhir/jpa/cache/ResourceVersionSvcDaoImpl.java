@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import jakarta.annotation.Nonnull;
@@ -60,6 +61,9 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 	@Autowired
 	IIdHelperService<JpaPid> myIdHelperService;
 
+	@Autowired
+	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
 	@Override
 	@Nonnull
 	public ResourceVersionMap getVersionMap(
@@ -74,6 +78,13 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 		List<IIdType> fhirIds = dao.searchForResourceIds(theSearchParamMap, request);
 
 		return ResourceVersionMap.fromIdsWithVersions(fhirIds);
+	}
+
+	@Override
+	public ResourceVersionMap getVersionMap(String theResourceName, SearchParameterMap theSearchParamMap) {
+		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+				null, theResourceName, theSearchParamMap);
+		return getVersionMap(requestPartition, theResourceName, theSearchParamMap);
 	}
 
 	/**

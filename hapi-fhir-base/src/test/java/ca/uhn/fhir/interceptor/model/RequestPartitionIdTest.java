@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.allPartitions;
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.defaultPartition;
@@ -116,6 +118,24 @@ public class RequestPartitionIdTest {
 		RequestPartitionId expected = fromPartitionIds(1, 2, 3, null);
 		assertEquals(expected, actual);
 
+	}
+
+	@ParameterizedTest
+	@MethodSource("testStringifyForKeyTestCases")
+	public void testStringifyForKey(RequestPartitionId theRequestPartitionId, String theExpectedString) {
+		String actual = RequestPartitionId.stringifyForKey(theRequestPartitionId);
+		assertEquals(theExpectedString, actual);
+	}
+
+
+	static Stream<Object[]> testStringifyForKeyTestCases() {
+		return List.of(
+			new Object[]{RequestPartitionId.allPartitions(), "(all)"},
+			new Object[]{RequestPartitionId.defaultPartition(), "null"},
+			new Object[]{RequestPartitionId.fromPartitionIds(1, 2, 3), "1 2 3"},
+			new Object[]{RequestPartitionId.fromPartitionIds(null, 2, 3), "null 2 3"},
+			new Object[]{RequestPartitionId.allPartitionsWithPartitionIds(1, 2, 3), "(all) 1 2 3"}
+		).stream();
 	}
 
 	record ContainsTestCase(String description, RequestPartitionId left, RequestPartitionId right, Comparison comparison) {
