@@ -8,7 +8,9 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -20,6 +22,7 @@ import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
@@ -43,6 +46,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.collect.Lists;
 import jakarta.persistence.EntityManager;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -60,6 +64,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.TransactionStatus;
@@ -72,21 +78,28 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static graphql.Assert.assertFalse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -481,6 +494,71 @@ class BaseHapiFhirResourceDaoTest {
 		Collection<ResourceTag> entityTags = entity.getTags();
 		assertThat(entityTags).hasSize(1);
 		assertThat(entityTags.iterator().next().getTag().getId()).isEqualTo(tagDefinition.getId());
+	}
+
+	@Test
+	public void deleteEntity_sendsCorrectVersionToCutpoint() {
+
+		final String VERSION_ONE = "1";
+		final String VERSION_TWO = "2";
+		final String ID="123";
+
+		// initialize our class
+		setup(Patient.class);
+
+		// setup
+		when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
+
+		// resource will be set to version 1
+		Patient patient = new Patient();
+		IIdType id = new IdType(String.format("Patient/%s/_history/%s", ID, VERSION_ONE)); // id part is only numbers
+		patient.setId(id);
+		DeleteConflictList deleteConflicts = new DeleteConflictList();
+		RequestDetails requestDetails = new SystemRequestDetails();
+		TransactionDetails transactionDetails = new TransactionDetails();
+
+		RequestPartitionId partitionId = Mockito.mock(RequestPartitionId.class);
+
+		// The resource retrieved will be set to version 2.
+		ResourceTable entity = new ResourceTable();
+		entity.setIdForUnitTest(Long.parseLong(ID));
+		entity.setVersionForUnitTest(Integer.parseInt(VERSION_TWO));
+		entity.setFhirId("456");
+
+		doReturn(entity).when(mySpiedSvc).readEntityLatestVersion(any(), any(), any(), any());
+		doReturn(entity).when(mySpiedSvc).updateEntityForDelete(requestDetails, transactionDetails, entity);
+		doReturn(patient).when(myJpaStorageResourceParser).toResource(any(), any(), any(), any(), anyBoolean());
+		// Capture the resource version at the time of the call to doCallHooks()
+		AtomicReference<String> versionAtCall = new AtomicReference<>();
+		doAnswer( invocation -> {
+			Pointcut pc = invocation.getArgument(2);
+			if(pc == Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED) {
+				HookParams hp = invocation.getArgument(3);
+				versionAtCall.set(hp.get(IBaseResource.class).getIdElement().getVersionIdPart());
+			}
+			return null;
+		}).when(mySpiedSvc).doCallHooks(any(TransactionDetails.class), any(RequestDetails.class), any(Pointcut.class), any(HookParams.class));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
+			any(RequestDetails.class),
+			anyString(),
+			any(IIdType.class)
+		)).thenReturn(partitionId);
+
+		// set a transactionService that will actually execute the callback
+		mySvc.setTransactionService(new MockHapiTransactionService());
+
+		try {
+			TransactionSynchronizationManager.setActualTransactionActive(true);
+			mySpiedSvc.delete(entity.getIdType(myFhirContext), deleteConflicts, requestDetails, transactionDetails);
+		} finally {
+			TransactionSynchronizationManager.setActualTransactionActive(false);
+		}
+
+		// verify that the call to doCallHooks happens before the resource's version is updated
+		assertFalse(versionAtCall.get().isBlank());
+		assertEquals(VERSION_ONE,  versionAtCall.get());
+		// verify that the patient's version was updated after the call to doCallHooks
+		assertEquals(VERSION_TWO, patient.getIdElement().getVersionIdPart());
 	}
 
 	private TagDefinition createTagDefinition(int theId) {

@@ -1,0 +1,5 @@
+---
+type: change
+issue: 7390
+title: "Previously, specifying a specific resource in subscription criteria failed to deliver DELETE events. 
+This has been fixed"
