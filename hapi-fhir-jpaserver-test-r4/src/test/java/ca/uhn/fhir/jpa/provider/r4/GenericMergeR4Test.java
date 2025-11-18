@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Identifier;
@@ -28,8 +29,8 @@ public class GenericMergeR4Test extends BaseResourceProviderR4Test {
 		targetPractitioner = (Practitioner) myPractitionerDao.create(targetPractitioner, mySrd).getResource();
 
 		Parameters inParams = new Parameters();
-		inParams.addParameter("source-resource", new Reference(sourcePractitioner.getIdElement().toVersionless()));
-		inParams.addParameter("target-resource", new Reference(targetPractitioner.getIdElement().toVersionless()));
+		inParams.addParameter(ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_RESOURCE, new Reference(sourcePractitioner.getIdElement().toVersionless()));
+		inParams.addParameter(ProviderConstants.OPERATION_MERGE_PARAM_TARGET_RESOURCE, new Reference(targetPractitioner.getIdElement().toVersionless()));
 
 		// execute
 		Parameters outParams;
@@ -72,8 +73,8 @@ public class GenericMergeR4Test extends BaseResourceProviderR4Test {
 
 		// Create parameters with identifier lookups
 		Parameters inParams = new Parameters();
-		inParams.addParameter("source-resource-identifier", sourceId);
-		inParams.addParameter("target-resource-identifier", targetId);
+		inParams.addParameter(ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_RESOURCE_IDENTIFIER, sourceId);
+		inParams.addParameter(ProviderConstants.OPERATION_MERGE_PARAM_TARGET_RESOURCE_IDENTIFIER, targetId);
 
 		// execute
 		Parameters outParams;
@@ -110,8 +111,8 @@ public class GenericMergeR4Test extends BaseResourceProviderR4Test {
 
 		// Create parameters with identifier lookups on Bundle resource type
 		Parameters inParams = new Parameters();
-		inParams.addParameter("source-resource-identifier", sourceId);
-		inParams.addParameter("target-resource-identifier", targetId);
+		inParams.addParameter(ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_RESOURCE_IDENTIFIER, sourceId);
+		inParams.addParameter(ProviderConstants.OPERATION_MERGE_PARAM_TARGET_RESOURCE_IDENTIFIER, targetId);
 
 		// Execute and catch exception to log behavior
 		try {
