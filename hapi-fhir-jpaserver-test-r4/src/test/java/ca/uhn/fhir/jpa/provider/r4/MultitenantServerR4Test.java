@@ -70,8 +70,8 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -112,7 +112,7 @@ import static org.mockito.Mockito.when;
 public class 	MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Test implements ITestDataBuilder {
 	@Captor
 	private ArgumentCaptor<JpaPid> myMatchUrlCacheValueCaptor;
-	@SpyBean
+	@MockitoSpyBean
 	private MemoryCacheService myMemoryCacheService;
 
 	@Autowired
@@ -183,6 +183,54 @@ public class 	MultitenantServerR4Test extends BaseMultitenantResourceProviderR4T
 		assertThat(foundIds).hasSize(3);
 	}
 
+	/**
+	 * Tests Encounter/$everything operation with REQUEST_TENANT partitioning
+	 *
+	 * Steps:
+	 * 1. Create Patient in TENANT_A
+	 * 2. Create Encounter in TENANT_A referencing the Patient
+	 * 3. Call Encounter/$everything
+	 * 4. Validate response contains both Encounter and Patient
+	 */
+	@Test
+	public void testEncounterEverything_withRequestTenantPartitioning_shouldReturnEncounterAndPatient() {
+		// Arrange - Set tenant context to TENANT_A
+		myTenantClientInterceptor.setTenantId(TENANT_A);
+
+		// Create Patient in TENANT_A
+		IIdType patient = createPatient(withTenant(TENANT_A), withActiveTrue());
+
+		// Create Encounter in TENANT_A referencing the Patient
+		IIdType encounter = createEncounter(withTenant(TENANT_A), withSubject(patient.toUnqualifiedVersionless().toString()));
+
+		// Act - Call Encounter/$everything
+		Bundle everythingBundle = myClient.operation()
+			.onInstance(encounter.toUnqualifiedVersionless().toString())
+			.named("$everything")
+			.withNoParameters(Parameters.class)
+			.returnResourceType(Bundle.class)
+			.execute();
+
+		// Assert - Should return at least the Encounter and Patient resources
+		assertThat(everythingBundle).isNotNull();
+		assertThat(everythingBundle.getEntry())
+			.as("Encounter/$everything should return at least Encounter and Patient resources")
+			.isNotEmpty()
+			.hasSizeGreaterThanOrEqualTo(2);
+
+		// Verify Encounter is in the bundle
+		boolean hasEncounter = everythingBundle.getEntry().stream()
+			.anyMatch(entry -> entry.getResource() instanceof Encounter
+				&& entry.getResource().getIdElement().getIdPart().equals(encounter.getIdPart()));
+		assertThat(hasEncounter).as("Bundle should contain the Encounter").isTrue();
+
+		// Verify Patient is in the bundle (referenced by Encounter)
+		boolean hasPatient = everythingBundle.getEntry().stream()
+			.anyMatch(entry -> entry.getResource() instanceof Patient
+				&& entry.getResource().getIdElement().getIdPart().equals(patient.getIdPart()));
+		assertThat(hasPatient).as("Bundle should contain the referenced Patient").isTrue();
+	}
+
 	@Test
 	public void testFetchCapabilityStatement() {
 		myTenantClientInterceptor.setTenantId(TENANT_A);
@@ -202,7 +250,7 @@ public class 	MultitenantServerR4Test extends BaseMultitenantResourceProviderR4T
 
 		runInTransaction(() -> {
 			PartitionEntity partition = myPartitionDao.findForName(TENANT_A).orElseThrow(IllegalStateException::new);
-			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+			ResourceTable resourceTable = myResourceTableDao.findById(JpaPid.fromId(idA.getIdPartAsLong())).orElseThrow(IllegalStateException::new);
             assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(partition.getId(), resourceTable.getPartitionId().getPartitionId());
 		});
@@ -240,7 +288,7 @@ public class 	MultitenantServerR4Test extends BaseMultitenantResourceProviderR4T
 		createPatient(withTenant(TENANT_B), withActiveFalse());
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+			ResourceTable resourceTable = myResourceTableDao.findById(JpaPid.fromId(idA.getIdPartAsLong())).orElseThrow(IllegalStateException::new);
 			assertNull(resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -460,7 +508,7 @@ public class 	MultitenantServerR4Test extends BaseMultitenantResourceProviderR4T
 		IIdType idA = createResource("NamingSystem", withTenant(JpaConstants.DEFAULT_PARTITION_NAME), withStatus("draft"));
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+			ResourceTable resourceTable = myResourceTableDao.findById(JpaPid.fromId(idA.getIdPartAsLong())).orElseThrow(IllegalStateException::new);
 			assertNull(resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -514,10 +562,10 @@ public class 	MultitenantServerR4Test extends BaseMultitenantResourceProviderR4T
 		IdType idB = new IdType(response.getEntry().get(1).getResponse().getLocation());
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+			ResourceTable resourceTable = myResourceTableDao.findById(JpaPid.fromId(idA.getIdPartAsLong())).orElseThrow(IllegalStateException::new);
             assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(1, resourceTable.getPartitionId().getPartitionId());
-			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+			resourceTable = myResourceTableDao.findById(JpaPid.fromId(idB.getIdPartAsLong())).orElseThrow(IllegalStateException::new);
             assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 		});
@@ -702,9 +750,9 @@ public class 	MultitenantServerR4Test extends BaseMultitenantResourceProviderR4T
 		IIdType idB = myPatientDao.create((Patient) patientB, requestDetails).getId();
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+			ResourceTable resourceTable = myResourceTableDao.findById(JpaPid.fromId(idA.getIdPartAsLong())).orElseThrow(IllegalStateException::new);
 			assertNull(resourceTable.getPartitionId().getPartitionId());
-			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+			resourceTable = myResourceTableDao.findById(JpaPid.fromId(idB.getIdPartAsLong())).orElseThrow(IllegalStateException::new);
             assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
@@ -769,9 +817,9 @@ public class 	MultitenantServerR4Test extends BaseMultitenantResourceProviderR4T
 		myPatientDao.update((Patient) patientB, requestDetails);
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+			ResourceTable resourceTable = myResourceTableDao.findById(JpaPid.fromId(idA.getIdPartAsLong())).orElseThrow(IllegalStateException::new);
 			assertNull(resourceTable.getPartitionId().getPartitionId());
-			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+			resourceTable = myResourceTableDao.findById(JpaPid.fromId(idB.getIdPartAsLong())).orElseThrow(IllegalStateException::new);
             assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
@@ -833,10 +881,10 @@ public class 	MultitenantServerR4Test extends BaseMultitenantResourceProviderR4T
 		IdType idB = new IdType(response.getEntry().get(1).getResponse().getLocation());
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+			ResourceTable resourceTable = myResourceTableDao.findById(JpaPid.fromId(idA.getIdPartAsLong())).orElseThrow(IllegalStateException::new);
             assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(1, resourceTable.getPartitionId().getPartitionId());
-			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+			resourceTable = myResourceTableDao.findById(JpaPid.fromId(idB.getIdPartAsLong())).orElseThrow(IllegalStateException::new);
             assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 		});
