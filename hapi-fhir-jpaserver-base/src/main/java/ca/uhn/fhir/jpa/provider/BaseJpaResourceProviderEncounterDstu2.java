@@ -44,12 +44,12 @@ public abstract class BaseJpaResourceProviderEncounterDstu2 extends BaseJpaResou
 			jakarta.servlet.http.HttpServletRequest theServletRequest,
 			@IdParam ca.uhn.fhir.model.primitive.IdDt theId,
 			@Description(
-							formalDefinition =
+							value =
 									"Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
 					@OperationParam(name = Constants.PARAM_COUNT)
 					ca.uhn.fhir.model.primitive.UnsignedIntDt theCount,
 			@Description(
-							formalDefinition =
+							value =
 									"Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
 					@OperationParam(name = Constants.PARAM_OFFSET)
 					ca.uhn.fhir.model.primitive.UnsignedIntDt theOffset,
@@ -65,13 +65,7 @@ public abstract class BaseJpaResourceProviderEncounterDstu2 extends BaseJpaResou
 		try {
 			return ((IFhirResourceDaoEncounter<Encounter>) getDao())
 					.encounterInstanceEverything(
-							theServletRequest,
-							theRequestDetails,
-							theId,
-							theCount,
-							theOffset,
-							theLastUpdated,
-							theSortSpec);
+							theRequestDetails, theId, theCount, theOffset, theLastUpdated, theSortSpec);
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -84,12 +78,12 @@ public abstract class BaseJpaResourceProviderEncounterDstu2 extends BaseJpaResou
 	public IBundleProvider EncounterTypeEverything(
 			jakarta.servlet.http.HttpServletRequest theServletRequest,
 			@Description(
-							formalDefinition =
+							value =
 									"Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
 					@OperationParam(name = Constants.PARAM_COUNT)
 					ca.uhn.fhir.model.primitive.UnsignedIntDt theCount,
 			@Description(
-							formalDefinition =
+							value =
 									"Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
 					@OperationParam(name = Constants.PARAM_OFFSET)
 					ca.uhn.fhir.model.primitive.UnsignedIntDt theOffset,
@@ -104,8 +98,7 @@ public abstract class BaseJpaResourceProviderEncounterDstu2 extends BaseJpaResou
 		startRequest(theServletRequest);
 		try {
 			return ((IFhirResourceDaoEncounter<Encounter>) getDao())
-					.encounterTypeEverything(
-							theServletRequest, theRequestDetails, theCount, theOffset, theLastUpdated, theSortSpec);
+					.encounterTypeEverything(theRequestDetails, theCount, theOffset, theLastUpdated, theSortSpec);
 		} finally {
 			endRequest(theServletRequest);
 		}

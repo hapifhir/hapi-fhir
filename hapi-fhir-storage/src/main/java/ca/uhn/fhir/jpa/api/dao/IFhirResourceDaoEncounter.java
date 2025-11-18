@@ -23,7 +23,6 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -31,7 +30,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 public interface IFhirResourceDaoEncounter<T extends IBaseResource> extends IFhirResourceDao<T> {
 
 	IBundleProvider encounterInstanceEverything(
-			HttpServletRequest theServletRequest,
 			RequestDetails theRequest,
 			IIdType theId,
 			IPrimitiveType<Integer> theCount,
@@ -40,7 +38,6 @@ public interface IFhirResourceDaoEncounter<T extends IBaseResource> extends IFhi
 			SortSpec theSort);
 
 	IBundleProvider encounterTypeEverything(
-			HttpServletRequest theServletRequest,
 			RequestDetails theRequest,
 			IPrimitiveType<Integer> theCount,
 			IPrimitiveType<Integer> theOffset,

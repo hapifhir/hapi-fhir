@@ -41,17 +41,18 @@ public abstract class BaseJpaResourceProviderEncounter<T extends IBaseResource> 
 	/**
 	 * Encounter/123/$everything
 	 */
+	@SuppressWarnings("unused")
 	@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider EncounterInstanceEverything(
 			jakarta.servlet.http.HttpServletRequest theServletRequest,
 			@IdParam IIdType theId,
 			@Description(
-							formalDefinition =
+							value =
 									"Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
 					@OperationParam(name = Constants.PARAM_COUNT, typeName = "unsignedInt")
 					IPrimitiveType<Integer> theCount,
 			@Description(
-							formalDefinition =
+							value =
 									"Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
 					@OperationParam(name = Constants.PARAM_OFFSET, typeName = "unsignedInt")
 					IPrimitiveType<Integer> theOffset,
@@ -67,13 +68,7 @@ public abstract class BaseJpaResourceProviderEncounter<T extends IBaseResource> 
 		try {
 			return ((IFhirResourceDaoEncounter<?>) getDao())
 					.encounterInstanceEverything(
-							theServletRequest,
-							theRequestDetails,
-							theId,
-							theCount,
-							theOffset,
-							theLastUpdated,
-							theSortSpec);
+							theRequestDetails, theId, theCount, theOffset, theLastUpdated, theSortSpec);
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -82,16 +77,17 @@ public abstract class BaseJpaResourceProviderEncounter<T extends IBaseResource> 
 	/**
 	 * /Encounter/$everything
 	 */
+	@SuppressWarnings("unused")
 	@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider EncounterTypeEverything(
 			jakarta.servlet.http.HttpServletRequest theServletRequest,
 			@Description(
-							formalDefinition =
+							value =
 									"Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
 					@OperationParam(name = Constants.PARAM_COUNT, typeName = "unsignedInt")
 					IPrimitiveType<Integer> theCount,
 			@Description(
-							formalDefinition =
+							value =
 									"Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
 					@OperationParam(name = Constants.PARAM_OFFSET, typeName = "unsignedInt")
 					IPrimitiveType<Integer> theOffset,
@@ -106,8 +102,7 @@ public abstract class BaseJpaResourceProviderEncounter<T extends IBaseResource> 
 		startRequest(theServletRequest);
 		try {
 			return ((IFhirResourceDaoEncounter<?>) getDao())
-					.encounterTypeEverything(
-							theServletRequest, theRequestDetails, theCount, theOffset, theLastUpdated, theSortSpec);
+					.encounterTypeEverything(theRequestDetails, theCount, theOffset, theLastUpdated, theSortSpec);
 		} finally {
 			endRequest(theServletRequest);
 		}

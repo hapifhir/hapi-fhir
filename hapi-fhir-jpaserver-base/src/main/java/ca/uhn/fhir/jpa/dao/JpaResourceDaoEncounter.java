@@ -30,7 +30,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -42,7 +41,6 @@ public class JpaResourceDaoEncounter<T extends IBaseResource> extends BaseHapiFh
 
 	@Override
 	public IBundleProvider encounterInstanceEverything(
-			HttpServletRequest theServletRequest,
 			RequestDetails theRequest,
 			IIdType theId,
 			IPrimitiveType<Integer> theCount,
@@ -82,13 +80,11 @@ public class JpaResourceDaoEncounter<T extends IBaseResource> extends BaseHapiFh
 
 	@Override
 	public IBundleProvider encounterTypeEverything(
-			HttpServletRequest theServletRequest,
 			RequestDetails theRequest,
 			IPrimitiveType<Integer> theCount,
 			IPrimitiveType<Integer> theOffset,
 			DateRangeParam theLastUpdated,
 			SortSpec theSort) {
-		return encounterInstanceEverything(
-				theServletRequest, theRequest, null, theCount, theOffset, theLastUpdated, theSort);
+		return encounterInstanceEverything(theRequest, null, theCount, theOffset, theLastUpdated, theSort);
 	}
 }
