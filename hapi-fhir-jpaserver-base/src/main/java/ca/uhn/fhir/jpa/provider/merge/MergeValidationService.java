@@ -57,7 +57,6 @@ import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTIT
 public class MergeValidationService {
 	private final FhirContext myFhirContext;
 	private final DaoRegistry myDaoRegistry;
-	private final MergeOperationInputParameterNames myInputParamNames;
 	private final ResourceLinkServiceFactory myResourceLinkServiceFactory;
 	private final FhirTerser myFhirTerser;
 
@@ -68,7 +67,6 @@ public class MergeValidationService {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
 		myResourceLinkServiceFactory = theResourceLinkServiceFactory;
-		myInputParamNames = new MergeOperationInputParameterNames();
 		myFhirTerser = myFhirContext.newTerser();
 	}
 
@@ -77,21 +75,25 @@ public class MergeValidationService {
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome) {
 
+		// Initialize parameter names based on operation type
+		MergeOperationInputParameterNames parameterNames =
+				MergeOperationInputParameterNames.forOperation(theRequestDetails.getOperation());
+
 		IBaseOperationOutcome operationOutcome = theMergeOutcome.getOperationOutcome();
 
-		if (!validateCommonMergeOperationParameters(theMergeOperationParameters, operationOutcome)) {
+		if (!validateCommonMergeOperationParameters(theMergeOperationParameters, operationOutcome, parameterNames)) {
 			return MergeValidationResult.invalidResult(STATUS_HTTP_400_BAD_REQUEST);
 		}
 
 		IBaseResource sourceResource =
-				resolveSourceResource(theMergeOperationParameters, theRequestDetails, operationOutcome);
+				resolveSourceResource(theMergeOperationParameters, theRequestDetails, operationOutcome, parameterNames);
 
 		if (sourceResource == null) {
 			return MergeValidationResult.invalidResult(STATUS_HTTP_422_UNPROCESSABLE_ENTITY);
 		}
 
 		IBaseResource targetResource =
-				resolveTargetResource(theMergeOperationParameters, theRequestDetails, operationOutcome);
+				resolveTargetResource(theMergeOperationParameters, theRequestDetails, operationOutcome, parameterNames);
 
 		if (targetResource == null) {
 			return MergeValidationResult.invalidResult(STATUS_HTTP_422_UNPROCESSABLE_ENTITY);
@@ -102,7 +104,11 @@ public class MergeValidationService {
 		}
 
 		if (!validateResultResourceIfExists(
-				theMergeOperationParameters, (Patient) targetResource, (Patient) sourceResource, operationOutcome)) {
+				theMergeOperationParameters,
+				(Patient) targetResource,
+				(Patient) sourceResource,
+				operationOutcome,
+				parameterNames)) {
 			return MergeValidationResult.invalidResult(STATUS_HTTP_400_BAD_REQUEST);
 		}
 		return MergeValidationResult.validResult(sourceResource, targetResource);
@@ -112,7 +118,8 @@ public class MergeValidationService {
 			MergeOperationInputParameters theMergeOperationParameters,
 			Patient theResolvedTargetResource,
 			Patient theResolvedSourceResource,
-			IBaseOperationOutcome theOperationOutcome) {
+			IBaseOperationOutcome theOperationOutcome,
+			MergeOperationInputParameterNames theParameterNames) {
 
 		if (theMergeOperationParameters.getResultResource() == null) {
 			// result resource is not provided, no further validation is needed
@@ -128,7 +135,7 @@ public class MergeValidationService {
 			String msg = String.format(
 					"'%s' must have the same versionless id as the actual resolved target resource '%s'. "
 							+ "The actual resolved target resource's id is: '%s'",
-					myInputParamNames.getResultResourceParameterName(),
+					theParameterNames.getResultResourceParameterName(),
 					theResultResource.getIdElement(),
 					theResolvedTargetResource.getIdElement().toVersionless().getValue());
 			addErrorToOperationOutcome(myFhirContext, theOperationOutcome, msg, "invalid");
@@ -140,8 +147,8 @@ public class MergeValidationService {
 				&& !hasAllIdentifiers(theResultResource, theMergeOperationParameters.getTargetIdentifiers())) {
 			String msg = String.format(
 					"'%s' must have all the identifiers provided in %s",
-					myInputParamNames.getResultResourceParameterName(),
-					myInputParamNames.getTargetIdentifiersParameterName());
+					theParameterNames.getResultResourceParameterName(),
+					theParameterNames.getTargetIdentifiersParameterName());
 			addErrorToOperationOutcome(myFhirContext, theOperationOutcome, msg, "invalid");
 			retval = false;
 		}
@@ -153,7 +160,7 @@ public class MergeValidationService {
 		if (!validateResultResourceReplacesLinkToSourceResource(
 				theResultResource,
 				theResolvedSourceResource,
-				myInputParamNames.getResultResourceParameterName(),
+				theParameterNames.getResultResourceParameterName(),
 				theMergeOperationParameters.getDeleteSource(),
 				theOperationOutcome)) {
 			retval = false;
@@ -301,17 +308,20 @@ public class MergeValidationService {
 	 *
 	 * @param theCommonInputParameters the operation input parameters
 	 * @param theOutcome the outcome to add validation errors to
+	 * @param theParameterNames the parameter names for the operation
 	 * @return true if the parameters are valid, false otherwise
 	 */
 	boolean validateCommonMergeOperationParameters(
-			MergeOperationsCommonInputParameters theCommonInputParameters, IBaseOperationOutcome theOutcome) {
+			MergeOperationsCommonInputParameters theCommonInputParameters,
+			IBaseOperationOutcome theOutcome,
+			MergeOperationInputParameterNames theParameterNames) {
 		List<String> errorMessages = new ArrayList<>();
 		if (!theCommonInputParameters.hasAtLeastOneSourceIdentifier()
 				&& theCommonInputParameters.getSourceResource() == null) {
 			String msg = String.format(
 					"There are no source resource parameters provided, include either a '%s', or a '%s' parameter.",
-					myInputParamNames.getSourceResourceParameterName(),
-					myInputParamNames.getSourceIdentifiersParameterName());
+					theParameterNames.getSourceResourceParameterName(),
+					theParameterNames.getSourceIdentifiersParameterName());
 			errorMessages.add(msg);
 		}
 
@@ -320,8 +330,8 @@ public class MergeValidationService {
 				&& theCommonInputParameters.getSourceResource() != null) {
 			String msg = String.format(
 					"Source resource must be provided either by '%s' or by '%s', not both.",
-					myInputParamNames.getSourceResourceParameterName(),
-					myInputParamNames.getSourceIdentifiersParameterName());
+					theParameterNames.getSourceResourceParameterName(),
+					theParameterNames.getSourceIdentifiersParameterName());
 			errorMessages.add(msg);
 		}
 
@@ -329,8 +339,8 @@ public class MergeValidationService {
 				&& theCommonInputParameters.getTargetResource() == null) {
 			String msg = String.format(
 					"There are no target resource parameters provided, include either a '%s', or a '%s' parameter.",
-					myInputParamNames.getTargetResourceParameterName(),
-					myInputParamNames.getTargetIdentifiersParameterName());
+					theParameterNames.getTargetResourceParameterName(),
+					theParameterNames.getTargetIdentifiersParameterName());
 			errorMessages.add(msg);
 		}
 
@@ -339,8 +349,8 @@ public class MergeValidationService {
 				&& theCommonInputParameters.getTargetResource() != null) {
 			String msg = String.format(
 					"Target resource must be provided either by '%s' or by '%s', not both.",
-					myInputParamNames.getTargetResourceParameterName(),
-					myInputParamNames.getTargetIdentifiersParameterName());
+					theParameterNames.getTargetResourceParameterName(),
+					theParameterNames.getTargetIdentifiersParameterName());
 			errorMessages.add(msg);
 		}
 
@@ -348,7 +358,7 @@ public class MergeValidationService {
 		if (sourceRef != null && !sourceRef.hasReference()) {
 			String msg = String.format(
 					"Reference specified in '%s' parameter does not have a reference element.",
-					myInputParamNames.getSourceResourceParameterName());
+					theParameterNames.getSourceResourceParameterName());
 			errorMessages.add(msg);
 		}
 
@@ -356,7 +366,7 @@ public class MergeValidationService {
 		if (targetRef != null && !targetRef.hasReference()) {
 			String msg = String.format(
 					"Reference specified in '%s' parameter does not have a reference element.",
-					myInputParamNames.getTargetResourceParameterName());
+					theParameterNames.getTargetResourceParameterName());
 			errorMessages.add(msg);
 		}
 
@@ -375,27 +385,29 @@ public class MergeValidationService {
 	private IBaseResource resolveSourceResource(
 			MergeOperationsCommonInputParameters theOperationParameters,
 			RequestDetails theRequestDetails,
-			IBaseOperationOutcome theOutcome) {
+			IBaseOperationOutcome theOutcome,
+			MergeOperationInputParameterNames theParameterNames) {
 		return resolveResource(
 				theOperationParameters.getSourceResource(),
 				theOperationParameters.getSourceIdentifiers(),
 				theRequestDetails,
 				theOutcome,
-				myInputParamNames.getSourceResourceParameterName(),
-				myInputParamNames.getSourceIdentifiersParameterName());
+				theParameterNames.getSourceResourceParameterName(),
+				theParameterNames.getSourceIdentifiersParameterName());
 	}
 
 	protected IBaseResource resolveTargetResource(
 			MergeOperationsCommonInputParameters theOperationParameters,
 			RequestDetails theRequestDetails,
-			IBaseOperationOutcome theOutcome) {
+			IBaseOperationOutcome theOutcome,
+			MergeOperationInputParameterNames theParameterNames) {
 		return resolveResource(
 				theOperationParameters.getTargetResource(),
 				theOperationParameters.getTargetIdentifiers(),
 				theRequestDetails,
 				theOutcome,
-				myInputParamNames.getTargetResourceParameterName(),
-				myInputParamNames.getTargetIdentifiersParameterName());
+				theParameterNames.getTargetResourceParameterName(),
+				theParameterNames.getTargetIdentifiersParameterName());
 	}
 
 	private IBaseResource resolveResource(

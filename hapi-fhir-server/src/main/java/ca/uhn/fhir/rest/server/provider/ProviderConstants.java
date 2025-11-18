@@ -295,6 +295,7 @@ public class ProviderConstants {
 	 * Patient $merge operation parameters (specific to Patient/$merge)
 	 */
 	public static final String OPERATION_MERGE_PARAM_SOURCE_PATIENT = "source-patient";
+
 	public static final String OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER = "source-patient-identifier";
 	public static final String OPERATION_MERGE_PARAM_TARGET_PATIENT = "target-patient";
 	public static final String OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER = "target-patient-identifier";
@@ -314,6 +315,7 @@ public class ProviderConstants {
 	 * The following are common to Patient/$merge and  $hapi-fhir-merge (resource agnostic merge)
 	 */
 	public static final String OPERATION_MERGE_PARAM_BATCH_SIZE = "batch-size";
+
 	public static final String OPERATION_MERGE_PARAM_PREVIEW = "preview";
 	public static final String OPERATION_MERGE_PARAM_DELETE_SOURCE = "delete-source";
 	public static final String OPERATION_MERGE_OUTPUT_PARAM_INPUT = "input";

@@ -47,7 +47,9 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 
 	public MergeProvenanceSvc(DaoRegistry theDaoRegistry) {
 		super(theDaoRegistry);
-		myInputParamNames = new MergeOperationInputParameterNames();
+		// Currently only supports Patient merge operations
+		// TODO: Make this operation-aware when generic merge provenance is fully implemented
+		myInputParamNames = new PatientMergeOperationInputParameterNames();
 	}
 
 	@Override

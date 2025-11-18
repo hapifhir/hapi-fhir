@@ -301,8 +301,9 @@ public class ResourceMergeService implements IGenericResourceMergeService {
 			MergeOperationOutcome theMergeOutcome,
 			RequestPartitionId thePartitionId) {
 
+		String operationName = theRequestDetails.getOperation();
 		MergeJobParameters mergeJobParameters = theMergeOperationParameters.asMergeJobParameters(
-				myFhirContext, myStorageSettings, theSourceResource, theTargetResource, thePartitionId);
+				myFhirContext, myStorageSettings, theSourceResource, theTargetResource, thePartitionId, operationName);
 
 		Task task = myBatch2TaskHelper.startJobAndCreateAssociatedTask(
 				myTaskDao, theRequestDetails, myJobCoordinator, JOB_MERGE, mergeJobParameters);
