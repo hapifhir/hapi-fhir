@@ -43,13 +43,9 @@ import java.util.List;
 public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 
 	private static final String ACTIVITY_CODE_MERGE = "merge";
-	private final MergeOperationInputParameterNames myInputParamNames;
 
 	public MergeProvenanceSvc(DaoRegistry theDaoRegistry) {
 		super(theDaoRegistry);
-		// Currently only supports Patient merge operations
-		// TODO: Make this operation-aware when generic merge provenance is fully implemented
-		myInputParamNames = new PatientMergeOperationInputParameterNames();
 	}
 
 	@Override
@@ -84,12 +80,19 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 
 	/**
 	 * Finds a Provenance with the activity code "merge" that has the given target id and source identifiers.
+	 * @param theTargetId the target resource id
+	 * @param theSourceIdentifiers the source identifiers to match
+	 * @param theRequestDetails the request details
+	 * @param theParameterNames the parameter names for the specific operation
 	 * @return the Provenance resource if matching one is found, or null if not found.
 	 */
 	@Nullable
 	public Provenance findProvenanceByTargetIdAndSourceIdentifiers(
-			IIdType theTargetId, List<CanonicalIdentifier> theSourceIdentifiers, RequestDetails theRequestDetails) {
-		String sourceIdentifierParameterName = myInputParamNames.getSourceIdentifiersParameterName();
+			IIdType theTargetId,
+			List<CanonicalIdentifier> theSourceIdentifiers,
+			RequestDetails theRequestDetails,
+			MergeOperationInputParameterNames theParameterNames) {
+		String sourceIdentifierParameterName = theParameterNames.getSourceIdentifiersParameterName();
 		List<Provenance> provenances =
 				getProvenancesOfTargetsFilteredByActivity(List.of(theTargetId), theRequestDetails);
 		// the input parameters must be the first contained resource in Provenance's contained resources,
