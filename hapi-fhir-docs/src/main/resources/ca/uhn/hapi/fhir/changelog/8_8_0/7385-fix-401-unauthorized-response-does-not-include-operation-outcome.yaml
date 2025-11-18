@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7385
+jira: SMILE-11170
+title: "The HTTP 401 Unauthorized response now returns a FHIR OperationOutcome resource instead of a plain text message. 
+This ensures compliance with Inferno ONC Certification expectations by resolving response body parsing failures."
