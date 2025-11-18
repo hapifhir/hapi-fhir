@@ -88,7 +88,7 @@ public class Icd10CmLoader {
 		concept.setCode(code);
 		concept.setDisplay(display);
 
-		// Check for a seventh character definitions. If one does not exist at this level,
+		// Check for seventh character definitions. If none exist at this level,
 		// use seventh character definitions inherited from parent level.
 		if (!XmlUtil.getChildrenByTagName(theDiagElement, SEVEN_CHR_DEF).isEmpty()) {
 			mySevenChrDef = XmlUtil.getChildrenByTagName(theDiagElement, SEVEN_CHR_DEF);
