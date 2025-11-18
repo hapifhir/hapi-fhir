@@ -19,36 +19,60 @@
  */
 package ca.uhn.fhir.merge;
 
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_DELETE_SOURCE;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_RESULT_PATIENT;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_PATIENT;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_TARGET_PATIENT;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_UNDO_MERGE;
 
-public class MergeOperationInputParameterNames {
+/**
+ * Abstract base class for merge operation input parameter names.
+ * Provides parameter names for different merge operations:
+ * - Patient-specific: {@code $merge} and {@code $hapi.fhir.undo-merge}
+ * - Generic: {@code $hapi-fhir-merge} (and future {@code $hapi.fhir.undo-merge} for non-Patient resources)
+ */
+public abstract class MergeOperationInputParameterNames {
 
-	public String getSourceResourceParameterName() {
-		return OPERATION_MERGE_PARAM_SOURCE_PATIENT;
+	/**
+	 * Factory method to get the appropriate parameter names implementation for a given operation.
+	 *
+	 * @param theOperationName the operation name (e.g., "$merge", "$hapi-fhir-merge", "$hapi.fhir.undo-merge"), or null for default (Patient merge)
+	 * @return the appropriate implementation for the operation
+	 */
+	public static MergeOperationInputParameterNames forOperation(String theOperationName) {
+		if (theOperationName == null
+				|| OPERATION_MERGE.equals(theOperationName)
+				|| OPERATION_UNDO_MERGE.equals(theOperationName)) {
+			return new PatientMergeOperationInputParameterNames();
+		} else {
+			return new GenericMergeOperationInputParameterNames();
+		}
 	}
 
-	public String getTargetResourceParameterName() {
-		return OPERATION_MERGE_PARAM_TARGET_PATIENT;
-	}
+	/**
+	 * @return the parameter name for the source resource (e.g., "source-patient" or "source-resource")
+	 */
+	public abstract String getSourceResourceParameterName();
 
-	public String getSourceIdentifiersParameterName() {
-		return OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER;
-	}
+	/**
+	 * @return the parameter name for the target resource (e.g., "target-patient" or "target-resource")
+	 */
+	public abstract String getTargetResourceParameterName();
 
-	public String getTargetIdentifiersParameterName() {
-		return OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER;
-	}
+	/**
+	 * @return the parameter name for source identifiers (e.g., "source-patient-identifier" or "source-resource-identifier")
+	 */
+	public abstract String getSourceIdentifiersParameterName();
 
-	public String getResultResourceParameterName() {
-		return OPERATION_MERGE_PARAM_RESULT_PATIENT;
-	}
+	/**
+	 * @return the parameter name for target identifiers (e.g., "target-patient-identifier" or "target-resource-identifier")
+	 */
+	public abstract String getTargetIdentifiersParameterName();
 
-	public String getDeleteSourceParameterName() {
-		return OPERATION_MERGE_PARAM_DELETE_SOURCE;
-	}
+	/**
+	 * @return the parameter name for the result resource (e.g., "result-patient" or "result-resource")
+	 */
+	public abstract String getResultResourceParameterName();
+
+	/**
+	 * @return the parameter name for the delete source flag (always "delete-source")
+	 */
+	public abstract String getDeleteSourceParameterName();
 }

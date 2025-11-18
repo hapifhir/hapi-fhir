@@ -102,7 +102,8 @@ public class MergeOperationInputParameters extends MergeOperationsCommonInputPar
 			JpaStorageSettings theStorageSettings,
 			IBaseResource theSourceResource,
 			IBaseResource theTargetResource,
-			RequestPartitionId thePartitionId) {
+			RequestPartitionId thePartitionId,
+			String theOperationName) {
 		MergeJobParameters retval = new MergeJobParameters();
 		retval.setOriginalInputParameters(
 				theFhirContext.newJsonParser().encodeResourceToString(myOriginalInputParameters));
@@ -112,6 +113,7 @@ public class MergeOperationInputParameters extends MergeOperationsCommonInputPar
 		retval.setPartitionId(thePartitionId);
 		retval.setProvenanceAgents(ProvenanceAgentJson.from(myProvenanceAgents, theFhirContext));
 		retval.setCreateProvenance(myCreateProvenance);
+		retval.setOperationName(theOperationName);
 		return retval;
 	}
 
