@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
@@ -26,6 +27,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -36,9 +38,12 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 @ContextConfiguration(classes = {MdmHelperConfig.class})
 public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
+
+	private static final Logger ourLog = getLogger(MdmSearchExpandingInterceptorIT.class);
 
 	@RegisterExtension
 	@Autowired
@@ -264,6 +269,32 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		map.add(Observation.SP_SUBJECT, new ReferenceParam("Patient/" + id).setMdmExpand(true));
 		IBundleProvider search = myObservationDao.search(map, mySrd);
 		assertEquals(1, search.size());
+	}
+
+	@Test
+	public void testChainedReferenceSearch_whenMdmExpansionEnabled_shouldGetSearchResult() throws InterruptedException {
+		// setup
+		myStorageSettings.setAllowMdmExpansion(true);
+
+		Patient patient = buildResource(("Patient"), withIdentifier("http://foo.bar/test", "abc"));
+		String pid = myMdmHelper.executeWithLatch(() -> myMdmHelper.doCreateResource(patient, true)).getId().getIdPart();
+		AllergyIntolerance allergy = new AllergyIntolerance();
+		allergy.setPatient(new Reference("Patient/" + pid));
+		doCreateResource(allergy);
+
+		SearchParameterMap paramMap = new SearchParameterMap();
+		ReferenceParam param = new ReferenceParam("identifier", "http://foo.bar/test|abc");
+		param.setValueAsQueryToken(myFhirContext, "patient", ":Patient.identifier", "http://foo.bar/test|abc");
+		paramMap.add("patient", param);
+
+		// execute
+		myCaptureQueriesListener.clear();
+		IBundleProvider search = myAllergyIntoleranceDao.search(paramMap, mySrd);
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
+
+		// validate
+		assertEquals(1, search.size());
+		ourLog.info(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
 	}
 
 	private Observation createObservationWithSubject(String thePatientId) {

@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 7384
+jira: SMILE-11171
+title: "When MDM expansion search was enabled, search operations with chained references returned 404 Not Found errors.
+  The OperationOutcome in the response indicated that the wrong resource name had been used for the search.
+  This issue has now been resolved.
+  "
