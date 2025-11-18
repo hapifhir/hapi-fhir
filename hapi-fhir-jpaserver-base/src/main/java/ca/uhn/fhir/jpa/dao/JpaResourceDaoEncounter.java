@@ -23,8 +23,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoEncounter;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
-import ca.uhn.fhir.rest.api.CacheControlDirective;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -47,6 +45,7 @@ public class JpaResourceDaoEncounter<T extends IBaseResource> extends BaseHapiFh
 			IPrimitiveType<Integer> theOffset,
 			DateRangeParam theLastUpdated,
 			SortSpec theSort) {
+
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {
 			paramMap.setCount(theCount.getValue());
@@ -70,12 +69,7 @@ public class JpaResourceDaoEncounter<T extends IBaseResource> extends BaseHapiFh
 			paramMap.setLoadSynchronous(true);
 		}
 
-		return mySearchCoordinatorSvc.registerSearch(
-				this,
-				paramMap,
-				getResourceName(),
-				new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL)),
-				theRequest);
+		return search(paramMap, theRequest);
 	}
 
 	@Override
