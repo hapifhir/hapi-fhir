@@ -145,7 +145,7 @@ public class ResourceUndoMergeService {
 		} else {
 			// the client provided source identifiers, find a provenance using those identifiers and the target id
 			provenance = myMergeProvenanceSvc.findProvenanceByTargetIdAndSourceIdentifiers(
-					targetId, inputParameters.getSourceIdentifiers(), theRequestDetails);
+					targetId, inputParameters.getSourceIdentifiers(), theRequestDetails, myInputParamNames);
 		}
 
 		if (provenance == null) {
