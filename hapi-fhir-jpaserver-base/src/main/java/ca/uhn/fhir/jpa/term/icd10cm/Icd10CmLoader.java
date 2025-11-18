@@ -29,6 +29,7 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -37,10 +38,7 @@ public class Icd10CmLoader {
 	private final TermCodeSystemVersion myCodeSystemVersion;
 	private int myConceptCount;
 	private static final String SEVEN_CHR_DEF = "sevenChrDef";
-	private static final String VERSION = "version";
 	private static final String EXTENSION = "extension";
-	private static final String CHAPTER = "chapter";
-	private static final String SECTION = "section";
 	private static final String DIAG = "diag";
 	private static final String NAME = "name";
 	private static final String DESC = "desc";
@@ -70,16 +68,16 @@ public class Icd10CmLoader {
 		for (Element nextChapter : XmlUtil.getChildrenByTagName(documentElement, "chapter")) {
 			for (Element nextSection : XmlUtil.getChildrenByTagName(nextChapter, "section")) {
 				for (Element nextDiag : XmlUtil.getChildrenByTagName(nextSection, "diag")) {
-					extractCode(nextDiag, null);
+					extractCode(nextDiag, null, null);
 				}
 			}
 		}
 	}
 
-	private void extractCode(Element theDiagElement, TermConcept theParentConcept) {
+	private void extractCode(Element theDiagElement, TermConcept theParentConcept, List<Element> theParentSevenChrDef) {
 		String code = theDiagElement.getElementsByTagName(NAME).item(0).getTextContent();
 		String display = theDiagElement.getElementsByTagName(DESC).item(0).getTextContent();
-
+		List<Element> mySevenChrDef = null;
 		TermConcept concept;
 		if (theParentConcept == null) {
 			concept = myCodeSystemVersion.addConcept();
@@ -90,21 +88,46 @@ public class Icd10CmLoader {
 		concept.setCode(code);
 		concept.setDisplay(display);
 
-		for (Element nextChildDiag : XmlUtil.getChildrenByTagName(theDiagElement, DIAG)) {
-			extractCode(nextChildDiag, concept);
-			if (XmlUtil.getChildrenByTagName(theDiagElement, SEVEN_CHR_DEF).size() != 0) {
-				extractExtension(theDiagElement, nextChildDiag, concept);
+		// Check for seventh character definitions. If none exist at this level,
+		// use seventh character definitions inherited from parent level.
+		if (!XmlUtil.getChildrenByTagName(theDiagElement, SEVEN_CHR_DEF).isEmpty()) {
+			mySevenChrDef = XmlUtil.getChildrenByTagName(theDiagElement, SEVEN_CHR_DEF);
+		} else if (theParentSevenChrDef != null) {
+			mySevenChrDef = theParentSevenChrDef.stream().toList();
+		}
+
+		// If this concept has no children, apply the seventh character definitions.
+		// Otherwise create the children.
+		if (mySevenChrDef != null
+				&& XmlUtil.getChildrenByTagName(theDiagElement, DIAG).isEmpty()) {
+			if (theParentConcept == null) {
+				// This is a root concept. Add the extensions as children of the current concept.
+				extractExtension(mySevenChrDef, theDiagElement, concept, true);
+			} else {
+				// This is a child concept. Add the extensions as siblings of the current concept
+				extractExtension(mySevenChrDef, theDiagElement, theParentConcept, false);
+			}
+		} else {
+			for (Element nextChildDiag : XmlUtil.getChildrenByTagName(theDiagElement, DIAG)) {
+				extractCode(nextChildDiag, concept, mySevenChrDef);
 			}
 		}
 
 		myConceptCount++;
 	}
 
-	private void extractExtension(Element theDiagElement, Element theChildDiag, TermConcept theParentConcept) {
-		for (Element nextChrNote : XmlUtil.getChildrenByTagName(theDiagElement, SEVEN_CHR_DEF)) {
+	private void extractExtension(
+			List<Element> theSevenChrDefElement,
+			Element theChildDiag,
+			TermConcept theParentConcept,
+			boolean isRootCode) {
+		for (Element nextChrNote : theSevenChrDefElement) {
 			for (Element nextExtension : XmlUtil.getChildrenByTagName(nextChrNote, EXTENSION)) {
 				String baseCode =
 						theChildDiag.getElementsByTagName(NAME).item(0).getTextContent();
+				if (isRootCode) {
+					baseCode = baseCode + ".";
+				}
 				String sevenChar = nextExtension.getAttributes().item(0).getNodeValue();
 				String baseDef = theChildDiag.getElementsByTagName(DESC).item(0).getTextContent();
 				String sevenCharDef = nextExtension.getTextContent();
@@ -127,12 +150,10 @@ public class Icd10CmLoader {
 	 */
 	private String getExtendedCode(String theBaseCode, String theSevenChar) {
 		String placeholder = "X";
-		String code = theBaseCode;
-		for (int i = code.length(); i < 7; i++) {
-			code += placeholder;
-		}
-		code += theSevenChar;
-		return code;
+		StringBuilder code = new StringBuilder(theBaseCode);
+		code.append(placeholder.repeat(Math.max(0, 7 - code.length())));
+		code.append(theSevenChar);
+		return code.toString();
 	}
 
 	public int getConceptCount() {
