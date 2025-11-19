@@ -22,11 +22,17 @@ package ca.uhn.fhir.jpa.packages;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.repository.SearchConverter;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import com.google.common.collect.Multimap;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class NpmJpaValidationSupport implements IValidationSupport {
 
@@ -54,6 +60,21 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 	@Override
 	public IBaseResource fetchStructureDefinition(String theUri) {
 		return fetchResource("StructureDefinition", theUri);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends IBaseResource> T fetchResource(@Nullable Class<T> theClass, String theUri) {
+		if (theClass != null) {
+			String resourceType = myFhirContext.getResourceType(theClass);
+			// we can cast safely because the resource type must match what we're passing in.
+			// we aren't loading different versions of FHIR after all (since what we
+			// load is dependent on the fhir context too)
+			return (T) fetchResource(resourceType, theUri);
+		}
+
+		// no class
+		return null;
 	}
 
 	@Nullable
