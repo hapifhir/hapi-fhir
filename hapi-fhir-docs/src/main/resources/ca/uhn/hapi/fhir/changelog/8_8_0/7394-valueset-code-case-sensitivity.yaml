@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 7394
+title: "Fixed an issue where ValueSet expansion did not properly handle case-sensitive codes that differ only in case. When a case-sensitive CodeSystem contained codes like Drug and drug, and a ValueSet explicitly included both codes, the expansion would previously return only one code instead of both. This has been corrected."
