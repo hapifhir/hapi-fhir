@@ -45,10 +45,8 @@ import ca.uhn.fhir.rest.api.server.IFhirVersionServer;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
@@ -99,7 +97,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -1211,23 +1208,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			hookParams.add(ServletRequestDetails.class, requestDetails);
 			myInterceptorService.callHooks(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY, hookParams);
 
-		} catch (NotModifiedException | AuthenticationException e) {
-
-			unhandledException = e;
-
-			HookParams handleExceptionParams = new HookParams();
-			handleExceptionParams.add(RequestDetails.class, requestDetails);
-			handleExceptionParams.add(ServletRequestDetails.class, requestDetails);
-			handleExceptionParams.add(HttpServletRequest.class, theRequest);
-			handleExceptionParams.add(HttpServletResponse.class, theResponse);
-			handleExceptionParams.add(BaseServerResponseException.class, e);
-			if (!myInterceptorService.callHooks(Pointcut.SERVER_HANDLE_EXCEPTION, handleExceptionParams)) {
-				return;
-			}
-
-			writeExceptionToResponse(theResponse, e);
-			unhandledException = null;
-
 		} catch (Throwable e) {
 
 			unhandledException = e;
@@ -2073,26 +2053,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		while (theProviders.size() > 0) {
 			unregisterProvider(theProviders.get(0));
 		}
-	}
-
-	private void writeExceptionToResponse(HttpServletResponse theResponse, BaseServerResponseException theException)
-			throws IOException {
-		theResponse.setStatus(theException.getStatusCode());
-		addHeadersToResponse(theResponse);
-		if (theException.hasResponseHeaders()) {
-			for (Entry<String, List<String>> nextEntry :
-					theException.getResponseHeaders().entrySet()) {
-				for (String nextValue : nextEntry.getValue()) {
-					if (isNotBlank(nextValue)) {
-						theResponse.addHeader(nextEntry.getKey(), nextValue);
-					}
-				}
-			}
-		}
-		theResponse.setContentType("text/plain");
-		theResponse.setCharacterEncoding("UTF-8");
-		String message = UrlUtil.sanitizeUrlPart(theException.getMessage());
-		theResponse.getWriter().write(message);
 	}
 
 	/**
