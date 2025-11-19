@@ -94,9 +94,11 @@ public class JpaSearchParamCache {
 
 	public List<RuntimeSearchParam> getActiveComboSearchParams(
 			String theResourceName, ComboSearchParamType theParamType) {
-		return getActiveComboSearchParams(theResourceName).stream()
+		List<RuntimeSearchParam> activeComboSearchParams = getActiveComboSearchParams(theResourceName);
+		List<RuntimeSearchParam> retVal = activeComboSearchParams.stream()
 				.filter(param -> Objects.equals(theParamType, param.getComboSearchParamType()))
 				.collect(Collectors.toList());
+		return retVal;
 	}
 
 	public Optional<RuntimeSearchParam> getActiveComboSearchParamById(String theResourceName, IIdType theId) {
@@ -250,7 +252,7 @@ public class JpaSearchParamCache {
 			}
 			// handle Uplifted Ref Chain Search Parameters
 			theRuntimeSearchParam.getUpliftRefchainCodes().stream()
-					.map(urCode -> String.format("%s.%s", theRuntimeSearchParam.getName(), urCode))
+					.map(urCode -> theRuntimeSearchParam.getName() + "." + urCode)
 					.forEach(urSpName ->
 							addIndexedSearchParam(theResourceName, theHashIdentityToIndexedSearchParams, urSpName));
 		}

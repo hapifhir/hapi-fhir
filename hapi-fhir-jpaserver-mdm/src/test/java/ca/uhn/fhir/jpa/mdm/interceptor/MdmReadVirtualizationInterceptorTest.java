@@ -21,11 +21,13 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -76,7 +78,7 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 	}
 
 	@Override
-	@BeforeEach
+	@AfterEach
 	public void after() throws IOException {
 		super.after();
 		myInterceptorRegistry.unregisterInterceptor(myInterceptor);
@@ -335,6 +337,38 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 			myObservationReferencingSourcePatientA0Id.getValue(),
 			myObservationReferencingSourcePatientA1Id.getValue(),
 			myObservationReferencingSourcePatientA2Id.getValue()
+		);
+
+	}
+
+	@Test
+	public void testSearch_Observation_chainReferencesAreLeftAlone() {
+		// Setup
+		HumanName name  = new HumanName();
+		name.addGiven("Firstname").setFamily("Lastname");
+		Patient patient = createPatient(new Patient().setActive(true).addName(name));
+		IIdType patientId = patient.getIdElement();
+
+		registerVirtualizationInterceptor();
+		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.SEARCH_TYPE);
+
+		IIdType obsId = createObservation(withSubject(patientId), withObservationCode("http://foo", "code0")).toUnqualifiedVersionless();
+		Observation obs = myObservationDao.read(obsId, mySrd);
+
+		logAllResourceLinks();
+
+		// Test
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		//  ReferenceParam(String theChain, String theValue)
+		params.add(Observation.SP_SUBJECT, new ReferenceParam("name", name.getFamily()));
+		params.addInclude(Observation.INCLUDE_PATIENT);
+		IBundleProvider outcome = myObservationDao.search(params, mySrd);
+
+		// Verify
+		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
+		assertThat(ids).asList().containsExactlyInAnyOrder(
+			patientId.toUnqualifiedVersionless().getValue(),
+			obsId.getValue()
 		);
 
 	}

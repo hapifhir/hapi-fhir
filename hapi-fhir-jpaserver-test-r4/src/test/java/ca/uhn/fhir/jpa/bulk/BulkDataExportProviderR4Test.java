@@ -44,6 +44,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
@@ -391,6 +392,7 @@ public class BulkDataExportProviderR4Test {
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response content: {}", responseContent);
 			assertThat(responseContent).contains("\"diagnostics\": \"Some Error Message\"");
+			assertThat(responseContent).contains(OperationOutcome.IssueType.PROCESSING.toCode());
 		}
 	}
 
@@ -1091,6 +1093,7 @@ public class BulkDataExportProviderR4Test {
 			// content would be blank, since the job is cancelled, so no
 			ourLog.info("Response content: {}", responseContent);
 			assertThat(responseContent).contains("was already cancelled or has completed.");
+			assertThat(responseContent).contains(OperationOutcome.IssueType.NOTFOUND.toCode());
 		}
 	}
 
@@ -1122,6 +1125,7 @@ public class BulkDataExportProviderR4Test {
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response content: {}", responseContent);
 			assertThat(responseContent).contains("was cancelled.  No status to report.");
+			assertThat(responseContent).contains(OperationOutcome.IssueType.NOTFOUND.toCode());
 		}
 	}
 
@@ -1146,13 +1150,49 @@ public class BulkDataExportProviderR4Test {
 		// Execute
 		try (CloseableHttpResponse response = myClient.execute(httpGet)) {
 			// Verify
-			ourLog.debug("Response: {}", response);
+			ourLog.debug("Response: {}", response.getEntity());
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.SC_NOT_FOUND);
 			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Not Found");
+			assertThat(responseContent).contains(OperationOutcome.IssueType.NOTFOUND.toCode());
 			assertThat(responseContent).contains("was cancelled.  No status to report.");
 		}
 	}
+
+	@Test
+	public void testGetBulkExportByGroupId_urlParamNotEncoded_resultShouldBeFilteredByCriteria() throws IOException {
+		// Setup
+		when(myJobCoordinator.startInstance(isNotNull(), any())).thenReturn(createJobStartResponse(G_JOB_ID));
+
+		String url = myServer.getBaseUrl() + "/" + GROUP_ID + "/" + ProviderConstants.OPERATION_EXPORT
+			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + Constants.CT_FHIR_NDJSON
+			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=Patient,Observation"
+			+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=Patient?gender=male"
+			+ "&" + JpaConstants.PARAM_EXPORT_MDM + "=true";
+
+		HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		ourLog.info("Request: {}", url);
+
+		// Execute
+		try (CloseableHttpResponse response = myClient.execute(get)) {
+			ourLog.info("Response: {}", response.toString());
+
+			// Verify
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.SC_ACCEPTED);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+			assertThat(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue())
+				.isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID);
+
+			BulkExportJobParameters params = verifyJobStartAndReturnParameters();
+			assertThat(params.getGroupId()).isEqualTo(GROUP_ID);
+			assertThat(params.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
+			assertThat(params.getResourceTypes()).containsExactlyInAnyOrder("Patient", "Observation");
+			assertThat(params.getFilters()).contains("Patient?gender=male");
+			assertThat(params.isExpandMdm()).isTrue();
+		}
+	}
+
 
 	@ParameterizedTest
 	@ValueSource(strings = {

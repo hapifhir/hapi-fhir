@@ -474,7 +474,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			TransactionDetails theTransactionDetails) {
 		StopWatch w = new StopWatch();
 
-		preProcessResourceForStorage(theResource);
 		preProcessResourceForStorage(theResource, theRequest, theTransactionDetails, thePerformIndexing);
 
 		ResourceTable entity = new ResourceTable();
@@ -1352,7 +1351,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.withRequestPartitionId(requestPartitionId)
 				.execute(() -> {
 					IIdType id = theId.withResourceType(myResourceName).toUnqualifiedVersionless();
-					BaseHasResource entity = readEntity(id, true, theRequest, requestPartitionId);
+					BaseHasResource entity = readEntity(id, requestPartitionId);
 
 					return myPersistedJpaBundleProviderFactory.history(
 							theRequest,
@@ -1382,7 +1381,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.withRequestPartitionId(requestPartitionId)
 				.execute(() -> {
 					IIdType id = theId.withResourceType(myResourceName).toUnqualifiedVersionless();
-					BaseHasResource entity = readEntity(id, true, theRequest, requestPartitionId);
+					BaseHasResource entity = readEntity(id, requestPartitionId);
 
 					return myPersistedJpaBundleProviderFactory.history(
 							theRequest,
@@ -1474,7 +1473,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		TransactionDetails transactionDetails = new TransactionDetails();
 
 		StopWatch w = new StopWatch();
-		BaseHasResource entity = readEntity(theResourceId, true, theRequest, theRequestPartitionId);
+		BaseHasResource entity = readEntity(theResourceId, theRequestPartitionId);
 
 		if (isNull(entity)) {
 			throw new ResourceNotFoundException(Msg.code(1993) + theResourceId);
@@ -1521,7 +1520,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		TransactionDetails transactionDetails = new TransactionDetails();
 		StopWatch w = new StopWatch();
 
-		BaseHasResource entity = readEntity(theResourceId, true, theRequest, theRequestPartitionId);
+		BaseHasResource entity = readEntity(theResourceId, theRequestPartitionId);
 
 		if (isNull(entity)) {
 			throw new ResourceNotFoundException(Msg.code(1994) + theResourceId);
@@ -1547,19 +1546,25 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, IIdType theId, RequestDetails theRequest) {
-		return myTransactionService.withRequest(theRequest).execute(() -> {
-			Set<TagDefinition> tagDefs = new HashSet<>();
-			BaseHasResource<?> entity = readEntity(theId, theRequest);
-			for (BaseTag next : entity.getTags()) {
-				tagDefs.add(next.getTag());
-			}
-			MT retVal = toMetaDt(theType, tagDefs);
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
+				theRequest, myResourceName, theId);
 
-			retVal.setLastUpdated(entity.getUpdatedDate());
-			retVal.setVersionId(Long.toString(entity.getVersion()));
+		return myTransactionService
+				.withRequest(theRequest)
+				.withRequestPartitionId(requestPartitionId)
+				.execute(() -> {
+					Set<TagDefinition> tagDefs = new HashSet<>();
+					BaseHasResource<?> entity = readEntity(theId, requestPartitionId);
+					for (BaseTag next : entity.getTags()) {
+						tagDefs.add(next.getTag());
+					}
+					MT retVal = toMetaDt(theType, tagDefs);
 
-			return retVal;
-		});
+					retVal.setLastUpdated(entity.getUpdatedDate());
+					retVal.setVersionId(Long.toString(entity.getVersion()));
+
+					return retVal;
+				});
 	}
 
 	@Override
@@ -1666,7 +1671,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		StopWatch w = new StopWatch();
-		BaseHasResource<?> entity = readEntity(theId, true, theRequest, theRequestPartitionId);
+		BaseHasResource<?> entity = readEntity(theId, theRequestPartitionId);
 		validateResourceType(entity);
 
 		T retVal = myJpaStorageResourceParser.toResource(theRequest, myResourceType, entity, null, false);
@@ -1720,7 +1725,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myTransactionService
 				.withRequest(theRequest)
 				.withRequestPartitionId(requestPartitionId)
-				.execute(() -> readEntity(theId, true, theRequest, requestPartitionId));
+				.execute(() -> readEntity(theId, requestPartitionId));
 	}
 
 	@Override
@@ -1930,11 +1935,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-	private BaseHasResource<?> readEntity(
-			IIdType theId,
-			boolean theCheckForForcedId,
-			RequestDetails theRequest,
-			RequestPartitionId requestPartitionId) {
+	private BaseHasResource<?> readEntity(IIdType theId, RequestPartitionId requestPartitionId) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
 		BaseHasResource entity;
@@ -2030,10 +2031,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		validateResourceType(entity);
+		validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
 
-		if (theCheckForForcedId) {
-			validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
-		}
 		return entity;
 	}
 

@@ -28,6 +28,7 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
@@ -59,7 +60,7 @@ public class GenerateRangeChunksStep<PT extends PartitionedUrlJobParameters>
 			partitionedUrls.forEach(partitionedUrl -> {
 				ChunkRangeJson chunkRangeJson = new ChunkRangeJson(start, end)
 						.setUrl(partitionedUrl.getUrl())
-						.setPartitionId(partitionedUrl.getRequestPartitionId());
+						.setPartitionId(getRequestPartitionIdForUrl(partitionedUrl));
 				sendChunk(chunkRangeJson, theDataSink);
 			});
 			return RunOutcome.SUCCESS;
@@ -80,5 +81,9 @@ public class GenerateRangeChunksStep<PT extends PartitionedUrlJobParameters>
 				theData.getEnd(),
 				theData.getPartitionId());
 		theDataSink.accept(theData);
+	}
+
+	private RequestPartitionId getRequestPartitionIdForUrl(PartitionedUrl theUrl) {
+		return theUrl.getRequestPartitionId();
 	}
 }

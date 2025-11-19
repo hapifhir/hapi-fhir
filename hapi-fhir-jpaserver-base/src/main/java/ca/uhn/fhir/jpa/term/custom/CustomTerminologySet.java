@@ -153,6 +153,7 @@ public class CustomTerminologySet {
 			for (TermConcept termConcept : code2concept.values()) {
 				if (!theCode2property.isEmpty() && theCode2property.get(termConcept.getCode()) != null) {
 					theCode2property.get(termConcept.getCode()).forEach(property -> {
+						property.setConcept(termConcept);
 						termConcept.getProperties().add(property);
 					});
 				}

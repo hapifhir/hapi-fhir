@@ -227,7 +227,12 @@ public class ExpandResourceAndWriteBinaryStep
 		for (String resourceType : theTypeToIds.keySet()) {
 			List<TypedPidJson> typePidJsonList = theTypeToIds.get(resourceType);
 
-			List<String> idList = convertToStringIds(theRequestPartitionId, resourceType, typePidJsonList);
+			List<IResourcePersistentId<?>> idList = new ArrayList<>();
+			for (TypedPidJson typePid : typePidJsonList) {
+				@SuppressWarnings("unchecked")
+				IResourcePersistentId<?> persistentId = typePid.toPersistentId(myIdHelperService);
+				idList.add(persistentId);
+			}
 
 			consumeHistoryInBatches(
 					resourceType, idList, theRequestPartitionId, theJobParameters, theResourceListConsumer);
@@ -253,7 +258,7 @@ public class ExpandResourceAndWriteBinaryStep
 
 	private void consumeHistoryInBatches(
 			String theResourceType,
-			List<String> theIdList,
+			List<IResourcePersistentId<?>> theIdList,
 			RequestPartitionId theRequestPartitionId,
 			BulkExportJobParameters theJobParameters,
 			Consumer<List<IBaseResource>> theResourceListConsumer) {
@@ -394,7 +399,7 @@ public class ExpandResourceAndWriteBinaryStep
 	 */
 	private IBundleProvider searchForResourcesHistory(
 			String theResourceType,
-			List<String> theIdList,
+			List<IResourcePersistentId<?>> theIdList,
 			RequestPartitionId theRequestPartitionId,
 			BulkExportJobParameters theJobParameters) {
 

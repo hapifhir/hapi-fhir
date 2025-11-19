@@ -33,6 +33,7 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.PhoneticEncoderUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -57,7 +58,6 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.startsWith;
 
 @Service
 public class SearchParameterCanonicalizer {
@@ -313,7 +313,8 @@ public class SearchParameterCanonicalizer {
 					next.getDefinition()
 							.getReferenceElement()
 							.toUnqualifiedVersionless()
-							.getValue()));
+							.getValue(),
+					null));
 		}
 
 		return new RuntimeSearchParam(
@@ -412,7 +413,7 @@ public class SearchParameterCanonicalizer {
 						.filter(e -> HapiExtensions.EXT_SP_UNIQUE.equals(e.getUrl()))
 						.filter(t -> t.getValue() instanceof IPrimitiveType)
 						.map(t -> (IPrimitiveType<?>) t.getValue())
-						.map(t -> t.getValueAsString())
+						.map(IPrimitiveType::getValueAsString)
 						.findFirst()
 						.orElse("");
 		if ("true".equalsIgnoreCase(value)) {
@@ -425,11 +426,22 @@ public class SearchParameterCanonicalizer {
 		for (IBase next : myTerser.getValues(theNextSp, "component")) {
 			String expression = myTerser.getSinglePrimitiveValueOrNull(next, "expression");
 			String definition = myTerser.getSinglePrimitiveValueOrNull(next, "definition");
-			if (startsWith(definition, "/SearchParameter/")) {
+			if (Strings.CS.startsWith(definition, "/SearchParameter/")) {
 				definition = definition.substring(1);
 			}
 
-			components.add(new RuntimeSearchParam.Component(expression, definition));
+			String comboUpliftChain = null;
+			List<? extends IBaseExtension<?, ?>> componentExtensions = ((IBaseHasExtensions) next).getExtension();
+			for (IBaseExtension<?, ?> nextComponentExtension : componentExtensions) {
+				if (HapiExtensions.EXT_SP_COMBO_UPLIFT_CHAIN.equals(nextComponentExtension.getUrl())
+						&& unique == ComboSearchParamType.NON_UNIQUE) {
+					IPrimitiveType<String> upliftChainValue =
+							(IPrimitiveType<String>) nextComponentExtension.getValue();
+					comboUpliftChain = upliftChainValue.getValueAsString();
+				}
+			}
+
+			components.add(new RuntimeSearchParam.Component(expression, definition, comboUpliftChain));
 		}
 
 		return new RuntimeSearchParam(
