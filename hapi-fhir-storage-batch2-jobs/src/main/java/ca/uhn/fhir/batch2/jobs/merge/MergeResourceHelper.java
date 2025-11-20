@@ -197,9 +197,13 @@ public class MergeResourceHelper {
 	 */
 	private void prepareSourceResourceForUpdate(IBaseResource theSourceResource, IBaseResource theTargetResource) {
 		// Set active=false if the resource has an active field
-		List<IBase> activeValues = myFhirTerser.getValues(theSourceResource, "active");
-		if (!activeValues.isEmpty()) {
-			myFhirTerser.setElement(theSourceResource, "active", "false");
+		// Note: Not all resource types have an 'active' field (e.g., Observation doesn't)
+		if (myFhirTerser.fieldExists("active", theSourceResource)) {
+			IPrimitiveType<?> activePrimitive =
+					myFhirTerser.getSingleValueOrNull(theSourceResource, "active", IPrimitiveType.class);
+			if (activePrimitive != null) {
+				activePrimitive.setValueAsString("false");
+			}
 		}
 
 		// Add replaced-by link using appropriate strategy (native Patient.link or extension-based)

@@ -261,10 +261,11 @@ public class MergeValidationService {
 		}
 
 		// Check if target resource has an active field and if it's set to false
-		List<IBase> activeValues = myFhirTerser.getValues(theTargetResource, "active");
-		if (!activeValues.isEmpty()) {
-			IPrimitiveType<?> activePrimitive = (IPrimitiveType<?>) activeValues.get(0);
-			if (Boolean.FALSE.equals(activePrimitive.getValue())) {
+		// Note: Not all resource types have an 'active' field (e.g., Observation doesn't)
+		if (myFhirTerser.fieldExists("active", theTargetResource)) {
+			IPrimitiveType<?> activePrimitive =
+					myFhirTerser.getSingleValueOrNull(theTargetResource, "active", IPrimitiveType.class);
+			if (activePrimitive != null && Boolean.FALSE.equals(activePrimitive.getValue())) {
 				String msg = "Target resource is not active, it must be active to be the target of a merge operation.";
 				addErrorToOperationOutcome(myFhirContext, outcome, msg, "invalid");
 				return false;
