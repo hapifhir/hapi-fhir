@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.packages;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -17,6 +18,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
@@ -229,6 +231,40 @@ public class PackageInstallerSvcImplTest {
 
 
 
+
+	@Test
+	public void testCreateRequestDetailsUsesDefaultPartition() {
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setDefaultPartitionId(42);
+
+		RequestDetails requestDetails = mySvc.createRequestDetails();
+		assertTrue(requestDetails instanceof SystemRequestDetails);
+		SystemRequestDetails systemRequestDetails = (SystemRequestDetails) requestDetails;
+
+		assertEquals(RequestPartitionId.fromPartitionId(42), systemRequestDetails.getRequestPartitionId());
+	}
+
+	@Test
+	public void testInstallPackageUsesDefaultPartition() throws IOException {
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setDefaultPartitionId(7);
+
+		CodeSystem newCodeSystem = new CodeSystem();
+		newCodeSystem.setId("CodeSystem/newcs");
+		newCodeSystem.setUrl("http://partitioned-code-system");
+		newCodeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+
+		PackageInstallationSpec spec = setupResourceInPackage(null, newCodeSystem, myCodeSystemDao);
+
+		mySvc.install(spec);
+
+		verify(myCodeSystemDao).create(any(CodeSystem.class), myRequestDetailsCaptor.capture());
+		RequestDetails requestDetails = myRequestDetailsCaptor.getValue();
+
+		assertTrue(requestDetails instanceof SystemRequestDetails);
+		SystemRequestDetails systemRequestDetails = (SystemRequestDetails) requestDetails;
+		assertEquals(RequestPartitionId.fromPartitionId(7), systemRequestDetails.getRequestPartitionId());
+	}
 
 	@Test
 	public void testDontTryToInstallDuplicateCodeSystem_CodeSystemAlreadyExistsWithDifferentId() throws IOException {
