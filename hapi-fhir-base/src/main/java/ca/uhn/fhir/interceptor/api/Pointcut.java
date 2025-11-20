@@ -1925,7 +1925,7 @@ public enum Pointcut implements IPointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
-	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 8.6)
+	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 8.8.0)
 	 * </li>
 	 * </ul>
 	 * <p>
