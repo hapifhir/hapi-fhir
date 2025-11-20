@@ -11,14 +11,10 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
-import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.junit.jupiter.api.AfterEach;
@@ -34,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test {
+public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test{
 	@Autowired
 	private IMdmSettings myMdmSettings;
 
@@ -43,7 +39,7 @@ public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test {
 	private RequestTenantPartitionInterceptor requestTenantPartitionInterceptor;
 
 	@Override
-	@BeforeEach
+    @BeforeEach
 	public void before() throws Exception {
 		super.before();
 
