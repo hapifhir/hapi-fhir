@@ -1885,6 +1885,9 @@ public enum Pointcut implements IPointcut {
 	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 8.8.0)
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks must return an instance of <code>ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse</code>.
@@ -1896,7 +1899,8 @@ public enum Pointcut implements IPointcut {
 			"ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse",
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"org.hl7.fhir.instance.model.api.IBaseBundle"),
+			"org.hl7.fhir.instance.model.api.IBaseBundle",
+			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1920,6 +1924,9 @@ public enum Pointcut implements IPointcut {
 	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 8.8.0)
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
@@ -1932,7 +1939,8 @@ public enum Pointcut implements IPointcut {
 			void.class,
 			"org.hl7.fhir.instance.model.api.IBaseBundle",
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),
 
 	/**
 	 * <b>Storage Hook:</b>
