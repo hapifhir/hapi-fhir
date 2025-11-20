@@ -1348,7 +1348,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	private ValueSet.ConceptReferenceComponent getMatchedConceptIncludedInValueSet(
 			ValueSet.ConceptSetComponent theIncludeOrExclude, TermConcept concept) {
 		return theIncludeOrExclude.getConcept().stream()
-				.filter(includedConcept -> includedConcept.getCode().equals(concept.getCode()))
+				.filter(includedConcept -> includedConcept.getCode().equalsIgnoreCase(concept.getCode()))
 				.findFirst()
 				.orElse(null);
 	}
@@ -1358,7 +1358,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	 */
 	private PredicateFinalStep buildExpansionPredicate(List<String> theCodes, SearchPredicateFactory thePredicate) {
 		assert !theCodes.isEmpty();
-		return thePredicate.terms().field("myCode").matchingAny(theCodes);
+		return thePredicate.simpleQueryString().field("myCode").matching(String.join(" | ", theCodes));
 	}
 
 	private String buildCodeSystemUrlAndVersion(String theSystem, String theIncludeOrExcludeVersion) {
