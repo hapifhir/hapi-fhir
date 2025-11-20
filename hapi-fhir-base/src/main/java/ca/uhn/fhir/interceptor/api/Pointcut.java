@@ -608,8 +608,14 @@ public enum Pointcut implements IPointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
-	 * org.hl7.fhir.instance.model.api.IBaseOperationOutcome - The OperationOutcome resource that will be
-	 * returned.
+	 * org.hl7.fhir.instance.model.api.IBaseOperationOutcome - The OperationOutcome resource that will be returned.
+	 * </ul>
+	 * <li>
+	 * <code>ca.uhn.fhir.rest.api.server.ResponseDetails</code> - A wrapper around the Http Status Code
+	 * and resource that will be used in the response to the caller. The Pointcut may decide to change this value from the default
+	 * value of <b>500</b> representing an <b>Internal Server Error</b>.
+	 * The OperationOutcome is passed for modification directly, and as part of the ResponseDetails parameter.  To replace the response
+	 * resource entirely, use ResponseDetails.setResponseResource().
 	 * </ul>
 	 * <p>
 	 * Hook methods must return <code>void</code>
@@ -619,7 +625,8 @@ public enum Pointcut implements IPointcut {
 			void.class,
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"org.hl7.fhir.instance.model.api.IBaseOperationOutcome"),
+			"org.hl7.fhir.instance.model.api.IBaseOperationOutcome",
+			"ca.uhn.fhir.rest.api.server.ResponseDetails"),
 
 	/**
 	 * <b>Server Hook:</b>
