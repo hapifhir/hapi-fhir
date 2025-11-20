@@ -36,4 +36,4 @@ You then simply have to register the interceptor against your RestfulServer inst
 
 # Demonstration
 
-See the HAPI FHIR Test Server for a demonstration of HAPI FHIR OpenAPI functionality: http://hapi.fhir.org/baseR4/swagger-ui/
+See the HAPI FHIR Test Server for a demonstration of HAPI FHIR OpenAPI functionality: https://hapi.fhir.org/baseR4/swagger-ui/
