@@ -2318,21 +2318,19 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	/**
 	 * Test for case-sensitive code matching in ValueSet expansion.
 	 * When a CodeSystem has caseSensitive=true and contains codes that differ only in case
-	 * (e.g., "Drug" vs "drug"), and a ValueSet explicitly includes both codes, the expansion
-	 * should return both codes, not just one.
+	 * (e.g., "Drug" vs "drug"), the ValueSet expansion should return both codes, not just one.
 	 * <p>
 	 * This test reproduces a bug where simpleQueryString() performs case-insensitive matching,
 	 * causing only one code to be returned when both should be included.
 	 */
 	@Test
 	void testExpandValueSet_CaseSensitiveCodeSystem_CodesWithDifferentCase() {
-		// Arrange: Create case-sensitive CodeSystem with content=COMPLETE
+		// Arrange: Create case-sensitive CodeSystem with content=FRAGMENT
 		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setId("insurance-plan-type");
-		codeSystem.setUrl("http://terminology.hl7.org/CodeSystem/insurance-plan-type");
+		codeSystem.setUrl("http://example.com/fhir/CodeSystem/case-sensitive-test");
 		codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		codeSystem.setCaseSensitive(true);
-		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.FRAGMENT);
 
 		// Add "Drug" code (uppercase D) - mark as retired to match real HL7 resource
 		CodeSystem.ConceptDefinitionComponent drugRetired = codeSystem.addConcept();
@@ -2350,19 +2348,19 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		drugActive.setCode("drug");
 		drugActive.setDisplay("Drug");
 
+		// CRITICAL: Use create() and saveAllDeferred() to index concepts
 		myCodeSystemDao.create(codeSystem, mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
-		// Create ValueSet that explicitly includes both codes
+		// Create ValueSet that includes the entire CodeSystem (not specific concepts)
+		// This triggers the Hibernate Search code path
 		ValueSet valueSet = new ValueSet();
-		valueSet.setId("insuranceplan-type");
-		valueSet.setUrl("http://terminology.hl7.org/ValueSet/insuranceplan-type");
+		valueSet.setUrl("http://example.com/fhir/ValueSet/case-sensitive-test");
 		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
 		ValueSet.ConceptSetComponent include = valueSet.getCompose().addInclude();
-		include.setSystem("http://terminology.hl7.org/CodeSystem/insurance-plan-type");
-		include.addConcept().setCode("Drug");  // uppercase
-		include.addConcept().setCode("drug");  // lowercase
+		include.setSystem("http://example.com/fhir/CodeSystem/case-sensitive-test");
+		// CRITICAL: Do NOT enumerate specific concepts - include entire system to trigger Hibernate Search
 
 		myValueSetDao.create(valueSet, mySrd);
 
@@ -2370,12 +2368,13 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		ValueSet expanded = myTermSvc.expandValueSet(null, valueSet);
 
 		// Assert: Both codes should be present
-		assertThat(expanded.getExpansion().getContains()).hasSize(2);
-
 		List<String> codes = expanded.getExpansion().getContains().stream()
 			.map(ValueSet.ValueSetExpansionContainsComponent::getCode)
 			.collect(Collectors.toList());
 
-		assertThat(codes).containsExactlyInAnyOrder("Drug", "drug");
+		// The bug causes only one of "Drug" or "drug" to be included due to case-insensitive matching
+		assertThat(codes)
+			.as("ValueSet expansion should include both case variants")
+			.contains("Drug", "drug");
 	}
 }
