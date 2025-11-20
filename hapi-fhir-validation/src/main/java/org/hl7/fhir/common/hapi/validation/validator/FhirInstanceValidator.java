@@ -44,6 +44,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private IValidatorResourceFetcher validatorResourceFetcher;
 	private IValidationPolicyAdvisor validatorPolicyAdvisor = new FhirDefaultPolicyAdvisor();
 	private boolean myAllowExamples;
+	private IHostApplicationServices evaluationContext;
 
 	/**
 	 * Constructor
@@ -255,6 +256,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 				.setValidatorResourceFetcher(getValidatorResourceFetcher())
 				.setAssumeValidRestReferences(isAssumeValidRestReferences())
 				.setAllowExamples(isAllowExamples())
+				.setEvaluationContext(getEvaluationContext())
 				.validate(wrappedWorkerContext, theValidationCtx);
 	}
 
@@ -296,6 +298,14 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 	public void setAssumeValidRestReferences(boolean assumeValidRestReferences) {
 		this.assumeValidRestReferences = assumeValidRestReferences;
+	}
+
+	public IHostApplicationServices getEvaluationContext() {
+		return evaluationContext;
+	}
+
+	public void setEvaluationContext(IHostApplicationServices evaluationContext) {
+		this.evaluationContext = evaluationContext;
 	}
 
 	/**
