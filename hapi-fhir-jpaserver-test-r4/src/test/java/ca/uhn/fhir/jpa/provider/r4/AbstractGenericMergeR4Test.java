@@ -49,7 +49,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Arrays;
 import java.util.List;
 
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -172,7 +171,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		if (theAsync) {
 			myHelper.validateAsyncTaskCreated(outParams);
-			Task task = (Task) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
+			Task task = (Task) outParams.getParameter("task").getResource();
 			String jobId = myHelper.getJobIdFromTask(task);
 			myHelper.awaitJobCompletion(jobId);
 		} else {
@@ -222,7 +221,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		// Validate
 		myHelper.validateAsyncTaskCreated(outParams);
-		Task task = (Task) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
+		Task task = (Task) outParams.getParameter("task").getResource();
 		String jobId = myHelper.getJobIdFromTask(task);
 		myHelper.awaitJobCompletion(jobId);
 
@@ -460,7 +459,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		Parameters outParams = myHelper.callMergeOperation(getResourceTypeName(), params, true);
 
 		// Wait for completion
-		Task task = (Task) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
+		Task task = (Task) outParams.getParameter("task").getResource();
 		String jobId = myHelper.getJobIdFromTask(task);
 		myHelper.awaitJobCompletion(jobId);
 

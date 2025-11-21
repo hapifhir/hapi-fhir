@@ -24,7 +24,6 @@ package ca.uhn.fhir.jpa.merge;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -40,8 +39,6 @@ import org.hl7.fhir.r4.model.Task;
 
 import java.util.List;
 
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_OUTCOME;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -127,23 +124,14 @@ public class MergeOperationTestHelper {
 
 		var operation = myClient.operation()
 				.onType(theResourceType)
-				.named(JpaConstants.OPERATION_HAPI_FHIR_MERGE)
+				.named("$hapi-fhir-merge")
 				.withParameters(inputParams);
 
 		if (theAsync) {
 			operation.withAdditionalHeader("Prefer", "respond-async");
 		}
 
-		Parameters result = operation.execute();
-		ourLog.debug(
-				"Merge operation completed, returned {} parameters",
-				result.getParameter().size());
-
-		// Pretty print the result for debugging
-		String resultJson = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result);
-		ourLog.info("Merge operation result:\n{}", resultJson);
-
-		return result;
+		return operation.execute();
 	}
 
 	// Validation methods
@@ -163,8 +151,8 @@ public class MergeOperationTestHelper {
 				.as("Sync merge should return 3 parameters")
 				.hasSize(3);
 
-		OperationOutcome outcome = (OperationOutcome)
-				theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
+		OperationOutcome outcome =
+				(OperationOutcome) theOutParams.getParameter("outcome").getResource();
 
 		ourLog.info(
 				"Sync merge OperationOutcome: severity={}, details={}, diagnostics={}",
@@ -201,8 +189,7 @@ public class MergeOperationTestHelper {
 				.as("Async merge should return 3 parameters")
 				.hasSize(3);
 
-		Task task = (Task)
-				theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
+		Task task = (Task) theOutParams.getParameter("task").getResource();
 		assertThat(task).as("Task should be present").isNotNull();
 
 		ourLog.info(
@@ -217,8 +204,8 @@ public class MergeOperationTestHelper {
 				.as("Task should not have version")
 				.isFalse();
 
-		OperationOutcome outcome = (OperationOutcome)
-				theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
+		OperationOutcome outcome =
+				(OperationOutcome) theOutParams.getParameter("outcome").getResource();
 
 		assertThat(outcome.getIssue()).hasSize(1).element(0).satisfies(issue -> {
 			assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
@@ -239,8 +226,8 @@ public class MergeOperationTestHelper {
 	 * @param theExpectedUpdateCount Expected number of resources that would be updated
 	 */
 	public void validatePreviewOutcome(@Nonnull Parameters theOutParams, int theExpectedUpdateCount) {
-		OperationOutcome outcome = (OperationOutcome)
-				theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
+		OperationOutcome outcome =
+				(OperationOutcome) theOutParams.getParameter("outcome").getResource();
 
 		ourLog.info(
 				"Preview merge OperationOutcome: expectedCount={}, actualDiagnostics={}, details={}",
