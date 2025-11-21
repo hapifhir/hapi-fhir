@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.provider.r4;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.merge.MergeTestScenario;
+import ca.uhn.fhir.jpa.merge.AbstractMergeTestScenario;
 import ca.uhn.fhir.jpa.merge.PractitionerMergeTestScenario;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -48,7 +48,7 @@ public class PractitionerMergeR4Test extends AbstractGenericMergeR4Test<Practiti
 
 	@Nonnull
 	@Override
-	protected MergeTestScenario<Practitioner> createScenario() {
+	protected AbstractMergeTestScenario<Practitioner> createScenario() {
 		return new PractitionerMergeTestScenario(myDaoRegistry, myFhirContext, myLinkServiceFactory, mySrd);
 	}
 

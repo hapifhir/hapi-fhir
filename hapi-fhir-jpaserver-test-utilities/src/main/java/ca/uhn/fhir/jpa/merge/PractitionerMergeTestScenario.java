@@ -70,19 +70,16 @@ public class PractitionerMergeTestScenario extends AbstractMergeTestScenario<Pra
 	}
 
 	@Nonnull
-	@Override
 	public String getResourceTypeName() {
 		return "Practitioner";
 	}
 
 	@Nonnull
-	@Override
 	public Class<Practitioner> getResourceClass() {
 		return Practitioner.class;
 	}
 
 	@Nonnull
-	@Override
 	public Practitioner createResourceWithIdentifiers(@Nonnull String... theIdentifierValues) {
 		Practitioner p = new Practitioner();
 		p.setActive(true);
@@ -96,7 +93,6 @@ public class PractitionerMergeTestScenario extends AbstractMergeTestScenario<Pra
 	}
 
 	@Nonnull
-	@Override
 	public Practitioner createResourceWithIdentifiers(@Nonnull List<Identifier> theIdentifiers) {
 		Practitioner p = new Practitioner();
 		p.setActive(true);
@@ -106,7 +102,6 @@ public class PractitionerMergeTestScenario extends AbstractMergeTestScenario<Pra
 	}
 
 	@Nonnull
-	@Override
 	public IBaseResource createReferencingResource(
 			@Nonnull String theResourceType, @Nonnull String theReferencePath, @Nonnull IIdType theTargetId) {
 
@@ -137,7 +132,6 @@ public class PractitionerMergeTestScenario extends AbstractMergeTestScenario<Pra
 	}
 
 	@Nonnull
-	@Override
 	public List<ReferencingResourceConfig> getStandardReferenceConfigs() {
 		return Arrays.asList(
 				ReferencingResourceConfig.of("PractitionerRole", "practitioner", 3),
@@ -145,12 +139,10 @@ public class PractitionerMergeTestScenario extends AbstractMergeTestScenario<Pra
 				ReferencingResourceConfig.of("CarePlan", "activity.detail.performer", 1));
 	}
 
-	@Override
 	public boolean hasActiveField() {
 		return true;
 	}
 
-	@Override
 	protected void assertActiveFieldIfPresent(@Nonnull Practitioner theResource, boolean theExpectedValue) {
 		assertThat(theResource.getActive())
 				.as("Practitioner active field should be " + theExpectedValue)
