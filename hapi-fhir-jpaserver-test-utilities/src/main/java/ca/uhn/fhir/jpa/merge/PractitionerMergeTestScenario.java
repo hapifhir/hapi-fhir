@@ -145,19 +145,8 @@ public class PractitionerMergeTestScenario extends AbstractMergeTestScenario<Pra
 				ReferencingResourceConfig.of("CarePlan", "activity.detail.performer", 1));
 	}
 
-	@Nonnull
-	@Override
-	public List<Identifier> getIdentifiersFromResource(@Nonnull Practitioner theResource) {
-		return new ArrayList<>(theResource.getIdentifier());
-	}
-
 	@Override
 	public boolean hasActiveField() {
-		return true;
-	}
-
-	@Override
-	public boolean hasIdentifierField() {
 		return true;
 	}
 

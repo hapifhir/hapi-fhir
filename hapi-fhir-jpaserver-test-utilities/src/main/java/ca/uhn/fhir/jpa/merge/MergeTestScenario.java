@@ -26,6 +26,7 @@ import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Parameters;
 
 import java.util.List;
 import java.util.Map;
@@ -392,15 +393,81 @@ public interface MergeTestScenario<T extends IBaseResource> {
 	 */
 	void assertNoLinks(@Nonnull T theResource);
 
+	// ================================================
+	// VALIDATION METHODS - Operation outcome validation
+	// ================================================
+
+	/**
+	 * Validate that a synchronous merge completed successfully.
+	 * <p>
+	 * Checks:
+	 * - Output has 3 parameters (input, outcome, result)
+	 * - Outcome severity is INFORMATION
+	 * - Outcome message indicates success
+	 *
+	 * @param theOutParams The operation output parameters
+	 */
+	void validateSyncMergeOutcome(@Nonnull Parameters theOutParams);
+
+	/**
+	 * Validate that an async merge task was created.
+	 * <p>
+	 * Checks:
+	 * - Output has 3 parameters (input, outcome, task)
+	 * - Task resource is present
+	 * - Outcome indicates async processing
+	 *
+	 * @param theOutParams The operation output parameters
+	 */
+	void validateAsyncTaskCreated(@Nonnull Parameters theOutParams);
+
+	/**
+	 * Validate that a preview merge completed successfully.
+	 * <p>
+	 * Checks:
+	 * - Outcome indicates preview mode
+	 * - Diagnostics shows expected update count
+	 *
+	 * @param theOutParams           The operation output parameters
+	 * @param theExpectedUpdateCount Expected number of resources that would be updated
+	 */
+	void validatePreviewOutcome(@Nonnull Parameters theOutParams, int theExpectedUpdateCount);
+
+	/**
+	 * Assert that referencing resources have been updated to point to the target.
+	 * <p>
+	 * Verifies that none of the specified resources contain references to the source resource.
+	 *
+	 * @param theReferencingResourceIds IDs of resources that should have been updated
+	 * @param theSourceId               The source resource ID (references should be removed)
+	 * @param theTargetId               The target resource ID (not used in validation, provided for logging)
+	 */
+	void assertReferencesUpdated(
+			@Nonnull List<IIdType> theReferencingResourceIds,
+			@Nonnull IIdType theSourceId,
+			@Nonnull IIdType theTargetId);
+
+	/**
+	 * Assert that referencing resources have NOT been updated (for preview mode validation).
+	 * <p>
+	 * Verifies that resources still contain references to the source resource.
+	 */
+	void assertReferencesNotUpdated();
+
+	/**
+	 * Assert that merge provenance was created for the merge operation.
+	 *
+	 * @param theSourceId    The source resource ID
+	 * @param theTargetId    The target resource ID
+	 * @param theInputParams The input parameters used for the merge
+	 */
+	void assertMergeProvenanceCreated(
+			@Nonnull IIdType theSourceId, @Nonnull IIdType theTargetId, @Nonnull Parameters theInputParams);
+
 	/**
 	 * @return true if this resource type has an "active" field (boolean)
 	 */
 	boolean hasActiveField();
-
-	/**
-	 * @return true if this resource type has an "identifier" field
-	 */
-	boolean hasIdentifierField();
 
 	/**
 	 * Calculate the expected identifiers on the target resource after merge completes.

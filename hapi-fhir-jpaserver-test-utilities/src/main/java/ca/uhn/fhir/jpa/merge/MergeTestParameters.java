@@ -177,10 +177,9 @@ public class MergeTestParameters {
 	 * Convert this test parameters object to a FHIR Parameters resource
 	 * suitable for invoking the merge operation.
 	 *
-	 * @param theResourceTypeName The resource type name (e.g., "Practitioner", "Observation")
 	 * @return A Parameters resource with all configured values
 	 */
-	public Parameters asParametersResource(String theResourceTypeName) {
+	public Parameters asParametersResource() {
 		Parameters params = new Parameters();
 
 		// Source resource
