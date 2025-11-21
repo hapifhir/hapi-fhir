@@ -3391,6 +3391,36 @@ public enum Pointcut implements IPointcut {
 			IInterceptorFilterHook.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.batch2.model.WorkChunk"),
 
 	/**
+	 * <b>Batch2 Hook:</b>
+	 * <p>Invoked before the job instance is started. JobInstance is mutable here.</p>
+	 * <p>Parameters:</p>
+	 * <ul>
+	 *     <li>ca.uhn.fhir.batch2.model.JobInstance - The job instance</li>
+	 *     <li>ca.uhn.fhir.rest.api.server.RequestDetails - The request details</li>
+	 *  </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	BATCH2_JOB_START(
+		void.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.rest.api.server.RequestDetails"),
+
+	/**
+	 * <b>Batch2 Hook:</b>
+	 * <p>Invoked after the job instance is completed. JobInstance is immutable here.</p>
+	 * <p>Parameters:</p>
+	 * <ul>
+	 *     <li>ca.uhn.fhir.batch2.model.JobInstance - The job instance</li>
+	 *     <li>ca.uhn.fhir.batch2.api.JobCompletionDetails - The job completions details</li>
+	 *  </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	BATCH2_JOB_COMPLETION(
+		void.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.batch2.api.JobCompletionDetails"),
+
+	/**
 	 * <b>Provenance Agents Pointcut:</b>
 	 * This is a pointcut to retrieve data for populating the agent element of a Provenance resource that needs to be created
 	 * as a result of a request, such as a $merge or a $hapi.fhir.replace-references operation.
