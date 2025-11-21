@@ -103,7 +103,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		// with versioned target references, and delete-source on merge works correctly.
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
 
-		myHelper = new MergeOperationTestHelper(myFhirContext, myDaoRegistry, myClient, myBatch2JobHelper);
+		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper);
 	}
 
 	@AfterEach
@@ -164,18 +164,18 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		// Validate outcome based on mode
 		if (thePreview) {
-			myHelper.validatePreviewOutcome(outParams, scenario.getTotalReferenceCount() + 2);
-			myHelper.assertReferencesNotUpdated(scenario);
+			scenario.validatePreviewOutcome(outParams, scenario.getTotalReferenceCount() + 2);
+			scenario.assertReferencesNotUpdated();
 			return; // Preview mode doesn't make actual changes
 		}
 
 		if (theAsync) {
-			myHelper.validateAsyncTaskCreated(outParams);
+			scenario.validateAsyncTaskCreated(outParams);
 			Task task = (Task) outParams.getParameter("task").getResource();
 			String jobId = myHelper.getJobIdFromTask(task);
 			myHelper.awaitJobCompletion(jobId);
 		} else {
-			myHelper.validateSyncMergeOutcome(outParams);
+			scenario.validateSyncMergeOutcome(outParams);
 		}
 
 		// Validate merge outcomes
@@ -201,7 +201,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		Parameters outParams = myHelper.callMergeOperation(getResourceTypeName(), params, false);
 
 		// Validate
-		myHelper.validateSyncMergeOutcome(outParams);
+		scenario.validateSyncMergeOutcome(outParams);
 		validateMergeOutcome(scenario, false);
 	}
 
@@ -220,7 +220,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		Parameters outParams = myHelper.callMergeOperation(getResourceTypeName(), params, true);
 
 		// Validate
-		myHelper.validateAsyncTaskCreated(outParams);
+		scenario.validateAsyncTaskCreated(outParams);
 		Task task = (Task) outParams.getParameter("task").getResource();
 		String jobId = myHelper.getJobIdFromTask(task);
 		myHelper.awaitJobCompletion(jobId);
@@ -308,7 +308,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		// Validate all reference types updated
 		for (String resourceType : scenario.getReferencingResourceTypes()) {
-			myHelper.assertReferencesUpdated(
+			scenario.assertReferencesUpdated(
 					scenario.getReferencingResourceIds(resourceType),
 					scenario.getSourceId(),
 					scenario.getTargetId());
@@ -439,11 +439,11 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		// Execute merge
 		MergeTestParameters params = scenario.buildMergeParameters(false, false);
-		Parameters inParams = params.asParametersResource(getResourceTypeName());
+		Parameters inParams = params.asParametersResource();
 		myHelper.callMergeOperation(getResourceTypeName(), params, false);
 
 		// Validate provenance created
-		myHelper.assertMergeProvenanceCreated(scenario.getSourceId(), scenario.getTargetId(), inParams);
+		scenario.assertMergeProvenanceCreated(scenario.getSourceId(), scenario.getTargetId(), inParams);
 	}
 
 	@Test
@@ -455,7 +455,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		// Execute merge
 		MergeTestParameters params = scenario.buildMergeParameters(false, false);
-		Parameters inParams = params.asParametersResource(getResourceTypeName());
+		Parameters inParams = params.asParametersResource();
 		Parameters outParams = myHelper.callMergeOperation(getResourceTypeName(), params, true);
 
 		// Wait for completion
@@ -464,7 +464,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		myHelper.awaitJobCompletion(jobId);
 
 		// Validate provenance created
-		myHelper.assertMergeProvenanceCreated(scenario.getSourceId(), scenario.getTargetId(), inParams);
+		scenario.assertMergeProvenanceCreated(scenario.getSourceId(), scenario.getTargetId(), inParams);
 	}
 
 	@Test
@@ -479,7 +479,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		myHelper.callMergeOperation(getResourceTypeName(), params, false);
 
 		// Validate no changes (preview mode validation already checks this)
-		myHelper.assertReferencesNotUpdated(scenario);
+		scenario.assertReferencesNotUpdated();
 	}
 
 	// ================================================
@@ -559,7 +559,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		// Validate all references still updated to target
 		for (String resourceType : scenario.getReferencingResourceTypes()) {
-			myHelper.assertReferencesUpdated(
+			scenario.assertReferencesUpdated(
 					scenario.getReferencingResourceIds(resourceType),
 					scenario.getSourceId(),
 					scenario.getTargetId());
@@ -592,7 +592,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		for (String resourceType : theScenario.getReferencingResourceTypes()) {
 			List<IIdType> referencingIds = theScenario.getReferencingResourceIds(resourceType);
 			if (!referencingIds.isEmpty()) {
-				myHelper.assertReferencesUpdated(referencingIds, theScenario.getSourceId(), theScenario.getTargetId());
+				theScenario.assertReferencesUpdated(referencingIds, theScenario.getSourceId(), theScenario.getTargetId());
 			}
 		}
 	}
