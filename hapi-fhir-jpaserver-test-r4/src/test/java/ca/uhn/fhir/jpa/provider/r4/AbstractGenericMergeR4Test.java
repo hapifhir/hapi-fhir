@@ -164,7 +164,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		// Validate outcome based on mode
 		if (thePreview) {
-			scenario.validatePreviewOutcome(outParams, scenario.getTotalReferenceCount() + 2);
+			scenario.validatePreviewOutcome(outParams);
 			scenario.assertReferencesNotUpdated();
 			return; // Preview mode doesn't make actual changes
 		}
@@ -308,10 +308,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		// Validate all reference types updated
 		for (String resourceType : scenario.getReferencingResourceTypes()) {
-			scenario.assertReferencesUpdated(
-					scenario.getReferencingResourceIds(resourceType),
-					scenario.getSourceId(),
-					scenario.getTargetId());
+			scenario.assertReferencesUpdated(resourceType);
 		}
 	}
 
@@ -443,7 +440,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		myHelper.callMergeOperation(getResourceTypeName(), params, false);
 
 		// Validate provenance created
-		scenario.assertMergeProvenanceCreated(scenario.getSourceId(), scenario.getTargetId(), inParams);
+		scenario.assertMergeProvenanceCreated(inParams);
 	}
 
 	@Test
@@ -464,7 +461,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		myHelper.awaitJobCompletion(jobId);
 
 		// Validate provenance created
-		scenario.assertMergeProvenanceCreated(scenario.getSourceId(), scenario.getTargetId(), inParams);
+		scenario.assertMergeProvenanceCreated(inParams);
 	}
 
 	@Test
@@ -559,10 +556,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		// Validate all references still updated to target
 		for (String resourceType : scenario.getReferencingResourceTypes()) {
-			scenario.assertReferencesUpdated(
-					scenario.getReferencingResourceIds(resourceType),
-					scenario.getSourceId(),
-					scenario.getTargetId());
+			scenario.assertReferencesUpdated(resourceType);
 		}
 	}
 
@@ -592,7 +586,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		for (String resourceType : theScenario.getReferencingResourceTypes()) {
 			List<IIdType> referencingIds = theScenario.getReferencingResourceIds(resourceType);
 			if (!referencingIds.isEmpty()) {
-				theScenario.assertReferencesUpdated(referencingIds, theScenario.getSourceId(), theScenario.getTargetId());
+				theScenario.assertReferencesUpdated(resourceType);
 			}
 		}
 	}

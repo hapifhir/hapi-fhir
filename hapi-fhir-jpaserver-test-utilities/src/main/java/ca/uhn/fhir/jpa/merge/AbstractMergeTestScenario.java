@@ -618,7 +618,12 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> impleme
 	}
 
 	@Override
-	public void validatePreviewOutcome(@Nonnull Parameters theOutParams, int theExpectedUpdateCount) {
+	public void validatePreviewOutcome(@Nonnull Parameters theOutParams) {
+		assertTestDataCreated();
+
+		// Calculate expected count: total referencing resources + 2 (source and target)
+		int theExpectedUpdateCount = getTotalReferenceCount() + 2;
+
 		OperationOutcome outcome =
 				(OperationOutcome) theOutParams.getParameter("outcome").getResource();
 
@@ -646,10 +651,11 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> impleme
 	// ================================================
 
 	@Override
-	public void assertReferencesUpdated(
-			@Nonnull List<IIdType> theReferencingResourceIds,
-			@Nonnull IIdType theSourceId,
-			@Nonnull IIdType theTargetId) {
+	public void assertReferencesUpdated(@Nonnull List<IIdType> theReferencingResourceIds) {
+		assertTestDataCreated();
+
+		IIdType theSourceId = getSourceId();
+		IIdType theTargetId = getTargetId();
 
 		ourLog.debug(
 				"Validating {} referencing resources updated from {} to {}",
@@ -685,6 +691,13 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> impleme
 		}
 
 		ourLog.debug("All {} referencing resources validated successfully", theReferencingResourceIds.size());
+	}
+
+	@Override
+	public void assertReferencesUpdated(@Nonnull String theResourceType) {
+		assertTestDataCreated();
+		List<IIdType> referencingResourceIds = getReferencingResourceIds(theResourceType);
+		assertReferencesUpdated(referencingResourceIds);
 	}
 
 	@Override
@@ -725,8 +738,11 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> impleme
 	// ================================================
 
 	@Override
-	public void assertMergeProvenanceCreated(
-			@Nonnull IIdType theSourceId, @Nonnull IIdType theTargetId, @Nonnull Parameters theInputParams) {
+	public void assertMergeProvenanceCreated(@Nonnull Parameters theInputParams) {
+		assertTestDataCreated();
+
+		IIdType theSourceId = getSourceId();
+		IIdType theTargetId = getTargetId();
 
 		ourLog.debug("Validating provenance created for merge: source={}, target={}", theSourceId, theTargetId);
 
