@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.provider.r4;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.merge.AbstractMergeTestScenario;
 import ca.uhn.fhir.jpa.merge.MergeTestParameters;
-import ca.uhn.fhir.jpa.merge.MergeTestScenario;
 import ca.uhn.fhir.jpa.merge.ObservationMergeTestScenario;
 import ca.uhn.fhir.jpa.merge.ReferencingResourceConfig;
 import jakarta.annotation.Nonnull;
@@ -60,7 +60,7 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 
 	@Nonnull
 	@Override
-	protected MergeTestScenario<Observation> createScenario() {
+	protected AbstractMergeTestScenario<Observation> createScenario() {
 		return new ObservationMergeTestScenario(myDaoRegistry, myFhirContext, myLinkServiceFactory, mySrd);
 	}
 
@@ -80,7 +80,7 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 	@Test
 	void testMerge_observationSpecific_diagnosticReportResult() {
 		// Setup
-		MergeTestScenario<Observation> scenario = createScenario();
+		AbstractMergeTestScenario<Observation> scenario = createScenario();
 		scenario.withReferences(ReferencingResourceConfig.of("DiagnosticReport", "result", 10));
 		scenario.createTestData();
 
@@ -98,7 +98,7 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 	@Test
 	void testMerge_observationSpecific_loincCodeIdentifiers() {
 		// Setup with LOINC-like identifiers
-		MergeTestScenario<Observation> scenario = createScenario();
+		AbstractMergeTestScenario<Observation> scenario = createScenario();
 		scenario.withSourceIdentifiers("8867-4", "2339-0");
 		scenario.withTargetIdentifiers("8867-4", "94531-1");
 		scenario.withReferences(ReferencingResourceConfig.of("DiagnosticReport", "result", 3));
@@ -122,7 +122,7 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 	@Test
 	void testMerge_observationSpecific_allStandardReferences() {
 		// Setup with standard references
-		MergeTestScenario<Observation> scenario = createScenario();
+		AbstractMergeTestScenario<Observation> scenario = createScenario();
 		scenario.withStandardReferences();
 		scenario.createTestData();
 
