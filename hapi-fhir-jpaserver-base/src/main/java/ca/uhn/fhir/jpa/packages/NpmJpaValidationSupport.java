@@ -22,17 +22,18 @@ package ca.uhn.fhir.jpa.packages;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.repository.SearchConverter;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import com.google.common.collect.Multimap;
+import ca.uhn.fhir.model.api.PagingIterator;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class NpmJpaValidationSupport implements IValidationSupport {
 
@@ -75,6 +76,40 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 
 		// no class
 		return null;
+	}
+
+	public static int batchSize() {
+		return 100;
+	}
+
+	@Override
+	public <T extends IBaseResource> Stream<T> fetchResources(Class<T> theClazz, String theUrl) {
+		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
+		PagingIterator<T> pagingIterator = new PagingIterator<>(
+				batchSize(),
+				(pageSize, batchSize, theConsumer) ->
+						myHapiPackageCacheManager
+								.loadPackageAssetsByUrl(fhirVersion, theUrl, PageRequest.of(pageSize, batchSize))
+								.stream()
+								.filter(r -> {
+									if (theClazz != null) {
+										return r.getClass().isAssignableFrom(theClazz);
+									}
+									return true;
+								})
+								.forEach(r -> theConsumer.accept((T) r)));
+
+		return StreamSupport.stream(
+				Spliterators.spliteratorUnknownSize(pagingIterator, Spliterator.ORDERED), false); // sequential
+	}
+
+	@Override
+	public <T extends IBaseResource> Stream<T> fetchAllResourcesOfType(@Nonnull Class<T> theClazz) {
+		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
+		return myHapiPackageCacheManager.loadPackageAssetsByType(fhirVersion, theClazz.getSimpleName()).stream()
+				.map(r -> (T) r)
+				.toList()
+				.stream();
 	}
 
 	@Nullable

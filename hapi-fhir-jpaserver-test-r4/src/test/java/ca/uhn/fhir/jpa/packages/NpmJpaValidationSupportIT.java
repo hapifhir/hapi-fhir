@@ -5,25 +5,34 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.implementationguide.ImplementationGuideCreator;
 import ca.uhn.fhir.jpa.api.svc.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.test.util.LogbackTestExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mockStatic;
 
 public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 	@Autowired
@@ -34,6 +43,14 @@ public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 
 	@RegisterExtension
 	public final LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(NpmJpaValidationSupport.class);
+
+	private IValidationSupport myValidationSupport;
+
+	@BeforeEach
+	public void before() throws Exception {
+		super.before();
+		myValidationSupport = mySvc;
+	}
 
 	@Test
 	public void loadIGAndFetchSpecificResource_throughGenericIValidationsupport(@TempDir Path theTempDirPath) throws IOException {
@@ -65,12 +82,10 @@ public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 
 		PackageInstallationSpec installationSpec = createAndInstallPackageSpec(igCreator, PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
 
-		IValidationSupport support = mySvc;
-
-		SearchParameter sp = support.fetchResource(SearchParameter.class, spUrl + "1");
+		SearchParameter sp = myValidationSupport.fetchResource(SearchParameter.class, spUrl + "1");
 		assertNotNull(sp);
 		assertEquals(spUrl + "1", sp.getUrl());
-		Questionnaire q = support.fetchResource(Questionnaire.class, qUrl + "1");
+		Questionnaire q = myValidationSupport.fetchResource(Questionnaire.class, qUrl + "1");
 		assertNotNull(q);
 		assertEquals(qUrl + "1", q.getUrl());
 	}
@@ -140,11 +155,9 @@ public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 
 		PackageInstallationSpec installationSpec = createAndInstallPackageSpec(igCreator, PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
 
-		IValidationSupport validationSupport = mySvc;
-
 		// test
 		try {
-			ca.uhn.fhir.model.dstu2.resource.SearchParameter sp = validationSupport.fetchResource(ca.uhn.fhir.model.dstu2.resource.SearchParameter.class, spUrl);
+			ca.uhn.fhir.model.dstu2.resource.SearchParameter sp = myValidationSupport.fetchResource(ca.uhn.fhir.model.dstu2.resource.SearchParameter.class, spUrl);
 			fail();
 		} catch (ConfigurationException ex) {
 			assertTrue(ex.getLocalizedMessage().contains("This context is for FHIR version \"R4\""));
@@ -173,13 +186,112 @@ public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 
 		PackageInstallationSpec installationSpec = createAndInstallPackageSpec(igCreator, PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
 
-		IValidationSupport validationSupport = mySvc;
-
 		// test
-		SearchParameter sp = validationSupport.fetchResource(SearchParameter.class, spUrl + "2");
+		SearchParameter sp = myValidationSupport.fetchResource(SearchParameter.class, spUrl + "2");
 
 		// validate
 		assertNull(sp);
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void fetchResources_specifiedResourceType_works(boolean theRequestSpecificTypes, @TempDir Path theTempDirPath) throws IOException {
+
+		int versionCount = 5;
+		String spUrl = "http://localhost/ig-test-dir/url";
+		String qUrl = "http://localhost/ig-test-dir/qurl";
+		for (int i = 0; i < versionCount; i++) {
+			ImplementationGuideCreator igCreator = new ImplementationGuideCreator(myFhirContext, "test.ig.com", "1." + i);
+			Path subpath = Path.of(theTempDirPath.toString(), igCreator.getPackageName() + "_" + igCreator.getPackageVersion());
+			Files.createDirectory(subpath);
+			igCreator.setDirectory(subpath);
+
+			SearchParameter sp = new SearchParameter();
+			sp.setUrl(spUrl);
+			sp.setCode("helloWorld" + i);
+			sp.setName(sp.getCode());
+			sp.setDescription("description");
+			sp.setType(Enumerations.SearchParamType.STRING);
+			sp.addBase("Patient");
+			sp.setExpression("Patient.name.given");
+			sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			igCreator.addResourceToIG(sp.getName(), sp);
+
+			Questionnaire questionnaire = new Questionnaire();
+			questionnaire.setUrl(qUrl);
+			questionnaire.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			questionnaire.setName("questionnaire" + i);
+			igCreator.addResourceToIG(questionnaire.getName(), questionnaire);
+
+			PackageInstallationSpec installationSpec1 = createAndInstallPackageSpec(igCreator, PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
+		}
+
+		// test
+		try (MockedStatic<NpmJpaValidationSupport> staticMock = mockStatic(NpmJpaValidationSupport.class)) {
+			// we use a small number to ensure batching works
+			staticMock.when(NpmJpaValidationSupport::batchSize).thenReturn(2);
+
+			if (theRequestSpecificTypes) {
+				Stream<SearchParameter> sps = myValidationSupport.fetchResources(SearchParameter.class, spUrl);
+				assertNotNull(sps);
+				List<SearchParameter> spList = sps.toList();
+				assertEquals(versionCount, spList.size());
+				spList.forEach(sp -> {
+					assertEquals(spUrl, sp.getUrl());
+				});
+			} else {
+				Stream<IBaseResource> resourceStream = myValidationSupport.fetchResources(null, qUrl);
+				assertNotNull(resourceStream);
+				List<IBaseResource> resources = resourceStream.toList();
+				assertEquals(versionCount, resources.size());
+				FhirTerser terser = myFhirContext.newTerser();
+				resources.forEach(r -> {
+					assertTrue(r instanceof Questionnaire);
+					Optional<String> urlOp = terser.getSinglePrimitiveValue(r, "url");
+					assertTrue(urlOp.isPresent());
+					assertEquals(qUrl, urlOp.get());
+				});
+			}
+		}
+	}
+
+	@Test
+	public void fetchAllResourcesOfType_works(@TempDir Path theTempDirPath) throws IOException {
+		// create an IG
+		ImplementationGuideCreator igCreator = new ImplementationGuideCreator(myFhirContext);
+		igCreator.setDirectory(theTempDirPath);
+
+		int resourceCount = 50;
+		String spUrl = "http://localhost/ig-test-dir/sp";
+		String qUrl = "http://localhost/ig-test-dir/quest";
+		for (int i = 0; i < resourceCount; i++) {
+			SearchParameter sp = new SearchParameter();
+			sp.setUrl(spUrl);
+			sp.setCode("helloWorld" + i);
+			sp.setName(sp.getCode());
+			sp.setDescription("description");
+			sp.setType(Enumerations.SearchParamType.STRING);
+			sp.addBase("Patient");
+			sp.setExpression("Patient.name.given");
+			sp.setVersion("1." + i);
+			sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			igCreator.addResourceToIG(sp.getName(), sp);
+
+			Questionnaire questionnaire = new Questionnaire();
+			questionnaire.setUrl(qUrl + i);
+			questionnaire.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			questionnaire.setName("questionnaire" + i);
+			igCreator.addResourceToIG(questionnaire.getName(), questionnaire);
+		}
+
+		PackageInstallationSpec installationSpec = createAndInstallPackageSpec(igCreator, PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
+
+		// test
+		Stream<Questionnaire> questionnaireStream = myValidationSupport.fetchAllResourcesOfType(Questionnaire.class);
+
+		// verify
+		List<Questionnaire> questionnaireList = questionnaireStream.toList();
+		assertEquals(resourceCount, questionnaireList.size());
 	}
 
 	private PackageInstallationSpec createAndInstallPackageSpec(ImplementationGuideCreator theIgCreator,
