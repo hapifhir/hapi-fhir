@@ -72,19 +72,16 @@ public class ObservationMergeTestScenario extends AbstractMergeTestScenario<Obse
 	}
 
 	@Nonnull
-	@Override
 	public String getResourceTypeName() {
 		return "Observation";
 	}
 
 	@Nonnull
-	@Override
 	public Class<Observation> getResourceClass() {
 		return Observation.class;
 	}
 
 	@Nonnull
-	@Override
 	public Observation createResourceWithIdentifiers(@Nonnull String... theIdentifierValues) {
 		Observation obs = new Observation();
 		obs.setStatus(Observation.ObservationStatus.FINAL);
@@ -98,7 +95,6 @@ public class ObservationMergeTestScenario extends AbstractMergeTestScenario<Obse
 	}
 
 	@Nonnull
-	@Override
 	public Observation createResourceWithIdentifiers(@Nonnull List<Identifier> theIdentifiers) {
 		Observation obs = new Observation();
 		obs.setStatus(Observation.ObservationStatus.FINAL);
@@ -108,7 +104,6 @@ public class ObservationMergeTestScenario extends AbstractMergeTestScenario<Obse
 	}
 
 	@Nonnull
-	@Override
 	public IBaseResource createReferencingResource(
 			@Nonnull String theResourceType, @Nonnull String theReferencePath, @Nonnull IIdType theTargetId) {
 
@@ -141,12 +136,10 @@ public class ObservationMergeTestScenario extends AbstractMergeTestScenario<Obse
 	}
 
 	@Nonnull
-	@Override
 	public List<ReferencingResourceConfig> getStandardReferenceConfigs() {
 		return Arrays.asList(ReferencingResourceConfig.of("DiagnosticReport", "result", 5));
 	}
 
-	@Override
 	public boolean hasActiveField() {
 		// KEY DIFFERENCE: Observation does NOT have active field
 		return false;
