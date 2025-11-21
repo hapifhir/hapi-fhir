@@ -89,7 +89,7 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 		myHelper.callMergeOperation("Observation", params, false);
 
 		// Validate all DiagnosticReport.result references updated
-		myHelper.assertReferencesUpdated(
+		scenario.assertReferencesUpdated(
 				scenario.getReferencingResourceIds("DiagnosticReport"),
 				scenario.getSourceId(),
 				scenario.getTargetId());
@@ -135,7 +135,7 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 
 		// Validate all reference types updated
 		for (String resourceType : scenario.getReferencingResourceTypes()) {
-			myHelper.assertReferencesUpdated(
+			scenario.assertReferencesUpdated(
 					scenario.getReferencingResourceIds(resourceType),
 					scenario.getSourceId(),
 					scenario.getTargetId());

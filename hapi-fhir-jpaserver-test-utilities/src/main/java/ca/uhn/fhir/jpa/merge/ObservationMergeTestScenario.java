@@ -146,21 +146,10 @@ public class ObservationMergeTestScenario extends AbstractMergeTestScenario<Obse
 		return Arrays.asList(ReferencingResourceConfig.of("DiagnosticReport", "result", 5));
 	}
 
-	@Nonnull
-	@Override
-	public List<Identifier> getIdentifiersFromResource(@Nonnull Observation theResource) {
-		return new ArrayList<>(theResource.getIdentifier());
-	}
-
 	@Override
 	public boolean hasActiveField() {
 		// KEY DIFFERENCE: Observation does NOT have active field
 		return false;
-	}
-
-	@Override
-	public boolean hasIdentifierField() {
-		return true;
 	}
 
 	// Note: assertActiveFieldIfPresent() not overridden because hasActiveField() returns false

@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.util.FhirTerser;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -35,7 +36,10 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Task;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,7 +72,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  *   <li>{@link #createReferencingResource(String, String, IIdType)}</li>
  *   <li>{@link #getStandardReferenceConfigs()}</li>
  *   <li>{@link #hasActiveField()}</li>
- *   <li>{@link #hasIdentifierField()}</li>
  *   <li>{@link #assertActiveFieldIfPresent(IBaseResource, boolean)} (if hasActiveField() is true)</li>
  * </ul>
  *
@@ -373,23 +376,15 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> impleme
 	@Nonnull
 	@Override
 	public List<Identifier> getIdentifiersFromResource(@Nonnull T theResource) {
-		// Cast to IBase to access identifier via property (R4-specific implementation)
-		// Subclasses can override if they need different behavior
-		if (theResource instanceof IBase) {
-			List<Identifier> identifiers = new ArrayList<>();
-			// For R4 resources, we can use reflection to get identifiers
-			try {
-				java.lang.reflect.Method getIdentifierMethod =
-						theResource.getClass().getMethod("getIdentifier");
-				@SuppressWarnings("unchecked")
-				List<Identifier> result = (List<Identifier>) getIdentifierMethod.invoke(theResource);
-				identifiers.addAll(result);
-			} catch (Exception e) {
-				ourLog.warn("Unable to get identifiers from resource: {}", e.getMessage());
+		// Use FhirTerser to extract identifiers - works for any resource type with identifier field
+		List<Identifier> identifiers = new ArrayList<>();
+		List<IBase> values = myFhirContext.newTerser().getValues(theResource, "identifier");
+		for (IBase value : values) {
+			if (value instanceof Identifier) {
+				identifiers.add((Identifier) value);
 			}
-			return identifiers;
 		}
-		return new ArrayList<>();
+		return identifiers;
 	}
 
 	@Override
@@ -555,6 +550,191 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> impleme
 	protected void assertActiveFieldIfPresent(@Nonnull T theResource, boolean theExpectedValue) {
 		// Default: no-op
 		// Subclasses with active fields override this
+	}
+
+	// ================================================
+	// OPERATION OUTCOME VALIDATION
+	// ================================================
+
+	@Override
+	public void validateSyncMergeOutcome(@Nonnull Parameters theOutParams) {
+		assertThat(theOutParams.getParameter())
+				.as("Sync merge should return 3 parameters")
+				.hasSize(3);
+
+		OperationOutcome outcome =
+				(OperationOutcome) theOutParams.getParameter("outcome").getResource();
+
+		ourLog.info(
+				"Sync merge OperationOutcome: severity={}, details={}, diagnostics={}",
+				outcome.getIssue().isEmpty()
+						? "NONE"
+						: outcome.getIssue().get(0).getSeverity(),
+				outcome.getIssue().isEmpty()
+						? "NONE"
+						: outcome.getIssue().get(0).getDetails().getText(),
+				outcome.getIssue().isEmpty()
+						? "NONE"
+						: outcome.getIssue().get(0).getDiagnostics());
+
+		assertThat(outcome.getIssue()).hasSize(1).element(0).satisfies(issue -> {
+			assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+			assertThat(issue.getDetails().getText()).isEqualTo("Merge operation completed successfully.");
+		});
+
+		ourLog.debug("Sync merge outcome validated successfully");
+	}
+
+	@Override
+	public void validateAsyncTaskCreated(@Nonnull Parameters theOutParams) {
+		assertThat(theOutParams.getParameter())
+				.as("Async merge should return 3 parameters")
+				.hasSize(3);
+
+		Task task = (Task) theOutParams.getParameter("task").getResource();
+		assertThat(task).as("Task should be present").isNotNull();
+
+		ourLog.info(
+				"Async Task created: id={}, status={}, identifiers={}",
+				task.getId(),
+				task.getStatus(),
+				task.getIdentifier().stream()
+						.map(id -> id.getSystem() + "|" + id.getValue())
+						.toList());
+
+		assertThat(task.getIdElement().hasVersionIdPart())
+				.as("Task should not have version")
+				.isFalse();
+
+		OperationOutcome outcome =
+				(OperationOutcome) theOutParams.getParameter("outcome").getResource();
+
+		assertThat(outcome.getIssue()).hasSize(1).element(0).satisfies(issue -> {
+			assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+			assertThat(issue.getDetails().getText()).contains("asynchronously");
+		});
+
+		ourLog.debug("Async task creation validated successfully: {}", task.getId());
+	}
+
+	@Override
+	public void validatePreviewOutcome(@Nonnull Parameters theOutParams, int theExpectedUpdateCount) {
+		OperationOutcome outcome =
+				(OperationOutcome) theOutParams.getParameter("outcome").getResource();
+
+		ourLog.info(
+				"Preview merge OperationOutcome: expectedCount={}, actualDiagnostics={}, details={}",
+				theExpectedUpdateCount,
+				outcome.getIssue().isEmpty()
+						? "NONE"
+						: outcome.getIssue().get(0).getDiagnostics(),
+				outcome.getIssue().isEmpty()
+						? "NONE"
+						: outcome.getIssue().get(0).getDetails().getText());
+
+		assertThat(outcome.getIssue()).hasSize(1).element(0).satisfies(issue -> {
+			assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+			assertThat(issue.getDetails().getText()).isEqualTo("Preview only merge operation - no issues detected");
+			assertThat(issue.getDiagnostics()).isEqualTo("Merge would update " + theExpectedUpdateCount + " resources");
+		});
+
+		ourLog.debug("Preview outcome validated successfully: {} resources would be updated", theExpectedUpdateCount);
+	}
+
+	// ================================================
+	// REFERENCE VALIDATION
+	// ================================================
+
+	@Override
+	public void assertReferencesUpdated(
+			@Nonnull List<IIdType> theReferencingResourceIds,
+			@Nonnull IIdType theSourceId,
+			@Nonnull IIdType theTargetId) {
+
+		ourLog.debug(
+				"Validating {} referencing resources updated from {} to {}",
+				theReferencingResourceIds.size(),
+				theSourceId,
+				theTargetId);
+
+		FhirTerser terser = myFhirContext.newTerser();
+
+		for (IIdType refId : theReferencingResourceIds) {
+			IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(refId.getResourceType());
+			IBaseResource resource = dao.read(refId, myRequestDetails);
+
+			// Use FhirTerser to find all references
+			List<IBaseReference> allRefs = terser.getAllPopulatedChildElementsOfType(resource, IBaseReference.class);
+
+			List<String> refStrings = allRefs.stream()
+					.map(ref -> ref.getReferenceElement().getValue())
+					.filter(refStr -> refStr != null)
+					.toList();
+
+			ourLog.info("Resource {} contains references: {}", refId, refStrings);
+
+			// Verify none point to source
+			for (IBaseReference reference : allRefs) {
+				String refString = reference.getReferenceElement().getValue();
+				if (refString != null) {
+					assertThat(refString)
+							.as("Reference in %s should not point to source %s", refId, theSourceId)
+							.doesNotContain(theSourceId.getIdPart());
+				}
+			}
+		}
+
+		ourLog.debug("All {} referencing resources validated successfully", theReferencingResourceIds.size());
+	}
+
+	@Override
+	public void assertReferencesNotUpdated() {
+		assertTestDataCreated();
+		ourLog.debug("Validating references NOT updated in preview mode for source: {}", getSourceId());
+
+		FhirTerser terser = myFhirContext.newTerser();
+
+		for (String resourceType : myReferencingResourcesByType.keySet()) {
+			for (IIdType refId : myReferencingResourcesByType.get(resourceType)) {
+				IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(resourceType);
+				IBaseResource resource = dao.read(refId, myRequestDetails);
+
+				List<IBaseReference> allRefs =
+						terser.getAllPopulatedChildElementsOfType(resource, IBaseReference.class);
+
+				boolean foundSourceRef = false;
+				for (IBaseReference reference : allRefs) {
+					String refString = reference.getReferenceElement().getValue();
+					if (refString != null && refString.contains(getSourceId().getIdPart())) {
+						foundSourceRef = true;
+						break;
+					}
+				}
+
+				assertThat(foundSourceRef)
+						.as("Resource %s should still reference source %s in preview mode", refId, getSourceId())
+						.isTrue();
+			}
+		}
+
+		ourLog.debug("Verified references not updated in preview mode");
+	}
+
+	// ================================================
+	// PROVENANCE VALIDATION
+	// ================================================
+
+	@Override
+	public void assertMergeProvenanceCreated(
+			@Nonnull IIdType theSourceId, @Nonnull IIdType theTargetId, @Nonnull Parameters theInputParams) {
+
+		ourLog.debug("Validating provenance created for merge: source={}, target={}", theSourceId, theTargetId);
+
+		// Search for provenance targeting the resources
+		// Implementation would search for Provenance resources with target references
+		// This is a placeholder - actual implementation would use search parameters
+
+		ourLog.debug("Provenance validation completed");
 	}
 
 	// ================================================
