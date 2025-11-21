@@ -32,10 +32,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_BATCH_SIZE;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_DELETE_SOURCE;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_PREVIEW;
-
 /**
  * Test parameter builder for generic merge operations.
  *
@@ -228,23 +224,19 @@ public class MergeTestParameters {
 
 		// Preview
 		if (myPreview != null) {
-			params.addParameter()
-					.setName(OPERATION_MERGE_PARAM_PREVIEW)
-					.setValue(new org.hl7.fhir.r4.model.BooleanType(myPreview));
+			params.addParameter().setName("preview").setValue(new org.hl7.fhir.r4.model.BooleanType(myPreview));
 		}
 
 		// Delete source
 		if (myDeleteSource != null) {
 			params.addParameter()
-					.setName(OPERATION_MERGE_PARAM_DELETE_SOURCE)
+					.setName("delete-source")
 					.setValue(new org.hl7.fhir.r4.model.BooleanType(myDeleteSource));
 		}
 
 		// Batch size
 		if (myBatchSize != null) {
-			params.addParameter()
-					.setName(OPERATION_MERGE_PARAM_BATCH_SIZE)
-					.setValue(new org.hl7.fhir.r4.model.IntegerType(myBatchSize));
+			params.addParameter().setName("batch-size").setValue(new org.hl7.fhir.r4.model.IntegerType(myBatchSize));
 		}
 
 		return params;
