@@ -865,7 +865,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		preDelete(resourceToDelete, entity, theRequestDetails);
 
 		ResourceTable savedEntity = updateEntityForDelete(theRequestDetails, theTransactionDetails, entity);
-		resourceToDelete.setId(entity.getIdDt());
 
 		// Notify JPA interceptors
 		HookParams hookParams = new HookParams()
@@ -879,6 +878,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		doCallHooks(theTransactionDetails, theRequestDetails, Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
 
+		// DoCallHooks was being called after the resource version was updated. As a consequence, the subscription
+		// service
+		// was being called with a resource version that had not been saved in the DB yet, therefore failing to find
+		// and match the resource to the subscription (https://gitlab.com/simpatico.ai/cdr/-/issues/6616)
+		resourceToDelete.setId(entity.getIdDt());
 		DaoMethodOutcome outcome = toMethodOutcome(
 						theRequestDetails, savedEntity, resourceToDelete, null, RestOperationTypeEnum.DELETE)
 				.setCreated(true);
@@ -2060,7 +2064,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Nonnull
-	private ResourceTable readEntityLatestVersion(
+	ResourceTable readEntityLatestVersion(
 			RequestDetails theRequestDetails,
 			IIdType theId,
 			@Nonnull RequestPartitionId theRequestPartitionId,

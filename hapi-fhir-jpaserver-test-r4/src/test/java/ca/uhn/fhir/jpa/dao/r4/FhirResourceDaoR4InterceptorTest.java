@@ -211,7 +211,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		doAnswer(t -> {
 			IBaseResource res = (IBaseResource) t.getArguments()[1];
 			Long id1 = res.getIdElement().getIdPartAsLong();
-			assertEquals("Patient/" + id1 + "/_history/2", res.getIdElement().getValue());
+			assertEquals("Patient/" + id1 + "/_history/1", res.getIdElement().getValue());
 			return null;
 		}).when(interceptor).resourceDeleted(any(), any());
 
