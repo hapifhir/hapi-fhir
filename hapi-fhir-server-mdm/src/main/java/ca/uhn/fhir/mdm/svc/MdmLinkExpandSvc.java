@@ -19,32 +19,49 @@
  */
 package ca.uhn.fhir.mdm.svc;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.util.ExtensionUtil;
+import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Service
 @Transactional
 public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
+
+	@Autowired
+	private FhirContext myContext;
 
 	@Autowired
 	IMdmLinkDao myMdmLinkDao;
@@ -52,7 +69,19 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	@Autowired
 	IIdHelperService myIdHelperService;
 
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+
+	private IFhirPath myFhirPath;
+
 	public MdmLinkExpandSvc() {}
+
+	private IFhirPath getFhirPath() {
+		if (myFhirPath == null) {
+			myFhirPath = myContext.newFhirPath();
+		}
+		return myFhirPath;
+	}
 
 	/**
 	 * Given a source resource, perform MDM expansion and return all the resource IDs of all resources that are
@@ -171,5 +200,100 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 		}
 
 		return Collections.emptySet();
+	}
+
+	@Override
+	public Set<JpaPid> expandGroup(String theGroupResourceId, RequestPartitionId theRequestPartitionId) {
+		IdDt groupId = new IdDt(theGroupResourceId);
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setRequestPartitionId(theRequestPartitionId);
+		IBaseResource group = myDaoRegistry.getResourceDao("Group").read(groupId, requestDetails);
+		JpaPid pidOrNull = (JpaPid) myIdHelperService.getPidOrNull(theRequestPartitionId, group);
+		// Attempt to perform MDM Expansion of membership
+		return performMembershipExpansionViaMdmTable(pidOrNull);
+	}
+
+	@Override
+	public void annotateResource(IBaseResource iBaseResource) {
+		Optional<String> patientReference = getPatientReference(iBaseResource);
+		if (patientReference.isPresent()) {
+			addGoldenResourceExtension(iBaseResource, patientReference.get());
+		} else {
+			ourLog.error(
+					"Failed to find the patient reference information for resource {}. This is a bug, "
+							+ "as all resources which can be exported via Group Bulk Export must reference a patient.",
+					iBaseResource);
+		}
+	}
+
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	private Set<JpaPid> performMembershipExpansionViaMdmTable(JpaPid pidOrNull) {
+		List<MdmPidTuple<JpaPid>> goldenPidTargetPidTuples =
+				myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
+
+		Set<JpaPid> uniquePids = new HashSet<>();
+		goldenPidTargetPidTuples.forEach(tuple -> {
+			uniquePids.add(tuple.getGoldenPid());
+			uniquePids.add(tuple.getSourcePid());
+		});
+		return uniquePids;
+	}
+
+	private Optional<String> getPatientReference(IBaseResource iBaseResource) {
+		String fhirPath;
+
+		RuntimeSearchParam runtimeSearchParam = getRuntimeSearchParam(iBaseResource);
+		fhirPath = getPatientFhirPath(runtimeSearchParam);
+
+		if (iBaseResource.fhirType().equalsIgnoreCase("Patient")) {
+			return Optional.of(iBaseResource.getIdElement().getIdPart());
+		} else {
+			Optional<IBaseReference> optionalReference =
+					getFhirPath().evaluateFirst(iBaseResource, fhirPath, IBaseReference.class);
+			if (optionalReference.isPresent()) {
+				return optionalReference.map(theIBaseReference ->
+						theIBaseReference.getReferenceElement().getIdPart());
+			} else {
+				return Optional.empty();
+			}
+		}
+	}
+
+	private void addGoldenResourceExtension(IBaseResource iBaseResource, String sourceResourceId) {
+		// TODO, reimplement this, it is currently completely broken given the distributed nature of the job.
+		String goldenResourceId = ""; // TODO we must be able to fetch this, for now, will be no-op
+		if (!StringUtils.isBlank(goldenResourceId)) {
+			IBaseExtension<?, ?> extension = ExtensionUtil.getOrCreateExtension(
+					iBaseResource, HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
+			ExtensionUtil.setExtension(myContext, extension, "reference", prefixPatient(goldenResourceId));
+		}
+	}
+
+	private String prefixPatient(String theResourceId) {
+		return "Patient/" + theResourceId;
+	}
+
+	private String getPatientFhirPath(RuntimeSearchParam theRuntimeParam) {
+		String path = theRuntimeParam.getPath();
+		// GGG: Yes this is a stupid hack, but by default this runtime search param will return stuff like
+		// Observation.subject.where(resolve() is Patient) which unfortunately our FHIRpath evaluator doesn't play
+		// nicely with
+		if (path.contains(".where")) {
+			path = path.substring(0, path.indexOf(".where"));
+		}
+		return path;
+	}
+
+	private RuntimeSearchParam getRuntimeSearchParam(IBaseResource theResource) {
+		Optional<RuntimeSearchParam> oPatientSearchParam =
+				SearchParameterUtil.getOnlyPatientSearchParamForResourceType(myContext, theResource.fhirType());
+		if (!oPatientSearchParam.isPresent()) {
+			String errorMessage = String.format(
+					"[%s] has  no search parameters that are for patients, so it is invalid for Group Bulk Export!",
+					theResource.fhirType());
+			throw new IllegalArgumentException(Msg.code(2242) + errorMessage);
+		} else {
+			return oPatientSearchParam.get();
+		}
 	}
 }
