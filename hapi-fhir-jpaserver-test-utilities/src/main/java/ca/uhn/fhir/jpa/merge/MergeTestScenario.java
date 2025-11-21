@@ -427,25 +427,32 @@ public interface MergeTestScenario<T extends IBaseResource> {
 	 * Checks:
 	 * - Outcome indicates preview mode
 	 * - Diagnostics shows expected update count
+	 * <p>
+	 * Expected count is calculated as: total reference count + 2 (source and target resources)
 	 *
-	 * @param theOutParams           The operation output parameters
-	 * @param theExpectedUpdateCount Expected number of resources that would be updated
+	 * @param theOutParams The operation output parameters
 	 */
-	void validatePreviewOutcome(@Nonnull Parameters theOutParams, int theExpectedUpdateCount);
+	void validatePreviewOutcome(@Nonnull Parameters theOutParams);
 
 	/**
 	 * Assert that referencing resources have been updated to point to the target.
 	 * <p>
 	 * Verifies that none of the specified resources contain references to the source resource.
+	 * <p>
+	 * Uses scenario's internal source and target IDs for validation.
 	 *
 	 * @param theReferencingResourceIds IDs of resources that should have been updated
-	 * @param theSourceId               The source resource ID (references should be removed)
-	 * @param theTargetId               The target resource ID (not used in validation, provided for logging)
 	 */
-	void assertReferencesUpdated(
-			@Nonnull List<IIdType> theReferencingResourceIds,
-			@Nonnull IIdType theSourceId,
-			@Nonnull IIdType theTargetId);
+	void assertReferencesUpdated(@Nonnull List<IIdType> theReferencingResourceIds);
+
+	/**
+	 * Assert that referencing resources of a specific type have been updated to point to the target.
+	 * <p>
+	 * Convenience method that retrieves referencing resource IDs by type from scenario state.
+	 *
+	 * @param theResourceType The resource type (e.g., "PractitionerRole", "DiagnosticReport")
+	 */
+	void assertReferencesUpdated(@Nonnull String theResourceType);
 
 	/**
 	 * Assert that referencing resources have NOT been updated (for preview mode validation).
@@ -456,13 +463,12 @@ public interface MergeTestScenario<T extends IBaseResource> {
 
 	/**
 	 * Assert that merge provenance was created for the merge operation.
+	 * <p>
+	 * Uses scenario's internal source and target IDs for validation.
 	 *
-	 * @param theSourceId    The source resource ID
-	 * @param theTargetId    The target resource ID
 	 * @param theInputParams The input parameters used for the merge
 	 */
-	void assertMergeProvenanceCreated(
-			@Nonnull IIdType theSourceId, @Nonnull IIdType theTargetId, @Nonnull Parameters theInputParams);
+	void assertMergeProvenanceCreated(@Nonnull Parameters theInputParams);
 
 	/**
 	 * @return true if this resource type has an "active" field (boolean)
