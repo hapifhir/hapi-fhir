@@ -1,0 +1,1 @@
+../../cdr/.claude/instructions.md
