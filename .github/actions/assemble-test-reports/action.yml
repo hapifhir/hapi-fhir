@@ -16,7 +16,7 @@ runs:
   using: "composite"
   steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 1
 
@@ -54,13 +54,13 @@ runs:
         ./codecov -t ${{ inputs.CODECOV_TOKEN }} -R ${{ github.workspace }}/hapi-fhir-jacoco/target/site/jacoco-aggregate/
 
     - name: Publish test results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: junit-test-results
         path: './**/TEST-*.xml'
 
     - name: Publish code coverage report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: code-coverage
         path: ${{ github.workspace }}/hapi-fhir-jacoco/target/site/jacoco-aggregate/jacoco.xml
