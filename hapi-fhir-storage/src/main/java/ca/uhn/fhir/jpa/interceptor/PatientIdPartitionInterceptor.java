@@ -226,7 +226,7 @@ public class PatientIdPartitionInterceptor {
 				}
 				break;
 			default:
-			// nothing
+				// nothing
 		}
 
 		if (isBlank(theReadDetails.getResourceType())) {

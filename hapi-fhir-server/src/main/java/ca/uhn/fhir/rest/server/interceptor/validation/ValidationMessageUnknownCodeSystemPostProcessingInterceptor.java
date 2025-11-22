@@ -79,7 +79,7 @@ public class ValidationMessageUnknownCodeSystemPostProcessingInterceptor
 			case FATAL -> ResultSeverityEnum.FATAL;
 			case ERROR -> ResultSeverityEnum.ERROR;
 			case WARNING -> ResultSeverityEnum.WARNING;
-			// treat success as information level
+				// treat success as information level
 			case INFORMATION, SUCCESS -> ResultSeverityEnum.INFORMATION;
 		};
 	}

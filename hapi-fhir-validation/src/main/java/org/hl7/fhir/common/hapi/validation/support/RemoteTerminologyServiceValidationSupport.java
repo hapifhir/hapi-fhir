@@ -358,7 +358,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				conceptProperty =
 						new CodingConceptProperty(theName, coding.getSystem(), coding.getCode(), coding.getDisplay());
 				break;
-			// TODO: add other property types as per FHIR spec https://github.com/hapifhir/hapi-fhir/issues/5699
+				// TODO: add other property types as per FHIR spec https://github.com/hapifhir/hapi-fhir/issues/5699
 			default:
 				// other types will not fail for Remote Terminology
 				conceptProperty = new StringConceptProperty(theName, theValue.toString());
@@ -491,7 +491,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				conceptProperty =
 						new CodingConceptProperty(theName, coding.getSystem(), coding.getCode(), coding.getDisplay());
 				break;
-			// TODO: add other property types as per FHIR spec https://github.com/hapifhir/hapi-fhir/issues/5699
+				// TODO: add other property types as per FHIR spec https://github.com/hapifhir/hapi-fhir/issues/5699
 			default:
 				// other types will not fail for Remote Terminology
 				conceptProperty = new StringConceptProperty(theName, theValue.toString());

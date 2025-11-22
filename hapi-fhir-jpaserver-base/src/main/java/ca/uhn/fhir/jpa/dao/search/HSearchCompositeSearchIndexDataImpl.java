@@ -169,7 +169,7 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 				case REFERENCE:
 					break;
 
-				// unsupported
+					// unsupported
 				case SPECIAL:
 				case HAS:
 					break;

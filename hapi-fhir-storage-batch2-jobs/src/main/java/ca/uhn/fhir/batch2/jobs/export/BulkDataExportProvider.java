@@ -490,17 +490,17 @@ public class BulkDataExportProvider {
 				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(oo, response.getWriter());
 				response.getWriter().close();
 				break;
-			//noinspection DefaultNotLastCaseInSwitch
+				//noinspection DefaultNotLastCaseInSwitch
 			default:
 				// Deliberate fall through
 				ourLog.warn(
 						"Unrecognized status encountered: {}. Treating as BUILDING/SUBMITTED",
 						info.getStatus().name());
-			//noinspection fallthrough
+				//noinspection fallthrough
 			case FINALIZE:
 			case QUEUED:
 			case IN_PROGRESS:
-			//noinspection deprecation - we need to support old jobs after upgrade.
+				//noinspection deprecation - we need to support old jobs after upgrade.
 			case ERRORED:
 				if (info.isCancelled()) {
 					ourLog.info("{} job instance <{}> was marked cancelled.", info.getStatus(), theJobId);

@@ -463,8 +463,8 @@ class ModelScanner {
 	@SuppressWarnings("JavadocLinkAsPlainText")
 	private String toCanonicalSearchParameterUri(RuntimeResourceDefinition theResourceDef, String theName) {
 		return switch (theName) {
-			// Hard-code a few URLs that we know don't follow the
-			// usual pattern
+				// Hard-code a few URLs that we know don't follow the
+				// usual pattern
 			case Constants.PARAM_LANGUAGE -> Constants.PARAM_LANGUAGE_URL;
 			case Constants.PARAM_TEXT -> Constants.PARAM_TEXT_URL;
 			case Constants.PARAM_CONTENT -> Constants.PARAM_CONTENT_URL;

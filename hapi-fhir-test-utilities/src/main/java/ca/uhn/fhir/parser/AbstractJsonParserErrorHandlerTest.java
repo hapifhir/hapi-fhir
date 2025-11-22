@@ -23,7 +23,8 @@ import ca.uhn.fhir.context.FhirContext;
 
 public abstract non-sealed class AbstractJsonParserErrorHandlerTest extends AbstractParserErrorHandlerTest {
 
-	private static String PATIENT_DUPLICATE_CHOICE = """
+	private static String PATIENT_DUPLICATE_CHOICE =
+			"""
 			{
 				"resourceType": "Patient",
 				"deceasedBoolean": "true",

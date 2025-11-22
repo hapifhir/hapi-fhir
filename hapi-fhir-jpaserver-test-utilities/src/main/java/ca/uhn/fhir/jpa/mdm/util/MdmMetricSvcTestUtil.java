@@ -40,7 +40,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class MdmMetricSvcTestUtil {
 
-	public static final String OUR_BASIC_STATE = """
+	public static final String OUR_BASIC_STATE =
+			"""
 					G1, AUTO, MATCH, P1
 					G2, AUTO, MATCH, P2,
 					G3, AUTO, POSSIBLE_MATCH, P3,
@@ -166,7 +167,8 @@ public class MdmMetricSvcTestUtil {
 		{
 			// a mix of golden, regular, and blocked resources
 			ResourceMetricTestParams p = new ResourceMetricTestParams();
-			p.setInitialState("""
+			p.setInitialState(
+					"""
 				G1, AUTO, MATCH, P1
 				G2, AUTO, MATCH, P2
 				G2, AUTO, MATCH, P1,
@@ -239,7 +241,8 @@ public class MdmMetricSvcTestUtil {
 		{
 			// score counts
 			LinkScoreMetricTestParams p = new LinkScoreMetricTestParams();
-			p.setInitialState("""
+			p.setInitialState(
+					"""
 				G1, AUTO, MATCH, P1
 				G2, AUTO, POSSIBLE_MATCH, P2,
 				G3, AUTO, POSSIBLE_MATCH, P1
@@ -272,7 +275,8 @@ public class MdmMetricSvcTestUtil {
 		{
 			// match type filtering
 			LinkScoreMetricTestParams p = new LinkScoreMetricTestParams();
-			p.setInitialState("""
+			p.setInitialState(
+					"""
 				G1, AUTO, POSSIBLE_MATCH, P1
 				G2, AUTO, MATCH, P2
 				G3, AUTO, POSSIBLE_MATCH, P3

@@ -55,7 +55,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class HapiForeignKeyIndexHelper {
 
 	@Language("SQL")
-	private static final String FK_QUERY = """
+	private static final String FK_QUERY =
+			"""
 		SELECT c.conrelid::regclass AS "table",
 				/* list of key column names in order */
 				string_agg(a.attname, ',' ORDER BY x.n) AS columns,
