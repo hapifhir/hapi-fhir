@@ -2452,7 +2452,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		ScheduledJobDefinition vsJobDefinition = new ScheduledJobDefinition();
 		vsJobDefinition.setId(getClass().getName());
 		vsJobDefinition.setJobClass(Job.class);
-		theSchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_MINUTE, vsJobDefinition);
+		theSchedulerService.scheduleClusteredJob(
+				myStorageSettings.getPreExpandValueSetsScheduleInMinutes() * DateUtils.MILLIS_PER_MINUTE,
+				vsJobDefinition);
 	}
 
 	@Override
