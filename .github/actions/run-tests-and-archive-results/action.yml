@@ -18,7 +18,7 @@ runs:
   using: "composite"
   steps:
     - name: Set up JDK ${{ inputs.java-version }}
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
         java-version: ${{ inputs.java-version }}
         distribution: 'temurin'
@@ -59,7 +59,7 @@ runs:
         echo "sanitized_name=$sanitized_name" >> $GITHUB_ENV
 
     - name: Upload target Directory
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ env.sanitized_name }}
         path: '**/target/**'
