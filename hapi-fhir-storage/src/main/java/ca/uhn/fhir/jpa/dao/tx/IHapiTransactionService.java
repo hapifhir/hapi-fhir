@@ -96,6 +96,11 @@ public interface IHapiTransactionService {
 	 * <p>
 	 * This is an experimental API, subject to change in a future release.
 	 * </p>
+	 * <p>
+	 * If two partitions are being compared for upgrade purposes, the previous partition should be
+	 * supplied to {@literal theRequestPartitionId} and the new partition should be supplied to
+	 * {@literal theOtherRequestPartitionId}.
+	 * </p>
 	 *
 	 * @since 7.4.0
 	 */
