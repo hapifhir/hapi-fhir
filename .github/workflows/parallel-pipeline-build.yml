@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Build the Maven cache
         id: cache-maven
@@ -32,7 +32,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Run Checkstyle Validation
         uses: ./.github/actions/checkstyle-validation
@@ -50,7 +50,7 @@ jobs:
       modules_list: ${{ steps.format-modules.outputs.modules_list }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Generate Modules List
         id: generate_list
@@ -82,7 +82,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Run Tests and Archive Results
         uses: ./.github/actions/run-tests-and-archive-results
@@ -99,7 +99,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Assemble Reports
         uses: ./.github/actions/assemble-test-reports

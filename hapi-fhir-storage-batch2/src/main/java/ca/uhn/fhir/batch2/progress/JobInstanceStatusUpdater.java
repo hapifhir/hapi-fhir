@@ -86,7 +86,7 @@ public class JobInstanceStatusUpdater {
 			case IN_PROGRESS:
 			case FINALIZE:
 			default:
-				// do nothing
+			// do nothing
 		}
 	}
 

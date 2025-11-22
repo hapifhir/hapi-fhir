@@ -86,9 +86,7 @@ public class PostgresEmbeddedDatabase extends JpaEmbeddedDatabase {
 	}
 
 	public void validateConstraints() {
-		getJdbcTemplate()
-				.execute(
-						"""
+		getJdbcTemplate().execute("""
 			do $$
 			declare r record;
 			BEGIN

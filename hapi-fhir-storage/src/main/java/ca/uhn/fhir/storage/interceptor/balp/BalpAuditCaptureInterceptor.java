@@ -149,7 +149,7 @@ public class BalpAuditCaptureInterceptor {
 				handleReadOrVRead(theDetails, theRequestDetails);
 				break;
 			default:
-				// No actions for other operations
+			// No actions for other operations
 		}
 	}
 

@@ -2363,7 +2363,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		return new CanonicalUrlTargets(hashIdentityValues, partitionIds);
 	}
 
-	record CanonicalUrlTargets(@Nonnull Set<Long> hashIdentityValues, @Nonnull Set<Integer> partitionIds) {
+	record CanonicalUrlTargets(
+			@Nonnull Set<Long> hashIdentityValues, @Nonnull Set<Integer> partitionIds) {
 		public boolean isEmpty() {
 			return hashIdentityValues.isEmpty();
 		}

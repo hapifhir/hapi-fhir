@@ -227,15 +227,15 @@ public class ExtendedHSearchIndexExtractor {
 			case "Coding":
 				addToken_Coding(theRetVal, spName, (IBaseCoding) nextValue);
 				break;
-				// TODO share this with TokenExtractor and introduce a ITokenIndexer interface.
-				// Ignore unknown types for now.
-				// This is just for autocomplete, and we are focused on Observation.code, category, combo-code, etc.
-				//					case "Identifier":
-				//						mySearchParamExtractor.addToken_Identifier(myResourceTypeName, params, searchParam, value);
-				//						break;
-				//					case "ContactPoint":
-				//						mySearchParamExtractor.addToken_ContactPoint(myResourceTypeName, params, searchParam, value);
-				//						break;
+			// TODO share this with TokenExtractor and introduce a ITokenIndexer interface.
+			// Ignore unknown types for now.
+			// This is just for autocomplete, and we are focused on Observation.code, category, combo-code, etc.
+			//					case "Identifier":
+			//						mySearchParamExtractor.addToken_Identifier(myResourceTypeName, params, searchParam, value);
+			//						break;
+			//					case "ContactPoint":
+			//						mySearchParamExtractor.addToken_ContactPoint(myResourceTypeName, params, searchParam, value);
+			//						break;
 			default:
 				break;
 		}

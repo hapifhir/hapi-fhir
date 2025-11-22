@@ -242,8 +242,8 @@ public class ExtendedHSearchClauseBuilder {
 		}
 		String fieldName;
 		switch (theSearchParamName) {
-				// _content and _text were here first, and don't obey our mapping.
-				// Leave them as-is for backwards compatibility.
+			// _content and _text were here first, and don't obey our mapping.
+			// Leave them as-is for backwards compatibility.
 			case Constants.PARAM_CONTENT:
 				fieldName = "myContentText";
 				break;
@@ -690,7 +690,7 @@ public class ExtendedHSearchClauseBuilder {
 
 		ParamPrefixEnum activePrefix = thePrefix == null ? ParamPrefixEnum.EQUAL : thePrefix;
 		switch (activePrefix) {
-				//	searches for resource quantity between passed param value +/- 10%
+			//	searches for resource quantity between passed param value +/- 10%
 			case APPROXIMATE:
 				predicate = ((SearchPredicateFactory) thePathContext)
 						.range()
@@ -698,7 +698,7 @@ public class ExtendedHSearchClauseBuilder {
 						.between(value - approxTolerance, value + approxTolerance);
 				break;
 
-				// searches for resource quantity between passed param value +/- 5%
+			// searches for resource quantity between passed param value +/- 5%
 			case EQUAL:
 				predicate = ((SearchPredicateFactory) thePathContext)
 						.range()
@@ -706,7 +706,7 @@ public class ExtendedHSearchClauseBuilder {
 						.between(range.getLeft().doubleValue(), range.getRight().doubleValue());
 				break;
 
-				// searches for resource quantity > param value
+			// searches for resource quantity > param value
 			case GREATERTHAN:
 			case STARTS_AFTER: // treated as GREATERTHAN because search doesn't handle ranges
 				predicate = ((SearchPredicateFactory) thePathContext)
@@ -715,7 +715,7 @@ public class ExtendedHSearchClauseBuilder {
 						.greaterThan(value);
 				break;
 
-				// searches for resource quantity not < param value
+			// searches for resource quantity not < param value
 			case GREATERTHAN_OR_EQUALS:
 				predicate = ((SearchPredicateFactory) thePathContext)
 						.range()
@@ -723,7 +723,7 @@ public class ExtendedHSearchClauseBuilder {
 						.atLeast(value);
 				break;
 
-				// searches for resource quantity < param value
+			// searches for resource quantity < param value
 			case LESSTHAN:
 			case ENDS_BEFORE: // treated as LESSTHAN because search doesn't handle ranges
 				predicate = ((SearchPredicateFactory) thePathContext)
@@ -732,7 +732,7 @@ public class ExtendedHSearchClauseBuilder {
 						.lessThan(value);
 				break;
 
-				// searches for resource quantity not > param value
+			// searches for resource quantity not > param value
 			case LESSTHAN_OR_EQUALS:
 				predicate = ((SearchPredicateFactory) thePathContext)
 						.range()
@@ -740,7 +740,7 @@ public class ExtendedHSearchClauseBuilder {
 						.atMost(value);
 				break;
 
-				// NOT_EQUAL: searches for resource quantity not between passed param value +/- 5%
+			// NOT_EQUAL: searches for resource quantity not between passed param value +/- 5%
 			case NOT_EQUAL:
 				RangePredicateOptionsStep<?> negRange = ((SearchPredicateFactory) thePathContext)
 						.range()

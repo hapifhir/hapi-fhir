@@ -192,7 +192,7 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
 			case PRIMITIVE_XHTML_HL7ORG:
 			case RESOURCE_BLOCK:
 			case UNDECL_EXT:
-				// TODO: not implemented. What to do?
+			// TODO: not implemented. What to do?
 		}
 	}
 
@@ -342,7 +342,7 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
 			case Type:
 			case Union:
 			case Upper:
-				// TODO: unimplemented, what to do?
+			// TODO: unimplemented, what to do?
 			case ConvertsToDate:
 				break;
 			case Round:
@@ -423,7 +423,7 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
 				case RESOURCE:
 				case RESOURCE_BLOCK:
 				case UNDECL_EXT:
-					// TODO: unimplemented. What to do?
+				// TODO: unimplemented. What to do?
 			}
 		}
 	}
@@ -484,7 +484,7 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
 						case Times:
 						case Union:
 						case Xor:
-							// TODO: unimplemented, what to do?
+						// TODO: unimplemented, what to do?
 					}
 				}
 			}
@@ -548,7 +548,7 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
 				case Times:
 				case Union:
 				case Xor:
-					// TODO: need to implement above first
+				// TODO: need to implement above first
 			}
 		}
 
@@ -628,7 +628,7 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
 							case Times:
 							case Union:
 							case Xor:
-								// TODO: need to implement above first
+							// TODO: need to implement above first
 						}
 					}
 				}

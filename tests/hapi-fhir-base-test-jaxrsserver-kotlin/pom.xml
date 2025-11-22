@@ -172,6 +172,6 @@
 
 	<properties>
 		<!--<kotlin.compiler.incremental>true</kotlin.compiler.incremental>-->
-		<kotlin.version>1.9.23</kotlin.version>
+		<kotlin.version>2.2.21</kotlin.version>
 	</properties>
 </project>

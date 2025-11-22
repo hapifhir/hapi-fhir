@@ -60,8 +60,7 @@ public interface IValueSetExpansionIT {
 	static final String CODE_SYSTEM_CODE = "PRODUCT-MULTI-SOURCE";
 	static final String PROPERTY_NAME = "ACTIVE";
 
-	static final String CODE_SYSTEM_STR_BASE =
-			"""
+	static final String CODE_SYSTEM_STR_BASE = """
 								{
 								"resourceType": "CodeSystem",
 								"id": "4fb48e4e-57a4-4844-be74-d93707bdf9a1",
@@ -97,8 +96,7 @@ public interface IValueSetExpansionIT {
 							}
 					""";
 
-	static final String VALUE_SET_STR_BASE =
-			"""
+	static final String VALUE_SET_STR_BASE = """
 						{
 							"resourceType": "ValueSet",
 							"id": "e0324e95-6d5c-4b08-8832-d5f5cd00a29a",
@@ -180,8 +178,8 @@ public interface IValueSetExpansionIT {
 			case NOTIN -> filterComponent.setValue("1,2,3");
 			case EQUAL -> filterComponent.setValue("2");
 			default ->
-			// just in case
-			fail(theOperator.getDisplay() + " is not added for testing");
+				// just in case
+				fail(theOperator.getDisplay() + " is not added for testing");
 		}
 		conceptSetComponent.setFilter(List.of(filterComponent));
 
