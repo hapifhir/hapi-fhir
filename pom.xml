@@ -1095,7 +1095,7 @@
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<elastic_apm_version>1.52.0</elastic_apm_version>
 		<elasticsearch_version>8.16.2</elasticsearch_version>
-		<ucum_version>1.0.10</ucum_version>
+		<ucum_version>1.0.9</ucum_version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
