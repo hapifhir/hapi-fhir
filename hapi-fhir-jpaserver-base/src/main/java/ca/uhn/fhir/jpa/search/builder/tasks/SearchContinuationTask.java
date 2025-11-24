@@ -26,13 +26,11 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.ExceptionService;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IPagingProvider;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
 import java.util.List;
 
@@ -93,11 +91,8 @@ public class SearchContinuationTask extends SearchTask {
 
 		} catch (Throwable e) {
 			ourLog.error("Failure processing search", e);
-			getSearch().setFailureMessage(e.getMessage());
-			getSearch().setStatus(SearchStatusEnum.FAILED);
-			if (e instanceof BaseServerResponseException) {
-				getSearch().setFailureCode(((BaseServerResponseException) e).getStatusCode());
-			}
+
+			markSearchAsFailedWithExceptionDetails(e);
 
 			saveSearch();
 			return null;

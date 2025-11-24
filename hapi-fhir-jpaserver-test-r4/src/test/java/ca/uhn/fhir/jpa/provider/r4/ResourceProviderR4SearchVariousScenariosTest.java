@@ -12,6 +12,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -249,6 +250,84 @@ public class ResourceProviderR4SearchVariousScenariosTest extends BaseResourcePr
 		}
 	}
 
+
+	/**
+	 * Test that invalid date format in built-in chained date SearchParameter returns HTTP 400.
+	 * This test uses Observation?subject.birthdate which is a BUILT-IN chained parameter.
+	 * This verifies the fix for a bug where chained parameters validation happens
+	 * in SearchTask, causing DataFormatException to return HTTP 500 instead of 400.
+	 */
+	@Test
+	void testChainedDateSearchWithInvalidFormatReturns400() {
+		// Create a Patient with a valid birthdate
+		Patient patient = new Patient();
+		patient.setId("P1");
+		patient.addName().setFamily("Smith").addGiven("John");
+		patient.getBirthDateElement().setValueAsString("1990-05-15");
+		IIdType patientId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+
+		// Create an Observation that references the Patient
+		Observation obs = new Observation();
+		obs.getSubject().setReference(patientId.getValue());
+		obs.getCode().setText("Test Observation");
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+		// Test 1: Invalid date with prefix - should return HTTP 400 (not 500)
+		InvalidRequestException exception1 = runAndAssertThrows(InvalidRequestException.class,
+			"Observation?subject.birthdate=geinvaliddate");
+		assertThat(exception1.getStatusCode()).isEqualTo(400);
+		assertThat(exception1.getMessage()).contains("HAPI-1940");
+		assertThat(exception1.getMessage()).contains("Invalid date/time/quantity format");
+
+		// Test 2: Invalid date WITHOUT prefix
+		InvalidRequestException exception2 = runAndAssertThrows(InvalidRequestException.class,
+			"Observation?subject.birthdate=invaliddate");
+		assertThat(exception2.getStatusCode()).isEqualTo(400);
+		assertThat(exception2.getMessage()).contains("HAPI-1940");
+		assertThat(exception2.getMessage()).contains("Invalid date/time/quantity format");
+
+		// Test 3: Valid format - should work and find the observation (birthdate 1990-05-15 >= 1984-05-01)
+		Bundle result = runQueryAndGetBundle("Observation?subject.birthdate=ge1984-05-01", myClient);
+		List<String> foundResources = toUnqualifiedVersionlessIdValues(result);
+		assertThat(foundResources).contains(obsId.getValue());
+	}
+
+
+	/**
+	 * Test that invalid quantity format in built-in chained quantity SearchParameter returns HTTP 400 instead of 500.
+	 * This test uses DiagnosticReport?result.value-quantity which is a BUILT-IN chained parameter.
+	 */
+	@Test
+	void testChainedQuantitySearchWithInvalidFormatReturns400() {
+		// Create an Observation with a quantity value
+		Observation obs = new Observation();
+		obs.setId("OBS1");
+		obs.getCode().setText("Test Observation");
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		obs.getValueQuantity().setValue(150).setUnit("mg/dL").setSystem("http://unitsofmeasure.org").setCode("mg/dL");
+		IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+		// Create a DiagnosticReport that references the Observation
+		DiagnosticReport report = new org.hl7.fhir.r4.model.DiagnosticReport();
+		report.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
+		report.getCode().setText("Test Report");
+		report.addResult().setReference(obsId.getValue());
+		IIdType reportId = myDiagnosticReportDao.create(report, mySrd).getId().toUnqualifiedVersionless();
+
+		// Test 1: Invalid format - should return HTTP 400 (not 500)
+		InvalidRequestException exception = runAndAssertThrows(InvalidRequestException.class,
+			"DiagnosticReport?result.value-quantity=invalid");
+		assertThat(exception.getStatusCode()).isEqualTo(400);
+		assertThat(exception.getMessage()).contains("HAPI-1940");
+		assertThat(exception.getMessage()).contains("Invalid date/time/quantity format");
+
+		// Test 2: Valid format - should work and find the report (value 150 >= 100)
+		Bundle result = runQueryAndGetBundle("DiagnosticReport?result.value-quantity=ge100", myClient);
+		List<String> foundResources = toUnqualifiedVersionlessIdValues(result);
+		assertThat(foundResources).contains(reportId.getValue());
+	}
+
 	@Nested
 	class PractitionerEobCoveragePractitionerGroupYesCustomSearchParam {
 		private static final String PAT_ID = "pat1";
@@ -444,6 +523,8 @@ public class ResourceProviderR4SearchVariousScenariosTest extends BaseResourcePr
 		assertThat(actualIdsInOrder).as(theReason).contains(theExpectedIdsInOrder);
 	}
 
+
+
 	private void runAndAssert(String theQueryString) {
 		ourLog.debug("queryString:\n{}", theQueryString);
 
@@ -453,8 +534,8 @@ public class ResourceProviderR4SearchVariousScenariosTest extends BaseResourcePr
 		ourLog.debug("result:\n{}", theQueryString);
 	}
 
-	private void runAndAssertThrows(Class<? extends Exception> theExceptedException, String theQueryString) {
-		assertThrows(theExceptedException, () -> runQueryAndGetBundle(theQueryString, myClient));
+	private <T extends Exception> T runAndAssertThrows(Class<T> theExceptedException, String theQueryString) {
+		return assertThrows(theExceptedException, () -> runQueryAndGetBundle(theQueryString, myClient));
 	}
 
 	private static Bundle runQueryAndGetBundle(String theTheQueryString, IGenericClient theClient) {
