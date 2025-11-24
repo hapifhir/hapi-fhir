@@ -101,6 +101,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 			new Identifier().setSystem("http://test.org").setValue("target-1"),
 			new Identifier().setSystem("http://test.org").setValue("target-2"),
 			new Identifier().setSystem("http://test.org").setValue("common"));
+	private List<Identifier> myResultResourceIdentifiers = null;
 	private boolean myCreateResultResource = false;
 	private boolean myDeleteSource = false;
 	private boolean myPreview = false;
@@ -184,6 +185,12 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	@Nonnull
 	public AbstractMergeTestScenario<T> withTargetIdentifiers(@Nonnull List<Identifier> theIdentifiers) {
 		myTargetIdentifiers = theIdentifiers;
+		return this;
+	}
+
+	@Nonnull
+	public AbstractMergeTestScenario<T> withResultResourceIdentifiers(@Nonnull List<Identifier> theIdentifiers) {
+		myResultResourceIdentifiers = theIdentifiers;
 		return this;
 	}
 
@@ -286,13 +293,21 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		return myReferencingResourcesByType.keySet();
 	}
 
+	/**
+	 * Get identifiers for result resource, defaulting to target identifiers if not explicitly set.
+	 */
+	@Nonnull
+	private List<Identifier> getResultResourceIdentifiers() {
+		return myResultResourceIdentifiers != null ? myResultResourceIdentifiers : myTargetIdentifiers;
+	}
+
 	@Nonnull
 	public List<Identifier> getExpectedIdentifiers() {
 		assertTestDataCreated();
 
 		if (myCreateResultResource) {
-			// Result resource provided - identifiers come from target identifiers
-			return new ArrayList<>(myTargetIdentifiers);
+			// Result resource provided - identifiers come from result resource identifiers (defaults to target)
+			return new ArrayList<>(getResultResourceIdentifiers());
 		}
 
 		// Merge logic: target keeps its identifiers, source identifiers marked as "old" are added
@@ -324,8 +339,8 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 				.preview(myPreview);
 
 		if (myCreateResultResource) {
-			// Create result resource with target identifiers (not persisted)
-			T result = createResourceWithIdentifiers(myTargetIdentifiers);
+			// Create result resource with result resource identifiers (defaults to target identifiers if not set)
+			T result = createResourceWithIdentifiers(getResultResourceIdentifiers());
 			// Result resource must have same ID as target for validation
 			result.setId(getTargetId());
 
@@ -615,23 +630,11 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		OperationOutcome outcome =
 				(OperationOutcome) theOutParams.getParameter("outcome").getResource();
 
-		ourLog.info(
-				"Preview merge OperationOutcome: expectedCount={}, actualDiagnostics={}, details={}",
-				theExpectedUpdateCount,
-				outcome.getIssue().isEmpty()
-						? "NONE"
-						: outcome.getIssue().get(0).getDiagnostics(),
-				outcome.getIssue().isEmpty()
-						? "NONE"
-						: outcome.getIssue().get(0).getDetails().getText());
-
 		assertThat(outcome.getIssue()).hasSize(1).element(0).satisfies(issue -> {
 			assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
 			assertThat(issue.getDetails().getText()).isEqualTo("Preview only merge operation - no issues detected");
 			assertThat(issue.getDiagnostics()).isEqualTo("Merge would update " + theExpectedUpdateCount + " resources");
 		});
-
-		ourLog.debug("Preview outcome validated successfully: {} resources would be updated", theExpectedUpdateCount);
 	}
 
 	// ================================================
