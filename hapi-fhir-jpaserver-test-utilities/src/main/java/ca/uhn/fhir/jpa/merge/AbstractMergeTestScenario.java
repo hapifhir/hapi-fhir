@@ -338,22 +338,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 				.deleteSource(myDeleteSource)
 				.preview(myPreview);
 
-		if (myCreateResultResource) {
-			// Create result resource with result resource identifiers (defaults to target identifiers if not set)
-			T result = createResourceWithIdentifiers(getResultResourceIdentifiers());
-			// Result resource must have same ID as target for validation
-			result.setId(getTargetId());
-
-			// Add "replaces" link only when deleteSource=false
-			// (validation requires this link when source is kept, but forbids it when source is deleted)
-			if (!myDeleteSource) {
-				addReplacesLinkToResource(result, getSourceId());
-			}
-
-			params.resultResource(result);
-			ourLog.debug("Created result resource for merge parameters with ID: {}", result.getIdElement());
-		}
-
+		addResultResourceIfNeeded(params);
 		return params;
 	}
 
@@ -376,21 +361,29 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 			params.targetIdentifiers(getIdentifiersFromResource(myTargetResource));
 		}
 
+		addResultResourceIfNeeded(params);
+		return params;
+	}
+
+	/**
+	 * Add result resource to parameters if configured.
+	 */
+	private void addResultResourceIfNeeded(@Nonnull MergeTestParameters theParams) {
 		if (myCreateResultResource) {
-			// Create result resource with target identifiers (not persisted)
-			T result = createResourceWithIdentifiers(myTargetIdentifiers);
+			// Create result resource with result resource identifiers (defaults to target identifiers if not set)
+			T result = createResourceWithIdentifiers(getResultResourceIdentifiers());
+			// Result resource must have same ID as target for validation
 			result.setId(getTargetId());
 
 			// Add "replaces" link only when deleteSource=false
+			// (validation requires this link when source is kept, but forbids it when source is deleted)
 			if (!myDeleteSource) {
 				addReplacesLinkToResource(result, getSourceId());
 			}
 
-			params.resultResource(result);
+			theParams.resultResource(result);
 			ourLog.debug("Created result resource for merge parameters with ID: {}", result.getIdElement());
 		}
-
-		return params;
 	}
 
 	// ================================================
