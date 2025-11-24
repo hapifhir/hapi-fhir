@@ -501,11 +501,11 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		if (theWithResultResource) {
 			// Result resource provided - identifiers come from there
 			// For now, return target identifiers (actual logic would use result resource)
-			return new ArrayList<>(getIdentifiersFromResource(theTarget));
+			return getIdentifiersFromResource(theTarget);
 		}
 
 		// Merge logic: target keeps its identifiers, source identifiers marked as "old" are added
-		List<Identifier> expected = new ArrayList<>(getIdentifiersFromResource(theTarget));
+		List<Identifier> expected = getIdentifiersFromResource(theTarget);
 
 		for (Identifier sourceId : getIdentifiersFromResource(theSource)) {
 			boolean alreadyPresent = expected.stream()
