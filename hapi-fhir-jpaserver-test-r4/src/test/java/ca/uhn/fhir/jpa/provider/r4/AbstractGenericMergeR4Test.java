@@ -159,11 +159,8 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		scenario.createTestData();
 
-		// Build merge parameters
-		MergeTestParameters params = scenario.buildMergeOperationParameters();
-
 		// Execute merge
-		Parameters outParams = myHelper.callMergeOperation(getResourceTypeName(), params, theAsync);
+		Parameters outParams = myHelper.callMergeOperation(scenario, theAsync);
 
 		// Validate outcome based on mode
 		if (thePreview) {
@@ -243,8 +240,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		scenario.createTestData();
 
 		// Execute merge
-		MergeTestParameters params = scenario.buildMergeOperationParameters();
-		myHelper.callMergeOperation(getResourceTypeName(), params, false);
+		myHelper.callMergeOperation(scenario, false);
 
 		// Validate target has "replaces" link to source
 		T target = scenario.readResource(scenario.getTargetId());
@@ -259,8 +255,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		scenario.createTestData();
 
 		// Execute merge
-		MergeTestParameters params = scenario.buildMergeOperationParameters();
-		myHelper.callMergeOperation(getResourceTypeName(), params, false);
+		myHelper.callMergeOperation(scenario, false);
 
 		// Validate source has "replaced-by" link to target
 		T source = scenario.readResource(scenario.getSourceId());
@@ -291,8 +286,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		scenario.createTestData();
 
 		// Execute merge with delete
-		MergeTestParameters params = scenario.buildMergeOperationParameters();
-		myHelper.callMergeOperation(getResourceTypeName(), params, false);
+		myHelper.callMergeOperation(scenario, false);
 
 		// Validate source is deleted (cannot read it)
 		scenario.assertSourceResourceState(null, scenario.getSourceId(), scenario.getTargetId(), true);
@@ -306,8 +300,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		scenario.createTestData();
 
 		// Execute merge
-		MergeTestParameters params = scenario.buildMergeOperationParameters();
-		myHelper.callMergeOperation(getResourceTypeName(), params, false);
+		myHelper.callMergeOperation(scenario, false);
 
 		// Validate all reference types updated
 		for (String resourceType : scenario.getReferencingResourceTypes()) {
@@ -327,8 +320,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		List<Identifier> targetIdentifiersBefore = scenario.getIdentifiersFromResource(targetBefore);
 
 		// Execute merge
-		MergeTestParameters params = scenario.buildMergeOperationParameters();
-		myHelper.callMergeOperation(getResourceTypeName(), params, false);
+		myHelper.callMergeOperation(scenario, false);
 
 		// Validate target preserved its original identifiers
 		T targetAfter = scenario.readResource(scenario.getTargetId());
@@ -438,7 +430,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		// Execute merge
 		MergeTestParameters params = scenario.buildMergeOperationParameters();
 		Parameters inParams = params.asParametersResource();
-		myHelper.callMergeOperation(getResourceTypeName(), params, false);
+		myHelper.callMergeOperation(scenario, false);
 
 		// Validate provenance created
 		scenario.assertMergeProvenanceCreated(inParams);
@@ -454,7 +446,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		// Execute merge
 		MergeTestParameters params = scenario.buildMergeOperationParameters();
 		Parameters inParams = params.asParametersResource();
-		Parameters outParams = myHelper.callMergeOperation(getResourceTypeName(), params, true);
+		Parameters outParams = myHelper.callMergeOperation(scenario, true);
 
 		// Wait for completion
 		Task task = (Task) outParams.getParameter("task").getResource();
@@ -474,8 +466,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		scenario.createTestData();
 
 		// Execute merge in preview mode
-		MergeTestParameters params = scenario.buildMergeOperationParameters();
-		myHelper.callMergeOperation(getResourceTypeName(), params, false);
+		myHelper.callMergeOperation(scenario, false);
 
 		// Validate no changes (preview mode validation already checks this)
 		scenario.assertReferencesNotUpdated();
@@ -493,8 +484,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		scenario.createTestData();
 
 		// Execute merge (no delete)
-		MergeTestParameters params = scenario.buildMergeOperationParameters();
-		myHelper.callMergeOperation(getResourceTypeName(), params, false);
+		myHelper.callMergeOperation(scenario, false);
 
 		// Validate source state using scenario (handles active/status field differences)
 		T sourceAfter = scenario.readResource(scenario.getSourceId());
@@ -509,8 +499,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		scenario.createTestData();
 
 		// Execute merge
-		MergeTestParameters params = scenario.buildMergeOperationParameters();
-		myHelper.callMergeOperation(getResourceTypeName(), params, false);
+		myHelper.callMergeOperation(scenario, false);
 
 		// Validate target state using scenario (handles active/status field differences)
 		T targetAfter = scenario.readResource(scenario.getTargetId());
@@ -531,8 +520,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		scenario.createTestData();
 
 		// Execute merge with result resource
-		MergeTestParameters params = scenario.buildMergeOperationParameters();
-		myHelper.callMergeOperation(getResourceTypeName(), params, false);
+		myHelper.callMergeOperation(scenario, false);
 
 		// Validate target has result resource identifiers
 		T target = scenario.readResource(scenario.getTargetId());
@@ -551,8 +539,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		scenario.createTestData();
 
 		// Execute merge with result resource
-		MergeTestParameters params = scenario.buildMergeOperationParameters();
-		myHelper.callMergeOperation(getResourceTypeName(), params, false);
+		myHelper.callMergeOperation(scenario, false);
 
 		// Validate all references still updated to target
 		for (String resourceType : scenario.getReferencingResourceTypes()) {

@@ -33,7 +33,6 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

@@ -82,6 +82,21 @@ public class MergeOperationTestHelper {
 	// Core merge operation invocation
 
 	/**
+	 * Invoke the generic merge operation using a scenario object.
+	 *
+	 * @param theScenario The test scenario containing merge configuration
+	 * @param theAsync    Whether to execute asynchronously
+	 * @return The operation output parameters
+	 */
+	@Nonnull
+	public Parameters callMergeOperation(@Nonnull AbstractMergeTestScenario<?> theScenario, boolean theAsync) {
+
+		String resourceType = theScenario.getResourceTypeName();
+		MergeTestParameters params = theScenario.buildMergeOperationParameters();
+		return callMergeOperation(resourceType, params, theAsync);
+	}
+
+	/**
 	 * Invoke the generic merge operation.
 	 *
 	 * @param theResourceType The resource type (e.g., "Practitioner", "Observation")
