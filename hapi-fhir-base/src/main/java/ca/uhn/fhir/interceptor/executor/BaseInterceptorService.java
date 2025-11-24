@@ -214,9 +214,6 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 				return false;
 			}
 
-			// FIXME: make trace
-			ourLog.info("AAA Interceptor registered: {}", theInterceptor.getClass().getName());
-
 			// Add to the global list
 			myInterceptors.add(theInterceptor);
 			sortByOrderAnnotation(myInterceptors);
@@ -250,12 +247,6 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 			removed |= myGlobalInvokers.entries().removeIf(t -> t.getValue().getInterceptor() == theInterceptor);
 			removed |= myAnonymousInvokers.entries().removeIf(t -> t.getValue().getInterceptor() == theInterceptor);
 			rebuildRegisteredPointcutSet();
-
-			if (removed) {
-				// FIXME: make trace
-				ourLog.info("AAA Interceptor unregistered: {}", theInterceptor.getClass().getName());
-			}
-
 			return removed;
 		}
 	}

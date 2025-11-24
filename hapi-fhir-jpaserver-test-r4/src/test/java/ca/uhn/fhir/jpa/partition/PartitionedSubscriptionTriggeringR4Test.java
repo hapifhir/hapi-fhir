@@ -91,8 +91,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 		myPartitionInterceptor = new MyReadWriteInterceptor();
 		myPartitionInterceptor.setRequestPartitionId(REQ_PART_1);
-
-		mySrdInterceptorService.registerInterceptor(myPartitionInterceptor);
+		registerInterceptor(myPartitionInterceptor);
 
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
@@ -116,7 +115,6 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
-		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof BasePartitioningR4Test.MyReadWriteInterceptor);
 		await().until(() -> {
 			mySubscriptionTriggeringSvc.runDeliveryPass();
 			return ((SubscriptionTriggeringSvcImpl) mySubscriptionTriggeringSvc).getActiveJobCount() == 0;
@@ -132,8 +130,6 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		Subscription subscription = newSubscription(criteria1, payload);
-
-		assertThat(mySrdInterceptorService.getAllRegisteredInterceptors()).hasSize(1);
 
 		myDaoRegistry.getResourceDao("Subscription").create(subscription, mySrd);
 
@@ -159,8 +155,6 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		String criteria1 = "Patient?active=true";
 		Subscription subscription = newSubscription(criteria1, payload);
 		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new org.hl7.fhir.r4.model.BooleanType().setValue(true));
-
-		assertThat(mySrdInterceptorService.getAllRegisteredInterceptors()).hasSize(1);
 
 		myDaoRegistry.getResourceDao("Subscription").create(subscription,
 			new SystemRequestDetails().setRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId()));
@@ -314,8 +308,6 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 		// Create the subscription now
 		DaoMethodOutcome subscriptionOutcome = myDaoRegistry.getResourceDao("Subscription").create(newSubscription(criteria1, payload), mySrd);
-
-		assertThat(mySrdInterceptorService.getAllRegisteredInterceptors()).hasSize(1);
 
 		Subscription subscription = (Subscription) subscriptionOutcome.getResource();
 

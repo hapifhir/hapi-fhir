@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -61,7 +60,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	protected FhirContext myFhirContext;
 
 	@Autowired
-	private IInterceptorService myInterceptorBroadcaster;
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	PartitionSettings myPartitionSettings;
 
@@ -121,14 +120,9 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 
 		boolean nonPartitionableResource = isResourceNonPartitionable(resourceType);
 
-		ourLog.info("AAA ResourceType[{}] non-partitionable: {}", resourceType, nonPartitionableResource);
-		ourLog.info("AAA Registered interceptors: {}", myInterceptorBroadcaster.getAllRegisteredInterceptors());
-
 		RequestPartitionId requestPartitionId = null;
 
 		if (nonPartitionableResource) {
-			// FIXME: remove all AAAs in this class
-			ourLog.info("AAA Using default partition for non partitionable resource: {}", resourceType);
 			requestPartitionId = myPartitionSettings.getDefaultRequestPartitionId();
 			logRequestDetailsResolution(requestDetails);
 			logNonPartitionableType(resourceType);
@@ -137,19 +131,14 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			// !nonPartitionableResource
 			requestPartitionId = getSystemRequestPartitionId(systemRequestDetails, false);
 			logRequestDetailsResolution(systemRequestDetails);
-			ourLog.info("AAA Using partition {} for SystemRequestDetails", requestPartitionId);
 
 		} else {
 			IInterceptorBroadcaster compositeBroadcaster =
 					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, requestDetails);
 			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY)) {
 				requestPartitionId = callAnyPointcut(compositeBroadcaster, requestDetails);
-				ourLog.info("AAA Using partition {} from STORAGE_PARTITION_IDENTIFY_ANY", requestPartitionId);
 			} else if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)) {
 				requestPartitionId = callReadPointcut(compositeBroadcaster, requestDetails, theDetails);
-				ourLog.info("AAA Using partition {} from STORAGE_PARTITION_IDENTIFY_READ", requestPartitionId);
-			} else {
-				ourLog.info("AAA No partition found for request: {}", requestDetails);
 			}
 		}
 
