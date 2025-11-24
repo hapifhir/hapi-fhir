@@ -1831,6 +1831,117 @@ public class OrganizationMergeR4Test extends AbstractGenericMergeR4Test<Organiza
 
 ---
 
-**Last Updated**: 2025-11-20
+### Session 10: Remove MergeTestScenario Interface and Simplify Test Hierarchy (2025-11-21)
+
+**Goal**: Eliminate unnecessary interface abstraction and simplify test infrastructure from 3-level hierarchy (Interface → Abstract → Concrete) to 2-level hierarchy (Abstract → Concrete).
+
+**Motivation**: Analysis revealed that the `MergeTestScenario` interface (494 lines) provided zero polymorphic value:
+- Used in only 3 locations, all with specific generic parameters
+- No factories, collections, or dependency injection requiring the interface
+- All 45+ methods implemented in single abstract class
+- Pattern is actually Template Method (abstract class + abstract methods), not interface-based polymorphism
+
+**Implemented**:
+
+1. **Removed MergeTestScenario Interface**
+   - Deleted `hapi-fhir-jpaserver-test-utilities/src/main/java/ca/uhn/fhir/jpa/merge/MergeTestScenario.java` (494 lines)
+   - Analysis confirmed no polymorphic usage anywhere in codebase
+   - Following YAGNI principle - interface added no value
+
+2. **Updated AbstractMergeTestScenario**
+   - Removed `implements MergeTestScenario<T>` (line 86)
+   - Changed 6 builder method return types from `MergeTestScenario<T>` to `AbstractMergeTestScenario<T>`:
+     - `withSourceIdentifiers()`, `withTargetIdentifiers()`, `withReferences()`, `withStandardReferences()`, `withResultResource()`, `buildMergeParameters()`
+   - Added abstract method declarations that were previously in interface:
+     - `getResourceTypeName()`, `getResourceClass()`, `createResourceWithIdentifiers()` (2 overloads), `createReferencingResource()`, `getStandardReferenceConfigs()`, `hasActiveField()`
+   - Made `assertActiveFieldIfPresent()` a concrete protected method (not abstract) with no-op default implementation
+   - Made `getStandardReferenceConfigs()` public (was protected) for test code access
+   - Removed all `@Override` annotations (40+ across 3 files) since no interface to override
+
+3. **Updated Test Class Type Declarations**
+   - **AbstractGenericMergeR4Test.java**:
+     - Changed abstract method return type: `protected abstract AbstractMergeTestScenario<T> createScenario()`
+     - Changed helper method parameter: `protected void validateMergeOutcome(AbstractMergeTestScenario<T> theScenario, ...)`
+     - Updated all ~18 local variable declarations from `MergeTestScenario<T>` to `AbstractMergeTestScenario<T>` using sed
+     - Added import for AbstractMergeTestScenario
+
+   - **PractitionerMergeR4Test.java**:
+     - Changed `createScenario()` return type to `AbstractMergeTestScenario<Practitioner>`
+     - Updated import from MergeTestScenario to AbstractMergeTestScenario
+
+   - **ObservationMergeR4Test.java**:
+     - Changed `createScenario()` return type to `AbstractMergeTestScenario<Observation>`
+     - Updated local variable declarations in 3 observation-specific tests
+     - Updated import from MergeTestScenario to AbstractMergeTestScenario
+
+4. **Removed @Override Annotations**
+   - Used sed to remove all standalone `@Override` annotations from AbstractMergeTestScenario, PractitionerMergeTestScenario, and ObservationMergeTestScenario
+   - Total: 40+ annotations removed across 3 files
+   - Necessary because subclasses no longer implement an interface
+
+**Key Technical Decisions**:
+
+1. **Abstract Class Sufficient**: Since there's no polymorphic usage, abstract class with abstract methods (Template Method pattern) is the correct design
+2. **Public Abstract Method**: `getStandardReferenceConfigs()` must be public because test code calls it directly on scenario instances
+3. **Concrete assertActiveFieldIfPresent**: This method has a default no-op implementation and subclasses override only if needed (Practitioner does, Observation doesn't)
+4. **Sed for Bulk Replacements**: Used `sed -i '' 's/MergeTestScenario<T>/AbstractMergeTestScenario<T>/g'` for efficient bulk replacements in test files
+5. **No Circular Dependencies**: Abstract class in test-utilities module, concrete implementations also in test-utilities, test classes use both
+
+**Files Modified**:
+- `hapi-fhir-jpaserver-test-utilities/src/main/java/ca/uhn/fhir/jpa/merge/AbstractMergeTestScenario.java`
+- `hapi-fhir-jpaserver-test-utilities/src/main/java/ca/uhn/fhir/jpa/merge/PractitionerMergeTestScenario.java`
+- `hapi-fhir-jpaserver-test-utilities/src/main/java/ca/uhn/fhir/jpa/merge/ObservationMergeTestScenario.java`
+- `hapi-fhir-jpaserver-test-r4/src/test/java/ca/uhn/fhir/jpa/provider/r4/AbstractGenericMergeR4Test.java`
+- `hapi-fhir-jpaserver-test-r4/src/test/java/ca/uhn/fhir/jpa/provider/r4/PractitionerMergeR4Test.java`
+- `hapi-fhir-jpaserver-test-r4/src/test/java/ca/uhn/fhir/jpa/provider/r4/ObservationMergeR4Test.java`
+
+**Files Deleted**:
+- `hapi-fhir-jpaserver-test-utilities/src/main/java/ca/uhn/fhir/jpa/merge/MergeTestScenario.java` (494 lines)
+
+**Test Results**:
+- ✅ PractitionerMergeR4Test: 42 tests passing
+- ✅ ObservationMergeR4Test: 45 tests passing
+- ✅ Total: **87 tests passing, 0 failures, 0 errors**
+- ✅ Full backward compatibility maintained
+
+**Metrics**:
+
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| Hierarchy Levels | 3 (Interface → Abstract → Concrete) | 2 (Abstract → Concrete) | **-33%** |
+| Files | 7 | 6 | -1 |
+| Lines of Code | ~40,494 | ~40,000 | -494 lines |
+| Interface Methods | 45+ | 0 | **-100%** |
+| @Override Annotations | 40+ | 0 | **-100%** |
+
+**Benefits**:
+
+1. **Simpler Architecture**: 2-level hierarchy instead of 3-level reduces cognitive load
+2. **Less Boilerplate**: 494 lines of redundant interface code removed
+3. **Clearer Pattern**: Now clearly Template Method pattern instead of confusing interface-based approach
+4. **Easier Maintenance**: One file to edit (abstract class) instead of two (interface + abstract class)
+5. **Follows YAGNI**: Removed speculative abstraction that provided no value
+6. **No Loss of Functionality**: All tests pass, same capabilities, cleaner design
+
+**Analysis Process**:
+
+Used Task agent to perform comprehensive analysis:
+- Searched for all usages of MergeTestScenario interface
+- Identified zero polymorphic usage patterns
+- Confirmed all methods implemented in single abstract class
+- Verified no factories, collections, or DI requiring interface
+- Concluded interface was unnecessary abstraction
+
+**Commits**:
+- 658ddfdc02a - "Remove MergeTestScenario interface and simplify test hierarchy"
+
+**Next Steps**:
+- Continue implementing generic merge operations for Practitioner and Observation
+- Tests now ready to validate merge implementation once complete
+- Consider similar analysis for other potential over-abstractions in codebase
+
+---
+
+**Last Updated**: 2025-11-21
 **Author**: Claude Code (Sonnet 4.5)
-**Status**: Test infrastructure consolidated (87 tests passing) - Generic merge implementation progressing
+**Status**: Test infrastructure simplified (87 tests passing) - Generic merge implementation progressing
