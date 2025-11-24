@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -60,7 +61,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	protected FhirContext myFhirContext;
 
 	@Autowired
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	private IInterceptorService myInterceptorBroadcaster;
 
 	PartitionSettings myPartitionSettings;
 
@@ -119,6 +120,9 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		}
 
 		boolean nonPartitionableResource = isResourceNonPartitionable(resourceType);
+
+		ourLog.info("AAA ResourceType[{}] non-partitionable: {}", resourceType, nonPartitionableResource);
+		ourLog.info("AAA Registered interceptors: {}", myInterceptorBroadcaster.getAllRegisteredInterceptors());
 
 		RequestPartitionId requestPartitionId = null;
 
