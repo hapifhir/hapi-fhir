@@ -109,7 +109,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	private T mySourceResource;
 	private T myTargetResource;
 	private Map<String, List<IIdType>> myReferencingResourcesByType;
-	private List<Identifier> myExpectedIdentifiersAfterMerge;
 	private boolean myIsTestDataCreated = false;
 
 	/**
@@ -209,14 +208,10 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 			referencingResourcesByType.put(resourceType.getResourceType(), idsForType);
 		}
 
-		// Calculate expected identifiers after merge
-		List<Identifier> expectedIdentifiers = calculateExpectedIdentifiersAfterMerge();
-
 		// Store data state
 		mySourceResource = source;
 		myTargetResource = target;
 		myReferencingResourcesByType = referencingResourcesByType;
-		myExpectedIdentifiersAfterMerge = expectedIdentifiers;
 		myIsTestDataCreated = true;
 
 		ourLog.info(
@@ -282,7 +277,29 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	@Nonnull
 	public List<Identifier> getExpectedIdentifiers() {
 		assertTestDataCreated();
-		return Collections.unmodifiableList(myExpectedIdentifiersAfterMerge);
+
+		if (myCreateResultResource) {
+			// Result resource provided - identifiers come from target identifiers
+			return new ArrayList<>(myTargetIdentifiers);
+		}
+
+		// Merge logic: target keeps its identifiers, source identifiers marked as "old" are added
+		List<Identifier> expected = new ArrayList<>(myTargetIdentifiers);
+
+		// Add source identifiers marked as "old" if not already present
+		for (Identifier sourceId : mySourceIdentifiers) {
+			boolean isCommonIdentifier = myTargetIdentifiers.stream()
+					.anyMatch(targetId -> sourceId.getSystem().equals(targetId.getSystem())
+							&& sourceId.getValue().equals(targetId.getValue()));
+
+			if (!isCommonIdentifier) {
+				Identifier copy = sourceId.copy();
+				copy.setUse(Identifier.IdentifierUse.OLD);
+				expected.add(copy);
+			}
+		}
+
+		return expected;
 	}
 
 	@Nonnull
@@ -498,33 +515,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		}
 
 		ourLog.debug("Verified {} identifiers match expected", theActualIdentifiers.size());
-	}
-
-	@Nonnull
-	private List<Identifier> calculateExpectedIdentifiersAfterMerge() {
-
-		if (myCreateResultResource) {
-			// Result resource provided - identifiers come from target identifiers
-			return new ArrayList<>(myTargetIdentifiers);
-		}
-
-		// Merge logic: target keeps its identifiers, source identifiers marked as "old" are added
-		List<Identifier> expected = new ArrayList<>(myTargetIdentifiers);
-
-		// Add source identifiers marked as "old" if not already present
-		for (Identifier sourceId : mySourceIdentifiers) {
-			boolean alreadyPresent = myTargetIdentifiers.stream()
-					.anyMatch(targetId -> sourceId.getSystem().equals(targetId.getSystem())
-							&& sourceId.getValue().equals(targetId.getValue()));
-
-			if (!alreadyPresent) {
-				Identifier copy = sourceId.copy();
-				copy.setUse(Identifier.IdentifierUse.OLD);
-				expected.add(copy);
-			}
-		}
-
-		return expected;
 	}
 
 	/**
