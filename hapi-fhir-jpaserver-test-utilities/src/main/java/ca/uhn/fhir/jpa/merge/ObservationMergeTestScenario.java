@@ -30,9 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
 
 import java.util.ArrayList;
@@ -104,8 +102,7 @@ public class ObservationMergeTestScenario extends AbstractMergeTestScenario<Obse
 	}
 
 	@Nonnull
-	public IBaseResource createReferencingResource(
-			@Nonnull String theResourceType, @Nonnull String theReferencePath, @Nonnull IIdType theTargetId) {
+	public IBaseResource createReferencingResource(@Nonnull String theResourceType, @Nonnull IIdType theTargetId) {
 
 		switch (theResourceType) {
 			case "DiagnosticReport":
@@ -115,20 +112,6 @@ public class ObservationMergeTestScenario extends AbstractMergeTestScenario<Obse
 				report.addResult(new Reference(theTargetId));
 				return report;
 
-			case "Procedure":
-				Procedure proc = new Procedure();
-				proc.setStatus(Procedure.ProcedureStatus.COMPLETED);
-				proc.getCode().addCoding().setSystem("http://snomed.info/sct").setCode("procedure-code");
-				proc.addReport(new Reference(theTargetId));
-				return proc;
-
-			case "MedicationRequest":
-				MedicationRequest med = new MedicationRequest();
-				med.setStatus(MedicationRequest.MedicationRequestStatus.ACTIVE);
-				med.setIntent(MedicationRequest.MedicationRequestIntent.ORDER);
-				med.addSupportingInformation(new Reference(theTargetId));
-				return med;
-
 			default:
 				throw new IllegalArgumentException(
 						"Unsupported resource type for Observation references: " + theResourceType);
@@ -137,7 +120,7 @@ public class ObservationMergeTestScenario extends AbstractMergeTestScenario<Obse
 
 	@Nonnull
 	public List<ReferencingResourceConfig> getStandardReferenceConfigs() {
-		return Arrays.asList(ReferencingResourceConfig.of("DiagnosticReport", "result", 5));
+		return Arrays.asList(ReferencingResourceConfig.of("DiagnosticReport", 5));
 	}
 
 	public boolean hasActiveField() {

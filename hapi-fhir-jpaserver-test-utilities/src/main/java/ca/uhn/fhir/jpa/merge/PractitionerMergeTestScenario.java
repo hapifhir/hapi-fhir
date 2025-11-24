@@ -102,8 +102,7 @@ public class PractitionerMergeTestScenario extends AbstractMergeTestScenario<Pra
 	}
 
 	@Nonnull
-	public IBaseResource createReferencingResource(
-			@Nonnull String theResourceType, @Nonnull String theReferencePath, @Nonnull IIdType theTargetId) {
+	public IBaseResource createReferencingResource(@Nonnull String theResourceType, @Nonnull IIdType theTargetId) {
 
 		switch (theResourceType) {
 			case "PractitionerRole":
@@ -134,9 +133,9 @@ public class PractitionerMergeTestScenario extends AbstractMergeTestScenario<Pra
 	@Nonnull
 	public List<ReferencingResourceConfig> getStandardReferenceConfigs() {
 		return Arrays.asList(
-				ReferencingResourceConfig.of("PractitionerRole", "practitioner", 3),
-				ReferencingResourceConfig.of("Encounter", "participant.individual", 2),
-				ReferencingResourceConfig.of("CarePlan", "activity.detail.performer", 1));
+				ReferencingResourceConfig.of("PractitionerRole", 3),
+				ReferencingResourceConfig.of("Encounter", 2),
+				ReferencingResourceConfig.of("CarePlan", 1));
 	}
 
 	public boolean hasActiveField() {
