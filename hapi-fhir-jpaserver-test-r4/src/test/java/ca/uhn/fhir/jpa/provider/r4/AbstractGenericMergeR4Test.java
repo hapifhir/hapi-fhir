@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -226,6 +227,66 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		myHelper.awaitJobCompletion(jobId);
 
 		validateMergeOutcome(scenario, false);
+	}
+
+	// ================================================
+	// IDENTIFIER EDGE CASES (3 tests)
+	// ================================================
+
+	@Test
+	protected void testMerge_identifiers_emptySourceIdentifiers() {
+		// Setup - source has no identifiers, target has identifiers
+		AbstractMergeTestScenario<T> scenario = createScenario();
+		scenario.withSourceIdentifiers(Collections.emptyList());
+		scenario.withOneReferencingResource();
+		scenario.createTestData();
+
+		// Execute merge
+		myHelper.callMergeOperation(scenario, false);
+
+		// Validate - target should keep its identifiers unchanged
+		T target = scenario.readResource(scenario.getTargetId());
+		List<Identifier> expectedIdentifiers = scenario.getExpectedIdentifiers();
+		scenario.assertIdentifiers(scenario.getIdentifiersFromResource(target), expectedIdentifiers);
+		assertThat(expectedIdentifiers).hasSize(3); // Only target identifiers
+	}
+
+	@Test
+	protected void testMerge_identifiers_emptyTargetIdentifiers() {
+		// Setup - source has identifiers, target has no identifiers
+		AbstractMergeTestScenario<T> scenario = createScenario();
+		scenario.withTargetIdentifiers(Collections.emptyList());
+		scenario.withOneReferencingResource();
+		scenario.createTestData();
+
+		// Execute merge
+		myHelper.callMergeOperation(scenario, false);
+
+		// Validate - target should get all source identifiers marked as OLD
+		T target = scenario.readResource(scenario.getTargetId());
+		List<Identifier> expectedIdentifiers = scenario.getExpectedIdentifiers();
+		scenario.assertIdentifiers(scenario.getIdentifiersFromResource(target), expectedIdentifiers);
+		assertThat(expectedIdentifiers).hasSize(3); // All source identifiers marked as OLD
+		assertThat(expectedIdentifiers).allMatch(id -> id.getUse() == Identifier.IdentifierUse.OLD);
+	}
+
+	@Test
+	protected void testMerge_identifiers_bothEmpty() {
+		// Setup - both source and target have no identifiers
+		AbstractMergeTestScenario<T> scenario = createScenario();
+		scenario.withSourceIdentifiers(Collections.emptyList());
+		scenario.withTargetIdentifiers(Collections.emptyList());
+		scenario.withOneReferencingResource();
+		scenario.createTestData();
+
+		// Execute merge
+		myHelper.callMergeOperation(scenario, false);
+
+		// Validate - target should have empty identifier list
+		T target = scenario.readResource(scenario.getTargetId());
+		List<Identifier> expectedIdentifiers = scenario.getExpectedIdentifiers();
+		scenario.assertIdentifiers(scenario.getIdentifiersFromResource(target), expectedIdentifiers);
+		assertThat(expectedIdentifiers).isEmpty();
 	}
 
 	// ================================================
