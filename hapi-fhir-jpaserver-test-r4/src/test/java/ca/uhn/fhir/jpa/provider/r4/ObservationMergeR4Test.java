@@ -84,8 +84,7 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 		scenario.createTestData();
 
 		// Execute merge
-		MergeTestParameters params = scenario.buildMergeOperationParameters();
-		myHelper.callMergeOperation("Observation", params, false);
+		myHelper.callMergeOperation(scenario, false);
 
 		// Validate all DiagnosticReport.result references updated
 		scenario.assertReferencesUpdated("DiagnosticReport");
@@ -102,8 +101,7 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 		scenario.createTestData();
 
 		// Execute merge
-		MergeTestParameters params = scenario.buildMergeOperationParameters();
-		myHelper.callMergeOperation("Observation", params, false);
+		myHelper.callMergeOperation(scenario, false);
 
 		// Validate all reference types updated
 		for (String resourceType : scenario.getReferencingResourceTypes()) {
