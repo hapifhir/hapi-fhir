@@ -83,7 +83,9 @@ public class ValidationMessagePostProcessingInterceptor {
 			newMessages.add(inputMessage);
 		}
 
-		return new ValidationResult(theResult.getContext(), newMessages);
+		theResult.setMessages(newMessages);
+
+		return null; // keep processing
 	}
 
 	private int logResult(

@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 7378
+title: "The STORAGE_PARTITION_IDENTIFY_ANY hook was recently removed from RequestTenantPartitionInterceptor which caused BaseRequestPartitionHelperSvc.determineGenericPartitionForRequest() to fail in Request Tenant mode. This change restores the functionality of BaseRequestPartitionHelperSvc.determineGenericPartitionForRequest() by falling back to STORAGE_PARTITION_IDENTIFY_READ if STORAGE_PARTITION_IDENTIFY_ANY is not set."
