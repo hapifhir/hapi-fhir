@@ -647,11 +647,15 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		IIdType theSourceId = getSourceId();
 		IIdType theTargetId = getTargetId();
 
+		// Build expected reference strings with resourceType/id format
+		String expectedTargetRef = theTargetId.getResourceType() + "/" + theTargetId.getIdPart();
+		String unexpectedSourceRef = theSourceId.getResourceType() + "/" + theSourceId.getIdPart();
+
 		ourLog.debug(
 				"Validating {} referencing resources updated from {} to {}",
 				theReferencingResourceIds.size(),
-				theSourceId,
-				theTargetId);
+				unexpectedSourceRef,
+				expectedTargetRef);
 
 		FhirTerser terser = myFhirContext.newTerser();
 
@@ -669,18 +673,15 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 			ourLog.info("Resource {} contains references: {}", refId, refStrings);
 
-			// Verify none point to source
-			for (IBaseReference reference : allRefs) {
-				String refString = reference.getReferenceElement().getValue();
-				if (refString != null) {
-					assertThat(refString)
-							.as("Reference in %s should not point to source %s", refId, theSourceId)
-							.doesNotContain(theSourceId.getIdPart());
-				}
-			}
-		}
+			// Verify references contain target and not source
+			assertThat(refStrings)
+					.as("Resource %s should contain reference to target %s", refId, expectedTargetRef)
+					.contains(expectedTargetRef);
 
-		ourLog.debug("All {} referencing resources validated successfully", theReferencingResourceIds.size());
+			assertThat(refStrings)
+					.as("Resource %s should not contain reference to source %s", refId, unexpectedSourceRef)
+					.doesNotContain(unexpectedSourceRef);
+		}
 	}
 
 	public void assertReferencesUpdated(@Nonnull String theResourceType) {
