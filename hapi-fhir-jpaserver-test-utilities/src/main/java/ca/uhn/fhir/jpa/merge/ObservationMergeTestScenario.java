@@ -118,15 +118,15 @@ public class ObservationMergeTestScenario extends AbstractMergeTestScenario<Obse
 	}
 
 	public AbstractMergeTestScenario<Observation> withOneReferencingResource() {
-		return withReferences(List.of(ReferencingResourceConfig.of("DiagnosticReport", 1)));
+		return withReferences(List.of(ReferencingTestResourceType.of("DiagnosticReport", 1)));
 	}
 
 	public AbstractMergeTestScenario<Observation> withMultipleReferencingResources() {
-		return withReferences(List.of(ReferencingResourceConfig.of("DiagnosticReport", 5)));
+		return withReferences(List.of(ReferencingTestResourceType.of("DiagnosticReport", 5)));
 	}
 
 	public boolean hasActiveField() {
-		// KEY DIFFERENCE: Observation does NOT have active field
+		// Observation does NOT have active field
 		return false;
 	}
 
