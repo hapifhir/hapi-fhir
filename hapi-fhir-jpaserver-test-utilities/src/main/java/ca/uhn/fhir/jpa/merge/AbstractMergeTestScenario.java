@@ -102,6 +102,8 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 			new Identifier().setSystem("http://test.org").setValue("target-2"),
 			new Identifier().setSystem("http://test.org").setValue("common"));
 	private boolean myCreateResultResource = false;
+	private boolean myDeleteSource = false;
+	private boolean myPreview = false;
 
 	// Data State (after createTestData)
 	private T mySourceResource;
@@ -159,6 +161,18 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	@Nonnull
 	public AbstractMergeTestScenario<T> withResultResource() {
 		myCreateResultResource = true;
+		return this;
+	}
+
+	@Nonnull
+	public AbstractMergeTestScenario<T> withDeleteSource(boolean theDeleteSource) {
+		myDeleteSource = theDeleteSource;
+		return this;
+	}
+
+	@Nonnull
+	public AbstractMergeTestScenario<T> withPreview(boolean thePreview) {
+		myPreview = thePreview;
 		return this;
 	}
 
@@ -277,13 +291,13 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	@Nonnull
-	public MergeTestParameters buildMergeOperationParameters(boolean theDeleteSource, boolean thePreview) {
+	public MergeTestParameters buildMergeOperationParameters() {
 		assertTestDataCreated();
 		MergeTestParameters params = new MergeTestParameters()
 				.sourceResource(new Reference(getSourceId()))
 				.targetResource(new Reference(getTargetId()))
-				.deleteSource(theDeleteSource)
-				.preview(thePreview);
+				.deleteSource(myDeleteSource)
+				.preview(myPreview);
 
 		if (myCreateResultResource) {
 			// Create result resource with target identifiers (not persisted)
@@ -293,7 +307,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 			// Add "replaces" link only when deleteSource=false
 			// (validation requires this link when source is kept, but forbids it when source is deleted)
-			if (!theDeleteSource) {
+			if (!myDeleteSource) {
 				addReplacesLinkToResource(result, getSourceId());
 			}
 
@@ -305,12 +319,11 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	@Nonnull
-	public MergeTestParameters buildMergeOperationParameters(
-			boolean theSourceById, boolean theTargetById, boolean theDeleteSource, boolean thePreview) {
+	public MergeTestParameters buildMergeOperationParameters(boolean theSourceById, boolean theTargetById) {
 		assertTestDataCreated();
 
 		MergeTestParameters params =
-				new MergeTestParameters().deleteSource(theDeleteSource).preview(thePreview);
+				new MergeTestParameters().deleteSource(myDeleteSource).preview(myPreview);
 
 		if (theSourceById) {
 			params.sourceResource(new Reference(getSourceId()));
@@ -330,7 +343,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 			result.setId(getTargetId());
 
 			// Add "replaces" link only when deleteSource=false
-			if (!theDeleteSource) {
+			if (!myDeleteSource) {
 				addReplacesLinkToResource(result, getSourceId());
 			}
 
