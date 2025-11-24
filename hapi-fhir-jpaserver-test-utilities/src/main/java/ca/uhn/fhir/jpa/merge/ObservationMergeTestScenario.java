@@ -83,7 +83,7 @@ public class ObservationMergeTestScenario extends AbstractMergeTestScenario<Obse
 		Observation obs = new Observation();
 		obs.setStatus(Observation.ObservationStatus.FINAL);
 		obs.getCode().addCoding().setSystem("http://loinc.org").setCode("test-code");
-		obs.setIdentifier(new ArrayList<>(theIdentifiers));
+		obs.setIdentifier(theIdentifiers);
 		return obs;
 	}
 

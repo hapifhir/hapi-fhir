@@ -83,7 +83,7 @@ public class PractitionerMergeTestScenario extends AbstractMergeTestScenario<Pra
 		Practitioner p = new Practitioner();
 		p.setActive(true);
 		p.addName().setFamily("TestPractitioner");
-		p.setIdentifier(new ArrayList<>(theIdentifiers));
+		p.setIdentifier(theIdentifiers);
 		return p;
 	}
 
