@@ -87,14 +87,14 @@ public class ObservationMergeTestScenario extends AbstractMergeTestScenario<Obse
 	}
 
 	@Nonnull
-	public IBaseResource createReferencingResource(@Nonnull String theResourceType, @Nonnull IIdType theTargetId) {
+	public IBaseResource createReferencingResource(@Nonnull String theResourceType, @Nonnull IIdType theReferencedId) {
 
 		switch (theResourceType) {
 			case "DiagnosticReport":
 				DiagnosticReport report = new DiagnosticReport();
 				report.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
 				report.getCode().addCoding().setSystem("http://loinc.org").setCode("report-code");
-				report.addResult(new Reference(theTargetId));
+				report.addResult(new Reference(theReferencedId));
 				return report;
 
 			default:

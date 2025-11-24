@@ -183,12 +183,10 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		T source = createResourceWithIdentifiers(mySourceIdentifiers);
 		IFhirResourceDao<T> dao = getDao();
 		source = (T) dao.create(source, myRequestDetails).getResource();
-		ourLog.debug("Created source resource: {}", source.getIdElement());
 
 		// Create and persist target resource
 		T target = createResourceWithIdentifiers(myTargetIdentifiers);
 		target = (T) dao.create(target, myRequestDetails).getResource();
-		ourLog.debug("Created target resource: {}", target.getIdElement());
 
 		// Create referencing resources organized by type
 		Map<String, List<IIdType>> referencingResourcesByType = new HashMap<>();
@@ -208,8 +206,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 				idsForType.add(createdId);
 			}
 
-			ourLog.debug(
-					"Created {} {} resources referencing source", idsForType.size(), resourceType.getResourceType());
 			referencingResourcesByType.put(resourceType.getResourceType(), idsForType);
 		}
 
@@ -224,7 +220,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		myExpectedIdentifiersAfterMerge = expectedIdentifiers;
 		myIsTestDataCreated = true;
 
-		ourLog.debug(
+		ourLog.info(
 				"Merge test data built successfully: source={}, target={}, referencing resource types={}",
 				source.getIdElement(),
 				target.getIdElement(),
@@ -767,12 +763,12 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	 * Create a referencing resource (e.g., Encounter.subject, DiagnosticReport.result).
 	 *
 	 * @param theReferencingResourceType The resource type that will contain the reference
-	 * @param theTargetId                The ID of the resource being referenced
+	 * @param theReferencedId            The ID of the resource being referenced
 	 * @return A new referencing resource
 	 */
 	@Nonnull
 	protected abstract IBaseResource createReferencingResource(
-			@Nonnull String theReferencingResourceType, @Nonnull IIdType theTargetId);
+			@Nonnull String theReferencingResourceType, @Nonnull IIdType theReferencedId);
 
 	/**
 	 * Check if this resource type has an "active" field.
