@@ -87,26 +87,26 @@ public class PractitionerMergeTestScenario extends AbstractMergeTestScenario<Pra
 	}
 
 	@Nonnull
-	public IBaseResource createReferencingResource(@Nonnull String theResourceType, @Nonnull IIdType theTargetId) {
+	public IBaseResource createReferencingResource(@Nonnull String theResourceType, @Nonnull IIdType theReferencedId) {
 
 		switch (theResourceType) {
 			case "PractitionerRole":
 				PractitionerRole role = new PractitionerRole();
-				role.setPractitioner(new Reference(theTargetId));
+				role.setPractitioner(new Reference(theReferencedId));
 				role.setActive(true);
 				return role;
 
 			case "Encounter":
 				Encounter enc = new Encounter();
 				enc.setStatus(Encounter.EncounterStatus.FINISHED);
-				enc.addParticipant().setIndividual(new Reference(theTargetId));
+				enc.addParticipant().setIndividual(new Reference(theReferencedId));
 				return enc;
 
 			case "CarePlan":
 				CarePlan plan = new CarePlan();
 				plan.setStatus(CarePlan.CarePlanStatus.ACTIVE);
 				plan.setIntent(CarePlan.CarePlanIntent.PLAN);
-				plan.addActivity().getDetail().addPerformer(new Reference(theTargetId));
+				plan.addActivity().getDetail().addPerformer(new Reference(theReferencedId));
 				return plan;
 
 			default:
