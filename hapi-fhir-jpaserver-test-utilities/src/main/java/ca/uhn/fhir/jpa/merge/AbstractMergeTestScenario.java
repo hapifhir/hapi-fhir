@@ -142,12 +142,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	@Nonnull
-	public AbstractMergeTestScenario<T> withReferences(@Nonnull ReferencingResourceConfig... theConfigs) {
-		myReferenceConfigs.addAll(Arrays.asList(theConfigs));
-		return this;
-	}
-
-	@Nonnull
 	public AbstractMergeTestScenario<T> withReferences(@Nonnull List<ReferencingResourceConfig> theConfigs) {
 		myReferenceConfigs.addAll(theConfigs);
 		return this;
