@@ -97,9 +97,7 @@ public interface IHapiTransactionService {
 	 * This is an experimental API, subject to change in a future release.
 	 * </p>
 	 * <p>
-	 * If two partitions are being compared for upgrade purposes, the previous partition should be
-	 * supplied to {@literal theRequestPartitionId} and the new partition should be supplied to
-	 * {@literal theOtherRequestPartitionId}.
+	 * This method should return the same result regardless of the order of the arguments.
 	 * </p>
 	 *
 	 * @since 7.4.0
@@ -137,7 +135,6 @@ public interface IHapiTransactionService {
 				return this;
 			}
 		}
-		;
 
 		/**
 		 * @deprecated Use {@link TransactionDetails#addRollbackUndoAction(Runnable)} instead
@@ -154,23 +151,22 @@ public interface IHapiTransactionService {
 		/**
 		 * Read query path.
 		 */
-		default <T> T read(Callable<T> theCallback) {
-			return execute(theCallback);
-		}
+		<T> T read(IExecutionCallable<T> theCallback);
 
 		/**
 		 * Search for open Stream.
 		 * The Stream may not be readable outside an outermost transaction.
 		 */
-		default <T> Stream<T> search(Callable<Stream<T>> theCallback) {
-			return execute(theCallback);
-		}
+		<T> Stream<T> search(IExecutionCallable<Stream<T>> theCallback);
 
 		/**
 		 * Search for concrete List.
 		 */
-		default <T> List<T> searchList(Callable<List<T>> theCallback) {
-			return execute(theCallback);
-		}
+		<T> List<T> searchList(IExecutionCallable<List<T>> theCallback);
+	}
+
+	interface IExecutionCallable<T> {
+
+		T call(RequestPartitionId theRequestPartition);
 	}
 }
