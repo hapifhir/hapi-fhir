@@ -110,7 +110,7 @@ public class MergeOperationTestHelper {
 
 		Parameters inputParams = theParams.asParametersResource();
 
-		ourLog.debug("Calling $hapi-fhir-merge on {} with async={}", theResourceType, theAsync);
+		ourLog.info("Calling $hapi-fhir-merge on {} with async={}", theResourceType, theAsync);
 
 		var operation = myClient.operation()
 				.onType(theResourceType)

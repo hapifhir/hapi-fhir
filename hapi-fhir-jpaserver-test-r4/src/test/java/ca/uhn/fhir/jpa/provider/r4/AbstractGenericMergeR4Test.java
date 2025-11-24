@@ -289,6 +289,29 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		assertThat(expectedIdentifiers).isEmpty();
 	}
 
+	@Test
+	protected void testMerge_resultResource_overridesTargetIdentifiers() {
+		// Setup - result resource has different identifiers than target
+		List<Identifier> resultIdentifiers = Arrays.asList(
+				new Identifier().setSystem("http://test.org").setValue("result-1"),
+				new Identifier().setSystem("http://test.org").setValue("result-2"));
+
+		AbstractMergeTestScenario<T> scenario = createScenario();
+		scenario.withResultResourceIdentifiers(resultIdentifiers);
+		scenario.withResultResource();
+		scenario.withOneReferencingResource();
+		scenario.createTestData();
+
+		// Execute merge
+		myHelper.callMergeOperation(scenario, false);
+
+		// Validate - target should have result resource identifiers (not target's original)
+		T target = scenario.readResource(scenario.getTargetId());
+		List<Identifier> actualIdentifiers = scenario.getIdentifiersFromResource(target);
+		scenario.assertIdentifiers(actualIdentifiers, resultIdentifiers);
+		assertThat(actualIdentifiers).hasSize(2);
+	}
+
 	// ================================================
 	// EXTENSION LINK VALIDATION TESTS (6 tests)
 	// ================================================
