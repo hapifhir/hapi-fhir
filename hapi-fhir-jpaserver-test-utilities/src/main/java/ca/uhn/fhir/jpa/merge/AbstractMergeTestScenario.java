@@ -432,9 +432,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 		// Should have expected identifiers
 		List<Identifier> actualIdentifiers = getIdentifiersFromResource(theResource);
-		assertThat(actualIdentifiers)
-				.as("Target should have expected identifiers")
-				.hasSize(theExpectedIdentifiers.size());
+		assertIdentifiers(actualIdentifiers, theExpectedIdentifiers);
 
 		// Template method pattern: subclasses implement active field check if applicable
 		if (hasActiveField()) {
@@ -487,6 +485,19 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 				.isEmpty();
 
 		ourLog.debug("Verified no links present on resource");
+	}
+
+	public void assertIdentifiers(
+			@Nonnull List<Identifier> theActualIdentifiers, @Nonnull List<Identifier> theExpectedIdentifiers) {
+		assertThat(theActualIdentifiers).hasSize(theExpectedIdentifiers.size());
+
+		for (int i = 0; i < theExpectedIdentifiers.size(); i++) {
+			Identifier expectedIdentifier = theExpectedIdentifiers.get(i);
+			Identifier actualIdentifier = theActualIdentifiers.get(i);
+			assertThat(actualIdentifier.equalsDeep(expectedIdentifier)).isTrue();
+		}
+
+		ourLog.debug("Verified {} identifiers match expected", theActualIdentifiers.size());
 	}
 
 	@Nonnull
