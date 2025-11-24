@@ -70,7 +70,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  *   <li>{@link #createResourceWithIdentifiers(String...)}</li>
  *   <li>{@link #createResourceWithIdentifiers(List)}</li>
  *   <li>{@link #createReferencingResource(String, IIdType)}</li>
- *   <li>{@link #getStandardReferenceConfigs()}</li>
  *   <li>{@link #hasActiveField()}</li>
  *   <li>{@link #assertActiveFieldIfPresent(IBaseResource, boolean)} (if hasActiveField() is true)</li>
  * </ul>
@@ -154,11 +153,21 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		return this;
 	}
 
-	@Nonnull
-	public AbstractMergeTestScenario<T> withStandardReferences() {
-		myReferenceConfigs.addAll(getStandardReferenceConfigs());
-		return this;
-	}
+	/**
+	 * Configure scenario with one referencing resource of the primary type.
+	 * Subclasses define which resource type and count are used.
+	 *
+	 * @return this scenario for chaining
+	 */
+	public abstract AbstractMergeTestScenario<T> withOneReferencingResource();
+
+	/**
+	 * Configure scenario with multiple referencing resources (possibly of different types).
+	 * Subclasses define which resource types and counts are used.
+	 *
+	 * @return this scenario for chaining
+	 */
+	public abstract AbstractMergeTestScenario<T> withMultipleReferencingResources();
 
 	@Nonnull
 	public AbstractMergeTestScenario<T> withResultResource() {
@@ -772,16 +781,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	@Nonnull
 	protected abstract IBaseResource createReferencingResource(
 			@Nonnull String theReferencingResourceType, @Nonnull IIdType theTargetId);
-
-	/**
-	 * Get the standard reference configurations for this resource type.
-	 * For example, Practitioner might return [Encounter.participant, Procedure.performer].
-	 * Observation might return [DiagnosticReport.result].
-	 *
-	 * @return List of standard reference configurations
-	 */
-	@Nonnull
-	public abstract List<ReferencingResourceConfig> getStandardReferenceConfigs();
 
 	/**
 	 * Check if this resource type has an "active" field.
