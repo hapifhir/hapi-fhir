@@ -34,7 +34,6 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -118,9 +117,12 @@ public class ObservationMergeTestScenario extends AbstractMergeTestScenario<Obse
 		}
 	}
 
-	@Nonnull
-	public List<ReferencingResourceConfig> getStandardReferenceConfigs() {
-		return Arrays.asList(ReferencingResourceConfig.of("DiagnosticReport", 5));
+	public AbstractMergeTestScenario<Observation> withOneReferencingResource() {
+		return withReferences(ReferencingResourceConfig.of("DiagnosticReport", 1));
+	}
+
+	public AbstractMergeTestScenario<Observation> withMultipleReferencingResources() {
+		return withReferences(ReferencingResourceConfig.of("DiagnosticReport", 5));
 	}
 
 	public boolean hasActiveField() {

@@ -24,7 +24,6 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.merge.AbstractMergeTestScenario;
 import ca.uhn.fhir.jpa.merge.MergeTestParameters;
 import ca.uhn.fhir.jpa.merge.ObservationMergeTestScenario;
-import ca.uhn.fhir.jpa.merge.ReferencingResourceConfig;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
@@ -81,7 +80,7 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 	void testMerge_observationSpecific_diagnosticReportResult() {
 		// Setup
 		AbstractMergeTestScenario<Observation> scenario = createScenario();
-		scenario.withReferences(ReferencingResourceConfig.of("DiagnosticReport", 10));
+		scenario.withMultipleReferencingResources();
 		scenario.createTestData();
 
 		// Execute merge
@@ -101,7 +100,7 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 		AbstractMergeTestScenario<Observation> scenario = createScenario();
 		scenario.withSourceIdentifiers("8867-4", "2339-0");
 		scenario.withTargetIdentifiers("8867-4", "94531-1");
-		scenario.withReferences(ReferencingResourceConfig.of("DiagnosticReport", 3));
+		scenario.withMultipleReferencingResources();
 		scenario.createTestData();
 
 		// Execute merge
@@ -123,7 +122,7 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 	void testMerge_observationSpecific_allStandardReferences() {
 		// Setup with standard references
 		AbstractMergeTestScenario<Observation> scenario = createScenario();
-		scenario.withStandardReferences();
+		scenario.withMultipleReferencingResources();
 		scenario.createTestData();
 
 		// Execute merge

@@ -36,7 +36,6 @@ import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -130,9 +129,12 @@ public class PractitionerMergeTestScenario extends AbstractMergeTestScenario<Pra
 		}
 	}
 
-	@Nonnull
-	public List<ReferencingResourceConfig> getStandardReferenceConfigs() {
-		return Arrays.asList(
+	public AbstractMergeTestScenario<Practitioner> withOneReferencingResource() {
+		return withReferences(ReferencingResourceConfig.of("PractitionerRole", 1));
+	}
+
+	public AbstractMergeTestScenario<Practitioner> withMultipleReferencingResources() {
+		return withReferences(
 				ReferencingResourceConfig.of("PractitionerRole", 3),
 				ReferencingResourceConfig.of("Encounter", 2),
 				ReferencingResourceConfig.of("CarePlan", 1));
