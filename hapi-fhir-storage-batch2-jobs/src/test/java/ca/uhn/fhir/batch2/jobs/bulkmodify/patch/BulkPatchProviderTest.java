@@ -9,6 +9,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
@@ -97,6 +98,7 @@ public class BulkPatchProviderTest {
 	void beforeEach() {
 		ourProvider.setContextForUnitTest(ourCtx);
 		ourProvider.setJobCoordinatorForUnitTest(myJobCoordinator);
+		ourProvider.setPartitionSettingsForUnitTest(new PartitionSettings());
 	}
 
 	@ParameterizedTest

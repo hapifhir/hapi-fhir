@@ -465,6 +465,12 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 		myJobCoordinator = theJobCoordinator;
 	}
 
+	@VisibleForTesting
+	public void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
+	}
+
+
 	public static RequestPartitionId parsePartitionIdsParameter(List<IPrimitiveType<String>> thePartitionIdsParameter) {
 		List<Integer> partitionIds = new ArrayList<>();
 
