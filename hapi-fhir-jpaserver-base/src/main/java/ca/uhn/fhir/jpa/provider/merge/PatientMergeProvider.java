@@ -45,8 +45,6 @@ import org.hl7.fhir.r4.model.Patient;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_RESULT;
-
 public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 
 	private final FhirContext myFhirContext;
@@ -126,7 +124,8 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 					myResourceMergeService.merge(mergeOperationParameters, theRequestDetails);
 
 			theServletResponse.setStatus(mergeOutcome.getHttpStatusCode());
-			return buildMergeOperationOutputParameters(myFhirContext, mergeOutcome, theRequestDetails.getResource());
+			return MergeOperationParametersUtil.buildMergeOperationOutputParameters(
+					myFhirContext, mergeOutcome, theRequestDetails.getResource());
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -171,37 +170,6 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 		} finally {
 			endRequest(theServletRequest);
 		}
-	}
-
-	private IBaseParameters buildMergeOperationOutputParameters(
-			FhirContext theFhirContext, MergeOperationOutcome theMergeOutcome, IBaseResource theInputParameters) {
-
-		IBaseParameters retVal = ParametersUtil.newInstance(theFhirContext);
-		ParametersUtil.addParameterToParameters(
-				theFhirContext, retVal, ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_INPUT, theInputParameters);
-
-		ParametersUtil.addParameterToParameters(
-				theFhirContext,
-				retVal,
-				ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_OUTCOME,
-				theMergeOutcome.getOperationOutcome());
-
-		if (theMergeOutcome.getUpdatedTargetResource() != null) {
-			ParametersUtil.addParameterToParameters(
-					theFhirContext,
-					retVal,
-					OPERATION_MERGE_OUTPUT_PARAM_RESULT,
-					theMergeOutcome.getUpdatedTargetResource());
-		}
-
-		if (theMergeOutcome.getTask() != null) {
-			ParametersUtil.addParameterToParameters(
-					theFhirContext,
-					retVal,
-					ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK,
-					theMergeOutcome.getTask());
-		}
-		return retVal;
 	}
 
 	private UndoMergeOperationInputParameters buildUndoMergeOperationInputParameters(
