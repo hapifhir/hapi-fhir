@@ -81,11 +81,11 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 	void testMerge_observationSpecific_diagnosticReportResult() {
 		// Setup
 		AbstractMergeTestScenario<Observation> scenario = createScenario();
-		scenario.withReferences(ReferencingResourceConfig.of("DiagnosticReport", "result", 10));
+		scenario.withReferences(ReferencingResourceConfig.of("DiagnosticReport", 10));
 		scenario.createTestData();
 
 		// Execute merge
-		MergeTestParameters params = scenario.buildMergeParameters(false, false);
+		MergeTestParameters params = scenario.buildMergeOperationParameters(false, false);
 		myHelper.callMergeOperation("Observation", params, false);
 
 		// Validate all DiagnosticReport.result references updated
@@ -101,11 +101,11 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 		AbstractMergeTestScenario<Observation> scenario = createScenario();
 		scenario.withSourceIdentifiers("8867-4", "2339-0");
 		scenario.withTargetIdentifiers("8867-4", "94531-1");
-		scenario.withReferences(ReferencingResourceConfig.of("DiagnosticReport", "result", 3));
+		scenario.withReferences(ReferencingResourceConfig.of("DiagnosticReport", 3));
 		scenario.createTestData();
 
 		// Execute merge
-		MergeTestParameters params = scenario.buildMergeParameters(false, false);
+		MergeTestParameters params = scenario.buildMergeOperationParameters(false, false);
 		myHelper.callMergeOperation("Observation", params, false);
 
 		// Validate target has all identifiers
@@ -127,7 +127,7 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 		scenario.createTestData();
 
 		// Execute merge
-		MergeTestParameters params = scenario.buildMergeParameters(false, false);
+		MergeTestParameters params = scenario.buildMergeOperationParameters(false, false);
 		myHelper.callMergeOperation("Observation", params, false);
 
 		// Validate all reference types updated

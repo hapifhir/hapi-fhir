@@ -69,7 +69,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  *   <li>{@link #getResourceClass()}</li>
  *   <li>{@link #createResourceWithIdentifiers(String...)}</li>
  *   <li>{@link #createResourceWithIdentifiers(List)}</li>
- *   <li>{@link #createReferencingResource(String, String, IIdType)}</li>
+ *   <li>{@link #createReferencingResource(String, IIdType)}</li>
  *   <li>{@link #getStandardReferenceConfigs()}</li>
  *   <li>{@link #hasActiveField()}</li>
  *   <li>{@link #assertActiveFieldIfPresent(IBaseResource, boolean)} (if hasActiveField() is true)</li>
@@ -187,8 +187,8 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 			List<IIdType> idsForType = new ArrayList<>();
 
 			for (int i = 0; i < config.getCount(); i++) {
-				IBaseResource referencingResource = createReferencingResource(
-						config.getResourceType(), config.getReferencePath(), source.getIdElement());
+				IBaseResource referencingResource =
+						createReferencingResource(config.getResourceType(), source.getIdElement());
 
 				// Persist referencing resource
 				IFhirResourceDao<IBaseResource> refDao = myDaoRegistry.getResourceDao(config.getResourceType());
@@ -280,7 +280,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	@Nonnull
-	public MergeTestParameters buildMergeParameters(boolean theDeleteSource, boolean thePreview) {
+	public MergeTestParameters buildMergeOperationParameters(boolean theDeleteSource, boolean thePreview) {
 		assertTestDataCreated();
 		MergeTestParameters params = new MergeTestParameters()
 				.sourceResource(new Reference(getSourceId()))
@@ -308,7 +308,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	@Nonnull
-	public MergeTestParameters buildMergeParameters(
+	public MergeTestParameters buildMergeOperationParameters(
 			boolean theSourceById, boolean theTargetById, boolean theDeleteSource, boolean thePreview) {
 		assertTestDataCreated();
 
@@ -766,15 +766,12 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	 * Create a referencing resource (e.g., Encounter.subject, DiagnosticReport.result).
 	 *
 	 * @param theReferencingResourceType The resource type that will contain the reference
-	 * @param theReferenceFieldPath      The field path containing the reference (e.g., "subject", "result")
 	 * @param theTargetId                The ID of the resource being referenced
 	 * @return A new referencing resource
 	 */
 	@Nonnull
 	protected abstract IBaseResource createReferencingResource(
-			@Nonnull String theReferencingResourceType,
-			@Nonnull String theReferenceFieldPath,
-			@Nonnull IIdType theTargetId);
+			@Nonnull String theReferencingResourceType, @Nonnull IIdType theTargetId);
 
 	/**
 	 * Get the standard reference configurations for this resource type.
