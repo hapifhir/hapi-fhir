@@ -175,6 +175,18 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		return this;
 	}
 
+	@Nonnull
+	public AbstractMergeTestScenario<T> withSourceIdentifiers(@Nonnull List<Identifier> theIdentifiers) {
+		mySourceIdentifiers = theIdentifiers;
+		return this;
+	}
+
+	@Nonnull
+	public AbstractMergeTestScenario<T> withTargetIdentifiers(@Nonnull List<Identifier> theIdentifiers) {
+		myTargetIdentifiers = theIdentifiers;
+		return this;
+	}
+
 	public void createTestData() {
 		ourLog.debug("Building merge test data for resource type: {}", getResourceTypeName());
 
