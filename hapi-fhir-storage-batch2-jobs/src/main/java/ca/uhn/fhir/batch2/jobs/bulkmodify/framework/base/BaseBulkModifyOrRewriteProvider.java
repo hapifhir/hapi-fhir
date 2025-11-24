@@ -470,7 +470,6 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 		myPartitionSettings = thePartitionSettings;
 	}
 
-
 	public static RequestPartitionId parsePartitionIdsParameter(List<IPrimitiveType<String>> thePartitionIdsParameter) {
 		List<Integer> partitionIds = new ArrayList<>();
 
