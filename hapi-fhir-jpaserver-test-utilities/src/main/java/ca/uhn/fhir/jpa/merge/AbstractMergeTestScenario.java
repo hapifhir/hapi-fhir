@@ -67,7 +67,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * <ul>
  *   <li>{@link #getResourceTypeName()}</li>
  *   <li>{@link #getResourceClass()}</li>
- *   <li>{@link #createResourceWithIdentifiers(String...)}</li>
  *   <li>{@link #createResourceWithIdentifiers(List)}</li>
  *   <li>{@link #createReferencingResource(String, IIdType)}</li>
  *   <li>{@link #hasActiveField()}</li>
@@ -94,8 +93,14 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 	// Configuration State (before createTestData)
 	private final List<ReferencingTestResourceType> myReferencingTestResourceTypes = new ArrayList<>();
-	private List<String> mySourceIdentifierValues = Arrays.asList("source-1", "source-2", "common");
-	private List<String> myTargetIdentifierValues = Arrays.asList("target-1", "target-2", "common");
+	private List<Identifier> mySourceIdentifiers = Arrays.asList(
+			new Identifier().setSystem("http://test.org").setValue("source-1"),
+			new Identifier().setSystem("http://test.org").setValue("source-2"),
+			new Identifier().setSystem("http://test.org").setValue("common"));
+	private List<Identifier> myTargetIdentifiers = Arrays.asList(
+			new Identifier().setSystem("http://test.org").setValue("target-1"),
+			new Identifier().setSystem("http://test.org").setValue("target-2"),
+			new Identifier().setSystem("http://test.org").setValue("common"));
 	private boolean myCreateResultResource = false;
 
 	// Data State (after createTestData)
@@ -130,18 +135,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	// ================================================
 
 	@Nonnull
-	public AbstractMergeTestScenario<T> withSourceIdentifiers(@Nonnull String... theValues) {
-		mySourceIdentifierValues = Arrays.asList(theValues);
-		return this;
-	}
-
-	@Nonnull
-	public AbstractMergeTestScenario<T> withTargetIdentifiers(@Nonnull String... theValues) {
-		myTargetIdentifierValues = Arrays.asList(theValues);
-		return this;
-	}
-
-	@Nonnull
 	public AbstractMergeTestScenario<T> withReferences(@Nonnull List<ReferencingTestResourceType> theConfigs) {
 		myReferencingTestResourceTypes.addAll(theConfigs);
 		return this;
@@ -173,13 +166,13 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		ourLog.debug("Building merge test data for resource type: {}", getResourceTypeName());
 
 		// Create and persist source resource
-		T source = createResourceWithIdentifiers(mySourceIdentifierValues.toArray(new String[0]));
+		T source = createResourceWithIdentifiers(mySourceIdentifiers);
 		IFhirResourceDao<T> dao = getDao();
 		source = (T) dao.create(source, myRequestDetails).getResource();
 		ourLog.debug("Created source resource: {}", source.getIdElement());
 
 		// Create and persist target resource
-		T target = createResourceWithIdentifiers(myTargetIdentifierValues.toArray(new String[0]));
+		T target = createResourceWithIdentifiers(myTargetIdentifiers);
 		target = (T) dao.create(target, myRequestDetails).getResource();
 		ourLog.debug("Created target resource: {}", target.getIdElement());
 
@@ -294,7 +287,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 		if (myCreateResultResource) {
 			// Create result resource with target identifiers (not persisted)
-			T result = createResourceWithIdentifiers(myTargetIdentifierValues.toArray(new String[0]));
+			T result = createResourceWithIdentifiers(myTargetIdentifiers);
 			// Result resource must have same ID as target for validation
 			result.setId(getTargetId());
 
@@ -333,7 +326,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 		if (myCreateResultResource) {
 			// Create result resource with target identifiers (not persisted)
-			T result = createResourceWithIdentifiers(myTargetIdentifierValues.toArray(new String[0]));
+			T result = createResourceWithIdentifiers(myTargetIdentifiers);
 			result.setId(getTargetId());
 
 			// Add "replaces" link only when deleteSource=false
@@ -749,15 +742,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	protected abstract Class<T> getResourceClass();
 
 	/**
-	 * Create a resource instance with the given identifier values.
-	 *
-	 * @param theIdentifierValues Identifier values to add
-	 * @return A new resource with the identifiers
-	 */
-	@Nonnull
-	protected abstract T createResourceWithIdentifiers(@Nonnull String... theIdentifierValues);
-
-	/**
 	 * Create a resource instance with the given identifier objects.
 	 *
 	 * @param theIdentifiers Identifiers to add
@@ -806,8 +790,8 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	private void assertTestDataCreated() {
 		if (!myIsTestDataCreated) {
 			throw new IllegalStateException(
-					"createTestData() must be called before accessing data. Use withSourceIdentifiers(), "
-							+ "withTargetIdentifiers(), withReferences(), etc. to configure, then call createTestData().");
+					"createTestData() must be called before accessing data. Use withReferences(), "
+							+ "withResultResource(), etc. to configure, then call createTestData().");
 		}
 	}
 }

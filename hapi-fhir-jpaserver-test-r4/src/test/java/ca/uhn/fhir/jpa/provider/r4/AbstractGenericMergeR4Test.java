@@ -315,8 +315,6 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	protected void testMerge_extensionLinks_targetPreservesExistingData() {
 		// Setup
 		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.withSourceIdentifiers("source-1", "source-2");
-		scenario.withTargetIdentifiers("target-1", "target-2");
 		scenario.withOneReferencingResource();
 		scenario.createTestData();
 
@@ -523,8 +521,6 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	protected void testMerge_resultResource_overridesTargetData() {
 		// Setup with result resource
 		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.withSourceIdentifiers("source-1", "source-2");
-		scenario.withTargetIdentifiers("target-1", "target-2");
 		scenario.withOneReferencingResource();
 		scenario.withResultResource();
 		scenario.createTestData();

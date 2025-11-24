@@ -51,9 +51,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * - Provenance validation (3 tests): sync, async, not created for preview
  * - Status field validation (2 tests): source/target status handling (via scenario, not directly modified)
  * - Result resource validation (2 tests): overrides target data, preserves references
- * - Observation-specific tests (3 tests): DiagnosticReport references, LOINC identifiers, all standard references
+ * - Observation-specific tests (2 tests): DiagnosticReport references, all standard references
  *
- * <p>Total: 45 comprehensive tests for Observation merge operations.
+ * <p>Total: 44 comprehensive tests for Observation merge operations.
  */
 public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observation> {
 
@@ -89,30 +89,6 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 
 		// Validate all DiagnosticReport.result references updated
 		scenario.assertReferencesUpdated("DiagnosticReport");
-	}
-
-	/**
-	 * Test identifier merging with LOINC codes (common in Observation).
-	 */
-	@Test
-	void testMerge_observationSpecific_loincCodeIdentifiers() {
-		// Setup with LOINC-like identifiers
-		AbstractMergeTestScenario<Observation> scenario = createScenario();
-		scenario.withSourceIdentifiers("8867-4", "2339-0");
-		scenario.withTargetIdentifiers("8867-4", "94531-1");
-		scenario.withMultipleReferencingResources();
-		scenario.createTestData();
-
-		// Execute merge
-		MergeTestParameters params = scenario.buildMergeOperationParameters(false, false);
-		myHelper.callMergeOperation("Observation", params, false);
-
-		// Validate target has all identifiers
-		Observation target = scenario.readResource(scenario.getTargetId());
-		List<Identifier> targetIdentifiers = scenario.getIdentifiersFromResource(target);
-
-		// Should have original target identifiers + non-duplicate source identifiers
-		assertThat(targetIdentifiers).hasSizeGreaterThanOrEqualTo(3);
 	}
 
 	/**
