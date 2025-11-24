@@ -93,7 +93,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	protected final FhirContext myFhirContext;
 
 	// Configuration State (before createTestData)
-	private final List<ReferencingResourceConfig> myReferenceConfigs = new ArrayList<>();
+	private final List<ReferencingTestResourceType> myReferencingTestResourceTypes = new ArrayList<>();
 	private List<String> mySourceIdentifierValues = Arrays.asList("source-1", "source-2", "common");
 	private List<String> myTargetIdentifierValues = Arrays.asList("target-1", "target-2", "common");
 	private boolean myCreateResultResource = false;
@@ -142,8 +142,8 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	@Nonnull
-	public AbstractMergeTestScenario<T> withReferences(@Nonnull List<ReferencingResourceConfig> theConfigs) {
-		myReferenceConfigs.addAll(theConfigs);
+	public AbstractMergeTestScenario<T> withReferences(@Nonnull List<ReferencingTestResourceType> theConfigs) {
+		myReferencingTestResourceTypes.addAll(theConfigs);
 		return this;
 	}
 
@@ -186,23 +186,24 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		// Create referencing resources organized by type
 		Map<String, List<IIdType>> referencingResourcesByType = new HashMap<>();
 
-		for (ReferencingResourceConfig config : myReferenceConfigs) {
+		for (ReferencingTestResourceType resourceType : myReferencingTestResourceTypes) {
 			List<IIdType> idsForType = new ArrayList<>();
 
-			for (int i = 0; i < config.getCount(); i++) {
+			for (int i = 0; i < resourceType.getCount(); i++) {
 				IBaseResource referencingResource =
-						createReferencingResource(config.getResourceType(), source.getIdElement());
+						createReferencingResource(resourceType.getResourceType(), source.getIdElement());
 
 				// Persist referencing resource
-				IFhirResourceDao<IBaseResource> refDao = myDaoRegistry.getResourceDao(config.getResourceType());
+				IFhirResourceDao<IBaseResource> refDao = myDaoRegistry.getResourceDao(resourceType.getResourceType());
 				IIdType createdId = refDao.create(referencingResource, myRequestDetails)
 						.getId()
 						.toUnqualifiedVersionless();
 				idsForType.add(createdId);
 			}
 
-			ourLog.debug("Created {} {} resources referencing source", idsForType.size(), config.getResourceType());
-			referencingResourcesByType.put(config.getResourceType(), idsForType);
+			ourLog.debug(
+					"Created {} {} resources referencing source", idsForType.size(), resourceType.getResourceType());
+			referencingResourcesByType.put(resourceType.getResourceType(), idsForType);
 		}
 
 		// Calculate expected identifiers after merge

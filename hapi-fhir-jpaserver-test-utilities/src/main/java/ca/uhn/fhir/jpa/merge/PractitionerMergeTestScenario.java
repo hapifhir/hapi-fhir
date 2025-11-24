@@ -130,14 +130,14 @@ public class PractitionerMergeTestScenario extends AbstractMergeTestScenario<Pra
 	}
 
 	public AbstractMergeTestScenario<Practitioner> withOneReferencingResource() {
-		return withReferences(List.of(ReferencingResourceConfig.of("PractitionerRole", 1)));
+		return withReferences(List.of(ReferencingTestResourceType.of("PractitionerRole", 1)));
 	}
 
 	public AbstractMergeTestScenario<Practitioner> withMultipleReferencingResources() {
 		return withReferences(List.of(
-				ReferencingResourceConfig.of("PractitionerRole", 3),
-				ReferencingResourceConfig.of("Encounter", 2),
-				ReferencingResourceConfig.of("CarePlan", 1)));
+				ReferencingTestResourceType.of("PractitionerRole", 3),
+				ReferencingTestResourceType.of("Encounter", 2),
+				ReferencingTestResourceType.of("CarePlan", 1)));
 	}
 
 	public boolean hasActiveField() {

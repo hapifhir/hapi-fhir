@@ -24,7 +24,7 @@ package ca.uhn.fhir.jpa.merge;
 import jakarta.annotation.Nonnull;
 
 /**
- * Configuration for creating referencing resources in merge operation tests.
+ * Test specification for creating referencing resources in merge operation tests.
  *
  * This class encapsulates the information needed to create resources that reference
  * a merge source/target resource. It supports flexible test scenarios with multiple
@@ -33,32 +33,32 @@ import jakarta.annotation.Nonnull;
  * <p>Example usage:</p>
  * <pre>
  * // Create 10 PractitionerRole resources that reference a Practitioner
- * ReferencingResourceConfig config = ReferencingResourceConfig.of("PractitionerRole", 10);
+ * ReferencingTestResourceType spec = ReferencingTestResourceType.of("PractitionerRole", 10);
  *
  * // Create 5 DiagnosticReport resources that reference an Observation
- * ReferencingResourceConfig config = ReferencingResourceConfig.of("DiagnosticReport", 5);
+ * ReferencingTestResourceType spec = ReferencingTestResourceType.of("DiagnosticReport", 5);
  * </pre>
  */
-public class ReferencingResourceConfig {
+public class ReferencingTestResourceType {
 
 	private final String myResourceType;
 	private final int myCount;
 
-	private ReferencingResourceConfig(@Nonnull String theResourceType, int theCount) {
+	private ReferencingTestResourceType(@Nonnull String theResourceType, int theCount) {
 		myResourceType = theResourceType;
 		myCount = theCount;
 	}
 
 	/**
-	 * Factory method to create a referencing resource configuration.
+	 * Factory method to create a referencing resource type specification.
 	 *
 	 * @param theResourceType The FHIR resource type to create (e.g., "PractitionerRole", "Encounter")
 	 * @param theCount The number of resources to create
-	 * @return A new configuration instance
+	 * @return A new specification instance
 	 */
 	@Nonnull
-	public static ReferencingResourceConfig of(@Nonnull String theResourceType, int theCount) {
-		return new ReferencingResourceConfig(theResourceType, theCount);
+	public static ReferencingTestResourceType of(@Nonnull String theResourceType, int theCount) {
+		return new ReferencingTestResourceType(theResourceType, theCount);
 	}
 
 	/**
