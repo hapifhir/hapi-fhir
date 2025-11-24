@@ -28,17 +28,18 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import jakarta.annotation.Nonnull;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.Strings;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 public class ResourceUtil {
@@ -48,6 +49,8 @@ public class ResourceUtil {
 	private static final String EQUALS_DEEP = "equalsDeep";
 	public static final String DATA_ABSENT_REASON_EXTENSION_URI =
 			"http://hl7.org/fhir/StructureDefinition/data-absent-reason";
+
+	private static final Logger ourLog = LoggerFactory.getLogger(ResourceUtil.class);
 
 	private ResourceUtil() {}
 
@@ -78,8 +81,7 @@ public class ResourceUtil {
 	}
 
 	public static void addRawDataToResource(
-			@Nonnull IBaseResource theResource, @Nonnull EncodingEnum theEncodingType, String theSerializedData)
-			throws IOException {
+			@Nonnull IBaseResource theResource, @Nonnull EncodingEnum theEncodingType, String theSerializedData) {
 		theResource.setUserData(getRawUserDataKey(theEncodingType), theSerializedData);
 		theResource.setUserData(ENCODING, theEncodingType);
 	}
@@ -186,31 +188,24 @@ public class ResourceUtil {
 			BaseRuntimeChildDefinition childDefinition,
 			List<IBase> theFromFieldValues,
 			List<IBase> theToFieldValues) {
+
 		if (!theFromFieldValues.isEmpty() && theToFieldValues.stream().anyMatch(ResourceUtil::hasDataAbsentReason)) {
 			// If the to resource has a data absent reason, and there is potentially real data incoming
 			// in the from resource, we should clear the data absent reason because it won't be absent anymore.
 			theToFieldValues = removeDataAbsentReason(theTo, childDefinition, theToFieldValues);
 		}
 
-		for (IBase fromFieldValue : theFromFieldValues) {
-			if (contains(fromFieldValue, theToFieldValues)) {
-				continue;
-			}
+		List<IBase> filteredFromFieldValues = filterFromFields(theFromFieldValues, theToFieldValues);
 
-			if (hasDataAbsentReason(fromFieldValue) && !theToFieldValues.isEmpty()) {
-				// if the from field value asserts a reason the field isn't populated, but the to field is populated,
-				// we don't want to overwrite real data with the extension
-				continue;
-			}
-
-			IBase newFieldValue = newElement(theTerser, childDefinition, fromFieldValue, null);
+		for (IBase fromFieldValue : filteredFromFieldValues) {
+			IBase newFieldValue = newElement(theTerser, childDefinition, fromFieldValue);
 			if (fromFieldValue instanceof IPrimitiveType) {
 				try {
 					Method copyMethod = getMethod(fromFieldValue, "copy");
 					if (copyMethod != null) {
-						newFieldValue = (IBase) copyMethod.invoke(fromFieldValue, new Object[] {});
+						newFieldValue = (IBase) copyMethod.invoke(fromFieldValue);
 					}
-				} catch (Throwable t) {
+				} catch (Exception t) {
 					((IPrimitiveType<?>) newFieldValue)
 							.setValueAsString(((IPrimitiveType<?>) fromFieldValue).getValueAsString());
 				}
@@ -227,11 +222,18 @@ public class ResourceUtil {
 		}
 	}
 
+	private static List<IBase> filterFromFields(List<IBase> theFromFieldValues, List<IBase> theToFieldValues) {
+		return theFromFieldValues.stream()
+				.filter(v -> !contains(v, theToFieldValues))
+				.filter(v -> !hasDataAbsentReason(v) || theToFieldValues.isEmpty())
+				.toList();
+	}
+
 	private static BaseRuntimeChildDefinition getBaseRuntimeChildDefinition(
 			FhirContext theFhirContext, String theFieldName, IBaseResource theFrom) {
 		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
 		BaseRuntimeChildDefinition childDefinition = definition.getChildByName(theFieldName);
-		Validate.notNull(childDefinition);
+		Objects.requireNonNull(childDefinition);
 		return childDefinition;
 	}
 
@@ -251,8 +253,7 @@ public class ResourceUtil {
 			try {
 				return (Boolean) theMethod.invoke(theItem1, theItem2);
 			} catch (Exception e) {
-				throw new RuntimeException(
-						Msg.code(1746) + String.format("Unable to compare equality via %s", EQUALS_DEEP), e);
+				ourLog.debug("{} Unable to compare equality via {}", Msg.code(2821), EQUALS_DEEP, e);
 			}
 		}
 		return theItem1.equals(theItem2);
@@ -264,10 +265,9 @@ public class ResourceUtil {
 	}
 
 	private static boolean hasDataAbsentReason(IBase theItem) {
-		if (theItem instanceof IBaseHasExtensions) {
-			IBaseHasExtensions hasExtensions = (IBaseHasExtensions) theItem;
+		if (theItem instanceof IBaseHasExtensions hasExtensions) {
 			return hasExtensions.getExtension().stream()
-					.anyMatch(t -> StringUtils.equals(t.getUrl(), DATA_ABSENT_REASON_EXTENSION_URI));
+					.anyMatch(t -> Strings.CS.equals(t.getUrl(), DATA_ABSENT_REASON_EXTENSION_URI));
 		}
 		return false;
 	}
@@ -291,18 +291,14 @@ public class ResourceUtil {
 	 * Creates a new element taking into consideration elements with choice that are not directly retrievable by element
 	 * name
 	 *
-	 * @param theFhirTerser
-	 * @param theChildDefinition  Child to create a new instance for
-	 * @param theFromFieldValue   The base parent field
-	 * @param theConstructorParam Optional constructor param
+	 * @param theFhirTerser      A terser instance for the FHIR release
+	 * @param theChildDefinition Child to create a new instance for
+	 * @param theFromFieldValue  The base parent field
 	 * @return Returns the new element with the given value if configured
 	 */
 	private static IBase newElement(
-			FhirTerser theFhirTerser,
-			BaseRuntimeChildDefinition theChildDefinition,
-			IBase theFromFieldValue,
-			Object theConstructorParam) {
-		BaseRuntimeElementDefinition runtimeElementDefinition;
+			FhirTerser theFhirTerser, BaseRuntimeChildDefinition theChildDefinition, IBase theFromFieldValue) {
+		BaseRuntimeElementDefinition<?> runtimeElementDefinition;
 		if (theChildDefinition instanceof RuntimeChildChoiceDefinition) {
 			runtimeElementDefinition =
 					theChildDefinition.getChildElementDefinitionByDatatype(theFromFieldValue.getClass());
@@ -312,10 +308,8 @@ public class ResourceUtil {
 		if ("contained".equals(runtimeElementDefinition.getName())) {
 			IBaseResource sourceResource = (IBaseResource) theFromFieldValue;
 			return theFhirTerser.clone(sourceResource);
-		} else if (theConstructorParam == null) {
-			return runtimeElementDefinition.newInstance();
 		} else {
-			return runtimeElementDefinition.newInstance(theConstructorParam);
+			return runtimeElementDefinition.newInstance();
 		}
 	}
 }
