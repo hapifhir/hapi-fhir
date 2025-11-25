@@ -22,8 +22,6 @@ package ca.uhn.fhir.jpa.term.custom;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.entity.TermConceptPropertyTypeEnum;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
-import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
-import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.csv.CSVRecord;
 
 import java.util.ArrayList;
@@ -50,18 +48,14 @@ public class PropertyHandler implements IZipContentsHandlerCsv {
 		String code = trim(theRecord.get(CODE));
 		String key = trim(theRecord.get(KEY));
 
-		if (isNotBlank(code) && isNotBlank(KEY)) {
+		if (isNotBlank(code) && isNotBlank(key)) {
 			String value = trim(theRecord.get(VALUE));
 			String type = trim(theRecord.get(TYPE));
 
 			List<TermConceptProperty> conceptProperties = myCode2Properties.get(code);
 			if (conceptProperties == null) conceptProperties = new ArrayList<>();
 
-			TermConceptProperty conceptProperty =
-					TermLoaderSvcImpl.getOrCreateConceptProperty(myCode2Properties, code, key);
-			ValidateUtil.isNotNullOrThrowUnprocessableEntity(
-					conceptProperty, "Concept property %s not found in file", conceptProperty);
-
+			TermConceptProperty conceptProperty = new TermConceptProperty();
 			conceptProperty.setKey(key);
 			conceptProperty.setValue(value);
 			// TODO: check this for different types, other types should be added once TermConceptPropertyTypeEnum
