@@ -160,6 +160,7 @@ public void method(String theParameter) { // Parameters: the*
 **Dependencies & Imports**
 - **NEVER** use `org.jetbrains.annotations`
 - Use `jakarta.annotation` (NOT `javax.annotation`)
+- Use import statements instead of fully-qualified class names in code
 - JSON properties: camelCase (not snake_case)
 
 **File Creation**
