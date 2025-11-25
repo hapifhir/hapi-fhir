@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
@@ -315,6 +316,52 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				String failureMessage = String.format("Concept %s did not contain property with key %s and value %s ", code.getCode(), "property1", "property1Value");
 				fail(failureMessage);
 			}
+		});
+	}
+
+	@Test
+	public void testApplyDeltaAdd_duplicateConceptPropertyKeys_allPropertiesSaved() throws IOException {
+		String inputParamJson = loadResource("/custom_term/codeSystem-duplicatePropertyKeys.json");
+		Parameters inputParameters = myFhirContext.newJsonParser().parseResource(Parameters.class, inputParamJson);
+
+		LoggingInterceptor interceptor = new LoggingInterceptor(true);
+		myClient.registerInterceptor(interceptor);
+		Parameters outcome = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+			.withParameters(inputParameters)
+			.prettyPrint()
+			.execute();
+		myClient.unregisterInterceptor(interceptor);
+
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		ourLog.info(encoded);
+		assertThat(encoded).containsSubsequence(
+			"\"name\": \"conceptCount\"",
+			"\"valueInteger\": 1",
+			"\"name\": \"target\"",
+			"\"reference\": \"CodeSystem/"
+		);
+		runInTransaction(() -> {
+			TermCodeSystem cs = myTermCodeSystemDao.findByCodeSystemUri("http://www.nlm.nih.gov/research/umls/rxnorm_resource");
+			TermCodeSystemVersion version = cs.getCurrentVersion();
+			Optional<TermConcept> optional = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "748856");
+			assertThat(optional).isPresent();
+
+			TermConcept concept = optional.get();
+			Collection<TermConceptProperty> properties = concept.getProperties();
+
+			properties.forEach(prop -> ourLog.info("Property: {} = {}", prop.getKey(), prop.getValue()));
+			assertThat(properties).hasSize(3);
+
+			// Check that a property with key "STY" appears twice
+			List<String> valuesForSTY = properties.stream()
+				.filter(p -> "STY".equalsIgnoreCase(p.getKey()))
+				.map(TermConceptProperty::getValue)
+				.toList();
+			assertThat(valuesForSTY).hasSize(2);
+			assertThat(valuesForSTY).containsExactlyInAnyOrder("STN:A1.3.1.1", "STY:Drug Delivery Device");
 		});
 	}
 
