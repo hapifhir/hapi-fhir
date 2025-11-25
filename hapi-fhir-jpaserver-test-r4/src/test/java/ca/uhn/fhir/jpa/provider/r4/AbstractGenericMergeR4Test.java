@@ -168,10 +168,9 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		}
 
 		if (theAsync) {
-			scenario.validateAsyncTaskCreated(outParams);
-			Task task = (Task) outParams.getParameter("task").getResource();
-			String jobId = myHelper.getJobIdFromTask(task);
-			myHelper.awaitJobCompletion(jobId);
+			scenario.validateAsyncOperationOutcome(outParams);
+			myHelper.waitForAsyncTaskCompletion(outParams);
+			scenario.validateTaskOutput(outParams);
 		} else {
 			scenario.validateSyncMergeOutcome(outParams);
 		}
@@ -221,10 +220,9 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		Parameters outParams = myHelper.callMergeOperation(getResourceTypeName(), params, true);
 
 		// Validate
-		scenario.validateAsyncTaskCreated(outParams);
-		Task task = (Task) outParams.getParameter("task").getResource();
-		String jobId = myHelper.getJobIdFromTask(task);
-		myHelper.awaitJobCompletion(jobId);
+		scenario.validateAsyncOperationOutcome(outParams);
+		myHelper.waitForAsyncTaskCompletion(outParams);
+		scenario.validateTaskOutput(outParams);
 
 		validateMergeOutcome(scenario, false);
 	}

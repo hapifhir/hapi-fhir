@@ -29,6 +29,9 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Task;
 
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 /**
  * Test helper for invoking generic merge operations.
  * <p>
@@ -150,5 +153,28 @@ public class MergeOperationTestHelper {
 		ourLog.debug("Waiting for job completion: {}", theJobId);
 		myBatch2JobHelper.awaitJobCompletion(theJobId);
 		ourLog.debug("Job completed: {}", theJobId);
+	}
+
+	/**
+	 * Waits for async task completion after merge operation.
+	 * Validates task creation, extracts job ID, and waits for batch job to complete.
+	 * Copied from PatientMergeR4Test.waitForAsyncTaskCompletion().
+	 *
+	 * @param theOutParams the output parameters from merge operation
+	 */
+	public void waitForAsyncTaskCompletion(@Nonnull Parameters theOutParams) {
+		Task task = (Task)
+				theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
+		assertNull(task.getIdElement().getVersionIdPart()); // No version on initial task
+
+		ourLog.info("Got task {}", task.getId());
+
+		// Use existing getJobIdFromTask() method
+		String jobId = getJobIdFromTask(task);
+
+		// Use existing awaitJobCompletion() method
+		awaitJobCompletion(jobId);
+
+		ourLog.debug("Async task job completed: {}", jobId);
 	}
 }
