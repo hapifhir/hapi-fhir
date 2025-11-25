@@ -90,8 +90,12 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	public void postConstruct() {
 		myWorkerContextValidationSupportAdapter.setValidationSupport(this);
 
-		addValidationSupport(myDefaultProfileValidationSupport);
+		// JPA validation support comes first so that user-persisted resources
+		// take precedence over built-in default profile resources.
+		// This is important for case-sensitive CodeSystems where the user may
+		// have added additional codes that differ only by case from built-in codes.
 		addValidationSupport(myJpaValidationSupport);
+		addValidationSupport(myDefaultProfileValidationSupport);
 		addValidationSupport(myTerminologyService);
 		addValidationSupport(
 				new SnapshotGeneratingValidationSupport(myFhirContext, myWorkerContextValidationSupportAdapter));
