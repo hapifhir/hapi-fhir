@@ -636,40 +636,47 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	// REFERENCE VALIDATION
 	// ================================================
 
+	/**
+	 * Extract all reference strings from a resource.
+	 *
+	 * @param theRefId Resource ID to read and extract references from
+	 * @return List of reference strings (resourceType/id format)
+	 */
+	private List<String> extractReferenceStrings(IIdType theRefId) {
+		IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(theRefId.getResourceType());
+		IBaseResource resource = dao.read(theRefId, myRequestDetails);
+
+		FhirTerser terser = myFhirContext.newTerser();
+		List<IBaseReference> allRefs = terser.getAllPopulatedChildElementsOfType(resource, IBaseReference.class);
+
+		List<String> refStrings = allRefs.stream()
+				.map(ref -> ref.getReferenceElement().getValue())
+				.filter(Objects::nonNull)
+				.toList();
+
+		ourLog.info("Resource {} contains references: {}", theRefId, refStrings);
+
+		return refStrings;
+	}
+
 	public void assertReferencesUpdated(@Nonnull List<IIdType> theReferencingResourceIds) {
 		assertTestDataCreated();
 
-		IIdType theVersionlessSourceId = getVersionlessSourceId();
-		IIdType theVersionlessTargetId = getVersionlessTargetId();
-
-		// Build expected reference strings with resourceType/id format
-		String expectedTargetRef = theVersionlessTargetId.getValue();
-		String unexpectedSourceRef = theVersionlessSourceId.getValue();
-
-		FhirTerser terser = myFhirContext.newTerser();
-
 		for (IIdType refId : theReferencingResourceIds) {
-			IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(refId.getResourceType());
-			IBaseResource resource = dao.read(refId, myRequestDetails);
-
-			// Use FhirTerser to find all references
-			List<IBaseReference> allRefs = terser.getAllPopulatedChildElementsOfType(resource, IBaseReference.class);
-
-			List<String> refStrings = allRefs.stream()
-					.map(ref -> ref.getReferenceElement().getValue())
-					.filter(Objects::nonNull)
-					.toList();
-
-			ourLog.info("Resource {} contains references: {}", refId, refStrings);
+			List<String> refStrings = extractReferenceStrings(refId);
 
 			// Verify references contain target and not source
 			assertThat(refStrings)
-					.as("Resource %s should contain reference to target %s", refId, expectedTargetRef)
-					.contains(expectedTargetRef);
+					.as(
+							"Resource %s should contain reference to target %s",
+							refId, getVersionlessTargetId().getValue())
+					.contains(getVersionlessTargetId().getValue());
 
 			assertThat(refStrings)
-					.as("Resource %s should not contain reference to source %s", refId, unexpectedSourceRef)
-					.doesNotContain(unexpectedSourceRef);
+					.as(
+							"Resource %s should not contain reference to source %s",
+							refId, getVersionlessSourceId().getValue())
+					.doesNotContain(getVersionlessSourceId().getValue());
 		}
 	}
 
@@ -683,31 +690,18 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		assertTestDataCreated();
 		ourLog.debug("Validating references NOT updated in preview mode for source: {}", getVersionlessSourceId());
 
-		FhirTerser terser = myFhirContext.newTerser();
-
 		for (String resourceType : myReferencingResourcesByType.keySet()) {
 			for (IIdType refId : myReferencingResourcesByType.get(resourceType)) {
-				IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(resourceType);
-				IBaseResource resource = dao.read(refId, myRequestDetails);
+				List<String> refStrings = extractReferenceStrings(refId);
 
-				List<IBaseReference> allRefs =
-						terser.getAllPopulatedChildElementsOfType(resource, IBaseReference.class);
+				// Verify references still contain source and not target
+				assertThat(refStrings)
+						.as("Resource %s should still reference source %s in preview mode", refId, getVersionlessSourceId().getValue())
+						.contains(getVersionlessSourceId().getValue());
 
-				boolean foundSourceRef = false;
-				for (IBaseReference reference : allRefs) {
-					String refString = reference.getReferenceElement().getValue();
-					if (refString != null
-							&& refString.contains(getVersionlessSourceId().getIdPart())) {
-						foundSourceRef = true;
-						break;
-					}
-				}
-
-				assertThat(foundSourceRef)
-						.as(
-								"Resource %s should still reference source %s in preview mode",
-								refId, getVersionlessSourceId())
-						.isTrue();
+				assertThat(refStrings)
+						.as("Resource %s should not reference target %s in preview mode", refId, getVersionlessTargetId().getValue())
+						.doesNotContain(getVersionlessTargetId().getValue());
 			}
 		}
 
