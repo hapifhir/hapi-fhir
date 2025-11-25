@@ -7,7 +7,10 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -23,6 +27,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -44,8 +49,8 @@ class JobInstanceStatusUpdaterTest {
 	private JobInstance myInstance;
 	private TestParameters myTestParameters;
 	private AtomicReference<JobCompletionDetails> myDetails;
-	@Mock
-	protected IInterceptorService myInterceptorRegistry;
+	@Spy
+	private IInterceptorService myInterceptorRegistry = new InterceptorService("testIS");
 
 	@BeforeEach
 	public void before() {
@@ -70,6 +75,26 @@ class JobInstanceStatusUpdaterTest {
 		mySvc.updateInstanceStatus(myInstance, StatusEnum.COMPLETED);
 
 		assertCompleteCallbackCalled();
+	}
+
+	@Test
+	public void testCompletionHandler_withCompleteInterceptor() {
+		IAnonymousInterceptor postBatchJobCcompletionInterceptor = (pointcut, params) -> {
+			JobInstance jobInstance = params.get(JobInstance.class);
+			assertEquals("test-instance-id", jobInstance.getInstanceId());
+		};
+		try {
+			// setup
+			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.BATCH2_JOB_COMPLETION, postBatchJobCcompletionInterceptor);
+			setupCompleteCallback();
+
+			// execute
+			mySvc.updateInstanceStatus(myInstance, StatusEnum.COMPLETED);
+
+			assertCompleteCallbackCalled();
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(postBatchJobCcompletionInterceptor);
+		}
 	}
 
 	@Test
