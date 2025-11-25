@@ -36,10 +36,13 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 
 import java.util.ArrayList;
@@ -52,8 +55,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_OUTCOME;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Abstract base class for merge test scenarios.
@@ -577,24 +585,10 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		OperationOutcome outcome =
 				(OperationOutcome) theOutParams.getParameter("outcome").getResource();
 
-		ourLog.info(
-				"Sync merge OperationOutcome: severity={}, details={}, diagnostics={}",
-				outcome.getIssue().isEmpty()
-						? "NONE"
-						: outcome.getIssue().get(0).getSeverity(),
-				outcome.getIssue().isEmpty()
-						? "NONE"
-						: outcome.getIssue().get(0).getDetails().getText(),
-				outcome.getIssue().isEmpty()
-						? "NONE"
-						: outcome.getIssue().get(0).getDiagnostics());
-
 		assertThat(outcome.getIssue()).hasSize(1).element(0).satisfies(issue -> {
 			assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
 			assertThat(issue.getDetails().getText()).isEqualTo("Merge operation completed successfully.");
 		});
-
-		ourLog.debug("Sync merge outcome validated successfully");
 	}
 
 	public void validateAsyncTaskCreated(@Nonnull Parameters theOutParams) {
@@ -604,14 +598,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 		Task task = (Task) theOutParams.getParameter("task").getResource();
 		assertThat(task).as("Task should be present").isNotNull();
-
-		ourLog.info(
-				"Async Task created: id={}, status={}, identifiers={}",
-				task.getId(),
-				task.getStatus(),
-				task.getIdentifier().stream()
-						.map(id -> id.getSystem() + "|" + id.getValue())
-						.toList());
 
 		assertThat(task.getIdElement().hasVersionIdPart())
 				.as("Task should not have version")
@@ -626,6 +612,72 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		});
 
 		ourLog.debug("Async task creation validated successfully: {}", task.getId());
+	}
+
+	/**
+	 * Validates the completed async task output after job finishes.
+	 * Should be called AFTER waitForAsyncTaskCompletion().
+	 * Copied from PatientMergeR4Test.validateTaskOutput().
+	 *
+	 * @param theOutParams the original output parameters from merge operation
+	 */
+	public void validateTaskOutput(@Nonnull Parameters theOutParams) {
+		assertTestDataCreated();
+
+		Task task = (Task)
+				theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
+
+		// Re-fetch task to get final state with outputs (use myDaoRegistry + myRequestDetails)
+		IFhirResourceDao<Task> taskDao = myDaoRegistry.getResourceDao(Task.class);
+		task = taskDao.read(task.getIdElement(), myRequestDetails);
+
+		assertThat(task.getStatus()).isEqualTo(Task.TaskStatus.COMPLETED);
+		ourLog.info(
+				"Complete Task: {}",
+				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(task));
+
+		Task.TaskOutputComponent taskOutput = task.getOutputFirstRep();
+
+		// Assert on the output type
+		Coding taskOutputType = taskOutput.getType().getCodingFirstRep();
+		assertEquals(RESOURCE_TYPES_SYSTEM, taskOutputType.getSystem());
+		assertEquals("Bundle", taskOutputType.getCode());
+
+		// Validate Task properly includes the patch result Bundle as a contained resource
+		// FHIR Tasks return operation results using this pattern:
+		// 1. Task.contained[] - the actual Bundle resource is embedded here with an ID (e.g., "b84941d0-...")
+		// 2. Task.output[].valueReference - a reference pointing to that contained Bundle (e.g., "#b84941d0-...")
+		// This validates the Bundle exists in contained[] and output properly references it (ensuring data integrity)
+		List<Resource> containedResources = task.getContained();
+		assertThat(containedResources).hasSize(1).element(0).isInstanceOf(Bundle.class);
+		Bundle containedBundle = (Bundle) containedResources.get(0);
+		Reference outputRef = (Reference) taskOutput.getValue();
+		Bundle patchResultBundle = (Bundle) outputRef.getResource();
+		assertTrue(containedBundle.equalsDeep(patchResultBundle));
+
+		// Calculate expected patches from scenario data (use getTotalReferenceCount/getReferencingResourceTypes)
+		int expectedPatches = getTotalReferenceCount();
+		List<String> expectedResourceTypes = new ArrayList<>(getReferencingResourceTypes());
+		ReplaceReferencesTestHelper.validatePatchResultBundle(
+				patchResultBundle, expectedPatches, expectedResourceTypes);
+	}
+
+	/**
+	 * Validates the OperationOutcome from an async merge operation response.
+	 * The outcome should contain an informational message about async processing.
+	 * Should be called BEFORE waitForAsyncTaskCompletion() to validate the initial response.
+	 *
+	 * @param theOutParams the output parameters from merge operation
+	 */
+	public void validateAsyncOperationOutcome(@Nonnull Parameters theOutParams) {
+		OperationOutcome outcome = (OperationOutcome)
+				theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
+		assertThat(outcome.getIssue()).hasSize(1).element(0).satisfies(issue -> {
+			assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+			assertThat(issue.getDetails().getText())
+					.isEqualTo("Merge request is accepted, and will be "
+							+ "processed asynchronously. See task resource returned in this response for details.");
+		});
 	}
 
 	public void validatePreviewOutcome(@Nonnull Parameters theOutParams) {
