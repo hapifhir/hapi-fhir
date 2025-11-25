@@ -296,11 +296,21 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	/**
-	 * Get identifiers for result resource, defaulting to target identifiers if not explicitly set.
+	 * Get identifiers for result resource, defaulting to target identifiers plus an extra identifier
+	 * to ensure the result resource is different from target.
 	 */
 	@Nonnull
 	private List<Identifier> getResultResourceIdentifiers() {
-		return myResultResourceIdentifiers != null ? myResultResourceIdentifiers : myTargetIdentifiers;
+		if (myResultResourceIdentifiers != null) {
+			return myResultResourceIdentifiers;
+		}
+
+		// Default: use target identifiers plus an extra identifier to ensure result is different
+		// This ensures the target update is not a no-op in case deleteSource=true,
+		// causing version of the target resource to increment from v1 to v2
+		List<Identifier> result = new ArrayList<>(myTargetIdentifiers);
+		result.add(new Identifier().setSystem("http://test.org/result").setValue("extra-result-identifier"));
+		return result;
 	}
 
 	@Nonnull
@@ -308,7 +318,8 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		assertTestDataCreated();
 
 		if (myCreateResultResource) {
-			// Result resource provided - identifiers come from result resource identifiers (defaults to target)
+			// Result resource provided - identifiers come from result resource identifiers
+			// (which includes the extra identifier by default to ensure it's different from target)
 			return new ArrayList<>(getResultResourceIdentifiers());
 		}
 
@@ -372,7 +383,8 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	 */
 	private void addResultResourceIfNeeded(@Nonnull MergeTestParameters theParams) {
 		if (myCreateResultResource) {
-			// Create result resource with result resource identifiers (defaults to target identifiers if not set)
+			// Create result resource with result resource identifiers
+			// (defaults to target identifiers + extra identifier to ensure it's different from target)
 			T result = createResourceWithIdentifiers(getResultResourceIdentifiers());
 			// Result resource must have same ID as target for validation
 			result.setId(getVersionlessTargetId());
@@ -696,11 +708,15 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 				// Verify references still contain source and not target
 				assertThat(refStrings)
-						.as("Resource %s should still reference source %s in preview mode", refId, getVersionlessSourceId().getValue())
+						.as(
+								"Resource %s should still reference source %s in preview mode",
+								refId, getVersionlessSourceId().getValue())
 						.contains(getVersionlessSourceId().getValue());
 
 				assertThat(refStrings)
-						.as("Resource %s should not reference target %s in preview mode", refId, getVersionlessTargetId().getValue())
+						.as(
+								"Resource %s should not reference target %s in preview mode",
+								refId, getVersionlessTargetId().getValue())
 						.doesNotContain(getVersionlessTargetId().getValue());
 			}
 		}
@@ -712,14 +728,18 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	// PROVENANCE VALIDATION
 	// ================================================
 
-	public void assertMergeProvenanceCreated(@Nonnull Parameters theInputParams) {
+	public void assertMergeProvenanceCreated() {
 		assertTestDataCreated();
 
-		// Read source and target resources to get their current versioned IDs
-		T sourceResource = readResource(getVersionlessSourceId());
-		T targetResource = readResource(getVersionlessTargetId());
-		IIdType sourceId = sourceResource.getIdElement();
-		IIdType targetId = targetResource.getIdElement();
+		// Rebuild input parameters from scenario configuration
+		Parameters inputParams = buildMergeOperationParameters().asParametersResource();
+
+		// Both source and target are always version 2 in provenance
+		// - Target: always updated to v2 (regardless of deleteSource)
+		// - Source: v2 in provenance even when deleteSource=true
+		//   (provenance increments version to match what delete operation will create)
+		IIdType sourceId = getVersionlessSourceId().withVersion("2");
+		IIdType targetId = getVersionlessTargetId().withVersion("2");
 
 		// Calculate expected referencing resource IDs with versions
 		// Referencing resources get updated during merge, so they should have version 2
@@ -731,14 +751,12 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		// Delegate to ReplaceReferencesTestHelper for provenance validation
 		ReplaceReferencesTestHelper helper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
 		helper.assertMergeProvenance(
-				theInputParams,
+				inputParams,
 				sourceId,
 				targetId,
 				getTotalReferenceCount(),
 				expectedReferencingResourceIds,
 				null); // No custom provenance agents for now
-
-		ourLog.debug("Provenance validation completed successfully");
 	}
 
 	// ================================================
