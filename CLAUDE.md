@@ -29,7 +29,7 @@ HAPI FHIR is an open-source Java implementation of the HL7 FHIR specification. T
 
 ```bash
 # Fast build (skip tests/validation)
-mvn -P FASTINSTALL,NOJAVADOCS install -T 1C
+mvn -P FASTINSTALL install -T 1C
 
 # Full build with tests
 mvn clean install
@@ -44,7 +44,7 @@ mvn test -pl <module-name>
 mvn failsafe:integration-test -Dit.test=TestClassName -pl <module-name>
 
 # Code coverage
-mvn test -T 1C -P CODECOV -pl <module-name>
+mvn test -T 1C -P JACOCO -pl <module-name>
 
 # Code formatting
 mvn spotless:apply
@@ -205,12 +205,8 @@ Before writing production code, write a failing test first. All code changes mus
 
 ## Development Workflow
 
-1. Always use Maven (never `javac` or `java` directly)
-2. Always prefer `rg` for searching over `find` or `grep`
-3. Follow TDD: write tests before code following RED-GREEN-REFACTOR
-4. Use AssertJ for assertions
-5. Use SLF4J for logging
-6. Check for existing test infrastructure before creating new test classes
-7. Run tests to verify changes
-8. Format code with `mvn spotless:apply`
-9. Check style with `mvn checkstyle:check`
+1. Prefer `rg` for searching over `find` or `grep`
+2. Follow TDD: RED-GREEN-REFACTOR
+3. Run tests to verify changes
+4. Format code with `mvn spotless:apply`
+5. Check style with `mvn checkstyle:check`
