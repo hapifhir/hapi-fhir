@@ -6,22 +6,22 @@ This file provides guidance to AI Agents when working with code in this reposito
 
 HAPI FHIR is an open-source Java implementation of the HL7 FHIR specification. The project is a multi-module Maven build with 60+ modules supporting FHIR clients, servers, and JPA-based data storage.
 
-- **Version**: 8.7.0-SNAPSHOT
 - **Java**: Java 17
-- **Build System**: Apache Maven (with Maven wrapper at `.mvn/wrapper/`)
+- **Build System**: Apache Maven
 - **License**: Apache 2.0
 - **Website**: https://hapifhir.io
 - **Repository**: https://github.com/hapifhir/hapi-fhir
 
-### Restrictions
+### Restricted Code
 
 - **CRITICAL** You are not permitted to change any code under src/main folders pertaining to the security of the application. This includes any class that contains the word Security, Permission, Oidc, Authorization, Authority, Authentication, KeyStore, etc.
 - You may not modify existing security test code.
-- If any task the user requests could lead you to change src/main security code, you will explain it is not permitted to change these files directly. You may, however, give broad advice about how to approach changing these restricted parts of the code.
 
 - **CRITICAL** You are not permitted to change any code under src/main folders pertaining to database migrations. This includes:
     - any classes under a package that starts with `ca.uhn.fhir.jpa.migrate`
     - any classes that contain `MigrationTask` in their name
+
+- **CRITICAL** If any task the user requests could lead you to change Restricted Code you will explain you are not permitted to change these files directly. You may, however, offer insights and advice to help the user better understand this code so they are able to make the necessary changes themselves.
 
 ## Build Commands
 
