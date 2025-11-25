@@ -215,20 +215,7 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 
 	private IBaseResource fetchCodeSystemOrValueSet(String theSystem, boolean codeSystem) {
 		synchronized (this) {
-			Map<String, IBaseResource> codeSystems = myCodeSystems;
-			Map<String, IBaseResource> valueSets = myValueSets;
-			if (codeSystems == null || valueSets == null) {
-				codeSystems = new HashMap<>();
-				valueSets = new HashMap<>();
-
-				initializeResourceLists();
-				for (String next : myTerminologyResources) {
-					loadCodeSystems(codeSystems, valueSets, next);
-				}
-
-				myCodeSystems = codeSystems;
-				myValueSets = valueSets;
-			}
+			ensureTerminologyMapsInitialized();
 
 			// System can take the form "http://url|version"
 			String system = theSystem;
@@ -241,9 +228,9 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 
 			IBaseResource candidate;
 			if (codeSystem) {
-				candidate = codeSystems.get(system);
+				candidate = myCodeSystems.get(system);
 			} else {
-				candidate = valueSets.get(system);
+				candidate = myValueSets.get(system);
 			}
 
 			if (candidate != null
@@ -309,6 +296,55 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 	public void flush() {
 		myCodeSystems = null;
 		myStructureDefinitions = null;
+	}
+
+	/**
+	 * Removes a CodeSystem with the given URL from the in-memory cache.
+	 * This allows JPA-persisted resources to override built-in defaults.
+	 *
+	 * @param theUrl The canonical URL of the CodeSystem to remove
+	 */
+	public void removeCodeSystem(String theUrl) {
+		synchronized (this) {
+			// Force initialization of the maps if not already done,
+			// then remove the URL so it won't be found by fetchCodeSystem
+			ensureTerminologyMapsInitialized();
+			myCodeSystems.remove(theUrl);
+		}
+	}
+
+	/**
+	 * Removes a ValueSet with the given URL from the in-memory cache.
+	 * This allows JPA-persisted resources to override built-in defaults.
+	 *
+	 * @param theUrl The canonical URL of the ValueSet to remove
+	 */
+	public void removeValueSet(String theUrl) {
+		synchronized (this) {
+			// Force initialization of the maps if not already done,
+			// then remove the URL so it won't be found by fetchValueSet
+			ensureTerminologyMapsInitialized();
+			myValueSets.remove(theUrl);
+		}
+	}
+
+	/**
+	 * Ensures that myCodeSystems and myValueSets maps are initialized.
+	 * Must be called while holding the synchronized lock on 'this'.
+	 */
+	private void ensureTerminologyMapsInitialized() {
+		if (myCodeSystems == null || myValueSets == null) {
+			Map<String, IBaseResource> codeSystems = new HashMap<>();
+			Map<String, IBaseResource> valueSets = new HashMap<>();
+
+			initializeResourceLists();
+			for (String next : myTerminologyResources) {
+				loadCodeSystems(codeSystems, valueSets, next);
+			}
+
+			myCodeSystems = codeSystems;
+			myValueSets = valueSets;
+		}
 	}
 
 	@Override

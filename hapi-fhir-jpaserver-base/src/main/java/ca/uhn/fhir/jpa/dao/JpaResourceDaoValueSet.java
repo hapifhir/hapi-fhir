@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
+import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -64,6 +65,9 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 
 	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearch;
+
+	@Autowired
+	private JpaValidationSupportChain myJpaValidationSupportChain;
 
 	@Override
 	public T expand(IIdType theId, ValueSetExpansionOptions theOptions, RequestDetails theRequestDetails) {
@@ -304,12 +308,24 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 				theCreateNewHistoryEntry);
 
 		if (thePerformIndexing) {
-			if (getStorageSettings().isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
-				if (retVal.getDeleted() == null) {
-					ValueSet valueSet = myVersionCanonicalizer.valueSetToCanonical(theResource);
-					myTerminologySvc.storeTermValueSet(retVal, valueSet);
-				} else {
-					myTerminologySvc.deleteValueSetAndChildren(retVal);
+			if (!retVal.isUnchangedInCurrentOperation()) {
+				ValueSet valueSet = myVersionCanonicalizer.valueSetToCanonical(theResource);
+
+				if (getStorageSettings().isPreExpandValueSets()) {
+					if (retVal.getDeleted() == null) {
+						myTerminologySvc.storeTermValueSet(retVal, valueSet);
+					} else {
+						myTerminologySvc.deleteValueSetAndChildren(retVal);
+					}
+				}
+
+				// Remove this ValueSet URL from the default profile cache so that
+				// the JPA-persisted version takes precedence over built-in defaults
+				if (valueSet != null) {
+					String url = valueSet.getUrl();
+					if (url != null) {
+						myJpaValidationSupportChain.removeValueSetFromDefaultCache(url);
+					}
 				}
 			}
 		}

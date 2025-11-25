@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -92,6 +93,9 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 
 	@Autowired
 	private VersionCanonicalizer myVersionCanonicalizer;
+
+	@Autowired
+	private JpaValidationSupportChain myJpaValidationSupportChain;
 
 	@Override
 	@PostConstruct
@@ -251,6 +255,15 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 
 				myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(
 						cs, (ResourceTable) theEntity, theRequest);
+
+				// Remove this CodeSystem URL from the default profile cache so that
+				// the JPA-persisted version takes precedence over built-in defaults
+				if (cs != null) {
+					String url = cs.getUrl();
+					if (url != null) {
+						myJpaValidationSupportChain.removeCodeSystemFromDefaultCache(url);
+					}
+				}
 			}
 
 			/*

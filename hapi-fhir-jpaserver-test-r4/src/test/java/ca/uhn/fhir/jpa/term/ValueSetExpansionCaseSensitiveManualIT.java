@@ -8,6 +8,9 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +24,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * a user-defined CodeSystem should override the built-in HL7 CodeSystem.
  */
 class ValueSetExpansionCaseSensitiveManualIT extends BaseJpaR4Test {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetExpansionCaseSensitiveManualIT.class);
 
 	@Test
 	void testValueSetExpansion_CaseSensitive_IncludeEntireSystem() {
@@ -75,6 +80,8 @@ class ValueSetExpansionCaseSensitiveManualIT extends BaseJpaR4Test {
 		List<String> codes = expanded.getExpansion().getContains().stream()
 			.map(ValueSet.ValueSetExpansionContainsComponent::getCode)
 			.collect(Collectors.toList());
+
+		ourLog.info("Expanded ValueSet contains {} codes: {}", codes.size(), codes);
 
 		assertThat(codes)
 			.as("ValueSet expansion should include both case variants")
