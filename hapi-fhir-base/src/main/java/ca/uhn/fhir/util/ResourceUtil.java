@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -51,6 +52,18 @@ public class ResourceUtil {
 			"http://hl7.org/fhir/StructureDefinition/data-absent-reason";
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceUtil.class);
+
+	public static class MergeControlParameters {
+		private boolean ignoreCodeableConceptCodingOrder;
+
+		public boolean isIgnoreCodeableConceptCodingOrder() {
+			return ignoreCodeableConceptCodingOrder;
+		}
+
+		public void setIgnoreCodeableConceptCodingOrder(boolean theIgnoreCodeableConceptCodingOrder) {
+			ignoreCodeableConceptCodingOrder = theIgnoreCodeableConceptCodingOrder;
+		}
+	}
 
 	private ResourceUtil() {}
 
@@ -161,6 +174,25 @@ public class ResourceUtil {
 	 * Merges value of the specified field from <code>theFrom</code> resource to <code>theTo</code> resource. Fields
 	 * values are compared via the equalsDeep method, or via object identity if this method is not available.
 	 *
+	 * @param theFhirContext            Context holding resource definition
+	 * @param theFieldName              Name of the child filed to merge
+	 * @param theFrom                   Resource to merge the specified field from
+	 * @param theTo                     Resource to merge the specified field into
+	 * @param theMergeControlParameters Parameters to provide fine-grained control over the behaviour of the merge
+	 */
+	public static void mergeField(
+			FhirContext theFhirContext,
+			String theFieldName,
+			IBaseResource theFrom,
+			IBaseResource theTo,
+			MergeControlParameters theMergeControlParameters) {
+		mergeField(theFhirContext, theFhirContext.newTerser(), theFieldName, theFrom, theTo, theMergeControlParameters);
+	}
+
+	/**
+	 * Merges value of the specified field from <code>theFrom</code> resource to <code>theTo</code> resource. Fields
+	 * values are compared via the equalsDeep method, or via object identity if this method is not available.
+	 *
 	 * @param theFhirContext Context holding resource definition
 	 * @param theTerser      Terser to be used when cloning the field values
 	 * @param theFieldName   Name of the child filed to merge
@@ -173,13 +205,34 @@ public class ResourceUtil {
 			String theFieldName,
 			IBaseResource theFrom,
 			IBaseResource theTo) {
+		mergeField(theFhirContext, theTerser, theFieldName, theFrom, theTo, new MergeControlParameters());
+	}
+
+	/**
+	 * Merges value of the specified field from <code>theFrom</code> resource to <code>theTo</code> resource. Fields
+	 * values are compared via the equalsDeep method, or via object identity if this method is not available.
+	 *
+	 * @param theFhirContext            Context holding resource definition
+	 * @param theTerser                 Terser to be used when cloning the field values
+	 * @param theFieldName              Name of the child filed to merge
+	 * @param theFrom                   Resource to merge the specified field from
+	 * @param theTo                     Resource to merge the specified field into
+	 * @param theMergeControlParameters Parameters to provide fine-grained control over the behaviour of the merge
+	 */
+	public static void mergeField(
+			FhirContext theFhirContext,
+			FhirTerser theTerser,
+			String theFieldName,
+			IBaseResource theFrom,
+			IBaseResource theTo,
+			MergeControlParameters theMergeControlParameters) {
 		BaseRuntimeChildDefinition childDefinition =
 				getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theFrom);
 
 		List<IBase> theFromFieldValues = childDefinition.getAccessor().getValues(theFrom);
 		List<IBase> theToFieldValues = childDefinition.getAccessor().getValues(theTo);
 
-		mergeFields(theTerser, theTo, childDefinition, theFromFieldValues, theToFieldValues);
+		mergeFields(theTerser, theTo, childDefinition, theFromFieldValues, theToFieldValues, theMergeControlParameters);
 	}
 
 	private static void mergeFields(
@@ -188,14 +241,42 @@ public class ResourceUtil {
 			BaseRuntimeChildDefinition childDefinition,
 			List<IBase> theFromFieldValues,
 			List<IBase> theToFieldValues) {
+		mergeFields(
+				theTerser, theTo, childDefinition, theFromFieldValues, theToFieldValues, new MergeControlParameters());
+	}
 
+	private static void mergeFields(
+			FhirTerser theTerser,
+			IBaseResource theTo,
+			BaseRuntimeChildDefinition childDefinition,
+			List<IBase> theFromFieldValues,
+			List<IBase> theToFieldValues,
+			MergeControlParameters theMergeControlParameters) {
 		if (!theFromFieldValues.isEmpty() && theToFieldValues.stream().anyMatch(ResourceUtil::hasDataAbsentReason)) {
 			// If the to resource has a data absent reason, and there is potentially real data incoming
 			// in the from resource, we should clear the data absent reason because it won't be absent anymore.
 			theToFieldValues = removeDataAbsentReason(theTo, childDefinition, theToFieldValues);
 		}
 
-		List<IBase> filteredFromFieldValues = filterFromFields(theFromFieldValues, theToFieldValues);
+		List<IBase> filteredFromFieldValues = new ArrayList<>();
+		for (IBase fromFieldValue : theFromFieldValues) {
+			if (theToFieldValues.isEmpty()) {
+				// if the target field is unpopulated, accept any value from the source field
+				filteredFromFieldValues.add(fromFieldValue);
+			} else if (!hasDataAbsentReason(fromFieldValue)) {
+				// if the value from the source field does not have a data absent reason extension,
+				// evaluate its suitability for inclusion
+				if (Strings.CI.equals(fromFieldValue.fhirType(), "codeableConcept")) {
+					if (!containsCodeableConcept(
+							fromFieldValue, theToFieldValues, theTerser, theMergeControlParameters)) {
+						filteredFromFieldValues.add(fromFieldValue);
+					}
+				} else if (!contains(fromFieldValue, theToFieldValues)) {
+					// include it if the target list doesn't already contain an exact match
+					filteredFromFieldValues.add(fromFieldValue);
+				}
+			}
+		}
 
 		for (IBase fromFieldValue : filteredFromFieldValues) {
 			IBase newFieldValue = newElement(theTerser, childDefinition, fromFieldValue);
@@ -222,13 +303,6 @@ public class ResourceUtil {
 		}
 	}
 
-	private static List<IBase> filterFromFields(List<IBase> theFromFieldValues, List<IBase> theToFieldValues) {
-		return theFromFieldValues.stream()
-				.filter(v -> !contains(v, theToFieldValues))
-				.filter(v -> !hasDataAbsentReason(v) || theToFieldValues.isEmpty())
-				.toList();
-	}
-
 	private static BaseRuntimeChildDefinition getBaseRuntimeChildDefinition(
 			FhirContext theFhirContext, String theFieldName, IBaseResource theFrom) {
 		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
@@ -248,12 +322,12 @@ public class ResourceUtil {
 		return method;
 	}
 
-	private static boolean equals(IBase theItem1, IBase theItem2, Method theMethod) {
+	private static boolean evaluateEquality(IBase theItem1, IBase theItem2, Method theMethod) {
 		if (theMethod != null) {
 			try {
 				return (Boolean) theMethod.invoke(theItem1, theItem2);
 			} catch (Exception e) {
-				ourLog.debug("{} Unable to compare equality via {}", Msg.code(2821), EQUALS_DEEP, e);
+				ourLog.debug("{} Unable to compare equality via {}", Msg.code(2821), theMethod.getName(), e);
 			}
 		}
 		return theItem1.equals(theItem2);
@@ -261,7 +335,46 @@ public class ResourceUtil {
 
 	private static boolean contains(IBase theItem, List<IBase> theItems) {
 		final Method method = getMethod(theItem, EQUALS_DEEP);
-		return theItems.stream().anyMatch(i -> equals(i, theItem, method));
+		return theItems.stream().anyMatch(i -> evaluateEquality(i, theItem, method));
+	}
+
+
+	private static boolean containsCodeableConcept(
+			IBase theSourceItem,
+			List<IBase> theTargetItems,
+			FhirTerser theTerser,
+			MergeControlParameters theMergeControlParameters) {
+		Method shallowEquals = getMethod(theSourceItem, "equalsShallow");
+		List<IBase> shallowMatches = theTargetItems.stream()
+				.filter(targetItem -> evaluateEquality(targetItem, theSourceItem, shallowEquals))
+				.toList();
+
+		if (theMergeControlParameters.isIgnoreCodeableConceptCodingOrder()) {
+			return shallowMatches.stream().anyMatch(targetItem -> {
+				List<IBase> sourceCodings = theTerser.getValues(theSourceItem, "coding");
+				List<IBase> targetCodings = theTerser.getValues(targetItem, "coding");
+				return sourceCodings.stream().allMatch(sourceCoding -> {
+					Method deepEquals = getMethod(sourceCoding, EQUALS_DEEP);
+					return targetCodings.stream()
+							.anyMatch(targetCoding -> evaluateEquality(sourceCoding, targetCoding, deepEquals));
+				});
+			});
+		} else {
+			return shallowMatches.stream().anyMatch(targetItem -> {
+				boolean match = true;
+				List<IBase> sourceCodings = theTerser.getValues(theSourceItem, "coding");
+				List<IBase> targetCodings = theTerser.getValues(targetItem, "coding");
+				if (sourceCodings.size() == targetCodings.size()) {
+					for (int i = 0; i < sourceCodings.size(); i++) {
+						Method deepEquals = getMethod(sourceCodings.get(i), EQUALS_DEEP);
+						match &= evaluateEquality(sourceCodings.get(i), targetCodings.get(i), deepEquals);
+					}
+				} else {
+					match = false;
+				}
+				return match;
+			});
+		}
 	}
 
 	private static boolean hasDataAbsentReason(IBase theItem) {

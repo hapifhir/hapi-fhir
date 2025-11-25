@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.lang3.Strings;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -260,5 +261,75 @@ public class ResourceUtilTest {
 		Enumeration<Enumerations.DataAbsentReason> extension = new Enumeration<>(new Enumerations.DataAbsentReasonEnumFactory(), Enumerations.DataAbsentReason.UNKNOWN);
 		identifier.addExtension(DATA_ABSENT_REASON_EXTENSION_URI, extension);
 		return identifier;
+	}
+
+	/*
+	 * Ensure that codeable concepts with entirely disjoint codings are treated as discrete
+	 */
+	@Test
+	public void testMerge_discreteCodeableConcepts_doesNotMerge() {
+		// set up
+		Observation o1 = new Observation();
+		CodeableConcept category1 = o1.addCategory();
+		category1.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("social-history");
+		category1.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("survey");
+
+		Observation o2 = new Observation();
+		CodeableConcept category2 = o2.addCategory();
+		category2.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+
+		// execute
+		ResourceUtil.mergeField(ourFhirContext, "category", o1, o2);
+
+		// validate
+		assertThat(o2.getCategory()).hasSize(2);
+	}
+
+	/*
+	 * The default behaviour for the merge operation requires an exact match between elements.
+	 * Therefore, two CodeableConcepts where the order of the Codings differs will be considered
+	 * distinct elements, and both will be included in the merged Resource.
+	 */
+	@Test
+	public void testMerge_codingOrder_doesNotMerge() {
+		// set up
+		Observation o1 = new Observation();
+		CodeableConcept category1 = o1.addCategory();
+		category1.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("social-history");
+		category1.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("survey");
+
+		Observation o2 = new Observation();
+		CodeableConcept category2 = o2.addCategory();
+		category2.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("survey");
+		category2.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("social-history");
+
+		// execute
+		ResourceUtil.mergeField(ourFhirContext, "category", o1, o2);
+
+		// validate
+		assertThat(o2.getCategory()).hasSize(2);
+	}
+
+	@Test
+	public void testMerge_ignoreCodingOrder() {
+		// set up
+		Observation o1 = new Observation();
+		CodeableConcept category1 = o1.addCategory();
+		category1.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("social-history");
+		category1.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("survey");
+
+		Observation o2 = new Observation();
+		CodeableConcept category2 = o2.addCategory();
+		category2.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("survey");
+		category2.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("social-history");
+
+		ResourceUtil.MergeControlParameters mergeControlParameters = new ResourceUtil.MergeControlParameters();
+		mergeControlParameters.setIgnoreCodeableConceptCodingOrder(true);
+
+		// execute
+		ResourceUtil.mergeField(ourFhirContext, "category", o1, o2, mergeControlParameters);
+
+		// validate
+		assertThat(o2.getCategory()).hasSize(1);
 	}
 }
