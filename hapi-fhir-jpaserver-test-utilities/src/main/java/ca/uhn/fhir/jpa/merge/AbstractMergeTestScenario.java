@@ -47,6 +47,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -159,8 +160,8 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	public abstract AbstractMergeTestScenario<T> withMultipleReferencingResources();
 
 	@Nonnull
-	public AbstractMergeTestScenario<T> withResultResource() {
-		myCreateResultResource = true;
+	public AbstractMergeTestScenario<T> withResultResource(boolean theCreateResultResource) {
+		myCreateResultResource = theCreateResultResource;
 		return this;
 	}
 
@@ -644,12 +645,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		String expectedTargetRef = theTargetId.getResourceType() + "/" + theTargetId.getIdPart();
 		String unexpectedSourceRef = theSourceId.getResourceType() + "/" + theSourceId.getIdPart();
 
-		ourLog.debug(
-				"Validating {} referencing resources updated from {} to {}",
-				theReferencingResourceIds.size(),
-				unexpectedSourceRef,
-				expectedTargetRef);
-
 		FhirTerser terser = myFhirContext.newTerser();
 
 		for (IIdType refId : theReferencingResourceIds) {
@@ -661,7 +656,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 			List<String> refStrings = allRefs.stream()
 					.map(ref -> ref.getReferenceElement().getValue())
-					.filter(refStr -> refStr != null)
+					.filter(Objects::nonNull)
 					.toList();
 
 			ourLog.info("Resource {} contains references: {}", refId, refStrings);
