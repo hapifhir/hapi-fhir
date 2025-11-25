@@ -7,6 +7,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.Logs;
@@ -67,6 +68,9 @@ public class ReductionStepDataSinkTest {
 	@Mock
 	private Appender<ILoggingEvent> myListAppender;
 
+	@Mock
+	private IInterceptorService myInterceptorService;
+
 	private Logger ourLogger;
 
 
@@ -81,7 +85,8 @@ public class ReductionStepDataSinkTest {
 			INSTANCE_ID,
 			myWorkCursor,
 			myJobPersistence,
-			myJobDefinitionRegistry);
+			myJobDefinitionRegistry,
+			myInterceptorService);
 		ourLogger = (Logger) Logs.getBatchTroubleshootingLog();
 		ourLogger.addAppender(myListAppender);
 	}

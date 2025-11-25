@@ -28,7 +28,6 @@ import ca.uhn.fhir.batch2.api.JobCompletionDetails;
 import ca.uhn.fhir.batch2.api.ReductionStepFailureException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
-import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
@@ -38,9 +37,7 @@ import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
@@ -98,8 +95,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	private final AtomicReference<String> myCurrentlyFinalizingInstanceId = new AtomicReference<>();
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
-	private Timer myHeartbeatTimer;
 	private final IInterceptorService myInterceptorService;
+	private Timer myHeartbeatTimer;
 
 	/**
 	 * Constructor
@@ -108,13 +105,12 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 			IJobPersistence theJobPersistence,
 			IHapiTransactionService theTransactionService,
 			JobDefinitionRegistry theJobDefinitionRegistry,
-			@Nonnull IInterceptorService theInterceptorService) {
+			IInterceptorService theInterceptorService) {
 		myJobPersistence = theJobPersistence;
 		myTransactionService = theTransactionService;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
-		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry, theInterceptorService);
 		myInterceptorService = theInterceptorService;
-
 		myReducerExecutor = Executors.newSingleThreadExecutor(new CustomizableThreadFactory("batch2-reducer"));
 
 		// This is a single thread executor because there are no guarantees that the chunk
@@ -304,7 +300,11 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 						response.getFailedChunksIds().size());
 
 				ReductionStepDataSink<PT, IT, OT> dataSink = new ReductionStepDataSink<>(
-						instance.getInstanceId(), theJobWorkCursor, myJobPersistence, myJobDefinitionRegistry);
+						instance.getInstanceId(),
+						theJobWorkCursor,
+						myJobPersistence,
+						myJobDefinitionRegistry,
+						myInterceptorService);
 				StepExecutionDetails<PT, IT> chunkDetails =
 						StepExecutionDetails.createReductionStepDetails(parameters, null, instance);
 
@@ -358,13 +358,6 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 					JobCompletionDetails<PT> jcd = new JobCompletionDetails<>(parameters, instance);
 					if (completionHandler != null) {
 						completionHandler.jobComplete(jcd);
-					}
-					if (myInterceptorService.hasHooks(Pointcut.BATCH2_JOB_COMPLETION)) {
-						final HookParams params = new HookParams()
-							.add(JobDefinition.class, theJobWorkCursor.getJobDefinition())
-							.add(JobCompletionDetails.class, jcd);
-						myInterceptorService.callHooks(
-							Pointcut.BATCH2_JOB_COMPLETION, params);
 					}
 				}
 

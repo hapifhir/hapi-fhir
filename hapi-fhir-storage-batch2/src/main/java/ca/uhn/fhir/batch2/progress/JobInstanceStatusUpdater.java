@@ -25,6 +25,9 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
@@ -32,9 +35,12 @@ import org.slf4j.Logger;
 public class JobInstanceStatusUpdater {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
+	private final IInterceptorService myInterceptorService;
 
-	public JobInstanceStatusUpdater(JobDefinitionRegistry theJobDefinitionRegistry) {
+	public JobInstanceStatusUpdater(
+			JobDefinitionRegistry theJobDefinitionRegistry, IInterceptorService theInterceptorService) {
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
+		myInterceptorService = theInterceptorService;
 	}
 
 	/**
@@ -100,5 +106,9 @@ public class JobInstanceStatusUpdater {
 		PT jobParameters = theJobInstance.getParameters(theJobDefinition.getParametersType());
 		JobCompletionDetails<PT> completionDetails = new JobCompletionDetails<>(jobParameters, theJobInstance);
 		theJobCompletionHandler.jobComplete(completionDetails);
+		if (myInterceptorService.hasHooks(Pointcut.BATCH2_JOB_COMPLETION)) {
+			final HookParams params = new HookParams().add(JobInstance.class, theJobInstance);
+			myInterceptorService.callHooks(Pointcut.BATCH2_JOB_COMPLETION, params);
+		}
 	}
 }

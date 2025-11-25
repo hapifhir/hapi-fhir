@@ -3305,6 +3305,25 @@ public enum Pointcut implements IPointcut {
 			void.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.rest.api.server.RequestDetails"),
 
 	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked after a batch job is persisted to the database.
+	 * <p>
+	 * Hooks will have access to the content of the job created
+	 * and the id set to it.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.batch2.model.JobInstance
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_POSTSTORAGE_BATCH_JOB_CREATE(void.class, "ca.uhn.fhir.batch2.model.JobInstance"),
+
+	/**
 	 * <b>CDS Hooks Prefetch Hook:</b>
 	 * Invoked before a CDS Hooks prefetch request is made.
 	 * Hooks may accept the following parameters:
@@ -3392,33 +3411,16 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Batch2 Hook:</b>
-	 * <p>Invoked before the job instance is started. JobInstance is mutable here.</p>
-	 * <p>Parameters:</p>
-	 * <ul>
-	 *     <li>ca.uhn.fhir.batch2.model.JobInstance - The job instance</li>
-	 *     <li>ca.uhn.fhir.rest.api.server.RequestDetails - The request details</li>
-	 *  </ul>
-	 * <p>
-	 * Hooks should return <code>void</code>.
-	 * </p>
-	 */
-	BATCH2_JOB_START(
-		void.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.rest.api.server.RequestDetails"),
-
-	/**
-	 * <b>Batch2 Hook:</b>
 	 * <p>Invoked after the job instance is completed. JobInstance is immutable here.</p>
 	 * <p>Parameters:</p>
 	 * <ul>
 	 *     <li>ca.uhn.fhir.batch2.model.JobInstance - The job instance</li>
-	 *     <li>ca.uhn.fhir.batch2.api.JobCompletionDetails - The job completions details</li>
-	 *  </ul>
+	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	BATCH2_JOB_COMPLETION(
-		void.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.batch2.api.JobCompletionDetails"),
+	BATCH2_JOB_COMPLETION(void.class, "ca.uhn.fhir.batch2.model.JobInstance"),
 
 	/**
 	 * <b>Provenance Agents Pointcut:</b>

@@ -87,7 +87,8 @@ public abstract class BaseBatch2Config {
 	@Bean
 	public IJobCoordinator batch2JobCoordinator(
 			JobDefinitionRegistry theJobDefinitionRegistry, IHapiTransactionService theTransactionService) {
-		return new JobCoordinatorImpl(myPersistence, theJobDefinitionRegistry, theTransactionService, myInterceptorService);
+		return new JobCoordinatorImpl(
+				myPersistence, theJobDefinitionRegistry, theTransactionService, myInterceptorService);
 	}
 
 	@Bean
@@ -95,7 +96,8 @@ public abstract class BaseBatch2Config {
 			IJobPersistence theJobPersistence,
 			IHapiTransactionService theTransactionService,
 			JobDefinitionRegistry theJobDefinitionRegistry) {
-		return new ReductionStepExecutorServiceImpl(theJobPersistence, theTransactionService, theJobDefinitionRegistry, myInterceptorService);
+		return new ReductionStepExecutorServiceImpl(
+				theJobPersistence, theTransactionService, theJobDefinitionRegistry, myInterceptorService);
 	}
 
 	@Bean
@@ -113,7 +115,8 @@ public abstract class BaseBatch2Config {
 				theJobDefinitionRegistry,
 				theBatchJobSender,
 				theExecutor,
-				theReductionStepExecutorService);
+				theReductionStepExecutorService,
+				myInterceptorService);
 	}
 
 	@Bean
@@ -139,7 +142,8 @@ public abstract class BaseBatch2Config {
 				theExecutorSvc,
 				theJobMaintenanceService,
 				theHapiTransactionService,
-				theInterceptorBroadcaster);
+				theInterceptorBroadcaster,
+				myInterceptorService);
 	}
 
 	@Bean

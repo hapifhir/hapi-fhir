@@ -31,9 +31,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -92,6 +90,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		}
 		Validate.notBlank(theStartRequest.getJobDefinitionId(), "No job definition ID supplied in start request");
 
+		// ALTERNATIVE 1:
 		// if cache - use that first
 		if (theStartRequest.isUseCache()) {
 			FetchJobInstancesRequest request = new FetchJobInstancesRequest(
@@ -132,14 +131,6 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 				.withSystemRequestOnDefaultPartition()
 				.withPropagation(Propagation.REQUIRES_NEW)
 				.execute(() -> myJobPersistence.onCreateWithFirstChunk(jobDefinition, theStartRequest.getParameters()));
-
-		if (myInterceptorService.hasHooks(Pointcut.BATCH2_JOB_START)) {
-			final HookParams params = new HookParams()
-				.add(JobDefinition.class, jobDefinition)
-				.add(RequestDetails.class, theRequestDetails);
-			myInterceptorService.callHooks(
-				Pointcut.BATCH2_JOB_START, params);
-		}
 
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
 		response.setInstanceId(instanceAndFirstChunk.jobInstanceId);

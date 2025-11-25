@@ -30,6 +30,7 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
@@ -59,7 +60,8 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 			@Nonnull WorkChunkProcessor theExecutorSvc,
 			@Nonnull IJobMaintenanceService theJobMaintenanceService,
 			IHapiTransactionService theHapiTransactionService,
-			IInterceptorBroadcaster theInterceptorBroadcaster) {
+			IInterceptorBroadcaster theInterceptorBroadcaster,
+			@Nonnull IInterceptorService theInterceptorService) {
 		myJobPersistence = theJobPersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myHapiTransactionService = theHapiTransactionService;
@@ -69,7 +71,8 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 				theBatchJobSender,
 				theExecutorSvc,
 				theJobMaintenanceService,
-				theJobDefinitionRegistry);
+				theJobDefinitionRegistry,
+				theInterceptorService);
 	}
 
 	public Class<JobWorkNotification> getPayloadType() {

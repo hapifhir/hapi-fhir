@@ -122,7 +122,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		// but in this service (so it's a real service here!)
 		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender, new NonTransactionalHapiTransactionService());
 		WorkChannelMessageListener workChannelMessageListener = new WorkChannelMessageListener(myJobInstancePersister,
-			myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService,myInterceptorBroadcaster);
+			myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService,myInterceptorBroadcaster, myInterceptorService);
 
 		myJobConsumer = myLinkedBlockingBrokerClient.getOrCreateConsumer(BATCH_CHANNEL_NAME, JobWorkNotificationJsonMessage.class, workChannelMessageListener, new ChannelConsumerSettings());
 

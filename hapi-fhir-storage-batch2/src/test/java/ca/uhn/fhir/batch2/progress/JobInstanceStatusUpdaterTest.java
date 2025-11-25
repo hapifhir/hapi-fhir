@@ -7,6 +7,7 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +16,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -40,6 +44,8 @@ class JobInstanceStatusUpdaterTest {
 	private JobInstance myInstance;
 	private TestParameters myTestParameters;
 	private AtomicReference<JobCompletionDetails> myDetails;
+	@Mock
+	protected IInterceptorService myInterceptorRegistry;
 
 	@BeforeEach
 	public void before() {

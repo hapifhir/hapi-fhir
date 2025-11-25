@@ -1032,6 +1032,29 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testPostStorageInterceptor_hasJobInstanceId_preStorageHasNot(){
+		IAnonymousInterceptor poststorageBatchJobCreateInterceptor = (pointcut, params) -> {
+			JobInstance jobInstance = params.get(JobInstance.class);
+			assertNotNull(jobInstance.getInstanceId());
+		};
+		IAnonymousInterceptor prestorageBatchJobCreateInterceptor = (pointcut, params) -> {
+			JobInstance jobInstance = params.get(JobInstance.class);
+			assertNull(jobInstance.getInstanceId());
+		};
+
+		try{
+			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_POSTSTORAGE_BATCH_JOB_CREATE, poststorageBatchJobCreateInterceptor);
+			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE, prestorageBatchJobCreateInterceptor);
+			JobInstance instance = createInstance();
+			mySvc.storeNewInstance(instance);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(poststorageBatchJobCreateInterceptor);
+			myInterceptorRegistry.unregisterInterceptor(prestorageBatchJobCreateInterceptor);
+		}
+
+	}
+
+	@Test
 	public void testFetchInstanceAndWorkChunkStatus() {
 		// Setup
 

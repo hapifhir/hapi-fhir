@@ -26,6 +26,7 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.Logs;
@@ -46,11 +47,12 @@ public class JobInstanceProgressCalculator {
 	public JobInstanceProgressCalculator(
 			IJobPersistence theJobPersistence,
 			JobChunkProgressAccumulator theProgressAccumulator,
-			JobDefinitionRegistry theJobDefinitionRegistry) {
+			JobDefinitionRegistry theJobDefinitionRegistry,
+			IInterceptorService theInterceptorService) {
 		myJobPersistence = theJobPersistence;
 		myProgressAccumulator = theProgressAccumulator;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
-		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry, theInterceptorService);
 	}
 
 	public void calculateAndStoreInstanceProgress(String theInstanceId) {
