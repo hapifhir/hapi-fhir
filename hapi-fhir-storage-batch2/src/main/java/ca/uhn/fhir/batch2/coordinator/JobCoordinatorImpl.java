@@ -90,7 +90,6 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		}
 		Validate.notBlank(theStartRequest.getJobDefinitionId(), "No job definition ID supplied in start request");
 
-		// ALTERNATIVE 1:
 		// if cache - use that first
 		if (theStartRequest.isUseCache()) {
 			FetchJobInstancesRequest request = new FetchJobInstancesRequest(
