@@ -26,6 +26,7 @@ import ca.uhn.fhir.batch2.jobs.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.FhirTerser;
@@ -720,19 +721,30 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	public void assertMergeProvenanceCreated(@Nonnull Parameters theInputParams) {
 		assertTestDataCreated();
 
-		IIdType theVersionlessSourceId = getVersionlessSourceId();
-		IIdType theVersionlessTargetId = getVersionlessTargetId();
+		// Read source and target resources to get their current versioned IDs
+		T sourceResource = readResource(getVersionlessSourceId());
+		T targetResource = readResource(getVersionlessTargetId());
+		IIdType sourceId = sourceResource.getIdElement();
+		IIdType targetId = targetResource.getIdElement();
 
-		ourLog.debug(
-				"Validating provenance created for merge: source={}, target={}",
-				theVersionlessSourceId,
-				theVersionlessTargetId);
+		// Calculate expected referencing resource IDs with versions
+		// Referencing resources get updated during merge, so they should have version 2
+		Set<String> expectedReferencingResourceIds = getAllReferencingResources().values().stream()
+				.flatMap(List::stream)
+				.map(id -> id.withVersion("2").toString())
+				.collect(Collectors.toSet());
 
-		// Search for provenance targeting the resources
-		// Implementation would search for Provenance resources with target references
-		// This is a placeholder - actual implementation would use search parameters
+		// Delegate to ReplaceReferencesTestHelper for provenance validation
+		ReplaceReferencesTestHelper helper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
+		helper.assertMergeProvenance(
+				theInputParams,
+				sourceId,
+				targetId,
+				getTotalReferenceCount(),
+				expectedReferencingResourceIds,
+				null); // No custom provenance agents for now
 
-		ourLog.debug("Provenance validation completed");
+		ourLog.debug("Provenance validation completed successfully");
 	}
 
 	// ================================================
