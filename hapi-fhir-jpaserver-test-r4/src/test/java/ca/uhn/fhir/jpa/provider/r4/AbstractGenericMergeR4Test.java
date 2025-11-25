@@ -152,11 +152,8 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		AbstractMergeTestScenario<T> scenario = createScenario()
 				.withMultipleReferencingResources()
 				.withDeleteSource(theDeleteSource)
-				.withPreview(thePreview);
-
-		if (theResultResource) {
-			scenario.withResultResource();
-		}
+				.withPreview(thePreview)
+				.withResultResource(theResultResource);
 
 		scenario.createTestData();
 
@@ -298,7 +295,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.withResultResourceIdentifiers(resultIdentifiers);
-		scenario.withResultResource();
+		scenario.withResultResource(true);
 		scenario.withOneReferencingResource();
 		scenario.createTestData();
 
@@ -600,7 +597,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		// Setup with result resource
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.withOneReferencingResource();
-		scenario.withResultResource();
+		scenario.withResultResource(true);
 		scenario.createTestData();
 
 		// Execute merge with result resource
@@ -619,7 +616,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		// Setup with result resource
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.withOneReferencingResource();
-		scenario.withResultResource();
+		scenario.withResultResource(true);
 		scenario.createTestData();
 
 		// Execute merge with result resource
