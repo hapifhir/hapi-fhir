@@ -29,9 +29,10 @@ HAPI FHIR is an open-source Java implementation of the HL7 FHIR specification. T
 
 ```bash
 # Fast build (skip tests/validation)
-mvn -P FASTINSTALL install -T 1C
+mvn -P FASTINSTALL install
 
 # Full build with tests
+# ** DO NOT RUN THIS ** It takes over an hour to complete
 mvn clean install
 
 # Run single test class
@@ -52,7 +53,7 @@ mvn spotless:apply
 # Code style check
 mvn checkstyle:check
 
-# Add copyright headers
+# Add license headers
 mvn clean install -DskipTests -P DIST
 ```
 
@@ -187,14 +188,14 @@ Before writing production code, write a failing test first. All code changes mus
 ## Key Dependencies
 
 - Spring Framework 6.2.12
-- Spring Boot 3.4.11
-- Hibernate 6.6.4.Final
-- Hibernate Search 7.2.1.Final
-- Jackson 2.20.0
-- JUnit 5.11.4 (Jupiter)
-- Mockito 5.18.0
+- Spring Boot 3.x
+- Hibernate 6.x
+- Hibernate Search 7.x
+- Jackson 2.x
+- JUnit 5.x
+- Mockito 5.x
 - AssertJ (assertions)
-- Flyway 10.20.1 (migrations)
+- Flyway 10.x (migrations)
 
 ## Documentation
 
