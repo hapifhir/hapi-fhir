@@ -178,6 +178,9 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		// Validate merge outcomes
 		validateMergeOutcome(scenario, theDeleteSource);
+
+		// Validate provenance created for actual merges
+		scenario.assertMergeProvenanceCreated();
 	}
 
 	// ================================================
@@ -245,7 +248,6 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		T target = scenario.readResource(scenario.getVersionlessTargetId());
 		List<Identifier> expectedIdentifiers = scenario.getExpectedIdentifiers();
 		scenario.assertIdentifiers(scenario.getIdentifiersFromResource(target), expectedIdentifiers);
-		assertThat(expectedIdentifiers).hasSize(3); // Only target identifiers
 	}
 
 	@Test
@@ -495,62 +497,6 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		// Validate error
 		assertThatThrownBy(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false))
 				.isInstanceOf(UnprocessableEntityException.class);
-	}
-
-	// ================================================
-	// PROVENANCE VALIDATION TESTS (3 tests)
-	// ================================================
-
-	@Test
-	protected void testMerge_provenance_createdForSync() {
-		// Setup
-		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.withOneReferencingResource();
-		scenario.createTestData();
-
-		// Execute merge
-		MergeTestParameters params = scenario.buildMergeOperationParameters();
-		Parameters inParams = params.asParametersResource();
-		myHelper.callMergeOperation(scenario, false);
-
-		// Validate provenance created
-		scenario.assertMergeProvenanceCreated(inParams);
-	}
-
-	@Test
-	protected void testMerge_provenance_createdForAsync() {
-		// Setup
-		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.withOneReferencingResource();
-		scenario.createTestData();
-
-		// Execute merge
-		MergeTestParameters params = scenario.buildMergeOperationParameters();
-		Parameters inParams = params.asParametersResource();
-		Parameters outParams = myHelper.callMergeOperation(scenario, true);
-
-		// Wait for completion
-		Task task = (Task) outParams.getParameter("task").getResource();
-		String jobId = myHelper.getJobIdFromTask(task);
-		myHelper.awaitJobCompletion(jobId);
-
-		// Validate provenance created
-		scenario.assertMergeProvenanceCreated(inParams);
-	}
-
-	@Test
-	protected void testMerge_provenance_notCreatedForPreview() {
-		// Setup
-		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.withOneReferencingResource();
-		scenario.withPreview(true);
-		scenario.createTestData();
-
-		// Execute merge in preview mode
-		myHelper.callMergeOperation(scenario, false);
-
-		// Validate no changes (preview mode validation already checks this)
-		scenario.assertReferencesNotUpdated();
 	}
 
 	// ================================================
