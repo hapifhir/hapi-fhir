@@ -242,7 +242,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		myHelper.callMergeOperation(scenario, false);
 
 		// Validate - target should keep its identifiers unchanged
-		T target = scenario.readResource(scenario.getTargetId());
+		T target = scenario.readResource(scenario.getVersionlessTargetId());
 		List<Identifier> expectedIdentifiers = scenario.getExpectedIdentifiers();
 		scenario.assertIdentifiers(scenario.getIdentifiersFromResource(target), expectedIdentifiers);
 		assertThat(expectedIdentifiers).hasSize(3); // Only target identifiers
@@ -260,7 +260,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		myHelper.callMergeOperation(scenario, false);
 
 		// Validate - target should get all source identifiers marked as OLD
-		T target = scenario.readResource(scenario.getTargetId());
+		T target = scenario.readResource(scenario.getVersionlessTargetId());
 		List<Identifier> expectedIdentifiers = scenario.getExpectedIdentifiers();
 		scenario.assertIdentifiers(scenario.getIdentifiersFromResource(target), expectedIdentifiers);
 		assertThat(expectedIdentifiers).hasSize(3); // All source identifiers marked as OLD
@@ -280,7 +280,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		myHelper.callMergeOperation(scenario, false);
 
 		// Validate - target should have empty identifier list
-		T target = scenario.readResource(scenario.getTargetId());
+		T target = scenario.readResource(scenario.getVersionlessTargetId());
 		List<Identifier> expectedIdentifiers = scenario.getExpectedIdentifiers();
 		scenario.assertIdentifiers(scenario.getIdentifiersFromResource(target), expectedIdentifiers);
 		assertThat(expectedIdentifiers).isEmpty();
@@ -303,7 +303,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		myHelper.callMergeOperation(scenario, false);
 
 		// Validate - target should have result resource identifiers (not target's original)
-		T target = scenario.readResource(scenario.getTargetId());
+		T target = scenario.readResource(scenario.getVersionlessTargetId());
 		List<Identifier> actualIdentifiers = scenario.getIdentifiersFromResource(target);
 		scenario.assertIdentifiers(actualIdentifiers, resultIdentifiers);
 		assertThat(actualIdentifiers).hasSize(2);
@@ -324,8 +324,8 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		myHelper.callMergeOperation(scenario, false);
 
 		// Validate target has "replaces" link to source
-		T target = scenario.readResource(scenario.getTargetId());
-		scenario.assertLinksPresent(target, Arrays.asList(scenario.getSourceId()), "replaces");
+		T target = scenario.readResource(scenario.getVersionlessTargetId());
+		scenario.assertLinksPresent(target, Arrays.asList(scenario.getVersionlessSourceId()), "replaces");
 	}
 
 	@Test
@@ -339,8 +339,8 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		myHelper.callMergeOperation(scenario, false);
 
 		// Validate source has "replaced-by" link to target
-		T source = scenario.readResource(scenario.getSourceId());
-		scenario.assertLinksPresent(source, Arrays.asList(scenario.getTargetId()), "replaced-by");
+		T source = scenario.readResource(scenario.getVersionlessSourceId());
+		scenario.assertLinksPresent(source, Arrays.asList(scenario.getVersionlessTargetId()), "replaced-by");
 	}
 
 	@Test
@@ -351,8 +351,8 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		scenario.createTestData();
 
 		// Validate no links before merge
-		T source = scenario.readResource(scenario.getSourceId());
-		T target = scenario.readResource(scenario.getTargetId());
+		T source = scenario.readResource(scenario.getVersionlessSourceId());
+		T target = scenario.readResource(scenario.getVersionlessTargetId());
 
 		scenario.assertNoLinks(source);
 		scenario.assertNoLinks(target);
@@ -370,7 +370,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		myHelper.callMergeOperation(scenario, false);
 
 		// Validate source is deleted (cannot read it)
-		scenario.assertSourceResourceState(null, scenario.getSourceId(), scenario.getTargetId(), true);
+		scenario.assertSourceResourceState(null, scenario.getVersionlessSourceId(), scenario.getVersionlessTargetId(), true);
 	}
 
 	@Test
@@ -397,14 +397,14 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		scenario.createTestData();
 
 		// Get target data before merge
-		T targetBefore = scenario.readResource(scenario.getTargetId());
+		T targetBefore = scenario.readResource(scenario.getVersionlessTargetId());
 		List<Identifier> targetIdentifiersBefore = scenario.getIdentifiersFromResource(targetBefore);
 
 		// Execute merge
 		myHelper.callMergeOperation(scenario, false);
 
 		// Validate target preserved its original identifiers
-		T targetAfter = scenario.readResource(scenario.getTargetId());
+		T targetAfter = scenario.readResource(scenario.getVersionlessTargetId());
 		List<Identifier> targetIdentifiersAfter = scenario.getIdentifiersFromResource(targetAfter);
 
 		// Target should have original identifiers plus source identifiers marked as OLD
@@ -449,8 +449,8 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		// Build parameters with source == target
 		MergeTestParameters params = new MergeTestParameters()
-				.sourceResource(new Reference(scenario.getTargetId()))
-				.targetResource(new Reference(scenario.getTargetId()))
+				.sourceResource(new Reference(scenario.getVersionlessTargetId()))
+				.targetResource(new Reference(scenario.getVersionlessTargetId()))
 				.deleteSource(false)
 				.preview(false);
 
@@ -469,7 +469,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		MergeTestParameters params = new MergeTestParameters()
 				.sourceIdentifiers(
 						Arrays.asList(new Identifier().setSystem("http://test.org").setValue("non-existent-id")))
-				.targetResource(new Reference(scenario.getTargetId()))
+				.targetResource(new Reference(scenario.getVersionlessTargetId()))
 				.deleteSource(false)
 				.preview(false);
 
@@ -486,7 +486,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		// Build parameters with non-existent target identifier
 		MergeTestParameters params = new MergeTestParameters()
-				.sourceResource(new Reference(scenario.getSourceId()))
+				.sourceResource(new Reference(scenario.getVersionlessSourceId()))
 				.targetIdentifiers(
 						Arrays.asList(new Identifier().setSystem("http://test.org").setValue("non-existent-id")))
 				.deleteSource(false)
@@ -568,8 +568,8 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		myHelper.callMergeOperation(scenario, false);
 
 		// Validate source state using scenario (handles active/status field differences)
-		T sourceAfter = scenario.readResource(scenario.getSourceId());
-		scenario.assertSourceResourceState(sourceAfter, scenario.getSourceId(), scenario.getTargetId(), false);
+		T sourceAfter = scenario.readResource(scenario.getVersionlessSourceId());
+		scenario.assertSourceResourceState(sourceAfter, scenario.getVersionlessSourceId(), scenario.getVersionlessTargetId(), false);
 	}
 
 	@Test
@@ -583,9 +583,9 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		myHelper.callMergeOperation(scenario, false);
 
 		// Validate target state using scenario (handles active/status field differences)
-		T targetAfter = scenario.readResource(scenario.getTargetId());
+		T targetAfter = scenario.readResource(scenario.getVersionlessTargetId());
 		scenario.assertTargetResourceState(
-				targetAfter, scenario.getSourceId(), false, scenario.getExpectedIdentifiers());
+				targetAfter, scenario.getVersionlessSourceId(), false, scenario.getExpectedIdentifiers());
 	}
 
 	// ================================================
@@ -604,7 +604,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		myHelper.callMergeOperation(scenario, false);
 
 		// Validate target has result resource identifiers
-		T target = scenario.readResource(scenario.getTargetId());
+		T target = scenario.readResource(scenario.getVersionlessTargetId());
 		List<Identifier> targetIdentifiers = scenario.getIdentifiersFromResource(target);
 
 		// Result resource should have the target's original identifiers
@@ -638,17 +638,17 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	protected void validateMergeOutcome(AbstractMergeTestScenario<T> theScenario, boolean theDeleteSource) {
 		// Validate source resource state
 		if (theDeleteSource) {
-			theScenario.assertSourceResourceState(null, theScenario.getSourceId(), theScenario.getTargetId(), true);
+			theScenario.assertSourceResourceState(null, theScenario.getVersionlessSourceId(), theScenario.getVersionlessTargetId(), true);
 		} else {
-			T source = theScenario.readResource(theScenario.getSourceId());
+			T source = theScenario.readResource(theScenario.getVersionlessSourceId());
 			theScenario.assertSourceResourceState(
-					source, theScenario.getSourceId(), theScenario.getTargetId(), false);
+					source, theScenario.getVersionlessSourceId(), theScenario.getVersionlessTargetId(), false);
 		}
 
 		// Validate target resource state
-		T target = theScenario.readResource(theScenario.getTargetId());
+		T target = theScenario.readResource(theScenario.getVersionlessTargetId());
 		theScenario.assertTargetResourceState(
-				target, theScenario.getSourceId(), theDeleteSource, theScenario.getExpectedIdentifiers());
+				target, theScenario.getVersionlessSourceId(), theDeleteSource, theScenario.getExpectedIdentifiers());
 
 		// Validate all references updated
 		for (String resourceType : theScenario.getReferencingResourceTypes()) {

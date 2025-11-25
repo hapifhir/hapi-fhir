@@ -246,13 +246,13 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	// ================================================
 
 	@Nonnull
-	public IIdType getSourceId() {
+	public IIdType getVersionlessSourceId() {
 		assertTestDataCreated();
 		return mySourceResource.getIdElement().toUnqualifiedVersionless();
 	}
 
 	@Nonnull
-	public IIdType getTargetId() {
+	public IIdType getVersionlessTargetId() {
 		assertTestDataCreated();
 		return myTargetResource.getIdElement().toUnqualifiedVersionless();
 	}
@@ -334,8 +334,8 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	public MergeTestParameters buildMergeOperationParameters() {
 		assertTestDataCreated();
 		MergeTestParameters params = new MergeTestParameters()
-				.sourceResource(new Reference(getSourceId()))
-				.targetResource(new Reference(getTargetId()))
+				.sourceResource(new Reference(getVersionlessSourceId()))
+				.targetResource(new Reference(getVersionlessTargetId()))
 				.deleteSource(myDeleteSource)
 				.preview(myPreview);
 
@@ -351,13 +351,13 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 				new MergeTestParameters().deleteSource(myDeleteSource).preview(myPreview);
 
 		if (theSourceById) {
-			params.sourceResource(new Reference(getSourceId()));
+			params.sourceResource(new Reference(getVersionlessSourceId()));
 		} else {
 			params.sourceIdentifiers(getIdentifiersFromResource(mySourceResource));
 		}
 
 		if (theTargetById) {
-			params.targetResource(new Reference(getTargetId()));
+			params.targetResource(new Reference(getVersionlessTargetId()));
 		} else {
 			params.targetIdentifiers(getIdentifiersFromResource(myTargetResource));
 		}
@@ -374,12 +374,12 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 			// Create result resource with result resource identifiers (defaults to target identifiers if not set)
 			T result = createResourceWithIdentifiers(getResultResourceIdentifiers());
 			// Result resource must have same ID as target for validation
-			result.setId(getTargetId());
+			result.setId(getVersionlessTargetId());
 
 			// Add "replaces" link only when deleteSource=false
 			// (validation requires this link when source is kept, but forbids it when source is deleted)
 			if (!myDeleteSource) {
-				addReplacesLinkToResource(result, getSourceId());
+				addReplacesLinkToResource(result, getVersionlessSourceId());
 			}
 
 			theParams.resultResource(result);
@@ -638,12 +638,12 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	public void assertReferencesUpdated(@Nonnull List<IIdType> theReferencingResourceIds) {
 		assertTestDataCreated();
 
-		IIdType theSourceId = getSourceId();
-		IIdType theTargetId = getTargetId();
+		IIdType theVersionlessSourceId = getVersionlessSourceId();
+		IIdType theVersionlessTargetId = getVersionlessTargetId();
 
 		// Build expected reference strings with resourceType/id format
-		String expectedTargetRef = theTargetId.getResourceType() + "/" + theTargetId.getIdPart();
-		String unexpectedSourceRef = theSourceId.getResourceType() + "/" + theSourceId.getIdPart();
+		String expectedTargetRef = theVersionlessTargetId.getValue();
+		String unexpectedSourceRef = theVersionlessSourceId.getValue();
 
 		FhirTerser terser = myFhirContext.newTerser();
 
@@ -680,7 +680,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 	public void assertReferencesNotUpdated() {
 		assertTestDataCreated();
-		ourLog.debug("Validating references NOT updated in preview mode for source: {}", getSourceId());
+		ourLog.debug("Validating references NOT updated in preview mode for source: {}", getVersionlessSourceId());
 
 		FhirTerser terser = myFhirContext.newTerser();
 
@@ -695,14 +695,17 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 				boolean foundSourceRef = false;
 				for (IBaseReference reference : allRefs) {
 					String refString = reference.getReferenceElement().getValue();
-					if (refString != null && refString.contains(getSourceId().getIdPart())) {
+					if (refString != null
+							&& refString.contains(getVersionlessSourceId().getIdPart())) {
 						foundSourceRef = true;
 						break;
 					}
 				}
 
 				assertThat(foundSourceRef)
-						.as("Resource %s should still reference source %s in preview mode", refId, getSourceId())
+						.as(
+								"Resource %s should still reference source %s in preview mode",
+								refId, getVersionlessSourceId())
 						.isTrue();
 			}
 		}
@@ -717,10 +720,13 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	public void assertMergeProvenanceCreated(@Nonnull Parameters theInputParams) {
 		assertTestDataCreated();
 
-		IIdType theSourceId = getSourceId();
-		IIdType theTargetId = getTargetId();
+		IIdType theVersionlessSourceId = getVersionlessSourceId();
+		IIdType theVersionlessTargetId = getVersionlessTargetId();
 
-		ourLog.debug("Validating provenance created for merge: source={}, target={}", theSourceId, theTargetId);
+		ourLog.debug(
+				"Validating provenance created for merge: source={}, target={}",
+				theVersionlessSourceId,
+				theVersionlessTargetId);
 
 		// Search for provenance targeting the resources
 		// Implementation would search for Provenance resources with target references
