@@ -22,16 +22,10 @@ package ca.uhn.fhir.jpa.provider.r4;
  */
 
 import ca.uhn.fhir.jpa.merge.AbstractMergeTestScenario;
-import ca.uhn.fhir.jpa.merge.MergeTestParameters;
 import ca.uhn.fhir.jpa.merge.ObservationMergeTestScenario;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for generic merge operations on Observation resources.
