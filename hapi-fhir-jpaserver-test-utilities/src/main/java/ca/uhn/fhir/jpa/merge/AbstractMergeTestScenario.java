@@ -446,18 +446,18 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	public void assertSourceResourceState() {
 		assertTestDataCreated();
 
-		IIdType sourceId = getVersionlessSourceId();
-		IIdType targetId = getVersionlessTargetId();
+		IIdType versionlessSourceId = getVersionlessSourceId();
+		IIdType versionlessTargetId = getVersionlessTargetId();
 
 		if (myDeleteSource) {
 			// Resource should not exist
-			assertThatThrownBy(() -> readResource(sourceId))
+			assertThatThrownBy(() -> readResource(versionlessSourceId))
 					.as("Source resource should be deleted")
 					.isInstanceOf(ResourceGoneException.class);
-			ourLog.debug("Verified source resource is deleted: {}", sourceId);
+			ourLog.debug("Verified source resource is deleted: {}", versionlessSourceId);
 		} else {
 			// Read the resource internally
-			T source = readResource(sourceId);
+			T source = readResource(versionlessSourceId);
 
 			// Resource should have replaced-by link
 			IResourceLinkService linkService = myLinkServiceFactory.getServiceForResourceType(getResourceTypeName());
@@ -467,15 +467,12 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 					.as("Source should have replaced-by link")
 					.hasSize(1)
 					.element(0)
-					.satisfies(link -> assertThat(link.getReferenceElement().toUnqualifiedVersionless())
-							.isEqualTo(targetId.toUnqualifiedVersionless()));
+					.satisfies(link -> assertThat(link.getReferenceElement()).isEqualTo(versionlessTargetId));
 
 			// Template method pattern: subclasses implement active field check if applicable
 			if (hasActiveField()) {
 				assertActiveFieldIfPresent(source, false);
 			}
-
-			ourLog.debug("Verified source resource state: has replaced-by link");
 		}
 	}
 
@@ -874,15 +871,12 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	public void assertMergeProvenanceCreated() {
 		assertTestDataCreated();
 
-		// Rebuild input parameters from scenario configuration
-		Parameters inputParams = buildMergeOperationParameters().asParametersResource();
-
 		// Both source and target are always version 2 in provenance
 		// - Target: always updated to v2 (regardless of deleteSource)
 		// - Source: v2 in provenance even when deleteSource=true
 		//   (provenance increments version to match what delete operation will create)
-		IIdType sourceId = getVersionlessSourceId().withVersion("2");
-		IIdType targetId = getVersionlessTargetId().withVersion("2");
+		IIdType expectedSourceId = getVersionlessSourceId().withVersion("2");
+		IIdType expectedTargetId = getVersionlessTargetId().withVersion("2");
 
 		// Calculate expected referencing resource IDs with versions
 		// Referencing resources get updated during merge, so they should have version 2
@@ -894,9 +888,9 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		// Delegate to ReplaceReferencesTestHelper for provenance validation
 		ReplaceReferencesTestHelper helper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
 		helper.assertMergeProvenance(
-				inputParams,
-				sourceId,
-				targetId,
+				myInputParameters,
+				expectedSourceId,
+				expectedTargetId,
 				getTotalReferenceCount(),
 				expectedReferencingResourceIds,
 				null); // No custom provenance agents for now
