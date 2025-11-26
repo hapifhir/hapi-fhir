@@ -427,6 +427,20 @@ public class JpaStorageSettings extends StorageSettings {
 	private boolean myWriteToSearchParamIdentityTable = true;
 
 	/**
+	 * Controls whether database-stored validation resources (CodeSystem, ValueSet, etc.) take precedence
+	 * over built-in default profile validation resources when resolving during validation.
+	 * <p>
+	 * When set to {@code true}, the JPA validation support is registered before the default profile
+	 * validation support in the validation chain, allowing database-stored resources to override
+	 * built-in definitions.
+	 * <p>
+	 * Defaults to {@code false}, meaning built-in default profiles take precedence.
+	 *
+	 * @since 8.2.0
+	 */
+	private boolean myAllowDatabaseValidationOverride = false;
+
+	/**
 	 * Constructor
 	 */
 	public JpaStorageSettings() {
@@ -2738,7 +2752,31 @@ public class JpaStorageSettings extends StorageSettings {
 		myWriteToSearchParamIdentityTable = theWriteToSearchParamIdentityTable;
 	}
 
-	public enum StoreMetaSourceInformationEnum {
+	/**
+	 * Sets whether database-stored validation resources should take precedence over built-in
+	 * default profile validation resources.
+	 *
+	 * @param theAllowDatabaseValidationOverride if {@code true}, database resources override defaults
+	 * @see #isAllowDatabaseValidationOverride()
+	 * @since 8.2.0
+	 */
+	public void setAllowDatabaseValidationOverride(boolean theAllowDatabaseValidationOverride) {
+		myAllowDatabaseValidationOverride = theAllowDatabaseValidationOverride;
+	}
+
+	/**
+	 * Returns whether database-stored validation resources take precedence over built-in
+	 * default profile validation resources.
+	 *
+	 * @return {@code true} if database resources override defaults; {@code false} otherwise
+	 * @see #setAllowDatabaseValidationOverride(boolean)
+	 * @since 8.2.0
+	 */
+	public boolean isAllowDatabaseValidationOverride() {
+		return myAllowDatabaseValidationOverride;
+	}
+
+    public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),
 		SOURCE_URI(true, false),
 		REQUEST_ID(false, true),

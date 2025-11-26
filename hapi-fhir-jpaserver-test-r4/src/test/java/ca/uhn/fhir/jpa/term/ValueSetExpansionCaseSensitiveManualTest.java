@@ -1,15 +1,20 @@
 // Created by claude-sonnet-4-5
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,9 +31,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ValueSetExpansionCaseSensitiveManualTest extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetExpansionCaseSensitiveManualTest.class);
+	@Autowired
+	private IValidationSupport myJpaValidationSupportChain;
+
+	@AfterEach
+	public void after() {
+		myStorageSettings.setAllowDatabaseValidationOverride(new JpaStorageSettings().isAllowDatabaseValidationOverride());
+		((JpaValidationSupportChain)myJpaValidationSupportChain).rebuildChainForUnitTest();
+	}
 
 	@Test
 	void testValueSetExpansion_CaseSensitive_IncludeEntireSystem() {
+		myStorageSettings.setAllowDatabaseValidationOverride(true);
+		((JpaValidationSupportChain)myJpaValidationSupportChain).rebuildChainForUnitTest();
+
 		// Create case-sensitive CodeSystem with FRAGMENT content mode
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl("http://terminology.hl7.org/CodeSystem/insurance-plan-type");
