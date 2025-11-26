@@ -23,9 +23,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The test uses FRAGMENT content mode to reproduce the bug scenario where
  * a user-defined CodeSystem should override the built-in HL7 CodeSystem.
  */
-class ValueSetExpansionCaseSensitiveManualIT extends BaseJpaR4Test {
+class ValueSetExpansionCaseSensitiveManualTest extends BaseJpaR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetExpansionCaseSensitiveManualIT.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetExpansionCaseSensitiveManualTest.class);
 
 	@Test
 	void testValueSetExpansion_CaseSensitive_IncludeEntireSystem() {
@@ -35,6 +35,7 @@ class ValueSetExpansionCaseSensitiveManualIT extends BaseJpaR4Test {
 		codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		codeSystem.setCaseSensitive(true);
 		codeSystem.setContent(CodeSystem.CodeSystemContentMode.FRAGMENT);
+		codeSystem.setVersion("3.0.0");
 
 		// Add all the codes from the real HL7 resource
 		codeSystem.addConcept().setCode("medical").setDisplay("Medical");
