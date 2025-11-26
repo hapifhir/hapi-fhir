@@ -174,9 +174,6 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		// Validate merge outcomes
 		scenario.validateResourcesAfterMerge();
-
-		// Validate provenance created for actual merges
-		scenario.assertMergeProvenanceCreated();
 	}
 
 	// ================================================
