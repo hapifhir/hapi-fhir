@@ -78,7 +78,7 @@ public class PractitionerMergeTestScenario extends AbstractMergeTestScenario<Pra
 	}
 
 	@Nonnull
-	public Practitioner createResourceWithIdentifiers(@Nonnull List<Identifier> theIdentifiers) {
+	public Practitioner createResource(@Nonnull List<Identifier> theIdentifiers) {
 		Practitioner p = new Practitioner();
 		p.setActive(true);
 		p.addName().setFamily("TestPractitioner");
