@@ -135,6 +135,7 @@ public class JpaStorageSettings extends StorageSettings {
 
 	public static final List<Integer> DEFAULT_SEARCH_PRE_FETCH_THRESHOLDS = Arrays.asList(13, 503, 2003, 1000003, -1);
 
+	private static final int DEFAULT_PRE_EXPAND_VALUE_SETS_SCHEDULE_IN_MINUTES = 10;
 	/**
 	 * Do not change default of {@code 0}!
 	 *
@@ -425,6 +426,13 @@ public class JpaStorageSettings extends StorageSettings {
 	 * @since 8.2.0
 	 */
 	private boolean myWriteToSearchParamIdentityTable = true;
+
+	/**
+	 * Controls the schedule time in minutes for pre expand value set job.
+	 * Defaults to {@code 10}.
+	 * @since 8.8.0
+	 */
+	private int myPreExpandValueSetsScheduleInMinutes = DEFAULT_PRE_EXPAND_VALUE_SETS_SCHEDULE_IN_MINUTES;
 
 	/**
 	 * Constructor
@@ -2736,6 +2744,24 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public void setWriteToSearchParamIdentityTable(boolean theWriteToSearchParamIdentityTable) {
 		myWriteToSearchParamIdentityTable = theWriteToSearchParamIdentityTable;
+	}
+
+	/**
+	 * Controls the schedule time in minutes for pre expand value set job.
+	 * Defaults to {@code 10}.
+	 * @since 8.8.0
+	 */
+	public int getPreExpandValueSetsScheduleInMinutes() {
+		return myPreExpandValueSetsScheduleInMinutes;
+	}
+
+	/**
+	 * Controls the schedule time in minutes for pre expand value set job.
+	 * Defaults to {@code 10}.
+	 * @since 8.8.0
+	 */
+	public void setPreExpandValueSetsScheduleInMinutes(int thePreExpandValueSetsScheduleInMinutes) {
+		myPreExpandValueSetsScheduleInMinutes = thePreExpandValueSetsScheduleInMinutes;
 	}
 
 	public enum StoreMetaSourceInformationEnum {
