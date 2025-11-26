@@ -35,7 +35,7 @@ class ValueSetExpansionCaseSensitiveManualTest extends BaseJpaR4Test {
 		codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		codeSystem.setCaseSensitive(true);
 		codeSystem.setContent(CodeSystem.CodeSystemContentMode.FRAGMENT);
-		codeSystem.setVersion("3.0.0");
+		codeSystem.setVersion("4.0.1");
 
 		// Add all the codes from the real HL7 resource
 		codeSystem.addConcept().setCode("medical").setDisplay("Medical");
