@@ -530,6 +530,9 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 				assertReferencesUpdated(resourceType);
 			}
 		}
+
+		// Validate provenance created for merge operation
+		assertMergeProvenanceCreated();
 	}
 
 	public void assertLinksPresent(
