@@ -78,7 +78,7 @@ public class ObservationMergeTestScenario extends AbstractMergeTestScenario<Obse
 	}
 
 	@Nonnull
-	public Observation createResourceWithIdentifiers(@Nonnull List<Identifier> theIdentifiers) {
+	public Observation createResource(@Nonnull List<Identifier> theIdentifiers) {
 		Observation obs = new Observation();
 		obs.setStatus(Observation.ObservationStatus.FINAL);
 		obs.getCode().addCoding().setSystem("http://loinc.org").setCode("test-code");

@@ -79,7 +79,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <ul>
  *   <li>{@link #getResourceTypeName()}</li>
  *   <li>{@link #getResourceClass()}</li>
- *   <li>{@link #createResourceWithIdentifiers(List)}</li>
+ *   <li>{@link #createResource(List)}</li>
  *   <li>{@link #createReferencingResource(String, IIdType)}</li>
  *   <li>{@link #assertActiveFieldIfSupported(IBaseResource, boolean)}</li>
  * </ul>
@@ -210,12 +210,12 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		ourLog.debug("Building merge test data for resource type: {}", getResourceTypeName());
 
 		// Create and persist source resource
-		T source = createResourceWithIdentifiers(mySourceIdentifiers);
+		T source = createResource(mySourceIdentifiers);
 		IFhirResourceDao<T> dao = getDao();
 		source = (T) dao.create(source, myRequestDetails).getResource();
 
 		// Create and persist target resource
-		T target = createResourceWithIdentifiers(myTargetIdentifiers);
+		T target = createResource(myTargetIdentifiers);
 		target = (T) dao.create(target, myRequestDetails).getResource();
 
 		// Create referencing resources organized by type
@@ -397,7 +397,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		if (myCreateResultResource) {
 			// Create result resource with result resource identifiers
 			// (defaults to target identifiers + extra identifier to ensure it's different from target)
-			T result = createResourceWithIdentifiers(getResultResourceIdentifiers());
+			T result = createResource(getResultResourceIdentifiers());
 			// Result resource must have same ID as target for validation
 			result.setId(getVersionlessTargetId());
 
@@ -453,7 +453,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 			assertThatThrownBy(() -> readResource(versionlessSourceId))
 					.as("Source resource should be deleted")
 					.isInstanceOf(ResourceGoneException.class);
-			ourLog.debug("Verified source resource is deleted: {}", versionlessSourceId);
 		} else {
 			// Read the resource internally
 			T source = readResource(versionlessSourceId);
@@ -468,7 +467,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 					.element(0)
 					.satisfies(link -> assertThat(link.getReferenceElement()).isEqualTo(versionlessTargetId));
 
-			// Template method pattern: subclasses implement active field check if applicable
+			// active field on the source should be set to false, if the resourceType has an active field
 			assertActiveFieldIfSupported(source, false);
 		}
 	}
@@ -478,7 +477,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 		// Read target resource
 		T target = readResource(getVersionlessTargetId());
-		IIdType sourceId = getVersionlessSourceId();
 
 		// Should have replaces link only if source was not deleted
 		// (when source is deleted, we don't want a dangling reference)
@@ -490,16 +488,12 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 					.as("Target should have replaces link when source not deleted")
 					.hasSize(1)
 					.element(0)
-					.satisfies(link -> assertThat(link.getReferenceElement().toUnqualifiedVersionless())
-							.isEqualTo(sourceId.toUnqualifiedVersionless()));
-			ourLog.debug("Verified target has replaces link to source");
+					.satisfies(link -> assertThat(link.getReferenceElement()).isEqualTo(getVersionlessSourceId()));
 		}
 
 		// Should have expected identifiers
 		List<Identifier> actualIdentifiers = getIdentifiersFromResource(target);
 		assertIdentifiers(actualIdentifiers, getExpectedIdentifiers());
-
-		ourLog.debug("Verified target resource state: correct identifiers");
 	}
 
 	/**
@@ -515,7 +509,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		// Validate target resource state
 		assertTargetResourceState();
 
-		// Validate all references updated
+		// Validate references to source in referencing resources now point to target (i.e. replace-refences worked)
 		for (String resourceType : getReferencingResourceTypes()) {
 			List<IIdType> referencingIds = getReferencingResourceIds(resourceType);
 			if (!referencingIds.isEmpty()) {
@@ -925,7 +919,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	 * @return A new resource with the identifiers
 	 */
 	@Nonnull
-	protected abstract T createResourceWithIdentifiers(@Nonnull List<Identifier> theIdentifiers);
+	public abstract T createResource(@Nonnull List<Identifier> theIdentifiers);
 
 	/**
 	 * Create a referencing resource (e.g., Encounter.subject, DiagnosticReport.result).

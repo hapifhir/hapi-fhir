@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
@@ -110,7 +111,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	// ================================================
-	// BASIC MERGE MATRIX TESTS (16 tests)
+	// BASIC MERGE MATRIX TESTS
 	// ================================================
 
 	/**
@@ -177,7 +178,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	// ================================================
-	// IDENTIFIER RESOLUTION TESTS (8 tests)
+	// IDENTIFIER RESOLUTION TESTS
 	// ================================================
 
 	@ParameterizedTest(name = "{index}: sourceById={0}, targetById={1}")
@@ -222,7 +223,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	// ================================================
-	// IDENTIFIER EDGE CASES (3 tests)
+	// IDENTIFIER EDGE CASES
 	// ================================================
 
 	@Test
@@ -304,109 +305,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	// ================================================
-	// EXTENSION LINK VALIDATION TESTS (6 tests)
-	// ================================================
-
-	@Test
-	protected void testMerge_extensionLinks_replacesLink() {
-		// Setup
-		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.withOneReferencingResource();
-		scenario.createTestData();
-
-		// Execute merge
-		myHelper.callMergeOperation(scenario, false);
-
-		// Validate target has "replaces" link to source
-		T target = scenario.readResource(scenario.getVersionlessTargetId());
-		scenario.assertLinksPresent(target, Arrays.asList(scenario.getVersionlessSourceId()), "replaces");
-	}
-
-	@Test
-	protected void testMerge_extensionLinks_replacedByLink() {
-		// Setup
-		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.withOneReferencingResource();
-		scenario.createTestData();
-
-		// Execute merge
-		myHelper.callMergeOperation(scenario, false);
-
-		// Validate source has "replaced-by" link to target
-		T source = scenario.readResource(scenario.getVersionlessSourceId());
-		scenario.assertLinksPresent(source, Arrays.asList(scenario.getVersionlessTargetId()), "replaced-by");
-	}
-
-	@Test
-	protected void testMerge_extensionLinks_noLinksBeforeMerge() {
-		// Setup
-		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.withOneReferencingResource();
-		scenario.createTestData();
-
-		// Validate no links before merge
-		T source = scenario.readResource(scenario.getVersionlessSourceId());
-		T target = scenario.readResource(scenario.getVersionlessTargetId());
-
-		scenario.assertNoLinks(source);
-		scenario.assertNoLinks(target);
-	}
-
-	@Test
-	protected void testMerge_extensionLinks_deletedSourceHasNoLinks() {
-		// Setup
-		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.withOneReferencingResource();
-		scenario.withDeleteSource(true);
-		scenario.createTestData();
-
-		// Execute merge with delete
-		myHelper.callMergeOperation(scenario, false);
-
-		// Validate source is deleted (cannot read it)
-		scenario.assertSourceResourceState();
-	}
-
-	@Test
-	protected void testMerge_extensionLinks_multipleReferencingResourceTypes() {
-		// Setup with all standard referencing resource types
-		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.withMultipleReferencingResources();
-		scenario.createTestData();
-
-		// Execute merge
-		myHelper.callMergeOperation(scenario, false);
-
-		// Validate all reference types updated
-		for (String resourceType : scenario.getReferencingResourceTypes()) {
-			scenario.assertReferencesUpdated(resourceType);
-		}
-	}
-
-	@Test
-	protected void testMerge_extensionLinks_targetPreservesExistingData() {
-		// Setup
-		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.withOneReferencingResource();
-		scenario.createTestData();
-
-		// Get target data before merge
-		T targetBefore = scenario.readResource(scenario.getVersionlessTargetId());
-		List<Identifier> targetIdentifiersBefore = scenario.getIdentifiersFromResource(targetBefore);
-
-		// Execute merge
-		myHelper.callMergeOperation(scenario, false);
-
-		// Validate target preserved its original identifiers
-		T targetAfter = scenario.readResource(scenario.getVersionlessTargetId());
-		List<Identifier> targetIdentifiersAfter = scenario.getIdentifiersFromResource(targetAfter);
-
-		// Target should have original identifiers plus source identifiers marked as OLD
-		assertThat(targetIdentifiersAfter.size()).isGreaterThan(targetIdentifiersBefore.size());
-	}
-
-	// ================================================
-	// EDGE CASES AND ERROR HANDLING TESTS (5 tests)
+	// EDGE CASES AND ERROR HANDLING TESTS
 	// ================================================
 
 	@Test
@@ -491,76 +390,50 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				.isInstanceOf(UnprocessableEntityException.class);
 	}
 
-	// ================================================
-	// ACTIVE FIELD / STATUS FIELD VALIDATION TESTS (2 tests)
-	// ================================================
-
 	@Test
-	protected void testMerge_activeOrStatusField_sourceHandledCorrectly() {
-		// Setup
+	protected void testMerge_errorHandling_sourceWithReplacedByLink() {
+		// Setup: Create and merge source with another resource first
 		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.withOneReferencingResource();
 		scenario.createTestData();
-
-		// Execute merge (no delete)
 		myHelper.callMergeOperation(scenario, false);
 
-		// Validate source state using scenario (handles active/status field differences)
-		scenario.assertSourceResourceState();
+		// Create a minimal target resource (no identifiers needed)
+		T simpleTarget = createScenario().createResource(Collections.emptyList());
+		IIdType newTargetIdVersionless = myClient.create().resource(simpleTarget).execute().getId().toUnqualifiedVersionless();
+
+		// Try to use the already-merged source in another merge
+		MergeTestParameters params = new MergeTestParameters()
+				.sourceResource(new Reference(scenario.getVersionlessSourceId())) // Previously merged
+				.targetResource(new Reference(newTargetIdVersionless))
+				.deleteSource(false)
+				.preview(false);
+
+		// Validate error
+		assertThatThrownBy(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false))
+				.isInstanceOf(UnprocessableEntityException.class);
 	}
 
 	@Test
-	protected void testMerge_activeOrStatusField_targetHandledCorrectly() {
-		// Setup
+	protected void testMerge_errorHandling_targetWithReplacedByLink() {
+		// Setup: Create and merge to get a resource with replaced-by link
 		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.withOneReferencingResource();
 		scenario.createTestData();
-
-		// Execute merge
 		myHelper.callMergeOperation(scenario, false);
 
-		// Validate target state using scenario (handles active/status field differences)
-		scenario.assertTargetResourceState();
-	}
+		// Create a minimal source resource (no identifiers needed)
+		T simpleSource = createScenario().createResource(Collections.emptyList());
+		IIdType newSourceIdVersionless = myClient.create().resource(simpleSource).execute().getId().toUnqualifiedVersionless();
 
-	// ================================================
-	// RESULT RESOURCE VALIDATION TESTS (2 tests)
-	// ================================================
+		// Try to use the already-merged source (which has replaced-by link) as target
+		MergeTestParameters params = new MergeTestParameters()
+				.sourceResource(new Reference(newSourceIdVersionless))
+				.targetResource(new Reference(scenario.getVersionlessSourceId())) // Previously merged (has replaced-by link)
+				.deleteSource(false)
+				.preview(false);
 
-	@Test
-	protected void testMerge_resultResource_overridesTargetData() {
-		// Setup with result resource
-		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.withOneReferencingResource();
-		scenario.withResultResource(true);
-		scenario.createTestData();
-
-		// Execute merge with result resource
-		myHelper.callMergeOperation(scenario, false);
-
-		// Validate target has result resource identifiers
-		T target = scenario.readResource(scenario.getVersionlessTargetId());
-		List<Identifier> targetIdentifiers = scenario.getIdentifiersFromResource(target);
-
-		// Result resource should have the target's original identifiers
-		assertThat(targetIdentifiers).hasSizeGreaterThanOrEqualTo(2);
-	}
-
-	@Test
-	protected void testMerge_resultResource_preservesReferences() {
-		// Setup with result resource
-		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.withOneReferencingResource();
-		scenario.withResultResource(true);
-		scenario.createTestData();
-
-		// Execute merge with result resource
-		myHelper.callMergeOperation(scenario, false);
-
-		// Validate all references still updated to target
-		for (String resourceType : scenario.getReferencingResourceTypes()) {
-			scenario.assertReferencesUpdated(resourceType);
-		}
+		// Validate error
+		assertThatThrownBy(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false))
+				.isInstanceOf(UnprocessableEntityException.class);
 	}
 
 	// ================================================
