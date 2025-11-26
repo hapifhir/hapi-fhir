@@ -370,7 +370,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		myHelper.callMergeOperation(scenario, false);
 
 		// Validate source is deleted (cannot read it)
-		scenario.assertSourceResourceState(null, scenario.getVersionlessSourceId(), scenario.getVersionlessTargetId(), true);
+		scenario.assertSourceResourceState();
 	}
 
 	@Test
@@ -512,8 +512,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		myHelper.callMergeOperation(scenario, false);
 
 		// Validate source state using scenario (handles active/status field differences)
-		T sourceAfter = scenario.readResource(scenario.getVersionlessSourceId());
-		scenario.assertSourceResourceState(sourceAfter, scenario.getVersionlessSourceId(), scenario.getVersionlessTargetId(), false);
+		scenario.assertSourceResourceState();
 	}
 
 	@Test
@@ -581,13 +580,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	 */
 	protected void validateMergeOutcome(AbstractMergeTestScenario<T> theScenario, boolean theDeleteSource) {
 		// Validate source resource state
-		if (theDeleteSource) {
-			theScenario.assertSourceResourceState(null, theScenario.getVersionlessSourceId(), theScenario.getVersionlessTargetId(), true);
-		} else {
-			T source = theScenario.readResource(theScenario.getVersionlessSourceId());
-			theScenario.assertSourceResourceState(
-					source, theScenario.getVersionlessSourceId(), theScenario.getVersionlessTargetId(), false);
-		}
+		theScenario.assertSourceResourceState();
 
 		// Validate target resource state
 		T target = theScenario.readResource(theScenario.getVersionlessTargetId());

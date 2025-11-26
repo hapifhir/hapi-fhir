@@ -32,7 +32,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.FhirTerser;
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -57,6 +56,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_INPUT;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_OUTCOME;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_RESULT;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK;
@@ -123,6 +123,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	private T myTargetResource;
 	private Map<String, List<IIdType>> myReferencingResourcesByType;
 	private boolean myIsTestDataCreated = false;
+	private Parameters myInputParameters;
 
 	/**
 	 * Create a new abstract merge test scenario.
@@ -362,6 +363,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 				.preview(myPreview);
 
 		addResultResourceIfNeeded(params);
+		myInputParameters = params.asParametersResource();
 		return params;
 	}
 
@@ -385,6 +387,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		}
 
 		addResultResourceIfNeeded(params);
+		myInputParameters = params.asParametersResource();
 		return params;
 	}
 
@@ -440,30 +443,36 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		ourLog.debug("Added replaces link to {} pointing to {}", theResource.getIdElement(), theTargetId);
 	}
 
-	public void assertSourceResourceState(
-			@Nullable T theResource, @Nonnull IIdType theSourceId, @Nonnull IIdType theTargetId, boolean theDeleted) {
+	public void assertSourceResourceState() {
+		assertTestDataCreated();
 
-		if (theDeleted) {
+		IIdType sourceId = getVersionlessSourceId();
+		IIdType targetId = getVersionlessTargetId();
+
+		if (myDeleteSource) {
 			// Resource should not exist
-			assertThatThrownBy(() -> readResource(theSourceId))
+			assertThatThrownBy(() -> readResource(sourceId))
 					.as("Source resource should be deleted")
 					.isInstanceOf(ResourceGoneException.class);
-			ourLog.debug("Verified source resource is deleted: {}", theSourceId);
+			ourLog.debug("Verified source resource is deleted: {}", sourceId);
 		} else {
+			// Read the resource internally
+			T source = readResource(sourceId);
+
 			// Resource should have replaced-by link
 			IResourceLinkService linkService = myLinkServiceFactory.getServiceForResourceType(getResourceTypeName());
-			List<IBaseReference> replacedByLinksRefs = linkService.getReplacedByLinks(theResource);
+			List<IBaseReference> replacedByLinksRefs = linkService.getReplacedByLinks(source);
 
 			assertThat(replacedByLinksRefs)
 					.as("Source should have replaced-by link")
 					.hasSize(1)
 					.element(0)
 					.satisfies(link -> assertThat(link.getReferenceElement().toUnqualifiedVersionless())
-							.isEqualTo(theTargetId.toUnqualifiedVersionless()));
+							.isEqualTo(targetId.toUnqualifiedVersionless()));
 
 			// Template method pattern: subclasses implement active field check if applicable
 			if (hasActiveField()) {
-				assertActiveFieldIfPresent(theResource, false);
+				assertActiveFieldIfPresent(source, false);
 			}
 
 			ourLog.debug("Verified source resource state: has replaced-by link");
@@ -580,6 +589,9 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	// ================================================
 
 	public void validateSyncMergeOutcome(@Nonnull Parameters theOutParams) {
+		// Validate input parameters returned
+		validateInputParametersReturned(theOutParams);
+
 		// Assert outcome
 		OperationOutcome outcome = (OperationOutcome)
 				theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
@@ -677,6 +689,9 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	 * @param theOutParams the output parameters from merge operation
 	 */
 	public void validateAsyncOperationOutcome(@Nonnull Parameters theOutParams) {
+		// Validate input parameters returned
+		validateInputParametersReturned(theOutParams);
+
 		OperationOutcome outcome = (OperationOutcome)
 				theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
 		assertThat(outcome.getIssue()).hasSize(1).element(0).satisfies(issue -> {
@@ -701,6 +716,52 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 			assertThat(issue.getDetails().getText()).isEqualTo("Preview only merge operation - no issues detected");
 			assertThat(issue.getDiagnostics()).isEqualTo("Merge would update " + theExpectedUpdateCount + " resources");
 		});
+	}
+
+	/**
+	 * Validates that input parameters are correctly returned in the merge operation output.
+	 * This validation applies to both synchronous and asynchronous merge operations.
+	 *
+	 * <p>The merge operation must echo back the original input parameters in the response,
+	 * which allows clients to correlate requests with responses and provides an audit trail.
+	 *
+	 * @param theOutParams the output parameters from merge operation
+	 */
+	public void validateInputParametersReturned(@Nonnull Parameters theOutParams) {
+		assertTestDataCreated();
+
+		// Extract returned input parameters
+		Parameters returnedInput = (Parameters)
+				theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_INPUT).getResource();
+
+		// Special handling for result-resource parameter if present
+		// Log both resources for debugging if they don't match
+		if (myCreateResultResource) {
+			Resource originalResultResource =
+					(Resource) myInputParameters.getParameter("result-resource").getResource();
+			Resource returnedResultResource =
+					(Resource) returnedInput.getParameter("result-resource").getResource();
+
+			if (!originalResultResource.equalsDeep(returnedResultResource)) {
+				ourLog.info(
+						"Original result-resource:\n{}",
+						myFhirContext
+								.newJsonParser()
+								.setPrettyPrint(true)
+								.encodeResourceToString(originalResultResource));
+				ourLog.info(
+						"Returned result-resource:\n{}",
+						myFhirContext
+								.newJsonParser()
+								.setPrettyPrint(true)
+								.encodeResourceToString(returnedResultResource));
+			}
+		}
+
+		// Deep equality assertion
+		assertThat(returnedInput.equalsDeep(myInputParameters))
+				.as("Returned input parameters should match original input parameters")
+				.isTrue();
 	}
 
 	// ================================================
