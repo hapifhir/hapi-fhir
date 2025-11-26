@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.merge.AbstractMergeTestScenario;
 import ca.uhn.fhir.jpa.merge.MergeOperationTestHelper;
 import ca.uhn.fhir.jpa.merge.MergeTestParameters;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -50,6 +51,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchException;
 
 /**
  * Abstract base class for generic merge operation tests.
@@ -83,6 +85,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	protected ResourceLinkServiceFactory myLinkServiceFactory;
 
 	protected MergeOperationTestHelper myHelper;
+	protected ReplaceReferencesTestHelper myReplaceReferencesTestHelper;
 
 	/**
 	 * Template method for subclasses to create their test scenario.
@@ -103,6 +106,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
 
 		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper);
+		myReplaceReferencesTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
 	}
 
 	@AfterEach
@@ -391,7 +395,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_errorHandling_sourceWithReplacedByLink() {
+	protected void testMerge_errorHandling_previouslyMergedSourceAsSource() {
 		// Setup: Create and merge source with another resource first
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.createTestData();
@@ -408,13 +412,18 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				.deleteSource(false)
 				.preview(false);
 
-		// Validate error
-		assertThatThrownBy(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false))
-				.isInstanceOf(UnprocessableEntityException.class);
+		// Validate error - should mention replaced-by link
+		Exception ex = catchException(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false));
+		assertThat(ex).isInstanceOf(UnprocessableEntityException.class);
+		UnprocessableEntityException baseEx = (UnprocessableEntityException) ex;
+		String diagnosticMessage = myReplaceReferencesTestHelper.extractFailureMessageFromOutcomeParameter(baseEx);
+		assertThat(diagnosticMessage)
+				.contains("Source resource was previously replaced by a resource with reference")
+				.contains("not a suitable source for merging");
 	}
 
 	@Test
-	protected void testMerge_errorHandling_targetWithReplacedByLink() {
+	protected void testMerge_errorHandling_previouslyMergedSourceAsTarget() {
 		// Setup: Create and merge to get a resource with replaced-by link
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.createTestData();
@@ -424,19 +433,26 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		T simpleSource = createScenario().createResource(Collections.emptyList());
 		IIdType newSourceIdVersionless = myClient.create().resource(simpleSource).execute().getId().toUnqualifiedVersionless();
 
-		// Try to use the already-merged source (which has replaced-by link) as target
+		// Try to use the already-merged source as target
 		MergeTestParameters params = new MergeTestParameters()
 				.sourceResource(new Reference(newSourceIdVersionless))
-				.targetResource(new Reference(scenario.getVersionlessSourceId())) // Previously merged (has replaced-by link)
+				.targetResource(new Reference(scenario.getVersionlessSourceId())) // Previously merged
 				.deleteSource(false)
 				.preview(false);
 
-		// Validate error
-		assertThatThrownBy(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false))
-				.isInstanceOf(UnprocessableEntityException.class);
+		// Validate error - for resources with active field, may fail on "not active" first
+		// For resources without active field, should mention replaced-by link
+		Exception ex = catchException(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false));
+		assertThat(ex).isInstanceOf(UnprocessableEntityException.class);
+		UnprocessableEntityException baseEx = (UnprocessableEntityException) ex;
+		String diagnosticMessage = myReplaceReferencesTestHelper.extractFailureMessageFromOutcomeParameter(baseEx);
+
+		// Validate that error prevents using previously merged resource
+		// Message may be about "not active" OR "previously replaced by"
+		assertThat(diagnosticMessage).satisfiesAnyOf(
+				msg -> assertThat(msg).contains("not active"),
+				msg -> assertThat(msg).contains("Target resource was previously replaced by a resource with reference")
+		);
 	}
 
-	// ================================================
-	// HELPER METHODS
-	// ================================================
 }
