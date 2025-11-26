@@ -281,4 +281,111 @@ class ExtensionBasedLinkServiceTest {
 		assertThat(links).hasSize(1);
 		assertThat(links.get(0).getReferenceElement().getValue()).isEqualTo("Observation/source-456");
 	}
+
+
+	@Test
+	void shouldWorkWithDifferentResourceTypes_Practitioner() {
+		// Given - Test with Practitioner to verify resource-agnostic behavior
+		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
+		practitioner.setId("Practitioner/prac-123");
+		Reference ref = new Reference("Practitioner/prac-456");
+
+		// When
+		myService.addReplacesLink(practitioner, ref);
+
+		// Then
+		List<IBaseReference> links = myService.getReplacesLinks(practitioner);
+		assertThat(links).hasSize(1);
+		assertThat(links.get(0).getReferenceElement().getValue()).isEqualTo("Practitioner/prac-456");
+	}
+
+	@Test
+	void shouldPreserveReferenceDisplayText() {
+		// Given
+		Observation observation = new Observation();
+		observation.setId("Observation/obs-123");
+		Reference ref = new Reference("Observation/obs-456").setDisplay("Test Display");
+
+		// When
+		myService.addReplacesLink(observation, ref);
+
+		// Then
+		IBaseReference retrieved = myService.getReplacesLinks(observation).get(0);
+		assertThat(((Reference) retrieved).getDisplay()).isEqualTo("Test Display");
+		assertThat(retrieved.getReferenceElement().getValue()).isEqualTo("Observation/obs-456");
+	}
+
+	@Test
+	void shouldNotAffectOtherExtensions() {
+		// Given - Resource with unrelated extension
+		Observation obs = new Observation();
+		obs.setId("Observation/obs-123");
+		obs.addExtension("http://example.org/custom", new StringType("custom-value"));
+
+		// When
+		myService.addReplacesLink(obs, new Reference("Observation/obs-456"));
+
+		// Then - Verify both extensions exist
+		assertThat(obs.getExtension()).hasSize(2);
+		assertThat(obs.getExtensionByUrl("http://example.org/custom")).isNotNull();
+		assertThat(obs.getExtensionByUrl("http://example.org/custom").getValue())
+			.isInstanceOf(StringType.class);
+		assertThat(((StringType) obs.getExtensionByUrl("http://example.org/custom").getValue()).getValue())
+			.isEqualTo("custom-value");
+
+		// Verify the replaces link we added is retrievable
+		List<IBaseReference> replacesLinks = myService.getReplacesLinks(obs);
+		assertThat(replacesLinks).hasSize(1);
+		assertThat(replacesLinks.get(0).getReferenceElement().getValue()).isEqualTo("Observation/obs-456");
+	}
+
+	@Test
+	void hasReplacesLinkTo_shouldMatchWhenTargetIdHasVersion() {
+		// Given - Reference without version
+		Observation observation = new Observation();
+		observation.setId("Observation/obs-123");
+		Reference ref = new Reference("Observation/obs-456");
+		myService.addReplacesLink(observation, ref);
+
+		// When - Query with versioned ID
+		IIdType targetIdVersioned = new IdType("Observation/obs-456/_history/2");
+
+		// Then - Should match even though target has version
+		assertThat(myService.hasReplacesLinkTo(observation, targetIdVersioned)).isTrue();
+	}
+
+	@Test
+	void hasReplacedByLink_shouldReturnTrueWithMultipleLinks() {
+		// Given
+		Observation observation = new Observation();
+		observation.setId("Observation/obs-123");
+		myService.addReplacedByLink(observation, new Reference("Observation/target1"));
+		myService.addReplacedByLink(observation, new Reference("Observation/target2"));
+
+		// When
+		boolean hasLink = myService.hasReplacedByLink(observation);
+
+		// Then
+		assertThat(hasLink).isTrue();
+		assertThat(myService.getReplacedByLinks(observation)).hasSize(2);
+	}
+
+	@Test
+	void hasReplacesLinkTo_shouldFindMatchAmongMultipleLinks() {
+		// Given - Multiple replaces links
+		Observation observation = new Observation();
+		observation.setId("Observation/obs-123");
+		myService.addReplacesLink(observation, new Reference("Observation/source1"));
+		myService.addReplacesLink(observation, new Reference("Observation/source2"));
+		myService.addReplacesLink(observation, new Reference("Observation/source3"));
+
+		// When/Then - Should find match
+		assertThat(myService.hasReplacesLinkTo(observation, new IdType("Observation/source2"))).isTrue();
+
+		// When/Then - Should not find non-existent match
+		assertThat(myService.hasReplacesLinkTo(observation, new IdType("Observation/source999"))).isFalse();
+
+		// Verify all three links are present
+		assertThat(myService.getReplacesLinks(observation)).hasSize(3);
+	}
 }

@@ -280,4 +280,94 @@ class PatientNativeLinkServiceTest {
 		assertThat(links).hasSize(1);
 		assertThat(links.get(0).getReferenceElement().getValue()).isEqualTo("Patient/source-456");
 	}
+
+	@Test
+	void shouldPreserveReferenceDisplayText() {
+		// Given
+		Patient patient = new Patient();
+		patient.setId("Patient/pat-123");
+		Reference ref = new Reference("Patient/pat-456").setDisplay("Test Display");
+
+		// When
+		myService.addReplacesLink(patient, ref);
+
+		// Then
+		IBaseReference retrieved = myService.getReplacesLinks(patient).get(0);
+		assertThat(((Reference) retrieved).getDisplay()).isEqualTo("Test Display");
+		assertThat(retrieved.getReferenceElement().getValue()).isEqualTo("Patient/pat-456");
+	}
+
+	@Test
+	void shouldNotAffectOtherLinkTypes() {
+		// Given - Patient with SEEALSO link
+		Patient patient = new Patient();
+		patient.setId("Patient/pat-123");
+		patient.addLink()
+			.setType(Patient.LinkType.SEEALSO)
+			.setOther(new Reference("Patient/other-patient"));
+
+		// When
+		myService.addReplacesLink(patient, new Reference("Patient/pat-456"));
+
+		// Then - Verify both links exist
+		assertThat(patient.getLink()).hasSize(2);
+
+		// Verify first link (SEEALSO) is untouched - also verifies link order preserved
+		assertThat(patient.getLink().get(0).getType()).isEqualTo(Patient.LinkType.SEEALSO);
+		assertThat(patient.getLink().get(0).getOther().getReference()).isEqualTo("Patient/other-patient");
+
+		// Verify second link is the replaces link we added
+		assertThat(patient.getLink().get(1).getType()).isEqualTo(Patient.LinkType.REPLACES);
+		assertThat(patient.getLink().get(1).getOther().getReference()).isEqualTo("Patient/pat-456");
+	}
+
+	@Test
+	void hasReplacesLinkTo_shouldMatchWhenTargetIdHasVersion() {
+		// Given - Reference without version
+		Patient patient = new Patient();
+		patient.setId("Patient/pat-123");
+		Reference ref = new Reference("Patient/pat-456");
+		myService.addReplacesLink(patient, ref);
+
+		// When - Query with versioned ID
+		IIdType targetIdVersioned = new IdType("Patient/pat-456/_history/2");
+
+		// Then - Should match even though target has version
+		assertThat(myService.hasReplacesLinkTo(patient, targetIdVersioned)).isTrue();
+	}
+
+	@Test
+	void hasReplacedByLink_shouldReturnTrueWithMultipleLinks() {
+		// Given
+		Patient patient = new Patient();
+		patient.setId("Patient/pat-123");
+		myService.addReplacedByLink(patient, new Reference("Patient/target1"));
+		myService.addReplacedByLink(patient, new Reference("Patient/target2"));
+
+		// When
+		boolean hasLink = myService.hasReplacedByLink(patient);
+
+		// Then
+		assertThat(hasLink).isTrue();
+		assertThat(myService.getReplacedByLinks(patient)).hasSize(2);
+	}
+
+	@Test
+	void hasReplacesLinkTo_shouldFindMatchAmongMultipleLinks() {
+		// Given - Multiple replaces links
+		Patient patient = new Patient();
+		patient.setId("Patient/pat-123");
+		myService.addReplacesLink(patient, new Reference("Patient/source1"));
+		myService.addReplacesLink(patient, new Reference("Patient/source2"));
+		myService.addReplacesLink(patient, new Reference("Patient/source3"));
+
+		// When/Then - Should find match
+		assertThat(myService.hasReplacesLinkTo(patient, new IdType("Patient/source2"))).isTrue();
+
+		// When/Then - Should not find non-existent match
+		assertThat(myService.hasReplacesLinkTo(patient, new IdType("Patient/source999"))).isFalse();
+
+		// Verify all three links are present
+		assertThat(myService.getReplacesLinks(patient)).hasSize(3);
+	}
 }
