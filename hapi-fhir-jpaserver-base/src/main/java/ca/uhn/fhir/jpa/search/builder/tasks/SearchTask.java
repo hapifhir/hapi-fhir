@@ -40,11 +40,13 @@ import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.jpa.util.SearchParameterMapCalculator;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.system.HapiSystemProperties;
@@ -493,23 +495,8 @@ public class SearchTask implements Callable<Void> {
 				ourLog.error("Failed during search loading after {}ms", sw.getMillis(), t);
 			}
 			myUnsyncedPids.clear();
-			Throwable rootCause = ExceptionUtils.getRootCause(t);
-			rootCause = defaultIfNull(rootCause, t);
 
-			String failureMessage = rootCause.getMessage();
-
-			int failureCode = InternalErrorException.STATUS_CODE;
-			if (t instanceof BaseServerResponseException) {
-				failureCode = ((BaseServerResponseException) t).getStatusCode();
-			}
-
-			if (HapiSystemProperties.isUnitTestCaptureStackEnabled()) {
-				failureMessage += "\nStack\n" + ExceptionUtils.getStackTrace(rootCause);
-			}
-
-			mySearch.setFailureMessage(failureMessage);
-			mySearch.setFailureCode(failureCode);
-			mySearch.setStatus(SearchStatusEnum.FAILED);
+			markSearchAsFailedWithExceptionDetails(t);
 
 			mySearchRuntimeDetails.setSearchStatus(mySearch.getStatus());
 			HookParams params = new HookParams()
@@ -528,6 +515,43 @@ public class SearchTask implements Callable<Void> {
 			span.end();
 		}
 		return null;
+	}
+
+	/**
+	 * Updates the search entity with failure information based on the exception.
+	 * Determines the appropriate HTTP status code based on exception type:
+	 * - DataFormatException -> 400 Bad Request (client error)
+	 * - BaseServerResponseException -> Use exception's status code
+	 * - Other exceptions -> 500 Internal Server Error
+	 *
+	 * Optionally appends stack trace if unit test capture is enabled.
+	 *
+	 * @param theThrowable The exception that caused the search to fail
+	 */
+	protected void markSearchAsFailedWithExceptionDetails(Throwable theThrowable) {
+		Throwable rootCause = ExceptionUtils.getRootCause(theThrowable);
+		rootCause = defaultIfNull(rootCause, theThrowable);
+
+		String failureMessage = rootCause.getMessage();
+
+		int failureCode;
+		if (rootCause instanceof DataFormatException || theThrowable instanceof DataFormatException) {
+			// DataFormatException indicates invalid client input
+			// and should return HTTP 400 Bad Request, not 500 Internal Server Error.
+			failureCode = InvalidRequestException.STATUS_CODE;
+		} else if (theThrowable instanceof BaseServerResponseException baseServerResponseException) {
+			failureCode = baseServerResponseException.getStatusCode();
+		} else {
+			failureCode = InternalErrorException.STATUS_CODE;
+		}
+
+		if (HapiSystemProperties.isUnitTestCaptureStackEnabled()) {
+			failureMessage += "\nStack\n" + ExceptionUtils.getStackTrace(rootCause);
+		}
+
+		mySearch.setFailureMessage(failureMessage);
+		mySearch.setFailureCode(failureCode);
+		mySearch.setStatus(SearchStatusEnum.FAILED);
 	}
 
 	private void doSaveSearch() {
