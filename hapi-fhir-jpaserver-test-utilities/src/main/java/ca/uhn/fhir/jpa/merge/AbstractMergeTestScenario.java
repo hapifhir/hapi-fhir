@@ -479,37 +479,60 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		}
 	}
 
-	public void assertTargetResourceState(
-			@Nonnull T theResource,
-			@Nonnull IIdType theSourceId,
-			boolean theSourceDeleted,
-			@Nonnull List<Identifier> theExpectedIdentifiers) {
+	public void assertTargetResourceState() {
+		assertTestDataCreated();
+
+		// Read target resource
+		T target = readResource(getVersionlessTargetId());
+		IIdType sourceId = getVersionlessSourceId();
 
 		// Should have replaces link only if source was not deleted
 		// (when source is deleted, we don't want a dangling reference)
-		if (!theSourceDeleted) {
+		if (!myDeleteSource) {
 			IResourceLinkService linkService = myLinkServiceFactory.getServiceForResourceType(getResourceTypeName());
-			List<IBaseReference> replacesLinksRefs = linkService.getReplacesLinks(theResource);
+			List<IBaseReference> replacesLinksRefs = linkService.getReplacesLinks(target);
 
 			assertThat(replacesLinksRefs)
 					.as("Target should have replaces link when source not deleted")
 					.hasSize(1)
 					.element(0)
 					.satisfies(link -> assertThat(link.getReferenceElement().toUnqualifiedVersionless())
-							.isEqualTo(theSourceId.toUnqualifiedVersionless()));
+							.isEqualTo(sourceId.toUnqualifiedVersionless()));
 			ourLog.debug("Verified target has replaces link to source");
 		}
 
 		// Should have expected identifiers
-		List<Identifier> actualIdentifiers = getIdentifiersFromResource(theResource);
-		assertIdentifiers(actualIdentifiers, theExpectedIdentifiers);
+		List<Identifier> actualIdentifiers = getIdentifiersFromResource(target);
+		assertIdentifiers(actualIdentifiers, getExpectedIdentifiers());
 
 		// Template method pattern: subclasses implement active field check if applicable
 		if (hasActiveField()) {
-			assertActiveFieldIfPresent(theResource, true);
+			assertActiveFieldIfPresent(target, true);
 		}
 
 		ourLog.debug("Verified target resource state: correct identifiers");
+	}
+
+	/**
+	 * Validates all resources after a merge operation.
+	 * Comprehensive validation that checks source state, target state, and reference updates.
+	 */
+	public void validateResourcesAfterMerge() {
+		assertTestDataCreated();
+
+		// Validate source resource state
+		assertSourceResourceState();
+
+		// Validate target resource state
+		assertTargetResourceState();
+
+		// Validate all references updated
+		for (String resourceType : getReferencingResourceTypes()) {
+			List<IIdType> referencingIds = getReferencingResourceIds(resourceType);
+			if (!referencingIds.isEmpty()) {
+				assertReferencesUpdated(resourceType);
+			}
+		}
 	}
 
 	public void assertLinksPresent(
