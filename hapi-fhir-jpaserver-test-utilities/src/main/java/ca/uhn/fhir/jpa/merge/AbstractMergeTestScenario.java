@@ -27,6 +27,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.FhirTerser;
@@ -57,6 +58,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_OUTCOME;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_RESULT;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -578,17 +580,22 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	// ================================================
 
 	public void validateSyncMergeOutcome(@Nonnull Parameters theOutParams) {
-		assertThat(theOutParams.getParameter())
-				.as("Sync merge should return 3 parameters")
-				.hasSize(3);
-
-		OperationOutcome outcome =
-				(OperationOutcome) theOutParams.getParameter("outcome").getResource();
-
+		// Assert outcome
+		OperationOutcome outcome = (OperationOutcome)
+				theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
 		assertThat(outcome.getIssue()).hasSize(1).element(0).satisfies(issue -> {
 			assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
 			assertThat(issue.getDetails().getText()).isEqualTo("Merge operation completed successfully.");
 		});
+
+		// In sync mode, the result resource is returned in the output,
+		// assert what is returned is the same as the one in the db
+		T targetResourceInOutput = (T)
+				theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_RESULT).getResource();
+		T targetResourceReadFromDB = readResource(getVersionlessTargetId());
+		IParser parser = myFhirContext.newJsonParser();
+		assertThat(parser.encodeResourceToString(targetResourceInOutput))
+				.isEqualTo(parser.encodeResourceToString(targetResourceReadFromDB));
 	}
 
 	public void validateAsyncTaskCreated(@Nonnull Parameters theOutParams) {
