@@ -126,11 +126,8 @@ public class PractitionerMergeTestScenario extends AbstractMergeTestScenario<Pra
 				ReferencingTestResourceType.of("CarePlan", 1)));
 	}
 
-	public boolean hasActiveField() {
-		return true;
-	}
-
-	protected void assertActiveFieldIfPresent(@Nonnull Practitioner theResource, boolean theExpectedValue) {
+	@Override
+	protected void assertActiveFieldIfSupported(@Nonnull Practitioner theResource, boolean theExpectedValue) {
 		assertThat(theResource.getActive())
 				.as("Practitioner active field should be " + theExpectedValue)
 				.isEqualTo(theExpectedValue);

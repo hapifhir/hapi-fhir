@@ -81,8 +81,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *   <li>{@link #getResourceClass()}</li>
  *   <li>{@link #createResourceWithIdentifiers(List)}</li>
  *   <li>{@link #createReferencingResource(String, IIdType)}</li>
- *   <li>{@link #hasActiveField()}</li>
- *   <li>{@link #assertActiveFieldIfPresent(IBaseResource, boolean)} (if hasActiveField() is true)</li>
+ *   <li>{@link #assertActiveFieldIfSupported(IBaseResource, boolean)}</li>
  * </ul>
  *
  * <p>The scenario has two states:
@@ -337,7 +336,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		// Merge logic: target keeps its identifiers, source identifiers marked as "old" are added
 		List<Identifier> expected = new ArrayList<>(myTargetIdentifiers);
 
-		// Add source identifiers marked as "old" if not already present
+		// Add source identifiers marked as "old" if not already present in target
 		for (Identifier sourceId : mySourceIdentifiers) {
 			boolean isCommonIdentifier = myTargetIdentifiers.stream()
 					.anyMatch(targetId -> sourceId.getSystem().equals(targetId.getSystem())
@@ -470,9 +469,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 					.satisfies(link -> assertThat(link.getReferenceElement()).isEqualTo(versionlessTargetId));
 
 			// Template method pattern: subclasses implement active field check if applicable
-			if (hasActiveField()) {
-				assertActiveFieldIfPresent(source, false);
-			}
+			assertActiveFieldIfSupported(source, false);
 		}
 	}
 
@@ -501,11 +498,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		// Should have expected identifiers
 		List<Identifier> actualIdentifiers = getIdentifiersFromResource(target);
 		assertIdentifiers(actualIdentifiers, getExpectedIdentifiers());
-
-		// Template method pattern: subclasses implement active field check if applicable
-		if (hasActiveField()) {
-			assertActiveFieldIfPresent(target, true);
-		}
 
 		ourLog.debug("Verified target resource state: correct identifiers");
 	}
@@ -596,16 +588,19 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	/**
 	 * Template method for subclasses to implement active field assertions.
 	 *
-	 * <p>Only called if {@link #hasActiveField()} returns true.
-	 * Subclasses with an active field should override this to perform the assertion.
+	 * <p>Subclasses must implement this method to either:
+	 * <ul>
+	 *   <li>Perform active field validation if the resource supports it (e.g., Practitioner)</li>
+	 *   <li>Provide an explicit no-op if the resource doesn't support it (e.g., Observation)</li>
+	 * </ul>
+	 *
+	 * <p>This forces implementers to consciously decide and document whether
+	 * their resource type supports the active field.
 	 *
 	 * @param theResource the resource to check
 	 * @param theExpectedValue the expected value of the active field (true for target, false for source)
 	 */
-	protected void assertActiveFieldIfPresent(@Nonnull T theResource, boolean theExpectedValue) {
-		// Default: no-op
-		// Subclasses with active fields override this
-	}
+	protected abstract void assertActiveFieldIfSupported(@Nonnull T theResource, boolean theExpectedValue);
 
 	// ================================================
 	// OPERATION OUTCOME VALIDATION
@@ -942,13 +937,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	@Nonnull
 	protected abstract IBaseResource createReferencingResource(
 			@Nonnull String theReferencingResourceType, @Nonnull IIdType theReferencedId);
-
-	/**
-	 * Check if this resource type has an "active" field.
-	 *
-	 * @return True if the resource has an active field, false otherwise
-	 */
-	protected abstract boolean hasActiveField();
 
 	// ================================================
 	// PRIVATE HELPER METHODS
