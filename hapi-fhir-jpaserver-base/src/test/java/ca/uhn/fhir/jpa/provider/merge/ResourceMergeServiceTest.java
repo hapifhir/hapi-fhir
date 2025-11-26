@@ -210,8 +210,18 @@ public class ResourceMergeServiceTest {
 	}
 
 
-	@Test
-	void testMerge_WithoutResultResource_TargetSetToActiveExplicitly_Success() {
+	@ParameterizedTest
+	@CsvSource(value = {
+		"true,  true",   // Both explicitly active
+		"true,  null",   // Source active, target not set
+		"false, true",   // Source inactive, target active
+		"false, null",   // Source inactive, target not set
+		"null,  true",   // Source not set, target active
+		"null,  null"    // Neither explicitly set
+		// Note: target.active=false is excluded - tested separately as failure case
+	}, nullValues = {"null"})
+	void testMerge_WithoutResultResource_VariousActiveStates_Success(
+			Boolean isSourceActive, Boolean isTargetActive) {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
@@ -219,8 +229,15 @@ public class ResourceMergeServiceTest {
 		setOriginalInputParameters(mergeOperationParameters);
 
 		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID_WITH_VERSION_1);
+		if (isSourceActive != null) {
+			sourcePatient.setActive(isSourceActive);
+		}
+
 		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID_WITH_VERSION_1);
-		targetPatient.setActive(true);
+		if (isTargetActive != null) {
+			targetPatient.setActive(isTargetActive);
+		}
+
 		setupDaoMockForSuccessfulRead(sourcePatient);
 		setupDaoMockForSuccessfulRead(targetPatient);
 		setupDaoMockForSuccessfulSourcePatientUpdate(sourcePatient, createPatient(SOURCE_PATIENT_TEST_ID_WITH_VERSION_2));
@@ -236,6 +253,11 @@ public class ResourceMergeServiceTest {
 		verifySuccessfulOutcomeForSync(mergeOutcome, patientReturnedFromDaoAfterTargetUpdate);
 		verifyUpdatedSourcePatient();
 		verifyUpdatedTargetPatient(true, Collections.emptyList());
+
+		// Verify target active field preserved
+		boolean activeWasSetExplicitlyOnTarget = (isTargetActive != null);
+		verifyTargetActiveFieldPreserved(activeWasSetExplicitlyOnTarget);
+
 		verifyProvenanceCreated();
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
@@ -1428,6 +1450,9 @@ public class ResourceMergeServiceTest {
 		assertThat(myCapturedSourcePatientForUpdate.getLink()).hasSize(1);
 		assertThat(myCapturedSourcePatientForUpdate.getLinkFirstRep().getType()).isEqualTo(Patient.LinkType.REPLACEDBY);
 		assertThat(myCapturedSourcePatientForUpdate.getLinkFirstRep().getOther().getReference()).isEqualTo(TARGET_PATIENT_TEST_ID);
+
+		// Validate source active field set to false after merge
+		assertThat(myCapturedSourcePatientForUpdate.getActive()).isFalse();
 	}
 
 	private void setupDaoMockForSuccessfulSourcePatientUpdate(Patient thePatientExpectedAsInput,
@@ -1463,6 +1488,17 @@ public class ResourceMergeServiceTest {
 			assertThat(expectedIdentifier.equalsDeep(actualIdentifier)).isTrue();
 		}
 
+	}
+
+	private void verifyTargetActiveFieldPreserved(boolean theActiveWasSetExplicitly) {
+		Patient updatedTarget = myCapturedTargetPatientForUpdate;
+		if (theActiveWasSetExplicitly) {
+			// If active was set, it must be true (false is failure case tested separately)
+			assertThat(updatedTarget.getActive()).isTrue();
+		} else {
+			// If active was not set, verify it remains unset
+			assertThat(updatedTarget.hasActive()).isFalse();
+		}
 	}
 
 	private void verifyProvenanceCreated() {
