@@ -169,30 +169,6 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		myFlush.run();
 	}
 
-	/**
-	 * Removes a CodeSystem with the given URL from the in-memory cache.
-	 * This allows JPA-persisted resources to override built-in defaults.
-	 *
-	 * @param theUrl The canonical URL of the CodeSystem to remove
-	 */
-	public void removeCodeSystem(String theUrl) {
-		if (myDelegate instanceof DefaultProfileValidationSupportBundleStrategy) {
-			((DefaultProfileValidationSupportBundleStrategy) myDelegate).removeCodeSystem(theUrl);
-		}
-	}
-
-	/**
-	 * Removes a ValueSet with the given URL from the in-memory cache.
-	 * This allows JPA-persisted resources to override built-in defaults.
-	 *
-	 * @param theUrl The canonical URL of the ValueSet to remove
-	 */
-	public void removeValueSet(String theUrl) {
-		if (myDelegate instanceof DefaultProfileValidationSupportBundleStrategy) {
-			((DefaultProfileValidationSupportBundleStrategy) myDelegate).removeValueSet(theUrl);
-		}
-	}
-
 	@Override
 	public FhirContext getFhirContext() {
 		return myCtx;
