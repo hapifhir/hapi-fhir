@@ -176,7 +176,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		}
 
 		// Validate merge outcomes
-		validateMergeOutcome(scenario, theDeleteSource);
+		scenario.validateResourcesAfterMerge();
 
 		// Validate provenance created for actual merges
 		scenario.assertMergeProvenanceCreated();
@@ -202,7 +202,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		// Validate
 		scenario.validateSyncMergeOutcome(outParams);
-		validateMergeOutcome(scenario, false);
+		scenario.validateResourcesAfterMerge();
 	}
 
 	@ParameterizedTest(name = "{index}: sourceById={0}, targetById={1}")
@@ -224,7 +224,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		myHelper.waitForAsyncTaskCompletion(outParams);
 		scenario.validateTaskOutput(outParams);
 
-		validateMergeOutcome(scenario, false);
+		scenario.validateResourcesAfterMerge();
 	}
 
 	// ================================================
@@ -526,9 +526,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		myHelper.callMergeOperation(scenario, false);
 
 		// Validate target state using scenario (handles active/status field differences)
-		T targetAfter = scenario.readResource(scenario.getVersionlessTargetId());
-		scenario.assertTargetResourceState(
-				targetAfter, scenario.getVersionlessSourceId(), false, scenario.getExpectedIdentifiers());
+		scenario.assertTargetResourceState();
 	}
 
 	// ================================================
@@ -574,25 +572,4 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	// ================================================
 	// HELPER METHODS
 	// ================================================
-
-	/**
-	 * Validate merge outcome including source/target state and reference updates.
-	 */
-	protected void validateMergeOutcome(AbstractMergeTestScenario<T> theScenario, boolean theDeleteSource) {
-		// Validate source resource state
-		theScenario.assertSourceResourceState();
-
-		// Validate target resource state
-		T target = theScenario.readResource(theScenario.getVersionlessTargetId());
-		theScenario.assertTargetResourceState(
-				target, theScenario.getVersionlessSourceId(), theDeleteSource, theScenario.getExpectedIdentifiers());
-
-		// Validate all references updated
-		for (String resourceType : theScenario.getReferencingResourceTypes()) {
-			List<IIdType> referencingIds = theScenario.getReferencingResourceIds(resourceType);
-			if (!referencingIds.isEmpty()) {
-				theScenario.assertReferencesUpdated(resourceType);
-			}
-		}
-	}
 }
