@@ -2776,7 +2776,7 @@ public class JpaStorageSettings extends StorageSettings {
 		return myAllowDatabaseValidationOverride;
 	}
 
-    public enum StoreMetaSourceInformationEnum {
+	public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),
 		SOURCE_URI(true, false),
 		REQUEST_ID(false, true),
