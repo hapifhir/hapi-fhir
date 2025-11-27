@@ -436,7 +436,7 @@ public class JpaStorageSettings extends StorageSettings {
 	 * <p>
 	 * Defaults to {@code false}, meaning built-in default profiles take precedence.
 	 *
-	 * @since 8.2.0
+	 * @since 8.8.0
 	 */
 	private boolean myAllowDatabaseValidationOverride = false;
 
@@ -2758,7 +2758,7 @@ public class JpaStorageSettings extends StorageSettings {
 	 *
 	 * @param theAllowDatabaseValidationOverride if {@code true}, database resources override defaults
 	 * @see #isAllowDatabaseValidationOverride()
-	 * @since 8.2.0
+	 * @since 8.8.0
 	 */
 	public void setAllowDatabaseValidationOverride(boolean theAllowDatabaseValidationOverride) {
 		myAllowDatabaseValidationOverride = theAllowDatabaseValidationOverride;
@@ -2770,7 +2770,7 @@ public class JpaStorageSettings extends StorageSettings {
 	 *
 	 * @return {@code true} if database resources override defaults; {@code false} otherwise
 	 * @see #setAllowDatabaseValidationOverride(boolean)
-	 * @since 8.2.0
+	 * @since 8.8.0
 	 */
 	public boolean isAllowDatabaseValidationOverride() {
 		return myAllowDatabaseValidationOverride;
