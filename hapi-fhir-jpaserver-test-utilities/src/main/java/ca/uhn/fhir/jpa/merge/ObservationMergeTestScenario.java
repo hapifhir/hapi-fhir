@@ -108,7 +108,11 @@ public class ObservationMergeTestScenario extends AbstractMergeTestScenario<Obse
 	}
 
 	public AbstractMergeTestScenario<Observation> withMultipleReferencingResources() {
-		return withReferences(List.of(ReferencingTestResourceType.of("DiagnosticReport", 5)));
+		return withMultipleReferencingResources(3);
+	}
+
+	public AbstractMergeTestScenario<Observation> withMultipleReferencingResources(int theCount) {
+		return withReferences(List.of(ReferencingTestResourceType.of("DiagnosticReport", theCount)));
 	}
 
 	@Override

@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CarePlan;
@@ -124,6 +125,22 @@ public class PractitionerMergeTestScenario extends AbstractMergeTestScenario<Pra
 				ReferencingTestResourceType.of("PractitionerRole", 3),
 				ReferencingTestResourceType.of("Encounter", 2),
 				ReferencingTestResourceType.of("CarePlan", 1)));
+	}
+
+	public AbstractMergeTestScenario<Practitioner> withMultipleReferencingResources(int theCount) {
+		Validate.isTrue(theCount > 0, "Count must be greater than 0");
+		if (theCount >= 3) {
+			return withReferences(List.of(
+					ReferencingTestResourceType.of("PractitionerRole", 1),
+					ReferencingTestResourceType.of("Encounter", 1),
+					ReferencingTestResourceType.of("CarePlan", theCount - 2)));
+		} else if (theCount == 2) {
+			return withReferences(List.of(
+					ReferencingTestResourceType.of("PractitionerRole", 1),
+					ReferencingTestResourceType.of("Encounter", 1)));
+		} else {
+			return withReferences(List.of(ReferencingTestResourceType.of("PractitionerRole", theCount)));
+		}
 	}
 
 	@Override
