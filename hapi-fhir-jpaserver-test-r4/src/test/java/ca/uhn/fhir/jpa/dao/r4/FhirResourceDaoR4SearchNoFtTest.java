@@ -61,6 +61,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;

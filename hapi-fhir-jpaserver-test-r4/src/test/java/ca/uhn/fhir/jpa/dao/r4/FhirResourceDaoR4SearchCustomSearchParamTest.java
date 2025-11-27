@@ -29,6 +29,7 @@ import ca.uhn.fhir.util.HapiExtensions;
 
 import java.util.Objects;
 
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.Appointment.AppointmentStatus;
