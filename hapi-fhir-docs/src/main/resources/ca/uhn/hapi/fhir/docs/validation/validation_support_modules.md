@@ -177,6 +177,34 @@ these generated issues, you can use the [ValidationMessageUnknownCodeSystemPostP
 This module is deprecated and no longer provides any functionality. Caching is provided by [ValidationSupportChain](#validationsupportchain).
 
 
+# JPA Server Validation Chain Configuration
+
+When using the JPA Server, the validation support chain is configured automatically. By default, the built-in FHIR definitions (from `DefaultProfileValidationSupport`) take precedence over user-defined terminology resources stored in the database (from `JpaPersistedResourceValidationSupport`).
+
+## Allowing Database Validation Override
+
+In some cases, you may want your database-stored CodeSystem and ValueSet resources to take precedence over the built-in HL7 definitions. This is useful when:
+
+* You need to override a built-in terminology resource with a different version
+
+To enable this behavior, use the `allowDatabaseValidationOverride` setting:
+
+```java
+@Bean
+public JpaStorageSettings storageSettings() {
+   JpaStorageSettings retVal = new JpaStorageSettings();
+   // Allow database-stored validation resources to take precedence
+   retVal.setAllowDatabaseValidationOverride(true);
+   return retVal;
+}
+```
+
+When this setting is enabled (`true`), the JPA validation support (database-stored resources) is placed before the default profile validation support in the chain. When disabled (`false`, the default), the built-in definitions take precedence.
+
+<p class="doc_info_bubble">
+<b>Note:</b> Enabling this setting means that any CodeSystem or ValueSet you store in the database with the same URL as a built-in HL7 resource will override the built-in version during validation. Use this setting carefully as it can affect validation behavior for standard FHIR resources.
+</p>
+
 # Recipes
 
 The IValidationSupport instance passed to the FhirInstanceValidator will often resemble the chain shown in the diagram below. In this diagram:
