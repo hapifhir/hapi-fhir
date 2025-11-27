@@ -419,6 +419,55 @@ public class ResourceUtilTest {
 	}
 
 	@Test
+	public void testMerge_singleton_ignoreOrderEnabled_mergeCodingsEnabled_mergeCodings() {
+		// set up
+		Observation o1 = new Observation();
+		o1.getCode().addCoding().setSystem("http://loinc.org").setCode("10836-5").setDisplay("Niacin [Mass/volume] in Blood");
+		o1.getCode().addCoding().setSystem("http://customlocalcodesystem.org").setCode("ABC").setDisplay("Niacin");
+		o1.getCode().addCoding().setSystem("http://anothersystem.org").setCode("123").setDisplay("Niacin");
+
+		Observation o2 = new Observation();
+		o2.getCode().addCoding().setSystem("http://anothersystem.org").setCode("123").setDisplay("Niacin");
+		o2.getCode().addCoding().setSystem("http://loinc.org").setCode("10836-5").setDisplay("Niacin [Mass/volume] in Blood");
+
+		ResourceUtil.MergeControlParameters mergeControlParameters = new ResourceUtil.MergeControlParameters();
+		mergeControlParameters.setIgnoreCodeableConceptCodingOrder(true);
+		mergeControlParameters.setMergeCodings(true);
+
+		// execute
+		ResourceUtil.mergeField(ourFhirContext, "code", o1, o2, mergeControlParameters);
+
+		// validate
+		assertThat(o2.getCode().getCoding()).hasSize(3);
+		assertThat(o2.getCode().getCoding().get(0).getSystem()).isEqualTo("http://anothersystem.org");
+		assertThat(o2.getCode().getCoding().get(1).getSystem()).isEqualTo("http://loinc.org");
+		assertThat(o2.getCode().getCoding().get(2).getSystem()).isEqualTo("http://customlocalcodesystem.org");
+	}
+
+	@Test
+	public void testMerge_singleton_mergeCodingsEnabled_overlapingCodings_doNotMerge() {
+		// set up
+		Observation o1 = new Observation();
+		o1.getCode().addCoding().setSystem("http://loinc.org").setCode("10836-5").setDisplay("Niacin [Mass/volume] in Blood");
+		o1.getCode().addCoding().setSystem("http://anothersystem.org").setCode("123").setDisplay("Niacin");
+
+		Observation o2 = new Observation();
+		o2.getCode().addCoding().setSystem("http://loinc.org").setCode("10836-5").setDisplay("Niacin [Mass/volume] in Blood");
+		o2.getCode().addCoding().setSystem("http://customlocalcodesystem.org").setCode("ABC").setDisplay("Niacin");
+
+		ResourceUtil.MergeControlParameters mergeControlParameters = new ResourceUtil.MergeControlParameters();
+		mergeControlParameters.setMergeCodings(true);
+
+		// execute
+		ResourceUtil.mergeField(ourFhirContext, "code", o1, o2, mergeControlParameters);
+
+		// validate
+		assertThat(o2.getCode().getCoding()).hasSize(2);
+		assertThat(o2.getCode().getCoding().get(0).getSystem()).isEqualTo("http://loinc.org");
+		assertThat(o2.getCode().getCoding().get(1).getSystem()).isEqualTo("http://anothersystem.org");
+	}
+
+	@Test
 	public void testMerge_singleton_conceptsMatch_doNotMergeCodingFields() {
 		// set up
 		Observation o1 = new Observation();

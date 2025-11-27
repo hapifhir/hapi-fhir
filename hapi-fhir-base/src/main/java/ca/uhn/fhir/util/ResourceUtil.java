@@ -232,7 +232,8 @@ public class ResourceUtil {
 			MergeControlParameters theMergeControlParameters) {
 		FhirTerser terser = theFhirContext.newTerser();
 
-		if (!theSourceFieldValues.isEmpty() && theTargetFieldValues.stream().anyMatch(ResourceUtil::hasDataAbsentReason)) {
+		if (!theSourceFieldValues.isEmpty()
+				&& theTargetFieldValues.stream().anyMatch(ResourceUtil::hasDataAbsentReason)) {
 			// If the target resource has a data absent reason, and there is potentially real data incoming
 			// in the source resource, we should clear the data absent reason because it won't be absent anymore.
 			theTargetFieldValues = removeDataAbsentReason(theTarget, childDefinition, theTargetFieldValues);
