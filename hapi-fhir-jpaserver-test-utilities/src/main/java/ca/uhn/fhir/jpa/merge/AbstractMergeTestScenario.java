@@ -349,7 +349,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 		if (myCreateResultResource) {
 			// Result resource provided - identifiers come from result resource identifiers
-			// (which includes the extra identifier by default to ensure it's different from target)
 			return new ArrayList<>(getResultResourceIdentifiers());
 		}
 
@@ -686,6 +685,16 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		ourLog.info(
 				"Complete Task: {}",
 				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(task));
+
+		// Handle zero-reference case: when no references need patching, no output is created
+		// The batch job completes successfully but doesn't create Task.output or Task.contained
+		// because there are no patch results to include
+		if (getTotalReferenceCount() == 0) {
+			assertThat(task.getOutput()).isEmpty();
+			assertThat(task.getContained()).isEmpty();
+			ourLog.info("Verified: Task has no output (zero referencing resources)");
+			return;
+		}
 
 		Task.TaskOutputComponent taskOutput = task.getOutputFirstRep();
 
