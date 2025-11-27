@@ -13,12 +13,12 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Patient;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -389,7 +389,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg0) {
 				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(bundleProvider.getUuid()).orElseThrow(() -> new InternalErrorException("Search doesn't exist"));
 				assertNotNull(search);
 			}
@@ -435,7 +435,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(@NotNull TransactionStatus theArg) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg) {
 				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(
 					() -> new InternalErrorException("Search doesn't exist"));
 				assertNotNull(search, "Failed after " + sw);
@@ -449,7 +449,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(@NotNull TransactionStatus theArg) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg) {
 				assertNotNull(mySearchEntityDao.findByUuidAndFetchIncludes(bundleProvider.getUuid()));
 			}
 		});
@@ -459,7 +459,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(@NotNull TransactionStatus theArg) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg) {
 				assertNotNull(mySearchEntityDao.findByUuidAndFetchIncludes(bundleProvider.getUuid()));
 			}
 		});
@@ -469,7 +469,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(@NotNull TransactionStatus theArg) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg) {
 				assertFalse(mySearchEntityDao.findByUuidAndFetchIncludes(bundleProvider.getUuid()).isPresent());
 			}
 		});
@@ -484,7 +484,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 	public static void waitForSearchToSave(final String theUuid, final ISearchDao theSearchEntityDao, TransactionTemplate theTxTemplate) {
 		theTxTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg0) {
 				Search search = null;
 				for (int i = 0; i < 20 && search == null; i++) {
 					search = theSearchEntityDao.findByUuidAndFetchIncludes(theUuid).orElse(null);
