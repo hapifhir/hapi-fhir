@@ -57,6 +57,7 @@ public class ResourceUtil {
 	public static class MergeControlParameters {
 		private boolean myIgnoreCodeableConceptCodingOrder;
 		private boolean myMergeCodings;
+		private boolean myMergeCodingDetails;
 
 		public boolean isIgnoreCodeableConceptCodingOrder() {
 			return myIgnoreCodeableConceptCodingOrder;
@@ -72,6 +73,14 @@ public class ResourceUtil {
 
 		public void setMergeCodings(boolean theMergeCodings) {
 			myMergeCodings = theMergeCodings;
+		}
+
+		public boolean isMergeCodingDetails() {
+			return myMergeCodingDetails;
+		}
+
+		public void setMergeCodingDetails(boolean theMergeCodingDetails) {
+			myMergeCodingDetails = theMergeCodingDetails;
 		}
 	}
 
@@ -376,40 +385,32 @@ public class ResourceUtil {
 			if (theMergeControlParameters.isIgnoreCodeableConceptCodingOrder()) {
 				if (theMergeControlParameters.isMergeCodings()) {
 					if (sourceCodings.size() < targetCodings.size()) {
-						isMergeCandidate = sourceCodings.stream().allMatch(sourceCoding -> {
-							Method deepEquals = getMethod(sourceCoding, EQUALS_DEEP);
-							return targetCodings.stream()
-									.anyMatch(targetCoding -> evaluateEquality(sourceCoding, targetCoding, deepEquals));
-						});
+						isMergeCandidate = sourceCodings.stream().allMatch(sourceCoding -> targetCodings.stream()
+								.anyMatch(targetCoding -> isCodingMatches(
+										theTerser, sourceCoding, targetCoding, theMergeControlParameters)));
 					} else {
-						isMergeCandidate = targetCodings.stream().allMatch(targetCoding -> {
-							Method deepEquals = getMethod(targetCoding, EQUALS_DEEP);
-							return sourceCodings.stream()
-									.anyMatch(sourceCoding -> evaluateEquality(sourceCoding, targetCoding, deepEquals));
-						});
+						isMergeCandidate = targetCodings.stream().allMatch(targetCoding -> sourceCodings.stream()
+								.anyMatch(sourceCoding -> isCodingMatches(
+										theTerser, sourceCoding, targetCoding, theMergeControlParameters)));
 					}
 				} else {
 					isMergeCandidate = sourceCodings.size() == targetCodings.size()
-							&& sourceCodings.stream().allMatch(sourceCoding -> {
-								Method deepEquals = getMethod(sourceCoding, EQUALS_DEEP);
-								return targetCodings.stream()
-										.anyMatch(targetCoding ->
-												evaluateEquality(sourceCoding, targetCoding, deepEquals));
-							});
+							&& sourceCodings.stream().allMatch(sourceCoding -> targetCodings.stream()
+									.anyMatch(targetCoding -> isCodingMatches(
+											theTerser, sourceCoding, targetCoding, theMergeControlParameters)));
 				}
 			} else {
 				if (theMergeControlParameters.isMergeCodings()) {
 					int prefixLength = Math.min(sourceCodings.size(), targetCodings.size());
 					for (int i = 0; i < prefixLength; i++) {
-						Method deepEquals = getMethod(sourceCodings.get(i), EQUALS_DEEP);
-						isMergeCandidate &= evaluateEquality(sourceCodings.get(i), targetCodings.get(i), deepEquals);
+						isMergeCandidate &= isCodingMatches(
+								theTerser, sourceCodings.get(i), targetCodings.get(i), theMergeControlParameters);
 					}
 				} else {
 					if (sourceCodings.size() == targetCodings.size()) {
 						for (int i = 0; i < sourceCodings.size(); i++) {
-							Method deepEquals = getMethod(sourceCodings.get(i), EQUALS_DEEP);
-							isMergeCandidate &=
-									evaluateEquality(sourceCodings.get(i), targetCodings.get(i), deepEquals);
+							isMergeCandidate &= isCodingMatches(
+									theTerser, sourceCodings.get(i), targetCodings.get(i), theMergeControlParameters);
 						}
 					} else {
 						isMergeCandidate = false;
@@ -419,6 +420,42 @@ public class ResourceUtil {
 		}
 
 		return isMergeCandidate;
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static boolean isCodingMatches(
+			FhirTerser theTerser,
+			IBase theSourceCoding,
+			IBase theTargetCoding,
+			MergeControlParameters theMergeControlParameters) {
+		boolean codingMatches;
+		if (theMergeControlParameters.isMergeCodingDetails()) {
+			// Use the tuple (system,code) as a business key on Coding
+			Optional<IPrimitiveType> sourceSystem =
+					theTerser.getSingleValue(theSourceCoding, "system", IPrimitiveType.class);
+			Optional<IPrimitiveType> sourceCode =
+					theTerser.getSingleValue(theSourceCoding, "code", IPrimitiveType.class);
+			Optional<IPrimitiveType> targetSystem =
+					theTerser.getSingleValue(theTargetCoding, "system", IPrimitiveType.class);
+			Optional<IPrimitiveType> targetCode =
+					theTerser.getSingleValue(theTargetCoding, "code", IPrimitiveType.class);
+			boolean systemMatches = sourceSystem.isPresent()
+					&& targetSystem.isPresent()
+					&& Strings.CS.equals(
+							sourceSystem.get().getValueAsString(),
+							targetSystem.get().getValueAsString());
+			boolean codeMatches = sourceCode.isPresent()
+					&& targetCode.isPresent()
+					&& Strings.CS.equals(
+							sourceCode.get().getValueAsString(),
+							targetCode.get().getValueAsString());
+			codingMatches = systemMatches && codeMatches;
+		} else {
+			// require an exact match on every field
+			Method deepEquals = getMethod(theSourceCoding, EQUALS_DEEP);
+			codingMatches = evaluateEquality(theSourceCoding, theTargetCoding, deepEquals);
+		}
+		return codingMatches;
 	}
 
 	/**

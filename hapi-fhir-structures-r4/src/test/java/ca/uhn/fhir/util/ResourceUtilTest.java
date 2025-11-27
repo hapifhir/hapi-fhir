@@ -672,7 +672,7 @@ public class ResourceUtilTest {
 		o2.getCode().addCoding().setSystem("http://loinc.org").setCode("10836-5").setDisplay("Niacin [Mass/volume] in Blood");
 
 		ResourceUtil.MergeControlParameters mergeControlParameters = new ResourceUtil.MergeControlParameters();
-		mergeControlParameters.setMergeCodings(true);
+		mergeControlParameters.setMergeCodingDetails(true);
 
 		// execute
 		ResourceUtil.mergeField(ourFhirContext, "code", o1, o2, mergeControlParameters);
