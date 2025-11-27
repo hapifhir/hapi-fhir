@@ -1460,7 +1460,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg0) {
 				Class<ResourceLink> type = ResourceLink.class;
 				List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
 				ourLog.info(toStringMultiline(results));

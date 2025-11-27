@@ -119,7 +119,7 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc, IHasScheduledJ
 			}
 
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg0) {
 				int maxResult = 1000;
 				Page<TermConcept> concepts =
 						myConceptDao.findResourcesRequiringReindexing(PageRequest.of(0, maxResult));
