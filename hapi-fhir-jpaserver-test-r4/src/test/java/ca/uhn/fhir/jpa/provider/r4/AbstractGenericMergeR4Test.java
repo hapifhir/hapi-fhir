@@ -29,6 +29,8 @@ import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nonnull;
@@ -50,8 +52,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -159,7 +159,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				.withPreview(thePreview)
 				.withResultResource(theResultResource);
 
-		scenario.createTestData();
+		scenario.persistTestData();
 
 		// Execute merge
 		Parameters outParams = myHelper.callMergeOperation(scenario, theAsync);
@@ -193,7 +193,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		// Setup
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.withOneReferencingResource();
-		scenario.createTestData();
+		scenario.persistTestData();
 
 		// Build parameters with identifier-based resolution
 		MergeTestParameters params = scenario.buildMergeOperationParameters(theSourceById, theTargetById);
@@ -212,7 +212,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		// Setup
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.withOneReferencingResource();
-		scenario.createTestData();
+		scenario.persistTestData();
 
 		// Build parameters with identifier-based resolution
 		MergeTestParameters params = scenario.buildMergeOperationParameters(theSourceById, theTargetById);
@@ -238,7 +238,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.withSourceIdentifiers(Collections.emptyList());
 		scenario.withOneReferencingResource();
-		scenario.createTestData();
+		scenario.persistTestData();
 
 		// Execute merge
 		myHelper.callMergeOperation(scenario, false);
@@ -255,7 +255,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.withTargetIdentifiers(Collections.emptyList());
 		scenario.withOneReferencingResource();
-		scenario.createTestData();
+		scenario.persistTestData();
 
 		// Execute merge
 		myHelper.callMergeOperation(scenario, false);
@@ -275,7 +275,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		scenario.withSourceIdentifiers(Collections.emptyList());
 		scenario.withTargetIdentifiers(Collections.emptyList());
 		scenario.withOneReferencingResource();
-		scenario.createTestData();
+		scenario.persistTestData();
 
 		// Execute merge
 		myHelper.callMergeOperation(scenario, false);
@@ -298,7 +298,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		scenario.withResultResourceIdentifiers(resultIdentifiers);
 		scenario.withResultResource(true);
 		scenario.withOneReferencingResource();
-		scenario.createTestData();
+		scenario.persistTestData();
 
 		// Execute merge
 		myHelper.callMergeOperation(scenario, false);
@@ -344,7 +344,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	protected void testMerge_errorHandling_sourceEqualsTarget() {
 		// Setup
 		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.createTestData();
+		scenario.persistTestData();
 
 		// Build parameters with source == target
 		MergeTestParameters params = new MergeTestParameters()
@@ -362,7 +362,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	protected void testMerge_errorHandling_nonExistentSourceIdentifier() {
 		// Setup
 		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.createTestData();
+		scenario.persistTestData();
 
 		// Build parameters with non-existent source identifier
 		MergeTestParameters params = new MergeTestParameters()
@@ -381,7 +381,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	protected void testMerge_errorHandling_nonExistentTargetIdentifier() {
 		// Setup
 		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.createTestData();
+		scenario.persistTestData();
 
 		// Build parameters with non-existent target identifier
 		MergeTestParameters params = new MergeTestParameters()
@@ -400,7 +400,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	protected void testMerge_errorHandling_previouslyMergedSourceAsSource() {
 		// Setup: Create and merge source with another resource first
 		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.createTestData();
+		scenario.persistTestData();
 		myHelper.callMergeOperation(scenario, false);
 
 		// Create a minimal target resource (no identifiers needed)
@@ -428,7 +428,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	protected void testMerge_errorHandling_previouslyMergedSourceAsTarget() {
 		// Setup: Create and merge to get a resource with replaced-by link
 		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.createTestData();
+		scenario.persistTestData();
 		myHelper.callMergeOperation(scenario, false);
 
 		// Create a minimal source resource (no identifiers needed)
@@ -487,7 +487,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		AbstractMergeTestScenario<T> scenario = createScenario()
 			.withOneReferencingResource()
 			.withExpectedProvenanceAgents(agents);
-		scenario.createTestData();
+		scenario.persistTestData();
 
 		// Execute merge
 		Parameters outParams = myHelper.callMergeOperation(scenario, theAsync);
@@ -503,6 +503,37 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		// Validate all merge outcomes including provenance with agents
 		scenario.validateResourcesAfterMerge();
+	}
+
+	/**
+	 * GAP #2: Test Provenance Agent Interceptor error handling when no agents provided.
+	 * Tests that merge operation fails with InternalErrorException when interceptor
+	 * returns empty agent list, validating defensive programming around hook points.
+	 */
+	@ParameterizedTest(name = "{index}: async={0}")
+	@CsvSource({
+		"false",
+		"true"
+	})
+	void testMerge_withProvenanceAgentInterceptor_InterceptorReturnsNoAgent_ReturnsInternalError(boolean theAsync) {
+		// this interceptor will be unregistered in @AfterEach of the base class, which unregisters all interceptors
+		ReplaceReferencesTestHelper.registerProvenanceAgentInterceptor(
+			myServer.getRestfulServer(),
+			Collections.emptyList()
+		);
+
+		// Build merge parameters using scenario
+		AbstractMergeTestScenario<T> scenario = createScenario();
+		scenario.persistTestData();
+		MergeTestParameters params = scenario.buildMergeOperationParameters();
+
+		// Execute merge and expect error
+		assertThatThrownBy(() -> myHelper.callMergeOperation(getResourceTypeName(), params, theAsync))
+			.isInstanceOf(InternalErrorException.class)
+			.hasMessageContaining("HAPI-2723: No Provenance Agent was provided by any interceptor for Pointcut.PROVENANCE_AGENTS")
+			.extracting(InternalErrorException.class::cast)
+			.extracting(BaseServerResponseException::getStatusCode)
+			.isEqualTo(500);
 	}
 
 }
