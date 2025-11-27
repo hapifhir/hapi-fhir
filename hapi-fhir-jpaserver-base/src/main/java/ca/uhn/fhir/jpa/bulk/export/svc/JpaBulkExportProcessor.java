@@ -172,11 +172,13 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				SearchRuntimeDetails searchRuntime = new SearchRuntimeDetails(null, theJobId);
 
 				Logs.getBatchTroubleshootingLog()
-						.debug(
-								"Executing query for bulk export job[{}] chunk[{}]: {}",
-								theJobId,
-								theChunkId,
-								map.toNormalizedQueryString(myContext));
+					.atDebug()
+					.setMessage("Executing query for bulk export job[{}] chunk[{}]: {}")
+					.addArgument(theJobId)
+					.addArgument(theChunkId)
+					.addArgument(map.toNormalizedQueryString())
+					.log();
+
 
 				try (IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(
 						map, searchRuntime, new SystemRequestDetails(), theParams.getPartitionIdOrAllPartitions())) {
@@ -184,11 +186,12 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 					while (resultIterator.hasNext()) {
 						if (pidCount % 10000 == 0) {
 							Logs.getBatchTroubleshootingLog()
-									.debug(
-											"Bulk export job[{}] chunk[{}] has loaded {} pids",
-											theJobId,
-											theChunkId,
-											pidCount);
+									.atDebug()
+								.setMessage("Bulk export job[{}] chunk[{}] has loaded {} pids")
+								.addArgument(theJobId)
+								.addArgument(theChunkId)
+								.addArgument(pidCount)
+								.log();
 						}
 						pidCount++;
 						pids.add(resultIterator.next());
@@ -244,7 +247,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 							"Executing query for bulk export job[{}] chunk[{}]: {}",
 							theJobId,
 							theChunkId,
-							map.toNormalizedQueryString(myContext));
+							map.toNormalizedQueryString());
 
 			// requires a transaction
 			try (IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(
@@ -411,11 +414,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			return theParameters.getExpandedPatientIdsForGroupExport();
 		}
 
-		ourLog.debug("Expanding patient list for group export (cache miss)");
-
 		List<JpaPid> members = getMembersFromGroupWithFilter(theParameters, theConsiderDateRange);
-		ourLog.info(
-				"Group with ID [{}] has been expanded to {} members, member JpaIds: {}",
+		ourLog.debug(
+				"Group with ID [{}] has {} members, member JpaIds: {}",
 				theParameters.getGroupId(),
 				members.size(),
 				members);
@@ -423,12 +424,20 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 		if (theParameters.isExpandMdm()) {
 			RequestPartitionId partitionId = theParameters.getPartitionIdOrAllPartitions();
-			patientPidsToExport.addAll(myMdmExpandersHolder
-					.getBulkExportMDMResourceExpanderInstance()
-					.expandGroup(theParameters.getGroupId(), partitionId));
+
+			Set<JpaPid> singlePatientExpandedSet = myMdmExpandersHolder
+				.getBulkExportMDMResourceExpanderInstance()
+				.expandGroup(theParameters.getGroupId(), partitionId);
+
+			patientPidsToExport.addAll(singlePatientExpandedSet);
+
+			ourLog.debug(
+				"Group with ID [{}] has been expanded to {} members, member JpaIds: {}",
+				theParameters.getGroupId(),
+				singlePatientExpandedSet.size(),
+				singlePatientExpandedSet);
 		}
 
-		// Store in cache for subsequent resource type iterations
 		theParameters.setExpandedPatientIdsForGroupExport(patientPidsToExport);
 
 		return patientPidsToExport;
@@ -457,20 +466,14 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 		List<String> patientIds = theParams.getPatientIds();
 		if (patientIds == null || patientIds.isEmpty()) {
-			// No patients specified - cache empty set
-			LinkedHashSet<String> emptySet = new LinkedHashSet<>();
-			theParams.setExpandedPatientIdsForPatientExport(emptySet);
-			return emptySet;
+			return new HashSet<>();
 		}
 
-		ourLog.debug("Expanding {} patient(s) for Patient export (cache miss)", patientIds.size());
-
-		LinkedHashSet<String> expandedPatientIds = new LinkedHashSet<>();
+		LinkedHashSet<String> expandedPatientIds = new LinkedHashSet<>(patientIds);
 		RequestPartitionId partitionId = theParams.getPartitionIdOrAllPartitions();
 
-		// If MDM expansion enabled, expand each patient
 		if (theParams.isExpandMdm()) {
-			ourLog.info("MDM expansion enabled - expanding {} patients", patientIds.size());
+			ourLog.debug("MDM expansion enabled - expanding {} patients", patientIds.size());
 
 			for (String patientId : patientIds) {
 				// Call expandPatient() method to get all MDM-linked patients
@@ -479,12 +482,6 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 						.expandPatient(patientId, partitionId);
 				expandedPatientIds.addAll(mdmExpandedIds);
 			}
-
-			ourLog.info("MDM expansion resulted in {} total patient IDs", expandedPatientIds.size());
-		} else {
-			// No MDM expansion - just use original patient IDs
-			expandedPatientIds.addAll(patientIds);
-			ourLog.debug("MDM expansion disabled - using {} original patient IDs", patientIds.size());
 		}
 
 		ourLog.debug("Patient expansion resulted in {} total patient IDs", expandedPatientIds.size());
