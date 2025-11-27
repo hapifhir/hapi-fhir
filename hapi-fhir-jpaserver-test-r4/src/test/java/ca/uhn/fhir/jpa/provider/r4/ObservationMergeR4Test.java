@@ -37,17 +37,17 @@ import org.junit.jupiter.api.Test;
  * an "active" field, so the merge operation does not set source.active=false.
  *
  * <p>Test coverage includes:
- * - Basic merge matrix (16 tests): sync/async × delete/no-delete × preview/execute × with/without result-resource
- * - Identifier resolution (8 tests): source/target by ID or identifiers × sync/async
- * - Extension link validation (6 tests): replaces, replaced-by, no links before, deleted source, multiple types,
+ * - Basic merge matrix: sync/async × delete/no-delete × preview/execute × with/without result-resource
+ * - Identifier resolution: source/target by ID or identifiers × sync/async
+ * - Extension link validation: replaces, replaced-by, no links before, deleted source, multiple types,
  * preserve target
- * - Edge cases and error handling (5 tests): missing source, missing target, source==target, non-existent identifiers
- * - Provenance validation (3 tests): sync, async, not created for preview
- * - Status field validation (2 tests): source/target status handling (via scenario, not directly modified)
- * - Result resource validation (2 tests): overrides target data, preserves references
- * - Observation-specific tests (2 tests): DiagnosticReport references, all standard references
+ * - Edge cases and error handling: missing source, missing target, source==target, non-existent identifiers
+ * - Provenance validation: sync, async, not created for preview
+ * - Status field validation: source/target status handling (via scenario, not directly modified)
+ * - Result resource validation: overrides target data, preserves references
+ * - Observation-specific tests: DiagnosticReport references, all standard references
  *
- * <p>Total: 44 comprehensive tests for Observation merge operations.
+ * <p>Comprehensive tests for Observation merge operations.
  */
 public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observation> {
 
@@ -64,7 +64,7 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 	}
 
 	// ================================================
-	// OBSERVATION-SPECIFIC TESTS (3 tests)
+	// OBSERVATION-SPECIFIC TESTS
 	// ================================================
 
 	/**

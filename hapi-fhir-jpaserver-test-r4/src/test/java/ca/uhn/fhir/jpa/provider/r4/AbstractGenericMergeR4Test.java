@@ -124,8 +124,6 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	 * - resultResource: true/false
 	 * - preview: true/false
 	 * - async: true/false
-	 *
-	 * Total: 16 test cases
 	 */
 	@ParameterizedTest(name = "{index}: deleteSource={0}, resultResource={1}, preview={2}, async={3}")
 	@CsvSource({
