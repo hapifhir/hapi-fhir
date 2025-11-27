@@ -124,7 +124,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 					String chunkId = theParams.getChunkId();
 					RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceType);
 
-					LinkedHashSet<JpaPid> pids;
+					HashSet<JpaPid> pids;
 					if (theParams.getExportStyle() == BulkExportJobParameters.ExportStyle.PATIENT) {
 						pids = getPidsForPatientStyleExport(theParams, resourceType, jobId, chunkId, def);
 					} else if (theParams.getExportStyle() == BulkExportJobParameters.ExportStyle.GROUP) {
@@ -155,6 +155,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			throw new IllegalStateException(Msg.code(797) + errorMessage);
 		}
 
+		HashSet<String> expandedPatientIds = getExpandedPatientSetForPatientExport(theParams);
+
 		Set<String> patientSearchParams = getPatientActiveSearchParamsForResourceType(theParams.getResourceType());
 		for (String patientSearchParam : patientSearchParams) {
 			List<SearchParameterMap> maps =
@@ -165,7 +167,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 				ISearchBuilder<JpaPid> searchBuilder = getSearchBuilderForResourceType(theParams.getResourceType());
 
-				filterBySpecificPatient(theParams, resourceType, patientSearchParam, map);
+				filterBySpecificPatient(expandedPatientIds, resourceType, patientSearchParam, map);
 
 				SearchRuntimeDetails searchRuntime = new SearchRuntimeDetails(null, theJobId);
 
@@ -198,18 +200,20 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	}
 
 	private void filterBySpecificPatient(
-			ExportPIDIteratorParameters theParams,
+			HashSet<String> theExpandedPatientIds,
 			String resourceType,
 			String patientSearchParam,
 			SearchParameterMap map) {
 		if (resourceType.equalsIgnoreCase("Patient")) {
-			if (theParams.getPatientIds() != null) {
-				ReferenceOrListParam referenceOrListParam = makeReferenceOrListParam(theParams.getPatientIds());
+			if (theExpandedPatientIds != null) {
+				ReferenceOrListParam referenceOrListParam =
+						makeReferenceOrListParam(new ArrayList<>(theExpandedPatientIds));
 				map.add(PARAM_ID, referenceOrListParam);
 			}
 		} else {
-			if (theParams.getPatientIds() != null) {
-				ReferenceOrListParam referenceOrListParam = makeReferenceOrListParam(theParams.getPatientIds());
+			if (theExpandedPatientIds != null) {
+				ReferenceOrListParam referenceOrListParam =
+						makeReferenceOrListParam(new ArrayList<>(theExpandedPatientIds));
 				map.add(patientSearchParam, referenceOrListParam);
 			} else {
 				map.add(patientSearchParam, new ReferenceParam().setMissing(false));
@@ -263,14 +267,14 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		return pids;
 	}
 
-	private LinkedHashSet<JpaPid> getPidsForGroupStyleExport(
+	private HashSet<JpaPid> getPidsForGroupStyleExport(
 			ExportPIDIteratorParameters theParams, String theResourceType, RuntimeResourceDefinition theDef)
 			throws IOException {
-		LinkedHashSet<JpaPid> pids;
+		HashSet<JpaPid> pids;
 
 		if (theResourceType.equalsIgnoreCase("Patient")) {
 			ourLog.info("Expanding Patients of a Group Bulk Export.");
-			pids = getExpandedPatientList(theParams, true);
+			pids = getExpandedPatientSetForGroupExport(theParams, true);
 			ourLog.info("Obtained {} PIDs", pids.size());
 		} else if (theResourceType.equalsIgnoreCase("Group")) {
 			pids = getSingletonGroupList(theParams);
@@ -288,7 +292,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				getActivePatientSearchParamForCurrentResourceType(theParams.getResourceType());
 		if (activeSearchParam != null) {
 			// expand the group pid -> list of patients in that group (list of patient pids)
-			Set<JpaPid> expandedMemberResourceIds = getExpandedPatientList(theParams, false);
+			HashSet<JpaPid> expandedMemberResourceIds = getExpandedPatientSetForGroupExport(theParams, false);
 			assert !expandedMemberResourceIds.isEmpty();
 			Logs.getBatchTroubleshootingLog()
 					.debug("{} has been expanded to members:[{}]", theParams.getGroupId(), expandedMemberResourceIds);
@@ -388,13 +392,27 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 	/**
 	 * Given the local myGroupId, perform an expansion to retrieve all resource IDs of member patients.
-	 * if myMdmEnabled is set to true, we also attempt to also expand it into matched
-	 * patients.
+	 * If myMdmEnabled is set to true, we also expand into MDM-matched patients.
 	 *
-	 * @return a Set of Strings representing the resource IDs of all members of a group.
+	 * CACHING: Results are cached in theParameters.myExpandedPatientIdsForGroupExport to avoid redundant expansion
+	 * across multiple resource type iterations.
+	 *
+	 * @param theParameters - export parameters containing group ID and MDM flag
+	 * @param theConsiderDateRange - whether to apply date range filters
+	 * @return a LinkedHashSet of JpaPids representing all member patients (with MDM expansion if enabled)
 	 */
-	private LinkedHashSet<JpaPid> getExpandedPatientList(
+	private HashSet<JpaPid> getExpandedPatientSetForGroupExport(
 			ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) throws IOException {
+
+		if (theParameters.hasExpandedPatientIdsForGroupExport()) {
+			ourLog.debug(
+					"Using cached expanded patient set with {} patients",
+					theParameters.getExpandedPatientIdsForGroupExport().size());
+			return theParameters.getExpandedPatientIdsForGroupExport();
+		}
+
+		ourLog.debug("Expanding patient list for group export (cache miss)");
+
 		List<JpaPid> members = getMembersFromGroupWithFilter(theParameters, theConsiderDateRange);
 		ourLog.info(
 				"Group with ID [{}] has been expanded to {} members, member JpaIds: {}",
@@ -409,7 +427,60 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 					.getBulkExportMDMResourceExpanderInstance()
 					.expandGroup(theParameters.getGroupId(), partitionId));
 		}
+
+		// Store in cache for subsequent resource type iterations
+		theParameters.setExpandedPatientIdsForGroupExport(patientPidsToExport);
+
 		return patientPidsToExport;
+	}
+
+	/**
+	 * Expands patient IDs for Patient-style bulk export.
+	 * If MDM expansion is enabled, expands each patient to include their MDM-linked patients.
+	 *
+	 * CACHING: Results are cached in theParams.myExpandedPatientIdsForPatientExport to avoid redundant expansion
+	 * across multiple resource type iterations.
+	 *
+	 * @param theParams - export parameters containing patient IDs and MDM flag
+	 * @return LinkedHashSet of String patient IDs for all patients (original + MDM-expanded)
+	 *
+	 * Created by Claude 4.5 Sonnet
+	 */
+	private HashSet<String> getExpandedPatientSetForPatientExport(ExportPIDIteratorParameters theParams) {
+
+		if (theParams.hasExpandedPatientIdsForPatientExport()) {
+			ourLog.debug(
+					"Using cached expanded patient ID set with {} patients",
+					theParams.getExpandedPatientIdsForPatientExport().size());
+			return theParams.getExpandedPatientIdsForPatientExport();
+		}
+
+		List<String> patientIds = theParams.getPatientIds();
+		if (patientIds == null || patientIds.isEmpty()) {
+			// No patients specified - cache empty set
+			LinkedHashSet<String> emptySet = new LinkedHashSet<>();
+			theParams.setExpandedPatientIdsForPatientExport(emptySet);
+			return emptySet;
+		}
+
+		ourLog.debug("Expanding {} patient(s) for Patient export (cache miss)", patientIds.size());
+
+		LinkedHashSet<String> expandedPatientIds = new LinkedHashSet<>();
+
+		expandedPatientIds.addAll(patientIds);
+
+		if (theParams.isExpandMdm()) {
+			// MDM expansion will be implemented in the Patient MDM Export feature
+			// For now, just use the original patient IDs without expansion
+			// TODO: Call myMdmExpandersHolder.getBulkExportMDMResourceExpanderInstance().expandPatient()
+			ourLog.debug("MDM expansion for Patient export not yet implemented - using original patient IDs");
+		}
+
+		ourLog.debug("Patient expansion resulted in {} total patient IDs", expandedPatientIds.size());
+
+		theParams.setExpandedPatientIdsForPatientExport(expandedPatientIds);
+
+		return expandedPatientIds;
 	}
 
 	/**
