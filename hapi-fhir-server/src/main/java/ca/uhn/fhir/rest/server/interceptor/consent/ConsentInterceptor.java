@@ -49,6 +49,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -502,6 +503,9 @@ public class ConsentInterceptor {
 					}
 
 					return shouldCheckChildren;
+				}
+				if (theElement instanceof IPrimitiveType<?>) {
+					return false;
 				}
 
 				return true;
