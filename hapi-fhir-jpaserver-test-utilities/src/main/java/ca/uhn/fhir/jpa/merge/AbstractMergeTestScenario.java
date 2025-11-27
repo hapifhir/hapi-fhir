@@ -27,11 +27,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
+import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.FhirTerser;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -116,6 +118,9 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	private boolean myCreateResultResource = false;
 	private boolean myDeleteSource = false;
 	private boolean myPreview = false;
+
+	@Nullable
+	private List<IProvenanceAgent> myExpectedProvenanceAgents = null;
 
 	// Data State (after createTestData)
 	private T mySourceResource;
@@ -203,6 +208,12 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	@Nonnull
 	public AbstractMergeTestScenario<T> withResultResourceIdentifiers(@Nonnull List<Identifier> theIdentifiers) {
 		myResultResourceIdentifiers = theIdentifiers;
+		return this;
+	}
+
+	@Nonnull
+	public AbstractMergeTestScenario<T> withExpectedProvenanceAgents(@Nullable List<IProvenanceAgent> theAgents) {
+		myExpectedProvenanceAgents = theAgents;
 		return this;
 	}
 
@@ -885,7 +896,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 				expectedTargetId,
 				getTotalReferenceCount(),
 				expectedReferencingResourceIds,
-				null); // No custom provenance agents for now
+				myExpectedProvenanceAgents);
 	}
 
 	// ================================================
