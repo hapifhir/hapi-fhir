@@ -561,4 +561,43 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				.isEqualTo("HAPI-2597: Number of resources with references to " + sourceId + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'."));
 	}
 
+	/**
+	 * Test that validates merge behavior when source resource is not referenced by any other resources.
+	 * This edge case tests minimal merge workflow where only source and target exist.
+	 * Validates that merge succeeds, provenance is created, and links are properly established
+	 * even when there are zero referencing resources.
+	 */
+	@ParameterizedTest(name = "{index}: deleteSource={0}, async={1}")
+	@CsvSource({
+		"false, false",
+		"false, true",
+		"true, false",
+		"true, true"
+	})
+	void testMerge_sourceNotReferencedByAnyResource(boolean theDeleteSource, boolean theAsync) {
+		// Setup: Create minimal scenario with NO referencing resources
+		AbstractMergeTestScenario<T> scenario = createScenario()
+			.withDeleteSource(theDeleteSource)
+			.withPreview(false);
+		// NOTE: Don't call .withOneReferencingResource() or .withMultipleReferencingResources()
+		// This creates only source + target with default identifiers
+
+		scenario.persistTestData();
+
+		// Execute merge
+		Parameters outParams = myHelper.callMergeOperation(scenario, theAsync);
+
+		// Validate outcome based on mode
+		if (theAsync) {
+			scenario.validateAsyncOperationOutcome(outParams);
+			myHelper.waitForAsyncTaskCompletion(outParams);
+			scenario.validateTaskOutput(outParams);
+		} else {
+			scenario.validateSyncMergeOutcome(outParams);
+		}
+
+		// Comprehensive validation (handles all edge cases automatically)
+		scenario.validateResourcesAfterMerge();
+	}
+
 }
