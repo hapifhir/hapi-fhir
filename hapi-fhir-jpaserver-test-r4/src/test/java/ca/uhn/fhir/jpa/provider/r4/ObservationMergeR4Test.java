@@ -75,7 +75,7 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 		// Setup
 		AbstractMergeTestScenario<Observation> scenario = createScenario();
 		scenario.withMultipleReferencingResources();
-		scenario.createTestData();
+		scenario.persistTestData();
 
 		// Execute merge
 		myHelper.callMergeOperation(scenario, false);
@@ -92,7 +92,7 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 		// Setup with standard references
 		AbstractMergeTestScenario<Observation> scenario = createScenario();
 		scenario.withMultipleReferencingResources();
-		scenario.createTestData();
+		scenario.persistTestData();
 
 		// Execute merge
 		myHelper.callMergeOperation(scenario, false);

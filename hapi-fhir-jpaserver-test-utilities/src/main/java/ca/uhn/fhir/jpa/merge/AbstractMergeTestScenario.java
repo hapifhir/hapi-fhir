@@ -126,7 +126,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	private T mySourceResource;
 	private T myTargetResource;
 	private Map<String, List<IIdType>> myReferencingResourcesByType;
-	private boolean myIsTestDataCreated = false;
+	private boolean myIsTestDataPersisted = false;
 	private Parameters myInputParameters;
 
 	/**
@@ -217,7 +217,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		return this;
 	}
 
-	public void createTestData() {
+	public void persistTestData() {
 		ourLog.debug("Building merge test data for resource type: {}", getResourceTypeName());
 
 		// Create and persist source resource
@@ -254,7 +254,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		mySourceResource = source;
 		myTargetResource = target;
 		myReferencingResourcesByType = referencingResourcesByType;
-		myIsTestDataCreated = true;
+		myIsTestDataPersisted = true;
 
 		ourLog.info(
 				"Merge test data built successfully: source={}, target={}, referencing resource types={}",
@@ -269,42 +269,42 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 	@Nonnull
 	public IIdType getVersionlessSourceId() {
-		assertTestDataCreated();
+		assertTestDataPersisted();
 		return mySourceResource.getIdElement().toUnqualifiedVersionless();
 	}
 
 	@Nonnull
 	public IIdType getVersionlessTargetId() {
-		assertTestDataCreated();
+		assertTestDataPersisted();
 		return myTargetResource.getIdElement().toUnqualifiedVersionless();
 	}
 
 	@Nonnull
 	public T getSourceResource() {
-		assertTestDataCreated();
+		assertTestDataPersisted();
 		return mySourceResource;
 	}
 
 	@Nonnull
 	public T getTargetResource() {
-		assertTestDataCreated();
+		assertTestDataPersisted();
 		return myTargetResource;
 	}
 
 	@Nonnull
 	public List<IIdType> getReferencingResourceIds(@Nonnull String theResourceType) {
-		assertTestDataCreated();
+		assertTestDataPersisted();
 		return myReferencingResourcesByType.getOrDefault(theResourceType, Collections.emptyList());
 	}
 
 	@Nonnull
 	public Map<String, List<IIdType>> getAllReferencingResources() {
-		assertTestDataCreated();
+		assertTestDataPersisted();
 		return Collections.unmodifiableMap(myReferencingResourcesByType);
 	}
 
 	public int getTotalReferenceCount() {
-		assertTestDataCreated();
+		assertTestDataPersisted();
 		return myReferencingResourcesByType.values().stream()
 				.mapToInt(List::size)
 				.sum();
@@ -312,7 +312,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 	@Nonnull
 	public Set<String> getReferencingResourceTypes() {
-		assertTestDataCreated();
+		assertTestDataPersisted();
 		return myReferencingResourcesByType.keySet();
 	}
 
@@ -336,7 +336,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 	@Nonnull
 	public List<Identifier> getExpectedIdentifiers() {
-		assertTestDataCreated();
+		assertTestDataPersisted();
 
 		if (myCreateResultResource) {
 			// Result resource provided - identifiers come from result resource identifiers
@@ -365,7 +365,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 	@Nonnull
 	public MergeTestParameters buildMergeOperationParameters() {
-		assertTestDataCreated();
+		assertTestDataPersisted();
 		MergeTestParameters params = new MergeTestParameters()
 				.sourceResource(new Reference(getVersionlessSourceId()))
 				.targetResource(new Reference(getVersionlessTargetId()))
@@ -379,7 +379,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 	@Nonnull
 	public MergeTestParameters buildMergeOperationParameters(boolean theSourceById, boolean theTargetById) {
-		assertTestDataCreated();
+		assertTestDataPersisted();
 
 		MergeTestParameters params =
 				new MergeTestParameters().deleteSource(myDeleteSource).preview(myPreview);
@@ -454,7 +454,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	public void assertSourceResourceState() {
-		assertTestDataCreated();
+		assertTestDataPersisted();
 
 		IIdType versionlessSourceId = getVersionlessSourceId();
 		IIdType versionlessTargetId = getVersionlessTargetId();
@@ -484,7 +484,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	public void assertTargetResourceState() {
-		assertTestDataCreated();
+		assertTestDataPersisted();
 
 		// Read target resource
 		T target = readResource(getVersionlessTargetId());
@@ -512,7 +512,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	 * Comprehensive validation that checks source state, target state, and reference updates.
 	 */
 	public void validateResourcesAfterMerge() {
-		assertTestDataCreated();
+		assertTestDataPersisted();
 
 		// Validate source resource state
 		assertSourceResourceState();
@@ -664,7 +664,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	 * @param theOutParams the original output parameters from merge operation
 	 */
 	public void validateTaskOutput(@Nonnull Parameters theOutParams) {
-		assertTestDataCreated();
+		assertTestDataPersisted();
 
 		Task task = (Task)
 				theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
@@ -726,7 +726,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	public void validatePreviewOutcome(@Nonnull Parameters theOutParams) {
-		assertTestDataCreated();
+		assertTestDataPersisted();
 
 		// Calculate expected count: total referencing resources + 2 (source and target)
 		int theExpectedUpdateCount = getTotalReferenceCount() + 2;
@@ -751,7 +751,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	 * @param theOutParams the output parameters from merge operation
 	 */
 	public void validateInputParametersReturned(@Nonnull Parameters theOutParams) {
-		assertTestDataCreated();
+		assertTestDataPersisted();
 
 		// Extract returned input parameters
 		Parameters returnedInput = (Parameters)
@@ -815,7 +815,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	public void assertReferencesUpdated(@Nonnull List<IIdType> theReferencingResourceIds) {
-		assertTestDataCreated();
+		assertTestDataPersisted();
 
 		for (IIdType refId : theReferencingResourceIds) {
 			List<String> refStrings = extractReferenceStrings(refId);
@@ -836,13 +836,13 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	public void assertReferencesUpdated(@Nonnull String theResourceType) {
-		assertTestDataCreated();
+		assertTestDataPersisted();
 		List<IIdType> referencingResourceIds = getReferencingResourceIds(theResourceType);
 		assertReferencesUpdated(referencingResourceIds);
 	}
 
 	public void assertReferencesNotUpdated() {
-		assertTestDataCreated();
+		assertTestDataPersisted();
 		ourLog.debug("Validating references NOT updated in preview mode for source: {}", getVersionlessSourceId());
 
 		for (String resourceType : myReferencingResourcesByType.keySet()) {
@@ -872,7 +872,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	// ================================================
 
 	public void assertMergeProvenanceCreated() {
-		assertTestDataCreated();
+		assertTestDataPersisted();
 
 		// Both source and target are always version 2 in provenance
 		// - Target: always updated to v2 (regardless of deleteSource)
@@ -958,15 +958,15 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	/**
-	 * Assert that createTestData() has been called.
+	 * Assert that persistTestData() has been called.
 	 *
-	 * @throws IllegalStateException if createTestData() has not been called
+	 * @throws IllegalStateException if persistTestData() has not been called
 	 */
-	private void assertTestDataCreated() {
-		if (!myIsTestDataCreated) {
+	private void assertTestDataPersisted() {
+		if (!myIsTestDataPersisted) {
 			throw new IllegalStateException(
-					"createTestData() must be called before accessing data. Use withReferences(), "
-							+ "withResultResource(), etc. to configure, then call createTestData().");
+					"persistTestData() must be called before accessing data. Use withReferences(), "
+							+ "withResultResource(), etc. to configure, then call persistTestData().");
 		}
 	}
 }
