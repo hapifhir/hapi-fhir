@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.merge.MergeTestParameters;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nonnull;
@@ -45,9 +46,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -451,6 +455,54 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				msg -> assertThat(msg).contains("not active"),
 				msg -> assertThat(msg).contains("Target resource was previously replaced by a resource with reference")
 		);
+	}
+
+	// ================================================
+	// PROVENANCE AGENT INTERCEPTOR TESTS
+	// ================================================
+
+	/**
+	 * Tests that Provenance.agent is correctly populated from interceptor hooks.
+	 * Validates the PROVENANCE_AGENTS pointcut mechanism for generic resource merge operations.
+	 */
+	@ParameterizedTest(name = "{index}: async={0}, multipleAgents={1}")
+	@CsvSource({
+		"false, false",
+		"false, true",
+		"true, false",
+		"true, true"
+	})
+	protected void testMerge_withProvenanceAgentInterceptor_Success(boolean theAsync, boolean theMultipleAgents) {
+		// Setup: Create Provenance agents
+		List<IProvenanceAgent> agents = new ArrayList<>();
+		agents.add(myReplaceReferencesTestHelper.createTestProvenanceAgent());
+		if (theMultipleAgents) {
+			agents.add(myReplaceReferencesTestHelper.createTestProvenanceAgent());
+		}
+
+		// Register interceptor (will be unregistered in @AfterEach of base class)
+		ReplaceReferencesTestHelper.registerProvenanceAgentInterceptor(myServer.getRestfulServer(), agents);
+
+		// Create test scenario with referencing resources and expected agents
+		AbstractMergeTestScenario<T> scenario = createScenario()
+			.withOneReferencingResource()
+			.withExpectedProvenanceAgents(agents);
+		scenario.createTestData();
+
+		// Execute merge
+		Parameters outParams = myHelper.callMergeOperation(scenario, theAsync);
+
+		// Validate based on execution mode
+		if (theAsync) {
+			scenario.validateAsyncOperationOutcome(outParams);
+			myHelper.waitForAsyncTaskCompletion(outParams);
+			scenario.validateTaskOutput(outParams);
+		} else {
+			scenario.validateSyncMergeOutcome(outParams);
+		}
+
+		// Validate all merge outcomes including provenance with agents
+		scenario.validateResourcesAfterMerge();
 	}
 
 }
