@@ -467,6 +467,160 @@ public class ResourceUtilTest {
 		assertThat(o2.getCode().getCoding().get(1).getSystem()).isEqualTo("http://anothersystem.org");
 	}
 
+	/*
+	 * The default behaviour is to simply overwrite the field in the target resource
+	 * with the value from the source resource
+	 */
+	@Test
+	public void testMerge_collection_conceptsDoNotMatch_doNotMerge() {
+		// set up
+		Observation o1 = new Observation();
+		CodeableConcept category1 = o1.addCategory();
+		category1.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("social-history");
+
+		Observation o2 = new Observation();
+		CodeableConcept category2 = o2.addCategory();
+		category2.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("survey");
+
+		// execute
+		ResourceUtil.mergeField(ourFhirContext, "category", o1, o2);
+
+		// validate
+		assertThat(o2.getCategory()).hasSize(2);
+		assertThat(o2.getCategory().get(0).getCoding()).hasSize(1);
+		assertThat(o2.getCategory().get(0).getCodingFirstRep().getCode()).isEqualTo("survey");
+		assertThat(o2.getCategory().get(1).getCoding()).hasSize(1);
+		assertThat(o2.getCategory().get(1).getCodingFirstRep().getCode()).isEqualTo("social-history");
+	}
+
+	@Test
+	public void testMerge_collection_mergeCodingsDisabled_doNotMerge() {
+		// set up
+		Observation o1 = new Observation();
+		CodeableConcept category1 = o1.addCategory();
+		category1.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("social-history");
+
+		Observation o2 = new Observation();
+		CodeableConcept category2 = o2.addCategory();
+		category2.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("social-history");
+		category2.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("survey");
+
+		// execute
+		ResourceUtil.mergeField(ourFhirContext, "category", o1, o2);
+
+		// validate
+		assertThat(o2.getCategory()).hasSize(2);
+		assertThat(o2.getCategory().get(0).getCoding()).hasSize(2);
+		assertThat(o2.getCategory().get(0).getCoding().get(0).getCode()).isEqualTo("social-history");
+		assertThat(o2.getCategory().get(0).getCoding().get(1).getCode()).isEqualTo("survey");
+		assertThat(o2.getCategory().get(1).getCoding()).hasSize(1);
+		assertThat(o2.getCategory().get(1).getCodingFirstRep().getCode()).isEqualTo("social-history");
+	}
+
+	@Test
+	public void testMerge_collection_mergeCodingsEnabled_mergeCodingsFromSource() {
+		// set up
+		Observation o1 = new Observation();
+		CodeableConcept category1 = o1.addCategory();
+		category1.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("social-history");
+		category1.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("survey");
+
+		Observation o2 = new Observation();
+		CodeableConcept category2 = o2.addCategory();
+		category2.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("social-history");
+
+		ResourceUtil.MergeControlParameters mergeControlParameters = new ResourceUtil.MergeControlParameters();
+		mergeControlParameters.setMergeCodings(true);
+
+		// execute
+		ResourceUtil.mergeField(ourFhirContext, "category", o1, o2, mergeControlParameters);
+
+		// validate
+		assertThat(o2.getCategory()).hasSize(1);
+		assertThat(o2.getCategory().get(0).getCoding()).hasSize(2);
+		assertThat(o2.getCategory().get(0).getCoding().get(0).getCode()).isEqualTo("social-history");
+		assertThat(o2.getCategory().get(0).getCoding().get(1).getCode()).isEqualTo("survey");
+	}
+
+	@Test
+	public void testMerge_collection_mergeCodingsEnabled_mergeCodingsFromTarget() {
+		// set up
+		Observation o1 = new Observation();
+		CodeableConcept category1 = o1.addCategory();
+		category1.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("social-history");
+
+		Observation o2 = new Observation();
+		CodeableConcept category2 = o2.addCategory();
+		category2.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("social-history");
+		category2.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("survey");
+
+		ResourceUtil.MergeControlParameters mergeControlParameters = new ResourceUtil.MergeControlParameters();
+		mergeControlParameters.setMergeCodings(true);
+
+		// execute
+		ResourceUtil.mergeField(ourFhirContext, "category", o1, o2, mergeControlParameters);
+
+		// validate
+		assertThat(o2.getCategory()).hasSize(1);
+		assertThat(o2.getCategory().get(0).getCoding()).hasSize(2);
+		assertThat(o2.getCategory().get(0).getCoding().get(0).getCode()).isEqualTo("social-history");
+		assertThat(o2.getCategory().get(0).getCoding().get(1).getCode()).isEqualTo("survey");
+	}
+
+	@Test
+	public void testMerge_collection_ignoreOrderEnabled_mergeCodingsEnabled_mergeCodings() {
+		// set up
+		Observation o1 = new Observation();
+		CodeableConcept category1 = o1.addCategory();
+		category1.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("social-history");
+		category1.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("survey");
+		category1.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("therapy");
+
+		Observation o2 = new Observation();
+		CodeableConcept category2 = o2.addCategory();
+		category2.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("therapy");
+		category2.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("social-history");
+
+		ResourceUtil.MergeControlParameters mergeControlParameters = new ResourceUtil.MergeControlParameters();
+		mergeControlParameters.setIgnoreCodeableConceptCodingOrder(true);
+		mergeControlParameters.setMergeCodings(true);
+
+		// execute
+		ResourceUtil.mergeField(ourFhirContext, "category", o1, o2, mergeControlParameters);
+
+		// validate
+		assertThat(o2.getCategory()).hasSize(1);
+		assertThat(o2.getCategory().get(0).getCoding()).hasSize(3);
+		assertThat(o2.getCategory().get(0).getCoding().get(0).getCode()).isEqualTo("therapy");
+		assertThat(o2.getCategory().get(0).getCoding().get(1).getCode()).isEqualTo("social-history");
+		assertThat(o2.getCategory().get(0).getCoding().get(2).getCode()).isEqualTo("survey");
+	}
+
+	@Test
+	public void testMerge_collection_mergeCodingsEnabled_overlappingCodings_doNotMerge() {
+		// set up
+		Observation o1 = new Observation();
+		CodeableConcept category1 = o1.addCategory();
+		category1.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("social-history");
+		category1.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("survey");
+
+		Observation o2 = new Observation();
+		CodeableConcept category2 = o2.addCategory();
+		category2.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("social-history");
+		category2.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("therapy");
+
+		ResourceUtil.MergeControlParameters mergeControlParameters = new ResourceUtil.MergeControlParameters();
+		mergeControlParameters.setMergeCodings(true);
+
+		// execute
+		ResourceUtil.mergeField(ourFhirContext, "category", o1, o2, mergeControlParameters);
+
+		// validate
+		assertThat(o2.getCategory()).hasSize(2);
+		assertThat(o2.getCategory().get(0).getCoding().get(1).getCode()).isEqualTo("therapy");
+		assertThat(o2.getCategory().get(1).getCoding().get(1).getCode()).isEqualTo("survey");
+	}
+
 	@Test
 	public void testMerge_singleton_conceptsMatch_doNotMergeCodingFields() {
 		// set up
