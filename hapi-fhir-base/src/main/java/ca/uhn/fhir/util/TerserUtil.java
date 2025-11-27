@@ -286,7 +286,7 @@ public final class TerserUtil {
 	 * @param theFhirContext Context holding resource definition
 	 * @param theFrom        The resource to merge the fields from
 	 * @param theTo          The resource to merge the fields into
-	 * @deprecated Use {@link ResourceUtil#mergeAllFields(FhirContext, IBaseResource, IBaseResource)}
+	 * @deprecated Use {@link ResourceUtil#mergeAllFields(FhirContext, IBase, IBase)}
 	 */
 	@Deprecated(since = "8.7.0")
 	public static void mergeAllFields(FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo) {
@@ -604,7 +604,7 @@ public final class TerserUtil {
 	 * @param theFrom           Resource to merge the specified field from
 	 * @param theTo             Resource to merge the specified field into
 	 * @param inclusionStrategy Predicate to test which fields should be merged
-	 * @deprecated Use {@link ResourceUtil#mergeFields(FhirContext, IBaseResource, IBaseResource, Predicate)}
+	 * @deprecated Use {@link ResourceUtil#mergeFields(FhirContext, IBase, IBase, Predicate)}
 	 */
 	@Deprecated(since = "8.7.0")
 	public static void mergeFields(
@@ -652,7 +652,7 @@ public final class TerserUtil {
 	 * @param theFieldName   Name of the child filed to merge
 	 * @param theFrom        Resource to merge the specified field from
 	 * @param theTo          Resource to merge the specified field into
-	 * @deprecated Use {@link ResourceUtil#mergeField(FhirContext, FhirTerser, String, IBaseResource, IBaseResource)}
+	 * @deprecated Use {@link ResourceUtil#mergeField(FhirContext, String, IBaseResource, IBaseResource)}
 	 */
 	@Deprecated(since = "8.7.0")
 	public static void mergeField(

@@ -332,4 +332,149 @@ public class ResourceUtilTest {
 		// validate
 		assertThat(o2.getCategory()).hasSize(1);
 	}
+
+	/*
+	 * The default behaviour is to simply overwrite the field in the target resource
+	 * with the value from the source resource
+	 */
+	@Test
+	public void testMerge_singleton_conceptsDoNotMatch_doNotMerge() {
+		// set up
+		Observation o1 = new Observation();
+		o1.getCode().addCoding().setSystem("http://loinc.org").setCode("10836-5").setDisplay("Niacin [Mass/volume] in Blood");
+
+		Observation o2 = new Observation();
+		o2.getCode().addCoding().setSystem("http://loinc.org").setCode("10834-0");
+
+		// execute
+		ResourceUtil.mergeField(ourFhirContext, "code", o1, o2);
+
+		// validate
+		assertThat(o2.getCode().getCoding()).hasSize(1);
+		assertThat(o2.getCode().getCodingFirstRep().getSystem()).isEqualTo("http://loinc.org");
+		assertThat(o2.getCode().getCodingFirstRep().getCode()).isEqualTo("10836-5");
+		assertThat(o2.getCode().getCodingFirstRep().getDisplay()).isEqualTo("Niacin [Mass/volume] in Blood");
+	}
+
+	@Test
+	public void testMerge_singleton_mergeCodingsDisabled_doNotMerge() {
+		// set up
+		Observation o1 = new Observation();
+		o1.getCode().addCoding().setSystem("http://loinc.org").setCode("10836-5").setDisplay("Niacin [Mass/volume] in Blood");
+
+		Observation o2 = new Observation();
+		o2.getCode().addCoding().setSystem("http://loinc.org").setCode("10836-5").setDisplay("Niacin [Mass/volume] in Blood");
+		o2.getCode().addCoding().setSystem("http://customlocalcodesystem.org").setCode("ABC").setDisplay("Niacin");
+
+		// execute
+		ResourceUtil.mergeField(ourFhirContext, "code", o1, o2);
+
+		// validate
+		assertThat(o2.getCode().getCoding()).hasSize(1);
+		assertThat(o2.getCode().getCodingFirstRep().getSystem()).isEqualTo("http://loinc.org");
+	}
+
+	@Test
+	public void testMerge_singleton_mergeCodingsEnabled_mergeCodingsFromSource() {
+		// set up
+		Observation o1 = new Observation();
+		o1.getCode().addCoding().setSystem("http://loinc.org").setCode("10836-5").setDisplay("Niacin [Mass/volume] in Blood");
+		o1.getCode().addCoding().setSystem("http://customlocalcodesystem.org").setCode("ABC").setDisplay("Niacin");
+
+		Observation o2 = new Observation();
+		o2.getCode().addCoding().setSystem("http://loinc.org").setCode("10836-5").setDisplay("Niacin [Mass/volume] in Blood");
+
+		ResourceUtil.MergeControlParameters mergeControlParameters = new ResourceUtil.MergeControlParameters();
+		mergeControlParameters.setMergeCodings(true);
+
+		// execute
+		ResourceUtil.mergeField(ourFhirContext, "code", o1, o2, mergeControlParameters);
+
+		// validate
+		assertThat(o2.getCode().getCoding()).hasSize(2);
+		assertThat(o2.getCode().getCoding().get(0).getSystem()).isEqualTo("http://loinc.org");
+		assertThat(o2.getCode().getCoding().get(1).getSystem()).isEqualTo("http://customlocalcodesystem.org");
+	}
+
+	@Test
+	public void testMerge_singleton_mergeCodingsEnabled_mergeCodingsFromTarget() {
+		// set up
+		Observation o1 = new Observation();
+		o1.getCode().addCoding().setSystem("http://loinc.org").setCode("10836-5").setDisplay("Niacin [Mass/volume] in Blood");
+
+		Observation o2 = new Observation();
+		o2.getCode().addCoding().setSystem("http://loinc.org").setCode("10836-5").setDisplay("Niacin [Mass/volume] in Blood");
+		o2.getCode().addCoding().setSystem("http://customlocalcodesystem.org").setCode("ABC").setDisplay("Niacin");
+
+		ResourceUtil.MergeControlParameters mergeControlParameters = new ResourceUtil.MergeControlParameters();
+		mergeControlParameters.setMergeCodings(true);
+
+		// execute
+		ResourceUtil.mergeField(ourFhirContext, "code", o1, o2, mergeControlParameters);
+
+		// validate
+		assertThat(o2.getCode().getCoding()).hasSize(2);
+		assertThat(o2.getCode().getCoding().get(0).getSystem()).isEqualTo("http://loinc.org");
+		assertThat(o2.getCode().getCoding().get(1).getSystem()).isEqualTo("http://customlocalcodesystem.org");
+	}
+
+	@Test
+	public void testMerge_singleton_conceptsMatch_doNotMergeCodingFields() {
+		// set up
+		Observation o1 = new Observation();
+		o1.getCode().addCoding().setSystem("http://loinc.org").setCode("10836-5");
+
+		Observation o2 = new Observation();
+		o2.getCode().addCoding().setSystem("http://loinc.org").setCode("10836-5").setDisplay("Niacin [Mass/volume] in Blood");
+
+		// execute
+		ResourceUtil.mergeField(ourFhirContext, "code", o1, o2);
+
+		// validate
+		assertThat(o2.getCode().getCodingFirstRep().hasDisplay()).isFalse();
+	}
+
+	/*
+	 * The default behaviour should be retained if the codings do not match
+	 */
+	@Test
+	public void testMerge_singleton_conceptsDoNotMatch_mergeCodingEnabled_noEffect() {
+		// set up
+		Observation o1 = new Observation();
+		o1.getCode().addCoding().setSystem("http://loinc.org").setCode("10836-5").setDisplay("Niacin [Mass/volume] in Blood");
+
+		Observation o2 = new Observation();
+		o2.getCode().addCoding().setSystem("http://loinc.org").setCode("10834-0");
+
+		ResourceUtil.MergeControlParameters mergeControlParameters = new ResourceUtil.MergeControlParameters();
+		mergeControlParameters.setMergeCodings(true);
+
+		// execute
+		ResourceUtil.mergeField(ourFhirContext, "code", o1, o2, mergeControlParameters);
+
+		// validate
+		assertThat(o2.getCode().getCoding()).hasSize(1);
+		assertThat(o2.getCode().getCodingFirstRep().getSystem()).isEqualTo("http://loinc.org");
+		assertThat(o2.getCode().getCodingFirstRep().getCode()).isEqualTo("10836-5");
+		assertThat(o2.getCode().getCodingFirstRep().getDisplay()).isEqualTo("Niacin [Mass/volume] in Blood");
+	}
+
+	@Test
+	public void testMerge_singleton_conceptsMatch_mergeCodingEnabled() {
+		// set up
+		Observation o1 = new Observation();
+		o1.getCode().addCoding().setSystem("http://loinc.org").setCode("10836-5");
+
+		Observation o2 = new Observation();
+		o2.getCode().addCoding().setSystem("http://loinc.org").setCode("10836-5").setDisplay("Niacin [Mass/volume] in Blood");
+
+		ResourceUtil.MergeControlParameters mergeControlParameters = new ResourceUtil.MergeControlParameters();
+		mergeControlParameters.setMergeCodings(true);
+
+		// execute
+		ResourceUtil.mergeField(ourFhirContext, "code", o1, o2, mergeControlParameters);
+
+		// validate
+		assertThat(o2.getCode().getCodingFirstRep().getDisplay()).isEqualTo("Niacin [Mass/volume] in Blood");
+	}
 }
