@@ -26,7 +26,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import java.util.Set;
 
 /**
- * Interface for mdm expanding Group resources on group bulk export
+ * Interface for mdm expanding Group resources on group bulk export and Patient resources on patient bulk export
  */
 public interface IBulkExportMdmResourceExpander {
 
@@ -35,6 +35,20 @@ public interface IBulkExportMdmResourceExpander {
 	 * the members of the group + the mdm matched resources to a member in the group
 	 */
 	Set<JpaPid> expandGroup(String groupResourceId, RequestPartitionId requestPartitionId);
+
+	/**
+	 * Expands a single patient ID to include all patients linked via MDM.
+	 * For the given patient:
+	 * - Finds the patient's golden resource (if MDM-linked)
+	 * - Finds all other patients linked to that golden resource
+	 * - Returns the complete set of patient ID strings in the MDM cluster
+	 *
+	 * @param thePatientId Patient ID to expand (e.g., "Patient/123")
+	 * @param theRequestPartitionId Partition context for the request
+	 * @return Set of String patient IDs including the original patient, golden resource, and all linked patients
+	 *         (e.g., {"Patient/123", "Patient/456", "Patient/Golden"})
+	 */
+	Set<String> expandPatient(String thePatientId, RequestPartitionId theRequestPartitionId);
 
 	/**
 	 * annotates the given resource to be exported with the implementation specific extra information if applicable

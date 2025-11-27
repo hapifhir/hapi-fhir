@@ -58,6 +58,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -270,6 +271,7 @@ public class BulkDataExportProvider {
 		final List<IPrimitiveType<String>> patientIds =
 				thePatient != null ? parsePatientList(thePatient) : new ArrayList<>();
 
+		// Type-level export does NOT support MDM expansion - pass null
 		doPatientExport(
 				theRequestDetails,
 				theOutputFormat,
@@ -280,6 +282,7 @@ public class BulkDataExportProvider {
 				theTypeFilter,
 				theTypePostFetchFilterUrl,
 				patientIds,
+				null,
 				theIncludeHistory);
 	}
 
@@ -313,24 +316,27 @@ public class BulkDataExportProvider {
 							max = OperationParam.MAX_UNLIMITED,
 							typeName = "string")
 					List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean")
+					IPrimitiveType<Boolean> theMdm,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_INCLUDE_HISTORY, min = 0, max = 1, typeName = "boolean")
 					IPrimitiveType<Boolean> theIncludeHistory,
 			ServletRequestDetails theRequestDetails) {
 
-		// call the type-level export to ensure spec compliance
-		patientExport(
+		// Patient instance export supports MDM expansion, so call doPatientExport directly
+		doPatientExport(
+				theRequestDetails,
 				theOutputFormat,
 				theType,
 				theSince,
 				theUntil,
+				theExportIdentifier,
 				theTypeFilter,
 				theTypePostFetchFilterUrl,
-				List.of(theIdParam),
-				theExportIdentifier,
-				theIncludeHistory,
-				theRequestDetails);
+				List.of(new StringType(theIdParam.getValue())),
+				theMdm,
+				theIncludeHistory);
 	}
 
 	static List<IPrimitiveType<String>> parsePatientList(@Nonnull List<IBase> thePatient) {
@@ -372,6 +378,7 @@ public class BulkDataExportProvider {
 			List<IPrimitiveType<String>> theTypeFilter,
 			List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
 			List<IPrimitiveType<String>> thePatientIds,
+			IPrimitiveType<Boolean> theMdm,
 			IPrimitiveType<Boolean> theIncludeHistory) {
 		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
@@ -399,6 +406,7 @@ public class BulkDataExportProvider {
 				.exportStyle(ExportStyle.PATIENT)
 				.postFetchFilterUrl(theTypePostFetchFilterUrl)
 				.patientIds(thePatientIds)
+				.expandMdm(theMdm)
 				.includeHistory(theIncludeHistory)
 				.build();
 

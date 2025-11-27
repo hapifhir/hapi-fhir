@@ -466,14 +466,25 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		ourLog.debug("Expanding {} patient(s) for Patient export (cache miss)", patientIds.size());
 
 		LinkedHashSet<String> expandedPatientIds = new LinkedHashSet<>();
+		RequestPartitionId partitionId = theParams.getPartitionIdOrAllPartitions();
 
-		expandedPatientIds.addAll(patientIds);
-
+		// If MDM expansion enabled, expand each patient
 		if (theParams.isExpandMdm()) {
-			// MDM expansion will be implemented in the Patient MDM Export feature
-			// For now, just use the original patient IDs without expansion
-			// TODO: Call myMdmExpandersHolder.getBulkExportMDMResourceExpanderInstance().expandPatient()
-			ourLog.debug("MDM expansion for Patient export not yet implemented - using original patient IDs");
+			ourLog.info("MDM expansion enabled - expanding {} patients", patientIds.size());
+
+			for (String patientId : patientIds) {
+				// Call expandPatient() method to get all MDM-linked patients
+				Set<String> mdmExpandedIds = myMdmExpandersHolder
+						.getBulkExportMDMResourceExpanderInstance()
+						.expandPatient(patientId, partitionId);
+				expandedPatientIds.addAll(mdmExpandedIds);
+			}
+
+			ourLog.info("MDM expansion resulted in {} total patient IDs", expandedPatientIds.size());
+		} else {
+			// No MDM expansion - just use original patient IDs
+			expandedPatientIds.addAll(patientIds);
+			ourLog.debug("MDM expansion disabled - using {} original patient IDs", patientIds.size());
 		}
 
 		ourLog.debug("Patient expansion resulted in {} total patient IDs", expandedPatientIds.size());

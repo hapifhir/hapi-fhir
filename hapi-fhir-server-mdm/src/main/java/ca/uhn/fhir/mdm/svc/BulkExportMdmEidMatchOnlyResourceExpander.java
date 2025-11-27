@@ -115,6 +115,38 @@ public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdm
 		return new HashSet<>(pidList);
 	}
 
+	/**
+	 * Expands a single patient ID to include all patients linked via EID matching.
+	 * For the given patient:
+	 * - Extracts the patient's EID (Enterprise ID)
+	 * - Finds all other patients with matching EIDs using configured EID systems
+	 * - Returns the complete set of patient ID strings with matching EIDs
+	 *
+	 * @param thePatientId Patient ID to expand (e.g., "Patient/123")
+	 * @param theRequestPartitionId Partition context for the request
+	 * @return Set of String patient IDs including the original patient and all EID-matched patients
+	 */
+	@Override
+	public Set<String> expandPatient(String thePatientId, RequestPartitionId theRequestPartitionId) {
+		// Read the Patient resource to verify it exists
+		SystemRequestDetails srd = SystemRequestDetails.forRequestPartitionId(theRequestPartitionId);
+		IIdType patientIdType = myFhirContext.getVersion().newIdType(thePatientId);
+
+		try {
+			// Verify patient exists by attempting to read it
+			myDaoRegistry.getResourceDao("Patient").read(patientIdType, srd);
+		} catch (Exception e) {
+			// If patient doesn't exist or can't be read, return empty set
+			return new HashSet<>();
+		}
+
+		// Use EID expansion service to find all patients with matching EIDs
+		Set<String> expandedPatientIds =
+				myMdmEidMatchOnlyLinkExpandSvc.expandMdmBySourceResourceId(theRequestPartitionId, patientIdType);
+
+		return expandedPatientIds;
+	}
+
 	@Override
 	public void annotateResource(IBaseResource resource) {
 		// This function is normally used to add golden resource id to the exported resources,
