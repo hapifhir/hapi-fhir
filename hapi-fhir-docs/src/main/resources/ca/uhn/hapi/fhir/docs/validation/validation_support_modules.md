@@ -183,9 +183,7 @@ When using the JPA Server, the validation support chain is configured automatica
 
 ## Allowing Database Validation Override
 
-In some cases, you may want your database-stored CodeSystem and ValueSet resources to take precedence over the built-in HL7 definitions. This is useful when:
-
-* You need to override a built-in terminology resource with a different version
+In some cases, you may want your database-stored CodeSystem and ValueSet resources to take precedence over the built-in HL7 definitions. This is useful when you need to override a built-in terminology resource with a different version of that resource.
 
 To enable this behavior, use the `allowDatabaseValidationOverride` setting:
 
