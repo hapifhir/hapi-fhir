@@ -32,6 +32,7 @@ import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -534,6 +535,30 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 			.extracting(InternalErrorException.class::cast)
 			.extracting(BaseServerResponseException::getStatusCode)
 			.isEqualTo(500);
+	}
+
+	/**
+	 * Test that validates resource limit validation for merge operations.
+	 * Creates more referencing resources than batch-size, expecting
+	 * a PreconditionFailedException since the number of resources exceeds the limit.
+	 */
+	@Test
+	void testMerge_smallResourceLimit() {
+		// Create scenario with many referencing resources (6 total)
+		AbstractMergeTestScenario<T> scenario = createScenario();
+		scenario.withMultipleReferencingResources(6);
+		scenario.persistTestData();
+
+		// Build parameters and set batch size (which controls resource limit)
+		MergeTestParameters params = scenario.buildMergeOperationParameters();
+		params.batchSize(5);
+
+		// Execute merge and expect error
+		String sourceId = scenario.getSourceResource().getIdElement().toUnqualifiedVersionless().getValue();
+		assertThatThrownBy(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false))
+			.isInstanceOf(PreconditionFailedException.class)
+			.satisfies(ex -> assertThat(myReplaceReferencesTestHelper.extractFailureMessageFromOutcomeParameter((BaseServerResponseException) ex))
+				.isEqualTo("HAPI-2597: Number of resources with references to " + sourceId + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'."));
 	}
 
 }

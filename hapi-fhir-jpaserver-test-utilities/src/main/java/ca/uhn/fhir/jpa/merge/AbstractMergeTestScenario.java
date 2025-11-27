@@ -175,6 +175,15 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	 */
 	public abstract AbstractMergeTestScenario<T> withMultipleReferencingResources();
 
+	/**
+	 * Configure scenario with a specific number of referencing resources.
+	 * Subclasses define which resource types are used and how they're distributed.
+	 *
+	 * @param theCount number of referencing resources to create
+	 * @return this scenario for chaining
+	 */
+	public abstract AbstractMergeTestScenario<T> withMultipleReferencingResources(int theCount);
+
 	@Nonnull
 	public AbstractMergeTestScenario<T> withResultResource(boolean theCreateResultResource) {
 		myCreateResultResource = theCreateResultResource;
