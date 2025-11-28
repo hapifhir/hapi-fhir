@@ -318,6 +318,34 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	// EDGE CASES AND ERROR HANDLING TESTS
 	// ================================================
 
+	/**
+	 * Call merge operation and validate that it throws expected exception with expected diagnostic messages.
+	 *
+	 * @param theParams merge parameters to pass to the operation
+	 * @param theExpectedExceptionType expected exception class (e.g., InvalidRequestException.class)
+	 * @param theExpectedDiagnosticMessageParts diagnostic message parts that should be present (varargs)
+	 */
+	protected void callMergeAndValidateException(
+			MergeTestParameters theParams,
+			Class<? extends BaseServerResponseException> theExpectedExceptionType,
+			String... theExpectedDiagnosticMessageParts) {
+
+		// Catch exception from merge operation
+		Exception ex = catchException(() -> myHelper.callMergeOperation(getResourceTypeName(), theParams, false));
+
+		// Validate exception type
+		assertThat(ex).isInstanceOf(theExpectedExceptionType);
+
+		// Extract and validate diagnostic message
+		BaseServerResponseException serverEx = (BaseServerResponseException) ex;
+		String diagnosticMessage = myReplaceReferencesTestHelper.extractFailureMessageFromOutcomeParameter(serverEx);
+
+		// Validate all expected message parts are present
+		for (String messagePart : theExpectedDiagnosticMessageParts) {
+			assertThat(diagnosticMessage).contains(messagePart);
+		}
+	}
+
 	@Test
 	protected void testMerge_errorHandling_missingSourceResource() {
 		// Build invalid parameters (no source)
@@ -327,13 +355,10 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				.preview(false);
 
 		// Validate error
-		Exception ex = catchException(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false));
-		assertThat(ex).isInstanceOf(InvalidRequestException.class);
-
-		InvalidRequestException invalidEx = (InvalidRequestException) ex;
-		String diagnosticMessage = myReplaceReferencesTestHelper.extractFailureMessageFromOutcomeParameter(invalidEx);
-		assertThat(diagnosticMessage)
-				.contains("There are no source resource parameters provided, include either a 'source-resource', or a 'source-resource-identifier' parameter");
+		callMergeAndValidateException(
+				params,
+				InvalidRequestException.class,
+				"There are no source resource parameters provided, include either a 'source-resource', or a 'source-resource-identifier' parameter");
 	}
 
 	@Test
@@ -345,13 +370,10 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				.preview(false);
 
 		// Validate error
-		Exception ex = catchException(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false));
-		assertThat(ex).isInstanceOf(InvalidRequestException.class);
-
-		InvalidRequestException invalidEx = (InvalidRequestException) ex;
-		String diagnosticMessage = myReplaceReferencesTestHelper.extractFailureMessageFromOutcomeParameter(invalidEx);
-		assertThat(diagnosticMessage)
-				.contains("There are no target resource parameters provided, include either a 'target-resource', or a 'target-resource-identifier' parameter");
+		callMergeAndValidateException(
+				params,
+				InvalidRequestException.class,
+				"There are no target resource parameters provided, include either a 'target-resource', or a 'target-resource-identifier' parameter");
 	}
 
 	@Test
@@ -361,7 +383,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				.deleteSource(false)
 				.preview(false);
 
-		// Validate error - should return InvalidRequestException with 400 status and both error messages
+		// Validate error - should return InvalidRequestException with 400 status
 		Exception ex = catchException(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false));
 		assertThat(ex)
 				.isInstanceOf(InvalidRequestException.class)
@@ -370,11 +392,11 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				.isEqualTo(400);
 
 		// Validate both error messages are present
-		InvalidRequestException invalidEx = (InvalidRequestException) ex;
-		String diagnosticMessage = myReplaceReferencesTestHelper.extractFailureMessageFromOutcomeParameter(invalidEx);
-		assertThat(diagnosticMessage)
-				.contains("There are no source resource parameters provided")
-				.contains("There are no target resource parameters provided");
+		callMergeAndValidateException(
+				params,
+				InvalidRequestException.class,
+				"There are no source resource parameters provided",
+				"There are no target resource parameters provided");
 	}
 
 	@Test
