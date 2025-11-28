@@ -520,6 +520,9 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	@Override
 	public <T extends Resource> T fetchResource(Class<T> class_, String uri, String version, Resource sourceOfReference)
 			throws FHIRException {
+		if (version == null) {
+			return fetchResource(class_, uri);
+		}
 		return fetchResource(class_, uri + "|" + version);
 	}
 
