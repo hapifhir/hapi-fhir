@@ -319,6 +319,24 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	// ================================================
 
 	/**
+	 * Call merge operation expecting exception, validate type, and return diagnostic message for custom validation.
+	 *
+	 * @param theParams merge parameters to pass to the operation
+	 * @param theExpectedExceptionType expected exception class
+	 * @return diagnostic message extracted from the exception for further validation
+	 */
+	protected String callMergeAndExtractDiagnosticMessage(
+			MergeTestParameters theParams,
+			Class<? extends BaseServerResponseException> theExpectedExceptionType) {
+
+		Exception ex = catchException(() -> myHelper.callMergeOperation(getResourceTypeName(), theParams, false));
+		assertThat(ex).isInstanceOf(theExpectedExceptionType);
+
+		BaseServerResponseException serverEx = (BaseServerResponseException) ex;
+		return myReplaceReferencesTestHelper.extractFailureMessageFromOutcomeParameter(serverEx);
+	}
+
+	/**
 	 * Call merge operation and validate that it throws expected exception with expected diagnostic messages.
 	 *
 	 * @param theParams merge parameters to pass to the operation
@@ -330,17 +348,8 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 			Class<? extends BaseServerResponseException> theExpectedExceptionType,
 			String... theExpectedDiagnosticMessageParts) {
 
-		// Catch exception from merge operation
-		Exception ex = catchException(() -> myHelper.callMergeOperation(getResourceTypeName(), theParams, false));
+		String diagnosticMessage = callMergeAndExtractDiagnosticMessage(theParams, theExpectedExceptionType);
 
-		// Validate exception type
-		assertThat(ex).isInstanceOf(theExpectedExceptionType);
-
-		// Extract and validate diagnostic message
-		BaseServerResponseException serverEx = (BaseServerResponseException) ex;
-		String diagnosticMessage = myReplaceReferencesTestHelper.extractFailureMessageFromOutcomeParameter(serverEx);
-
-		// Validate all expected message parts are present
 		for (String messagePart : theExpectedDiagnosticMessageParts) {
 			assertThat(diagnosticMessage).contains(messagePart);
 		}
@@ -405,8 +414,10 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				.preview(false);
 
 		// Validate error
-		assertThatThrownBy(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false))
-				.isInstanceOf(UnprocessableEntityException.class);
+		callMergeAndValidateException(
+				params,
+				UnprocessableEntityException.class,
+				"Source and target resources are the same resource.");
 	}
 
 	@Test
@@ -424,8 +435,10 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				.preview(false);
 
 		// Validate error
-		assertThatThrownBy(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false))
-				.isInstanceOf(UnprocessableEntityException.class);
+		callMergeAndValidateException(
+				params,
+				UnprocessableEntityException.class,
+				"No resources found matching the identifier(s) specified in 'source-resource-identifier'");
 	}
 
 	@Test
@@ -443,8 +456,10 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				.preview(false);
 
 		// Validate error
-		assertThatThrownBy(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false))
-				.isInstanceOf(UnprocessableEntityException.class);
+		callMergeAndValidateException(
+				params,
+				UnprocessableEntityException.class,
+				"No resources found matching the identifier(s) specified in 'target-resource-identifier'");
 	}
 
 	@Test
@@ -545,15 +560,14 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		// Validate error - for resources with active field, may fail on "not active" first
 		// For resources without active field, should mention replaced-by link
-		Exception ex = catchException(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false));
-		assertThat(ex).isInstanceOf(UnprocessableEntityException.class);
-		UnprocessableEntityException baseEx = (UnprocessableEntityException) ex;
-		String diagnosticMessage = myReplaceReferencesTestHelper.extractFailureMessageFromOutcomeParameter(baseEx);
+		String diagnosticMessage = callMergeAndExtractDiagnosticMessage(
+				params,
+				UnprocessableEntityException.class);
 
 		// Validate that error prevents using previously merged resource
 		// Message may be about "not active" OR "previously replaced by"
 		assertThat(diagnosticMessage).satisfiesAnyOf(
-				msg -> assertThat(msg).contains("not active"),
+				msg -> assertThat(msg).contains("Target resource is not active, it must be active to be the target of a merge operation."),
 				msg -> assertThat(msg).contains("Target resource was previously replaced by a resource with reference")
 		);
 	}
@@ -655,10 +669,10 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		// Execute merge and expect error
 		String sourceId = scenario.getSourceResource().getIdElement().toUnqualifiedVersionless().getValue();
-		assertThatThrownBy(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false))
-			.isInstanceOf(PreconditionFailedException.class)
-			.satisfies(ex -> assertThat(myReplaceReferencesTestHelper.extractFailureMessageFromOutcomeParameter((BaseServerResponseException) ex))
-				.isEqualTo("HAPI-2597: Number of resources with references to " + sourceId + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'."));
+		callMergeAndValidateException(
+				params,
+				PreconditionFailedException.class,
+				"HAPI-2597: Number of resources with references to " + sourceId + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'.");
 	}
 
 	/**
