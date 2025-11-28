@@ -198,6 +198,11 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 		}
 
 		@Override
+		public Base findContainingResource(Object o, Base base) {
+			return null;
+		}
+
+		@Override
 		public boolean conformsToProfile(FHIRPathEngine engine, Object appContext, Base item, String url)
 				throws FHIRException {
 			return false;
