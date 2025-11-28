@@ -116,6 +116,12 @@ public class PractitionerMergeTestScenario extends AbstractMergeTestScenario<Pra
 		}
 	}
 
+	@Nonnull
+	@Override
+	public IBaseResource createReferencingResource() {
+		return createReferencingResource("PractitionerRole", getVersionlessSourceId());
+	}
+
 	public AbstractMergeTestScenario<Practitioner> withOneReferencingResource() {
 		return withReferences(List.of(ReferencingTestResourceType.of("PractitionerRole", 1)));
 	}

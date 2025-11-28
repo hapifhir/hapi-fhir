@@ -961,6 +961,19 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	protected abstract IBaseResource createReferencingResource(
 			@Nonnull String theReferencingResourceType, @Nonnull IIdType theReferencedId);
 
+	/**
+	 * Creates a single referencing resource for concurrent modification testing.
+	 * This resource references the source resource and is used to simulate
+	 * race conditions during async merge operations.
+	 *
+	 * <p>Implementations should call {@link #createReferencingResource(String, IIdType)}
+	 * with a hardcoded resource type appropriate for this scenario.
+	 *
+	 * @return A new referencing resource that references the source resource
+	 */
+	@Nonnull
+	public abstract IBaseResource createReferencingResource();
+
 	// ================================================
 	// PRIVATE HELPER METHODS
 	// ================================================
