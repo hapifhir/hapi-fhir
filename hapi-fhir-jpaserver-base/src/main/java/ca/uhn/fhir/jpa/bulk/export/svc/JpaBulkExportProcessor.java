@@ -139,7 +139,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	}
 
 	@SuppressWarnings("unchecked")
-	private LinkedHashSet<JpaPid> getPidsForPatientStyleExport(
+	protected LinkedHashSet<JpaPid> getPidsForPatientStyleExport(
 			ExportPIDIteratorParameters theParams,
 			String resourceType,
 			String theJobId,
@@ -172,13 +172,12 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				SearchRuntimeDetails searchRuntime = new SearchRuntimeDetails(null, theJobId);
 
 				Logs.getBatchTroubleshootingLog()
-					.atDebug()
-					.setMessage("Executing query for bulk export job[{}] chunk[{}]: {}")
-					.addArgument(theJobId)
-					.addArgument(theChunkId)
-					.addArgument(map.toNormalizedQueryString())
-					.log();
-
+						.atDebug()
+						.setMessage("Executing query for bulk export job[{}] chunk[{}]: {}")
+						.addArgument(theJobId)
+						.addArgument(theChunkId)
+						.addArgument(map.toNormalizedQueryString())
+						.log();
 
 				try (IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(
 						map, searchRuntime, new SystemRequestDetails(), theParams.getPartitionIdOrAllPartitions())) {
@@ -187,11 +186,11 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 						if (pidCount % 10000 == 0) {
 							Logs.getBatchTroubleshootingLog()
 									.atDebug()
-								.setMessage("Bulk export job[{}] chunk[{}] has loaded {} pids")
-								.addArgument(theJobId)
-								.addArgument(theChunkId)
-								.addArgument(pidCount)
-								.log();
+									.setMessage("Bulk export job[{}] chunk[{}] has loaded {} pids")
+									.addArgument(theJobId)
+									.addArgument(theChunkId)
+									.addArgument(pidCount)
+									.log();
 						}
 						pidCount++;
 						pids.add(resultIterator.next());
@@ -426,16 +425,16 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			RequestPartitionId partitionId = theParameters.getPartitionIdOrAllPartitions();
 
 			Set<JpaPid> singlePatientExpandedSet = myMdmExpandersHolder
-				.getBulkExportMDMResourceExpanderInstance()
-				.expandGroup(theParameters.getGroupId(), partitionId);
+					.getBulkExportMDMResourceExpanderInstance()
+					.expandGroup(theParameters.getGroupId(), partitionId);
 
 			patientPidsToExport.addAll(singlePatientExpandedSet);
 
 			ourLog.debug(
-				"Group with ID [{}] has been expanded to {} members, member JpaIds: {}",
-				theParameters.getGroupId(),
-				singlePatientExpandedSet.size(),
-				singlePatientExpandedSet);
+					"Group with ID [{}] has been expanded to {} members, member JpaIds: {}",
+					theParameters.getGroupId(),
+					singlePatientExpandedSet.size(),
+					singlePatientExpandedSet);
 		}
 
 		theParameters.setExpandedPatientIdsForGroupExport(patientPidsToExport);
@@ -455,7 +454,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 *
 	 * Created by Claude 4.5 Sonnet
 	 */
-	private HashSet<String> getExpandedPatientSetForPatientExport(ExportPIDIteratorParameters theParams) {
+	HashSet<String> getExpandedPatientSetForPatientExport(ExportPIDIteratorParameters theParams) {
 		if (theParams.hasExpandedPatientIdsForPatientExport()) {
 			ourLog.debug(
 					"Using cached expanded patient ID set with {} patients",

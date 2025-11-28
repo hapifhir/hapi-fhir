@@ -65,6 +65,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -504,6 +505,95 @@ public class JpaBulkExportProcessorTest {
 		ArgumentCaptor<SystemRequestDetails> resourceDaoServletRequestDetailsCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
 		verify(mockDao).read(any(IdDt.class), resourceDaoServletRequestDetailsCaptor.capture());
 		validatePartitionId(thePartitioned, resourceDaoServletRequestDetailsCaptor.getValue().getRequestPartitionId());
+	}
+
+	@Test
+	void testGetExpandedPatientSetForPatientExport_withoutMdm_returnsOriginalPatients() {
+		// Given - Parameters with MDM disabled
+		ExportPIDIteratorParameters params = new ExportPIDIteratorParameters();
+		params.setPatientIds(List.of("Patient/1"));
+		params.setExpandMdm(false); // MDM disabled
+
+		// When - Call method
+		HashSet<String> result = myProcessor.getExpandedPatientSetForPatientExport(params);
+
+		// Then - Returns only original patient ID
+		assertThat(result).containsExactlyInAnyOrder("Patient/1");
+		assertThat(result).hasSize(1);
+
+		// Verify MDM expander was NOT called
+		verify(myMdmExpandersHolder, never()).getBulkExportMDMResourceExpanderInstance();
+		verify(myBulkExportMDMResourceExpander, never()).expandPatient(any(), any());
+
+		// Verify results were cached
+		assertThat(params.getExpandedPatientIdsForPatientExport()).isEqualTo(result);
+		assertThat(params.hasExpandedPatientIdsForPatientExport()).isTrue();
+	}
+
+	@Test
+	void testGetExpandedPatientSetForPatientExport_withMdm_expandsAndCachesPatients() {
+		// Given - Parameters with MDM enabled
+		ExportPIDIteratorParameters params = new ExportPIDIteratorParameters();
+		params.setPatientIds(List.of("Patient/1"));
+		params.setExpandMdm(true); // MDM enabled
+		params.setPartitionId(RequestPartitionId.allPartitions());
+
+		// Mock MDM expander behavior
+		when(myMdmExpandersHolder.getBulkExportMDMResourceExpanderInstance())
+				.thenReturn(myBulkExportMDMResourceExpander);
+
+		// Patient/1 expands to Patient/1 + Patient/golden (linked via MDM)
+		when(myBulkExportMDMResourceExpander.expandPatient(eq("Patient/1"), any()))
+				.thenReturn(Set.of("Patient/1", "Patient/golden"));
+
+		// When - Call method
+		HashSet<String> result = myProcessor.getExpandedPatientSetForPatientExport(params);
+
+		// Then - Returns original + expanded patient IDs
+		assertThat(result).containsExactlyInAnyOrder("Patient/1", "Patient/golden");
+		assertThat(result).hasSize(2);
+
+		// Verify MDM expander was called for the patient
+		verify(myMdmExpandersHolder, times(1)).getBulkExportMDMResourceExpanderInstance();
+		verify(myBulkExportMDMResourceExpander, times(1))
+				.expandPatient(eq("Patient/1"), eq(RequestPartitionId.allPartitions()));
+
+		// Verify results were cached
+		assertThat(params.getExpandedPatientIdsForPatientExport()).isEqualTo(result);
+		assertThat(params.hasExpandedPatientIdsForPatientExport()).isTrue();
+	}
+	
+	@Test
+	void testGetExpandedPatientSetForPatientExport_cachePreventsRedundantExpansion() {
+		// Given - Parameters with MDM enabled
+		ExportPIDIteratorParameters params = new ExportPIDIteratorParameters();
+		params.setPatientIds(List.of("Patient/1"));
+		params.setExpandMdm(true);
+		params.setPartitionId(RequestPartitionId.allPartitions());
+
+		// Mock MDM expander to return expanded set
+		when(myMdmExpandersHolder.getBulkExportMDMResourceExpanderInstance())
+				.thenReturn(myBulkExportMDMResourceExpander);
+		when(myBulkExportMDMResourceExpander.expandPatient(eq("Patient/1"), any()))
+				.thenReturn(Set.of("Patient/1", "Patient/golden"));
+
+		// When - Call method FIRST time
+		HashSet<String> result1 = myProcessor.getExpandedPatientSetForPatientExport(params);
+
+		// Then - First call should expand and cache
+		assertThat(result1).containsExactlyInAnyOrder("Patient/1", "Patient/golden");
+		verify(myBulkExportMDMResourceExpander, times(1)).expandPatient(eq("Patient/1"), any());
+
+		// When - Call method SECOND time with SAME params
+		HashSet<String> result2 = myProcessor.getExpandedPatientSetForPatientExport(params);
+
+		// Then - Second call should use cache (no additional MDM calls)
+		assertThat(result2).containsExactlyInAnyOrder("Patient/1", "Patient/golden");
+		assertThat(result2).isSameAs(result1); // Same object reference (cached)
+
+		// Verify MDM expander was called only ONCE (on first call)
+		verify(myBulkExportMDMResourceExpander, times(1)).expandPatient(eq("Patient/1"), any());
+		verify(myMdmExpandersHolder, times(1)).getBulkExportMDMResourceExpanderInstance();
 	}
 
 }
