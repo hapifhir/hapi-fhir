@@ -245,8 +245,8 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 			List<IIdType> idsForType = new ArrayList<>();
 
 			for (int i = 0; i < resourceType.getCount(); i++) {
-				IBaseResource referencingResource =
-						createReferencingResource(resourceType.getResourceType(), source.getIdElement());
+				IBaseResource referencingResource = createReferencingResource(
+						resourceType.getResourceType(), source.getIdElement().toUnqualifiedVersionless());
 
 				// Persist referencing resource
 				IFhirResourceDao<IBaseResource> refDao = myDaoRegistry.getResourceDao(resourceType.getResourceType());
