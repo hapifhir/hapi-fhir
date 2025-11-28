@@ -22,9 +22,9 @@ import org.fhir.ucum.UcumService;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportUtils;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.context.IContextResourceLoader;
+import org.hl7.fhir.r5.context.ExpansionOptions;
+import org.hl7.fhir.r5.context.IOIDServices;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.context.IWorkerContextManager;
 import org.hl7.fhir.r5.fhirpath.FHIRPathEngine;
@@ -47,11 +47,8 @@ import org.hl7.fhir.r5.terminologies.utilities.TerminologyServiceErrorClass;
 import org.hl7.fhir.r5.terminologies.utilities.ValidationResult;
 import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.ValidationContextCarrier;
-import org.hl7.fhir.utilities.FhirPublication;
 import org.hl7.fhir.utilities.TimeTracker;
 import org.hl7.fhir.utilities.i18n.I18nBase;
-import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
-import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.slf4j.Logger;
@@ -198,17 +195,6 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	@Override
-	public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader) throws FHIRException {
-		throw new UnsupportedOperationException(Msg.code(652));
-	}
-
-	@Override
-	public int loadFromPackageAndDependencies(NpmPackage pi, IContextResourceLoader loader, BasePackageCacheManager pcm)
-			throws FHIRException {
-		throw new UnsupportedOperationException(Msg.code(654));
-	}
-
-	@Override
 	public boolean hasPackage(String id, String ver) {
 		throw new UnsupportedOperationException(Msg.code(655));
 	}
@@ -272,7 +258,6 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 		return myExpansionProfile;
 	}
 
-	@Override
 	public void setExpansionParameters(Parameters expParameters) {
 		setExpansionProfile(expParameters);
 	}
@@ -324,15 +309,6 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 
 		return retVal;
 	}
-
-	@Override
-	public void cacheResource(Resource res) {}
-
-	@Override
-	public void cacheResourceFromPackage(Resource res, PackageInformation packageDetails) throws FHIRException {}
-
-	@Override
-	public void cachePackage(PackageInformation packageInformation) {}
 
 	@Nonnull
 	private ValidationResult convertValidationResult(
@@ -435,7 +411,17 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	@Override
+	public ValueSetExpansionOutcome expandVS(ExpansionOptions options, ValueSet source) {
+		return null;
+	}
+
+	@Override
 	public ValueSetExpansionOutcome expandVS(ValueSet valueSet, boolean b, boolean b1, int i) {
+		return null;
+	}
+
+	@Override
+	public ValueSetExpansionOutcome expandVS(ExpansionOptions options, String uri) {
 		return null;
 	}
 
@@ -445,25 +431,9 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			ElementDefinition.ElementDefinitionBindingComponent binding,
 			boolean cacheOk,
 			boolean Hierarchical) {
-		ValueSet valueSet = fetchResource(ValueSet.class, binding.getValueSet(), src);
+		ValueSet valueSet = fetchResource(ValueSet.class, binding.getValueSet(), null, src);
 		return expandVS(valueSet, cacheOk, Hierarchical);
 	}
-
-	@Override
-	public ValueSetExpansionOutcome expandVS(
-			ITerminologyOperationDetails iTerminologyOperationDetails,
-			ValueSet.ConceptSetComponent conceptSetComponent,
-			boolean b,
-			boolean b1)
-			throws TerminologyServiceException {
-		return null;
-	}
-
-	/*@Override
-	public ValueSetExpansionOutcome expandVS(ValueSet.ConceptSetComponent inc, boolean hierarchical, boolean noInactive)
-			throws TerminologyServiceException {
-		throw new UnsupportedOperationException(Msg.code(664));
-	}*/
 
 	@Override
 	public Locale getLocale() {
@@ -489,7 +459,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	@Override
-	public CodeSystem fetchCodeSystem(String system, String verison) {
+	public CodeSystem fetchCodeSystem(String system, String version, Resource sourceOfReference) {
 		IBaseResource fetched = myValidationSupport.fetchCodeSystem(system);
 		if (fetched == null) {
 			return null;
@@ -502,32 +472,11 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	@Override
-	public CodeSystem fetchCodeSystem(String system, FhirPublication fhirVersion) {
-		return null;
-	}
-
-	@Override
-	public CodeSystem fetchCodeSystem(String system, String version, FhirPublication fhirVersion) {
-		return null;
-	}
-
-	@Override
 	public CodeSystem fetchSupplementedCodeSystem(String system) {
 		return null;
 	}
 
-	@Override
-	public CodeSystem fetchSupplementedCodeSystem(String system, String version) {
-		return null;
-	}
-
-	@Override
-	public CodeSystem fetchSupplementedCodeSystem(String system, FhirPublication fhirVersion) {
-		return null;
-	}
-
-	@Override
-	public CodeSystem fetchSupplementedCodeSystem(String system, String version, FhirPublication fhirVersion) {
+	public CodeSystem fetchSupplementedCodeSystem(String system, String version, Resource sourceOfReference) {
 		return null;
 	}
 
@@ -559,11 +508,6 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	@Override
-	public Resource fetchResourceById(String type, String uri, FhirPublication fhirVersion) {
-		return null;
-	}
-
-	@Override
 	public <T extends Resource> T fetchResourceWithException(Class<T> class_, String uri) throws FHIRException {
 		T retVal = fetchResource(class_, uri);
 		if (retVal == null) {
@@ -574,34 +518,14 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	@Override
-	public <T extends Resource> T fetchResource(Class<T> class_, String uri, String version) {
+	public <T extends Resource> T fetchResource(Class<T> class_, String uri, String version, Resource sourceOfReference)
+			throws FHIRException {
 		return fetchResource(class_, uri + "|" + version);
 	}
 
 	@Override
-	public <T extends Resource> T fetchResource(Class<T> class_, String uri, FhirPublication fhirVersion) {
-		return null;
-	}
-
-	@Override
-	public <T extends Resource> T fetchResource(
-			Class<T> class_, String uri, String version, FhirPublication fhirVersion) {
-		return null;
-	}
-
-	@Override
-	public <T extends Resource> T fetchResource(Class<T> class_, String uri, Resource canonicalForSource) {
-		return fetchResource(class_, uri);
-	}
-
-	@Override
-	public <T extends Resource> List<T> fetchResourcesByType(Class<T> class_, FhirPublication fhirVersion) {
-		return null;
-	}
-
-	@Override
-	public <T extends Resource> T fetchResourceWithException(Class<T> class_, String uri, Resource sourceOfReference)
-			throws FHIRException {
+	public <T extends Resource> T fetchResourceWithException(
+			Class<T> class_, String uri, String version, Resource sourceOfReference) throws FHIRException {
 		throw new UnsupportedOperationException(Msg.code(2214));
 	}
 
@@ -611,18 +535,8 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	@Override
-	public List<String> getResourceNames(FhirPublication fhirVersion) {
-		return null;
-	}
-
-	@Override
 	public Set<String> getResourceNamesAsSet() {
 		return myFhirContext.getResourceTypes();
-	}
-
-	@Override
-	public Set<String> getResourceNamesAsSet(FhirPublication theFhirVersion) {
-		return null;
 	}
 
 	@Override
@@ -631,20 +545,10 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	@Override
-	public StructureDefinition fetchTypeDefinition(String theTypeName, FhirPublication theFhirVersion) {
-		return null;
-	}
-
-	@Override
 	public List<StructureDefinition> fetchTypeDefinitions(String theTypeName) {
 		List<StructureDefinition> allStructures = new ArrayList<>(allStructureDefinitions());
 		allStructures.removeIf(sd -> !sd.hasType() || !sd.getType().equals(theTypeName));
 		return allStructures;
-	}
-
-	@Override
-	public List<StructureDefinition> fetchTypeDefinitions(String theTypeName, FhirPublication theFhirVersion) {
-		return null;
 	}
 
 	@Override
@@ -679,8 +583,13 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	@Override
-	public void setUcumService(UcumService ucumService) {
-		throw new UnsupportedOperationException(Msg.code(677));
+	public IOIDServices oidServices() {
+		return null;
+	}
+
+	@Override
+	public IWorkerContextManager getManager() {
+		return null;
 	}
 
 	@Override
@@ -699,12 +608,8 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	@Override
-	public <T extends Resource> boolean hasResource(Class<T> class_, String uri, Resource sourceOfReference) {
-		return false;
-	}
-
-	@Override
-	public <T extends Resource> boolean hasResource(Class<T> class_, String uri, String fhirVersion) {
+	public <T extends Resource> boolean hasResource(
+			Class<T> class_, String uri, String version, Resource sourceOfReference) {
 		return false;
 	}
 
@@ -734,38 +639,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	@Override
-	public void setLogger(@Nonnull org.hl7.fhir.r5.context.ILoggingService logger) {
-		throw new UnsupportedOperationException(Msg.code(687));
-	}
-
-	@Override
-	public boolean supportsSystem(String system) {
-		return myValidationSupport.isCodeSystemSupported(newValidationSupportContext(), system);
-	}
-
-	@Override
-	public boolean supportsSystem(String system, FhirPublication fhirVersion) throws TerminologyServiceException {
-		return supportsSystem(system);
-	}
-
-	@Override
 	public SystemSupportInformation getTxSupportInfo(String system, String version) {
-		return null;
-	}
-
-	@Override
-	public SystemSupportInformation getTxSupportInfo(String system) {
-		return null;
-	}
-
-	@Override
-	public ValueSetExpansionOutcome expandVS(
-			ValueSet source, boolean cacheOk, boolean heiarchical, boolean incompleteOk) {
-		return null;
-	}
-
-	@Override
-	public ValueSetExpansionOutcome expandVS(String s, boolean b, boolean b1, int i) {
 		return null;
 	}
 
@@ -1005,14 +879,8 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	@Override
-	public <T extends Resource> List<T> fetchResourceVersionsByTypeAndUrl(Class<T> class_, String url) {
-		throw new UnsupportedOperationException(
-				Msg.code(2797) + "Can't fetch all resources of type : " + class_ + " and url: " + url);
-	}
-
-	@Override
-	public <T extends Resource> List<T> fetchResourcesByUrl(Class<T> class_, String url) {
-		throw new UnsupportedOperationException(Msg.code(2509) + "Can't fetch all resources of url: " + url);
+	public <T extends Resource> List<T> fetchResourceVersions(Class<T> class_, String url) {
+		return List.of();
 	}
 
 	@Override
@@ -1026,19 +894,6 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	@Override
-	public OIDSummary urlsForOid(String oid, String resourceType) {
-		return null;
-	}
-
-	@Override
-	public <T extends Resource> T findTxResource(Class<T> class_, String canonical, Resource sourceOfReference) {
-		if (canonical == null) {
-			return null;
-		}
-		return fetchResource(class_, canonical, sourceOfReference);
-	}
-
-	@Override
 	public <T extends Resource> T findTxResource(Class<T> class_, String canonical) {
 		if (canonical == null) {
 			return null;
@@ -1048,22 +903,18 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	@Override
-	public <T extends Resource> T findTxResource(Class<T> class_, String canonical, String version) {
+	public <T extends Resource> T findTxResource(
+			Class<T> class_, String canonical, String version, Resource sourceOfReference) {
 		if (canonical == null) {
 			return null;
 		}
 
-		return fetchResource(class_, canonical, version);
+		return fetchResource(class_, canonical, version, sourceOfReference);
 	}
 
 	@Override
 	public Boolean subsumes(ValidationOptions optionsArg, Coding parent, Coding child) {
 		throw new UnsupportedOperationException(Msg.code(2489));
-	}
-
-	@Override
-	public boolean isServerSideSystem(String url) {
-		return false;
 	}
 
 	private IBaseResource fetchResource(String theResourceType, String theUrl) {
