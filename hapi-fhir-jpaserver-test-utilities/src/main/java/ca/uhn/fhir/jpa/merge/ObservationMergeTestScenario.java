@@ -103,6 +103,12 @@ public class ObservationMergeTestScenario extends AbstractMergeTestScenario<Obse
 		}
 	}
 
+	@Nonnull
+	@Override
+	public IBaseResource createReferencingResource() {
+		return createReferencingResource("DiagnosticReport", getVersionlessSourceId());
+	}
+
 	public AbstractMergeTestScenario<Observation> withOneReferencingResource() {
 		return withReferences(List.of(ReferencingTestResourceType.of("DiagnosticReport", 1)));
 	}

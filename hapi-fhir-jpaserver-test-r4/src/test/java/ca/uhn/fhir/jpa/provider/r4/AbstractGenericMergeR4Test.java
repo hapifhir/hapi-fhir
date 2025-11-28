@@ -40,6 +40,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,9 +55,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchException;
+import static org.awaitility.Awaitility.await;
 
 /**
  * Abstract base class for generic merge operation tests.
@@ -652,6 +655,63 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		// Comprehensive validation (handles all edge cases automatically)
 		scenario.validateResourcesAfterMerge();
+	}
+
+	/**
+	 * GAP #5: Tests race condition handling when a new resource referencing the source
+	 * is added mid-job during async merge with deleteSource=true.
+	 *
+	 * <p>Test validates that when a concurrent modification occurs (new reference to source
+	 * created while async job is running), the job fails safely rather than leaving orphaned
+	 * references. This tests transaction isolation in multi-user environments.
+	 */
+	@Test
+	void testMerge_concurrentModificationDuringAsyncJob_JobFails() {
+		// Setup: Create scenario with many referencing resources
+		AbstractMergeTestScenario<T> scenario = createScenario();
+		scenario.withMultipleReferencingResources(25);
+		scenario.persistTestData();
+
+		// Small batch size to slow job execution
+		int originalBatchSize = myStorageSettings.getDefaultTransactionEntriesForWrite();
+		myStorageSettings.setDefaultTransactionEntriesForWrite(5);
+
+		try {
+			// Build merge parameters with deleteSource=true
+			MergeTestParameters params = scenario.buildMergeOperationParameters()
+					.deleteSource(true)
+					.preview(false);
+
+			// Execute async merge
+			Parameters outParams = myHelper.callMergeOperation(getResourceTypeName(), params, true);
+			Task task = (Task) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
+			String jobId = myHelper.getJobIdFromTask(task);
+
+			// Wait for "query-ids" step to complete
+			await()
+					.until(() -> {
+						myBatch2JobHelper.runMaintenancePass();
+						String currentGatedStepId = myJobCoordinator.getInstance(jobId).getCurrentGatedStepId();
+						return !"query-ids".equals(currentGatedStepId);
+					});
+
+			// Create NEW resource referencing source WHILE JOB IS RUNNING
+			IBaseResource referencingResource = scenario.createReferencingResource();
+			myClient.create().resource(referencingResource).execute();
+
+			// Job should fail when trying to delete source
+			myBatch2JobHelper.awaitJobFailure(jobId);
+
+			// Verify task status
+			Task taskAfterJobFailure = myClient.read()
+					.resource(Task.class)
+					.withId(task.getIdElement().toVersionless())
+					.execute();
+			assertThat(taskAfterJobFailure.getStatus()).isEqualTo(Task.TaskStatus.FAILED);
+		} finally {
+			// Restore original batch size
+			myStorageSettings.setDefaultTransactionEntriesForWrite(originalBatchSize);
+		}
 	}
 
 }
