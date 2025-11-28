@@ -127,13 +127,9 @@ public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpa
 		}
 
 		for (JpaPid pid : expandedPatientJpaPids) {
-			Optional<String> forcedId = myIdHelperService.translatePidIdToForcedIdWithCache(pid);
-			String patientIdString;
-			if (forcedId.isPresent()) {
-				patientIdString = "Patient/" + forcedId.get();
-			} else {
-				patientIdString = "Patient/" + pid.getId();
-			}
+			Optional<String> forcedIdOpt = myIdHelperService.translatePidIdToForcedIdWithCache(pid);
+			String patientIdString = "Patient/" + forcedIdOpt.orElse(pid.getId().toString());
+
 			expandedPatientIdsAsString.add(patientIdString);
 		}
 
@@ -209,7 +205,7 @@ public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpa
 	private RuntimeSearchParam getRuntimeSearchParam(IBaseResource theResource) {
 		Optional<RuntimeSearchParam> oPatientSearchParam =
 				SearchParameterUtil.getOnlyPatientSearchParamForResourceType(myContext, theResource.fhirType());
-		if (!oPatientSearchParam.isPresent()) {
+		if (oPatientSearchParam.isEmpty()) {
 			String errorMessage = String.format(
 					"[%s] has  no search parameters that are for patients, so it is invalid for Group Bulk Export!",
 					theResource.fhirType());
