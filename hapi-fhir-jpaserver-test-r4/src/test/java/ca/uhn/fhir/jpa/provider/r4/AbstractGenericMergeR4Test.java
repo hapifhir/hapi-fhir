@@ -398,6 +398,33 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
+	protected void testMerge_errorHandling_multipleTargetMatches() {
+		// Setup: Create scenario with standard source and target
+		AbstractMergeTestScenario<T> scenario = createScenario();
+		scenario.persistTestData();
+
+		// Create a duplicate resource with the same identifiers as target
+		// This simulates the scenario where multiple resources match the target identifiers
+		List<Identifier> targetIdentifiers = scenario.getIdentifiersFromResource(scenario.getTargetResource());
+		T duplicateResource = scenario.createResource(targetIdentifiers);
+		myClient.create().resource(duplicateResource).execute();
+
+		// Build parameters with target resolved by identifier (not ID)
+		// This will cause the identifier search to find both the original target and the duplicate
+		MergeTestParameters params = scenario.buildMergeOperationParameters(
+			true,  // sourceById = true (no ambiguity for source)
+			false  // targetById = false (triggers identifier search → multiple matches)
+		);
+
+		// Validate error
+		Exception ex = catchException(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false));
+		assertThat(ex).isInstanceOf(UnprocessableEntityException.class);
+		UnprocessableEntityException baseEx = (UnprocessableEntityException) ex;
+		String diagnosticMessage = myReplaceReferencesTestHelper.extractFailureMessageFromOutcomeParameter(baseEx);
+		assertThat(diagnosticMessage).isEqualTo("Multiple resources found matching the identifier(s) specified in 'target-resource-identifier'");
+	}
+
+	@Test
 	protected void testMerge_errorHandling_previouslyMergedSourceAsSource() {
 		// Setup: Create and merge source with another resource first
 		AbstractMergeTestScenario<T> scenario = createScenario();
