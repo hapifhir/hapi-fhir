@@ -327,8 +327,13 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				.preview(false);
 
 		// Validate error
-		assertThatThrownBy(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false))
-				.isInstanceOf(InvalidRequestException.class);
+		Exception ex = catchException(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false));
+		assertThat(ex).isInstanceOf(InvalidRequestException.class);
+
+		InvalidRequestException invalidEx = (InvalidRequestException) ex;
+		String diagnosticMessage = myReplaceReferencesTestHelper.extractFailureMessageFromOutcomeParameter(invalidEx);
+		assertThat(diagnosticMessage)
+				.contains("There are no source resource parameters provided, include either a 'source-resource', or a 'source-resource-identifier' parameter");
 	}
 
 	@Test
@@ -340,8 +345,13 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				.preview(false);
 
 		// Validate error
-		assertThatThrownBy(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false))
-				.isInstanceOf(InvalidRequestException.class);
+		Exception ex = catchException(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false));
+		assertThat(ex).isInstanceOf(InvalidRequestException.class);
+
+		InvalidRequestException invalidEx = (InvalidRequestException) ex;
+		String diagnosticMessage = myReplaceReferencesTestHelper.extractFailureMessageFromOutcomeParameter(invalidEx);
+		assertThat(diagnosticMessage)
+				.contains("There are no target resource parameters provided, include either a 'target-resource', or a 'target-resource-identifier' parameter");
 	}
 
 	@Test
@@ -351,13 +361,20 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				.deleteSource(false)
 				.preview(false);
 
-		// Validate error - should return InvalidRequestException with 400 status
+		// Validate error - should return InvalidRequestException with 400 status and both error messages
 		Exception ex = catchException(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false));
 		assertThat(ex)
 				.isInstanceOf(InvalidRequestException.class)
 				.extracting(InvalidRequestException.class::cast)
 				.extracting(BaseServerResponseException::getStatusCode)
 				.isEqualTo(400);
+
+		// Validate both error messages are present
+		InvalidRequestException invalidEx = (InvalidRequestException) ex;
+		String diagnosticMessage = myReplaceReferencesTestHelper.extractFailureMessageFromOutcomeParameter(invalidEx);
+		assertThat(diagnosticMessage)
+				.contains("There are no source resource parameters provided")
+				.contains("There are no target resource parameters provided");
 	}
 
 	@Test
