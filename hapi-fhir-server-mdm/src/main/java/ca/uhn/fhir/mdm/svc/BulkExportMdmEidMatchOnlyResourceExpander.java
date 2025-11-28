@@ -128,23 +128,12 @@ public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdm
 	 */
 	@Override
 	public Set<String> expandPatient(String thePatientId, RequestPartitionId theRequestPartitionId) {
-		// Read the Patient resource to verify it exists
 		SystemRequestDetails srd = SystemRequestDetails.forRequestPartitionId(theRequestPartitionId);
 		IIdType patientIdType = myFhirContext.getVersion().newIdType(thePatientId);
 
-		try {
-			// Verify patient exists by attempting to read it
-			myDaoRegistry.getResourceDao("Patient").read(patientIdType, srd);
-		} catch (Exception e) {
-			// If patient doesn't exist or can't be read, return empty set
-			return new HashSet<>();
-		}
+		myDaoRegistry.getResourceDao("Patient").read(patientIdType, srd);
 
-		// Use EID expansion service to find all patients with matching EIDs
-		Set<String> expandedPatientIds =
-				myMdmEidMatchOnlyLinkExpandSvc.expandMdmBySourceResourceId(theRequestPartitionId, patientIdType);
-
-		return expandedPatientIds;
+		return myMdmEidMatchOnlyLinkExpandSvc.expandMdmBySourceResourceId(theRequestPartitionId, patientIdType);
 	}
 
 	@Override

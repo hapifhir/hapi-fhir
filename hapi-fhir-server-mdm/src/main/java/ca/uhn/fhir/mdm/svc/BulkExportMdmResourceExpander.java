@@ -85,14 +85,12 @@ public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpa
 
 	@Override
 	public Set<String> expandPatient(String thePatientId, RequestPartitionId theRequestPartitionId) {
-		Set<String> expandedPatientIds = new HashSet<>();
-		Set<JpaPid> expandedPids = new HashSet<>();
-		List<MdmPidTuple<JpaPid>> goldenPidSourcePidTuples = new ArrayList<>();
+		Set<String> expandedPatientIdsAsString = new HashSet<>();
+		Set<JpaPid> expandedPatientJpaPids = new HashSet<>();
 
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setRequestPartitionId(theRequestPartitionId);
 
-		// 1. Read patient resource to get JpaPid
 		IdDt patientIdDt = new IdDt(thePatientId);
 
 		IBaseResource patient;
@@ -100,43 +98,35 @@ public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpa
 			patient = myDaoRegistry.getResourceDao("Patient").read(patientIdDt, requestDetails);
 		} catch (Exception e) {
 			ourLog.warn("Failed to read patient {} for MDM expansion: {}", thePatientId, e.getMessage());
-			// Return empty set if patient doesn't exist
-			return expandedPatientIds;
+			return expandedPatientIdsAsString;
 		}
 
 		JpaPid patientPid = myIdHelperService.getPidOrNull(theRequestPartitionId, patient);
 		if (patientPid == null) {
 			ourLog.warn("Failed to resolve PID for patient {}", thePatientId);
-			return expandedPatientIds;
+			return expandedPatientIdsAsString;
 		}
 
-		// 2. Expand using existing MDM link query
-		//    CRITICAL: expandPidsBySourcePidAndMatchResult() returns ALL patients
-		//    linked to the same golden resource in a SINGLE query!
 		List<MdmPidTuple<JpaPid>> allLinkedPatients =
 				myMdmLinkDao.expandPidsBySourcePidAndMatchResult(patientPid, MdmMatchResultEnum.MATCH);
 
 		if (allLinkedPatients.isEmpty()) {
-			// Patient has no MDM links - just include the patient itself
-			expandedPids.add(patientPid);
+			expandedPatientJpaPids.add(patientPid);
 			ourLog.debug("Patient {} has no MDM links, including only this patient", thePatientId);
 		} else {
-			// Patient has MDM links - add all tuples for processing
-			goldenPidSourcePidTuples.addAll(allLinkedPatients);
+
 			ourLog.debug("Patient {} expanded to {} linked patients", thePatientId, allLinkedPatients.size());
+			List<MdmPidTuple<JpaPid>> goldenPidSourcePidTuples = new ArrayList<>(allLinkedPatients);
 
-			// 3. Collect all unique PIDs (golden + source patients)
-			for (MdmPidTuple<JpaPid> tuple : goldenPidSourcePidTuples) {
-				expandedPids.add(tuple.getGoldenPid());
-				expandedPids.add(tuple.getSourcePid());
-			}
-
-			// 4. Populate cache for resource annotation
 			populateMdmResourceCache(goldenPidSourcePidTuples);
+
+			for (MdmPidTuple<JpaPid> tuple : goldenPidSourcePidTuples) {
+				expandedPatientJpaPids.add(tuple.getGoldenPid());
+				expandedPatientJpaPids.add(tuple.getSourcePid());
+			}
 		}
 
-		// 5. Convert PIDs to String patient IDs
-		for (JpaPid pid : expandedPids) {
+		for (JpaPid pid : expandedPatientJpaPids) {
 			Optional<String> forcedId = myIdHelperService.translatePidIdToForcedIdWithCache(pid);
 			String patientIdString;
 			if (forcedId.isPresent()) {
@@ -144,11 +134,11 @@ public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpa
 			} else {
 				patientIdString = "Patient/" + pid.getId();
 			}
-			expandedPatientIds.add(patientIdString);
+			expandedPatientIdsAsString.add(patientIdString);
 		}
 
-		ourLog.info("Expanded patient {} to {} total patient IDs via MDM", thePatientId, expandedPatientIds.size());
-		return expandedPatientIds;
+		ourLog.debug("Expanded patient {} to {} total patient IDs via MDM", thePatientId, expandedPatientIdsAsString.size());
+		return expandedPatientIdsAsString;
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})

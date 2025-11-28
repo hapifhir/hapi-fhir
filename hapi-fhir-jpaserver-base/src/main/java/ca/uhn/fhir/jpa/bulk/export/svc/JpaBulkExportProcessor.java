@@ -451,12 +451,11 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 * across multiple resource type iterations.
 	 *
 	 * @param theParams - export parameters containing patient IDs and MDM flag
-	 * @return LinkedHashSet of String patient IDs for all patients (original + MDM-expanded)
+	 * @return HashSet of String patient IDs for all patients (original + MDM-expanded)
 	 *
 	 * Created by Claude 4.5 Sonnet
 	 */
 	private HashSet<String> getExpandedPatientSetForPatientExport(ExportPIDIteratorParameters theParams) {
-
 		if (theParams.hasExpandedPatientIdsForPatientExport()) {
 			ourLog.debug(
 					"Using cached expanded patient ID set with {} patients",
@@ -464,19 +463,22 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			return theParams.getExpandedPatientIdsForPatientExport();
 		}
 
+		HashSet<String> expandedPatientIds = new HashSet<>();
+
 		List<String> patientIds = theParams.getPatientIds();
+
 		if (patientIds == null || patientIds.isEmpty()) {
-			return new HashSet<>();
+			return expandedPatientIds;
 		}
 
-		LinkedHashSet<String> expandedPatientIds = new LinkedHashSet<>(patientIds);
+		expandedPatientIds.addAll(patientIds);
+
 		RequestPartitionId partitionId = theParams.getPartitionIdOrAllPartitions();
 
 		if (theParams.isExpandMdm()) {
 			ourLog.debug("MDM expansion enabled - expanding {} patients", patientIds.size());
 
 			for (String patientId : patientIds) {
-				// Call expandPatient() method to get all MDM-linked patients
 				Set<String> mdmExpandedIds = myMdmExpandersHolder
 						.getBulkExportMDMResourceExpanderInstance()
 						.expandPatient(patientId, partitionId);
