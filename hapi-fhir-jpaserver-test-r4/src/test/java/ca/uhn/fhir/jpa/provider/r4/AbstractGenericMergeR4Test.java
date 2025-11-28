@@ -345,6 +345,22 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
+	protected void testMerge_MissingRequiredParameters_Returns400BadRequest() {
+		// Build completely empty parameters (no source, no target)
+		MergeTestParameters params = new MergeTestParameters()
+				.deleteSource(false)
+				.preview(false);
+
+		// Validate error - should return InvalidRequestException with 400 status
+		Exception ex = catchException(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false));
+		assertThat(ex)
+				.isInstanceOf(InvalidRequestException.class)
+				.extracting(InvalidRequestException.class::cast)
+				.extracting(BaseServerResponseException::getStatusCode)
+				.isEqualTo(400);
+	}
+
+	@Test
 	protected void testMerge_errorHandling_sourceEqualsTarget() {
 		// Setup
 		AbstractMergeTestScenario<T> scenario = createScenario();
@@ -658,10 +674,8 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	/**
-	 * GAP #5: Tests race condition handling when a new resource referencing the source
-	 * is added mid-job during async merge with deleteSource=true.
 	 *
-	 * <p>Test validates that when a concurrent modification occurs (new reference to source
+	 * Test validates that when a concurrent modification occurs (new reference to source
 	 * created while async job is running), the job fails safely rather than leaving orphaned
 	 * references. This tests transaction isolation in multi-user environments.
 	 */
