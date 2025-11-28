@@ -117,10 +117,6 @@ public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdm
 
 	/**
 	 * Expands a single patient ID to include all patients linked via EID matching.
-	 * For the given patient:
-	 * - Extracts the patient's EID (Enterprise ID)
-	 * - Finds all other patients with matching EIDs using configured EID systems
-	 * - Returns the complete set of patient ID strings with matching EIDs
 	 *
 	 * @param thePatientId Patient ID to expand (e.g., "Patient/123")
 	 * @param theRequestPartitionId Partition context for the request
@@ -128,10 +124,7 @@ public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdm
 	 */
 	@Override
 	public Set<String> expandPatient(String thePatientId, RequestPartitionId theRequestPartitionId) {
-		SystemRequestDetails srd = SystemRequestDetails.forRequestPartitionId(theRequestPartitionId);
 		IIdType patientIdType = myFhirContext.getVersion().newIdType(thePatientId);
-
-		myDaoRegistry.getResourceDao("Patient").read(patientIdType, srd);
 
 		return myMdmEidMatchOnlyLinkExpandSvc.expandMdmBySourceResourceId(theRequestPartitionId, patientIdType);
 	}

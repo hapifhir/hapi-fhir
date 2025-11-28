@@ -133,7 +133,8 @@ public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpa
 			expandedPatientIdsAsString.add(patientIdString);
 		}
 
-		ourLog.debug("Expanded patient {} to {} total patient IDs via MDM", thePatientId, expandedPatientIdsAsString.size());
+		ourLog.debug(
+				"Expanded patient {} to {} total patient IDs via MDM", thePatientId, expandedPatientIdsAsString.size());
 		return expandedPatientIdsAsString;
 	}
 
