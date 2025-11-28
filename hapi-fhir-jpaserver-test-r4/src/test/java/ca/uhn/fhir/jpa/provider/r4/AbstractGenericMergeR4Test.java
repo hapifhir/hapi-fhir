@@ -383,14 +383,6 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				.deleteSource(false)
 				.preview(false);
 
-		// Validate error - should return InvalidRequestException with 400 status
-		Exception ex = catchException(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false));
-		assertThat(ex)
-				.isInstanceOf(InvalidRequestException.class)
-				.extracting(InvalidRequestException.class::cast)
-				.extracting(BaseServerResponseException::getStatusCode)
-				.isEqualTo(400);
-
 		// Validate both error messages are present
 		callMergeAndValidateException(
 				params,
@@ -475,11 +467,10 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		);
 
 		// Validate error
-		Exception ex = catchException(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false));
-		assertThat(ex).isInstanceOf(UnprocessableEntityException.class);
-		UnprocessableEntityException baseEx = (UnprocessableEntityException) ex;
-		String diagnosticMessage = myReplaceReferencesTestHelper.extractFailureMessageFromOutcomeParameter(baseEx);
-		assertThat(diagnosticMessage).isEqualTo("Multiple resources found matching the identifier(s) specified in 'target-resource-identifier'");
+		callMergeAndValidateException(
+				params,
+				UnprocessableEntityException.class,
+				"Multiple resources found matching the identifier(s) specified in 'target-resource-identifier'");
 	}
 
 	@Test
@@ -502,11 +493,10 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		);
 
 		// Validate error
-		Exception ex = catchException(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false));
-		assertThat(ex).isInstanceOf(UnprocessableEntityException.class);
-		UnprocessableEntityException baseEx = (UnprocessableEntityException) ex;
-		String diagnosticMessage = myReplaceReferencesTestHelper.extractFailureMessageFromOutcomeParameter(baseEx);
-		assertThat(diagnosticMessage).isEqualTo("Multiple resources found matching the identifier(s) specified in 'source-resource-identifier'");
+		callMergeAndValidateException(
+				params,
+				UnprocessableEntityException.class,
+				"Multiple resources found matching the identifier(s) specified in 'source-resource-identifier'");
 	}
 
 	@Test
@@ -528,13 +518,11 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				.preview(false);
 
 		// Validate error - should mention replaced-by link
-		Exception ex = catchException(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false));
-		assertThat(ex).isInstanceOf(UnprocessableEntityException.class);
-		UnprocessableEntityException baseEx = (UnprocessableEntityException) ex;
-		String diagnosticMessage = myReplaceReferencesTestHelper.extractFailureMessageFromOutcomeParameter(baseEx);
-		assertThat(diagnosticMessage)
-				.contains("Source resource was previously replaced by a resource with reference")
-				.contains("not a suitable source for merging");
+		callMergeAndValidateException(
+				params,
+				UnprocessableEntityException.class,
+				"Source resource was previously replaced by a resource with reference",
+				"not a suitable source for merging");
 	}
 
 	@Test
