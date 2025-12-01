@@ -710,29 +710,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 				.isEqualTo(parser.encodeResourceToString(targetResourceReadFromDB));
 	}
 
-	public void validateAsyncTaskCreated(@Nonnull Parameters theOutParams) {
-		assertThat(theOutParams.getParameter())
-				.as("Async merge should return 3 parameters")
-				.hasSize(3);
-
-		Task task = (Task) theOutParams.getParameter("task").getResource();
-		assertThat(task).as("Task should be present").isNotNull();
-
-		assertThat(task.getIdElement().hasVersionIdPart())
-				.as("Task should not have version")
-				.isFalse();
-
-		OperationOutcome outcome =
-				(OperationOutcome) theOutParams.getParameter("outcome").getResource();
-
-		assertThat(outcome.getIssue()).hasSize(1).element(0).satisfies(issue -> {
-			assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
-			assertThat(issue.getDetails().getText()).contains("asynchronously");
-		});
-
-		ourLog.debug("Async task creation validated successfully: {}", task.getId());
-	}
-
 	/**
 	 * Validates the completed async task output after job finishes.
 	 * Should be called AFTER waitForAsyncTaskCompletion().

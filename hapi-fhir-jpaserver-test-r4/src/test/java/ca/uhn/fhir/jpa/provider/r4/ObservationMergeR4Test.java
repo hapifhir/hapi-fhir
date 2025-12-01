@@ -25,14 +25,12 @@ import ca.uhn.fhir.jpa.merge.AbstractMergeTestScenario;
 import ca.uhn.fhir.jpa.merge.ObservationMergeTestScenario;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Parameters;
-import org.junit.jupiter.api.Test;
 
 /**
  * Integration tests for generic merge operations on Observation resources.
  *
  * <p>All common test methods are inherited from {@link AbstractGenericMergeR4Test}.
- * This class configures the Observation-specific scenario and adds observation-specific tests.
+ * This class only configures the Observation-specific scenario and resource type name.
  *
  * <p><b>Key difference from Practitioner</b>: Observation resources do NOT have
  * an "active" field, so the merge operation does not set source.active=false.
@@ -46,7 +44,6 @@ import org.junit.jupiter.api.Test;
  * - Provenance validation: sync, async, not created for preview
  * - Status field validation: source/target status handling (via scenario, not directly modified)
  * - Result resource validation: overrides target data, preserves references
- * - Observation-specific tests: DiagnosticReport references, all standard references
  *
  * <p>Comprehensive tests for Observation merge operations.
  */
@@ -64,45 +61,6 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 		return "Observation";
 	}
 
-	// ================================================
-	// OBSERVATION-SPECIFIC TESTS
-	// ================================================
-
-	/**
-	 * Test with DiagnosticReport.result references (most common for Observation).
-	 */
-	@Test
-	void testMerge_observationSpecific_diagnosticReportResult() {
-		// Setup
-		AbstractMergeTestScenario<Observation> scenario = createScenario()
-				.withMultipleReferencingResources();
-		scenario.persistTestData();
-
-		// Execute merge and validate
-		Parameters outParams = scenario.callMergeOperation();
-		scenario.validateSuccess(outParams);
-
-		// Additional validation - all DiagnosticReport.result references updated
-		scenario.assertReferencesUpdated("DiagnosticReport");
-	}
-
-	/**
-	 * Test merge with all standard referencing resource types.
-	 */
-	@Test
-	void testMerge_observationSpecific_allStandardReferences() {
-		// Setup with standard references
-		AbstractMergeTestScenario<Observation> scenario = createScenario()
-				.withMultipleReferencingResources();
-		scenario.persistTestData();
-
-		// Execute merge and validate
-		Parameters outParams = scenario.callMergeOperation();
-		scenario.validateSuccess(outParams);
-
-		// Additional validation - all reference types updated
-		for (String resourceType : scenario.getReferencingResourceTypes()) {
-			scenario.assertReferencesUpdated(resourceType);
-		}
-	}
+	// All test methods are inherited from AbstractGenericMergeR4Test
+	// Add Observation-specific tests here if needed
 }
