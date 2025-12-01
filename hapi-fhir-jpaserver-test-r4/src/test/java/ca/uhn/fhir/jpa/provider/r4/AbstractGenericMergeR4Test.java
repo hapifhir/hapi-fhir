@@ -202,6 +202,34 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		scenario.validateSuccess(outParams);
 	}
 
+	/**
+	 * Test that validates merge behavior when source resource is not referenced by any other resources.
+	 * This edge case tests minimal merge workflow where only source and target exist.
+	 * Validates that merge succeeds, provenance is created, and links are properly established
+	 * even when there are zero referencing resources.
+	 */
+	@ParameterizedTest(name = "{index}: deleteSource={0}, async={1}")
+	@CsvSource({
+		"false, false",
+		"false, true",
+		"true, false",
+		"true, true"
+	})
+	void testMerge_sourceNotReferencedByAnyResource(boolean theDeleteSource, boolean theAsync) {
+		// Setup: Create minimal scenario with NO referencing resources
+		// NOTE: Don't call .withOneReferencingResource() or .withMultipleReferencingResources()
+		// This creates only source + target with default identifiers
+		AbstractMergeTestScenario<T> scenario = createScenario()
+			.withDeleteSource(theDeleteSource)
+			.withPreview(false)
+			.withAsync(theAsync);
+		scenario.persistTestData();
+
+		// Execute merge and validate
+		Parameters outParams = scenario.callMergeOperation();
+		scenario.validateSuccess(outParams);
+	}
+
 	// ================================================
 	// IDENTIFIER EDGE CASES
 	// ================================================
@@ -265,45 +293,79 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	// ================================================
-	// EDGE CASES AND ERROR HANDLING TESTS
+	// PROVENANCE AGENT INTERCEPTOR TESTS
 	// ================================================
 
 	/**
-	 * Call merge operation expecting exception, validate type, and return diagnostic message for custom validation.
-	 *
-	 * @param theParams merge parameters to pass to the operation
-	 * @param theExpectedExceptionType expected exception class
-	 * @return diagnostic message extracted from the exception for further validation
+	 * Tests that Provenance.agent is correctly populated from interceptor hooks.
+	 * Validates the PROVENANCE_AGENTS pointcut mechanism for generic resource merge operations.
 	 */
-	protected String callMergeAndExtractDiagnosticMessage(
-			MergeTestParameters theParams,
-			Class<? extends BaseServerResponseException> theExpectedExceptionType) {
+	@ParameterizedTest(name = "{index}: async={0}, multipleAgents={1}")
+	@CsvSource({
+		"false, false",
+		"false, true",
+		"true, false",
+		"true, true"
+	})
+	protected void testMerge_withProvenanceAgentInterceptor_Success(boolean theAsync, boolean theMultipleAgents) {
+		// Setup: Create Provenance agents
+		List<IProvenanceAgent> agents = new ArrayList<>();
+		agents.add(myReplaceReferencesTestHelper.createTestProvenanceAgent());
+		if (theMultipleAgents) {
+			agents.add(myReplaceReferencesTestHelper.createTestProvenanceAgent());
+		}
 
-		Exception ex = catchException(() -> myHelper.callMergeOperation(getResourceTypeName(), theParams, false));
-		assertThat(ex).isInstanceOf(theExpectedExceptionType);
+		// Register interceptor (will be unregistered in @AfterEach of base class)
+		ReplaceReferencesTestHelper.registerProvenanceAgentInterceptor(myServer.getRestfulServer(), agents);
 
-		BaseServerResponseException serverEx = (BaseServerResponseException) ex;
-		return myReplaceReferencesTestHelper.extractFailureMessageFromOutcomeParameter(serverEx);
+		// Create test scenario with referencing resources and expected agents
+		AbstractMergeTestScenario<T> scenario = createScenario()
+			.withOneReferencingResource()
+			.withExpectedProvenanceAgents(agents)
+			.withAsync(theAsync);
+		scenario.persistTestData();
+
+		// Execute merge and validate
+		Parameters outParams = scenario.callMergeOperation();
+		scenario.validateSuccess(outParams);
 	}
 
 	/**
-	 * Call merge operation and validate that it throws expected exception with expected diagnostic messages.
-	 *
-	 * @param theParams merge parameters to pass to the operation
-	 * @param theExpectedExceptionType expected exception class (e.g., InvalidRequestException.class)
-	 * @param theExpectedDiagnosticMessageParts diagnostic message parts that should be present (varargs)
+	 * GAP #2: Test Provenance Agent Interceptor error handling when no agents provided.
+	 * Tests that merge operation fails with InternalErrorException when interceptor
+	 * returns empty agent list, validating defensive programming around hook points.
 	 */
-	protected void callMergeAndValidateException(
-			MergeTestParameters theParams,
-			Class<? extends BaseServerResponseException> theExpectedExceptionType,
-			String... theExpectedDiagnosticMessageParts) {
+	@ParameterizedTest(name = "{index}: async={0}")
+	@CsvSource({
+		"false",
+		"true"
+	})
+	void testMerge_withProvenanceAgentInterceptor_InterceptorReturnsNoAgent_ReturnsInternalError(boolean theAsync) {
+		// this interceptor will be unregistered in @AfterEach of the base class, which unregisters all interceptors
+		ReplaceReferencesTestHelper.registerProvenanceAgentInterceptor(
+			myServer.getRestfulServer(),
+			Collections.emptyList()
+		);
 
-		String diagnosticMessage = callMergeAndExtractDiagnosticMessage(theParams, theExpectedExceptionType);
+		// Build merge parameters using scenario
+		AbstractMergeTestScenario<T> scenario = createScenario();
+		scenario.persistTestData();
+		MergeTestParameters params = scenario.buildMergeOperationParameters();
 
-		for (String messagePart : theExpectedDiagnosticMessageParts) {
-			assertThat(diagnosticMessage).contains(messagePart);
-		}
+		// Execute merge and expect error
+		assertThatThrownBy(() -> myHelper.callMergeOperation(getResourceTypeName(), params, theAsync))
+			.isInstanceOf(InternalErrorException.class)
+			.hasMessageContaining("HAPI-2723: No Provenance Agent was provided by any interceptor for Pointcut.PROVENANCE_AGENTS")
+			.extracting(InternalErrorException.class::cast)
+			.extracting(BaseServerResponseException::getStatusCode)
+			.isEqualTo(500);
 	}
+
+	// ================================================
+	// EDGE CASES AND ERROR HANDLING TESTS
+	// ================================================
+
+
 
 	@Test
 	protected void testMerge_errorHandling_missingSourceResource() {
@@ -522,74 +584,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		);
 	}
 
-	// ================================================
-	// PROVENANCE AGENT INTERCEPTOR TESTS
-	// ================================================
 
-	/**
-	 * Tests that Provenance.agent is correctly populated from interceptor hooks.
-	 * Validates the PROVENANCE_AGENTS pointcut mechanism for generic resource merge operations.
-	 */
-	@ParameterizedTest(name = "{index}: async={0}, multipleAgents={1}")
-	@CsvSource({
-		"false, false",
-		"false, true",
-		"true, false",
-		"true, true"
-	})
-	protected void testMerge_withProvenanceAgentInterceptor_Success(boolean theAsync, boolean theMultipleAgents) {
-		// Setup: Create Provenance agents
-		List<IProvenanceAgent> agents = new ArrayList<>();
-		agents.add(myReplaceReferencesTestHelper.createTestProvenanceAgent());
-		if (theMultipleAgents) {
-			agents.add(myReplaceReferencesTestHelper.createTestProvenanceAgent());
-		}
-
-		// Register interceptor (will be unregistered in @AfterEach of base class)
-		ReplaceReferencesTestHelper.registerProvenanceAgentInterceptor(myServer.getRestfulServer(), agents);
-
-		// Create test scenario with referencing resources and expected agents
-		AbstractMergeTestScenario<T> scenario = createScenario()
-			.withOneReferencingResource()
-			.withExpectedProvenanceAgents(agents)
-			.withAsync(theAsync);
-		scenario.persistTestData();
-
-		// Execute merge and validate
-		Parameters outParams = scenario.callMergeOperation();
-		scenario.validateSuccess(outParams);
-	}
-
-	/**
-	 * GAP #2: Test Provenance Agent Interceptor error handling when no agents provided.
-	 * Tests that merge operation fails with InternalErrorException when interceptor
-	 * returns empty agent list, validating defensive programming around hook points.
-	 */
-	@ParameterizedTest(name = "{index}: async={0}")
-	@CsvSource({
-		"false",
-		"true"
-	})
-	void testMerge_withProvenanceAgentInterceptor_InterceptorReturnsNoAgent_ReturnsInternalError(boolean theAsync) {
-		// this interceptor will be unregistered in @AfterEach of the base class, which unregisters all interceptors
-		ReplaceReferencesTestHelper.registerProvenanceAgentInterceptor(
-			myServer.getRestfulServer(),
-			Collections.emptyList()
-		);
-
-		// Build merge parameters using scenario
-		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.persistTestData();
-		MergeTestParameters params = scenario.buildMergeOperationParameters();
-
-		// Execute merge and expect error
-		assertThatThrownBy(() -> myHelper.callMergeOperation(getResourceTypeName(), params, theAsync))
-			.isInstanceOf(InternalErrorException.class)
-			.hasMessageContaining("HAPI-2723: No Provenance Agent was provided by any interceptor for Pointcut.PROVENANCE_AGENTS")
-			.extracting(InternalErrorException.class::cast)
-			.extracting(BaseServerResponseException::getStatusCode)
-			.isEqualTo(500);
-	}
 
 	/**
 	 * Test that validates resource limit validation for merge operations.
@@ -613,34 +608,6 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				params,
 				PreconditionFailedException.class,
 				"HAPI-2597: Number of resources with references to " + sourceId + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'.");
-	}
-
-	/**
-	 * Test that validates merge behavior when source resource is not referenced by any other resources.
-	 * This edge case tests minimal merge workflow where only source and target exist.
-	 * Validates that merge succeeds, provenance is created, and links are properly established
-	 * even when there are zero referencing resources.
-	 */
-	@ParameterizedTest(name = "{index}: deleteSource={0}, async={1}")
-	@CsvSource({
-		"false, false",
-		"false, true",
-		"true, false",
-		"true, true"
-	})
-	void testMerge_sourceNotReferencedByAnyResource(boolean theDeleteSource, boolean theAsync) {
-		// Setup: Create minimal scenario with NO referencing resources
-		// NOTE: Don't call .withOneReferencingResource() or .withMultipleReferencingResources()
-		// This creates only source + target with default identifiers
-		AbstractMergeTestScenario<T> scenario = createScenario()
-			.withDeleteSource(theDeleteSource)
-			.withPreview(false)
-			.withAsync(theAsync);
-		scenario.persistTestData();
-
-		// Execute merge and validate
-		Parameters outParams = scenario.callMergeOperation();
-		scenario.validateSuccess(outParams);
 	}
 
 	/**
@@ -695,6 +662,44 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		} finally {
 			// Restore original batch size
 			myStorageSettings.setDefaultTransactionEntriesForWrite(originalBatchSize);
+		}
+	}
+
+
+	/**
+	 * Call merge operation expecting exception, validate type, and return diagnostic message for custom validation.
+	 *
+	 * @param theParams merge parameters to pass to the operation
+	 * @param theExpectedExceptionType expected exception class
+	 * @return diagnostic message extracted from the exception for further validation
+	 */
+	protected String callMergeAndExtractDiagnosticMessage(
+		MergeTestParameters theParams,
+		Class<? extends BaseServerResponseException> theExpectedExceptionType) {
+
+		Exception ex = catchException(() -> myHelper.callMergeOperation(getResourceTypeName(), theParams, false));
+		assertThat(ex).isInstanceOf(theExpectedExceptionType);
+
+		BaseServerResponseException serverEx = (BaseServerResponseException) ex;
+		return myReplaceReferencesTestHelper.extractFailureMessageFromOutcomeParameter(serverEx);
+	}
+
+	/**
+	 * Call merge operation and validate that it throws expected exception with expected diagnostic messages.
+	 *
+	 * @param theParams merge parameters to pass to the operation
+	 * @param theExpectedExceptionType expected exception class (e.g., InvalidRequestException.class)
+	 * @param theExpectedDiagnosticMessageParts diagnostic message parts that should be present (varargs)
+	 */
+	protected void callMergeAndValidateException(
+		MergeTestParameters theParams,
+		Class<? extends BaseServerResponseException> theExpectedExceptionType,
+		String... theExpectedDiagnosticMessageParts) {
+
+		String diagnosticMessage = callMergeAndExtractDiagnosticMessage(theParams, theExpectedExceptionType);
+
+		for (String messagePart : theExpectedDiagnosticMessageParts) {
+			assertThat(diagnosticMessage).contains(messagePart);
 		}
 	}
 
