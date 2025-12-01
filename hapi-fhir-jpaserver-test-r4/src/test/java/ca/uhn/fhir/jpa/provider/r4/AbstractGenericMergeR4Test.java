@@ -289,6 +289,33 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		scenario.validateSuccess(outParams);
 	}
 
+	/**
+	 * Tests that when source has no identifiers and deleteSource=true, the target update is a no-op.
+	 * This validates that:
+	 * - Target resource version doesn't increment (no changes to merge)
+	 * - Provenance.target references the original target version (not a new version)
+	 * - Merge still succeeds and creates appropriate links
+	 */
+	@Test
+	protected void testMerge_emptySourceIdentifiers_deleteSource_targetNoopUpdate_succeeds() {
+		// Setup - source has NO identifiers to merge, deleteSource=true
+		AbstractMergeTestScenario<T> scenario = createScenario()
+				.withSourceIdentifiers(Collections.emptyList())
+				.withDeleteSource(true)
+				.withOneReferencingResource();
+		scenario.persistTestData();
+
+		// Execute merge
+		Parameters outParams = scenario.callMergeOperation();
+
+		// Validate operation output (sync merge)
+		scenario.validateSyncMergeOutcome(outParams);
+
+		// Validate resource states with expectTargetUpdated=false
+		// This validates that target version stayed at 1 and Provenance.target references v1
+		scenario.validateResourcesAfterMerge(false);
+	}
+
 	// ================================================
 	// PROVENANCE AGENT INTERCEPTOR TESTS
 	// ================================================
