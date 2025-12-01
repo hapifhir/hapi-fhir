@@ -175,8 +175,11 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	// ================================================
 
 	@ParameterizedTest(name = "{index}: sourceById={0}, targetById={1}")
-	@CsvSource({"true, true", "true, false", "false, true", "false, false"})
-	protected void testMerge_identifierResolution_sync(boolean theSourceById, boolean theTargetById) {
+	@CsvSource({"true, true",
+		"true, false",
+		"false, true",
+		"false, false"})
+	protected void testMerge_identifierResolution_sync_succeeds(boolean theSourceById, boolean theTargetById) {
 		// Setup
 		AbstractMergeTestScenario<T> scenario = createScenario()
 				.withOneReferencingResource()
@@ -190,7 +193,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 	@ParameterizedTest(name = "{index}: sourceById={0}, targetById={1}")
 	@CsvSource({"true, true", "true, false", "false, true", "false, false"})
-	protected void testMerge_identifierResolution_async(boolean theSourceById, boolean theTargetById) {
+	protected void testMerge_identifierResolution_async_succeeds(boolean theSourceById, boolean theTargetById) {
 		// Setup
 		AbstractMergeTestScenario<T> scenario = createScenario()
 				.withOneReferencingResource()
@@ -215,7 +218,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		"true, false",
 		"true, true"
 	})
-	void testMerge_sourceNotReferencedByAnyResource(boolean theDeleteSource, boolean theAsync) {
+	void testMerge_sourceNotReferencedByAnyResource_succeeds(boolean theDeleteSource, boolean theAsync) {
 		// Setup: Create minimal scenario with NO referencing resources
 		// NOTE: Don't call .withOneReferencingResource() or .withMultipleReferencingResources()
 		// This creates only source + target with default identifiers
@@ -235,7 +238,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	// ================================================
 
 	@Test
-	protected void testMerge_identifiers_emptySourceIdentifiers() {
+	protected void testMerge_identifiers_emptySourceIdentifiers_succeeds() {
 		// Setup - source has no identifiers, target has identifiers
 		AbstractMergeTestScenario<T> scenario = createScenario()
 				.withSourceIdentifiers(Collections.emptyList())
@@ -248,7 +251,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_identifiers_emptyTargetIdentifiers() {
+	protected void testMerge_identifiers_emptyTargetIdentifiers_succeeds() {
 		// Setup - source has identifiers, target has no identifiers
 		AbstractMergeTestScenario<T> scenario = createScenario()
 				.withTargetIdentifiers(Collections.emptyList())
@@ -261,7 +264,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_identifiers_bothEmpty() {
+	protected void testMerge_identifiers_bothEmpty_succeeds() {
 		// Setup - both source and target have no identifiers
 		AbstractMergeTestScenario<T> scenario = createScenario()
 				.withSourceIdentifiers(Collections.emptyList())
@@ -275,7 +278,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_resultResource_overridesTargetIdentifiers() {
+	protected void testMerge_resultResource_overridesTargetIdentifiers_succeeds() {
 		// Setup - result resource has different identifiers than target
 		List<Identifier> resultIdentifiers = Arrays.asList(
 				new Identifier().setSystem("http://test.org").setValue("result-1"),
@@ -307,7 +310,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		"true, false",
 		"true, true"
 	})
-	protected void testMerge_withProvenanceAgentInterceptor_Success(boolean theAsync, boolean theMultipleAgents) {
+	protected void testMerge_withProvenanceAgentInterceptor_succeeds(boolean theAsync, boolean theMultipleAgents) {
 		// Setup: Create Provenance agents
 		List<IProvenanceAgent> agents = new ArrayList<>();
 		agents.add(myReplaceReferencesTestHelper.createTestProvenanceAgent());
@@ -340,7 +343,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		"false",
 		"true"
 	})
-	void testMerge_withProvenanceAgentInterceptor_InterceptorReturnsNoAgent_ReturnsInternalError(boolean theAsync) {
+	void testMerge_withProvenanceAgentInterceptor_InterceptorReturnsNoAgent_failsWitInternalErrorException(boolean theAsync) {
 		// this interceptor will be unregistered in @AfterEach of the base class, which unregisters all interceptors
 		ReplaceReferencesTestHelper.registerProvenanceAgentInterceptor(
 			myServer.getRestfulServer(),
