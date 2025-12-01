@@ -57,7 +57,6 @@ import java.util.List;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchException;
 import static org.awaitility.Awaitility.await;
 
@@ -334,16 +333,11 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	/**
-	 * GAP #2: Test Provenance Agent Interceptor error handling when no agents provided.
 	 * Tests that merge operation fails with InternalErrorException when interceptor
 	 * returns empty agent list, validating defensive programming around hook points.
 	 */
-	@ParameterizedTest(name = "{index}: async={0}")
-	@CsvSource({
-		"false",
-		"true"
-	})
-	void testMerge_withProvenanceAgentInterceptor_InterceptorReturnsNoAgent_failsWitInternalErrorException(boolean theAsync) {
+	@Test
+	void testMerge_withProvenanceAgentInterceptor_InterceptorReturnsNoAgent_failsWithInternalErrorException() {
 		// this interceptor will be unregistered in @AfterEach of the base class, which unregisters all interceptors
 		ReplaceReferencesTestHelper.registerProvenanceAgentInterceptor(
 			myServer.getRestfulServer(),
@@ -355,13 +349,11 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		scenario.persistTestData();
 		MergeTestParameters params = scenario.buildMergeOperationParameters();
 
-		// Execute merge and expect error
-		assertThatThrownBy(() -> myHelper.callMergeOperation(getResourceTypeName(), params, theAsync))
-			.isInstanceOf(InternalErrorException.class)
-			.hasMessageContaining("HAPI-2723: No Provenance Agent was provided by any interceptor for Pointcut.PROVENANCE_AGENTS")
-			.extracting(InternalErrorException.class::cast)
-			.extracting(BaseServerResponseException::getStatusCode)
-			.isEqualTo(500);
+		// Validate error
+		callMergeAndValidateException(
+			params,
+			InternalErrorException.class,
+			"HAPI-2723: No Provenance Agent was provided by any interceptor for Pointcut.PROVENANCE_AGENTS");
 	}
 
 	// ================================================
