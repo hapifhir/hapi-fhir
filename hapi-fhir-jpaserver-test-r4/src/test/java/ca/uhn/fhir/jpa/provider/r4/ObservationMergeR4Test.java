@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.merge.AbstractMergeTestScenario;
 import ca.uhn.fhir.jpa.merge.ObservationMergeTestScenario;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -54,7 +55,7 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 	@Nonnull
 	@Override
 	protected AbstractMergeTestScenario<Observation> createScenario() {
-		return new ObservationMergeTestScenario(myDaoRegistry, myFhirContext, myLinkServiceFactory, mySrd);
+		return new ObservationMergeTestScenario(myDaoRegistry, myFhirContext, myLinkServiceFactory, mySrd, myHelper);
 	}
 
 	@Nonnull
@@ -73,14 +74,15 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 	@Test
 	void testMerge_observationSpecific_diagnosticReportResult() {
 		// Setup
-		AbstractMergeTestScenario<Observation> scenario = createScenario();
-		scenario.withMultipleReferencingResources();
+		AbstractMergeTestScenario<Observation> scenario = createScenario()
+				.withMultipleReferencingResources();
 		scenario.persistTestData();
 
-		// Execute merge
-		myHelper.callMergeOperation(scenario, false);
+		// Execute merge and validate
+		Parameters outParams = scenario.callMergeOperation();
+		scenario.validateSuccess(outParams);
 
-		// Validate all DiagnosticReport.result references updated
+		// Additional validation - all DiagnosticReport.result references updated
 		scenario.assertReferencesUpdated("DiagnosticReport");
 	}
 
@@ -90,14 +92,15 @@ public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observati
 	@Test
 	void testMerge_observationSpecific_allStandardReferences() {
 		// Setup with standard references
-		AbstractMergeTestScenario<Observation> scenario = createScenario();
-		scenario.withMultipleReferencingResources();
+		AbstractMergeTestScenario<Observation> scenario = createScenario()
+				.withMultipleReferencingResources();
 		scenario.persistTestData();
 
-		// Execute merge
-		myHelper.callMergeOperation(scenario, false);
+		// Execute merge and validate
+		Parameters outParams = scenario.callMergeOperation();
+		scenario.validateSuccess(outParams);
 
-		// Validate all reference types updated
+		// Additional validation - all reference types updated
 		for (String resourceType : scenario.getReferencingResourceTypes()) {
 			scenario.assertReferencesUpdated(resourceType);
 		}

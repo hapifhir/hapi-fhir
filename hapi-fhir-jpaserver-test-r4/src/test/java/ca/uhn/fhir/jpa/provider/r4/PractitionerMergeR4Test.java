@@ -49,7 +49,7 @@ public class PractitionerMergeR4Test extends AbstractGenericMergeR4Test<Practiti
 	@Nonnull
 	@Override
 	protected AbstractMergeTestScenario<Practitioner> createScenario() {
-		return new PractitionerMergeTestScenario(myDaoRegistry, myFhirContext, myLinkServiceFactory, mySrd);
+		return new PractitionerMergeTestScenario(myDaoRegistry, myFhirContext, myLinkServiceFactory, mySrd, myHelper);
 	}
 
 	@Nonnull

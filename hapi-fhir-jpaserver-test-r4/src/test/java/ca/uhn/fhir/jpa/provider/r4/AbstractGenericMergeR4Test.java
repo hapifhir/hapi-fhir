@@ -161,30 +161,13 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				.withMultipleReferencingResources()
 				.withDeleteSource(theDeleteSource)
 				.withPreview(thePreview)
-				.withResultResource(theResultResource);
-
+				.withResultResource(theResultResource)
+				.withAsync(theAsync);
 		scenario.persistTestData();
 
-		// Execute merge
-		Parameters outParams = myHelper.callMergeOperation(scenario, theAsync);
-
-		// Validate outcome based on mode
-		if (thePreview) {
-			scenario.validatePreviewOutcome(outParams);
-			scenario.assertReferencesNotUpdated();
-			return; // Preview mode doesn't make actual changes
-		}
-
-		if (theAsync) {
-			scenario.validateAsyncOperationOutcome(outParams);
-			myHelper.waitForAsyncTaskCompletion(outParams);
-			scenario.validateTaskOutput(outParams);
-		} else {
-			scenario.validateSyncMergeOutcome(outParams);
-		}
-
-		// Validate merge outcomes
-		scenario.validateResourcesAfterMerge();
+		// Execute merge and validate
+		Parameters outParams = scenario.callMergeOperation();
+		scenario.validateSuccess(outParams);
 	}
 
 	// ================================================
@@ -195,41 +178,28 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	@CsvSource({"true, true", "true, false", "false, true", "false, false"})
 	protected void testMerge_identifierResolution_sync(boolean theSourceById, boolean theTargetById) {
 		// Setup
-		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.withOneReferencingResource();
+		AbstractMergeTestScenario<T> scenario = createScenario()
+				.withOneReferencingResource()
+				.withAsync(false);
 		scenario.persistTestData();
 
-		// Build parameters with identifier-based resolution
-		MergeTestParameters params = scenario.buildMergeOperationParameters(theSourceById, theTargetById);
-
-		// Execute
-		Parameters outParams = myHelper.callMergeOperation(getResourceTypeName(), params, false);
-
-		// Validate
-		scenario.validateSyncMergeOutcome(outParams);
-		scenario.validateResourcesAfterMerge();
+		// Execute and validate with identifier-based resolution
+		Parameters outParams = scenario.callMergeOperation(theSourceById, theTargetById);
+		scenario.validateSuccess(outParams);
 	}
 
 	@ParameterizedTest(name = "{index}: sourceById={0}, targetById={1}")
 	@CsvSource({"true, true", "true, false", "false, true", "false, false"})
 	protected void testMerge_identifierResolution_async(boolean theSourceById, boolean theTargetById) {
 		// Setup
-		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.withOneReferencingResource();
+		AbstractMergeTestScenario<T> scenario = createScenario()
+				.withOneReferencingResource()
+				.withAsync(true);
 		scenario.persistTestData();
 
-		// Build parameters with identifier-based resolution
-		MergeTestParameters params = scenario.buildMergeOperationParameters(theSourceById, theTargetById);
-
-		// Execute
-		Parameters outParams = myHelper.callMergeOperation(getResourceTypeName(), params, true);
-
-		// Validate
-		scenario.validateAsyncOperationOutcome(outParams);
-		myHelper.waitForAsyncTaskCompletion(outParams);
-		scenario.validateTaskOutput(outParams);
-
-		scenario.validateResourcesAfterMerge();
+		// Execute and validate with identifier-based resolution
+		Parameters outParams = scenario.callMergeOperation(theSourceById, theTargetById);
+		scenario.validateSuccess(outParams);
 	}
 
 	// ================================================
@@ -239,56 +209,41 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	@Test
 	protected void testMerge_identifiers_emptySourceIdentifiers() {
 		// Setup - source has no identifiers, target has identifiers
-		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.withSourceIdentifiers(Collections.emptyList());
-		scenario.withOneReferencingResource();
+		AbstractMergeTestScenario<T> scenario = createScenario()
+				.withSourceIdentifiers(Collections.emptyList())
+				.withOneReferencingResource();
 		scenario.persistTestData();
 
-		// Execute merge
-		myHelper.callMergeOperation(scenario, false);
-
-		// Validate - target should keep its identifiers unchanged
-		T target = scenario.readResource(scenario.getVersionlessTargetId());
-		List<Identifier> expectedIdentifiers = scenario.getExpectedIdentifiers();
-		scenario.assertIdentifiers(scenario.getIdentifiersFromResource(target), expectedIdentifiers);
+		// Execute merge and validate
+		Parameters outParams = scenario.callMergeOperation();
+		scenario.validateSuccess(outParams);
 	}
 
 	@Test
 	protected void testMerge_identifiers_emptyTargetIdentifiers() {
 		// Setup - source has identifiers, target has no identifiers
-		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.withTargetIdentifiers(Collections.emptyList());
-		scenario.withOneReferencingResource();
+		AbstractMergeTestScenario<T> scenario = createScenario()
+				.withTargetIdentifiers(Collections.emptyList())
+				.withOneReferencingResource();
 		scenario.persistTestData();
 
-		// Execute merge
-		myHelper.callMergeOperation(scenario, false);
-
-		// Validate - target should get all source identifiers marked as OLD
-		T target = scenario.readResource(scenario.getVersionlessTargetId());
-		List<Identifier> expectedIdentifiers = scenario.getExpectedIdentifiers();
-		scenario.assertIdentifiers(scenario.getIdentifiersFromResource(target), expectedIdentifiers);
-		assertThat(expectedIdentifiers).hasSize(3); // All source identifiers marked as OLD
-		assertThat(expectedIdentifiers).allMatch(id -> id.getUse() == Identifier.IdentifierUse.OLD);
+		// Execute merge and validate
+		Parameters outParams = scenario.callMergeOperation();
+		scenario.validateSuccess(outParams);
 	}
 
 	@Test
 	protected void testMerge_identifiers_bothEmpty() {
 		// Setup - both source and target have no identifiers
-		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.withSourceIdentifiers(Collections.emptyList());
-		scenario.withTargetIdentifiers(Collections.emptyList());
-		scenario.withOneReferencingResource();
+		AbstractMergeTestScenario<T> scenario = createScenario()
+				.withSourceIdentifiers(Collections.emptyList())
+				.withTargetIdentifiers(Collections.emptyList())
+				.withOneReferencingResource();
 		scenario.persistTestData();
 
-		// Execute merge
-		myHelper.callMergeOperation(scenario, false);
-
-		// Validate - target should have empty identifier list
-		T target = scenario.readResource(scenario.getVersionlessTargetId());
-		List<Identifier> expectedIdentifiers = scenario.getExpectedIdentifiers();
-		scenario.assertIdentifiers(scenario.getIdentifiersFromResource(target), expectedIdentifiers);
-		assertThat(expectedIdentifiers).isEmpty();
+		// Execute merge and validate
+		Parameters outParams = scenario.callMergeOperation();
+		scenario.validateSuccess(outParams);
 	}
 
 	@Test
@@ -298,20 +253,15 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				new Identifier().setSystem("http://test.org").setValue("result-1"),
 				new Identifier().setSystem("http://test.org").setValue("result-2"));
 
-		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.withResultResourceIdentifiers(resultIdentifiers);
-		scenario.withResultResource(true);
-		scenario.withOneReferencingResource();
+		AbstractMergeTestScenario<T> scenario = createScenario()
+				.withResultResourceIdentifiers(resultIdentifiers)
+				.withResultResource(true)
+				.withOneReferencingResource();
 		scenario.persistTestData();
 
-		// Execute merge
-		myHelper.callMergeOperation(scenario, false);
-
-		// Validate - target should have result resource identifiers (not target's original)
-		T target = scenario.readResource(scenario.getVersionlessTargetId());
-		List<Identifier> actualIdentifiers = scenario.getIdentifiersFromResource(target);
-		scenario.assertIdentifiers(actualIdentifiers, resultIdentifiers);
-		assertThat(actualIdentifiers).hasSize(2);
+		// Execute merge and validate
+		Parameters outParams = scenario.callMergeOperation();
+		scenario.validateSuccess(outParams);
 	}
 
 	// ================================================
@@ -519,7 +469,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		// Setup: Create and merge source with another resource first
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.persistTestData();
-		myHelper.callMergeOperation(scenario, false);
+		scenario.callMergeOperation();
 
 		// Create a minimal target resource (no identifiers needed)
 		T simpleTarget = createScenario().createResource(Collections.emptyList());
@@ -545,7 +495,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		// Setup: Create and merge to get a resource with replaced-by link
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.persistTestData();
-		myHelper.callMergeOperation(scenario, false);
+		scenario.callMergeOperation();
 
 		// Create a minimal source resource (no identifiers needed)
 		T simpleSource = createScenario().createResource(Collections.emptyList());
@@ -601,23 +551,13 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		// Create test scenario with referencing resources and expected agents
 		AbstractMergeTestScenario<T> scenario = createScenario()
 			.withOneReferencingResource()
-			.withExpectedProvenanceAgents(agents);
+			.withExpectedProvenanceAgents(agents)
+			.withAsync(theAsync);
 		scenario.persistTestData();
 
-		// Execute merge
-		Parameters outParams = myHelper.callMergeOperation(scenario, theAsync);
-
-		// Validate based on execution mode
-		if (theAsync) {
-			scenario.validateAsyncOperationOutcome(outParams);
-			myHelper.waitForAsyncTaskCompletion(outParams);
-			scenario.validateTaskOutput(outParams);
-		} else {
-			scenario.validateSyncMergeOutcome(outParams);
-		}
-
-		// Validate all merge outcomes including provenance with agents
-		scenario.validateResourcesAfterMerge();
+		// Execute merge and validate
+		Parameters outParams = scenario.callMergeOperation();
+		scenario.validateSuccess(outParams);
 	}
 
 	/**
@@ -690,28 +630,17 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	})
 	void testMerge_sourceNotReferencedByAnyResource(boolean theDeleteSource, boolean theAsync) {
 		// Setup: Create minimal scenario with NO referencing resources
-		AbstractMergeTestScenario<T> scenario = createScenario()
-			.withDeleteSource(theDeleteSource)
-			.withPreview(false);
 		// NOTE: Don't call .withOneReferencingResource() or .withMultipleReferencingResources()
 		// This creates only source + target with default identifiers
-
+		AbstractMergeTestScenario<T> scenario = createScenario()
+			.withDeleteSource(theDeleteSource)
+			.withPreview(false)
+			.withAsync(theAsync);
 		scenario.persistTestData();
 
-		// Execute merge
-		Parameters outParams = myHelper.callMergeOperation(scenario, theAsync);
-
-		// Validate outcome based on mode
-		if (theAsync) {
-			scenario.validateAsyncOperationOutcome(outParams);
-			myHelper.waitForAsyncTaskCompletion(outParams);
-			scenario.validateTaskOutput(outParams);
-		} else {
-			scenario.validateSyncMergeOutcome(outParams);
-		}
-
-		// Comprehensive validation (handles all edge cases automatically)
-		scenario.validateResourcesAfterMerge();
+		// Execute merge and validate
+		Parameters outParams = scenario.callMergeOperation();
+		scenario.validateSuccess(outParams);
 	}
 
 	/**

@@ -103,6 +103,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	protected final ResourceLinkServiceFactory myLinkServiceFactory;
 	protected final RequestDetails myRequestDetails;
 	protected final FhirContext myFhirContext;
+	protected final MergeOperationTestHelper myHelper;
 
 	// Configuration State (before createTestData)
 	private final List<ReferencingTestResourceType> myReferencingTestResourceTypes = new ArrayList<>();
@@ -118,6 +119,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	private boolean myCreateResultResource = false;
 	private boolean myDeleteSource = false;
 	private boolean myPreview = false;
+	private boolean myAsync = false;
 
 	@Nullable
 	private List<IProvenanceAgent> myExpectedProvenanceAgents = null;
@@ -136,17 +138,20 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	 * @param theFhirContext FHIR context
 	 * @param theLinkServiceFactory Factory for getting link services
 	 * @param theRequestDetails Request details for DAO operations
+	 * @param theHelper Helper for merge operations
 	 */
 	protected AbstractMergeTestScenario(
 			@Nonnull DaoRegistry theDaoRegistry,
 			@Nonnull FhirContext theFhirContext,
 			@Nonnull ResourceLinkServiceFactory theLinkServiceFactory,
-			@Nonnull RequestDetails theRequestDetails) {
+			@Nonnull RequestDetails theRequestDetails,
+			@Nonnull MergeOperationTestHelper theHelper) {
 
 		myDaoRegistry = theDaoRegistry;
 		myFhirContext = theFhirContext;
 		myLinkServiceFactory = theLinkServiceFactory;
 		myRequestDetails = theRequestDetails;
+		myHelper = theHelper;
 	}
 
 	// ================================================
@@ -199,6 +204,12 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	@Nonnull
 	public AbstractMergeTestScenario<T> withPreview(boolean thePreview) {
 		myPreview = thePreview;
+		return this;
+	}
+
+	@Nonnull
+	public AbstractMergeTestScenario<T> withAsync(boolean theAsync) {
+		myAsync = theAsync;
 		return this;
 	}
 
@@ -373,16 +384,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 	@Nonnull
 	public MergeTestParameters buildMergeOperationParameters() {
-		assertTestDataPersisted();
-		MergeTestParameters params = new MergeTestParameters()
-				.sourceResource(new Reference(getVersionlessSourceId()))
-				.targetResource(new Reference(getVersionlessTargetId()))
-				.deleteSource(myDeleteSource)
-				.preview(myPreview);
-
-		addResultResourceIfNeeded(params);
-		myInputParameters = params.asParametersResource();
-		return params;
+		return buildMergeOperationParameters(true, true);
 	}
 
 	@Nonnull
@@ -407,6 +409,36 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		addResultResourceIfNeeded(params);
 		myInputParameters = params.asParametersResource();
 		return params;
+	}
+
+	/**
+	 * Executes the merge operation using this scenario's configuration.
+	 * Returns the output parameters for validation via {@link #validateSuccess(Parameters)}.
+	 *
+	 * @return the operation output parameters
+	 */
+	@Nonnull
+	public Parameters callMergeOperation() {
+		return callMergeOperation(true, true);
+	}
+
+	/**
+	 * Executes the merge operation using custom identifier-based resolution.
+	 * Returns the output parameters for validation via {@link #validateSuccess(Parameters)}.
+	 *
+	 * @param theSourceById if true, use source ID; if false, use source identifiers
+	 * @param theTargetById if true, use target ID; if false, use target identifiers
+	 * @return the operation output parameters
+	 */
+	@Nonnull
+	public Parameters callMergeOperation(boolean theSourceById, boolean theTargetById) {
+		assertTestDataPersisted();
+
+		// Build parameters with custom identifier resolution
+		MergeTestParameters params = buildMergeOperationParameters(theSourceById, theTargetById);
+
+		// Call merge operation via helper and return result
+		return myHelper.callMergeOperation(getResourceTypeName(), params, myAsync);
 	}
 
 	/**
@@ -513,6 +545,33 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		// Should have expected identifiers
 		List<Identifier> actualIdentifiers = getIdentifiersFromResource(target);
 		assertIdentifiers(actualIdentifiers, getExpectedIdentifiers());
+	}
+
+	/**
+	 * Orchestrates complete validation of successful merge operation.
+	 * Handles validation flow based on scenario configuration (preview, async, etc.).
+	 *
+	 * @param theOutParams the output parameters from {@link #callMergeOperation()}
+	 */
+	public void validateSuccess(@Nonnull Parameters theOutParams) {
+		// Preview mode: validate preview outcome and early return
+		if (myPreview) {
+			validatePreviewOutcome(theOutParams);
+			assertReferencesNotUpdated();
+			return; // Preview mode doesn't make actual changes
+		}
+
+		// Execute mode: validate based on async vs sync
+		if (myAsync) {
+			validateAsyncOperationOutcome(theOutParams);
+			myHelper.waitForAsyncTaskCompletion(theOutParams);
+			validateTaskOutput(theOutParams);
+		} else {
+			validateSyncMergeOutcome(theOutParams);
+		}
+
+		// Validate final resource states (for both async and sync)
+		validateResourcesAfterMerge();
 	}
 
 	/**
