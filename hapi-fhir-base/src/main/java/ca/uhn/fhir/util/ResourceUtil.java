@@ -135,74 +135,79 @@ public class ResourceUtil {
 	}
 
 	/**
-	 * Merges all fields on the provided instance. <code>theTo</code> will contain a union of all values from <code>theFrom</code>
-	 * instance and <code>theTo</code> instance.
+	 * Merges all fields on the provided instance. <code>theTarget</code> will contain a union of all values from
+	 * <code>theSource</code> instance and <code>theTarget</code> instance.
 	 *
 	 * @param theFhirContext Context holding resource definition
-	 * @param theFrom        The resource to merge the fields from
-	 * @param theTo          The resource to merge the fields into
+	 * @param theSource      The FHIR element to merge the fields from
+	 * @param theTarget      The FHIR element to merge the fields into
 	 */
-	public static void mergeAllFields(FhirContext theFhirContext, IBase theFrom, IBase theTo) {
-		mergeAllFields(theFhirContext, theFrom, theTo, new MergeControlParameters());
+	public static void mergeAllFields(FhirContext theFhirContext, IBase theSource, IBase theTarget) {
+		mergeAllFields(theFhirContext, theSource, theTarget, new MergeControlParameters());
 	}
 
 	/**
-	 * Merges all fields on the provided instance. <code>theTo</code> will contain a union of all values from <code>theFrom</code>
-	 * instance and <code>theTo</code> instance.
+	 * Merges all fields on the provided instance. <code>theTarget</code> will contain a union of all values from
+	 * <code>theSource</code> instance and <code>theTarget</code> instance.
 	 *
-	 * @param theFhirContext Context holding resource definition
-	 * @param theFrom        The resource to merge the fields from
-	 * @param theTo          The resource to merge the fields into
-	 * @param theMergeControlParameters
+	 * @param theFhirContext            Context holding resource definition
+	 * @param theSource                 The FHIR element to merge the fields from
+	 * @param theTarget                 The FHIR element to merge the fields into
+	 * @param theMergeControlParameters Parameters to provide fine-grained control over the behaviour of the merge
 	 */
 	public static void mergeAllFields(
-			FhirContext theFhirContext, IBase theFrom, IBase theTo, MergeControlParameters theMergeControlParameters) {
-		mergeFields(theFhirContext, theFrom, theTo, INCLUDE_ALL, theMergeControlParameters);
+			FhirContext theFhirContext,
+			IBase theSource,
+			IBase theTarget,
+			MergeControlParameters theMergeControlParameters) {
+		mergeFields(theFhirContext, theSource, theTarget, INCLUDE_ALL, theMergeControlParameters);
 	}
 
 	/**
-	 * Merges values of all field from <code>theFrom</code> resource to <code>theTo</code> resource. Fields
+	 * Merges values of all field from <code>theSource</code> resource to <code>theTarget</code> resource. Fields
 	 * values are compared via the equalsDeep method, or via object identity if this method is not available.
 	 *
-	 * @param theFhirContext    Context holding resource definition
-	 * @param theFrom           Resource to merge the specified field from
-	 * @param theTo             Resource to merge the specified field into
-	 * @param inclusionStrategy Predicate to test which fields should be merged
+	 * @param theFhirContext       Context holding resource definition
+	 * @param theSource            Resource to merge the specified field from
+	 * @param theTarget            Resource to merge the specified field into
+	 * @param theInclusionStrategy Predicate to test which fields should be merged
 	 */
 	public static void mergeFields(
-			FhirContext theFhirContext, IBase theFrom, IBase theTo, Predicate<String> inclusionStrategy) {
-		mergeFields(theFhirContext, theFrom, theTo, inclusionStrategy, new MergeControlParameters());
+			FhirContext theFhirContext, IBase theSource, IBase theTarget, Predicate<String> theInclusionStrategy) {
+		mergeFields(theFhirContext, theSource, theTarget, theInclusionStrategy, new MergeControlParameters());
 	}
 
 	/**
-	 * Merges values of all field from <code>theFrom</code> resource to <code>theTo</code> resource. Fields
-	 * values are compared via the equalsDeep method, or via object identity if this method is not available.
+	 * Merges values of all field from <code>theSource</code> resource to <code>theTarget</code> resource. Fields
+	 * with type <code>Coding</code> or <code>CodeableConcept</code> will be recursively merged according to the
+	 * strategy specified by <code>theMergeControlParameters</code>. Fields of other types
+	 * are compared via the equalsDeep method, or via object identity if this method is not available.
 	 *
-	 * @param theFhirContext    Context holding resource definition
-	 * @param theFrom           Resource to merge the specified field from
-	 * @param theTo             Resource to merge the specified field into
-	 * @param inclusionStrategy Predicate to test which fields should be merged
-	 * @param theMergeControlParameters
+	 * @param theFhirContext            Context holding resource definition
+	 * @param theSource                 Resource to merge the specified field from
+	 * @param theTarget                 Resource to merge the specified field into
+	 * @param theInclusionStrategy      Predicate to test which fields should be merged
+	 * @param theMergeControlParameters Parameters to provide fine-grained control over the behaviour of the merge
 	 */
 	public static void mergeFields(
 			FhirContext theFhirContext,
-			IBase theFrom,
-			IBase theTo,
-			Predicate<String> inclusionStrategy,
+			IBase theSource,
+			IBase theTarget,
+			Predicate<String> theInclusionStrategy,
 			MergeControlParameters theMergeControlParameters) {
-		BaseRuntimeElementDefinition<?> definition = theFhirContext.getElementDefinition(theFrom.getClass());
+		BaseRuntimeElementDefinition<?> definition = theFhirContext.getElementDefinition(theSource.getClass());
 		if (definition instanceof BaseRuntimeElementCompositeDefinition<?> compositeDefinition) {
 			for (BaseRuntimeChildDefinition childDefinition : compositeDefinition.getChildrenAndExtension()) {
-				if (!inclusionStrategy.test(childDefinition.getElementName())) {
+				if (!theInclusionStrategy.test(childDefinition.getElementName())) {
 					continue;
 				}
 
-				List<IBase> theFromFieldValues = childDefinition.getAccessor().getValues(theFrom);
-				List<IBase> theToFieldValues = childDefinition.getAccessor().getValues(theTo);
+				List<IBase> theFromFieldValues = childDefinition.getAccessor().getValues(theSource);
+				List<IBase> theToFieldValues = childDefinition.getAccessor().getValues(theTarget);
 
 				mergeFields(
 						theFhirContext,
-						theTo,
+						theTarget,
 						childDefinition,
 						theFromFieldValues,
 						theToFieldValues,
@@ -212,44 +217,46 @@ public class ResourceUtil {
 	}
 
 	/**
-	 * Merges value of the specified field from <code>theFrom</code> resource to <code>theTo</code> resource. Fields
+	 * Merges value of the specified field from <code>theSource</code> resource to <code>theTarget</code> resource. Fields
 	 * values are compared via the equalsDeep method, or via object identity if this method is not available.
 	 *
 	 * @param theFhirContext Context holding resource definition
 	 * @param theFieldName   Name of the child filed to merge
-	 * @param theFrom        Resource to merge the specified field from
-	 * @param theTo          Resource to merge the specified field into
+	 * @param theSource      Resource to merge the specified field from
+	 * @param theTarget      Resource to merge the specified field into
 	 */
 	public static void mergeField(
-			FhirContext theFhirContext, String theFieldName, IBaseResource theFrom, IBaseResource theTo) {
-		mergeField(theFhirContext, theFieldName, theFrom, theTo, new MergeControlParameters());
+			FhirContext theFhirContext, String theFieldName, IBaseResource theSource, IBaseResource theTarget) {
+		mergeField(theFhirContext, theFieldName, theSource, theTarget, new MergeControlParameters());
 	}
 
 	/**
-	 * Merges value of the specified field from <code>theFrom</code> resource to <code>theTo</code> resource. Fields
-	 * values are compared via the equalsDeep method, or via object identity if this method is not available.
+	 * Merges value of the specified field from <code>theSource</code> resource to <code>theTarget</code> resource. Fields
+	 * with type <code>Coding</code> or <code>CodeableConcept</code> will be recursively merged according to the
+	 * strategy specified by <code>theMergeControlParameters</code>. Fields of other types
+	 * are compared via the equalsDeep method, or via object identity if this method is not available.
 	 *
 	 * @param theFhirContext            Context holding resource definition
 	 * @param theFieldName              Name of the child filed to merge
-	 * @param theFrom                   Resource to merge the specified field from
-	 * @param theTo                     Resource to merge the specified field into
+	 * @param theSource                 Resource to merge the specified field from
+	 * @param theTarget                 Resource to merge the specified field into
 	 * @param theMergeControlParameters Parameters to provide fine-grained control over the behaviour of the merge
 	 */
 	public static void mergeField(
 			FhirContext theFhirContext,
 			String theFieldName,
-			IBaseResource theFrom,
-			IBaseResource theTo,
+			IBaseResource theSource,
+			IBaseResource theTarget,
 			MergeControlParameters theMergeControlParameters) {
 		BaseRuntimeChildDefinition childDefinition =
-				getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theFrom);
+				getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theSource);
 
-		List<IBase> theFromFieldValues = childDefinition.getAccessor().getValues(theFrom);
-		List<IBase> theToFieldValues = childDefinition.getAccessor().getValues(theTo);
+		List<IBase> theFromFieldValues = childDefinition.getAccessor().getValues(theSource);
+		List<IBase> theToFieldValues = childDefinition.getAccessor().getValues(theTarget);
 
 		mergeFields(
 				theFhirContext,
-				theTo,
+				theTarget,
 				childDefinition,
 				theFromFieldValues,
 				theToFieldValues,
@@ -259,7 +266,7 @@ public class ResourceUtil {
 	private static void mergeFields(
 			FhirContext theFhirContext,
 			IBase theTarget,
-			BaseRuntimeChildDefinition childDefinition,
+			BaseRuntimeChildDefinition theChildDefinition,
 			List<IBase> theSourceFieldValues,
 			List<IBase> theTargetFieldValues,
 			MergeControlParameters theMergeControlParameters) {
@@ -269,7 +276,7 @@ public class ResourceUtil {
 				&& theTargetFieldValues.stream().anyMatch(ResourceUtil::hasDataAbsentReason)) {
 			// If the target resource has a data absent reason, and there is potentially real data incoming
 			// in the source resource, we should clear the data absent reason because it won't be absent anymore.
-			theTargetFieldValues = removeDataAbsentReason(theTarget, childDefinition, theTargetFieldValues);
+			theTargetFieldValues = removeDataAbsentReason(theTarget, theChildDefinition, theTargetFieldValues);
 		}
 
 		List<IBase> filteredFromFieldValues = filterValuesThatAlreadyExistInTarget(
@@ -278,38 +285,68 @@ public class ResourceUtil {
 		for (IBase fromFieldValue : filteredFromFieldValues) {
 			IBase newFieldValue = null;
 			if (Strings.CI.equals(fromFieldValue.fhirType(), "CodeableConcept")) {
-				Optional<IBase> matchedTargetValue = theTargetFieldValues.stream()
-						.filter(targetValue ->
-								isMergeCandidate(fromFieldValue, targetValue, terser, theMergeControlParameters))
-						.findFirst();
-				if (matchedTargetValue.isPresent()) {
-					mergeAllFields(theFhirContext, fromFieldValue, matchedTargetValue.get(), theMergeControlParameters);
-				} else {
-					newFieldValue = createNewElement(terser, childDefinition, fromFieldValue);
-				}
+				newFieldValue = mergeOrClone(
+						theFhirContext,
+						theChildDefinition,
+						fromFieldValue,
+						theTargetFieldValues,
+						theMergeControlParameters,
+						targetValue -> isCodeableConceptMergeCandidate(
+								fromFieldValue, targetValue, terser, theMergeControlParameters));
 			} else if (Strings.CI.equals(fromFieldValue.fhirType(), "Coding")) {
-				Optional<IBase> matchedTargetValue = theTargetFieldValues.stream()
-						.filter(targetValue ->
-								isCodingMatches(terser, fromFieldValue, targetValue, theMergeControlParameters))
-						.findFirst();
-				if (matchedTargetValue.isPresent()) {
-					mergeAllFields(theFhirContext, fromFieldValue, matchedTargetValue.get(), theMergeControlParameters);
-				} else {
-					newFieldValue = createNewElement(terser, childDefinition, fromFieldValue);
-				}
+				newFieldValue = mergeOrClone(
+						theFhirContext,
+						theChildDefinition,
+						fromFieldValue,
+						theTargetFieldValues,
+						theMergeControlParameters,
+						targetValue ->
+								isCodingMergeCandidate(terser, fromFieldValue, targetValue, theMergeControlParameters));
 			} else {
-				newFieldValue = createNewElement(terser, childDefinition, fromFieldValue);
+				newFieldValue = createNewElement(terser, theChildDefinition, fromFieldValue);
 			}
 
 			if (newFieldValue != null) {
 				try {
 					theTargetFieldValues.add(newFieldValue);
 				} catch (UnsupportedOperationException e) {
-					childDefinition.getMutator().setValue(theTarget, newFieldValue);
-					theTargetFieldValues = childDefinition.getAccessor().getValues(theTarget);
+					theChildDefinition.getMutator().setValue(theTarget, newFieldValue);
+					theTargetFieldValues = theChildDefinition.getAccessor().getValues(theTarget);
 				}
 			}
 		}
+	}
+
+	/**
+	 * If <code>theMergePredicate</code> identifies one of the elements in <code>theTargetFieldValues</code>
+	 * as a match for <code>theSourceFieldValue</code>, those two elements will be merged.
+	 * Otherwise, <code>theSourceFieldValue</code> will be cloned and returned.
+	 * @param theFhirContext            Context holding resource definition
+	 * @param theChildDefinition        The definition of the field being merged
+	 * @param theSourceFieldValue       A value from the source resource
+	 * @param theTargetFieldValues      The values already present in the target resource
+	 * @param theMergeControlParameters Parameters to provide fine-grained control over the behaviour of the merge
+	 * @param theMergePredicate         An algorithm to identify matching resources
+	 * @return a clone of <code>theSourceFieldValue</code> if none of the values in <code>theTargetFieldValues</code>
+	 *         is a match. Otherwise, null, indicating that a merge took place
+	 */
+	private static IBase mergeOrClone(
+			FhirContext theFhirContext,
+			BaseRuntimeChildDefinition theChildDefinition,
+			IBase theSourceFieldValue,
+			List<IBase> theTargetFieldValues,
+			MergeControlParameters theMergeControlParameters,
+			Predicate<IBase> theMergePredicate) {
+		IBase newFieldValue = null;
+		FhirTerser terser = theFhirContext.newTerser();
+		Optional<IBase> matchedTargetValue =
+				theTargetFieldValues.stream().filter(theMergePredicate).findFirst();
+		if (matchedTargetValue.isPresent()) {
+			mergeAllFields(theFhirContext, theSourceFieldValue, matchedTargetValue.get(), theMergeControlParameters);
+		} else {
+			newFieldValue = createNewElement(terser, theChildDefinition, theSourceFieldValue);
+		}
+		return newFieldValue;
 	}
 
 	private static IBase createNewElement(
@@ -403,7 +440,7 @@ public class ResourceUtil {
 	 * @param theMergeControlParameters parameters providing fine-grained control over the merge operation
 	 * @return true if the source item can be merged into the target item
 	 */
-	private static boolean isMergeCandidate(
+	private static boolean isCodeableConceptMergeCandidate(
 			IBase theSourceItem,
 			IBase theTargetItem,
 			FhirTerser theTerser,
@@ -420,30 +457,30 @@ public class ResourceUtil {
 				if (theMergeControlParameters.isMergeCodings()) {
 					if (sourceCodings.size() < targetCodings.size()) {
 						isMergeCandidate = sourceCodings.stream().allMatch(sourceCoding -> targetCodings.stream()
-								.anyMatch(targetCoding -> isCodingMatches(
+								.anyMatch(targetCoding -> isCodingMergeCandidate(
 										theTerser, sourceCoding, targetCoding, theMergeControlParameters)));
 					} else {
 						isMergeCandidate = targetCodings.stream().allMatch(targetCoding -> sourceCodings.stream()
-								.anyMatch(sourceCoding -> isCodingMatches(
+								.anyMatch(sourceCoding -> isCodingMergeCandidate(
 										theTerser, sourceCoding, targetCoding, theMergeControlParameters)));
 					}
 				} else {
 					isMergeCandidate = sourceCodings.size() == targetCodings.size()
 							&& sourceCodings.stream().allMatch(sourceCoding -> targetCodings.stream()
-									.anyMatch(targetCoding -> isCodingMatches(
+									.anyMatch(targetCoding -> isCodingMergeCandidate(
 											theTerser, sourceCoding, targetCoding, theMergeControlParameters)));
 				}
 			} else {
 				if (theMergeControlParameters.isMergeCodings()) {
 					int prefixLength = Math.min(sourceCodings.size(), targetCodings.size());
 					for (int i = 0; i < prefixLength; i++) {
-						isMergeCandidate &= isCodingMatches(
+						isMergeCandidate &= isCodingMergeCandidate(
 								theTerser, sourceCodings.get(i), targetCodings.get(i), theMergeControlParameters);
 					}
 				} else {
 					if (sourceCodings.size() == targetCodings.size()) {
 						for (int i = 0; i < sourceCodings.size(); i++) {
-							isMergeCandidate &= isCodingMatches(
+							isMergeCandidate &= isCodingMergeCandidate(
 									theTerser, sourceCodings.get(i), targetCodings.get(i), theMergeControlParameters);
 						}
 					} else {
@@ -457,7 +494,7 @@ public class ResourceUtil {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private static boolean isCodingMatches(
+	private static boolean isCodingMergeCandidate(
 			FhirTerser theTerser,
 			IBase theSourceCoding,
 			IBase theTargetCoding,
