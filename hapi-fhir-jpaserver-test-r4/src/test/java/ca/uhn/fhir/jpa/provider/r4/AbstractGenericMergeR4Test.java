@@ -154,7 +154,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		"false, true, false, true",
 		"false, false, false, true",
 	})
-	protected void testMerge_basicMatrix(
+	protected void testMerge_basicInputParameterVariations_succeeds(
 			boolean theDeleteSource, boolean theResultResource, boolean thePreview, boolean theAsync) {
 		// Setup: Create and configure scenario with standard references
 		AbstractMergeTestScenario<T> scenario = createScenario()
@@ -368,7 +368,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 
 	@Test
-	protected void testMerge_errorHandling_missingSourceResource() {
+	protected void testMerge_missingSourceResource_failsWithInvalidRequestException() {
 		// Build invalid parameters (no source)
 		MergeTestParameters params = new MergeTestParameters()
 				.targetResource(new Reference(getResourceTypeName() + "/123"))
@@ -383,7 +383,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_errorHandling_missingTargetResource() {
+	protected void testMerge_missingTargetResource_failsWithInvalidRequestException() {
 		// Build invalid parameters (no target)
 		MergeTestParameters params = new MergeTestParameters()
 				.sourceResource(new Reference(getResourceTypeName() + "/123"))
@@ -398,7 +398,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_MissingRequiredParameters_Returns400BadRequest() {
+	protected void testMerge_missingRequiredParameters_failsWithInvalidRequestException() {
 		// Build completely empty parameters (no source, no target)
 		MergeTestParameters params = new MergeTestParameters()
 				.deleteSource(false)
@@ -413,7 +413,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_errorHandling_sourceEqualsTarget() {
+	protected void testMerge_sourceEqualsTarget_failsWithUnprocessableEntityException() {
 		// Setup
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.persistTestData();
@@ -433,7 +433,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_errorHandling_nonExistentSourceIdentifier() {
+	protected void testMerge_nonExistentSourceIdentifier_failsWithUnprocessableEntityException() {
 		// Setup
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.persistTestData();
@@ -454,7 +454,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_errorHandling_nonExistentTargetIdentifier() {
+	protected void testMerge_nonExistentTargetIdentifier_failsWithUnprocessableEntityException() {
 		// Setup
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.persistTestData();
@@ -475,7 +475,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_errorHandling_multipleTargetMatches() {
+	protected void testMerge_multipleTargetMatches_failsWithUnprocessableEntityException() {
 		// Setup: Create scenario with standard source and target
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.persistTestData();
@@ -501,7 +501,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_errorHandling_multipleSourceMatches() {
+	protected void testMerge_multipleSourceMatches_failsWithUnprocessableEntityException() {
 		// Setup: Create scenario with standard source and target
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.persistTestData();
@@ -527,7 +527,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_errorHandling_previouslyMergedSourceAsSource() {
+	protected void testMerge_previouslyMergedSourceAsSource_failsWithUnprocessableEntityException() {
 		// Setup: Create and merge source with another resource first
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.persistTestData();
@@ -553,7 +553,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_errorHandling_previouslyMergedSourceAsTarget() {
+	protected void testMerge_previouslyMergedSourceAsTarget_failsWithUnprocessableEntityException() {
 		// Setup: Create and merge to get a resource with replaced-by link
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.persistTestData();
@@ -592,7 +592,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	 * a PreconditionFailedException since the number of resources exceeds the limit.
 	 */
 	@Test
-	void testMerge_smallResourceLimit() {
+	void testMerge_smallResourceLimit_failsWithPreconditionFailedException() {
 		// Create scenario with many referencing resources (6 total)
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.withMultipleReferencingResources(6);
