@@ -1311,6 +1311,10 @@ public class FhirTerser {
 		}
 
 		BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition(theElement.getClass());
+
+		// The following method calls itself recursively to descend through and visit each child element
+		// so we call it here with empty lists that get added-to and removed-from as we walk into and out
+		// of the tree
 		visit(theElement, null, def, theVisitor, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 	}
 

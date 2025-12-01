@@ -461,6 +461,13 @@ public class ConsentInterceptor {
 				if (theElement == outerResource) {
 					return true;
 				}
+
+				// Primitive elements can't contain any embedded resources, so we don't need to
+				// descend into them (and any extensions they might hold)
+				if (theElement instanceof IPrimitiveType<?>) {
+					return false;
+				}
+
 				if (theElement instanceof IBaseResource) {
 					IBaseResource resource = (IBaseResource) theElement;
 					if (alreadySeenResources.putIfAbsent(resource, ConsentOperationStatusEnum.PROCEED) != null) {
@@ -503,9 +510,6 @@ public class ConsentInterceptor {
 					}
 
 					return shouldCheckChildren;
-				}
-				if (theElement instanceof IPrimitiveType<?>) {
-					return false;
 				}
 
 				return true;

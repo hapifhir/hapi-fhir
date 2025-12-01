@@ -518,6 +518,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	}
 
 	private void validateSearch(SearchParameterMap theParams) {
+		/*
+		 * Having duplicate identical params in the search (e.g. Patient?gender=male&gender=male) is not
+		 * technically wrong, but it's inefficient and can slow query execution down. Checking for it also
+		 * adds CPU load itself though, so we only check this in an assert to hopefully catch errors in tests.
+		 */
 		assert checkNoDuplicateParameters(theParams)
 				: "Duplicate parameters found in query: " + theParams.toNormalizedQueryString();
 
