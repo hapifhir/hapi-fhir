@@ -37,6 +37,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -142,7 +143,8 @@ public class ResourceUtil {
 	}
 
 	public static void addRawDataToResource(
-			@Nonnull IBaseResource theResource, @Nonnull EncodingEnum theEncodingType, String theSerializedData) {
+			@Nonnull IBaseResource theResource, @Nonnull EncodingEnum theEncodingType, String theSerializedData)
+			throws IOException {
 		theResource.setUserData(getRawUserDataKey(theEncodingType), theSerializedData);
 		theResource.setUserData(ENCODING, theEncodingType);
 	}
