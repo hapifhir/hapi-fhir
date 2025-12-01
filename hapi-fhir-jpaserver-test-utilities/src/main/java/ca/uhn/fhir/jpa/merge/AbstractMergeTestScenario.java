@@ -579,6 +579,16 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	 * Comprehensive validation that checks source state, target state, and reference updates.
 	 */
 	public void validateResourcesAfterMerge() {
+		validateResourcesAfterMerge(true);
+	}
+
+	/**
+	 * Validates all resources after a merge operation with control over target update expectation.
+	 * Comprehensive validation that checks source state, target state, and reference updates.
+	 *
+	 * @param theExpectTargetToBeUpdated whether the target resource is expected to have been updated (version incremented)
+	 */
+	public void validateResourcesAfterMerge(boolean theExpectTargetToBeUpdated) {
 		assertTestDataPersisted();
 
 		// Validate source resource state
@@ -596,7 +606,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		}
 
 		// Validate provenance created for merge operation
-		assertMergeProvenanceCreated();
+		assertMergeProvenanceCreated(theExpectTargetToBeUpdated);
 	}
 
 	public void assertLinksPresent(
@@ -947,16 +957,16 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	// ================================================
 	// PROVENANCE VALIDATION
 	// ================================================
-
-	public void assertMergeProvenanceCreated() {
+	public void assertMergeProvenanceCreated(boolean theExpectTargetToBeUpdated) {
 		assertTestDataPersisted();
 
-		// Both source and target are always version 2 in provenance
-		// - Target: always updated to v2 (regardless of deleteSource)
-		// - Source: v2 in provenance even when deleteSource=true
-		//   (provenance increments version to match what delete operation will create)
+		// Source is always version 2 in provenance even when deleteSource=true
+		// (provenance increments version to match what delete operation will create)
 		IIdType expectedSourceId = getVersionlessSourceId().withVersion("2");
-		IIdType expectedTargetId = getVersionlessTargetId().withVersion("2");
+
+		// Target version depends on whether it was actually updated during merge
+		String expectedTargetVersion = theExpectTargetToBeUpdated ? "2" : "1";
+		IIdType expectedTargetId = getVersionlessTargetId().withVersion(expectedTargetVersion);
 
 		// Calculate expected referencing resource IDs with versions
 		// Referencing resources get updated during merge, so they should have version 2
