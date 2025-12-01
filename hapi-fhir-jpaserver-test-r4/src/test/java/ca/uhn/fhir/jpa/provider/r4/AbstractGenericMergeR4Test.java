@@ -57,6 +57,7 @@ import java.util.List;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchException;
 import static org.awaitility.Awaitility.await;
 
@@ -329,6 +330,8 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	/**
 	 * Tests that merge operation fails with InternalErrorException when interceptor
 	 * returns empty agent list, validating defensive programming around hook points.
+	 * Note: Uses inline validation since InternalErrorException (500) returns OperationOutcome directly,
+	 * not wrapped in Parameters like client errors (4xx).
 	 */
 	@Test
 	void testMerge_withProvenanceAgentInterceptor_InterceptorReturnsNoAgent_failsWithInternalErrorException() {
@@ -343,11 +346,10 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		scenario.persistTestData();
 		MergeTestParameters params = scenario.buildMergeOperationParameters();
 
-		// Validate error
-		callMergeAndValidateException(
-			params,
-			InternalErrorException.class,
-			"HAPI-2723: No Provenance Agent was provided by any interceptor for Pointcut.PROVENANCE_AGENTS");
+		// Execute merge and expect error (inline validation for 500 errors)
+		assertThatThrownBy(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false))
+			.isInstanceOf(InternalErrorException.class)
+			.hasMessageContaining("HAPI-2723: No Provenance Agent was provided by any interceptor for Pointcut.PROVENANCE_AGENTS");
 	}
 
 	// ================================================
