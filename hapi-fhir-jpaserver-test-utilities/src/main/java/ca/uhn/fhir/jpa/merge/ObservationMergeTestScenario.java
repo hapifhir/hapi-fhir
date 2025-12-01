@@ -57,14 +57,16 @@ public class ObservationMergeTestScenario extends AbstractMergeTestScenario<Obse
 	 * @param theFhirContext FHIR context
 	 * @param theLinkServiceFactory Factory for getting link services
 	 * @param theRequestDetails Request details for DAO operations
+	 * @param theHelper Helper for merge operations
 	 */
 	public ObservationMergeTestScenario(
 			@Nonnull DaoRegistry theDaoRegistry,
 			@Nonnull FhirContext theFhirContext,
 			@Nonnull ResourceLinkServiceFactory theLinkServiceFactory,
-			@Nonnull RequestDetails theRequestDetails) {
+			@Nonnull RequestDetails theRequestDetails,
+			@Nonnull MergeOperationTestHelper theHelper) {
 
-		super(theDaoRegistry, theFhirContext, theLinkServiceFactory, theRequestDetails);
+		super(theDaoRegistry, theFhirContext, theLinkServiceFactory, theRequestDetails, theHelper);
 	}
 
 	@Nonnull
