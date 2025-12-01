@@ -54,6 +54,10 @@ public class ResourceUtil {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceUtil.class);
 
+	/**
+	 * A strategy object that specifies which rules to apply when merging <code>Coding</code>
+	 * and <code>CodeableConcept</code> fields
+	 */
 	public static class MergeControlParameters {
 		private boolean myIgnoreCodeableConceptCodingOrder;
 		private boolean myMergeCodings;
@@ -63,6 +67,15 @@ public class ResourceUtil {
 			return myIgnoreCodeableConceptCodingOrder;
 		}
 
+		/**
+		 * In most cases, the order of elements in a FHIR list should not be considered meaningful. This parameter
+		 * specifies whether the order of <code>Coding</code> entities within a <code>CodeableConcept</code>
+		 * matters when performing a merge.
+		 * @param theIgnoreCodeableConceptCodingOrder if true, two <code>CodeableConcept</code> entities will
+		 *                                            be considered to match each other if they contain
+		 *                                            matching <code>Coding</code>s in any order. If false,
+		 *                                            the <code>Coding</code>s must be in the same order.
+		 */
 		public void setIgnoreCodeableConceptCodingOrder(boolean theIgnoreCodeableConceptCodingOrder) {
 			myIgnoreCodeableConceptCodingOrder = theIgnoreCodeableConceptCodingOrder;
 		}
@@ -71,6 +84,16 @@ public class ResourceUtil {
 			return myMergeCodings;
 		}
 
+		/**
+		 * If the <code>Coding</code>s of one <code>CodeableConcept</code> are a strict subset of another, the two
+		 * may be considered to match, and can be merged into a single element that contains the larger list of
+		 * <code>Coding</code>s. The case where the two lists of <code>Coding</code>s overlap, but each contains
+		 * elements that are absent from the other, the two <code>CodeableConcept</code>s will be considered distinct,
+		 * and will not be merged.
+		 * @param theMergeCodings if true, two <code>CodeableConcept</code> entities will be considered to match each
+		 *                        other if all the <code>Coding</code>s from the shorter list occur in the longer list.
+		 *                        If false, the lists must be the same length, and contain exactly the same elements.
+		 */
 		public void setMergeCodings(boolean theMergeCodings) {
 			myMergeCodings = theMergeCodings;
 		}
@@ -79,6 +102,12 @@ public class ResourceUtil {
 			return myMergeCodingDetails;
 		}
 
+		/**
+		 * Two <code>Coding</code>s may be considered to match if they share the same business key (system, code).
+		 * If this is the case, the remaining fields of the element can be merged into a survivor <code>Coding</code>.
+		 * @param theMergeCodingDetails if true, will match on the <code>Coding</code> business key only.
+		 *                              if false, matching requires exact equality of every field.
+		 */
 		public void setMergeCodingDetails(boolean theMergeCodingDetails) {
 			myMergeCodingDetails = theMergeCodingDetails;
 		}
@@ -283,7 +312,7 @@ public class ResourceUtil {
 				terser, theSourceFieldValues, theTargetFieldValues, theMergeControlParameters);
 
 		for (IBase fromFieldValue : filteredFromFieldValues) {
-			IBase newFieldValue = null;
+			IBase newFieldValue;
 			if (Strings.CI.equals(fromFieldValue.fhirType(), "CodeableConcept")) {
 				newFieldValue = mergeOrClone(
 						theFhirContext,
