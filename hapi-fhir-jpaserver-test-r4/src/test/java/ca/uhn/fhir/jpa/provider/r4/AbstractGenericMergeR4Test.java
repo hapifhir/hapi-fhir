@@ -173,30 +173,24 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	// IDENTIFIER RESOLUTION TESTS
 	// ================================================
 
-	@ParameterizedTest(name = "{index}: sourceById={0}, targetById={1}")
-	@CsvSource({"true, true",
-		"true, false",
-		"false, true",
-		"false, false"})
-	protected void testMerge_identifierResolution_sync_succeeds(boolean theSourceById, boolean theTargetById) {
+	/**
+	 * Tests identifier-based resource resolution (source-resource-identifier / target-resource-identifier parameters).
+	 * Note: The (theSourceById=true, theTargetById=true) cases where both use IDs is covered by testMerge_basicInputParameterVariations_succeeds.
+	 */
+	@ParameterizedTest(name = "{index}: sourceById={0}, targetById={1}, async={2}")
+	@CsvSource({
+		"true, false, false",
+		"false, true, false",
+		"false, false, false",
+		"true, false, true",
+		"false, true, true",
+		"false, false, true"
+	})
+	protected void testMerge_identifierResolution_succeeds(boolean theSourceById, boolean theTargetById, boolean theAsync) {
 		// Setup
 		AbstractMergeTestScenario<T> scenario = createScenario()
 				.withOneReferencingResource()
-				.withAsync(false);
-		scenario.persistTestData();
-
-		// Execute and validate with identifier-based resolution
-		Parameters outParams = scenario.callMergeOperation(theSourceById, theTargetById);
-		scenario.validateSuccess(outParams);
-	}
-
-	@ParameterizedTest(name = "{index}: sourceById={0}, targetById={1}")
-	@CsvSource({"true, true", "true, false", "false, true", "false, false"})
-	protected void testMerge_identifierResolution_async_succeeds(boolean theSourceById, boolean theTargetById) {
-		// Setup
-		AbstractMergeTestScenario<T> scenario = createScenario()
-				.withOneReferencingResource()
-				.withAsync(true);
+				.withAsync(theAsync);
 		scenario.persistTestData();
 
 		// Execute and validate with identifier-based resolution
