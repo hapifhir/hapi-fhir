@@ -24,7 +24,8 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportUtils;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.context.ExpansionOptions;
-import org.hl7.fhir.r5.context.IContextResourceLoader;import org.hl7.fhir.r5.context.IOIDServices;
+import org.hl7.fhir.r5.context.IContextResourceLoader;
+import org.hl7.fhir.r5.context.IOIDServices;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.context.IWorkerContextManager;
 import org.hl7.fhir.r5.fhirpath.FHIRPathEngine;
@@ -49,11 +50,16 @@ import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.ValidationContextCarrier;
 import org.hl7.fhir.utilities.TimeTracker;
 import org.hl7.fhir.utilities.i18n.I18nBase;
-import org.hl7.fhir.utilities.npm.BasePackageCacheManager;import org.hl7.fhir.utilities.npm.IPackageCacheManager;import org.hl7.fhir.utilities.npm.NpmPackage;import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
+import org.hl7.fhir.utilities.npm.IPackageCacheManager;
+import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.slf4j.Logger;
 
-import java.io.FileNotFoundException;import java.io.IOException;import java.util.ArrayList;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -594,59 +600,51 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	public IWorkerContextManager getManager() {
 		return new IWorkerContextManager() {
 			@Override
-            public IPackageCacheManager packageManager() {
-                return null;
-            }
+			public IPackageCacheManager packageManager() {
+				return null;
+			}
 
 			@Override
-            public void setPackageManager(IPackageCacheManager manager) {
-
-            }
+			public void setPackageManager(IPackageCacheManager manager) {}
 
 			@Override
-            public void setExpansionParameters(Parameters expParameters) {
-
-            }
+			public void setExpansionParameters(Parameters expParameters) {}
 
 			@Override
-            public void setLocale(Locale locale) {
-
-            }
+			public void setLocale(Locale locale) {}
 
 			@Override
-            public void cacheResource(Resource res) throws FHIRException {
-
-            }
+			public void cacheResource(Resource res) throws FHIRException {}
 
 			@Override
-            public void cacheResourceFromPackage(Resource res, PackageInformation packageInfo) throws FHIRException {
-
-            }
+			public void cacheResourceFromPackage(Resource res, PackageInformation packageInfo) throws FHIRException {}
 
 			@Override
-            public void cachePackage(PackageInformation packageInfo) {
-
-            }
+			public void cachePackage(PackageInformation packageInfo) {}
 
 			@Override
-            public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader) throws FileNotFoundException, IOException, FHIRException {
-                return 0;
-            }
+			public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader)
+					throws FileNotFoundException, IOException, FHIRException {
+				return 0;
+			}
 
 			@Override
-            public int loadPackage(NpmPackage pi) throws FileNotFoundException, IOException, FHIRException {
-                return 0;
-            }
+			public int loadPackage(NpmPackage pi) throws FileNotFoundException, IOException, FHIRException {
+				return 0;
+			}
 
 			@Override
-            public int loadPackage(String idAndVer) throws FileNotFoundException, IOException, FHIRException {
-                return 0;
-            }
+			public int loadPackage(String idAndVer) throws FileNotFoundException, IOException, FHIRException {
+				return 0;
+			}
 
 			@Override
-            public int loadFromPackageAndDependencies(NpmPackage pi, IContextResourceLoader loader, BasePackageCacheManager pcm) throws FileNotFoundException, IOException, FHIRException {
-                return 0;
-            }};
+			public int loadFromPackageAndDependencies(
+					NpmPackage pi, IContextResourceLoader loader, BasePackageCacheManager pcm)
+					throws FileNotFoundException, IOException, FHIRException {
+				return 0;
+			}
+		};
 	}
 
 	@Override
@@ -697,10 +695,8 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 
 	@Override
 	public SystemSupportInformation getTxSupportInfo(String system, String version) {
-		boolean isSupported = myValidationSupport.isCodeSystemSupported(newValidationSupportContext(),  system);
-		return new SystemSupportInformation(
-			isSupported
-		);
+		boolean isSupported = myValidationSupport.isCodeSystemSupported(newValidationSupportContext(), system);
+		return new SystemSupportInformation(isSupported);
 	}
 
 	@Override
