@@ -17,7 +17,6 @@ import ca.uhn.fhir.sl.cache.CacheFactory;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import jakarta.annotation.Nonnull;
