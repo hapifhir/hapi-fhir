@@ -100,10 +100,10 @@ class BulkExportMdmResourceExpanderTest {
 				.thenReturn(patientPid);
 
 		// Mock MDM links - patient 123 is linked to golden 999 along with patients 456 and 789
-		JpaPid goldenPid = JpaPid.fromId(999L);
-		JpaPid sourcePid1 = JpaPid.fromId(123L); // Original patient
-		JpaPid sourcePid2 = JpaPid.fromId(456L); // Linked patient 1
-		JpaPid sourcePid3 = JpaPid.fromId(789L); // Linked patient 2
+		JpaPid goldenPid = JpaPid.fromIdAndResourceType(999L, "Patient");
+		JpaPid sourcePid1 = JpaPid.fromIdAndResourceType(123L, "Patient"); // Original patient
+		JpaPid sourcePid2 = JpaPid.fromIdAndResourceType(456L, "Patient"); // Linked patient 1
+		JpaPid sourcePid3 = JpaPid.fromIdAndResourceType(789L, "Patient"); // Linked patient 2
 
 		MdmPidTuple<JpaPid> tuple1 = MdmPidTuple.fromGoldenAndSource(goldenPid, sourcePid1);
 		MdmPidTuple<JpaPid> tuple2 = MdmPidTuple.fromGoldenAndSource(goldenPid, sourcePid2);
@@ -114,21 +114,21 @@ class BulkExportMdmResourceExpanderTest {
 
 		// Mock translatePidsToForcedIds for cache population
 		Map<JpaPid, Optional<String>> pidToForcedIdMap = new HashMap<>();
-		pidToForcedIdMap.put(sourcePid1, Optional.of("123"));
-		pidToForcedIdMap.put(sourcePid2, Optional.of("456"));
-		pidToForcedIdMap.put(sourcePid3, Optional.of("789"));
+		pidToForcedIdMap.put(sourcePid1, Optional.of("Patient/123"));
+		pidToForcedIdMap.put(sourcePid2, Optional.of("Patient/456"));
+		pidToForcedIdMap.put(sourcePid3, Optional.of("Patient/789"));
 		PersistentIdToForcedIdMap<JpaPid> persistentIdMap = new PersistentIdToForcedIdMap<>(pidToForcedIdMap);
 		when(myIdHelperService.translatePidsToForcedIds(any())).thenReturn(persistentIdMap);
 
 		// Mock PID to forced ID translation
 		when(myIdHelperService.translatePidIdToForcedIdWithCache(goldenPid))
-				.thenReturn(Optional.of("golden"));
+				.thenReturn(Optional.of("Patient/golden"));
 		when(myIdHelperService.translatePidIdToForcedIdWithCache(sourcePid1))
-				.thenReturn(Optional.of("123"));
+				.thenReturn(Optional.of("Patient/123"));
 		when(myIdHelperService.translatePidIdToForcedIdWithCache(sourcePid2))
-				.thenReturn(Optional.of("456"));
+				.thenReturn(Optional.of("Patient/456"));
 		when(myIdHelperService.translatePidIdToForcedIdWithCache(sourcePid3))
-				.thenReturn(Optional.of("789"));
+				.thenReturn(Optional.of("Patient/789"));
 
 		// Mock cache service (not already populated)
 		when(myMdmExpansionCacheSvc.hasBeenPopulated()).thenReturn(false);
@@ -168,7 +168,7 @@ class BulkExportMdmResourceExpanderTest {
 				.thenReturn(patient);
 
 		// Mock PID resolution
-		JpaPid patientPid = JpaPid.fromId(123L);
+		JpaPid patientPid = JpaPid.fromIdAndResourceType(123L, "Patient");
 		when(myIdHelperService.getPidOrNull(eq(partitionId), eq(patient)))
 				.thenReturn(patientPid);
 
@@ -178,7 +178,7 @@ class BulkExportMdmResourceExpanderTest {
 
 		// Mock PID to forced ID translation
 		when(myIdHelperService.translatePidIdToForcedIdWithCache(patientPid))
-				.thenReturn(Optional.of("123"));
+				.thenReturn(Optional.of("Patient/123"));
 
 		// When
 		Set<String> result = myExpander.expandPatient(inputPatientId, partitionId);
@@ -203,20 +203,17 @@ class BulkExportMdmResourceExpanderTest {
 		String inputPatientId = "Patient/123";
 		RequestPartitionId partitionId = RequestPartitionId.allPartitions();
 
-		// Mock patient resource
 		Patient patient = new Patient();
 		patient.setId("123");
 		when(myPatientDao.read(any(IdDt.class), any(SystemRequestDetails.class)))
 				.thenReturn(patient);
 
-		// Mock PID resolution
 		JpaPid patientPid = JpaPid.fromId(123L);
 		when(myIdHelperService.getPidOrNull(eq(partitionId), eq(patient)))
 				.thenReturn(patientPid);
 
-		// Mock MDM links
-		JpaPid goldenPid = JpaPid.fromId(999L);
-		JpaPid sourcePid1 = JpaPid.fromId(123L);
+		JpaPid goldenPid = JpaPid.fromIdAndResourceType(999L, "Patient");
+		JpaPid sourcePid1 = JpaPid.fromIdAndResourceType(123L, "Patient");
 
 		MdmPidTuple<JpaPid> tuple1 = MdmPidTuple.fromGoldenAndSource(goldenPid, sourcePid1);
 
@@ -229,53 +226,43 @@ class BulkExportMdmResourceExpanderTest {
 		PersistentIdToForcedIdMap<JpaPid> persistentIdMap = new PersistentIdToForcedIdMap<>(pidToForcedIdMap);
 		when(myIdHelperService.translatePidsToForcedIds(any())).thenReturn(persistentIdMap);
 
-		// Mock PID to forced ID translation - return EMPTY (no forced IDs)
 		when(myIdHelperService.translatePidIdToForcedIdWithCache(any()))
 				.thenReturn(Optional.empty());
 
-		// Mock cache service
 		when(myMdmExpansionCacheSvc.hasBeenPopulated()).thenReturn(false);
 
 		// When
 		Set<String> result = myExpander.expandPatient(inputPatientId, partitionId);
 
-		// Then - Should return numeric IDs
-		assertThat(result).containsExactlyInAnyOrder(
-				"Patient/999",  // Numeric golden PID
-				"Patient/123"   // Numeric source PID
-		);
-		assertThat(result).hasSize(2);
+		// Then
+		assertThat(result).containsExactlyInAnyOrder("Patient/999", "Patient/123");
 	}
 
 	@Test
 	void testExpandPatient_partitionContextPropagated() {
-		// Given - Specific partition
+		// Given
 		String inputPatientId = "Patient/123";
 		RequestPartitionId partitionId = RequestPartitionId.fromPartitionId(5);
 
-		// Mock patient resource
 		Patient patient = new Patient();
 		patient.setId("123");
 		when(myPatientDao.read(any(IdDt.class), any(SystemRequestDetails.class)))
 				.thenReturn(patient);
 
-		// Mock PID resolution
-		JpaPid patientPid = JpaPid.fromId(123L);
+		JpaPid patientPid = JpaPid.fromIdAndResourceType(123L, "Patient");
 		when(myIdHelperService.getPidOrNull(eq(partitionId), eq(patient)))
 				.thenReturn(patientPid);
 
-		// Mock MDM links (empty for simplicity)
 		when(myMdmLinkDao.expandPidsBySourcePidAndMatchResult(eq(patientPid), eq(MdmMatchResultEnum.MATCH)))
 				.thenReturn(List.of());
 
-		// Mock PID to forced ID translation
 		when(myIdHelperService.translatePidIdToForcedIdWithCache(patientPid))
-				.thenReturn(Optional.of("123"));
+				.thenReturn(Optional.of("Patient/123"));
 
 		// When
 		myExpander.expandPatient(inputPatientId, partitionId);
 
-		// Then - Verify partition was used
+		// Then
 		ArgumentCaptor<SystemRequestDetails> requestCaptor =
 			ArgumentCaptor.forClass(SystemRequestDetails.class);
 		verify(myPatientDao).read(any(IdDt.class), requestCaptor.capture());
@@ -283,7 +270,6 @@ class BulkExportMdmResourceExpanderTest {
 		SystemRequestDetails capturedRequest = requestCaptor.getValue();
 		assertThat(capturedRequest.getRequestPartitionId()).isEqualTo(partitionId);
 
-		// Verify PID helper used correct partition
 		verify(myIdHelperService).getPidOrNull(eq(partitionId), eq(patient));
 	}
 }

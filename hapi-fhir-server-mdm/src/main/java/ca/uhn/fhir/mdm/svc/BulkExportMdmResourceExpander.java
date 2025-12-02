@@ -43,7 +43,13 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Implementation of MDM resource expansion for bulk export operations.
@@ -127,8 +133,14 @@ public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpa
 		}
 
 		for (JpaPid pid : expandedPatientJpaPids) {
+			String patientIdString = null;
+
 			Optional<String> forcedIdOpt = myIdHelperService.translatePidIdToForcedIdWithCache(pid);
-			String patientIdString = "Patient/" + forcedIdOpt.orElse(pid.getId().toString());
+			if (forcedIdOpt.isEmpty()) {
+				patientIdString = "Patient/" + pid.getId().toString();
+			} else {
+				patientIdString = forcedIdOpt.get();
+			}
 
 			expandedPatientIdsAsString.add(patientIdString);
 		}
@@ -242,7 +254,7 @@ public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpa
 					getFhirParser().evaluateFirst(iBaseResource, fhirPath, IBaseReference.class);
 			if (optionalReference.isPresent()) {
 				return optionalReference.map(theIBaseReference ->
-						theIBaseReference.getReferenceElement().getIdPart());
+						theIBaseReference.getReferenceElement().toUnqualifiedVersionless().toString());
 			} else {
 				return Optional.empty();
 			}
@@ -253,13 +265,10 @@ public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpa
 		String goldenResourceId = myMdmExpansionCacheSvc.getGoldenResourceId(sourceResourceId);
 		IBaseExtension<?, ?> extension = ExtensionUtil.getOrCreateExtension(
 				iBaseResource, HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
-		if (!StringUtils.isBlank(goldenResourceId)) {
-			ExtensionUtil.setExtension(myContext, extension, "reference", prefixPatient(goldenResourceId));
-		}
-	}
 
-	private String prefixPatient(String theResourceId) {
-		return "Patient/" + theResourceId;
+		if (!StringUtils.isBlank(goldenResourceId)) {
+			ExtensionUtil.setExtension(myContext, extension, "reference", goldenResourceId);
+		}
 	}
 
 	private IFhirPath getFhirParser() {
