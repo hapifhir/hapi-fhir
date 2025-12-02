@@ -712,8 +712,8 @@ public class ValidationSupportChain implements IValidationSupport {
 	@Override
 	public <T extends IBaseResource> Stream<T> fetchAllResourcesOfType(@Nonnull Class<T> theClazz) {
 		return myChain.stream()
-			.flatMap(vs -> vs.fetchAllResourcesOfType(theClazz))
-			.filter(vs -> !vs.isEmpty());
+				.flatMap(vs -> vs.fetchAllResourcesOfType(theClazz))
+				.filter(vs -> !vs.isEmpty());
 	}
 
 	@Override
