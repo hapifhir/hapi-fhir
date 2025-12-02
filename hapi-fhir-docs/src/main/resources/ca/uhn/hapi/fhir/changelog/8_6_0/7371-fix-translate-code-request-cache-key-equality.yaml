@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7371
+title: "Fixed an issue where ConceptMap $translate operation caching was not working properly,
+  causing unnecessary cache misses for semantically identical requests."

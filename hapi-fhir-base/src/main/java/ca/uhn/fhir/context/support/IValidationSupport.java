@@ -1395,7 +1395,7 @@ public interface IValidationSupport {
 			TranslateCodeRequest that = (TranslateCodeRequest) theO;
 
 			return new EqualsBuilder()
-					.append(myCodings, that.myCodings)
+					.append(CodingEqualsAdapter.fromList(myCodings), CodingEqualsAdapter.fromList(that.myCodings))
 					.append(myTargetSystemUrl, that.myTargetSystemUrl)
 					.append(myConceptMapUrl, that.myConceptMapUrl)
 					.append(myConceptMapVersion, that.myConceptMapVersion)
@@ -1409,7 +1409,7 @@ public interface IValidationSupport {
 		@Override
 		public int hashCode() {
 			return new HashCodeBuilder(17, 37)
-					.append(myCodings)
+					.append(CodingEqualsAdapter.fromList(myCodings))
 					.append(myTargetSystemUrl)
 					.append(myConceptMapUrl)
 					.append(myConceptMapVersion)
@@ -1460,6 +1460,58 @@ public interface IValidationSupport {
 					.append("targetValueSetUrl", myTargetValueSetUrl)
 					.append("reverse", myReverse)
 					.toString();
+		}
+
+		/**
+		 * Adapter class that provides semantic equality comparison for {@link IBaseCoding} instances in the context
+		 * of TranslateCodeRequests.
+		 * <p>
+		 * This adapter is used to compare codings based on their semantic content (system, code, and version)
+		 * rather than object identity. This is essential for proper cache key comparison.
+		 * </p>
+		 * <p>
+		 * The display value is intentionally excluded from equality comparison as it is not semantically
+		 * significant for code translation operations.
+		 * </p>
+		 */
+		private static class CodingEqualsAdapter {
+			private final IBaseCoding myCoding;
+
+			CodingEqualsAdapter(IBaseCoding theCoding) {
+				myCoding = theCoding;
+			}
+
+			@Override
+			public int hashCode() {
+				return new HashCodeBuilder(17, 37)
+						.append(myCoding.getSystem())
+						.append(myCoding.getCode())
+						.append(myCoding.getVersion())
+						.toHashCode();
+			}
+
+			@Override
+			public boolean equals(Object theO) {
+
+				if (this == theO) {
+					return true;
+				}
+
+				if (theO == null || getClass() != theO.getClass()) {
+					return false;
+				}
+
+				CodingEqualsAdapter that = (CodingEqualsAdapter) theO;
+				return new EqualsBuilder()
+						.append(myCoding.getSystem(), that.myCoding.getSystem())
+						.append(myCoding.getCode(), that.myCoding.getCode())
+						.append(myCoding.getVersion(), that.myCoding.getVersion())
+						.isEquals();
+			}
+
+			static List<CodingEqualsAdapter> fromList(List<IBaseCoding> theList) {
+				return theList.stream().map(CodingEqualsAdapter::new).toList();
+			}
 		}
 	}
 

@@ -237,7 +237,13 @@ In order to improve sorting performance when chained sorts are needed, an [Uplif
 
 # _include and _revinclude order
 
-By default, all _revincludes will be performed first and then all _includes are performed afterwards.  However, if any _revinclude parameters are modified with :iterate (or :recurse for earlier versions of FHIR) then all _include parameters will be evaluated first.
+By default, all _revincludes will be performed first and then all _includes are performed afterwards.  
+
+However, if any _revinclude parameters are modified with :iterate (or :recurse for earlier versions of FHIR), the order in which parameters are evaluated is as follows:
+1. non-iterated _revincludes
+2. non-iterated _includes
+3. iterated _revincludes
+4. iterated _includes.
 
 # Custom Search Parameters
 

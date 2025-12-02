@@ -137,9 +137,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreateSearchParameter_DefaultPartition() {
+		addNextInterceptorCreateResult(defaultPartition());
+		addNextInterceptorCreateResult(defaultPartition()); // one for search param validation
 
-		addNextTargetPartitionForCreateDefaultPartition();
-		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -314,8 +314,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreateSearchParameter_DefaultPartitionWithDate() {
-		addNextTargetPartitionForCreateDefaultPartition(myPartitionDate);
-		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
+		addNextInterceptorCreateResult(fromPartitionId(null, myPartitionDate));
+		addNextInterceptorCreateResult(fromPartitionId(null, myPartitionDate)); // one for search param validation
 
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
@@ -954,7 +954,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		{
 			myCaptureQueriesListener.clear();
 			assertNoRemainingPartitionIds();
-			myPartitionInterceptor.addNextIterceptorReadResult(RequestPartitionId.fromPartitionNames(PARTITION_1, PARTITION_2));
+			addNextInterceptorReadResult(withPartitionNames(PARTITION_1, PARTITION_2));
 			IdType gotId1 = myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
 			assertEquals(patientId1, gotId1);
 
@@ -968,7 +968,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		// Two partitions including default - Found
 		{
 			myCaptureQueriesListener.clear();
-			myPartitionInterceptor.addNextIterceptorReadResult(RequestPartitionId.fromPartitionNames(PARTITION_1, JpaConstants.DEFAULT_PARTITION_NAME));
+			addNextInterceptorReadResult(withPartitionNames(PARTITION_1, JpaConstants.DEFAULT_PARTITION_NAME));
+
 			IdType gotId1;
 			try {
 				gotId1 = myPatientDao.read(patientIdNull, mySrd).getIdElement().toUnqualifiedVersionless();
@@ -987,7 +988,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Two partitions - Not Found
 		{
-			myPartitionInterceptor.addNextIterceptorReadResult(RequestPartitionId.fromPartitionNames(PARTITION_1, PARTITION_2));
+			addNextInterceptorReadResult(withPartitionNames(PARTITION_1, PARTITION_2));
 			try {
 				myPatientDao.read(patientId3, mySrd);
 				fail();
@@ -995,7 +996,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 				// good
 			}
 
-			myPartitionInterceptor.addNextIterceptorReadResult(RequestPartitionId.fromPartitionNames(PARTITION_1, PARTITION_2));
+			addNextInterceptorReadResult(withPartitionNames(PARTITION_1, PARTITION_2));
 			try {
 				myPatientDao.read(patientIdNull, mySrd);
 				fail();

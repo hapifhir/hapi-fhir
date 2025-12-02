@@ -282,7 +282,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 	@Test
 	public void testSearchByPatientReference_NoUnion() {
 		createPatient(withId("PAT-0"));
-		createEncounter(withId("ENC-0"), withPatient("Patient/PAT-0"));
+		createEncounter(withId("ENC-0"), withSubject("Patient/PAT-0"));
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap params = SearchParameterMap

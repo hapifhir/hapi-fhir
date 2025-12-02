@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class ValidationMessagePostProcessingInterceptorTest {
 
@@ -46,10 +47,11 @@ class ValidationMessagePostProcessingInterceptorTest {
 		ValidationResult validationResult = buildValidationResult();
 
 		// execute
-		ValidationResult postProcessedResult = testedInterceptor.handle(validationResult);
+		ValidationResult returnValue = testedInterceptor.handle(validationResult);
+		assertNull(returnValue); // null so we keep processing other VALIDATION_COMPLETED interceptors
 
 		ValidationResult expectedMessageResult = buildExpectedPostProcessedResult();
-		assertThat(postProcessedResult.getMessages()).hasSameElementsAs(expectedMessageResult.getMessages());
+		assertThat(validationResult.getMessages()).hasSameElementsAs(expectedMessageResult.getMessages());
 	}
 
 	private ValidationResult buildExpectedPostProcessedResult() {
