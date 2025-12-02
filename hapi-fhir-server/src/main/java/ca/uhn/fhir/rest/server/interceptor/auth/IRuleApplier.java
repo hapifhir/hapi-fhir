@@ -52,11 +52,11 @@ public interface IRuleApplier {
 	}
 
 	/**
-	 * The auth resource resolve is a service that allows you to query the DB for a resource, given a resource ID
-	 * WARNING: This is slow, and should have limited use in authorization.
+	 * <strong>WARNING: This is slow, and should have limited use in authorization.</strong>
+	 * The auth resource resolve is a service that allows you to query the DB for a resource, given a resource ID.
 	 *
-	 * It is currently used for bulk-export, to support permissible Group/Patient exports by matching a FHIR query
-	 * This is ok, since bulk-export is a slow and (relatively) rare operation
+	 * It is currently used for bulk-export, to support permissible Group/Patient exports by matching a FHIR query.
+	 * This is ok, since bulk-export is a slow and (relatively) rare operation.
 	 */
 	default IAuthResourceResolver getAuthResourceResolver() {
 		return null;
