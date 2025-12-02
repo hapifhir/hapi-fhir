@@ -1006,7 +1006,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					myRules.add(myRuleGroupBulkExportByCompartmentMatcher);
 				}
 
-				return new RuleBuilderGroupBulkExportWithFilter(myRuleGroupBulkExportByCompartmentMatcher);
+				return new RuleBuilderBulkExportWithFilter(myRuleGroupBulkExportByCompartmentMatcher);
 			}
 
 			@Override
@@ -1029,7 +1029,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					myRules.add(myRulePatientBulkExportByCompartmentMatcher);
 				}
 
-				return new RuleBuilderPatientBulkExportWithFilter(myRulePatientBulkExportByCompartmentMatcher);
+				return new RuleBuilderBulkExportWithFilter(myRulePatientBulkExportByCompartmentMatcher);
 			}
 
 			private class RuleBuilderBulkExportWithTarget extends RuleBuilderFinished
@@ -1048,27 +1048,11 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				}
 			}
 
-			private class RuleBuilderGroupBulkExportWithFilter extends RuleBuilderFinished
+			private class RuleBuilderBulkExportWithFilter extends RuleBuilderFinished
 					implements IAuthRuleBuilderRuleBulkExportWithTarget {
-				private final RuleGroupBulkExportByCompartmentMatcherImpl myRule;
+				private final BaseRuleBulkExportByCompartmentMatcher myRule;
 
-				private RuleBuilderGroupBulkExportWithFilter(RuleGroupBulkExportByCompartmentMatcherImpl theRule) {
-					super(theRule);
-					myRule = theRule;
-				}
-
-				@Override
-				public IAuthRuleBuilderRuleBulkExportWithTarget withResourceTypes(Collection<String> theResourceTypes) {
-					myRule.setResourceTypes(theResourceTypes);
-					return this;
-				}
-			}
-
-			private class RuleBuilderPatientBulkExportWithFilter extends RuleBuilderFinished
-					implements IAuthRuleBuilderRuleBulkExportWithTarget {
-				private final RulePatientBulkExportByCompartmentMatcherImpl myRule;
-
-				private RuleBuilderPatientBulkExportWithFilter(RulePatientBulkExportByCompartmentMatcherImpl theRule) {
+				private RuleBuilderBulkExportWithFilter(BaseRuleBulkExportByCompartmentMatcher theRule) {
 					super(theRule);
 					myRule = theRule;
 				}
