@@ -28,7 +28,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
-import ca.uhn.fhir.merge.MergeOperationInputParameterNames;
+import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -77,8 +77,8 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 			// Default to Patient merge parameter names
 			operationName = ProviderConstants.OPERATION_MERGE;
 		}
-		MergeOperationInputParameterNames parameterNames =
-				MergeOperationInputParameterNames.forOperation(operationName);
+		AbstractMergeOperationInputParameterNames parameterNames =
+				AbstractMergeOperationInputParameterNames.forOperation(operationName);
 
 		IBaseResource resultResource;
 		boolean deleteSource;
@@ -142,7 +142,7 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 	}
 
 	private boolean isDeleteSource(
-			Parameters originalInputParameters, MergeOperationInputParameterNames theParameterNames) {
+			Parameters originalInputParameters, AbstractMergeOperationInputParameterNames theParameterNames) {
 		boolean deleteSource = false;
 		String deleteSourceParamName = theParameterNames.getDeleteSourceParameterName();
 		if (originalInputParameters.hasParameter(deleteSourceParamName)) {
@@ -152,7 +152,7 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 	}
 
 	private IBaseResource getResultResource(
-			Parameters theOriginalInputParameters, MergeOperationInputParameterNames theParameterNames) {
+			Parameters theOriginalInputParameters, AbstractMergeOperationInputParameterNames theParameterNames) {
 		IBaseResource resultResource = null;
 		String resultResourceParamName = theParameterNames.getResultResourceParameterName();
 		if (theOriginalInputParameters.hasParameter(resultResourceParamName)) {

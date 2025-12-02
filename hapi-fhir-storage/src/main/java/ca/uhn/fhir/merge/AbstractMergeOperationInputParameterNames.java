@@ -28,7 +28,7 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_UNDO_
  * - Patient-specific: {@code $merge} and {@code $hapi.fhir.undo-merge}
  * - Generic: {@code $hapi-fhir-merge} (and future {@code $hapi.fhir.undo-merge} for non-Patient resources)
  */
-public abstract class MergeOperationInputParameterNames {
+public abstract class AbstractMergeOperationInputParameterNames {
 
 	/**
 	 * Factory method to get the appropriate parameter names implementation for a given operation.
@@ -36,7 +36,7 @@ public abstract class MergeOperationInputParameterNames {
 	 * @param theOperationName the operation name (e.g., "$merge", "$hapi-fhir-merge", "$hapi.fhir.undo-merge"), or null for default (Patient merge)
 	 * @return the appropriate implementation for the operation
 	 */
-	public static MergeOperationInputParameterNames forOperation(String theOperationName) {
+	public static AbstractMergeOperationInputParameterNames forOperation(String theOperationName) {
 		if (theOperationName == null
 				|| OPERATION_MERGE.equals(theOperationName)
 				|| OPERATION_UNDO_MERGE.equals(theOperationName)) {

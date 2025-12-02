@@ -151,7 +151,8 @@ public class PatientMergeTestScenario extends AbstractMergeTestScenario<Patient>
 					ReferencingTestResourceType.of("CarePlan", theCount - 2)));
 		} else if (theCount == 2) {
 			return withReferences(List.of(
-					ReferencingTestResourceType.of("Encounter", 1), ReferencingTestResourceType.of("Observation", 1)));
+					ReferencingTestResourceType.of("Encounter", 1),
+					ReferencingTestResourceType.of("Observation", 1)));
 		} else {
 			return withReferences(List.of(ReferencingTestResourceType.of("Encounter", theCount)));
 		}
