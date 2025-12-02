@@ -129,9 +129,8 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		// resource don't block another from succeeding
 		state.moveFailedResourcesBackToInitialState();
 		if (state.hasPidsInInitialState()) {
-			for (int retryCount = state.incrementAndGetRetryCount();
-					retryCount <= MAX_RETRIES;
-					retryCount = state.incrementAndGetRetryCount()) {
+			while (true) {
+				int retryCount = state.incrementAndGetRetryCount();
 				state.addRetriedResourceCount(state.countPidsToModify());
 
 				while (state.hasPidsInInitialState()) {
@@ -140,7 +139,9 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 				}
 
 				boolean finalRetry = retryCount == MAX_RETRIES;
-				if (!finalRetry) {
+				if (finalRetry) {
+					break;
+				} else {
 					state.moveFailedResourcesBackToInitialState();
 				}
 			}
@@ -263,9 +264,9 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 					IIdType nextVersionedId = resource.getIdElement().withVersion(Long.toString(nextVersion));
 					IBaseResource resourceVersion = dao.read(nextVersionedId, new SystemRequestDetails(), true);
 
-					// Ignore deleted resources
+					// Don't try to modify resource versions that are already deleted
 					if (ResourceMetadataKeyEnum.DELETED_AT.get(resourceVersion) != null) {
-						continue;
+						theState.moveToState(typedVersionedPid, StateEnum.UNCHANGED);
 					}
 
 					theState.setResourceForPid(typedVersionedPid, resourceVersion);
@@ -280,10 +281,13 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		C modificationContext = preModifyResources(theJobParameters, thePids);
 
 		for (TypedPidAndVersionJson pid : thePids) {
-			IBaseResource resource = theState.getResourceForPid(pid);
-			if (resource == null) {
+			if (!theState.isPidInState(pid, StateEnum.INITIAL)) {
+				// If we found that a resource version was deleted, we move it
+				// straight to UNCHANGED status
 				continue;
 			}
+
+			IBaseResource resource = theState.getResourceForPid(pid);
 			String resourceType = myFhirContext.getResourceType(resource);
 			String resourceId = resource.getIdElement().getIdPart();
 			String resourceVersion = resource.getIdElement().getVersionIdPart();
@@ -472,7 +476,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		outcome.setResourceRetryCount(theState.getRetriedResourceCount());
 
 		for (TypedPidAndVersionJson next : theState.getPidsInState(StateEnum.CHANGED_SAVED)) {
-			IBaseResource resource = theState.getResourceForPidNotNull(next);
+			IBaseResource resource = theState.getResourceForPid(next);
 			if (theJobParameters.isDryRun()) {
 				if (theJobParameters.getDryRunMode() == BaseBulkModifyJobParameters.DryRunMode.COLLECT_CHANGED) {
 					outcome.addChangedResourceBody(myFhirContext.newJsonParser().encodeResourceToString(resource));
@@ -482,16 +486,16 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			outcome.addChangedId(resource.getIdElement());
 		}
 		for (TypedPidAndVersionJson next : theState.getPidsInState(StateEnum.DELETED_SAVED)) {
-			IBaseResource resource = theState.getResourceForPidNotNull(next);
+			IBaseResource resource = theState.getResourceForPid(next);
 			outcome.addDeletedId(resource.getIdElement());
 		}
 		for (TypedPidAndVersionJson next : theState.getPidsInState(StateEnum.UNCHANGED)) {
-			IBaseResource resource = theState.getResourceForPidNotNull(next);
+			IBaseResource resource = theState.getResourceForPid(next);
 			outcome.addUnchangedId(resource.getIdElement());
 		}
 		for (Map.Entry<TypedPidAndVersionJson, String> next :
 				theState.getFailures().entrySet()) {
-			IBaseResource resource = theState.getResourceForPidNotNull(next.getKey());
+			IBaseResource resource = theState.getResourceForPid(next.getKey());
 			outcome.addFailure(resource.getIdElement(), next.getValue());
 		}
 		return outcome;
@@ -682,21 +686,8 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			myPidToResource.put(thePid, theResourceVersion);
 		}
 
-		/**
-		 * This can be <code>null</code> if the resource associated with the given PID was found
-		 * to be deleted.
-		 */
-		@Nullable
-		public IBaseResource getResourceForPid(TypedPidAndVersionJson thePid) {
-			return myPidToResource.get(thePid);
-		}
-
-		/**
-		 * This can be <code>null</code>n if the resource associated with the given PID was found
-		 * to be deleted.
-		 */
 		@Nonnull
-		public IBaseResource getResourceForPidNotNull(TypedPidAndVersionJson thePid) {
+		public IBaseResource getResourceForPid(TypedPidAndVersionJson thePid) {
 			IBaseResource retVal = myPidToResource.get(thePid);
 			Validate.notNull(retVal, "Resource for PID %s is null", thePid);
 			return retVal;

@@ -41,6 +41,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -58,7 +59,7 @@ class BaseBulkModifyResourcesStepTest {
 	private DaoRegistry myDaoRegistry;
 	@SuppressWarnings("rawtypes")
 	@Mock
-	private IFhirSystemDao mySystemDao;
+	private IFhirSystemDao<?,?> mySystemDao;
 	@Mock
 	private IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
 	@Mock
