@@ -25,7 +25,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.merge.MergeOperationInputParameterNames;
+import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -75,8 +75,8 @@ public class MergeValidationService {
 			MergeOperationOutcome theMergeOutcome) {
 
 		// Initialize parameter names based on operation type
-		MergeOperationInputParameterNames parameterNames =
-				MergeOperationInputParameterNames.forOperation(theRequestDetails.getOperation());
+		AbstractMergeOperationInputParameterNames parameterNames =
+				AbstractMergeOperationInputParameterNames.forOperation(theRequestDetails.getOperation());
 
 		IBaseOperationOutcome operationOutcome = theMergeOutcome.getOperationOutcome();
 
@@ -114,7 +114,7 @@ public class MergeValidationService {
 			IBaseResource theResolvedTargetResource,
 			IBaseResource theResolvedSourceResource,
 			IBaseOperationOutcome theOperationOutcome,
-			MergeOperationInputParameterNames theParameterNames) {
+			AbstractMergeOperationInputParameterNames theParameterNames) {
 
 		if (theMergeOperationParameters.getResultResource() == null) {
 			// result resource is not provided, no further validation is needed
@@ -310,7 +310,7 @@ public class MergeValidationService {
 	boolean validateCommonMergeOperationParameters(
 			MergeOperationsCommonInputParameters theCommonInputParameters,
 			IBaseOperationOutcome theOutcome,
-			MergeOperationInputParameterNames theParameterNames) {
+			AbstractMergeOperationInputParameterNames theParameterNames) {
 		List<String> errorMessages = new ArrayList<>();
 		if (!theCommonInputParameters.hasAtLeastOneSourceIdentifier()
 				&& theCommonInputParameters.getSourceResource() == null) {
@@ -382,7 +382,7 @@ public class MergeValidationService {
 			MergeOperationsCommonInputParameters theOperationParameters,
 			RequestDetails theRequestDetails,
 			IBaseOperationOutcome theOutcome,
-			MergeOperationInputParameterNames theParameterNames) {
+			AbstractMergeOperationInputParameterNames theParameterNames) {
 		return resolveResource(
 				theOperationParameters.getSourceResource(),
 				theOperationParameters.getSourceIdentifiers(),
@@ -396,7 +396,7 @@ public class MergeValidationService {
 			MergeOperationsCommonInputParameters theOperationParameters,
 			RequestDetails theRequestDetails,
 			IBaseOperationOutcome theOutcome,
-			MergeOperationInputParameterNames theParameterNames) {
+			AbstractMergeOperationInputParameterNames theParameterNames) {
 		return resolveResource(
 				theOperationParameters.getTargetResource(),
 				theOperationParameters.getTargetIdentifiers(),

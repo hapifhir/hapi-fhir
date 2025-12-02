@@ -25,7 +25,7 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.merge.MergeOperationInputParameterNames;
+import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.merge.PatientMergeOperationInputParameterNames;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
@@ -80,7 +80,7 @@ public class ResourceUndoMergeService {
 	private final MergeValidationService myMergeValidationService;
 	private final FhirContext myFhirContext;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-	private final MergeOperationInputParameterNames myInputParamNames;
+	private final AbstractMergeOperationInputParameterNames myInputParamNames;
 
 	public ResourceUndoMergeService(
 			DaoRegistry theDaoRegistry,

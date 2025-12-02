@@ -30,7 +30,7 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE
  * Patient-specific merge operation parameter names.
  * Used for Patient {@code $merge} and {@code $hapi.fhir.undo-merge} operations.
  */
-public class PatientMergeOperationInputParameterNames extends MergeOperationInputParameterNames {
+public class PatientMergeOperationInputParameterNames extends AbstractMergeOperationInputParameterNames {
 
 	@Override
 	public String getSourceResourceParameterName() {

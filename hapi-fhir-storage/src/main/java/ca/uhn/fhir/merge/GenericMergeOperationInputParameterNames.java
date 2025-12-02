@@ -30,7 +30,7 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE
  * Generic merge operation parameter names.
  * Used for generic {@code $hapi-fhir-merge} operation (and future generic {@code $hapi.fhir.undo-merge}).
  */
-public class GenericMergeOperationInputParameterNames extends MergeOperationInputParameterNames {
+public class GenericMergeOperationInputParameterNames extends AbstractMergeOperationInputParameterNames {
 
 	@Override
 	public String getSourceResourceParameterName() {

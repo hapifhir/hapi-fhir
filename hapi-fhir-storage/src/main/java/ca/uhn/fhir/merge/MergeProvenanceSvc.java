@@ -91,7 +91,7 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 			IIdType theTargetId,
 			List<CanonicalIdentifier> theSourceIdentifiers,
 			RequestDetails theRequestDetails,
-			MergeOperationInputParameterNames theParameterNames) {
+			AbstractMergeOperationInputParameterNames theParameterNames) {
 		String sourceIdentifierParameterName = theParameterNames.getSourceIdentifiersParameterName();
 		List<Provenance> provenances =
 				getProvenancesOfTargetsFilteredByActivity(List.of(theTargetId), theRequestDetails);

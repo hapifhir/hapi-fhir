@@ -238,8 +238,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	public void persistTestData() {
-		ourLog.debug("Building merge test data for resource type: {}", getResourceTypeName());
-
 		// Create and persist source resource
 		T source = createResource(mySourceIdentifiers);
 		IFhirResourceDao<T> dao = getDao();
