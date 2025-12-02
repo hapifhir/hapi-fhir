@@ -30,6 +30,7 @@ import org.apache.commons.text.WordUtils;
 
 import java.util.Map;
 
+import static ca.uhn.fhir.jpa.fql.parser.HfqlStatementParser.newExceptionUnexpectedTokenExpectDescription;
 import static java.util.Map.entry;
 
 public class HfqlFhirPathParser {
@@ -147,6 +148,9 @@ public class HfqlFhirPathParser {
 			if (childDefForNode == null) {
 				childDefForNode = currentElementDefinition.getChildByName(nextTokenString + "[x]");
 				if (childDefForNode != null) {
+					if (!lexer.hasNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION_PART)) {
+						throw newExceptionUnexpectedTokenExpectDescription(null, ".ofType() function after polymorphic item " + nextTokenString);
+					}
 					if (lexer.peekNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION_PART)
 							.getToken()
 							.equals(".")) {
