@@ -45,8 +45,11 @@ public interface IModelVisitor2 {
 			List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath);
 
 	/**
-	 *
+	 * @deprecated This method is called inconsistently by {@link FhirTerser} and should not be used. Any
+	 * 			   extensions present on the element being visited (including cases where an extension element
+	 * 			   is being visited directly) will result in call(s) to {@link #acceptElement(IBase, List, List, List)}.
 	 */
+	@Deprecated(forRemoval = true, since = "8.8.0")
 	default boolean acceptUndeclaredExtension(
 			IBaseExtension<?, ?> theNextExt,
 			List<IBase> theContainingElementPath,

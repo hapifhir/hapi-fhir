@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.context;
 
+import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -43,8 +44,14 @@ public class RuntimeChildExt extends BaseRuntimeChildDefinition {
 			@SuppressWarnings({"unchecked", "rawtypes"})
 			@Override
 			public List<IBase> getValues(IBase theTarget) {
-				List extension = ((IBaseHasExtensions) theTarget).getExtension();
-				return Collections.unmodifiableList(extension);
+				if (theTarget instanceof IBaseHasExtensions hasExtensions) {
+					List extension = hasExtensions.getExtension();
+					return Collections.unmodifiableList(extension);
+				} else {
+					// DSTU2 only
+					List extension = ((ISupportsUndeclaredExtensions) theTarget).getAllUndeclaredExtensions();
+					return Collections.unmodifiableList(extension);
+				}
 			}
 		};
 	}
