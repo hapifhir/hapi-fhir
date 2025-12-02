@@ -643,7 +643,10 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 
 	@Override
 	public SystemSupportInformation getTxSupportInfo(String system, String version) {
-		return null;
+
+		return new SystemSupportInformation(
+			false, "", ""
+		);
 	}
 
 	@Override
