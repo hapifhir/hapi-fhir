@@ -643,9 +643,9 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 
 	@Override
 	public SystemSupportInformation getTxSupportInfo(String system, String version) {
-
+		boolean isSupported = myValidationSupport.isCodeSystemSupported(newValidationSupportContext(),  system);
 		return new SystemSupportInformation(
-			false, "", ""
+			isSupported
 		);
 	}
 
