@@ -45,6 +45,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
@@ -706,6 +707,20 @@ public class ValidationSupportChain implements IValidationSupport {
 		Function<IValidationSupport, IBaseResource> invoker = v -> v.fetchValueSet(theUrl);
 		ResourceByUrlKey<IBaseResource> key = new ResourceByUrlKey<>(ResourceByUrlKey.TypeEnum.VALUESET, theUrl);
 		return fetchValue(key, invoker, theUrl);
+	}
+
+	@Override
+	public <T extends IBaseResource> Stream<T> fetchAllResourcesOfType(@Nonnull Class<T> theClazz) {
+		return myChain.stream()
+			.flatMap(vs -> vs.fetchAllResourcesOfType(theClazz))
+			.filter(vs -> !vs.isEmpty());
+	}
+
+	@Override
+	public <T extends IBaseResource> Stream<T> fetchResources(Class<T> theClazz, String theUrl) {
+		return myChain.stream()
+				.flatMap(vs -> vs.fetchResources(theClazz, theUrl))
+				.filter(vs -> !vs.isEmpty());
 	}
 
 	@SuppressWarnings("unchecked")
