@@ -134,12 +134,11 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 				state.addRetriedResourceCount(state.countPidsToModify());
 
 				while (state.hasPidsInInitialState()) {
-					List<TypedPidAndVersionJson> singlePidList = state.getSinglePidInState(StateEnum.INITIAL);
-					processPids(jobParameters, state, singlePidList, requestPartitionId);
+					TypedPidAndVersionJson singlePid = state.getSinglePidInState(StateEnum.INITIAL);
+					processPids(jobParameters, state, List.of(singlePid), requestPartitionId);
 				}
 
-				boolean finalRetry = retryCount == MAX_RETRIES;
-				if (finalRetry) {
+				if (retryCount == MAX_RETRIES) {
 					break;
 				} else {
 					state.moveFailedResourcesBackToInitialState();
@@ -649,10 +648,14 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			return List.copyOf(myStateToPids.get(theState));
 		}
 
-		public List<TypedPidAndVersionJson> getSinglePidInState(StateEnum theState) {
+		/**
+		 * @throws java.util.NoSuchElementException if no PIDs are present in the given state
+		 */
+		@Nonnull
+		public TypedPidAndVersionJson getSinglePidInState(StateEnum theState) {
 			TypedPidAndVersionJson pid = myStateToPids.get(theState).iterator().next();
 			Validate.notNull(pid, "No PIDs in state %s", theState);
-			return List.of(pid);
+			return pid;
 		}
 
 		public boolean hasPidsInInitialState() {
