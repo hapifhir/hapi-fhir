@@ -32,7 +32,6 @@ import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
 import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.thymeleaf.util.StringUtils;
 
 import java.util.Date;
@@ -44,8 +43,11 @@ public class GenerateRangeChunksStep<PT extends PartitionedUrlJobParameters>
 		implements IFirstJobStepWorker<PT, ChunkRangeJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
-	@Autowired
-	private IJobPartitionProvider myJobPartitionProvider;
+	private final IJobPartitionProvider myJobPartitionProvider;
+
+	public GenerateRangeChunksStep(IJobPartitionProvider theJobPartitionProvider) {
+		myJobPartitionProvider = theJobPartitionProvider;
+	}
 
 	@Nonnull
 	@Override

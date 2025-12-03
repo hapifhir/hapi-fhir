@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common;
 
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyJobParameters;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
 import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
@@ -30,12 +31,14 @@ import org.springframework.context.annotation.Configuration;
 public class BulkModifyCommonJobAppCtx {
 
 	private final IBatch2DaoSvc myBatch2DaoSvc;
+	private final IJobPartitionProvider myJobPartitionProvider;
 
 	/**
 	 * Constructor
 	 */
-	public BulkModifyCommonJobAppCtx(IBatch2DaoSvc theBatch2DaoSvc) {
+	public BulkModifyCommonJobAppCtx(IBatch2DaoSvc theBatch2DaoSvc, IJobPartitionProvider theJobPartitionProvider) {
 		myBatch2DaoSvc = theBatch2DaoSvc;
+		myJobPartitionProvider = theJobPartitionProvider;
 	}
 
 	/**
@@ -43,7 +46,7 @@ public class BulkModifyCommonJobAppCtx {
 	 */
 	@Bean("bulkModifyGenerateRangesStep")
 	public GenerateRangeChunksStep<BaseBulkModifyJobParameters> generateRangesStep() {
-		return new GenerateRangeChunksStep<>();
+		return new GenerateRangeChunksStep<>(myJobPartitionProvider);
 	}
 
 	/**

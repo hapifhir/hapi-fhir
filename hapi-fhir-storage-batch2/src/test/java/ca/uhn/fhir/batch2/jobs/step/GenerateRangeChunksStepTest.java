@@ -32,8 +32,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class GenerateRangeChunksStepTest {
 
-	@InjectMocks
-	private final GenerateRangeChunksStep<PartitionedUrlJobParameters> myStep = new GenerateRangeChunksStep<>();
+	private GenerateRangeChunksStep<PartitionedUrlJobParameters> myStep;
+
 	@Mock
 	private StepExecutionDetails<PartitionedUrlJobParameters, VoidModel> myStepExecutionDetails;
 	@Mock
@@ -43,6 +43,7 @@ public class GenerateRangeChunksStepTest {
 
 	@BeforeEach
 	void setUp() {
+		myStep = new GenerateRangeChunksStep<>(myJobPartitionProvider);
 	}
 
 	@AfterEach
