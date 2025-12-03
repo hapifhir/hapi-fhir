@@ -7,12 +7,10 @@ import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
-import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.util.FhirPatchBuilder;
 import ca.uhn.fhir.util.JsonUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -31,7 +29,6 @@ import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class BulkPatchJobR5Test extends BaseBulkPatchR5Test {
 
@@ -83,19 +80,16 @@ public class BulkPatchJobR5Test extends BaseBulkPatchR5Test {
 	 * such as a validation failure
 	 */
 	@Test
-	public void testBulkPatch_SomePatchingFails() {
+	public void testBulkPatch_PatchingFails_AtCommitTime() {
 		// Setup
 		createPatient(withId("A"), withIdentifier("http://blah", "A1"));
 		createPatient(withId("B"), withIdentifier("http://blah", "B1"));
 		createPatient(withId("C"), withIdentifier("http://blah", "C1"));
 
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, new IAnonymousInterceptor() {
-			@Override
-			public void invoke(IPointcut thePointcut, HookParams theArgs) {
-				IBaseResource newResource = theArgs.get(IBaseResource.class, 1);
-				if (newResource.getIdElement().getIdPart().equals("B")) {
-					throw new PreconditionFailedException("Simulated validation failed message");
-				}
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, (thePointcut, theArgs) -> {
+			IBaseResource newResource = theArgs.get(IBaseResource.class, 1);
+			if (newResource.getIdElement().getIdPart().equals("B")) {
+				throw new PreconditionFailedException("Simulated validation failed message");
 			}
 		});
 
@@ -123,12 +117,79 @@ public class BulkPatchJobR5Test extends BaseBulkPatchR5Test {
 			"Bulk Patch Report",
 			"Total Resources Changed   : 2 ",
 			"Total Resources Unchanged : 0 ",
-			"Total Failed Changes      : 1 ",
+			"Total Resources Failed    : 1 ",
 			"ResourceType[Patient]",
 			"Changed   : 2",
 			"Failures  : 1",
 			"Failures:",
-			"Patient/B/_history/1: Simulated validation failed message"
+			"Patient/B/_history/1: ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException: Simulated validation failed message"
+		);
+	}
+
+	/**
+	 * Patch a group of resources where one of them can't be stored due to a failure
+	 * such as a validation failure
+	 */
+	@Test
+	public void testBulkPatch_PatchingFails_AtPatchTime() {
+		/*
+		 * Setup
+		 */
+
+		// These will fail because they have 2 identifiers
+		createPatient(withId("A"), withIdentifier("http://blah", "A1"), withIdentifier("http://blah", "A2"));
+		createPatient(withId("B"), withIdentifier("http://blah", "B1"), withIdentifier("http://blah", "B2"));
+
+		// This will succeed, it only has 1 identifier
+		createPatient(withId("C"), withIdentifier("http://blah", "C1"));
+
+		/*
+		 * Test
+		 */
+
+		FhirPatchBuilder patchBuilder = new FhirPatchBuilder(myFhirContext);
+		// Per the spec, delete should fail if there are multiple matches to the path
+		patchBuilder.delete().path("Patient.identifier");
+		String jobId = initiateAllPatientJobAndAwaitFailure((Parameters) patchBuilder.build());
+
+		/*
+		 * Verify
+		 */
+
+		Patient actualPatientA = readPatient("Patient/A");
+		assertEquals(2, actualPatientA.getIdentifier().size());
+		assertEquals("http://blah", actualPatientA.getIdentifier().get(0).getSystem());
+		assertEquals("A1", actualPatientA.getIdentifier().get(0).getValue());
+		assertEquals("http://blah", actualPatientA.getIdentifier().get(0).getSystem());
+		assertEquals("A2", actualPatientA.getIdentifier().get(1).getValue());
+
+		Patient actualPatientB = readPatient("Patient/B");
+		assertEquals(2, actualPatientB.getIdentifier().size());
+		assertEquals("http://blah", actualPatientB.getIdentifier().get(0).getSystem());
+		assertEquals("B1", actualPatientB.getIdentifier().get(0).getValue());
+		assertEquals("http://blah", actualPatientB.getIdentifier().get(0).getSystem());
+		assertEquals("B2", actualPatientB.getIdentifier().get(1).getValue());
+
+		Patient actualPatientC = readPatient("Patient/C");
+		assertEquals(0, actualPatientC.getIdentifier().size());
+
+		JobInstance instance = myJobCoordinator.getInstance(jobId);
+		assertEquals(StatusEnum.FAILED, instance.getStatus());
+		assertEquals("HAPI-2790: Bulk Patch had 2 failure(s). See report for details.", instance.getErrorMessage());
+		BulkModifyResourcesResultsJson report = JsonUtil.deserialize(instance.getReport(), BulkModifyResourcesResultsJson.class);
+		ourLog.info("Report: {}", report.getReport());
+
+		assertThat(report.getReport()).containsSubsequence(
+			"Bulk Patch Report",
+			"Total Resources Changed   : 1 ",
+			"Total Resources Unchanged : 0 ",
+			"Total Resources Failed    : 2 ",
+			"ResourceType[Patient]",
+			"Changed   : 1",
+			"Failures  : 2",
+			"Failures:",
+			"Patient/A/_history/1: ca.uhn.fhir.rest.server.exceptions.InvalidRequestException: HAPI-1267: [Multiple elements found at Patient.identifier when deleting]",
+			"Patient/B/_history/1: ca.uhn.fhir.rest.server.exceptions.InvalidRequestException: HAPI-1267: [Multiple elements found at Patient.identifier when deleting]"
 		);
 	}
 
@@ -262,8 +323,7 @@ public class BulkPatchJobR5Test extends BaseBulkPatchR5Test {
 		startRequest.setJobDefinitionId(BulkPatchJobAppCtx.JOB_ID);
 		startRequest.setParameters(jobParameters);
 		startRequest.setUseCache(false);
-		String jobId = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest).getInstanceId();
-		return jobId;
+		return myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest).getInstanceId();
 	}
 
 	@Nonnull
