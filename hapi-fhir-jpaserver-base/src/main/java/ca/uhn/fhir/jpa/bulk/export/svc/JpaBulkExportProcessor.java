@@ -155,7 +155,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			throw new IllegalStateException(Msg.code(797) + errorMessage);
 		}
 
-		HashSet<String> expandedPatientIds = getExpandedPatientSetForPatientExport(theParams);
+		Set<String> expandedPatientIds = getExpandedPatientSetForPatientExport(theParams);
 
 		Set<String> patientSearchParams = getPatientActiveSearchParamsForResourceType(theParams.getResourceType());
 		for (String patientSearchParam : patientSearchParams) {
@@ -202,7 +202,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	}
 
 	private void filterBySpecificPatient(
-			HashSet<String> theExpandedPatientIds,
+			Set<String> theExpandedPatientIds,
 			String resourceType,
 			String patientSearchParam,
 			SearchParameterMap map) {
@@ -242,11 +242,10 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 		for (SearchParameterMap map : maps) {
 			Logs.getBatchTroubleshootingLog()
-					.debug(
-							"Executing query for bulk export job[{}] chunk[{}]: {}",
-							theJobId,
-							theChunkId,
-							map.toNormalizedQueryString());
+				.atDebug().setMessage("Executing query for bulk export job[{}] chunk[{}]: {}")
+				.addArgument(theJobId)
+				.addArgument(theChunkId)
+				.addArgument(map.toNormalizedQueryString());
 
 			// requires a transaction
 			try (IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(
@@ -302,7 +301,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			// for each patient pid ->
 			//	search for the target resources, with their correct patient references, chunked.
 			// The results will be jammed into myReadPids
-			TaskChunker.chunk(expandedMemberResourceIds, QUERY_CHUNK_SIZE, (idChunk) -> {
+			TaskChunker.chunk(expandedMemberResourceIds, QUERY_CHUNK_SIZE, idChunk -> {
 				try {
 					queryResourceTypeWithReferencesToPatients(pids, idChunk, theParams, theDef);
 				} catch (IOException ex) {
@@ -315,8 +314,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				}
 			});
 		} else {
-			ourLog.warn("No active patient compartment search parameter(s) for resource type "
-					+ theParams.getResourceType());
+			ourLog.warn("No active patient compartment search parameter(s) for resource type {}", theParams.getResourceType());
 		}
 		return pids;
 	}
@@ -406,13 +404,6 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	private HashSet<JpaPid> getExpandedPatientSetForGroupExport(
 			ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) throws IOException {
 
-		if (theParameters.hasExpandedPatientIdsForGroupExport()) {
-			ourLog.debug(
-					"Using cached expanded patient set with {} patients",
-					theParameters.getExpandedPatientIdsForGroupExport().size());
-			return theParameters.getExpandedPatientIdsForGroupExport();
-		}
-
 		List<JpaPid> members = getMembersFromGroupWithFilter(theParameters, theConsiderDateRange);
 		ourLog.debug(
 				"Group with ID [{}] has {} members, member JpaIds: {}",
@@ -437,8 +428,6 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 					singlePatientExpandedSet);
 		}
 
-		theParameters.setExpandedPatientIdsForGroupExport(patientPidsToExport);
-
 		return patientPidsToExport;
 	}
 
@@ -454,7 +443,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 *
 	 * Created by Claude 4.5 Sonnet
 	 */
-	HashSet<String> getExpandedPatientSetForPatientExport(ExportPIDIteratorParameters theParams) {
+	Set<String> getExpandedPatientSetForPatientExport(ExportPIDIteratorParameters theParams) {
 		if (theParams.hasExpandedPatientIdsForPatientExport()) {
 			ourLog.debug(
 					"Using cached expanded patient ID set with {} patients",
@@ -613,7 +602,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 			// gets rid of the Patient duplicates
 			theReadPids.addAll(includeIds.stream()
-					.filter((id) -> !id.getResourceType().equals("Patient"))
+					.filter(id -> !id.getResourceType().equals("Patient"))
 					.collect(Collectors.toSet()));
 		}
 	}

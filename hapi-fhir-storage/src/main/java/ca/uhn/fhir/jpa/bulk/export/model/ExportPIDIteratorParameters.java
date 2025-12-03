@@ -20,15 +20,14 @@
 package ca.uhn.fhir.jpa.bulk.export.model;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -86,14 +85,9 @@ public class ExportPIDIteratorParameters {
 	private RequestPartitionId myPartitionId;
 
 	/**
-	 * Cached expanded patient PIDs for GROUP export with MDM.
-	 */
-	private HashSet<JpaPid> myExpandedPatientIdsForGroupExport;
-
-	/**
 	 * Cached expanded patient ID strings for PATIENT export with MDM.
 	 */
-	private HashSet<String> myExpandedPatientIdsForPatientExport;
+	private Set<String> myExpandedPatientIdsForPatientExport;
 
 	/**
 	 * The list of resource types to recurse on.
@@ -207,23 +201,11 @@ public class ExportPIDIteratorParameters {
 		myRequestedResourceTypes = theRequestedResourceTypes;
 	}
 
-	public HashSet<JpaPid> getExpandedPatientIdsForGroupExport() {
-		return myExpandedPatientIdsForGroupExport;
-	}
-
-	public void setExpandedPatientIdsForGroupExport(HashSet<JpaPid> theExpandedPatientIdsForGroupExport) {
-		myExpandedPatientIdsForGroupExport = theExpandedPatientIdsForGroupExport;
-	}
-
-	public boolean hasExpandedPatientIdsForGroupExport() {
-		return myExpandedPatientIdsForGroupExport != null && !myExpandedPatientIdsForGroupExport.isEmpty();
-	}
-
-	public HashSet<String> getExpandedPatientIdsForPatientExport() {
+	public Set<String> getExpandedPatientIdsForPatientExport() {
 		return myExpandedPatientIdsForPatientExport;
 	}
 
-	public void setExpandedPatientIdsForPatientExport(HashSet<String> theExpandedPatientIdsForPatientExport) {
+	public void setExpandedPatientIdsForPatientExport(Set<String> theExpandedPatientIdsForPatientExport) {
 		myExpandedPatientIdsForPatientExport = theExpandedPatientIdsForPatientExport;
 	}
 

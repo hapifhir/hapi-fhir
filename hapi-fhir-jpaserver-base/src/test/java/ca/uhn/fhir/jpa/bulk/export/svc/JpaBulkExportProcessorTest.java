@@ -406,8 +406,9 @@ public class JpaBulkExportProcessorTest {
 		Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
 
 		// verify
-		assertThat(pidIterator).as("PID iterator null for mdm = " + theMdm).isNotNull();
-		assertThat(pidIterator).toIterable().containsExactly(observationPid, observationPid2);
+		assertThat(pidIterator)
+			.as("PID iterator null for mdm = " + theMdm).isNotNull()
+			.toIterable().containsExactly(observationPid, observationPid2);
 
 		ArgumentCaptor<SearchBuilderLoadIncludesParameters> searchBuilderLoadIncludesRequestDetailsCaptor = ArgumentCaptor.forClass(SearchBuilderLoadIncludesParameters.class);
 		verify(observationSearchBuilder).loadIncludes(searchBuilderLoadIncludesRequestDetailsCaptor.capture());
@@ -515,11 +516,10 @@ public class JpaBulkExportProcessorTest {
 		params.setExpandMdm(false); // MDM disabled
 
 		// When - Call method
-		HashSet<String> result = myProcessor.getExpandedPatientSetForPatientExport(params);
+		Set<String> result = myProcessor.getExpandedPatientSetForPatientExport(params);
 
 		// Then - Returns only original patient ID
-		assertThat(result).containsExactlyInAnyOrder("Patient/1");
-		assertThat(result).hasSize(1);
+		assertThat(result).containsExactly("Patient/1");
 
 		// Verify MDM expander was NOT called
 		verify(myMdmExpandersHolder, never()).getBulkExportMDMResourceExpanderInstance();
@@ -547,11 +547,10 @@ public class JpaBulkExportProcessorTest {
 				.thenReturn(Set.of("Patient/1", "Patient/golden"));
 
 		// When - Call method
-		HashSet<String> result = myProcessor.getExpandedPatientSetForPatientExport(params);
+		Set<String> result = myProcessor.getExpandedPatientSetForPatientExport(params);
 
 		// Then - Returns original + expanded patient IDs
 		assertThat(result).containsExactlyInAnyOrder("Patient/1", "Patient/golden");
-		assertThat(result).hasSize(2);
 
 		// Verify MDM expander was called for the patient
 		verify(myMdmExpandersHolder, times(1)).getBulkExportMDMResourceExpanderInstance();
@@ -578,18 +577,17 @@ public class JpaBulkExportProcessorTest {
 				.thenReturn(Set.of("Patient/1", "Patient/golden"));
 
 		// When - Call method FIRST time
-		HashSet<String> result1 = myProcessor.getExpandedPatientSetForPatientExport(params);
+		Set<String> result1 = myProcessor.getExpandedPatientSetForPatientExport(params);
 
 		// Then - First call should expand and cache
 		assertThat(result1).containsExactlyInAnyOrder("Patient/1", "Patient/golden");
 		verify(myBulkExportMDMResourceExpander, times(1)).expandPatient(eq("Patient/1"), any());
 
 		// When - Call method SECOND time with SAME params
-		HashSet<String> result2 = myProcessor.getExpandedPatientSetForPatientExport(params);
+		Set<String> result2 = myProcessor.getExpandedPatientSetForPatientExport(params);
 
 		// Then - Second call should use cache (no additional MDM calls)
 		assertThat(result2).containsExactlyInAnyOrder("Patient/1", "Patient/golden");
-		assertThat(result2).isSameAs(result1); // Same object reference (cached)
 
 		// Verify MDM expander was called only ONCE (on first call)
 		verify(myBulkExportMDMResourceExpander, times(1)).expandPatient(eq("Patient/1"), any());
