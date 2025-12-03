@@ -143,8 +143,7 @@ public class ResourceUtil {
 	}
 
 	public static void addRawDataToResource(
-			@Nonnull IBaseResource theResource, @Nonnull EncodingEnum theEncodingType, String theSerializedData)
-			throws IOException {
+			@Nonnull IBaseResource theResource, @Nonnull EncodingEnum theEncodingType, String theSerializedData) {
 		theResource.setUserData(getRawUserDataKey(theEncodingType), theSerializedData);
 		theResource.setUserData(ENCODING, theEncodingType);
 	}
@@ -481,46 +480,57 @@ public class ResourceUtil {
 		boolean isMergeCandidate = evaluateEquality(theSourceItem, theTargetItem, shallowEquals);
 
 		// if the shallow fields match, we proceed to compare the lists of Codings
-		if (isMergeCandidate) {
-			List<IBase> sourceCodings = theTerser.getValues(theSourceItem, "coding");
-			List<IBase> targetCodings = theTerser.getValues(theTargetItem, "coding");
-			if (theMergeControlParameters.isIgnoreCodeableConceptCodingOrder()) {
-				if (theMergeControlParameters.isMergeCodings()) {
-					if (sourceCodings.size() < targetCodings.size()) {
-						isMergeCandidate = sourceCodings.stream().allMatch(sourceCoding -> targetCodings.stream()
-								.anyMatch(targetCoding -> isCodingMergeCandidate(
-										theTerser, sourceCoding, targetCoding, theMergeControlParameters)));
-					} else {
-						isMergeCandidate = targetCodings.stream().allMatch(targetCoding -> sourceCodings.stream()
-								.anyMatch(sourceCoding -> isCodingMergeCandidate(
-										theTerser, sourceCoding, targetCoding, theMergeControlParameters)));
-					}
-				} else {
-					isMergeCandidate = sourceCodings.size() == targetCodings.size()
-							&& sourceCodings.stream().allMatch(sourceCoding -> targetCodings.stream()
-									.anyMatch(targetCoding -> isCodingMergeCandidate(
-											theTerser, sourceCoding, targetCoding, theMergeControlParameters)));
-				}
-			} else {
-				if (theMergeControlParameters.isMergeCodings()) {
-					int prefixLength = Math.min(sourceCodings.size(), targetCodings.size());
-					for (int i = 0; i < prefixLength; i++) {
-						isMergeCandidate &= isCodingMergeCandidate(
-								theTerser, sourceCodings.get(i), targetCodings.get(i), theMergeControlParameters);
-					}
-				} else {
-					if (sourceCodings.size() == targetCodings.size()) {
-						for (int i = 0; i < sourceCodings.size(); i++) {
-							isMergeCandidate &= isCodingMergeCandidate(
-									theTerser, sourceCodings.get(i), targetCodings.get(i), theMergeControlParameters);
-						}
-					} else {
-						isMergeCandidate = false;
-					}
-				}
-			}
+		if (theMergeControlParameters.isIgnoreCodeableConceptCodingOrder()) {
+			isMergeCandidate &= isCodingListsMatchUnordered(theSourceItem, theTargetItem, theTerser, theMergeControlParameters);
+		} else {
+			isMergeCandidate &= isCodingListsMatchOrdered(theSourceItem, theTargetItem, theTerser, theMergeControlParameters, isMergeCandidate);
 		}
 
+		return isMergeCandidate;
+	}
+
+	private static boolean isCodingListsMatchOrdered(IBase theSourceItem, IBase theTargetItem, FhirTerser theTerser, MergeControlParameters theMergeControlParameters, boolean isMergeCandidate) {
+		List<IBase> sourceCodings = theTerser.getValues(theSourceItem, "coding");
+		List<IBase> targetCodings = theTerser.getValues(theTargetItem, "coding");
+		if (theMergeControlParameters.isMergeCodings()) {
+			int prefixLength = Math.min(sourceCodings.size(), targetCodings.size());
+			for (int i = 0; i < prefixLength; i++) {
+				isMergeCandidate &= isCodingMergeCandidate(
+					theTerser, sourceCodings.get(i), targetCodings.get(i), theMergeControlParameters);
+			}
+		} else {
+			if (sourceCodings.size() == targetCodings.size()) {
+				for (int i = 0; i < sourceCodings.size(); i++) {
+					isMergeCandidate &= isCodingMergeCandidate(
+						theTerser, sourceCodings.get(i), targetCodings.get(i), theMergeControlParameters);
+				}
+			} else {
+				isMergeCandidate = false;
+			}
+		}
+		return isMergeCandidate;
+	}
+
+	private static boolean isCodingListsMatchUnordered(IBase theSourceItem, IBase theTargetItem, FhirTerser theTerser, MergeControlParameters theMergeControlParameters) {
+		boolean isMergeCandidate;
+		List<IBase> sourceCodings = theTerser.getValues(theSourceItem, "coding");
+		List<IBase> targetCodings = theTerser.getValues(theTargetItem, "coding");
+		if (theMergeControlParameters.isMergeCodings()) {
+			if (sourceCodings.size() < targetCodings.size()) {
+				isMergeCandidate = sourceCodings.stream().allMatch(sourceCoding -> targetCodings.stream()
+						.anyMatch(targetCoding -> isCodingMergeCandidate(
+							theTerser, sourceCoding, targetCoding, theMergeControlParameters)));
+			} else {
+				isMergeCandidate = targetCodings.stream().allMatch(targetCoding -> sourceCodings.stream()
+						.anyMatch(sourceCoding -> isCodingMergeCandidate(
+							theTerser, sourceCoding, targetCoding, theMergeControlParameters)));
+			}
+		} else {
+			isMergeCandidate = sourceCodings.size() == targetCodings.size()
+					&& sourceCodings.stream().allMatch(sourceCoding -> targetCodings.stream()
+							.anyMatch(targetCoding -> isCodingMergeCandidate(
+								theTerser, sourceCoding, targetCoding, theMergeControlParameters)));
+		}
 		return isMergeCandidate;
 	}
 
