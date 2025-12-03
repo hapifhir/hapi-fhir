@@ -99,23 +99,46 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRuleBulkE
 			}
 		}
 
-		List<IBaseResource> thePatientResources =
+		List<IBaseResource> patients =
 				theRuleApplier.getAuthResourceResolver().resolveResourcesByIds(patientIdOptions, "Patient");
 
+		return applyTestersToPatientResources(theOperation, theRequestDetails, theRuleApplier, patients);
+	}
+
+	/**
+	 * Applies the testers (via OR - at least one matches) to the list of Patient resources, and returns a verdict.
+	 *
+	 * @param theOperation the operation type
+	 * @param theRequestDetails the request details
+	 * @param theRuleApplier the rule applier
+	 * @param thePatientResources the list of patient resources to apply the testers to
+	 * @return Cases:
+	 * <ul>
+	 * <li> null/abstain: If the list of patient resources is empty
+	 * <li> null/abstain: If all Patients evaluate to NO match
+	 * <li> DENY: If some Patients evaluate to match, while other Patients evaluate to NO match
+	 * <li> ALLOW: If all Patients evaluate to match
+	 * </ul>
+	 */
+	private AuthorizationInterceptor.Verdict applyTestersToPatientResources(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IRuleApplier theRuleApplier, List<IBaseResource> thePatientResources) {
 		// Apply the FhirQueryTester (which contains a inMemoryResourceMatcher) to the found Patient compartment
 		// resource,
 		// and return the verdict
 		// All requested Patient IDs must be permitted to return an ALLOW verdict.
-		Map<Boolean, Integer> counts = new HashMap<>();
-		counts.put(true, 0);
-		counts.put(false, 0);
+
+		boolean atLeastOnePatientMatchesOnTesters = false;
+		boolean atLeastOnePatientDoesNotMatchOnTesters = false;
 
 		for (IBaseResource patient : thePatientResources) {
 			boolean applies = atLeastOneTesterMatches(theOperation, theRequestDetails, patient, theRuleApplier);
 
-			counts.put(applies, counts.get(applies) + 1);
+			if (applies) {
+				atLeastOnePatientMatchesOnTesters = true;
+			} else {
+				atLeastOnePatientDoesNotMatchOnTesters = true;
+			}
 
-			if (counts.get(applies) > 0 && counts.get(!applies) > 0) {
+			if (atLeastOnePatientMatchesOnTesters && atLeastOnePatientDoesNotMatchOnTesters) {
 				// Then the testers evaluated to true on some Patients, and false on others - no need to evaluate the
 				// rest
 				// We have a mixture of ALLOW and abstain
@@ -125,8 +148,9 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRuleBulkE
 		}
 
 		// If all testers evaluated to match, then ALLOW. If they all evaluated to false, then abstain.
-		// It's impossible to have a mixture due to the early-return in the for loop
-		return counts.get(true) > 0 ? new AuthorizationInterceptor.Verdict(PolicyEnum.ALLOW, this) : null;
+		// It's impossible for both atLeastOneTesterApplied=true and atLeastOneTesterDoesNotApplied=true
+		// due to the early-return in the for loop
+		return atLeastOnePatientMatchesOnTesters ? new AuthorizationInterceptor.Verdict(PolicyEnum.ALLOW, this) : null;
 	}
 
 	/**
