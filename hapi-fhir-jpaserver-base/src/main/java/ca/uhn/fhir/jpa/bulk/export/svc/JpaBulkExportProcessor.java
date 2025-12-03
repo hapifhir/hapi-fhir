@@ -202,10 +202,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	}
 
 	private void filterBySpecificPatient(
-			Set<String> theExpandedPatientIds,
-			String resourceType,
-			String patientSearchParam,
-			SearchParameterMap map) {
+			Set<String> theExpandedPatientIds, String resourceType, String patientSearchParam, SearchParameterMap map) {
 		if (resourceType.equalsIgnoreCase("Patient")) {
 			if (theExpandedPatientIds != null) {
 				ReferenceOrListParam referenceOrListParam =
@@ -242,10 +239,11 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 		for (SearchParameterMap map : maps) {
 			Logs.getBatchTroubleshootingLog()
-				.atDebug().setMessage("Executing query for bulk export job[{}] chunk[{}]: {}")
-				.addArgument(theJobId)
-				.addArgument(theChunkId)
-				.addArgument(map.toNormalizedQueryString());
+					.atDebug()
+					.setMessage("Executing query for bulk export job[{}] chunk[{}]: {}")
+					.addArgument(theJobId)
+					.addArgument(theChunkId)
+					.addArgument(map.toNormalizedQueryString());
 
 			// requires a transaction
 			try (IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(
@@ -314,7 +312,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				}
 			});
 		} else {
-			ourLog.warn("No active patient compartment search parameter(s) for resource type {}", theParams.getResourceType());
+			ourLog.warn(
+					"No active patient compartment search parameter(s) for resource type {}",
+					theParams.getResourceType());
 		}
 		return pids;
 	}
