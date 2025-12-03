@@ -21,10 +21,12 @@ package ca.uhn.fhir.jpa.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.packages.NpmJpaValidationSupport;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
@@ -60,6 +62,9 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	@Autowired
 	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
 
+	@Autowired
+	private JpaStorageSettings myJpaStorageSettings;
+
 	/**
 	 * Constructor
 	 */
@@ -90,8 +95,13 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	public void postConstruct() {
 		myWorkerContextValidationSupportAdapter.setValidationSupport(this);
 
-		addValidationSupport(myDefaultProfileValidationSupport);
-		addValidationSupport(myJpaValidationSupport);
+		if (myJpaStorageSettings.isAllowDatabaseValidationOverride()) {
+			addValidationSupport(myJpaValidationSupport);
+			addValidationSupport(myDefaultProfileValidationSupport);
+		} else {
+			addValidationSupport(myDefaultProfileValidationSupport);
+			addValidationSupport(myJpaValidationSupport);
+		}
 		addValidationSupport(myTerminologyService);
 		addValidationSupport(
 				new SnapshotGeneratingValidationSupport(myFhirContext, myWorkerContextValidationSupportAdapter));
@@ -99,5 +109,17 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 		addValidationSupport(myNpmJpaValidationSupport);
 		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
 		addValidationSupport(myConceptMappingSvc);
+	}
+
+	/**
+	 * Clears and rebuilds the validation support chain.
+	 * This method is intended for unit testing purposes only to allow
+	 * re-initializing the chain after changing configuration settings
+	 * such as {@link JpaStorageSettings#setAllowDatabaseValidationOverride(boolean)}.
+	 */
+	@VisibleForTesting
+	public void rebuildChainForUnitTest() {
+		super.clearChainForUnitTest();
+		postConstruct();
 	}
 }
