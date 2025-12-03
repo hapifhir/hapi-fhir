@@ -71,10 +71,7 @@ public class GenerateRangeChunksStepTest {
 		thePartitionedUrls.forEach(parameters::addPartitionedUrl);
 
 		if (!thePartitionedUrls.isEmpty()) {
-			when(myJobPartitionProvider.splitPartitionByShards(any())).thenAnswer(t -> {
-				RequestPartitionId partitionId = t.getArgument(0, RequestPartitionId.class);
-				return List.of(partitionId);
-			});
+			when(myJobPartitionProvider.toChunkRanges(any(), any(), any())).thenCallRealMethod();
 		}
 		when(myStepExecutionDetails.getParameters()).thenReturn(parameters);
 		myStep.run(myStepExecutionDetails, myJobDataSink);

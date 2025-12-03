@@ -190,7 +190,7 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 	 */
 	private RequestPartitionId parsePartitionIdsParameterAndInvokeInterceptors(
 			RequestDetails theRequestDetails, List<IPrimitiveType<String>> thePartitionIds) {
-		if (!myPartitionSettings.isPartitioningEnabled()) {
+		if (!myPartitionSettings.isPartitioningEnabled() || !myPartitionSettings.isUnnamedPartitionMode()) {
 			return null;
 		}
 
