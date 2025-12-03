@@ -494,7 +494,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public <T extends Resource> T findTxResource(
 			Class<T> class_, String canonical, String version, Resource sourceOfReference) {
-		throw new UnsupportedOperationException(Msg.code(2822));
+		throw new UnsupportedOperationException(Msg.code(2829));
 	}
 
 	@Override
