@@ -23,15 +23,21 @@ import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.entity.TermConceptPropertyTypeEnum;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import org.apache.commons.csv.CSVRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class PropertyHandler implements IZipContentsHandlerCsv {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(PropertyHandler.class);
 
 	public static final String CODE = "CODE";
 	public static final String KEY = "KEY";
@@ -55,6 +61,16 @@ public class PropertyHandler implements IZipContentsHandlerCsv {
 			List<TermConceptProperty> conceptProperties = myCode2Properties.get(code);
 			if (conceptProperties == null) conceptProperties = new ArrayList<>();
 
+			if (isDuplicateConceptProperty(conceptProperties, key, value, type)) {
+				ourLog.info(
+						"Duplicate concept property found for code {}, key {}, value {}, type {}. Skipping entry.",
+						code,
+						key,
+						value,
+						type);
+				return;
+			}
+
 			TermConceptProperty conceptProperty = new TermConceptProperty();
 			conceptProperty.setKey(key);
 			conceptProperty.setValue(value);
@@ -64,5 +80,16 @@ public class PropertyHandler implements IZipContentsHandlerCsv {
 			conceptProperties.add(conceptProperty);
 			myCode2Properties.put(code, conceptProperties);
 		}
+	}
+
+	public boolean isDuplicateConceptProperty(
+			List<TermConceptProperty> conceptProperties, String key, String value, String typeString) {
+		if (CollectionUtils.isEmpty(conceptProperties)) {
+			return false;
+		}
+		return conceptProperties.stream()
+				.anyMatch(p -> Objects.equals(p.getKey(), key)
+						&& Objects.equals(p.getValue(), value)
+						&& Objects.equals(p.getType(), TermConceptPropertyTypeEnum.fromString(typeString)));
 	}
 }
