@@ -294,15 +294,6 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			return RequestPartitionId.allPartitions();
 		}
 
-		// If we previously fetched a resource from the DB, it already knows what
-		// partition it is from, so we don't need to figure out its partition again
-		// when writing to it
-		RequestPartitionId existingPartitionId =
-				(RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
-		if (existingPartitionId != null) {
-			return existingPartitionId;
-		}
-
 		RequestDetails requestDetails = theRequest;
 		boolean nonPartitionableResource = isResourceNonPartitionable(theResourceType);
 
@@ -311,6 +302,16 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		if (theRequest == null) {
 			requestDetails = new SystemRequestDetails();
 			logSubstitutingDefaultSystemRequestDetails();
+		}
+
+		// If we previously fetched a resource from the DB, it already knows what
+		// partition it is from, so we don't need to figure out its partition again
+		// when writing to it
+		RequestPartitionId existingPartitionId =
+				(RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+		if (existingPartitionId != null) {
+			existingPartitionId = validateAndNormalizePartition(existingPartitionId, theRequest, theResourceType);
+			return existingPartitionId;
 		}
 
 		RequestPartitionId requestPartitionId = null;

@@ -27,6 +27,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -198,10 +199,17 @@ public class RequestPartitionId implements IModelJson {
 	public boolean contains(RequestPartitionId theOther) {
 		if (this.isAllPartitions()) {
 			return true;
-		} else if (theOther.isAllPartitions()) {
+		}
+		if (theOther.isAllPartitions()) {
 			return false;
 		}
-		return this.myPartitionIds.containsAll(theOther.myPartitionIds);
+		if (hasPartitionNames() && theOther.hasPartitionNames()) {
+			return CollectionUtils.containsAll(myPartitionNames, theOther.myPartitionNames);
+		}
+		if (hasPartitionNames() || theOther.hasPartitionNames()) {
+			return false;
+		}
+		return CollectionUtils.containsAll(this.myPartitionIds, theOther.myPartitionIds);
 	}
 
 	@Override
