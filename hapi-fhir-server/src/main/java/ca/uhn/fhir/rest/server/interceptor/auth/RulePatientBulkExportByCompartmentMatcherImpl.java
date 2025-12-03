@@ -26,17 +26,13 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.util.MatchUrlUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
-
-import java.util.HashSet;
-
 import org.apache.http.NameValuePair;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS;
@@ -120,7 +116,11 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRuleBulkE
 	 * <li> ALLOW: If all Patients evaluate to match
 	 * </ul>
 	 */
-	private AuthorizationInterceptor.Verdict applyTestersToPatientResources(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IRuleApplier theRuleApplier, List<IBaseResource> thePatientResources) {
+	private AuthorizationInterceptor.Verdict applyTestersToPatientResources(
+			RestOperationTypeEnum theOperation,
+			RequestDetails theRequestDetails,
+			IRuleApplier theRuleApplier,
+			List<IBaseResource> thePatientResources) {
 		// Apply the FhirQueryTester (which contains a inMemoryResourceMatcher) to the found Patient compartment
 		// resource,
 		// and return the verdict
