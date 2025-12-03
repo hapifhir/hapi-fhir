@@ -354,6 +354,9 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public <T extends Resource> T fetchResource(
 			Class<T> theClass, String theUri, String theVersion, Resource sourceOfReference) {
+		if (theVersion == null) {
+			return fetchResource(theClass, theUri);
+		}
 		return fetchResource(theClass, theUri + "|" + theVersion);
 	}
 
