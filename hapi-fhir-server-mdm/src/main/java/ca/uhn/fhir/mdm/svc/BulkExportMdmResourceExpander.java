@@ -262,11 +262,11 @@ public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpa
 	}
 
 	private void addGoldenResourceExtension(IBaseResource iBaseResource, String sourceResourceId) {
-		String goldenResourceId = myMdmExpansionCacheSvc.getGoldenResourceId(sourceResourceId);
-		IBaseExtension<?, ?> extension = ExtensionUtil.getOrCreateExtension(
-				iBaseResource, HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
-
+		// TODO, reimplement this, it is currently completely broken given the distributed nature of the job.
+		String goldenResourceId = ""; // TODO we must be able to fetch this, for now, will be no-op
 		if (!StringUtils.isBlank(goldenResourceId)) {
+			IBaseExtension<?, ?> extension = ExtensionUtil.getOrCreateExtension(
+				iBaseResource, HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
 			ExtensionUtil.setExtension(myContext, extension, "reference", goldenResourceId);
 		}
 	}
