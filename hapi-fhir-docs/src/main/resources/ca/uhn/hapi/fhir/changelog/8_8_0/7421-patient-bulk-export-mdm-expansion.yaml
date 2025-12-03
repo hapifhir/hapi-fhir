@@ -1,0 +1,12 @@
+---
+type: add
+issue: 7421
+title: "Patient instance bulk export operation now supports MDM expansion. When the `_mdm` parameter is set to `true` on
+  a Patient instance bulk export request, the Patient instance will be expanded to include all MDM-linked Patient records
+  (such as golden records and linked patients).  As a result, the exported set of resources will include:
+  <ul>
+  <li>Patient/123 (the requested patient)</li>
+  <li>Patient/123's golden resource (if MDM-linked)</li>
+  <li>All other patients linked to the same golden resource</li>
+  <li>All resources in the patient compartment referring to ANY of the above patients</li>
+  </ul>"
