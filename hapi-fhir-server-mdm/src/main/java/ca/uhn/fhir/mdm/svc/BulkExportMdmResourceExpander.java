@@ -133,14 +133,10 @@ public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpa
 		}
 
 		for (JpaPid pid : expandedPatientJpaPids) {
-			String patientIdString = null;
+			String patientIdString;
 
 			Optional<String> forcedIdOpt = myIdHelperService.translatePidIdToForcedIdWithCache(pid);
-			if (forcedIdOpt.isEmpty()) {
-				patientIdString = "Patient/" + pid.getId().toString();
-			} else {
-				patientIdString = forcedIdOpt.get();
-			}
+			patientIdString = forcedIdOpt.orElse("Patient/" + pid.getId().toString());
 
 			expandedPatientIdsAsString.add(patientIdString);
 		}
