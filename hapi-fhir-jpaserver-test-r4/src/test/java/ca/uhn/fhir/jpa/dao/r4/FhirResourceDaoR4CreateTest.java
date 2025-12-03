@@ -86,6 +86,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.test.utilities.UuidUtils.HASH_UUID_PATTERN;
@@ -1420,7 +1421,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			partitionEntity2.setName("Partition-B");
 			myPartitionDao.save(partitionEntity2);
 
-			Callable<Bundle> bundleSupplier = () -> {
+			Supplier<Bundle> bundleSupplier = () -> {
 				final BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 				final String matchUrl = "identifier=http://tempuri.org|1";
 				Task task = myFhirContext.newTerser().clone(myTask1);
@@ -1432,18 +1433,18 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			final RequestPartitionId requestPartitionId1 = RequestPartitionId.fromPartitionId(1, LocalDate.now());
 			final RequestPartitionId requestPartitionId2 = RequestPartitionId.fromPartitionId(2, LocalDate.now());
 
-			final List<Bundle.BundleEntryComponent> responseEntries1 = sendBundleAndGetResponse(bundleSupplier.call(), requestPartitionId1);
+			final List<Bundle.BundleEntryComponent> responseEntries1 = sendBundleAndGetResponse(bundleSupplier.get(), requestPartitionId1);
 			assertEquals(1, responseEntries1.size());
 			final Bundle.BundleEntryComponent bundleEntry1 = responseEntries1.get(0);
 			assertEquals("201 Created", bundleEntry1.getResponse().getStatus());
 
 			if (!theIsSearchUrlDuplicateAcrossPartitionsEnabled) {
-				final IBaseBundle bundle = bundleSupplier.call();
+				final IBaseBundle bundle = bundleSupplier.get();
 				assertThatThrownBy(() -> sendBundleAndGetResponse(bundle, requestPartitionId2)).isInstanceOf(ResourceVersionConflictException.class);
 				return;
 			}
 
-			final List<Bundle.BundleEntryComponent> responseEntries2 = sendBundleAndGetResponse(bundleSupplier.call(), requestPartitionId2);
+			final List<Bundle.BundleEntryComponent> responseEntries2 = sendBundleAndGetResponse(bundleSupplier.get(), requestPartitionId2);
 			assertEquals(1, responseEntries2.size());
 			final Bundle.BundleEntryComponent bundleEntry2 = responseEntries1.get(0);
 			assertEquals("201 Created", bundleEntry2.getResponse().getStatus());

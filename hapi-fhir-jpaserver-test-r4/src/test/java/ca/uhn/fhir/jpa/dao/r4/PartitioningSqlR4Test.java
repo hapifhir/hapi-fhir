@@ -1835,6 +1835,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		String searchSql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
+		assertThat(searchSql).contains("t0.HASH_VALUE = '7943378963388545453'");
 		assertThat(searchSql).doesNotContainIgnoringCase("PARTITION_ID IN");
 		assertThat(searchSql).doesNotContainIgnoringCase("PARTITION_ID =");
 	}

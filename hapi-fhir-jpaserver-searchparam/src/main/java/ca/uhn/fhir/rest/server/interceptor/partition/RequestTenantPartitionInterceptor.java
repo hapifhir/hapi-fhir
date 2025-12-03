@@ -106,7 +106,7 @@ public class RequestTenantPartitionInterceptor {
 				if (requestDetails.getRequestPartitionId() != null) {
 					return requestDetails.getRequestPartitionId();
 				}
-				return RequestPartitionId.allPartitions();
+				return RequestPartitionId.defaultPartition(myPartitionSettings);
 			}
 			throw new InternalErrorException(Msg.code(343) + "No partition ID has been specified");
 		}

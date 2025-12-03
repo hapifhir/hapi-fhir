@@ -80,13 +80,6 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 		return ResourceVersionMap.fromIdsWithVersions(fhirIds);
 	}
 
-	@Override
-	public ResourceVersionMap getVersionMap(String theResourceName, SearchParameterMap theSearchParamMap) {
-		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-				null, theResourceName, theSearchParamMap);
-		return getVersionMap(requestPartition, theResourceName, theSearchParamMap);
-	}
-
 	/**
 	 * Retrieves the latest versions for any resourceid that are found.
 	 * If they are not found, they will not be contained in the returned map.
