@@ -29,7 +29,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -41,12 +40,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.slf4j.LoggerFactory.getLogger;
 
 @ContextConfiguration(classes = {MdmHelperConfig.class})
 public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
-
-	private static final Logger ourLog = getLogger(MdmSearchExpandingInterceptorIT.class);
 
 	@RegisterExtension
 	@Autowired

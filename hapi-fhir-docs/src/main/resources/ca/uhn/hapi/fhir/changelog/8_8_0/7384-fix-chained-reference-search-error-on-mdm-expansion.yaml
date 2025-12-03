@@ -2,7 +2,6 @@
 type: fix
 issue: 7384
 jira: SMILE-11171
-title: "Fixed chained-reference search on MDM expansion to ensure a 400 Bad Request is returned with the correct 
-message when an invalid search parameter is used."
-
-
+title: "Previously, chained reference searches by users with `FHIR_AUTO_MDM` could cause a 500 resource not known error. 
+This fix runs those searches without MDM expansion so they return correct results. If a chained search explicitly 
+includes the `:mdm` modifier, the request is invalid and the server now returns a 400 Bad Request."

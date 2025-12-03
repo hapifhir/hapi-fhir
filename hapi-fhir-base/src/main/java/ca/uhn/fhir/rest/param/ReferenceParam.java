@@ -128,12 +128,12 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 
 	@Override
 	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
-		if (Constants.PARAMQUALIFIER_MDM.equals(theQualifier)) {
+		String q = theQualifier;
+		if (q != null && q.endsWith(Constants.PARAMQUALIFIER_MDM)) {
 			myMdmExpand = true;
-			theQualifier = "";
+			q = q.substring(0, q.length() - Constants.PARAMQUALIFIER_MDM.length());
 		}
 
-		String q = theQualifier;
 		if (isNotBlank(q)) {
 			if (q.startsWith(":")) {
 				int nextIdx = q.indexOf('.');

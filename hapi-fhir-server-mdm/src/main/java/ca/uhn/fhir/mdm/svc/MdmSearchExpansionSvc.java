@@ -149,11 +149,11 @@ public class MdmSearchExpansionSvc {
 		List<IQueryParameterType> toAdd = new ArrayList<>();
 		for (IQueryParameterType iQueryParameterType : orList) {
 			if (iQueryParameterType instanceof ReferenceParam refParam) {
-				if (refParam.hasChain()) {
-					throw new InvalidRequestException(
-							Msg.code(2822) + "MDM Expansion can not be applied to chained reference search.");
-				}
 				if (theParamTester.shouldExpand(theParamName, refParam)) {
+					if (refParam.hasChain()) {
+						throw new InvalidRequestException(
+								Msg.code(2822) + "MDM Expansion can not be applied to chained reference search.");
+					}
 					ourLog.debug("Found a reference parameter to expand: {}", refParam);
 					// First, attempt to expand as a source resource.
 					IIdType sourceId = newId(refParam.getValue());
