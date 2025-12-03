@@ -18,6 +18,7 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -1084,6 +1085,16 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	int getMetricExpiringCacheMaxSize() {
 		return myCacheConfiguration.getCacheSize();
+	}
+
+	/**
+	 * Clears all validation support modules from the chain.
+	 * This method is intended for unit testing purposes only to allow
+	 * rebuilding the chain with different configurations.
+	 */
+	@VisibleForTesting
+	protected void clearChainForUnitTest() {
+		myChain.clear();
 	}
 
 	/**

@@ -837,6 +837,32 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		return totalNumberOfPatientsCreated;
 	}
 
+	/**
+	 * Ensure that a search for a specific date (which is transformed internally into a
+	 * date range with an identical lower and upper by PatientResourceProvider) doesn't
+	 * cause duplicate parameters.
+	 */
+	@Test
+	public void testSearchDate() {
+		// Setup
+		createPatient(withId("PAT-0"), withBirthdate("2020-01-01"));
+
+		// Test
+		myCaptureQueriesListener.clear();
+		Bundle actual = myClient
+			.search()
+			.forResource(Patient.class)
+			.where(Patient.BIRTHDATE.exactly().day("2020-01-01"))
+			.returnBundle(Bundle.class)
+			.execute();
+		myCaptureQueriesListener.logSelectQueries();
+
+		// Verify
+		assertThat(toUnqualifiedVersionlessIdValues(actual)).containsExactly("Patient/PAT-0");
+		assertThat(actual.getLink(Constants.LINK_SELF).getUrl()).endsWith("Patient?birthdate=2020-01-01");
+	}
+
+
 	@Test
 	public void testSearchWithDeepChain() throws IOException {
 
@@ -1115,8 +1141,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * See #484
-	 */
+     * See #484
+     */
 	@Test
 	public void saveAndRetrieveBasicResource() throws IOException {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/basic-stu3.xml"), StandardCharsets.UTF_8);
