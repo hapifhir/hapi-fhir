@@ -153,7 +153,7 @@ public abstract class BaseBulkModifyOrRewriteGenerateReportStep<PT extends BaseB
 					.append('\n');
 		}
 		if (myFailureCount > 0) {
-			report.append("Total Failed Changes      : ")
+			report.append("Total Resources Failed    : ")
 					.append(myFailureCount)
 					.append(" (")
 					.append(failedPerSecond)

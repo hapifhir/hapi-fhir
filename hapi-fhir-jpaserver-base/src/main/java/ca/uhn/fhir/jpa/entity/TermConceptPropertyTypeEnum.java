@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 /**
  * @see TermConceptProperty#getType()
  */
@@ -51,5 +53,15 @@ public enum TermConceptPropertyTypeEnum {
 	/**
 	 * Date and time values.
 	 */
-	DATETIME
+	DATETIME;
+
+	public static TermConceptPropertyTypeEnum fromString(String theString) {
+		TermConceptPropertyTypeEnum retVal;
+		try {
+			retVal = TermConceptPropertyTypeEnum.valueOf(defaultString(theString));
+		} catch (Exception e) {
+			retVal = TermConceptPropertyTypeEnum.STRING;
+		}
+		return retVal;
+	}
 }

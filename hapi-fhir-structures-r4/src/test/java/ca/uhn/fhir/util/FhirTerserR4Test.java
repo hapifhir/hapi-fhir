@@ -1427,6 +1427,56 @@ public class FhirTerserR4Test {
 	}
 
 	@Test
+	public void testVisitWithModelVisitor2_PrimitiveElementVisitsExtensions() {
+		IModelVisitor2 visitor = mock(IModelVisitor2.class);
+
+		ArgumentCaptor<IBase> element = ArgumentCaptor.forClass(IBase.class);
+		ArgumentCaptor<List<IBase>> containingElementPath = ArgumentCaptor.forClass(getListClass(IBase.class));
+		ArgumentCaptor<List<BaseRuntimeChildDefinition>> childDefinitionPath = ArgumentCaptor.forClass(getListClass(BaseRuntimeChildDefinition.class));
+		ArgumentCaptor<List<BaseRuntimeElementDefinition<?>>> elementDefinitionPath = ArgumentCaptor.forClass(getListClass2());
+		when(visitor.acceptElement(element.capture(), containingElementPath.capture(), childDefinitionPath.capture(), elementDefinitionPath.capture())).thenReturn(true);
+
+		StringType string = new StringType("foo");
+		string.addExtension().setUrl("http://ext0").setValue(new StringType("value0"));
+		string.addExtension().setUrl("http://ext1").setValue(new StringType("value1"));
+
+		myCtx.newTerser().visit(string, visitor);
+
+		assertThat(element.getAllValues()).hasSize(7);
+		assertThat(element.getAllValues().get(0)).isSameAs(string);
+		assertThat(element.getAllValues().get(1)).isSameAs(string.getExtension().get(0));
+		assertThat(element.getAllValues().get(2)).isSameAs(string.getExtension().get(0).getUrlElement());
+		assertThat(element.getAllValues().get(3)).isSameAs(string.getExtension().get(0).getValue());
+		assertThat(element.getAllValues().get(4)).isSameAs(string.getExtension().get(1));
+		assertThat(element.getAllValues().get(5)).isSameAs(string.getExtension().get(1).getUrlElement());
+		assertThat(element.getAllValues().get(6)).isSameAs(string.getExtension().get(1).getValue());
+	}
+
+	@Test
+	public void testVisitWithModelVisitor2_InvokeOnExtensionDirectly() {
+		IModelVisitor2 visitor = mock(IModelVisitor2.class);
+
+		ArgumentCaptor<IBase> element = ArgumentCaptor.forClass(IBase.class);
+		ArgumentCaptor<List<IBase>> containingElementPath = ArgumentCaptor.forClass(getListClass(IBase.class));
+		ArgumentCaptor<List<BaseRuntimeChildDefinition>> childDefinitionPath = ArgumentCaptor.forClass(getListClass(BaseRuntimeChildDefinition.class));
+		ArgumentCaptor<List<BaseRuntimeElementDefinition<?>>> elementDefinitionPath = ArgumentCaptor.forClass(getListClass2());
+		when(visitor.acceptElement(element.capture(), containingElementPath.capture(), childDefinitionPath.capture(), elementDefinitionPath.capture())).thenReturn(true);
+
+		Extension ext = new Extension();
+		ext.setUrl("http://ext0");
+		ext.addExtension().setUrl("http://ext1").setValue(new StringType("value1"));
+
+		myCtx.newTerser().visit(ext, visitor);
+
+		assertThat(element.getAllValues()).hasSize(5);
+		assertThat(element.getAllValues().get(0)).isSameAs(ext);
+		assertThat(element.getAllValues().get(1)).isSameAs(ext.getExtension().get(0));
+		assertThat(element.getAllValues().get(2)).isSameAs(ext.getExtension().get(0).getUrlElement());
+		assertThat(element.getAllValues().get(3)).isSameAs(ext.getExtension().get(0).getValue());
+		assertThat(element.getAllValues().get(4)).isSameAs(ext.getUrlElement());
+	}
+
+	@Test
 	public void testGetAllPopulatedChildElementsOfType() {
 
 		Patient p = new Patient();
