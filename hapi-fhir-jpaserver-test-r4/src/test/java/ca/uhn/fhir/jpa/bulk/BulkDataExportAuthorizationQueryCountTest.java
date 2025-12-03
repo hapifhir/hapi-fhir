@@ -77,11 +77,11 @@ public class BulkDataExportAuthorizationQueryCountTest extends BaseResourceProvi
 
 	private static final Identifier AUTH_IDENTIFIER = new Identifier().setSystem("foo").setValue("bar");
 	private static final Identifier UNAUTH_IDENTIFIER = new Identifier().setSystem("abc").setValue("123");
-	private static IAuthResourceResolver myAuthResourceResolver;
+	private static IAuthResourceResolver ourAuthResourceResolver;
 
 	@Autowired
 	public void setAuthResourceResolver(IAuthResourceResolver theResourceResolver) {
-		myAuthResourceResolver = theResourceResolver;
+		ourAuthResourceResolver = theResourceResolver;
 	}
 
 	@BeforeAll
@@ -306,7 +306,7 @@ public class BulkDataExportAuthorizationQueryCountTest extends BaseResourceProvi
 
 			@Override
 			public IAuthResourceResolver getAuthResourceResolver() {
-				return myAuthResourceResolver;
+				return ourAuthResourceResolver;
 			}
 		};
 	}
