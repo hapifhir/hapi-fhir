@@ -51,7 +51,7 @@ class RuleGroupBulkExportByCompartmentMatcherImplTest {
 	@MethodSource("params")
 	void testGroupRule_withCompartmentMatchers(IAuthorizationSearchParamMatcher.MatchResult theSearchParamMatcherMatchResult, Collection<String> theAllowedResourceTypes, ExportStyle theExportStyle, Collection<String> theRequestedResourceTypes, PolicyEnum theExpectedVerdict, String theMessage) {
 		RuleGroupBulkExportByCompartmentMatcherImpl rule = new RuleGroupBulkExportByCompartmentMatcherImpl("b");
-		rule.setAppliesToGroupExportOnGroup("identifier=foo|bar");
+		rule.setAppliesToGroupExportOnGroup("?identifier=foo|bar");
 		rule.setResourceTypes(theAllowedResourceTypes);
 		rule.setMode(PolicyEnum.ALLOW);
 

@@ -23,7 +23,13 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import ca.uhn.fhir.rest.server.util.MatchUrlUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
+
+import java.util.HashSet;
+
+import org.apache.http.NameValuePair;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -39,7 +45,7 @@ import static ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum.DENY;
 
 public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRuleBulkExportByCompartmentMatcher {
 	private List<String> myPatientMatcherFilter;
-	private List<Set<String>> myTokenizedPatientMatcherFilter;
+	private List<Set<NameValuePair>> myTokenizedPatientMatcherFilter;
 
 	RulePatientBulkExportByCompartmentMatcherImpl(String theRuleName) {
 		super(theRuleName, BulkExportJobParameters.ExportStyle.PATIENT);
@@ -130,7 +136,7 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRuleBulkE
 	 * The search parameters in the filters are tokenized so that parameter ordering does not matter
 	 *
 	 * Example 1: Patient?name=Doe&active=true == Patient?active=true&name=Doe
-	 * Example 2: Patient?name=Doe != Patient?active=True&name=Doe
+	 * Example 2: Patient?name=Doe != Patient?active=true&name=Doe
 	 *
 	 * @param theFilterOptions The inbound export _typeFilter options.
 	 *                         As per the spec, these filters should have a resource type.
@@ -140,9 +146,8 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRuleBulkE
 	 */
 	private boolean matchOnFilterOptions(List<String> theFilterOptions) {
 		for (String filter : theFilterOptions) {
-			String query = sanitizeQueryFilter(filter);
-
-			Set<String> tokenizedQuery = Set.of(query.split("&"));
+			String query = UrlUtil.parseUrl(filter).getParams();
+			Set<NameValuePair> tokenizedQuery = new HashSet<>(MatchUrlUtil.translateMatchUrl(query));
 
 			if (!myTokenizedPatientMatcherFilter.contains(tokenizedQuery)) {
 				return false;
@@ -160,7 +165,7 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRuleBulkE
 			myPatientMatcherFilter = new ArrayList<>();
 		}
 
-		String sanitizedFilter = sanitizeQueryFilter(thePatientMatcherFilter);
+		String sanitizedFilter = UrlUtil.parseUrl(thePatientMatcherFilter).getParams();
 		myPatientMatcherFilter.add(sanitizedFilter);
 		addTester(new FhirQueryRuleTester(sanitizedFilter));
 
@@ -168,7 +173,7 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRuleBulkE
 			myTokenizedPatientMatcherFilter = new ArrayList<>();
 		}
 
-		myTokenizedPatientMatcherFilter.add(Set.of(thePatientMatcherFilter.split("&")));
+		myTokenizedPatientMatcherFilter.add(new HashSet<>(MatchUrlUtil.translateMatchUrl(sanitizedFilter)));
 	}
 
 	public List<String> getPatientMatcherFilters() {
@@ -176,7 +181,7 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRuleBulkE
 	}
 
 	@VisibleForTesting
-	public List<Set<String>> getTokenizedPatientMatcherFilter() {
+	public List<Set<NameValuePair>> getTokenizedPatientMatcherFilter() {
 		return myTokenizedPatientMatcherFilter;
 	}
 }

@@ -90,17 +90,6 @@ abstract class BaseRuleBulkExportByCompartmentMatcher extends BaseRule {
 		myResourceTypes = theResourceTypes;
 	}
 
-	/**
-	 * Remove the resource type and "?" prefix, if present
-	 * since resource type is implied for the rule based on the permission (Patient in this case)
-	 */
-	static String sanitizeQueryFilter(String theFilter) {
-		if (theFilter.contains("?")) {
-			return theFilter.substring(theFilter.indexOf("?") + 1);
-		}
-		return theFilter;
-	}
-
 	@VisibleForTesting
 	Collection<String> getResourceTypes() {
 		return myResourceTypes;

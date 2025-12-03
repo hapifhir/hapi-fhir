@@ -24,6 +24,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -82,7 +83,7 @@ public class RuleGroupBulkExportByCompartmentMatcherImpl extends BaseRuleBulkExp
 	}
 
 	public void setAppliesToGroupExportOnGroup(String theGroupMatcherFilter) {
-		String sanitizedFilter = sanitizeQueryFilter(theGroupMatcherFilter);
+		String sanitizedFilter = UrlUtil.parseUrl(theGroupMatcherFilter).getParams();
 		myGroupMatcherFilter = sanitizedFilter;
 		addTester(new FhirQueryRuleTester(sanitizedFilter));
 	}

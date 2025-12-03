@@ -57,7 +57,7 @@ class RulePatientBulkExportByCompartmentMatcherImplTest {
 												 PolicyEnum theExpectedVerdict,
 												 String theMessage) {
 		RulePatientBulkExportByCompartmentMatcherImpl rule = new RulePatientBulkExportByCompartmentMatcherImpl("b");
-		rule.addAppliesToPatientExportOnPatient("identifier=foo|bar");
+		rule.addAppliesToPatientExportOnPatient("?identifier=foo|bar");
 		rule.setResourceTypes(theAllowedResourceTypes);
 		rule.setMode(PolicyEnum.ALLOW);
 
@@ -116,10 +116,10 @@ class RulePatientBulkExportByCompartmentMatcherImplTest {
 			Arguments.of(List.of("Patient"), new BulkExportParamsBuilder().exportTwoPatients().withResourceTypes("Patient").build(), List.of(match, noMatch), PolicyEnum.DENY, "Deny when requesting some resource types on 2 patients, but only one Patient match the permission query"),
 
 			// Instance-level with _typeFilter
-			Arguments.of(List.of("Patient", "Observation"), new BulkExportParamsBuilder().exportOnePatient().withTypeFilters("identifier=foo|bar").withResourceTypes("Patient","Observation").build(), List.of(match), PolicyEnum.ALLOW, "Allow request with typeFilter for exact set of allowable types"),
-			Arguments.of(List.of("Patient", "Observation"), new BulkExportParamsBuilder().exportOnePatient().withTypeFilters("identifier=abc|def").withResourceTypes("Patient","Observation").build(), null, PolicyEnum.DENY, "Deny request with typeFilter when all don't match permissible filter"),
-			Arguments.of(List.of("Patient", "Observation"), new BulkExportParamsBuilder().exportOnePatient().withTypeFilters("identifier=foo|bar", "name=Doe").withResourceTypes("Patient","Observation").build(), null, PolicyEnum.DENY, "Deny request with typeFilter when one doesn't match permissible filter"),
-			Arguments.of(List.of("Patient", "Observation"), new BulkExportParamsBuilder().exportTwoPatients().withTypeFilters("identifier=foo|bar").withResourceTypes("Patient","Observation").build(), List.of(match, noMatch), PolicyEnum.DENY, "Deny request with typeFilter for exact set of allowable types, but matcher doesn't match")
+			Arguments.of(List.of("Patient", "Observation"), new BulkExportParamsBuilder().exportOnePatient().withTypeFilters("?identifier=foo|bar").withResourceTypes("Patient","Observation").build(), List.of(match), PolicyEnum.ALLOW, "Allow request with typeFilter for exact set of allowable types"),
+			Arguments.of(List.of("Patient", "Observation"), new BulkExportParamsBuilder().exportOnePatient().withTypeFilters("?identifier=abc|def").withResourceTypes("Patient","Observation").build(), null, PolicyEnum.DENY, "Deny request with typeFilter when all don't match permissible filter"),
+			Arguments.of(List.of("Patient", "Observation"), new BulkExportParamsBuilder().exportOnePatient().withTypeFilters("?identifier=foo|bar", "?name=Doe").withResourceTypes("Patient","Observation").build(), null, PolicyEnum.DENY, "Deny request with typeFilter when one doesn't match permissible filter"),
+			Arguments.of(List.of("Patient", "Observation"), new BulkExportParamsBuilder().exportTwoPatients().withTypeFilters("?identifier=foo|bar").withResourceTypes("Patient","Observation").build(), List.of(match, noMatch), PolicyEnum.DENY, "Deny request with typeFilter for exact set of allowable types, but matcher doesn't match")
 		);
 	}
 
@@ -155,17 +155,17 @@ class RulePatientBulkExportByCompartmentMatcherImplTest {
 		// theAllowedResourceTypes, thePermissionFilters, theBulkExportJobParams, theExpectedVerdict, theMessage
 		return Stream.of(
 			// Type-Level export with _typeFilter
-			Arguments.of(List.of(), List.of("identifier=foo|bar"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar").build(), PolicyEnum.ALLOW, "Allow request when filters match"),
-			Arguments.of(List.of(), List.of("identifier=foo|bar", "name=Doe"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar").build(), PolicyEnum.ALLOW, "Allow request with subset of permitted filters"),
-			Arguments.of(List.of(), List.of("identifier=foo|bar", "name=Doe"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar", "Patient?name=Doe").build(), PolicyEnum.ALLOW, "Allow request when multiple filters match"),
-			Arguments.of(List.of("Patient"), List.of("identifier=foo|bar", "name=Doe"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar", "Patient?name=Doe").withResourceTypes("Patient").build(), PolicyEnum.ALLOW, "Allow request when multiple filters match including resource type"),
-			Arguments.of(List.of("Observation"), List.of("identifier=foo|bar", "name=Doe"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar", "Patient?name=Doe").withResourceTypes("Patient").build(), PolicyEnum.DENY, "Deny request when multiple filters match, but resource type doesn't"),
-			Arguments.of(List.of(), List.of("identifier=foo|bar&active=true", "name=Doe"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar&active=true", "Patient?name=Doe").build(), PolicyEnum.ALLOW, "Allow request when multiple filters match"),
-			Arguments.of(List.of(), List.of("active=true&identifier=foo|bar", "name=Doe"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar&active=true", "Patient?name=Doe").build(), PolicyEnum.ALLOW, "Allow request when multiple filters match"),
-			Arguments.of(List.of(), List.of("identifier=foo|bar&active=true", "name=Doe"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar", "Patient?name=Doe").build(), PolicyEnum.DENY, "Deny request when some tokenized filters match"),
-			Arguments.of(List.of(), List.of("identifier=foo|bar", "name=Doe"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar&active=true", "Patient?name=Doe").build(), PolicyEnum.DENY, "Deny request when filters don't match"),
-			Arguments.of(List.of(), List.of("identifier=abc|def"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar").build(), PolicyEnum.DENY, "Deny request when filters do not match"),
-			Arguments.of(List.of(), List.of("identifier=foo|bar"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar","Patient?name=Doe").build(), PolicyEnum.DENY, "Deny request when requesting more filters than permitted")
+			Arguments.of(List.of(), List.of("?identifier=foo|bar"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar").build(), PolicyEnum.ALLOW, "Allow request when filters match"),
+			Arguments.of(List.of(), List.of("?identifier=foo|bar", "?name=Doe"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar").build(), PolicyEnum.ALLOW, "Allow request with subset of permitted filters"),
+			Arguments.of(List.of(), List.of("?identifier=foo|bar", "?name=Doe"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar", "Patient?name=Doe").build(), PolicyEnum.ALLOW, "Allow request when multiple filters match"),
+			Arguments.of(List.of("Patient"), List.of("?identifier=foo|bar", "?name=Doe"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar", "Patient?name=Doe").withResourceTypes("Patient").build(), PolicyEnum.ALLOW, "Allow request when multiple filters match including resource type"),
+			Arguments.of(List.of("Observation"), List.of("?identifier=foo|bar", "?name=Doe"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar", "Patient?name=Doe").withResourceTypes("Patient").build(), PolicyEnum.DENY, "Deny request when multiple filters match, but resource type doesn't"),
+			Arguments.of(List.of(), List.of("?identifier=foo|bar&active=true", "?name=Doe"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar&active=true", "Patient?name=Doe").build(), PolicyEnum.ALLOW, "Allow request when multiple filters match"),
+			Arguments.of(List.of(), List.of("?active=true&identifier=foo|bar", "?name=Doe"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar&active=true", "Patient?name=Doe").build(), PolicyEnum.ALLOW, "Allow request when multiple filters match"),
+			Arguments.of(List.of(), List.of("?identifier=foo|bar&active=true", "?name=Doe"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar", "Patient?name=Doe").build(), PolicyEnum.DENY, "Deny request when some tokenized filters match"),
+			Arguments.of(List.of(), List.of("?identifier=foo|bar", "?name=Doe"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar&active=true", "Patient?name=Doe").build(), PolicyEnum.DENY, "Deny request when filters don't match"),
+			Arguments.of(List.of(), List.of("?identifier=abc|def"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar").build(), PolicyEnum.DENY, "Deny request when filters do not match"),
+			Arguments.of(List.of(), List.of("?identifier=foo|bar"), new BulkExportParamsBuilder().withTypeFilters("Patient?identifier=foo|bar","Patient?name=Doe").build(), PolicyEnum.DENY, "Deny request when requesting more filters than permitted")
 		);
 	}
 
