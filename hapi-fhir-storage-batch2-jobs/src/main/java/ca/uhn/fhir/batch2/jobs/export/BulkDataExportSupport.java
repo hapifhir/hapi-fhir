@@ -153,15 +153,13 @@ public class BulkDataExportSupport {
 		}
 
 		return myCompartmentResources.stream()
-			.filter(r -> {
-				if (theExportStyle == BulkExportJobParameters.ExportStyle.PATIENT) {
-					return !SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT
-						.containsKey(r);
-				}
-				return true;
-			})
-			.collect(Collectors.toSet());
-
+				.filter(r -> {
+					if (theExportStyle == BulkExportJobParameters.ExportStyle.PATIENT) {
+						return !SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.containsKey(
+								r);
+					}
+					return true;
+				})
+				.collect(Collectors.toSet());
 	}
-
 }

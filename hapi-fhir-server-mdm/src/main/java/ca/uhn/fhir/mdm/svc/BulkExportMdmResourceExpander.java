@@ -249,8 +249,10 @@ public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpa
 			Optional<IBaseReference> optionalReference =
 					getFhirParser().evaluateFirst(iBaseResource, fhirPath, IBaseReference.class);
 			if (optionalReference.isPresent()) {
-				return optionalReference.map(theIBaseReference ->
-						theIBaseReference.getReferenceElement().toUnqualifiedVersionless().toString());
+				return optionalReference.map(theIBaseReference -> theIBaseReference
+						.getReferenceElement()
+						.toUnqualifiedVersionless()
+						.toString());
 			} else {
 				return Optional.empty();
 			}
@@ -258,11 +260,11 @@ public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpa
 	}
 
 	private void addGoldenResourceExtension(IBaseResource iBaseResource, String sourceResourceId) {
-		// TODO, reimplement this, it is currently completely broken given the distributed nature of the job.
+		// EHP: reimplement this, it is currently completely broken given the distributed nature of the job.
 		String goldenResourceId = ""; // TODO we must be able to fetch this, for now, will be no-op
 		if (!StringUtils.isBlank(goldenResourceId)) {
 			IBaseExtension<?, ?> extension = ExtensionUtil.getOrCreateExtension(
-				iBaseResource, HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
+					iBaseResource, HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
 			ExtensionUtil.setExtension(myContext, extension, "reference", goldenResourceId);
 		}
 	}
