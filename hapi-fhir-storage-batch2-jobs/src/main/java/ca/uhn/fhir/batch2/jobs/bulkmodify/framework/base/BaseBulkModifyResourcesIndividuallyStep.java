@@ -69,10 +69,13 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 
 	@Override
 	protected void processPidsInTransaction(
-		String theInstanceId, String theChunkId, PT theJobParameters,
-		State theState,
-		List<TypedPidAndVersionJson> thePids,
-		TransactionDetails theTransactionDetails, IJobDataSink<BulkModifyResourcesChunkOutcomeJson> theDataSink) {
+			String theInstanceId,
+			String theChunkId,
+			PT theJobParameters,
+			State theState,
+			List<TypedPidAndVersionJson> thePids,
+			TransactionDetails theTransactionDetails,
+			IJobDataSink<BulkModifyResourcesChunkOutcomeJson> theDataSink) {
 		HapiTransactionService.requireTransaction();
 
 		// Fetch all the resources in the chunk

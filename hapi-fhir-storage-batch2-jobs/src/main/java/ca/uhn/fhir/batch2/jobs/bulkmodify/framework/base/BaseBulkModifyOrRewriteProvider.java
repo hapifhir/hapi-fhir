@@ -32,6 +32,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.BaseTransactionProcessor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -78,6 +79,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.ALL_PARTITIONS_TENANT_NAME;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -102,6 +104,9 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 	@Autowired
 	protected IJobPartitionProvider myJobPartitionProvider;
 
+	@Autowired
+	private IDaoRegistry myDaoRegistry;
+
 	/**
 	 * Subclasses should call this method to initiate a new job
 	 */
@@ -120,19 +125,33 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 			ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, getOperationName());
 		}
 
-
 		if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isUnnamedPartitionMode()) {
 			theJobParameters.setRequestPartitionId(
-				parsePartitionIdsParameterAndInvokeInterceptors(theRequestDetails, thePartitionIds));
+					parsePartitionIdsParameterAndInvokeInterceptors(theRequestDetails, thePartitionIds));
 		}
 
-		if (theUrlsToReindex != null) {
-			List<String> urls = theUrlsToReindex
-				.stream()
+		List<IPrimitiveType<String>> urlsToReindex = getIfNull(theUrlsToReindex, List.of());
+		List<String> urls = urlsToReindex.stream()
 				.filter(Objects::nonNull)
 				.map(IPrimitiveType::getValueAsString)
 				.filter(StringUtils::isNotBlank)
 				.toList();
+
+		if (isAutoExpandEmptyUrlList()) {
+			// if the url list is empty, use all the supported resource types to build the url list
+			// we can go back to no url scenario if all resource types point to the same partition
+			if (urls.isEmpty()) {
+				List<String> list = new ArrayList<>();
+				for (String t : myContext.getResourceTypes()) {
+					if (myDaoRegistry.isResourceTypeSupported(t)) {
+						list.add(t + "?");
+					}
+				}
+				urls = list;
+			}
+		}
+
+		if (urls.size() > 0) {
 			List<PartitionedUrl> partitionedUrls = myJobPartitionProvider.getPartitionedUrls(theRequestDetails, urls);
 			partitionedUrls.forEach(theJobParameters::addPartitionedUrl);
 		}
@@ -196,6 +215,14 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 				theRequestDetails,
 				null,
 				null);
+	}
+
+	/**
+	 * Subclasses may override. If <code>true</code> (default implementation returns <code>false</code>),
+	 * if no URLs are provided, the list will be auto expanded to include all supported resource types.
+	 */
+	protected boolean isAutoExpandEmptyUrlList() {
+		return false;
 	}
 
 	/**

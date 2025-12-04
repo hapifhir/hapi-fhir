@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI-FHIR Storage Batch2 Jobs
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.batch2.jobs.bulkmodify.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
@@ -41,7 +60,14 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 	}
 
 	@Override
-	protected void processPidsInTransaction(String theInstanceId, String theChunkId, ReindexJobParameters theJobParameters, State theState, List<TypedPidAndVersionJson> thePids, TransactionDetails theTransactionDetails, IJobDataSink<BulkModifyResourcesChunkOutcomeJson> theDataSink) {
+	protected void processPidsInTransaction(
+			String theInstanceId,
+			String theChunkId,
+			ReindexJobParameters theJobParameters,
+			State theState,
+			List<TypedPidAndVersionJson> thePids,
+			TransactionDetails theTransactionDetails,
+			IJobDataSink<BulkModifyResourcesChunkOutcomeJson> theDataSink) {
 
 		// TODO: this whole construction with a "warning processor" getting attached to the sink
 		// is weirdly complex - all it does is massage specific warning messages. This logic
@@ -63,8 +89,7 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 		}
 
 		// Convert JSON TypedPids into Persistent IDs
-		List<? extends IResourcePersistentId<?>> persistentIds = thePids
-				.stream()
+		List<? extends IResourcePersistentId<?>> persistentIds = thePids.stream()
 				.map(TypedPidAndVersionJson::toTypedPid)
 				.map(t -> t.toPersistentId(myIdHelperService))
 				.toList();
@@ -74,20 +99,20 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 
 		// Prefetch Resources from DB
 		boolean reindexSearchParameters =
-			theJobParameters.getReindexSearchParameters() != ReindexParameters.ReindexSearchParametersEnum.NONE;
+				theJobParameters.getReindexSearchParameters() != ReindexParameters.ReindexSearchParametersEnum.NONE;
 		mySystemDao.preFetchResources(persistentIds, reindexSearchParameters);
 		ourLog.info(
-			"Prefetched {} resources in {} - Instance[{}] Chunk[{}]",
-			persistentIds.size(),
-			sw,
-			theInstanceId,
-			theChunkId);
+				"Prefetched {} resources in {} - Instance[{}] Chunk[{}]",
+				persistentIds.size(),
+				sw,
+				theInstanceId,
+				theChunkId);
 
 		ReindexParameters parameters = new ReindexParameters()
-			.setReindexSearchParameters(theJobParameters.getReindexSearchParameters())
-			.setOptimizeStorage(theJobParameters.getOptimizeStorage())
-			.setOptimisticLock(theJobParameters.getOptimisticLock())
-			.setCorrectCurrentVersion(theJobParameters.getCorrectCurrentVersion());
+				.setReindexSearchParameters(theJobParameters.getReindexSearchParameters())
+				.setOptimizeStorage(theJobParameters.getOptimizeStorage())
+				.setOptimisticLock(theJobParameters.getOptimisticLock())
+				.setCorrectCurrentVersion(theJobParameters.getCorrectCurrentVersion());
 
 		// Reindex
 
@@ -102,7 +127,7 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 			try {
 
 				ReindexOutcome outcome =
-					dao.reindex(resourcePersistentId, parameters, requestDetails, theTransactionDetails);
+						dao.reindex(resourcePersistentId, parameters, requestDetails, theTransactionDetails);
 
 				theState.setResourceIdForPid(nextPid, outcome.getResourceId());
 				theState.moveToState(nextPid, StateEnum.CHANGED_PENDING);
@@ -111,20 +136,19 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 
 			} catch (BaseServerResponseException | DataFormatException e) {
 				String resourceForcedId = myIdHelperService
-					.translatePidIdToForcedIdWithCache(resourcePersistentId)
-					.orElse(resourcePersistentId.toString());
+						.translatePidIdToForcedIdWithCache(resourcePersistentId)
+						.orElse(resourcePersistentId.toString());
 				String resourceId = nextResourceType + "/" + resourceForcedId;
 				ourLog.error("Failure during reindexing {}", resourceId, e);
 				theDataSink.recoveredError("Failure reindexing " + resourceId + ": " + e.getMessage());
-				theState.setResourceIdForPid(nextPid, myFhirContext.getVersion().newIdType(nextResourceType, resourceId));
+				theState.setResourceIdForPid(
+						nextPid, myFhirContext.getVersion().newIdType(nextResourceType, resourceId));
 			}
 		}
-
 	}
 
 	@Override
 	protected String getJobNameForLogging() {
 		return ProviderConstants.OPERATION_REINDEX;
 	}
-
 }

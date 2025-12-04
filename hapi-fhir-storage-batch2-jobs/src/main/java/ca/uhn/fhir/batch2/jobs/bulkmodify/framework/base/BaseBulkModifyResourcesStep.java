@@ -68,17 +68,22 @@ import java.util.concurrent.TimeUnit;
  * @since 8.6.0
  */
 public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobParameters, C>
-	implements IJobStepWorker<PT, TypedPidAndVersionListWorkChunkJson, BulkModifyResourcesChunkOutcomeJson> {
+		implements IJobStepWorker<PT, TypedPidAndVersionListWorkChunkJson, BulkModifyResourcesChunkOutcomeJson> {
 	public static final int MAX_RETRIES = 2;
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseBulkModifyResourcesStep.class);
+
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
+
 	@Autowired
 	protected IFhirSystemDao<?, ?> mySystemDao;
+
 	@Autowired
 	protected IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
+
 	@Autowired
 	protected FhirContext myFhirContext;
+
 	@Autowired
 	private IHapiTransactionService myTransactionService;
 
@@ -92,14 +97,14 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	@Nonnull
 	@Override
 	public RunOutcome run(
-		@Nonnull StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
-		@Nonnull IJobDataSink<BulkModifyResourcesChunkOutcomeJson> theDataSink)
-		throws JobExecutionFailedException {
+			@Nonnull StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<BulkModifyResourcesChunkOutcomeJson> theDataSink)
+			throws JobExecutionFailedException {
 
 		List<TypedPidAndVersionJson> pids = theStepExecutionDetails.getData().getTypedPidAndVersions();
 		PT jobParameters = theStepExecutionDetails.getParameters();
 		RequestPartitionId requestPartitionId =
-			theStepExecutionDetails.getData().getRequestPartitionId();
+				theStepExecutionDetails.getData().getRequestPartitionId();
 		String instanceId = theStepExecutionDetails.getInstance().getInstanceId();
 		String chunkId = theStepExecutionDetails.getChunkId();
 
@@ -120,7 +125,14 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 
 				while (state.hasPidsInInitialState()) {
 					TypedPidAndVersionJson singlePid = state.getSinglePidInState(StateEnum.INITIAL);
-					processPids(instanceId, chunkId, jobParameters, state, List.of(singlePid), requestPartitionId, theDataSink);
+					processPids(
+							instanceId,
+							chunkId,
+							jobParameters,
+							state,
+							List.of(singlePid),
+							requestPartitionId,
+							theDataSink);
 				}
 
 				if (retryCount == MAX_RETRIES) {
@@ -132,9 +144,9 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		}
 
 		Validate.isTrue(
-			!state.hasPidsInInitialState(),
-			"PIDs remain in INITIAL state, this is a bug: %s",
-			state.getPidsInState(StateEnum.INITIAL));
+				!state.hasPidsInInitialState(),
+				"PIDs remain in INITIAL state, this is a bug: %s",
+				state.getPidsInState(StateEnum.INITIAL));
 
 		BulkModifyResourcesChunkOutcomeJson outcome = generateOutcome(jobParameters, state);
 		theDataSink.accept(outcome);
@@ -146,40 +158,47 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	 * @param thePids     If <code>true</code>, attempt to modify all resources in the {@link State}. If <code>false</code>, only attempt to modify a single resource.
 	 */
 	private void processPids(
-		String theInstanceId,
-		String theChunkId,
-		PT theJobParameters,
-		State theState,
-		List<TypedPidAndVersionJson> thePids,
-		RequestPartitionId theRequestPartitionId,
-		IJobDataSink<BulkModifyResourcesChunkOutcomeJson> theDataSink) {
+			String theInstanceId,
+			String theChunkId,
+			PT theJobParameters,
+			State theState,
+			List<TypedPidAndVersionJson> thePids,
+			RequestPartitionId theRequestPartitionId,
+			IJobDataSink<BulkModifyResourcesChunkOutcomeJson> theDataSink) {
 		HapiTransactionService.noTransactionAllowed();
 
 		final TransactionDetails transactionDetails = new TransactionDetails();
 		try {
 
 			ourLog.info(
-				"Starting {} work chunk with {} resources - Instance[{}] Chunk[{}]",
-				getJobNameForLogging(),
-				thePids.size(),
-				theInstanceId,
-				theChunkId);
+					"Starting {} work chunk with {} resources - Instance[{}] Chunk[{}]",
+					getJobNameForLogging(),
+					thePids.size(),
+					theInstanceId,
+					theChunkId);
 			StopWatch sw = new StopWatch();
 
 			myTransactionService
-				.withSystemRequestOnPartition(theRequestPartitionId)
-				.withTransactionDetails(transactionDetails)
-				.readOnly(theJobParameters.isDryRun())
-				.execute(() -> processPidsInTransaction(theInstanceId, theChunkId, theJobParameters, theState, thePids, transactionDetails, theDataSink));
+					.withSystemRequestOnPartition(theRequestPartitionId)
+					.withTransactionDetails(transactionDetails)
+					.readOnly(theJobParameters.isDryRun())
+					.execute(() -> processPidsInTransaction(
+							theInstanceId,
+							theChunkId,
+							theJobParameters,
+							theState,
+							thePids,
+							transactionDetails,
+							theDataSink));
 
 			ourLog.info(
-				"Finished {} work chunk with {} resources in {} - {}/sec - Instance[{}] Chunk[{}]",
-				getJobNameForLogging(),
-				thePids.size(),
-				sw,
-				sw.formatThroughput(thePids.size(), TimeUnit.SECONDS),
-				theInstanceId,
-				theChunkId);
+					"Finished {} work chunk with {} resources in {} - {}/sec - Instance[{}] Chunk[{}]",
+					getJobNameForLogging(),
+					thePids.size(),
+					sw,
+					sw.formatThroughput(thePids.size(), TimeUnit.SECONDS),
+					theInstanceId,
+					theChunkId);
 
 			// Storage transaction succeeded
 			theState.movePendingToSaved();
@@ -219,14 +238,13 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	 * @param theDataSink
 	 */
 	protected abstract void processPidsInTransaction(
-		String theInstanceId,
-		String theChunkId,
-		PT theJobParameters,
-		State theState,
-		List<TypedPidAndVersionJson> thePids,
-		TransactionDetails theTransactionDetails,
-		IJobDataSink<BulkModifyResourcesChunkOutcomeJson> theDataSink);
-
+			String theInstanceId,
+			String theChunkId,
+			PT theJobParameters,
+			State theState,
+			List<TypedPidAndVersionJson> thePids,
+			TransactionDetails theTransactionDetails,
+			IJobDataSink<BulkModifyResourcesChunkOutcomeJson> theDataSink);
 
 	/**
 	 * Subclasses may override this method to indicate that this resource should be stored
@@ -268,7 +286,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 
 	@Nonnull
 	private BulkModifyResourcesChunkOutcomeJson generateOutcome(
-		BaseBulkModifyJobParameters theJobParameters, State theState) {
+			BaseBulkModifyJobParameters theJobParameters, State theState) {
 		BulkModifyResourcesChunkOutcomeJson outcome = new BulkModifyResourcesChunkOutcomeJson();
 
 		outcome.setChunkRetryCount(theState.getRetryCount());
@@ -291,7 +309,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			outcome.addUnchangedId(theState.getResourceIdStringForPid(next));
 		}
 		for (Map.Entry<TypedPidAndVersionJson, String> next :
-			theState.getFailures().entrySet()) {
+				theState.getFailures().entrySet()) {
 			String id = theState.getResourceIdStringForPid(next.getKey());
 			outcome.addFailure(id, next.getValue());
 		}
@@ -303,7 +321,6 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	 * updates (FHIR operation name should be enough, e.g. "$hapi.fhir.bulk-patch")
 	 */
 	protected abstract String getJobNameForLogging();
-
 
 	protected enum StateEnum {
 
@@ -370,7 +387,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		private final Map<TypedPidAndVersionJson, IBaseResource> myPidToResource = new HashMap<>();
 		private final Map<TypedPidAndVersionJson, IIdType> myPidToResourceId = new HashMap<>();
 		private final SetMultimap<StateEnum, TypedPidAndVersionJson> myStateToPids =
-			MultimapBuilder.enumKeys(StateEnum.class).hashSetValues().build();
+				MultimapBuilder.enumKeys(StateEnum.class).hashSetValues().build();
 		private final Map<TypedPidAndVersionJson, String> myPidToFailure = new HashMap<>();
 		private int myRetryCount;
 		private int myRetriedResourceCount;
@@ -404,8 +421,8 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		 */
 		public void addPid(TypedPidAndVersionJson thePid) {
 			Validate.isTrue(
-				!myPidToState.containsKey(thePid),
-				() -> "Resource " + thePid + " already present in state " + myPidToState.get(thePid));
+					!myPidToState.containsKey(thePid),
+					() -> "Resource " + thePid + " already present in state " + myPidToState.get(thePid));
 			myStateToPids.put(StateEnum.INITIAL, thePid);
 			myPidToState.put(thePid, StateEnum.INITIAL);
 		}
@@ -521,6 +538,4 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			return theStateEnum.equals(myPidToState.get(thePid));
 		}
 	}
-
-
 }

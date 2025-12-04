@@ -20,7 +20,6 @@
 package ca.uhn.fhir.batch2.jobs.reindex;
 
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyJobParameters;
-import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nullable;

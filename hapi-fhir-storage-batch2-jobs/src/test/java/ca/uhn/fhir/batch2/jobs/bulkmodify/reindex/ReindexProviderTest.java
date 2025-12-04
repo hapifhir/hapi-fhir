@@ -2,12 +2,12 @@ package ca.uhn.fhir.batch2.jobs.bulkmodify.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
-import ca.uhn.fhir.batch2.jobs.bulkmodify.reindex.ReindexProvider;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -21,7 +21,6 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,12 +40,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -69,8 +70,11 @@ public class ReindexProviderTest {
 	@Mock(strictness = Mock.Strictness.LENIENT)
 	private IJobCoordinator myJobCoordinator;
 
-	@Mock
+	@Mock(strictness = Mock.Strictness.LENIENT)
 	private IJobPartitionProvider myJobPartitionProvider;
+
+	@Mock(strictness = Mock.Strictness.LENIENT)
+	private IDaoRegistry myDaoRegistry;
 
 	@Captor
 	private ArgumentCaptor<JobInstanceStartRequest> myStartRequestCaptor;
@@ -78,12 +82,22 @@ public class ReindexProviderTest {
 	@InjectMocks
 	private ReindexProvider mySvc;
 
+	@SuppressWarnings("unchecked")
 	@BeforeEach
 	public void beforeEach() {
 		myServerExtension.registerProvider(mySvc);
 
 		when(myJobCoordinator.startInstance(isNotNull(), any()))
 			.thenReturn(createJobStartResponse());
+
+		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
+		when(myDaoRegistry.isResourceTypeSupported(eq("Observation"))).thenReturn(true);
+		when(myJobPartitionProvider.getPartitionedUrls(any(), any())).thenAnswer(t-> {
+			List<String> urls = t.getArgument(1, List.class);
+			return urls.stream().map(u -> new PartitionedUrl()
+				.setUrl(u)
+				.setRequestPartitionId(RequestPartitionId.fromPartitionId(1))).toList();
+		});
 	}
 
 	private Batch2JobStartResponse createJobStartResponse() {
@@ -110,10 +124,6 @@ public class ReindexProviderTest {
 		input.addParameter(ReindexJobParameters.OPTIMIZE_STORAGE, new CodeType("current_version"));
 		input.addParameter(ReindexJobParameters.CORRECT_CURRENT_VERSION, new CodeType("ALL"));
 
-		RequestPartitionId partitionId = RequestPartitionId.fromPartitionId(1);
-		final PartitionedUrl partitionedUrl = new PartitionedUrl().setUrl(theUrl).setRequestPartitionId(partitionId);
-		when(myJobPartitionProvider.getPartitionedUrls(any(), any())).thenReturn(List.of(partitionedUrl));
-
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// Execute
@@ -133,7 +143,16 @@ public class ReindexProviderTest {
 		verify(myJobCoordinator, times(1)).startInstance(isNotNull(), myStartRequestCaptor.capture());
 
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
-		assertThat(params.getPartitionedUrls().iterator().next()).isEqualTo(partitionedUrl);
+		if (isBlank(theUrl)) {
+			assertThat(params.getPartitionedUrls()).containsExactlyInAnyOrder(
+				new PartitionedUrl().setUrl("Observation?").setRequestPartitionId(RequestPartitionId.fromPartitionId(1)),
+				new PartitionedUrl().setUrl("Patient?").setRequestPartitionId(RequestPartitionId.fromPartitionId(1))
+			);
+		} else {
+			RequestPartitionId partitionId = RequestPartitionId.fromPartitionId(1);
+			final PartitionedUrl partitionedUrl = new PartitionedUrl().setUrl(theUrl).setRequestPartitionId(partitionId);
+			assertThat(params.getPartitionedUrls().iterator().next()).isEqualTo(partitionedUrl);
+		}
 
 		// Non-default values
 		assertEquals(ReindexParameters.ReindexSearchParametersEnum.NONE, params.getReindexSearchParameters());
@@ -175,6 +194,10 @@ public class ReindexProviderTest {
 		assertTrue(params.getOptimisticLock());
 		assertEquals(ReindexParameters.OptimizeStorageModeEnum.NONE, params.getOptimizeStorage());
 		assertEquals(ReindexParameters.CorrectCurrentVersionModeEnum.NONE, params.getCorrectCurrentVersion());
+		assertThat(params.getPartitionedUrls()).containsExactlyInAnyOrder(
+			new PartitionedUrl().setUrl("Observation?").setRequestPartitionId(RequestPartitionId.fromPartitionId(1)),
+			new PartitionedUrl().setUrl("Patient?").setRequestPartitionId(RequestPartitionId.fromPartitionId(1))
+		);
 	}
 
 	@Test

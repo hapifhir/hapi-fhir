@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({ReindexV1Config.class, ReindexV2Config.class, 	ReindexV3JobAppCtx.class})
+@Import({ReindexV1Config.class, ReindexV2Config.class, ReindexV3JobAppCtx.class})
 public class ReindexAppCtx {
 
 	@Autowired

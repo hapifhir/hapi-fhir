@@ -23,6 +23,7 @@ import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
@@ -32,7 +33,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Default implementation which provides the {@link PartitionedUrl} list for a certain operation request.
@@ -41,15 +41,13 @@ public class DefaultJobPartitionProvider implements IJobPartitionProvider {
 	protected final IRequestPartitionHelperSvc myRequestPartitionHelper;
 	protected FhirContext myFhirContext;
 	private MatchUrlService myMatchUrlService;
-
-	public DefaultJobPartitionProvider(IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-		myRequestPartitionHelper = theRequestPartitionHelperSvc;
-	}
+	private IDaoRegistry myDaoRegistry;
 
 	public DefaultJobPartitionProvider(
 			FhirContext theFhirContext,
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
-			MatchUrlService theMatchUrlService) {
+			MatchUrlService theMatchUrlService,
+			IDaoRegistry theDaoRegistry) {
 		myFhirContext = theFhirContext;
 		myRequestPartitionHelper = theRequestPartitionHelperSvc;
 		myMatchUrlService = theMatchUrlService;
@@ -63,19 +61,10 @@ public class DefaultJobPartitionProvider implements IJobPartitionProvider {
 
 	@Override
 	public List<PartitionedUrl> getPartitionedUrls(RequestDetails theRequestDetails, List<String> theUrls) {
-		List<String> urls = theUrls;
-
-		// if the url list is empty, use all the supported resource types to build the url list
-		// we can go back to no url scenario if all resource types point to the same partition
-		if (theUrls == null || theUrls.isEmpty()) {
-			urls = myFhirContext.getResourceTypes().stream()
-					.map(resourceType -> resourceType + "?")
-					.collect(Collectors.toList());
-		}
 
 		// determine the partition associated with each of the urls
 		List<PartitionedUrl> partitionedUrls = new ArrayList<>();
-		for (String s : urls) {
+		for (String s : theUrls) {
 			ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(s);
 			RequestPartitionId partitionId = myRequestPartitionHelper.determineReadPartitionForRequestForSearchType(
 					theRequestDetails, resourceSearch.getResourceName(), resourceSearch.getSearchParameterMap());

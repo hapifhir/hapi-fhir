@@ -97,11 +97,12 @@ public class ReindexProvider extends BaseBulkModifyOrRewriteProvider {
 			ServletRequestDetails theRequestDetails,
 			// partitionId
 			@OperationParam(
-				name = JpaConstants.OPERATION_BULK_PATCH_PARAM_PARTITION_ID,
-				typeName = "string",
-				min = 0,
-				max = OperationParam.MAX_UNLIMITED)
-			List<IPrimitiveType<String>> thePartitionIds) throws IOException {
+							name = JpaConstants.OPERATION_BULK_PATCH_PARAM_PARTITION_ID,
+							typeName = "string",
+							min = 0,
+							max = OperationParam.MAX_UNLIMITED)
+					List<IPrimitiveType<String>> thePartitionIds)
+			throws IOException {
 
 		ReindexJobParameters params = new ReindexJobParameters();
 
@@ -146,16 +147,7 @@ public class ReindexProvider extends BaseBulkModifyOrRewriteProvider {
 		}
 
 		startJobAndReturnResponse(
-			theRequestDetails,
-			theUrlsToReindex,
-			null,
-			null,
-			theBatchSize,
-			null,
-			null,
-			thePartitionIds,
-			params);
-
+				theRequestDetails, theUrlsToReindex, null, null, theBatchSize, null, null, thePartitionIds, params);
 	}
 
 	/**
@@ -163,25 +155,25 @@ public class ReindexProvider extends BaseBulkModifyOrRewriteProvider {
 	 */
 	@Operation(name = JpaConstants.OPERATION_BULK_PATCH_STATUS, idempotent = true, manualResponse = true)
 	public void bulkPatchStatus(
-		ServletRequestDetails theRequestDetails,
-		// _jobId=
-		@Description("Query the server for the status of a reindex operation")
-		@OperationParam(
-			name = JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID,
-			typeName = "string",
-			min = 1,
-			max = 1)
-		IPrimitiveType<String> theJobId,
+			ServletRequestDetails theRequestDetails,
+			// _jobId=
+			@Description("Query the server for the status of a reindex operation")
+					@OperationParam(
+							name = JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID,
+							typeName = "string",
+							min = 1,
+							max = 1)
+					IPrimitiveType<String> theJobId,
 
-		// _return
-		@Description("If provided, specifies that a specific part of the job report should be returned")
-		@OperationParam(
-			name = JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN,
-			typeName = "code",
-			min = 0,
-			max = 1)
-		IPrimitiveType<String> theReturn)
-		throws IOException {
+			// _return
+			@Description("If provided, specifies that a specific part of the job report should be returned")
+					@OperationParam(
+							name = JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN,
+							typeName = "code",
+							min = 0,
+							max = 1)
+					IPrimitiveType<String> theReturn)
+			throws IOException {
 
 		pollForJobStatus(theRequestDetails, theJobId, theReturn);
 	}
@@ -211,5 +203,10 @@ public class ReindexProvider extends BaseBulkModifyOrRewriteProvider {
 	@Override
 	protected boolean isRequirePreferAsyncHeader(ServletRequestDetails theRequestDetails) {
 		return false;
+	}
+
+	@Override
+	protected boolean isAutoExpandEmptyUrlList() {
+		return true;
 	}
 }

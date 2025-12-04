@@ -23,7 +23,6 @@ import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyOrRewriteGenerateReportStep;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesResultsJson;
-import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchJobParameters;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import jakarta.annotation.Nonnull;
 
@@ -37,7 +36,7 @@ public class ReindexV3GenerateReportStep extends BaseBulkModifyOrRewriteGenerate
 
 	@Override
 	public IReductionStepWorker<
-		ReindexJobParameters, BulkModifyResourcesChunkOutcomeJson, BulkModifyResourcesResultsJson>
+					ReindexJobParameters, BulkModifyResourcesChunkOutcomeJson, BulkModifyResourcesResultsJson>
 			newInstance() {
 		return new ReindexV3GenerateReportStep();
 	}

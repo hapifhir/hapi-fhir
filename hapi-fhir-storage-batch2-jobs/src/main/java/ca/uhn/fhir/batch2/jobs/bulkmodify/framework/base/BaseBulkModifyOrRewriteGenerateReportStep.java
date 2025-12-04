@@ -140,11 +140,11 @@ public abstract class BaseBulkModifyOrRewriteGenerateReportStep<PT extends BaseB
 				.append('\n');
 		if (myUnchangedCount > 0) {
 			report.append("Total Resources Unchanged : ")
-				.append(myUnchangedCount)
-				.append(" (")
-				.append(unchangedPerSecond)
-				.append("/sec)")
-				.append('\n');
+					.append(myUnchangedCount)
+					.append(" (")
+					.append(unchangedPerSecond)
+					.append("/sec)")
+					.append('\n');
 		}
 		if (myDeletedCount > 0) {
 			report.append("Total Resources Deleted   : ")

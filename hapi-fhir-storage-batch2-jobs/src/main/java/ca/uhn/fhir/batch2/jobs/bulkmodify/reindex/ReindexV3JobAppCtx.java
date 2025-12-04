@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyJobAppCtx
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyOrRewriteGenerateReportStep;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyResourcesStep;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyCommonJobAppCtx;
-import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchJobParameters;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils;
@@ -70,7 +69,8 @@ public class ReindexV3JobAppCtx extends BaseBulkModifyJobAppCtx<ReindexJobParame
 
 	@Override
 	protected ReindexJobParametersValidatorV3 getJobParameterValidator() {
-		return new ReindexJobParametersValidatorV3(myDaoRegistry, new UrlListValidator(ProviderConstants.OPERATION_REINDEX, myBatch2DaoSvc));
+		return new ReindexJobParametersValidatorV3(
+				myDaoRegistry, new UrlListValidator(ProviderConstants.OPERATION_REINDEX, myBatch2DaoSvc));
 	}
 
 	@Override

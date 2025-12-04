@@ -25,14 +25,11 @@ import ca.uhn.fhir.batch2.jobs.parameters.IUrlListValidator;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class ReindexJobParametersValidatorV3 extends BaseBulkModifyJobParametersValidator<ReindexJobParameters> implements IJobParametersValidator<ReindexJobParameters> {
+public class ReindexJobParametersValidatorV3 extends BaseBulkModifyJobParametersValidator<ReindexJobParameters>
+		implements IJobParametersValidator<ReindexJobParameters> {
 
 	/**
 	 * Constructor
@@ -42,7 +39,8 @@ public class ReindexJobParametersValidatorV3 extends BaseBulkModifyJobParameters
 	}
 
 	@Override
-	protected void validateJobSpecificParameters(ReindexJobParameters theParameters, List<String> theIssueListToPopulate) {
+	protected void validateJobSpecificParameters(
+			ReindexJobParameters theParameters, List<String> theIssueListToPopulate) {
 		if (theParameters.getCorrectCurrentVersion() == ReindexParameters.CorrectCurrentVersionModeEnum.ALL) {
 			if (theParameters.getOptimisticLock()) {
 				theIssueListToPopulate.add("Optimistic locking cannot be enabled when correcting current versions");
@@ -58,5 +56,4 @@ public class ReindexJobParametersValidatorV3 extends BaseBulkModifyJobParameters
 	protected boolean isEmptyUrlListAllowed() {
 		return true;
 	}
-
 }

@@ -102,7 +102,6 @@ public abstract class BaseBulkModifyJobParametersValidator<PT extends BaseBulkMo
 				}
 			}
 		}
-
 	}
 
 	/**

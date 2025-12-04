@@ -41,6 +41,7 @@ import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -163,7 +164,9 @@ public abstract class BaseBatch2Config {
 	public IJobPartitionProvider jobPartitionProvider(
 			FhirContext theFhirContext,
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
-			MatchUrlService theMatchUrlService) {
-		return new DefaultJobPartitionProvider(theFhirContext, theRequestPartitionHelperSvc, theMatchUrlService);
+			MatchUrlService theMatchUrlService,
+			IDaoRegistry theDaoRegistry) {
+		return new DefaultJobPartitionProvider(
+				theFhirContext, theRequestPartitionHelperSvc, theMatchUrlService, theDaoRegistry);
 	}
 }

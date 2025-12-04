@@ -35,7 +35,8 @@ public class BulkPatchJobParametersValidator<PT extends BulkPatchJobParameters>
 
 	private final FhirContext myFhirContext;
 
-	public BulkPatchJobParametersValidator(FhirContext theFhirContext, IDaoRegistry theDaoRegistry, IBatch2DaoSvc theBatch2DaoSvc) {
+	public BulkPatchJobParametersValidator(
+			FhirContext theFhirContext, IDaoRegistry theDaoRegistry, IBatch2DaoSvc theBatch2DaoSvc) {
 		super(theDaoRegistry, new UrlListValidator("Bulk Patch", theBatch2DaoSvc));
 		myFhirContext = theFhirContext;
 	}

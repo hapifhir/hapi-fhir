@@ -25,7 +25,6 @@ import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
