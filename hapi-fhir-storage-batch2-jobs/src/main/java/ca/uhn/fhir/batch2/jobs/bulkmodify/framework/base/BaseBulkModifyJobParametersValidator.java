@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
+import ca.uhn.fhir.batch2.jobs.parameters.IUrlListValidator;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
@@ -40,9 +41,11 @@ public abstract class BaseBulkModifyJobParametersValidator<PT extends BaseBulkMo
 	public static final int DEFAULT_DRY_RUN_LIMIT_RESOURCE_VERSION_COUNT = 5;
 
 	private final IDaoRegistry myDaoRegistry;
+	private final IUrlListValidator myUrlListValidator;
 
-	protected BaseBulkModifyJobParametersValidator(IDaoRegistry theDaoRegistry) {
+	protected BaseBulkModifyJobParametersValidator(IDaoRegistry theDaoRegistry, IUrlListValidator theUrlListValidator) {
 		myDaoRegistry = theDaoRegistry;
+		myUrlListValidator = theUrlListValidator;
 	}
 
 	/**
@@ -71,11 +74,22 @@ public abstract class BaseBulkModifyJobParametersValidator<PT extends BaseBulkMo
 
 	protected void validateUrls(@Nonnull PT theParameters, List<String> theIssueListToPopulate) {
 		List<String> urls = theParameters.getUrls();
-		if (urls.isEmpty()) {
+		if (urls.isEmpty() && !isEmptyUrlListAllowed()) {
 			theIssueListToPopulate.add("No URLs were provided");
 		}
 
+		List<String> urlListValidatorErrors = myUrlListValidator.validateUrls(theParameters.getUrls());
+		if (urlListValidatorErrors != null) {
+			theIssueListToPopulate.addAll(urlListValidatorErrors);
+			return;
+		}
+
 		for (String nextUrl : urls) {
+			if (nextUrl.contains(" ") || nextUrl.contains("\n") || nextUrl.contains("\t")) {
+				theIssueListToPopulate.add("Invalid URL, cannot contain whitespace: " + sanitizeUrlPart(nextUrl));
+				continue;
+			}
+
 			Matcher matcher = URL_PATTERN.matcher(defaultString(nextUrl));
 			if (!matcher.matches()) {
 				theIssueListToPopulate.add(
@@ -88,6 +102,15 @@ public abstract class BaseBulkModifyJobParametersValidator<PT extends BaseBulkMo
 				}
 			}
 		}
+
+	}
+
+	/**
+	 * Subclasses may override if the given job type should allow an empty URL list (meaning all
+	 * resources will be modified)
+	 */
+	protected boolean isEmptyUrlListAllowed() {
+		return false;
 	}
 
 	protected abstract void validateJobSpecificParameters(PT theParameters, List<String> theIssueListToPopulate);

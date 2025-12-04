@@ -20,8 +20,10 @@
 package ca.uhn.fhir.batch2.jobs.bulkmodify.patch;
 
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyJobParametersValidator;
+import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
+import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.patch.FhirPatch;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -33,8 +35,8 @@ public class BulkPatchJobParametersValidator<PT extends BulkPatchJobParameters>
 
 	private final FhirContext myFhirContext;
 
-	public BulkPatchJobParametersValidator(FhirContext theFhirContext, IDaoRegistry theDaoRegistry) {
-		super(theDaoRegistry);
+	public BulkPatchJobParametersValidator(FhirContext theFhirContext, IDaoRegistry theDaoRegistry, IBatch2DaoSvc theBatch2DaoSvc) {
+		super(theDaoRegistry, new UrlListValidator("Bulk Patch", theBatch2DaoSvc));
 		myFhirContext = theFhirContext;
 	}
 

@@ -6,14 +6,13 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.api.ResourceModificationRequest;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.api.ResourceModificationResponse;
-import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyResourcesStep;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyResourcesIndividuallyStep;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchJobParameters;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -133,13 +132,18 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 	}
 
 
-	public static class MyBulkModifyResourcesStep extends BaseBulkModifyResourcesStep<BulkPatchJobParameters, Object> {
+	public static class MyBulkModifyResourcesStep extends BaseBulkModifyResourcesIndividuallyStep<BulkPatchJobParameters, Object> {
 
 		private IMockStep myMockStep;
 
 		@Override
 		public boolean isRewriteHistory(Object theState, IBaseResource theResource) {
 			return myMockStep.isRewriteHistory(theState, theResource);
+		}
+
+		@Override
+		protected String getJobNameForLogging() {
+			return "TEST-JOB";
 		}
 
 		@Nullable
@@ -153,7 +157,7 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 			return myMockStep.modifyResource(theJobParameters, theModificationContext, theModificationRequest);
 		}
 
-		public void setMockStep(IMockStep theMockStep) {
+		void setMockStep(IMockStep theMockStep) {
 			assert myMockStep == null;
 			myMockStep = theMockStep;
 		}

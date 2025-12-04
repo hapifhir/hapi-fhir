@@ -1,20 +1,25 @@
-package ca.uhn.fhir.batch2.jobs.reindex;
+package ca.uhn.fhir.batch2.jobs.bulkmodify.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.reindex.ReindexProvider;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
@@ -54,6 +59,9 @@ public class ReindexProviderTest {
 
 	@Spy
 	private final FhirContext myCtx = FhirContext.forR4Cached();
+
+	@Spy
+	private final PartitionSettings myPartitionSettings = new PartitionSettings();
 
 	@RegisterExtension
 	public final RestfulServerExtension myServerExtension = new RestfulServerExtension(myCtx);
@@ -109,18 +117,18 @@ public class ReindexProviderTest {
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// Execute
-		Parameters response = myServerExtension
+		OperationOutcome response = myServerExtension
 			.getFhirClient()
 			.operation()
 			.onServer()
 			.named(ProviderConstants.OPERATION_REINDEX)
 			.withParameters(input)
+			.returnResourceType(OperationOutcome.class)
 			.execute();
 
 		// Verify
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
-		assertEquals(TEST_JOB_ID, jobId.getValue());
+		assertThat(response.getIssueFirstRep().getDiagnostics()).containsSubsequence(TEST_JOB_ID);
 
 		verify(myJobCoordinator, times(1)).startInstance(isNotNull(), myStartRequestCaptor.capture());
 
@@ -142,18 +150,22 @@ public class ReindexProviderTest {
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// Execute
-		Parameters response = myServerExtension
+		MethodOutcome response = myServerExtension
 				.getFhirClient()
 				.operation()
 				.onServer()
 				.named(ProviderConstants.OPERATION_REINDEX)
 				.withParameters(input)
+				.returnMethodOutcome()
 				.execute();
 
 		// Verify
-		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
-		assertEquals(TEST_JOB_ID, jobId.getValue());
+		String expectedPollUrl = "http://localhost:" + myServerExtension.getPort() + "/$hapi.fhir.bulk-patch-status?_jobId=test-job-id";
+
+		String serializedOutput = myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response.getOperationOutcome());
+		ourLog.info(serializedOutput);
+		assertThat(serializedOutput).contains("$reindex job has been accepted. Poll for status at the following URL: " + expectedPollUrl);
+		assertEquals(expectedPollUrl, response.getResponseHeaders().get(Constants.HEADER_CONTENT_LOCATION).get(0));
 
 		verify(myJobCoordinator, times(1)).startInstance(isNotNull(), myStartRequestCaptor.capture());
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);

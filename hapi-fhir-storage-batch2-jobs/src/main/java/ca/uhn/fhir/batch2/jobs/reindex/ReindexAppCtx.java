@@ -19,46 +19,29 @@
  */
 package ca.uhn.fhir.batch2.jobs.reindex;
 
-import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.reindex.ReindexProvider;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.reindex.ReindexV3JobAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.svcs.ReindexJobService;
 import ca.uhn.fhir.batch2.jobs.reindex.v1.ReindexV1Config;
 import ca.uhn.fhir.batch2.jobs.reindex.v2.ReindexV2Config;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({ReindexV1Config.class, ReindexV2Config.class})
+@Import({ReindexV1Config.class, ReindexV2Config.class, 	ReindexV3JobAppCtx.class})
 public class ReindexAppCtx {
-
-	@Autowired
-	private HapiTransactionService myHapiTransactionService;
-
-	@Autowired
-	private IFhirSystemDao<?, ?> mySystemDao;
 
 	@Autowired
 	private DaoRegistry myRegistry;
 
-	@Autowired
-	private IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
-
 	/* Shared services */
 
 	@Bean
-	public ReindexProvider reindexProvider(
-			FhirContext theFhirContext,
-			IJobCoordinator theJobCoordinator,
-			IJobPartitionProvider theJobPartitionHandler) {
-		return new ReindexProvider(theFhirContext, theJobCoordinator, theJobPartitionHandler);
+	public ReindexProvider reindexProvider() {
+		return new ReindexProvider();
 	}
 
 	@Bean

@@ -17,56 +17,43 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.batch2.jobs.reindex;
+package ca.uhn.fhir.batch2.jobs.bulkmodify.reindex;
 
-import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyOrRewriteProvider;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils;
 import ca.uhn.fhir.batch2.jobs.step.ResourceIdListStep;
-import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
-import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.base.Ascii;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.EnumUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters.OPTIMIZE_STORAGE;
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters.REINDEX_SEARCH_PARAMETERS;
-import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 
-public class ReindexProvider {
-
-	private final FhirContext myFhirContext;
-	private final IJobCoordinator myJobCoordinator;
-	private final IJobPartitionProvider myJobPartitionProvider;
+public class ReindexProvider extends BaseBulkModifyOrRewriteProvider {
 
 	/**
 	 * Constructor
 	 */
-	public ReindexProvider(
-			FhirContext theFhirContext,
-			IJobCoordinator theJobCoordinator,
-			IJobPartitionProvider theJobPartitionProvider) {
-		myFhirContext = theFhirContext;
-		myJobCoordinator = theJobCoordinator;
-		myJobPartitionProvider = theJobPartitionProvider;
+	public ReindexProvider() {
+		super();
 	}
 
-	@Operation(name = ProviderConstants.OPERATION_REINDEX, idempotent = false)
-	public IBaseParameters reindex(
+	@Operation(name = ProviderConstants.OPERATION_REINDEX, idempotent = false, manualResponse = true)
+	public void reindex(
 			@Description(
 							"Optionally provides one ore more relative search parameter URLs (e.g. \"Patient?active=true\" or \"Observation?\") that will be reindexed. Note that the URL applies to the resources as they are currently indexed, so you should not use a search parameter that needs reindexing in the URL or some resources may be missed. If no URLs are provided, all resources of all types will be reindexed.")
 					@OperationParam(
@@ -107,7 +94,14 @@ public class ReindexProvider {
 							min = 0,
 							max = 1)
 					IPrimitiveType<Integer> theBatchSize,
-			RequestDetails theRequestDetails) {
+			ServletRequestDetails theRequestDetails,
+			// partitionId
+			@OperationParam(
+				name = JpaConstants.OPERATION_BULK_PATCH_PARAM_PARTITION_ID,
+				typeName = "string",
+				min = 0,
+				max = OperationParam.MAX_UNLIMITED)
+			List<IPrimitiveType<String>> thePartitionIds) throws IOException {
 
 		ReindexJobParameters params = new ReindexJobParameters();
 
@@ -151,32 +145,71 @@ public class ReindexProvider {
 			}
 		}
 
-		List<String> urls = List.of();
-		if (theUrlsToReindex != null) {
-			urls = theUrlsToReindex.stream()
-					.map(IPrimitiveType::getValue)
-					.filter(StringUtils::isNotBlank)
-					.collect(Collectors.toList());
-		}
+		startJobAndReturnResponse(
+			theRequestDetails,
+			theUrlsToReindex,
+			null,
+			null,
+			theBatchSize,
+			null,
+			null,
+			thePartitionIds,
+			params);
 
-		if (theBatchSize != null && theBatchSize.getValue() != null) {
-			int value = theBatchSize.getValue();
-			// Ignore invalid values
-			value = Math.min(value, ResourceIdListStep.MAX_BATCH_OF_IDS);
-			value = Math.max(value, 1);
-			params.setBatchSize(value);
-		}
+	}
 
-		myJobPartitionProvider.getPartitionedUrls(theRequestDetails, urls).forEach(params::addPartitionedUrl);
+	/**
+	 * Operation: $hapi.fhir.reindex-status
+	 */
+	@Operation(name = JpaConstants.OPERATION_BULK_PATCH_STATUS, idempotent = true, manualResponse = true)
+	public void bulkPatchStatus(
+		ServletRequestDetails theRequestDetails,
+		// _jobId=
+		@Description("Query the server for the status of a reindex operation")
+		@OperationParam(
+			name = JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID,
+			typeName = "string",
+			min = 1,
+			max = 1)
+		IPrimitiveType<String> theJobId,
 
-		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		request.setJobDefinitionId(JOB_REINDEX);
-		request.setParameters(params);
-		Batch2JobStartResponse response = myJobCoordinator.startInstance(theRequestDetails, request);
+		// _return
+		@Description("If provided, specifies that a specific part of the job report should be returned")
+		@OperationParam(
+			name = JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN,
+			typeName = "code",
+			min = 0,
+			max = 1)
+		IPrimitiveType<String> theReturn)
+		throws IOException {
 
-		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
-		ParametersUtil.addParameterToParametersString(
-				myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, response.getInstanceId());
-		return retVal;
+		pollForJobStatus(theRequestDetails, theJobId, theReturn);
+	}
+
+	@Nonnull
+	@Override
+	protected String getOperationPollForStatusStatus() {
+		return JpaConstants.OPERATION_BULK_PATCH_STATUS;
+	}
+
+	@Nonnull
+	@Override
+	protected String getJobId() {
+		return ReindexUtils.JOB_REINDEX;
+	}
+
+	@Nonnull
+	@Override
+	protected String getOperationName() {
+		return ProviderConstants.OPERATION_REINDEX;
+	}
+
+	/**
+	 * This operation is kicking off a batch job and should really be requiring the Prefer: respond-async
+	 * header, but it didn't historically want that so we don't require it just to be kind.
+	 */
+	@Override
+	protected boolean isRequirePreferAsyncHeader(ServletRequestDetails theRequestDetails) {
+		return false;
 	}
 }

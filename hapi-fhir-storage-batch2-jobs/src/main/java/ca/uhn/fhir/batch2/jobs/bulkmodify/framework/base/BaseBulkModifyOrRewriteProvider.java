@@ -20,7 +20,9 @@
 package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesResultsJson;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
@@ -58,6 +60,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -71,6 +74,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.ALL_PARTITIONS_TENANT_NAME;
@@ -95,6 +99,9 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 	@Autowired
 	protected IInterceptorService myInterceptorService;
 
+	@Autowired
+	protected IJobPartitionProvider myJobPartitionProvider;
+
 	/**
 	 * Subclasses should call this method to initiate a new job
 	 */
@@ -109,17 +116,25 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 			List<IPrimitiveType<String>> thePartitionIds,
 			BaseBulkModifyJobParameters theJobParameters)
 			throws IOException {
-		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, getOperationName());
+		if (isRequirePreferAsyncHeader(theRequestDetails)) {
+			ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, getOperationName());
+		}
 
-		theJobParameters.setRequestPartitionId(
+
+		if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isUnnamedPartitionMode()) {
+			theJobParameters.setRequestPartitionId(
 				parsePartitionIdsParameterAndInvokeInterceptors(theRequestDetails, thePartitionIds));
+		}
 
 		if (theUrlsToReindex != null) {
-			for (IPrimitiveType<String> url : theUrlsToReindex) {
-				if (isNotBlank(url.getValueAsString())) {
-					theJobParameters.addUrl(url.getValueAsString());
-				}
-			}
+			List<String> urls = theUrlsToReindex
+				.stream()
+				.filter(Objects::nonNull)
+				.map(IPrimitiveType::getValueAsString)
+				.filter(StringUtils::isNotBlank)
+				.toList();
+			List<PartitionedUrl> partitionedUrls = myJobPartitionProvider.getPartitionedUrls(theRequestDetails, urls);
+			partitionedUrls.forEach(theJobParameters::addPartitionedUrl);
 		}
 
 		if (theDryRun != null && theDryRun.getValue().equals(Boolean.TRUE)) {
@@ -184,16 +199,21 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 	}
 
 	/**
+	 * Subclasses may override this if they don't want to require a
+	 * Prefer async header in the request. Generally we should always want this
+	 * for kicking off batch jobs but we can skip it for legacy operations.
+	 */
+	protected boolean isRequirePreferAsyncHeader(ServletRequestDetails theRequestDetails) {
+		return true;
+	}
+
+	/**
 	 * Parses the {@link JpaConstants#OPERATION_BULK_PATCH_PARAM_PARTITION_ID} parameter value(s)
 	 * and invokes any registered {@link Pointcut#STORAGE_PARTITION_SELECTED} interceptors (used
 	 * for security)
 	 */
 	private RequestPartitionId parsePartitionIdsParameterAndInvokeInterceptors(
 			RequestDetails theRequestDetails, List<IPrimitiveType<String>> thePartitionIds) {
-		if (!myPartitionSettings.isPartitioningEnabled() || !myPartitionSettings.isUnnamedPartitionMode()) {
-			return null;
-		}
-
 		RequestPartitionId partitionId = parsePartitionIdsParameter(thePartitionIds);
 
 		// Invoke interceptor: STORAGE_PARTITION_SELECTED

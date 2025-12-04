@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesResultsJson;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -28,6 +29,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.base.Charsets;
 import jakarta.annotation.PostConstruct;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -380,7 +382,17 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		Batch2JobStartResponse res = myJobCoordinator.startInstance(mySrd, startRequest);
 		myBatch2JobHelper.awaitJobCompletion(res);
 
-		// validate
+		// validate report
+		JobInstance finalInstance = myJobCoordinator.getInstance(res.getInstanceId());
+		BulkModifyResourcesResultsJson finalResults = JsonUtil.deserialize(finalInstance.getReport(), BulkModifyResourcesResultsJson.class);
+		assertEquals(1, finalResults.getResourcesChangedCount());
+		assertEquals(0, finalResults.getResourcesUnchangedCount());
+		assertEquals(0, finalResults.getResourcesFailedCount());
+		assertThat(finalResults.getReport()).containsSubsequence(
+			"Total Resources Changed   : 1 "
+		);
+
+		// validate results
 		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
 
 		// Now one of them should be indexed
@@ -880,6 +892,19 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		assertEquals(50, myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
 		// Now all of them should be indexed
 		assertThat(myReindexTestHelper.getAlleleObservationIds()).hasSize(50);
+		// validate report
+		JobInstance finalInstance = myJobCoordinator.getInstance(startResponse.getInstanceId());
+		BulkModifyResourcesResultsJson finalResults = JsonUtil.deserialize(finalInstance.getReport(), BulkModifyResourcesResultsJson.class);
+		assertEquals(51, finalResults.getResourcesChangedCount());
+		assertEquals(0, finalResults.getResourcesUnchangedCount());
+		assertEquals(0, finalResults.getResourcesFailedCount());
+		assertThat(finalResults.getReport()).containsSubsequence(
+			"Total Resources Changed   : 51 ",
+			"ResourceType[Observation]",
+			"Changed   : 50",
+			"ResourceType[SearchParameter]",
+			"Changed   : 1"
+		);
 	}
 
 	@Test
