@@ -64,6 +64,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.stream.Stream;
 
 /**
  * @see IHapiTransactionService for an explanation of this class
@@ -188,7 +189,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
 	 */
 	@Deprecated
-	@SuppressWarnings("ConstantConditions")
+	@SuppressWarnings({"ConstantConditions", "removal"})
 	public <T> T execute(
 			@Nullable RequestDetails theRequestDetails,
 			@Nullable TransactionDetails theTransactionDetails,
@@ -207,6 +208,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 	/**
 	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
 	 */
+	@SuppressWarnings("removal")
 	@Deprecated
 	public <T> T execute(
 			@Nullable RequestDetails theRequestDetails,
@@ -533,6 +535,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 			return this;
 		}
 
+		@SuppressWarnings("removal")
 		@Override
 		public ExecutionBuilder onRollback(Runnable theOnRollback) {
 			assert myOnRollback == null;
@@ -558,6 +561,21 @@ public class HapiTransactionService implements IHapiTransactionService {
 		@Override
 		public <T> T execute(@Nonnull TransactionCallback<T> callback) {
 			return doExecute(this, callback);
+		}
+
+		@Override
+		public <T> T read(IExecutionCallable<T> theCallback) {
+			return execute(() -> theCallback.call(myRequestPartitionId));
+		}
+
+		@Override
+		public <T> Stream<T> search(IExecutionCallable<Stream<T>> theCallback) {
+			return execute(() -> theCallback.call(myRequestPartitionId));
+		}
+
+		@Override
+		public <T> List<T> searchList(IExecutionCallable<List<T>> theCallback) {
+			return execute(() -> theCallback.call(myRequestPartitionId));
 		}
 
 		@VisibleForTesting
