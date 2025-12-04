@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.jobs.step;
 
 import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
@@ -28,7 +29,6 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
@@ -42,6 +42,12 @@ import static ca.uhn.fhir.batch2.util.Batch2Utils.BATCH_START_DATE;
 public class GenerateRangeChunksStep<PT extends PartitionedUrlJobParameters>
 		implements IFirstJobStepWorker<PT, ChunkRangeJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+
+	private final IJobPartitionProvider myJobPartitionProvider;
+
+	public GenerateRangeChunksStep(IJobPartitionProvider theJobPartitionProvider) {
+		myJobPartitionProvider = theJobPartitionProvider;
+	}
 
 	@Nonnull
 	@Override
@@ -57,12 +63,13 @@ public class GenerateRangeChunksStep<PT extends PartitionedUrlJobParameters>
 		List<PartitionedUrl> partitionedUrls = params.getPartitionedUrls();
 
 		if (!partitionedUrls.isEmpty()) {
-			partitionedUrls.forEach(partitionedUrl -> {
-				ChunkRangeJson chunkRangeJson = new ChunkRangeJson(start, end)
-						.setUrl(partitionedUrl.getUrl())
-						.setPartitionId(getRequestPartitionIdForUrl(partitionedUrl));
-				sendChunk(chunkRangeJson, theDataSink);
-			});
+			for (PartitionedUrl partitionedUrl : partitionedUrls) {
+
+				List<ChunkRangeJson> chunkRanges = myJobPartitionProvider.toChunkRanges(partitionedUrl, start, end);
+				for (ChunkRangeJson chunkRangeJson : chunkRanges) {
+					sendChunk(chunkRangeJson, theDataSink);
+				}
+			}
 			return RunOutcome.SUCCESS;
 		}
 
@@ -81,9 +88,5 @@ public class GenerateRangeChunksStep<PT extends PartitionedUrlJobParameters>
 				theData.getEnd(),
 				theData.getPartitionId());
 		theDataSink.accept(theData);
-	}
-
-	private RequestPartitionId getRequestPartitionIdForUrl(PartitionedUrl theUrl) {
-		return theUrl.getRequestPartitionId();
 	}
 }

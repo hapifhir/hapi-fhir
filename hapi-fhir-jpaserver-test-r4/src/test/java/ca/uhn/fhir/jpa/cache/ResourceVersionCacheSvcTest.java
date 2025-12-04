@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.cache;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -20,13 +22,13 @@ public class ResourceVersionCacheSvcTest extends BaseJpaR4Test {
 		Patient patient = new Patient();
 		patient.setActive(true);
 		IIdType patientId = myPatientDao.create(patient).getId();
-		ResourceVersionMap versionMap = myResourceVersionCacheSvc.getVersionMap("Patient", SearchParameterMap.newSynchronous());
+		ResourceVersionMap versionMap = myResourceVersionCacheSvc.getVersionMap(RequestPartitionId.allPartitions(), "Patient", SearchParameterMap.newSynchronous());
 		assertEquals(1, versionMap.size());
 		assertEquals(1L, versionMap.getVersion(patientId));
 
 		patient.setGender(Enumerations.AdministrativeGender.MALE);
 		myPatientDao.update(patient);
-		versionMap = myResourceVersionCacheSvc.getVersionMap("Patient", SearchParameterMap.newSynchronous());
+		versionMap = myResourceVersionCacheSvc.getVersionMap(RequestPartitionId.allPartitions(), "Patient", SearchParameterMap.newSynchronous());
 		assertEquals(1, versionMap.size());
 		assertEquals(2L, versionMap.getVersion(patientId));
 	}

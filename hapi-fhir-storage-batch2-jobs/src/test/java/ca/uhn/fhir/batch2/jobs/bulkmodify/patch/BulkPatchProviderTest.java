@@ -9,9 +9,12 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -20,11 +23,13 @@ import ca.uhn.test.util.CloseableHttpResponseUtil;
 import ca.uhn.test.util.ParsedHttpResponse;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
@@ -37,6 +42,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
@@ -48,7 +54,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_BULK_PATCH_STATUS;
@@ -57,6 +65,7 @@ import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_BULK_PATCH_STATU
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_DRYRUN_CHANGES;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_REPORT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -89,6 +98,7 @@ public class BulkPatchProviderTest {
 	void beforeEach() {
 		ourProvider.setContextForUnitTest(ourCtx);
 		ourProvider.setJobCoordinatorForUnitTest(myJobCoordinator);
+		ourProvider.setPartitionSettingsForUnitTest(new PartitionSettings());
 	}
 
 	@ParameterizedTest
@@ -318,6 +328,34 @@ public class BulkPatchProviderTest {
 			assertNull(response.getFirstHeader(Constants.HEADER_X_PROGRESS));
 		}
 	}
+
+	@ParameterizedTest
+	@CsvSource(delimiter = '#', textBlock = """
+		1|2|3       # {"allPartitions":false,"partitionIds":[1,2,3]}
+		1|  2   |3  # {"allPartitions":false,"partitionIds":[1,2,3]}
+		1|2|  | |3  # {"allPartitions":false,"partitionIds":[1,2,3]}
+		_ALL        # {"allPartitions":true}
+		_ALL|1      # {"allPartitions":true}
+		2|_ALL|1    # {"allPartitions":true}
+		FOO         # EX: HAPI-2820: Invalid partition ID: FOO
+		""")
+	void testPparsePartitionIdsParameter(String theValues, String theExpected) {
+		List<IPrimitiveType<String>> input = Arrays.stream(StringUtils.split(theValues, '|'))
+			.map(StringType::new)
+			.collect(Collectors.toUnmodifiableList());
+
+		if (theExpected.startsWith("EX: ")) {
+			String expectedMessage = theExpected.substring(4);
+			assertThatThrownBy(() -> BulkPatchProvider.parsePartitionIdsParameter(input))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage(expectedMessage);
+			return;
+		}
+
+		String actual = BulkPatchProvider.parsePartitionIdsParameter(input).toJson();
+		assertEquals(theExpected, actual);
+	}
+
 
 	public static void validateStatusPollResponse(PollForStatusTest theParams, CloseableHttpResponse response) throws IOException {
 		String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);

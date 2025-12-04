@@ -73,8 +73,9 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myPartitionSettings.setPartitioningEnabled(defaultPartitionSettings.isPartitioningEnabled());
 		myPartitionSettings.setAllowReferencesAcrossPartitions(defaultPartitionSettings.getAllowReferencesAcrossPartitions());
 		myPartitionSettings.setDefaultPartitionId(defaultPartitionSettings.getDefaultPartitionId());
+		myPartitionSettings.setUnnamedPartitionMode(defaultPartitionSettings.isUnnamedPartitionMode());
 
-		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof MyReadWriteInterceptor);
+		unregisterPartitionInterceptor();
 
 		myStorageSettings.setIndexMissingFields(defaultStorageSettings.getIndexMissingFields());
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(defaultStorageSettings.isAutoCreatePlaceholderReferenceTargets());
@@ -84,6 +85,10 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		if (myRegisteredSearchParamValidatingInterceptor) {
 			myInterceptorRegistry.unregisterInterceptor(mySearchParamValidatingInterceptor);
 		}
+	}
+
+	protected void unregisterPartitionInterceptor() {
+		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof MyReadWriteInterceptor);
 	}
 
 	protected void assertNoRemainingPartitionIds() {
