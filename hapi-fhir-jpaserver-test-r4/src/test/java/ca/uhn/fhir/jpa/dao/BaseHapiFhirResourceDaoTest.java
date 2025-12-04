@@ -59,6 +59,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationContext;
@@ -139,8 +140,7 @@ class BaseHapiFhirResourceDaoTest {
 	@Mock
 	private MatchResourceUrlService<JpaPid> myMatchResourceUrlService;
 
-	@Mock
-	private HapiTransactionService myTransactionService;
+	private HapiTransactionService myTransactionService = new MockHapiTransactionService();
 
 	@Mock
 	private DeleteConflictService myDeleteConflictService;
@@ -174,6 +174,7 @@ class BaseHapiFhirResourceDaoTest {
 		// by calling setup themselves
 		mySvc.setResourceType(Patient.class);
 		mySvc.setContext(myFhirContext);
+		mySvc.setTransactionService(myTransactionService);
 		mySvc.start();
 		mySpiedSvc = spy(mySvc);
 	}
@@ -501,17 +502,6 @@ class BaseHapiFhirResourceDaoTest {
 			when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
 			when(myMatchUrlService.getResourceSearch(URL))
 				.thenReturn(new ResourceSearch(mock(RuntimeResourceDefinition.class), SearchParameterMap.newSynchronous(), RequestPartitionId.allPartitions()));
-
-			// mocks for transaction handling:
-			final IHapiTransactionService.IExecutionBuilder mockExecutionBuilder = mock(IHapiTransactionService.IExecutionBuilder.class);
-			when(mockExecutionBuilder.withTransactionDetails(any(TransactionDetails.class))).thenReturn(mockExecutionBuilder);
-			when(myTransactionService.withRequest(REQUEST)).thenReturn(mockExecutionBuilder);
-			final Answer<DeleteMethodOutcome> answer = theInvocationOnMock -> {
-				final TransactionCallback<DeleteMethodOutcome> arg = theInvocationOnMock.getArgument(0);
-				return arg.doInTransaction(mock(TransactionStatus.class));
-			};
-			when(mockExecutionBuilder.execute(ArgumentMatchers.<TransactionCallback<DeleteMethodOutcome>>any()))
-				.thenAnswer(answer);
 		}
 
 		@ParameterizedTest

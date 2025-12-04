@@ -391,10 +391,12 @@ public class PatientIdPartitionInterceptor {
 	 * <code>Math.abs(theResourceIdPart.hashCode()) % 15000</code>.
 	 * <p>
 	 * This logic can be replaced with other logic of your choosing.
+	 *
+	 * @see #defaultPartitionAlgorithm(String)
 	 */
 	@SuppressWarnings("unused")
 	protected int providePartitionIdForPatientId(RequestDetails theRequestDetails, String theResourceIdPart) {
-		return Math.abs(theResourceIdPart.hashCode() % 15000);
+		return defaultPartitionAlgorithm(theResourceIdPart);
 	}
 
 	/**
@@ -418,5 +420,13 @@ public class PatientIdPartitionInterceptor {
 	@Nonnull
 	protected RequestPartitionId provideNonCompartmentMemberTypeResponse(IBaseResource theResource) {
 		return myPartitionSettings.getDefaultRequestPartitionId();
+	}
+
+	/**
+	 * This method supplies the default algorithm used for partitioning, if {@link #providePartitionIdForPatientId(RequestDetails, String)}
+	 * has not been overridden.
+	 */
+	public static int defaultPartitionAlgorithm(String theResourceIdPart) {
+		return Math.abs(theResourceIdPart.hashCode() % 15000);
 	}
 }
