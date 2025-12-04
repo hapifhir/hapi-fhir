@@ -991,10 +991,10 @@
 
 	<properties>
 		<fhir_core_version>6.6.7</fhir_core_version>
-		<spotless_version>2.41.1</spotless_version>
+		<spotless_version>2.46.1</spotless_version>
 		<spotless.exclude.pattern>**/test/**/*.java</spotless.exclude.pattern>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
-		<surefire_version>3.5.2</surefire_version>
+		<surefire_version>3.5.4</surefire_version>
 
 
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
@@ -1012,8 +1012,8 @@
 		<caffeine_version>3.1.8</caffeine_version>
 		<checkstyle_version>10.21.1</checkstyle_version>
 		<maven_changes_version>2.12.1</maven_changes_version>
-		<commons_codec_version>1.15</commons_codec_version>
-		<commons_compress_version>1.26.0</commons_compress_version>
+		<commons_codec_version>1.20.0</commons_codec_version>
+		<commons_compress_version>1.28.0</commons_compress_version>
 		<!--
 		Note if you bump the version here - The commons-dbcp2 2.11.0 version
 		explicitly depends on commons-pool2 2.12.0, so we explicitly specify that
@@ -1044,7 +1044,7 @@
 		<flexmark_version>0.64.8</flexmark_version>
 		<flyway_version>10.20.1</flyway_version>
 		<hibernate_version>6.6.4.Final</hibernate_version>
-		<logback_version>1.5.19</logback_version>
+		<logback_version>1.5.21</logback_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
 		<hibernate_search_version>7.2.1.Final</hibernate_search_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
@@ -1053,8 +1053,8 @@
 		<hibernate_validator_version>8.0.0.Final</hibernate_validator_version>
 		<httpcore_version>4.4.16</httpcore_version>
 		<httpclient_version>4.5.14</httpclient_version>
-		<jackson_version>2.20.0</jackson_version>
-		<jackson_databind_version>2.20.0</jackson_databind_version>
+		<jackson_version>2.20.1</jackson_version>
+		<jackson_databind_version>2.20.1</jackson_databind_version>
 		<jackson_annotations_version>2.20</jackson_annotations_version>
 		<httpclient5_version>5.4.3</httpclient5_version>
 		<httpcore5_version>5.3.1</httpcore5_version>
@@ -1078,7 +1078,7 @@
 		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<swagger_jakarta_version>2.2.30</swagger_jakarta_version>
-		<slf4j_version>2.0.16</slf4j_version>
+		<slf4j_version>2.0.17</slf4j_version>
 		<log4j_to_slf4j_version>2.24.1</log4j_to_slf4j_version>
 		<spring_version>6.2.12</spring_version>
 		<spring_data_bom_version>2024.0.5</spring_data_bom_version>
@@ -1112,9 +1112,9 @@
 		<!-- Plugin Versioning -->
 		<maven-resources-plugin-version>3.3.0</maven-resources-plugin-version>
 		<buildnumber-maven-plugin-version>3.2.1</buildnumber-maven-plugin-version>
-		<jacoco-maven-plugin-version>0.8.12</jacoco-maven-plugin-version>
+		<jacoco-maven-plugin-version>0.8.14</jacoco-maven-plugin-version>
 		<maven-assembly-plugin-version>3.7.1</maven-assembly-plugin-version>
-		<maven-license-plugin-version>2.5.0</maven-license-plugin-version>
+		<maven-license-plugin-version>2.7.0</maven-license-plugin-version>
 		<maven-enforcer-plugin-version>3.5.0</maven-enforcer-plugin-version>
 		<maven-checkstyle-version>3.6.0</maven-checkstyle-version>
 	</properties>
@@ -2507,12 +2507,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
-					<version>3.4.0</version>
+					<version>3.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.14.0</version>
+					<version>3.14.1</version>
 					<configuration>
 						<encoding>UTF-8</encoding>
 						<fork>true</fork>
@@ -2523,12 +2523,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.8.1</version>
+					<version>3.9.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.sonatype.central</groupId>
 					<artifactId>central-publishing-maven-plugin</artifactId>
-					<version>0.8.0</version>
+					<version>0.9.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -2543,7 +2543,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -2575,7 +2575,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<version>3.6.0</version>
+					<version>3.6.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -2606,12 +2606,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>
-					<version>3.4.0</version>
+					<version>3.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>build-helper-maven-plugin</artifactId>
-					<version>3.6.0</version>
+					<version>3.6.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>

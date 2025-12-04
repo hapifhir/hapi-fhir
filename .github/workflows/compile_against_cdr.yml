@@ -18,7 +18,7 @@ jobs:
         if: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
         run: echo "Skipping CDR compilation for fork - this is expected and safe"
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
         name: Checkout
       - name: Install poetry
@@ -26,9 +26,9 @@ jobs:
         run: pipx install poetry
       - name: Setup Python
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: actions/setup-python@v4.6.0
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.10'
+          python-version: '3.14'
       - run: poetry install
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
         name: Install Dependencies
