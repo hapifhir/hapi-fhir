@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.batch2.jobs.reindex.v1;
 
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
@@ -102,8 +103,9 @@ public class ReindexV1Config {
 	}
 
 	@Bean("reindexGenerateRangeChunkStepV1")
-	public IJobStepWorker<ReindexJobParameters, VoidModel, ChunkRangeJson> reindexGenerateRangeChunksStep() {
-		return new GenerateRangeChunksStep<>();
+	public IJobStepWorker<ReindexJobParameters, VoidModel, ChunkRangeJson> reindexGenerateRangeChunksStep(
+			IJobPartitionProvider theJobPartitionProvider) {
+		return new GenerateRangeChunksStep<>(theJobPartitionProvider);
 	}
 
 	@Bean("reindexLoadIdsStepV1")

@@ -35,10 +35,5 @@ public interface IResourceVersionSvc {
 	ResourceVersionMap getVersionMap(
 			RequestPartitionId theRequestPartitionId, String theResourceName, SearchParameterMap theSearchParamMap);
 
-	@Nonnull
-	default ResourceVersionMap getVersionMap(String theResourceName, SearchParameterMap theSearchParamMap) {
-		return getVersionMap(RequestPartitionId.allPartitions(), theResourceName, theSearchParamMap);
-	}
-
 	ResourcePersistentIdMap getLatestVersionIdsForResourceIds(RequestPartitionId thePartition, List<IIdType> theIds);
 }

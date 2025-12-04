@@ -45,8 +45,7 @@ public class TypedPidAndVersionJson extends TypedPidJson {
 	@Override
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
-		if (!(theO instanceof TypedPidAndVersionJson)) return false;
-		TypedPidAndVersionJson that = (TypedPidAndVersionJson) theO;
+		if (!(theO instanceof TypedPidAndVersionJson that)) return false;
 		return super.equals(theO) && Objects.equals(myVersionId, that.myVersionId);
 	}
 
