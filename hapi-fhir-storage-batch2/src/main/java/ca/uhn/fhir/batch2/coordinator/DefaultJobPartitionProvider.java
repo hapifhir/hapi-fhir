@@ -101,6 +101,7 @@ public class DefaultJobPartitionProvider implements IJobPartitionProvider {
 		return retVal;
 	}
 
+	@Override
 	public List<RequestPartitionId> getAllPartitions() {
 		return List.of(RequestPartitionId.allPartitions());
 	}

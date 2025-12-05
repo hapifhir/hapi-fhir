@@ -226,12 +226,12 @@ public class GiantTransactionPerfTest {
 		myResourceChangeListenerCacheRefresher = new ResourceChangeListenerCacheRefresherImpl();
 		myResourceChangeListenerCacheRefresher.setResourceVersionSvc(myResourceVersionSvc);
 
-		when(myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(any(), any(), any(), anyLong())).thenAnswer(t -> {
+		when(myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(any(), any(), any(), any(), anyLong())).thenAnswer(t -> {
 			String resourceName = t.getArgument(0, String.class);
-			SearchParameterMap searchParameterMap = t.getArgument(1, SearchParameterMap.class);
-			IResourceChangeListener changeListener = t.getArgument(2, IResourceChangeListener.class);
-			long refreshInterval = t.getArgument(3, Long.class);
-			ResourceChangeListenerCache retVal = new ResourceChangeListenerCache(resourceName, changeListener, searchParameterMap, refreshInterval);
+			SearchParameterMap searchParameterMap = t.getArgument(2, SearchParameterMap.class);
+			IResourceChangeListener changeListener = t.getArgument(3, IResourceChangeListener.class);
+			long refreshInterval = t.getArgument(4, Long.class);
+			ResourceChangeListenerCache retVal = new ResourceChangeListenerCache(resourceName, changeListener, RequestPartitionId.allPartitions(), searchParameterMap, refreshInterval);
 			retVal.setResourceChangeListenerCacheRefresher(myResourceChangeListenerCacheRefresher);
 			return retVal;
 		});

@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -49,6 +50,7 @@ public interface IResourceChangeListenerRegistry {
 	 */
 	IResourceChangeListenerCache registerResourceResourceChangeListener(
 			String theResourceName,
+			RequestPartitionId theRequestPartitionId,
 			SearchParameterMap theSearchParameterMap,
 			IResourceChangeListener theResourceChangeListener,
 			long theRemoteRefreshIntervalMs);
