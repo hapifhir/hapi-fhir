@@ -219,7 +219,6 @@ class ValidatorWrapper {
 		messages = messages.stream()
 				.filter(m -> m.getMessageId() == null
 						|| !(m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_BINDING_NOSOURCE)
-								|| m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_BINDING_NOSOURCE2)
 								|| (m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_VALUESET_NOTFOUND)
 										&& m.getMessage().contains("http://hl7.org/fhir/ValueSet/mimetypes"))))
 				.collect(Collectors.toList());
