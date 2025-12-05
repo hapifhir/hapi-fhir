@@ -153,7 +153,7 @@ public class ReindexProvider extends BaseBulkModifyOrRewriteProvider {
 	/**
 	 * Operation: $hapi.fhir.reindex-status
 	 */
-	@Operation(name = JpaConstants.OPERATION_BULK_PATCH_STATUS, idempotent = true, manualResponse = true)
+	@Operation(name = ProviderConstants.OPERATION_REINDEX_STATUS, idempotent = true, manualResponse = true)
 	public void bulkPatchStatus(
 			ServletRequestDetails theRequestDetails,
 			// _jobId=
@@ -181,7 +181,7 @@ public class ReindexProvider extends BaseBulkModifyOrRewriteProvider {
 	@Nonnull
 	@Override
 	protected String getOperationPollForStatusStatus() {
-		return JpaConstants.OPERATION_BULK_PATCH_STATUS;
+		return ProviderConstants.OPERATION_REINDEX_STATUS;
 	}
 
 	@Nonnull

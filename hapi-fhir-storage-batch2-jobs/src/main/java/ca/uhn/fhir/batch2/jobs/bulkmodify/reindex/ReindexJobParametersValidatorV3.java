@@ -46,7 +46,15 @@ public class ReindexJobParametersValidatorV3 extends BaseBulkModifyJobParameters
 				theIssueListToPopulate.add("Optimistic locking cannot be enabled when correcting current versions");
 			}
 		}
+	}
 
+	/**
+	 * We currently don't support dry-run for reindexing. The {@link ReindexProvider} doesn't expose it
+	 * as an option so normally there is no way for someone to even try, but we keep this check
+	 * just in case someone tries to use the internal API to start a dry-run reindex.
+	 */
+	@Override
+	protected void validateDryRun(ReindexJobParameters theParameters, List<String> theIssueListToPopulate) {
 		if (theParameters.isDryRun()) {
 			theIssueListToPopulate.add("Dry-run mode is not yet supported for reindexing");
 		}

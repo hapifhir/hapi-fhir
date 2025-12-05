@@ -151,9 +151,16 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 			}
 		}
 
-		if (urls.size() > 0) {
-			List<PartitionedUrl> partitionedUrls = myJobPartitionProvider.getPartitionedUrls(theRequestDetails, urls);
-			partitionedUrls.forEach(theJobParameters::addPartitionedUrl);
+		if (!urls.isEmpty()) {
+			if (theJobParameters.getRequestPartitionId() == null) {
+				List<PartitionedUrl> partitionedUrls =
+						myJobPartitionProvider.getPartitionedUrls(theRequestDetails, urls);
+				theJobParameters.addPartitionedUrls(partitionedUrls);
+			} else {
+				for (String url : urls) {
+					theJobParameters.addPartitionedUrl(new PartitionedUrl().setUrl(url));
+				}
+			}
 		}
 
 		if (theDryRun != null && theDryRun.getValue().equals(Boolean.TRUE)) {

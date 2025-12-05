@@ -23,7 +23,6 @@ import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
@@ -41,13 +40,11 @@ public class DefaultJobPartitionProvider implements IJobPartitionProvider {
 	protected final IRequestPartitionHelperSvc myRequestPartitionHelper;
 	protected FhirContext myFhirContext;
 	private MatchUrlService myMatchUrlService;
-	private IDaoRegistry myDaoRegistry;
 
 	public DefaultJobPartitionProvider(
 			FhirContext theFhirContext,
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
-			MatchUrlService theMatchUrlService,
-			IDaoRegistry theDaoRegistry) {
+			MatchUrlService theMatchUrlService) {
 		myFhirContext = theFhirContext;
 		myRequestPartitionHelper = theRequestPartitionHelperSvc;
 		myMatchUrlService = theMatchUrlService;

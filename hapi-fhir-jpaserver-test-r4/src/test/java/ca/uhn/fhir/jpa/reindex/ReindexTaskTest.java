@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.reindex;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesResultsJson;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -28,6 +29,7 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.base.Charsets;
@@ -57,6 +59,7 @@ import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 import static ca.uhn.fhir.jpa.api.dao.ReindexParameters.OptimizeStorageModeEnum.ALL_VERSIONS;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -923,6 +926,20 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		assertEquals(StatusEnum.COMPLETED, myJob.getStatus());
 		assertNotNull(myJob.getWarningMessages());
 		assertThat(myJob.getWarningMessages()).contains("Failed to reindex resource because unique search parameter " + searchParameter.getEntity().getIdDt().toVersionless().toString());
+	}
+
+	@Test
+	public void testReindex_DryRunNotSupported() {
+		ReindexJobParameters jobParameters = new ReindexJobParameters();
+		jobParameters.setDryRun(true);
+		jobParameters.addPartitionedUrl(new PartitionedUrl().setUrl("Patient?"));
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(JOB_REINDEX);
+		startRequest.setParameters(jobParameters);
+		assertThatThrownBy(()->myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("Dry-run mode is not yet supported for reindexing");
 	}
 
 	/**
