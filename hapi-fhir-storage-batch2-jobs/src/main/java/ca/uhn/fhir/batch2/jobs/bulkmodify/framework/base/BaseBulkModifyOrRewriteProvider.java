@@ -24,18 +24,26 @@ import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesRe
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.BaseTransactionProcessor;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.CanonicalBundleEntry;
@@ -65,8 +73,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.ALL_PARTITIONS_TENANT_NAME;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 /**
  * Base class for a plain provider which can initiate a Bulk Modify or Bulk Rewrite job.
@@ -79,6 +89,12 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 	@Autowired
 	protected IJobCoordinator myJobCoordinator;
 
+	@Autowired
+	protected PartitionSettings myPartitionSettings;
+
+	@Autowired
+	protected IInterceptorService myInterceptorService;
+
 	/**
 	 * Subclasses should call this method to initiate a new job
 	 */
@@ -90,9 +106,14 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 			IPrimitiveType<Integer> theBatchSize,
 			IPrimitiveType<Integer> theLimitResourceCount,
 			IPrimitiveType<Integer> theLimitResourceVersionCount,
+			List<IPrimitiveType<String>> thePartitionIds,
 			BaseBulkModifyJobParameters theJobParameters)
 			throws IOException {
 		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, getOperationName());
+
+		theJobParameters.setRequestPartitionId(
+				parsePartitionIdsParameterAndInvokeInterceptors(theRequestDetails, thePartitionIds));
+
 		if (theUrlsToReindex != null) {
 			for (IPrimitiveType<String> url : theUrlsToReindex) {
 				if (isNotBlank(url.getValueAsString())) {
@@ -162,6 +183,30 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 				null);
 	}
 
+	/**
+	 * Parses the {@link JpaConstants#OPERATION_BULK_PATCH_PARAM_PARTITION_ID} parameter value(s)
+	 * and invokes any registered {@link Pointcut#STORAGE_PARTITION_SELECTED} interceptors (used
+	 * for security)
+	 */
+	private RequestPartitionId parsePartitionIdsParameterAndInvokeInterceptors(
+			RequestDetails theRequestDetails, List<IPrimitiveType<String>> thePartitionIds) {
+		if (!myPartitionSettings.isPartitioningEnabled() || !myPartitionSettings.isUnnamedPartitionMode()) {
+			return null;
+		}
+
+		RequestPartitionId partitionId = parsePartitionIdsParameter(thePartitionIds);
+
+		// Invoke interceptor: STORAGE_PARTITION_SELECTED
+		CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorService, theRequestDetails)
+				.ifHasCallHooks(Pointcut.STORAGE_PARTITION_SELECTED, () -> new HookParams()
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+						.add(RequestPartitionId.class, partitionId)
+						.add(RuntimeResourceDefinition.class, null));
+
+		return partitionId;
+	}
+
 	@Nonnull
 	private String createPollUrl(ServletRequestDetails theRequestDetails, String jobInstanceId) {
 		ServletContext servletContext =
@@ -181,8 +226,7 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 		pollUrlBuilder.append(JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID);
 		pollUrlBuilder.append('=');
 		pollUrlBuilder.append(jobInstanceId);
-		String pollUrl = pollUrlBuilder.toString();
-		return pollUrl;
+		return pollUrlBuilder.toString();
 	}
 
 	/**
@@ -419,5 +463,38 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 	@VisibleForTesting
 	public void setJobCoordinatorForUnitTest(IJobCoordinator theJobCoordinator) {
 		myJobCoordinator = theJobCoordinator;
+	}
+
+	@VisibleForTesting
+	public void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
+	}
+
+	public static RequestPartitionId parsePartitionIdsParameter(List<IPrimitiveType<String>> thePartitionIdsParameter) {
+		List<Integer> partitionIds = new ArrayList<>();
+
+		if (thePartitionIdsParameter != null) {
+			for (IPrimitiveType<String> next : thePartitionIdsParameter) {
+				String value = next.getValueAsString();
+				if (isNotBlank(value)) {
+					if (ALL_PARTITIONS_TENANT_NAME.equals(value)) {
+						partitionIds.clear();
+						break;
+					}
+					try {
+						partitionIds.add(Integer.parseInt(trim(value)));
+					} catch (NumberFormatException e) {
+						throw new InvalidRequestException(
+								Msg.code(2820) + "Invalid partition ID: " + UrlUtil.sanitizeUrlPart(value));
+					}
+				}
+			}
+		}
+
+		if (partitionIds.isEmpty()) {
+			return RequestPartitionId.allPartitions();
+		}
+
+		return RequestPartitionId.fromPartitionIds(partitionIds);
 	}
 }

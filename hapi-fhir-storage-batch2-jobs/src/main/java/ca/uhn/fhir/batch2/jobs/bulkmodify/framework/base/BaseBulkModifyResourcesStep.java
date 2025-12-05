@@ -45,9 +45,9 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.SetMultimap;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import jakarta.annotation.Nonnull;
@@ -62,7 +62,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -92,7 +91,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	private DaoRegistry myDaoRegistry;
 
 	@Autowired
-	private IFhirSystemDao mySystemDao;
+	private IFhirSystemDao<?, ?> mySystemDao;
 
 	@Autowired
 	private IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
@@ -113,35 +112,44 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			@Nonnull StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
 			@Nonnull IJobDataSink<BulkModifyResourcesChunkOutcomeJson> theDataSink)
 			throws JobExecutionFailedException {
-		State state = new State();
 
 		List<TypedPidAndVersionJson> pids = theStepExecutionDetails.getData().getTypedPidAndVersions();
 		PT jobParameters = theStepExecutionDetails.getParameters();
 		RequestPartitionId requestPartitionId =
 				theStepExecutionDetails.getData().getRequestPartitionId();
 
+		State state = new State();
+		state.addPids(pids);
+
 		// Try to update the whole chunk in a single database transaction for fast performance
-		processPids(jobParameters, state, pids, requestPartitionId, false);
+		processPids(jobParameters, state, pids, requestPartitionId);
 
 		// If our attempt to process as a single DB transaction failed, we will try each
 		// resource individually in a separate DB transaction so that any failures on one
 		// resource don't block another from succeeding
-		while (state.hasPidsToModify()) {
-			int retryCount = state.incrementAndGetRetryCount();
-			state.addRetriedResourceCount(state.countPidsToModify());
+		state.moveFailedResourcesBackToInitialState();
+		if (state.hasPidsInInitialState()) {
+			while (true) {
+				int retryCount = state.incrementAndGetRetryCount();
+				state.addRetriedResourceCount(state.countPidsToModify());
 
-			boolean finalRetry = retryCount >= MAX_RETRIES;
-			processPidsInIndividualTransactions(jobParameters, state, requestPartitionId, finalRetry);
-			if (!state.hasPidsToModify()) {
-				break;
-			}
-			if (finalRetry) {
-				break;
+				while (state.hasPidsInInitialState()) {
+					TypedPidAndVersionJson singlePid = state.getSinglePidInState(StateEnum.INITIAL);
+					processPids(jobParameters, state, List.of(singlePid), requestPartitionId);
+				}
+
+				if (retryCount == MAX_RETRIES) {
+					break;
+				} else {
+					state.moveFailedResourcesBackToInitialState();
+				}
 			}
 		}
 
 		Validate.isTrue(
-				!state.hasPidsToModify(), "PIDs remain in state, this is a bug: %s", state.getPidsToModifyAndClear());
+				!state.hasPidsInInitialState(),
+				"PIDs remain in INITIAL state, this is a bug: %s",
+				state.getPidsInState(StateEnum.INITIAL));
 
 		BulkModifyResourcesChunkOutcomeJson outcome = generateOutcome(jobParameters, state);
 		theDataSink.accept(outcome);
@@ -149,12 +157,14 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		return RunOutcome.SUCCESS;
 	}
 
+	/**
+	 * @param thePids If <code>true</code>, attempt to modify all resources in the {@link State}. If <code>false</code>, only attempt to modify a single resource.
+	 */
 	private void processPids(
 			PT theJobParameters,
 			State theState,
 			List<TypedPidAndVersionJson> thePids,
-			RequestPartitionId theRequestPartitionId,
-			boolean theFinalRetry) {
+			RequestPartitionId theRequestPartitionId) {
 		HapiTransactionService.noTransactionAllowed();
 
 		final TransactionDetails transactionDetails = new TransactionDetails();
@@ -172,14 +182,10 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		} catch (JobExecutionFailedException e) {
 			throw e;
 		} catch (Exception e) {
-
-			ourLog.warn("Failure occurred during bulk modification, will retry. Failure: {}", e.toString());
-
-			// Storage transaction failed
-			if (theFinalRetry) {
-				theState.movePendingToFailed(e.getMessage());
-			} else {
-				theState.movePendingBackToModificationList();
+			String failureMessage = e.toString();
+			ourLog.warn("Failure occurred during bulk modification. Failure: {}", failureMessage);
+			for (TypedPidAndVersionJson pid : thePids) {
+				theState.moveToFailure(pid, failureMessage);
 			}
 		}
 
@@ -196,12 +202,12 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		HapiTransactionService.requireTransaction();
 
 		// Fetch all the resources in the chunk
-		List<PidAndResource> resources = fetchResourcesInTransaction(thePids);
+		fetchResourcesInTransaction(theState, thePids);
 
 		// Perform the modification (handled by subclasses)
 		C modificationContext;
 		try {
-			modificationContext = modifyResourcesInTransaction(theState, theJobParameters, resources);
+			modificationContext = modifyResourcesInTransaction(theState, theJobParameters, thePids);
 		} catch (JobExecutionFailedException e) {
 			theState.setJobFailure(e);
 			throw e;
@@ -209,23 +215,17 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 
 		// Store the modified resources to the DB
 		if (!theJobParameters.isDryRun()) {
-			storeResourcesInTransaction(modificationContext, theState, theTransactionDetails);
+			storeResourcesInTransaction(modificationContext, theState, thePids, theTransactionDetails);
 		} else {
 			theState.moveUnsavedToSaved();
 		}
 	}
 
-	private void processPidsInIndividualTransactions(
-			PT theJobParameters, State theState, RequestPartitionId theRequestPartitionId, boolean theFinalRetry) {
-		List<PidAndResource> pids = theState.getPidsToModifyAndClear();
-
-		for (PidAndResource nextPid : pids) {
-			processPids(theJobParameters, theState, List.of(nextPid.pid()), theRequestPartitionId, theFinalRetry);
-		}
-	}
-
-	@Nonnull
-	private List<PidAndResource> fetchResourcesInTransaction(List<TypedPidAndVersionJson> thePids) {
+	/**
+	 * Fetches the given resources by PID from the database, and stores the fetched
+	 * resources in the {@link State}.
+	 */
+	private void fetchResourcesInTransaction(State theState, List<TypedPidAndVersionJson> thePids) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		Multimap<TypedPidJson, TypedPidAndVersionJson> pidsToVersions =
@@ -239,7 +239,6 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 
 		mySystemDao.preFetchResources(typedPidsAsPersistentIds, true);
 
-		List<PidAndResource> resources = new ArrayList<>(thePids.size());
 		for (int i = 0; i < typedPids.size(); i++) {
 			TypedPidJson typedPid = typedPids.get(i);
 			IResourcePersistentId<?> persistentId = typedPidsAsPersistentIds.get(i);
@@ -252,80 +251,89 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 				Long nextVersion = typedVersionedPid.getVersionId();
 				if (nextVersion == null
 						|| nextVersion.equals(resource.getIdElement().getVersionIdPartAsLong())) {
-					resources.add(new PidAndResource(typedVersionedPid, resource));
+
+					// Current version
+					theState.setResourceForPid(typedVersionedPid, resource);
+
 				} else {
+
+					// If we're fetching specific versions of resources, we fetch them
+					// individually here. This could be made more efficient with some kind
+					// of bulk versioned fetch in the future.
 					IIdType nextVersionedId = resource.getIdElement().withVersion(Long.toString(nextVersion));
 					IBaseResource resourceVersion = dao.read(nextVersionedId, new SystemRequestDetails(), true);
 
-					// Ignore deleted resources
+					// Don't try to modify resource versions that are already deleted
 					if (ResourceMetadataKeyEnum.DELETED_AT.get(resourceVersion) != null) {
-						continue;
+						theState.moveToState(typedVersionedPid, StateEnum.UNCHANGED);
 					}
 
-					resources.add(new PidAndResource(typedVersionedPid, resourceVersion));
+					theState.setResourceForPid(typedVersionedPid, resourceVersion);
 				}
 			}
 		}
-
-		return resources;
 	}
 
-	private C modifyResourcesInTransaction(State theState, PT theJobParameters, List<PidAndResource> resources) {
+	private C modifyResourcesInTransaction(State theState, PT theJobParameters, List<TypedPidAndVersionJson> thePids) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
-		List<TypedPidAndVersionJson> pids =
-				resources.stream().map(PidAndResource::pid).toList();
-		C modificationContext = preModifyResources(theJobParameters, pids);
+		C modificationContext = preModifyResources(theJobParameters, thePids);
 
-		for (PidAndResource pidAndResource : resources) {
+		for (TypedPidAndVersionJson pid : thePids) {
+			if (!theState.isPidInState(pid, StateEnum.INITIAL)) {
+				// If we found that a resource version was deleted, we move it
+				// straight to UNCHANGED status
+				continue;
+			}
 
-			TypedPidAndVersionJson pid = pidAndResource.pid();
-			IBaseResource resource = pidAndResource.resource();
+			IBaseResource resource = theState.getResourceForPid(pid);
 			String resourceType = myFhirContext.getResourceType(resource);
 			String resourceId = resource.getIdElement().getIdPart();
 			String resourceVersion = resource.getIdElement().getVersionIdPart();
 
-			HashingWriter preModificationHash = hashResource(resource);
+			try (HashingWriter preModificationHash = hashResource(resource)) {
 
-			ResourceModificationRequest modificationRequest = new ResourceModificationRequest(resource);
-			ResourceModificationResponse modificationResponse =
-					modifyResource(theJobParameters, modificationContext, modificationRequest);
-			if (modificationResponse == null) {
-				throw new JobExecutionFailedException(Msg.code(2789) + "Null response from Modification for Resource["
-						+ resource.getIdElement() + "]");
-			}
+				ResourceModificationRequest modificationRequest = new ResourceModificationRequest(resource);
+				ResourceModificationResponse modificationResponse =
+						modifyResource(theJobParameters, modificationContext, modificationRequest);
+				if (modificationResponse == null) {
+					throw new JobExecutionFailedException(Msg.code(2789)
+							+ "Null response from Modification for Resource[" + resource.getIdElement() + "]");
+				}
 
-			if (modificationResponse.isDeleted()) {
-				theState.addResource(StateEnum.DELETED_UNSAVED, new PidAndResource(pid, resource));
-				continue;
-			}
+				if (modificationResponse.isDeleted()) {
+					theState.moveToState(pid, StateEnum.DELETED_UNSAVED);
+					continue;
+				}
 
-			IBaseResource updatedResource = modificationResponse.getResource();
-			if (updatedResource == null) {
-				theState.addResource(StateEnum.UNCHANGED, new PidAndResource(pid, resource));
-				continue;
-			}
+				IBaseResource updatedResource = modificationResponse.getResource();
+				if (updatedResource == null) {
+					theState.moveToState(pid, StateEnum.UNCHANGED);
+					continue;
+				}
 
-			if (!resourceType.equals(myFhirContext.getResourceType(updatedResource))) {
-				throw new JobExecutionFailedException(Msg.code(2782) + "Modification for Resource["
-						+ resource.getIdElement() + "] returned wrong resource type, expected " + resourceType
-						+ " but was " + myFhirContext.getResourceType(updatedResource));
-			}
-			if (!resourceId.equals(updatedResource.getIdElement().getIdPart())) {
-				throw new JobExecutionFailedException(Msg.code(2783) + "Modification for Resource[" + resourceType + "/"
-						+ resourceId + "] attempted to change the resource ID");
-			}
-			if (!resourceVersion.equals(updatedResource.getIdElement().getVersionIdPart())) {
-				throw new JobExecutionFailedException(Msg.code(2784) + "Modification for Resource[" + resourceType + "/"
-						+ resourceId + "] attempted to change the resource version");
-			}
+				if (!resourceType.equals(myFhirContext.getResourceType(updatedResource))) {
+					throw new JobExecutionFailedException(Msg.code(2782) + "Modification for Resource["
+							+ resource.getIdElement() + "] returned wrong resource type, expected " + resourceType
+							+ " but was " + myFhirContext.getResourceType(updatedResource));
+				}
+				if (!resourceId.equals(updatedResource.getIdElement().getIdPart())) {
+					throw new JobExecutionFailedException(Msg.code(2783) + "Modification for Resource[" + resourceType
+							+ "/" + resourceId + "] attempted to change the resource ID");
+				}
+				if (!resourceVersion.equals(updatedResource.getIdElement().getVersionIdPart())) {
+					throw new JobExecutionFailedException(Msg.code(2784) + "Modification for Resource[" + resourceType
+							+ "/" + resourceId + "] attempted to change the resource version");
+				}
 
-			HashingWriter postModificationHash = hashResource(resource);
+				HashingWriter postModificationHash = hashResource(resource);
 
-			if (preModificationHash.matches(postModificationHash)) {
-				theState.addResource(StateEnum.UNCHANGED, new PidAndResource(pid, updatedResource));
-			} else {
-				theState.addResource(StateEnum.CHANGED_UNSAVED, new PidAndResource(pid, updatedResource));
+				if (preModificationHash.matches(postModificationHash)) {
+					theState.moveToState(pid, StateEnum.UNCHANGED);
+				} else {
+					theState.moveToState(pid, StateEnum.CHANGED_UNSAVED);
+					theState.setResourceForPid(pid, updatedResource);
+				}
 			}
 		}
 
@@ -341,47 +349,59 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	}
 
 	private void storeResourcesInTransaction(
-			C theModificationContext, State theState, TransactionDetails theTransactionDetails) {
+			C theModificationContext,
+			State theState,
+			List<TypedPidAndVersionJson> thePids,
+			TransactionDetails theTransactionDetails) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
-		// Changed resources
-		for (PidAndResource pidAndResource : theState.getResourcesInStateAndMoveToPending(StateEnum.CHANGED_UNSAVED)) {
-			IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(pidAndResource.resource());
+		for (TypedPidAndVersionJson pid : thePids) {
 
-			SystemRequestDetails requestDetails = createRequestDetails(theModificationContext, pidAndResource);
+			// Changed resources
+			if (theState.isPidInState(pid, StateEnum.CHANGED_UNSAVED)) {
+				IBaseResource resource = theState.getResourceForPid(pid);
+				Validate.isTrue(resource != null, "Resource for PID[%s] is null", pid);
+				IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(resource);
 
-			DaoMethodOutcome outcome =
-					dao.update(pidAndResource.resource(), null, true, false, requestDetails, theTransactionDetails);
-			ourLog.debug(
-					"Storage for PID[{}] resulted in version: {}",
-					pidAndResource.pid,
-					outcome.getId().getVersionIdPart());
-		}
+				SystemRequestDetails requestDetails = createRequestDetails(theModificationContext, resource);
 
-		// Deleted resources
-		for (PidAndResource pidAndResource : theState.getResourcesInStateAndMoveToPending(StateEnum.DELETED_UNSAVED)) {
-			IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(pidAndResource.resource());
-
-			SystemRequestDetails requestDetails = createRequestDetails(theModificationContext, pidAndResource);
-			if (requestDetails.isRewriteHistory()) {
-				throw new JobExecutionFailedException(
-						Msg.code(2806) + "Can't store deleted resources as history rewrites");
+				DaoMethodOutcome outcome =
+						dao.update(resource, null, true, false, requestDetails, theTransactionDetails);
+				ourLog.debug(
+						"Storage for PID[{}] resulted in version: {}",
+						pid,
+						outcome.getId().getVersionIdPart());
+				theState.moveToState(pid, StateEnum.CHANGED_PENDING);
 			}
 
-			IIdType resourceId = pidAndResource.resource().getIdElement();
-			DaoMethodOutcome outcome = dao.delete(resourceId, requestDetails);
+			// Deleted resources
+			if (theState.isPidInState(pid, StateEnum.DELETED_UNSAVED)) {
+				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(pid.getResourceType());
+				IBaseResource resource = theState.getResourceForPid(pid);
+				Validate.isTrue(resource != null, "Resource for PID[%s] is null", pid);
 
-			ourLog.debug(
-					"Deletion for PID[{}] resulted in version: {}",
-					pidAndResource.pid,
-					outcome.getId().getVersionIdPart());
+				SystemRequestDetails requestDetails = createRequestDetails(theModificationContext, resource);
+				if (requestDetails.isRewriteHistory()) {
+					throw new JobExecutionFailedException(
+							Msg.code(2806) + "Can't store deleted resources as history rewrites");
+				}
+
+				IIdType resourceId = resource.getIdElement();
+				DaoMethodOutcome outcome = dao.delete(resourceId, requestDetails);
+
+				ourLog.debug(
+						"Deletion for PID[{}] resulted in version: {}",
+						pid,
+						outcome.getId().getVersionIdPart());
+				theState.moveToState(pid, StateEnum.DELETED_PENDING);
+			}
 		}
 	}
 
 	@Nonnull
-	private SystemRequestDetails createRequestDetails(C theModificationContext, PidAndResource pidAndResource) {
+	private SystemRequestDetails createRequestDetails(C theModificationContext, IBaseResource theResource) {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setRewriteHistory(isRewriteHistory(theModificationContext, pidAndResource.resource()));
+		requestDetails.setRewriteHistory(isRewriteHistory(theModificationContext, theResource));
 		return requestDetails;
 	}
 
@@ -396,11 +416,11 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 
 	/**
 	 * Subclasses may override this method, which will be called immediately before beginning processing
-	 * of a batch of resources. It can be used to perform any shared processing which would otherwise need
+	 * of a resource batch. It can be used to perform any shared processing that would otherwise need
 	 * to be repeated, such as looking up context resources, parsing a patch object in the job parameters
 	 * or other expensive operations.
 	 *
-	 * @param theJobParameters The parametrs for the current instance of the job
+	 * @param theJobParameters The parameters for the current instance of the job
 	 * @param thePids          The PIDs of the resources to be modified. The PIDs will be in the same order as the resources in the chunk.
 	 * @return A context object which will be passed to {@link #modifyResource(PT, Object, ResourceModificationRequest)}
 	 * 	during each invocation. The format of the context object is up to the subclass, the framework
@@ -430,7 +450,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	}
 
 	@VisibleForTesting
-	public void setSystemDaoForUnitTest(IFhirSystemDao theSystemDao) {
+	public void setSystemDaoForUnitTest(IFhirSystemDao<?, ?> theSystemDao) {
 		assert theSystemDao != null;
 		mySystemDao = theSystemDao;
 	}
@@ -454,54 +474,70 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		outcome.setChunkRetryCount(theState.getRetryCount());
 		outcome.setResourceRetryCount(theState.getRetriedResourceCount());
 
-		for (PidAndResource next : theState.getResourcesInState(StateEnum.CHANGED_SAVED)) {
+		for (TypedPidAndVersionJson next : theState.getPidsInState(StateEnum.CHANGED_SAVED)) {
+			IBaseResource resource = theState.getResourceForPid(next);
 			if (theJobParameters.isDryRun()) {
 				if (theJobParameters.getDryRunMode() == BaseBulkModifyJobParameters.DryRunMode.COLLECT_CHANGED) {
-					outcome.addChangedResourceBody(
-							myFhirContext.newJsonParser().encodeResourceToString(next.resource()));
+					outcome.addChangedResourceBody(myFhirContext.newJsonParser().encodeResourceToString(resource));
 				}
 			}
 
-			outcome.addChangedId(next.resource().getIdElement());
+			outcome.addChangedId(resource.getIdElement());
 		}
-		for (PidAndResource next : theState.getResourcesInState(StateEnum.DELETED_SAVED)) {
-			outcome.addDeletedId(next.resource().getIdElement());
+		for (TypedPidAndVersionJson next : theState.getPidsInState(StateEnum.DELETED_SAVED)) {
+			IBaseResource resource = theState.getResourceForPid(next);
+			outcome.addDeletedId(resource.getIdElement());
 		}
-		for (PidAndResource next : theState.getResourcesInState(StateEnum.UNCHANGED)) {
-			outcome.addUnchangedId(next.resource().getIdElement());
+		for (TypedPidAndVersionJson next : theState.getPidsInState(StateEnum.UNCHANGED)) {
+			IBaseResource resource = theState.getResourceForPid(next);
+			outcome.addUnchangedId(resource.getIdElement());
 		}
-		for (Map.Entry<PidAndResource, String> next : theState.getFailures().entrySet()) {
-			outcome.addFailure(next.getKey().resource().getIdElement(), next.getValue());
+		for (Map.Entry<TypedPidAndVersionJson, String> next :
+				theState.getFailures().entrySet()) {
+			IBaseResource resource = theState.getResourceForPid(next.getKey());
+			outcome.addFailure(resource.getIdElement(), next.getValue());
 		}
 		return outcome;
 	}
 
 	private enum StateEnum {
 
-		/** Resource has not yet been fetched or modified, only the PID is present */
+		/**
+		 * Resource has not yet been fetched or modified, only the PID is present
+		 */
 		INITIAL,
-		/** Resource was not modified and doesn't need to be written to the DB */
+		/**
+		 * Resource was not modified and doesn't need to be written to the DB
+		 */
 		UNCHANGED,
-		/** Resource was modified and needs to be written to the DB */
+		/**
+		 * Resource was modified and needs to be written to the DB
+		 */
 		CHANGED_UNSAVED,
-		/** Resource was modified and written to the DB, transaction is not yet committed */
+		/**
+		 * Resource was modified and written to the DB, transaction is not yet committed
+		 */
 		CHANGED_PENDING,
-		/** Resource was modified and successfully written to the DB */
+		/**
+		 * Resource was modified and successfully written to the DB
+		 */
 		CHANGED_SAVED,
-		/** Resource was deleted and needs to be written to the DB */
+		/**
+		 * Resource was deleted and needs to be written to the DB
+		 */
 		DELETED_UNSAVED,
-		/** Resource was deleted and written to the DB, transaction is not yet committed */
+		/**
+		 * Resource was deleted and written to the DB, transaction is not yet committed
+		 */
 		DELETED_PENDING,
-		/** Resource was deleted and successfully written to the DB */
-		DELETED_SAVED;
-
-		public StateEnum toPending() {
-			return switch (this) {
-				case CHANGED_UNSAVED -> CHANGED_PENDING;
-				case DELETED_UNSAVED -> DELETED_PENDING;
-				default -> throw new IllegalStateException(Msg.code(2807) + "Can't convert " + this + " to pending");
-			};
-		}
+		/**
+		 * Resource was deleted and successfully written to the DB
+		 */
+		DELETED_SAVED,
+		/**
+		 * Resource modification was not successful
+		 */
+		FAILED;
 
 		public StateEnum toSaved() {
 			return switch (this) {
@@ -525,9 +561,11 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	 */
 	private static class State {
 
-		private final ListMultimap<StateEnum, PidAndResource> myStateMap =
-				MultimapBuilder.enumKeys(StateEnum.class).arrayListValues().build();
-		private final Map<PidAndResource, String> myFailures = new HashMap<>();
+		private final Map<TypedPidAndVersionJson, StateEnum> myPidToState = new HashMap<>();
+		private final Map<TypedPidAndVersionJson, IBaseResource> myPidToResource = new HashMap<>();
+		private final SetMultimap<StateEnum, TypedPidAndVersionJson> myStateToPids =
+				MultimapBuilder.enumKeys(StateEnum.class).hashSetValues().build();
+		private final Map<TypedPidAndVersionJson, String> myPidToFailure = new HashMap<>();
 		private int myRetryCount;
 		private int myRetriedResourceCount;
 		private JobExecutionFailedException myJobFailure;
@@ -549,66 +587,83 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			myRetriedResourceCount += theIncrement;
 		}
 
-		public List<PidAndResource> getResourcesInState(StateEnum theState) {
-			return List.copyOf(myStateMap.get(theState));
+		public void addPids(List<TypedPidAndVersionJson> thePids) {
+			for (TypedPidAndVersionJson next : thePids) {
+				addPid(next);
+			}
 		}
 
-		public List<PidAndResource> getResourcesInStateAndClear(StateEnum theState) {
-			return List.copyOf(myStateMap.removeAll(theState));
+		/**
+		 * Adds a resource in {@link StateEnum#INITIAL} state.
+		 */
+		public void addPid(TypedPidAndVersionJson thePid) {
+			Validate.isTrue(
+					!myPidToState.containsKey(thePid),
+					() -> "Resource " + thePid + " already present in state " + myPidToState.get(thePid));
+			myStateToPids.put(StateEnum.INITIAL, thePid);
+			myPidToState.put(thePid, StateEnum.INITIAL);
 		}
 
-		public List<PidAndResource> getResourcesInStateAndMoveToPending(StateEnum theState) {
-			List<PidAndResource> retVal = myStateMap.removeAll(theState);
-			StateEnum nextState = theState.toPending();
-			myStateMap.putAll(nextState, retVal);
-			return retVal;
+		public void moveToFailure(TypedPidAndVersionJson thePid, String theMessage) {
+			String previousValue = myPidToFailure.put(thePid, theMessage);
+			Validate.isTrue(previousValue == null, "%s is already present", thePid);
+
+			moveToState(thePid, StateEnum.FAILED);
 		}
 
-		public void addResource(StateEnum theState, PidAndResource theResource) {
-			assert !myStateMap.containsEntry(theState, theResource);
-			myStateMap.put(theState, theResource);
+		public void moveToState(TypedPidAndVersionJson thePid, StateEnum theNewState) {
+			StateEnum previousState = myPidToState.get(thePid);
+			Validate.notNull(previousState, "Resource %s is not present", thePid);
+
+			myPidToState.put(thePid, theNewState);
+			myStateToPids.remove(previousState, thePid);
+			myStateToPids.put(theNewState, thePid);
 		}
 
-		public void addFailure(PidAndResource theResource, String theMessage) {
-			String previousValue = myFailures.put(theResource, theMessage);
-			Validate.isTrue(previousValue == null, "%s is already present", theResource);
-		}
-
-		public Map<PidAndResource, String> getFailures() {
-			return myFailures;
+		public Map<TypedPidAndVersionJson, String> getFailures() {
+			return myPidToFailure;
 		}
 
 		public void movePendingToSaved() {
 			for (StateEnum state : StateEnum.pendingStates()) {
-				List<PidAndResource> pidsAndResources = getResourcesInStateAndClear(state);
-				myStateMap.putAll(state.toSaved(), pidsAndResources);
+				StateEnum saved = state.toSaved();
+				assert saved != null;
+				List<TypedPidAndVersionJson> pids = getPidsInState(state);
+				for (TypedPidAndVersionJson pid : pids) {
+					moveToState(pid, saved);
+				}
 			}
 		}
 
-		public void movePendingBackToModificationList() {
-			for (StateEnum state : StateEnum.pendingStates()) {
-				List<PidAndResource> pidsAndResources = getResourcesInStateAndClear(state);
-				pidsAndResources.forEach(r -> addResource(StateEnum.INITIAL, r));
+		public void moveFailedResourcesBackToInitialState() {
+			List<TypedPidAndVersionJson> failed = getPidsInState(StateEnum.FAILED);
+			for (TypedPidAndVersionJson pid : failed) {
+				moveToState(pid, StateEnum.INITIAL);
+				myPidToResource.remove(pid);
+				myPidToFailure.remove(pid);
 			}
 		}
 
-		public void movePendingToFailed(String theMessage) {
-			for (StateEnum state : StateEnum.pendingStates()) {
-				List<PidAndResource> pidsAndResources = getResourcesInStateAndClear(state);
-				pidsAndResources.forEach(r -> addFailure(r, theMessage));
-			}
+		public List<TypedPidAndVersionJson> getPidsInState(StateEnum theState) {
+			return List.copyOf(myStateToPids.get(theState));
 		}
 
-		public List<PidAndResource> getPidsToModifyAndClear() {
-			return getResourcesInStateAndClear(StateEnum.INITIAL);
+		/**
+		 * @throws java.util.NoSuchElementException if no PIDs are present in the given state
+		 */
+		@Nonnull
+		public TypedPidAndVersionJson getSinglePidInState(StateEnum theState) {
+			TypedPidAndVersionJson pid = myStateToPids.get(theState).iterator().next();
+			Validate.notNull(pid, "No PIDs in state %s", theState);
+			return pid;
 		}
 
-		public boolean hasPidsToModify() {
-			return !myStateMap.get(StateEnum.INITIAL).isEmpty();
+		public boolean hasPidsInInitialState() {
+			return !myStateToPids.get(StateEnum.INITIAL).isEmpty();
 		}
 
 		public int countPidsToModify() {
-			return myStateMap.get(StateEnum.INITIAL).size();
+			return myStateToPids.get(StateEnum.INITIAL).size();
 		}
 
 		public JobExecutionFailedException getJobFailure() {
@@ -621,15 +676,30 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 
 		public void moveUnsavedToSaved() {
 			for (StateEnum state : StateEnum.unsavedStates()) {
-				List<PidAndResource> entries = myStateMap.removeAll(state);
-				StateEnum savedState = state.toSaved();
-				assert savedState != null;
-				myStateMap.putAll(savedState, entries);
+				StateEnum newState = state.toSaved();
+				assert newState != null;
+				for (TypedPidAndVersionJson pid : getPidsInState(state)) {
+					moveToState(pid, newState);
+				}
 			}
 		}
-	}
 
-	private record PidAndResource(TypedPidAndVersionJson pid, IBaseResource resource) {}
+		public void setResourceForPid(TypedPidAndVersionJson thePid, IBaseResource theResourceVersion) {
+			Validate.isTrue(myPidToState.containsKey(thePid), "Pid %s is not present", thePid);
+			myPidToResource.put(thePid, theResourceVersion);
+		}
+
+		@Nonnull
+		public IBaseResource getResourceForPid(TypedPidAndVersionJson thePid) {
+			IBaseResource retVal = myPidToResource.get(thePid);
+			Validate.notNull(retVal, "Resource for PID %s is null", thePid);
+			return retVal;
+		}
+
+		public boolean isPidInState(@Nonnull TypedPidAndVersionJson thePid, @Nonnull StateEnum theStateEnum) {
+			return theStateEnum.equals(myPidToState.get(thePid));
+		}
+	}
 
 	@SuppressWarnings("UnstableApiUsage")
 	private class HashingWriter extends Writer {
