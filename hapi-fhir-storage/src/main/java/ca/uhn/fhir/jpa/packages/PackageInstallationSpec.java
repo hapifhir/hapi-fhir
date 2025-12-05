@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%

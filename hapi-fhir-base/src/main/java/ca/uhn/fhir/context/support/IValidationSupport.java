@@ -45,6 +45,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -190,6 +191,14 @@ public interface IValidationSupport {
 	@Nullable
 	default IBaseResource fetchCodeSystem(String theSystem) {
 		return null;
+	}
+
+	default <T extends IBaseResource> Stream<T> fetchResources(Class<T> theClazz, String theUrl) {
+		return Stream.empty();
+	}
+
+	default <T extends IBaseResource> Stream<T> fetchAllResourcesOfType(@Nonnull Class<T> theClazz) {
+		return Stream.empty();
 	}
 
 	/**

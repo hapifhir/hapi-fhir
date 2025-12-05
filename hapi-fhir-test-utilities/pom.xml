@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>8.7.1-SNAPSHOT</version>
+		<version>8.7.2-SNAPSHOT-LS</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -208,6 +208,13 @@
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
+		</dependency>
+		<!-- Apache compres: https://commons.apache.org/proper/commons-compress/ -->
+		<!-- Apache license -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>1.28.0</version>
 		</dependency>
 </dependencies>
 
