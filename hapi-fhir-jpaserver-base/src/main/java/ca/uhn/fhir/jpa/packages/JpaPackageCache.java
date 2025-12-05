@@ -346,7 +346,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			} catch (IOException e) {
 				throw new InternalErrorException(Msg.code(2371) + e);
 			}
-			IParser jsonParser = packageContext.newJsonParser();;
+			IParser jsonParser = packageContext.newJsonParser();
+			;
 			for (Map.Entry<String, List<String>> nextTypeToFiles : packageFolderTypes.entrySet()) {
 				String nextType = nextTypeToFiles.getKey();
 				for (String nextFile : nextTypeToFiles.getValue()) {
@@ -377,9 +378,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					 */
 					String contentType = Constants.CT_FHIR_JSON_NEW;
 					ResourceUtil.removeNarrative(packageContext, resource);
-					byte[] minimizedContents = jsonParser
-							.encodeResourceToString(resource)
-							.getBytes(StandardCharsets.UTF_8);
+					byte[] minimizedContents =
+							jsonParser.encodeResourceToString(resource).getBytes(StandardCharsets.UTF_8);
 
 					IBaseBinary resourceBinary = createPackageResourceBinary(minimizedContents, contentType);
 					ResourceTable persistedResource = createResourceBinary(resourceBinary);
