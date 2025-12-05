@@ -106,7 +106,7 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 	private String myGroupId;
 
 	/**
-	 * For group export;
+	 * For group and patient instance exports;
 	 * whether or not to expand mdm
 	 */
 	@JsonProperty("expandMdm")
