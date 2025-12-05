@@ -980,6 +980,10 @@
 			<id>MadsSwensson</id>
 			<name>Mads Swensson</name>
 		</developer>
+		<developer>
+			<id>esecules</id>
+			<name>Eric Secules</name>
+		</developer>
 	</developers>
 
 	<licenses>

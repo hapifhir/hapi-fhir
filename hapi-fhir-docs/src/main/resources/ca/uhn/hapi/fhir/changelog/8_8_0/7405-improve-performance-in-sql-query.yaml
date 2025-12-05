@@ -1,0 +1,7 @@
+---
+type: perf
+issue: 7404
+title: "A SQL query used by the JPA server when fetching search results has
+   been made more efficient when fetching resources with many previous
+   versions stored in the database. Thanks to Eric Secules for the
+   controbution!"
