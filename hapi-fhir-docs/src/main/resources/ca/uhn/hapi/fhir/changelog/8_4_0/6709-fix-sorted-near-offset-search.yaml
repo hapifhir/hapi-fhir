@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6709
+title: "Fix SQL generation for _sort=near with grouped queries and OFFSET — now adds the distance column to the GROUP BY clause to produce valid PostgreSQL syntax."
