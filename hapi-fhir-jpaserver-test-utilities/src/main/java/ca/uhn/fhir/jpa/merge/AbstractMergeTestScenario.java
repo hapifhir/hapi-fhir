@@ -241,11 +241,13 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		// Create and persist source resource
 		T source = createResource(mySourceIdentifiers);
 		IFhirResourceDao<T> dao = getDao();
-		IIdType versionlessSourceId = dao.create(source, myRequestDetails).getId().toUnqualifiedVersionless();
+		IIdType versionlessSourceId =
+				dao.create(source, myRequestDetails).getId().toUnqualifiedVersionless();
 
 		// Create and persist target resource
 		T target = createResource(myTargetIdentifiers);
-		IIdType versionlessTargetId = dao.create(target, myRequestDetails).getId().toUnqualifiedVersionless();
+		IIdType versionlessTargetId =
+				dao.create(target, myRequestDetails).getId().toUnqualifiedVersionless();
 
 		// Create referencing resources organized by type
 		Map<String, List<IIdType>> referencingResourcesByType = new HashMap<>();
@@ -254,7 +256,8 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 			List<IIdType> idsForType = new ArrayList<>();
 
 			for (int i = 0; i < resourceType.getCount(); i++) {
-				IBaseResource referencingResource = createReferencingResource(resourceType.getResourceType(), versionlessSourceId);
+				IBaseResource referencingResource =
+						createReferencingResource(resourceType.getResourceType(), versionlessSourceId);
 
 				// Persist referencing resource
 				IFhirResourceDao<IBaseResource> refDao = myDaoRegistry.getResourceDao(resourceType.getResourceType());
