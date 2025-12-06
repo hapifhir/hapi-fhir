@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
+import ca.uhn.fhir.jpa.api.svc.IMergeOperationProviderSvc;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.At;
@@ -52,16 +53,21 @@ import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
+import java.util.List;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_ADD;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_DELETE;
@@ -69,6 +75,11 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_META;
 
 public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends BaseJpaProvider
 		implements IResourceProvider {
+
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaResourceProvider.class);
+
+	@Autowired(required = false)
+	private IMergeOperationProviderSvc myMergeOperationProviderSvc;
 
 	private IFhirResourceDao<T> myDao;
 
@@ -108,6 +119,10 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 
 	public void setDao(IFhirResourceDao<T> theDao) {
 		myDao = theDao;
+	}
+
+	protected IMergeOperationProviderSvc getMergeOperationProviderSvc() {
+		return myMergeOperationProviderSvc;
 	}
 
 	@History
@@ -366,5 +381,59 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 			RequestDetails theRequestDetails) {
 		return getDao().validate(
 						theResource, theId, theRawResource, theEncoding, theMode, theProfile, theRequestDetails);
+	}
+
+	@Operation(name = JpaConstants.OPERATION_HAPI_FHIR_MERGE, idempotent = false)
+	public IBaseParameters mergeResource(
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_RESOURCE, min = 0, max = 1)
+					IBaseReference theSourceResource,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_TARGET_RESOURCE, min = 0, max = 1)
+					IBaseReference theTargetResource,
+			@OperationParam(
+							name = ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_RESOURCE_IDENTIFIER,
+							typeName = "Identifier")
+					List<IBase> theSourceResourceIdentifier,
+			@OperationParam(
+							name = ProviderConstants.OPERATION_MERGE_PARAM_TARGET_RESOURCE_IDENTIFIER,
+							typeName = "Identifier")
+					List<IBase> theTargetResourceIdentifier,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_RESULT_RESOURCE, min = 0, max = 1)
+					IBaseResource theResultResource,
+			@OperationParam(
+							name = ProviderConstants.OPERATION_MERGE_PARAM_PREVIEW,
+							typeName = "boolean",
+							min = 0,
+							max = 1)
+					IPrimitiveType<Boolean> thePreview,
+			@OperationParam(
+							name = ProviderConstants.OPERATION_MERGE_PARAM_DELETE_SOURCE,
+							typeName = "boolean",
+							min = 0,
+							max = 1)
+					IPrimitiveType<Boolean> theDeleteSource,
+			@OperationParam(
+							name = ProviderConstants.OPERATION_MERGE_PARAM_BATCH_SIZE,
+							typeName = "integer",
+							min = 0,
+							max = 1)
+					IPrimitiveType<Integer> theBatchSize,
+			ServletRequestDetails theRequestDetails) {
+
+		if (getMergeOperationProviderSvc() == null) {
+			throw new InvalidRequestException(
+					Msg.code(2572) + "Merge operation is not supported on this server - service not configured");
+		}
+
+		return getMergeOperationProviderSvc()
+				.merge(
+						theSourceResourceIdentifier,
+						theTargetResourceIdentifier,
+						theSourceResource,
+						theTargetResource,
+						thePreview,
+						theDeleteSource,
+						theResultResource,
+						theBatchSize,
+						theRequestDetails);
 	}
 }
