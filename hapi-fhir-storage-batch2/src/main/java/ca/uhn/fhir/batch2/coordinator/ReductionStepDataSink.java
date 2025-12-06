@@ -28,6 +28,7 @@ import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.batch2.progress.InstanceProgress;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.util.JsonUtil;
@@ -43,15 +44,18 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 
 	private final IJobPersistence myJobPersistence;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
+	private final IInterceptorService myInterceptorService;
 
 	public ReductionStepDataSink(
 			String theInstanceId,
 			JobWorkCursor<PT, IT, OT> theJobWorkCursor,
 			IJobPersistence thePersistence,
-			JobDefinitionRegistry theJobDefinitionRegistry) {
+			JobDefinitionRegistry theJobDefinitionRegistry,
+			IInterceptorService theInterceptorService) {
 		super(theInstanceId, theJobWorkCursor);
 		myJobPersistence = thePersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
+		myInterceptorService = theInterceptorService;
 	}
 
 	@Override
@@ -60,8 +64,8 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 		OT data = theData.getData();
 		String dataString = JsonUtil.serialize(data, false);
 		JobChunkProgressAccumulator progressAccumulator = new JobChunkProgressAccumulator();
-		JobInstanceProgressCalculator myJobInstanceProgressCalculator =
-				new JobInstanceProgressCalculator(myJobPersistence, progressAccumulator, myJobDefinitionRegistry);
+		JobInstanceProgressCalculator myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(
+				myJobPersistence, progressAccumulator, myJobDefinitionRegistry, myInterceptorService);
 
 		InstanceProgress progress = myJobInstanceProgressCalculator.calculateInstanceProgress(instanceId);
 		boolean changed = myJobPersistence.updateInstance(instanceId, instance -> {
