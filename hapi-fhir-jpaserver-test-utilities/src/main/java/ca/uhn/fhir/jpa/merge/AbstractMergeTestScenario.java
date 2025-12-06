@@ -125,8 +125,8 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	private List<IProvenanceAgent> myExpectedProvenanceAgents = null;
 
 	// Data State (after createTestData)
-	private T mySourceResource;
-	private T myTargetResource;
+	private IIdType myVersionlessSourceId;
+	private IIdType myVersionlessTargetId;
 	private Map<String, List<IIdType>> myReferencingResourcesByType;
 	private boolean myIsTestDataPersisted = false;
 	private Parameters myInputParameters;
@@ -241,11 +241,11 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		// Create and persist source resource
 		T source = createResource(mySourceIdentifiers);
 		IFhirResourceDao<T> dao = getDao();
-		source = (T) dao.create(source, myRequestDetails).getResource();
+		IIdType versionlessSourceId = dao.create(source, myRequestDetails).getId().toUnqualifiedVersionless();
 
 		// Create and persist target resource
 		T target = createResource(myTargetIdentifiers);
-		target = (T) dao.create(target, myRequestDetails).getResource();
+		IIdType versionlessTargetId = dao.create(target, myRequestDetails).getId().toUnqualifiedVersionless();
 
 		// Create referencing resources organized by type
 		Map<String, List<IIdType>> referencingResourcesByType = new HashMap<>();
@@ -254,8 +254,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 			List<IIdType> idsForType = new ArrayList<>();
 
 			for (int i = 0; i < resourceType.getCount(); i++) {
-				IBaseResource referencingResource = createReferencingResource(
-						resourceType.getResourceType(), source.getIdElement().toUnqualifiedVersionless());
+				IBaseResource referencingResource = createReferencingResource(resourceType.getResourceType(), versionlessSourceId);
 
 				// Persist referencing resource
 				IFhirResourceDao<IBaseResource> refDao = myDaoRegistry.getResourceDao(resourceType.getResourceType());
@@ -268,16 +267,16 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 			referencingResourcesByType.put(resourceType.getResourceType(), idsForType);
 		}
 
-		// Store data state
-		mySourceResource = source;
-		myTargetResource = target;
+		// Store data state - only IDs
+		myVersionlessSourceId = versionlessSourceId;
+		myVersionlessTargetId = versionlessTargetId;
 		myReferencingResourcesByType = referencingResourcesByType;
 		myIsTestDataPersisted = true;
 
 		ourLog.info(
 				"Merge test data built successfully: source={}, target={}, referencing resource types={}",
-				source.getIdElement(),
-				target.getIdElement(),
+				versionlessSourceId,
+				versionlessTargetId,
 				referencingResourcesByType.keySet());
 	}
 
@@ -288,25 +287,57 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	@Nonnull
 	public IIdType getVersionlessSourceId() {
 		assertTestDataPersisted();
-		return mySourceResource.getIdElement().toUnqualifiedVersionless();
+		return myVersionlessSourceId;
 	}
 
 	@Nonnull
 	public IIdType getVersionlessTargetId() {
 		assertTestDataPersisted();
-		return myTargetResource.getIdElement().toUnqualifiedVersionless();
+		return myVersionlessTargetId;
 	}
 
+	/**
+	 * Reads the source resource from the database.
+	 * Always returns fresh data from the database.
+	 *
+	 * @return the source resource read from database
+	 */
 	@Nonnull
-	public T getSourceResource() {
+	public T readSourceResource() {
 		assertTestDataPersisted();
-		return mySourceResource;
+		return readResource(myVersionlessSourceId);
 	}
 
+	/**
+	 * Reads the target resource from the database.
+	 * Always returns fresh data from the database.
+	 *
+	 * @return the target resource read from database
+	 */
 	@Nonnull
-	public T getTargetResource() {
+	public T readTargetResource() {
 		assertTestDataPersisted();
-		return myTargetResource;
+		return readResource(myVersionlessTargetId);
+	}
+
+	/**
+	 * Get the source identifiers used to create the source resource.
+	 *
+	 * @return list of source identifiers from configuration
+	 */
+	@Nonnull
+	public List<Identifier> getSourceIdentifiers() {
+		return Collections.unmodifiableList(mySourceIdentifiers);
+	}
+
+	/**
+	 * Get the target identifiers used to create the target resource.
+	 *
+	 * @return list of target identifiers from configuration
+	 */
+	@Nonnull
+	public List<Identifier> getTargetIdentifiers() {
+		return Collections.unmodifiableList(myTargetIdentifiers);
 	}
 
 	@Nonnull
@@ -395,13 +426,13 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		if (theSourceById) {
 			params.sourceResource(new Reference(getVersionlessSourceId()));
 		} else {
-			params.sourceIdentifiers(getIdentifiersFromResource(mySourceResource));
+			params.sourceIdentifiers(getSourceIdentifiers());
 		}
 
 		if (theTargetById) {
 			params.targetResource(new Reference(getVersionlessTargetId()));
 		} else {
-			params.targetIdentifiers(getIdentifiersFromResource(myTargetResource));
+			params.targetIdentifiers(getTargetIdentifiers());
 		}
 
 		addResultResourceIfNeeded(params);
@@ -499,12 +530,12 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 		if (myDeleteSource) {
 			// Resource should not exist
-			assertThatThrownBy(() -> readResource(versionlessSourceId))
+			assertThatThrownBy(this::readSourceResource)
 					.as("Source resource should be deleted")
 					.isInstanceOf(ResourceGoneException.class);
 		} else {
 			// Read the resource internally
-			T source = readResource(versionlessSourceId);
+			T source = readSourceResource();
 
 			// Resource should have replaced-by link
 			IResourceLinkService linkService = myLinkServiceFactory.getServiceForResourceType(getResourceTypeName());
@@ -525,7 +556,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		assertTestDataPersisted();
 
 		// Read target resource
-		T target = readResource(getVersionlessTargetId());
+		T target = readTargetResource();
 
 		// Should have replaces link only if source was not deleted
 		// (when source is deleted, we don't want a dangling reference)
@@ -702,7 +733,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		// assert what is returned is the same as the one in the db
 		T targetResourceInOutput = (T)
 				theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_RESULT).getResource();
-		T targetResourceReadFromDB = readResource(getVersionlessTargetId());
+		T targetResourceReadFromDB = readTargetResource();
 		IParser parser = myFhirContext.newJsonParser();
 		assertThat(parser.encodeResourceToString(targetResourceInOutput))
 				.isEqualTo(parser.encodeResourceToString(targetResourceReadFromDB));
