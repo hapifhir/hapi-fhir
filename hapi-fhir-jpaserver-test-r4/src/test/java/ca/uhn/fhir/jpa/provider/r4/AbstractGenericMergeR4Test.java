@@ -500,7 +500,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		// Create a duplicate resource with the same identifiers as target
 		// This simulates the scenario where multiple resources match the target identifiers
-		List<Identifier> targetIdentifiers = scenario.getIdentifiersFromResource(scenario.getTargetResource());
+		List<Identifier> targetIdentifiers = scenario.getTargetIdentifiers();
 		T duplicateResource = scenario.createResource(targetIdentifiers);
 		myClient.create().resource(duplicateResource).execute();
 
@@ -526,7 +526,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 		// Create a duplicate resource with the same identifiers as source
 		// This simulates the scenario where multiple resources match the source identifiers
-		List<Identifier> sourceIdentifiers = scenario.getIdentifiersFromResource(scenario.getSourceResource());
+		List<Identifier> sourceIdentifiers = scenario.getSourceIdentifiers();
 		T duplicateResource = scenario.createResource(sourceIdentifiers);
 		myClient.create().resource(duplicateResource).execute();
 
@@ -621,7 +621,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		params.batchSize(5);
 
 		// Execute merge and expect error
-		String sourceId = scenario.getSourceResource().getIdElement().toUnqualifiedVersionless().getValue();
+		String sourceId = scenario.getVersionlessSourceId().getValue();
 		callMergeAndValidateException(
 				params,
 				PreconditionFailedException.class,
