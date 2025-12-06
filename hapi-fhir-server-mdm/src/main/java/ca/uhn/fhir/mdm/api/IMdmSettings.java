@@ -53,6 +53,21 @@ public interface IMdmSettings {
 		return getMdmRules().getMdmTypes().stream().collect(Collectors.joining(", "));
 	}
 
+	/**
+	 * Link based expansion (using the {@link IMdmLink}) table is enabled if MDM is running in MATCH_AND_LINK mode.
+	 */
+	default boolean supportsLinkBasedExpansion() {
+		return getMode().equals(MdmModeEnum.MATCH_AND_LINK);
+	}
+
+	/**
+	 * EID-Based expansion is supported if MDM is running in MATCH_ONLY mode, and at least one EID system is defined.
+	 */
+	default boolean supportsEidBasedExpansion() {
+		return getMode().equals(MdmModeEnum.MATCH_ONLY)
+				&& !getMdmRules().getEnterpriseEIDSystems().isEmpty();
+	}
+
 	int getCandidateSearchLimit();
 
 	String getGoldenResourcePartitionName();
