@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,12 +59,12 @@ public class BulkModifyResourcesChunkOutcomeJson implements IModelJson {
 	@JsonProperty("resourceRetryCount")
 	private Integer myResourceRetryCount;
 
-	public void addChangedId(String theId) {
-		getChangedIds().add(theId);
+	public void addChangedId(IIdType theIdElement) {
+		getChangedIds().add(theIdElement.toUnqualified().getValue());
 	}
 
-	public void addDeletedId(String theId) {
-		getDeletedIds().add(theId);
+	public void addDeletedId(IIdType theIdElement) {
+		getDeletedIds().add(theIdElement.toUnqualified().getValue());
 	}
 
 	public List<String> getChangedResourceBodies() {
@@ -87,8 +88,8 @@ public class BulkModifyResourcesChunkOutcomeJson implements IModelJson {
 		return myDeletedIds;
 	}
 
-	public void addUnchangedId(String theId) {
-		getUnchangedIds().add(theId);
+	public void addUnchangedId(IIdType theIdElement) {
+		getUnchangedIds().add(theIdElement.toUnqualified().getValue());
 	}
 
 	public List<String> getUnchangedIds() {
@@ -98,9 +99,8 @@ public class BulkModifyResourcesChunkOutcomeJson implements IModelJson {
 		return myUnchangedIds;
 	}
 
-	public void addFailure(String theId, String theMessage) {
-		Validate.notBlank(theId, "theId must not be blank");
-		getFailures().put(theId, theMessage);
+	public void addFailure(IIdType theId, String theMessage) {
+		getFailures().put(theId.toUnqualified().getValue(), theMessage);
 	}
 
 	/**

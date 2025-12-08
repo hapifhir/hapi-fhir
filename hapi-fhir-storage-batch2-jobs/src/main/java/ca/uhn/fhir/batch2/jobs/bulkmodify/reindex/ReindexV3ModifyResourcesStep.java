@@ -27,8 +27,8 @@ import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionJson;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexWarningProcessor;
-import ca.uhn.fhir.batch2.jobs.reindex.models.ReindexResults;
 import ca.uhn.fhir.batch2.jobs.reindex.svcs.ReindexJobService;
+import ca.uhn.fhir.batch2.jobs.reindex.v2.ReindexResults;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.ReindexOutcome;
@@ -60,6 +60,32 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 	}
 
 	@Override
+	protected void processPidsOutsideTransaction(
+			String theInstanceId,
+			String theChunkId,
+			ReindexJobParameters theJobParameters,
+			State theState,
+			List<TypedPidAndVersionJson> thePids,
+			TransactionDetails theTransactionDetails,
+			IJobDataSink<BulkModifyResourcesChunkOutcomeJson> theDataSink) {
+		/*
+		 * This logic is ported from the V2 reindex task, and is used to ensure that we don't
+		 * reindex CodeSystem resources if they are pending CodeSystem backend indexing. We really
+		 * need to move CS extraction and VS expansion into Batch2 jobs which have some sort of
+		 * guarding against collisions, so we can do this in a less convoluted way.
+		 */
+		Map<String, Boolean> resourceTypesToCheckFlag = new HashMap<>();
+		thePids.forEach(id -> {
+			// we don't really care about duplicates; we check by resource type
+			resourceTypesToCheckFlag.put(id.getResourceType(), true);
+		});
+		if (myReindexJobService.anyResourceHasPendingReindexWork(resourceTypesToCheckFlag)) {
+			// FIXME: new code
+			throw new RetryChunkLaterException(Msg.code(0), ReindexUtils.getRetryLaterDelay());
+		}
+	}
+
+	@Override
 	protected void processPidsInTransaction(
 			String theInstanceId,
 			String theChunkId,
@@ -73,20 +99,6 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 		// is weirdly complex - all it does is massage specific warning messages. This logic
 		// should just be moved into this class
 		theDataSink.setWarningProcessor(new ReindexWarningProcessor());
-
-		// This is not strictly necessary;
-		// but we'll ensure that no outstanding "reindex work"
-		// is waiting to be completed, so that when we do
-		// our reindex work here, it won't skip over that data
-		Map<String, Boolean> resourceTypesToCheckFlag = new HashMap<>();
-		thePids.forEach(id -> {
-			// we don't really care about duplicates; we check by resource type
-			resourceTypesToCheckFlag.put(id.getResourceType(), true);
-		});
-		if (myReindexJobService.anyResourceHasPendingReindexWork(resourceTypesToCheckFlag)) {
-			// FIXME: new code
-			throw new RetryChunkLaterException(Msg.code(0), ReindexUtils.getRetryLaterDelay());
-		}
 
 		// Convert JSON TypedPids into Persistent IDs
 		List<? extends IResourcePersistentId<?>> persistentIds = thePids.stream()
@@ -129,6 +141,8 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 				ReindexOutcome outcome =
 						dao.reindex(resourcePersistentId, parameters, requestDetails, theTransactionDetails);
 
+				// FIXME: make sure we have a test where the actual reindex step fails and make sure the report captures
+				// the ID correctly
 				theState.setResourceIdForPid(nextPid, outcome.getResourceId());
 				theState.moveToState(nextPid, StateEnum.CHANGED_PENDING);
 				outcome.getWarnings().forEach(theDataSink::recoveredError);

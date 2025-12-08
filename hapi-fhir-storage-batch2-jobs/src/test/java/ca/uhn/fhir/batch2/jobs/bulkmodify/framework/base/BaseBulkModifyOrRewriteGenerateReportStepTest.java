@@ -43,7 +43,7 @@ class BaseBulkModifyOrRewriteGenerateReportStepTest {
 
 		BulkModifyResourcesChunkOutcomeJson data = new BulkModifyResourcesChunkOutcomeJson();
 		for (int i = 0; i < 200; i++) {
-			data.addFailure("Patient/" + i, "Failure Message " + i);
+			data.addFailure(new IdType("Patient/" + i), "Failure Message " + i);
 		}
 		MyParams params = new MyParams();
 		JobInstance instance = new JobInstance();
@@ -76,8 +76,8 @@ class BaseBulkModifyOrRewriteGenerateReportStepTest {
 		MySvc svc = new MySvc();
 
 		BulkModifyResourcesChunkOutcomeJson data = new BulkModifyResourcesChunkOutcomeJson();
-		data.addDeletedId("Patient/10");
-		data.addDeletedId("Patient/11");
+		data.addDeletedId(new IdType("Patient/10"));
+		data.addDeletedId(new IdType("Patient/11"));
 		data.addChangedResourceBody("{\"resourceType\":\"Patient\",\"id\":\"12\"}");
 		data.addChangedResourceBody("{\"resourceType\":\"Patient\",\"id\":\"13\"}");
 		MyParams params = new MyParams();

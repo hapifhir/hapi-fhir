@@ -205,6 +205,7 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 		String severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
 		String code = OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL;
 		OperationOutcomeUtil.addIssue(myContext, oo, severity, message, null, code);
+		postProcessResponseOperationOutcome(oo, theRequestDetails);
 
 		// Provide a response
 		Multimap<String, String> additionalHeaders = ImmutableMultimap.<String, String>builder()
@@ -222,6 +223,14 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 				theRequestDetails,
 				null,
 				null);
+	}
+
+	/**
+	 * Subclasses may implement this method to provide post-processing on the response OperationOutcome
+	 */
+	protected void postProcessResponseOperationOutcome(
+			IBaseOperationOutcome theOo, ServletRequestDetails theRequestDetails) {
+		// nothing
 	}
 
 	/**
@@ -517,6 +526,16 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 	@VisibleForTesting
 	public void setJobCoordinatorForUnitTest(IJobCoordinator theJobCoordinator) {
 		myJobCoordinator = theJobCoordinator;
+	}
+
+	@VisibleForTesting
+	public void setDaoRegistryForUnitTest(IDaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
+	}
+
+	@VisibleForTesting
+	public void setJobPartitionProviderForUnitTest(IJobPartitionProvider theJobPartitionProvider) {
+		myJobPartitionProvider = theJobPartitionProvider;
 	}
 
 	@VisibleForTesting

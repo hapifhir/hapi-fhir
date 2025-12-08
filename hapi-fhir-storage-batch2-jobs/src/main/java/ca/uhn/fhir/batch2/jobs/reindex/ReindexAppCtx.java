@@ -22,7 +22,6 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.reindex.ReindexProvider;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.reindex.ReindexV3JobAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.svcs.ReindexJobService;
-import ca.uhn.fhir.batch2.jobs.reindex.v1.ReindexV1Config;
 import ca.uhn.fhir.batch2.jobs.reindex.v2.ReindexV2Config;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +30,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({ReindexV1Config.class, ReindexV2Config.class, ReindexV3JobAppCtx.class})
+@Import({ReindexV2Config.class, ReindexV3JobAppCtx.class})
 public class ReindexAppCtx {
 
 	@Autowired

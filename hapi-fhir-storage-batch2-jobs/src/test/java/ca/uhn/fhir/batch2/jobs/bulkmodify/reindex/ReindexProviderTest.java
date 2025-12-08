@@ -98,6 +98,9 @@ public class ReindexProviderTest {
 				.setUrl(u)
 				.setRequestPartitionId(RequestPartitionId.fromPartitionId(1))).toList();
 		});
+
+		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
+		mySvc.setJobPartitionProviderForUnitTest(myJobPartitionProvider);
 	}
 
 	private Batch2JobStartResponse createJobStartResponse() {
@@ -198,6 +201,34 @@ public class ReindexProviderTest {
 			new PartitionedUrl().setUrl("Observation?").setRequestPartitionId(RequestPartitionId.fromPartitionId(1)),
 			new PartitionedUrl().setUrl("Patient?").setRequestPartitionId(RequestPartitionId.fromPartitionId(1))
 		);
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testReindex_noPreferHeader(boolean theOmitHeader) {
+		// setup
+		Parameters input = new Parameters();
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+
+		// Execute
+		MethodOutcome response = myServerExtension
+				.getFhirClient()
+				.operation()
+				.onServer()
+				.named(ProviderConstants.OPERATION_REINDEX)
+				.withParameters(input)
+			.withAdditionalHeader(Constants.HEADER_PREFER, theOmitHeader ? "123" : Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.returnMethodOutcome()
+				.execute();
+
+		// Verify
+		String serializedResponseBody = myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response.getOperationOutcome());
+		String warning = "This method should be invoked with the Prefer: respond-async header";
+		if (theOmitHeader) {
+			assertThat(serializedResponseBody).contains(warning);
+		} else {
+			assertThat(serializedResponseBody).doesNotContain(warning);
+		}
 	}
 
 	@Test

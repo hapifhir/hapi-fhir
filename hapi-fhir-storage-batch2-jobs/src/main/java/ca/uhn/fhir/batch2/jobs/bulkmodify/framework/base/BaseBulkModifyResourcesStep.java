@@ -42,6 +42,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SetMultimap;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -102,11 +103,20 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			throws JobExecutionFailedException {
 
 		List<TypedPidAndVersionJson> pids = theStepExecutionDetails.getData().getTypedPidAndVersions();
+
+		String instanceId = theStepExecutionDetails.getInstance().getInstanceId();
+		String chunkId = theStepExecutionDetails.getChunkId();
+		ourLog.info(
+				"Starting {} work chunk with {} resources - Instance[{}] Chunk[{}]",
+				getJobNameForLogging(),
+				pids.size(),
+				instanceId,
+				chunkId);
+		StopWatch sw = new StopWatch();
+
 		PT jobParameters = theStepExecutionDetails.getParameters();
 		RequestPartitionId requestPartitionId =
 				theStepExecutionDetails.getData().getRequestPartitionId();
-		String instanceId = theStepExecutionDetails.getInstance().getInstanceId();
-		String chunkId = theStepExecutionDetails.getChunkId();
 
 		State state = new State();
 		state.addPids(pids);
@@ -148,6 +158,15 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 				"PIDs remain in INITIAL state, this is a bug: %s",
 				state.getPidsInState(StateEnum.INITIAL));
 
+		ourLog.info(
+				"Finished {} work chunk with {} resources in {} - {}/sec - Instance[{}] Chunk[{}]",
+				getJobNameForLogging(),
+				pids.size(),
+				sw,
+				sw.formatThroughput(pids.size(), TimeUnit.SECONDS),
+				instanceId,
+				chunkId);
+
 		BulkModifyResourcesChunkOutcomeJson outcome = generateOutcome(jobParameters, state);
 		theDataSink.accept(outcome);
 
@@ -155,7 +174,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	}
 
 	/**
-	 * @param thePids     If <code>true</code>, attempt to modify all resources in the {@link State}. If <code>false</code>, only attempt to modify a single resource.
+	 * @param thePids If <code>true</code>, attempt to modify all resources in the {@link State}. If <code>false</code>, only attempt to modify a single resource.
 	 */
 	private void processPids(
 			String theInstanceId,
@@ -170,13 +189,8 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		final TransactionDetails transactionDetails = new TransactionDetails();
 		try {
 
-			ourLog.info(
-					"Starting {} work chunk with {} resources - Instance[{}] Chunk[{}]",
-					getJobNameForLogging(),
-					thePids.size(),
-					theInstanceId,
-					theChunkId);
-			StopWatch sw = new StopWatch();
+			processPidsOutsideTransaction(
+					theInstanceId, theChunkId, theJobParameters, theState, thePids, transactionDetails, theDataSink);
 
 			myTransactionService
 					.withSystemRequestOnPartition(theRequestPartitionId)
@@ -191,21 +205,12 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 							transactionDetails,
 							theDataSink));
 
-			ourLog.info(
-					"Finished {} work chunk with {} resources in {} - {}/sec - Instance[{}] Chunk[{}]",
-					getJobNameForLogging(),
-					thePids.size(),
-					sw,
-					sw.formatThroughput(thePids.size(), TimeUnit.SECONDS),
-					theInstanceId,
-					theChunkId);
-
 			// Storage transaction succeeded
 			theState.movePendingToSaved();
 
 		} catch (JobExecutionFailedException e) {
 			throw e;
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			String failureMessage = e.toString();
 			ourLog.warn("Failure occurred during bulk modification. Failure: {}", failureMessage);
 			for (TypedPidAndVersionJson pid : thePids) {
@@ -216,6 +221,31 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		if (theState.getJobFailure() != null) {
 			throw theState.getJobFailure();
 		}
+	}
+
+	/**
+	 * For each group of PIDs, this method is called outside of any FHIR transaction, prior to
+	 * {@link #processPidsInTransaction(String, String, BaseBulkModifyJobParameters, State, List, TransactionDetails, IJobDataSink)}
+	 * being called. It can handle any pre-processing that needs to happen outside of a DB transaction.
+	 *
+	 * @param theInstanceId         The job instance ID
+	 * @param theChunkId            The work chunk ID
+	 * @param theJobParameters      The job parameters for this job instance
+	 * @param theState              The modification state object, which must be updated for all PIDs
+	 * @param thePids               The PIDs to modify.
+	 * @param theTransactionDetails A TransactionDetails associated with the current DB transaction.
+	 * @param theDataSink           The sink that will ultimately be written to
+	 * @see #processPidsInTransaction(String, String, BaseBulkModifyJobParameters, State, List, TransactionDetails, IJobDataSink)
+	 */
+	protected void processPidsOutsideTransaction(
+			String theInstanceId,
+			String theChunkId,
+			PT theJobParameters,
+			State theState,
+			List<TypedPidAndVersionJson> thePids,
+			TransactionDetails theTransactionDetails,
+			IJobDataSink<BulkModifyResourcesChunkOutcomeJson> theDataSink) {
+		// nothing
 	}
 
 	/**
@@ -235,7 +265,8 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	 * @param theState              The modification state object, which must be updated for all PIDs
 	 * @param thePids               The PIDs to modify.
 	 * @param theTransactionDetails A TransactionDetails associated with the current DB transaction.
-	 * @param theDataSink
+	 * @param theDataSink           The sink that will ultimately be written to
+	 * @see #processPidsOutsideTransaction(String, String, BaseBulkModifyJobParameters, State, List, TransactionDetails, IJobDataSink)
 	 */
 	protected abstract void processPidsInTransaction(
 			String theInstanceId,
@@ -300,20 +331,31 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 				}
 			}
 
-			outcome.addChangedId(theState.getResourceIdStringForPid(next));
+			outcome.addChangedId(toId(next, theState));
 		}
 		for (TypedPidAndVersionJson next : theState.getPidsInState(StateEnum.DELETED_SAVED)) {
-			outcome.addDeletedId(theState.getResourceIdStringForPid(next));
+			outcome.addDeletedId(toId(next, theState));
 		}
 		for (TypedPidAndVersionJson next : theState.getPidsInState(StateEnum.UNCHANGED)) {
-			outcome.addUnchangedId(theState.getResourceIdStringForPid(next));
+			outcome.addUnchangedId(toId(next, theState));
 		}
 		for (Map.Entry<TypedPidAndVersionJson, String> next :
 				theState.getFailures().entrySet()) {
-			String id = theState.getResourceIdStringForPid(next.getKey());
-			outcome.addFailure(id, next.getValue());
+			outcome.addFailure(toId(next.getKey(), theState), next.getValue());
 		}
 		return outcome;
+	}
+
+	private IIdType toId(TypedPidAndVersionJson thePid, State theState) {
+		IIdType retVal = theState.getResourceIdForPidOrNull(thePid);
+		if (retVal == null) {
+			IResourcePersistentId<?> persistentId = thePid.toTypedPid().toPersistentId(myIdHelperService);
+			retVal = myIdHelperService.translatePidIdToForcedId(myFhirContext, thePid.getResourceType(), persistentId);
+			if (thePid.getVersionId() != null) {
+				retVal = retVal.withVersion(Long.toString(thePid.getVersionId()));
+			}
+		}
+		return retVal;
 	}
 
 	/**
@@ -525,13 +567,9 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			return retVal;
 		}
 
-		@Nonnull
-		public String getResourceIdStringForPid(TypedPidAndVersionJson thePid) {
-			IIdType resourceId = myPidToResourceId.get(thePid);
-			if (resourceId != null) {
-				return resourceId.getValue();
-			}
-			return thePid.toTypedPid().toString();
+		@Nullable
+		public IIdType getResourceIdForPidOrNull(TypedPidAndVersionJson thePid) {
+			return myPidToResourceId.get(thePid);
 		}
 
 		public boolean isPidInState(@Nonnull TypedPidAndVersionJson thePid, @Nonnull StateEnum theStateEnum) {

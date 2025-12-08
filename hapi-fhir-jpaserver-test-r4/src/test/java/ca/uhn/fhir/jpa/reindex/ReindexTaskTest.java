@@ -21,6 +21,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.PatientReindexTestHelper;
@@ -1041,14 +1042,19 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 	public void testReindex_FailureThrownDuringWrite() {
 		// setup
 
-		myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL);
+		// This observation will fail
+		String failingId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL).toUnqualifiedVersionless().getValue();
+		// This observation will succeed
+		String passingId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL).toUnqualifiedVersionless().getValue();
 		myReindexTestHelper.createAlleleSearchParameter();
 		mySearchParamRegistry.forceRefresh();
 
-		// Throw an error (will be treated as unrecoverable) during reindex
-
+		// Throw an error every time we try to write
 		IAnonymousInterceptor exceptionThrowingInterceptor = (pointcut, args) -> {
-			throw new Error("foo message");
+			StorageProcessingMessage message = args.get(StorageProcessingMessage.class);
+			if (message.getMessage().contains(failingId + " ")) {
+				throw new Error("foo message");
+			}
 		};
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_INFO, exceptionThrowingInterceptor);
 
@@ -1062,7 +1068,26 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		// Verify
 
 		assertEquals(StatusEnum.FAILED, outcome.getStatus());
-		assertEquals("java.lang.Error: foo message", outcome.getErrorMessage());
+		assertEquals("HAPI-2790: Reindex (v3) had 1 failure(s). See report for details.", outcome.getErrorMessage());
+
+		JobInstance finalInstance = myJobCoordinator.getInstance(startResponse.getInstanceId());
+		BulkModifyResourcesResultsJson finalResults = JsonUtil.deserialize(finalInstance.getReport(), BulkModifyResourcesResultsJson.class);
+		assertEquals(2, finalResults.getResourcesChangedCount());
+		assertEquals(0, finalResults.getResourcesUnchangedCount());
+		assertEquals(1, finalResults.getResourcesFailedCount());
+		assertThat(finalResults.getReport()).containsSubsequence(
+			"Total Resources Changed   : 2 ",
+				"Total Resources Failed    : 1 ",
+				"Total Retried Chunks      : 2",
+				"Total Retried Resources   : 4",
+				"ResourceType[Observation]",
+				"    Changed   : 1",
+				"    Failures  : 1",
+				"ResourceType[SearchParameter]",
+				"    Changed   : 1",
+				"Failures:",
+				"Observation/1000: java.lang.Error: foo message"
+		);
 	}
 
 	@Test

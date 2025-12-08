@@ -28,13 +28,18 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.PreferHeader;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.base.Ascii;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.EnumUtils;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.io.IOException;
@@ -52,6 +57,9 @@ public class ReindexProvider extends BaseBulkModifyOrRewriteProvider {
 		super();
 	}
 
+	/**
+	 * Operation: $reindex
+	 */
 	@Operation(name = ProviderConstants.OPERATION_REINDEX, idempotent = false, manualResponse = true)
 	public void reindex(
 			@Description(
@@ -176,6 +184,26 @@ public class ReindexProvider extends BaseBulkModifyOrRewriteProvider {
 			throws IOException {
 
 		pollForJobStatus(theRequestDetails, theJobId, theReturn);
+	}
+
+	/**
+	 * This is an async operation and should really have the <code>Prefer: respond-async</code> header, but
+	 * the $reindex operation has existed for a long time without requiring it. So we probably
+	 * shouldn't make it mandatory, but we'll log a warning beginning in 8.8.0
+	 *
+	 * @since 8.8.0
+	 */
+	@Override
+	protected void postProcessResponseOperationOutcome(
+			IBaseOperationOutcome theOo, ServletRequestDetails theRequestDetails) {
+		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
+		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
+		if (!prefer.getRespondAsync()) {
+			String message = "This method should be invoked with the Prefer: respond-async header. Proceeding anyway.";
+			String severity = OperationOutcomeUtil.OO_SEVERITY_WARN;
+			String code = OperationOutcomeUtil.OO_ISSUE_CODE_REQUIRED;
+			OperationOutcomeUtil.addIssue(myContext, theOo, severity, message, null, code);
+		}
 	}
 
 	@Nonnull
