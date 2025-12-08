@@ -3,6 +3,7 @@ package org.hl7.fhir.common.hapi.validation.validator;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.XmlUtil;
 import ca.uhn.fhir.validation.IValidationContext;
@@ -168,13 +169,10 @@ class ValidatorWrapper {
 			Document document;
 			try {
 				document = XmlUtil.parseDocument(input);
-			} catch (Exception e2) {
-				ourLog.error("Failure to parse XML input", e2);
-				ValidationMessage m = new ValidationMessage();
-				m.setLevel(ValidationMessage.IssueSeverity.FATAL);
-				m.setMessage("Failed to parse input, it does not appear to be valid XML:" + e2.getMessage());
-				messages.add(m);
-				return messages;
+			} catch (Exception e) {
+				String msg = "Failed to parse input, it does not appear to be valid XML: " + e.getMessage();
+				ourLog.error(msg, e);
+				throw new InvalidRequestException(Msg.code(2572) + msg, e);
 			}
 
 			// Determine if meta/profiles are present...
@@ -189,7 +187,14 @@ class ValidatorWrapper {
 		} else if (encoding == EncodingEnum.JSON) {
 
 			Gson gson = new GsonBuilder().create();
-			JsonObject json = gson.fromJson(input, JsonObject.class);
+			JsonObject json;
+			try {
+				json = gson.fromJson(input, JsonObject.class);
+			} catch (Exception e) {
+				String msg = "Failed to parse input, it does not appear to be valid JSON: " + e.getMessage();
+				ourLog.error(msg, e);
+				throw new InvalidRequestException(Msg.code(2573) + msg, e);
+			}
 
 			JsonObject meta = json.getAsJsonObject("meta");
 			if (meta != null) {
