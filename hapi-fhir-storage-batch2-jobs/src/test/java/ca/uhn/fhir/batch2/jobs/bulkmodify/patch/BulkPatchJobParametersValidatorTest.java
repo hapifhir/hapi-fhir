@@ -80,8 +80,6 @@ class BulkPatchJobParametersValidatorTest {
 
 	@Test
 	void testValidate_InvalidPatchSpecified_BadDocument() {
-		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
-
 		Parameters patch = new Parameters();
 		patch.addParameter("foo", new StringType("bar"));
 

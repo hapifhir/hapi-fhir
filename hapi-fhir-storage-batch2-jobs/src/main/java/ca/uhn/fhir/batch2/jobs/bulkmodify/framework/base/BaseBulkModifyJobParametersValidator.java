@@ -79,7 +79,7 @@ public abstract class BaseBulkModifyJobParametersValidator<PT extends BaseBulkMo
 		}
 
 		List<String> urlListValidatorErrors = myUrlListValidator.validateUrls(theParameters.getUrls());
-		if (urlListValidatorErrors != null) {
+		if (urlListValidatorErrors != null && !urlListValidatorErrors.isEmpty()) {
 			theIssueListToPopulate.addAll(urlListValidatorErrors);
 			return;
 		}
