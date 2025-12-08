@@ -58,10 +58,12 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This is the base class for any <b>bulk modification</b> or <b>bulk rewrite</b> jobs. Any new bulk modification
- * job type should subclass {@link BaseBulkModifyResourcesIndividuallyStep} if they want to make modifications
- * to individual resources. If they want to make modifications to multiple resources at once, they should subclass
+ * This is the base class for any <b>bulk modification</b> or <b>bulk rewrite</b> jobs.
+ * <p>
+ * Bulk modification/rewrite jobs should subclass {@link BaseBulkModifyResourcesIndividuallyStep} if they want to make modifications
+ * to individual resources one-at-a-time. If they want to make modifications to multiple resources in a batch, they should subclass
  * this class and implement {@link #processPidsInTransaction(String, String, BaseBulkModifyJobParameters, State, List, TransactionDetails, IJobDataSink)}
+ * </p>
  *
  * @param <PT> The job parameters type
  * @param <C>  A context object which will be passed between methods for a single chunk of resources. The format of the
