@@ -160,7 +160,8 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 	}
 
 	@Override
-	public Set<String> fetchCanonicalResourceVersions(IResourceValidator validator, Object appContext, String url) {
+	public Set<ResourceVersionInformation> fetchCanonicalResourceVersions(
+			IResourceValidator validator, Object appContext, String url) {
 		return Collections.emptySet();
 	}
 }
