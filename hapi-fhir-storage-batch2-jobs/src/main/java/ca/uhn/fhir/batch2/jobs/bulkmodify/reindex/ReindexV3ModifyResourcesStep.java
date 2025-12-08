@@ -80,8 +80,7 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 			resourceTypesToCheckFlag.put(id.getResourceType(), true);
 		});
 		if (myReindexJobService.anyResourceHasPendingReindexWork(resourceTypesToCheckFlag)) {
-			// FIXME: new code
-			throw new RetryChunkLaterException(Msg.code(0), ReindexUtils.getRetryLaterDelay());
+			throw new RetryChunkLaterException(Msg.code(2830), ReindexUtils.getRetryLaterDelay());
 		}
 	}
 
@@ -141,8 +140,6 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 				ReindexOutcome outcome =
 						dao.reindex(resourcePersistentId, parameters, requestDetails, theTransactionDetails);
 
-				// FIXME: make sure we have a test where the actual reindex step fails and make sure the report captures
-				// the ID correctly
 				theState.setResourceIdForPid(nextPid, outcome.getResourceId());
 				theState.moveToState(nextPid, StateEnum.CHANGED_PENDING);
 				outcome.getWarnings().forEach(theDataSink::recoveredError);

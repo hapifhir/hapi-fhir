@@ -113,7 +113,4 @@ public class ReindexV3JobAppCtx extends BaseBulkModifyJobAppCtx<ReindexJobParame
 	protected int getJobDefinitionVersion() {
 		return JOB_VERSION;
 	}
-
-	// FIXME: implement CheckPendingReindexWorkStep equivalent
-
 }

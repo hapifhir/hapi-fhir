@@ -52,8 +52,7 @@ public class Batch2JobHelper {
 	private static final Logger ourLog = LoggerFactory.getLogger(Batch2JobHelper.class);
 
 	private static final int BATCH_SIZE = 100;
-	// FIXME: make 30
-	public static final int DEFAULT_WAIT_DEADLINE = 30000;
+	public static final int DEFAULT_WAIT_DEADLINE = 30;
 	public static final Duration DEFAULT_WAIT_DURATION = Duration.of(DEFAULT_WAIT_DEADLINE, ChronoUnit.SECONDS);
 
 	private final IJobMaintenanceService myJobMaintenanceService;
