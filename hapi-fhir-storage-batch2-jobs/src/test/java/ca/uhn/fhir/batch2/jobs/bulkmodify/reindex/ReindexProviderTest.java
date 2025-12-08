@@ -182,7 +182,7 @@ public class ReindexProviderTest {
 				.execute();
 
 		// Verify
-		String expectedPollUrl = "http://localhost:" + myServerExtension.getPort() + "/$hapi.fhir.bulk-patch-status?_jobId=test-job-id";
+		String expectedPollUrl = "http://localhost:" + myServerExtension.getPort() + "/$hapi.fhir.reindex-status?_jobId=test-job-id";
 
 		String serializedOutput = myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response.getOperationOutcome());
 		ourLog.info(serializedOutput);
