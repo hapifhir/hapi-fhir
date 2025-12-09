@@ -434,7 +434,7 @@ public class BulkPatchProviderTest {
 			new PollForStatusTest(StatusEnum.IN_PROGRESS, HttpStatus.Code.ACCEPTED.getCode(), theOperation + " job has started and is in progress"),
 			new PollForStatusTest(StatusEnum.FINALIZE, HttpStatus.Code.ACCEPTED.getCode(), theOperation + " job has started and is being finalized"),
 			new PollForStatusTest(StatusEnum.CANCELLED, null, null, HttpStatus.Code.OK.getCode(), theOperation + " job has been cancelled", theOperation + " job has been cancelled", true),
-			new PollForStatusTest(StatusEnum.FAILED, "This is an error message", null, HttpStatus.Code.INTERNAL_SERVER_ERROR.getCode(), theOperation + " job has failed with error: This is an error message", theOperation + " job has failed with error: This is an error message", true),
+			new PollForStatusTest(StatusEnum.FAILED, "This is an error message", null, HttpStatus.Code.OK.getCode(), theOperation + " job has failed with error: This is an error message", theOperation + " job has failed with error: This is an error message", true),
 			new PollForStatusTest(StatusEnum.COMPLETED, null, null, HttpStatus.Code.OK.getCode(), theOperation + " job has completed successfully", theOperation + " job has completed successfully", true),
 			new PollForStatusTest(StatusEnum.COMPLETED, null, successReport, HttpStatus.Code.OK.getCode(), successReportJson.getReport(), theOperation + " job has completed successfully", true)
 		);

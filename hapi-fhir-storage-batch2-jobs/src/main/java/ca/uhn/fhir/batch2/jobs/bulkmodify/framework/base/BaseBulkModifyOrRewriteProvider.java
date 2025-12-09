@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesRe
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
@@ -344,10 +345,21 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 				severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
 				code = OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL;
 			}
-			case COMPLETED -> {
-				status = HttpStatus.SC_OK;
+			case ERRORED, FAILED, COMPLETED -> {
+
+				if (instance.getStatus() == StatusEnum.COMPLETED) {
+					status = HttpStatus.SC_OK;
+					progressMessage = getOperationName() + " job has completed successfully";
+					severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
+					code = OperationOutcomeUtil.OO_ISSUE_CODE_SUCCESS;
+				} else {
+					status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
+					progressMessage = getOperationName() + " job has failed with error: " + instance.getErrorMessage();
+					severity = OperationOutcomeUtil.OO_SEVERITY_ERROR;
+					code = OperationOutcomeUtil.OO_ISSUE_CODE_PROCESSING;
+				}
+
 				String reportText = instance.getReport();
-				progressMessage = getOperationName() + " job has completed successfully";
 				if (isBlank(reportText)) {
 					messages.add(progressMessage);
 				} else {
@@ -384,15 +396,6 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 								+ JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_DRYRUN_CHANGES);
 					}
 				}
-				severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
-				code = OperationOutcomeUtil.OO_ISSUE_CODE_SUCCESS;
-				respondUsingBundle = true;
-			}
-			case ERRORED, FAILED -> {
-				status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
-				messages.add(getOperationName() + " job has failed with error: " + instance.getErrorMessage());
-				severity = OperationOutcomeUtil.OO_SEVERITY_ERROR;
-				code = OperationOutcomeUtil.OO_ISSUE_CODE_PROCESSING;
 				respondUsingBundle = true;
 			}
 			case CANCELLED -> {

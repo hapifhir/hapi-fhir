@@ -95,7 +95,8 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 
 	private final Semaphore myRunMaintenanceSemaphore = new Semaphore(1);
 
-	private long myScheduledJobFrequencyMillis = DateUtils.MILLIS_PER_MINUTE;
+	// FIXME: restore
+	private long myScheduledJobFrequencyMillis = DateUtils.MILLIS_PER_SECOND;
 	private Runnable myMaintenanceJobStartedCallback = () -> {};
 	private Runnable myMaintenanceJobFinishedCallback = () -> {};
 
