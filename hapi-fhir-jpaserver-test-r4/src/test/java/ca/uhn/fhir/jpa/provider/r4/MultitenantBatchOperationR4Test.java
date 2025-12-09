@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,6 +120,35 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		assertEquals(1, getAllPatientsInTenant(TENANT_B).getTotal());
 		assertEquals(0, getAllPatientsInTenant(DEFAULT_PARTITION_NAME).getTotal());
 
+	}
+
+	@Test
+	public void testExpungeOperation() {
+		// Create patients
+		createPatient(withTenant(TENANT_A));
+		createPatient(withTenant(TENANT_B));
+		createPatient(withTenant(DEFAULT_PARTITION_NAME));
+
+		// validate setup
+		assertEquals(1, getAllPatientsInTenant(TENANT_A).getTotal());
+		assertEquals(1, getAllPatientsInTenant(TENANT_B).getTotal());
+		assertEquals(1, getAllPatientsInTenant(DEFAULT_PARTITION_NAME).getTotal());
+
+		Parameters input = new Parameters();
+		input.addParameter(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING, true);
+		myTenantClientInterceptor.setTenantId(TENANT_B);
+
+		// execute
+		myClient.operation()
+				.onServer()
+				.named(ProviderConstants.OPERATION_EXPUNGE)
+				.withParameters(input)
+				.execute();
+
+		// validate only the patients in TENANT_B are removed
+		assertEquals(1, getAllPatientsInTenant(TENANT_A).getTotal());
+		assertEquals(0, getAllPatientsInTenant(TENANT_B).getTotal());
+		assertEquals(1, getAllPatientsInTenant(DEFAULT_PARTITION_NAME).getTotal());
 	}
 
 	@Test
