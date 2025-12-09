@@ -185,8 +185,11 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 			 * reuse this across sub-transactions because we can leverage pre-resolved IDs
 			 * and that kind of thing, but there is other state in there that shouldn't be
 			 * preserved, such as tag definitions and rollback items
+			 *
+			 * DO, however, copy user data from the parent transaction details
 			 */
 			TransactionDetails transactionDetails = new TransactionDetails();
+			myTransactionDetails.getUserData().forEach(transactionDetails::putUserData);
 
 			// Apply any placeholder ID substitutions from previous partition executions
 			for (IBaseResource resource : terser.getAllEmbeddedResources(singlePartitionRequest, true)) {
@@ -201,7 +204,7 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 			}
 
 			IBaseBundle singlePartitionResponse = myTransactionProcessor.processTransactionAsSubRequest(
-					myRequestDetails, myTransactionDetails, singlePartitionRequest, myActionName, myNestedMode);
+					myRequestDetails, transactionDetails, singlePartitionRequest, myActionName, myNestedMode);
 
 			// Capture any placeholder ID substitutions from this partition
 			TransactionUtil.TransactionResponse singlePartitionResponseParsed =
