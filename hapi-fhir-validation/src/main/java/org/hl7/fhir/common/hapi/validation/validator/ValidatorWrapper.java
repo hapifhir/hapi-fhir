@@ -172,7 +172,7 @@ class ValidatorWrapper {
 			} catch (Exception e) {
 				String msg = "Failed to parse input, it does not appear to be valid XML: " + e.getMessage();
 				ourLog.error(msg, e);
-				throw new InvalidRequestException(Msg.code(2572) + msg, e);
+				throw new InvalidRequestException(Msg.code(2830) + msg, e);
 			}
 
 			// Determine if meta/profiles are present...
@@ -193,7 +193,7 @@ class ValidatorWrapper {
 			} catch (Exception e) {
 				String msg = "Failed to parse input, it does not appear to be valid JSON: " + e.getMessage();
 				ourLog.error(msg, e);
-				throw new InvalidRequestException(Msg.code(2573) + msg, e);
+				throw new InvalidRequestException(Msg.code(2831) + msg, e);
 			}
 
 			JsonObject meta = json.getAsJsonObject("meta");
