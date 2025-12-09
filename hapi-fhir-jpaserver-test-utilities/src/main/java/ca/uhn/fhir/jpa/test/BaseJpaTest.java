@@ -65,7 +65,6 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
-import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
@@ -105,7 +104,6 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
-import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -229,8 +227,6 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	protected ServletRequestDetails mySrd;
 	protected InterceptorService mySrdInterceptorService;
-	@Autowired
-	protected IMdmLinkDao<JpaPid, MdmLink> myMdmLinkDao;
 	@Autowired
 	protected FhirContext myFhirContext;
 	@Autowired
@@ -590,22 +586,6 @@ public abstract class BaseJpaTest extends BaseTest {
 			IBaseResource next = resources.get(i);
 			ourLog.info("{} #{}:\n{}", type, i, parser.setPrettyPrint(true).encodeResourceToString(next));
 		}
-	}
-
-	protected int countAllMdmLinks() {
-		return runInTransaction(()-> myMdmLinkDao.findAll().size());
-	}
-
-	protected int logAllMdmLinks() {
-		return runInTransaction(()->{
-			List<MdmLink> links = myMdmLinkDao.findAll();
-			if (links.isEmpty()) {
-				ourLog.info("MDM Links: NONE");
-			} else {
-				ourLog.info("MDM Links:\n * {}", links.stream().map(t -> t.toString()).collect(joining("\n * ")));
-			}
-			return links.size();
-		});
 	}
 
 	public void logAllResourceLinks() {

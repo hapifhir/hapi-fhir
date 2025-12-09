@@ -1,6 +1,7 @@
 package ca.uhn.fhir.mdm.batch2.clear;
 
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
@@ -32,17 +33,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Disabled("Keeping as a sandbox to be used whenever we need a lot of MdmLinks in DB for performance testing")
 @ContextConfiguration(classes = {MdmLinkSlowDeletionSandboxIT.TestDataSource.class})
-public class MdmLinkSlowDeletionSandboxIT  extends BaseJpaR4Test {
+public class MdmLinkSlowDeletionSandboxIT  extends BaseMdmR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmLinkSlowDeletionSandboxIT.class);
 
 	private final int ourMdmLinksToCreate = 1_000_000;
 	private final int ourLogMdmLinksEach = 1_000;
 
+	/**
+	 * Overridden so we don't purge the DB in between tests.
+	 */
 	@Override
-	public void afterPurgeDatabase() {
-		// keep the generated data!
-//		super.afterPurgeDatabase();
-	}
+	public void afterPurgeDatabase() {}
 
 	@Disabled
 	@Test
@@ -54,7 +55,6 @@ public class MdmLinkSlowDeletionSandboxIT  extends BaseJpaR4Test {
 		assertTrue(totalLinks > 0);
 	}
 	
-
 	private void generatePatientsAndMdmLinks(int theLinkCount) {
 		StopWatch sw = new StopWatch();
 		int totalMdmLinksCreated = 0;

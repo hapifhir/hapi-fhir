@@ -42,6 +42,7 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
+import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -66,6 +67,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.batch2.jobs.export.BulkDataExportUtil.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -99,6 +101,9 @@ public class ExpandResourcesStep
 
 	@Autowired
 	private InterceptorService myInterceptorService;
+
+	@Autowired(required = false)
+	private Optional<IMdmLinkExpandSvc> myMdmLinkExpandSvc;
 
 	private volatile ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
@@ -139,7 +144,16 @@ public class ExpandResourcesStep
 
 			// if necessary, expand resources
 			if (parameters.isExpandMdm()) {
-				myBulkExportProcessor.expandMdmResources(allResources);
+				if (myMdmLinkExpandSvc.isPresent()) {
+					for (IBaseResource resource : allResources) {
+						if (!PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(resource.fhirType())) {
+							myMdmLinkExpandSvc.get().annotateResource(resource);
+						}
+					}
+				} else {
+					ourLog.warn(
+							"Attempted to annotate a resource with an extension identifying it's associated golden resource, but no IMdmLinkExpandSvc was configured. Is MDM configured correctly?");
+				}
 			}
 
 			// Normalize terminology

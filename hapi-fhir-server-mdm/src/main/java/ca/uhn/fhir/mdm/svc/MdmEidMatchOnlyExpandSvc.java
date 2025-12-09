@@ -19,10 +19,14 @@
  */
 package ca.uhn.fhir.mdm.svc;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
@@ -31,9 +35,12 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.util.FhirTerser;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.stream.Collectors;
 import java.util.*;
 
 /**
@@ -46,11 +53,18 @@ public class MdmEidMatchOnlyExpandSvc implements IMdmLinkExpandSvc {
 
 	private EIDHelper myEidHelper;
 
-	public MdmEidMatchOnlyExpandSvc(DaoRegistry theDaoRegistry) {
-		myDaoRegistry = theDaoRegistry;
-	}
+	private IIdHelperService myIdHelperService;
 
-	public void setMyEidHelper(EIDHelper theEidHelper) {
+	private FhirContext myFhirContext;
+
+	public MdmEidMatchOnlyExpandSvc(
+			DaoRegistry theDaoRegistry,
+			FhirContext theFhirContext,
+			IIdHelperService theIdHelperService,
+			EIDHelper theEidHelper) {
+		myDaoRegistry = theDaoRegistry;
+		myFhirContext = theFhirContext;
+		myIdHelperService = theIdHelperService;
 		myEidHelper = theEidHelper;
 	}
 
@@ -117,5 +131,58 @@ public class MdmEidMatchOnlyExpandSvc implements IMdmLinkExpandSvc {
 		// This operation is not applicable when using MDM in MATCH_ONLY mode,
 		// return an emtpy set to rather than an exception to not affect existing code
 		return Collections.emptySet();
+	}
+	/**
+	 * Expands a Group resource and returns the Group members' resource persistent ids.
+	 * The returned ids consists of group members + all MDM matched resources based on EID only.
+	 *
+	 * <p>This method:</p>
+	 * <ol>
+	 *   <li>Reads the specified Group resource</li>
+	 *   <li>Extracts all member entity references from the Group</li>
+	 *   <li>For each member, uses EID matching to find all resources that have the same EID as the member, using eid system specified in mdm rules</li>
+	 *   <li>Converts the expanded resource IDs to persistent IDs (PIDs)</li>
+	 * </ol>
+	 *
+	 * @param groupResourceId The ID of the Group resource to expand
+	 * @param requestPartitionId The request partition ID
+	 * @return A set of {@link JpaPid} objects representing all expanded resources
+	 */
+	@Override
+	public Set<JpaPid> expandGroup(String groupResourceId, RequestPartitionId requestPartitionId) {
+		// Read the Group resource
+		SystemRequestDetails srd = SystemRequestDetails.forRequestPartitionId(requestPartitionId);
+		IIdType groupId = myFhirContext.getVersion().newIdType(groupResourceId);
+		IFhirResourceDao<?> groupDao = myDaoRegistry.getResourceDao("Group");
+		IBaseResource groupResource = groupDao.read(groupId, srd);
+
+		Set<String> allResourceIds = new HashSet<>();
+		FhirTerser terser = myFhirContext.newTerser();
+		// Extract all member.entity references from the Group resource
+		List<IBaseReference> memberEntities =
+				terser.getValues(groupResource, "Group.member.entity", IBaseReference.class);
+		// mdm expand each member based on eid
+		for (IBaseReference entityRef : memberEntities) {
+			if (!entityRef.getReferenceElement().isEmpty()) {
+				IIdType memberId = entityRef.getReferenceElement();
+				Set<String> expanded = this.expandMdmBySourceResourceId(requestPartitionId, memberId);
+				allResourceIds.addAll(expanded);
+			}
+		}
+		// Convert all resourceIds to IIdType and resolve in batch
+		List<IIdType> idTypes = allResourceIds.stream()
+				.map(id -> myFhirContext.getVersion().newIdType(id))
+				.collect(Collectors.toList());
+		List<JpaPid> pidList = myIdHelperService.resolveResourcePids(
+				requestPartitionId,
+				idTypes,
+				ResolveIdentityMode.excludeDeleted().cacheOk());
+		return new HashSet<>(pidList);
+	}
+
+	@Override
+	public void annotateResource(IBaseResource resource) {
+		// This function is normally used to add golden resource id to the exported resources,
+		// but in the Eid-based match only mode, there isn't any golden resource, so nothing to do here
 	}
 }
