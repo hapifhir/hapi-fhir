@@ -22,22 +22,22 @@ INSERT INTO HFJ_RESOURCE (
 ) VALUES (
    1678,
    'R4',
-   0,
+   false,
    '2023-06-15 09:58:42.92',
    '2023-06-15 09:58:42.92',
-   0,
+   false,
    '6beed652b77f6c65d776e57341a0b5b0596ac9cfb0e8345a5a5cfbfaa59e2b62',
    1,
-   0,
-   0,
-   0,
-   0,
-   1,
-   0,
-   0,
-   1,
-   1,
-   0,
+   false,
+   false,
+   false,
+   false,
+   true,
+   false,
+   false,
+   true,
+   true,
+   false,
    'Observation',
    1
 );
@@ -93,8 +93,8 @@ INSERT INTO MPI_LINK_AUD (
    2,
    0,
    1,
-   0,
-   1,
+   false,
+   true,
    1,
    '2024-03-29 10:14:40.69',
    '2024-03-29 10:14:41.70',
@@ -117,7 +117,7 @@ INSERT INTO HFJ_TAG_DEF (
    'display',
    'https://github.com/hapifhir/hapi-fhir/ns/jpa/profile',
    1,
-   0,
+   false,
    'V 1.0'
 );
 
@@ -132,5 +132,5 @@ INSERT INTO HFJ_RESOURCE_MODIFIED (
    '1',
    '2024-03-30 10:14:41.70',
    'Observation',
-   '{"operationType":"CREATE","attributes":{"attKey":"attValue"},"transactionId":"txId","mediaType":"json","messageKey":"messageKey","payloadId":"Observation/1","partitionId":{"allPartitions":true},"payloadVersion":"1","subscriptionId":"subId"}'
+   '{"operationType":"CREATE","attributes":{"attKey":"attValue"},"transactionId":"txId","mediaType":"json","messageKey":"messageKey","payloadId":"Observation/1","payloadVersion":"1","subscriptionId":"subId"}'
 );

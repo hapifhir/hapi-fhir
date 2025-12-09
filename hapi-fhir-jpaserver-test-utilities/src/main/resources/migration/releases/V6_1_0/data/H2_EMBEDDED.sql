@@ -21,7 +21,7 @@ INSERT INTO BT2_JOB_INSTANCE (
    REPORT
 ) VALUES (
    'a59cb9c2-f699-44c7-bfee-93f1e6f68038',
-   0,
+   false,
    0,
    0,
    '2023-08-06 14:24:10.845',
@@ -38,6 +38,6 @@ INSERT INTO BT2_JOB_INSTANCE (
    200,
    'Error message',
    83006,
-   1,
+   true,
    72995
 );
