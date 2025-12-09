@@ -73,7 +73,8 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 		TypedPidAndVersionListWorkChunkJson data = createWorkChunkForAllResources();
 		BulkPatchJobParameters jobParameters = new BulkPatchJobParameters();
 		jobParameters.setDryRun(theDryRun);
-		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(jobParameters, data, new JobInstance(), new WorkChunk());
+		WorkChunk chunk = new WorkChunk().setId("my-chunk-id");
+		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(jobParameters, data, new JobInstance(), chunk);
 
 		when(myMockStep.modifyResource(any(), any(), any())).thenAnswer(t->{
 			ResourceModificationRequest request = t.getArgument(2, ResourceModificationRequest.class);
@@ -90,7 +91,7 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 
 		// Test
 		RunOutcome outcome = myStep.run(stepExecutionDetails, mySink);
-		assertEquals(0, outcome.getRecordsProcessed());
+		assertEquals(2, outcome.getRecordsProcessed());
 
 		// Verify
 		assertNotGone("Patient/P1");
@@ -109,7 +110,8 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 	public void testDeleteResource_RewriteHistoryIsBlocked() {
 		createPatient(withId("P1"), withFamily("Family1"));
 		TypedPidAndVersionListWorkChunkJson data = createWorkChunkForAllResources();
-		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(new BulkPatchJobParameters(), data, new JobInstance(), new WorkChunk());
+		WorkChunk chunk = new WorkChunk().setId("my-chunk-id");
+		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(new BulkPatchJobParameters(), data, new JobInstance(), chunk);
 
 		when(myMockStep.isRewriteHistory(any(), any())).thenReturn(true);
 		when(myMockStep.modifyResource(any(), any(), any())).thenReturn(ResourceModificationResponse.delete());
