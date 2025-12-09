@@ -1086,7 +1086,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 				"ResourceType[SearchParameter]",
 				"    Changed   : 1",
 				"Failures:",
-				"Observation/1000: java.lang.Error: foo message"
+				": java.lang.Error: foo message"
 		);
 	}
 

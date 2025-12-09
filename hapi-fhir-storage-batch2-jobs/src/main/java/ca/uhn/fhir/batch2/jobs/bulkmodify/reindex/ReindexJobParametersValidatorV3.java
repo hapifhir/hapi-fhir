@@ -64,4 +64,9 @@ public class ReindexJobParametersValidatorV3 extends BaseBulkModifyJobParameters
 	protected boolean isEmptyUrlListAllowed() {
 		return true;
 	}
+
+	@Override
+	protected boolean isUrlWithNoResourceTypeAllowed() {
+		return true;
+	}
 }

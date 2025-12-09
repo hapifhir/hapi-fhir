@@ -346,7 +346,6 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 				code = OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL;
 			}
 			case ERRORED, FAILED, COMPLETED -> {
-
 				if (instance.getStatus() == StatusEnum.COMPLETED) {
 					status = HttpStatus.SC_OK;
 					progressMessage = getOperationName() + " job has completed successfully";

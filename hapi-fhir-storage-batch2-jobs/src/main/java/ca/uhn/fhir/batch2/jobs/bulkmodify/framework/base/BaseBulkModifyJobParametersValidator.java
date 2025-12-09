@@ -33,10 +33,11 @@ import java.util.regex.Pattern;
 
 import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class BaseBulkModifyJobParametersValidator<PT extends BaseBulkModifyJobParameters>
 		implements IJobParametersValidator<PT> {
-	private static final Pattern URL_PATTERN = Pattern.compile("([A-Z][a-zA-Z0-9]+)\\?.*");
+	private static final Pattern URL_PATTERN = Pattern.compile("([A-Z][a-zA-Z0-9]+)?\\?.*");
 	public static final int DEFAULT_DRY_RUN_LIMIT_RESOURCE_COUNT = 5;
 	public static final int DEFAULT_DRY_RUN_LIMIT_RESOURCE_VERSION_COUNT = 5;
 
@@ -97,11 +98,24 @@ public abstract class BaseBulkModifyJobParametersValidator<PT extends BaseBulkMo
 								+ sanitizeUrlPart(nextUrl));
 			} else {
 				String resourceType = matcher.group(1);
-				if (!myDaoRegistry.isResourceTypeSupported(resourceType)) {
+				if (isBlank(resourceType)) {
+					if (!isUrlWithNoResourceTypeAllowed()) {
+						theIssueListToPopulate.add("Invalid URL (must use syntax '{resourceType}?[optional params]'): "
+								+ sanitizeUrlPart(nextUrl));
+					}
+				} else if (!myDaoRegistry.isResourceTypeSupported(resourceType)) {
 					theIssueListToPopulate.add("Resource type " + sanitizeUrlPart(resourceType) + " is not supported");
 				}
 			}
 		}
+	}
+
+	/**
+	 * Subclasses may override if the given job type should allow a URL with no resource type (meaning all resource types).
+	 * This is disabled in the default implementation but can make sense for some job types (e.g. reindex)
+	 */
+	protected boolean isUrlWithNoResourceTypeAllowed() {
+		return false;
 	}
 
 	/**
