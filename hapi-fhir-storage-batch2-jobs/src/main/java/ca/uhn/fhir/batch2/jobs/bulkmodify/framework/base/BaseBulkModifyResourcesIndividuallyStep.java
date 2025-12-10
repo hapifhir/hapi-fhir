@@ -190,6 +190,12 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 					continue;
 				}
 
+				HashingWriter postModificationHash = hashResource(resource);
+				if (preModificationHash.matches(postModificationHash)) {
+					theState.moveToState(pid, StateEnum.UNCHANGED);
+					continue;
+				}
+
 				if (!resourceType.equals(myFhirContext.getResourceType(updatedResource))) {
 					throw new JobExecutionFailedException(Msg.code(2782) + "Modification for Resource["
 							+ resource.getIdElement() + "] returned wrong resource type, expected " + resourceType
@@ -204,14 +210,8 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 							+ "/" + resourceId + "] attempted to change the resource version");
 				}
 
-				HashingWriter postModificationHash = hashResource(resource);
-
-				if (preModificationHash.matches(postModificationHash)) {
-					theState.moveToState(pid, StateEnum.UNCHANGED);
-				} else {
-					theState.moveToState(pid, StateEnum.CHANGED_UNSAVED);
-					theState.setResourceForPid(pid, updatedResource);
-				}
+				theState.moveToState(pid, StateEnum.CHANGED_UNSAVED);
+				theState.setResourceForPid(pid, updatedResource);
 			}
 		}
 
@@ -310,7 +310,13 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	}
 
 	/**
-	 * This method is called once for each resource needing modification
+	 * This method is called once for each resource needing modification.
+	 * Subclasses should implement this method to perform the actual modification of resources. Note
+	 * the following restrictions:
+	 * <ul>
+	 *     <li>The modified resource must be of the same resource type as the original</li>
+	 *     <li>The version must not be modified</li>
+	 * </ul>
 	 */
 	protected abstract ResourceModificationResponse modifyResource(
 			PT theJobParameters, C theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest);
