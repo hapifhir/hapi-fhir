@@ -56,7 +56,7 @@ public abstract class BaseBulkPatchRewriteJobAppCtx extends BaseBulkModifyJobApp
 
 	@Override
 	protected BulkPatchJobParametersValidator<BulkPatchRewriteJobParameters> getJobParameterValidator() {
-		return new BulkPatchJobParametersValidator<>(myFhirContext, myDaoRegistry);
+		return new BulkPatchJobParametersValidator<>(myFhirContext, myDaoRegistry, myBatch2DaoSvc);
 	}
 
 	@Override

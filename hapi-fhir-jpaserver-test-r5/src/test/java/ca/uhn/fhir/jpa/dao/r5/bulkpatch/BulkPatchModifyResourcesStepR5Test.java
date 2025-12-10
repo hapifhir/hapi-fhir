@@ -57,7 +57,7 @@ public class BulkPatchModifyResourcesStepR5Test extends BaseBulkPatchR5Test {
 		BulkPatchJobParameters jobParameters = new BulkPatchJobParameters();
 		jobParameters.setFhirPatch(myFhirContext, createPatchWithModifyPatientIdentifierSystem());
 
-		WorkChunk workChunk = new WorkChunk();
+		WorkChunk workChunk = new WorkChunk().setId("my-chunk-id");
 		JobInstance jobInstance = new JobInstance();
 
 		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> parameters = new StepExecutionDetails<>(jobParameters, data, jobInstance, workChunk);
@@ -100,7 +100,7 @@ public class BulkPatchModifyResourcesStepR5Test extends BaseBulkPatchR5Test {
 		BulkPatchRewriteJobParameters jobParameters = new BulkPatchRewriteJobParameters();
 		jobParameters.setFhirPatch(myFhirContext, createPatchWithModifyPatientIdentifierSystem());
 
-		WorkChunk workChunk = new WorkChunk();
+		WorkChunk workChunk = new WorkChunk().setId("my-chunk-id");
 		JobInstance jobInstance = new JobInstance();
 
 		StepExecutionDetails<BulkPatchRewriteJobParameters, TypedPidAndVersionListWorkChunkJson> parameters = new StepExecutionDetails<>(jobParameters, data, jobInstance, workChunk);
@@ -155,7 +155,7 @@ public class BulkPatchModifyResourcesStepR5Test extends BaseBulkPatchR5Test {
 		BulkPatchJobParameters jobParameters = new BulkPatchJobParameters();
 		jobParameters.setFhirPatch(myFhirContext, createPatchWithModifyPatientIdentifierSystem());
 
-		WorkChunk workChunk = new WorkChunk();
+		WorkChunk workChunk = new WorkChunk().setId("my-chunk-id");
 		JobInstance jobInstance = new JobInstance();
 
 		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> parameters = new StepExecutionDetails<>(jobParameters, data, jobInstance, workChunk);
@@ -191,10 +191,10 @@ public class BulkPatchModifyResourcesStepR5Test extends BaseBulkPatchR5Test {
 		BulkModifyResourcesChunkOutcomeJson outcome = myDataCaptor.getValue();
 		assertEquals(2, outcome.getChunkRetryCount());
 		assertEquals(11, outcome.getResourceRetryCount());
-		assertThat(outcome.getChangedIds()).contains(succeedingId.withVersion("2").getValue());
+		assertThat(outcome.getChangedIds()).contains(succeedingId.withVersion("1").getValue());
 		assertThat(outcome.getUnchangedIds()).isEmpty();
 		if (theErrorCount == 2) {
-			assertThat(outcome.getChangedIds()).contains(failingId.withVersion("2").getValue());
+			assertThat(outcome.getChangedIds()).contains(failingId.withVersion("1").getValue());
 		} else {
 			assertThat(List.copyOf(outcome.getFailures().keySet())).contains(failingId.withVersion("1").getValue());
 		}

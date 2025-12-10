@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.jobs.bulkmodify.patchrewrite;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchProviderTest;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -63,6 +64,8 @@ class BulkPatchRewriteProviderTest {
 	static HttpClientExtension ourHttpClient = new HttpClientExtension();
 	@Mock
 	private IJobCoordinator myJobCoordinator;
+	@Mock
+	private IJobPartitionProvider myJobPartitionProvider;
 	@Captor
 	private ArgumentCaptor<JobInstanceStartRequest> myStartRequestCaptor;
 
@@ -71,6 +74,7 @@ class BulkPatchRewriteProviderTest {
 		ourProvider.setContextForUnitTest(ourCtx);
 		ourProvider.setJobCoordinatorForUnitTest(myJobCoordinator);
 		ourProvider.setPartitionSettingsForUnitTest(new PartitionSettings());
+		ourProvider.setJobPartitionProviderForUnitTest(myJobPartitionProvider);
 	}
 
 	@Test
@@ -79,6 +83,7 @@ class BulkPatchRewriteProviderTest {
 		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
 		startResponse.setInstanceId(MY_INSTANCE_ID);
 		when(myJobCoordinator.startInstance(any(), any())).thenReturn(startResponse);
+		when(myJobPartitionProvider.getPartitionedUrls(any(), any())).thenCallRealMethod();
 
 		Parameters patch = new Parameters();
 		patch.setId("PATCH");
