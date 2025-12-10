@@ -193,10 +193,18 @@ public interface IValidationSupport {
 		return null;
 	}
 
+	/**
+	 * This works the same as fetchResource, but as url may not be unique (different versions of an IG, for example),
+	 * it can return multiple resources instead.
+	 */
 	default <T extends IBaseResource> Stream<T> fetchResources(Class<T> theClazz, String theUrl) {
 		return Stream.empty();
 	}
 
+	/**
+	 * Fetches all resources of a given type.
+	 * No order is defined.
+	 */
 	default <T extends IBaseResource> Stream<T> fetchAllResourcesOfType(@Nonnull Class<T> theClazz) {
 		return Stream.empty();
 	}

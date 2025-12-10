@@ -131,10 +131,7 @@
 			<artifactId>quartz</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>jakarta.annotation</groupId>
-			<artifactId>jakarta.annotation-api</artifactId>
-		</dependency>
+
 
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
