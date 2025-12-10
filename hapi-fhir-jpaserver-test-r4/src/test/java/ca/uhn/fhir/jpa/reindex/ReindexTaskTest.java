@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesResultsJson;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -19,6 +21,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.PatientReindexTestHelper;
@@ -27,7 +30,9 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.base.Charsets;
 import jakarta.annotation.PostConstruct;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -55,6 +60,7 @@ import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 import static ca.uhn.fhir.jpa.api.dao.ReindexParameters.OptimizeStorageModeEnum.ALL_VERSIONS;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -380,7 +386,17 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		Batch2JobStartResponse res = myJobCoordinator.startInstance(mySrd, startRequest);
 		myBatch2JobHelper.awaitJobCompletion(res);
 
-		// validate
+		// validate report
+		JobInstance finalInstance = myJobCoordinator.getInstance(res.getInstanceId());
+		BulkModifyResourcesResultsJson finalResults = JsonUtil.deserialize(finalInstance.getReport(), BulkModifyResourcesResultsJson.class);
+		assertEquals(1, finalResults.getResourcesChangedCount());
+		assertEquals(0, finalResults.getResourcesUnchangedCount());
+		assertEquals(0, finalResults.getResourcesFailedCount());
+		assertThat(finalResults.getReport()).containsSubsequence(
+			"Total Resources Changed   : 1 "
+		);
+
+		// validate results
 		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
 
 		// Now one of them should be indexed
@@ -880,6 +896,19 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		assertEquals(50, myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
 		// Now all of them should be indexed
 		assertThat(myReindexTestHelper.getAlleleObservationIds()).hasSize(50);
+		// validate report
+		JobInstance finalInstance = myJobCoordinator.getInstance(startResponse.getInstanceId());
+		BulkModifyResourcesResultsJson finalResults = JsonUtil.deserialize(finalInstance.getReport(), BulkModifyResourcesResultsJson.class);
+		assertEquals(51, finalResults.getResourcesChangedCount());
+		assertEquals(0, finalResults.getResourcesUnchangedCount());
+		assertEquals(0, finalResults.getResourcesFailedCount());
+		assertThat(finalResults.getReport()).containsSubsequence(
+			"Total Resources Changed   : 51 ",
+			"ResourceType[Observation]",
+			"Changed   : 50",
+			"ResourceType[SearchParameter]",
+			"Changed   : 1"
+		);
 	}
 
 	@Test
@@ -898,6 +927,20 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		assertEquals(StatusEnum.COMPLETED, myJob.getStatus());
 		assertNotNull(myJob.getWarningMessages());
 		assertThat(myJob.getWarningMessages()).contains("Failed to reindex resource because unique search parameter " + searchParameter.getEntity().getIdDt().toVersionless().toString());
+	}
+
+	@Test
+	public void testReindex_DryRunNotSupported() {
+		ReindexJobParameters jobParameters = new ReindexJobParameters();
+		jobParameters.setDryRun(true);
+		jobParameters.addPartitionedUrl(new PartitionedUrl().setUrl("Patient?"));
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(JOB_REINDEX);
+		startRequest.setParameters(jobParameters);
+		assertThatThrownBy(()->myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("Dry-run mode is not yet supported for reindexing");
 	}
 
 	/**
@@ -999,14 +1042,19 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 	public void testReindex_FailureThrownDuringWrite() {
 		// setup
 
-		myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL);
+		// This observation will fail
+		String failingId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL).toUnqualifiedVersionless().getValue();
+		// This observation will succeed
+		String passingId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL).toUnqualifiedVersionless().getValue();
 		myReindexTestHelper.createAlleleSearchParameter();
 		mySearchParamRegistry.forceRefresh();
 
-		// Throw an error (will be treated as unrecoverable) during reindex
-
+		// Throw an error every time we try to write
 		IAnonymousInterceptor exceptionThrowingInterceptor = (pointcut, args) -> {
-			throw new Error("foo message");
+			StorageProcessingMessage message = args.get(StorageProcessingMessage.class);
+			if (message.getMessage().contains(failingId + " ")) {
+				throw new Error("foo message");
+			}
 		};
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_INFO, exceptionThrowingInterceptor);
 
@@ -1020,7 +1068,26 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		// Verify
 
 		assertEquals(StatusEnum.FAILED, outcome.getStatus());
-		assertEquals("java.lang.Error: foo message", outcome.getErrorMessage());
+		assertEquals("HAPI-2790: Reindex (v3) had 1 failure(s). See report for details.", outcome.getErrorMessage());
+
+		JobInstance finalInstance = myJobCoordinator.getInstance(startResponse.getInstanceId());
+		BulkModifyResourcesResultsJson finalResults = JsonUtil.deserialize(finalInstance.getReport(), BulkModifyResourcesResultsJson.class);
+		assertEquals(2, finalResults.getResourcesChangedCount());
+		assertEquals(0, finalResults.getResourcesUnchangedCount());
+		assertEquals(1, finalResults.getResourcesFailedCount());
+		assertThat(finalResults.getReport()).containsSubsequence(
+			"Total Resources Changed   : 2 ",
+				"Total Resources Failed    : 1 ",
+				"Total Retried Chunks      : 2",
+				"Total Retried Resources   : 4",
+				"ResourceType[Observation]",
+				"    Changed   : 1",
+				"    Failures  : 1",
+				"ResourceType[SearchParameter]",
+				"    Changed   : 1",
+				"Failures:",
+				": java.lang.Error: foo message"
+		);
 	}
 
 	@Test

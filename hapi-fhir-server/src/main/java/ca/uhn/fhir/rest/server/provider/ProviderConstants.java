@@ -191,6 +191,11 @@ public class ProviderConstants {
 	public static final String OPERATION_REINDEX = "$reindex";
 
 	/**
+	 * Operation name for the $hapi.fhir.reindex-status operation
+	 */
+	public static final String OPERATION_REINDEX_STATUS = "$hapi.fhir.reindex-status";
+
+	/**
 	 * Operation name for the $reindex operation
 	 */
 	public static final String OPERATION_REINDEX_DRYRUN = "$reindex-dryrun";

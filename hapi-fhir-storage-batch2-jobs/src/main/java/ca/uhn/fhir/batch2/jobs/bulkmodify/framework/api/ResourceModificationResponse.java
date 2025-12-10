@@ -57,7 +57,10 @@ public class ResourceModificationResponse {
 	}
 
 	/**
-	 * Update the current resource contents with the given resource.
+	 * Update the current resource contents with the given resource. Note that the framework will do a
+	 * comparison to determine whether the resource has actually changed. So if you are positive that
+	 * the resource has not changed, you can call {@link #noChange()} instead but if there is any
+	 * doubt at all, just call this method.
 	 */
 	public static ResourceModificationResponse updateResource(@Nonnull IBaseResource theResource) {
 		Validate.notNull(theResource, "theResource must not be null");
