@@ -190,7 +190,7 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 					continue;
 				}
 
-				HashingWriter postModificationHash = hashResource(resource);
+				HashingWriter postModificationHash = hashResource(updatedResource);
 				if (preModificationHash.matches(postModificationHash)) {
 					theState.moveToState(pid, StateEnum.UNCHANGED);
 					continue;

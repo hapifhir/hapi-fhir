@@ -48,7 +48,7 @@ import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unused")
 @ExtendWith(MockitoExtension.class)
-class BaseBulkModifyResourcesStepTest {
+class BaseBulkModifyResourcesIndividuallyStepTest {
 
 	@Mock
 	private Function<ResourceModificationRequest, ResourceModificationResponse> myFunction;
@@ -101,7 +101,8 @@ class BaseBulkModifyResourcesStepTest {
 		}
 
 		// Test
-		assertThatThrownBy(() -> mySvc.run(new StepExecutionDetails<>(params, data, instance, new WorkChunk()), mySink))
+		WorkChunk workChunk = new WorkChunk().setId("my-chunk-id");
+		assertThatThrownBy(() -> mySvc.run(new StepExecutionDetails<>(params, data, instance, workChunk), mySink))
 			.isInstanceOf(JobExecutionFailedException.class)
 			.hasMessage(theExpectedMessage);
 
@@ -125,7 +126,8 @@ class BaseBulkModifyResourcesStepTest {
 		when(myFunction.apply(any())).thenReturn(ResourceModificationResponse.noChange());
 
 		// Test
-		mySvc.run(new StepExecutionDetails<>(params, data, instance, new WorkChunk()), mySink);
+		WorkChunk chunk = new WorkChunk().setId("my-chunk-id");
+		mySvc.run(new StepExecutionDetails<>(params, data, instance, chunk), mySink);
 
 		// Verify
 		verify(mySink, times(1)).accept(myDataCaptor.capture());
