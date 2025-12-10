@@ -95,6 +95,10 @@ public class PartitionedUrlJobParameters implements IModelJson {
 		getPartitionedUrls().add(theUrl);
 	}
 
+	public void addPartitionedUrls(List<PartitionedUrl> thePartitionedUrls) {
+		getPartitionedUrls().addAll(thePartitionedUrls);
+	}
+
 	public void addUrl(@Nonnull String theUrl) {
 		getPartitionedUrls().add(new PartitionedUrl().setUrl(theUrl));
 	}

@@ -25,7 +25,10 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionTimeoutException;
 import org.slf4j.Logger;
@@ -361,5 +364,23 @@ public class Batch2JobHelper {
 		for (JobInstance next : instances) {
 			myJobPersistence.cancelInstance(next.getInstanceId());
 		}
+	}
+
+	/**
+	 * Given the contents of a <code>Content-Location</code> header coming back from a Bulk Modification
+	 * initiation request, determine the job ID
+	 */
+	@Nonnull
+	public static String getJobIdFromPollingLocation(String thePollingLocation) {
+		return thePollingLocation.substring(thePollingLocation.indexOf("_jobId=") + 7);
+	}
+
+	/**
+	 * Given a MethodOutcome coming back from a client-initiated Bulk Modification
+	 * initiation request, determine the job ID
+	 */
+	@Nonnull
+	public static String getJobIdFromPollingLocation(MethodOutcome theMethodOutcome) {
+		return getJobIdFromPollingLocation(theMethodOutcome.getFirstResponseHeader(Constants.HEADER_CONTENT_LOCATION).orElseThrow());
 	}
 }
