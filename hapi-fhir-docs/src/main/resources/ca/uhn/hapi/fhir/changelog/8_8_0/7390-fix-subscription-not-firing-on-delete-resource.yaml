@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 7390
+title: "Subscriptions were not triggering on delete when subscription criteria uses resource attributes. This has been fixed"
