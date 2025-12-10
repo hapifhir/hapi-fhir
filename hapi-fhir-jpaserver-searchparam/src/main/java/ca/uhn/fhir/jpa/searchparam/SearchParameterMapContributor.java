@@ -27,10 +27,21 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_SEARCH_TOTAL_MODE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_SORT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_SUMMARY;
 
+/**
+ * Internal implementation class to convert SearchParameterMap
+ * to other query formats.
+ *
+ * @param mySearchParameterMap
+ * @param myBuilder
+ */
 record SearchParameterMapContributor(SearchParameterMap mySearchParameterMap, IRepositoryRestQueryBuilder myBuilder) {
 
-	public void contributeToQuery() {
-		addSearchParameters();
+	static void contributeToBuilder(SearchParameterMap theSearchParameterMap, IRepositoryRestQueryBuilder theBuilder) {
+		new SearchParameterMapContributor(theSearchParameterMap, theBuilder).contributeToQuery();
+	}
+
+	private void contributeToQuery() {
+		addCriteriaParameters();
 		addToken(PARAM_CONTAINED, mySearchParameterMap.getSearchContainedMode(), SearchContainedModeEnum::getCode);
 		addNumeric(PARAM_COUNT, mySearchParameterMap.getCount());
 		addNumeric(PARAM_OFFSET, mySearchParameterMap.getOffset());
@@ -41,7 +52,7 @@ record SearchParameterMapContributor(SearchParameterMap mySearchParameterMap, IR
 		addIncludes(PARAM_REVINCLUDE, PARAM_REVINCLUDE_ITERATE, mySearchParameterMap.getRevIncludes());
 	}
 
-	private void addSearchParameters() {
+	private void addCriteriaParameters() {
 		mySearchParameterMap.entrySet().forEach(nextAndOrListEntry -> {
 			for (List<IQueryParameterType> nextOrList : nextAndOrListEntry.getValue()) {
 				if (nextOrList.isEmpty()) {

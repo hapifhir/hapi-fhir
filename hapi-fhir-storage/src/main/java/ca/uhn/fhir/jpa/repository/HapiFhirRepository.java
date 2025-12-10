@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.repository.impl.MultiMapRepositoryRestQueryBuilder;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
@@ -149,8 +150,9 @@ public class HapiFhirRepository implements IRepository {
 				.create();
 		SearchParameterMap searchParameterMap =
 				SearchParameterMapRepositoryRestQueryBuilder.buildFromQueryContributor(theQueryContributor);
-		// fixme need a SPMap -> Map<String, String[]> converter
-		// details.setParameters(fixme);
+
+		details.setParameters(MultiMapRepositoryRestQueryBuilder.toFlatMap(searchParameterMap));
+
 		details.setResourceName(myDaoRegistry.getFhirContext().getResourceType(theResourceType));
 		IBundleProvider bundleProvider =
 				myDaoRegistry.getResourceDao(theResourceType).search(searchParameterMap, details);

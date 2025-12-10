@@ -607,7 +607,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 	 */
 	@Override
 	public void contributeToQuery(IRepositoryRestQueryBuilder theBuilder) {
-		new SearchParameterMapContributor(this, theBuilder).contributeToQuery();
+		SearchParameterMapContributor.contributeToBuilder(this, theBuilder);
 	}
 
 	private boolean isNotEqualsComparator(DateParam theLowerBound, DateParam theUpperBound) {
