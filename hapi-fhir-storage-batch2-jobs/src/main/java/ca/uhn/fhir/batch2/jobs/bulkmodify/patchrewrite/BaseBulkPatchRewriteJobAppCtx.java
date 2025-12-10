@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.batch2.jobs.bulkmodify.patchrewrite;
 
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyJobAppCtx;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyCommonJobAppCtx;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchJobParametersValidator;
@@ -37,20 +38,25 @@ public abstract class BaseBulkPatchRewriteJobAppCtx extends BaseBulkModifyJobApp
 	protected final IBatch2DaoSvc myBatch2DaoSvc;
 	private final FhirContext myFhirContext;
 	private final IDaoRegistry myDaoRegistry;
+	protected final IJobPartitionProvider myJobPartitionProvider;
 
 	/**
 	 * Constructor
 	 */
 	public BaseBulkPatchRewriteJobAppCtx(
-			IBatch2DaoSvc theBatch2DaoSvc, FhirContext theFhirContext, IDaoRegistry theDaoRegistry) {
+			IBatch2DaoSvc theBatch2DaoSvc,
+			FhirContext theFhirContext,
+			IDaoRegistry theDaoRegistry,
+			IJobPartitionProvider theJobPartitionProvider) {
 		myBatch2DaoSvc = theBatch2DaoSvc;
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
+		myJobPartitionProvider = theJobPartitionProvider;
 	}
 
 	@Override
 	protected BulkPatchJobParametersValidator<BulkPatchRewriteJobParameters> getJobParameterValidator() {
-		return new BulkPatchJobParametersValidator<>(myFhirContext, myDaoRegistry);
+		return new BulkPatchJobParametersValidator<>(myFhirContext, myDaoRegistry, myBatch2DaoSvc);
 	}
 
 	@Override

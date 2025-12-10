@@ -48,7 +48,7 @@ import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unused")
 @ExtendWith(MockitoExtension.class)
-class BaseBulkModifyResourcesStepTest {
+class BaseBulkModifyResourcesIndividuallyStepTest {
 
 	@Mock
 	private Function<ResourceModificationRequest, ResourceModificationResponse> myFunction;
@@ -56,9 +56,8 @@ class BaseBulkModifyResourcesStepTest {
 	private IHapiTransactionService myTransactionService = new MyMockTxService();
 	@Mock
 	private DaoRegistry myDaoRegistry;
-	@SuppressWarnings("rawtypes")
 	@Mock
-	private IFhirSystemDao mySystemDao;
+	private IFhirSystemDao<?,?> mySystemDao;
 	@Mock
 	private IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
 	@Mock
@@ -102,7 +101,8 @@ class BaseBulkModifyResourcesStepTest {
 		}
 
 		// Test
-		assertThatThrownBy(() -> mySvc.run(new StepExecutionDetails<>(params, data, instance, new WorkChunk()), mySink))
+		WorkChunk workChunk = new WorkChunk().setId("my-chunk-id");
+		assertThatThrownBy(() -> mySvc.run(new StepExecutionDetails<>(params, data, instance, workChunk), mySink))
 			.isInstanceOf(JobExecutionFailedException.class)
 			.hasMessage(theExpectedMessage);
 
@@ -126,7 +126,8 @@ class BaseBulkModifyResourcesStepTest {
 		when(myFunction.apply(any())).thenReturn(ResourceModificationResponse.noChange());
 
 		// Test
-		mySvc.run(new StepExecutionDetails<>(params, data, instance, new WorkChunk()), mySink);
+		WorkChunk chunk = new WorkChunk().setId("my-chunk-id");
+		mySvc.run(new StepExecutionDetails<>(params, data, instance, chunk), mySink);
 
 		// Verify
 		verify(mySink, times(1)).accept(myDataCaptor.capture());
@@ -160,10 +161,15 @@ class BaseBulkModifyResourcesStepTest {
 		}
 	}
 
-	private class MySvc extends BaseBulkModifyResourcesStep<MyParameters, Integer> {
+	private class MySvc extends BaseBulkModifyResourcesIndividuallyStep<MyParameters, Integer> {
 		@Override
 		protected ResourceModificationResponse modifyResource(MyParameters theJobParameters, Integer theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest) {
 			return myFunction.apply(theModificationRequest);
+		}
+
+		@Override
+		protected String getJobNameForLogging() {
+			return "TEST-STEP";
 		}
 	}
 

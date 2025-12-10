@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Default implementation which provides the {@link PartitionedUrl} list for a certain operation request.
@@ -41,10 +40,6 @@ public class DefaultJobPartitionProvider implements IJobPartitionProvider {
 	protected final IRequestPartitionHelperSvc myRequestPartitionHelper;
 	protected FhirContext myFhirContext;
 	private MatchUrlService myMatchUrlService;
-
-	public DefaultJobPartitionProvider(IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-		myRequestPartitionHelper = theRequestPartitionHelperSvc;
-	}
 
 	public DefaultJobPartitionProvider(
 			FhirContext theFhirContext,
@@ -63,19 +58,10 @@ public class DefaultJobPartitionProvider implements IJobPartitionProvider {
 
 	@Override
 	public List<PartitionedUrl> getPartitionedUrls(RequestDetails theRequestDetails, List<String> theUrls) {
-		List<String> urls = theUrls;
-
-		// if the url list is empty, use all the supported resource types to build the url list
-		// we can go back to no url scenario if all resource types point to the same partition
-		if (theUrls == null || theUrls.isEmpty()) {
-			urls = myFhirContext.getResourceTypes().stream()
-					.map(resourceType -> resourceType + "?")
-					.collect(Collectors.toList());
-		}
 
 		// determine the partition associated with each of the urls
 		List<PartitionedUrl> partitionedUrls = new ArrayList<>();
-		for (String s : urls) {
+		for (String s : theUrls) {
 			ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(s);
 			RequestPartitionId partitionId = myRequestPartitionHelper.determineReadPartitionForRequestForSearchType(
 					theRequestDetails, resourceSearch.getResourceName(), resourceSearch.getSearchParameterMap());
@@ -101,6 +87,7 @@ public class DefaultJobPartitionProvider implements IJobPartitionProvider {
 		return retVal;
 	}
 
+	@Override
 	public List<RequestPartitionId> getAllPartitions() {
 		return List.of(RequestPartitionId.allPartitions());
 	}

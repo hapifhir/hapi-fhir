@@ -48,7 +48,6 @@ import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -1275,9 +1274,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		// Load the resource bodies
-		List<JpaPidFk> historyVersionPks = JpaPidFk.fromPids(versionlessPids);
 		List<ResourceHistoryTable> resourceSearchViewList =
-				myResourceHistoryTableDao.findCurrentVersionsByResourcePidsAndFetchResourceTable(historyVersionPks);
+				myResourceHistoryTableDao.findCurrentVersionsByResourcePidsAndFetchResourceTable(versionlessPids);
 
 		/*
 		 * If we have specific versions to load, replace the history entries with the

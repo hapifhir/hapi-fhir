@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.batch2.jobs.bulkmodify.patchrewrite;
 
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyOrRewriteGenerateReportStep;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyCommonJobAppCtx;
@@ -44,8 +45,11 @@ public class BulkPatchRewriteJobAppCtx extends BaseBulkPatchRewriteJobAppCtx {
 	 * Constructor
 	 */
 	public BulkPatchRewriteJobAppCtx(
-			IBatch2DaoSvc theBatch2DaoSvc, FhirContext theFhirContext, IDaoRegistry theDaoRegistry) {
-		super(theBatch2DaoSvc, theFhirContext, theDaoRegistry);
+			IBatch2DaoSvc theBatch2DaoSvc,
+			FhirContext theFhirContext,
+			IDaoRegistry theDaoRegistry,
+			IJobPartitionProvider theJobPartitionProvider) {
+		super(theBatch2DaoSvc, theFhirContext, theDaoRegistry, theJobPartitionProvider);
 	}
 
 	@Bean("bulkModifyPatchRewriteJobDefinition")
@@ -62,7 +66,7 @@ public class BulkPatchRewriteJobAppCtx extends BaseBulkPatchRewriteJobAppCtx {
 	@Bean("bulkModifyPatchRewriteGenerateRangesStep")
 	@Override
 	public GenerateRangeChunksStep<BulkPatchRewriteJobParameters> generateRangesStep() {
-		return new GenerateRangeChunksStep<>();
+		return new GenerateRangeChunksStep<>(myJobPartitionProvider);
 	}
 
 	@Bean("bulkModifyPatchRewriteGenerateReportStep")

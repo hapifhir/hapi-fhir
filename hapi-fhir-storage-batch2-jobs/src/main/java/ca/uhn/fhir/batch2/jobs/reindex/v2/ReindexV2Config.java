@@ -19,13 +19,13 @@
  */
 package ca.uhn.fhir.batch2.jobs.reindex.v2;
 
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
-import ca.uhn.fhir.batch2.jobs.reindex.models.ReindexResults;
 import ca.uhn.fhir.batch2.jobs.reindex.svcs.ReindexJobService;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
 import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
@@ -111,8 +111,9 @@ public class ReindexV2Config {
 	}
 
 	@Bean("reindexGenerateRangeChunkStepV2")
-	public IJobStepWorker<ReindexJobParameters, VoidModel, ChunkRangeJson> reindexGenerateRangeChunksStep() {
-		return new GenerateRangeChunksStep<>();
+	public IJobStepWorker<ReindexJobParameters, VoidModel, ChunkRangeJson> reindexGenerateRangeChunksStep(
+			IJobPartitionProvider theJobPartitionProvider) {
+		return new GenerateRangeChunksStep<>(theJobPartitionProvider);
 	}
 
 	@Bean("reindexLoadIdsStepV2")

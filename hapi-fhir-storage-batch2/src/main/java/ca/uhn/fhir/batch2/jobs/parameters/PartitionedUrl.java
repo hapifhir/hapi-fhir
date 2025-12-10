@@ -45,6 +45,13 @@ public class PartitionedUrl implements IModelJson {
 	@JsonProperty("requestPartitionId")
 	private RequestPartitionId myRequestPartitionId;
 
+	/**
+	 * Constructor
+	 */
+	public PartitionedUrl() {
+		super();
+	}
+
 	public String getUrl() {
 		return myUrl;
 	}

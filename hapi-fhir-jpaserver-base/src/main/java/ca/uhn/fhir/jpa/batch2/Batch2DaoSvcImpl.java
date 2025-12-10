@@ -171,12 +171,13 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		ISearchBuilder<JpaPid> builder = mySearchBuilderFactory.newSearchBuilder(null, null);
 		return myTransactionService
 				.withRequest(theRequestDetails)
-				.search(() -> builder.createQueryStream(
+				.withRequestPartitionId(theRequestPartitionId)
+				.search(partition -> builder.createQueryStream(
 						theSearchParams,
 						new SearchRuntimeDetails(
 								theRequestDetails, UUID.randomUUID().toString()),
 						theRequestDetails,
-						theRequestPartitionId))
+						partition))
 				.map(pid -> new TypedResourcePid(pid.getResourceType(), pid));
 	}
 
