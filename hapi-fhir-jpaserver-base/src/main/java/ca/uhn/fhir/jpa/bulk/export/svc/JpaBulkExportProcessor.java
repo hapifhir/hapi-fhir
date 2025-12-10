@@ -150,7 +150,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		// Patient
 		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.DISABLED) {
 			String errorMessage =
-					"You attempted to start a Patient Bulk Export, but the system has `Index Missing Fields` disabled. It must be enabled for Patient Bulk Export";
+					"You attempted to start a Patient Bulk Export, but the system has \"Index Missing Fields\" (aka \"Index Missing Search Params\") disabled. It must be enabled for Patient Bulk Export";
 			ourLog.error(errorMessage);
 			throw new IllegalStateException(Msg.code(797) + errorMessage);
 		}

@@ -1096,7 +1096,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		/*
 		 * Indexing
 		 */
-		if (thePerformIndexing) {
+		boolean performIndexing = thePerformIndexing;
+		if (Boolean.TRUE.equals(theResource.getUserData(JpaConstants.RESOURCE_SKIP_INDEXING))) {
+			performIndexing = false;
+		}
+		if (performIndexing) {
 			if (newParams == null) {
 				myExpungeService.deleteAllSearchParams(entity.getPersistentId());
 				entity.clearAllParamsPopulated();

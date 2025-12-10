@@ -30,10 +30,21 @@ import java.util.Set;
 public class JpaConstants {
 
 	/**
-	 * Userdata key for tracking the fact that a resource ID was assigned by the server
+	 * Userdata key for indicating that a resource ID was assigned by the server,
+	 * meaning that it should be accepted and used as the stored FHIR ID.
+	 * A value of {@link Boolean#TRUE} should be used.
 	 */
 	public static final String RESOURCE_ID_SERVER_ASSIGNED =
 			JpaConstants.class.getName() + "_RESOURCE_ID_SERVER_ASSIGNED";
+
+	/**
+	 * Userdata key indicating that the server should not generate any search
+	 * indexes for the resource during storage.
+	 *
+	 * @since 8.8.0
+	 */
+	public static final String RESOURCE_SKIP_INDEXING =
+			JpaConstants.class.getName() + "RESOURCE_SKIP_INDEXING";
 
 	/**
 	 * Metadata key which can be used to influence the ID assigned to a resource being

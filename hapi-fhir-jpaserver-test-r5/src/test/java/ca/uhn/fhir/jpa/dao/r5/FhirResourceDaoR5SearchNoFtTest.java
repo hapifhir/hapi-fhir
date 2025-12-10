@@ -5,6 +5,8 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.rest.api.Constants;
@@ -200,6 +202,27 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 		actual = outcome.getResources(0, 3);
 		assertThat(actual).isEmpty();
     }
+
+	@Test
+	void testSkipIndexing() {
+		// Setup
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
+
+		// Test
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("http://foo").setValue("1");
+		p.setBirthDate(new Date());
+		p.setUserData(JpaConstants.RESOURCE_SKIP_INDEXING, Boolean.TRUE);
+		myPatientDao.create(p, mySrd);
+
+		// Verify
+		runInTransaction(() -> {
+			assertThat(myResourceIndexedSearchParamTokenDao.findAll()).isEmpty();
+			assertThat(myResourceIndexedSearchParamStringDao.findAll()).isEmpty();
+			assertThat(myResourceIndexedSearchParamDateDao.findAll()).isEmpty();
+		});
+
+	}
 
     @Test
     public void testToken_CodeableReference_Reference() {
