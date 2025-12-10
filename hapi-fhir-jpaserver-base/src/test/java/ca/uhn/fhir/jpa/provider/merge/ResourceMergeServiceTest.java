@@ -1154,6 +1154,32 @@ public class ResourceMergeServiceTest {
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
+	void testMerge_ResourceTypeWithoutIdentifierElement_ReturnsErrorWith422Status(boolean thePreview) {
+		// Given
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		mergeOperationParameters.setPreview(thePreview);
+		mergeOperationParameters.setSourceResource(new Reference("OperationOutcome/source-id"));
+		mergeOperationParameters.setTargetResource(new Reference("OperationOutcome/target-id"));
+		when(myRequestDetailsMock.getResourceName()).thenReturn("OperationOutcome");
+
+		// When
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+
+		// Then
+		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
+		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(422);
+
+		assertThat(operationOutcome.getIssue()).hasSize(1);
+		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
+		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+		assertThat(issue.getDiagnostics()).contains("Merge operation cannot be performed on resource type 'OperationOutcome' because it does not have an 'identifier' element.");
+		assertThat(issue.getCode().toCode()).isEqualTo("invalid");
+
+		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
 	void testMerge_ValidatesResultResource_ResultResourceHasDifferentIdThanTargetResource_ReturnsErrorWith400Status(boolean thePreview) {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);

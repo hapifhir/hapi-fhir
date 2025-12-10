@@ -21,7 +21,9 @@ package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.batch2.jobs.merge.IResourceLinkService;
 import ca.uhn.fhir.batch2.jobs.merge.ResourceLinkServiceFactory;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -79,6 +81,12 @@ public class MergeValidationService {
 				AbstractMergeOperationInputParameterNames.forOperation(theRequestDetails.getOperation());
 
 		IBaseOperationOutcome operationOutcome = theMergeOutcome.getOperationOutcome();
+
+		// Validate that the resource type supports identifier element
+		String resourceType = theRequestDetails.getResourceName();
+		if (!validateResourceTypeSupportsIdentifier(resourceType, operationOutcome)) {
+			return MergeValidationResult.invalidResult(STATUS_HTTP_422_UNPROCESSABLE_ENTITY);
+		}
 
 		if (!validateCommonMergeOperationParameters(theMergeOperationParameters, operationOutcome, parameterNames)) {
 			return MergeValidationResult.invalidResult(STATUS_HTTP_400_BAD_REQUEST);
@@ -293,6 +301,28 @@ public class MergeValidationService {
 							+ "is not a suitable source for merging.",
 					ref);
 			addErrorToOperationOutcome(myFhirContext, outcome, msg, "invalid");
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Validates that the resource type supports the 'identifier' element, which is required for merge operations.
+	 *
+	 * @param theResourceType the resource type to validate
+	 * @param theOutcome the outcome to add validation errors to
+	 * @return true if the resource type supports identifier, false otherwise
+	 */
+	private boolean validateResourceTypeSupportsIdentifier(String theResourceType, IBaseOperationOutcome theOutcome) {
+		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
+		BaseRuntimeChildDefinition identifierChild = resourceDefinition.getChildByName("identifier");
+
+		if (identifierChild == null) {
+			String msg = String.format(
+					"Merge operation cannot be performed on resource type '%s' because it does not have an 'identifier' element.",
+					theResourceType);
+			addErrorToOperationOutcome(myFhirContext, theOutcome, msg, "invalid");
 			return false;
 		}
 
