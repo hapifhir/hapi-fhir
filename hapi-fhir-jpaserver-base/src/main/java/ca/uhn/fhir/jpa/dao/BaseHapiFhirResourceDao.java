@@ -474,7 +474,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			TransactionDetails theTransactionDetails) {
 		StopWatch w = new StopWatch();
 
-		preProcessResourceForStorage(theResource);
 		preProcessResourceForStorage(theResource, theRequest, theTransactionDetails, thePerformIndexing);
 
 		ResourceTable entity = new ResourceTable();
@@ -935,23 +934,32 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			@Nonnull TransactionDetails theTransactionDetails) {
 		validateDeleteEnabled();
 
+		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(theUrl);
+		SearchParameterMap paramMap = resourceSearch.getSearchParameterMap();
+
+		RequestPartitionId requestPartitionId =
+				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
+						theRequestDetails, myResourceName, paramMap);
+
 		return myTransactionService
 				.withRequest(theRequestDetails)
+				.withRequestPartitionId(requestPartitionId)
 				.withTransactionDetails(theTransactionDetails)
-				.execute(tx -> doDeleteByUrl(theUrl, deleteConflicts, theTransactionDetails, theRequestDetails));
+				.execute(tx ->
+						doDeleteByUrl(theUrl, paramMap, deleteConflicts, theTransactionDetails, theRequestDetails));
 	}
 
 	@Nonnull
 	private DeleteMethodOutcome doDeleteByUrl(
 			String theUrl,
+			SearchParameterMap theParamMap,
 			DeleteConflictList deleteConflicts,
 			TransactionDetails theTransactionDetails,
 			RequestDetails theRequestDetails) {
-		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(theUrl);
-		SearchParameterMap paramMap = resourceSearch.getSearchParameterMap();
-		paramMap.setLoadSynchronous(true);
 
-		Set<JpaPid> resourceIds = myMatchResourceUrlService.search(paramMap, myResourceType, theRequestDetails, null);
+		theParamMap.setLoadSynchronous(true);
+		Set<JpaPid> resourceIds =
+				myMatchResourceUrlService.search(theParamMap, myResourceType, theRequestDetails, null);
 
 		if (resourceIds.size() > 1) {
 			if (!getStorageSettings().isAllowMultipleDelete()) {
@@ -1664,7 +1672,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.withRequest(theRequest)
 				.withTransactionDetails(transactionDetails)
 				.withRequestPartitionId(requestPartitionId)
-				.read(() -> doReadInTransaction(theId, theRequest, theDeletedOk, requestPartitionId));
+				.read(partition -> doReadInTransaction(theId, theRequest, theDeletedOk, partition));
 	}
 
 	private T doReadInTransaction(
@@ -1749,6 +1757,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		} else {
 			entity = myEntityManager.find(ResourceTable.class, jpaPid);
 		}
+
+		IIdType id = myFhirContext.getVersion().newIdType(entity.getResourceType(), entity.getFhirId());
+		retVal.setResourceId(id);
 
 		if (entity == null) {
 			retVal.addWarning("Unable to find entity with PID: " + jpaPid.getId());
@@ -2279,7 +2290,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.withRequest(theRequest)
 				.withTransactionDetails(transactionDetails)
 				.withRequestPartitionId(requestPartitionId)
-				.searchList(() -> {
+				.searchList(partition -> {
 					if (isNull(theParams.getLoadSynchronousUpTo())) {
 						theParams.setLoadSynchronousUpTo(myStorageSettings.getInternalSynchronousSearchSize());
 					}
@@ -2293,7 +2304,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 					SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
 					try (IResultIterator<JpaPid> iter =
-							builder.createQuery(theParams, searchRuntimeDetails, theRequest, requestPartitionId)) {
+							builder.createQuery(theParams, searchRuntimeDetails, theRequest, partition)) {
 						while (iter.hasNext()) {
 							ids.add(iter.next());
 						}
@@ -2326,8 +2337,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		//noinspection unchecked
 		return (Stream<PID>) myTransactionService
 				.withRequest(theRequest)
-				.search(() ->
-						builder.createQueryStream(theParams, searchRuntimeDetails, theRequest, requestPartitionId));
+				.withRequestPartitionId(requestPartitionId)
+				.search(partition -> builder.createQueryStream(theParams, searchRuntimeDetails, theRequest, partition));
 	}
 
 	@Override
@@ -2354,13 +2365,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myTransactionService
 				.withRequest(theRequest)
 				.withPropagation(Propagation.REQUIRED)
-				.searchList(() -> {
+				.withRequestPartitionId(requestPartitionId)
+				.searchList(partition -> {
 					ISearchBuilder<JpaPid> builder =
 							mySearchBuilderFactory.newSearchBuilder(getResourceName(), getResourceType());
 					Stream<JpaPid> pidStream =
-							builder.createQueryStream(theParams, searchRuntimeDetails, theRequest, requestPartitionId);
+							builder.createQueryStream(theParams, searchRuntimeDetails, theRequest, partition);
 
-					Stream<V> transformedStream = transform.apply(theRequest, pidStream, requestPartitionId);
+					Stream<V> transformedStream = transform.apply(theRequest, pidStream, partition);
 
 					return transformedStream.collect(Collectors.toList());
 				});

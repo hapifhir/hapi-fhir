@@ -37,15 +37,17 @@ public class Batch2JobStartResponse {
 		return myInstanceId;
 	}
 
-	public void setInstanceId(String theInstanceId) {
+	public Batch2JobStartResponse setInstanceId(String theInstanceId) {
 		myInstanceId = theInstanceId;
+		return this;
 	}
 
 	public boolean isUsesCachedResult() {
 		return myUsesCachedResult;
 	}
 
-	public void setUsesCachedResult(boolean theUseCachedResult) {
+	public Batch2JobStartResponse setUsesCachedResult(boolean theUseCachedResult) {
 		myUsesCachedResult = theUseCachedResult;
+		return this;
 	}
 }

@@ -61,7 +61,7 @@ public class PatientCompartmentEnforcingInterceptor {
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
 	public void storagePreStorageResourceUpdated(IBaseResource theOldResource, IBaseResource theResource) {
 
-		ourLog.info("Interceptor STORAGE_PRESTORAGE_RESOURCE_UPDATED - started");
+		ourLog.debug("Interceptor STORAGE_PRESTORAGE_RESOURCE_UPDATED - started");
 		StopWatch stopWatch = new StopWatch();
 		try {
 			String patientCompartmentOld = ResourceCompartmentUtil.getPatientCompartmentIdentity(
@@ -78,7 +78,7 @@ public class PatientCompartmentEnforcingInterceptor {
 			}
 
 		} finally {
-			ourLog.info("Interceptor STORAGE_PRESTORAGE_RESOURCE_UPDATED - ended, execution took {}", stopWatch);
+			ourLog.debug("Interceptor STORAGE_PRESTORAGE_RESOURCE_UPDATED - ended, execution took {}", stopWatch);
 		}
 	}
 }

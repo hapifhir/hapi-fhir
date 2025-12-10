@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.batch2.jobs.expunge;
 
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
@@ -47,7 +48,8 @@ public class DeleteExpungeAppCtx {
 			HapiTransactionService theHapiTransactionService,
 			IDeleteExpungeSvc<?> theDeleteExpungeSvc,
 			IIdHelperService<?> theIdHelperService,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+			IJobPartitionProvider theJobPartitionProvider) {
 		return JobDefinition.newBuilder()
 				.setJobDefinitionId(JOB_DELETE_EXPUNGE)
 				.setJobDescription("Expunge resources")
@@ -60,7 +62,7 @@ public class DeleteExpungeAppCtx {
 						"generate-ranges",
 						"Generate data ranges to expunge",
 						ChunkRangeJson.class,
-						expungeGenerateRangeChunksStep())
+						expungeGenerateRangeChunksStep(theJobPartitionProvider))
 				.addIntermediateStep(
 						"load-ids",
 						"Load IDs of resources to expunge",
@@ -98,8 +100,9 @@ public class DeleteExpungeAppCtx {
 	}
 
 	@Bean
-	public GenerateRangeChunksStep<DeleteExpungeJobParameters> expungeGenerateRangeChunksStep() {
-		return new GenerateRangeChunksStep<>();
+	public GenerateRangeChunksStep<DeleteExpungeJobParameters> expungeGenerateRangeChunksStep(
+			IJobPartitionProvider theJobPartitionProvider) {
+		return new GenerateRangeChunksStep<>(theJobPartitionProvider);
 	}
 
 	@Bean

@@ -1148,7 +1148,7 @@ public class FhirTerser {
 		if (recurse) {
 
 			/*
-			 * Visit undeclared extensions
+			 * Visit undeclared extensions (DSTU2 only)
 			 */
 			if (theElement instanceof ISupportsUndeclaredExtensions) {
 				ISupportsUndeclaredExtensions containingElement = (ISupportsUndeclaredExtensions) theElement;
@@ -1168,14 +1168,16 @@ public class FhirTerser {
 				case PRIMITIVE_XHTML_HL7ORG:
 				case PRIMITIVE_XHTML:
 				case PRIMITIVE_DATATYPE:
-					// These are primitive types, so we don't need to visit their children
-					break;
 				case RESOURCE:
 				case RESOURCE_BLOCK:
 				case COMPOSITE_DATATYPE: {
-					BaseRuntimeElementCompositeDefinition<?> childDef =
-							(BaseRuntimeElementCompositeDefinition<?>) theDefinition;
-					for (BaseRuntimeChildDefinition nextChild : childDef.getChildrenAndExtension()) {
+					List<BaseRuntimeChildDefinition> children;
+					if (theDefinition instanceof BaseRuntimeElementCompositeDefinition<?> compositeDef) {
+						children = compositeDef.getChildrenAndExtension();
+					} else {
+						children = theDefinition.getChildren();
+					}
+					for (BaseRuntimeChildDefinition nextChild : children) {
 						List<? extends IBase> values = nextChild.getAccessor().getValues(theElement);
 						if (values != null) {
 							for (IBase nextValue : values) {
@@ -1205,7 +1207,7 @@ public class FhirTerser {
 										"Found value of type[%s] which is not valid for field[%s] in %s",
 										nextValue.getClass(),
 										nextChild.getElementName(),
-										childDef.getName());
+										theDefinition.getName());
 
 								visit(
 										nextValue,
@@ -1297,20 +1299,23 @@ public class FhirTerser {
 	 * @param theElement The element to visit
 	 * @param theVisitor The visitor
 	 */
+	@SuppressWarnings("removal")
 	public void visit(IBase theElement, IModelVisitor2 theVisitor) {
-		BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition(theElement.getClass());
-		if (def instanceof BaseRuntimeElementCompositeDefinition) {
-			visit(theElement, null, def, theVisitor, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-		} else if (theElement instanceof IBaseExtension) {
+		if (theElement instanceof IBaseExtension) {
+			// Only provided for legacy support
 			theVisitor.acceptUndeclaredExtension(
 					(IBaseExtension<?, ?>) theElement,
 					Collections.emptyList(),
 					Collections.emptyList(),
 					Collections.emptyList());
-		} else {
-			theVisitor.acceptElement(
-					theElement, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
 		}
+
+		BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition(theElement.getClass());
+
+		// The following method calls itself recursively to descend through and visit each child element
+		// so we call it here with empty lists that get added-to and removed-from as we walk into and out
+		// of the tree
+		visit(theElement, null, def, theVisitor, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 	}
 
 	private void visit(
@@ -1458,15 +1463,10 @@ public class FhirTerser {
 					retVal.add((IBaseResource) theElement);
 					return theRecurse;
 				}
-				return true;
-			}
-
-			@Override
-			public boolean acceptUndeclaredExtension(
-					IBaseExtension<?, ?> theNextExt,
-					List<IBase> theContainingElementPath,
-					List<BaseRuntimeChildDefinition> theChildDefinitionPath,
-					List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+				if (theElement instanceof IPrimitiveType<?>) {
+					// Primitive elements can't contain embedded resources
+					return false;
+				}
 				return true;
 			}
 		});

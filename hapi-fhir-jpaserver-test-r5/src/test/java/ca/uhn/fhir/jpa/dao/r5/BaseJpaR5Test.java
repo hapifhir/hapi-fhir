@@ -57,6 +57,7 @@ import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IInstanceReindexService;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
@@ -176,6 +177,8 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	protected IResourceLinkDao myResourceLinkDao;
 	@Autowired
 	protected ISearchParamPresentDao mySearchParamPresentDao;
+	@Autowired
+	protected ISearchParamExtractor mySearchParamExtractor;
 	@Autowired
 	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
 	@Autowired
@@ -496,6 +499,16 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@BeforeEach
 	public void beforeResetConfig() {
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+	}
+
+	protected void createOrUpdateSearchParameter(SearchParameter theSearchParameter) {
+		ourLog.info("Creating Search Param: {}", myFhirCtx.newJsonParser().encodeResourceToString(theSearchParameter));
+		if (theSearchParameter.getIdElement().isEmpty()) {
+			mySearchParameterDao.create(theSearchParameter, newSrd());
+		} else {
+			mySearchParameterDao.update(theSearchParameter, newSrd());
+		}
+		mySearchParamRegistry.forceRefresh();
 	}
 
 	@Override

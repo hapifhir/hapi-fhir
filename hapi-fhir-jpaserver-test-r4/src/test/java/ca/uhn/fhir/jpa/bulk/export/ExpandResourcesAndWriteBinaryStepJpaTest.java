@@ -16,6 +16,7 @@ import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.util.BundleUtil;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -28,7 +29,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -271,7 +271,7 @@ public class ExpandResourcesAndWriteBinaryStepJpaTest extends BaseJpaR4Test {
 			assertThat(exportedResourceVersionsLists).isEqualTo(expectedExportedVersionsLists);
 		}
 
-		private @NotNull List<List<String>> getExportedResourceVersionsLists() {
+		private @Nonnull List<List<String>> getExportedResourceVersionsLists() {
 			List<List<String>> exportedResourceVersionsLists = new ArrayList<>();
 			for (BulkExportBinaryFileId next : myWorkChunkCaptor.getAllValues()) {
 

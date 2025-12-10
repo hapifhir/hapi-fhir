@@ -175,8 +175,18 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 			return this;
 		}
 
-		List<List<IQueryParameterType>> paramList = getOrCreate(theName);
+		if (theAnd instanceof DateRangeParam dateRangeParam) {
+			if (dateRangeParam.getLowerBound() != null
+					&& !dateRangeParam.getLowerBound().isEmpty()
+					&& dateRangeParam.getUpperBound() != null
+					&& !dateRangeParam.isEmpty()
+					&& dateRangeParam.getLowerBound().equals(dateRangeParam.getUpperBound())) {
+				add(theName, dateRangeParam.getLowerBound());
+				return this;
+			}
+		}
 
+		List<List<IQueryParameterType>> paramList = get(theName);
 		for (IQueryParameterOr<?> next : theAnd.getValuesAsQueryTokens()) {
 			if (next == null) {
 				continue;

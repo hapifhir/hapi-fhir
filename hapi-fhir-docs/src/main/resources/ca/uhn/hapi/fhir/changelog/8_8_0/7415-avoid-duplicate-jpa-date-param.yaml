@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 7415
+title: "When processing a JPA server search query containing a simple
+   date parameter (e.g. `Patient?birthdate=2020-01-01`) the server incorrectly
+   converted this into a date range with an identical lower and upper bound.
+   This did not affect the correctness of results returned, but did cause an
+   error when performing this search with Java assertions enabled. This has been
+   corrected."
