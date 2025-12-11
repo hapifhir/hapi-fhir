@@ -46,6 +46,7 @@ import org.hl7.fhir.r4.model.Reference;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper.addErrorToOperationOutcome;
@@ -88,7 +89,8 @@ public class MergeValidationService {
 			return MergeValidationResult.invalidResult(STATUS_HTTP_422_UNPROCESSABLE_ENTITY);
 		}
 
-		if (!validateCommonMergeOperationParameters(theMergeOperationParameters, operationOutcome, parameterNames)) {
+		if (!validateCommonMergeOperationParameters(
+				theMergeOperationParameters, operationOutcome, parameterNames, theRequestDetails)) {
 			return MergeValidationResult.invalidResult(STATUS_HTTP_400_BAD_REQUEST);
 		}
 
@@ -340,7 +342,8 @@ public class MergeValidationService {
 	boolean validateCommonMergeOperationParameters(
 			MergeOperationsCommonInputParameters theCommonInputParameters,
 			IBaseOperationOutcome theOutcome,
-			AbstractMergeOperationInputParameterNames theParameterNames) {
+			AbstractMergeOperationInputParameterNames theParameterNames,
+			RequestDetails theRequestDetails) {
 		List<String> errorMessages = new ArrayList<>();
 		if (!theCommonInputParameters.hasAtLeastOneSourceIdentifier()
 				&& theCommonInputParameters.getSourceResource() == null) {
@@ -396,6 +399,15 @@ public class MergeValidationService {
 			errorMessages.add(msg);
 		}
 
+		// Validate if source reference exists its resource type matches API path resource type
+		String apiResourceType = theRequestDetails.getResourceName();
+		validateReferenceResourceTypeMatchesRequest(
+				sourceRef, apiResourceType, theParameterNames.getSourceResourceParameterName(), errorMessages);
+
+		// Validate if target reference exists its resource type matches API path resource type
+		validateReferenceResourceTypeMatchesRequest(
+				targetRef, apiResourceType, theParameterNames.getTargetResourceParameterName(), errorMessages);
+
 		if (!errorMessages.isEmpty()) {
 			for (String validationError : errorMessages) {
 				addErrorToOperationOutcome(myFhirContext, theOutcome, validationError, "required");
@@ -406,6 +418,28 @@ public class MergeValidationService {
 
 		// no validation errors
 		return true;
+	}
+
+	/**
+	 * Validates that the resource type in a reference matches the API path resource type.
+	 *
+	 * @param theReference the reference to validate
+	 * @param theApiResourceType the expected resource type from the API path
+	 * @param theParameterName the parameter name for error messages
+	 * @param theErrorMessages the list to add error messages to
+	 */
+	private void validateReferenceResourceTypeMatchesRequest(
+			Reference theReference, String theApiResourceType, String theParameterName, List<String> theErrorMessages) {
+		if (theReference != null && theReference.hasReference()) {
+			IdType id = new IdType(theReference.getReference());
+			String referenceResourceType = id.getResourceType();
+			if (!Objects.equals(referenceResourceType, theApiResourceType)) {
+				String msg = String.format(
+						"The request was for \"%s\" type but %s contains a reference for \"%s\" type",
+						theApiResourceType, theParameterName, referenceResourceType);
+				theErrorMessages.add(msg);
+			}
+		}
 	}
 
 	private IBaseResource resolveSourceResource(
@@ -502,8 +536,8 @@ public class MergeValidationService {
 
 		IIdType theResourceId = new IdType(r4ref.getReferenceElement().getValue());
 
-		// Get the resource type from the reference and dynamically fetch the appropriate DAO
-		String resourceType = theResourceId.getResourceType();
+		// Get the resource type from request details and dynamically fetch the appropriate DAO
+		String resourceType = theRequestDetails.getResourceName();
 		IFhirResourceDao<IBaseResource> resourceDao = myDaoRegistry.getResourceDao(resourceType);
 
 		IBaseResource resource;

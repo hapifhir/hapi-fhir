@@ -25,11 +25,21 @@ import ca.uhn.fhir.jpa.merge.MergeOperationTestHelper;
 import ca.uhn.fhir.jpa.merge.MergeTestParameters;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Tests for edge cases in merge operations that don't fit the generic resource pattern.
@@ -61,7 +71,60 @@ public class MergeEdgeCaseR4Test extends BaseResourceProviderR4Test {
 			"OperationOutcome",
 			params,
 			UnprocessableEntityException.class,
-			"Merge operation cannot be performed on resource type 'OperationOutcome'",
-			"does not have an 'identifier' element");
+			"Merge operation cannot be performed on resource type 'OperationOutcome' because it does not have an 'identifier' element.");
+	}
+
+	static Stream<Arguments> resourceTypeMismatchScenarios() {
+		return Stream.of(
+			Arguments.of("Patient", "Practitioner", "Patient", List.of("The request was for \"Patient\" type but source-resource contains a reference for \"Practitioner\" type")),
+			Arguments.of("Patient", "Patient", "Practitioner", List.of("The request was for \"Patient\" type but target-resource contains a reference for \"Practitioner\" type")),
+			Arguments.of("Practitioner", "Patient", "Practitioner", List.of("The request was for \"Practitioner\" type but source-resource contains a reference for \"Patient\" type")),
+			Arguments.of("Practitioner", "Practitioner", "Patient", List.of("The request was for \"Practitioner\" type but target-resource contains a reference for \"Patient\" type")),
+			Arguments.of("Practitioner", "Patient", "Patient", List.of(
+				"The request was for \"Practitioner\" type but source-resource contains a reference for \"Patient\" type",
+				"The request was for \"Practitioner\" type but target-resource contains a reference for \"Patient\" type"
+			))
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource("resourceTypeMismatchScenarios")
+	void testMerge_resourceTypeMismatch_failsWithInvalidRequestException(
+			String endpointResourceType,
+			String sourceResourceType,
+			String targetResourceType,
+			List<String> expectedErrorMessages) {
+		// Setup: Create both Patient and Practitioner resources upfront
+		Patient patient = new Patient();
+		IIdType patientId = myClient.create()
+			.resource(patient)
+			.execute()
+			.getId()
+			.toUnqualifiedVersionless();
+
+		Practitioner practitioner = new Practitioner();
+		IIdType practitionerId = myClient.create()
+			.resource(practitioner)
+			.execute()
+			.getId()
+			.toUnqualifiedVersionless();
+
+		// Determine which IDs to use based on test parameters
+		IIdType sourceId = "Patient".equals(sourceResourceType) ? patientId : practitionerId;
+		IIdType targetId = "Patient".equals(targetResourceType) ? patientId : practitionerId;
+
+		// Build parameters
+		MergeTestParameters params = new MergeTestParameters()
+			.sourceResource(new Reference(sourceId))
+			.targetResource(new Reference(targetId))
+			.deleteSource(false)
+			.preview(false);
+
+		// Execute and validate error
+		myHelper.callMergeAndValidateException(
+			endpointResourceType,
+			params,
+			InvalidRequestException.class,
+			expectedErrorMessages.toArray(new String[0]));
 	}
 }
