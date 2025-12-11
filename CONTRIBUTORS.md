@@ -1,7 +1,7 @@
 # Contributors Guide — HAPI FHIR
 
-Welcome to the **HAPI FHIR** project!  
-We’re happy that you’re interested in contributing to the world's best FHIR implementation.  
+Welcome to the **HAPI FHIR** project!
+We’re happy that you’re interested in contributing to the world's best FHIR implementation.
 This document outlines how to contribute effectively and how to record your changes for release tracking.
 
 ---
@@ -42,14 +42,14 @@ git checkout -b feature/your-feature-name
 
 ## 🧾 Changelog Entries (Required)
 
-HAPI FHIR uses a **YAML-based changelog** to maintain a structured record of changes.  
+HAPI FHIR uses a **YAML-based changelog** to maintain a structured record of changes.
 Each contribution must include a new file in:
 
 ```
 hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/changelog/[CURRENT_RELEASE]
 ```
 
-Significant changes must also be described in the release upgrade notes in 
+Significant changes must also be described in the release upgrade notes in
 ```
 hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/changelog/[CURRENT_RELEASE]/upgrade.md
 ```
@@ -70,7 +70,7 @@ Each changelog entry must include:
 type: add|fix|perf|change|remove|security
 issue: 1234          # GitHub issue/PR number
 title: :"Changelog summary.
-    For bugs, describe the broken behaviour, and how it has changed.  
+    For bugs, describe the broken behaviour, and how it has changed.
     For features, describe the new feature."
 ```
 
@@ -109,7 +109,7 @@ Document any new operations, or important features.
 
 ## 🏷️ Attribution
 
-Contributors are listed in the `<developers>` section of the root `pom.xml`.  
+Contributors are listed in the `<developers>` section of the root `pom.xml`.
 
 
 ## Thank You
