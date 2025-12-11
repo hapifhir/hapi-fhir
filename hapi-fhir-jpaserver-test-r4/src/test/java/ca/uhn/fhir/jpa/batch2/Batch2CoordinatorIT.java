@@ -653,7 +653,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		try {
 
 			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_POSTSTORAGE_BATCH_JOB_CREATE, poststorageBatchJobCreateInterceptor);
-			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.BATCH2_JOB_COMPLETION, postBatchJobCcompletionInterceptor);
+			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_POSTCOMPLETE_BATCH_JOB, postBatchJobCcompletionInterceptor);
 
 			// test
 			JobInstanceStartRequest request = buildRequest(jobId);

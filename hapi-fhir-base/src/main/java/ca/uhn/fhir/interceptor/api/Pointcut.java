@@ -3324,6 +3324,19 @@ public enum Pointcut implements IPointcut {
 	STORAGE_POSTSTORAGE_BATCH_JOB_CREATE(void.class, "ca.uhn.fhir.batch2.model.JobInstance"),
 
 	/**
+	 * <b>Batch2 Hook:</b>
+	 * <p>Invoked after the job instance is completed. JobInstance is immutable here.</p>
+	 * <p>Parameters:</p>
+	 * <ul>
+	 *     <li>ca.uhn.fhir.batch2.model.JobInstance - The job instance</li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_POSTCOMPLETE_BATCH_JOB(void.class, "ca.uhn.fhir.batch2.model.JobInstance"),
+
+	/**
 	 * <b>CDS Hooks Prefetch Hook:</b>
 	 * Invoked before a CDS Hooks prefetch request is made.
 	 * Hooks may accept the following parameters:
@@ -3408,19 +3421,6 @@ public enum Pointcut implements IPointcut {
 	 */
 	BATCH2_CHUNK_PROCESS_FILTER(
 			IInterceptorFilterHook.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.batch2.model.WorkChunk"),
-
-	/**
-	 * <b>Batch2 Hook:</b>
-	 * <p>Invoked after the job instance is completed. JobInstance is immutable here.</p>
-	 * <p>Parameters:</p>
-	 * <ul>
-	 *     <li>ca.uhn.fhir.batch2.model.JobInstance - The job instance</li>
-	 * </ul>
-	 * <p>
-	 * Hooks should return <code>void</code>.
-	 * </p>
-	 */
-	BATCH2_JOB_COMPLETION(void.class, "ca.uhn.fhir.batch2.model.JobInstance"),
 
 	/**
 	 * <b>Provenance Agents Pointcut:</b>

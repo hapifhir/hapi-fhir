@@ -20,9 +20,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -85,7 +82,7 @@ class JobInstanceStatusUpdaterTest {
 		};
 		try {
 			// setup
-			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.BATCH2_JOB_COMPLETION, postBatchJobCcompletionInterceptor);
+			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_POSTCOMPLETE_BATCH_JOB, postBatchJobCcompletionInterceptor);
 			setupCompleteCallback();
 
 			// execute

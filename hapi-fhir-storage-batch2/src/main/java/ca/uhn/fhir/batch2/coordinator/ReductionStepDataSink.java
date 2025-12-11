@@ -112,9 +112,9 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 			if (ourLog.isTraceEnabled()) {
 				ourLog.trace("New instance state: {}", JsonUtil.serialize(instance));
 			}
-			if (myInterceptorService.hasHooks(Pointcut.BATCH2_JOB_COMPLETION)) {
+			if (myInterceptorService.hasHooks(Pointcut.STORAGE_POSTCOMPLETE_BATCH_JOB)) {
 				final HookParams params = new HookParams().add(JobInstance.class, instance);
-				myInterceptorService.callHooks(Pointcut.BATCH2_JOB_COMPLETION, params);
+				myInterceptorService.callHooks(Pointcut.STORAGE_POSTCOMPLETE_BATCH_JOB, params);
 			}
 
 			return true;

@@ -107,7 +107,7 @@ public class ReductionStepDataSinkTest {
 		WorkChunkData<StepOutputData> chunkData = new WorkChunkData<>(stepData);
 		@SuppressWarnings("unchecked")
 		JobDefinition<IModelJson> jobDefinition = mock(JobDefinition.class);
-		myInterceptorService.registerAnonymousInterceptor(Pointcut.BATCH2_JOB_COMPLETION, jobCompletionInterceptor);
+		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_POSTCOMPLETE_BATCH_JOB, jobCompletionInterceptor);
 
 		// when
 		JobInstance instance = JobInstance.fromInstanceId(INSTANCE_ID);
