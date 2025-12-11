@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRestfulResponse;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -55,8 +56,8 @@ class RequestDetailsCloner {
 		newDetails.setResourceName(null);
 		newDetails.setCompartmentName(null);
 		IRestfulResponse response = theDetails.getResponse();
-		if (response == null) {
-			response = new SystemRestfulResponse(newDetails);
+		if (response == null && newDetails instanceof SystemRequestDetails systemDetails) {
+			response = new SystemRestfulResponse(systemDetails);
 		}
 		newDetails.setResponse(response);
 

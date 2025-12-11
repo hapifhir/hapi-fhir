@@ -30,7 +30,7 @@ class SearchParameterMapQueryBuilderTest {
 		SearchParameterMap result = SearchParameterMapRepositoryRestQueryBuilder.buildFromQueryContributor(spMap);
 
 	    // then
-	    assertThat(result).isSameAs(spMap);
+	    assertThat(result).isEqualTo(spMap);
 	}
 
 	@Test

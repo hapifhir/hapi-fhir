@@ -72,7 +72,7 @@ public class SearchParameterMapRepositoryRestQueryBuilder implements IRepository
 		// If the contributor is already a SearchParameterMap, use it directly.
 		// This allows pass-though of stuff like $everything that isn't part of the main rest-query syntax.
 		if (theQueryContributor instanceof SearchParameterMap theSp) {
-			searchParameterMap = theSp;
+			searchParameterMap = theSp.clone();
 		} else {
 			// Build a SearchParameterMap from scratch.
 			SearchParameterMapRepositoryRestQueryBuilder builder = new SearchParameterMapRepositoryRestQueryBuilder();
@@ -104,7 +104,7 @@ public class SearchParameterMapRepositoryRestQueryBuilder implements IRepository
 
 		Map<String, ISpecialParameterProcessor> includeProcessors = Map.of(
 				PARAM_INCLUDE, includeProcessor(false),
-				// fixme Include should be a normal IQueryParameterType
+				// todo Include should be a normal IQueryParameterType
 				PARAM_INCLUDE_ITERATE, includeProcessor(true),
 				PARAM_INCLUDE_RECURSE, includeProcessor(true),
 				PARAM_REVINCLUDE, revincludeProcessor(false),

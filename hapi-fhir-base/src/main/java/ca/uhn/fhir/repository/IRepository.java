@@ -87,9 +87,12 @@ import java.util.Map;
  *     Note to implementors: this interface exposes several search() methods.
  *     Several are deprecated and present for source-compatibility with previous versions
  *     of this interface used by the clinical reasoning project.
+ *     They will be removed at a future date.
  *     We provide two main apis with different payloads for the query parameters: a Multimap method,
- *     and an abstract builder callback.  Implementations must implement at least one of these two.
- *     We provide default implementations of each in terms of the other.
+ *     and an abstract builder callback which is compatible with SearchParameterMap.
+ *     Implementations must implement at least one of these two.
+ *     We provide default implementations of each in terms of the other so you only need to implement one.
+ *     Note that the SearchParameterMap used by the JPA repository implements the interface, and can be used as is.
  * </p>
  *
  * @see <a href="https://www.hl7.org/fhir/http.html">FHIR REST API</a>
@@ -272,7 +275,7 @@ public interface IRepository {
 	 * @param resourceType the class of the Resource type to search
 	 * @param searchParameters the searchParameters for this search
 	 * @return a Bundle with the results of the search
-	 * @deprecated since 8.4 use Multimap instead
+	 * @deprecated since 8.4 use Multimap or IRepositoryRestQueryContributor with SearchParamterMap instead
 	 */
 	@Deprecated(since = "8.4.0")
 	default <B extends IBaseBundle, T extends IBaseResource> B search(
@@ -342,7 +345,7 @@ public interface IRepository {
 	 * @param searchParameters the searchParameters for this search
 	 * @param headers headers for this request, typically key-value pairs of HTTP headers
 	 * @return a Bundle with the results of the search
-	 * @deprecated since 8.4 use Multimap instead
+	 * @deprecated since 8.4 use Multimap or IRepositoryRestQueryContributor with SearchParamterMap instead
 	 */
 	@Deprecated(since = "8.4.0")
 	default <B extends IBaseBundle, T extends IBaseResource> B search(
