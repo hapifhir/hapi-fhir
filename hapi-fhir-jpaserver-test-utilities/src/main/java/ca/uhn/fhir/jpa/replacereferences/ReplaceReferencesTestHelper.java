@@ -191,12 +191,14 @@ public class ReplaceReferencesTestHelper {
 		assertThat(period.getStart()).isBetween(oneMinuteAgo, now);
 		assertThat(period.getEnd()).isEqualTo(provenance.getRecorded());
 
-		// validate provenance.reason
+		// validate provenance.reason - dynamic based on resource type
+		String resourceType = theTargetResourceIdWithExpectedVersion.getResourceType();
+		String expectedReasonCode = "Patient".equals(resourceType) ? "PATADMIN" : "RECORDMGT";
 		assertThat(provenance.getReason()).hasSize(1);
 		Coding reasonCoding = provenance.getReason().get(0).getCodingFirstRep();
 		assertThat(reasonCoding).isNotNull();
 		assertThat(reasonCoding.getSystem()).isEqualTo("http://terminology.hl7.org/CodeSystem/v3-ActReason");
-		assertThat(reasonCoding.getCode()).isEqualTo("PATADMIN");
+		assertThat(reasonCoding.getCode()).isEqualTo(expectedReasonCode);
 
 		// validate provenance.activity
 		Coding activityCoding = provenance.getActivity().getCodingFirstRep();
@@ -257,12 +259,14 @@ public class ReplaceReferencesTestHelper {
 		assertThat(period.getStart()).isBetween(oneMinuteAgo, now);
 		assertThat(period.getEnd()).isEqualTo(provenance.getRecorded());
 
-		// validate provenance.reason
+		// validate provenance.reason - dynamic based on resource type
+		String resourceType = theTargetPatientIdWithExpectedVersion.getResourceType();
+		String expectedReasonCode = "Patient".equals(resourceType) ? "PATADMIN" : "RECORDMGT";
 		assertThat(provenance.getReason()).hasSize(1);
 		Coding reasonCoding = provenance.getReason().get(0).getCodingFirstRep();
 		assertThat(reasonCoding).isNotNull();
 		assertThat(reasonCoding.getSystem()).isEqualTo("http://terminology.hl7.org/CodeSystem/v3-ActReason");
-		assertThat(reasonCoding.getCode()).isEqualTo("PATADMIN");
+		assertThat(reasonCoding.getCode()).isEqualTo(expectedReasonCode);
 
 		// validate provenance.activity
 		Coding activityCoding = provenance.getActivity().getCodingFirstRep();

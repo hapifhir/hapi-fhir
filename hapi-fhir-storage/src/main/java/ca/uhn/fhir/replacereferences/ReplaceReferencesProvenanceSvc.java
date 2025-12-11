@@ -63,6 +63,7 @@ public class ReplaceReferencesProvenanceSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(ReplaceReferencesProvenanceSvc.class);
 	private static final String ACT_REASON_CODE_SYSTEM = "http://terminology.hl7.org/CodeSystem/v3-ActReason";
 	private static final String ACT_REASON_PATIENT_ADMINISTRATION_CODE = "PATADMIN";
+	private static final String ACT_REASON_RECORDS_MANAGEMENT_CODE = "RECORDMGT";
 	protected static final String ACTIVITY_CODE_SYSTEM = "http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle";
 	private static final String ACTIVITY_CODE_LINK = "link";
 	private final IFhirResourceDao<IBaseResource> myProvenanceDao;
@@ -79,13 +80,28 @@ public class ReplaceReferencesProvenanceSvc {
 		return retVal;
 	}
 
+	/**
+	 * Returns the appropriate reason code based on the resource type being processed.
+	 * Patient resources use "PATADMIN" (patient administration), all other resources use "RECORDMGT" (records management).
+	 *
+	 * @param theResourceType the resource type being merged/replaced
+	 * @return the reason code string
+	 */
+	protected String getReasonCode(String theResourceType) {
+		if ("Patient".equals(theResourceType)) {
+			return ACT_REASON_PATIENT_ADMINISTRATION_CODE;
+		}
+		return ACT_REASON_RECORDS_MANAGEMENT_CODE;
+	}
+
 	protected Provenance createProvenanceObject(
 			Reference theTargetReference,
 			@Nullable Reference theSourceReference,
 			List<Reference> theUpdatedReferencingResources,
 			Date theStartTime,
 			List<IProvenanceAgent> theProvenanceAgents,
-			List<IBaseResource> theContainedResources) {
+			List<IBaseResource> theContainedResources,
+			String theResourceType) {
 		Provenance provenance = new Provenance();
 
 		Date now = new Date();
@@ -100,11 +116,12 @@ public class ReplaceReferencesProvenanceSvc {
 		if (activityCodeableConcept != null) {
 			provenance.setActivity(activityCodeableConcept);
 		}
+		String reasonCode = getReasonCode(theResourceType);
 		CodeableConcept activityReasonCodeableConcept = new CodeableConcept();
 		activityReasonCodeableConcept
 				.addCoding()
 				.setSystem(ACT_REASON_CODE_SYSTEM)
-				.setCode(ACT_REASON_PATIENT_ADMINISTRATION_CODE);
+				.setCode(reasonCode);
 
 		provenance.addReason(activityReasonCodeableConcept);
 
@@ -156,6 +173,7 @@ public class ReplaceReferencesProvenanceSvc {
 			List<IProvenanceAgent> theProvenanceAgents,
 			List<IBaseResource> theContainedResources,
 			boolean theCreateEvenWhenNoReferencesWereUpdated) {
+		String resourceType = theTargetId.getResourceType();
 		Reference targetReference = new Reference(theTargetId);
 		Reference sourceReference = new Reference(theSourceId);
 		List<Reference> patchedReferences = extractUpdatedResourceReferences(thePatchResultBundles);
@@ -166,7 +184,8 @@ public class ReplaceReferencesProvenanceSvc {
 					patchedReferences,
 					theStartTime,
 					theProvenanceAgents,
-					theContainedResources);
+					theContainedResources,
+					resourceType);
 			myProvenanceDao.create(provenance, theRequestDetails);
 		}
 	}
