@@ -146,7 +146,7 @@ class SearchParameterMapQueryBuilderTest {
 	}
 
 
-	// fixme we normally put modifiers on values, not keys..
+	// todo we normally put modifiers on values, not keys.  But Includes aren't QueryParams yet.
 	@Test
 	void testIncludeIterate() {
 		// given
