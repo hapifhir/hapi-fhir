@@ -156,7 +156,7 @@ public class HapiSchemaMigrationTest {
 		HapiSystemProperties.disableUnitTestMode();
 		String testDataSeedFile = "migration/data/MSSQL_2012_collation_fix.sql";
 		DriverTypeEnum mssql2012DriverType = myCurrentDriverType = DriverTypeEnum.MSSQL_2012;
-		VersionEnum versionWithMssqlCollationFixOnSchemaInit = VersionEnum.V8_6_0;
+		VersionEnum versionWithMssqlCollationFixOnSchemaInit = VersionEnum.V8_8_0;
 
 		// given
 		myEmbeddedServersExtension.initializePersistenceSchema(mssql2012DriverType, versionWithMssqlCollationFixOnSchemaInit);
