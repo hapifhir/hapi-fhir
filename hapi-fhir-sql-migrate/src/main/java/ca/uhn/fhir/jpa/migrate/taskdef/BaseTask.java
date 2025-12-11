@@ -359,6 +359,10 @@ public abstract class BaseTask {
 		return myFlags.contains(TaskFlagEnum.HEAVYWEIGHT_SKIP_BY_DEFAULT);
 	}
 
+	public boolean isRunDuringSchemaInitialization() {
+		return myFlags.contains(TaskFlagEnum.RUN_DURING_SCHEMA_INITIALIZATION);
+	}
+
 	public boolean hasFlag(TaskFlagEnum theFlag) {
 		return myFlags.contains(theFlag);
 	}
