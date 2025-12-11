@@ -50,6 +50,10 @@ public class OperationOutcomeUtil {
 	public static final String OO_SEVERITY_INFO = "information";
 	public static final String OO_SEVERITY_WARN = "warning";
 	public static final String OO_ISSUE_CODE_INFORMATIONAL = "informational";
+	/**
+	 * OperationOutcome.issue.code value: A required element is missing.
+	 */
+	public static final String OO_ISSUE_CODE_REQUIRED = "required";
 
 	/**
 	 * Note: This code was added in FHIR R5, so the {@link #addIssue(FhirContext, IBaseOperationOutcome, String, String, String, String) addIssue}

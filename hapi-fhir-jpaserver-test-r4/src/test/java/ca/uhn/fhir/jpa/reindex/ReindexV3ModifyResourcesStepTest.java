@@ -3,10 +3,10 @@ package ca.uhn.fhir.jpa.reindex;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.reindex.ReindexV3ModifyResourcesStep;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
-import ca.uhn.fhir.batch2.jobs.reindex.v1.ReindexStepV1;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -33,13 +33,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @SuppressWarnings("removal")
-public class ReindexStepV1Test extends BaseJpaR4Test {
+public class ReindexV3ModifyResourcesStepTest extends BaseJpaR4Test {
 
 	@Autowired
-	private ReindexStepV1 myReindexStepV1;
+	private ReindexV3ModifyResourcesStep myReindexStepV1;
 
 	@Mock
-	private IJobDataSink<VoidModel> myDataSink;
+	private IJobDataSink<BulkModifyResourcesChunkOutcomeJson> myDataSink;
 
 	@Captor
 	private ArgumentCaptor<String> myErrorCaptor;
@@ -55,7 +55,7 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 		Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON")).getIdPartAsLong();
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
 
-		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+		TypedPidAndVersionListWorkChunkJson data = new TypedPidAndVersionListWorkChunkJson();
 		data.addTypedPidWithNullPartitionForUnitTest("Patient", id0);
 		data.addTypedPidWithNullPartitionForUnitTest("Patient", id1);
 
@@ -66,7 +66,7 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 		instance.setInstanceId("index-id");
 		WorkChunk chunk = new WorkChunk();
 		chunk.setId("chunk-id");
-		StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(
+		StepExecutionDetails<ReindexJobParameters, TypedPidAndVersionListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(
 			params,
 			data,
 			instance,
@@ -93,7 +93,7 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 		Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON")).getIdPartAsLong();
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
 
-		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+		TypedPidAndVersionListWorkChunkJson data = new TypedPidAndVersionListWorkChunkJson();
 		data.addTypedPidWithNullPartitionForUnitTest("Patient", id0);
 		data.addTypedPidWithNullPartitionForUnitTest("Patient", id1);
 
@@ -101,11 +101,11 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 		ReindexJobParameters params = new ReindexJobParameters();
 		myCaptureQueriesListener.clear();
 		JobInstance instance = new JobInstance();
-		StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(
+		StepExecutionDetails<ReindexJobParameters, TypedPidAndVersionListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(
 			params,
 			data,
 			instance,
-			mock(WorkChunk.class)
+			new WorkChunk().setId("chunk-id")
 		);
 		RunOutcome outcome = myReindexStepV1.run(stepExecutionDetails, myDataSink);
 
@@ -128,7 +128,7 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 		Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON")).getIdPartAsLong();
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
 
-		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+		TypedPidAndVersionListWorkChunkJson data = new TypedPidAndVersionListWorkChunkJson();
 		data.addTypedPidWithNullPartitionForUnitTest("Patient", id0);
 		data.addTypedPidWithNullPartitionForUnitTest("Patient", id1);
 
@@ -141,11 +141,11 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 		ReindexJobParameters params = new ReindexJobParameters();
 		myCaptureQueriesListener.clear();
 		JobInstance instance = new JobInstance();
-		StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(
+		StepExecutionDetails<ReindexJobParameters, TypedPidAndVersionListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(
 			params,
 			data,
 			instance,
-			mock(WorkChunk.class)
+			new WorkChunk().setId("chunk-id")
 		);
 		RunOutcome outcome = myReindexStepV1.run(stepExecutionDetails, myDataSink);
 
@@ -171,7 +171,7 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 		Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON"), withOrganization(orgId)).getIdPartAsLong();
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS"), withOrganization(orgId)).getIdPartAsLong();
 
-		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+		TypedPidAndVersionListWorkChunkJson data = new TypedPidAndVersionListWorkChunkJson();
 		data.addTypedPidWithNullPartitionForUnitTest("Patient", id0);
 		data.addTypedPidWithNullPartitionForUnitTest("Patient", id1);
 
@@ -213,11 +213,11 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 		ReindexJobParameters params = new ReindexJobParameters();
 		myCaptureQueriesListener.clear();
 		JobInstance instance = new JobInstance();
-		StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(
+		StepExecutionDetails<ReindexJobParameters, TypedPidAndVersionListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(
 			params,
 			data,
 			instance,
-			mock(WorkChunk.class)
+			new WorkChunk().setId("chunk-id")
 		);
 		RunOutcome outcome = myReindexStepV1.run(stepExecutionDetails, myDataSink);
 
@@ -241,7 +241,7 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 		Long idPatientToInvalidate = createPatient().getIdPartAsLong();
 		Long idObservation = createObservation(withSubject(new IdType("Patient/" + idPatientToInvalidate))).getIdPartAsLong();
 
-		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+		TypedPidAndVersionListWorkChunkJson data = new TypedPidAndVersionListWorkChunkJson();
 		data.addTypedPidWithNullPartitionForUnitTest("Patient", id0);
 		data.addTypedPidWithNullPartitionForUnitTest("Patient", id1);
 		data.addTypedPidWithNullPartitionForUnitTest("Patient", idPatientToInvalidate);
@@ -266,7 +266,7 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 		instance.setInstanceId("index-id");
 		WorkChunk workChunk = new WorkChunk();
 		workChunk.setId("workid");
-		StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(
+		StepExecutionDetails<ReindexJobParameters, TypedPidAndVersionListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(
 			params,
 			data,
 			instance,

@@ -1758,6 +1758,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			entity = myEntityManager.find(ResourceTable.class, jpaPid);
 		}
 
+		IIdType id = myFhirContext.getVersion().newIdType(entity.getResourceType(), entity.getFhirId());
+		retVal.setResourceId(id);
+
 		if (entity == null) {
 			retVal.addWarning("Unable to find entity with PID: " + jpaPid.getId());
 			return retVal;
