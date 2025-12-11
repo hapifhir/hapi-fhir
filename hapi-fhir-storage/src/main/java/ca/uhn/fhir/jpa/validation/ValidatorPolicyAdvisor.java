@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 
@@ -150,5 +151,10 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 	@Override
 	public ReferenceValidationPolicy getReferencePolicy() {
 		return ReferenceValidationPolicy.IGNORE;
+	}
+
+	@Override
+	public Set<String> getCheckReferencesTo() {
+		return Set.of();
 	}
 }
