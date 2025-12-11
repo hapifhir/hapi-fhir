@@ -737,8 +737,6 @@ public class ReplaceReferencesTestHelper {
 		}
 	}
 
-
-
 	@Nonnull
 	public String extractFailureMessageFromOutcomeParameter(@Nonnull BaseServerResponseException ex) {
 		return extractFailureMessageFromOutcomeParameter(myFhirContext, ex);
@@ -746,19 +744,19 @@ public class ReplaceReferencesTestHelper {
 
 	@Nonnull
 	public static String extractFailureMessageFromOutcomeParameter(
-		@Nonnull FhirContext theFhirContext, @Nonnull BaseServerResponseException theException) {
+			@Nonnull FhirContext theFhirContext, @Nonnull BaseServerResponseException theException) {
 		String body = theException.getResponseBody();
 		IParser jsonParser = theFhirContext.newJsonParser();
 		if (body != null) {
 			Parameters outParams = jsonParser.parseResource(Parameters.class, body);
 			OperationOutcome outcome =
-				(OperationOutcome) outParams.getParameter("outcome").getResource();
+					(OperationOutcome) outParams.getParameter("outcome").getResource();
 			ourLog.info(
-				"Extracted OperationOutcome from exception: {}",
-				jsonParser.setPrettyPrint(true).encodeResourceToString(outcome));
+					"Extracted OperationOutcome from exception: {}",
+					jsonParser.setPrettyPrint(true).encodeResourceToString(outcome));
 			return outcome.getIssue().stream()
-				.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
-				.collect(Collectors.joining(", "));
+					.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
+					.collect(Collectors.joining(", "));
 		} else {
 			return "null";
 		}

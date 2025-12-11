@@ -284,7 +284,7 @@ public class ResourceMergeService implements IGenericResourceMergeService {
 						// by using an id with versionId, the delete fails if
 						// the resource was updated since we last read it
 						IFhirResourceDao<IBaseResource> dao =
-								myDaoRegistry.getResourceDao(theSourceResource.fhirType());
+								myDaoRegistry.getResourceDao(theRequestDetails.getResourceName());
 						dao.delete(theSourceResource.getIdElement(), theRequestDetails);
 					}
 				});

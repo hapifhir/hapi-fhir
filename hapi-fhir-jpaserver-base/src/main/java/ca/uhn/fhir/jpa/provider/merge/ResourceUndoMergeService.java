@@ -126,7 +126,7 @@ public class ResourceUndoMergeService {
 		IBaseOperationOutcome opOutcome = undoMergeOutcome.getOperationOutcome();
 
 		if (!myMergeValidationService.validateCommonMergeOperationParameters(
-				inputParameters, opOutcome, myInputParamNames)) {
+				inputParameters, opOutcome, myInputParamNames, theRequestDetails)) {
 			undoMergeOutcome.setHttpStatusCode(STATUS_HTTP_400_BAD_REQUEST);
 			return undoMergeOutcome;
 		}
