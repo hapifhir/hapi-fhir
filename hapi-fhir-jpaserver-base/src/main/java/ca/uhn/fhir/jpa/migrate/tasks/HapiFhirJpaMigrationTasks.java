@@ -227,7 +227,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.modifyColumn("20251015.01", "IDX_STRING")
 				.nullable()
 				.withType(ColumnTypeEnum.STRING, 500);
-
 	}
 
 	protected void init840() {

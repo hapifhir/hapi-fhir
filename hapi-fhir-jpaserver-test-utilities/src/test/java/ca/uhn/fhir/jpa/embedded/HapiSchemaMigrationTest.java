@@ -119,9 +119,6 @@ public class HapiSchemaMigrationTest {
 		myEmbeddedServersExtension.initializePersistenceSchema(theDriverType);
 		myEmbeddedServersExtension.insertPersistenceTestData(theDriverType, FIRST_TESTED_VERSION);
 
-		JpaEmbeddedDatabase database = myEmbeddedServersExtension.getEmbeddedDatabase(theDriverType);
-		DataSource dataSource = database.getDataSource();
-
 		for (VersionEnum aVersion : VersionEnum.values()) {
 			ourLog.info("Applying migrations for {}", aVersion);
 			MigrationTaskList migrationTasks = myHapiFhirJpaMigrationTasks.getAllTasks(aVersion);
@@ -139,7 +136,7 @@ public class HapiSchemaMigrationTest {
 			// 3 Oracle doesn't run on everyone's machine (and is difficult to do so)
 			// 4 Postgres is generally the fastest/least terrible relational db supported
 			new HapiForeignKeyIndexHelper()
-				.ensureAllForeignKeysAreIndexed(dataSource);
+				.ensureAllForeignKeysAreIndexed(getDataSource(theDriverType));
 		}
 
 		verifyForcedIdMigration(theDriverType);
