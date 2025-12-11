@@ -7,7 +7,10 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.Logs;
@@ -20,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
@@ -68,8 +72,8 @@ public class ReductionStepDataSinkTest {
 	@Mock
 	private Appender<ILoggingEvent> myListAppender;
 
-	@Mock
-	private IInterceptorService myInterceptorService;
+	@Spy
+	private IInterceptorService myInterceptorService = new InterceptorService("testIS");;
 
 	private Logger ourLogger;
 
@@ -92,13 +96,18 @@ public class ReductionStepDataSinkTest {
 	}
 
 	@Test
-	public void accept_validInputSubmittedOnlyOnce_updatesInstanceWithData() {
+	public void accept_validInputSubmittedOnlyOnce_updatesInstanceWithData_withInterceptor() {
+		IAnonymousInterceptor jobCompletionInterceptor = (pointcut, params) -> {
+			JobInstance jobInstance = params.get(JobInstance.class);
+			assertEquals(INSTANCE_ID, jobInstance.getInstanceId());
+		};
 		// setup
 		String data = "data";
 		StepOutputData stepData = new StepOutputData(data);
 		WorkChunkData<StepOutputData> chunkData = new WorkChunkData<>(stepData);
 		@SuppressWarnings("unchecked")
 		JobDefinition<IModelJson> jobDefinition = mock(JobDefinition.class);
+		myInterceptorService.registerAnonymousInterceptor(Pointcut.BATCH2_JOB_COMPLETION, jobCompletionInterceptor);
 
 		// when
 		JobInstance instance = JobInstance.fromInstanceId(INSTANCE_ID);
@@ -107,6 +116,7 @@ public class ReductionStepDataSinkTest {
 		when(myJobPersistence.fetchAllWorkChunksIterator(any(), anyBoolean())).thenReturn(Collections.emptyIterator());
 		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance));
 		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(instance)).thenReturn(jobDefinition);
+		//when(myInterceptorService.hasHooks(Pointcut.BATCH2_JOB_COMPLETION)).thenReturn(true);
 
 		// test
 		myDataSink.accept(chunkData);
