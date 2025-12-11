@@ -21,15 +21,24 @@ package ca.uhn.fhir.jpa.merge;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Task;
 
+import java.util.stream.Collectors;
+
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchException;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
@@ -61,17 +70,23 @@ public class MergeOperationTestHelper {
 
 	private final IGenericClient myClient;
 	private final Batch2JobHelper myBatch2JobHelper;
+	private final FhirContext myFhirContext;
 
 	/**
 	 * Create a new merge operation test helper.
 	 *
 	 * @param theClient          FHIR client for invoking operations
 	 * @param theBatch2JobHelper Helper for tracking async jobs
+	 * @param theFhirContext     FHIR context for parsing error responses
 	 */
-	public MergeOperationTestHelper(@Nonnull IGenericClient theClient, @Nonnull Batch2JobHelper theBatch2JobHelper) {
+	public MergeOperationTestHelper(
+			@Nonnull IGenericClient theClient,
+			@Nonnull Batch2JobHelper theBatch2JobHelper,
+			@Nonnull FhirContext theFhirContext) {
 
 		myClient = theClient;
 		myBatch2JobHelper = theBatch2JobHelper;
+		myFhirContext = theFhirContext;
 
 		// Register verbose logging interceptor to capture error response bodies
 		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
@@ -157,5 +172,50 @@ public class MergeOperationTestHelper {
 
 		// Use existing awaitJobCompletion() method
 		awaitJobCompletion(jobId);
+	}
+
+	// Error validation helpers
+
+	/**
+	 * Call merge operation expecting exception, validate type, and return diagnostic message.
+	 *
+	 * @param theResourceType          resource type to merge
+	 * @param theParams                merge parameters
+	 * @param theExpectedExceptionType expected exception class
+	 * @return diagnostic message for custom validation
+	 */
+	@Nonnull
+	public String callMergeAndExtractDiagnosticMessage(
+			@Nonnull String theResourceType,
+			@Nonnull MergeTestParameters theParams,
+			@Nonnull Class<? extends BaseServerResponseException> theExpectedExceptionType) {
+
+		Exception ex = catchException(() -> callMergeOperation(theResourceType, theParams, false));
+		assertThat(ex).isInstanceOf(theExpectedExceptionType);
+
+		BaseServerResponseException serverEx = (BaseServerResponseException) ex;
+		return ReplaceReferencesTestHelper.extractFailureMessageFromOutcomeParameter(myFhirContext, serverEx);
+	}
+
+	/**
+	 * Call merge operation and validate that it throws expected exception with expected messages.
+	 *
+	 * @param theResourceType                resource type to merge
+	 * @param theParams                      merge parameters
+	 * @param theExpectedExceptionType       expected exception class
+	 * @param theExpectedDiagnosticMessageParts diagnostic message parts that should be present
+	 */
+	public void callMergeAndValidateException(
+			@Nonnull String theResourceType,
+			@Nonnull MergeTestParameters theParams,
+			@Nonnull Class<? extends BaseServerResponseException> theExpectedExceptionType,
+			String... theExpectedDiagnosticMessageParts) {
+
+		String diagnosticMessage =
+				callMergeAndExtractDiagnosticMessage(theResourceType, theParams, theExpectedExceptionType);
+
+		for (String messagePart : theExpectedDiagnosticMessageParts) {
+			assertThat(diagnosticMessage).contains(messagePart);
+		}
 	}
 }
