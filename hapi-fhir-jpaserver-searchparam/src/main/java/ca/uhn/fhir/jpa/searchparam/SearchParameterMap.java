@@ -186,7 +186,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 			}
 		}
 
-		List<List<IQueryParameterType>> paramList = get(theName);
+		List<List<IQueryParameterType>> paramList = getOrCreate(theName);
 		for (IQueryParameterOr<?> next : theAnd.getValuesAsQueryTokens()) {
 			if (next == null) {
 				continue;
