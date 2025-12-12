@@ -100,15 +100,15 @@ public class JobInstanceStatusUpdater {
 			JobInstance theJobInstance,
 			JobDefinition<PT> theJobDefinition,
 			IJobCompletionHandler<PT> theJobCompletionHandler) {
+		if (myInterceptorService.hasHooks(Pointcut.STORAGE_POSTCOMPLETE_BATCH_JOB)) {
+			final HookParams params = new HookParams().add(JobInstance.class, theJobInstance);
+			myInterceptorService.callHooks(Pointcut.STORAGE_POSTCOMPLETE_BATCH_JOB, params);
+		}
 		if (theJobCompletionHandler == null) {
 			return;
 		}
 		PT jobParameters = theJobInstance.getParameters(theJobDefinition.getParametersType());
 		JobCompletionDetails<PT> completionDetails = new JobCompletionDetails<>(jobParameters, theJobInstance);
 		theJobCompletionHandler.jobComplete(completionDetails);
-		if (myInterceptorService.hasHooks(Pointcut.STORAGE_POSTCOMPLETE_BATCH_JOB)) {
-			final HookParams params = new HookParams().add(JobInstance.class, theJobInstance);
-			myInterceptorService.callHooks(Pointcut.STORAGE_POSTCOMPLETE_BATCH_JOB, params);
-		}
 	}
 }
