@@ -28,6 +28,7 @@ import ca.uhn.fhir.broker.api.IChannelNamer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.impl.LinkedBlockingBrokerClient;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -87,6 +88,8 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	private JobDefinitionRegistry myJobDefinitionRegistry;
 	@Mock
 	private IJobMaintenanceService myJobMaintenanceService;
+	@Mock
+	private IInterceptorService myInterceptorService;
 	private final IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
 	@Captor
 	private ArgumentCaptor<StepExecutionDetails<TestJobParameters, VoidModel>> myStep1ExecutionDetailsCaptor;
@@ -119,11 +122,11 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		// but in this service (so it's a real service here!)
 		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender, new NonTransactionalHapiTransactionService());
 		WorkChannelMessageListener workChannelMessageListener = new WorkChannelMessageListener(myJobInstancePersister,
-			myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService,myInterceptorBroadcaster);
+			myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService,myInterceptorBroadcaster, myInterceptorService);
 
 		myJobConsumer = myLinkedBlockingBrokerClient.getOrCreateConsumer(BATCH_CHANNEL_NAME, JobWorkNotificationJsonMessage.class, workChannelMessageListener, new ChannelConsumerSettings());
 
-		mySvc = new JobCoordinatorImpl(myJobInstancePersister, myJobDefinitionRegistry, myTransactionService);
+		mySvc = new JobCoordinatorImpl(myJobInstancePersister, myJobDefinitionRegistry, myTransactionService, myInterceptorService);
 	}
 
 	@AfterEach
