@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.svc.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
@@ -199,6 +200,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 							"Package {}#{} is already installed",
 							theInstallationSpec.getName(),
 							theInstallationSpec.getVersion());
+					// TODO
+					// add a property to specify whether we keep going or not.
+					// use quartz to schedule a batch job on one instance to install the packages
 				}
 
 				NpmPackage npmPackage = myPackageCacheManager.installPackage(theInstallationSpec);

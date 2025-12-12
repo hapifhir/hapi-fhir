@@ -22,11 +22,18 @@ package ca.uhn.fhir.jpa.packages;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.model.api.PagingIterator;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class NpmJpaValidationSupport implements IValidationSupport {
 
@@ -54,6 +61,55 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 	@Override
 	public IBaseResource fetchStructureDefinition(String theUri) {
 		return fetchResource("StructureDefinition", theUri);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends IBaseResource> T fetchResource(@Nullable Class<T> theClass, String theUri) {
+		if (theClass != null) {
+			String resourceType = myFhirContext.getResourceType(theClass);
+			// we can cast safely because the resource type must match what we're passing in.
+			// we aren't loading different versions of FHIR after all (since what we
+			// load is dependent on the fhir context too)
+			return (T) fetchResource(resourceType, theUri);
+		}
+
+		// no class
+		return null;
+	}
+
+	public static int batchSize() {
+		return 100;
+	}
+
+	@Override
+	public <T extends IBaseResource> Stream<T> fetchResources(Class<T> theClazz, String theUrl) {
+		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
+		PagingIterator<T> pagingIterator = new PagingIterator<>(
+				batchSize(),
+				(pageSize, batchSize, theConsumer) ->
+						myHapiPackageCacheManager
+								.loadPackageAssetsByUrl(fhirVersion, theUrl, PageRequest.of(pageSize, batchSize))
+								.stream()
+								.filter(r -> {
+									if (theClazz != null) {
+										return r.getClass().isAssignableFrom(theClazz);
+									}
+									return true;
+								})
+								.forEach(r -> theConsumer.accept((T) r)));
+
+		return StreamSupport.stream(
+				Spliterators.spliteratorUnknownSize(pagingIterator, Spliterator.ORDERED), false); // sequential
+	}
+
+	@Override
+	public <T extends IBaseResource> Stream<T> fetchAllResourcesOfType(@Nonnull Class<T> theClazz) {
+		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
+		return myHapiPackageCacheManager.loadPackageAssetsByType(fhirVersion, theClazz.getSimpleName()).stream()
+				.map(r -> (T) r)
+				.toList()
+				.stream();
 	}
 
 	@Nullable

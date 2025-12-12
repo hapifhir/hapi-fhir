@@ -45,6 +45,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -190,6 +191,22 @@ public interface IValidationSupport {
 	@Nullable
 	default IBaseResource fetchCodeSystem(String theSystem) {
 		return null;
+	}
+
+	/**
+	 * This works the same as fetchResource, but as url may not be unique (different versions of an IG, for example),
+	 * it can return multiple resources instead.
+	 */
+	default <T extends IBaseResource> Stream<T> fetchResources(Class<T> theClazz, String theUrl) {
+		return Stream.empty();
+	}
+
+	/**
+	 * Fetches all resources of a given type.
+	 * No order is defined.
+	 */
+	default <T extends IBaseResource> Stream<T> fetchAllResourcesOfType(@Nonnull Class<T> theClazz) {
+		return Stream.empty();
 	}
 
 	/**
