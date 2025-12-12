@@ -20,9 +20,12 @@
 package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesResultsJson;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
@@ -30,6 +33,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.BaseTransactionProcessor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -58,6 +62,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -71,9 +76,11 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.ALL_PARTITIONS_TENANT_NAME;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -95,6 +102,12 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 	@Autowired
 	protected IInterceptorService myInterceptorService;
 
+	@Autowired
+	protected IJobPartitionProvider myJobPartitionProvider;
+
+	@Autowired
+	private IDaoRegistry myDaoRegistry;
+
 	/**
 	 * Subclasses should call this method to initiate a new job
 	 */
@@ -109,15 +122,44 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 			List<IPrimitiveType<String>> thePartitionIds,
 			BaseBulkModifyJobParameters theJobParameters)
 			throws IOException {
-		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, getOperationName());
+		if (isRequirePreferAsyncHeader(theRequestDetails)) {
+			ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, getOperationName());
+		}
 
-		theJobParameters.setRequestPartitionId(
-				parsePartitionIdsParameterAndInvokeInterceptors(theRequestDetails, thePartitionIds));
+		if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isUnnamedPartitionMode()) {
+			theJobParameters.setRequestPartitionId(
+					parsePartitionIdsParameterAndInvokeInterceptors(theRequestDetails, thePartitionIds));
+		}
 
-		if (theUrlsToReindex != null) {
-			for (IPrimitiveType<String> url : theUrlsToReindex) {
-				if (isNotBlank(url.getValueAsString())) {
-					theJobParameters.addUrl(url.getValueAsString());
+		List<IPrimitiveType<String>> urlsToReindex = getIfNull(theUrlsToReindex, List.of());
+		List<String> urls = urlsToReindex.stream()
+				.filter(Objects::nonNull)
+				.map(IPrimitiveType::getValueAsString)
+				.filter(StringUtils::isNotBlank)
+				.toList();
+
+		if (isAutoExpandEmptyUrlList()) {
+			// if the url list is empty, use all the supported resource types to build the url list
+			// we can go back to no url scenario if all resource types point to the same partition
+			if (urls.isEmpty()) {
+				List<String> list = new ArrayList<>();
+				for (String t : myContext.getResourceTypes()) {
+					if (myDaoRegistry.isResourceTypeSupported(t)) {
+						list.add(t + "?");
+					}
+				}
+				urls = list;
+			}
+		}
+
+		if (!urls.isEmpty()) {
+			if (theJobParameters.getRequestPartitionId() == null) {
+				List<PartitionedUrl> partitionedUrls =
+						myJobPartitionProvider.getPartitionedUrls(theRequestDetails, urls);
+				theJobParameters.addPartitionedUrls(partitionedUrls);
+			} else {
+				for (String url : urls) {
+					theJobParameters.addPartitionedUrl(new PartitionedUrl().setUrl(url));
 				}
 			}
 		}
@@ -164,6 +206,7 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 		String severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
 		String code = OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL;
 		OperationOutcomeUtil.addIssue(myContext, oo, severity, message, null, code);
+		postProcessResponseOperationOutcome(oo, theRequestDetails);
 
 		// Provide a response
 		Multimap<String, String> additionalHeaders = ImmutableMultimap.<String, String>builder()
@@ -184,16 +227,37 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 	}
 
 	/**
+	 * Subclasses may implement this method to provide post-processing on the response OperationOutcome
+	 */
+	protected void postProcessResponseOperationOutcome(
+			IBaseOperationOutcome theOo, ServletRequestDetails theRequestDetails) {
+		// nothing
+	}
+
+	/**
+	 * Subclasses may override. If <code>true</code> (default implementation returns <code>false</code>),
+	 * if no URLs are provided, the list will be auto expanded to include all supported resource types.
+	 */
+	protected boolean isAutoExpandEmptyUrlList() {
+		return false;
+	}
+
+	/**
+	 * Subclasses may override this if they don't want to require a
+	 * Prefer async header in the request. Generally we should always want this
+	 * for kicking off batch jobs but we can skip it for legacy operations.
+	 */
+	protected boolean isRequirePreferAsyncHeader(ServletRequestDetails theRequestDetails) {
+		return true;
+	}
+
+	/**
 	 * Parses the {@link JpaConstants#OPERATION_BULK_PATCH_PARAM_PARTITION_ID} parameter value(s)
 	 * and invokes any registered {@link Pointcut#STORAGE_PARTITION_SELECTED} interceptors (used
 	 * for security)
 	 */
 	private RequestPartitionId parsePartitionIdsParameterAndInvokeInterceptors(
 			RequestDetails theRequestDetails, List<IPrimitiveType<String>> thePartitionIds) {
-		if (!myPartitionSettings.isPartitioningEnabled() || !myPartitionSettings.isUnnamedPartitionMode()) {
-			return null;
-		}
-
 		RequestPartitionId partitionId = parsePartitionIdsParameter(thePartitionIds);
 
 		// Invoke interceptor: STORAGE_PARTITION_SELECTED
@@ -281,10 +345,20 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 				severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
 				code = OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL;
 			}
-			case COMPLETED -> {
-				status = HttpStatus.SC_OK;
+			case ERRORED, FAILED, COMPLETED -> {
+				if (instance.getStatus() == StatusEnum.COMPLETED) {
+					status = HttpStatus.SC_OK;
+					progressMessage = getOperationName() + " job has completed successfully";
+					severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
+					code = OperationOutcomeUtil.OO_ISSUE_CODE_SUCCESS;
+				} else {
+					status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
+					progressMessage = getOperationName() + " job has failed with error: " + instance.getErrorMessage();
+					severity = OperationOutcomeUtil.OO_SEVERITY_ERROR;
+					code = OperationOutcomeUtil.OO_ISSUE_CODE_PROCESSING;
+				}
+
 				String reportText = instance.getReport();
-				progressMessage = getOperationName() + " job has completed successfully";
 				if (isBlank(reportText)) {
 					messages.add(progressMessage);
 				} else {
@@ -321,15 +395,6 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 								+ JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_DRYRUN_CHANGES);
 					}
 				}
-				severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
-				code = OperationOutcomeUtil.OO_ISSUE_CODE_SUCCESS;
-				respondUsingBundle = true;
-			}
-			case ERRORED, FAILED -> {
-				status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
-				messages.add(getOperationName() + " job has failed with error: " + instance.getErrorMessage());
-				severity = OperationOutcomeUtil.OO_SEVERITY_ERROR;
-				code = OperationOutcomeUtil.OO_ISSUE_CODE_PROCESSING;
 				respondUsingBundle = true;
 			}
 			case CANCELLED -> {
@@ -463,6 +528,16 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 	@VisibleForTesting
 	public void setJobCoordinatorForUnitTest(IJobCoordinator theJobCoordinator) {
 		myJobCoordinator = theJobCoordinator;
+	}
+
+	@VisibleForTesting
+	public void setDaoRegistryForUnitTest(IDaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
+	}
+
+	@VisibleForTesting
+	public void setJobPartitionProviderForUnitTest(IJobPartitionProvider theJobPartitionProvider) {
+		myJobPartitionProvider = theJobPartitionProvider;
 	}
 
 	@VisibleForTesting

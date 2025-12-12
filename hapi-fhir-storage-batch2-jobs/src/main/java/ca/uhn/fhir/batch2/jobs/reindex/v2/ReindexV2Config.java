@@ -26,7 +26,6 @@ import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
-import ca.uhn.fhir.batch2.jobs.reindex.models.ReindexResults;
 import ca.uhn.fhir.batch2.jobs.reindex.svcs.ReindexJobService;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
 import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;

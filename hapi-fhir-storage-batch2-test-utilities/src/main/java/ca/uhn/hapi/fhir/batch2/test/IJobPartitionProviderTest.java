@@ -50,30 +50,6 @@ public interface IJobPartitionProviderTest {
 	MatchUrlService getMatchUrlService();
 
 	@Test
-	default void getPartitionedUrls_noUrls_returnsCorrectly() {
-		// setup
-		SystemRequestDetails requestDetails = new SystemRequestDetails();
-
-		setupResourceNameUrlWithPartition(requestDetails, "Patient", RequestPartitionId.fromPartitionId(1));
-		setupResourceNameUrlWithPartition(requestDetails, "Observation", RequestPartitionId.fromPartitionId(2));
-		setupResourceNameUrlWithPartition(requestDetails, "Practitioner", null);
-		setupResourceNameUrlWithPartition(requestDetails, "SearchParameter", RequestPartitionId.defaultPartition());
-
-		Set<String> resourceTypes = Set.of("Patient", "Observation", "Practitioner", "SearchParameter");
-		when(getFhirContext().getResourceTypes()).thenReturn(resourceTypes);
-
-		// execute and verify
-		List<PartitionedUrl> partitionedUrls = List.of(
-				new PartitionedUrl().setUrl("Patient?").setRequestPartitionId(RequestPartitionId.fromPartitionId(1)),
-				new PartitionedUrl().setUrl("Observation?").setRequestPartitionId(RequestPartitionId.fromPartitionId(2)),
-				new PartitionedUrl().setUrl("Practitioner?"),
-				new PartitionedUrl().setUrl("SearchParameter?").setRequestPartitionId(RequestPartitionId.defaultPartition()));
-
-		executeAndVerifyGetPartitionedUrls(requestDetails, List.of(), partitionedUrls);
-		executeAndVerifyGetPartitionedUrls(requestDetails, null, partitionedUrls);
-	}
-
-	@Test
 	default void getPartitionedUrls_withUrls_returnsCorrectly() {
 		// setup
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
