@@ -1851,6 +1851,7 @@ public enum Pointcut implements IPointcut {
 	STORAGE_PRECOMMIT_RESOURCE_DELETED(
 			void.class,
 			"org.hl7.fhir.instance.model.api.IBaseResource",
+			"org.hl7.fhir.instance.model.api.IIdType",
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails",
