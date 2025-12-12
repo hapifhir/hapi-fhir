@@ -1,5 +1,6 @@
 package ca.uhn.fhir.repository.impl;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.repository.IRepository.IRepositoryRestQueryContributor;
 import ca.uhn.fhir.repository.IRepositoryRestQueryBuilder;
@@ -80,9 +81,10 @@ public class MultiMapRepositoryRestQueryBuilder implements IRepositoryRestQueryB
 		IQueryParameterType firstValue = theValues.get(0);
 		for (IQueryParameterType nextValue : theValues) {
 			if (!nextValue.getClass().equals(firstValue.getClass())) {
-				throw new IllegalArgumentException("All parameters in a or-list must be of the same type. Found "
-						+ firstValue.getClass().getSimpleName() + " and "
-						+ nextValue.getClass().getSimpleName() + " in parameter '" + theName + "'");
+				throw new IllegalArgumentException(
+						Msg.code(2833) + "All parameters in a or-list must be of the same type. Found "
+								+ firstValue.getClass().getSimpleName() + " and "
+								+ nextValue.getClass().getSimpleName() + " in parameter '" + theName + "'");
 			}
 		}
 	}
