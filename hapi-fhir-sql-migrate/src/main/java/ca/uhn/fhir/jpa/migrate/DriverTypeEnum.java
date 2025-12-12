@@ -24,7 +24,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -33,10 +32,11 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.sql.DataSource;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import javax.sql.DataSource;
+import java.util.Objects;
 
 public enum DriverTypeEnum {
 	H2_EMBEDDED("org.h2.Driver", false),
@@ -53,18 +53,19 @@ public enum DriverTypeEnum {
 	MSSQL_2012("com.microsoft.sqlserver.jdbc.SQLServerDriver", false),
 
 	COCKROACHDB_21_1("org.postgresql.Driver", false),
+
+	// Created by claude-opus-4-5-20251101
+	SNOWFLAKE("net.snowflake.client.jdbc.SnowflakeDriver", false),
 	;
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DriverTypeEnum.class);
-	private String myDriverClassName;
-	private boolean myDerby;
+	private final String myDriverClassName;
 
 	/**
 	 * Constructor
 	 */
 	DriverTypeEnum(String theDriverClassName, boolean theDerby) {
 		myDriverClassName = theDriverClassName;
-		myDerby = theDerby;
 	}
 
 	public static DriverTypeEnum fromDriverClassName(String theDriverClassName) {
@@ -81,35 +82,18 @@ public enum DriverTypeEnum {
 	}
 
 	public String getSchemaFilename() {
-		String retval;
-		switch (this) {
-			case H2_EMBEDDED:
-				retval = "h2.sql";
-				break;
-			case DERBY_EMBEDDED:
-				retval = "derby.sql";
-				break;
-			case MYSQL_5_7:
-			case MARIADB_10_1:
-				retval = "mysql.sql";
-				break;
-			case POSTGRES_9_4:
-				retval = "postgres.sql";
-				break;
-			case ORACLE_12C:
-				retval = "oracle.sql";
-				break;
-			case MSSQL_2012:
-				retval = "sqlserver.sql";
-				break;
-			case COCKROACHDB_21_1:
-				retval = "cockroachdb.sql";
-				break;
-			default:
-				throw new ConfigurationException(
-						Msg.code(45) + "No schema initialization script available for driver " + this);
-		}
-		return retval;
+		return switch (this) {
+			case H2_EMBEDDED -> "h2.sql";
+			case DERBY_EMBEDDED -> "derby.sql";
+			case MYSQL_5_7, MARIADB_10_1 -> "mysql.sql";
+			case POSTGRES_9_4 -> "postgres.sql";
+			case ORACLE_12C -> "oracle.sql";
+			case MSSQL_2012 -> "sqlserver.sql";
+			case COCKROACHDB_21_1 -> "cockroachdb.sql";
+			case SNOWFLAKE -> "snowflake.sql";
+			default -> throw new ConfigurationException(
+				Msg.code(45) + "No schema initialization script available for driver " + this);
+		};
 	}
 
 	public ConnectionProperties newConnectionProperties(String theUrl, String theUsername, String thePassword) {
@@ -167,9 +151,9 @@ public enum DriverTypeEnum {
 		 */
 		public ConnectionProperties(
 				DataSource theDataSource, TransactionTemplate theTxTemplate, DriverTypeEnum theDriverType) {
-			Validate.notNull(theDataSource);
-			Validate.notNull(theTxTemplate);
-			Validate.notNull(theDriverType);
+			Objects.requireNonNull(theDataSource);
+			Objects.requireNonNull(theTxTemplate);
+			Objects.requireNonNull(theDriverType);
 
 			myDataSource = theDataSource;
 			myTxTemplate = theTxTemplate;
