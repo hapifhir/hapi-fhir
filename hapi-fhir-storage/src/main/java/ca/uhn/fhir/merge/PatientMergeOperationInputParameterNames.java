@@ -26,28 +26,38 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_TARGET_PATIENT;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER;
 
-public class MergeOperationInputParameterNames {
+/**
+ * Patient-specific merge operation parameter names.
+ * Used for Patient {@code $merge} and {@code $hapi.fhir.undo-merge} operations.
+ */
+public class PatientMergeOperationInputParameterNames extends AbstractMergeOperationInputParameterNames {
 
+	@Override
 	public String getSourceResourceParameterName() {
 		return OPERATION_MERGE_PARAM_SOURCE_PATIENT;
 	}
 
+	@Override
 	public String getTargetResourceParameterName() {
 		return OPERATION_MERGE_PARAM_TARGET_PATIENT;
 	}
 
+	@Override
 	public String getSourceIdentifiersParameterName() {
 		return OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER;
 	}
 
+	@Override
 	public String getTargetIdentifiersParameterName() {
 		return OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER;
 	}
 
+	@Override
 	public String getResultResourceParameterName() {
 		return OPERATION_MERGE_PARAM_RESULT_PATIENT;
 	}
 
+	@Override
 	public String getDeleteSourceParameterName() {
 		return OPERATION_MERGE_PARAM_DELETE_SOURCE;
 	}
