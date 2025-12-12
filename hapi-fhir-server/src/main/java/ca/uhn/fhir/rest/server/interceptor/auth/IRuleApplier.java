@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
@@ -50,5 +51,5 @@ public interface IRuleApplier {
 	default IAuthorizationSearchParamMatcher getSearchParamMatcher() {
 		return null;
 	}
-	;
+
 }

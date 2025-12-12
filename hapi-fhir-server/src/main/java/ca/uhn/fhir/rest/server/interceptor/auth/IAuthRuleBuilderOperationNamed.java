@@ -48,6 +48,7 @@ public interface IAuthRuleBuilderOperationNamed {
 
 	IAuthRuleBuilderOperationNamedAndScoped onInstances(Collection<IIdType> theInstanceIds);
 
+	// fixme add/rename onInstancesOfTypeMatchingOptionalFilter with Optional/nullable IOptionalFilterRestriction parameter.
 	/**
 	 * Rule applies to invocations of this operation at the <code>instance</code> level on any instance of the given type
 	 */
