@@ -52,7 +52,6 @@ import ca.uhn.fhir.util.VersionEnum;
 import org.intellij.lang.annotations.Language;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,10 +91,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			+ "	WHERE my_collation != 'C')";
 
 	private final Set<FlagEnum> myFlags;
-
-	public HapiFhirJpaMigrationTasks() {
-		this(Collections.emptySet());
-	}
 
 	/**
 	 * Constructor
@@ -146,6 +141,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		{
 			final Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
 
+			// Changes 20251208.10-50 repeat migration 20240724.10-50,
+			// but with .runEvenDuringSchemaInitialization() turned on so it applies to new installations.
+			//
+			// This query checks if the FHIR_ID column has a case-sensitive collation.
 			@Language(("SQL"))
 			final String onlyIfSql = "SELECT CASE CHARINDEX('_CI_', COLLATION_NAME) WHEN 0 THEN 0 ELSE 1 END "
 					+ "FROM INFORMATION_SCHEMA.COLUMNS "
@@ -180,6 +179,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.online(true)
 					.withColumns("FHIR_ID")
 					.runEvenDuringSchemaInitialization()
+					// note that we do not apply the onlyIf() here since we have now fixed the column.
 					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
 
 			hfjResource
@@ -191,6 +191,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.includeColumns("RES_ID, RES_DELETED_AT")
 					.withColumns("RES_TYPE", "FHIR_ID")
 					.runEvenDuringSchemaInitialization()
+					// note that we do not apply the onlyIf() here since we have now fixed the column.
 					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
 		}
 	}

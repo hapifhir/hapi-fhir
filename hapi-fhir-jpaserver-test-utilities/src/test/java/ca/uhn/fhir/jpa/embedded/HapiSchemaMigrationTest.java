@@ -45,6 +45,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION;
+import static ca.uhn.fhir.jpa.migrate.DriverTypeEnum.MSSQL_2012;
 import static ca.uhn.fhir.jpa.migrate.SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -86,7 +87,7 @@ public class HapiSchemaMigrationTest {
 
 	private DriverTypeEnum myCurrentDriverType;
 
-	private HapiFhirJpaMigrationTasks myHapiFhirJpaMigrationTasks = new HapiFhirJpaMigrationTasks();
+	private HapiFhirJpaMigrationTasks myHapiFhirJpaMigrationTasks = new HapiFhirJpaMigrationTasks(Collections.emptySet());
 
 	@AfterEach
 	public void afterEach() {
@@ -152,31 +153,31 @@ public class HapiSchemaMigrationTest {
 	public void testCollationFixOnSchemaBasedInitialisation() throws SQLException {
 		HapiSystemProperties.disableUnitTestMode();
 		String testDataSeedFile = "migration/data/MSSQL_2012_collation_fix.sql";
-		DriverTypeEnum mssql2012DriverType = myCurrentDriverType = DriverTypeEnum.MSSQL_2012;
+		myCurrentDriverType = MSSQL_2012;
 		VersionEnum versionWithMssqlCollationFixOnSchemaInit = VersionEnum.V8_8_0;
 
 		// given
-		myEmbeddedServersExtension.initializePersistenceSchema(mssql2012DriverType, versionWithMssqlCollationFixOnSchemaInit);
+		myEmbeddedServersExtension.initializePersistenceSchema(MSSQL_2012, versionWithMssqlCollationFixOnSchemaInit);
 
 		MigrationTaskList migrationTasks = getRunEvenWhenSchemaInitializedTasksForVersion(versionWithMssqlCollationFixOnSchemaInit);
 
 		// when
-		migrate(mssql2012DriverType, migrationTasks);
+		migrate(MSSQL_2012, migrationTasks);
 
 		//then
-		initializeTestData(mssql2012DriverType, testDataSeedFile);
-		verifyHfjResourceFhirIdCollation(mssql2012DriverType);
+		initializeTestData(MSSQL_2012, testDataSeedFile);
+		verifyHfjResourceFhirIdCollation(MSSQL_2012);
 	}
 
 	@Test
 	public void testCollationFixForNewInstallPostRelease740() throws SQLException {
 		HapiSystemProperties.disableUnitTestMode();
 		String testDataSeedFile = "migration/data/MSSQL_2012_collation_fix.sql";
-		DriverTypeEnum mssql2012DriverType = myCurrentDriverType = DriverTypeEnum.MSSQL_2012;
+		myCurrentDriverType = MSSQL_2012;
 		VersionEnum startVersion = VersionEnum.V7_6_0;
 
 		// given
-		myEmbeddedServersExtension.initializePersistenceSchema(mssql2012DriverType, startVersion);
+		myEmbeddedServersExtension.initializePersistenceSchema(MSSQL_2012, startVersion);
 
 		List<VersionEnum> allVersionsToMigrate = getAllVersionsMatching(v -> v.isEqualOrNewerThan(startVersion));
 
@@ -184,13 +185,13 @@ public class HapiSchemaMigrationTest {
 		for (VersionEnum aVersion : allVersionsToMigrate) {
 			ourLog.info("Applying migrations for {}", aVersion);
 			MigrationTaskList migrationTasks = myHapiFhirJpaMigrationTasks.getAllTasks(aVersion);
-			migrate(mssql2012DriverType, migrationTasks);
+			migrate(MSSQL_2012, migrationTasks);
 		}
 
-		initializeTestData(mssql2012DriverType, testDataSeedFile);
+		initializeTestData(MSSQL_2012, testDataSeedFile);
 
 		//then
-		verifyHfjResourceFhirIdCollation(mssql2012DriverType);
+		verifyHfjResourceFhirIdCollation(MSSQL_2012);
 	}
 
 	private List<VersionEnum> getAllVersionsMatching(Predicate<VersionEnum> thePredicate) {
@@ -447,7 +448,7 @@ public class HapiSchemaMigrationTest {
 	}
 
 	private void verifyHfjResourceFhirIdCollation(DriverTypeEnum theDriverType) throws SQLException {
-		if (DriverTypeEnum.MSSQL_2012 == theDriverType) { // Other databases are unaffected by this migration and are irrelevant
+		if (MSSQL_2012 == theDriverType) { // Other databases are unaffected by this migration and are irrelevant
 
 			DataSource dataSource = getDataSource(theDriverType);
 
@@ -484,11 +485,11 @@ public class HapiSchemaMigrationTest {
 				final String fhirIdSql = """
 					SELECT fhir_id 
 					FROM hFj_ReSoUrCe  -- db must be case insensitive for the table name to be recognized 
-					WHERE fhir_ID = '2029'
+					WHERE fhir_ID = 'PatientId22'
 				""";
 
 				final Map<String, Object> fhirIdRow = querySingleRow(connection, fhirIdSql);
-				assertThat(fhirIdRow).containsEntry("fhir_id", "2029");
+				assertThat(fhirIdRow).containsEntry("fhir_id", "PatientId22");
 			}
 		}
 	}
