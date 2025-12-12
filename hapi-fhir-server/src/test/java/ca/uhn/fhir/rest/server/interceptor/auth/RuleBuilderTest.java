@@ -84,6 +84,71 @@ public class RuleBuilderTest {
 
 	}
 
+	@ParameterizedTest
+	@MethodSource("groupMatcherBulkExportParams")
+	public void testBulkExportByGroupMatcher(String theCompartmentMatcherFilter, Collection<String> theResourceTypes) {
+		// Given
+		RuleBuilder builder = new RuleBuilder();
+		List<String> resourceTypes = new ArrayList<>(theResourceTypes);
+
+		// When
+		builder.allow().bulkExport().groupExportOnFilter("?" + theCompartmentMatcherFilter).withResourceTypes(resourceTypes);
+		final List<IAuthRule> rules = builder.build();
+
+		// Then
+		assertEquals(1, rules.size());
+		final IAuthRule authRule = rules.get(0);
+		assertInstanceOf(RuleGroupBulkExportByCompartmentMatcherImpl.class, authRule);
+
+		final RuleGroupBulkExportByCompartmentMatcherImpl ruleGroupBulkExport = (RuleGroupBulkExportByCompartmentMatcherImpl) authRule;
+		assertEquals(theCompartmentMatcherFilter, ruleGroupBulkExport.getGroupMatcherFilter());
+		assertEquals(theResourceTypes, ruleGroupBulkExport.getResourceTypes());
+		assertEquals(PolicyEnum.ALLOW, ruleGroupBulkExport.getMode());
+	}
+
+	private static Stream<Arguments> groupMatcherBulkExportParams() {
+		return Stream.of(
+			Arguments.of("identifier=foo|bar", List.of()),
+			Arguments.of("identifier=foo|bar", List.of("Patient", "Observation"))
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource("patientMatcherBulkExportParams")
+	public void testBulkExportByPatientMatcher(List<String> theCompartmentMatcherFilter, Collection<String> theResourceTypes) {
+		// Given
+		RuleBuilder builder = new RuleBuilder();
+		List<String> resourceTypes = new ArrayList<>(theResourceTypes);
+
+		// When
+		for (String filter : theCompartmentMatcherFilter) {
+			builder.allow().bulkExport().patientExportOnFilter("?" + filter).withResourceTypes(resourceTypes);
+		}
+		final List<IAuthRule> rules = builder.build();
+
+		// Then
+		assertEquals(1, rules.size());
+		final IAuthRule authRule = rules.get(0);
+		assertInstanceOf(RulePatientBulkExportByCompartmentMatcherImpl.class, authRule);
+
+		final RulePatientBulkExportByCompartmentMatcherImpl rulePatientExport = (RulePatientBulkExportByCompartmentMatcherImpl) authRule;
+		assertThat(rulePatientExport.getPatientMatcherFilters()).containsExactlyInAnyOrderElementsOf(theCompartmentMatcherFilter);
+		assertEquals(theResourceTypes, rulePatientExport.getResourceTypes());
+		assertEquals(PolicyEnum.ALLOW, rulePatientExport.getMode());
+	}
+
+	private static Stream<Arguments> patientMatcherBulkExportParams() {
+		return Stream.of(
+			Arguments.of(List.of("identifier=foo|bar"), List.of()),
+			Arguments.of(List.of("identifier=foo|bar"), List.of("Patient", "Observation")),
+			// Multiple arguments may be added to the filter when multiple FHIR_OP_INITIATE_BULK_DATA_EXPORT_PATIENTS_MATCHING permissions
+			// are added to the same user, even when the permission does not accept multiple (a list of) arguments by itself.
+			Arguments.of(List.of("identifier=foo|bar", "name=Doe"), List.of()),
+			Arguments.of(List.of("identifier=foo|bar", "name=Doe&active=true"), List.of("Patient", "Observation")),
+			Arguments.of(List.of("identifier=foo|bar", "active=true&name=Doe"), List.of("Patient", "Observation"))
+		);
+	}
+
 	@Test
 	public void testBulkExport_PatientExportOnPatient_MultiplePatientsSingleRule() {
 		RuleBuilder builder = new RuleBuilder();
