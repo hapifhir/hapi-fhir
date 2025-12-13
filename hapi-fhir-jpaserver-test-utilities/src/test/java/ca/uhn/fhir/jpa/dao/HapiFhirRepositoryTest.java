@@ -28,6 +28,10 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Run the abstract test suite IRepositoryTest over our Hapi JPA DAO-based repository.
+ * Also add some search tests here to shake out the SearchParameterMap binding.
+ */
 class HapiFhirRepositoryTest extends BaseJpaR4Test implements IRepositoryTest {
 
 	private HapiFhirRepository myRepository;
@@ -35,8 +39,10 @@ class HapiFhirRepositoryTest extends BaseJpaR4Test implements IRepositoryTest {
 	@BeforeEach
 	public void beforeResetDao() {
 
+		// We need to set up a RestfulServer since Hapi DAOs don't actually implement search Bundle paging.
 		RestfulServer restfulServer = new RestfulServer(myFhirContext);
 
+		// The tests defined in IRepositoryTest and here search Patient, so we need a resource provider.
 		PatientResourceProvider patientResourceProvider = new PatientResourceProvider();
 		patientResourceProvider.setDao(myPatientDao);
 		patientResourceProvider.setContext(myFhirContext);
@@ -47,6 +53,7 @@ class HapiFhirRepositoryTest extends BaseJpaR4Test implements IRepositoryTest {
 		} catch (ServletException e) {
 			throw new RuntimeException(e);
 		}
+		// And our RequestDetails needs a handle RestfulServer for internal reasons.
 		var srd = new SystemRequestDetails(restfulServer.getInterceptorService());
 		srd.setFhirContext(myFhirContext);
 		srd.setServer(restfulServer);
@@ -69,6 +76,9 @@ class HapiFhirRepositoryTest extends BaseJpaR4Test implements IRepositoryTest {
 		return new RepositoryTestSupport(myRepository);
 	}
 
+	/**
+	 * duplicate super.testSearchById(), but with a SearchParameter map to make sure the wiring is ok.
+	 */
 	@Test
 	void testSearchBySearchParameterMap() {
 		// given
@@ -95,7 +105,7 @@ class HapiFhirRepositoryTest extends BaseJpaR4Test implements IRepositoryTest {
 	}
 
 	@Test
-	void testOperation() {
+	void testInstanceOperation() {
 		IIdType patientId = getTestDataBuilder().createPatient(withId("abc"));
 
 		Parameters result = getRepository().invoke(patientId, "$meta", null, Parameters.class, Map.of());

@@ -7,6 +7,9 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Map entry converter for sort
+ */
 class SortProcessor implements ISpecialParameterProcessor {
 	@Override
 	public void process(

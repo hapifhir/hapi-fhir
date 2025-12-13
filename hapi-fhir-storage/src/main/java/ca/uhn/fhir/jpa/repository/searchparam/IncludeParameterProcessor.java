@@ -8,6 +8,9 @@ import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.function.BiConsumer;
 
+/**
+ * Map entry converter for _include
+ */
 class IncludeParameterProcessor implements ISpecialParameterProcessor {
 	private final boolean myIterationFlag;
 	private final BiConsumer<SearchParameterMap, Include> mySetter;

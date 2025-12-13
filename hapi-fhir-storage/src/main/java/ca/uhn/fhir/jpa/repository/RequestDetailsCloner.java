@@ -56,6 +56,7 @@ class RequestDetailsCloner {
 		newDetails.setResourceName(null);
 		newDetails.setCompartmentName(null);
 		IRestfulResponse response = theDetails.getResponse();
+		// we need IRestfulResponse because RestfulServer uses it during extended operation processing.
 		if (response == null && newDetails instanceof SystemRequestDetails systemDetails) {
 			response = new SystemRestfulResponse(systemDetails);
 		}

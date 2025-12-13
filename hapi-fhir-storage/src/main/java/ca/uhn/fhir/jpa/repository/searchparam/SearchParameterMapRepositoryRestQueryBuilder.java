@@ -32,6 +32,9 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_SEARCH_TOTAL_MODE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_SORT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_SUMMARY;
 
+/**
+ * Implementation of IRepositoryRestQueryBuilder over SearchParameterMap.
+ */
 public class SearchParameterMapRepositoryRestQueryBuilder implements IRepositoryRestQueryBuilder {
 	/** Our unsupported specials */
 	private static final Set<String> ourIgnoredSpecials = Set.of(
