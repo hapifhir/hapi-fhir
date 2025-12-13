@@ -1,0 +1,4 @@
+---
+type: add
+issue: 7165
+title: "Add support for special parameters like _count, _summary, and _total to the HapiFhirRepository IRepository implementation."
