@@ -431,6 +431,17 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		return patientPidsToExport;
 	}
 
+	Set<String> getPatientSetForPatientExport(ExportPIDIteratorParameters theParams) {
+		if (theParams.hasExpandedPatientIdsForPatientExport()) {
+			ourLog.debug(
+					"Using cached expanded patient ID set with {} patients",
+					theParams.getExpandedPatientIdsForPatientExport().size());
+			return theParams.getExpandedPatientIdsForPatientExport();
+		} else {
+			return computeAndCachePatientIdForPatientExport(theParams);
+		}
+	}
+
 	/**
 	 * Expands patient IDs for Patient-style bulk export.
 	 * If MDM expansion is enabled, expands each patient to include their MDM-linked patients.
@@ -443,14 +454,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 *
 	 * Created by Claude 4.5 Sonnet
 	 */
-	Set<String> getPatientSetForPatientExport(ExportPIDIteratorParameters theParams) {
-		if (theParams.hasExpandedPatientIdsForPatientExport()) {
-			ourLog.debug(
-					"Using cached expanded patient ID set with {} patients",
-					theParams.getExpandedPatientIdsForPatientExport().size());
-			return theParams.getExpandedPatientIdsForPatientExport();
-		}
-
+	private Set<String> computeAndCachePatientIdForPatientExport(ExportPIDIteratorParameters theParams) {
 		HashSet<String> expandedPatientIds = new HashSet<>();
 
 		List<String> patientIds = theParams.getPatientIds();
@@ -468,8 +472,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 			for (String patientId : patientIds) {
 				Set<String> mdmExpandedIds = myMdmExpandersHolder
-						.getBulkExportMDMResourceExpanderInstance()
-						.expandPatient(patientId, partitionId);
+					.getBulkExportMDMResourceExpanderInstance()
+					.expandPatient(patientId, partitionId);
 				expandedPatientIds.addAll(mdmExpandedIds);
 			}
 		}
