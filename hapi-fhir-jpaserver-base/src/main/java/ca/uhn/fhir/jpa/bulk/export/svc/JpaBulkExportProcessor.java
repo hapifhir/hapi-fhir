@@ -155,7 +155,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			throw new IllegalStateException(Msg.code(797) + errorMessage);
 		}
 
-		Set<String> expandedPatientIds = getExpandedPatientSetForPatientExport(theParams);
+		Set<String> expandedPatientIds = getPatientSetForPatientExport(theParams);
 
 		Set<String> patientSearchParams = getPatientActiveSearchParamsForResourceType(theParams.getResourceType());
 		for (String patientSearchParam : patientSearchParams) {
@@ -273,7 +273,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 		if (theResourceType.equalsIgnoreCase("Patient")) {
 			ourLog.info("Expanding Patients of a Group Bulk Export.");
-			pids = getExpandedPatientSetForGroupExport(theParams, true);
+			pids = getPatientSetForGroupExport(theParams, true);
 			ourLog.info("Obtained {} PIDs", pids.size());
 		} else if (theResourceType.equalsIgnoreCase("Group")) {
 			pids = getSingletonGroupList(theParams);
@@ -291,7 +291,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				getActivePatientSearchParamForCurrentResourceType(theParams.getResourceType());
 		if (activeSearchParam != null) {
 			// expand the group pid -> list of patients in that group (list of patient pids)
-			HashSet<JpaPid> expandedMemberResourceIds = getExpandedPatientSetForGroupExport(theParams, false);
+			HashSet<JpaPid> expandedMemberResourceIds = getPatientSetForGroupExport(theParams, false);
 			assert !expandedMemberResourceIds.isEmpty();
 			Logs.getBatchTroubleshootingLog()
 					.debug("{} has been expanded to members:[{}]", theParams.getGroupId(), expandedMemberResourceIds);
@@ -401,7 +401,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 * @param theConsiderDateRange - whether to apply date range filters
 	 * @return a LinkedHashSet of JpaPids representing all member patients (with MDM expansion if enabled)
 	 */
-	private HashSet<JpaPid> getExpandedPatientSetForGroupExport(
+	private HashSet<JpaPid> getPatientSetForGroupExport(
 			ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) throws IOException {
 
 		List<JpaPid> members = getMembersFromGroupWithFilter(theParameters, theConsiderDateRange);
@@ -443,7 +443,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 *
 	 * Created by Claude 4.5 Sonnet
 	 */
-	Set<String> getExpandedPatientSetForPatientExport(ExportPIDIteratorParameters theParams) {
+	Set<String> getPatientSetForPatientExport(ExportPIDIteratorParameters theParams) {
 		if (theParams.hasExpandedPatientIdsForPatientExport()) {
 			ourLog.debug(
 					"Using cached expanded patient ID set with {} patients",

@@ -509,14 +509,14 @@ public class JpaBulkExportProcessorTest {
 	}
 
 	@Test
-	void testGetExpandedPatientSetForPatientExport_withoutMdm_returnsOriginalPatients() {
+	void testGetPatientSetForPatientExport_withoutMdm_returnsOriginalPatients() {
 		// Given - Parameters with MDM disabled
 		ExportPIDIteratorParameters params = new ExportPIDIteratorParameters();
 		params.setPatientIds(List.of("Patient/1"));
 		params.setExpandMdm(false); // MDM disabled
 
 		// When - Call method
-		Set<String> result = myProcessor.getExpandedPatientSetForPatientExport(params);
+		Set<String> result = myProcessor.getPatientSetForPatientExport(params);
 
 		// Then - Returns only original patient ID
 		assertThat(result).containsExactly("Patient/1");
@@ -531,7 +531,7 @@ public class JpaBulkExportProcessorTest {
 	}
 
 	@Test
-	void testGetExpandedPatientSetForPatientExport_withMdm_expandsAndCachesPatients() {
+	void testGetPatientSetForPatientExport_withMdm_expandsAndCachesPatients() {
 		// Given - Parameters with MDM enabled
 		ExportPIDIteratorParameters params = new ExportPIDIteratorParameters();
 		params.setPatientIds(List.of("Patient/1"));
@@ -547,7 +547,7 @@ public class JpaBulkExportProcessorTest {
 				.thenReturn(Set.of("Patient/1", "Patient/golden"));
 
 		// When - Call method
-		Set<String> result = myProcessor.getExpandedPatientSetForPatientExport(params);
+		Set<String> result = myProcessor.getPatientSetForPatientExport(params);
 
 		// Then - Returns original + expanded patient IDs
 		assertThat(result).containsExactlyInAnyOrder("Patient/1", "Patient/golden");
@@ -563,7 +563,7 @@ public class JpaBulkExportProcessorTest {
 	}
 	
 	@Test
-	void testGetExpandedPatientSetForPatientExport_cachePreventsRedundantExpansion() {
+	void testGetPatientSetForPatientExport_cachePreventsRedundantExpansion() {
 		// Given - Parameters with MDM enabled
 		ExportPIDIteratorParameters params = new ExportPIDIteratorParameters();
 		params.setPatientIds(List.of("Patient/1"));
@@ -577,14 +577,14 @@ public class JpaBulkExportProcessorTest {
 				.thenReturn(Set.of("Patient/1", "Patient/golden"));
 
 		// When - Call method FIRST time
-		Set<String> result1 = myProcessor.getExpandedPatientSetForPatientExport(params);
+		Set<String> result1 = myProcessor.getPatientSetForPatientExport(params);
 
 		// Then - First call should expand and cache
 		assertThat(result1).containsExactlyInAnyOrder("Patient/1", "Patient/golden");
 		verify(myBulkExportMDMResourceExpander, times(1)).expandPatient(eq("Patient/1"), any());
 
 		// When - Call method SECOND time with SAME params
-		Set<String> result2 = myProcessor.getExpandedPatientSetForPatientExport(params);
+		Set<String> result2 = myProcessor.getPatientSetForPatientExport(params);
 
 		// Then - Second call should use cache (no additional MDM calls)
 		assertThat(result2).containsExactlyInAnyOrder("Patient/1", "Patient/golden");
