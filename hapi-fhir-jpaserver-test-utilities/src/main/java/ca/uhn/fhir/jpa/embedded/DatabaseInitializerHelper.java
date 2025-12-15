@@ -30,10 +30,9 @@ import java.nio.file.Paths;
 public class DatabaseInitializerHelper {
 	private static final Logger ourLog = LoggerFactory.getLogger(DatabaseInitializerHelper.class);
 
-	public void initializePersistenceSchema(JpaEmbeddedDatabase theDatabase) {
-		String fileName = String.format(
-				"migration/releases/%s/schema/%s.sql",
-				HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION, theDatabase.getDriverType());
+	public void initializePersistenceSchema(JpaEmbeddedDatabase theDatabase, VersionEnum theSchemaVersion) {
+		String fileName =
+				String.format("migration/releases/%s/schema/%s.sql", theSchemaVersion, theDatabase.getDriverType());
 		String sql = getSqlFromResourceFile(fileName);
 		theDatabase.executeSqlAsBatch(sql);
 	}
@@ -42,6 +41,11 @@ public class DatabaseInitializerHelper {
 		String fileName =
 				String.format("migration/releases/%s/data/%s.sql", theVersionEnum, theDatabase.getDriverType());
 		String sql = getSqlFromResourceFile(fileName);
+		theDatabase.insertTestData(sql);
+	}
+
+	public void insertPersistenceTestData(JpaEmbeddedDatabase theDatabase, String theFilePath) {
+		String sql = getSqlFromResourceFile(theFilePath);
 		theDatabase.insertTestData(sql);
 	}
 

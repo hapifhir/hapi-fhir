@@ -34,6 +34,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -192,12 +193,11 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		ourCountHolder = myCountHolder;
 	}
 
-
 	protected Observation sendObservation(String theCode, String theSystem) {
 		return sendObservation(theCode, theSystem, null, null);
 	}
 
-	protected Observation sendObservation(String theCode, String theSystem, String theSource, String theRequestId) {
+	protected Observation sendObservation(String theCode, String theSystem, String theSource, String theRequestId, List<Identifier> theIdentifiers) {
 		Observation observation = buildBaseObservation(theCode, theSystem);
 		if (StringUtils.isNotBlank(theSource)) {
 			observation.getMeta().setSource(theSource);
@@ -207,9 +207,18 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		if (StringUtils.isNotBlank(theRequestId)) {
 			systemRequestDetails.setRequestId(theRequestId);
 		}
+
+		if(theIdentifiers != null && !theIdentifiers.isEmpty()) {
+			observation.setIdentifier(theIdentifiers);
+		}
+
 		IIdType id = myObservationDao.create(observation, systemRequestDetails).getId();
 		observation.setId(id);
 		return observation;
+	}
+
+	protected Observation sendObservation(String theCode, String theSystem, String theSource, String theRequestId) {
+		return sendObservation(theCode, theSystem, theSource, theRequestId, null);
 	}
 
 	protected Observation buildBaseObservation(String theCode, String theSystem) {
@@ -315,6 +324,4 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		}
 		return retval;
 	}
-
-
 }
