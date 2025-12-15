@@ -365,7 +365,7 @@ class MergeOperationParametersUtilTest {
 
 		@ParameterizedTest
 		@ValueSource(booleans = {true, false})
-		void testFromParameters_withDeleteSourceTrue_setsFlag(boolean theDeleteSourceParam) {
+		void testFromParameters_withDeleteSource_respectsParam(boolean theDeleteSourceParam) {
 			// Arrange
 			Parameters parameters = new Parameters();
 			parameters.addParameter().setName("source-patient").setValue(new Reference("Patient/123"));
@@ -377,21 +377,6 @@ class MergeOperationParametersUtilTest {
 
 			// Assert
 			assertThat(result.getDeleteSource()).isEqualTo(theDeleteSourceParam);
-		}
-
-		@Test
-		void testFromParameters_withDeleteSourceFalse_doesNotSetFlag() {
-			// Arrange
-			Parameters parameters = new Parameters();
-			parameters.addParameter().setName("source-patient").setValue(new Reference("Patient/123"));
-			parameters.addParameter().setName("target-patient").setValue(new Reference("Patient/456"));
-			parameters.addParameter().setName("delete-source").setValue(new BooleanType(false));
-
-			// Act
-			MergeOperationInputParameters result = MergeOperationParametersUtil.inputParamsFromParameters(myFhirContext, parameters, RESOURCE_LIMIT, myProvenanceAgents);
-
-			// Assert
-			assertThat(result.getDeleteSource()).isFalse();
 		}
 
 		@Test
