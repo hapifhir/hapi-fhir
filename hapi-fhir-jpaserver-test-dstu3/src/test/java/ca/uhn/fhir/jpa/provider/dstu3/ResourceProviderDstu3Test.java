@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -159,6 +160,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -4829,6 +4831,47 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			assertEquals(docStatus, createdDocumentReferenced.getDocStatus());
 			assertEquals(longUrl, createdDocumentReferenced.getContentFirstRep().getAttachment().getUrl());
 		}
+	}
+
+	@Test
+	void testMergeOperation_throwsNotImplementedOperationException() {
+		// Test with Patient
+		Parameters patientParams = new Parameters();
+		patientParams.addParameter().setName("source-resource").setValue(new Reference("Patient/source"));
+		patientParams.addParameter().setName("target-resource").setValue(new Reference("Patient/target"));
+
+		NotImplementedOperationException patientException = assertThrows(
+			NotImplementedOperationException.class,
+			() -> myClient
+				.operation()
+				.onType(Patient.class)
+				.named("$hapi-fhir-merge")
+				.withParameters(patientParams)
+				.execute()
+		);
+
+		assertThat(patientException.getMessage())
+			.contains("HAPI-2834")
+			.contains("This operation is not supported for the FHIR version used by this server");
+
+		// Test with Practitioner
+		Parameters practitionerParams = new Parameters();
+		practitionerParams.addParameter().setName("source-resource").setValue(new Reference("Practitioner/source"));
+		practitionerParams.addParameter().setName("target-resource").setValue(new Reference("Practitioner/target"));
+
+		NotImplementedOperationException practitionerException = assertThrows(
+			NotImplementedOperationException.class,
+			() -> myClient
+				.operation()
+				.onType(Practitioner.class)
+				.named("$hapi-fhir-merge")
+				.withParameters(practitionerParams)
+				.execute()
+		);
+
+		assertThat(practitionerException.getMessage())
+			.contains("HAPI-2834")
+			.contains("This operation is not supported for the FHIR version used by this server");
 	}
 
 	private String toStr(Date theDate) {

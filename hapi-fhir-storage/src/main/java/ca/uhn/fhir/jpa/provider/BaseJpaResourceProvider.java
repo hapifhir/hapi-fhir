@@ -52,6 +52,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.CoverageIgnore;
@@ -69,6 +70,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Date;
 import java.util.List;
 
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_HAPI_FHIR_MERGE;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_ADD;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_DELETE;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_META;
@@ -383,7 +385,7 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 						theResource, theId, theRawResource, theEncoding, theMode, theProfile, theRequestDetails);
 	}
 
-	@Operation(name = JpaConstants.OPERATION_HAPI_FHIR_MERGE, idempotent = false)
+	@Operation(name = OPERATION_HAPI_FHIR_MERGE, idempotent = false)
 	public IBaseParameters mergeResource(
 			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_RESOURCE, min = 0, max = 1)
 					IBaseReference theSourceResource,
@@ -420,8 +422,8 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 			ServletRequestDetails theRequestDetails) {
 
 		if (getMergeOperationProviderSvc() == null) {
-			throw new InvalidRequestException(
-					Msg.code(2572) + "Merge operation is not supported on this server - service not configured");
+			throw new NotImplementedOperationException(
+					Msg.code(2834) + "This operation is not supported for the FHIR version used by this server");
 		}
 
 		return getMergeOperationProviderSvc()
