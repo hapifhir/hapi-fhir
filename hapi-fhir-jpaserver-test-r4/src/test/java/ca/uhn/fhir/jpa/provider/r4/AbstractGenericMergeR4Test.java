@@ -55,6 +55,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.DEFAULT_PRESERVE_VERSION_REFS_R4_AND_LATER;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -119,7 +120,10 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 	@AfterEach
 	public void afterGenericMerge() {
-		// Cleanup
+		// For some reason, if this value is not restored to its default at the end, it interferes with other suites,
+		// so restore the default value
+		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(DEFAULT_PRESERVE_VERSION_REFS_R4_AND_LATER);
+
 	}
 
 	// ================================================
