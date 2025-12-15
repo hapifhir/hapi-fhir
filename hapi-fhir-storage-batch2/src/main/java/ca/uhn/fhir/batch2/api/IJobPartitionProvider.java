@@ -36,14 +36,6 @@ import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 public interface IJobPartitionProvider {
 
 	/**
-	 * Provides the list of partitions to run job steps against, based on the request that initiates the job.
-	 * @param theRequestDetails the requestDetails
-	 * @param theOperation the operation being run which corresponds to the job
-	 * @return the list of partitions
-	 */
-	List<RequestPartitionId> getPartitions(RequestDetails theRequestDetails, String theOperation);
-
-	/**
 	 * Provides the list of {@link PartitionedUrl} to run job steps against, based on the request that initiates the job
 	 * and the urls that it's configured with.
 	 * @param theRequestDetails the requestDetails
@@ -58,6 +50,17 @@ public interface IJobPartitionProvider {
 	 * Returns a collection of partitions representing "all partitions" for each shard
 	 */
 	List<RequestPartitionId> getAllPartitions();
+
+	/**
+	 * Given a partition (which might be an individual partition or list of partitions, or even
+	 * ALL partitions), separates it into a list of partitions that should be executed in separate
+	 * work chunks.
+	 *
+	 * @since 8.8.0
+	 */
+	default List<RequestPartitionId> splitPartitionsForJobExecution(RequestPartitionId theInputPartition) {
+		return List.of(getIfNull(theInputPartition, RequestPartitionId.allPartitions()));
+	}
 
 	/**
 	 * Converts a {@link PartitionedUrl} into a list of {@link ChunkRangeJson}s for the given

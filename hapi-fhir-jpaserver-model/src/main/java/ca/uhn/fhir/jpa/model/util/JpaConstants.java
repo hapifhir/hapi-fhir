@@ -43,8 +43,7 @@ public class JpaConstants {
 	 *
 	 * @since 8.8.0
 	 */
-	public static final String RESOURCE_SKIP_INDEXING =
-			JpaConstants.class.getName() + "RESOURCE_SKIP_INDEXING";
+	public static final String RESOURCE_SKIP_INDEXING = JpaConstants.class.getName() + "RESOURCE_SKIP_INDEXING";
 
 	/**
 	 * Metadata key which can be used to influence the ID assigned to a resource being

@@ -664,7 +664,21 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		verifyBulkExportResults(options, List.of("Patient/P1", practId, orgId, encId, encId2), List.of("Patient/P2", orgId2, encId3));
 	}
 
+	/**
+	 * In this test, a Practitioner is a part of two separate compartments, which can cause it
+	 * to appear twice in a single export (i.e. a duplicate practitioner will show up).
+	 * We used to guard against this with a giant hashset, but it's really not scalable to
+	 * be defending in this way. Other FHIR servers also don't guarantee against this
+	 * kind of duplicate. E.g. the Microsoft FHIR server
+	 * <a href="https://learn.microsoft.com/en-us/azure/healthcare-apis/fhir/export-data">says this</a>:
+	 * <blockquote>
+	 * Note:
+	 * Patient/$export and Group/[ID]/$export can export duplicate resources if
+	 * a resource is in multiple groups or in a compartment of more than one resource.
+	 * </blockquote>
+	 */
 	@Test
+	// FIXME: update docs to reflect this
 	public void testGroupBulkExportGroupIncludePractitionerLinkedFromTwoResourceTypes() {
 		// Create some resources
 		Practitioner practitioner = new Practitioner();
@@ -702,7 +716,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		verifyBulkExportResults(options, List.of("Patient/P1", practId, encId, obsId), Collections.emptyList());
+		verifyBulkExportResults(options, List.of("Patient/P1", practId, encId, obsId), Collections.emptyList(), Set.of(practId));
 	}
 
 	@Test
@@ -1245,6 +1259,10 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 
 	private JobInstance verifyBulkExportResults(BulkExportJobParameters theOptions, List<String> theContainedList, List<String> theExcludedList) {
+		return verifyBulkExportResults(theOptions, theContainedList, theExcludedList, Set.of());
+	}
+
+	private JobInstance verifyBulkExportResults(BulkExportJobParameters theOptions, List<String> theContainedList, List<String> theExcludedList, Collection<String> theAcceptableDuplicates) {
 		Batch2JobStartResponse startResponse = startNewJob(theOptions);
 
 		assertNotNull(startResponse);
@@ -1279,7 +1297,9 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 								fail("Found resource of type " + nextId.getResourceType() + " in file for type " + resourceType);
 							} else {
 								if (!foundIds.add(nextId.getValue())) {
-									fail("Found duplicate ID: " + nextId.getValue());
+									if (!theAcceptableDuplicates.contains(nextId.getValue())) {
+										fail("Found duplicate ID: " + nextId.getValue());
+									}
 								}
 							}
 						}

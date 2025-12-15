@@ -188,8 +188,7 @@ public class ExpandResourceAndWriteBinaryStep
 			Consumer<List<IBaseResource>> theResourceListConsumer,
 			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails) {
 
-		RequestPartitionId requestPartitionId = theJobParameters.getPartitionId();
-
+		RequestPartitionId requestPartitionId = theIds.getPartitionId();
 		ArrayListMultimap<String, TypedPidJson> typeToIds = ArrayListMultimap.create();
 		theIds.getIds().forEach(t -> typeToIds.put(t.getResourceType(), t));
 

@@ -892,6 +892,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		ourLog.debug("Starting entity update");
 
+		boolean skipIndexing = false;
+		if (theResource != null && Boolean.TRUE.equals(theResource.getUserData(JpaConstants.RESOURCE_SKIP_INDEXING))) {
+			skipIndexing = true;
+		}
+
 		ResourceTable entity = (ResourceTable) theEntity;
 
 		/*
@@ -971,15 +976,19 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 
 				// Extract search params for resource
-				mySearchParamWithInlineReferencesExtractor.populateFromResource(
-						requestPartitionId,
-						newParams,
-						theTransactionDetails,
-						entity,
-						theResource,
-						existingParams,
-						theRequest,
-						thePerformIndexing);
+				// FIXME: should we just skip this entirely if thePerformIndexing is false? should we collapse these
+				// variables?
+				if (!skipIndexing) {
+					mySearchParamWithInlineReferencesExtractor.populateFromResource(
+							requestPartitionId,
+							newParams,
+							theTransactionDetails,
+							entity,
+							theResource,
+							existingParams,
+							theRequest,
+							thePerformIndexing);
+				}
 
 				if (CollectionUtils.isNotEmpty(newParams.myLinks)) {
 					setTargetResourceTypeIdForResourceLinks(newParams.myLinks);
@@ -1096,11 +1105,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		/*
 		 * Indexing
 		 */
-		boolean performIndexing = thePerformIndexing;
-		if (Boolean.TRUE.equals(theResource.getUserData(JpaConstants.RESOURCE_SKIP_INDEXING))) {
-			performIndexing = false;
-		}
-		if (performIndexing) {
+		if (thePerformIndexing && !skipIndexing) {
 			if (newParams == null) {
 				myExpungeService.deleteAllSearchParams(entity.getPersistentId());
 				entity.clearAllParamsPopulated();

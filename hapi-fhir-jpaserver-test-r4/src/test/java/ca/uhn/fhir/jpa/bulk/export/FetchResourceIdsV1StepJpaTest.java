@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.bulk.export;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.export.FetchResourceIdsStep;
+import ca.uhn.fhir.batch2.jobs.export.v1.FetchResourceIdsV1Step;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
@@ -27,10 +27,10 @@ import static org.mockito.Mockito.verify;
 
 import java.util.List;
 
-public class FetchResourceIdsStepJpaTest  extends BaseJpaR4Test {
+public class FetchResourceIdsV1StepJpaTest extends BaseJpaR4Test {
 
 	@Autowired
-	private FetchResourceIdsStep myFetchResourceIdsStep;
+	private FetchResourceIdsV1Step myFetchResourceIdsStep;
 
 	@Mock
 	private IJobDataSink<ResourceIdList> mySink;

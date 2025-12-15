@@ -174,7 +174,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 								"Executing query for bulk export job[{}] chunk[{}]: {}",
 								theJobId,
 								theChunkId,
-								map.toNormalizedQueryString(myContext));
+								map.toNormalizedQueryString());
 
 				try (IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(
 						map, searchRuntime, new SystemRequestDetails(), theParams.getPartitionIdOrAllPartitions())) {
@@ -240,7 +240,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 							"Executing query for bulk export job[{}] chunk[{}]: {}",
 							theJobId,
 							theChunkId,
-							map.toNormalizedQueryString(myContext));
+							map.toNormalizedQueryString());
 
 			// requires a transaction
 			try (IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(
@@ -417,7 +417,6 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 *
 	 * @return A list of strings representing the Patient IDs of the members (e.g. ["P1", "P2", "P3"]
 	 */
-	@SuppressWarnings("unchecked")
 	private List<JpaPid> getMembersFromGroupWithFilter(
 			ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) throws IOException {
 		final List<SearchParameterMap> maps = makeSearchParameterMaps(theParameters, theConsiderDateRange);
@@ -466,7 +465,6 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	}
 
 	// gets all the resources related to each patient provided in the list of thePatientPids
-	@SuppressWarnings("unchecked")
 	private void queryResourceTypeWithReferencesToPatients(
 			Set<JpaPid> theReadPids,
 			List<JpaPid> thePatientPids,

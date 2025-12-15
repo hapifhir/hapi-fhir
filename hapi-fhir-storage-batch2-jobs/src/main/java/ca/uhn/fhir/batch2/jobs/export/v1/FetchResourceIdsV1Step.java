@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.batch2.jobs.export;
+package ca.uhn.fhir.batch2.jobs.export.v1;
 
 import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
@@ -28,6 +28,7 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
@@ -47,8 +48,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobParameters, ResourceIdList> {
-	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsStep.class);
+// FIXME: find the 2 FetchResourceIdsV1Step tests and make V2 versions too
+public class FetchResourceIdsV1Step implements IFirstJobStepWorker<BulkExportJobParameters, ResourceIdList> {
+	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsV1Step.class);
 
 	@Autowired
 	private IBulkExportProcessor<?> myBulkExportProcessor;
@@ -157,7 +159,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 					// Make sure resources stored in each batch does not go over the max capacity
 					if (idsToSubmit.size() >= myStorageSettings.getBulkExportFileMaximumCapacity()
 							|| estimatedChunkSize >= myStorageSettings.getBulkExportFileMaximumSize()) {
-						submitWorkChunk(idsToSubmit, resourceType, theDataSink);
+						submitWorkChunk(params.getPartitionId(), idsToSubmit, resourceType, theDataSink);
 						submissionCount++;
 						idsToSubmit = new ArrayList<>();
 						estimatedChunkSize = 0;
@@ -166,7 +168,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 				// if we have any other Ids left, submit them now
 				if (!idsToSubmit.isEmpty()) {
-					submitWorkChunk(idsToSubmit, resourceType, theDataSink);
+					submitWorkChunk(params.getPartitionId(), idsToSubmit, resourceType, theDataSink);
 					submissionCount++;
 				}
 			}
@@ -183,11 +185,14 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 	}
 
 	private void submitWorkChunk(
-			List<TypedPidJson> theBatchResourceIds, String theResourceType, IJobDataSink<ResourceIdList> theDataSink) {
+			RequestPartitionId thePartitionId,
+			List<TypedPidJson> theBatchResourceIds,
+			String theResourceType,
+			IJobDataSink<ResourceIdList> theDataSink) {
 		ResourceIdList idList = new ResourceIdList();
 
 		idList.setIds(theBatchResourceIds);
-
+		idList.setPartitionId(thePartitionId);
 		idList.setResourceType(theResourceType);
 
 		theDataSink.accept(idList);

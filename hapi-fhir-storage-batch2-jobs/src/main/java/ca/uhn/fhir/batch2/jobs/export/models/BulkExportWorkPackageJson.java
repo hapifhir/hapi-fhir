@@ -19,41 +19,16 @@
  */
 package ca.uhn.fhir.batch2.jobs.export.models;
 
-import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.List;
-
-public class ResourceIdList extends BulkExportJobBase {
-
-	/**
-	 * List of Id objects for serialization
-	 */
-	@JsonProperty("ids")
-	private List<TypedPidJson> myBatchResourceIds;
-
-	@JsonProperty("partitionId")
-	private RequestPartitionId myPartitionId;
-
+public class BulkExportWorkPackageJson implements IModelJson {
 	@JsonProperty("resourceType")
 	private String myResourceType;
 
-	public RequestPartitionId getPartitionId() {
-		return myPartitionId;
-	}
-
-	public void setPartitionId(RequestPartitionId thePartitionId) {
-		myPartitionId = thePartitionId;
-	}
-
-	public List<TypedPidJson> getIds() {
-		return myBatchResourceIds;
-	}
-
-	public void setIds(List<TypedPidJson> theBatchResourceIds) {
-		myBatchResourceIds = theBatchResourceIds;
-	}
+	@JsonProperty("partitionId")
+	private RequestPartitionId myPartitionId;
 
 	public String getResourceType() {
 		return myResourceType;
@@ -61,5 +36,13 @@ public class ResourceIdList extends BulkExportJobBase {
 
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
+	}
+
+	public RequestPartitionId getPartitionId() {
+		return myPartitionId;
+	}
+
+	public void setPartitionId(RequestPartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
 	}
 }

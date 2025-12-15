@@ -220,6 +220,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 			assertThat(myResourceIndexedSearchParamTokenDao.findAll()).isEmpty();
 			assertThat(myResourceIndexedSearchParamStringDao.findAll()).isEmpty();
 			assertThat(myResourceIndexedSearchParamDateDao.findAll()).isEmpty();
+			assertThat(mySearchParamPresentDao.findAll()).isEmpty();
 		});
 
 	}
