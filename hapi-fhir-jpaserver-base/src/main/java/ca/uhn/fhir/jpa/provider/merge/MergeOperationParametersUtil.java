@@ -40,6 +40,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_DELETE_SOURCE;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_PREVIEW;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_RESULT_PATIENT;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_PATIENT;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_TARGET_PATIENT;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER;
+
 /**
  * Utility class for building FHIR Parameters resources for merge operations.
  */
@@ -211,8 +219,8 @@ public class MergeOperationParametersUtil {
 
 		// Extract source-patient-identifier (list of identifiers)
 		List<Identifier> sourceIdentifiers = null;
-		List<IBase> sourceIdentifierParams =
-				ParametersUtil.getNamedParameters(theFhirContext, theParameters, "source-patient-identifier");
+		List<IBase> sourceIdentifierParams = ParametersUtil.getNamedParameters(
+				theFhirContext, theParameters, OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER);
 		if (!sourceIdentifierParams.isEmpty()) {
 			sourceIdentifiers = sourceIdentifierParams.stream()
 					.map(param -> extractIdentifierFromParameter(theFhirContext, param))
@@ -222,8 +230,8 @@ public class MergeOperationParametersUtil {
 
 		// Extract target-patient-identifier (list of identifiers)
 		List<Identifier> targetIdentifiers = null;
-		List<IBase> targetIdentifierParams =
-				ParametersUtil.getNamedParameters(theFhirContext, theParameters, "target-patient-identifier");
+		List<IBase> targetIdentifierParams = ParametersUtil.getNamedParameters(
+				theFhirContext, theParameters, OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER);
 		if (!targetIdentifierParams.isEmpty()) {
 			targetIdentifiers = targetIdentifierParams.stream()
 					.map(param -> extractIdentifierFromParameter(theFhirContext, param))
@@ -233,35 +241,35 @@ public class MergeOperationParametersUtil {
 
 		// Extract source-patient reference
 		IBaseReference sourcePatient = null;
-		List<IBaseReference> sourcePatientRefs =
-				ParametersUtil.getNamedParameterReferences(theFhirContext, theParameters, "source-patient");
+		List<IBaseReference> sourcePatientRefs = ParametersUtil.getNamedParameterReferences(
+				theFhirContext, theParameters, OPERATION_MERGE_PARAM_SOURCE_PATIENT);
 		if (!sourcePatientRefs.isEmpty()) {
 			sourcePatient = sourcePatientRefs.get(0);
 		}
 
 		// Extract target-patient reference
 		IBaseReference targetPatient = null;
-		List<IBaseReference> targetPatientRefs =
-				ParametersUtil.getNamedParameterReferences(theFhirContext, theParameters, "target-patient");
+		List<IBaseReference> targetPatientRefs = ParametersUtil.getNamedParameterReferences(
+				theFhirContext, theParameters, OPERATION_MERGE_PARAM_TARGET_PATIENT);
 		if (!targetPatientRefs.isEmpty()) {
 			targetPatient = targetPatientRefs.get(0);
 		}
 
 		// Extract preview flag
 		IPrimitiveType<Boolean> previewValue = ParametersUtil.getNamedParameterValueAsString(
-						theFhirContext, theParameters, "preview")
+						theFhirContext, theParameters, OPERATION_MERGE_PARAM_PREVIEW)
 				.map(b -> new BooleanDt(Boolean.parseBoolean(b)))
 				.orElse(new BooleanDt(false));
 
 		// Extract delete-source flag
 		IPrimitiveType<Boolean> deleteSourceValue = ParametersUtil.getNamedParameterValueAsString(
-						theFhirContext, theParameters, "delete-source")
+						theFhirContext, theParameters, OPERATION_MERGE_PARAM_DELETE_SOURCE)
 				.map(b -> new BooleanDt(Boolean.parseBoolean(b)))
 				.orElse(new BooleanDt(false));
 
 		// Extract result-patient
 		IBaseResource resultPatient = ParametersUtil.getNamedParameterResource(
-						theFhirContext, theParameters, "result-patient")
+						theFhirContext, theParameters, OPERATION_MERGE_PARAM_RESULT_PATIENT)
 				.orElse(null);
 
 		return inputParamsFromOperationParams(
