@@ -248,35 +248,33 @@ public class MergeOperationParametersUtil {
 		}
 
 		// Extract preview flag
-		IPrimitiveType<Boolean> previewValue = ParametersUtil
-			.getNamedParameterValueAsString(theFhirContext, theParameters, "preview")
-			.map(b -> new BooleanDt(Boolean.parseBoolean(b)))
-			.orElse(new BooleanDt(false));
+		IPrimitiveType<Boolean> previewValue = ParametersUtil.getNamedParameterValueAsString(
+						theFhirContext, theParameters, "preview")
+				.map(b -> new BooleanDt(Boolean.parseBoolean(b)))
+				.orElse(new BooleanDt(false));
 
 		// Extract delete-source flag
-		IPrimitiveType<Boolean> deleteSourceValue =
-			ParametersUtil
-				.getNamedParameterValueAsString(theFhirContext, theParameters, "delete-source")
+		IPrimitiveType<Boolean> deleteSourceValue = ParametersUtil.getNamedParameterValueAsString(
+						theFhirContext, theParameters, "delete-source")
 				.map(b -> new BooleanDt(Boolean.parseBoolean(b)))
 				.orElse(new BooleanDt(false));
 
 		// Extract result-patient
-		IBaseResource resultPatient = ParametersUtil
-			.getNamedParameterResource(theFhirContext, theParameters, "result-patient")
-			.orElse(null);
+		IBaseResource resultPatient = ParametersUtil.getNamedParameterResource(
+						theFhirContext, theParameters, "result-patient")
+				.orElse(null);
 
 		return inputParamsFromOperationParams(
-			sourceIdentifiers,
-			targetIdentifiers,
-			sourcePatient,
-			targetPatient,
-			previewValue,
-			deleteSourceValue,
-			resultPatient,
-			theProvenanceAgents,
-			theParameters,
-			theResourceLimit
-		);
+				sourceIdentifiers,
+				targetIdentifiers,
+				sourcePatient,
+				targetPatient,
+				previewValue,
+				deleteSourceValue,
+				resultPatient,
+				theProvenanceAgents,
+				theParameters,
+				theResourceLimit);
 	}
 
 	/**
@@ -286,8 +284,6 @@ public class MergeOperationParametersUtil {
 	 * @return the child value or null if not found
 	 */
 	private static Identifier extractIdentifierFromParameter(FhirContext theFhirContext, IBase theParameter) {
-		return theFhirContext
-			.newTerser()
-			.getSingleValueOrNull(theParameter, "valueIdentifier", Identifier.class);
+		return theFhirContext.newTerser().getSingleValueOrNull(theParameter, "valueIdentifier", Identifier.class);
 	}
 }

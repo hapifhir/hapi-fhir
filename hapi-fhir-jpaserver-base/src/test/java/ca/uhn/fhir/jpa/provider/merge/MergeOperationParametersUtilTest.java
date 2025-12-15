@@ -263,19 +263,23 @@ class MergeOperationParametersUtilTest {
 		}
 
 		@Test
-		void testFromParameters_withOnlyRequiredParameters_success() {
+		void testFromParameters_withReferences_success() {
 			// Arrange
 			Parameters parameters = new Parameters();
-			parameters.addParameter().setName("source-patient").setValue(new Reference("Patient/123"));
-			parameters.addParameter().setName("target-patient").setValue(new Reference("Patient/456"));
+			parameters.addParameter().setName("source-patient").setValue(new Reference("Patient/source-123"));
+			parameters.addParameter().setName("target-patient").setValue(new Reference("Patient/target-456"));
 
 			// Act
 			MergeOperationInputParameters result = MergeOperationParametersUtil.inputParamsFromParameters(myFhirContext, parameters, RESOURCE_LIMIT, myProvenanceAgents);
 
 			// Assert
 			assertThat(result).isNotNull();
-			assertThat(result.getSourceResource()).isNotNull();
-			assertThat(result.getTargetResource()).isNotNull();
+			assertThat(result.getSourceResource())
+				.isNotNull()
+				.returns("Patient/source-123", r -> r.getReferenceElement().getValue());
+			assertThat(result.getTargetResource())
+				.isNotNull()
+				.returns("Patient/target-456", r -> r.getReferenceElement().getValue());
 			assertThat(result.getPreview()).isFalse(); // default is false
 			assertThat(result.getDeleteSource()).isFalse(); // default is false
 			assertThat(result.getResultResource()).isNull();
@@ -342,24 +346,6 @@ class MergeOperationParametersUtilTest {
 			assertThat(result).isNotNull();
 			assertThat(result.getSourceIdentifiers()).hasSize(2);
 			assertThat(result.getTargetIdentifiers()).hasSize(1);
-		}
-
-		@Test
-		void testFromParameters_withReferences_success() {
-			// Arrange
-			Parameters parameters = new Parameters();
-			parameters.addParameter().setName("source-patient").setValue(new Reference("Patient/source-123"));
-			parameters.addParameter().setName("target-patient").setValue(new Reference("Patient/target-456"));
-
-			// Act
-			MergeOperationInputParameters result = MergeOperationParametersUtil.inputParamsFromParameters(myFhirContext, parameters, RESOURCE_LIMIT, myProvenanceAgents);
-
-			// Assert
-			assertThat(result).isNotNull();
-			assertThat(result.getSourceResource()).isNotNull();
-			assertThat(result.getSourceResource().getReferenceElement().getValue()).isEqualTo("Patient/source-123");
-			assertThat(result.getTargetResource()).isNotNull();
-			assertThat(result.getTargetResource().getReferenceElement().getValue()).isEqualTo("Patient/target-456");
 		}
 
 		@Test
