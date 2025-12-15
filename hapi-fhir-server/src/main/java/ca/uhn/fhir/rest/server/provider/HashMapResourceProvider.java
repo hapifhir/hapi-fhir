@@ -411,11 +411,15 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 
 			if (theDeleted) {
 
+				// In HashMapResourceProvider, the last version in myIdToHistory after a delete continues to have the
+				// full resource so it's ok to use it.
+				IBaseResource oldResourceVersion = myIdToHistory.get(theIdPart).getLast();
+
 				// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_DELETED
 				HookParams preStorageParams = new HookParams()
 						.add(RequestDetails.class, theRequestDetails)
 						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-						.add(IBaseResource.class, myIdToHistory.get(theIdPart).getFirst())
+						.add(IBaseResource.class, oldResourceVersion)
 						.add(TransactionDetails.class, theTransactionDetails);
 				interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, preStorageParams);
 
@@ -423,11 +427,12 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 				HookParams preCommitParams = new HookParams()
 						.add(RequestDetails.class, theRequestDetails)
 						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-						.add(IBaseResource.class, myIdToHistory.get(theIdPart).getFirst())
+						.add(IBaseResource.class, oldResourceVersion)
+						.add(IIdType.class, oldResourceVersion.getIdElement())
 						.add(TransactionDetails.class, theTransactionDetails)
 						.add(
 								InterceptorInvocationTimingEnum.class,
-								theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED));
+								theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED));
 				interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, preCommitParams);
 
 			} else if (!myIdToHistory.containsKey(theIdPart)) {
