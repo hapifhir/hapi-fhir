@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.merge;
 // Created by claude-sonnet-4-5
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.CanonicalIdentifier;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -16,6 +17,11 @@ import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,6 +32,7 @@ class MergeOperationParametersUtilTest {
 	private OperationOutcome myOperationOutcome;
 	private Patient myUpdatedPatient;
 	private Task myTask;
+	private final List<IProvenanceAgent> myProvenanceAgents = Collections.emptyList();
 
 	@BeforeEach
 	void setUp() {
@@ -240,9 +247,8 @@ class MergeOperationParametersUtilTest {
 			parameters.addParameter().setName("result-patient").setResource(resultPatient);
 
 			// Act
-			MergeOperationInputParameters result =
-					MergeOperationParametersUtil.inputParamsFromParameters(myFhirContext, parameters, RESOURCE_LIMIT);
-
+			MergeOperationInputParameters result = MergeOperationParametersUtil.inputParamsFromParameters(myFhirContext, parameters, RESOURCE_LIMIT, myProvenanceAgents);
+			
 			// Assert
 			assertThat(result).isNotNull();
 			assertThat(result.getSourceResource()).isNotNull();
@@ -264,8 +270,7 @@ class MergeOperationParametersUtilTest {
 			parameters.addParameter().setName("target-patient").setValue(new Reference("Patient/456"));
 
 			// Act
-			MergeOperationInputParameters result =
-					MergeOperationParametersUtil.inputParamsFromParameters(myFhirContext, parameters, RESOURCE_LIMIT);
+			MergeOperationInputParameters result = MergeOperationParametersUtil.inputParamsFromParameters(myFhirContext, parameters, RESOURCE_LIMIT, myProvenanceAgents);
 
 			// Assert
 			assertThat(result).isNotNull();
@@ -293,8 +298,7 @@ class MergeOperationParametersUtilTest {
 			parameters.addParameter().setName("target-patient-identifier").setValue(targetIdentifier);
 
 			// Act
-			MergeOperationInputParameters result =
-					MergeOperationParametersUtil.inputParamsFromParameters(myFhirContext, parameters, RESOURCE_LIMIT);
+			MergeOperationInputParameters result = MergeOperationParametersUtil.inputParamsFromParameters(myFhirContext, parameters, RESOURCE_LIMIT, myProvenanceAgents);
 
 			// Assert
 			assertThat(result).isNotNull();
@@ -332,8 +336,7 @@ class MergeOperationParametersUtilTest {
 			parameters.addParameter().setName("target-patient-identifier").setValue(targetIdentifier);
 
 			// Act
-			MergeOperationInputParameters result =
-					MergeOperationParametersUtil.inputParamsFromParameters(myFhirContext, parameters, RESOURCE_LIMIT);
+			MergeOperationInputParameters result = MergeOperationParametersUtil.inputParamsFromParameters(myFhirContext, parameters, RESOURCE_LIMIT, myProvenanceAgents);
 
 			// Assert
 			assertThat(result).isNotNull();
@@ -349,8 +352,7 @@ class MergeOperationParametersUtilTest {
 			parameters.addParameter().setName("target-patient").setValue(new Reference("Patient/target-456"));
 
 			// Act
-			MergeOperationInputParameters result =
-					MergeOperationParametersUtil.inputParamsFromParameters(myFhirContext, parameters, RESOURCE_LIMIT);
+			MergeOperationInputParameters result = MergeOperationParametersUtil.inputParamsFromParameters(myFhirContext, parameters, RESOURCE_LIMIT, myProvenanceAgents);
 
 			// Assert
 			assertThat(result).isNotNull();
@@ -369,43 +371,41 @@ class MergeOperationParametersUtilTest {
 			parameters.addParameter().setName("preview").setValue(new BooleanType(true));
 
 			// Act
-			MergeOperationInputParameters result =
-					MergeOperationParametersUtil.inputParamsFromParameters(myFhirContext, parameters, RESOURCE_LIMIT);
+			MergeOperationInputParameters result = MergeOperationParametersUtil.inputParamsFromParameters(myFhirContext, parameters, RESOURCE_LIMIT, myProvenanceAgents);
 
 			// Assert
 			assertThat(result.getPreview()).isTrue();
 		}
 
-		@Test
-		void testFromParameters_withPreviewFalse_setsFlag() {
+		@ParameterizedTest
+		@ValueSource(booleans = {true, false})
+		void testFromParameters_withDeleteSourceTrue_setsFlag(boolean theDeleteSourceParam) {
 			// Arrange
 			Parameters parameters = new Parameters();
 			parameters.addParameter().setName("source-patient").setValue(new Reference("Patient/123"));
 			parameters.addParameter().setName("target-patient").setValue(new Reference("Patient/456"));
-			parameters.addParameter().setName("preview").setValue(new BooleanType(false));
+			parameters.addParameter().setName("delete-source").setValue(new BooleanType(theDeleteSourceParam));
 
 			// Act
-			MergeOperationInputParameters result =
-					MergeOperationParametersUtil.inputParamsFromParameters(myFhirContext, parameters, RESOURCE_LIMIT);
+			MergeOperationInputParameters result = MergeOperationParametersUtil.inputParamsFromParameters(myFhirContext, parameters, RESOURCE_LIMIT, myProvenanceAgents);
 
 			// Assert
-			assertThat(result.getPreview()).isFalse();
+			assertThat(result.getDeleteSource()).isEqualTo(theDeleteSourceParam);
 		}
 
 		@Test
-		void testFromParameters_withDeleteSourceTrue_setsFlag() {
+		void testFromParameters_withDeleteSourceFalse_doesNotSetFlag() {
 			// Arrange
 			Parameters parameters = new Parameters();
 			parameters.addParameter().setName("source-patient").setValue(new Reference("Patient/123"));
 			parameters.addParameter().setName("target-patient").setValue(new Reference("Patient/456"));
-			parameters.addParameter().setName("delete-source").setValue(new BooleanType(true));
+			parameters.addParameter().setName("delete-source").setValue(new BooleanType(false));
 
 			// Act
-			MergeOperationInputParameters result =
-					MergeOperationParametersUtil.inputParamsFromParameters(myFhirContext, parameters, RESOURCE_LIMIT);
+			MergeOperationInputParameters result = MergeOperationParametersUtil.inputParamsFromParameters(myFhirContext, parameters, RESOURCE_LIMIT, myProvenanceAgents);
 
 			// Assert
-			assertThat(result.getDeleteSource()).isTrue();
+			assertThat(result.getDeleteSource()).isFalse();
 		}
 
 		@Test
@@ -421,8 +421,7 @@ class MergeOperationParametersUtilTest {
 			parameters.addParameter().setName("result-patient").setResource(resultPatient);
 
 			// Act
-			MergeOperationInputParameters result =
-					MergeOperationParametersUtil.inputParamsFromParameters(myFhirContext, parameters, RESOURCE_LIMIT);
+			MergeOperationInputParameters result = MergeOperationParametersUtil.inputParamsFromParameters(myFhirContext, parameters, RESOURCE_LIMIT, myProvenanceAgents);
 
 			// Assert
 			assertThat(result.getResultResource()).isNotNull();

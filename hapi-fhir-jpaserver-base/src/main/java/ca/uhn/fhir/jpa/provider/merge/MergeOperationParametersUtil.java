@@ -21,10 +21,9 @@ package ca.uhn.fhir.jpa.provider.merge;
 
 // Created by claude-sonnet-4-5
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.CanonicalIdentifier;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -33,10 +32,12 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Resource;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -179,15 +180,16 @@ public class MergeOperationParametersUtil {
 		result.setPreview(thePreview != null && thePreview.getValue());
 		result.setDeleteSource(theDeleteSource != null && theDeleteSource.getValue());
 
-		// Set result patient (make a copy to avoid modification)
+		// pass in a copy of the result patient as we don't want it to be modified. It will be
+		// returned back to the client as part of the response.
 		if (theResultPatient != null) {
-			result.setResultResource(((org.hl7.fhir.r4.model.Patient) theResultPatient).copy());
+			result.setResultResource(((Patient) theResultPatient).copy());
 		}
 
 		// Set provenance and original parameters
 		result.setProvenanceAgents(theProvenanceAgents);
 		if (theOriginalInputParameters != null) {
-			result.setOriginalInputParameters(((org.hl7.fhir.r4.model.Resource) theOriginalInputParameters).copy());
+			result.setOriginalInputParameters(((Resource) theOriginalInputParameters).copy());
 		}
 
 		return result;
@@ -197,102 +199,95 @@ public class MergeOperationParametersUtil {
 	 * Build MergeOperationInputParameters from a FHIR Parameters resource.
 	 * Extracts all merge operation parameters according to the FHIR spec.
 	 *
-	 * @param theParameters FHIR Parameters resource containing merge operation inputs
+	 * @param theParameters       FHIR Parameters resource containing merge operation inputs
+	 * @param theProvenanceAgents the obtained provenance agents
 	 * @return MergeOperationInputParameters ready for use with ResourceMergeService
 	 */
 	public static MergeOperationInputParameters inputParamsFromParameters(
-			FhirContext theFhirContext, IBaseParameters theParameters, int theResourceLimit) {
-
-		MergeOperationInputParameters result = new MergeOperationInputParameters(theResourceLimit);
+			FhirContext theFhirContext,
+			IBaseParameters theParameters,
+			int theResourceLimit,
+			List<IProvenanceAgent> theProvenanceAgents) {
 
 		// Extract source-patient-identifier (list of identifiers)
+		List<Identifier> sourceIdentifiers = null;
 		List<IBase> sourceIdentifierParams =
 				ParametersUtil.getNamedParameters(theFhirContext, theParameters, "source-patient-identifier");
 		if (!sourceIdentifierParams.isEmpty()) {
-			List<CanonicalIdentifier> sourceIds = sourceIdentifierParams.stream()
-					.map(param -> extractValueFromParameter(theFhirContext, param, "value"))
+			sourceIdentifiers = sourceIdentifierParams.stream()
+					.map(param -> extractIdentifierFromParameter(theFhirContext, param))
 					.filter(Objects::nonNull)
-					.map(CanonicalIdentifier::fromIdentifier)
 					.collect(Collectors.toList());
-			if (!sourceIds.isEmpty()) {
-				result.setSourceResourceIdentifiers(sourceIds);
-			}
 		}
 
 		// Extract target-patient-identifier (list of identifiers)
+		List<Identifier> targetIdentifiers = null;
 		List<IBase> targetIdentifierParams =
 				ParametersUtil.getNamedParameters(theFhirContext, theParameters, "target-patient-identifier");
 		if (!targetIdentifierParams.isEmpty()) {
-			List<CanonicalIdentifier> targetIds = targetIdentifierParams.stream()
-					.map(param -> extractValueFromParameter(theFhirContext, param, "value"))
+			targetIdentifiers = targetIdentifierParams.stream()
+					.map(param -> extractIdentifierFromParameter(theFhirContext, param))
 					.filter(Objects::nonNull)
-					.map(CanonicalIdentifier::fromIdentifier)
 					.collect(Collectors.toList());
-			if (!targetIds.isEmpty()) {
-				result.setTargetResourceIdentifiers(targetIds);
-			}
 		}
 
 		// Extract source-patient reference
+		IBaseReference sourcePatient = null;
 		List<IBaseReference> sourcePatientRefs =
 				ParametersUtil.getNamedParameterReferences(theFhirContext, theParameters, "source-patient");
 		if (!sourcePatientRefs.isEmpty()) {
-			result.setSourceResource(sourcePatientRefs.get(0));
+			sourcePatient = sourcePatientRefs.get(0);
 		}
 
 		// Extract target-patient reference
+		IBaseReference targetPatient = null;
 		List<IBaseReference> targetPatientRefs =
 				ParametersUtil.getNamedParameterReferences(theFhirContext, theParameters, "target-patient");
 		if (!targetPatientRefs.isEmpty()) {
-			result.setTargetResource(targetPatientRefs.get(0));
+			targetPatient = targetPatientRefs.get(0);
 		}
 
 		// Extract preview flag
-		Optional<String> previewValue =
-				ParametersUtil.getNamedParameterValueAsString(theFhirContext, theParameters, "preview");
-		previewValue.ifPresent(val -> result.setPreview(Boolean.parseBoolean(val)));
+		IPrimitiveType<Boolean> previewValue = ParametersUtil
+			.getNamedParameterValueAsString(theFhirContext, theParameters, "preview")
+			.map(b -> new BooleanDt(Boolean.parseBoolean(b)))
+			.orElse(new BooleanDt(false));
 
 		// Extract delete-source flag
-		Optional<String> deleteSourceValue =
-				ParametersUtil.getNamedParameterValueAsString(theFhirContext, theParameters, "delete-source");
-		deleteSourceValue.ifPresent(val -> result.setDeleteSource(Boolean.parseBoolean(val)));
+		IPrimitiveType<Boolean> deleteSourceValue =
+			ParametersUtil
+				.getNamedParameterValueAsString(theFhirContext, theParameters, "delete-source")
+				.map(b -> new BooleanDt(Boolean.parseBoolean(b)))
+				.orElse(new BooleanDt(false));
 
 		// Extract result-patient
-		ParametersUtil.getNamedParameterResource(theFhirContext, theParameters, "result-patient")
-				.ifPresent(result::setResultResource);
+		IBaseResource resultPatient = ParametersUtil
+			.getNamedParameterResource(theFhirContext, theParameters, "result-patient")
+			.orElse(null);
 
-		// Store original parameters for provenance
-		result.setOriginalInputParameters(theParameters);
-
-		return result;
+		return inputParamsFromOperationParams(
+			sourceIdentifiers,
+			targetIdentifiers,
+			sourcePatient,
+			targetPatient,
+			previewValue,
+			deleteSourceValue,
+			resultPatient,
+			theProvenanceAgents,
+			theParameters,
+			theResourceLimit
+		);
 	}
 
 	/**
-	 * Extract a value[x] from a Parameters.parameter element.
-	 * In FHIR Parameters, values are stored as value[x] which expands to valueString, valueIdentifier, etc.
+	 * Extract Identifier value from a Parameters.parameter element.
 	 *
 	 * @param theParameter the parameter element
-	 * @param theChildNamePrefix the child name prefix (e.g., "value" will match valueIdentifier, valueString, etc.)
 	 * @return the child value or null if not found
 	 */
-	private static IBase extractValueFromParameter(
-			FhirContext theFhirContext,
-			IBase theParameter,
-			@SuppressWarnings("SameParameterValue") String theChildNamePrefix) {
-
-		BaseRuntimeElementCompositeDefinition<?> parameterDef =
-				(BaseRuntimeElementCompositeDefinition<?>) theFhirContext.getElementDefinition(theParameter.getClass());
-
-		// Try to find a child that starts with the prefix (e.g., "value" matches "valueIdentifier")
-		for (BaseRuntimeChildDefinition childDef : parameterDef.getChildren()) {
-			String childName = childDef.getElementName();
-			if (childName.startsWith(theChildNamePrefix)) {
-				List<IBase> values = childDef.getAccessor().getValues(theParameter);
-				if (!values.isEmpty()) {
-					return values.get(0);
-				}
-			}
-		}
-		return null;
+	private static Identifier extractIdentifierFromParameter(FhirContext theFhirContext, IBase theParameter) {
+		return theFhirContext
+			.newTerser()
+			.getSingleValueOrNull(theParameter, "valueIdentifier", Identifier.class);
 	}
 }
