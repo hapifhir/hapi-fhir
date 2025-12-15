@@ -107,18 +107,18 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 					ProvenanceAgentsPointcutUtil.ifHasCallHooks(theRequestDetails, myInterceptorBroadcaster);
 
 			// Use the builder to construct MergeOperationInputParameters
-			MergeOperationInputParametersBuilder builder =
-					new MergeOperationInputParametersBuilder(myFhirContext, resourceLimit);
-			MergeOperationInputParameters mergeOperationParameters = builder.fromOperationParams(
-					theSourcePatientIdentifier,
-					theTargetPatientIdentifier,
-					theSourcePatient,
-					theTargetPatient,
-					thePreview,
-					theDeleteSource,
-					theResultPatient,
-					provenanceAgents,
-					theRequestDetails.getResource());
+			MergeOperationInputParameters mergeOperationParameters =
+					MergeOperationParametersUtil.inputParamsFromOperationParams(
+							theSourcePatientIdentifier,
+							theTargetPatientIdentifier,
+							theSourcePatient,
+							theTargetPatient,
+							thePreview,
+							theDeleteSource,
+							theResultPatient,
+							provenanceAgents,
+							theRequestDetails.getResource(),
+							resourceLimit);
 
 			MergeOperationOutcome mergeOutcome =
 					myResourceMergeService.merge(mergeOperationParameters, theRequestDetails);

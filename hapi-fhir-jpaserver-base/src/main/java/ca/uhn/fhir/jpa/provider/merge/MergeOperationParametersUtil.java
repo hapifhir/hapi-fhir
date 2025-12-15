@@ -21,11 +21,23 @@ package ca.uhn.fhir.jpa.provider.merge;
 
 // Created by claude-sonnet-4-5
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.util.CanonicalIdentifier;
 import ca.uhn.fhir.util.ParametersUtil;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Utility class for building FHIR Parameters resources for merge operations.
@@ -112,5 +124,175 @@ public class MergeOperationParametersUtil {
 		}
 
 		return retVal;
+	}
+
+	/**
+	 * Build MergeOperationInputParameters from REST operation parameters.
+	 * This method is used by REST providers that receive individual operation parameters.
+	 *
+	 * @param theSourcePatientIdentifier list of source patient identifiers
+	 * @param theTargetPatientIdentifier list of target patient identifiers
+	 * @param theSourcePatient source patient reference
+	 * @param theTargetPatient target patient reference
+	 * @param thePreview preview flag
+	 * @param theDeleteSource delete source flag
+	 * @param theResultPatient result patient resource
+	 * @param theProvenanceAgents provenance agents for audit
+	 * @param theOriginalInputParameters original input parameters for provenance
+	 * @return MergeOperationInputParameters ready for use with ResourceMergeService
+	 */
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	public static MergeOperationInputParameters inputParamsFromOperationParams(
+			List<?> theSourcePatientIdentifier,
+			List<?> theTargetPatientIdentifier,
+			IBaseReference theSourcePatient,
+			IBaseReference theTargetPatient,
+			IPrimitiveType<Boolean> thePreview,
+			IPrimitiveType<Boolean> theDeleteSource,
+			IBaseResource theResultPatient,
+			List<IProvenanceAgent> theProvenanceAgents,
+			IBaseResource theOriginalInputParameters,
+			int theResourceLimit) {
+
+		MergeOperationInputParameters result = new MergeOperationInputParameters(theResourceLimit);
+
+		// Set identifiers
+		if (theSourcePatientIdentifier != null && !theSourcePatientIdentifier.isEmpty()) {
+			List sourceIds = theSourcePatientIdentifier.stream()
+					.map(id -> CanonicalIdentifier.fromIdentifier((IBase) id))
+					.collect(Collectors.toList());
+			result.setSourceResourceIdentifiers(sourceIds);
+		}
+
+		if (theTargetPatientIdentifier != null && !theTargetPatientIdentifier.isEmpty()) {
+			List targetIds = theTargetPatientIdentifier.stream()
+					.map(id -> CanonicalIdentifier.fromIdentifier((IBase) id))
+					.collect(Collectors.toList());
+			result.setTargetResourceIdentifiers(targetIds);
+		}
+
+		// Set references
+		result.setSourceResource(theSourcePatient);
+		result.setTargetResource(theTargetPatient);
+
+		// Set flags
+		result.setPreview(thePreview != null && thePreview.getValue());
+		result.setDeleteSource(theDeleteSource != null && theDeleteSource.getValue());
+
+		// Set result patient (make a copy to avoid modification)
+		if (theResultPatient != null) {
+			result.setResultResource(((org.hl7.fhir.r4.model.Patient) theResultPatient).copy());
+		}
+
+		// Set provenance and original parameters
+		result.setProvenanceAgents(theProvenanceAgents);
+		if (theOriginalInputParameters != null) {
+			result.setOriginalInputParameters(((org.hl7.fhir.r4.model.Resource) theOriginalInputParameters).copy());
+		}
+
+		return result;
+	}
+
+	/**
+	 * Build MergeOperationInputParameters from a FHIR Parameters resource.
+	 * Extracts all merge operation parameters according to the FHIR spec.
+	 *
+	 * @param theParameters FHIR Parameters resource containing merge operation inputs
+	 * @return MergeOperationInputParameters ready for use with ResourceMergeService
+	 */
+	public static MergeOperationInputParameters inputParamsFromParameters(
+			FhirContext theFhirContext, IBaseParameters theParameters, int theResourceLimit) {
+
+		MergeOperationInputParameters result = new MergeOperationInputParameters(theResourceLimit);
+
+		// Extract source-patient-identifier (list of identifiers)
+		List<IBase> sourceIdentifierParams =
+				ParametersUtil.getNamedParameters(theFhirContext, theParameters, "source-patient-identifier");
+		if (!sourceIdentifierParams.isEmpty()) {
+			List<CanonicalIdentifier> sourceIds = sourceIdentifierParams.stream()
+					.map(param -> extractValueFromParameter(theFhirContext, param, "value"))
+					.filter(Objects::nonNull)
+					.map(CanonicalIdentifier::fromIdentifier)
+					.collect(Collectors.toList());
+			if (!sourceIds.isEmpty()) {
+				result.setSourceResourceIdentifiers(sourceIds);
+			}
+		}
+
+		// Extract target-patient-identifier (list of identifiers)
+		List<IBase> targetIdentifierParams =
+				ParametersUtil.getNamedParameters(theFhirContext, theParameters, "target-patient-identifier");
+		if (!targetIdentifierParams.isEmpty()) {
+			List<CanonicalIdentifier> targetIds = targetIdentifierParams.stream()
+					.map(param -> extractValueFromParameter(theFhirContext, param, "value"))
+					.filter(Objects::nonNull)
+					.map(CanonicalIdentifier::fromIdentifier)
+					.collect(Collectors.toList());
+			if (!targetIds.isEmpty()) {
+				result.setTargetResourceIdentifiers(targetIds);
+			}
+		}
+
+		// Extract source-patient reference
+		List<IBaseReference> sourcePatientRefs =
+				ParametersUtil.getNamedParameterReferences(theFhirContext, theParameters, "source-patient");
+		if (!sourcePatientRefs.isEmpty()) {
+			result.setSourceResource(sourcePatientRefs.get(0));
+		}
+
+		// Extract target-patient reference
+		List<IBaseReference> targetPatientRefs =
+				ParametersUtil.getNamedParameterReferences(theFhirContext, theParameters, "target-patient");
+		if (!targetPatientRefs.isEmpty()) {
+			result.setTargetResource(targetPatientRefs.get(0));
+		}
+
+		// Extract preview flag
+		Optional<String> previewValue =
+				ParametersUtil.getNamedParameterValueAsString(theFhirContext, theParameters, "preview");
+		previewValue.ifPresent(val -> result.setPreview(Boolean.parseBoolean(val)));
+
+		// Extract delete-source flag
+		Optional<String> deleteSourceValue =
+				ParametersUtil.getNamedParameterValueAsString(theFhirContext, theParameters, "delete-source");
+		deleteSourceValue.ifPresent(val -> result.setDeleteSource(Boolean.parseBoolean(val)));
+
+		// Extract result-patient
+		ParametersUtil.getNamedParameterResource(theFhirContext, theParameters, "result-patient")
+				.ifPresent(result::setResultResource);
+
+		// Store original parameters for provenance
+		result.setOriginalInputParameters(theParameters);
+
+		return result;
+	}
+
+	/**
+	 * Extract a value[x] from a Parameters.parameter element.
+	 * In FHIR Parameters, values are stored as value[x] which expands to valueString, valueIdentifier, etc.
+	 *
+	 * @param theParameter the parameter element
+	 * @param theChildNamePrefix the child name prefix (e.g., "value" will match valueIdentifier, valueString, etc.)
+	 * @return the child value or null if not found
+	 */
+	private static IBase extractValueFromParameter(
+			FhirContext theFhirContext,
+			IBase theParameter,
+			@SuppressWarnings("SameParameterValue") String theChildNamePrefix) {
+
+		BaseRuntimeElementCompositeDefinition<?> parameterDef =
+				(BaseRuntimeElementCompositeDefinition<?>) theFhirContext.getElementDefinition(theParameter.getClass());
+
+		// Try to find a child that starts with the prefix (e.g., "value" matches "valueIdentifier")
+		for (BaseRuntimeChildDefinition childDef : parameterDef.getChildren()) {
+			String childName = childDef.getElementName();
+			if (childName.startsWith(theChildNamePrefix)) {
+				List<IBase> values = childDef.getAccessor().getValues(theParameter);
+				if (!values.isEmpty()) {
+					return values.get(0);
+				}
+			}
+		}
+		return null;
 	}
 }
