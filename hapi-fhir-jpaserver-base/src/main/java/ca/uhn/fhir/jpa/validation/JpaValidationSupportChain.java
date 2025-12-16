@@ -65,9 +65,6 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	@Autowired
 	private JpaStorageSettings myJpaStorageSettings;
 
-	@Autowired
-	private JpaStorageSettings myJpaStorageSettings;
-
 	/**
 	 * Constructor
 	 */
