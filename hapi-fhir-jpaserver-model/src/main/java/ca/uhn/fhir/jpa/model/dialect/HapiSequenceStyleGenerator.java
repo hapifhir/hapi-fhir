@@ -101,6 +101,16 @@ public class HapiSequenceStyleGenerator
 			Long next = (Long) myGen.generate(theSession, theObject);
 
 			retVal = myIdMassager.massage(myGeneratorName, next);
+
+			/*
+			 * This should never happen since the sequence starts at 1, but if someone ever manually messes with sequences
+			 * or the sequence otherwise gets messed up, we don't want to end up with a resource using this PID which has
+			 * a special meaning to HAPI.
+			 */
+			if (NO_MORE_PID.equals(next) || NO_MORE_PID.equals(retVal)) {
+				throw new InternalErrorException(
+						Msg.code(2791) + "Resource ID generator provided illegal value: " + next + " / " + retVal);
+			}
 		}
 		return retVal;
 	}

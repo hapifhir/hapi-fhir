@@ -65,6 +65,9 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	@Autowired
 	private JpaStorageSettings myJpaStorageSettings;
 
+	@Autowired
+	private JpaStorageSettings myJpaStorageSettings;
+
 	/**
 	 * Constructor
 	 */
@@ -109,6 +112,18 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 		addValidationSupport(myNpmJpaValidationSupport);
 		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
 		addValidationSupport(myConceptMappingSvc);
+	}
+
+	/**
+	 * Clears and rebuilds the validation support chain.
+	 * This method is intended for unit testing purposes only to allow
+	 * re-initializing the chain after changing configuration settings
+	 * such as {@link JpaStorageSettings#setAllowDatabaseValidationOverride(boolean)}.
+	 */
+	@VisibleForTesting
+	public void rebuildChainForUnitTest() {
+		super.clearChainForUnitTest();
+		postConstruct();
 	}
 
 	/**
