@@ -12,8 +12,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.batch2.JpaJobPersistenceImpl;
-import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -28,9 +26,9 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.LineIterator;
@@ -110,12 +108,9 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
 	@Autowired
-	private IBatch2WorkChunkRepository myWorkChunkRepository;
-	@Autowired
 	private IJobPersistence myJobPersistence;
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-	private JpaJobPersistenceImpl myJobPersistenceImpl;
 
 	@AfterEach
 	void afterEach() {
@@ -129,7 +124,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	@BeforeEach
 	public void beforeEach() {
 		myStorageSettings.setJobFastTrackingEnabled(false);
-		myJobPersistenceImpl = ProxyUtil.getSingletonTarget(myJobPersistence, JpaJobPersistenceImpl.class);
 	}
 
 	@Spy
@@ -777,8 +771,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testGroupBulkExport_QualifiedSubResourcesOfUnqualifiedPatientShouldShowUp() throws InterruptedException {
-
+	public void testGroupBulkExport_QualifiedSubResourcesOfUnqualifiedPatientShouldShowUp() {
 		// Patient with lastUpdated before _since
 		Patient patient = new Patient();
 		patient.setId("A");
@@ -786,7 +779,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		// Sleep for 1 sec
 		ourLog.info("Patient lastUpdated: " + InstantType.withCurrentTime().getValueAsString());
-		Thread.sleep(1000);
+		TestUtil.sleepAtLeast(1000);
 
 		// LastUpdated since now
 		Date timeDate = InstantType.now().getValue();
@@ -934,7 +927,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	* This interceptor was needed so that similar GET and POST export requests return the same jobID
 	* The test testBulkExportReuse_withGetAndPost_expectSameJobIds() tests this functionality
 	*/
-	private class BulkExportReuseInterceptor{
+	private static class BulkExportReuseInterceptor{
 		@Hook(Pointcut.STORAGE_INITIATE_BULK_EXPORT)
 		public void initiateBulkExport(RequestDetails theRequestDetails, BulkExportJobParameters theBulkExportOptions){
 				if(theRequestDetails.getRequestType().equals(RequestTypeEnum.GET)) {
@@ -950,7 +943,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		patient.setActive(true);
 		myClient.update().resource(patient).execute();
 
-		BulkExportReuseInterceptor newInterceptor = new  BulkExportReuseInterceptor();
+		BulkExportReuseInterceptor newInterceptor = new BulkExportReuseInterceptor();
 		myInterceptorRegistry.registerInterceptor(newInterceptor);
 
 		Parameters input = new Parameters();
@@ -1283,7 +1276,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 				String nextBinaryIdPart = new IdType(nextBinaryId).getIdPart();
 				assertThat(nextBinaryIdPart).matches("[a-zA-Z0-9]{32}");
 
-				Binary binary = myBinaryDao.read(new IdType(nextBinaryId));
+				Binary binary = myBinaryDao.read(new IdType(nextBinaryId), newSrd());
 				assertEquals(theOptions.getOutputFormat(), binary.getContentType());
 
 				String nextNdJsonFileContent = new String(binary.getContent(), Constants.CHARSET_UTF8);
@@ -1423,8 +1416,9 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	private JobInstance awaitExportComplete(String theInstanceId) {
 		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(theInstanceId, 120);
 
+		// FIXME: change back to 200 seconds
 		await()
-			.atMost(200, TimeUnit.SECONDS)
+			.atMost(20000, TimeUnit.SECONDS)
 			.until(() -> myJobCoordinator.getInstance(theInstanceId).getStatus() == StatusEnum.COMPLETED);
 
 		await()

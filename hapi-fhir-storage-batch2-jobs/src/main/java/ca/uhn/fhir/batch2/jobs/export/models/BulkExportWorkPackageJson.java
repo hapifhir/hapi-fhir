@@ -23,12 +23,20 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 public class BulkExportWorkPackageJson implements IModelJson {
 	@JsonProperty("resourceType")
 	private String myResourceType;
 
 	@JsonProperty("partitionId")
 	private RequestPartitionId myPartitionId;
+
+	@JsonProperty("patientIds")
+	private List<String> myPatientIds;
+
+	@JsonProperty("groupId")
+	private String myGroupId;
 
 	public String getResourceType() {
 		return myResourceType;
@@ -44,5 +52,31 @@ public class BulkExportWorkPackageJson implements IModelJson {
 
 	public void setPartitionId(RequestPartitionId thePartitionId) {
 		myPartitionId = thePartitionId;
+	}
+
+	public void setPatientIds(List<String> thePatientIds) {
+		myPatientIds = thePatientIds;
+	}
+
+	public List<String> getPatientIds() {
+		return myPatientIds;
+	}
+
+	/**
+	 * This will only be set when the export type is "GROUP" and {@link #getResourceType()}
+	 * is "Group". For all other GROUP export resource types, this will be null and
+	 * {@link #getPatientIds()} will be populated with the members of the group.
+	 */
+	public String getGroupId() {
+		return myGroupId;
+	}
+
+	/**
+	 * This will only be set when the export type is "GROUP" and {@link #getResourceType()}
+	 * is "Group". For all other GROUP export resource types, this will be null and
+	 * {@link #getPatientIds()} will be populated with the members of the group.
+	 */
+	public void setGroupId(String theGroupId) {
+		myGroupId = theGroupId;
 	}
 }

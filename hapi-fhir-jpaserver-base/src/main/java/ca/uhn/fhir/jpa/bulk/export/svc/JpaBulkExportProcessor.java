@@ -46,12 +46,14 @@ import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.TaskChunker;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -393,8 +395,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 *
 	 * @return a Set of Strings representing the resource IDs of all members of a group.
 	 */
-	private LinkedHashSet<JpaPid> getExpandedPatientList(
-			ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) throws IOException {
+	@Override
+	public LinkedHashSet<JpaPid> getExpandedPatientList(
+			ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) {
 		List<JpaPid> members = getMembersFromGroupWithFilter(theParameters, theConsiderDateRange);
 		ourLog.info(
 				"Group with ID [{}] has been expanded to {} members, member JpaIds: {}",
@@ -418,7 +421,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 * @return A list of strings representing the Patient IDs of the members (e.g. ["P1", "P2", "P3"]
 	 */
 	private List<JpaPid> getMembersFromGroupWithFilter(
-			ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) throws IOException {
+			ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) {
 		final List<SearchParameterMap> maps = makeSearchParameterMaps(theParameters, theConsiderDateRange);
 		final List<JpaPid> resPids = new ArrayList<>();
 		for (SearchParameterMap map : maps) {
@@ -437,6 +440,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				while (resultIterator.hasNext()) {
 					resPids.add(resultIterator.next());
 				}
+			} catch (IOException e) {
+				// FIXME: add code
+				throw new InternalErrorException(e);
 			}
 		}
 		return resPids;
@@ -449,8 +455,14 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		final List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(
 				def, theParameters, theConsiderDateRange);
 		maps.forEach(map -> {
-			map.add(PARAM_HAS, makeGroupMemberHasOrListParam(theParameters.getGroupId()));
 			final List<String> patientIds = theParameters.getPatientIds();
+			if (theParameters.getGroupId() != null) {
+				// Job V1/V2
+				map.add(PARAM_HAS, makeGroupMemberHasOrListParam(theParameters.getGroupId()));
+			} else {
+				// Job V3
+				Validate.isTrue(patientIds != null && !patientIds.isEmpty());
+			}
 			if (patientIds != null && !patientIds.isEmpty()) {
 				map.add(PARAM_ID, makeReferenceOrListParam(patientIds));
 			}

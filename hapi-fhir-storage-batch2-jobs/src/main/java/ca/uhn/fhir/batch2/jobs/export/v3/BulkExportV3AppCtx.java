@@ -79,8 +79,8 @@ public class BulkExportV3AppCtx {
 	}
 
 	@Bean("bulkExportV3GenerateWorkPackagesStep")
-	public GenerateWorkPackagesStep generateWorkPackagesStep() {
-		return new GenerateWorkPackagesStep();
+	public GenerateWorkPackagesV3Step generateWorkPackagesStep() {
+		return new GenerateWorkPackagesV3Step();
 	}
 
 	@Bean("bulkExportV3JobParametersValidator")

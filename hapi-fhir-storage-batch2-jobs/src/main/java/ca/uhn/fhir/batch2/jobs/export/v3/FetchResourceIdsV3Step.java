@@ -79,8 +79,13 @@ public class FetchResourceIdsV3Step
 		providerParams.setStartDate(params.getSince());
 		providerParams.setEndDate(params.getUntil());
 		providerParams.setExportStyle(params.getExportStyle());
-		providerParams.setGroupId(params.getGroupId());
-		providerParams.setPatientIds(params.getPatientIds());
+		if (params.getExportStyle() == BulkExportJobParameters.ExportStyle.GROUP) {
+			providerParams.setGroupId(data.getGroupId());
+			providerParams.setPatientIds(data.getPatientIds());
+		} else {
+			providerParams.setGroupId(params.getGroupId());
+			providerParams.setPatientIds(params.getPatientIds());
+		}
 		providerParams.setExpandMdm(params.isExpandMdm());
 		providerParams.setPartitionId(partitionId);
 		// This step doesn't use this param. Included here for logging purpose

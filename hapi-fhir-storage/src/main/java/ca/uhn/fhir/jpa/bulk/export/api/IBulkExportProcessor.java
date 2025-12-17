@@ -20,10 +20,12 @@
 package ca.uhn.fhir.jpa.bulk.export.api;
 
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 public interface IBulkExportProcessor<T extends IResourcePersistentId> {
@@ -40,4 +42,7 @@ public interface IBulkExportProcessor<T extends IResourcePersistentId> {
 	 * @param theResources - the list of resources to expand
 	 */
 	void expandMdmResources(List<IBaseResource> theResources);
+
+	LinkedHashSet<JpaPid> getExpandedPatientList(
+			ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange);
 }
