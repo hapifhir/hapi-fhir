@@ -19,12 +19,16 @@
  */
 package ca.uhn.fhir.batch2.api;
 
+import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 /**
  * Provides the list of {@link PartitionedUrl} that a job should run against.
@@ -48,5 +52,24 @@ public interface IJobPartitionProvider {
 	 */
 	default List<PartitionedUrl> getPartitionedUrls(RequestDetails theRequestDetails, List<String> theUrls) {
 		return theUrls.stream().map(url -> new PartitionedUrl().setUrl(url)).collect(Collectors.toList());
+	}
+
+	/**
+	 * Returns a collection of partitions representing "all partitions" for each shard
+	 */
+	List<RequestPartitionId> getAllPartitions();
+
+	/**
+	 * Converts a {@link PartitionedUrl} into a list of {@link ChunkRangeJson}s for the given
+	 * start and end date. By default, a single URL is turned into a single chunk range.
+	 */
+	default List<ChunkRangeJson> toChunkRanges(PartitionedUrl thePartitionedUrl, Date theStart, Date theEnd) {
+		RequestPartitionId requestPartitionId = thePartitionedUrl.getRequestPartitionId();
+		requestPartitionId = getIfNull(requestPartitionId, RequestPartitionId.allPartitions());
+
+		ChunkRangeJson chunkRangeJson = new ChunkRangeJson(theStart, theEnd)
+				.setUrl(thePartitionedUrl.getUrl())
+				.setPartitionId(requestPartitionId);
+		return List.of(chunkRangeJson);
 	}
 }

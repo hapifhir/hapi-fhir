@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.topic;
 
 import ca.uhn.fhir.cache.BaseResourceCacheSynchronizer;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.Logs;
@@ -50,7 +51,7 @@ public abstract class BaseSubscriptionTopicLoader extends BaseResourceCacheSynch
 			String theResourceName,
 			SubscriptionTopicRegistry theSubscriptionTopicRegistry,
 			ISearchParamRegistry theSearchParamRegistry) {
-		super(theResourceName);
+		super(theResourceName, RequestPartitionId.allPartitions());
 		myVersionCanonicalizer = theVersionCanonicalizer;
 		mySubscriptionTopicRegistry = theSubscriptionTopicRegistry;
 		mySearchParamRegistry = theSearchParamRegistry;

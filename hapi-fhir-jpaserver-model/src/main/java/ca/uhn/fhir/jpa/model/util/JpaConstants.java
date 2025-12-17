@@ -348,6 +348,7 @@ public class JpaConstants {
 	public static final String OPERATION_BULK_PATCH_PARAM_DRY_RUN_MODE_COLLECT_CHANGES = "collectChanges";
 	public static final String OPERATION_BULK_PATCH_PARAM_LIMIT_RESOURCE_COUNT = "limitResourceCount";
 	public static final String OPERATION_BULK_PATCH_PARAM_LIMIT_RESOURCE_VERSION_COUNT = "limitResourceVersionCount";
+	public static final String OPERATION_BULK_PATCH_PARAM_PARTITION_ID = "partitionId";
 	public static final String OPERATION_BULK_PATCH_STATUS = "$hapi.fhir.bulk-patch-status";
 	public static final String OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID = "_jobId";
 	public static final String OPERATION_BULK_PATCH_PARAM_URL = "url";

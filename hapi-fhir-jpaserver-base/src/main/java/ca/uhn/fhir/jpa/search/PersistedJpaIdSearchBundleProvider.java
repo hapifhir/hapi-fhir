@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.method.ResponsePage;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -50,7 +51,7 @@ public class PersistedJpaIdSearchBundleProvider implements IBundleProvider {
 
 	private final String myUuid;
 	private final @Nonnull String myResourceType;
-	private final @Nonnull List<String> myResourceIds;
+	private final @Nonnull List<IResourcePersistentId<?>> myResourceIds;
 	private final RequestPartitionId myPartitionId;
 	private final Date myRangeStartInclusive;
 	private final @Nonnull Date myRangeEndInclusive;
@@ -66,7 +67,7 @@ public class PersistedJpaIdSearchBundleProvider implements IBundleProvider {
 
 	public PersistedJpaIdSearchBundleProvider(
 			@Nonnull String theResourceType,
-			@Nonnull List<String> theResourceIds,
+			@Nonnull List<IResourcePersistentId<?>> theResourceIds,
 			RequestPartitionId thePartitionId,
 			@Nullable Date theRangeStartInclusive,
 			@Nonnull Date theRangeEndInclusive) {

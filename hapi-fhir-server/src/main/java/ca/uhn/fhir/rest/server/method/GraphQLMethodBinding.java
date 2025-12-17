@@ -174,11 +174,12 @@ public class GraphQLMethodBinding extends OperationMethodBinding {
 		}
 
 		// Interceptor call: SERVER_OUTGOING_RESPONSE
+		ResponseDetails responseDetails = new ResponseDetails(statusCode, null);
 		params = new HookParams()
 				.add(RequestDetails.class, theRequest)
 				.addIfMatchesType(ServletRequestDetails.class, theRequest)
 				.add(IBaseResource.class, null)
-				.add(ResponseDetails.class, new ResponseDetails())
+				.add(ResponseDetails.class, responseDetails)
 				.add(HttpServletRequest.class, servletRequest)
 				.add(HttpServletResponse.class, servletResponse);
 		if (!theRequest.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_RESPONSE, params)) {
@@ -186,7 +187,9 @@ public class GraphQLMethodBinding extends OperationMethodBinding {
 		}
 
 		// Write the response
-		Writer writer = theRequest.getResponse().getResponseWriter(statusCode, contentType, charset, respondGzip);
+		Writer writer = theRequest
+				.getResponse()
+				.getResponseWriter(responseDetails.getResponseCode(), contentType, charset, respondGzip);
 		writer.write(responseString);
 		writer.close();
 

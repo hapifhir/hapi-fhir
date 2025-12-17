@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -31,6 +32,7 @@ public class ResourceChangeListenerCacheFactory {
 
 	public ResourceChangeListenerCache newResourceChangeListenerCache(
 			String theResourceName,
+			RequestPartitionId theRequestPartitionId,
 			SearchParameterMap theMap,
 			IResourceChangeListener theResourceChangeListener,
 			long theRemoteRefreshIntervalMs) {
@@ -38,6 +40,7 @@ public class ResourceChangeListenerCacheFactory {
 				ResourceChangeListenerCache.class,
 				theResourceName,
 				theResourceChangeListener,
+				theRequestPartitionId,
 				theMap,
 				theRemoteRefreshIntervalMs);
 	}

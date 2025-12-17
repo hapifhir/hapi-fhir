@@ -20,12 +20,12 @@
 package ca.uhn.fhir.jpa.ips.api;
 
 import jakarta.annotation.Nullable;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Call {@link #newBuilder()} to create a new instance of this class.
@@ -89,9 +89,8 @@ public class Section {
 
 	@Override
 	public boolean equals(Object theO) {
-		if (theO instanceof Section) {
-			Section o = (Section) theO;
-			return StringUtils.equals(myProfile, o.myProfile);
+		if (theO instanceof Section o) {
+			return Objects.equals(myProfile, o.myProfile);
 		}
 		return false;
 	}

@@ -138,7 +138,7 @@ public class PartitionSettings implements IDefaultPartitionSettings {
 	}
 
 	/**
-	 * Should resources references be permitted to cross partition boundaries. Default is {@link CrossPartitionReferenceMode#NOT_ALLOWED}.
+	 * Should resource references be permitted to cross partition boundaries? Default is {@link CrossPartitionReferenceMode#NOT_ALLOWED}.
 	 *
 	 * @since 5.0.0
 	 */

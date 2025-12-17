@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 7324
+title: "Previously, the AuthorizationInterceptor did not properly authorize searches and reads
+   for COLLECTION type Bundles when users had appropriate permissions. This has been fixed by
+   adding BundleTypeEnum.COLLECTION to the set of standalone bundle resource types that are
+   treated similarly to DOCUMENT and MESSAGE bundles for authorization purposes."

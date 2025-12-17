@@ -32,6 +32,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,8 +41,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION;
+import static ca.uhn.fhir.jpa.migrate.DriverTypeEnum.MSSQL_2012;
 import static ca.uhn.fhir.jpa.migrate.SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -83,6 +87,8 @@ public class HapiSchemaMigrationTest {
 
 	private DriverTypeEnum myCurrentDriverType;
 
+	private HapiFhirJpaMigrationTasks myHapiFhirJpaMigrationTasks = new HapiFhirJpaMigrationTasks(Collections.emptySet());
+
 	@AfterEach
 	public void afterEach() {
 		if (myCurrentDriverType != null) {
@@ -114,14 +120,10 @@ public class HapiSchemaMigrationTest {
 		myEmbeddedServersExtension.initializePersistenceSchema(theDriverType);
 		myEmbeddedServersExtension.insertPersistenceTestData(theDriverType, FIRST_TESTED_VERSION);
 
-		JpaEmbeddedDatabase database = myEmbeddedServersExtension.getEmbeddedDatabase(theDriverType);
-		DataSource dataSource = database.getDataSource();
-		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(dataSource, theDriverType, HAPI_FHIR_MIGRATION_TABLENAME);
-		HapiMigrationStorageSvc hapiMigrationStorageSvc = new HapiMigrationStorageSvc(hapiMigrationDao);
-
 		for (VersionEnum aVersion : VersionEnum.values()) {
 			ourLog.info("Applying migrations for {}", aVersion);
-			migrate(theDriverType, dataSource, hapiMigrationStorageSvc, aVersion);
+			MigrationTaskList migrationTasks = myHapiFhirJpaMigrationTasks.getAllTasks(aVersion);
+			migrate(theDriverType, migrationTasks);
 
 			if (aVersion.isNewerThan(FIRST_TESTED_VERSION)) {
 				myEmbeddedServersExtension.maybeInsertPersistenceTestData(theDriverType, aVersion);
@@ -135,16 +137,79 @@ public class HapiSchemaMigrationTest {
 			// 3 Oracle doesn't run on everyone's machine (and is difficult to do so)
 			// 4 Postgres is generally the fastest/least terrible relational db supported
 			new HapiForeignKeyIndexHelper()
-				.ensureAllForeignKeysAreIndexed(dataSource);
+				.ensureAllForeignKeysAreIndexed(getDataSource(theDriverType));
 		}
 
-		verifyForcedIdMigration(dataSource);
+		verifyForcedIdMigration(theDriverType);
 
-		verifyHfjResSearchUrlMigration(database, theDriverType);
+		verifyHfjResSearchUrlMigration(theDriverType);
 
-		verifyTrm_Concept_Desig(database, theDriverType);
+		verifyTrm_Concept_Design(theDriverType);
 
-		verifyHfjResourceFhirIdCollation(database, theDriverType);
+		verifyHfjResourceFhirIdCollation(theDriverType);
+	}
+
+	@Test
+	public void testCollationFixOnSchemaBasedInitialisation() throws SQLException {
+		HapiSystemProperties.disableUnitTestMode();
+		String testDataSeedFile = "migration/data/MSSQL_2012_collation_fix.sql";
+		myCurrentDriverType = MSSQL_2012;
+		VersionEnum versionWithMssqlCollationFixOnSchemaInit = VersionEnum.V8_8_0;
+
+		// given
+		myEmbeddedServersExtension.initializePersistenceSchema(MSSQL_2012, versionWithMssqlCollationFixOnSchemaInit);
+
+		MigrationTaskList migrationTasks = getRunEvenWhenSchemaInitializedTasksForVersion(versionWithMssqlCollationFixOnSchemaInit);
+
+		// when
+		migrate(MSSQL_2012, migrationTasks);
+
+		//then
+		initializeTestData(MSSQL_2012, testDataSeedFile);
+		verifyHfjResourceFhirIdCollation(MSSQL_2012);
+	}
+
+	@Test
+	public void testCollationFixForNewInstallPostRelease740() throws SQLException {
+		HapiSystemProperties.disableUnitTestMode();
+		String testDataSeedFile = "migration/data/MSSQL_2012_collation_fix.sql";
+		myCurrentDriverType = MSSQL_2012;
+		VersionEnum startVersion = VersionEnum.V7_6_0;
+
+		// given
+		myEmbeddedServersExtension.initializePersistenceSchema(MSSQL_2012, startVersion);
+
+		List<VersionEnum> allVersionsToMigrate = getAllVersionsMatching(v -> v.isEqualOrNewerThan(startVersion));
+
+		// when
+		for (VersionEnum aVersion : allVersionsToMigrate) {
+			ourLog.info("Applying migrations for {}", aVersion);
+			MigrationTaskList migrationTasks = myHapiFhirJpaMigrationTasks.getAllTasks(aVersion);
+			migrate(MSSQL_2012, migrationTasks);
+		}
+
+		initializeTestData(MSSQL_2012, testDataSeedFile);
+
+		//then
+		verifyHfjResourceFhirIdCollation(MSSQL_2012);
+	}
+
+	private List<VersionEnum> getAllVersionsMatching(Predicate<VersionEnum> thePredicate) {
+		return Arrays.stream(VersionEnum.values())
+			.filter(thePredicate)
+			.collect(Collectors.toList());
+	}
+
+	private void initializeTestData(DriverTypeEnum theDriverType, String theFilePath){
+		JpaEmbeddedDatabase jpaEmbeddedDatabase = myEmbeddedServersExtension.getEmbeddedDatabase(theDriverType);
+		DatabaseInitializerHelper databaseInitializerHelper = myEmbeddedServersExtension.getDatabaseInitializerHelper();
+		databaseInitializerHelper.insertPersistenceTestData(jpaEmbeddedDatabase, theFilePath);
+	}
+
+	private HapiMigrationStorageSvc createHapiMigrationStorageSvc(DriverTypeEnum theDriverType) {
+		DataSource dataSource = getDataSource(theDriverType);
+		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(dataSource, theDriverType, HAPI_FHIR_MIGRATION_TABLENAME);
+		return new HapiMigrationStorageSvc(hapiMigrationDao);
 	}
 
 	/**
@@ -167,9 +232,10 @@ public class HapiSchemaMigrationTest {
 	 *     <li>PARTITION_DATE: null</li>
 	 * </ul>
 	 */
-	private void verifyHfjResSearchUrlMigration(JpaEmbeddedDatabase theDatabase, DriverTypeEnum theDriverType) throws SQLException {
-		final List<Map<String, Object>> allCount = theDatabase.query(String.format("SELECT count(*) FROM %s", TABLE_HFJ_RES_SEARCH_URL));
-		final List<Map<String, Object>> minusOnePartitionCount = theDatabase.query(String.format("SELECT count(*) FROM %s WHERE %s = -1", TABLE_HFJ_RES_SEARCH_URL, COLUMN_PARTITION_ID));
+	private void verifyHfjResSearchUrlMigration(DriverTypeEnum theDriverType) throws SQLException {
+		JpaEmbeddedDatabase database = myEmbeddedServersExtension.getEmbeddedDatabase(theDriverType);
+		final List<Map<String, Object>> allCount = database.query(String.format("SELECT count(*) FROM %s", TABLE_HFJ_RES_SEARCH_URL));
+		final List<Map<String, Object>> minusOnePartitionCount = database.query(String.format("SELECT count(*) FROM %s WHERE %s = -1", TABLE_HFJ_RES_SEARCH_URL, COLUMN_PARTITION_ID));
 
 		assertThat(minusOnePartitionCount).hasSize(1);
 		final Collection<Object> queryResultValues = minusOnePartitionCount.get(0).values();
@@ -185,7 +251,7 @@ public class HapiSchemaMigrationTest {
 			assertThat(allCountNumber.intValue()).isEqualTo(2);
 		}
 
-		try (final Connection connection = theDatabase.getDataSource().getConnection()) {
+		try (final Connection connection = database.getDataSource().getConnection()) {
 			final DatabaseMetaData tableMetaData = connection.getMetaData();
 
 			final List<Map<String, String>> actualColumnResults = new ArrayList<>();
@@ -230,10 +296,11 @@ public class HapiSchemaMigrationTest {
 		}
 	}
 
-	private void verifyTrm_Concept_Desig(JpaEmbeddedDatabase theDatabase, DriverTypeEnum theDriverType) throws SQLException {
-		final List<Map<String, Object>> allCount = theDatabase.query(String.format("SELECT count(*) FROM %s", TABLE_TRM_CONCEPT_DESIG));
-		final List<Map<String, Object>> nonNullValCount = theDatabase.query(String.format("SELECT count(*) FROM %s WHERE %s IS NOT NULL", TABLE_TRM_CONCEPT_DESIG, COLUMN_VAL));
-		final List<Map<String, Object>> nullValVcCount = theDatabase.query(String.format("SELECT count(*) FROM %s WHERE %s IS NULL", TABLE_TRM_CONCEPT_DESIG, COLUMN_VAL_VC));
+	private void verifyTrm_Concept_Design(DriverTypeEnum theDriverType) throws SQLException {
+		JpaEmbeddedDatabase database = myEmbeddedServersExtension.getEmbeddedDatabase(theDriverType);
+		final List<Map<String, Object>> allCount = database.query(String.format("SELECT count(*) FROM %s", TABLE_TRM_CONCEPT_DESIG));
+		final List<Map<String, Object>> nonNullValCount = database.query(String.format("SELECT count(*) FROM %s WHERE %s IS NOT NULL", TABLE_TRM_CONCEPT_DESIG, COLUMN_VAL));
+		final List<Map<String, Object>> nullValVcCount = database.query(String.format("SELECT count(*) FROM %s WHERE %s IS NULL", TABLE_TRM_CONCEPT_DESIG, COLUMN_VAL_VC));
 
 		assertThat(nonNullValCount).hasSize(1);
 		final Collection<Object> queryResultValuesVal = nonNullValCount.get(0).values();
@@ -258,7 +325,7 @@ public class HapiSchemaMigrationTest {
 			assertThat(allCountNumber.intValue()).isEqualTo(3);
 		}
 
-		try (final Connection connection = theDatabase.getDataSource().getConnection()) {
+		try (final Connection connection = database.getDataSource().getConnection()) {
 			final DatabaseMetaData tableMetaData = connection.getMetaData();
 
 			final List<Map<String, String>> actualColumnResults = new ArrayList<>();
@@ -325,24 +392,32 @@ public class HapiSchemaMigrationTest {
 			.orElse(NULL_PLACEHOLDER));
 	}
 
-	private static void migrate(DriverTypeEnum theDriverType, DataSource dataSource, HapiMigrationStorageSvc hapiMigrationStorageSvc, VersionEnum to) {
-		MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getAllTasks(to);
-		SchemaMigrator schemaMigrator = new SchemaMigrator(TEST_SCHEMA_NAME, HAPI_FHIR_MIGRATION_TABLENAME, dataSource, new Properties(), migrationTasks, hapiMigrationStorageSvc);
+	private void migrate(DriverTypeEnum theDriverType, MigrationTaskList theMigrationTasks) {
+		HapiMigrationStorageSvc hapiMigrationStorageSvc = createHapiMigrationStorageSvc(theDriverType);
+		DataSource dataSource = getDataSource(theDriverType);
+		SchemaMigrator schemaMigrator = new SchemaMigrator(TEST_SCHEMA_NAME, HAPI_FHIR_MIGRATION_TABLENAME, dataSource, new Properties(), theMigrationTasks, hapiMigrationStorageSvc);
 		schemaMigrator.setDriverType(theDriverType);
 		schemaMigrator.createMigrationTableIfRequired();
 		schemaMigrator.migrate();
 	}
 
+	private MigrationTaskList getRunEvenWhenSchemaInitializedTasksForVersion(VersionEnum theVersion) {
+		MigrationTaskList tasks = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getAllTasks(theVersion);
+		tasks.removeIf(theBaseTask -> !theBaseTask.isRunDuringSchemaInitialization());
+		return tasks;
+	}
+
 	/**
 	 * For bug <a href="https://github.com/hapifhir/hapi-fhir/issues/5546">https://github.com/hapifhir/hapi-fhir/issues/5546</a>
 	 */
-	private void verifyForcedIdMigration(DataSource theDataSource) throws SQLException {
-		JdbcTemplate jdbcTemplate = new JdbcTemplate(theDataSource);
+	private void verifyForcedIdMigration(DriverTypeEnum theDriverType) {
+		DataSource dataSource = getDataSource(theDriverType);
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 		@SuppressWarnings("DataFlowIssue")
 		int nullCount = jdbcTemplate.queryForObject("select count(1) from hfj_resource where fhir_id is null", Integer.class);
-		assertThat(nullCount).as("no fhir_id should be null").isEqualTo(0);
+		assertThat(nullCount).as("no fhir_id should be null").isZero();
 		int trailingSpaceCount = jdbcTemplate.queryForObject("select count(1) from hfj_resource where fhir_id <> trim(fhir_id)", Integer.class);
-		assertThat(trailingSpaceCount).as("no fhir_id should contain a space").isEqualTo(0);
+		assertThat(trailingSpaceCount).as("no fhir_id should contain a space").isZero();
 	}
 
 
@@ -367,9 +442,17 @@ public class HapiSchemaMigrationTest {
 
 	}
 
-	private void verifyHfjResourceFhirIdCollation(JpaEmbeddedDatabase database, DriverTypeEnum theDriverType) throws SQLException {
-		if (DriverTypeEnum.MSSQL_2012 == theDriverType) { // Other databases are unaffected by this migration and are irrelevant
-			try (final Connection connection = database.getDataSource().getConnection()) {
+	private DataSource getDataSource(DriverTypeEnum theDriverType){
+		JpaEmbeddedDatabase database = myEmbeddedServersExtension.getEmbeddedDatabase(theDriverType);
+		return database.getDataSource();
+	}
+
+	private void verifyHfjResourceFhirIdCollation(DriverTypeEnum theDriverType) throws SQLException {
+		if (MSSQL_2012 == theDriverType) { // Other databases are unaffected by this migration and are irrelevant
+
+			DataSource dataSource = getDataSource(theDriverType);
+
+			try (final Connection connection = dataSource.getConnection()) {
 				@Language("SQL")
 				final String databaseCollationSql = """
 					SELECT collation_name
@@ -378,7 +461,7 @@ public class HapiSchemaMigrationTest {
 				""";
 
 				final Map<String, Object> databaseCollationRow = querySingleRow(connection, databaseCollationSql);
-				assertThat(databaseCollationRow.get("collation_name")).isEqualTo(COLLATION_CASE_INSENSITIVE);
+				assertThat(databaseCollationRow).containsEntry("collation_name", COLLATION_CASE_INSENSITIVE);
 
 				@Language("SQL")
 				final String tableColumnSql = """
@@ -394,19 +477,19 @@ public class HapiSchemaMigrationTest {
 				""";
 
 				final Map<String, Object> tableColumnCollationRow = querySingleRow(connection, tableColumnSql);
-				assertThat(tableColumnCollationRow.get("collation_name")).isEqualTo(COLLATION_CASE_SENSITIVE);
+				assertThat(tableColumnCollationRow).containsEntry("collation_name",COLLATION_CASE_SENSITIVE);
 
 				// We have not changed the database collation, so we can reference the table and column names with the wrong
 				// case and the query will work
 				@Language("SQL")
 				final String fhirIdSql = """
 					SELECT fhir_id 
-					FROM hfj_resource 
-					WHERE fhir_id = '2029'
+					FROM hFj_ReSoUrCe  -- db must be case insensitive for the table name to be recognized 
+					WHERE fhir_ID = 'PatientId22'
 				""";
 
 				final Map<String, Object> fhirIdRow = querySingleRow(connection, fhirIdSql);
-				assertThat(fhirIdRow.get("fhir_id")).isEqualTo("2029");
+				assertThat(fhirIdRow).containsEntry("fhir_id", "PatientId22");
 			}
 		}
 	}

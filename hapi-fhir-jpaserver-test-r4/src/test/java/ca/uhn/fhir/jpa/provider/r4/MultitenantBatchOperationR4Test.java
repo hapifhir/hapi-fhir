@@ -11,17 +11,17 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.reindex.ReindexTestHelper;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.DEFAULT_PARTITION_NAME;
+import static ca.uhn.fhir.jpa.test.Batch2JobHelper.getJobIdFromPollingLocation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -149,20 +150,19 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 
 		// reindex all of Tenant A
 		myTenantClientInterceptor.setTenantId(TENANT_A);
-		Parameters response = myClient
+		MethodOutcome response = myClient
 			.operation()
 			.onServer()
 			.named(ProviderConstants.OPERATION_REINDEX)
 			.withParameters(input)
+			.returnMethodOutcome()
 			.execute();
-		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
+		String jobId = getJobIdFromPollingLocation(response);
 
-		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
+		myBatch2JobHelper.awaitJobCompletion(jobId);
 
-		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation", null).getSearchParamNames());
+		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.ALL).getSearchParamNames());
 		logAllTokenIndexes();
-
 
 		// validate
 		runInTransaction(() -> {
@@ -191,22 +191,22 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 			.onServer()
 			.named(ProviderConstants.OPERATION_REINDEX)
 			.withParameters(input)
+			.returnMethodOutcome()
 			.execute();
-		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
+		jobId = getJobIdFromPollingLocation(response);
 
-		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
+		myBatch2JobHelper.awaitJobCompletion(jobId);
 
-		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation", null).getSearchParamNames());
+		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.ALL).getSearchParamNames());
 		logAllTokenIndexes();
 
 		runInTransaction(() -> {
-			long indexedSps = myResourceIndexedSearchParamTokenDao
+			List<ResourceIndexedSearchParamToken> indexedSps = myResourceIndexedSearchParamTokenDao
 				.findAll()
 				.stream()
 				.filter(t -> t.getParamName().equals("alleleName"))
-				.count();
-			assertEquals(2, indexedSps, () -> "Resources:\n * " + myResourceTableDao.findAll().stream().map(ResourceTable::toString).collect(Collectors.joining("\n * ")));
+				.toList();
+			assertEquals(2, indexedSps.size(), () -> "Resources:\n * " + myResourceTableDao.findAll().stream().map(ResourceTable::toString).collect(Collectors.joining("\n * ")));
 		});
 
 		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
@@ -225,7 +225,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		doCreateResource(reindexTestHelper.buildObservationWithAlleleExtension(Observation.ObservationStatus.CANCELLED));
 
 		reindexTestHelper.createAlleleSearchParameter();
-		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation", null).getSearchParamNames());
+		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.ALL).getSearchParamNames());
 
 		// The searchparam value is on the observation, but it hasn't been indexed yet
 		myTenantClientInterceptor.setTenantId(TENANT_A);
@@ -241,16 +241,16 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 
 		// Reindex Tenant A by query url 
 		myTenantClientInterceptor.setTenantId(TENANT_A);
-		Parameters response = myClient
+		MethodOutcome response = myClient
 			.operation()
 			.onServer()
 			.named(ProviderConstants.OPERATION_REINDEX)
 			.withParameters(input)
+			.returnMethodOutcome()
 			.execute();
-		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
+		String jobId = getJobIdFromPollingLocation(response);
 
-		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
+		myBatch2JobHelper.awaitJobCompletion(jobId);
 
 		// validate
 		logAllTokenIndexes();

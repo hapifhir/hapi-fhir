@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.jobs.step;
 
 import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
@@ -42,6 +43,12 @@ public class GenerateRangeChunksStep<PT extends PartitionedUrlJobParameters>
 		implements IFirstJobStepWorker<PT, ChunkRangeJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
+	private final IJobPartitionProvider myJobPartitionProvider;
+
+	public GenerateRangeChunksStep(IJobPartitionProvider theJobPartitionProvider) {
+		myJobPartitionProvider = theJobPartitionProvider;
+	}
+
 	@Nonnull
 	@Override
 	public RunOutcome run(
@@ -56,12 +63,13 @@ public class GenerateRangeChunksStep<PT extends PartitionedUrlJobParameters>
 		List<PartitionedUrl> partitionedUrls = params.getPartitionedUrls();
 
 		if (!partitionedUrls.isEmpty()) {
-			partitionedUrls.forEach(partitionedUrl -> {
-				ChunkRangeJson chunkRangeJson = new ChunkRangeJson(start, end)
-						.setUrl(partitionedUrl.getUrl())
-						.setPartitionId(partitionedUrl.getRequestPartitionId());
-				sendChunk(chunkRangeJson, theDataSink);
-			});
+			for (PartitionedUrl partitionedUrl : partitionedUrls) {
+
+				List<ChunkRangeJson> chunkRanges = myJobPartitionProvider.toChunkRanges(partitionedUrl, start, end);
+				for (ChunkRangeJson chunkRangeJson : chunkRanges) {
+					sendChunk(chunkRangeJson, theDataSink);
+				}
+			}
 			return RunOutcome.SUCCESS;
 		}
 

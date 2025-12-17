@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.api.dao;
 
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +30,7 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 public class ReindexOutcome {
 
 	private List<String> myWarnings;
+	private IIdType myResourceId;
 
 	/**
 	 * True if there is additional (async) work to wait on.
@@ -51,5 +54,13 @@ public class ReindexOutcome {
 
 	public void setHasPendingWork(boolean theHasPendingWork) {
 		myHasPendingWork = theHasPendingWork;
+	}
+
+	public void setResourceId(IIdType theResourceId) {
+		myResourceId = theResourceId;
+	}
+
+	public IIdType getResourceId() {
+		return myResourceId;
 	}
 }

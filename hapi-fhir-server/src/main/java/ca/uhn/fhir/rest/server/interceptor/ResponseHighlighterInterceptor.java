@@ -375,11 +375,9 @@ public class ResponseHighlighterInterceptor {
 			return true;
 		}
 
-		ResponseDetails responseDetails = new ResponseDetails();
-		responseDetails.setResponseResource(oo);
-		responseDetails.setResponseCode(theException.getStatusCode());
+		ResponseDetails responseDetails = BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(
+				theRequestDetails, oo, theException);
 
-		BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(theRequestDetails, oo);
 		streamResponse(
 				theRequestDetails,
 				theServletResponse,

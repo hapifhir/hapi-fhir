@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
@@ -505,10 +506,13 @@ public class SearchParamRegistryImpl
 	 */
 	@PostConstruct
 	public void registerListener() {
+		RequestPartitionId requestPartitionId = RequestPartitionId.defaultPartition(myPartitionSettings);
+
 		SearchParameterMap spMap = SearchParameterMap.newSynchronous();
 		spMap.setLoadSynchronousUpTo(MAX_MANAGED_PARAM_COUNT);
+
 		myResourceChangeListenerCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
-				"SearchParameter", spMap, this, REFRESH_INTERVAL);
+				"SearchParameter", requestPartitionId, spMap, this, REFRESH_INTERVAL);
 	}
 
 	@PreDestroy
