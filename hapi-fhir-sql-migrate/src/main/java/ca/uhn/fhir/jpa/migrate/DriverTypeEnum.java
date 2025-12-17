@@ -32,11 +32,11 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.sql.DataSource;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Objects;
+import javax.sql.DataSource;
 
 public enum DriverTypeEnum {
 	H2_EMBEDDED("org.h2.Driver", false),
@@ -92,7 +92,7 @@ public enum DriverTypeEnum {
 			case COCKROACHDB_21_1 -> "cockroachdb.sql";
 			case SNOWFLAKE -> "snowflake.sql";
 			default -> throw new ConfigurationException(
-				Msg.code(45) + "No schema initialization script available for driver " + this);
+					Msg.code(45) + "No schema initialization script available for driver " + this);
 		};
 	}
 
