@@ -805,46 +805,54 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	@Test
 	public void testGroupBulkExport_MultipleQualifiedSubResourcesOfUnqualifiedPatientShouldShowUp() throws InterruptedException {
 
-		// Patient with lastUpdated before _since
+		// Resources with lastUpdated before _since
 		Patient patient = new Patient();
 		patient.setId("P1");
 		myClient.update().resource(patient).execute();
+
+		Encounter encounter1 = new Encounter();
+		encounter1.setId("E1");
+		encounter1.setSubject(new Reference("Patient/P1"));
+		myClient.update().resource(encounter1).execute();
+
+		// Observation references to Patient/P1
+		Observation observation1 = new Observation();
+		observation1.setId("O1");
+		observation1.setSubject(new Reference("Patient/P1"));
+		observation1.setEncounter(new Reference("Encounter/E1"));
+		myClient.update().resource(observation1).execute();
+
+		Encounter encounter2 = new Encounter();
+		encounter2.setId("E2");
+		encounter2.setSubject(new Reference("Patient/P1"));
+		myClient.update().resource(encounter2).execute();
 
 		// Sleep for 1 sec
 		ourLog.info("Patient lastUpdated: " + InstantType.withCurrentTime().getValueAsString());
 		Thread.sleep(1000);
 
+		// ---------------------------------------------------------------------------
+
 		// LastUpdated since now
 		Date since = InstantType.now().getValue();
 		ourLog.info(since.toString());
 
-		// Group references to Patient/A
+		// Group references to Patient/P1
 		Group group = new Group();
 		group.setId("G1");
 		group.addMember().getEntity().setReference("Patient/P1");
 		myClient.update().resource(group).execute();
 
-		// Observation references to Patient/A
-		Observation observation = new Observation();
-		observation.setId("O1");
-		observation.setSubject(new Reference("Patient/P1"));
-		myClient.update().resource(observation).execute();
-
-		// Observation references to Patient/A
+		// Observation references to Patient/P1
 		Observation observation2 = new Observation();
 		observation2.setId("O2");
 		observation2.setSubject(new Reference("Patient/P1"));
+		observation2.setEncounter(new Reference("Encounter/E2"));
 		myClient.update().resource(observation2).execute();
-
-		// Observation references to Patient/A
-		Observation observation3 = new Observation();
-		observation3.setId("O3");
-		observation3.setSubject(new Reference("Patient/P1"));
-		myClient.update().resource(observation3).execute();
 
 		// Set the export options
 		BulkExportJobParameters options = new BulkExportJobParameters();
-		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "Group"));
+		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "Group", "Encounter"));
 		options.setGroupId("Group/G1");
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
@@ -852,7 +860,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 		// Should get the sub-resource (Observations) even the patient hasn't been updated after the _since param
-		verifyBulkExportResults(options, List.of("Observation/O1", "Group/G1", "Observation/O2", "Observation/O3"), List.of("Patient/P1"));
+		verifyBulkExportResults(options, List.of("Group/G1", "Observation/O2", "Encounter/E2"), List.of("Patient/P1", "Encounter/E1", "Observation/O1"));
 	}
 
 	@Test
