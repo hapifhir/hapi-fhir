@@ -1,6 +1,6 @@
 ---
 type: fix
 issue: 7338
-title: "A regression in HAPI FHIR 8.2 meant that setting FhirInstanceValidator.setErrorForUnknownProfiles(false) had no effect.
+title: "A regression in HAPI FHIR 8.2 meant that setting FhirInstanceValidator.setErrorForUnknownProfiles(false) had no effect. 
         This has been fixed while ensuring $validate always returns an error if the profile specified in the 'profile' parameter is unknown, as required by the FHIR specification. 
         Fix submitted by Tue Toft Nørgård (@ttnTrifork)"
