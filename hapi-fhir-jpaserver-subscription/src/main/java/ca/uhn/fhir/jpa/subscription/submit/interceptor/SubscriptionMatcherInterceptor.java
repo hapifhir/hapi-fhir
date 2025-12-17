@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,8 +86,11 @@ public class SubscriptionMatcherInterceptor {
 	}
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED)
-	public void resourceDeleted(IBaseResource theResource, RequestDetails theRequest) {
+	public void resourceDeleted(IBaseResource theResource, RequestDetails theRequest, IIdType previousId) {
 
+		// When matching for deleted resources, we want to match for the version before it was deleted because
+		// the resource version record for the deleted resource doesn't contain a body.
+		theResource.setId(previousId);
 		processResourceModifiedEvent(theResource, ResourceModifiedMessage.OperationTypeEnum.DELETE, theRequest);
 	}
 

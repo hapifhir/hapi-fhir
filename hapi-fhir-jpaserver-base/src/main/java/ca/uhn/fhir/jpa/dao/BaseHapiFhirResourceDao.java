@@ -140,6 +140,7 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -865,11 +866,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		preDelete(resourceToDelete, entity, theRequestDetails);
 
 		ResourceTable savedEntity = updateEntityForDelete(theRequestDetails, theTransactionDetails, entity);
+		IIdType idBeforeDelete = new IdDt(resourceToDelete.getIdElement());
 		resourceToDelete.setId(entity.getIdDt());
 
 		// Notify JPA interceptors
 		HookParams hookParams = new HookParams()
 				.add(IBaseResource.class, resourceToDelete)
+				.add(IIdType.class, idBeforeDelete)
 				.add(RequestDetails.class, theRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 				.add(TransactionDetails.class, theTransactionDetails)
@@ -1053,6 +1056,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			preDelete(resourceToDelete, entity, theRequestDetails);
 
 			updateEntityForDelete(theRequestDetails, transactionDetails, entity);
+			IdType oldVersionId = new IdType(entity.getIdDt().getValue());
 			resourceToDelete.setId(entity.getIdDt());
 
 			// Notify JPA interceptors
@@ -1061,6 +1065,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				public void beforeCommit(boolean readOnly) {
 					HookParams hookParams = new HookParams()
 							.add(IBaseResource.class, resourceToDelete)
+							.add(IIdType.class, oldVersionId)
 							.add(RequestDetails.class, theRequestDetails)
 							.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 							.add(TransactionDetails.class, transactionDetails)
@@ -2010,7 +2015,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 										theId.getVersionIdPart(),
 										theId.toUnqualifiedVersionless()));
 			}
-			if (entity.getVersion() != theId.getVersionIdPartAsLong()) {
+			if (entity != null && entity.getVersion() != theId.getVersionIdPartAsLong()) {
 				entity = null;
 			}
 		}
