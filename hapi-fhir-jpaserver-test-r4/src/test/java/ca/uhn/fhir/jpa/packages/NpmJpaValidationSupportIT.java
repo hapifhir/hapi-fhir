@@ -232,17 +232,13 @@ public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 			staticMock.when(NpmJpaValidationSupport::batchSize).thenReturn(2);
 
 			if (theRequestSpecificTypes) {
-				Stream<SearchParameter> sps = myValidationSupport.fetchResources(SearchParameter.class, spUrl);
-				assertNotNull(sps);
-				List<SearchParameter> spList = sps.toList();
+				List<SearchParameter> spList = myValidationSupport.fetchResources(SearchParameter.class, spUrl);
 				assertEquals(versionCount, spList.size());
 				spList.forEach(sp -> {
 					assertEquals(spUrl, sp.getUrl());
 				});
 			} else {
-				Stream<IBaseResource> resourceStream = myValidationSupport.fetchResources(null, qUrl);
-				assertNotNull(resourceStream);
-				List<IBaseResource> resources = resourceStream.toList();
+				List<IBaseResource> resources = myValidationSupport.fetchResources(null, qUrl);
 				assertEquals(versionCount, resources.size());
 				FhirTerser terser = myFhirContext.newTerser();
 				resources.forEach(r -> {
@@ -287,10 +283,9 @@ public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 		PackageInstallationSpec installationSpec = createAndInstallPackageSpec(igCreator, PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
 
 		// test
-		Stream<Questionnaire> questionnaireStream = myValidationSupport.fetchAllResourcesOfType(Questionnaire.class);
+		List<Questionnaire> questionnaireList = myValidationSupport.fetchAllResourcesOfType(Questionnaire.class);
 
 		// verify
-		List<Questionnaire> questionnaireList = questionnaireStream.toList();
 		assertEquals(resourceCount, questionnaireList.size());
 	}
 

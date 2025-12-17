@@ -29,6 +29,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -83,7 +84,7 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 	}
 
 	@Override
-	public <T extends IBaseResource> Stream<T> fetchResources(Class<T> theClazz, String theUrl) {
+	public <T extends IBaseResource> List<T> fetchResources(Class<T> theClazz, String theUrl) {
 		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
 		PagingIterator<T> pagingIterator = new PagingIterator<>(
 				batchSize(),
@@ -99,17 +100,19 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 								})
 								.forEach(r -> theConsumer.accept((T) r)));
 
-		return StreamSupport.stream(
-				Spliterators.spliteratorUnknownSize(pagingIterator, Spliterator.ORDERED), false); // sequential
+		List<T> retval = new ArrayList<>();
+		while (pagingIterator.hasNext()) {
+			retval.add(pagingIterator.next());
+		}
+		return retval;
 	}
 
 	@Override
-	public <T extends IBaseResource> Stream<T> fetchAllResourcesOfType(@Nonnull Class<T> theClazz) {
+	public <T extends IBaseResource> List<T> fetchAllResourcesOfType(@Nonnull Class<T> theClazz) {
 		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
 		return myHapiPackageCacheManager.loadPackageAssetsByType(fhirVersion, theClazz.getSimpleName()).stream()
 				.map(r -> (T) r)
-				.toList()
-				.stream();
+				.toList();
 	}
 
 	@Nullable
