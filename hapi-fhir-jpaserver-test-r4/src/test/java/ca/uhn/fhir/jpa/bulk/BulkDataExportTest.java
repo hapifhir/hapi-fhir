@@ -110,12 +110,9 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
 	@Autowired
-	private IBatch2WorkChunkRepository myWorkChunkRepository;
-	@Autowired
 	private IJobPersistence myJobPersistence;
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-	private JpaJobPersistenceImpl myJobPersistenceImpl;
 
 	@AfterEach
 	void afterEach() {
@@ -129,7 +126,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	@BeforeEach
 	public void beforeEach() {
 		myStorageSettings.setJobFastTrackingEnabled(false);
-		myJobPersistenceImpl = ProxyUtil.getSingletonTarget(myJobPersistence, JpaJobPersistenceImpl.class);
+		JpaJobPersistenceImpl jobPersistenceImpl = ProxyUtil.getSingletonTarget(myJobPersistence, JpaJobPersistenceImpl.class);
 	}
 
 	@Spy
@@ -1404,8 +1401,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 	private BulkExportJobResults getBulkExportJobResults(String theInstanceId) {
 		String report = myJobCoordinator.getInstance(theInstanceId).getReport();
-		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
-		return results;
+		return JsonUtil.deserialize(report, BulkExportJobResults.class);
+
 	}
 
 	private JobInstance awaitExportComplete(String theInstanceId) {
