@@ -34,7 +34,6 @@ import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.search.BatchResourceLoader.ResourceLoadResult;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -49,8 +48,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -67,16 +64,11 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -98,13 +90,10 @@ class BatchResourceLoaderTest {
 	private IPartitionLookupSvc myPartitionLookupSvc;
 	@Mock
 	private IExternallyStoredResourceService myExternallyStoredResourceService;
-	@Captor
-	private ArgumentCaptor<IBaseResource> myResourceCaptor;
 
 	private BatchResourceLoader myBatchResourceLoader;
-	private FhirContext fhirContext = FhirContext.forR4Cached();
-
-	private boolean myForHistoryOperation;
+	private final FhirContext fhirContext = FhirContext.forR4Cached();
+	private final boolean myForHistoryOperation = false;
 
 	@BeforeEach
 	void setUp() {
@@ -117,15 +106,6 @@ class BatchResourceLoaderTest {
 			myPartitionSettings,
 			myPartitionLookupSvc
 		);
-
-		myForHistoryOperation = false;
-
-		// Common mock setups
-		lenient().when(myPartitionSettings.isPartitioningEnabled()).thenReturn(false);
-		lenient().when(myResourceMetadataExtractorSvc.getTagsBatch(any()))
-			.thenReturn(new HashMap<>());
-		lenient().when(myResourceMetadataExtractorSvc.getProvenanceDetails(any()))
-			.thenReturn(new ProvenanceDetails(null, null));
 	}
 
 	@Test
@@ -142,7 +122,8 @@ class BatchResourceLoaderTest {
 		"DEL, false, Resource encoding is DEL - mark as deleted",
 		"	, true , Resource has deleted date - mark as deleted"
 	})
-	void testLoadResources_withDeletedResource_returnsDeletedResult(ResourceEncodingEnum theEncoding, boolean isDeleted, String theMessage) {
+	void testLoadResources_withDeletedResource_returnsDeletedResult(ResourceEncodingEnum theEncoding,
+																	boolean isDeleted, String theMessage) {
 		// setup
 		ResourceHistoryTable entity = new ResourceHistoryTable();
 		entity.setResourceId(1L);
@@ -156,7 +137,10 @@ class BatchResourceLoaderTest {
 
 		// verify
 		assertThat(results).hasSize(1);
-		validateDeletedResource(results, entity.getPersistentId());
+		ResourceLoadResult result = results.get(0);
+		assertThat(result.id()).isEqualTo(entity.getPersistentId());
+		assertThat(result.isDeleted()).as(theMessage).isTrue();
+		assertThat(result.resource()).as(theMessage).isNull();
 	}
 
 	@Test
@@ -173,6 +157,7 @@ class BatchResourceLoaderTest {
 
 		Map<JpaPid, Collection<BaseTag>> tagsMap = new HashMap<>();
 		when(myResourceMetadataExtractorSvc.getTagsBatch(entities)).thenReturn(tagsMap);
+		when(myResourceMetadataExtractorSvc.getProvenanceDetails(any())).thenReturn(new ProvenanceDetails(null, null));
 		when(myExternallyStoredResourceServiceRegistry.getProvider(providerId))
 			.thenReturn(myExternallyStoredResourceService);
 		Patient esrPatient1 = createPatient("Patient5");
@@ -181,7 +166,7 @@ class BatchResourceLoaderTest {
 		when(myExternallyStoredResourceService.fetchResource("address6")).thenReturn(esrPatient2);
 
 		// execute
-		List<ResourceLoadResult> results = myBatchResourceLoader.loadResources(entities, false);
+		List<ResourceLoadResult> results = myBatchResourceLoader.loadResources(entities, myForHistoryOperation);
 
 		// verify
 		verify(myExternallyStoredResourceServiceRegistry, times(2)).getProvider(providerId);
@@ -198,24 +183,26 @@ class BatchResourceLoaderTest {
 		validateJsonResource(results, esr2.getPersistentId(), resourceToJson(esrPatient2));
 	}
 
-	private void validateDeletedResource(List<ResourceLoadResult> theResults, JpaPid  thePid) {
-		Optional<ResourceLoadResult> resultOpt =  theResults.stream()
-			.filter(r -> r.id().equals(thePid)).findFirst();
+	private void validateDeletedResource(List<ResourceLoadResult> theResults, JpaPid thePid) {
+		Optional<ResourceLoadResult> resultOpt = getResultOpt(theResults, thePid);
 		assertThat(resultOpt).isPresent();
 		ResourceLoadResult result = resultOpt.get();
 		assertThat(result.isDeleted()).isTrue();
 		assertThat(result.resource()).isNull();
 	}
 
-	private void validateJsonResource(List<ResourceLoadResult> theResults, JpaPid  thePid, String theJsonResource) {
-		Optional<ResourceLoadResult> resultOpt =  theResults.stream()
-			.filter(r -> r.id().equals(thePid)).findFirst();
+	private void validateJsonResource(List<ResourceLoadResult> theResults, JpaPid thePid, String theJsonResource) {
+		Optional<ResourceLoadResult> resultOpt = getResultOpt(theResults, thePid);
 		assertThat(resultOpt).isPresent();
 		ResourceLoadResult result = resultOpt.get();
 		assertThat(result.isDeleted()).isFalse();
 		assertThat(result.resource()).isNotNull();
 		assertThat(resourceToJson(result.resource())).isEqualTo(theJsonResource);
-		assertNull(result.resource().getUserData(Constants.RESOURCE_PARTITION_ID));
+		assertThat(result.resource().getUserData(Constants.RESOURCE_PARTITION_ID)).isNull();
+	}
+
+	private Optional<ResourceLoadResult> getResultOpt(List<ResourceLoadResult> theResults, JpaPid thePid) {
+		return theResults.stream().filter(result -> result.id().equals(thePid)).findFirst();
 	}
 
 	@ParameterizedTest
@@ -224,9 +211,7 @@ class BatchResourceLoaderTest {
 		// setup
 		ResourceHistoryTable jsonEntity = createJsonResourceEntity(1L, createPatientJson("Patient1"));
 		ResourceHistoryTable esrEntity = createEsrResourceEntity(2L, "testProvider", "address1");
-		when(myExternallyStoredResourceServiceRegistry.getProvider("testProvider"))
-			.thenReturn(myExternallyStoredResourceService);
-		when(myExternallyStoredResourceService.fetchResource(any())).thenReturn(createPatient("Patient2"));
+		mockEsrProvider(createPatient("Patient2"));
 		List<ResourceHistoryTable> entities = List.of(jsonEntity, esrEntity);
 
 		Map<JpaPid, Collection<BaseTag>> tagsMap = new HashMap<>();
@@ -234,13 +219,15 @@ class BatchResourceLoaderTest {
 		tagsMap.put(jsonEntity.getPersistentId(), tagsList);
 		tagsMap.put(esrEntity.getPersistentId(), tagsList);
 		when(myResourceMetadataExtractorSvc.getTagsBatch(entities)).thenReturn(tagsMap);
+		when(myResourceMetadataExtractorSvc.getProvenanceDetails(any())).thenReturn(new ProvenanceDetails(null, null));
 
 		// execute
 		myBatchResourceLoader.loadResources(entities, theForHistoryOperation);
 
 		// verify
 		verify(myJpaStorageResourceParser, times(2)).populateResourceMetadata(
-			any(ResourceHistoryTable.class), eq(theForHistoryOperation), eq(tagsList), anyLong(), any(IBaseResource.class)
+			any(ResourceHistoryTable.class), eq(theForHistoryOperation), eq(tagsList), anyLong(),
+			any(IBaseResource.class)
 		);
 	}
 
@@ -251,9 +238,7 @@ class BatchResourceLoaderTest {
 		Integer partitionId = 1;
 		ResourceHistoryTable jsonEntity = createJsonResourceEntity(1L, createPatientJson("Patient1"));
 		ResourceHistoryTable esrEntity = createEsrResourceEntity(2L, "testProvider", "address1");
-		when(myExternallyStoredResourceServiceRegistry.getProvider("testProvider"))
-			.thenReturn(myExternallyStoredResourceService);
-		when(myExternallyStoredResourceService.fetchResource(any())).thenReturn(createPatient("Patient2"));
+		mockEsrProvider(createPatient("Patient2"));
 
 		if (!theDefaultPartition) {
 			jsonEntity.setPartitionId(new PartitionablePartitionId(partitionId, LocalDate.now()));
@@ -266,16 +251,17 @@ class BatchResourceLoaderTest {
 
 		List<ResourceHistoryTable> entities = List.of(jsonEntity, esrEntity);
 		when(myResourceMetadataExtractorSvc.getTagsBatch(entities)).thenReturn(Collections.emptyMap());
+		when(myResourceMetadataExtractorSvc.getProvenanceDetails(any())).thenReturn(new ProvenanceDetails(null, null));
 		when(myPartitionSettings.isPartitioningEnabled()).thenReturn(true);
 
 		// execute
-		List<ResourceLoadResult> results = myBatchResourceLoader.loadResources(entities, false);
+		List<ResourceLoadResult> results = myBatchResourceLoader.loadResources(entities, myForHistoryOperation);
 
 		// verify
 		assertThat(results).hasSize(2).allSatisfy(result -> {
-			assertNotNull(result);
+			assertThat(result).isNotNull();
 			if (theDefaultPartition) {
-				assertNull(result.resource().getUserData(Constants.RESOURCE_PARTITION_ID));
+				assertThat(result.resource().getUserData(Constants.RESOURCE_PARTITION_ID)).isNull();
 			} else {
 				assertThat(result.resource().getUserData(Constants.RESOURCE_PARTITION_ID))
 					.isEqualTo(RequestPartitionId.fromPartitionId(partitionId));
@@ -290,8 +276,8 @@ class BatchResourceLoaderTest {
 		List<ResourceHistoryTable> entities = List.of(jsonResource);
 		when(myResourceMetadataExtractorSvc.getTagsBatch(anyList())).thenReturn(Collections.emptyMap());
 
-		// execute & verify
-		assertThatThrownBy(() -> myBatchResourceLoader.loadResources(entities, false))
+		// execute and verify
+		assertThatThrownBy(() -> myBatchResourceLoader.loadResources(entities, myForHistoryOperation))
 			.isInstanceOf(DataFormatException.class)
 			.hasMessageContaining("Failed to parse database resource: Patient/3/_history/1")
 			.hasMessageContaining("reason: HAPI-1861: Failed to parse JSON encoded FHIR content");
@@ -300,10 +286,10 @@ class BatchResourceLoaderTest {
 	@Test
 	void testLoadResources_withEsrResourceFetchFailure_throwsInternalErrorException() {
 		// setup
-		String providerId = "test-provider";
-		String address = "test-address";
-		ResourceHistoryTable entity = createEsrResourceEntity(1L, providerId, address);
-		List<ResourceHistoryTable> entities = List.of(entity);
+		String providerId = "testProvider";
+		String address = "testAddress";
+		ResourceHistoryTable esrEntity = createEsrResourceEntity(1L, providerId, address);
+		List<ResourceHistoryTable> entities = List.of(esrEntity);
 
 		when(myResourceMetadataExtractorSvc.getTagsBatch(entities)).thenReturn(Collections.emptyMap());
 		when(myExternallyStoredResourceServiceRegistry.getProvider(providerId))
@@ -311,8 +297,8 @@ class BatchResourceLoaderTest {
 		when(myExternallyStoredResourceService.fetchResource(address))
 			.thenThrow(new RuntimeException("Fetch failed"));
 
-		// execute & verify
-		assertThatThrownBy(() -> myBatchResourceLoader.loadResources(entities, false))
+		// execute and verify
+		assertThatThrownBy(() -> myBatchResourceLoader.loadResources(entities, myForHistoryOperation))
 			.isInstanceOf(InternalErrorException.class)
 			.hasMessageContaining("Failed to load externally stored resource: Patient/1/_history/1")
 			.hasMessageContaining("reason: java.lang.RuntimeException: Fetch failed");
@@ -323,42 +309,35 @@ class BatchResourceLoaderTest {
 		// setup
 		ResourceHistoryTable jsonEntity = createJsonResourceEntity(1L, createPatientJson("Patient1"));
 		ResourceHistoryTable esrEntity = createEsrResourceEntity(2L, "testProvider", "address1");
-		when(myExternallyStoredResourceServiceRegistry.getProvider("testProvider"))
-			.thenReturn(myExternallyStoredResourceService);
-		when(myExternallyStoredResourceService.fetchResource(any())).thenReturn(createPatient("Patient2"));
 		List<ResourceHistoryTable> entities = List.of(jsonEntity, esrEntity);
-
+		mockEsrProvider(createPatient("Patient2"));
 		when(myResourceMetadataExtractorSvc.getTagsBatch(entities)).thenReturn(Collections.emptyMap());
 		when(myResourceMetadataExtractorSvc.getProvenanceDetails(any(ResourceHistoryTable.class)))
 			.thenReturn(new ProvenanceDetails("http://example.com/source", "request-123"));
 
 		// execute
-		List<ResourceLoadResult> results = myBatchResourceLoader.loadResources(entities, false);
+		List<ResourceLoadResult> results = myBatchResourceLoader.loadResources(entities, myForHistoryOperation);
 
-		// verify
-		assertThat(results).hasSize(2);
 		// verify
 		assertThat(results).hasSize(2).allSatisfy(result -> {
-			assertNotNull(result);
-			assertInstanceOf(Patient.class, result.resource());
+			assertThat(result).isNotNull();
+			assertThat(result.resource()).isInstanceOf(Patient.class);
 			Patient patient = (Patient) result.resource();
-			assertNotNull(patient.getMeta());
-			assertNotNull(patient.getMeta().getSource());
-			assertEquals("http://example.com/source#request-123", patient.getMeta().getSource());
+			assertThat(patient.getMeta()).isNotNull();
+			assertThat(patient.getMeta().getSource()).isNotNull();
+			assertThat(patient.getMeta().getSource()).isEqualTo("http://example.com/source#request-123");
 		});
-
 	}
 
-	// Helper methods
+	private void mockEsrProvider(Patient thePatient) {
+		when(myExternallyStoredResourceServiceRegistry.getProvider("testProvider"))
+			.thenReturn(myExternallyStoredResourceService);
+		when(myExternallyStoredResourceService.fetchResource(any())).thenReturn(thePatient);
+	}
 
 	private ResourceHistoryTable createDeletedResourceEntity(Long thePid) {
-		ResourceHistoryTable entity = new ResourceHistoryTable();
-		entity.setResourceId(thePid);
-		entity.setResourceType("Patient");
-		entity.setVersion(1L);
+		ResourceHistoryTable entity = createJsonResourceEntity(thePid, null);
 		entity.setEncoding(ResourceEncodingEnum.DEL);
-		entity.setTransientForcedId(thePid.toString());
-		entity.setResourceTable(createResourceTable(thePid));
 		return entity;
 	}
 
@@ -367,43 +346,26 @@ class BatchResourceLoaderTest {
 		entity.setResourceId(thePid);
 		entity.setResourceType("Patient");
 		entity.setVersion(1L);
+		entity.setTransientForcedId(thePid.toString());
 		entity.setEncoding(ResourceEncodingEnum.JSON);
 		entity.setResourceTextVc(theResourceJson);
-		entity.setResource(theResourceJson.getBytes());
-		entity.setTransientForcedId(thePid.toString());
-		entity.setResourceTable(createResourceTable(thePid));
 		entity.setFhirVersion(FhirVersionEnum.R4);
 		return entity;
 	}
 
 	private ResourceHistoryTable createEsrResourceEntity(Long thePid, String theProviderId, String theAddress) {
-		ResourceHistoryTable entity = new ResourceHistoryTable();
-		entity.setResourceId(thePid);
-		entity.setResourceType("Patient");
-		entity.setVersion(1L);
-		entity.setEncoding(ResourceEncodingEnum.ESR);
 		String esrContent = String.format("%s:%s", theProviderId, theAddress);
-		entity.setResourceTextVc(esrContent);
-		entity.setTransientForcedId(thePid.toString());
-		entity.setResourceTable(createResourceTable(thePid));
-		entity.setFhirVersion(FhirVersionEnum.R4);
+		ResourceHistoryTable entity = createJsonResourceEntity(thePid, esrContent);
+		entity.setEncoding(ResourceEncodingEnum.ESR);
 		return entity;
 	}
 
-	private ResourceTable createResourceTable(Long thePid) {
-		ResourceTable table = new ResourceTable();
-		table.setIdForUnitTest(thePid);
-		table.setFhirId(thePid.toString());
-		table.setResourceType("Patient");
-		return table;
-	}
-
 	private String resourceToJson(IBaseResource resource) {
-		return  fhirContext.newJsonParser().encodeResourceToString(resource);
+		return fhirContext.newJsonParser().encodeResourceToString(resource);
 	}
 
 	private String createPatientJson(String theId) {
-		return String.format("{\"resourceType\":\"Patient\",\"id\":\"%s\"}", theId);
+		return resourceToJson(createPatient(theId));
 	}
 
 	private Patient createPatient(String theId) {
