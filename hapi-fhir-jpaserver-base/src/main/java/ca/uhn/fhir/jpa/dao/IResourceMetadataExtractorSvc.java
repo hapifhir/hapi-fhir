@@ -28,11 +28,18 @@ import java.util.Collection;
 import java.util.Map;
 
 @SuppressWarnings("java:S1452") // Generic wildcard types are necessary here due to entity method return types
-public interface IResourceTagExtractorSvc {
+public interface IResourceMetadataExtractorSvc {
+
+	/**
+	 * Provenance details containing source URI and request ID from Resource.meta.source
+	 */
+	record ProvenanceDetails(String provenanceSourceUri, String provenanceRequestId) {}
 
 	Collection<? extends BaseTag> getTags(ResourceHistoryTable theHistoryEntity);
 
 	Collection<? extends BaseTag> getTags(ResourceTable theResourceEntity);
 
 	Map<JpaPid, Collection<BaseTag>> getTagsBatch(Collection<ResourceHistoryTable> theHistoryEntities);
+
+	ProvenanceDetails getProvenanceDetails(ResourceHistoryTable theHistoryEntity);
 }

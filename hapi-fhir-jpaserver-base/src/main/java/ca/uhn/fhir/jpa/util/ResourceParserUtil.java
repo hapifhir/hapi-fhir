@@ -21,21 +21,33 @@ package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
+import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
+import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.decodeResource;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ResourceParserUtil {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceParserUtil.class);
 
 	private ResourceParserUtil() {}
+
+	public static String getResourceText(
+			byte[] theResourceBytes, String theResourceText, ResourceEncodingEnum theResourceEncoding) {
+		if (theResourceText != null) {
+			return theResourceText;
+		} else {
+			return decodeResource(theResourceBytes, theResourceEncoding);
+		}
+	}
 
 	@SuppressWarnings("unchecked")
 	public static <R extends IBaseResource> Class<R> determineTypeToParse(
@@ -59,5 +71,17 @@ public class ResourceParserUtil {
 		}
 
 		return theResourceType;
+	}
+
+	public record EsrResourceDetails(String providerId, String address) {}
+
+	public static EsrResourceDetails getEsrResourceDetails(String theResourceText) {
+		int colonIndex = theResourceText.indexOf(':');
+		Validate.isTrue(colonIndex > 0, "Invalid ESR address: %s", theResourceText);
+		String providerId = theResourceText.substring(0, colonIndex);
+		String address = theResourceText.substring(colonIndex + 1);
+		Validate.notBlank(providerId, "No provider ID in ESR address: %s", theResourceText);
+		Validate.notBlank(address, "No address in ESR address: %s", theResourceText);
+		return new EsrResourceDetails(providerId, address);
 	}
 }
