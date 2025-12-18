@@ -561,7 +561,7 @@ public class ReplaceReferencesTestHelper {
 				inParams.addParameter().setName("delete-source").setValue(new BooleanType(deleteSource));
 			}
 			if (resourceLimit != null) {
-				inParams.addParameter().setName("batch-size").setValue(new IntegerType(resourceLimit));
+				inParams.addParameter().setName("resource-limit").setValue(new IntegerType(resourceLimit));
 			}
 			return inParams;
 		}

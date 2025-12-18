@@ -5,6 +5,7 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
@@ -172,10 +173,10 @@ class ExtensionBasedLinkServiceTest {
 		Observation target = new Observation();
 		Reference sourceRef = new Reference("Observation/source-456");
 		myService.addReplacesLink(target, sourceRef);
-		IIdType targetId = new IdType("Observation/source-456");
+		IIdType idToLookFor = new IdType("Observation/source-456");
 
 		// When
-		boolean hasLink = myService.hasReplacesLinkTo(target, targetId);
+		boolean hasLink = myService.hasReplacesLinkTo(target, idToLookFor);
 
 		// Then
 		assertThat(hasLink).isTrue();
@@ -187,10 +188,10 @@ class ExtensionBasedLinkServiceTest {
 		Observation target = new Observation();
 		Reference sourceRef = new Reference("Observation/source-456");
 		myService.addReplacesLink(target, sourceRef);
-		IIdType targetId = new IdType("Observation/source-999");
+		IIdType idToLookFor = new IdType("Observation/source-999");
 
 		// When
-		boolean hasLink = myService.hasReplacesLinkTo(target, targetId);
+		boolean hasLink = myService.hasReplacesLinkTo(target, idToLookFor);
 
 		// Then
 		assertThat(hasLink).isFalse();
@@ -202,10 +203,10 @@ class ExtensionBasedLinkServiceTest {
 		Observation target = new Observation();
 		Reference sourceRef = new Reference("Observation/source-456/_history/1");
 		myService.addReplacesLink(target, sourceRef);
-		IIdType targetIdUnversioned = new IdType("Observation/source-456");
+		IIdType idToLookForUnversioned = new IdType("Observation/source-456");
 
 		// When
-		boolean hasLink = myService.hasReplacesLinkTo(target, targetIdUnversioned);
+		boolean hasLink = myService.hasReplacesLinkTo(target, idToLookForUnversioned);
 
 		// Then
 		assertThat(hasLink).isTrue();
@@ -249,10 +250,10 @@ class ExtensionBasedLinkServiceTest {
 			.setUrl(REPLACES_EXTENSION_URL)
 			.setValue(validRef);
 
-		IIdType targetId = new IdType("Observation/source-456");
+		IIdType idToLookFor = new IdType("Observation/source-456");
 
 		// When
-		boolean hasLink = myService.hasReplacesLinkTo(target, targetId);
+		boolean hasLink = myService.hasReplacesLinkTo(target, idToLookFor);
 
 		// Then
 		assertThat(hasLink).isTrue();
@@ -286,7 +287,7 @@ class ExtensionBasedLinkServiceTest {
 	@Test
 	void shouldWorkWithDifferentResourceTypes_Practitioner() {
 		// Given - Test with Practitioner to verify resource-agnostic behavior
-		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
+		Practitioner practitioner = new Practitioner();
 		practitioner.setId("Practitioner/prac-123");
 		Reference ref = new Reference("Practitioner/prac-456");
 
@@ -324,9 +325,10 @@ class ExtensionBasedLinkServiceTest {
 
 		// When
 		myService.addReplacesLink(obs, new Reference("Observation/obs-456"));
+		myService.addReplacedByLink(obs, new Reference("Observation/obs-789"));
 
-		// Then - Verify both extensions exist
-		assertThat(obs.getExtension()).hasSize(2);
+		// Then - Verify all extensions exist
+		assertThat(obs.getExtension()).hasSize(3);
 		assertThat(obs.getExtensionByUrl("http://example.org/custom")).isNotNull();
 		assertThat(obs.getExtensionByUrl("http://example.org/custom").getValue())
 			.isInstanceOf(StringType.class);
@@ -337,6 +339,11 @@ class ExtensionBasedLinkServiceTest {
 		List<IBaseReference> replacesLinks = myService.getReplacesLinks(obs);
 		assertThat(replacesLinks).hasSize(1);
 		assertThat(replacesLinks.get(0).getReferenceElement().getValue()).isEqualTo("Observation/obs-456");
+
+		// Verify the replaced by link we added is retrievable
+		List<IBaseReference> replacedByLinks = myService.getReplacedByLinks(obs);
+		assertThat(replacedByLinks).hasSize(1);
+		assertThat(replacedByLinks.get(0).getReferenceElement().getValue()).isEqualTo("Observation/obs-789");
 	}
 
 	@Test

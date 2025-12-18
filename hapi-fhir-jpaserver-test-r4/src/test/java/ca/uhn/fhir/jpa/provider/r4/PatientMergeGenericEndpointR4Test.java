@@ -27,24 +27,15 @@ import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Patient;
 
 /**
- * Integration tests for generic merge operations on Patient resources.
+ * Integration tests for the Patient/$hapi.fhir.merge operation.
+ *
+ * <p>This test class validates the HAPI FHIR generic merge endpoint that works with any
+ * resource type, using generic parameter names (e.g., "source-resource", "target-resource").
  *
  * <p>All common test methods are inherited from {@link AbstractGenericMergeR4Test}.
  * This class only configures the Patient-specific scenario and resource type name.
  *
- * <p>Test coverage includes:
- * - Basic merge matrix: sync/async × delete/no-delete × preview/execute × with/without result-resource
- * - Identifier resolution: source/target by ID or identifiers × sync/async
- * - Zero references edge case: deleteSource × async
- * - Identifier edge cases: empty source/target/both identifiers, result resource overrides
- * - Provenance agent interceptor: async/sync × single/multiple agents, empty agent error
- * - Error handling: missing source/target, source==target, non-existent identifiers, multiple matches,
- *   previously merged resources, resource limit exceeded, concurrent modification
- * - Active field validation: source.active set to false, target.active remains true
- *
- * <p><b>Total: 40+ comprehensive tests inherited from AbstractGenericMergeR4Test</b>
- *
- * <p>Comprehensive tests for Patient merge operations using the modern generic merge framework.
+ * <p>For tests of the standard FHIR Patient/$merge endpoint, see {@link PatientMergeR4Test}.
  */
 public class PatientMergeGenericEndpointR4Test extends AbstractGenericMergeR4Test<Patient> {
 

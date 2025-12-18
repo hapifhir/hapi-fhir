@@ -62,7 +62,7 @@ public interface IResourceLinkService {
 	/**
 	 * Check if resource has a specific "replaces" link to target.
 	 * Used to validate result resource has correct link to source.
-	 * Compares IDs without version for flexibility.
+	 * Compares versionless ids.
 	 *
 	 * @param theResource the resource to check
 	 * @param theTargetId the target resource ID to look for

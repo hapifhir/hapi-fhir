@@ -308,9 +308,9 @@ class PatientNativeLinkServiceTest {
 
 		// When
 		myService.addReplacesLink(patient, new Reference("Patient/pat-456"));
-
+		myService.addReplacedByLink(patient, new Reference("Patient/pat-789"));
 		// Then - Verify both links exist
-		assertThat(patient.getLink()).hasSize(2);
+		assertThat(patient.getLink()).hasSize(3);
 
 		// Verify first link (SEEALSO) is untouched - also verifies link order preserved
 		assertThat(patient.getLink().get(0).getType()).isEqualTo(Patient.LinkType.SEEALSO);
@@ -319,6 +319,9 @@ class PatientNativeLinkServiceTest {
 		// Verify second link is the replaces link we added
 		assertThat(patient.getLink().get(1).getType()).isEqualTo(Patient.LinkType.REPLACES);
 		assertThat(patient.getLink().get(1).getOther().getReference()).isEqualTo("Patient/pat-456");
+		// Verify third link is the replaced-by link we added
+		assertThat(patient.getLink().get(2).getType()).isEqualTo(Patient.LinkType.REPLACEDBY);
+		assertThat(patient.getLink().get(2).getOther().getReference()).isEqualTo("Patient/pat-789");
 	}
 
 	@Test

@@ -25,7 +25,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Identifier;
@@ -44,21 +43,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  * - Invoking merge operations (sync and async)
  * - Tracking async job completion
  * - Extracting job IDs from Task resources
- *
- * <p>Validation methods have been moved to {@link MergeTestScenario}.</p>
- *
- * <p>Example usage:</p>
- * <pre>
- * MergeOperationTestHelper helper = new MergeOperationTestHelper(client, batch2JobHelper);
- *
- * // Execute merge
- * Parameters outParams = helper.callMergeOperation("Practitioner", params, false);
- *
- * // For async operations
- * Task task = (Task) outParams.getParameter("task").getResource();
- * String jobId = helper.getJobIdFromTask(task);
- * helper.awaitJobCompletion(jobId);
- * </pre>
  */
 public class MergeOperationTestHelper {
 
@@ -83,14 +67,6 @@ public class MergeOperationTestHelper {
 		myClient = theClient;
 		myBatch2JobHelper = theBatch2JobHelper;
 		myFhirContext = theFhirContext;
-
-		// Register verbose logging interceptor to capture error response bodies
-		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
-		loggingInterceptor.setLogRequestSummary(true);
-		loggingInterceptor.setLogResponseSummary(true);
-		loggingInterceptor.setLogRequestBody(true);
-		loggingInterceptor.setLogResponseBody(true); // KEY: This logs error response bodies
-		myClient.registerInterceptor(loggingInterceptor);
 	}
 
 	/**
@@ -139,20 +115,8 @@ public class MergeOperationTestHelper {
 	}
 
 	/**
-	 * Wait for an async job to complete.
-	 *
-	 * @param theJobId The batch job ID
-	 */
-	public void awaitJobCompletion(@Nonnull String theJobId) {
-		ourLog.debug("Waiting for job completion: {}", theJobId);
-		myBatch2JobHelper.awaitJobCompletion(theJobId);
-		ourLog.debug("Job completed: {}", theJobId);
-	}
-
-	/**
 	 * Waits for async task completion after merge operation.
 	 * Validates task creation, extracts job ID, and waits for batch job to complete.
-	 * Copied from PatientMergeR4Test.waitForAsyncTaskCompletion().
 	 *
 	 * @param theOutParams the output parameters from merge operation
 	 */
@@ -166,8 +130,7 @@ public class MergeOperationTestHelper {
 		// Use existing getJobIdFromTask() method
 		String jobId = getJobIdFromTask(task);
 
-		// Use existing awaitJobCompletion() method
-		awaitJobCompletion(jobId);
+		myBatch2JobHelper.awaitJobCompletion(jobId);
 	}
 
 	// Error validation helpers

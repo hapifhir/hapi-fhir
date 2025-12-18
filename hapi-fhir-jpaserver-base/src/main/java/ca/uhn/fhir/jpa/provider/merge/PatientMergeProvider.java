@@ -90,7 +90,7 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 					IPrimitiveType<Boolean> theDeleteSource,
 			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_RESULT_PATIENT, max = 1)
 					IBaseResource theResultPatient,
-			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_BATCH_SIZE, typeName = "unsignedInt")
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_RESOURCE_LIMIT, typeName = "unsignedInt")
 					IPrimitiveType<Integer> theResourceLimit) {
 
 		return myMergeOperationProviderSvc.merge(

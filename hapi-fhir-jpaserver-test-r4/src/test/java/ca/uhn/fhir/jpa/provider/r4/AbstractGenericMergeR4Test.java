@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -46,8 +45,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -59,7 +56,6 @@ import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.DEFAULT_PRESERVE_VER
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.catchException;
 import static org.awaitility.Awaitility.await;
 
 /**
@@ -471,7 +467,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		// Build parameters with non-existent source identifier
 		MergeTestParameters params = new MergeTestParameters()
 				.sourceIdentifiers(
-						Arrays.asList(new Identifier().setSystem("http://test.org").setValue("non-existent-id")))
+					Collections.singletonList(new Identifier().setSystem("http://test.org").setValue("non-existent-id")))
 				.targetResource(new Reference(scenario.getVersionlessTargetId()))
 				.deleteSource(false)
 				.preview(false);
@@ -494,7 +490,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		MergeTestParameters params = new MergeTestParameters()
 				.sourceResource(new Reference(scenario.getVersionlessSourceId()))
 				.targetIdentifiers(
-						Arrays.asList(new Identifier().setSystem("http://test.org").setValue("non-existent-id")))
+					Collections.singletonList(new Identifier().setSystem("http://test.org").setValue("non-existent-id")))
 				.deleteSource(false)
 				.preview(false);
 
@@ -633,9 +629,9 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		scenario.withMultipleReferencingResources(6);
 		scenario.persistTestData();
 
-		// Build parameters and set batch size (which controls resource limit)
+		// Build parameters and set resource limit
 		MergeTestParameters params = scenario.buildMergeOperationParameters();
-		params.batchSize(5);
+		params.resourceLimit(5);
 
 		// Execute merge and expect error
 		String sourceId = scenario.getVersionlessSourceId().getValue();

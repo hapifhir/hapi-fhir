@@ -27,15 +27,15 @@ import jakarta.annotation.Nonnull;
  * Test specification for creating referencing resources in merge operation tests.
  *
  * This class encapsulates the information needed to create resources that reference
- * a merge source/target resource. It supports flexible test scenarios with multiple
+ * a merge source resource. It supports flexible test scenarios with multiple
  * referencing resource types.
  *
  * <p>Example usage:</p>
  * <pre>
- * // Create 10 PractitionerRole resources that reference a Practitioner
+ * // Create 10 PractitionerRole resources (which could reference a Practitioner)
  * ReferencingTestResourceType spec = ReferencingTestResourceType.of("PractitionerRole", 10);
  *
- * // Create 5 DiagnosticReport resources that reference an Observation
+ * // Create 5 DiagnosticReport resources (which could reference an Observation)
  * ReferencingTestResourceType spec = ReferencingTestResourceType.of("DiagnosticReport", 5);
  * </pre>
  */

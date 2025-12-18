@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.merge;
 
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_DELETE_SOURCE;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_RESULT_RESOURCE;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_RESOURCE;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_RESOURCE_IDENTIFIER;
@@ -55,10 +54,5 @@ public class GenericMergeOperationInputParameterNames extends AbstractMergeOpera
 	@Override
 	public String getResultResourceParameterName() {
 		return OPERATION_MERGE_PARAM_RESULT_RESOURCE;
-	}
-
-	@Override
-	public String getDeleteSourceParameterName() {
-		return OPERATION_MERGE_PARAM_DELETE_SOURCE;
 	}
 }

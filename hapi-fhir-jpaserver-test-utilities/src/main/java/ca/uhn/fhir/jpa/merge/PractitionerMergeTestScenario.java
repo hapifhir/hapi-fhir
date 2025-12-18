@@ -43,11 +43,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Merge test scenario implementation for Practitioner resources.
  *
- * This scenario:
- * - Creates Practitioner resources with identifiers and active=true
- * - Creates referencing resources: PractitionerRole, Encounter, CarePlan
- * - Validates extension-based links (since Practitioner doesn't use native links)
- * - Validates active field behavior (set to false on merge source)
  */
 public class PractitionerMergeTestScenario extends AbstractMergeTestScenario<Practitioner> {
 

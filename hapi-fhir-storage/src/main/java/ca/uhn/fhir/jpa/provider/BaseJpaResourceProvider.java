@@ -406,10 +406,10 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_DELETE_SOURCE, typeName = "boolean", max = 1)
 					IPrimitiveType<Boolean> theDeleteSource,
 			@OperationParam(
-							name = ProviderConstants.OPERATION_MERGE_PARAM_BATCH_SIZE,
+							name = ProviderConstants.OPERATION_MERGE_PARAM_RESOURCE_LIMIT,
 							typeName = "unsignedInt",
 							max = 1)
-					IPrimitiveType<Integer> theBatchSize,
+					IPrimitiveType<Integer> theResourceLimit,
 			ServletRequestDetails theRequestDetails) {
 
 		if (getMergeOperationProviderSvc() == null) {
@@ -426,7 +426,7 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 						thePreview,
 						theDeleteSource,
 						theResultResource,
-						theBatchSize,
+						theResourceLimit,
 						theRequestDetails);
 	}
 }

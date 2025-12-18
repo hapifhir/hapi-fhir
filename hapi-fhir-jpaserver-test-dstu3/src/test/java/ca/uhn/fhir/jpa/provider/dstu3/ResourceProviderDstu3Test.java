@@ -4833,6 +4833,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 	}
 
+	// Currently $hapi.fhir.merge operation only supported in R4, when it is supported in R5 this test should be removed.
 	@Test
 	void testMergeOperation_throwsNotImplementedOperationException() {
 		// Test with Patient

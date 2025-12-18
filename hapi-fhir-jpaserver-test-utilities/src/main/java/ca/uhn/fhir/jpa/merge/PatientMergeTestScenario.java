@@ -42,12 +42,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Merge test scenario implementation for Patient resources.
  *
- * This scenario:
- * - Creates Patient resources with identifiers and active=true
- * - Creates referencing resources: Encounter, Observation, CarePlan
- * - Validates extension-based links (since Patient doesn't use native links)
- * - Validates active field behavior (set to false on merge source)
- *
  * <p><b>Key characteristics</b>:
  * <ul>
  *   <li>Patient resources have an "active" field that must be set to false on merge source</li>

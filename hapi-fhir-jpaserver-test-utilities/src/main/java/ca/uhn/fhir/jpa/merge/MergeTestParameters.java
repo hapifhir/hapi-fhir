@@ -29,7 +29,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -61,7 +60,7 @@ public class MergeTestParameters {
 	private IBaseResource myResultResource;
 	private Boolean myPreview;
 	private Boolean myDeleteSource;
-	private Integer myBatchSize;
+	private Integer myResourceLimit;
 
 	/**
 	 * Set the source resource reference (e.g., "Practitioner/123").
@@ -71,17 +70,6 @@ public class MergeTestParameters {
 	 */
 	public MergeTestParameters sourceResource(Reference theSourceResource) {
 		mySourceResource = theSourceResource;
-		return this;
-	}
-
-	/**
-	 * Set source resource identifiers for identifier-based resolution.
-	 *
-	 * @param theIdentifiers One or more identifiers to match the source resource
-	 * @return This builder for chaining
-	 */
-	public MergeTestParameters sourceIdentifiers(Identifier... theIdentifiers) {
-		mySourceResourceIdentifiers = Arrays.asList(theIdentifiers);
 		return this;
 	}
 
@@ -110,17 +98,6 @@ public class MergeTestParameters {
 	/**
 	 * Set target resource identifiers for identifier-based resolution.
 	 *
-	 * @param theIdentifiers One or more identifiers to match the target resource
-	 * @return This builder for chaining
-	 */
-	public MergeTestParameters targetIdentifiers(Identifier... theIdentifiers) {
-		myTargetResourceIdentifiers = Arrays.asList(theIdentifiers);
-		return this;
-	}
-
-	/**
-	 * Set target resource identifiers for identifier-based resolution.
-	 *
 	 * @param theIdentifiers List of identifiers to match the target resource
 	 * @return This builder for chaining
 	 */
@@ -130,9 +107,9 @@ public class MergeTestParameters {
 	}
 
 	/**
-	 * Set the result resource to use instead of merging source identifiers into target.
+	 * Set the result resource to use
 	 *
-	 * @param theResultResource The result resource (optional)
+	 * @param theResultResource The result resource
 	 * @return This builder for chaining
 	 */
 	public MergeTestParameters resultResource(IBaseResource theResultResource) {
@@ -163,13 +140,13 @@ public class MergeTestParameters {
 	}
 
 	/**
-	 * Set the batch size for async processing.
+	 * Set the resource limit for sync requests
 	 *
-	 * @param theBatchSize The batch size (optional)
+	 * @param theResourceLimit The resource limit (optional)
 	 * @return This builder for chaining
 	 */
-	public MergeTestParameters batchSize(int theBatchSize) {
-		myBatchSize = theBatchSize;
+	public MergeTestParameters resourceLimit(int theResourceLimit) {
+		myResourceLimit = theResourceLimit;
 		return this;
 	}
 
@@ -233,9 +210,11 @@ public class MergeTestParameters {
 					.setValue(new org.hl7.fhir.r4.model.BooleanType(myDeleteSource));
 		}
 
-		// Batch size
-		if (myBatchSize != null) {
-			params.addParameter().setName("batch-size").setValue(new org.hl7.fhir.r4.model.IntegerType(myBatchSize));
+		// Resource limit
+		if (myResourceLimit != null) {
+			params.addParameter()
+					.setName("resource-limit")
+					.setValue(new org.hl7.fhir.r4.model.IntegerType(myResourceLimit));
 		}
 
 		return params;
@@ -279,7 +258,7 @@ public class MergeTestParameters {
 	}
 
 	@Nullable
-	public Integer getBatchSize() {
-		return myBatchSize;
+	public Integer getResourceLimit() {
+		return myResourceLimit;
 	}
 }

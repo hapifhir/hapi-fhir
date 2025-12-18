@@ -79,7 +79,7 @@ public class MergeOperationProviderSvc implements IMergeOperationProviderSvc {
 	 * @param thePreview           Preview mode flag
 	 * @param theDeleteSource      Delete source flag
 	 * @param theResultResource    Optional result resource provided by client
-	 * @param theResourceLimit     Optional batch size limit
+	 * @param theResourceLimit     Optional resource limit
 	 * @param theRequestDetails    Servlet request details containing HTTP request/response and context
 	 * @return Parameters resource containing merge operation results
 	 */

@@ -38,12 +38,6 @@ import java.util.List;
 /**
  * Merge test scenario implementation for Observation resources.
  *
- * This scenario:
- * - Creates Observation resources with identifiers and status=FINAL
- * - Creates referencing resources: DiagnosticReport, Procedure, MedicationRequest
- * - Validates extension-based links (since Observation doesn't use native links)
- * - Does NOT validate active field (Observation has status instead)
- *
  * <p><b>Key difference from Practitioner</b>: Observation resources do NOT have
  * an "active" field, so merge operations should not attempt to set active=false
  * on the source resource.</p>

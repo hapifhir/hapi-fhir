@@ -31,18 +31,6 @@ import org.hl7.fhir.r4.model.Practitioner;
  *
  * <p>All common test methods are inherited from {@link AbstractGenericMergeR4Test}.
  * This class only configures the Practitioner-specific scenario and resource type name.
- *
- * <p>Test coverage includes:
- * - Basic merge matrix: sync/async × delete/no-delete × preview/execute × with/without result-resource
- * - Identifier resolution: source/target by ID or identifiers × sync/async
- * - Extension link validation: replaces, replaced-by, no links before, deleted source, multiple types,
- * preserve target
- * - Edge cases and error handling: missing source, missing target, source==target, non-existent identifiers
- * - Provenance validation: sync, async, not created for preview
- * - Active field validation: source.active set to false, target.active remains true
- * - Result resource validation: overrides target data, preserves references
- *
- * <p>Comprehensive tests for Practitioner merge operations.
  */
 public class PractitionerMergeR4Test extends AbstractGenericMergeR4Test<Practitioner> {
 

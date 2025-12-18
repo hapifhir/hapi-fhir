@@ -145,13 +145,11 @@ public class MergeResourceHelper {
 	}
 
 	/**
-	 * Prepares the target resource for update after merge by:
+	 * Prepares the target resource for update by:
 	 * 1. Using the provided result resource if supplied by the client
 	 * 2. Adding a "replaces" link from target to source (if source is not being deleted)
 	 * 3. Copying all identifiers from source to target and marking them as "old"
 	 * <p>
-	 * This method works generically with any resource type. Resources without an identifier field
-	 * (like Bundle) will have the identifier copy step silently skipped.
 	 *
 	 * @param theTargetResource the target resource that will survive the merge
 	 * @param theSourceResource the source resource being merged into the target
@@ -185,7 +183,7 @@ public class MergeResourceHelper {
 	}
 
 	/**
-	 * Prepares the source resource for update after merge by:
+	 * Prepares the source resource for update by:
 	 * 1. Setting active=false if the resource has an active field (e.g., Patient, Practitioner, Organization)
 	 * 2. Adding a "replaced-by" link to the target resource
 	 * <p>
@@ -216,8 +214,6 @@ public class MergeResourceHelper {
 	 * Copies each identifier from theSourceResource to theTargetResource, after checking that theTargetResource does
 	 * not already contain the source identifier. Marks the copied identifiers marked as old.
 	 * <p>
-	 * This method works generically with any resource type that has an identifier element. For resources without
-	 * identifiers (like Bundle), this method silently does nothing.
 	 *
 	 * @param theSourceResource the source resource to copy identifiers from
 	 * @param theTargetResource the target resource to copy identifiers to
@@ -227,7 +223,7 @@ public class MergeResourceHelper {
 		List<IBase> sourceIdentifiers = myFhirTerser.getValues(theSourceResource, "identifier");
 
 		if (sourceIdentifiers.isEmpty()) {
-			// Resource doesn't have identifiers or has none set - skip
+			// Resource doesn't have identifiers - skip
 			return;
 		}
 

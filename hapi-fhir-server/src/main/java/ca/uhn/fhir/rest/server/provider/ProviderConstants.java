@@ -312,9 +312,9 @@ public class ProviderConstants {
 	public static final String OPERATION_MERGE_PARAM_RESULT_RESOURCE = "result-resource";
 
 	/**
-	 * The following are common to Patient/$merge and  $hapi.fhir.merge (resource agnostic merge)
+	 * The following are common to Patient/$merge and  {ResourceType}/$hapi.fhir.merge (generic resource merge)
 	 */
-	public static final String OPERATION_MERGE_PARAM_BATCH_SIZE = "batch-size";
+	public static final String OPERATION_MERGE_PARAM_RESOURCE_LIMIT = OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT;
 
 	public static final String OPERATION_MERGE_PARAM_PREVIEW = "preview";
 	public static final String OPERATION_MERGE_PARAM_DELETE_SOURCE = "delete-source";
@@ -324,7 +324,7 @@ public class ProviderConstants {
 	public static final String OPERATION_MERGE_OUTPUT_PARAM_TASK = OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
 
 	/**
-	 * Operation name for the $hapi.fhir.merge operation (generic resource merge)
+	 * Operation name for the {ResourceType}/$hapi.fhir.merge operation (generic resource merge)
 	 */
 	public static final String OPERATION_HAPI_FHIR_MERGE = "$hapi.fhir.merge";
 

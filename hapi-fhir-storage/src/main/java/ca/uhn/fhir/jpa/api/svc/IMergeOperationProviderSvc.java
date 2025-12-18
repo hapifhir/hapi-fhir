@@ -33,7 +33,7 @@ import java.util.List;
  * Service interface for merge operation provider functionality.
  * Handles the common logic for merge operations across different resource types.
  *
- * @since 8.7.0
+ * @since 8.8.0
  */
 public interface IMergeOperationProviderSvc {
 
@@ -47,7 +47,7 @@ public interface IMergeOperationProviderSvc {
 	 * @param thePreview           Preview mode flag
 	 * @param theDeleteSource      Delete source flag
 	 * @param theResultResource    Optional result resource provided by client
-	 * @param theResourceLimit     Optional batch size limit
+	 * @param theResourceLimit     Optional resource limit
 	 * @param theRequestDetails    Servlet request details containing HTTP request/response and context
 	 * @return Parameters resource containing merge operation results
 	 */

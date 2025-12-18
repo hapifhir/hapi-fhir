@@ -34,18 +34,6 @@ import org.hl7.fhir.r4.model.Observation;
  *
  * <p><b>Key difference from Practitioner</b>: Observation resources do NOT have
  * an "active" field, so the merge operation does not set source.active=false.
- *
- * <p>Test coverage includes:
- * - Basic merge matrix: sync/async × delete/no-delete × preview/execute × with/without result-resource
- * - Identifier resolution: source/target by ID or identifiers × sync/async
- * - Extension link validation: replaces, replaced-by, no links before, deleted source, multiple types,
- * preserve target
- * - Edge cases and error handling: missing source, missing target, source==target, non-existent identifiers
- * - Provenance validation: sync, async, not created for preview
- * - Status field validation: source/target status handling (via scenario, not directly modified)
- * - Result resource validation: overrides target data, preserves references
- *
- * <p>Comprehensive tests for Observation merge operations.
  */
 public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observation> {
 

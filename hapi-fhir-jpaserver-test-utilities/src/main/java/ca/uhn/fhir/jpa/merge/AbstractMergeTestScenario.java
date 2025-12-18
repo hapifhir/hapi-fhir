@@ -46,6 +46,8 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,30 +75,34 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <p>This class provides a unified implementation combining three responsibilities:
  * <ol>
  *   <li><b>Builder</b>: Fluent API for configuring test data</li>
- *   <li><b>Data Holder</b>: Stores created resources after createTestData()</li>
+ *   <li><b>Data Holder</b>: Stores info about created resources after persistTestData()</li>
  *   <li><b>Strategy</b>: Common implementations for resource operations and validations</li>
  * </ol>
  *
- * <p>Subclasses only need to implement resource-specific methods:
+ * <p>Subclasses must implement resource-specific abstract methods:
  * <ul>
  *   <li>{@link #getResourceTypeName()}</li>
  *   <li>{@link #getResourceClass()}</li>
  *   <li>{@link #createResource(List)}</li>
  *   <li>{@link #createReferencingResource(String, IIdType)}</li>
+ *   <li>{@link #createReferencingResource()}</li>
  *   <li>{@link #assertActiveFieldIfSupported(IBaseResource, boolean)}</li>
+ *   <li>{@link #withOneReferencingResource()}</li>
+ *   <li>{@link #withMultipleReferencingResources()}</li>
+ *   <li>{@link #withMultipleReferencingResources(int)}</li>
  * </ul>
  *
  * <p>The scenario has two states:
  * <ul>
- *   <li><b>Configuration State</b>: Before createTestData() - builder methods available</li>
- *   <li><b>Data State</b>: After createTestData() - data accessors available</li>
+ *   <li><b>Configuration State</b>: Before persistTestData() - builder methods available</li>
+ *   <li><b>Data State</b>: After persistTestData() - data accessors available</li>
  * </ul>
  *
  * @param <T> the FHIR resource type this scenario handles
  */
 public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AbstractMergeTestScenario.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(AbstractMergeTestScenario.class);
 
 	// Dependencies
 	protected final DaoRegistry myDaoRegistry;
@@ -154,19 +160,57 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		myHelper = theHelper;
 	}
 
-	// ================================================
-	// BUILDER METHODS
-	// ================================================
-
+	/**
+	 * Get the FHIR resource type name (e.g., "Practitioner", "Observation").
+	 *
+	 * @return The resource type name
+	 */
 	@Nonnull
-	public AbstractMergeTestScenario<T> withReferences(@Nonnull List<ReferencingTestResourceType> theConfigs) {
-		myReferencingTestResourceTypes.addAll(theConfigs);
-		return this;
-	}
+	protected abstract String getResourceTypeName();
 
 	/**
+	 * Get the Java class for this resource type.
+	 *
+	 * @return The resource class
+	 */
+	@Nonnull
+	protected abstract Class<T> getResourceClass();
+
+	/**
+	 * Create a resource instance with the given identifier objects.
+	 *
+	 * @param theIdentifiers Identifiers to add
+	 * @return A new resource with the identifiers
+	 */
+	@Nonnull
+	public abstract T createResource(@Nonnull List<Identifier> theIdentifiers);
+
+	/**
+	 * Create a referencing resource (e.g., Encounter.subject, DiagnosticReport.result).
+	 *
+	 * @param theReferencingResourceType The resource type that will contain the reference
+	 * @param theReferencedId            The ID of the resource being referenced
+	 * @return A new referencing resource
+	 */
+	@Nonnull
+	protected abstract IBaseResource createReferencingResource(
+			@Nonnull String theReferencingResourceType, @Nonnull IIdType theReferencedId);
+
+	/**
+	 * Creates a single referencing resource for concurrent modification testing.
+	 * This resource references the source resource and is used to simulate
+	 * race conditions during async merge operations.
+	 *
+	 * <p>Implementations should call {@link #createReferencingResource(String, IIdType)}
+	 * with a hardcoded resource type appropriate for this scenario.
+	 *
+	 * @return A new referencing resource that references the source resource
+	 */
+	@Nonnull
+	public abstract IBaseResource createReferencingResource();
+	/**
 	 * Configure scenario with one referencing resource of the primary type.
-	 * Subclasses define which resource type and count are used.
+	 * Subclasses define which resource type is used.
 	 *
 	 * @return this scenario for chaining
 	 */
@@ -188,6 +232,33 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	 * @return this scenario for chaining
 	 */
 	public abstract AbstractMergeTestScenario<T> withMultipleReferencingResources(int theCount);
+
+	/**
+	 * Template method for subclasses to implement active field assertions.
+	 *
+	 * <p>Subclasses must implement this method to either:
+	 * <ul>
+	 *   <li>Perform active field validation if the resource supports it (e.g., Practitioner)</li>
+	 *   <li>Provide an explicit no-op if the resource doesn't support it (e.g., Observation)</li>
+	 * </ul>
+	 *
+	 * <p>This forces implementers to consciously decide and document whether
+	 * their resource type supports the active field.
+	 *
+	 * @param theResource the resource to check
+	 * @param theExpectedValue the expected value of the active field (true for target, false for source)
+	 */
+	protected abstract void assertActiveFieldIfSupported(@Nonnull T theResource, boolean theExpectedValue);
+
+	// ================================================
+	// BUILDER METHODS
+	// ================================================
+
+	@Nonnull
+	public AbstractMergeTestScenario<T> withReferences(@Nonnull List<ReferencingTestResourceType> theConfigs) {
+		myReferencingTestResourceTypes.addAll(theConfigs);
+		return this;
+	}
 
 	@Nonnull
 	public AbstractMergeTestScenario<T> withResultResource(boolean theCreateResultResource) {
@@ -270,7 +341,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 			referencingResourcesByType.put(resourceType.getResourceType(), idsForType);
 		}
 
-		// Store data state - only IDs
+		// Store data state
 		myVersionlessSourceId = versionlessSourceId;
 		myVersionlessTargetId = versionlessTargetId;
 		myReferencingResourcesByType = referencingResourcesByType;
@@ -343,10 +414,9 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		return Collections.unmodifiableList(myTargetIdentifiers);
 	}
 
-	@Nonnull
 	public List<IIdType> getReferencingResourceIds(@Nonnull String theResourceType) {
 		assertTestDataPersisted();
-		return myReferencingResourcesByType.getOrDefault(theResourceType, Collections.emptyList());
+		return myReferencingResourcesByType.get(theResourceType);
 	}
 
 	@Nonnull
@@ -387,9 +457,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	@Nonnull
-	public List<Identifier> getExpectedIdentifiers() {
-		assertTestDataPersisted();
-
+	public List<Identifier> getExpectedIdentifiersOnTargetAfterMerge() {
 		if (myCreateResultResource) {
 			// Result resource provided - identifiers come from result resource identifiers
 			return new ArrayList<>(getResultResourceIdentifiers());
@@ -421,8 +489,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 	@Nonnull
 	public MergeTestParameters buildMergeOperationParameters(boolean theSourceById, boolean theTargetById) {
-		assertTestDataPersisted();
-
 		MergeTestParameters params =
 				new MergeTestParameters().deleteSource(myDeleteSource).preview(myPreview);
 
@@ -464,8 +530,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	 */
 	@Nonnull
 	public Parameters callMergeOperation(boolean theSourceById, boolean theTargetById) {
-		assertTestDataPersisted();
-
 		// Build parameters with custom identifier resolution
 		MergeTestParameters params = buildMergeOperationParameters(theSourceById, theTargetById);
 
@@ -491,13 +555,8 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 			}
 
 			theParams.resultResource(result);
-			ourLog.debug("Created result resource for merge parameters with ID: {}", result.getIdElement());
 		}
 	}
-
-	// ================================================
-	// STRATEGY METHODS - Common Implementations
-	// ================================================
 
 	@Nonnull
 	public T readResource(@Nonnull IIdType theId) {
@@ -522,13 +581,9 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		IResourceLinkService linkService = myLinkServiceFactory.getServiceForResource(theResource);
 		Reference targetRef = new Reference(theTargetId.toVersionless());
 		linkService.addReplacesLink(theResource, targetRef);
-		ourLog.debug("Added replaces link to {} pointing to {}", theResource.getIdElement(), theTargetId);
 	}
 
 	public void assertSourceResourceState() {
-		assertTestDataPersisted();
-
-		IIdType versionlessSourceId = getVersionlessSourceId();
 		IIdType versionlessTargetId = getVersionlessTargetId();
 
 		if (myDeleteSource) {
@@ -556,8 +611,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	public void assertTargetResourceState() {
-		assertTestDataPersisted();
-
 		// Read target resource
 		T target = readTargetResource();
 
@@ -576,7 +629,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 		// Should have expected identifiers
 		List<Identifier> actualIdentifiers = getIdentifiersFromResource(target);
-		assertIdentifiers(actualIdentifiers, getExpectedIdentifiers());
+		assertIdentifiers(actualIdentifiers, getExpectedIdentifiersOnTargetAfterMerge());
 	}
 
 	/**
@@ -621,8 +674,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	 * @param theExpectTargetToBeUpdated whether the target resource is expected to have been updated (version incremented)
 	 */
 	public void validateResourcesAfterMerge(boolean theExpectTargetToBeUpdated) {
-		assertTestDataPersisted();
-
 		// Validate source resource state
 		assertSourceResourceState();
 
@@ -630,60 +681,10 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		assertTargetResourceState();
 
 		// Validate references to source in referencing resources now point to target (i.e. replace-refences worked)
-		for (String resourceType : getReferencingResourceTypes()) {
-			List<IIdType> referencingIds = getReferencingResourceIds(resourceType);
-			if (!referencingIds.isEmpty()) {
-				assertReferencesUpdated(resourceType);
-			}
-		}
+		assertReferencesUpdated();
 
 		// Validate provenance created for merge operation
 		assertMergeProvenanceCreated(theExpectTargetToBeUpdated);
-	}
-
-	public void assertLinksPresent(
-			@Nonnull T theResource, @Nonnull List<IIdType> theExpectedLinks, @Nonnull String theLinkType) {
-
-		IResourceLinkService linkService = myLinkServiceFactory.getServiceForResourceType(getResourceTypeName());
-
-		List<IBaseReference> actualLinksRefs;
-		if ("replaces".equals(theLinkType)) {
-			actualLinksRefs = linkService.getReplacesLinks(theResource);
-		} else if ("replaced-by".equals(theLinkType)) {
-			actualLinksRefs = linkService.getReplacedByLinks(theResource);
-		} else {
-			throw new IllegalArgumentException("Unknown link type: " + theLinkType);
-		}
-
-		// Convert IBaseReference list to IIdType list for comparison
-		List<IIdType> actualLinks = actualLinksRefs.stream()
-				.map(IBaseReference::getReferenceElement)
-				.map(IIdType::toUnqualifiedVersionless)
-				.collect(Collectors.toList());
-
-		List<IIdType> expectedLinksUnversioned =
-				theExpectedLinks.stream().map(IIdType::toUnqualifiedVersionless).collect(Collectors.toList());
-
-		assertThat(actualLinks)
-				.as("Resource should have expected %s links", theLinkType)
-				.containsExactlyInAnyOrderElementsOf(expectedLinksUnversioned);
-
-		ourLog.debug("Verified {} links present: {}", theLinkType, actualLinks.size());
-	}
-
-	public void assertNoLinks(@Nonnull T theResource) {
-		IResourceLinkService linkService = myLinkServiceFactory.getServiceForResourceType(getResourceTypeName());
-
-		List<IBaseReference> replacesLinks = linkService.getReplacesLinks(theResource);
-		List<IBaseReference> replacedByLinks = linkService.getReplacedByLinks(theResource);
-
-		assertThat(replacesLinks).as("Resource should have no replaces links").isEmpty();
-
-		assertThat(replacedByLinks)
-				.as("Resource should have no replaced-by links")
-				.isEmpty();
-
-		ourLog.debug("Verified no links present on resource");
 	}
 
 	public void assertIdentifiers(
@@ -695,26 +696,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 			Identifier actualIdentifier = theActualIdentifiers.get(i);
 			assertThat(actualIdentifier.equalsDeep(expectedIdentifier)).isTrue();
 		}
-
-		ourLog.debug("Verified {} identifiers match expected", theActualIdentifiers.size());
 	}
-
-	/**
-	 * Template method for subclasses to implement active field assertions.
-	 *
-	 * <p>Subclasses must implement this method to either:
-	 * <ul>
-	 *   <li>Perform active field validation if the resource supports it (e.g., Practitioner)</li>
-	 *   <li>Provide an explicit no-op if the resource doesn't support it (e.g., Observation)</li>
-	 * </ul>
-	 *
-	 * <p>This forces implementers to consciously decide and document whether
-	 * their resource type supports the active field.
-	 *
-	 * @param theResource the resource to check
-	 * @param theExpectedValue the expected value of the active field (true for target, false for source)
-	 */
-	protected abstract void assertActiveFieldIfSupported(@Nonnull T theResource, boolean theExpectedValue);
 
 	// ================================================
 	// OPERATION OUTCOME VALIDATION
@@ -750,12 +732,10 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	 * @param theOutParams the original output parameters from merge operation
 	 */
 	public void validateTaskOutput(@Nonnull Parameters theOutParams) {
-		assertTestDataPersisted();
-
 		Task task = (Task)
 				theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
 
-		// Re-fetch task to get final state with outputs (use myDaoRegistry + myRequestDetails)
+		// Re-fetch task to get final state with outputs
 		IFhirResourceDao<Task> taskDao = myDaoRegistry.getResourceDao(Task.class);
 		task = taskDao.read(task.getIdElement(), myRequestDetails);
 
@@ -822,8 +802,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	public void validatePreviewOutcome(@Nonnull Parameters theOutParams) {
-		assertTestDataPersisted();
-
 		// Calculate expected count: total referencing resources + 2 (source and target)
 		int theExpectedUpdateCount = getTotalReferenceCount() + 2;
 
@@ -841,9 +819,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	 * Validates that input parameters are correctly returned in the merge operation output.
 	 * This validation applies to both synchronous and asynchronous merge operations.
 	 *
-	 * <p>The merge operation must echo back the original input parameters in the response,
-	 * which allows clients to correlate requests with responses and provides an audit trail.
-	 *
 	 * @param theOutParams the output parameters from merge operation
 	 */
 	public void validateInputParametersReturned(@Nonnull Parameters theOutParams) {
@@ -852,30 +827,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		// Extract returned input parameters
 		Parameters returnedInput = (Parameters)
 				theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_INPUT).getResource();
-
-		// Special handling for result-resource parameter if present
-		// Log both resources for debugging if they don't match
-		if (myCreateResultResource) {
-			Resource originalResultResource =
-					(Resource) myInputParameters.getParameter("result-resource").getResource();
-			Resource returnedResultResource =
-					(Resource) returnedInput.getParameter("result-resource").getResource();
-
-			if (!originalResultResource.equalsDeep(returnedResultResource)) {
-				ourLog.info(
-						"Original result-resource:\n{}",
-						myFhirContext
-								.newJsonParser()
-								.setPrettyPrint(true)
-								.encodeResourceToString(originalResultResource));
-				ourLog.info(
-						"Returned result-resource:\n{}",
-						myFhirContext
-								.newJsonParser()
-								.setPrettyPrint(true)
-								.encodeResourceToString(returnedResultResource));
-			}
-		}
 
 		// Deep equality assertion
 		assertThat(returnedInput.equalsDeep(myInputParameters))
@@ -893,7 +844,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	 * @param theRefId Resource ID to read and extract references from
 	 * @return List of reference strings (resourceType/id format)
 	 */
-	private List<String> extractReferenceStrings(IIdType theRefId) {
+	private List<String> readResourceAndExtractReferences(IIdType theRefId) {
 		IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(theRefId.getResourceType());
 		IBaseResource resource = dao.read(theRefId, myRequestDetails);
 
@@ -910,11 +861,16 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		return refStrings;
 	}
 
-	public void assertReferencesUpdated(@Nonnull List<IIdType> theReferencingResourceIds) {
-		assertTestDataPersisted();
+	public void assertReferencesUpdated() {
+		for (String resourceType : getReferencingResourceTypes()) {
+			List<IIdType> referencingResourceIds = getReferencingResourceIds(resourceType);
+			assertReferencesUpdated(referencingResourceIds);
+		}
+	}
 
+	public void assertReferencesUpdated(@Nonnull List<IIdType> theReferencingResourceIds) {
 		for (IIdType refId : theReferencingResourceIds) {
-			List<String> refStrings = extractReferenceStrings(refId);
+			List<String> refStrings = readResourceAndExtractReferences(refId);
 
 			// Verify references contain target and not source
 			assertThat(refStrings)
@@ -931,44 +887,36 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		}
 	}
 
-	public void assertReferencesUpdated(@Nonnull String theResourceType) {
-		assertTestDataPersisted();
-		List<IIdType> referencingResourceIds = getReferencingResourceIds(theResourceType);
-		assertReferencesUpdated(referencingResourceIds);
+	public void assertReferencesNotUpdated() {
+		for (String resourceType : getReferencingResourceTypes()) {
+			List<IIdType> referencingResourceIds = getReferencingResourceIds(resourceType);
+			assertReferencesNotUpdated(referencingResourceIds);
+		}
 	}
 
-	public void assertReferencesNotUpdated() {
-		assertTestDataPersisted();
-		ourLog.debug("Validating references NOT updated in preview mode for source: {}", getVersionlessSourceId());
+	public void assertReferencesNotUpdated(@Nonnull List<IIdType> theReferencingResourceIds) {
+		for (IIdType refId : theReferencingResourceIds) {
+			List<String> refStrings = readResourceAndExtractReferences(refId);
 
-		for (String resourceType : myReferencingResourcesByType.keySet()) {
-			for (IIdType refId : myReferencingResourcesByType.get(resourceType)) {
-				List<String> refStrings = extractReferenceStrings(refId);
+			// Verify references still contain source and not target
+			assertThat(refStrings)
+					.as(
+							"Resource %s should still reference source %s in preview mode",
+							refId, getVersionlessSourceId().getValue())
+					.contains(getVersionlessSourceId().getValue());
 
-				// Verify references still contain source and not target
-				assertThat(refStrings)
-						.as(
-								"Resource %s should still reference source %s in preview mode",
-								refId, getVersionlessSourceId().getValue())
-						.contains(getVersionlessSourceId().getValue());
-
-				assertThat(refStrings)
-						.as(
-								"Resource %s should not reference target %s in preview mode",
-								refId, getVersionlessTargetId().getValue())
-						.doesNotContain(getVersionlessTargetId().getValue());
-			}
+			assertThat(refStrings)
+					.as(
+							"Resource %s should not reference target %s in preview mode",
+							refId, getVersionlessTargetId().getValue())
+					.doesNotContain(getVersionlessTargetId().getValue());
 		}
-
-		ourLog.debug("Verified references not updated in preview mode");
 	}
 
 	// ================================================
 	// PROVENANCE VALIDATION
 	// ================================================
 	public void assertMergeProvenanceCreated(boolean theExpectTargetToBeUpdated) {
-		assertTestDataPersisted();
-
 		// Source is always version 2 in provenance even when deleteSource=true
 		// (provenance increments version to match what delete operation will create)
 		IIdType expectedSourceId = getVersionlessSourceId().withVersion("2");
@@ -994,63 +942,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 				expectedReferencingResourceIds,
 				myExpectedProvenanceAgents);
 	}
-
-	// ================================================
-	// HELPER METHODS
-	// ================================================
-
-	// ================================================
-	// ABSTRACT METHODS - Subclasses must implement
-	// ================================================
-
-	/**
-	 * Get the FHIR resource type name (e.g., "Practitioner", "Observation").
-	 *
-	 * @return The resource type name
-	 */
-	@Nonnull
-	protected abstract String getResourceTypeName();
-
-	/**
-	 * Get the Java class for this resource type.
-	 *
-	 * @return The resource class
-	 */
-	@Nonnull
-	protected abstract Class<T> getResourceClass();
-
-	/**
-	 * Create a resource instance with the given identifier objects.
-	 *
-	 * @param theIdentifiers Identifiers to add
-	 * @return A new resource with the identifiers
-	 */
-	@Nonnull
-	public abstract T createResource(@Nonnull List<Identifier> theIdentifiers);
-
-	/**
-	 * Create a referencing resource (e.g., Encounter.subject, DiagnosticReport.result).
-	 *
-	 * @param theReferencingResourceType The resource type that will contain the reference
-	 * @param theReferencedId            The ID of the resource being referenced
-	 * @return A new referencing resource
-	 */
-	@Nonnull
-	protected abstract IBaseResource createReferencingResource(
-			@Nonnull String theReferencingResourceType, @Nonnull IIdType theReferencedId);
-
-	/**
-	 * Creates a single referencing resource for concurrent modification testing.
-	 * This resource references the source resource and is used to simulate
-	 * race conditions during async merge operations.
-	 *
-	 * <p>Implementations should call {@link #createReferencingResource(String, IIdType)}
-	 * with a hardcoded resource type appropriate for this scenario.
-	 *
-	 * @return A new referencing resource that references the source resource
-	 */
-	@Nonnull
-	public abstract IBaseResource createReferencingResource();
 
 	// ================================================
 	// PRIVATE HELPER METHODS

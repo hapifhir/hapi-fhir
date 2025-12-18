@@ -73,7 +73,7 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 		// Initialize parameter names based on operation type
 		String operationName = mergeJobParameters.getOperationName();
 		if (operationName == null) {
-			// Backward compatibility: old jobs (pre-8.7) don't have operationName field
+			// Backward compatibility: old jobs (pre-8.8) don't have operationName field
 			// Default to Patient merge parameter names
 			operationName = ProviderConstants.OPERATION_MERGE;
 		}

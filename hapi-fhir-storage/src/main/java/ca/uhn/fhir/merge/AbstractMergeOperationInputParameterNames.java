@@ -20,6 +20,7 @@
 package ca.uhn.fhir.merge;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_DELETE_SOURCE;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_UNDO_MERGE;
 
 /**
@@ -74,5 +75,7 @@ public abstract class AbstractMergeOperationInputParameterNames {
 	/**
 	 * @return the parameter name for the delete source flag (always "delete-source")
 	 */
-	public abstract String getDeleteSourceParameterName();
+	public String getDeleteSourceParameterName() {
+		return OPERATION_MERGE_PARAM_DELETE_SOURCE;
+	}
 }
