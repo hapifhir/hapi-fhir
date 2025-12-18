@@ -10,6 +10,8 @@ import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.PackageInformation;
@@ -27,6 +29,7 @@ import java.util.concurrent.ForkJoinTask;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
@@ -224,6 +227,30 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 		assertThat(actual.getSnapshot().getElementFirstRep().getId()).isEqualTo("FOO");
 		PackageInformation sourcePackage = actual.getSourcePackage();
 		assertThat(sourcePackage.getId()).isEqualTo("hl7.fhir.r999.core");
+	}
+
+	@Test
+	public void fetchCodeSystem_withVersion() {
+		// setup
+		String systemUrl = "http://codesystems.com/system";
+		String version = "v1";
+		setupValidation();
+
+		CodeSystem csV1 = new CodeSystem();
+		csV1.setUrl(systemUrl);
+		csV1.setVersion(version);
+		csV1.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		csV1.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		csV1.addConcept().setCode("code1").setDisplay("Code 1");
+		when(myValidationSupport.fetchCodeSystem(anyString())).thenReturn(csV1);
+
+		// execute
+		org.hl7.fhir.r5.model.CodeSystem codeSystem = myWorkerContextWrapper.fetchCodeSystem(systemUrl, version, null);
+
+		// Verify
+		verify(myValidationSupport, times(1)).fetchCodeSystem(systemUrl + "|" + version);
+		assertThat(codeSystem.getUrl()).isEqualTo(systemUrl);
+		assertThat(codeSystem.getVersion()).isEqualTo(version);
 	}
 
 	@Test

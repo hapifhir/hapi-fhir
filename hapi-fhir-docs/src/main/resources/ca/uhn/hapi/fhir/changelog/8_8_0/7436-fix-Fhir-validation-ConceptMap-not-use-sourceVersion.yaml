@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 7436
+jira: SMILE-9919
+title: "When creating or updating a ConceptMap via the FHIR endpoint with request validation enabled, 
+  the `sourceVersion` is now correctly considered during validation. This ensures that the appropriate CodeSystem 
+  version is used for validating the source codes in the ConceptMap, preventing erroneous validation failures when 
+  multiple versions of a CodeSystem exist."
