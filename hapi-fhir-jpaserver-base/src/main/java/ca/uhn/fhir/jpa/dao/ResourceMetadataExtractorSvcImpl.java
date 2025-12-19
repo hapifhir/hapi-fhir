@@ -65,12 +65,7 @@ public class ResourceMetadataExtractorSvcImpl implements IResourceMetadataExtrac
 		myResourceHistoryProvenanceDao = theResourceHistoryProvenanceDao;
 	}
 
-	/**
-	 * Extract tags from a resource history entity.
-	 *
-	 * @param theHistoryEntity The resource history entity
-	 * @return Collection of tags associated with the resource
-	 */
+	@Override
 	public Collection<? extends BaseTag> getTags(ResourceHistoryTable theHistoryEntity) {
 		Collection<? extends BaseTag> tagList = null;
 		switch (myStorageSettings.getTagStorageMode()) {
@@ -91,12 +86,7 @@ public class ResourceMetadataExtractorSvcImpl implements IResourceMetadataExtrac
 		return tagList;
 	}
 
-	/**
-	 * Extract tags from a resource entity.
-	 *
-	 * @param theResourceEntity The resource entity
-	 * @return Collection of tags associated with the resource
-	 */
+	@Override
 	public Collection<? extends BaseTag> getTags(ResourceTable theResourceEntity) {
 		Collection<? extends BaseTag> tagList = null;
 		switch (myStorageSettings.getTagStorageMode()) {
@@ -115,12 +105,7 @@ public class ResourceMetadataExtractorSvcImpl implements IResourceMetadataExtrac
 		return tagList;
 	}
 
-	/**
-	 * Batch extract tags for multiple resource history entities.
-	 *
-	 * @param theHistoryEntities Collection of resource history entities
-	 * @return Map of resource IDs to their tags
-	 */
+	@Override
 	public Map<JpaPid, Collection<BaseTag>> getTagsBatch(Collection<ResourceHistoryTable> theHistoryEntities) {
 		return switch (myStorageSettings.getTagStorageMode()) {
 			case VERSIONED -> getPidToTagMapVersioned(theHistoryEntities);
@@ -211,12 +196,7 @@ public class ResourceMetadataExtractorSvcImpl implements IResourceMetadataExtrac
 		return tagMap;
 	}
 
-	/**
-	 * Extract provenance details from a resource history entity.
-	 *
-	 * @param theHistoryEntity The resource history entity
-	 * @return Provenance details containing source URI and request ID
-	 */
+	@Override
 	public ProvenanceDetails getProvenanceDetails(ResourceHistoryTable theHistoryEntity) {
 		String provenanceSourceUri = theHistoryEntity.getSourceUri();
 		String provenanceRequestId = theHistoryEntity.getRequestId();
