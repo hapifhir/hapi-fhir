@@ -220,7 +220,7 @@ public class BatchResourceLoader {
 	private void postProcessResource(
 			IBaseResource theResource,
 			ResourceHistoryTable theHistoryEntity,
-			Collection<BaseTag> theTags,
+			Collection<? extends BaseTag> theTags,
 			List<ResourceLoadResult> theResult,
 			boolean theForHistoryOperation) {
 		ProvenanceDetails provenanceDetails = myResourceMetadataExtractorSvc.getProvenanceDetails(theHistoryEntity);
@@ -228,8 +228,11 @@ public class BatchResourceLoader {
 		String provenanceRequestId = provenanceDetails.provenanceRequestId();
 
 		// 1. Fill MetaData
+		if (theTags == null) {
+			theTags = myResourceMetadataExtractorSvc.getTags(theHistoryEntity);
+		}
 		myJpaStorageResourceParser.populateResourceMetadata(
-				theHistoryEntity, theForHistoryOperation, theTags, theHistoryEntity.getVersion(), theResource);
+			theHistoryEntity, theForHistoryOperation, theTags, theHistoryEntity.getVersion(), theResource);
 
 		// 2. Handle source (provenance)
 		MetaUtil.populateResourceSource(myFhirContext, provenanceSourceUri, provenanceRequestId, theResource);
