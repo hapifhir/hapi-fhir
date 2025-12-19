@@ -228,9 +228,6 @@ public class BatchResourceLoader {
 		String provenanceRequestId = provenanceDetails.provenanceRequestId();
 
 		// 1. Fill MetaData
-		if (theTags == null) {
-			theTags = myResourceMetadataExtractorSvc.getTags(theHistoryEntity);
-		}
 		myJpaStorageResourceParser.populateResourceMetadata(
 				theHistoryEntity, theForHistoryOperation, theTags, theHistoryEntity.getVersion(), theResource);
 
