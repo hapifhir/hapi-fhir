@@ -232,7 +232,7 @@ public class BatchResourceLoader {
 			theTags = myResourceMetadataExtractorSvc.getTags(theHistoryEntity);
 		}
 		myJpaStorageResourceParser.populateResourceMetadata(
-			theHistoryEntity, theForHistoryOperation, theTags, theHistoryEntity.getVersion(), theResource);
+				theHistoryEntity, theForHistoryOperation, theTags, theHistoryEntity.getVersion(), theResource);
 
 		// 2. Handle source (provenance)
 		MetaUtil.populateResourceSource(myFhirContext, provenanceSourceUri, provenanceRequestId, theResource);
