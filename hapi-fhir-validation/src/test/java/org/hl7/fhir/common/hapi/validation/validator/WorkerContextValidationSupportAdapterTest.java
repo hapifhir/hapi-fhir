@@ -230,7 +230,7 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 	}
 
 	@Test
-	public void fetchCodeSystem_withVersion() {
+	public void testFetchCodeSystem_withVersion() {
 		// setup
 		String systemUrl = "http://codesystems.com/system";
 		String version = "v1";
