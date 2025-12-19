@@ -75,4 +75,9 @@ public class TypedPidAndVersionListWorkChunkJson implements IModelJson {
 		}
 		myTypedPidAndVersions.add(new TypedPidAndVersionJson(theResourceType, null, thePid.toString(), theVersionId));
 	}
+
+	@VisibleForTesting
+	public void addTypedPidWithNullPartitionForUnitTest(String theResourceType, Long thePid) {
+		addTypedPidWithNullPartitionForUnitTest(theResourceType, thePid, null);
+	}
 }

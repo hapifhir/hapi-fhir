@@ -219,20 +219,18 @@ class ValidatorWrapper {
 		messages = messages.stream()
 				.filter(m -> m.getMessageId() == null
 						|| !(m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_BINDING_NOSOURCE)
-								|| m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_BINDING_NOSOURCE2)
 								|| (m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_VALUESET_NOTFOUND)
 										&& m.getMessage().contains("http://hl7.org/fhir/ValueSet/mimetypes"))))
 				.collect(Collectors.toList());
 
-		if (myErrorForUnknownProfiles) {
-			messages.stream()
-					.filter(m -> m.getMessageId() != null
-							&& (m.getMessageId().equals(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN)
-									|| m.getMessageId()
-											.equals(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY)))
-					.filter(m -> m.getLevel() == ValidationMessage.IssueSeverity.WARNING)
-					.forEach(m -> m.setLevel(ValidationMessage.IssueSeverity.ERROR));
-		}
+		messages.stream()
+				.filter(m -> I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN.equals(m.getMessageId())
+						|| I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY.equals(m.getMessageId()))
+				.forEach(m -> m.setLevel(
+						myErrorForUnknownProfiles
+								? ValidationMessage.IssueSeverity.ERROR
+								: ValidationMessage.IssueSeverity.WARNING));
+
 		return messages;
 	}
 

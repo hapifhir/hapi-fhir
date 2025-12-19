@@ -22,6 +22,7 @@ package ca.uhn.fhir.cache;
 import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
@@ -75,18 +76,21 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 
 	private Integer myMaxRetryCount = null;
 	private boolean myInitialized = false;
+	private final RequestPartitionId myRequestPartitionId;
 
-	protected BaseResourceCacheSynchronizer(String theResourceName) {
-		myResourceName = theResourceName;
+	protected BaseResourceCacheSynchronizer(String theResourceName, RequestPartitionId theRequestPartitionId) {
+		this(theResourceName, theRequestPartitionId, null, null);
 	}
 
 	protected BaseResourceCacheSynchronizer(
 			String theResourceName,
+			RequestPartitionId theRequestPartitionId,
 			IResourceChangeListenerRegistry theResourceChangeListenerRegistry,
 			DaoRegistry theDaoRegistry) {
 		myResourceName = theResourceName;
-		myDaoRegistry = theDaoRegistry;
+		myRequestPartitionId = theRequestPartitionId;
 		myResourceChangeListenerRegistry = theResourceChangeListenerRegistry;
+		myDaoRegistry = theDaoRegistry;
 	}
 
 	/**
@@ -106,7 +110,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 
 		IResourceChangeListenerCache resourceCache =
 				myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
-						myResourceName, provideSearchParameterMap(), this, REFRESH_INTERVAL);
+						myResourceName, myRequestPartitionId, provideSearchParameterMap(), this, REFRESH_INTERVAL);
 		resourceCache.forceRefresh();
 		myInitialized = true;
 	}

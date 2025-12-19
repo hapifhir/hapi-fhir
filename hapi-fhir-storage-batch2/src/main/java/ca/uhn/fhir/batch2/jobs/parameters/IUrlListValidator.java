@@ -24,6 +24,9 @@ import jakarta.annotation.Nullable;
 
 import java.util.List;
 
+/**
+ * TODO: Once Mongo is retired, this entire class can be removed
+ */
 public interface IUrlListValidator {
 	@Nullable
 	List<String> validateUrls(@Nonnull List<String> theUrls);

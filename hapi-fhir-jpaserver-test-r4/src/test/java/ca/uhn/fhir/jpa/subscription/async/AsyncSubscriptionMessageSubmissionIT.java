@@ -3,7 +3,9 @@ package ca.uhn.fhir.jpa.subscription.async;
 import ca.uhn.fhir.broker.TestMessageListenerWithLatch;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
@@ -21,7 +23,9 @@ import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Subscription;
@@ -29,6 +33,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
@@ -37,8 +43,10 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.Collections;
 import java.util.List;
 
+import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -162,6 +170,43 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {"[Observation]","Observation?identifier=1"})
+	// the purpose of this test is to assert that a resource matching a given subscription is
+	// delivered asynchronously to the subscription processing pipeline.
+	public void testAsynchronousDeliveryOfDeletedResourceMatchingASubscription_willSucceed(String theCriteria) throws Exception {
+		String aCode = "zoop";
+		String aSystem = "SNOMED-CT";
+
+		// given
+		Observation obs = sendObservation(aCode, aSystem);
+		List<Extension> deletedResourceExtension = Collections.singletonList(new Extension()
+			.setUrl(EX_SEND_DELETE_MESSAGES)
+			.setValue(new BooleanType(true)));
+		createAndSubmitSubscriptionWithCriteria(theCriteria, deletedResourceExtension);
+		waitForActivatedSubscriptionCount(1);
+
+		// when
+		DaoMethodOutcome outcome =  myObservationDao.delete(obs.getIdElement(), mySrd );
+
+		assertCountOfResourcesNeedingSubmission(2);  // the subscription and the observation
+		assertCountOfResourcesReceivedAtSubscriptionTerminalEndpoint(0);
+
+		// since scheduled tasks are disabled during tests, let's trigger a submission
+		// just like the AsyncResourceModifiedProcessingSchedulerSvc would.
+		myTestMessageListenerWithLatchWithLatch.setExpectedCount(1);
+		myAsyncResourceModifiedSubmitterSvc.runDeliveryPass();
+		List<HookParams> hookParams =  myTestMessageListenerWithLatchWithLatch.awaitExpected();
+
+		//then
+		assertCountOfResourcesNeedingSubmission(0);
+		assertCountOfResourcesReceivedAtSubscriptionTerminalEndpoint(1);
+
+		Observation observation = (Observation) fetchSingleResourceFromSubscriptionTerminalEndpoint();
+		assertEquals("1", observation.getIdElement().getVersionIdPart());
+
+	}
+
 	private void assertCountOfResourcesNeedingSubmission(int theExpectedCount) {
 		assertThat(myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime(
 			Pageable.unpaged()))
@@ -169,6 +214,10 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 	}
 
 	private Subscription createAndSubmitSubscriptionWithCriteria(String theCriteria) {
+		return createAndSubmitSubscriptionWithCriteria(theCriteria, null);
+	}
+
+	private Subscription createAndSubmitSubscriptionWithCriteria(String theCriteria, List<Extension> extensions) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
@@ -178,6 +227,11 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 		channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
 		channel.setPayload("application/fhir+json");
 		channel.setEndpoint("channel:my-queue-name");
+
+		if(extensions != null && !extensions.isEmpty()) {
+			subscription.setExtension(extensions);
+			channel.setExtension(extensions);
+		}
 
 		subscription.setChannel(channel);
 		postOrPutSubscription(subscription);

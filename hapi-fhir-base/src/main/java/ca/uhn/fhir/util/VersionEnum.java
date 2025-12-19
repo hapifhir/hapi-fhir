@@ -201,6 +201,10 @@ public enum VersionEnum {
 		return ordinal() > theVersionEnum.ordinal();
 	}
 
+	public boolean isEqualOrNewerThan(VersionEnum theVersionEnum) {
+		return ordinal() >= theVersionEnum.ordinal();
+	}
+
 	public String getVersionedDocsSlug() {
 		return this.name().replace("V", "").replaceAll("_", ".");
 	}

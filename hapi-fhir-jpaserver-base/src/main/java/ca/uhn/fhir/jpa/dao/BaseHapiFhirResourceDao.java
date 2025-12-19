@@ -122,6 +122,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.annotations.VisibleForTesting;
@@ -140,8 +141,10 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.utilities.i18n.I18nConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -865,11 +868,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		preDelete(resourceToDelete, entity, theRequestDetails);
 
 		ResourceTable savedEntity = updateEntityForDelete(theRequestDetails, theTransactionDetails, entity);
+		IIdType idBeforeDelete = new IdDt(resourceToDelete.getIdElement());
 		resourceToDelete.setId(entity.getIdDt());
 
 		// Notify JPA interceptors
 		HookParams hookParams = new HookParams()
 				.add(IBaseResource.class, resourceToDelete)
+				.add(IIdType.class, idBeforeDelete)
 				.add(RequestDetails.class, theRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 				.add(TransactionDetails.class, theTransactionDetails)
@@ -934,23 +939,32 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			@Nonnull TransactionDetails theTransactionDetails) {
 		validateDeleteEnabled();
 
+		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(theUrl);
+		SearchParameterMap paramMap = resourceSearch.getSearchParameterMap();
+
+		RequestPartitionId requestPartitionId =
+				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
+						theRequestDetails, myResourceName, paramMap);
+
 		return myTransactionService
 				.withRequest(theRequestDetails)
+				.withRequestPartitionId(requestPartitionId)
 				.withTransactionDetails(theTransactionDetails)
-				.execute(tx -> doDeleteByUrl(theUrl, deleteConflicts, theTransactionDetails, theRequestDetails));
+				.execute(tx ->
+						doDeleteByUrl(theUrl, paramMap, deleteConflicts, theTransactionDetails, theRequestDetails));
 	}
 
 	@Nonnull
 	private DeleteMethodOutcome doDeleteByUrl(
 			String theUrl,
+			SearchParameterMap theParamMap,
 			DeleteConflictList deleteConflicts,
 			TransactionDetails theTransactionDetails,
 			RequestDetails theRequestDetails) {
-		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(theUrl);
-		SearchParameterMap paramMap = resourceSearch.getSearchParameterMap();
-		paramMap.setLoadSynchronous(true);
 
-		Set<JpaPid> resourceIds = myMatchResourceUrlService.search(paramMap, myResourceType, theRequestDetails, null);
+		theParamMap.setLoadSynchronous(true);
+		Set<JpaPid> resourceIds =
+				myMatchResourceUrlService.search(theParamMap, myResourceType, theRequestDetails, null);
 
 		if (resourceIds.size() > 1) {
 			if (!getStorageSettings().isAllowMultipleDelete()) {
@@ -1044,6 +1058,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			preDelete(resourceToDelete, entity, theRequestDetails);
 
 			updateEntityForDelete(theRequestDetails, transactionDetails, entity);
+			IdType oldVersionId = new IdType(entity.getIdDt().getValue());
 			resourceToDelete.setId(entity.getIdDt());
 
 			// Notify JPA interceptors
@@ -1052,6 +1067,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				public void beforeCommit(boolean readOnly) {
 					HookParams hookParams = new HookParams()
 							.add(IBaseResource.class, resourceToDelete)
+							.add(IIdType.class, oldVersionId)
 							.add(RequestDetails.class, theRequestDetails)
 							.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 							.add(TransactionDetails.class, transactionDetails)
@@ -1663,7 +1679,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.withRequest(theRequest)
 				.withTransactionDetails(transactionDetails)
 				.withRequestPartitionId(requestPartitionId)
-				.read(() -> doReadInTransaction(theId, theRequest, theDeletedOk, requestPartitionId));
+				.read(partition -> doReadInTransaction(theId, theRequest, theDeletedOk, partition));
 	}
 
 	private T doReadInTransaction(
@@ -1748,6 +1764,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		} else {
 			entity = myEntityManager.find(ResourceTable.class, jpaPid);
 		}
+
+		IIdType id = myFhirContext.getVersion().newIdType(entity.getResourceType(), entity.getFhirId());
+		retVal.setResourceId(id);
 
 		if (entity == null) {
 			retVal.addWarning("Unable to find entity with PID: " + jpaPid.getId());
@@ -1998,7 +2017,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 										theId.getVersionIdPart(),
 										theId.toUnqualifiedVersionless()));
 			}
-			if (entity.getVersion() != theId.getVersionIdPartAsLong()) {
+			if (entity != null && entity.getVersion() != theId.getVersionIdPartAsLong()) {
 				entity = null;
 			}
 		}
@@ -2278,7 +2297,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.withRequest(theRequest)
 				.withTransactionDetails(transactionDetails)
 				.withRequestPartitionId(requestPartitionId)
-				.searchList(() -> {
+				.searchList(partition -> {
 					if (isNull(theParams.getLoadSynchronousUpTo())) {
 						theParams.setLoadSynchronousUpTo(myStorageSettings.getInternalSynchronousSearchSize());
 					}
@@ -2292,7 +2311,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 					SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
 					try (IResultIterator<JpaPid> iter =
-							builder.createQuery(theParams, searchRuntimeDetails, theRequest, requestPartitionId)) {
+							builder.createQuery(theParams, searchRuntimeDetails, theRequest, partition)) {
 						while (iter.hasNext()) {
 							ids.add(iter.next());
 						}
@@ -2325,8 +2344,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		//noinspection unchecked
 		return (Stream<PID>) myTransactionService
 				.withRequest(theRequest)
-				.search(() ->
-						builder.createQueryStream(theParams, searchRuntimeDetails, theRequest, requestPartitionId));
+				.withRequestPartitionId(requestPartitionId)
+				.search(partition -> builder.createQueryStream(theParams, searchRuntimeDetails, theRequest, partition));
 	}
 
 	@Override
@@ -2353,13 +2372,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myTransactionService
 				.withRequest(theRequest)
 				.withPropagation(Propagation.REQUIRED)
-				.searchList(() -> {
+				.withRequestPartitionId(requestPartitionId)
+				.searchList(partition -> {
 					ISearchBuilder<JpaPid> builder =
 							mySearchBuilderFactory.newSearchBuilder(getResourceName(), getResourceType());
 					Stream<JpaPid> pidStream =
-							builder.createQueryStream(theParams, searchRuntimeDetails, theRequest, requestPartitionId);
+							builder.createQueryStream(theParams, searchRuntimeDetails, theRequest, partition);
 
-					Stream<V> transformedStream = transform.apply(theRequest, pidStream, requestPartitionId);
+					Stream<V> transformedStream = transform.apply(theRequest, pidStream, partition);
 
 					return transformedStream.collect(Collectors.toList());
 				});
@@ -2886,6 +2906,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			result = validator.validateWithResult(theRawResource, options);
 		} else {
 			result = validator.validateWithResult(theResource, options);
+		}
+
+		if (isNotBlank(theProfile)) {
+			// The $validate operation SHALL return error if the server cannot validate against the nominated profile.
+			// See https://www.hl7.org/fhir/resource-operation-validate.html
+			// even if FhirInstanceValidator.setErrorForUnknownProfiles(false) has been set
+			result.getMessages().stream()
+					.filter(m -> I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN.equals(m.getMessageId())
+							&& m.getSeverity() != ResultSeverityEnum.ERROR
+							&& m.getSeverity() != ResultSeverityEnum.FATAL)
+					.forEach(m -> m.setSeverity(ResultSeverityEnum.ERROR));
 		}
 
 		MethodOutcome retVal = new MethodOutcome();

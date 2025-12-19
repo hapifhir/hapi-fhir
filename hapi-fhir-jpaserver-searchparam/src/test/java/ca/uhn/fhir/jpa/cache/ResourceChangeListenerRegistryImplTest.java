@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
@@ -77,7 +78,7 @@ class ResourceChangeListenerRegistryImplTest {
 	@BeforeEach
 	public void before() {
 		Set<IResourceChangeListenerCache> entries = new HashSet<>();
-		IResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(PATIENT_RESOURCE_NAME, ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
+		IResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(PATIENT_RESOURCE_NAME, RequestPartitionId.allPartitions(), ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
 		entries.add(cache);
 		when(myInMemoryResourceMatcher.canBeEvaluatedInMemory(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
 	}
@@ -85,7 +86,7 @@ class ResourceChangeListenerRegistryImplTest {
 	@Test
 	public void addingListenerForNonResourceFails() {
 		try {
-			myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Foo", ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
+			myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Foo", RequestPartitionId.allPartitions(), ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
 			fail("");
 		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1684) + "Unknown resource name \"Foo\" (this name is not known in FHIR version \"R4\")", e.getMessage());
@@ -96,7 +97,7 @@ class ResourceChangeListenerRegistryImplTest {
 	public void addingNonInMemorySearchParamFails() {
 		try {
 			mockInMemorySupported(InMemoryMatchResult.unsupportedFromReason("TEST REASON"));
-			myResourceChangeListenerRegistry.registerResourceResourceChangeListener(PATIENT_RESOURCE_NAME, ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
+			myResourceChangeListenerRegistry.registerResourceResourceChangeListener(PATIENT_RESOURCE_NAME, RequestPartitionId.allPartitions(), ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
 			fail("");
 		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(482) + "SearchParameterMap SearchParameterMap[] cannot be evaluated in-memory: TEST REASON.  Only search parameter maps that can be evaluated in-memory may be registered.", e.getMessage());
@@ -116,15 +117,15 @@ class ResourceChangeListenerRegistryImplTest {
 	@Test
 	public void registerUnregister() {
 		IResourceChangeListener listener1 = mock(IResourceChangeListener.class);
-		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(PATIENT_RESOURCE_NAME, ourMap, listener1, TEST_REFRESH_INTERVAL_MS);
-		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(OBSERVATION_RESOURCE_NAME, ourMap, listener1, TEST_REFRESH_INTERVAL_MS);
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(PATIENT_RESOURCE_NAME, RequestPartitionId.allPartitions(), ourMap, listener1, TEST_REFRESH_INTERVAL_MS);
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(OBSERVATION_RESOURCE_NAME, RequestPartitionId.allPartitions(), ourMap, listener1, TEST_REFRESH_INTERVAL_MS);
 
 		when(mySearchParamMatcher.match(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
 
 		assertEquals(2, myResourceChangeListenerRegistry.size());
 
 		IResourceChangeListener listener2 = mock(IResourceChangeListener.class);
-		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(PATIENT_RESOURCE_NAME, ourMap, listener2, TEST_REFRESH_INTERVAL_MS);
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(PATIENT_RESOURCE_NAME, RequestPartitionId.allPartitions(), ourMap, listener2, TEST_REFRESH_INTERVAL_MS);
 		assertEquals(3, myResourceChangeListenerRegistry.size());
 
 		List<ResourceChangeListenerCache> entries = Lists.newArrayList(myResourceChangeListenerRegistry.iterator());

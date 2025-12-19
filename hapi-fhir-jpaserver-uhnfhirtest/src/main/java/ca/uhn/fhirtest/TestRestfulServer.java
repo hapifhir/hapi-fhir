@@ -1,7 +1,7 @@
 package ca.uhn.fhirtest;
 
+import ca.uhn.fhir.batch2.jobs.bulkmodify.reindex.ReindexProvider;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;

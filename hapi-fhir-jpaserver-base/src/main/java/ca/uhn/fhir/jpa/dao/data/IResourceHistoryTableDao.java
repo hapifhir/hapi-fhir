@@ -100,10 +100,10 @@ public interface IResourceHistoryTableDao
 	void updateNonInlinedContents(@Param("text") byte[] theText, @Param("pid") ResourceHistoryTablePk thePid);
 
 	@Query("SELECT v FROM ResourceHistoryTable v " + "JOIN FETCH v.myResourceTable t "
-			+ "WHERE v.myResourcePid IN (:pids) "
+			+ "WHERE t.myPid IN (:pids) "
 			+ "AND t.myVersion = v.myResourceVersion")
 	List<ResourceHistoryTable> findCurrentVersionsByResourcePidsAndFetchResourceTable(
-			@Param("pids") List<JpaPidFk> theVersionlessPids);
+			@Param("pids") List<JpaPid> theVersionlessPids);
 
 	@Query("SELECT v FROM ResourceHistoryTable v " + "WHERE v.myResourcePid = :pid "
 			+ "ORDER BY v.myResourceVersion DESC")
