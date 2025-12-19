@@ -137,6 +137,9 @@ public class SearchConfig {
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 
+	@Autowired
+	private BatchResourceLoader myBatchResourceLoader;
+
 	@Bean
 	public ISearchCoordinatorSvc searchCoordinatorSvc() {
 		return new SearchCoordinatorSvcImpl(
@@ -181,10 +184,7 @@ public class SearchConfig {
 
 	@Bean(name = ISearchBuilder.SEARCH_BUILDER_BEAN_NAME)
 	@Scope("prototype")
-	public ISearchBuilder newSearchBuilder(
-			String theResourceName,
-			BatchResourceLoader theBatchResourceLoader,
-			Class<? extends IBaseResource> theResourceType) {
+	public ISearchBuilder newSearchBuilder(String theResourceName, Class<? extends IBaseResource> theResourceType) {
 		return new SearchBuilder(
 				theResourceName,
 				myStorageSettings,
@@ -199,7 +199,7 @@ public class SearchConfig {
 				myContext,
 				myIdHelperService,
 				myResourceHistoryTableDao,
-				theBatchResourceLoader,
+				myBatchResourceLoader,
 				theResourceType);
 	}
 
