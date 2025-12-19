@@ -35,11 +35,23 @@ public interface IResourceMetadataExtractorSvc {
 	 */
 	record ProvenanceDetails(String provenanceSourceUri, String provenanceRequestId) {}
 
+	/**
+	 * Extract tags from a resource history entity.
+	 */
 	Collection<? extends BaseTag> getTags(ResourceHistoryTable theHistoryEntity);
 
+	/**
+	 * Extract tags from a resource entity.
+	 */
 	Collection<? extends BaseTag> getTags(ResourceTable theResourceEntity);
 
+	/**
+	 * Batch extract tags for multiple resource history entities for improved performance.
+	 */
 	Map<JpaPid, Collection<BaseTag>> getTagsBatch(Collection<ResourceHistoryTable> theHistoryEntities);
 
+	/**
+	 * Extract provenance details (source URI and request ID) from a resource history entity.
+	 */
 	ProvenanceDetails getProvenanceDetails(ResourceHistoryTable theHistoryEntity);
 }

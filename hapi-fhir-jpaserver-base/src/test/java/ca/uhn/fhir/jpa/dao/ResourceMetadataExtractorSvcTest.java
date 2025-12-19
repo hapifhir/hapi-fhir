@@ -33,9 +33,6 @@ import java.util.Set;
 
 import static ca.uhn.fhir.jpa.dao.IResourceMetadataExtractorSvc.ProvenanceDetails;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.never;
@@ -54,15 +51,15 @@ public class ResourceMetadataExtractorSvcTest {
 
 	private ResourceHistoryTable myHistoryEntity;
 	private ResourceTable myResourceTable;
-	private IResourceMetadataExtractorSvc myResourceTagReadSvc;
+	private IResourceMetadataExtractorSvc myResourceMetadataExtractorSvc;
 	private JpaStorageSettings myStorageSettings;
 
 	@BeforeEach
 	void setUp() {
 		myStorageSettings = new JpaStorageSettings();
 		myStorageSettings.setAccessMetaSourceInformationFromProvenanceTable(false);
-		myResourceTagReadSvc = new ResourceMetadataExtractorSvcImpl(myStorageSettings, myResourceHistoryTagDao,
-			myResourceTagDao, myResourceHistoryProvenanceDao);
+		myResourceMetadataExtractorSvc = new ResourceMetadataExtractorSvcImpl(myStorageSettings,
+			myResourceHistoryTagDao, myResourceTagDao, myResourceHistoryProvenanceDao);
 		myHistoryEntity = new ResourceHistoryTable();
 		myResourceTable = new ResourceTable();
 	}
@@ -76,7 +73,7 @@ public class ResourceMetadataExtractorSvcTest {
 		myHistoryEntity.setHasTags(true);
 
 		// execute
-		Collection<? extends BaseTag> result = myResourceTagReadSvc.getTags(myHistoryEntity);
+		Collection<? extends BaseTag> result = myResourceMetadataExtractorSvc.getTags(myHistoryEntity);
 
 		// verify
 		assertThat(result).isNotNull().hasSize(2)
@@ -92,7 +89,7 @@ public class ResourceMetadataExtractorSvcTest {
 		myHistoryEntity.setResourceTable(myResourceTable);
 
 		// execute
-		Collection<? extends BaseTag> result = myResourceTagReadSvc.getTags(myHistoryEntity);
+		Collection<? extends BaseTag> result = myResourceMetadataExtractorSvc.getTags(myHistoryEntity);
 
 		// verify
 		assertThat(result).isNotNull().hasSize(2)
@@ -108,7 +105,7 @@ public class ResourceMetadataExtractorSvcTest {
 		createTagsForResourceTable();
 
 		// execute
-		Collection<? extends BaseTag> result = myResourceTagReadSvc.getTags(myResourceTable);
+		Collection<? extends BaseTag> result = myResourceMetadataExtractorSvc.getTags(myResourceTable);
 
 		// verify
 		assertThat(result).isNotNull().hasSize(2)
@@ -132,10 +129,10 @@ public class ResourceMetadataExtractorSvcTest {
 		myHistoryEntity.setResourceTable(myResourceTable);
 
 		// execute
-		Collection<? extends BaseTag> result = myResourceTagReadSvc.getTags(myHistoryEntity);
+		Collection<? extends BaseTag> result = myResourceMetadataExtractorSvc.getTags(myHistoryEntity);
 
 		// verify
-		assertNull(result);
+		assertThat(result).isNull();
 	}
 
 	@ParameterizedTest
@@ -145,7 +142,7 @@ public class ResourceMetadataExtractorSvcTest {
 		myStorageSettings.setTagStorageMode(theStorageMode);
 
 		// execute
-		Collection<? extends BaseTag> result = myResourceTagReadSvc.getTags(myResourceTable);
+		Collection<? extends BaseTag> result = myResourceMetadataExtractorSvc.getTags(myResourceTable);
 
 		// verify
 		assertThat(result).isNotNull().isEmpty();
@@ -157,10 +154,10 @@ public class ResourceMetadataExtractorSvcTest {
 		myStorageSettings.setTagStorageMode(TagStorageModeEnum.INLINE);
 
 		// execute
-		Collection<? extends BaseTag> result = myResourceTagReadSvc.getTags(myResourceTable);
+		Collection<? extends BaseTag> result = myResourceMetadataExtractorSvc.getTags(myResourceTable);
 
 		// verify
-		assertNull(result);
+		assertThat(result).isNull();
 	}
 
 	@Test
@@ -180,7 +177,7 @@ public class ResourceMetadataExtractorSvcTest {
 		when(myResourceHistoryTagDao.findByVersionIds(anyList())).thenReturn(List.of(tag1, tag2, tag3));
 
 		// execute
-		Map<JpaPid, Collection<BaseTag>> result = myResourceTagReadSvc.getTagsBatch(historyEntities);
+		Map<JpaPid, Collection<BaseTag>> result = myResourceMetadataExtractorSvc.getTagsBatch(historyEntities);
 
 		// verify
 		assertThat(result).hasSize(2);
@@ -205,7 +202,7 @@ public class ResourceMetadataExtractorSvcTest {
 		when(myResourceTagDao.findByResourceIds(anyList())).thenReturn(List.of(tag1, tag2, tag3));
 
 		// execute
-		Map<JpaPid, Collection<BaseTag>> result = myResourceTagReadSvc.getTagsBatch(historyEntities);
+		Map<JpaPid, Collection<BaseTag>> result = myResourceMetadataExtractorSvc.getTagsBatch(historyEntities);
 
 		// verify
 		assertThat(result).hasSize(2);
@@ -213,7 +210,7 @@ public class ResourceMetadataExtractorSvcTest {
 		assertThat(result.get(tag3.getResourceId())).hasSize(1).containsExactlyInAnyOrder(tag3);
 	}
 
-	private static List<ResourceHistoryTable> createHistoryEntityList() {
+	private List<ResourceHistoryTable> createHistoryEntityList() {
 		ResourceHistoryTable entity1 = new ResourceHistoryTable();
 		entity1.setHasTags(true);
 		ResourceHistoryTable entity2 = new ResourceHistoryTable();
@@ -231,7 +228,7 @@ public class ResourceMetadataExtractorSvcTest {
 		entity1.setHasTags(false);
 
 		// execute
-		Map<JpaPid, Collection<BaseTag>> result = myResourceTagReadSvc.getTagsBatch(List.of(entity1));
+		Map<JpaPid, Collection<BaseTag>> result = myResourceMetadataExtractorSvc.getTagsBatch(List.of(entity1));
 
 		// verify
 		assertThat(result).isEmpty();
@@ -252,12 +249,12 @@ public class ResourceMetadataExtractorSvcTest {
 		myHistoryEntity.setRequestId(theRequestId);
 
 		// execute
-		ProvenanceDetails result = myResourceTagReadSvc.getProvenanceDetails(myHistoryEntity);
+		ProvenanceDetails result = myResourceMetadataExtractorSvc.getProvenanceDetails(myHistoryEntity);
 
 		// verify
-		assertNotNull(result);
-		assertEquals(theSourceUri, result.provenanceSourceUri(), theMessage);
-		assertEquals(theRequestId, result.provenanceRequestId(), theMessage);
+		assertThat(result).isNotNull();
+		assertThat(result.provenanceSourceUri()).as(theMessage).isEqualTo(theSourceUri);
+		assertThat(result.provenanceRequestId()).as(theMessage).isEqualTo(theRequestId);
 		verify(myResourceHistoryProvenanceDao, never()).findById(any());
 	}
 
@@ -275,12 +272,12 @@ public class ResourceMetadataExtractorSvcTest {
 		when(myResourceHistoryProvenanceDao.findById(any())).thenReturn(Optional.of(provenanceEntity));
 
 		// execute
-		ProvenanceDetails result = myResourceTagReadSvc.getProvenanceDetails(myHistoryEntity);
+		ProvenanceDetails result = myResourceMetadataExtractorSvc.getProvenanceDetails(myHistoryEntity);
 
 		// verify
-		assertNotNull(result);
-		assertEquals("http://example.com", result.provenanceSourceUri());
-		assertEquals("requestId", result.provenanceRequestId());
+		assertThat(result).isNotNull();
+		assertThat(result.provenanceSourceUri()).isEqualTo("http://example.com");
+		assertThat(result.provenanceRequestId()).isEqualTo("requestId");
 	}
 
 	@Test
@@ -292,11 +289,11 @@ public class ResourceMetadataExtractorSvcTest {
 		when(myResourceHistoryProvenanceDao.findById(any())).thenReturn(Optional.empty());
 
 		// execute
-		ProvenanceDetails result = myResourceTagReadSvc.getProvenanceDetails(myHistoryEntity);
+		ProvenanceDetails result = myResourceMetadataExtractorSvc.getProvenanceDetails(myHistoryEntity);
 
 		// verify
-		assertNotNull(result);
-		assertNull(result.provenanceSourceUri());
-		assertNull(result.provenanceRequestId());
+		assertThat(result).isNotNull();
+		assertThat(result.provenanceSourceUri()).isNull();
+		assertThat(result.provenanceRequestId()).isNull();
 	}
 }

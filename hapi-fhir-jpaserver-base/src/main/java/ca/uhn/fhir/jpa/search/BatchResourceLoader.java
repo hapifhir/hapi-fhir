@@ -47,6 +47,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.IMetaTagSorter;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.ThreadPoolUtil;
+import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -63,6 +64,11 @@ import java.util.concurrent.Future;
 import static ca.uhn.fhir.jpa.util.ResourceParserUtil.EsrResourceDetails;
 import static ca.uhn.fhir.jpa.util.ResourceParserUtil.getEsrResourceDetails;
 
+/**
+ * Batch loader for efficiently loading FHIR resources during search operations.
+ * Optimizes performance by loading externally stored resources in parallel and
+ * batch-extracting metadata (tags, provenance) for all resources.
+ */
 public class BatchResourceLoader {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BatchResourceLoader.class);
@@ -102,7 +108,9 @@ public class BatchResourceLoader {
 	/**
 	 * Creates a thread pool executor for fetching externally stored resources in parallel.
 	 * Uses 5 core threads, max 50 threads, no queue.
-	 * When all threads are busy, the calling thread blocks until a worker becomes available
+	 * When all threads are busy, the calling thread blocks until a worker becomes available.
+	 * Max 50 threads was chosen based on performance testing with external storage.
+	 * Higher thread counts lead to degradation due to network overhead and storage throttling.
 	 */
 	private ThreadPoolTaskExecutor createExecutor() {
 		return ThreadPoolUtil.newThreadPool(
@@ -113,12 +121,27 @@ public class BatchResourceLoader {
 				new BlockPolicy());
 	}
 
+	@PreDestroy
+	public void destroy() {
+		myThreadPoolTaskExecutor.shutdown();
+	}
+
 	public record ResourceLoadResult(JpaPid id, IBaseResource resource, boolean isDeleted) {}
 
 	private record EntityResourceHolder(ResourceHistoryTable entity, IBaseResource resource) {}
 
 	private record EsrEntityResourceHolder(ResourceHistoryTable entity, Future<IBaseResource> future) {}
 
+	/**
+	 * Loads and parses FHIR resources from resource history entities with performance optimizations.
+	 * Externally stored resources are loaded in parallel, database-stored resources are parsed sequentially,
+	 * and metadata (tags, provenance) is extracted in batch operations. All resources are populated
+	 * with metadata, partition information, and tags.
+	 *
+	 * @param theResourceHistoryEntities List of resource history entities to load
+	 * @param theForHistoryOperation Whether this is for a history operation (affects metadata population)
+	 * @return List of loaded resources with their database IDs
+	 */
 	public List<ResourceLoadResult> loadResources(
 			List<ResourceHistoryTable> theResourceHistoryEntities, boolean theForHistoryOperation) {
 		// 1. Iterate over history entities and split them into ESR and non-ESR lists
@@ -217,39 +240,9 @@ public class BatchResourceLoader {
 		// 4. Sort tags, security labels and profiles
 		myMetaTagSorter.sort(theResource.getMeta());
 
+		// 5. Add resource to load result
 		theResult.add(new ResourceLoadResult(theHistoryEntity.getPersistentId(), theResource, false));
 	}
-
-	//	@Scheduled(fixedRate = 30000)
-	//	public void logPoolStats() {
-	//		ThreadPoolExecutor e = myThreadPoolTaskExecutor.getThreadPoolExecutor();
-	//
-	//		ourLog.info(
-	//				"""
-	//		EXECUTOR STATS:
-	//		corePoolSize      = {}, maxPoolSize      = {}, poolSize         = {}, largestPoolSize=   {}, activeCount      =
-	// {},
-	//		completedTasks    = {} totalTasks        = {} queueSize         = {} queueRemaining    = {} queueType         =
-	// {}
-	//		keepAliveMs       = {} rejectedHandler   = {} isShutdown        = {} isTerminating     = {} isTerminated      =
-	// {}
-	//		""",
-	//				e.getCorePoolSize(),
-	//				e.getMaximumPoolSize(),
-	//				e.getPoolSize(),
-	//				e.getLargestPoolSize(),
-	//				e.getActiveCount(),
-	//				e.getCompletedTaskCount(),
-	//				e.getTaskCount(),
-	//				e.getQueue().size(),
-	//				e.getQueue().remainingCapacity(),
-	//				e.getQueue().getClass().getSimpleName(),
-	//				e.getKeepAliveTime(TimeUnit.MILLISECONDS),
-	//				e.getRejectedExecutionHandler().getClass().getSimpleName(),
-	//				e.isShutdown(),
-	//				e.isTerminating(),
-	//				e.isTerminated());
-	//	}
 
 	private List<EntityResourceHolder> processPreloadedEntities(
 			List<EntityResourceHolder> thePreloadedEntities, Map<JpaPid, Collection<BaseTag>> theTagsMap) {
@@ -262,11 +255,11 @@ public class BatchResourceLoader {
 			String decodedText = ResourceParserUtil.getResourceText(resourceBytes, resourceText, resourceEncoding);
 
 			// 1. Use the appropriate custom type if one is specified in the context
-			Class<? extends IBaseResource> resourceType1 = myFhirContext
+			Class<? extends IBaseResource> defaultResourceType = myFhirContext
 					.getResourceDefinition(historyEntity.getResourceType())
 					.getImplementingClass();
 			Class<? extends IBaseResource> resourceType = ResourceParserUtil.determineTypeToParse(
-					myFhirContext, resourceType1, theTagsMap.get(historyEntity.getPersistentId()));
+					myFhirContext, defaultResourceType, theTagsMap.get(historyEntity.getPersistentId()));
 
 			IParser parser = new TolerantJsonParser(
 					getContext(historyEntity.getFhirVersion()), LENIENT_ERROR_HANDLER, historyEntity.getPersistentId());

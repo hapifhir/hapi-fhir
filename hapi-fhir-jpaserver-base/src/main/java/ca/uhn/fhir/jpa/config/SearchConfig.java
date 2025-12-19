@@ -163,7 +163,7 @@ public class SearchConfig {
 	}
 
 	@Bean
-	public BatchResourceLoader asyncStorageResourceParser(
+	public BatchResourceLoader batchResourceLoader(
 			IResourceMetadataExtractorSvc theResourceMetadataExtractorSvc,
 			IJpaStorageResourceParser theJpaStorageResourceParser,
 			ExternallyStoredResourceServiceRegistry theExternallyStoredResourceServiceRegistry,

@@ -24,10 +24,8 @@ import static ca.uhn.fhir.jpa.util.ResourceParserUtil.EsrResourceDetails;
 import static ca.uhn.fhir.jpa.util.ResourceParserUtil.determineTypeToParse;
 import static ca.uhn.fhir.jpa.util.ResourceParserUtil.getEsrResourceDetails;
 import static ca.uhn.fhir.jpa.util.ResourceParserUtil.getResourceText;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 class ResourceParserUtilTest {
 
@@ -47,7 +45,7 @@ class ResourceParserUtilTest {
 		Class<? extends IBaseResource> type = determineTypeToParse(myFhirContext, myDefaultResourceType, null);
 
 		// validate
-		assertEquals(myDefaultResourceType, type);
+		assertThat(type).isEqualTo(myDefaultResourceType);
 	}
 
 	@Test
@@ -56,7 +54,7 @@ class ResourceParserUtilTest {
 		Class<? extends IBaseResource> type = determineTypeToParse(myFhirContext, myDefaultResourceType, List.of());
 
 		// validate
-		assertEquals(myDefaultResourceType, type);
+		assertThat(type).isEqualTo(myDefaultResourceType);
 	}
 
 	@Test
@@ -70,7 +68,7 @@ class ResourceParserUtilTest {
 		Class<? extends IBaseResource> type = determineTypeToParse(myFhirContext, myDefaultResourceType, List.of(tag));
 
 		// validate
-		assertEquals(myDefaultResourceType, type);
+		assertThat(type).isEqualTo(myDefaultResourceType);
 	}
 
 	@Test
@@ -83,7 +81,7 @@ class ResourceParserUtilTest {
 		Class<? extends IBaseResource> type = determineTypeToParse(myFhirContext, myDefaultResourceType, List.of(tag));
 
 		// validate
-		assertEquals(myDefaultResourceType, type);
+		assertThat(type).isEqualTo(myDefaultResourceType);
 	}
 
 	@ParameterizedTest
@@ -97,7 +95,7 @@ class ResourceParserUtilTest {
 		Class<? extends IBaseResource> type = determineTypeToParse(myFhirContext, myDefaultResourceType, List.of(tag));
 
 		// validate
-		assertEquals(myDefaultResourceType, type);
+		assertThat(type).isEqualTo(myDefaultResourceType);
 	}
 
 	@Test
@@ -110,7 +108,7 @@ class ResourceParserUtilTest {
 		Class<? extends IBaseResource> type = determineTypeToParse(myFhirContext, myDefaultResourceType, List.of(tag));
 
 		// validate
-		assertEquals(myDefaultResourceType, type);
+		assertThat(type).isEqualTo(myDefaultResourceType);
 	}
 
 	@Test
@@ -123,7 +121,7 @@ class ResourceParserUtilTest {
 		Class<? extends IBaseResource> type = determineTypeToParse(myFhirContext, myDefaultResourceType, List.of(tag));
 
 		// validate
-		assertEquals(myDefaultResourceType, type);
+		assertThat(type).isEqualTo(myDefaultResourceType);
 	}
 
 	@Test
@@ -141,7 +139,7 @@ class ResourceParserUtilTest {
 		Class<? extends IBaseResource> type = determineTypeToParse(myFhirContext, BaseResource.class, tags);
 
 		// validate
-		assertEquals(CustomPatient.class, type);
+		assertThat(type).isEqualTo(CustomPatient.class);
 	}
 
 	@Test
@@ -158,7 +156,7 @@ class ResourceParserUtilTest {
 		Class<? extends IBaseResource> type = determineTypeToParse(myFhirContext, BaseResource.class, tags);
 
 		// validate
-		assertEquals(CustomPatient.class, type);
+		assertThat(type).isEqualTo(CustomPatient.class);
 	}
 
 	@Test
@@ -171,7 +169,7 @@ class ResourceParserUtilTest {
 		String result = getResourceText(resourceBytes, providedText, ResourceEncodingEnum.JSON);
 
 		// validate
-		assertEquals(providedText, result);
+		assertThat(result).isEqualTo(providedText);
 	}
 
 	@Test
@@ -184,7 +182,7 @@ class ResourceParserUtilTest {
 		String result = getResourceText(resourceBytes, null, ResourceEncodingEnum.JSON);
 
 		// validate
-		assertEquals(expectedText, result);
+		assertThat(result).isEqualTo(expectedText);
 	}
 
 	@Test
@@ -197,7 +195,7 @@ class ResourceParserUtilTest {
 		String result = getResourceText(compressedBytes, null, ResourceEncodingEnum.JSONC);
 
 		// validate
-		assertEquals(originalText, result);
+		assertThat(result).isEqualTo(originalText);
 	}
 
 	@ParameterizedTest
@@ -210,7 +208,7 @@ class ResourceParserUtilTest {
 		String result = getResourceText(resourceBytes, null, theEncoding);
 
 		// validate
-		assertNull(result);
+		assertThat(result).isNull();
 	}
 
 	@Test
@@ -219,9 +217,9 @@ class ResourceParserUtilTest {
 		EsrResourceDetails result = getEsrResourceDetails("providerId:address");
 
 		// validate
-		assertNotNull(result);
-		assertEquals("providerId", result.providerId());
-		assertEquals("address", result.address());
+		assertThat(result).isNotNull();
+		assertThat(result.providerId()).isEqualTo("providerId");
+		assertThat(result.address()).isEqualTo("address");
 	}
 
 	@ParameterizedTest

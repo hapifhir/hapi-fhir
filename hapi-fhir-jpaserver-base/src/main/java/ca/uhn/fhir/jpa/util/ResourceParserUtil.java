@@ -35,11 +35,18 @@ import java.util.Collection;
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.decodeResource;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+/**
+ * Utility class for parsing and processing FHIR resource data.
+ * Provides methods for text extraction, type determination, and externally stored resource handling.
+ */
 public class ResourceParserUtil {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceParserUtil.class);
 
 	private ResourceParserUtil() {}
 
+	/**
+	 * Extracts resource text from either the text field or decoded byte array.
+	 */
 	public static String getResourceText(
 			byte[] theResourceBytes, String theResourceText, ResourceEncodingEnum theResourceEncoding) {
 		if (theResourceText != null) {
@@ -49,6 +56,10 @@ public class ResourceParserUtil {
 		}
 	}
 
+	/**
+	 * Determines the appropriate resource type to parse based on profile tags.
+	 * If a custom type is registered for a profile tag, returns that type instead of the default.
+	 */
 	@SuppressWarnings("unchecked")
 	public static <R extends IBaseResource> Class<R> determineTypeToParse(
 			FhirContext theFhirContext, Class<R> theResourceType, @Nullable Collection<? extends BaseTag> tagList) {
@@ -73,8 +84,14 @@ public class ResourceParserUtil {
 		return theResourceType;
 	}
 
+	/**
+	 * Details for an externally stored resource, containing provider ID and storage address.
+	 */
 	public record EsrResourceDetails(String providerId, String address) {}
 
+	/**
+	 * Parses externally stored resource address in format "providerId:address".
+	 */
 	public static EsrResourceDetails getEsrResourceDetails(String theResourceText) {
 		int colonIndex = theResourceText.indexOf(':');
 		Validate.isTrue(colonIndex > 0, "Invalid ESR address: %s", theResourceText);
