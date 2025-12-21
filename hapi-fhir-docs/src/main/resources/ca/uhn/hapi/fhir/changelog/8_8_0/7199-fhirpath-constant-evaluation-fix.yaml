@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 7199
+title: "FHIRpath constants were not being evaluated for R4. This has now been fixed. Instances of IHostApplicationServices can now also be passed to the FhirInstanceValidator."
