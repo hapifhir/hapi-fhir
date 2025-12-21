@@ -236,8 +236,8 @@ class ValidatorWrapper {
 
 	private InstanceValidator buildInstanceValidator(IWorkerContext theWorkerContext) {
 
-		final IHostApplicationServices hostApplicationServices =
-				Objects.requireNonNullElseGet(this.hostApplicationServices, FhirInstanceValidator.NullEvaluationContext::new);
+		final IHostApplicationServices hostApplicationServices = Objects.requireNonNullElseGet(
+				this.hostApplicationServices, FhirInstanceValidator.NullEvaluationContext::new);
 		XVerExtensionManager xverManager = new XVerExtensionManagerOld(theWorkerContext);
 		try {
 			return new InstanceValidator(
