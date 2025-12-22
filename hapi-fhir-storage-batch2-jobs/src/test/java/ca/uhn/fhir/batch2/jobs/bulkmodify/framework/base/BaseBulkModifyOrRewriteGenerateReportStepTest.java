@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
 import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.ReductionStepFailureException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
@@ -24,7 +25,6 @@ import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -34,6 +34,8 @@ class BaseBulkModifyOrRewriteGenerateReportStepTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseBulkModifyOrRewriteGenerateReportStepTest.class);
 	@Mock
 	private IJobDataSink<BulkModifyResourcesResultsJson> mySink;
+	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
 	@Captor
 	private ArgumentCaptor<BulkModifyResourcesResultsJson> mySinkCaptor;
 
@@ -58,7 +60,7 @@ class BaseBulkModifyOrRewriteGenerateReportStepTest {
 		svc.consume(chunk);
 
 		// Test
-		StepExecutionDetails<MyParams, BulkModifyResourcesChunkOutcomeJson> executionDetails = new StepExecutionDetails<>(params, null, instance, new WorkChunk());
+		StepExecutionDetails<MyParams, BulkModifyResourcesChunkOutcomeJson> executionDetails = new StepExecutionDetails<>(params, null, instance, new WorkChunk(), myJobStepExecutionServices);
 		ReductionStepFailureException exception = assertThrows(ReductionStepFailureException.class, () -> svc.run(executionDetails, mySink));
 
 		// Verify
@@ -95,7 +97,7 @@ class BaseBulkModifyOrRewriteGenerateReportStepTest {
 		svc.consume(chunk);
 
 		// Test
-		StepExecutionDetails<MyParams, BulkModifyResourcesChunkOutcomeJson> executionDetails = new StepExecutionDetails<>(params, null, instance, new WorkChunk());
+		StepExecutionDetails<MyParams, BulkModifyResourcesChunkOutcomeJson> executionDetails = new StepExecutionDetails<>(params, null, instance, new WorkChunk(), myJobStepExecutionServices);
 		svc.run(executionDetails, mySink);
 
 		// Verify

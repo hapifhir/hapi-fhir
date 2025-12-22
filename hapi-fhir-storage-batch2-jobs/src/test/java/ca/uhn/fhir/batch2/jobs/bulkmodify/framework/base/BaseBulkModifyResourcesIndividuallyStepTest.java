@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.api.ResourceModificationRequest;
@@ -68,6 +69,8 @@ class BaseBulkModifyResourcesIndividuallyStepTest {
 	private MySvc mySvc = new MySvc();
 	@Mock
 	private IFhirResourceDaoPatient<Patient> myResourceDao;
+	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
 	@Captor
 	private ArgumentCaptor<BulkModifyResourcesChunkOutcomeJson> myDataCaptor;
 
@@ -102,7 +105,7 @@ class BaseBulkModifyResourcesIndividuallyStepTest {
 
 		// Test
 		WorkChunk workChunk = new WorkChunk().setId("my-chunk-id");
-		assertThatThrownBy(() -> mySvc.run(new StepExecutionDetails<>(params, data, instance, workChunk), mySink))
+		assertThatThrownBy(() -> mySvc.run(new StepExecutionDetails<>(params, data, instance, workChunk, myJobStepExecutionServices), mySink))
 			.isInstanceOf(JobExecutionFailedException.class)
 			.hasMessage(theExpectedMessage);
 
@@ -127,7 +130,7 @@ class BaseBulkModifyResourcesIndividuallyStepTest {
 
 		// Test
 		WorkChunk chunk = new WorkChunk().setId("my-chunk-id");
-		mySvc.run(new StepExecutionDetails<>(params, data, instance, chunk), mySink);
+		mySvc.run(new StepExecutionDetails<>(params, data, instance, chunk, myJobStepExecutionServices), mySink);
 
 		// Verify
 		verify(mySink, times(1)).accept(myDataCaptor.capture());

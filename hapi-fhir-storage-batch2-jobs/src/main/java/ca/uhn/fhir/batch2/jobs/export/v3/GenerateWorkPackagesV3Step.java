@@ -35,7 +35,6 @@ import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.IResourceSupportedSvc;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.collect.ListMultimap;
@@ -108,7 +107,7 @@ public class GenerateWorkPackagesV3Step
 
 		IIdType groupId = myFhirContext.getVersion().newIdType(params.getGroupId());
 		RequestPartitionId groupReadPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
-				new SystemRequestDetails(), groupId);
+				theStepExecutionDetails.newSystemRequestDetails(), groupId);
 
 		// FIXME: should consider date range?
 		ExportPIDIteratorParameters patientListParams = new ExportPIDIteratorParameters();
@@ -135,7 +134,7 @@ public class GenerateWorkPackagesV3Step
 		}
 
 		ListMultimap<RequestPartitionId, String> patientResourceIdsByPartition =
-				Multimaps.index(patientResourceIds, this::determinePatientPartition);
+				Multimaps.index(patientResourceIds, t -> determinePatientPartition(theStepExecutionDetails, t));
 		List<String> resourceTypes = getResourceTypes(theStepExecutionDetails, params);
 		for (RequestPartitionId nextPartitionChunk : patientResourceIdsByPartition.keySet()) {
 
@@ -162,9 +161,10 @@ public class GenerateWorkPackagesV3Step
 		}
 	}
 
-	private RequestPartitionId determinePatientPartition(String thePatientId) {
+	private RequestPartitionId determinePatientPartition(
+			StepExecutionDetails theStepExecutionDetails, String thePatientId) {
 		return myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
-				new SystemRequestDetails(),
+				theStepExecutionDetails.newSystemRequestDetails(),
 				"Patient",
 				myFhirContext.getVersion().newIdType(thePatientId));
 	}

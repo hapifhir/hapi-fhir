@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.jobs.export;
 
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
@@ -68,6 +69,9 @@ public class ExpandResourcesStepTest {
 	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
 	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
+
+	@Mock
 	IIdHelperService<JpaPid> myIdHelperService;
 
 	@Spy
@@ -109,7 +113,8 @@ public class ExpandResourcesStepTest {
 			theParameters,
 			theData,
 			theInstance,
-			new WorkChunk().setId("1")
+			new WorkChunk().setId("1"),
+			myJobStepExecutionServices
 		);
 	}
 

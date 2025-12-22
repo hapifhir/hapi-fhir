@@ -40,6 +40,7 @@ import org.hibernate.Length;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -57,7 +58,10 @@ public class Batch2JobInstanceEntity implements Serializable {
 	public static final int STATUS_MAX_LENGTH = 20;
 	public static final int TIME_REMAINING_LENGTH = 100;
 	public static final int PARAMS_JSON_MAX_LENGTH = 2000;
+
+	@Serial
 	private static final long serialVersionUID = 8187134261799095422L;
+
 	public static final int INITIATING_USER_NAME_MAX_LENGTH = 200;
 	public static final int INITIATING_CLIENT_ID_MAX_LENGTH = 200;
 
@@ -160,6 +164,10 @@ public class Batch2JobInstanceEntity implements Serializable {
 
 	@Column(name = "REPORT_VC", nullable = true, length = Length.LONG32)
 	private String myReportVc;
+
+	// FIXME: rollback this change?
+	//	@Column(name = "INITIATING_REQUEST_JSON", nullable = true, length = Length.LONG32)
+	//	private String myInitiatingRequestJson;
 
 	public String getCurrentGatedStepId() {
 		return myCurrentGatedStepId;

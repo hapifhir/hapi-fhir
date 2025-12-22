@@ -430,7 +430,7 @@ public class WorkChunkProcessorTest {
 	private class TestWorkChunkProcessor extends WorkChunkProcessor {
 
 		public TestWorkChunkProcessor(IJobPersistence thePersistence, BatchJobSender theSender) {
-			super(thePersistence, theSender, new NonTransactionalHapiTransactionService());
+			super(thePersistence, theSender, new NonTransactionalHapiTransactionService(), new DefaultJobStepExecutionServices());
 		}
 
 		@Override
