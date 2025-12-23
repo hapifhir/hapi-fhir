@@ -191,12 +191,14 @@ public class ReplaceReferencesTestHelper {
 		assertThat(period.getStart()).isBetween(oneMinuteAgo, now);
 		assertThat(period.getEnd()).isEqualTo(provenance.getRecorded());
 
-		// validate provenance.reason
+		// validate provenance.reason - dynamic based on resource type
+		String resourceType = theTargetResourceIdWithExpectedVersion.getResourceType();
+		String expectedReasonCode = "Patient".equals(resourceType) ? "PATADMIN" : "RECORDMGT";
 		assertThat(provenance.getReason()).hasSize(1);
 		Coding reasonCoding = provenance.getReason().get(0).getCodingFirstRep();
 		assertThat(reasonCoding).isNotNull();
 		assertThat(reasonCoding.getSystem()).isEqualTo("http://terminology.hl7.org/CodeSystem/v3-ActReason");
-		assertThat(reasonCoding.getCode()).isEqualTo("PATADMIN");
+		assertThat(reasonCoding.getCode()).isEqualTo(expectedReasonCode);
 
 		// validate provenance.activity
 		Coding activityCoding = provenance.getActivity().getCodingFirstRep();
@@ -257,12 +259,14 @@ public class ReplaceReferencesTestHelper {
 		assertThat(period.getStart()).isBetween(oneMinuteAgo, now);
 		assertThat(period.getEnd()).isEqualTo(provenance.getRecorded());
 
-		// validate provenance.reason
+		// validate provenance.reason - dynamic based on resource type
+		String resourceType = theTargetPatientIdWithExpectedVersion.getResourceType();
+		String expectedReasonCode = "Patient".equals(resourceType) ? "PATADMIN" : "RECORDMGT";
 		assertThat(provenance.getReason()).hasSize(1);
 		Coding reasonCoding = provenance.getReason().get(0).getCodingFirstRep();
 		assertThat(reasonCoding).isNotNull();
 		assertThat(reasonCoding.getSystem()).isEqualTo("http://terminology.hl7.org/CodeSystem/v3-ActReason");
-		assertThat(reasonCoding.getCode()).isEqualTo("PATADMIN");
+		assertThat(reasonCoding.getCode()).isEqualTo(expectedReasonCode);
 
 		// validate provenance.activity
 		Coding activityCoding = provenance.getActivity().getCodingFirstRep();
@@ -557,7 +561,7 @@ public class ReplaceReferencesTestHelper {
 				inParams.addParameter().setName("delete-source").setValue(new BooleanType(deleteSource));
 			}
 			if (resourceLimit != null) {
-				inParams.addParameter().setName("batch-size").setValue(new IntegerType(resourceLimit));
+				inParams.addParameter().setName("resource-limit").setValue(new IntegerType(resourceLimit));
 			}
 			return inParams;
 		}
@@ -737,9 +741,16 @@ public class ReplaceReferencesTestHelper {
 		}
 	}
 
-	public @Nonnull String extractFailureMessageFromOutcomeParameter(BaseServerResponseException ex) {
-		String body = ex.getResponseBody();
-		IParser jsonParser = myFhirContext.newJsonParser();
+	@Nonnull
+	public String extractFailureMessageFromOutcomeParameter(@Nonnull BaseServerResponseException ex) {
+		return extractFailureMessageFromOutcomeParameter(myFhirContext, ex);
+	}
+
+	@Nonnull
+	public static String extractFailureMessageFromOutcomeParameter(
+			@Nonnull FhirContext theFhirContext, @Nonnull BaseServerResponseException theException) {
+		String body = theException.getResponseBody();
+		IParser jsonParser = theFhirContext.newJsonParser();
 		if (body != null) {
 			Parameters outParams = jsonParser.parseResource(Parameters.class, body);
 			OperationOutcome outcome =
