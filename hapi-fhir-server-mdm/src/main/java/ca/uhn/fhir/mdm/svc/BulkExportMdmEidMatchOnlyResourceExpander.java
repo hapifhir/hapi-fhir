@@ -115,6 +115,20 @@ public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdm
 		return new HashSet<>(pidList);
 	}
 
+	/**
+	 * Expands a single patient ID to include all patients linked via EID matching.
+	 *
+	 * @param thePatientId Patient ID to expand (e.g., "Patient/123")
+	 * @param theRequestPartitionId Partition context for the request
+	 * @return Set of String patient IDs including the original patient and all EID-matched patients
+	 */
+	@Override
+	public Set<String> expandPatient(String thePatientId, RequestPartitionId theRequestPartitionId) {
+		IIdType patientIdType = myFhirContext.getVersion().newIdType(thePatientId);
+
+		return myMdmEidMatchOnlyLinkExpandSvc.expandMdmBySourceResourceId(theRequestPartitionId, patientIdType);
+	}
+
 	@Override
 	public void annotateResource(IBaseResource resource) {
 		// This function is normally used to add golden resource id to the exported resources,
