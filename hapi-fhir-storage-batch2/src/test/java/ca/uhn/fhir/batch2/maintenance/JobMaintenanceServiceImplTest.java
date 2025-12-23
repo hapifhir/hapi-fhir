@@ -19,6 +19,7 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkMetadata;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.broker.api.IChannelProducer;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
@@ -106,6 +107,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	private ArgumentCaptor<JobCompletionDetails<TestJobParameters>> myJobCompletionCaptor;
 	@Mock
 	private IReductionStepExecutorService myReductionStepExecutorService;
+	@Mock
+	private IInterceptorService myInterceptorService;
 
 	@BeforeEach
 	public void beforeEach() {
@@ -117,7 +120,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			myJobDefinitionRegistry,
 			batchJobSender,
 			myJobExecutorSvc,
-			myReductionStepExecutorService
+			myReductionStepExecutorService,
+			myInterceptorService
 		);
 		myStorageSettings.setJobFastTrackingEnabled(true);
 	}
