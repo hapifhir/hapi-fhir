@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -17,7 +17,11 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.packages;
+package ca.uhn.fhir.jpa.api.svc;
+
+import ca.uhn.fhir.jpa.packages.PackageDeleteOutcomeJson;
+import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
+import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 
 public interface IPackageInstallerSvc {
 

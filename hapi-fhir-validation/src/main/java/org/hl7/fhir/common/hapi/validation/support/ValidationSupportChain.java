@@ -709,6 +709,39 @@ public class ValidationSupportChain implements IValidationSupport {
 		return fetchValue(key, invoker, theUrl);
 	}
 
+	@Override
+	public <T extends IBaseResource> List<T> fetchAllResourcesOfType(@Nonnull Class<T> theClazz) {
+		FetchAllKey<T> key = new FetchAllKey<>(FetchAllKey.TypeEnum.ALL);
+		Supplier<List<T>> loader = () -> {
+			List<T> allCandidates = new ArrayList<>();
+			for (IValidationSupport vs : myChain) {
+				List<T> candidates = vs.fetchAllResourcesOfType(theClazz);
+				if (candidates != null) {
+					allCandidates.addAll(candidates);
+				}
+			}
+			return allCandidates;
+		};
+
+		return getFromCacheWithAsyncRefresh(key, loader);
+	}
+
+	@Override
+	public <T extends IBaseResource> List<T> fetchResources(Class<T> theClazz, String theUrl) {
+		FetchAllKey<T> key = new FetchAllKey<>(FetchAllKey.TypeEnum.ALL);
+		Supplier<List<T>> loader = () -> {
+			List<T> all = new ArrayList<>();
+			for (IValidationSupport vs : myChain) {
+				List<T> candidates = vs.fetchResources(theClazz, theUrl);
+				if (candidates != null) {
+					all.addAll(candidates);
+				}
+			}
+			return all;
+		};
+		return getFromCacheWithAsyncRefresh(key, loader);
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
@@ -1004,23 +1037,23 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<IBaseResource> getFromCacheWithAsyncRefresh(
-			FetchAllKey theKey, Supplier<List<IBaseResource>> theLoader) {
+	private <T extends IBaseResource> List<T> getFromCacheWithAsyncRefresh(
+			FetchAllKey<T> theKey, Supplier<List<T>> theLoader) {
 		if (myExpiringCache == null || myNonExpiringCache == null) {
 			return theLoader.get();
 		}
 
-		CacheValue<List<IBaseResource>> retVal = getFromCache(theKey);
+		CacheValue<List<T>> retVal = getFromCache(theKey);
 		if (retVal == null) {
-			retVal = (CacheValue<List<IBaseResource>>) myNonExpiringCache.get(theKey);
+			retVal = (CacheValue<List<T>>) myNonExpiringCache.get(theKey);
 			if (retVal != null) {
 				Runnable loaderTask = () -> {
-					List<IBaseResource> loadedItem = theLoader.get();
-					CacheValue<List<IBaseResource>> value = new CacheValue<>(loadedItem);
+					List<T> loadedItem = theLoader.get();
+					CacheValue<List<T>> value = new CacheValue<>(loadedItem);
 					myNonExpiringCache.put(theKey, value);
 					putInCache(theKey, value);
 				};
-				List<IBaseResource> returnValue = retVal.getValue();
+				List<T> returnValue = retVal.getValue();
 
 				myBackgroundExecutor.execute(loaderTask);
 
@@ -1175,7 +1208,7 @@ public class ValidationSupportChain implements IValidationSupport {
 		}
 	}
 
-	static class FetchAllKey extends BaseKey<List<IBaseResource>> {
+	static class FetchAllKey<T extends IBaseResource> extends BaseKey<List<T>> {
 
 		private final TypeEnum myType;
 		private final int myHashCode;
