@@ -1,8 +1,0 @@
----
-type: add
-issue: 8044
-title: "Add STORAGE_POSTSTORAGE_BATCH_JOB_CREATE and STORAGE_POSTCOMPLETE_BATCH_JOB pointcuts in batch 2 jobs.
-STORAGE_POSTSTORAGE_BATCH_JOB_CREATE is invoked after a batch job is persisted to the database and receives a
-ca.uhn.fhir.batch2.model.JobInstance that includes the job instance id as stored in the db
-STORAGE_POSTCOMPLETE_BATCH_JOB is invoked after the job instance is completed. JobInstance is immutable here and
-receives a ca.uhn.fhir.batch2.model.JobInstance"

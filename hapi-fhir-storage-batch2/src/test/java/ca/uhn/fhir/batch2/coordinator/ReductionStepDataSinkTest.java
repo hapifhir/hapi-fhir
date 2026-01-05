@@ -73,7 +73,7 @@ public class ReductionStepDataSinkTest {
 	private Appender<ILoggingEvent> myListAppender;
 
 	@Spy
-	private IInterceptorService myInterceptorService = new InterceptorService("testIS");;
+	private IInterceptorService myInterceptorService = new InterceptorService("testIS");
 
 	private Logger ourLogger;
 
@@ -116,7 +116,6 @@ public class ReductionStepDataSinkTest {
 		when(myJobPersistence.fetchAllWorkChunksIterator(any(), anyBoolean())).thenReturn(Collections.emptyIterator());
 		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance));
 		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(instance)).thenReturn(jobDefinition);
-		//when(myInterceptorService.hasHooks(Pointcut.BATCH2_JOB_COMPLETION)).thenReturn(true);
 
 		// test
 		myDataSink.accept(chunkData);

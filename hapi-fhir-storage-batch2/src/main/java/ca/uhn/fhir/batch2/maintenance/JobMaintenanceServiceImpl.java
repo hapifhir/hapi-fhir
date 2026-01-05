@@ -93,7 +93,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	private final BatchJobSender myBatchJobSender;
 	private final WorkChunkProcessor myJobExecutorSvc;
 	private final IReductionStepExecutorService myReductionStepExecutorService;
-	private IInterceptorService myInterceptorService;
+	private final IInterceptorService myInterceptorService;
 
 	private final Semaphore myRunMaintenanceSemaphore = new Semaphore(1);
 

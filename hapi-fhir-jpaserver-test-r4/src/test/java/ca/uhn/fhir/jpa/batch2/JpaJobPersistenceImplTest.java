@@ -1032,7 +1032,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testPostStorageInterceptor_hasJobInstanceId_preStorageHasNot(){
+	public void testPostStorageInterceptor_hasJobInstanceId_preStorageHasNot() {
 		IAnonymousInterceptor poststorageBatchJobCreateInterceptor = (pointcut, params) -> {
 			JobInstance jobInstance = params.get(JobInstance.class);
 			assertNotNull(jobInstance.getInstanceId());
