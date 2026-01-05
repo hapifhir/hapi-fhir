@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 7390
+title: "Subscriptions were not sending `DELETE` events when the criteria used resource attributes, for example `Patient?gender=male`. This has been fixed."

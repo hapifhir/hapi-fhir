@@ -2,10 +2,13 @@ package org.hl7.fhir.r4.utils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
+import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.utils.FhirPathEngineTest;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
@@ -14,6 +17,7 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
@@ -194,6 +198,29 @@ public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 		List<Base> answer = ourCtx.newFhirPath().evaluate(qr, path, Base.class);
 		assertEquals("2019-01-01", ((DateTimeType) answer.get(0)).getValueAsString());
 
+	}
+
+	@Test
+	public void testConstantEvaluation() {
+
+		QuestionnaireResponse current = new QuestionnaireResponse().setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS);
+		QuestionnaireResponse previous = new QuestionnaireResponse().setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+
+		IFhirPath fp = ourCtx.newFhirPath();
+		fp.setEvaluationContext(new IFhirPathEvaluationContext() {
+			@Override
+			public List<IBase> resolveConstant(Object theAppContext, String theName, ConstantEvaluationMode theConstantEvaluationMode) {
+				if ("current".equals(theName)) {
+					return List.of(current);
+				} else if ("previous".equals(theName)) {
+					return List.of(previous);
+				} else {
+					throw new IllegalArgumentException("Unknown constant: " + theName);
+				}
+			}
+		});
+		List<BooleanType> result = fp.evaluate(new QuestionnaireResponse(), "%current.status != %previous.status", BooleanType.class);
+		assertTrue(result.size() == 1 && result.get(0).booleanValue());
 	}
 
 
