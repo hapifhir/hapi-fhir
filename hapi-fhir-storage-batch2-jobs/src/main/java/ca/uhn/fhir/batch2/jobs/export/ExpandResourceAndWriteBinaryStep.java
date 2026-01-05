@@ -2,7 +2,7 @@
  * #%L
  * HAPI-FHIR Storage Batch2 Jobs
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ import ca.uhn.fhir.jpa.util.RandomTextUtils;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.bulk.IBulkDataExportHistoryHelper;
@@ -736,7 +737,8 @@ public class ExpandResourceAndWriteBinaryStep
 				// Make sure we don't accidentally reuse an ID. This should be impossible given the
 				// amount of entropy in the IDs but might as well be sure.
 				try {
-					IBaseBinary output = binaryDao.read(binary.getIdElement(), new SystemRequestDetails(), true);
+					RequestDetails requestDetails = myStepExecutionDetails.newSystemRequestDetails();
+					IBaseBinary output = binaryDao.read(binary.getIdElement(), requestDetails, true);
 					if (output != null) {
 						continue;
 					}
@@ -762,6 +764,9 @@ public class ExpandResourceAndWriteBinaryStep
 				}
 			}
 
+			ourLog.info(
+					"Writing Bulk Export Binary resource with ID: Binary/{}",
+					binary.getIdElement().getIdPart());
 			DaoMethodOutcome outcome = binaryDao.update(binary, srd);
 			IIdType id = outcome.getId();
 
