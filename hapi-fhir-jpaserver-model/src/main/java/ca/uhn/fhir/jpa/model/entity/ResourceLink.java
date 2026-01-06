@@ -114,7 +114,7 @@ public class ResourceLink extends BaseResourceIndex {
 	@FullTextField
 	private String mySourceResourceType;
 
-	@ManyToOne(optional = true, fetch = FetchType.EAGER)
+	@ManyToOne(optional = true, fetch = FetchType.LAZY)
 	@JoinColumns(
 			value = {
 				@JoinColumn(
