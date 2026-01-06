@@ -108,10 +108,11 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 			IHapiTransactionService theTransactionService,
 			JobDefinitionRegistry theJobDefinitionRegistry,
 			IJobStepExecutionServices theJobStepExecutionServices,
-            IInterceptorService theInterceptorService) {
+			IInterceptorService theInterceptorService) {
 		myJobPersistence = theJobPersistence;
 		myTransactionService = theTransactionService;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
+		myJobStepExecutionServices = theJobStepExecutionServices;
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry, theInterceptorService);
 		myInterceptorService = theInterceptorService;
 		myReducerExecutor = Executors.newSingleThreadExecutor(new CustomizableThreadFactory("batch2-reducer"));
@@ -308,8 +309,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 						myJobPersistence,
 						myJobDefinitionRegistry,
 						myInterceptorService);
-				StepExecutionDetails<PT, IT> chunkDetails =
-						StepExecutionDetails.createReductionStepDetails(parameters, null, instance, myJobStepExecutionServices);
+				StepExecutionDetails<PT, IT> chunkDetails = StepExecutionDetails.createReductionStepDetails(
+						parameters, null, instance, myJobStepExecutionServices);
 
 				if (response.isSuccessful()) {
 					try {

@@ -1046,7 +1046,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_POSTSTORAGE_BATCH_JOB_CREATE, poststorageBatchJobCreateInterceptor);
 			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE, prestorageBatchJobCreateInterceptor);
 			JobInstance instance = createInstance();
-			mySvc.storeNewInstance(instance);
+			mySvc.storeNewInstance(newSrd(), instance);
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(poststorageBatchJobCreateInterceptor);
 			myInterceptorRegistry.unregisterInterceptor(prestorageBatchJobCreateInterceptor);
