@@ -28,6 +28,7 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
@@ -59,7 +60,8 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			@Nonnull JobWorkCursor<PT, IT, OT> theCursor,
 			@Nonnull WorkChunkProcessor theExecutor,
 			@Nonnull IJobMaintenanceService theJobMaintenanceService,
-			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry) {
+			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
+			@Nonnull IInterceptorService theInterceptorService) {
 		myJobPersistence = theJobPersistence;
 		myDefinition = theCursor.jobDefinition;
 		myInstance = theInstance;
@@ -68,7 +70,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		myCursor = theCursor;
 		myJobExecutorSvc = theExecutor;
 		myJobMaintenanceService = theJobMaintenanceService;
-		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry, theInterceptorService);
 	}
 
 	@WithSpan(JOB_STEP_EXECUTION_SPAN_NAME)

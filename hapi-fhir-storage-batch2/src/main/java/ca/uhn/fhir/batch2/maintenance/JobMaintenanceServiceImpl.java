@@ -27,6 +27,7 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
@@ -92,6 +93,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	private final BatchJobSender myBatchJobSender;
 	private final WorkChunkProcessor myJobExecutorSvc;
 	private final IReductionStepExecutorService myReductionStepExecutorService;
+	private final IInterceptorService myInterceptorService;
 
 	private final Semaphore myRunMaintenanceSemaphore = new Semaphore(1);
 
@@ -111,7 +113,8 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 			@Nonnull BatchJobSender theBatchJobSender,
 			@Nonnull WorkChunkProcessor theExecutor,
-			@Nonnull IReductionStepExecutorService theReductionStepExecutorService) {
+			@Nonnull IReductionStepExecutorService theReductionStepExecutorService,
+			@Nonnull IInterceptorService theInterceptorService) {
 		myStorageSettings = theStorageSettings;
 		myReductionStepExecutorService = theReductionStepExecutorService;
 		Validate.notNull(theSchedulerService);
@@ -124,6 +127,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myBatchJobSender = theBatchJobSender;
 		myJobExecutorSvc = theExecutor;
+		myInterceptorService = theInterceptorService;
 	}
 
 	@Override
@@ -270,7 +274,8 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 				theInstanceId,
 				theAccumulator,
 				myReductionStepExecutorService,
-				myJobDefinitionRegistry);
+				myJobDefinitionRegistry,
+				myInterceptorService);
 		if (myFailedJobLifetimeOverride >= 0) {
 			processor.setPurgeThreshold(myFailedJobLifetimeOverride);
 		}
