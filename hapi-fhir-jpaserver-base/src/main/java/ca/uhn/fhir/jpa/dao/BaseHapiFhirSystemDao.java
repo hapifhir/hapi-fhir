@@ -248,8 +248,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 
 					prefetchByJoinClause(
 							"resourceLinks",
-							// fetch the ResourceLink but also the target resource for that link
-							"LEFT JOIN FETCH r.myResourceLinks l LEFT JOIN FETCH l.myTargetResource",
+							"LEFT JOIN FETCH r.myResourceLinks l",
 							ResourceTable::isHasLinks,
 							entityChunk);
 

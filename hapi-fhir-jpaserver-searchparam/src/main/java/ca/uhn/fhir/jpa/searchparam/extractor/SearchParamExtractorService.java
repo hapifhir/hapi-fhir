@@ -27,6 +27,8 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -107,6 +109,9 @@ public class SearchParamExtractorService {
 
 	@Autowired(required = false)
 	private IResourceLinkResolver myResourceLinkResolver;
+
+	@Autowired
+	private IIdHelperService myIdHelperService;
 
 	private SearchParamExtractionUtil mySearchParamExtractionUtil;
 
@@ -811,6 +816,16 @@ public class SearchParamExtractorService {
 			PathAndRef thePathAndRef, Collection<ResourceLink> theResourceLinks) {
 		IIdType referenceElement = thePathAndRef.getRef().getReferenceElement();
 		List<ResourceLink> resourceLinks = new ArrayList<>(theResourceLinks);
+
+		Set<JpaPid> pids = new HashSet<>();
+		for (ResourceLink resourceLink : resourceLinks) {
+			JpaPid targetResourceJpaPid = resourceLink.getTargetResourceJpaPid();
+			if (targetResourceJpaPid != null) {
+				pids.add(targetResourceJpaPid);
+			}
+		}
+		PersistentIdToForcedIdMap<JpaPid> targetResourceIdMap = myIdHelperService.translatePidsToForcedIds(pids);
+
 		for (ResourceLink resourceLink : resourceLinks) {
 
 			// comparing the searchParam path ex: Group.member.entity
@@ -820,8 +835,13 @@ public class SearchParamExtractorService {
 			boolean hasMatchingResourceType =
 					StringUtils.equals(resourceLink.getTargetResourceType(), referenceElement.getResourceType());
 
-			boolean hasMatchingResourceId =
-					StringUtils.equals(resourceLink.getTargetResourceId(), referenceElement.getIdPart());
+			boolean hasMatchingResourceId = false;
+			Optional<String> idPartOpt = targetResourceIdMap.get(resourceLink.getTargetResourceJpaPid());
+			if (idPartOpt.isPresent()) {
+				String idPart = idPartOpt.get();
+				idPart = idPart.substring(idPart.indexOf('/'));
+				hasMatchingResourceId = StringUtils.equals(idPart, referenceElement.getIdPart());
+			}
 
 			boolean hasMatchingResourceVersion = myContext.getParserOptions().isStripVersionsFromReferences()
 					|| referenceElement.getVersionIdPartAsLong() == null

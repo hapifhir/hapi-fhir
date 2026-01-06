@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.util.ResourceLinkUtils;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
@@ -481,6 +482,14 @@ public class ResourceLink extends BaseResourceIndex {
 		retVal.myTargetResourceUrl = myTargetResourceUrl;
 		retVal.myTargetResourceVersion = myTargetResourceVersion;
 		return retVal;
+	}
+
+	@Nullable
+	public JpaPid getTargetResourceJpaPid() {
+		if (myTargetResourcePid != null) {
+			return JpaPid.fromId(myTargetResourcePid, myTargetResourcePartitionId);
+		}
+		return null;
 	}
 
 	public static ResourceLink forAbsoluteReference(
