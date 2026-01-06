@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -348,6 +348,7 @@ public class JpaConstants {
 	public static final String OPERATION_BULK_PATCH_PARAM_DRY_RUN_MODE_COLLECT_CHANGES = "collectChanges";
 	public static final String OPERATION_BULK_PATCH_PARAM_LIMIT_RESOURCE_COUNT = "limitResourceCount";
 	public static final String OPERATION_BULK_PATCH_PARAM_LIMIT_RESOURCE_VERSION_COUNT = "limitResourceVersionCount";
+	public static final String OPERATION_BULK_PATCH_PARAM_PARTITION_ID = "partitionId";
 	public static final String OPERATION_BULK_PATCH_STATUS = "$hapi.fhir.bulk-patch-status";
 	public static final String OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID = "_jobId";
 	public static final String OPERATION_BULK_PATCH_PARAM_URL = "url";

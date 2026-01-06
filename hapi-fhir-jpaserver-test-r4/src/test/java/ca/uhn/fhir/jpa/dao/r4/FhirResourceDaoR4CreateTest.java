@@ -81,10 +81,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.test.utilities.UuidUtils.HASH_UUID_PATTERN;
@@ -1405,7 +1407,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		@ParameterizedTest
 		@ValueSource(booleans = {true, false})
-		void conditionalCreateSameIdentifierCrossPartition(boolean theIsSearchUrlDuplicateAcrossPartitionsEnabled) {
+		void conditionalCreateSameIdentifierCrossPartition(boolean theIsSearchUrlDuplicateAcrossPartitionsEnabled) throws Exception {
 			myPartitionSettings.setPartitioningEnabled(true);
 			myPartitionSettings.setConditionalCreateDuplicateIdentifiersEnabled(theIsSearchUrlDuplicateAcrossPartitionsEnabled);
 
@@ -1419,26 +1421,30 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			partitionEntity2.setName("Partition-B");
 			myPartitionDao.save(partitionEntity2);
 
-			final BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
-			final String matchUrl = "identifier=http://tempuri.org|1";
-			bundleBuilder.addTransactionCreateEntry(myTask1, "urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea")
-				.conditional(matchUrl);
+			Supplier<Bundle> bundleSupplier = () -> {
+				final BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+				final String matchUrl = "identifier=http://tempuri.org|1";
+				Task task = myFhirContext.newTerser().clone(myTask1);
+				bundleBuilder.addTransactionCreateEntry(task, "urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea")
+					.conditional(matchUrl);
+				return bundleBuilder.getBundleTyped();
+			};
 
 			final RequestPartitionId requestPartitionId1 = RequestPartitionId.fromPartitionId(1, LocalDate.now());
 			final RequestPartitionId requestPartitionId2 = RequestPartitionId.fromPartitionId(2, LocalDate.now());
 
-			final List<Bundle.BundleEntryComponent> responseEntries1 = sendBundleAndGetResponse(bundleBuilder.getBundle(), requestPartitionId1);
+			final List<Bundle.BundleEntryComponent> responseEntries1 = sendBundleAndGetResponse(bundleSupplier.get(), requestPartitionId1);
 			assertEquals(1, responseEntries1.size());
 			final Bundle.BundleEntryComponent bundleEntry1 = responseEntries1.get(0);
 			assertEquals("201 Created", bundleEntry1.getResponse().getStatus());
 
 			if (!theIsSearchUrlDuplicateAcrossPartitionsEnabled) {
-				final IBaseBundle bundle = bundleBuilder.getBundle();
+				final IBaseBundle bundle = bundleSupplier.get();
 				assertThatThrownBy(() -> sendBundleAndGetResponse(bundle, requestPartitionId2)).isInstanceOf(ResourceVersionConflictException.class);
 				return;
 			}
 
-			final List<Bundle.BundleEntryComponent> responseEntries2 = sendBundleAndGetResponse(bundleBuilder.getBundle(), requestPartitionId2);
+			final List<Bundle.BundleEntryComponent> responseEntries2 = sendBundleAndGetResponse(bundleSupplier.get(), requestPartitionId2);
 			assertEquals(1, responseEntries2.size());
 			final Bundle.BundleEntryComponent bundleEntry2 = responseEntries1.get(0);
 			assertEquals("201 Created", bundleEntry2.getResponse().getStatus());

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.searchparam.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCacheRefresher;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
@@ -138,10 +139,15 @@ public class SearchParamConfig {
 	ResourceChangeListenerCache registeredResourceChangeListener(
 			String theResourceName,
 			IResourceChangeListener theResourceChangeListener,
+			RequestPartitionId theRequestPartitionId,
 			SearchParameterMap theSearchParameterMap,
 			long theRemoteRefreshIntervalMs) {
 		return new ResourceChangeListenerCache(
-				theResourceName, theResourceChangeListener, theSearchParameterMap, theRemoteRefreshIntervalMs);
+				theResourceName,
+				theResourceChangeListener,
+				theRequestPartitionId,
+				theSearchParameterMap,
+				theRemoteRefreshIntervalMs);
 	}
 
 	@Bean

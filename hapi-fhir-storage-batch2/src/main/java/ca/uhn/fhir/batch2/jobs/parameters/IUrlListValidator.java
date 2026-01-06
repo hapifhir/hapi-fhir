@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,9 @@ import jakarta.annotation.Nullable;
 
 import java.util.List;
 
+/**
+ * TODO: Once Mongo is retired, this entire class can be removed
+ */
 public interface IUrlListValidator {
 	@Nullable
 	List<String> validateUrls(@Nonnull List<String> theUrls);

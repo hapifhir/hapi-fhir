@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -189,6 +189,11 @@ public class ProviderConstants {
 	 * Operation name for the $reindex operation
 	 */
 	public static final String OPERATION_REINDEX = "$reindex";
+
+	/**
+	 * Operation name for the $hapi.fhir.reindex-status operation
+	 */
+	public static final String OPERATION_REINDEX_STATUS = "$hapi.fhir.reindex-status";
 
 	/**
 	 * Operation name for the $reindex operation

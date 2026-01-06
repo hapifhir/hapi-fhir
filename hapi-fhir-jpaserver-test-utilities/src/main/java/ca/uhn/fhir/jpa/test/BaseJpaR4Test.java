@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -223,6 +223,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -1105,7 +1106,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		@Override
 		public IValidationPolicyAdvisor getPolicyAdvisor() {
 		  if (Objects.isNull(policyAdvisor)) {
-			  return new BasePolicyAdvisorForFullValidation(getReferencePolicy());
+			  return new BasePolicyAdvisorForFullValidation(getReferencePolicy(), Set.of());
 		  }
 
 		  return policyAdvisor;
@@ -1119,7 +1120,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		@Override
 		public ReferenceValidationPolicy getReferencePolicy() {
 			return ReferenceValidationPolicy.IGNORE;
-		}
+		}@Override
+
+        public Set<String> getCheckReferencesTo() {
+            return Set.of();
+        }
 	}
 
 

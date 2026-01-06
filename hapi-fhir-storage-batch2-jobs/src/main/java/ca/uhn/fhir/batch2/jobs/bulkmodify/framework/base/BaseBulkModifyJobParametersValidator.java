@@ -2,7 +2,7 @@
  * #%L
  * HAPI-FHIR Storage Batch2 Jobs
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
+import ca.uhn.fhir.batch2.jobs.parameters.IUrlListValidator;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
@@ -32,17 +33,20 @@ import java.util.regex.Pattern;
 
 import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class BaseBulkModifyJobParametersValidator<PT extends BaseBulkModifyJobParameters>
 		implements IJobParametersValidator<PT> {
-	private static final Pattern URL_PATTERN = Pattern.compile("([A-Z][a-zA-Z0-9]+)\\?.*");
+	private static final Pattern URL_PATTERN = Pattern.compile("([A-Z][a-zA-Z0-9]+)?\\?.*");
 	public static final int DEFAULT_DRY_RUN_LIMIT_RESOURCE_COUNT = 5;
 	public static final int DEFAULT_DRY_RUN_LIMIT_RESOURCE_VERSION_COUNT = 5;
 
 	private final IDaoRegistry myDaoRegistry;
+	private final IUrlListValidator myUrlListValidator;
 
-	protected BaseBulkModifyJobParametersValidator(IDaoRegistry theDaoRegistry) {
+	protected BaseBulkModifyJobParametersValidator(IDaoRegistry theDaoRegistry, IUrlListValidator theUrlListValidator) {
 		myDaoRegistry = theDaoRegistry;
+		myUrlListValidator = theUrlListValidator;
 	}
 
 	/**
@@ -71,11 +75,22 @@ public abstract class BaseBulkModifyJobParametersValidator<PT extends BaseBulkMo
 
 	protected void validateUrls(@Nonnull PT theParameters, List<String> theIssueListToPopulate) {
 		List<String> urls = theParameters.getUrls();
-		if (urls.isEmpty()) {
+		if (urls.isEmpty() && !isEmptyUrlListAllowed()) {
 			theIssueListToPopulate.add("No URLs were provided");
 		}
 
+		List<String> urlListValidatorErrors = myUrlListValidator.validateUrls(theParameters.getUrls());
+		if (urlListValidatorErrors != null && !urlListValidatorErrors.isEmpty()) {
+			theIssueListToPopulate.addAll(urlListValidatorErrors);
+			return;
+		}
+
 		for (String nextUrl : urls) {
+			if (nextUrl.contains(" ") || nextUrl.contains("\n") || nextUrl.contains("\t")) {
+				theIssueListToPopulate.add("Invalid URL, cannot contain whitespace: " + sanitizeUrlPart(nextUrl));
+				continue;
+			}
+
 			Matcher matcher = URL_PATTERN.matcher(defaultString(nextUrl));
 			if (!matcher.matches()) {
 				theIssueListToPopulate.add(
@@ -83,11 +98,32 @@ public abstract class BaseBulkModifyJobParametersValidator<PT extends BaseBulkMo
 								+ sanitizeUrlPart(nextUrl));
 			} else {
 				String resourceType = matcher.group(1);
-				if (!myDaoRegistry.isResourceTypeSupported(resourceType)) {
+				if (isBlank(resourceType)) {
+					if (!isUrlWithNoResourceTypeAllowed()) {
+						theIssueListToPopulate.add("Invalid URL (must use syntax '{resourceType}?[optional params]'): "
+								+ sanitizeUrlPart(nextUrl));
+					}
+				} else if (!myDaoRegistry.isResourceTypeSupported(resourceType)) {
 					theIssueListToPopulate.add("Resource type " + sanitizeUrlPart(resourceType) + " is not supported");
 				}
 			}
 		}
+	}
+
+	/**
+	 * Subclasses may override if the given job type should allow a URL with no resource type (meaning all resource types).
+	 * This is disabled in the default implementation but can make sense for some job types (e.g. reindex)
+	 */
+	protected boolean isUrlWithNoResourceTypeAllowed() {
+		return false;
+	}
+
+	/**
+	 * Subclasses may override if the given job type should allow an empty URL list (meaning all
+	 * resources will be modified)
+	 */
+	protected boolean isEmptyUrlListAllowed() {
+		return false;
 	}
 
 	protected abstract void validateJobSpecificParameters(PT theParameters, List<String> theIssueListToPopulate);

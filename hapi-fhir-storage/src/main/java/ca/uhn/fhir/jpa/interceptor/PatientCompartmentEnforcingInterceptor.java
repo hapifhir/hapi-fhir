@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class PatientCompartmentEnforcingInterceptor {
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
 	public void storagePreStorageResourceUpdated(IBaseResource theOldResource, IBaseResource theResource) {
 
-		ourLog.info("Interceptor STORAGE_PRESTORAGE_RESOURCE_UPDATED - started");
+		ourLog.debug("Interceptor STORAGE_PRESTORAGE_RESOURCE_UPDATED - started");
 		StopWatch stopWatch = new StopWatch();
 		try {
 			String patientCompartmentOld = ResourceCompartmentUtil.getPatientCompartmentIdentity(
@@ -78,7 +78,7 @@ public class PatientCompartmentEnforcingInterceptor {
 			}
 
 		} finally {
-			ourLog.info("Interceptor STORAGE_PRESTORAGE_RESOURCE_UPDATED - ended, execution took {}", stopWatch);
+			ourLog.debug("Interceptor STORAGE_PRESTORAGE_RESOURCE_UPDATED - ended, execution took {}", stopWatch);
 		}
 	}
 }

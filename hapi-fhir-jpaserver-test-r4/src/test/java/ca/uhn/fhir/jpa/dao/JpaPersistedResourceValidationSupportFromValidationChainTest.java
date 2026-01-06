@@ -16,6 +16,8 @@ import jakarta.annotation.Nonnull;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -28,11 +30,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.function.Predicate;
 
 import static ca.uhn.fhir.util.ClasspathUtil.loadResource;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -61,6 +63,9 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 	@Mock
 	private IFhirResourceDao<Questionnaire> myQuestionnaireDao;
+
+	@Mock
+	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
 
 	@Mock
 	private IBundleProvider search;
@@ -237,6 +242,30 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 		assertEquals("?url=http%3A//foo&version=1.0", mySearchParameterMapCaptor.getValue().toNormalizedQueryString());
 	}
 
+	@Test
+	public void testFetchCodeSystemWithVersion() {
+		// Setup
+		String systemUrl = "http://test.com/codeSystem/test";
+		String version = "2025-01-01";
+		when(myDaoRegistry.getResourceDao("CodeSystem")).thenReturn(myCodeSystemDao);
+		when(myCodeSystemDao.search(any(SearchParameterMap.class), any()))
+			.thenReturn(getBundleProviderWithCodeSystem(systemUrl, version));
+
+		IValidationSupport validationSupport = getValidationSupportWithJpaPersistedResourceValidationSupport();
+
+		// Execute
+		CodeSystem codeSystem = validationSupport.fetchResource(CodeSystem.class, systemUrl + "|" + version);
+
+		// Verify
+		verify(myCodeSystemDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
+		assertThat(mySearchParameterMapCaptor.getValue().toNormalizedQueryString())
+			.isEqualTo("?url=http%3A//test.com/codeSystem/test&version=2025-01-01");
+		assertThat(codeSystem).isNotNull();
+		assertThat(codeSystem.getIdElement().getIdPart()).isEqualTo("5678");
+		assertThat(codeSystem.getUrl()).isEqualTo(systemUrl);
+		assertThat(codeSystem.getVersion()).isEqualTo(version);
+	}
+
 	@Nonnull
 	private static SimpleBundleProvider newBundleProviderWithOneQuestionnaire() {
 		Questionnaire questionnaire = new Questionnaire();
@@ -273,5 +302,17 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 	@Nonnull
 	private static Predicate<SingleValidationMessage> errorMessagePredicate() {
 		return message -> message.getSeverity() == ResultSeverityEnum.ERROR;
+	}
+
+	private static SimpleBundleProvider getBundleProviderWithCodeSystem(String theUrl, String theVersion) {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setId("5678");
+		codeSystem.setUrl(theUrl);
+		codeSystem.setVersion(theVersion);
+		codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		codeSystem.addConcept().setCode("code1").setDisplay("Code 1");
+
+		return new SimpleBundleProvider(codeSystem);
 	}
 }
