@@ -116,6 +116,10 @@ public class BulkPatchJobR5Test extends BaseBulkPatchR5Test {
 		assertThat(report.getReport()).containsSubsequence(
 			"Bulk Patch Report",
 			"Total Resources Changed   : 2 ",
+<<<<<<< HEAD
+=======
+			"Total Resources Unchanged : 0 ",
+>>>>>>> rel_8_6
 			"Total Resources Failed    : 1 ",
 			"ResourceType[Patient]",
 			"Changed   : 2",
@@ -181,6 +185,10 @@ public class BulkPatchJobR5Test extends BaseBulkPatchR5Test {
 		assertThat(report.getReport()).containsSubsequence(
 			"Bulk Patch Report",
 			"Total Resources Changed   : 1 ",
+<<<<<<< HEAD
+=======
+			"Total Resources Unchanged : 0 ",
+>>>>>>> rel_8_6
 			"Total Resources Failed    : 2 ",
 			"ResourceType[Patient]",
 			"Changed   : 1",
