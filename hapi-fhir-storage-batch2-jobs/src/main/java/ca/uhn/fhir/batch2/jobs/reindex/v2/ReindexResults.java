@@ -2,7 +2,7 @@
  * #%L
  * HAPI-FHIR Storage Batch2 Jobs
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.batch2.jobs.reindex.models;
+package ca.uhn.fhir.batch2.jobs.reindex.v2;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;

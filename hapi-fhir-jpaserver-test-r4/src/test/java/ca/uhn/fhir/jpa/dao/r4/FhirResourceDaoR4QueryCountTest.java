@@ -8,7 +8,7 @@ import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeStep;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
-import ca.uhn.fhir.batch2.jobs.reindex.models.ReindexResults;
+import ca.uhn.fhir.batch2.jobs.reindex.v2.ReindexResults;
 import ca.uhn.fhir.batch2.jobs.reindex.v2.ReindexStepV2;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
@@ -69,6 +69,8 @@ import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.annotation.Nonnull;
+import org.assertj.core.api.Condition;
+import org.assertj.core.data.Index;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -198,22 +200,25 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@AfterEach
 	public void afterResetDao() {
 		mySubscriptionSettings.clearSupportedSubscriptionTypesForUnitTest();
-		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
-		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
-		myStorageSettings.setAutoVersionReferenceAtPaths(new JpaStorageSettings().getAutoVersionReferenceAtPaths());
-		myStorageSettings.setDeleteEnabled(new JpaStorageSettings().isDeleteEnabled());
-		myStorageSettings.setHistoryCountMode(JpaStorageSettings.DEFAULT_HISTORY_COUNT_MODE);
-		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
-		myStorageSettings.setMassIngestionMode(new JpaStorageSettings().isMassIngestionMode());
-		myStorageSettings.setMatchUrlCacheEnabled(new JpaStorageSettings().isMatchUrlCacheEnabled());
-		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new JpaStorageSettings().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
-		myStorageSettings.setResourceClientIdStrategy(new JpaStorageSettings().getResourceClientIdStrategy());
-		myStorageSettings.setResourceMetaCountHardLimit(new JpaStorageSettings().getResourceMetaCountHardLimit());
-		myStorageSettings.setRespectVersionsForSearchIncludes(new JpaStorageSettings().isRespectVersionsForSearchIncludes());
-		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
+
+		JpaStorageSettings defaultStorageSettings = new JpaStorageSettings();
+		myStorageSettings.setAllowMultipleDelete(defaultStorageSettings.isAllowMultipleDelete());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(defaultStorageSettings.isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setAutoVersionReferenceAtPaths(defaultStorageSettings.getAutoVersionReferenceAtPaths());
+		myStorageSettings.setDeleteEnabled(defaultStorageSettings.isDeleteEnabled());
+		myStorageSettings.setHistoryCountMode(defaultStorageSettings.getHistoryCountMode());
+		myStorageSettings.setIndexMissingFields(defaultStorageSettings.getIndexMissingFields());
+		myStorageSettings.setMassIngestionMode(defaultStorageSettings.isMassIngestionMode());
+		myStorageSettings.setMatchUrlCacheEnabled(defaultStorageSettings.isMatchUrlCacheEnabled());
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(defaultStorageSettings.isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
+		myStorageSettings.setResourceClientIdStrategy(defaultStorageSettings.getResourceClientIdStrategy());
+		myStorageSettings.setResourceMetaCountHardLimit(defaultStorageSettings.getResourceMetaCountHardLimit());
+		myStorageSettings.setRespectVersionsForSearchIncludes(defaultStorageSettings.isRespectVersionsForSearchIncludes());
+		myStorageSettings.setTagStorageMode(defaultStorageSettings.getTagStorageMode());
 		myStorageSettings.setExpungeEnabled(false);
-		myStorageSettings.setUniqueIndexesEnabled(new JpaStorageSettings().isUniqueIndexesEnabled());
-		myStorageSettings.setUniqueIndexesCheckedBeforeSave(new JpaStorageSettings().isUniqueIndexesCheckedBeforeSave());
+		myStorageSettings.setUniqueIndexesEnabled(defaultStorageSettings.isUniqueIndexesEnabled());
+		myStorageSettings.setUniqueIndexesCheckedBeforeSave(defaultStorageSettings.isUniqueIndexesCheckedBeforeSave());
+		myStorageSettings.setFetchSizeDefaultMaximum(defaultStorageSettings.getFetchSizeDefaultMaximum());
 
 		myFhirContext.getParserOptions().setStripVersionsFromReferences(true);
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
@@ -4611,6 +4616,27 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(20, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(5, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+	}
+
+	@Test
+	void testStreamingQueryDoesNotUseLimit() {
+	    // given
+		myCaptureQueriesListener.clear();
+		myStorageSettings.setFetchSizeDefaultMaximum(100);
+
+		// when
+		Long count = this.runInTransaction(() ->
+			myPatientDao.searchForIdStream(new SearchParameterMap().setLoadSynchronous(true), mySrd, null)
+				.count());
+
+		// then
+		assertEquals(0, count);
+		myCaptureQueriesListener.logSelectQueries();
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		Condition<SqlQuery> queryNotContainLimit = new Condition<>(query -> !query.getSql(false, false).matches(".*first .* rows.*"), "query does not have limit");
+		assertThat(selectQueries)
+			.hasSize(1)
+				.has(queryNotContainLimit, Index.atIndex(0));
 	}
 
 

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,6 +79,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.io.Serial;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -244,7 +245,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		StopWatch sw = new StopWatch();
 		while (true) {
 
-			if (myNeverUseLocalSearchForUnitTests == false) {
+			if (!myNeverUseLocalSearchForUnitTests) {
 				if (searchTask != null) {
 					ourLog.trace("Local search found");
 					List<JpaPid> resourcePids = searchTask.getResourcePids(theFrom, theTo);
@@ -517,8 +518,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	}
 
 	private void validateSearch(SearchParameterMap theParams) {
+		/*
+		 * Having duplicate identical params in the search (e.g. Patient?gender=male&gender=male) is not
+		 * technically wrong, but it's inefficient and can slow query execution down. Checking for it also
+		 * adds CPU load itself though, so we only check this in an assert to hopefully catch errors in tests.
+		 */
 		assert checkNoDuplicateParameters(theParams)
-				: "Duplicate parameters found in query: " + theParams.toNormalizedQueryString(myContext);
+				: "Duplicate parameters found in query: " + theParams.toNormalizedQueryString();
 
 		validateIncludes(theParams.getIncludes(), Constants.PARAM_INCLUDE);
 		validateIncludes(theParams.getRevIncludes(), Constants.PARAM_REVINCLUDE);
@@ -788,6 +794,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		int pageIndex = theFromIndex / pageSize;
 
 		return new PageRequest(pageIndex, pageSize, Sort.unsorted()) {
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

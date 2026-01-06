@@ -2,7 +2,7 @@
  * #%L
  * HAPI-FHIR Storage Batch2 Jobs
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,10 @@ public class ResourceModificationResponse {
 	}
 
 	/**
-	 * Update the current resource contents with the given resource.
+	 * Update the current resource contents with the given resource. Note that the framework will do a
+	 * comparison to determine whether the resource has actually changed. So if you are positive that
+	 * the resource has not changed, you can call {@link #noChange()} instead but if there is any
+	 * doubt at all, just call this method.
 	 */
 	public static ResourceModificationResponse updateResource(@Nonnull IBaseResource theResource) {
 		Validate.notNull(theResource, "theResource must not be null");

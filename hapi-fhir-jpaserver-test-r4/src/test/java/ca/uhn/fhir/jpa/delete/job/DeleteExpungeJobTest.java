@@ -46,32 +46,32 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		// setup
 		Patient patientActive = new Patient();
 		patientActive.setActive(true);
-		IIdType pKeepId = myPatientDao.create(patientActive).getId().toUnqualifiedVersionless();
+		IIdType pKeepId = myPatientDao.create(patientActive, newSrd()).getId().toUnqualifiedVersionless();
 
 		Patient patientInactive = new Patient();
 		patientInactive.setActive(false);
-		IIdType pDelId = myPatientDao.create(patientInactive).getId().toUnqualifiedVersionless();
+		IIdType pDelId = myPatientDao.create(patientInactive, newSrd()).getId().toUnqualifiedVersionless();
 
 		Observation obsActive = new Observation();
 		obsActive.setSubject(new Reference(pKeepId));
-		IIdType oKeepId = myObservationDao.create(obsActive).getId().toUnqualifiedVersionless();
+		myObservationDao.create(obsActive, newSrd()).getId().toUnqualifiedVersionless();
 
 		Observation obsInactive = new Observation();
 		obsInactive.setSubject(new Reference(pDelId));
-		IIdType oDelId = myObservationDao.create(obsInactive).getId().toUnqualifiedVersionless();
+		myObservationDao.create(obsInactive, newSrd()).getId().toUnqualifiedVersionless();
 
 		DiagnosticReport diagActive = new DiagnosticReport();
 		diagActive.setSubject(new Reference(pKeepId));
-		IIdType dKeepId = myDiagnosticReportDao.create(diagActive).getId().toUnqualifiedVersionless();
+		myDiagnosticReportDao.create(diagActive, newSrd()).getId().toUnqualifiedVersionless();
 
 		DiagnosticReport diagInactive = new DiagnosticReport();
 		diagInactive.setSubject(new Reference(pDelId));
-		IIdType dDelId = myDiagnosticReportDao.create(diagInactive).getId().toUnqualifiedVersionless();
+		myDiagnosticReportDao.create(diagInactive, newSrd()).getId().toUnqualifiedVersionless();
 
 		// validate precondition
-		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
-		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
-		assertEquals(2, myDiagnosticReportDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous(), newSrd()).sizeOrThrowNpe());
+		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous(), newSrd()).sizeOrThrowNpe());
+		assertEquals(2, myDiagnosticReportDao.search(SearchParameterMap.newSynchronous(), newSrd()).sizeOrThrowNpe());
 
 		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
 		jobParameters.addUrl("Observation?subject.active=false");
@@ -86,13 +86,13 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		myBatch2JobHelper.awaitJobCompletion(startResponse);
 
 		// validate
-		assertEquals(1, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(1, myObservationDao.search(SearchParameterMap.newSynchronous(), newSrd()).sizeOrThrowNpe());
 		assertDocumentCountMatchesResourceCount(myObservationDao);
 
-		assertEquals(1, myDiagnosticReportDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(1, myDiagnosticReportDao.search(SearchParameterMap.newSynchronous(), newSrd()).sizeOrThrowNpe());
 		assertDocumentCountMatchesResourceCount(myDiagnosticReportDao);
 
-		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous(), newSrd()).sizeOrThrowNpe());
 		assertDocumentCountMatchesResourceCount(myPatientDao);
 	}
 
@@ -101,11 +101,11 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		IIdType p1 = createPatient(withActiveTrue());
 		IIdType o1 = createObservation(withSubject(p1));
 		IIdType p2 = createPatient(withActiveTrue());
-		IIdType o2 = createObservation(withSubject(p2));
+		createObservation(withSubject(p2));
 
 		// validate precondition
-		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
-		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous(), newSrd()).sizeOrThrowNpe());
+		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous(), newSrd()).sizeOrThrowNpe());
 
 		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
 		jobParameters.addUrl("Patient?_id=" + p1.getIdPart());
@@ -115,7 +115,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		startRequest.setJobDefinitionId(DeleteExpungeAppCtx.JOB_DELETE_EXPUNGE);
 
 		// execute
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(newSrd(), startRequest);
 
 		// Validate
 		JobInstance failure = myBatch2JobHelper.awaitJobFailure(startResponse);
@@ -132,8 +132,8 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		IIdType o2 = createObservation(withSubject(p2));
 
 		// validate precondition
-		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
-		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous(), newSrd()).sizeOrThrowNpe());
+		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous(), newSrd()).sizeOrThrowNpe());
 
 		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
 		jobParameters.addUrl("Patient?_id=" + p1.getIdPart());
@@ -144,7 +144,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		startRequest.setJobDefinitionId(DeleteExpungeAppCtx.JOB_DELETE_EXPUNGE);
 
 		// execute
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(newSrd(), startRequest);
 
 		// Validate
 		JobInstance outcome = myBatch2JobHelper.awaitJobCompletion(startResponse);
@@ -167,8 +167,8 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		IIdType o1c = createObservation(withReference("hasMember", o1b));
 
 		// validate precondition
-		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
-		assertEquals(3, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous(), newSrd()).sizeOrThrowNpe());
+		assertEquals(3, myObservationDao.search(SearchParameterMap.newSynchronous(), newSrd()).sizeOrThrowNpe());
 
 		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
 		jobParameters.addUrl("Patient?_id=" + p1.getIdPart());
@@ -180,7 +180,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		startRequest.setJobDefinitionId(DeleteExpungeAppCtx.JOB_DELETE_EXPUNGE);
 
 		// execute
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(newSrd(), startRequest);
 
 		// Validate
 		JobInstance outcome = myBatch2JobHelper.awaitJobCompletion(startResponse);
@@ -202,8 +202,8 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		IIdType o1c = createObservation(withReference("hasMember", o1b));
 
 		// validate precondition
-		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
-		assertEquals(3, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous(), newSrd()).sizeOrThrowNpe());
+		assertEquals(3, myObservationDao.search(SearchParameterMap.newSynchronous(), newSrd()).sizeOrThrowNpe());
 
 		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
 		jobParameters.addUrl("Patient?_id=" + p1.getIdPart());
@@ -215,7 +215,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		startRequest.setJobDefinitionId(DeleteExpungeAppCtx.JOB_DELETE_EXPUNGE);
 
 		// execute
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(newSrd(), startRequest);
 
 		// Validate
 		JobInstance outcome = myBatch2JobHelper.awaitJobFailure(startResponse);
@@ -238,7 +238,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 
 		// execute
 		try {
-			myJobCoordinator.startInstance(startRequest);
+			myJobCoordinator.startInstance(newSrd(), startRequest);
 			fail();
 		} catch (InvalidRequestException e) {
 
@@ -249,12 +249,10 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 	}
 
 
-	public void assertDocumentCountMatchesResourceCount(IFhirResourceDao dao) {
+	public void assertDocumentCountMatchesResourceCount(IFhirResourceDao<?> dao) {
 		String resourceType = myFhirContext.getResourceType(dao.getResourceType());
-		long resourceCount = dao.search(new SearchParameterMap().setLoadSynchronous(true)).size();
-		runInTransaction(() -> {
-			assertEquals(resourceCount, myFulltestSearchSvc.count(resourceType, new SearchParameterMap()));
-		});
+		long resourceCount = dao.search(new SearchParameterMap().setLoadSynchronous(true), newSrd()).sizeOrThrowNpe();
+		runInTransaction(() -> assertEquals(resourceCount, myFulltestSearchSvc.count(resourceType, new SearchParameterMap())));
 
 	}
 }

@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>8.7.0-SNAPSHOT</version>
+	<version>8.7.4-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -980,6 +980,10 @@
 			<id>MadsSwensson</id>
 			<name>Mads Swensson</name>
 		</developer>
+		<developer>
+			<id>esecules</id>
+			<name>Eric Secules</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -990,7 +994,7 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.6.7</fhir_core_version>
+		<fhir_core_version>6.7.9</fhir_core_version>
 		<spotless_version>2.41.1</spotless_version>
 		<spotless.exclude.pattern>**/test/**/*.java</spotless.exclude.pattern>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -1044,7 +1048,7 @@
 		<flexmark_version>0.64.8</flexmark_version>
 		<flyway_version>10.20.1</flyway_version>
 		<hibernate_version>6.6.4.Final</hibernate_version>
-		<logback_version>1.5.16</logback_version>
+		<logback_version>1.5.19</logback_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
 		<hibernate_search_version>7.2.1.Final</hibernate_search_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
@@ -1088,13 +1092,13 @@
 		<json_path_version>2.9.0</json_path_version>
 		<jboss_logging_version>3.6.1.Final</jboss_logging_version>
 		<stax2_api_version>3.1.4</stax2_api_version>
-		<testcontainers_version>1.20.3</testcontainers_version>
+		<testcontainers_version>2.0.2</testcontainers_version>
 		<thymeleaf-version>3.1.2.RELEASE</thymeleaf-version>
 		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<elastic_apm_version>1.52.0</elastic_apm_version>
-		<elasticsearch_version>8.15.3</elasticsearch_version>
+		<elasticsearch_version>8.16.2</elasticsearch_version>
 		<ucum_version>1.0.9</ucum_version>
 
 		<!-- Site properties -->
@@ -1143,6 +1147,13 @@
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-framework-bom</artifactId>
 				<version>${spring_framework_bom_version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>testcontainers-bom</artifactId>
+				<version>${testcontainers_version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -1256,6 +1267,12 @@
 				<groupId>jakarta.mail</groupId>
 				<artifactId>jakarta.mail-api</artifactId>
 				<version>2.1.3</version>
+			</dependency>
+			<!-- Pinned for CVE-2025-5222, used by org.hl7.fhir.utilities -->
+			<dependency>
+				<groupId>com.ibm.icu</groupId>
+				<artifactId>icu4j</artifactId>
+				<version>78.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.icegreen</groupId>
@@ -1508,6 +1525,18 @@
 				<artifactId>elasticsearch-java</artifactId>
 				<version>${elasticsearch_version}</version>
 			</dependency>
+			<!-- Pinned for CVE-2024-52979, used by hibernate_search v7.2.1 -->
+			<dependency>
+				<groupId>org.elasticsearch.client</groupId>
+				<artifactId>elasticsearch-rest-client</artifactId>
+				<version>8.16.2</version>
+			</dependency>
+			<!-- Pinned for CVE-2024-52979, used by hibernate_search v7.2.1 -->
+			<dependency>
+				<groupId>org.elasticsearch.client</groupId>
+				<artifactId>elasticsearch-rest-client-sniffer</artifactId>
+				<version>8.16.2</version>
+			</dependency>
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
@@ -1526,7 +1555,7 @@
 			<dependency>
 				<groupId>com.microsoft.sqlserver</groupId>
 				<artifactId>mssql-jdbc</artifactId>
-				<version>12.4.2.jre11</version>
+				<version>12.4.3.jre11</version>
 			</dependency>
 			<dependency>
 				<!--
@@ -2309,38 +2338,6 @@
 				<groupId>org.xmlunit</groupId>
 				<artifactId>xmlunit-core</artifactId>
 				<version>2.10.0</version>
-			</dependency>
-			<dependency>
-				<groupId>org.testcontainers</groupId>
-				<artifactId>testcontainers</artifactId>
-				<version>${testcontainers_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.testcontainers</groupId>
-				<artifactId>postgresql</artifactId>
-				<version>${testcontainers_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.testcontainers</groupId>
-				<artifactId>mssqlserver</artifactId>
-				<version>${testcontainers_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.testcontainers</groupId>
-				<artifactId>oracle-xe</artifactId>
-				<version>${testcontainers_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.testcontainers</groupId>
-				<artifactId>elasticsearch</artifactId>
-				<version>${testcontainers_version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.testcontainers</groupId>
-				<artifactId>junit-jupiter</artifactId>
-				<version>${testcontainers_version}</version>
-				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.ogce</groupId>

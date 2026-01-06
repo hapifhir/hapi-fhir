@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -174,6 +174,17 @@ public class SearchParameterMap implements Serializable {
 		}
 		if (!containsKey(theName)) {
 			put(theName, new ArrayList<>());
+		}
+
+		if (theAnd instanceof DateRangeParam dateRangeParam) {
+			if (dateRangeParam.getLowerBound() != null
+					&& !dateRangeParam.getLowerBound().isEmpty()
+					&& dateRangeParam.getUpperBound() != null
+					&& !dateRangeParam.isEmpty()
+					&& dateRangeParam.getLowerBound().equals(dateRangeParam.getUpperBound())) {
+				add(theName, dateRangeParam.getLowerBound());
+				return this;
+			}
 		}
 
 		List<List<IQueryParameterType>> paramList = get(theName);

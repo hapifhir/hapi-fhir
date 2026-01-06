@@ -1,0 +1,9 @@
+---
+type: add
+issue: 7423
+title: "The `$reindex` operation has been refactored to take advantage of the new Bulk Modification Batch2 framework. This means that Reindex jobs now:
+
+* Provide a more helpful response when initially starting the job
+* Support polling for job completion status updates
+* Generate a report outlining the results of the operation, and make this report available to REST clients through the polling API
+* Support partitioning when operating in both NAMED and UNNAMED partition naming modes"

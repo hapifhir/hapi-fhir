@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,7 +160,8 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 	}
 
 	@Override
-	public Set<String> fetchCanonicalResourceVersions(IResourceValidator validator, Object appContext, String url) {
+	public Set<ResourceVersionInformation> fetchCanonicalResourceVersions(
+			IResourceValidator validator, Object appContext, String url) {
 		return Collections.emptySet();
 	}
 }

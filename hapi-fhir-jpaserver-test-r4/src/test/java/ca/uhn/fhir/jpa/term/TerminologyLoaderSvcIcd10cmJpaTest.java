@@ -9,26 +9,24 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TerminologyLoaderSvcIcd10cmJpaTest extends BaseJpaR4Test {
+class TerminologyLoaderSvcIcd10cmJpaTest extends BaseJpaR4Test {
 	private TermLoaderSvcImpl mySvc;
-	private ZipCollectionBuilder myFiles;
 
 	@BeforeEach
+	@Override
 	public void before() {
 		mySvc = new TermLoaderSvcImpl(myTerminologyDeferredStorageSvc, myTermCodeSystemStorageSvc);
 
-		myFiles = new ZipCollectionBuilder();
 	}
 
 	@Test
-	public void testLoadIcd10cm() throws IOException {
+	void testLoadIcd10cm() {
 		String filename = "icd/icd10cm_tabular_2021.xml";
 
 		String resource = ClasspathUtil.loadResource(filename);
@@ -44,7 +42,7 @@ public class TerminologyLoaderSvcIcd10cmJpaTest extends BaseJpaR4Test {
 			assertEquals(0, myTermValueSetDao.count());
 			assertEquals(0, myTermConceptMapDao.count());
 			assertEquals(1, myResourceTableDao.count());
-			assertEquals(43, myTermConceptDao.count());
+			assertEquals(95, myTermConceptDao.count());
 			TermCodeSystem codeSystem = myTermCodeSystemDao.findByCodeSystemUri(ITermLoaderSvc.ICD10CM_URI);
 
 			assertEquals("2021", codeSystem.getCurrentVersion().getCodeSystemVersionId());

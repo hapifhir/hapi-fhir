@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -59,6 +60,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	private final JobQuerySvc myJobQuerySvc;
 	private final JobParameterJsonValidator myJobParameterJsonValidator;
 	private final IHapiTransactionService myTransactionService;
+	private final IInterceptorService myInterceptorService;
 
 	/**
 	 * Constructor
@@ -66,7 +68,8 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	public JobCoordinatorImpl(
 			@Nonnull IJobPersistence theJobPersistence,
 			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
-			@Nonnull IHapiTransactionService theTransactionService) {
+			@Nonnull IHapiTransactionService theTransactionService,
+			@Nonnull IInterceptorService theInterceptorService) {
 		Validate.notNull(theJobPersistence);
 
 		myJobPersistence = theJobPersistence;
@@ -75,6 +78,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		myJobQuerySvc = new JobQuerySvc(theJobPersistence, theJobDefinitionRegistry);
 		myJobParameterJsonValidator = new JobParameterJsonValidator();
 		myTransactionService = theTransactionService;
+		myInterceptorService = theInterceptorService;
 	}
 
 	@Override

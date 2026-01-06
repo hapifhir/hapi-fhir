@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -247,7 +247,7 @@ public abstract class BaseTransactionProcessor {
 		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING)) {
 			HookParams params = new HookParams()
 					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 					.add(IBaseBundle.class, theRequest);
 			compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING, params);
 		}

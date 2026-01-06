@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,15 +37,17 @@ public class Batch2JobStartResponse {
 		return myInstanceId;
 	}
 
-	public void setInstanceId(String theInstanceId) {
+	public Batch2JobStartResponse setInstanceId(String theInstanceId) {
 		myInstanceId = theInstanceId;
+		return this;
 	}
 
 	public boolean isUsesCachedResult() {
 		return myUsesCachedResult;
 	}
 
-	public void setUsesCachedResult(boolean theUseCachedResult) {
+	public Batch2JobStartResponse setUsesCachedResult(boolean theUseCachedResult) {
 		myUsesCachedResult = theUseCachedResult;
+		return this;
 	}
 }

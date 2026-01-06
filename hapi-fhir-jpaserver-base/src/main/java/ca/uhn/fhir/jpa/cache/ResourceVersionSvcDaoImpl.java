@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import jakarta.annotation.Nonnull;
@@ -59,6 +60,9 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 
 	@Autowired
 	IIdHelperService<JpaPid> myIdHelperService;
+
+	@Autowired
+	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Override
 	@Nonnull

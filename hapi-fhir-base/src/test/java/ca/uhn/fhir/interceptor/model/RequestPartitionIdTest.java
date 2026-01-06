@@ -2,6 +2,7 @@ package ca.uhn.fhir.interceptor.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -9,10 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.allPartitions;
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.defaultPartition;
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionIds;
+import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionNames;
 import static ca.uhn.fhir.interceptor.model.RequestPartitionIdTest.ContainsTestCase.Comparison.EQUAL;
 import static ca.uhn.fhir.interceptor.model.RequestPartitionIdTest.ContainsTestCase.Comparison.LEFT_CONTAINS_RIGHT;
 import static ca.uhn.fhir.interceptor.model.RequestPartitionIdTest.ContainsTestCase.Comparison.NEITHER;
@@ -118,6 +122,24 @@ public class RequestPartitionIdTest {
 
 	}
 
+	@ParameterizedTest
+	@MethodSource("testStringifyForKeyTestCases")
+	public void testStringifyForKey(RequestPartitionId theRequestPartitionId, String theExpectedString) {
+		String actual = RequestPartitionId.stringifyForKey(theRequestPartitionId);
+		assertEquals(theExpectedString, actual);
+	}
+
+
+	static Stream<Object[]> testStringifyForKeyTestCases() {
+		return List.of(
+			new Object[]{RequestPartitionId.allPartitions(), "(all)"},
+			new Object[]{RequestPartitionId.defaultPartition(), "null"},
+			new Object[]{RequestPartitionId.fromPartitionIds(1, 2, 3), "1 2 3"},
+			new Object[]{RequestPartitionId.fromPartitionIds(null, 2, 3), "null 2 3"},
+			new Object[]{RequestPartitionId.allPartitionsWithPartitionIds(1, 2, 3), "(all) 1 2 3"}
+		).stream();
+	}
+
 	record ContainsTestCase(String description, RequestPartitionId left, RequestPartitionId right, Comparison comparison) {
 		enum Comparison {
 			LEFT_CONTAINS_RIGHT,
@@ -160,12 +182,16 @@ public class RequestPartitionIdTest {
 	}
 
 	static ContainsTestCase[] getContainsTestCases() {
+		IDefaultPartitionSettings nullDefaultPartition = new IDefaultPartitionSettings() {};
 		return new ContainsTestCase[]{
 			new ContainsTestCase("all vs all", allPartitions(), allPartitions(), EQUAL),
 			new ContainsTestCase("all vs normal", allPartitions(), fromPartitionIds(1, 2, 3), LEFT_CONTAINS_RIGHT),
 			new ContainsTestCase("equal partition id lists", fromPartitionIds(1, 2, 3), fromPartitionIds(1, 2, 3), EQUAL),
 			new ContainsTestCase("different id lists incomparable", fromPartitionIds(1, 2, 5), fromPartitionIds(1, 2, 9), NEITHER),
-			new ContainsTestCase("default as null contains", fromPartitionIds(1, 2, null), defaultPartition(), LEFT_CONTAINS_RIGHT),
+			new ContainsTestCase("default as null contains", fromPartitionIds(1, 2, null), defaultPartition(nullDefaultPartition), LEFT_CONTAINS_RIGHT),
+			new ContainsTestCase("names equivalent", fromPartitionNames("A", "B"), fromPartitionNames("A", "B"), EQUAL),
+			new ContainsTestCase("names left contains right", fromPartitionNames("A", "B"), fromPartitionNames("A"), LEFT_CONTAINS_RIGHT),
+			new ContainsTestCase("names left ids right", fromPartitionNames("A", "B"), fromPartitionIds(1, 2), NEITHER),
 		};
 	}
 
