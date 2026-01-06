@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
+import ca.uhn.fhir.batch2.jobs.export.v1.ExpandResourcesStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
@@ -101,7 +102,7 @@ public class ExpandResourcesStepTest {
 		parameters.setOutputFormat("json");
 		parameters.setSince(new Date());
 		if (thePartitioned) {
-			parameters.setPartitionId(RequestPartitionId.fromPartitionName("Partition-A"));
+			parameters.setPartitionIdForSecurity(RequestPartitionId.fromPartitionName("Partition-A"));
 		}
 		return parameters;
 	}
@@ -189,7 +190,7 @@ public class ExpandResourcesStepTest {
 		// Patient Search
 		ArgumentCaptor<SystemRequestDetails> patientSearchCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
 		verify(patientDao).search(any(), patientSearchCaptor.capture());
-		assertEquals(input.getParameters().getPartitionId(), patientSearchCaptor.getValue().getRequestPartitionId());
+		assertEquals(input.getParameters().getPartitionIdForSecurity(), patientSearchCaptor.getValue().getRequestPartitionId());
 
 	}
 }

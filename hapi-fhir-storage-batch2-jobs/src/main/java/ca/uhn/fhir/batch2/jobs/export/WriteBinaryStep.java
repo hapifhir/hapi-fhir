@@ -117,7 +117,7 @@ public class WriteBinaryStep
 
 		SystemRequestDetails srd = new SystemRequestDetails();
 		BulkExportJobParameters jobParameters = theStepExecutionDetails.getParameters();
-		RequestPartitionId partitionId = jobParameters.getPartitionId();
+		RequestPartitionId partitionId = jobParameters.getPartitionIdForSecurity();
 		if (partitionId == null) {
 			srd.setRequestPartitionId(RequestPartitionId.defaultPartition());
 		} else {

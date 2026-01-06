@@ -5,7 +5,7 @@ import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.export.BulkExportJobParametersBuilder;
-import ca.uhn.fhir.batch2.jobs.export.ExpandResourceAndWriteBinaryStep;
+import ca.uhn.fhir.batch2.jobs.export.v3.ExpandResourceAndWriteBinaryStep;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.model.JobInstance;

@@ -35,7 +35,9 @@ import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.IResourceSupportedSvc;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
@@ -49,6 +51,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class GenerateWorkPackagesV3Step
 		implements IFirstJobStepWorker<BulkExportJobParameters, BulkExportWorkPackageJson> {
@@ -109,7 +112,6 @@ public class GenerateWorkPackagesV3Step
 		RequestPartitionId groupReadPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
 				theStepExecutionDetails.newSystemRequestDetails(), groupId);
 
-		// FIXME: should consider date range?
 		ExportPIDIteratorParameters patientListParams = new ExportPIDIteratorParameters();
 		patientListParams.setGroupId(params.getGroupId());
 		patientListParams.setPartitionId(groupReadPartition);
@@ -126,35 +128,35 @@ public class GenerateWorkPackagesV3Step
 					return myIdHelperService.translatePidsToFhirResourceIds(groupMemberPids);
 				});
 
+		/*
+		 * Patient ID parameters are validated by BulkExportJobParametersValidator to ensure
+		 * that they are always in the format "Patient/[id]"
+		 */
 		List<String> requestedPatientIds =
 				theStepExecutionDetails.getParameters().getPatientIds();
 		if (requestedPatientIds != null && !requestedPatientIds.isEmpty()) {
-			// FIXME: validate format of parameter patientIds (need to be Patient/XXX)
 			patientResourceIds.retainAll(requestedPatientIds);
 		}
 
 		ListMultimap<RequestPartitionId, String> patientResourceIdsByPartition =
 				Multimaps.index(patientResourceIds, t -> determinePatientPartition(theStepExecutionDetails, t));
 		List<String> resourceTypes = getResourceTypes(theStepExecutionDetails, params);
+
+		boolean includesGroup = resourceTypes.remove("Group");
 		for (RequestPartitionId nextPartitionChunk : patientResourceIdsByPartition.keySet()) {
 
 			List<String> chunkPatientIds = patientResourceIdsByPartition.get(nextPartitionChunk);
-			for (String resourceType : resourceTypes) {
-				if ("Group".equals(resourceType)) {
-					continue;
-				}
 
-				BulkExportWorkPackageJson workPackage = new BulkExportWorkPackageJson();
-				workPackage.setPatientIds(chunkPatientIds);
-				workPackage.setResourceType(resourceType);
-				workPackage.setPartitionId(nextPartitionChunk);
-				theDataSink.accept(workPackage);
-			}
+			BulkExportWorkPackageJson workPackage = new BulkExportWorkPackageJson();
+			workPackage.setPatientIds(chunkPatientIds);
+			workPackage.setResourceTypes(resourceTypes);
+			workPackage.setPartitionId(nextPartitionChunk);
+			theDataSink.accept(workPackage);
 		}
 
-		if (resourceTypes.contains("Group")) {
+		if (includesGroup) {
 			BulkExportWorkPackageJson workPackage = new BulkExportWorkPackageJson();
-			workPackage.setResourceType("Group");
+			workPackage.setResourceTypes(List.of("Group"));
 			workPackage.setPartitionId(groupReadPartition);
 			workPackage.setGroupId(params.getGroupId());
 			theDataSink.accept(workPackage);
@@ -173,19 +175,22 @@ public class GenerateWorkPackagesV3Step
 			@Nonnull StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
 			@Nonnull IJobDataSink<BulkExportWorkPackageJson> theDataSink,
 			BulkExportJobParameters params) {
-		RequestPartitionId requestPartitionId = params.getPartitionId();
+
+		RequestDetails srd = theStepExecutionDetails.newSystemRequestDetails();
+		RequestPartitionId requestPartitionId =
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
+						srd, ProviderConstants.OPERATION_EXPORT);
+
 		List<RequestPartitionId> requestPartitions =
 				myJobPartitionProvider.splitPartitionsForJobExecution(requestPartitionId);
 
 		List<String> resourceTypes = getResourceTypes(theStepExecutionDetails, params);
-		for (String resourceType : resourceTypes) {
 
-			for (RequestPartitionId requestPartition : requestPartitions) {
-				BulkExportWorkPackageJson workPackage = new BulkExportWorkPackageJson();
-				workPackage.setResourceType(resourceType);
-				workPackage.setPartitionId(requestPartition);
-				theDataSink.accept(workPackage);
-			}
+		for (RequestPartitionId requestPartition : requestPartitions) {
+			BulkExportWorkPackageJson workPackage = new BulkExportWorkPackageJson();
+			workPackage.setResourceTypes(resourceTypes);
+			workPackage.setPartitionId(requestPartition);
+			theDataSink.accept(workPackage);
 		}
 	}
 
@@ -205,10 +210,9 @@ public class GenerateWorkPackagesV3Step
 								SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.keySet())
 						: Set.of();
 
-		List<String> resourceTypes = params.getResourceTypes().stream()
+		return params.getResourceTypes().stream()
 				.filter(resourceType -> myResourceSupportedSvc.isSupported(resourceType))
 				.filter(resourceType -> !resourceTypesToOmit.contains(resourceType))
-				.toList();
-		return resourceTypes;
+				.collect(Collectors.toList());
 	}
 }

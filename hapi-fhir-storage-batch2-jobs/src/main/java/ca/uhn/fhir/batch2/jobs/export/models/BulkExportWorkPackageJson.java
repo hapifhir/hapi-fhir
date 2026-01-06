@@ -26,8 +26,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 public class BulkExportWorkPackageJson implements IModelJson {
-	@JsonProperty("resourceType")
-	private String myResourceType;
+	@JsonProperty("resourceTypes")
+	private List<String> myResourceTypes;
 
 	@JsonProperty("partitionId")
 	private RequestPartitionId myPartitionId;
@@ -38,12 +38,12 @@ public class BulkExportWorkPackageJson implements IModelJson {
 	@JsonProperty("groupId")
 	private String myGroupId;
 
-	public String getResourceType() {
-		return myResourceType;
+	public List<String> getResourceTypes() {
+		return myResourceTypes;
 	}
 
-	public void setResourceType(String theResourceType) {
-		myResourceType = theResourceType;
+	public void setResourceTypes(List<String> theResourceType) {
+		myResourceTypes = theResourceType;
 	}
 
 	public RequestPartitionId getPartitionId() {
@@ -63,7 +63,7 @@ public class BulkExportWorkPackageJson implements IModelJson {
 	}
 
 	/**
-	 * This will only be set when the export type is "GROUP" and {@link #getResourceType()}
+	 * This will only be set when the export type is "GROUP" and {@link #getResourceTypes()}
 	 * is "Group". For all other GROUP export resource types, this will be null and
 	 * {@link #getPatientIds()} will be populated with the members of the group.
 	 */
@@ -72,7 +72,7 @@ public class BulkExportWorkPackageJson implements IModelJson {
 	}
 
 	/**
-	 * This will only be set when the export type is "GROUP" and {@link #getResourceType()}
+	 * This will only be set when the export type is "GROUP" and {@link #getResourceTypes()}
 	 * is "Group". For all other GROUP export resource types, this will be null and
 	 * {@link #getPatientIds()} will be populated with the members of the group.
 	 */

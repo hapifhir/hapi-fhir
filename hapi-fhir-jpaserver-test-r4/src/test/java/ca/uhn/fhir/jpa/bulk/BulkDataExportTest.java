@@ -672,7 +672,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	 * </blockquote>
 	 */
 	@Test
-	// FIXME: update docs to reflect this
 	public void testGroupBulkExportGroupIncludePractitionerLinkedFromTwoResourceTypes() {
 		// Create some resources
 		Practitioner practitioner = new Practitioner();
@@ -1416,9 +1415,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	private JobInstance awaitExportComplete(String theInstanceId) {
 		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(theInstanceId, 120);
 
-		// FIXME: change back to 200 seconds
 		await()
-			.atMost(20000, TimeUnit.SECONDS)
+			.atMost(200, TimeUnit.SECONDS)
 			.until(() -> myJobCoordinator.getInstance(theInstanceId).getStatus() == StatusEnum.COMPLETED);
 
 		await()

@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.partition;
 
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -53,6 +54,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 @Interceptor
 public class RequestTenantPartitionInterceptor {
+	private static final String INITIATING_TENANT_KEY =
+			RequestTenantPartitionInterceptor.class.getName() + "_INITIATING_TENANT";
 
 	@Autowired
 	private PartitionSettings myPartitionSettings;
@@ -90,6 +93,11 @@ public class RequestTenantPartitionInterceptor {
 		return extractPartitionIdFromRequest(theRequestDetails);
 	}
 
+	@Hook(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE)
+	public void createBatchJob(RequestDetails theRequestDetails, JobInstance theJobInstance) {
+		theJobInstance.addUserData(INITIATING_TENANT_KEY, theRequestDetails.getTenantId());
+	}
+
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 	public RequestPartitionId partitionIdentifyCreate(RequestDetails theRequestDetails) {
 		return extractPartitionIdFromRequest(theRequestDetails);
@@ -97,9 +105,12 @@ public class RequestTenantPartitionInterceptor {
 
 	@Nonnull
 	protected RequestPartitionId extractPartitionIdFromRequest(RequestDetails theRequestDetails) {
+		String tenantId = theRequestDetails.getTenantId();
+		if (tenantId == null) {
+			tenantId = (String) theRequestDetails.getUserData().get(INITIATING_TENANT_KEY);
+		}
 
 		// We will use the tenant ID that came from the request as the partition name
-		String tenantId = theRequestDetails.getTenantId();
 		if (isBlank(tenantId)) {
 			// this branch is no-op happen when "partitioning.tenant_identification_strategy" is set to URL_BASED
 			if (theRequestDetails instanceof SystemRequestDetails requestDetails) {

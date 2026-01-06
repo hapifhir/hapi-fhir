@@ -30,6 +30,8 @@ import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkMetadata;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -66,7 +68,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @param theInstance The details
 	 */
 	@Transactional(propagation = Propagation.REQUIRED)
-	String storeNewInstance(JobInstance theInstance);
+	String storeNewInstance(RequestDetails theRequestDetails, JobInstance theInstance);
 
 	/**
 	 * Fetch an instance
@@ -264,13 +266,15 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @return the ids of the instance and first chunk
 	 */
 	@Nonnull
-	@Transactional(propagation = Propagation.MANDATORY)
-	default CreateResult onCreateWithFirstChunk(JobDefinition<?> theJobDefinition, String theParameters) {
+	default CreateResult onCreateWithFirstChunk(
+			RequestDetails theRequestDetails, JobDefinition<?> theJobDefinition, String theParameters) {
+		HapiTransactionService.requireTransaction();
+
 		JobInstance instance = JobInstance.fromJobDefinition(theJobDefinition);
 		instance.setParameters(theParameters);
 		instance.setStatus(StatusEnum.QUEUED);
 
-		String instanceId = storeNewInstance(instance);
+		String instanceId = storeNewInstance(theRequestDetails, instance);
 		ourLog.info(
 				"Stored new {} job {} with status {}",
 				theJobDefinition.getJobDefinitionId(),

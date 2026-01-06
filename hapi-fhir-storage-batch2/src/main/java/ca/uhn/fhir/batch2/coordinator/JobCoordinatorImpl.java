@@ -125,7 +125,8 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		IJobPersistence.CreateResult instanceAndFirstChunk = myTransactionService
 				.withSystemRequestOnDefaultPartition()
 				.withPropagation(Propagation.REQUIRES_NEW)
-				.execute(() -> myJobPersistence.onCreateWithFirstChunk(jobDefinition, theStartRequest.getParameters()));
+				.execute(() -> myJobPersistence.onCreateWithFirstChunk(
+						theRequestDetails, jobDefinition, theStartRequest.getParameters()));
 
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
 		response.setInstanceId(instanceAndFirstChunk.jobInstanceId);

@@ -27,6 +27,8 @@ public class DefaultJobStepExecutionServices implements IJobStepExecutionService
 
 	@Override
 	public SystemRequestDetails newRequestDetails(IJobInstance theJobInstance) {
-		return new SystemRequestDetails();
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.getUserData().putAll(theJobInstance.getUserData());
+		return systemRequestDetails;
 	}
 }

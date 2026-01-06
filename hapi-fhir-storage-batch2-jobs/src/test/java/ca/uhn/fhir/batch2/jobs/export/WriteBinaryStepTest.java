@@ -113,7 +113,7 @@ public class WriteBinaryStepTest {
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
 		parameters.setSince(new Date());
 		parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
-		parameters.setPartitionId(getPartitionId(thePartitioned));
+		parameters.setPartitionIdForSecurity(getPartitionId(thePartitioned));
 		return new StepExecutionDetails<>(
 			parameters,
 			theData,

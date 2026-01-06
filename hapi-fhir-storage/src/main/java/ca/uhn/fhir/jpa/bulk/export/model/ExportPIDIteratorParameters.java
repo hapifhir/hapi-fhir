@@ -207,6 +207,20 @@ public class ExportPIDIteratorParameters {
 
 	@Override
 	public String toString() {
-		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		return new ToStringBuilder(this, ToStringStyle.NO_CLASS_NAME_STYLE)
+				.append("resourceType", myResourceType)
+				.append("startDate", myStartDate)
+				.append("endDate", myEndDate)
+				.append("filters", myFilters)
+				.append("instanceId", myInstanceId)
+				.append("chunkId", myChunkId)
+				.append("exportStyle", myExportStyle)
+				.append("groupId", myGroupId)
+				.append("expandMdm", myExpandMdm)
+				.append("patientIds", myPatientIds)
+				.append("partitionId", myPartitionId)
+				.append("requestedResourceTypes", myRequestedResourceTypes)
+				.append("includeHistory", myIncludeHistory)
+				.toString();
 	}
 }

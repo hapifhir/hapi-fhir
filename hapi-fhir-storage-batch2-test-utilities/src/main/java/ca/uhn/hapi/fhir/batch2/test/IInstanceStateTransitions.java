@@ -28,6 +28,8 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -50,7 +52,7 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 		// when
 		IJobPersistence.CreateResult createResult =
 			getTestManager().newTxTemplate().execute(status->
-				getTestManager().getSvc().onCreateWithFirstChunk(jd, "{}"));
+				getTestManager().getSvc().onCreateWithFirstChunk(newSrd(), jd, "{}"));
 
 		// then
 		ourLog.info("job and chunk created {}", createResult);
@@ -72,7 +74,7 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 		// given
 		JobDefinition<?> jd = getTestManager().withJobDefinition(false);
 		IJobPersistence.CreateResult createResult = getTestManager().newTxTemplate().execute(status->
-			getTestManager().getSvc().onCreateWithFirstChunk(jd, "{}"));
+			getTestManager().getSvc().onCreateWithFirstChunk(newSrd(), jd, "{}"));
 		assertNotNull(createResult);
 
 		// when
@@ -89,12 +91,12 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 		// given
 		JobInstance cancelledInstance = createInstance();
 		cancelledInstance.setStatus(theState);
-		String instanceId1 = getTestManager().getSvc().storeNewInstance(cancelledInstance);
+		String instanceId1 = getTestManager().getSvc().storeNewInstance(newSrd(), cancelledInstance);
 		getTestManager().getSvc().cancelInstance(instanceId1);
 
 		JobInstance normalInstance = createInstance();
 		normalInstance.setStatus(theState);
-		String instanceId2 = getTestManager().getSvc().storeNewInstance(normalInstance);
+		String instanceId2 = getTestManager().getSvc().storeNewInstance(newSrd(), normalInstance);
 
 		JobDefinitionRegistry jobDefinitionRegistry = new JobDefinitionRegistry();
 		jobDefinitionRegistry.addJobDefinitionIfNotRegistered(getTestManager().withJobDefinition(false));
@@ -122,5 +124,9 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 		}
 		JobInstance freshInstance2 = getTestManager().getSvc().fetchInstance(instanceId2).orElseThrow();
 		assertEquals(theState, freshInstance2.getStatus(), "cancel request ignored - cancelled not set");
+	}
+
+	default RequestDetails newSrd() {
+		return new SystemRequestDetails();
 	}
 }

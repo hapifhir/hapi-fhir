@@ -45,7 +45,7 @@ import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.IParameter;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
-import ca.uhn.fhir.rest.server.provider.BulkDataExportProvider;
+import ca.uhn.fhir.rest.server.provider.MockBulkDataExportProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -846,7 +846,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 	public void testMethodGetServerConformance_whenServerSupportsExportOperation_willIncludeInstantiatesElement() throws Exception {
 		// given
 		RestfulServer rs = new RestfulServer(ourCtx);
-		rs.setProviders(new BulkDataExportProvider());
+		rs.setProviders(new MockBulkDataExportProvider());
 		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR3"));
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
 		rs.setServerConformanceProvider(sc);

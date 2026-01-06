@@ -22,12 +22,11 @@ package ca.uhn.fhir.batch2.jobs.export.v1;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.export.BulkExportCreateReportStep;
 import ca.uhn.fhir.batch2.jobs.export.BulkExportJobParametersValidator;
-import ca.uhn.fhir.batch2.jobs.export.ExpandResourceAndWriteBinaryStep;
-import ca.uhn.fhir.batch2.jobs.export.ExpandResourcesStep;
 import ca.uhn.fhir.batch2.jobs.export.WriteBinaryStep;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
+import ca.uhn.fhir.batch2.jobs.export.v2.ExpandResourceAndWriteBinaryV2Step;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -43,13 +42,13 @@ import static ca.uhn.fhir.batch2.jobs.export.BulkExportAppCtx.WRITE_TO_BINARIES;
 public class BulkExportV1AppCtx {
 
 	@Bean
-	public JobDefinition bulkExportJobDefinition() {
+	public JobDefinition<BulkExportJobParameters> bulkExportJobDefinition() {
 		JobDefinition.Builder<IModelJson, VoidModel> builder = JobDefinition.newBuilder();
 		builder.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
 		builder.setJobDescription("FHIR Bulk Export");
 		builder.setJobDefinitionVersion(1);
 
-		JobDefinition def = builder.setParametersType(BulkExportJobParameters.class)
+		JobDefinition<BulkExportJobParameters> def = builder.setParametersType(BulkExportJobParameters.class)
 				// validator
 				.setParametersValidator(bulkExportJobParametersValidator())
 				.gatedExecution()
@@ -80,13 +79,13 @@ public class BulkExportV1AppCtx {
 	}
 
 	@Bean
-	public JobDefinition bulkExportJobV2Definition() {
+	public JobDefinition<BulkExportJobParameters> bulkExportJobV2Definition() {
 		JobDefinition.Builder<IModelJson, VoidModel> builder = JobDefinition.newBuilder();
 		builder.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
 		builder.setJobDescription("FHIR Bulk Export");
 		builder.setJobDefinitionVersion(2);
 
-		JobDefinition def = builder.setParametersType(BulkExportJobParameters.class)
+		JobDefinition<BulkExportJobParameters> def = builder.setParametersType(BulkExportJobParameters.class)
 				// validator
 				.setParametersValidator(bulkExportJobParametersValidator())
 				.gatedExecution()
@@ -144,8 +143,8 @@ public class BulkExportV1AppCtx {
 	 * Note, this bean is only used for version 2 of the bulk export job definition
 	 */
 	@Bean
-	public ExpandResourceAndWriteBinaryStep expandResourceAndWriteBinaryStep() {
-		return new ExpandResourceAndWriteBinaryStep();
+	public ExpandResourceAndWriteBinaryV2Step expandResourceAndWriteBinaryStep() {
+		return new ExpandResourceAndWriteBinaryV2Step();
 	}
 
 	@Bean

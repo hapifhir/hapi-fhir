@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.bulk.export.api;
 
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -28,12 +27,10 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-public interface IBulkExportProcessor<T extends IResourcePersistentId> {
+public interface IBulkExportProcessor<T extends IResourcePersistentId<?>> {
 
 	/**
 	 * For fetching PIDs of resources
-	 * @param theParams
-	 * @return
 	 */
 	Iterator<T> getResourcePidIterator(ExportPIDIteratorParameters theParams);
 
@@ -43,6 +40,5 @@ public interface IBulkExportProcessor<T extends IResourcePersistentId> {
 	 */
 	void expandMdmResources(List<IBaseResource> theResources);
 
-	LinkedHashSet<JpaPid> getExpandedPatientList(
-			ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange);
+	LinkedHashSet<T> getExpandedPatientList(ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange);
 }

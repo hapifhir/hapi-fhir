@@ -441,13 +441,13 @@ public class BulkDataExportProvider {
 		JobInstance info = myJobCoordinator.getInstance(theJobId.getValueAsString());
 
 		BulkExportJobParameters parameters = info.getParameters(BulkExportJobParameters.class);
-		if (parameters.getPartitionId() != null) {
+		if (parameters.getPartitionIdForSecurity() != null) {
 			// Determine and validate permissions for partition (if needed)
 			RequestPartitionId partitionId =
 					myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
 							theRequestDetails, ProviderConstants.OPERATION_EXPORT_POLL_STATUS);
 			myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
-			if (!parameters.getPartitionId().equals(partitionId)) {
+			if (!parameters.getPartitionIdForSecurity().equals(partitionId)) {
 				throw new InvalidRequestException(
 						Msg.code(2304) + "Invalid partition in request for Job ID " + theJobId);
 			}

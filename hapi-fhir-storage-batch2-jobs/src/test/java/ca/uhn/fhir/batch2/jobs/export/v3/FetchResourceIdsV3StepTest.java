@@ -1,13 +1,12 @@
-package ca.uhn.fhir.batch2.jobs.export;
+package ca.uhn.fhir.batch2.jobs.export.v3;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
+import ca.uhn.fhir.batch2.jobs.export.models.BulkExportWorkPackageJson;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
-import ca.uhn.fhir.batch2.jobs.export.v1.FetchResourceIdsV1Step;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -15,23 +14,20 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.rest.api.IResourceSupportedSvc;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
+import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
-import org.junit.jupiter.api.AfterEach;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,64 +40,54 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class FetchResourceIdsV1StepTest {
-	private static final Logger ourLog = (Logger) LoggerFactory.getLogger(FetchResourceIdsV1Step.class);
+public class FetchResourceIdsV3StepTest {
+
+	@RegisterExtension
+	private final LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(FetchResourceIdsV3Step.class);
 
 	@Mock
-	private ListAppender<ILoggingEvent> myAppender;
+	private IJobDataSink<ResourceIdList> mySink;
 
 	@Mock
 	private IBulkExportProcessor<JpaPid> myBulkExportProcessor;
 
 	@InjectMocks
-	private FetchResourceIdsV1Step myFirstStep;
+	private FetchResourceIdsV3Step myFirstStep;
 	@Mock
 	private JpaStorageSettings myStorageSettings;
-
-	@Mock
-	private IResourceSupportedSvc myResourceSupportedSvc;
 
 	@Mock
 	private IJobStepExecutionServices myJobStepExecutionServices;
 
 	@BeforeEach
 	public void init() {
-		ourLog.addAppender(myAppender);
 		myFirstStep.setBulkExportProcessorForUnitTest(myBulkExportProcessor);
 	}
 
-	@AfterEach
-	public void after() {
-		ourLog.detachAppender(myAppender);
-	}
-
-	private BulkExportJobParameters createParameters(boolean thePartitioned) {
+	private BulkExportJobParameters createParameters() {
 		BulkExportJobParameters jobParameters = new BulkExportJobParameters();
 		jobParameters.setSince(new Date());
 		jobParameters.setOutputFormat("json");
 		jobParameters.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		jobParameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
-		if (thePartitioned) {
-			jobParameters.setPartitionId(RequestPartitionId.fromPartitionName("Partition-A"));
-		} else {
-			jobParameters.setPartitionId(RequestPartitionId.allPartitions());
-		}
 		return jobParameters;
 	}
 
-	private StepExecutionDetails<BulkExportJobParameters, VoidModel> createInput(BulkExportJobParameters theParameters,
-																										  JobInstance theInstance) {
+	private StepExecutionDetails<BulkExportJobParameters, BulkExportWorkPackageJson> createInput(BulkExportJobParameters theParameters, JobInstance theInstance, boolean thePartitioned, List<String> theResourceTypes) {
+		BulkExportWorkPackageJson workPackage = new BulkExportWorkPackageJson();
+		workPackage.setResourceTypes(theResourceTypes);
+		if (thePartitioned) {
+			workPackage.setPartitionId(RequestPartitionId.fromPartitionId(1));
+		}
+
 		return new StepExecutionDetails<>(
 			theParameters,
-			null,
+			workPackage,
 			theInstance,
 			new WorkChunk().setId("1"),
 			myJobStepExecutionServices
@@ -110,14 +96,13 @@ public class FetchResourceIdsV1StepTest {
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	public void run_withValidInputs_succeeds(boolean thePartitioned) {
+	public void run_withValidInputs_succeeds(boolean thePartitioned) throws JsonProcessingException {
 		// setup
-		IJobDataSink<ResourceIdList> sink = mock(IJobDataSink.class);
-		BulkExportJobParameters parameters = createParameters(thePartitioned);
+		BulkExportJobParameters parameters = createParameters();
 		JobInstance instance = new JobInstance();
-		instance.setInstanceId("1");
-		StepExecutionDetails<BulkExportJobParameters, VoidModel> input = createInput(parameters, instance);
-		ourLog.setLevel(Level.INFO);
+		instance.setInstanceId("my-instance-id");
+		StepExecutionDetails<BulkExportJobParameters, BulkExportWorkPackageJson> input = createInput(parameters, instance, thePartitioned, List.of("Patient", "Observation"));
+
 		List<JpaPid> patientIds = new ArrayList<>();
 		List<JpaPid> observationIds = new ArrayList<>();
 
@@ -135,7 +120,6 @@ public class FetchResourceIdsV1StepTest {
 		}
 
 		// when
-		when(myResourceSupportedSvc.isSupported(anyString())).thenReturn(true);
 		when(myBulkExportProcessor.getResourcePidIterator(
 			any(ExportPIDIteratorParameters.class)
 		)).thenReturn(patientIds.iterator())
@@ -145,66 +129,65 @@ public class FetchResourceIdsV1StepTest {
 		when(myStorageSettings.getBulkExportFileMaximumSize()).thenReturn(10000L);
 
 		// test
-		RunOutcome outcome = myFirstStep.run(input, sink);
+		RunOutcome outcome = myFirstStep.run(input, mySink);
 
 		// verify
 		assertEquals(RunOutcome.SUCCESS, outcome);
 		ArgumentCaptor<ResourceIdList> resultCaptor = ArgumentCaptor.forClass(ResourceIdList.class);
-		verify(sink, times(parameters.getResourceTypes().size()))
+		verify(mySink, times(parameters.getResourceTypes().size()))
 			.accept(resultCaptor.capture());
 
 		List<ResourceIdList> results = resultCaptor.getAllValues();
 		assertThat(results).hasSize(parameters.getResourceTypes().size());
-		for (ResourceIdList idList: results) {
+		for (ResourceIdList idList : results) {
 			String resourceType = idList.getResourceType();
 			assertThat(parameters.getResourceTypes()).contains(resourceType);
 
 			if (resourceType.equals("Patient")) {
 				assertThat(idList.getIds()).hasSize(patientIds.size());
-			}
-			else if (resourceType.equals("Observation")) {
+			} else if (resourceType.equals("Observation")) {
 				assertThat(idList.getIds()).hasSize(observationIds.size());
-			}
-			else {
+			} else {
 				// we shouldn't have others
 				fail("");
 			}
 		}
 
-		ArgumentCaptor<ILoggingEvent> logCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
-		verify(myAppender, atLeastOnce()).doAppend(logCaptor.capture());
-		List<ILoggingEvent> events = logCaptor.getAllValues();
-		assertThat(events.get(0).getMessage()).contains("Fetching resource IDs for bulk export job instance");
-		assertThat(events.get(1).getMessage()).contains("Running FetchResource");
-		assertThat(events.get(2).getMessage()).contains("Running FetchResource");
-		assertThat(events.get(3).getFormattedMessage()).contains("Submitted "
-			+ parameters.getResourceTypes().size()
-			+ " groups of ids for processing");
+		List<ILoggingEvent> events = myLogbackTestExtension.getLogEvents();
+		String expectedPartitionId = "null";
+		if (thePartitioned) {
+			expectedPartitionId = "RequestPartitionId[ids=[1]]";
+		}
+		assertEquals("Running FetchResourceIdsV3Step for InstanceID[Patient] ChunkID[my-instance-id] with ResourceType[1] Partition[" + expectedPartitionId + "]", events.get(0).getFormattedMessage());
+		assertEquals("Running FetchResourceIdsV3Step for InstanceID[Observation] ChunkID[my-instance-id] with ResourceType[1] Partition[" + expectedPartitionId + "]", events.get(1).getFormattedMessage());
+		assertEquals("Submitted 2 chunks with 4 ids for processing", events.get(2).getFormattedMessage());
 
-		ArgumentCaptor<ExportPIDIteratorParameters> mapppedParamsCaptor = ArgumentCaptor.forClass(ExportPIDIteratorParameters.class);
-		verify(myBulkExportProcessor, times(2)).getResourcePidIterator(mapppedParamsCaptor.capture());
-		List<ExportPIDIteratorParameters> capturedParameters = mapppedParamsCaptor.getAllValues();
-		assertEquals(parameters.getPartitionId(), capturedParameters.get(0).getPartitionIdOrAllPartitions());
-		assertEquals(parameters.getPartitionId(), capturedParameters.get(1).getPartitionIdOrAllPartitions());
+		ArgumentCaptor<ExportPIDIteratorParameters> mappedParamsCaptor = ArgumentCaptor.forClass(ExportPIDIteratorParameters.class);
+		verify(myBulkExportProcessor, times(2)).getResourcePidIterator(mappedParamsCaptor.capture());
+		List<ExportPIDIteratorParameters> capturedParameters = mappedParamsCaptor.getAllValues();
+		if (thePartitioned) {
+			assertEquals("{\"allPartitions\":false,\"partitionIds\":[1]}", capturedParameters.get(0).getPartitionIdOrAllPartitions().asJson());
+			assertEquals("{\"allPartitions\":false,\"partitionIds\":[1]}", capturedParameters.get(1).getPartitionIdOrAllPartitions().asJson());
+		} else {
+			assertEquals("{\"allPartitions\":true}", capturedParameters.get(0).getPartitionIdOrAllPartitions().asJson());
+			assertEquals("{\"allPartitions\":true}", capturedParameters.get(1).getPartitionIdOrAllPartitions().asJson());
+		}
 	}
 
 	@Test
 	public void run_moreThanTheMaxFileCapacityPatients_hasAtLeastTwoJobs() {
 		// setup
-		IJobDataSink<ResourceIdList> sink = mock(IJobDataSink.class);
 		JobInstance instance = new JobInstance();
-		instance.setInstanceId("1");
-		BulkExportJobParameters parameters = createParameters(false);
+		instance.setInstanceId("my-instance-id");
+		BulkExportJobParameters parameters = createParameters();
 		parameters.setResourceTypes(Collections.singletonList("Patient"));
-		StepExecutionDetails<BulkExportJobParameters, VoidModel> input = createInput(parameters, instance);
-		ourLog.setLevel(Level.INFO);
+		StepExecutionDetails<BulkExportJobParameters, BulkExportWorkPackageJson> input = createInput(parameters, instance, false, List.of("Patient"));
 		List<JpaPid> patientIds = new ArrayList<>();
 
 		// when
 		int maxFileCapacity = 5;
 		when(myStorageSettings.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
 		when(myStorageSettings.getBulkExportFileMaximumSize()).thenReturn(10000L);
-		when(myResourceSupportedSvc.isSupported(anyString())).thenReturn(true);
 
 
 		for (int i = 0; i <= maxFileCapacity; i++) {
@@ -218,13 +201,13 @@ public class FetchResourceIdsV1StepTest {
 		)).thenReturn(patientIds.iterator());
 
 		// test
-		RunOutcome outcome = myFirstStep.run(input, sink);
+		RunOutcome outcome = myFirstStep.run(input, mySink);
 
 		// verify
 		ArgumentCaptor<ResourceIdList> captor = ArgumentCaptor.forClass(ResourceIdList.class);
 		assertEquals(RunOutcome.SUCCESS, outcome);
 
-		verify(sink, times(2))
+		verify(mySink, times(2))
 			.accept(captor.capture());
 		List<ResourceIdList> listIds = captor.getAllValues();
 

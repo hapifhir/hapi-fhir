@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.batch2.jobs.export;
+package ca.uhn.fhir.batch2.jobs.export.v1;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -125,7 +125,7 @@ public class ExpandResourcesStep
 		for (List<TypedPidJson> idList : idLists) {
 
 			// search the resources
-			List<IBaseResource> allResources = fetchAllResources(idList, parameters.getPartitionId());
+			List<IBaseResource> allResources = fetchAllResources(idList, parameters.getPartitionIdForSecurity());
 
 			// Apply post-fetch filtering
 			String resourceType = data.getResourceType();

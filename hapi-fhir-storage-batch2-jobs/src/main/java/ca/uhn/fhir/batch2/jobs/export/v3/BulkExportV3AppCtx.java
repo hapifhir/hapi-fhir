@@ -44,7 +44,7 @@ public class BulkExportV3AppCtx {
 		builder.setJobDescription("FHIR Bulk Export");
 		builder.setJobDefinitionVersion(3);
 
-		JobDefinition<BulkExportJobParameters> def = builder.setParametersType(BulkExportJobParameters.class)
+		return builder.setParametersType(BulkExportJobParameters.class)
 				// validator
 				.setParametersValidator(bulkExportJobParametersValidator())
 				.gatedExecution()
@@ -74,8 +74,6 @@ public class BulkExportV3AppCtx {
 						BulkExportJobResults.class,
 						createReportStep())
 				.build();
-
-		return def;
 	}
 
 	@Bean("bulkExportV3GenerateWorkPackagesStep")

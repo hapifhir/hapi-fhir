@@ -165,10 +165,6 @@ public class Batch2JobInstanceEntity implements Serializable {
 	@Column(name = "REPORT_VC", nullable = true, length = Length.LONG32)
 	private String myReportVc;
 
-	// FIXME: rollback this change?
-	//	@Column(name = "INITIATING_REQUEST_JSON", nullable = true, length = Length.LONG32)
-	//	private String myInitiatingRequestJson;
-
 	public String getCurrentGatedStepId() {
 		return myCurrentGatedStepId;
 	}

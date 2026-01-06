@@ -4,7 +4,7 @@ import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
-import ca.uhn.fhir.batch2.jobs.export.ExpandResourcesStep;
+import ca.uhn.fhir.batch2.jobs.export.v1.ExpandResourcesStep;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.model.JobInstance;

@@ -475,7 +475,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		JobDefinition<TestJobParameters> jobDefinition = createJobDefinition();
 		when(myJobDefinitionRegistry.getLatestJobDefinition(eq(JOB_DEFINITION_ID)))
 			.thenReturn(Optional.of(jobDefinition));
-		when(myJobInstancePersister.onCreateWithFirstChunk(any(), any())).thenReturn(new IJobPersistence.CreateResult(INSTANCE_ID, CHUNK_ID));
+		when(myJobInstancePersister.onCreateWithFirstChunk(any(), any(), any())).thenReturn(new IJobPersistence.CreateResult(INSTANCE_ID, CHUNK_ID));
 
 		// Execute
 
@@ -487,7 +487,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		// Verify
 
 		verify(myJobInstancePersister, times(1))
-			.onCreateWithFirstChunk(myJobDefinitionCaptor.capture(), myParametersJsonCaptor.capture());
+			.onCreateWithFirstChunk(any(), myJobDefinitionCaptor.capture(), myParametersJsonCaptor.capture());
 		assertThat(myJobDefinitionCaptor.getValue()).isSameAs(jobDefinition);
 		assertEquals(startRequest.getParameters(), myParametersJsonCaptor.getValue());
 
@@ -547,7 +547,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		startRequest.setParameters(new TestJobParameters().setParam1("bad").setParam2("aa"));
 
 		try {
-			mySvc.startInstance(startRequest);
+			mySvc.startInstance(null, startRequest);
 			fail();
 		} catch (InvalidRequestException e) {
 

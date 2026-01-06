@@ -19,20 +19,26 @@
  */
 package ca.uhn.fhir.jpa.test;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.mapping;
@@ -42,12 +48,22 @@ public class BulkExportJobHelper {
 
 
 	private final IGenericClient myClient;
+	private final FhirContext myFhirContext;
+	private final DaoRegistry myDaoRegistry;
+	private Supplier<RequestDetails> myRequestDetailsSupplier = SystemRequestDetails::new;
 
 	public BulkExportJobHelper(IGenericClient theClient) {
 		myClient = theClient;
+		myFhirContext = myClient.getFhirContext();
+		myDaoRegistry = null;
 	}
 
-	// FIXME: inline all
+	public BulkExportJobHelper(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
+		myFhirContext = theDaoRegistry.getFhirContext();
+		myClient = null;
+	}
+
 	public BulkExportContents fetchJobResults(BulkExportJobResults theResults) {
 		Multimap<String, IBaseResource> typeToResources = ArrayListMultimap.create();
 
@@ -85,18 +101,25 @@ public class BulkExportJobHelper {
 	}
 
 	private List<IBaseResource> convertNDJSONToResources(String theValue) {
-		IParser iParser = myClient.getFhirContext().newJsonParser();
+		IParser iParser = myFhirContext.newJsonParser();
 		return theValue.lines()
 			.map(iParser::parseResource)
 			.toList();
 	}
 
 	private String getBinaryContentsAsString(String theBinaryId) {
-		IBaseBinary binary = (IBaseBinary) myClient
-			.read()
-			.resource("Binary")
-			.withId(theBinaryId)
-			.execute();
+		IBaseBinary binary;
+		if (myClient != null) {
+			binary = (IBaseBinary) myClient
+				.read()
+				.resource("Binary")
+				.withId(theBinaryId)
+				.execute();
+		} else {
+			IFhirResourceDao<?> binaryDao = myDaoRegistry.getResourceDao("Binary");
+			IIdType id = myFhirContext.getVersion().newIdType("Binary/" + theBinaryId);
+			binary = (IBaseBinary) binaryDao.read(id, myRequestDetailsSupplier.get());
+		}
 		assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
 		return new String(binary.getContent(), Constants.CHARSET_UTF8);
 	}
@@ -119,6 +142,14 @@ public class BulkExportJobHelper {
 		return retVal;
 	}
 
+	/**
+	 * Only used if we're using the DaoRegistry constructor
+	 */
+	public void setRequestDetailsSupplier(Supplier<RequestDetails> theRequestDetailsSupplier) {
+		assert myClient == null;
+		assert myDaoRegistry != null;
+		myRequestDetailsSupplier = theRequestDetailsSupplier;
+	}
 
 	public static class BulkExportContents {
 		private final Multimap<String, IBaseResource> myTypeToResources;

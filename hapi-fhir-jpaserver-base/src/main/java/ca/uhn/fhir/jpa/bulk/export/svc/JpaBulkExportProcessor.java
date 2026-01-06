@@ -441,8 +441,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 					resPids.add(resultIterator.next());
 				}
 			} catch (IOException e) {
-				// FIXME: add code
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(2837) + e.getMessage(), e);
 			}
 		}
 		return resPids;

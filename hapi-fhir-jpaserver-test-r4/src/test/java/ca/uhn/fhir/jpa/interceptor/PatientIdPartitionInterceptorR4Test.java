@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -27,10 +28,8 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.rest.server.provider.BulkDataExportProvider;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.FhirPatchBuilder;
@@ -727,8 +726,8 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	public void testSystemBulkExport_withPatientIdPartitioningWithResourceType_exportUsesNonPatientSpecificPartition() throws IOException {
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE, "Patient");
-		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE_FILTER, "Patient?");
+		post.addHeader(JpaConstants.PARAM_EXPORT_TYPE, "Patient");
+		post.addHeader(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "Patient?");
 
 		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)){
 			ourLog.info("Response: {}",postResponse);
@@ -745,8 +744,8 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE, "Patient"); // ignored when computing partition
-		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE_FILTER, "Patient?");
+		post.addHeader(JpaConstants.PARAM_EXPORT_TYPE, "Patient"); // ignored when computing partition
+		post.addHeader(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "Patient?");
 
 		String locationUrl;
 

@@ -46,7 +46,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-// FIXME: find the 2 FetchResourceIdsV1Step tests and make V2 versions too
 public class FetchResourceIdsV3Step
 		implements IJobStepWorker<BulkExportJobParameters, BulkExportWorkPackageJson, ResourceIdList> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsV3Step.class);
@@ -63,14 +62,45 @@ public class FetchResourceIdsV3Step
 			@Nonnull StepExecutionDetails<BulkExportJobParameters, BulkExportWorkPackageJson> theStepExecutionDetails,
 			@Nonnull IJobDataSink<ResourceIdList> theDataSink)
 			throws JobExecutionFailedException {
-		BulkExportJobParameters params = theStepExecutionDetails.getParameters();
+
+		ActivityCounter activityCounter = new ActivityCounter();
+		try {
+			Set<TypedPidJson> submittedBatchResourceIds = new HashSet<>();
+			BulkExportWorkPackageJson data = theStepExecutionDetails.getData();
+
+			/*
+			 * We will fetch ids for each resource type in the ResourceTypes (_type filter).
+			 */
+			for (String resourceType : data.getResourceTypes()) {
+				fetchResourceIdsAndSubmitWorkChunksForResourceType(
+						theDataSink, theStepExecutionDetails, resourceType, submittedBatchResourceIds, activityCounter);
+			}
+
+		} catch (Exception ex) {
+			ourLog.error(ex.getMessage(), ex);
+
+			theDataSink.recoveredError(ex.getMessage());
+
+			throw new JobExecutionFailedException(Msg.code(2239) + " : " + ex.getMessage());
+		}
+
+		ourLog.info(
+				"Submitted {} chunks with {} ids for processing",
+				activityCounter.getSubmissionChunkCount(),
+				activityCounter.getSubmissionResourceCount());
+		return RunOutcome.SUCCESS;
+	}
+
+	private void fetchResourceIdsAndSubmitWorkChunksForResourceType(
+			@Nonnull IJobDataSink<ResourceIdList> theDataSink,
+			StepExecutionDetails<BulkExportJobParameters, BulkExportWorkPackageJson> theStepExecutionDetails,
+			String resourceType,
+			Set<TypedPidJson> submittedBatchResourceIds,
+			ActivityCounter theActivityCounter) {
 		BulkExportWorkPackageJson data = theStepExecutionDetails.getData();
 		RequestPartitionId partitionId = data.getPartitionId();
 
-		ourLog.info(
-				"Fetching resource IDs for bulk export job instance[{}] for partition(s): {}",
-				theStepExecutionDetails.getInstance().getInstanceId(),
-				partitionId);
+		BulkExportJobParameters params = theStepExecutionDetails.getParameters();
 
 		ExportPIDIteratorParameters providerParams = new ExportPIDIteratorParameters();
 		providerParams.setInstanceId(theStepExecutionDetails.getInstance().getInstanceId());
@@ -98,79 +128,65 @@ public class FetchResourceIdsV3Step
 		 */
 		providerParams.setRequestedResourceTypes(params.getResourceTypes());
 
-		int submissionChunkCount = 0;
-		int submissionResourceCount = 0;
-		try {
-			Set<TypedPidJson> submittedBatchResourceIds = new HashSet<>();
+		providerParams.setResourceType(resourceType);
 
-			/*
-			 * We will fetch ids for each resource type in the ResourceTypes (_type filter).
-			 */
-			String resourceType = data.getResourceType();
-			providerParams.setResourceType(resourceType);
+		// filters are the filters for searching
+		ourLog.info(
+				"Running {} for InstanceID[{}] ChunkID[{}] with ResourceType[{}] Partition[{}]",
+				getClass().getSimpleName(),
+				resourceType,
+				theStepExecutionDetails.getInstance().getInstanceId(),
+				theStepExecutionDetails.getChunkId(),
+				data.getPartitionId());
 
-			// filters are the filters for searching
-			ourLog.info(
-					"Running FetchResourceIdsStep for resource type: {} with params: {}", resourceType, providerParams);
-			@SuppressWarnings("unchecked")
-			Iterator<IResourcePersistentId<?>> pidIterator =
-					(Iterator<IResourcePersistentId<?>>) myBulkExportProcessor.getResourcePidIterator(providerParams);
-			List<TypedPidJson> idsToSubmit = new ArrayList<>();
+		@SuppressWarnings("unchecked")
+		Iterator<IResourcePersistentId<?>> pidIterator =
+				(Iterator<IResourcePersistentId<?>>) myBulkExportProcessor.getResourcePidIterator(providerParams);
+		List<TypedPidJson> idsToSubmit = new ArrayList<>();
 
-			int estimatedChunkSize = 0;
+		int estimatedChunkSize = 0;
 
-			if (!pidIterator.hasNext()) {
-				ourLog.debug("Bulk Export generated an iterator with no results!");
-			}
-			while (pidIterator.hasNext()) {
-				IResourcePersistentId<?> pid = pidIterator.next();
+		if (!pidIterator.hasNext()) {
+			ourLog.debug("Bulk Export generated an iterator with no results!");
+		}
+		while (pidIterator.hasNext()) {
+			IResourcePersistentId<?> pid = pidIterator.next();
 
-				TypedPidJson batchResourceId;
-				if (pid.getResourceType() != null) {
-					batchResourceId = new TypedPidJson(pid.getResourceType(), pid);
-				} else {
-					batchResourceId = new TypedPidJson(resourceType, pid);
-				}
-
-				if (!submittedBatchResourceIds.add(batchResourceId)) {
-					continue;
-				}
-
-				idsToSubmit.add(batchResourceId);
-				submissionResourceCount++;
-
-				if (estimatedChunkSize > 0) {
-					// Account for comma between array entries
-					estimatedChunkSize++;
-				}
-				estimatedChunkSize += batchResourceId.estimateSerializedSize();
-
-				// Make sure resources stored in each batch does not go over the max capacity
-				if (idsToSubmit.size() >= myStorageSettings.getBulkExportFileMaximumCapacity()
-						|| estimatedChunkSize >= myStorageSettings.getBulkExportFileMaximumSize()) {
-					submitWorkChunk(partitionId, resourceType, idsToSubmit, theDataSink);
-					submissionChunkCount++;
-					idsToSubmit = new ArrayList<>();
-					estimatedChunkSize = 0;
-				}
+			TypedPidJson batchResourceId;
+			if (pid.getResourceType() != null) {
+				batchResourceId = new TypedPidJson(pid.getResourceType(), pid);
+			} else {
+				batchResourceId = new TypedPidJson(resourceType, pid);
 			}
 
-			// if we have any other Ids left, submit them now
-			if (!idsToSubmit.isEmpty()) {
+			if (!submittedBatchResourceIds.add(batchResourceId)) {
+				continue;
+			}
+
+			idsToSubmit.add(batchResourceId);
+			theActivityCounter.incrementSubmissionResourceCount();
+
+			if (estimatedChunkSize > 0) {
+				// Account for comma between array entries
+				estimatedChunkSize++;
+			}
+			estimatedChunkSize += batchResourceId.estimateSerializedSize();
+
+			// Make sure resources stored in each batch does not go over the max capacity
+			if (idsToSubmit.size() >= myStorageSettings.getBulkExportFileMaximumCapacity()
+					|| estimatedChunkSize >= myStorageSettings.getBulkExportFileMaximumSize()) {
 				submitWorkChunk(partitionId, resourceType, idsToSubmit, theDataSink);
-				submissionChunkCount++;
+				theActivityCounter.incrementSubmissionChunkCount();
+				idsToSubmit = new ArrayList<>();
+				estimatedChunkSize = 0;
 			}
-
-		} catch (Exception ex) {
-			ourLog.error(ex.getMessage(), ex);
-
-			theDataSink.recoveredError(ex.getMessage());
-
-			throw new JobExecutionFailedException(Msg.code(2239) + " : " + ex.getMessage());
 		}
 
-		ourLog.info("Submitted {} chunks with {} ids for processing", submissionChunkCount, submissionResourceCount);
-		return RunOutcome.SUCCESS;
+		// if we have any other Ids left, submit them now
+		if (!idsToSubmit.isEmpty()) {
+			submitWorkChunk(partitionId, resourceType, idsToSubmit, theDataSink);
+			theActivityCounter.incrementSubmissionChunkCount();
+		}
 	}
 
 	private void submitWorkChunk(
@@ -189,5 +205,26 @@ public class FetchResourceIdsV3Step
 	@VisibleForTesting
 	public void setBulkExportProcessorForUnitTest(IBulkExportProcessor<?> theBulkExportProcessor) {
 		myBulkExportProcessor = theBulkExportProcessor;
+	}
+
+	private static class ActivityCounter {
+		private int mySubmissionChunkCount;
+		private int mySubmissionResourceCount;
+
+		private void incrementSubmissionChunkCount() {
+			mySubmissionChunkCount++;
+		}
+
+		private void incrementSubmissionResourceCount() {
+			mySubmissionResourceCount++;
+		}
+
+		private int getSubmissionChunkCount() {
+			return mySubmissionChunkCount;
+		}
+
+		private int getSubmissionResourceCount() {
+			return mySubmissionResourceCount;
+		}
 	}
 }

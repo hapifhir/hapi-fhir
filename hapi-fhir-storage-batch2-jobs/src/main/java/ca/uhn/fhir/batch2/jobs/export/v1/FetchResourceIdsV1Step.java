@@ -48,7 +48,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-// FIXME: find the 2 FetchResourceIdsV1Step tests and make V2 versions too
 public class FetchResourceIdsV1Step implements IFirstJobStepWorker<BulkExportJobParameters, ResourceIdList> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsV1Step.class);
 
@@ -82,7 +81,7 @@ public class FetchResourceIdsV1Step implements IFirstJobStepWorker<BulkExportJob
 		providerParams.setGroupId(params.getGroupId());
 		providerParams.setPatientIds(params.getPatientIds());
 		providerParams.setExpandMdm(params.isExpandMdm());
-		providerParams.setPartitionId(params.getPartitionId());
+		providerParams.setPartitionId(params.getPartitionIdForSecurity());
 		// This step doesn't use this param. Included here for logging purpose
 		providerParams.setIncludeHistory(params.isIncludeHistory());
 
@@ -159,7 +158,7 @@ public class FetchResourceIdsV1Step implements IFirstJobStepWorker<BulkExportJob
 					// Make sure resources stored in each batch does not go over the max capacity
 					if (idsToSubmit.size() >= myStorageSettings.getBulkExportFileMaximumCapacity()
 							|| estimatedChunkSize >= myStorageSettings.getBulkExportFileMaximumSize()) {
-						submitWorkChunk(params.getPartitionId(), idsToSubmit, resourceType, theDataSink);
+						submitWorkChunk(params.getPartitionIdForSecurity(), idsToSubmit, resourceType, theDataSink);
 						submissionCount++;
 						idsToSubmit = new ArrayList<>();
 						estimatedChunkSize = 0;
@@ -168,7 +167,7 @@ public class FetchResourceIdsV1Step implements IFirstJobStepWorker<BulkExportJob
 
 				// if we have any other Ids left, submit them now
 				if (!idsToSubmit.isEmpty()) {
-					submitWorkChunk(params.getPartitionId(), idsToSubmit, resourceType, theDataSink);
+					submitWorkChunk(params.getPartitionIdForSecurity(), idsToSubmit, resourceType, theDataSink);
 					submissionCount++;
 				}
 			}

@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.batch2.jobs.export;
+package ca.uhn.fhir.batch2.jobs.export.v3;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -86,7 +86,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -719,10 +718,7 @@ public class ExpandResourceAndWriteBinaryStep
 				throw new JobExecutionFailedException(Msg.code(2431) + errorMsg);
 			}
 
-			SystemRequestDetails srd = new SystemRequestDetails();
 			BulkExportJobParameters jobParameters = myStepExecutionDetails.getParameters();
-			RequestPartitionId partitionId = jobParameters.getPartitionId();
-			srd.setRequestPartitionId(Objects.requireNonNullElseGet(partitionId, RequestPartitionId::defaultPartition));
 
 			binary.setContentType(jobParameters.getOutputFormat());
 
@@ -767,6 +763,8 @@ public class ExpandResourceAndWriteBinaryStep
 			ourLog.info(
 					"Writing Bulk Export Binary resource with ID: Binary/{}",
 					binary.getIdElement().getIdPart());
+
+			RequestDetails srd = newRequestDetails(myStepExecutionDetails, jobParameters);
 			DaoMethodOutcome outcome = binaryDao.update(binary, srd);
 			IIdType id = outcome.getId();
 
@@ -780,5 +778,11 @@ public class ExpandResourceAndWriteBinaryStep
 					processedRecordsCount,
 					theExpandedResourcesList.getResourceType());
 		}
+	}
+
+	protected RequestDetails newRequestDetails(
+			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
+			BulkExportJobParameters jobParameters) {
+		return theStepExecutionDetails.newSystemRequestDetails();
 	}
 }
