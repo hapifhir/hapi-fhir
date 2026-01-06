@@ -16,6 +16,7 @@ import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,12 +69,14 @@ public class ReductionStepExecutorServiceImplTest {
 	private IJobStepExecutionServices myJobStepExecutionServices;
 	@Mock
 	private IReductionStepWorker<TestJobParameters, StepInputData, StepOutputData> myReductionStepWorker;
+	@Mock
+	private IInterceptorService myInterceptorService;
 	private ReductionStepExecutorServiceImpl mySvc;
 	private final JobDefinitionRegistry myJobDefinitionRegistry = new JobDefinitionRegistry();
 
 	@BeforeEach
 	public void before() {
-		mySvc = new ReductionStepExecutorServiceImpl(myJobPersistence, myTransactionService, myJobDefinitionRegistry, myJobStepExecutionServices);
+		mySvc = new ReductionStepExecutorServiceImpl(myJobPersistence, myTransactionService, myJobDefinitionRegistry, myJobStepExecutionServices , myInterceptorService);
 	}
 
 	// QUEUED, IN_PROGRESS are supported because of backwards compatibility

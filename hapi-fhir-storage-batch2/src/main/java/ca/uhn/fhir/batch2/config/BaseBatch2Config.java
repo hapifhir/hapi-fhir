@@ -43,6 +43,7 @@ import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -67,6 +68,9 @@ public abstract class BaseBatch2Config {
 	@Autowired
 	IHapiTransactionService myHapiTransactionService;
 
+	@Autowired
+	private IInterceptorService myInterceptorService;
+
 	@Bean
 	public JobDefinitionRegistry batch2JobDefinitionRegistry() {
 		return new JobDefinitionRegistry();
@@ -87,7 +91,8 @@ public abstract class BaseBatch2Config {
 	@Bean
 	public IJobCoordinator batch2JobCoordinator(
 			JobDefinitionRegistry theJobDefinitionRegistry, IHapiTransactionService theTransactionService) {
-		return new JobCoordinatorImpl(myPersistence, theJobDefinitionRegistry, theTransactionService);
+		return new JobCoordinatorImpl(
+				myPersistence, theJobDefinitionRegistry, theTransactionService, myInterceptorService);
 	}
 
 	@Bean
@@ -97,7 +102,7 @@ public abstract class BaseBatch2Config {
 			JobDefinitionRegistry theJobDefinitionRegistry,
 			IJobStepExecutionServices theJobStepExecutionServices) {
 		return new ReductionStepExecutorServiceImpl(
-				theJobPersistence, theTransactionService, theJobDefinitionRegistry, theJobStepExecutionServices);
+				theJobPersistence, theTransactionService, theJobDefinitionRegistry, theJobStepExecutionServices, myInterceptorService);
 	}
 
 	@Bean
@@ -115,7 +120,8 @@ public abstract class BaseBatch2Config {
 				theJobDefinitionRegistry,
 				theBatchJobSender,
 				theExecutor,
-				theReductionStepExecutorService);
+				theReductionStepExecutorService,
+				myInterceptorService);
 	}
 
 	@Bean
@@ -141,7 +147,8 @@ public abstract class BaseBatch2Config {
 				theExecutorSvc,
 				theJobMaintenanceService,
 				theHapiTransactionService,
-				theInterceptorBroadcaster);
+				theInterceptorBroadcaster,
+				myInterceptorService);
 	}
 
 	@Bean

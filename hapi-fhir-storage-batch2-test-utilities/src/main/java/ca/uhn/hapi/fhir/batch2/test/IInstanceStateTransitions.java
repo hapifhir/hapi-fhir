@@ -30,6 +30,7 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -40,6 +41,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
 
 public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTestConstants {
 	Logger ourLog = LoggerFactory.getLogger(IInstanceStateTransitions.class);
@@ -88,6 +90,8 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 	@ParameterizedTest
 	@EnumSource(StatusEnum.class)
 	default void cancelRequest_cancelsJob_whenNotFinalState(StatusEnum theState) {
+		//Mocks
+		IInterceptorService interceptorService = mock(IInterceptorService.class);
 		// given
 		JobInstance cancelledInstance = createInstance();
 		cancelledInstance.setStatus(theState);
@@ -109,7 +113,8 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 				instanceId1,
 				new JobChunkProgressAccumulator(),
 				null,
-				jobDefinitionRegistry
+				jobDefinitionRegistry,
+				interceptorService
 			).process();
 		});
 

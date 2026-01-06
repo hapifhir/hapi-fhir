@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7445
+title: "Two new pointcuts have been added to support transaction logging and monitoring for Batch2 jobs:
+`STORAGE_POSTSTORAGE_BATCH_JOB_CREATE` and `STORAGE_POSTCOMPLETE_BATCH_JOB`."

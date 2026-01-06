@@ -206,6 +206,10 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setUserDataJson(theInstance.getUserDataAsString());
 
 		entity = myJobInstanceRepository.save(entity);
+		JobInstance savedJobInstance = new JobInstance(theInstance);
+		savedJobInstance.setInstanceId(entity.getId());
+		invokePostStorageBatchHooks(savedJobInstance);
+
 		return entity.getId();
 	}
 
@@ -634,6 +638,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 					.add(RequestDetails.class, theRequestDetails);
 
 			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE, params);
+		}
+	}
+
+	private void invokePostStorageBatchHooks(JobInstance theJobInstance) {
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_POSTSTORAGE_BATCH_JOB_CREATE)) {
+			HookParams params = new HookParams().add(JobInstance.class, theJobInstance);
+
+			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_POSTSTORAGE_BATCH_JOB_CREATE, params);
 		}
 	}
 
