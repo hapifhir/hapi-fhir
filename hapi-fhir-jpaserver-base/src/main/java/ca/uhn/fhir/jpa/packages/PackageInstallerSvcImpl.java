@@ -188,7 +188,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 				boolean exists = myTxService
 						.withSystemRequest()
-						.withRequestPartitionId(RequestPartitionId.defaultPartition())
+						.withRequestPartitionId(
+								RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId()))
 						.execute(() -> {
 							Optional<NpmPackageVersionEntity> existing = myPackageVersionDao.findByPackageIdAndVersion(
 									theInstallationSpec.getName(), theInstallationSpec.getVersion());
@@ -553,7 +554,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private RequestDetails createRequestDetails() {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			requestDetails.setRequestPartitionId(RequestPartitionId.defaultPartition());
+			requestDetails.setRequestPartitionId(
+					RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId()));
 		}
 		return requestDetails;
 	}
