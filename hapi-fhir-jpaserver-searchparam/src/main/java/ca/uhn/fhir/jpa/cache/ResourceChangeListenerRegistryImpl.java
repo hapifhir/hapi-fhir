@@ -105,7 +105,7 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 
 		return add(
 				theResourceName,
-			requestPartitionId,
+				requestPartitionId,
 				theResourceChangeListener,
 				theSearchParameterMap,
 				theRemoteRefreshIntervalMs);

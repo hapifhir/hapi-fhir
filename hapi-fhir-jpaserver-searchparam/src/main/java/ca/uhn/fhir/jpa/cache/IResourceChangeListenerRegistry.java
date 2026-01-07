@@ -48,7 +48,12 @@ public interface IResourceChangeListenerRegistry {
 		// Note: We use RequestPartitionId.defaultPartition() in this deprecated method even though
 		// it's really not a safe object to use generally. In this case it's safe because we check
 		// for it downstream and replace it with RequestPartitionId.defaultPartition(PartitionSettings)
-		return registerResourceResourceChangeListener(theResourceName, RequestPartitionId.defaultPartition(), theSearchParameterMap, theResourceChangeListener, theRemoteRefreshIntervalMs);
+		return registerResourceResourceChangeListener(
+				theResourceName,
+				RequestPartitionId.defaultPartition(),
+				theSearchParameterMap,
+				theResourceChangeListener,
+				theRemoteRefreshIntervalMs);
 	}
 
 	/**
