@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.bulk.export.model;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -82,6 +83,8 @@ public class ExportPIDIteratorParameters {
 	 * The partition id
 	 */
 	private RequestPartitionId myPartitionId;
+
+	private SystemRequestDetails myRequestDetails;
 
 	/**
 	 * The list of resource types to recurse on.
@@ -222,5 +225,13 @@ public class ExportPIDIteratorParameters {
 				.append("requestedResourceTypes", myRequestedResourceTypes)
 				.append("includeHistory", myIncludeHistory)
 				.toString();
+	}
+
+	public void setRequestDetails(SystemRequestDetails theRequestDetails) {
+		myRequestDetails = theRequestDetails;
+	}
+
+	public SystemRequestDetails getRequestDetails() {
+		return myRequestDetails;
 	}
 }

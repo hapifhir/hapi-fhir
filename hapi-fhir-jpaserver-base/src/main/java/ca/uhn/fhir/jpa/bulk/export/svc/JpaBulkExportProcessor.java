@@ -117,7 +117,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	@Override
 	public Iterator<JpaPid> getResourcePidIterator(ExportPIDIteratorParameters theParams) {
 		return myHapiTransactionService
-				.withSystemRequest()
+				.withRequest(theParams.getRequestDetails())
 				.withRequestPartitionId(theParams.getPartitionIdOrAllPartitions())
 				.readOnly()
 				.execute(() -> {
@@ -512,7 +512,10 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			// Execute query and all found pids to our local iterator.
 			RequestPartitionId partitionId = theParams.getPartitionIdOrAllPartitions();
 			try (IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(
-					expandedSpMap, new SearchRuntimeDetails(null, theParams.getInstanceId()), null, partitionId)) {
+					expandedSpMap,
+					new SearchRuntimeDetails(theParams.getRequestDetails(), theParams.getInstanceId()),
+					theParams.getRequestDetails(),
+					partitionId)) {
 				while (resultIterator.hasNext()) {
 					theReadPids.add(resultIterator.next());
 				}

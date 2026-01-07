@@ -103,6 +103,7 @@ public class FetchResourceIdsV3Step
 		BulkExportJobParameters params = theStepExecutionDetails.getParameters();
 
 		ExportPIDIteratorParameters providerParams = new ExportPIDIteratorParameters();
+		providerParams.setRequestDetails(theStepExecutionDetails.newSystemRequestDetails());
 		providerParams.setInstanceId(theStepExecutionDetails.getInstance().getInstanceId());
 		providerParams.setChunkId(theStepExecutionDetails.getChunkId());
 		providerParams.setFilters(params.getFilters());
