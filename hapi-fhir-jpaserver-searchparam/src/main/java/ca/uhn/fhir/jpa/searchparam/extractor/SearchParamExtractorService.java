@@ -819,7 +819,7 @@ public class SearchParamExtractorService {
 
 		Set<JpaPid> pids = new HashSet<>();
 		for (ResourceLink resourceLink : resourceLinks) {
-			JpaPid targetResourceJpaPid = resourceLink.getTargetResourceJpaPid();
+			JpaPid targetResourceJpaPid = resourceLink.getTargetResourcePk();
 			if (targetResourceJpaPid != null) {
 				pids.add(targetResourceJpaPid);
 			}
@@ -836,7 +836,7 @@ public class SearchParamExtractorService {
 					StringUtils.equals(resourceLink.getTargetResourceType(), referenceElement.getResourceType());
 
 			boolean hasMatchingResourceId = false;
-			Optional<String> idPartOpt = targetResourceIdMap.get(resourceLink.getTargetResourceJpaPid());
+			Optional<String> idPartOpt = targetResourceIdMap.get(resourceLink.getTargetResourcePk());
 			if (idPartOpt.isPresent()) {
 				String idPart = idPartOpt.get();
 				idPart = idPart.substring(idPart.indexOf('/'));

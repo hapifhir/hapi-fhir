@@ -485,7 +485,7 @@ public class ResourceLink extends BaseResourceIndex {
 	}
 
 	@Nullable
-	public JpaPid getTargetResourceJpaPid() {
+	public JpaPid getTargetResourcePk() {
 		if (myTargetResourcePid != null) {
 			return JpaPid.fromId(myTargetResourcePid, myTargetResourcePartitionId);
 		}

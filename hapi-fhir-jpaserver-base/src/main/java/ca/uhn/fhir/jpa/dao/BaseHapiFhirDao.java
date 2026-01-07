@@ -941,34 +941,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			existingParams = existingSearchParams.get(entity);
 			if (existingParams == null) {
 				existingParams = ResourceIndexedSearchParams.withLists(entity);
-
-				/*
-				 * If we have any existing resource links in the existing resource, look them up and
-				 * add them to the TransactionDetails. This avoids an existence check later, which
-				 * makes sense: if an existing reference was stored, then we should be able to trust
-				 * that the target exists and isn't deleted.
-				 */
-				Collection<ResourceLink> existingLinks = existingParams.getResourceLinks();
-				Set<JpaPid> existingLinkTargetPids = existingLinks.stream()
-						.map(ResourceLink::getTargetResourceJpaPid)
-						.filter(Objects::nonNull)
-						.filter(pid -> !theTransactionDetails.hasReverseResolvedId(pid))
-						.collect(Collectors.toSet());
-				PersistentIdToForcedIdMap<JpaPid> existingLinkTargetMap =
-						myIdHelperService.translatePidsToForcedIds(existingLinkTargetPids);
-				for (Map.Entry<JpaPid, Optional<String>> existingTarget : existingLinkTargetMap
-						.getResourcePersistentIdOptionalMap()
-						.entrySet()) {
-					if (existingTarget.getValue().isPresent()) {
-						JpaPid pid = existingTarget.getKey();
-						IIdType id = myContext
-								.getVersion()
-								.newIdType(existingTarget.getValue().get());
-						theTransactionDetails.addResolvedResourceId(id, pid);
-					}
-				}
-
 				existingSearchParams.put(entity, existingParams);
+
+				preResolveExistingReferences(theTransactionDetails, existingParams);
 			}
 			entity.setDeleted(null);
 
@@ -1155,6 +1130,35 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		return entity;
+	}
+
+	/**
+	 * If we have any existing resource links in an existing resource being updated,
+	 * (i.e., we're updating a resource and the previous version already had references in it)
+	 * look up those references and add them to the TransactionDetails. This avoids a
+	 * target existence check later, which makes sense: if an existing reference was
+	 * stored, then we should be able to trust that the target exists and isn't deleted.
+	 */
+	private void preResolveExistingReferences(
+			TransactionDetails theTransactionDetails, ResourceIndexedSearchParams existingParams) {
+		Collection<ResourceLink> existingLinks = existingParams.getResourceLinks();
+		Set<JpaPid> existingLinkTargetPids = existingLinks.stream()
+				.map(ResourceLink::getTargetResourcePk)
+				.filter(Objects::nonNull)
+				.filter(pid -> !theTransactionDetails.hasReverseResolvedId(pid))
+				.collect(Collectors.toSet());
+		PersistentIdToForcedIdMap<JpaPid> existingLinkTargetMap =
+				myIdHelperService.translatePidsToForcedIds(existingLinkTargetPids);
+		for (Map.Entry<JpaPid, Optional<String>> existingTarget :
+				existingLinkTargetMap.getResourcePersistentIdOptionalMap().entrySet()) {
+			if (existingTarget.getValue().isPresent()) {
+				JpaPid pid = existingTarget.getKey();
+				IIdType id = myContext
+						.getVersion()
+						.newIdType(existingTarget.getValue().get());
+				theTransactionDetails.addResolvedResourceId(id, pid);
+			}
+		}
 	}
 
 	private static IdentityHashMap<ResourceTable, ResourceIndexedSearchParams> getSearchParamsMapFromTransaction(
