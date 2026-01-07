@@ -76,7 +76,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 @SuppressWarnings("unused")
 @Interceptor(order = AuthorizationConstants.ORDER_AUTH_INTERCEPTOR)
-// FIXME ND - comment to trigger diff for PR
 public class AuthorizationInterceptor implements IRuleApplier {
 
 	public static final String REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS =
