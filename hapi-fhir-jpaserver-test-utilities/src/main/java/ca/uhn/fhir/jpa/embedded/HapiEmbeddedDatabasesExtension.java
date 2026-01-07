@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,11 +102,19 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 	}
 
 	public void initializePersistenceSchema(DriverTypeEnum theDriverType) {
-		myDatabaseInitializerHelper.initializePersistenceSchema(getEmbeddedDatabase(theDriverType));
+		initializePersistenceSchema(theDriverType, FIRST_TESTED_VERSION);
+	}
+
+	public void initializePersistenceSchema(DriverTypeEnum theDriverType, VersionEnum theSchemaVersion) {
+		myDatabaseInitializerHelper.initializePersistenceSchema(getEmbeddedDatabase(theDriverType), theSchemaVersion);
 	}
 
 	public void insertPersistenceTestData(DriverTypeEnum theDriverType, VersionEnum theVersionEnum) {
 		myDatabaseInitializerHelper.insertPersistenceTestData(getEmbeddedDatabase(theDriverType), theVersionEnum);
+	}
+
+	public DatabaseInitializerHelper getDatabaseInitializerHelper() {
+		return myDatabaseInitializerHelper;
 	}
 
 	public void maybeInsertPersistenceTestData(DriverTypeEnum theDriverType, VersionEnum theVersionEnum) {

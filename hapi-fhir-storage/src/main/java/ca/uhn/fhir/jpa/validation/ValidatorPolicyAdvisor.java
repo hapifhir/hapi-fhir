@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 
@@ -150,5 +151,10 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 	@Override
 	public ReferenceValidationPolicy getReferencePolicy() {
 		return ReferenceValidationPolicy.IGNORE;
+	}
+
+	@Override
+	public Set<String> getCheckReferencesTo() {
+		return Set.of();
 	}
 }
