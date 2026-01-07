@@ -24,6 +24,7 @@ import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmModeEnum;
 import ca.uhn.fhir.mdm.util.EIDHelper;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 /**
  * Holder class that manages two different MDM expansion implementation approaches based on MdmSettings.
@@ -65,7 +66,7 @@ public class MdmExpandersHolder {
 	private IMdmLinkExpandSvc myLinkExpandSvcInstanceToUse;
 
 	/** Cached instance of the selected bulk export resource expander */
-	private IBulkExportMdmResourceExpander myBulkExportMDMResourceExpanderInstanceToUse;
+	private IBulkExportMdmResourceExpander<? extends IResourcePersistentId> myBulkExportMDMResourceExpanderInstanceToUse;
 
 	/** Full MDM link expand service implementation
 	 * We have to use the interface as the type here instead of concrete implementing class MdmLinkExpandSvc
@@ -76,10 +77,10 @@ public class MdmExpandersHolder {
 	private final MdmEidMatchOnlyExpandSvc myMdmEidMatchOnlyExpandSvc;
 
 	/** Full MDM bulk export resource expander implementation */
-	private final BulkExportMdmResourceExpander myBulkExportMDMResourceExpander;
+	private final IBulkExportMdmFullResourceExpander myBulkExportMDMResourceExpander;
 
 	/** EID-only match bulk export resource expander implementation */
-	private final BulkExportMdmEidMatchOnlyResourceExpander myBulkExportMDMEidMatchOnlyResourceExpander;
+	private final IBulkExportMdmEidMatchOnlyResourceExpander myBulkExportMDMEidMatchOnlyResourceExpander;
 
 	private final FhirContext myFhirContext;
 
@@ -87,14 +88,14 @@ public class MdmExpandersHolder {
 			FhirContext theFhirContext,
 			IMdmLinkExpandSvc theMdmLinkExpandSvc,
 			MdmEidMatchOnlyExpandSvc theMdmEidMatchOnlyLinkExpandSvc,
-			BulkExportMdmResourceExpander theBulkExportMDMResourceExpander,
-			BulkExportMdmEidMatchOnlyResourceExpander theBulkExportMDMEidMatchOnlyResourceExpander) {
+			IBulkExportMdmFullResourceExpander theBulkExportMdmFullResourceExpander,
+			IBulkExportMdmEidMatchOnlyResourceExpander theBulkExportMdmEidMatchOnlyResourceExpander) {
 
 		myFhirContext = theFhirContext;
 		myMdmLinkExpandSvc = theMdmLinkExpandSvc;
 		myMdmEidMatchOnlyExpandSvc = theMdmEidMatchOnlyLinkExpandSvc;
-		myBulkExportMDMResourceExpander = theBulkExportMDMResourceExpander;
-		myBulkExportMDMEidMatchOnlyResourceExpander = theBulkExportMDMEidMatchOnlyResourceExpander;
+		myBulkExportMDMResourceExpander = theBulkExportMdmFullResourceExpander;
+		myBulkExportMDMEidMatchOnlyResourceExpander = theBulkExportMdmEidMatchOnlyResourceExpander;
 	}
 
 	/**

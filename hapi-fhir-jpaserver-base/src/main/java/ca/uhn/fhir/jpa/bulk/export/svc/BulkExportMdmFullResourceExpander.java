@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR - Master Data Management
+ * HAPI FHIR JPA Server - Master Data Management
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.svc;
+package ca.uhn.fhir.jpa.bulk.export.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -31,6 +31,8 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
+import ca.uhn.fhir.mdm.svc.IBulkExportMdmFullResourceExpander;
+import ca.uhn.fhir.mdm.svc.MdmExpansionCacheSvc;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.ExtensionUtil;
@@ -55,8 +57,8 @@ import java.util.Set;
  * Implementation of MDM resource expansion for bulk export operations.
  * Expands group memberships via MDM links and annotates exported resources with golden resource references.
  */
-public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpander {
-	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportMdmResourceExpander.class);
+public class BulkExportMdmFullResourceExpander implements IBulkExportMdmFullResourceExpander<JpaPid> {
+	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportMdmFullResourceExpander.class);
 
 	private final MdmExpansionCacheSvc myMdmExpansionCacheSvc;
 	private final IMdmLinkDao myMdmLinkDao;
@@ -65,7 +67,7 @@ public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpa
 	private final FhirContext myContext;
 	private IFhirPath myFhirPath;
 
-	public BulkExportMdmResourceExpander(
+	public BulkExportMdmFullResourceExpander(
 			MdmExpansionCacheSvc theMdmExpansionCacheSvc,
 			IMdmLinkDao theMdmLinkDao,
 			IIdHelperService<JpaPid> theIdHelperService,

@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.svc;
+package ca.uhn.fhir.jpa.bulk.export.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
+import ca.uhn.fhir.mdm.svc.MdmExpansionCacheSvc;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.r4.model.Patient;
@@ -53,7 +54,7 @@ import static org.mockito.Mockito.*;
 
 // Created by Claude 4.5 Sonnet
 @ExtendWith(MockitoExtension.class)
-class BulkExportMdmResourceExpanderTest {
+class BulkExportMdmFullResourceExpanderTest {
 
 	@Mock
 	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
@@ -74,7 +75,7 @@ class BulkExportMdmResourceExpanderTest {
 	private FhirContext myFhirContext;
 
 	@InjectMocks
-	private BulkExportMdmResourceExpander myExpander;
+	private BulkExportMdmFullResourceExpander myExpander;
 
 	@BeforeEach
 	void setUp() {
@@ -137,13 +138,13 @@ class BulkExportMdmResourceExpanderTest {
 		Set<String> result = myExpander.expandPatient(inputPatientId, partitionId);
 
 		// Then - Should return all 4 patients (golden + 3 sources)
-		assertThat(result).containsExactlyInAnyOrder(
+		assertThat(result)
+			.containsExactlyInAnyOrder(
 				"Patient/golden",
 				"Patient/123",
 				"Patient/456",
-				"Patient/789"
-		);
-		assertThat(result).hasSize(4);
+				"Patient/789").
+			hasSize(4);
 
 		// Verify MDM link DAO was called
 		verify(myMdmLinkDao, times(1)).expandPidsBySourcePidAndMatchResult(
@@ -184,8 +185,9 @@ class BulkExportMdmResourceExpanderTest {
 		Set<String> result = myExpander.expandPatient(inputPatientId, partitionId);
 
 		// Then - Should return only the original patient
-		assertThat(result).containsExactly("Patient/123");
-		assertThat(result).hasSize(1);
+		assertThat(result)
+			.containsExactly("Patient/123")
+			.hasSize(1);
 
 		// Verify MDM link DAO was called
 		verify(myMdmLinkDao, times(1)).expandPidsBySourcePidAndMatchResult(

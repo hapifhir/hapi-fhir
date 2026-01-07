@@ -20,7 +20,7 @@
 package ca.uhn.fhir.mdm.svc;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Set;
@@ -28,13 +28,13 @@ import java.util.Set;
 /**
  * Interface for mdm expanding Group resources on group bulk export and Patient resources on patient bulk export
  */
-public interface IBulkExportMdmResourceExpander {
+public interface IBulkExportMdmResourceExpander<T extends IResourcePersistentId> {
 
 	/**
 	 * For the Group resource with the given id, returns all the persistent id ofs
 	 * the members of the group + the mdm matched resources to a member in the group
 	 */
-	Set<JpaPid> expandGroup(String groupResourceId, RequestPartitionId requestPartitionId);
+	Set<T> expandGroup(String groupResourceId, RequestPartitionId requestPartitionId);
 
 	/**
 	 * Expands a single patient ID to include all patients linked via MDM.

@@ -472,8 +472,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 			for (String patientId : patientIds) {
 				Set<String> mdmExpandedIds = myMdmExpandersHolder
-					.getBulkExportMDMResourceExpanderInstance()
-					.expandPatient(patientId, partitionId);
+						.getBulkExportMDMResourceExpanderInstance()
+						.expandPatient(patientId, partitionId);
 				expandedPatientIds.addAll(mdmExpandedIds);
 			}
 		}
