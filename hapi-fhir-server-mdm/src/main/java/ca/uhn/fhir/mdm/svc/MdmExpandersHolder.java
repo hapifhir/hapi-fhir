@@ -66,7 +66,8 @@ public class MdmExpandersHolder {
 	private IMdmLinkExpandSvc myLinkExpandSvcInstanceToUse;
 
 	/** Cached instance of the selected bulk export resource expander */
-	private IBulkExportMdmResourceExpander<? extends IResourcePersistentId> myBulkExportMDMResourceExpanderInstanceToUse;
+	private IBulkExportMdmResourceExpander<? extends IResourcePersistentId>
+			myBulkExportMDMResourceExpanderInstanceToUse;
 
 	/** Full MDM link expand service implementation
 	 * We have to use the interface as the type here instead of concrete implementing class MdmLinkExpandSvc
