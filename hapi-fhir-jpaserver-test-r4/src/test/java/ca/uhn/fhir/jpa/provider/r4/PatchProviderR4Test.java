@@ -2,9 +2,14 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.PrePatchDetails;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import com.google.common.base.Charsets;
@@ -27,6 +32,9 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,12 +44,22 @@ import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PatchProviderR4Test.class);
+
+	@Mock
+	private IAnonymousInterceptor myAnonymousInterceptor;
+	@Captor
+	private ArgumentCaptor<HookParams> myHookParamsCaptor;
 
 	@Test
 	public void testFhirPatch() {
@@ -63,11 +81,19 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.setName("path")
 			.setValue(new StringType("Patient.identifier[0]"));
 
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_PREPATCH, myAnonymousInterceptor);
+
 		MethodOutcome outcome = myClient
 			.patch()
 			.withFhirPatch(patch)
 			.withId(id)
 			.execute();
+
+		verify(myAnonymousInterceptor, times(1)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_PREPATCH), myHookParamsCaptor.capture());
+		assertNotNull(myHookParamsCaptor.getValue().get(PrePatchDetails.class).getResource());
+		assertNotNull(myHookParamsCaptor.getValue().get(PrePatchDetails.class).getFhirPatchBody());
+		assertThat(myHookParamsCaptor.getValue().get(PrePatchDetails.class).getPatchBody()).startsWith("{\"resourceType\":\"Parameters\"");
+		assertEquals(PatchTypeEnum.FHIR_PATCH_JSON, myHookParamsCaptor.getValue().get(PrePatchDetails.class).getPatchType());
 
 		Patient resultingResource = (Patient) outcome.getResource();
 		assertThat(resultingResource.getIdentifier()).hasSize(1);
@@ -391,6 +417,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_PREPATCH, myAnonymousInterceptor);
+
 		HttpPatch patch = new HttpPatch(myServerBase + "/Patient/" + pid1.getIdPart());
 		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
@@ -401,6 +429,12 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(responseString).contains("<OperationOutcome");
 			assertThat(responseString).contains("INFORMATION");
 		}
+
+		verify(myAnonymousInterceptor, times(1)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_PREPATCH), myHookParamsCaptor.capture());
+		assertNotNull(myHookParamsCaptor.getValue().get(PrePatchDetails.class).getResource());
+		assertNull(myHookParamsCaptor.getValue().get(PrePatchDetails.class).getFhirPatchBody());
+		assertNotNull(myHookParamsCaptor.getValue().get(PrePatchDetails.class).getPatchBody());
+		assertEquals(PatchTypeEnum.JSON_PATCH, myHookParamsCaptor.getValue().get(PrePatchDetails.class).getPatchType());
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
 		assertEquals("2", newPt.getIdElement().getVersionIdPart());

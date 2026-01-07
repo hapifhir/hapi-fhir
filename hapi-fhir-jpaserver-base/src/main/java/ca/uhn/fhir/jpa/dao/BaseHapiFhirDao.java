@@ -201,9 +201,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	protected DeleteConflictService myDeleteConflictService;
 
 	@Autowired
-	protected IInterceptorBroadcaster myInterceptorBroadcaster;
-
-	@Autowired
 	protected InMemoryResourceMatcher myInMemoryResourceMatcher;
 
 	@Autowired
