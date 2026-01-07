@@ -20,11 +20,6 @@
 package ca.uhn.fhir.jpa.api.svc;
 
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 /**
  * Service for validating codes against ValueSets and CodeSystems.
@@ -40,50 +35,16 @@ public interface ITerminologyValidationSvc {
 	/**
 	 * Validates a code against a ValueSet.
 	 *
-	 * @param theValueSetId The ValueSet resource ID (optional, for instance-level operation)
-	 * @param theValueSetUrl The ValueSet canonical URL
-	 * @param theValueSetVersion The ValueSet version
-	 * @param theCode The code to validate
-	 * @param theSystem The code system URL
-	 * @param theSystemVersion The code system version
-	 * @param theDisplay The display value to validate
-	 * @param theCoding A Coding containing system, code, and display
-	 * @param theCodeableConcept A CodeableConcept containing one or more codings
-	 * @param theRequestDetails The request details
+	 * @param theRequest The validation request containing all parameters
 	 * @return The validation result
 	 */
-	CodeValidationResult validateCodeAgainstValueSet(
-			IIdType theValueSetId,
-			IPrimitiveType<String> theValueSetUrl,
-			IPrimitiveType<String> theValueSetVersion,
-			IPrimitiveType<String> theCode,
-			IPrimitiveType<String> theSystem,
-			IPrimitiveType<String> theSystemVersion,
-			IPrimitiveType<String> theDisplay,
-			IBaseCoding theCoding,
-			IBaseDatatype theCodeableConcept,
-			RequestDetails theRequestDetails);
+	CodeValidationResult validateCodeAgainstValueSet(ValueSetValidationRequest theRequest);
 
 	/**
 	 * Validates a code against a CodeSystem.
 	 *
-	 * @param theCodeSystemId The CodeSystem resource ID (optional, for instance-level operation)
-	 * @param theCodeSystemUrl The CodeSystem canonical URL
-	 * @param theVersion The CodeSystem version
-	 * @param theCode The code to validate
-	 * @param theDisplay The display value to validate
-	 * @param theCoding A Coding containing system, code, and display
-	 * @param theCodeableConcept A CodeableConcept containing one or more codings
-	 * @param theRequestDetails The request details
+	 * @param theRequest The validation request containing all parameters
 	 * @return The validation result
 	 */
-	CodeValidationResult validateCodeAgainstCodeSystem(
-			IIdType theCodeSystemId,
-			IPrimitiveType<String> theCodeSystemUrl,
-			IPrimitiveType<String> theVersion,
-			IPrimitiveType<String> theCode,
-			IPrimitiveType<String> theDisplay,
-			IBaseCoding theCoding,
-			IBaseDatatype theCodeableConcept,
-			RequestDetails theRequestDetails);
+	CodeValidationResult validateCodeAgainstCodeSystem(CodeSystemValidationRequest theRequest);
 }
