@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
@@ -52,15 +53,23 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	private final Queue<ResourceChangeListenerCache> myListenerEntries = new ConcurrentLinkedQueue<>();
 	private final FhirContext myFhirContext;
 	private final ResourceChangeListenerCacheFactory myResourceChangeListenerCacheFactory;
+	private final PartitionSettings myPartitionSettings;
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
 	public ResourceChangeListenerRegistryImpl(
-			FhirContext theFhirContext,
-			ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory,
-			InMemoryResourceMatcher theInMemoryResourceMatcher) {
+		FhirContext theFhirContext,
+		PartitionSettings thePartitionSettings, ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory,
+		InMemoryResourceMatcher theInMemoryResourceMatcher) {
 		myFhirContext = theFhirContext;
+		myPartitionSettings = thePartitionSettings;
 		myResourceChangeListenerCacheFactory = theResourceChangeListenerCacheFactory;
 		myInMemoryResourceMatcher = theInMemoryResourceMatcher;
+	}
+
+	@Override
+	public IResourceChangeListenerCache registerResourceResourceChangeListener(String theResourceName, SearchParameterMap theSearchParameterMap, IResourceChangeListener theResourceChangeListener, long theRemoteRefreshIntervalMs) {
+		RequestPartitionId defaultPartition = RequestPartitionId.defaultPartition(myPartitionSettings);
+		return registerResourceResourceChangeListener(theResourceName, defaultPartition, theSearchParameterMap, theResourceChangeListener, theRemoteRefreshIntervalMs);
 	}
 
 	/**

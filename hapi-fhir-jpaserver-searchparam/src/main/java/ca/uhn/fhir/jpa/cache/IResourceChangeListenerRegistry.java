@@ -36,6 +36,16 @@ import java.util.Set;
 public interface IResourceChangeListenerRegistry {
 
 	/**
+	 * @deprecated Use {@link #registerResourceResourceChangeListener(String, RequestPartitionId, SearchParameterMap, IResourceChangeListener, long)} instead
+	 */
+	@Deprecated(since = "8.8.0", forRemoval = true)
+	IResourceChangeListenerCache registerResourceResourceChangeListener(
+		String theResourceName,
+		SearchParameterMap theSearchParameterMap,
+		IResourceChangeListener theResourceChangeListener,
+		long theRemoteRefreshIntervalMs);
+
+	/**
 	 * Register a listener in order to be notified whenever a resource matching the provided SearchParameterMap
 	 * changes in any way.  If the change happened on the same jvm process where this registry resides, then the listener will be called
 	 * within {@link ResourceChangeListenerCacheRefresherImpl#LOCAL_REFRESH_INTERVAL_MS} of the change happening.  If the change happened
