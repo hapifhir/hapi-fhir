@@ -40,11 +40,16 @@ public interface IResourceChangeListenerRegistry {
 	 * instead. This method assumes the default partition, but will be removed in the future.
 	 */
 	@Deprecated(since = "8.8.0", forRemoval = true)
-	IResourceChangeListenerCache registerResourceResourceChangeListener(
+	default IResourceChangeListenerCache registerResourceResourceChangeListener(
 			String theResourceName,
 			SearchParameterMap theSearchParameterMap,
 			IResourceChangeListener theResourceChangeListener,
-			long theRemoteRefreshIntervalMs);
+			long theRemoteRefreshIntervalMs) {
+		// Note: We use RequestPartitionId.defaultPartition() in this deprecated method even though
+		// it's really not a safe object to use generally. In this case it's safe because we check
+		// for it downstream and replace it with RequestPartitionId.defaultPartition(PartitionSettings)
+		return registerResourceResourceChangeListener(theResourceName, RequestPartitionId.defaultPartition(), theSearchParameterMap, theResourceChangeListener, theRemoteRefreshIntervalMs);
+	}
 
 	/**
 	 * Register a listener in order to be notified whenever a resource matching the provided SearchParameterMap

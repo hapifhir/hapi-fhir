@@ -67,21 +67,6 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 		myInMemoryResourceMatcher = theInMemoryResourceMatcher;
 	}
 
-	@Override
-	public IResourceChangeListenerCache registerResourceResourceChangeListener(
-			String theResourceName,
-			SearchParameterMap theSearchParameterMap,
-			IResourceChangeListener theResourceChangeListener,
-			long theRemoteRefreshIntervalMs) {
-		RequestPartitionId defaultPartition = RequestPartitionId.defaultPartition(myPartitionSettings);
-		return registerResourceResourceChangeListener(
-				theResourceName,
-				defaultPartition,
-				theSearchParameterMap,
-				theResourceChangeListener,
-				theRemoteRefreshIntervalMs);
-	}
-
 	/**
 	 * Register a listener in order to be notified whenever a resource matching the provided SearchParameterMap
 	 * changes in any way.  If the change happened on the same jvm process where this registry resides, then the listener will be called
@@ -112,9 +97,15 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 					+ " cannot be evaluated in-memory: " + inMemoryMatchResult.getUnsupportedReason()
 					+ ".  Only search parameter maps that can be evaluated in-memory may be registered.");
 		}
+
+		RequestPartitionId requestPartitionId = theRequestPartitionId;
+		if (requestPartitionId != null && requestPartitionId.isDefaultPartition()) {
+			requestPartitionId = RequestPartitionId.defaultPartition(myPartitionSettings);
+		}
+
 		return add(
 				theResourceName,
-				theRequestPartitionId,
+			requestPartitionId,
 				theResourceChangeListener,
 				theSearchParameterMap,
 				theRemoteRefreshIntervalMs);
