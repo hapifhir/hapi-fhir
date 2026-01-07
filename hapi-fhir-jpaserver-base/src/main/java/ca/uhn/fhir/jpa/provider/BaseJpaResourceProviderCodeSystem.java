@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.provider;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.api.svc.CodeSystemValidationRequest;
 import ca.uhn.fhir.jpa.api.svc.ITerminologyValidationSvc;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -147,8 +148,17 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 
 		startRequest(theServletRequest);
 		try {
-			CodeValidationResult result = myTerminologyValidationSvc.validateCodeAgainstCodeSystem(
-					theId, theUrl, theVersion, theCode, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
+			CodeSystemValidationRequest request = CodeSystemValidationRequest.builder()
+					.codeSystemId(theId)
+					.codeSystemUrl(theUrl)
+					.version(theVersion)
+					.code(theCode)
+					.display(theDisplay)
+					.coding(theCoding)
+					.codeableConcept(theCodeableConcept)
+					.requestDetails(theRequestDetails)
+					.build();
+			CodeValidationResult result = myTerminologyValidationSvc.validateCodeAgainstCodeSystem(request);
 			return result.toParameters(getContext());
 		} finally {
 			endRequest(theServletRequest);

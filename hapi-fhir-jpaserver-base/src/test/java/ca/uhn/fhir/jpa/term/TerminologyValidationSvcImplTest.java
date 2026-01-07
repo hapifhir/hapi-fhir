@@ -5,6 +5,8 @@ import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.api.svc.CodeSystemValidationRequest;
+import ca.uhn.fhir.jpa.api.svc.ValueSetValidationRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -72,17 +74,14 @@ class TerminologyValidationSvcImplTest {
 				.thenReturn(expectedResult);
 
 		// Execute
-		CodeValidationResult result = mySvc.validateCodeAgainstValueSet(
-				null,
-				new UriType("http://valueset"),
-				null,
-				new CodeType("CODE1"),
-				new UriType("http://system"),
-				null,
-				new StringType("Display"),
-				null,
-				null,
-				myRequestDetails);
+		ValueSetValidationRequest request = ValueSetValidationRequest.builder()
+				.valueSetUrl(new UriType("http://valueset"))
+				.code(new CodeType("CODE1"))
+				.system(new UriType("http://system"))
+				.display(new StringType("Display"))
+				.requestDetails(myRequestDetails)
+				.build();
+		CodeValidationResult result = mySvc.validateCodeAgainstValueSet(request);
 
 		// Verify
 		assertThat(result).isSameAs(expectedResult);
@@ -100,17 +99,13 @@ class TerminologyValidationSvcImplTest {
 				.thenReturn(expectedResult);
 
 		// Execute
-		CodeValidationResult result = mySvc.validateCodeAgainstValueSet(
-				null,
-				new UriType("http://valueset"),
-				null,
-				new CodeType("CODE1"),
-				new UriType("http://system"),
-				null,
-				null,
-				null,
-				null,
-				myRequestDetails);
+		ValueSetValidationRequest request = ValueSetValidationRequest.builder()
+				.valueSetUrl(new UriType("http://valueset"))
+				.code(new CodeType("CODE1"))
+				.system(new UriType("http://system"))
+				.requestDetails(myRequestDetails)
+				.build();
+		CodeValidationResult result = mySvc.validateCodeAgainstValueSet(request);
 
 		// Verify
 		assertThat(result).isSameAs(expectedResult);
@@ -132,17 +127,12 @@ class TerminologyValidationSvcImplTest {
 				.thenReturn(expectedResult);
 
 		// Execute
-		CodeValidationResult result = mySvc.validateCodeAgainstValueSet(
-				null,
-				new UriType("http://valueset"),
-				null,
-				null,
-				null,
-				null,
-				null,
-				coding,
-				null,
-				myRequestDetails);
+		ValueSetValidationRequest request = ValueSetValidationRequest.builder()
+				.valueSetUrl(new UriType("http://valueset"))
+				.coding(coding)
+				.requestDetails(myRequestDetails)
+				.build();
+		CodeValidationResult result = mySvc.validateCodeAgainstValueSet(request);
 
 		// Verify
 		assertThat(result).isSameAs(expectedResult);
@@ -158,17 +148,13 @@ class TerminologyValidationSvcImplTest {
 				.setCode("CODE");
 
 		// Execute & Verify
-		assertThatThrownBy(() -> mySvc.validateCodeAgainstValueSet(
-				null,
-				new UriType("http://valueset"),
-				null,
-				null,
-				new UriType("http://different.system"),
-				null,
-				null,
-				coding,
-				null,
-				myRequestDetails))
+		ValueSetValidationRequest request = ValueSetValidationRequest.builder()
+				.valueSetUrl(new UriType("http://valueset"))
+				.system(new UriType("http://different.system"))
+				.coding(coding)
+				.requestDetails(myRequestDetails)
+				.build();
+		assertThatThrownBy(() -> mySvc.validateCodeAgainstValueSet(request))
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining("does not equal param system");
 	}
@@ -181,17 +167,13 @@ class TerminologyValidationSvcImplTest {
 				.thenReturn(null);
 
 		// Execute
-		CodeValidationResult result = mySvc.validateCodeAgainstValueSet(
-				null,
-				new UriType("http://valueset"),
-				null,
-				new CodeType("CODE1"),
-				new UriType("http://system"),
-				null,
-				null,
-				null,
-				null,
-				myRequestDetails);
+		ValueSetValidationRequest request = ValueSetValidationRequest.builder()
+				.valueSetUrl(new UriType("http://valueset"))
+				.code(new CodeType("CODE1"))
+				.system(new UriType("http://system"))
+				.requestDetails(myRequestDetails)
+				.build();
+		CodeValidationResult result = mySvc.validateCodeAgainstValueSet(request);
 
 		// Verify - returns a result with message when chain returns null
 		assertThat(result).isNotNull();
@@ -210,15 +192,13 @@ class TerminologyValidationSvcImplTest {
 				.thenReturn(expectedResult);
 
 		// Execute
-		CodeValidationResult result = mySvc.validateCodeAgainstCodeSystem(
-				null,
-				new UriType("http://codesystem"),
-				null,
-				new CodeType("CODE1"),
-				new StringType("Display"),
-				null,
-				null,
-				myRequestDetails);
+		CodeSystemValidationRequest request = CodeSystemValidationRequest.builder()
+				.codeSystemUrl(new UriType("http://codesystem"))
+				.code(new CodeType("CODE1"))
+				.display(new StringType("Display"))
+				.requestDetails(myRequestDetails)
+				.build();
+		CodeValidationResult result = mySvc.validateCodeAgainstCodeSystem(request);
 
 		// Verify
 		assertThat(result).isSameAs(expectedResult);
@@ -236,15 +216,12 @@ class TerminologyValidationSvcImplTest {
 				.thenReturn(expectedResult);
 
 		// Execute
-		CodeValidationResult result = mySvc.validateCodeAgainstCodeSystem(
-				null,
-				new UriType("http://codesystem"),
-				null,
-				new CodeType("CODE1"),
-				null,
-				null,
-				null,
-				myRequestDetails);
+		CodeSystemValidationRequest request = CodeSystemValidationRequest.builder()
+				.codeSystemUrl(new UriType("http://codesystem"))
+				.code(new CodeType("CODE1"))
+				.requestDetails(myRequestDetails)
+				.build();
+		CodeValidationResult result = mySvc.validateCodeAgainstCodeSystem(request);
 
 		// Verify
 		assertThat(result).isSameAs(expectedResult);
@@ -266,15 +243,11 @@ class TerminologyValidationSvcImplTest {
 				.thenReturn(expectedResult);
 
 		// Execute
-		CodeValidationResult result = mySvc.validateCodeAgainstCodeSystem(
-				null,
-				null,
-				null,
-				null,
-				null,
-				coding,
-				null,
-				myRequestDetails);
+		CodeSystemValidationRequest request = CodeSystemValidationRequest.builder()
+				.coding(coding)
+				.requestDetails(myRequestDetails)
+				.build();
+		CodeValidationResult result = mySvc.validateCodeAgainstCodeSystem(request);
 
 		// Verify
 		assertThat(result).isSameAs(expectedResult);
@@ -290,15 +263,12 @@ class TerminologyValidationSvcImplTest {
 				.setCode("CODE");
 
 		// Execute & Verify
-		assertThatThrownBy(() -> mySvc.validateCodeAgainstCodeSystem(
-				null,
-				new UriType("http://different.codesystem"),
-				null,
-				null,
-				null,
-				coding,
-				null,
-				myRequestDetails))
+		CodeSystemValidationRequest request = CodeSystemValidationRequest.builder()
+				.codeSystemUrl(new UriType("http://different.codesystem"))
+				.coding(coding)
+				.requestDetails(myRequestDetails)
+				.build();
+		assertThatThrownBy(() -> mySvc.validateCodeAgainstCodeSystem(request))
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining("does not equal param url");
 	}
@@ -312,15 +282,11 @@ class TerminologyValidationSvcImplTest {
 				.addCoding(new Coding().setSystem("http://system").setCode("CODE"));
 
 		// Execute
-		CodeValidationResult result = mySvc.validateCodeAgainstCodeSystem(
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				codeableConcept,
-				myRequestDetails);
+		CodeSystemValidationRequest request = CodeSystemValidationRequest.builder()
+				.codeableConcept(codeableConcept)
+				.requestDetails(myRequestDetails)
+				.build();
+		CodeValidationResult result = mySvc.validateCodeAgainstCodeSystem(request);
 
 		// Verify - CodeableConcept not yet supported for CodeSystem validation via remote service
 		assertThat(result).isNotNull();
@@ -333,15 +299,10 @@ class TerminologyValidationSvcImplTest {
 		when(myValidationSupportChain.isRemoteTerminologyServiceConfigured()).thenReturn(true);
 
 		// Execute
-		CodeValidationResult result = mySvc.validateCodeAgainstCodeSystem(
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				myRequestDetails);
+		CodeSystemValidationRequest request = CodeSystemValidationRequest.builder()
+				.requestDetails(myRequestDetails)
+				.build();
+		CodeValidationResult result = mySvc.validateCodeAgainstCodeSystem(request);
 
 		// Verify
 		assertThat(result).isNotNull();
@@ -362,17 +323,15 @@ class TerminologyValidationSvcImplTest {
 				.thenReturn(expectedResult);
 
 		// Execute
-		mySvc.validateCodeAgainstValueSet(
-				null,
-				new UriType("http://valueset"),
-				new StringType("1.0"),
-				new CodeType("CODE1"),
-				new UriType("http://system"),
-				new StringType("2.0"),
-				null,
-				null,
-				null,
-				myRequestDetails);
+		ValueSetValidationRequest request = ValueSetValidationRequest.builder()
+				.valueSetUrl(new UriType("http://valueset"))
+				.valueSetVersion(new StringType("1.0"))
+				.code(new CodeType("CODE1"))
+				.system(new UriType("http://system"))
+				.systemVersion(new StringType("2.0"))
+				.requestDetails(myRequestDetails)
+				.build();
+		mySvc.validateCodeAgainstValueSet(request);
 
 		// Verify - versions should be concatenated with |
 		verify(myValueSetDao).validateCode(

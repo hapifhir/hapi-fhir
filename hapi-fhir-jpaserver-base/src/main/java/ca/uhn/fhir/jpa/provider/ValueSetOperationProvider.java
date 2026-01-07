@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.svc.ITerminologyValidationSvc;
+import ca.uhn.fhir.jpa.api.svc.ValueSetValidationRequest;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -164,17 +165,19 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 
 		startRequest(theServletRequest);
 		try {
-			CodeValidationResult result = myTerminologyValidationSvc.validateCodeAgainstValueSet(
-					theId,
-					theValueSetUrl,
-					theValueSetVersion,
-					theCode,
-					theSystem,
-					theSystemVersion,
-					theDisplay,
-					theCoding,
-					theCodeableConcept,
-					theRequestDetails);
+			ValueSetValidationRequest request = ValueSetValidationRequest.builder()
+					.valueSetId(theId)
+					.valueSetUrl(theValueSetUrl)
+					.valueSetVersion(theValueSetVersion)
+					.code(theCode)
+					.system(theSystem)
+					.systemVersion(theSystemVersion)
+					.display(theDisplay)
+					.coding(theCoding)
+					.codeableConcept(theCodeableConcept)
+					.requestDetails(theRequestDetails)
+					.build();
+			CodeValidationResult result = myTerminologyValidationSvc.validateCodeAgainstValueSet(request);
 			return result.toParameters(getContext());
 		} finally {
 			endRequest(theServletRequest);

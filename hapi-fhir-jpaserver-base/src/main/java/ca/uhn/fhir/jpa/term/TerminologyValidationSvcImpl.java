@@ -28,15 +28,14 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.api.svc.CodeSystemValidationRequest;
 import ca.uhn.fhir.jpa.api.svc.ITerminologyValidationSvc;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.jpa.api.svc.ValueSetValidationRequest;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Strings;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.Objects;
@@ -76,35 +75,25 @@ public class TerminologyValidationSvcImpl implements ITerminologyValidationSvc {
 	}
 
 	@Override
-	public CodeValidationResult validateCodeAgainstValueSet(
-			IIdType theValueSetId,
-			IPrimitiveType<String> theValueSetUrl,
-			IPrimitiveType<String> theValueSetVersion,
-			IPrimitiveType<String> theCode,
-			IPrimitiveType<String> theSystem,
-			IPrimitiveType<String> theSystemVersion,
-			IPrimitiveType<String> theDisplay,
-			IBaseCoding theCoding,
-			IBaseDatatype theCodeableConcept,
-			RequestDetails theRequestDetails) {
-
+	public CodeValidationResult validateCodeAgainstValueSet(ValueSetValidationRequest theRequest) {
 		// If a Remote Terminology Server has been configured, use it
 		if (myValidationSupport != null && myValidationSupport.isRemoteTerminologyServiceConfigured()) {
-			String systemString = getStringFromPrimitiveType(theSystem);
-			String codeString = getStringFromPrimitiveType(theCode);
-			String displayString = getStringFromPrimitiveType(theDisplay);
-			String valueSetUrlString = getStringFromPrimitiveType(theValueSetUrl);
+			String systemString = getStringFromPrimitiveType(theRequest.system());
+			String codeString = getStringFromPrimitiveType(theRequest.code());
+			String displayString = getStringFromPrimitiveType(theRequest.display());
+			String valueSetUrlString = getStringFromPrimitiveType(theRequest.valueSetUrl());
 
-			if (theCoding != null) {
-				if (isNotBlank(theCoding.getSystem())) {
-					if (systemString != null && !systemString.equalsIgnoreCase(theCoding.getSystem())) {
-						throw new InvalidRequestException(Msg.code(2352) + "Coding.system '" + theCoding.getSystem()
+			IBaseCoding coding = theRequest.coding();
+			if (coding != null) {
+				if (isNotBlank(coding.getSystem())) {
+					if (systemString != null && !systemString.equalsIgnoreCase(coding.getSystem())) {
+						throw new InvalidRequestException(Msg.code(2352) + "Coding.system '" + coding.getSystem()
 								+ "' does not equal param system '" + systemString
 								+ "'. Unable to validate-code.");
 					}
-					systemString = theCoding.getSystem();
-					codeString = theCoding.getCode();
-					displayString = theCoding.getDisplay();
+					systemString = coding.getSystem();
+					codeString = coding.getCode();
+					displayString = coding.getDisplay();
 				}
 			}
 
@@ -118,40 +107,34 @@ public class TerminologyValidationSvcImpl implements ITerminologyValidationSvc {
 				(IFhirResourceDaoValueSet<IBaseResource>) myDaoRegistry.getResourceDao("ValueSet");
 
 		IPrimitiveType<String> valueSetIdentifier;
-		if (theValueSetUrl != null && theValueSetVersion != null) {
-			valueSetIdentifier = createUriWithVersion(theValueSetUrl, theValueSetVersion);
+		if (theRequest.valueSetUrl() != null && theRequest.valueSetVersion() != null) {
+			valueSetIdentifier = createUriWithVersion(theRequest.valueSetUrl(), theRequest.valueSetVersion());
 		} else {
-			valueSetIdentifier = theValueSetUrl;
+			valueSetIdentifier = theRequest.valueSetUrl();
 		}
 
 		IPrimitiveType<String> codeSystemIdentifier;
-		if (theSystem != null && theSystemVersion != null) {
-			codeSystemIdentifier = createUriWithVersion(theSystem, theSystemVersion);
+		if (theRequest.system() != null && theRequest.systemVersion() != null) {
+			codeSystemIdentifier = createUriWithVersion(theRequest.system(), theRequest.systemVersion());
 		} else {
-			codeSystemIdentifier = theSystem;
+			codeSystemIdentifier = theRequest.system();
 		}
 
 		return dao.validateCode(
 				valueSetIdentifier,
-				theValueSetId,
-				theCode,
+				theRequest.valueSetId(),
+				theRequest.code(),
 				codeSystemIdentifier,
-				theDisplay,
-				theCoding,
-				theCodeableConcept,
-				theRequestDetails);
+				theRequest.display(),
+				theRequest.coding(),
+				theRequest.codeableConcept(),
+				theRequest.requestDetails());
 	}
 
 	@Override
-	public CodeValidationResult validateCodeAgainstCodeSystem(
-			IIdType theCodeSystemId,
-			IPrimitiveType<String> theCodeSystemUrl,
-			IPrimitiveType<String> theVersion,
-			IPrimitiveType<String> theCode,
-			IPrimitiveType<String> theDisplay,
-			IBaseCoding theCoding,
-			IBaseDatatype theCodeableConcept,
-			RequestDetails theRequestDetails) {
+	public CodeValidationResult validateCodeAgainstCodeSystem(CodeSystemValidationRequest theRequest) {
+		// TODO: JA why not just always just the chain here? and we can then get rid
+		// of the corresponding DAO method entirely
 
 		// If a Remote Terminology Server has been configured, use it
 		if (myValidationSupport != null && myValidationSupport.isRemoteTerminologyServiceConfigured()) {
@@ -163,28 +146,30 @@ public class TerminologyValidationSvcImpl implements ITerminologyValidationSvc {
 			// 1.- code/codeSystem url
 			// 2.- coding (which wraps one code/codeSystem url combo)
 			// 3.- a codeableConcept (which wraps potentially many code/codeSystem url combos)
-			String url = getStringFromPrimitiveType(theCodeSystemUrl);
+			String url = getStringFromPrimitiveType(theRequest.codeSystemUrl());
 
-			if (theCoding != null && isNotBlank(theCoding.getSystem())) {
+			IBaseCoding coding = theRequest.coding();
+			if (coding != null && isNotBlank(coding.getSystem())) {
 				// Coding case
-				if (url != null && !url.equalsIgnoreCase(theCoding.getSystem())) {
-					throw new InvalidRequestException(Msg.code(1160) + "Coding.system '" + theCoding.getSystem()
+				if (url != null && !url.equalsIgnoreCase(coding.getSystem())) {
+					throw new InvalidRequestException(Msg.code(1160) + "Coding.system '" + coding.getSystem()
 							+ "' does not equal param url '" + url
 							+ "'. Unable to validate-code.");
 				}
-				url = theCoding.getSystem();
-				code = theCoding.getCode();
-				display = theCoding.getDisplay();
+				url = coding.getSystem();
+				code = coding.getCode();
+				display = coding.getDisplay();
 				return validateCodeWithTerminologyService(url, code, display, null)
 						.orElseGet(supplyUnableToValidateResultForCodeSystem(url, code));
-			} else if (theCodeableConcept != null && !theCodeableConcept.isEmpty()) {
+			} else if (theRequest.codeableConcept() != null
+					&& !theRequest.codeableConcept().isEmpty()) {
 				// CodeableConcept case
 				return new CodeValidationResult()
 						.setMessage("Terminology service does not yet support codeable concepts.");
 			} else {
 				// code/systemUrl combo case
-				code = getStringFromPrimitiveType(theCode);
-				display = getStringFromPrimitiveType(theDisplay);
+				code = getStringFromPrimitiveType(theRequest.code());
+				display = getStringFromPrimitiveType(theRequest.display());
 				if (Strings.isNullOrEmpty(code) || Strings.isNullOrEmpty(url)) {
 					return new CodeValidationResult()
 							.setMessage("When specifying systemUrl and code, neither can be empty");
@@ -200,14 +185,14 @@ public class TerminologyValidationSvcImpl implements ITerminologyValidationSvc {
 				(IFhirResourceDaoCodeSystem<IBaseResource>) myDaoRegistry.getResourceDao("CodeSystem");
 
 		return dao.validateCode(
-				theCodeSystemId,
-				theCodeSystemUrl,
-				theVersion,
-				theCode,
-				theDisplay,
-				theCoding,
-				theCodeableConcept,
-				theRequestDetails);
+				theRequest.codeSystemId(),
+				theRequest.codeSystemUrl(),
+				theRequest.version(),
+				theRequest.code(),
+				theRequest.display(),
+				theRequest.coding(),
+				theRequest.codeableConcept(),
+				theRequest.requestDetails());
 	}
 
 	private Optional<CodeValidationResult> validateCodeWithTerminologyService(
@@ -238,8 +223,9 @@ public class TerminologyValidationSvcImpl implements ITerminologyValidationSvc {
 	@SuppressWarnings("unchecked")
 	private IPrimitiveType<String> createUriWithVersion(
 			IPrimitiveType<String> theUrl, IPrimitiveType<String> theVersion) {
-		IPrimitiveType<String> result = (IPrimitiveType<String>)
-				Objects.requireNonNull(myFhirContext.getElementDefinition("uri")).newInstance();
+		IPrimitiveType<String> result =
+				(IPrimitiveType<String>) Objects.requireNonNull(myFhirContext.getElementDefinition("uri"))
+						.newInstance();
 		result.setValue(theUrl.getValue() + "|" + theVersion.getValue());
 		return result;
 	}
