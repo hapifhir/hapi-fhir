@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -32,13 +33,13 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Strings;
 import jakarta.annotation.Nullable;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -57,20 +58,20 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class TerminologyValidationSvcImpl implements ITerminologyValidationSvc {
 
 	private final FhirContext myFhirContext;
-	private final ValidationSupportChain myValidationSupportChain;
+	private final IValidationSupport myValidationSupport;
 	private final DaoRegistry myDaoRegistry;
 
 	/**
 	 * Constructor.
 	 *
 	 * @param theFhirContext FHIR context for this service
-	 * @param theValidationSupportChain The validation support chain (includes remote terminology if configured)
+	 * @param theValidationSupport The validation support chain (includes remote terminology if configured)
 	 * @param theDaoRegistry The DAO registry for local validation
 	 */
 	public TerminologyValidationSvcImpl(
-			FhirContext theFhirContext, ValidationSupportChain theValidationSupportChain, DaoRegistry theDaoRegistry) {
+			FhirContext theFhirContext, IValidationSupport theValidationSupport, DaoRegistry theDaoRegistry) {
 		myFhirContext = theFhirContext;
-		myValidationSupportChain = theValidationSupportChain;
+		myValidationSupport = theValidationSupport;
 		myDaoRegistry = theDaoRegistry;
 	}
 
@@ -88,7 +89,7 @@ public class TerminologyValidationSvcImpl implements ITerminologyValidationSvc {
 			RequestDetails theRequestDetails) {
 
 		// If a Remote Terminology Server has been configured, use it
-		if (myValidationSupportChain != null && myValidationSupportChain.isRemoteTerminologyServiceConfigured()) {
+		if (myValidationSupport != null && myValidationSupport.isRemoteTerminologyServiceConfigured()) {
 			String systemString = getStringFromPrimitiveType(theSystem);
 			String codeString = getStringFromPrimitiveType(theCode);
 			String displayString = getStringFromPrimitiveType(theDisplay);
@@ -153,7 +154,7 @@ public class TerminologyValidationSvcImpl implements ITerminologyValidationSvc {
 			RequestDetails theRequestDetails) {
 
 		// If a Remote Terminology Server has been configured, use it
-		if (myValidationSupportChain != null && myValidationSupportChain.isRemoteTerminologyServiceConfigured()) {
+		if (myValidationSupport != null && myValidationSupport.isRemoteTerminologyServiceConfigured()) {
 			String code;
 			String display;
 
@@ -211,8 +212,8 @@ public class TerminologyValidationSvcImpl implements ITerminologyValidationSvc {
 
 	private Optional<CodeValidationResult> validateCodeWithTerminologyService(
 			String theSystem, String theCode, String theDisplay, String theValueSetUrl) {
-		return Optional.ofNullable(myValidationSupportChain.validateCode(
-				new ValidationSupportContext(myValidationSupportChain),
+		return Optional.ofNullable(myValidationSupport.validateCode(
+				new ValidationSupportContext(myValidationSupport),
 				new ConceptValidationOptions(),
 				theSystem,
 				theCode,
@@ -238,7 +239,7 @@ public class TerminologyValidationSvcImpl implements ITerminologyValidationSvc {
 	private IPrimitiveType<String> createUriWithVersion(
 			IPrimitiveType<String> theUrl, IPrimitiveType<String> theVersion) {
 		IPrimitiveType<String> result = (IPrimitiveType<String>)
-				myFhirContext.getElementDefinition("uri").newInstance();
+				Objects.requireNonNull(myFhirContext.getElementDefinition("uri")).newInstance();
 		result.setValue(theUrl.getValue() + "|" + theVersion.getValue());
 		return result;
 	}

@@ -983,8 +983,7 @@ public class JpaConfig {
 			FhirContext theFhirContext,
 			@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN) IValidationSupport theValidationSupportChain,
 			DaoRegistry theDaoRegistry) {
-		return new TerminologyValidationSvcImpl(
-				theFhirContext, (ValidationSupportChain) theValidationSupportChain, theDaoRegistry);
+		return new TerminologyValidationSvcImpl(theFhirContext, theValidationSupportChain, theDaoRegistry);
 	}
 
 	@Bean
