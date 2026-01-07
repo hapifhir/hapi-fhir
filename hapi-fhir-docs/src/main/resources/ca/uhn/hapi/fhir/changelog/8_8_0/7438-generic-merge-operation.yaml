@@ -1,4 +1,5 @@
 ---
 type: add
 issue: 7438
-title: "Introduces new $hapi.fhir.merge operation that works with any resource type (Practitioner, Organization, etc.) complementing the existing Patient-specific $merge operation. The new operation is available as a resource-level operation at `{resourceType}/$hapi.fhir.merge`."
+title: "Introduced the new `{resourceType}/$hapi.fhir.merge` operation that works with any resource type (Practitioner, 
+Organization, etc.) complementing the existing Patient-specific $merge operation."

@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.jpa.provider.merge;
 
-import ca.uhn.fhir.batch2.jobs.merge.IResourceLinkService;
-import ca.uhn.fhir.batch2.jobs.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -28,6 +26,8 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
+import ca.uhn.fhir.merge.IResourceLinkService;
+import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -50,7 +50,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper.addErrorToOperationOutcome;
+import static ca.uhn.fhir.merge.MergeResourceHelper.addErrorToOperationOutcome;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_400_BAD_REQUEST;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTITY;
 
@@ -289,7 +289,8 @@ public class MergeValidationService {
 		IResourceLinkService linkService = myResourceLinkServiceFactory.getServiceForResource(theTargetResource);
 		List<IBaseReference> replacedByLinksInTarget = linkService.getReplacedByLinks(theTargetResource);
 		if (!replacedByLinksInTarget.isEmpty()) {
-			String ref = replacedByLinksInTarget.get(0).getReferenceElement().getValue();
+			IIdType refEl = replacedByLinksInTarget.get(0).getReferenceElement();
+			String ref = refEl == null ? "null" : refEl.getValue();
 			String msg = String.format(
 					"Target resource was previously replaced by a resource with reference '%s', it "
 							+ "is not a suitable target for merging.",
@@ -534,11 +535,8 @@ public class MergeValidationService {
 			RequestDetails theRequestDetails,
 			IBaseOperationOutcome theOutcome,
 			String theOperationParameterName) {
-		// TODO Emre: why does IBaseReference not have getIdentifier or hasReference methods?
-		// casting it to r4.Reference for now
-		Reference r4ref = (Reference) theReference;
 
-		IIdType theResourceId = new IdType(r4ref.getReferenceElement().getValue());
+		IIdType theResourceId = theReference.getReferenceElement();
 
 		// Get the resource type from request details and dynamically fetch the appropriate DAO
 		String resourceType = theRequestDetails.getResourceName();

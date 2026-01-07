@@ -1,10 +1,10 @@
 // Created by claude-sonnet-4-5
-package ca.uhn.fhir.batch2.jobs.merge;
+package ca.uhn.fhir.merge;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PatientNativeLinkServiceTest {
 
@@ -372,5 +373,93 @@ class PatientNativeLinkServiceTest {
 
 		// Verify all three links are present
 		assertThat(myService.getReplacesLinks(patient)).hasSize(3);
+	}
+
+	@Test
+	void addReplacesLink_withNonPatientResource_shouldThrowException() {
+		// Given
+		Observation observation = new Observation();
+		observation.setId("Observation/obs-123");
+		Reference sourceRef = new Reference("Patient/source-456");
+
+		// When/Then
+		assertThatThrownBy(() -> myService.addReplacesLink(observation, sourceRef))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("PatientNativeLinkService only supports Patient resources. Received: Observation");
+	}
+
+	@Test
+	void addReplacesLink_withNullResource_shouldThrowException() {
+		// Given
+		Reference sourceRef = new Reference("Patient/source-456");
+
+		// When/Then
+		assertThatThrownBy(() -> myService.addReplacesLink(null, sourceRef))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("PatientNativeLinkService only supports Patient resources. Received: null");
+	}
+
+	@Test
+	void addReplacedByLink_withNonPatientResource_shouldThrowException() {
+		// Given
+		Observation observation = new Observation();
+		observation.setId("Observation/obs-123");
+		Reference targetRef = new Reference("Patient/target-789");
+
+		// When/Then
+		assertThatThrownBy(() -> myService.addReplacedByLink(observation, targetRef))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("PatientNativeLinkService only supports Patient resources. Received: Observation");
+	}
+
+	@Test
+	void addReplacedByLink_withNullResource_shouldThrowException() {
+		// Given
+		Reference targetRef = new Reference("Patient/target-789");
+
+		// When/Then
+		assertThatThrownBy(() -> myService.addReplacedByLink(null, targetRef))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("PatientNativeLinkService only supports Patient resources. Received: null");
+	}
+
+	@Test
+	void getReplacesLinks_withNonPatientResource_shouldThrowException() {
+		// Given
+		Observation observation = new Observation();
+		observation.setId("Observation/obs-123");
+
+		// When/Then
+		assertThatThrownBy(() -> myService.getReplacesLinks(observation))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("PatientNativeLinkService only supports Patient resources. Received: Observation");
+	}
+
+	@Test
+	void getReplacesLinks_withNullResource_shouldThrowException() {
+		// When/Then
+		assertThatThrownBy(() -> myService.getReplacesLinks(null))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("PatientNativeLinkService only supports Patient resources. Received: null");
+	}
+
+	@Test
+	void getReplacedByLinks_withNonPatientResource_shouldThrowException() {
+		// Given
+		Observation observation = new Observation();
+		observation.setId("Observation/obs-123");
+
+		// When/Then
+		assertThatThrownBy(() -> myService.getReplacedByLinks(observation))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("PatientNativeLinkService only supports Patient resources. Received: Observation");
+	}
+
+	@Test
+	void getReplacedByLinks_withNullResource_shouldThrowException() {
+		// When/Then
+		assertThatThrownBy(() -> myService.getReplacedByLinks(null))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("PatientNativeLinkService only supports Patient resources. Received: null");
 	}
 }

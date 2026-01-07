@@ -20,10 +20,6 @@
 package ca.uhn.fhir.jpa.config.r4;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.jobs.merge.ExtensionBasedLinkService;
-import ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper;
-import ca.uhn.fhir.batch2.jobs.merge.PatientNativeLinkService;
-import ca.uhn.fhir.batch2.jobs.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -54,7 +50,11 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
+import ca.uhn.fhir.merge.ExtensionBasedLinkService;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
+import ca.uhn.fhir.merge.MergeResourceHelper;
+import ca.uhn.fhir.merge.PatientNativeLinkService;
+import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.replacereferences.PreviousResourceVersionRestorer;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.r4.model.Bundle;
@@ -164,7 +164,6 @@ public class JpaR4Config {
 			Batch2TaskHelper theBatch2TaskHelper,
 			JpaStorageSettings theStorageSettings,
 			MergeValidationService theMergeValidationService,
-			MergeProvenanceSvc theMergeProvenanceSvc,
 			MergeResourceHelper theMergeResourceHelper) {
 
 		return new ResourceMergeService(
@@ -176,7 +175,6 @@ public class JpaR4Config {
 				theJobCoordinator,
 				theBatch2TaskHelper,
 				theMergeValidationService,
-				theMergeProvenanceSvc,
 				theMergeResourceHelper);
 	}
 

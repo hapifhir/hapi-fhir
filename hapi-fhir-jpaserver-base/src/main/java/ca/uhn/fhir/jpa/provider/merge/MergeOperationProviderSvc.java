@@ -20,12 +20,12 @@
  */
 package ca.uhn.fhir.jpa.provider.merge;
 
-import ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.svc.IMergeOperationProviderSvc;
 import ca.uhn.fhir.jpa.interceptor.ProvenanceAgentsPointcutUtil;
+import ca.uhn.fhir.merge.MergeResourceHelper;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import jakarta.servlet.http.HttpServletRequest;

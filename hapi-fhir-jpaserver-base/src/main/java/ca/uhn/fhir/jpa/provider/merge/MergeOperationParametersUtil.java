@@ -161,11 +161,11 @@ public class MergeOperationParametersUtil {
 			IBaseResource theOriginalInputParameters,
 			int theResourceLimit) {
 
-		MergeOperationInputParameters result = new MergeOperationInputParameters(theResourceLimit);
+		MergeOperationInputParameters result = new MergeOperationInputParameters();
 
 		// Set common parameters (identifiers and resource references), common with undo-merge operation
-		MergeOperationsCommonInputParameters.setParameters(
-				result, theSourceIdentifiers, theTargetIdentifiers, theSourceResource, theTargetResource);
+		result.setCommonParameters(
+				theSourceIdentifiers, theTargetIdentifiers, theSourceResource, theTargetResource, theResourceLimit);
 
 		// Set merge-specific parameters
 		// Set flags

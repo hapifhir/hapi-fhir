@@ -1,5 +1,5 @@
 // Created by claude-sonnet-4-5
-package ca.uhn.fhir.batch2.jobs.merge;
+package ca.uhn.fhir.merge;
 
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IIdType;

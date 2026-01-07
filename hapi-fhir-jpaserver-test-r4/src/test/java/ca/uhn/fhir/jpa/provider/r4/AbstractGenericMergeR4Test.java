@@ -21,9 +21,9 @@ package ca.uhn.fhir.jpa.provider.r4;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.jobs.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.jpa.merge.AbstractMergeTestScenario;
 import ca.uhn.fhir.jpa.merge.MergeOperationTestHelper;
+import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.jpa.merge.MergeTestParameters;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
@@ -158,7 +158,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		"false, true, true, true",
 		"true, true, true, true"
 	})
-	protected void testMerge_basicInputParameterVariations_succeeds(
+	void testMerge_basicInputParameterVariations_succeeds(
 			boolean theDeleteSource, boolean theResultResource, boolean thePreview, boolean theAsync) {
 		// Setup: Create and configure scenario with standard references
 		AbstractMergeTestScenario<T> scenario = createScenario()
@@ -191,7 +191,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		"false, true, true",
 		"false, false, true"
 	})
-	protected void testMerge_identifierResolution_succeeds(boolean theSourceById, boolean theTargetById, boolean theAsync) {
+	void testMerge_identifierResolution_succeeds(boolean theSourceById, boolean theTargetById, boolean theAsync) {
 		// Setup
 		AbstractMergeTestScenario<T> scenario = createScenario()
 				.withOneReferencingResource()
@@ -235,7 +235,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	// ================================================
 
 	@Test
-	protected void testMerge_identifiers_emptySourceIdentifiers_succeeds() {
+	void testMerge_identifiers_emptySourceIdentifiers_succeeds() {
 		// Setup - source has no identifiers, target has identifiers
 		AbstractMergeTestScenario<T> scenario = createScenario()
 				.withSourceIdentifiers(Collections.emptyList())
@@ -248,7 +248,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_identifiers_emptyTargetIdentifiers_succeeds() {
+	void testMerge_identifiers_emptyTargetIdentifiers_succeeds() {
 		// Setup - source has identifiers, target has no identifiers
 		AbstractMergeTestScenario<T> scenario = createScenario()
 				.withTargetIdentifiers(Collections.emptyList())
@@ -261,7 +261,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_identifiers_bothEmpty_succeeds() {
+	void testMerge_identifiers_bothEmpty_succeeds() {
 		// Setup - both source and target have no identifiers
 		AbstractMergeTestScenario<T> scenario = createScenario()
 				.withSourceIdentifiers(Collections.emptyList())
@@ -275,7 +275,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_resultResource_overridesTargetIdentifiers_succeeds() {
+	void testMerge_resultResource_overridesTargetIdentifiers_succeeds() {
 		// Setup - result resource has different identifiers than target
 		List<Identifier> resultIdentifiers = Arrays.asList(
 				new Identifier().setSystem("http://test.org").setValue("result-1"),
@@ -303,7 +303,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	 * - Merge still succeeds and creates appropriate links
 	 */
 	@Test
-	protected void testMerge_emptySourceIdentifiers_deleteSource_targetNoopUpdate_succeeds() {
+	void testMerge_emptySourceIdentifiers_deleteSource_targetNoopUpdate_succeeds() {
 		// Setup - source has NO identifiers to merge, deleteSource=true
 		AbstractMergeTestScenario<T> scenario = createScenario()
 				.withSourceIdentifiers(Collections.emptyList())
@@ -337,7 +337,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		"true, false",
 		"true, true"
 	})
-	protected void testMerge_withProvenanceAgentInterceptor_succeeds(boolean theAsync, boolean theMultipleAgents) {
+	void testMerge_withProvenanceAgentInterceptor_succeeds(boolean theAsync, boolean theMultipleAgents) {
 		// Setup: Create Provenance agents
 		List<IProvenanceAgent> agents = new ArrayList<>();
 		agents.add(myReplaceReferencesTestHelper.createTestProvenanceAgent());
@@ -390,7 +390,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	// ================================================
 
 	@Test
-	protected void testMerge_missingSourceResource_failsWithInvalidRequestException() {
+	void testMerge_missingSourceResource_failsWithInvalidRequestException() {
 		// Build invalid parameters (no source)
 		MergeTestParameters params = new MergeTestParameters()
 				.targetResource(new Reference(getResourceTypeName() + "/123"))
@@ -406,7 +406,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_missingTargetResource_failsWithInvalidRequestException() {
+	void testMerge_missingTargetResource_failsWithInvalidRequestException() {
 		// Build invalid parameters (no target)
 		MergeTestParameters params = new MergeTestParameters()
 				.sourceResource(new Reference(getResourceTypeName() + "/123"))
@@ -422,7 +422,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_missingRequiredParameters_failsWithInvalidRequestException() {
+	void testMerge_missingRequiredParameters_failsWithInvalidRequestException() {
 		// Build completely empty parameters (no source, no target)
 		MergeTestParameters params = new MergeTestParameters()
 				.deleteSource(false)
@@ -438,7 +438,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_sourceEqualsTarget_failsWithUnprocessableEntityException() {
+	void testMerge_sourceEqualsTarget_failsWithUnprocessableEntityException() {
 		// Setup
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.persistTestData();
@@ -459,7 +459,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_nonExistentSourceIdentifier_failsWithUnprocessableEntityException() {
+	void testMerge_nonExistentSourceIdentifier_failsWithUnprocessableEntityException() {
 		// Setup
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.persistTestData();
@@ -481,7 +481,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_nonExistentTargetIdentifier_failsWithUnprocessableEntityException() {
+	void testMerge_nonExistentTargetIdentifier_failsWithUnprocessableEntityException() {
 		// Setup
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.persistTestData();
@@ -503,7 +503,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_multipleTargetMatches_failsWithUnprocessableEntityException() {
+	void testMerge_multipleTargetMatches_failsWithUnprocessableEntityException() {
 		// Setup: Create scenario with standard source and target
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.persistTestData();
@@ -530,7 +530,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_multipleSourceMatches_failsWithUnprocessableEntityException() {
+	void testMerge_multipleSourceMatches_failsWithUnprocessableEntityException() {
 		// Setup: Create scenario with standard source and target
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.persistTestData();
@@ -557,7 +557,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_previouslyMergedSourceAsSource_failsWithUnprocessableEntityException() {
+	void testMerge_previouslyMergedSourceAsSource_failsWithUnprocessableEntityException() {
 		// Setup: Create and merge source with another resource first
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.persistTestData();
@@ -584,7 +584,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	}
 
 	@Test
-	protected void testMerge_previouslyMergedSourceAsTarget_failsWithUnprocessableEntityException() {
+	void testMerge_previouslyMergedSourceAsTarget_failsWithUnprocessableEntityException() {
 		// Setup: Create and merge to get a resource with replaced-by link
 		AbstractMergeTestScenario<T> scenario = createScenario();
 		scenario.persistTestData();

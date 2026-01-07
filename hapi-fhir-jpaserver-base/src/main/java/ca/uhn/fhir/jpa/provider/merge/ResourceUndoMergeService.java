@@ -51,8 +51,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper.addErrorToOperationOutcome;
-import static ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper.addInfoToOperationOutcome;
+import static ca.uhn.fhir.merge.MergeResourceHelper.addErrorToOperationOutcome;
+import static ca.uhn.fhir.merge.MergeResourceHelper.addInfoToOperationOutcome;
 import static ca.uhn.fhir.model.api.StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CHANGE;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_200_OK;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_400_BAD_REQUEST;
@@ -145,7 +145,7 @@ public class ResourceUndoMergeService {
 		} else {
 			// the client provided source identifiers, find a provenance using those identifiers and the target id
 			provenance = myMergeProvenanceSvc.findProvenanceByTargetIdAndSourceIdentifiers(
-					targetId, inputParameters.getSourceIdentifiers(), theRequestDetails, myInputParamNames);
+					targetId, inputParameters.getSourceIdentifiers(), myInputParamNames, theRequestDetails);
 		}
 
 		if (provenance == null) {

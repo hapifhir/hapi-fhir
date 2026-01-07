@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
-import ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper;
 import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
@@ -33,7 +32,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
-import ca.uhn.fhir.merge.MergeProvenanceSvc;
+import ca.uhn.fhir.merge.MergeResourceHelper;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -51,7 +50,7 @@ import java.util.Date;
 import java.util.List;
 
 import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
-import static ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper.addInfoToOperationOutcome;
+import static ca.uhn.fhir.merge.MergeResourceHelper.addInfoToOperationOutcome;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_200_OK;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_202_ACCEPTED;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_500_INTERNAL_ERROR;
@@ -74,7 +73,6 @@ public class ResourceMergeService {
 	private final MergeResourceHelper myMergeResourceHelper;
 	private final Batch2TaskHelper myBatch2TaskHelper;
 	private final MergeValidationService myMergeValidationService;
-	private final MergeProvenanceSvc myMergeProvenanceSvc;
 
 	public ResourceMergeService(
 			JpaStorageSettings theStorageSettings,
@@ -85,7 +83,6 @@ public class ResourceMergeService {
 			IJobCoordinator theJobCoordinator,
 			Batch2TaskHelper theBatch2TaskHelper,
 			MergeValidationService theMergeValidationService,
-			MergeProvenanceSvc theMergeProvenanceSvc,
 			MergeResourceHelper theMergeResourceHelper) {
 		myStorageSettings = theStorageSettings;
 		myDaoRegistry = theDaoRegistry;
@@ -97,7 +94,6 @@ public class ResourceMergeService {
 		myBatch2TaskHelper = theBatch2TaskHelper;
 		myFhirContext = theDaoRegistry.getFhirContext();
 		myHapiTransactionService = theHapiTransactionService;
-		myMergeProvenanceSvc = theMergeProvenanceSvc;
 		myMergeResourceHelper = theMergeResourceHelper;
 		myMergeValidationService = theMergeValidationService;
 	}
@@ -282,6 +278,7 @@ public class ResourceMergeService {
 					if (theMergeOperationParameters.getDeleteSource()) {
 						// by using an id with versionId, the delete fails if
 						// the resource was updated since we last read it
+						@SuppressWarnings("unchecked")
 						IFhirResourceDao<IBaseResource> dao =
 								myDaoRegistry.getResourceDao(theRequestDetails.getResourceName());
 						dao.delete(theSourceResource.getIdElement(), theRequestDetails);

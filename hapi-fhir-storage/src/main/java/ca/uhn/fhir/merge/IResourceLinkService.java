@@ -1,5 +1,5 @@
 // Created by claude-sonnet-4-5
-package ca.uhn.fhir.batch2.jobs.merge;
+package ca.uhn.fhir.merge;
 
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -57,7 +57,10 @@ public interface IResourceLinkService {
 	 * @param theResource the resource to check
 	 * @return true if resource has been replaced
 	 */
-	boolean hasReplacedByLink(IBaseResource theResource);
+	default boolean hasReplacedByLink(IBaseResource theResource) {
+		List<IBaseReference> links = getReplacedByLinks(theResource);
+		return !links.isEmpty();
+	}
 
 	/**
 	 * Check if resource has a specific "replaces" link to target.
@@ -68,5 +71,24 @@ public interface IResourceLinkService {
 	 * @param theTargetId the target resource ID to look for
 	 * @return true if resource has a replaces link to the target
 	 */
-	boolean hasReplacesLinkTo(IBaseResource theResource, IIdType theTargetId);
+	default boolean hasReplacesLinkTo(IBaseResource theResource, IIdType theTargetId) {
+		List<IBaseReference> replacesLinks = getReplacesLinks(theResource);
+
+		String targetIdValue = theTargetId.toUnqualifiedVersionless().getValue();
+
+		for (IBaseReference link : replacesLinks) {
+			IIdType linkRefElement = link.getReferenceElement();
+			if (linkRefElement == null) {
+				continue;
+			}
+
+			String linkIdValue = linkRefElement.toUnqualifiedVersionless().getValue();
+
+			if (targetIdValue.equals(linkIdValue)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 }

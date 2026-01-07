@@ -36,7 +36,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 
 import java.util.List;
@@ -113,10 +112,14 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 			HttpServletRequest theServletRequest,
 			HttpServletResponse theServletResponse,
 			ServletRequestDetails theRequestDetails,
-			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER)
-					List<Identifier> theSourcePatientIdentifier,
-			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER)
-					List<Identifier> theTargetPatientIdentifier,
+			@OperationParam(
+							name = ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER,
+							typeName = "Identifier")
+					List<IBase> theSourcePatientIdentifier,
+			@OperationParam(
+							name = ProviderConstants.OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER,
+							typeName = "Identifier")
+					List<IBase> theTargetPatientIdentifier,
 			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_PATIENT, max = 1)
 					IBaseReference theSourcePatient,
 			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_TARGET_PATIENT, max = 1)
@@ -147,22 +150,21 @@ public class PatientMergeProvider extends BaseJpaResourceProvider<Patient> {
 	}
 
 	private UndoMergeOperationInputParameters buildUndoMergeOperationInputParameters(
-			List<Identifier> theSourcePatientIdentifier,
-			List<Identifier> theTargetPatientIdentifier,
+			List<IBase> theSourcePatientIdentifier,
+			List<IBase> theTargetPatientIdentifier,
 			IBaseReference theSourcePatient,
 			IBaseReference theTargetPatient) {
 
 		int resourceLimit = myStorageSettings.getInternalSynchronousSearchSize();
 
-		UndoMergeOperationInputParameters undoMergeOperationParameters =
-				new UndoMergeOperationInputParameters(resourceLimit);
+		UndoMergeOperationInputParameters undoMergeOperationParameters = new UndoMergeOperationInputParameters();
 
-		MergeOperationsCommonInputParameters.setParameters(
-				undoMergeOperationParameters,
-				(List) theSourcePatientIdentifier,
-				(List) theTargetPatientIdentifier,
+		undoMergeOperationParameters.setCommonParameters(
+				theSourcePatientIdentifier,
+				theTargetPatientIdentifier,
 				theSourcePatient,
-				theTargetPatient);
+				theTargetPatient,
+				resourceLimit);
 
 		return undoMergeOperationParameters;
 	}

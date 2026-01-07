@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
+import ca.uhn.fhir.merge.MergeResourceHelper;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import org.hl7.fhir.r4.model.Task;
 import org.springframework.context.annotation.Bean;

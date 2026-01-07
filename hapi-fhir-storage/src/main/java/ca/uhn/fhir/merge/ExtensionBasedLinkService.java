@@ -1,5 +1,5 @@
 // Created by claude-sonnet-4-5
-package ca.uhn.fhir.batch2.jobs.merge;
+package ca.uhn.fhir.merge;
 
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -8,7 +8,6 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,34 +49,6 @@ public class ExtensionBasedLinkService implements IResourceLinkService {
 	@Override
 	public List<IBaseReference> getReplacedByLinks(IBaseResource theResource) {
 		return getLinksWithExtensionUrl(theResource, HapiExtensions.EXTENSION_REPLACED_BY);
-	}
-
-	@Override
-	public boolean hasReplacedByLink(IBaseResource theResource) {
-		List<IBaseReference> links = getReplacedByLinks(theResource);
-		return !links.isEmpty();
-	}
-
-	@Override
-	public boolean hasReplacesLinkTo(IBaseResource theResource, IIdType theTargetId) {
-		List<IBaseReference> replacesLinks = getReplacesLinks(theResource);
-
-		String targetIdValue = theTargetId.toUnqualifiedVersionless().getValue();
-
-		for (IBaseReference link : replacesLinks) {
-			IIdType linkRefElement = link.getReferenceElement();
-			if (linkRefElement == null) {
-				continue;
-			}
-
-			String linkIdValue = linkRefElement.toUnqualifiedVersionless().getValue();
-
-			if (targetIdValue.equals(linkIdValue)) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**

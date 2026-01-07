@@ -82,16 +82,16 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 	 * Finds a Provenance with the activity code "merge" that has the given target id and source identifiers.
 	 * @param theTargetId the target resource id
 	 * @param theSourceIdentifiers the source identifiers to match
-	 * @param theRequestDetails the request details
 	 * @param theParameterNames the parameter names for the specific operation
+	 * @param theRequestDetails the request details
 	 * @return the Provenance resource if matching one is found, or null if not found.
 	 */
 	@Nullable
 	public Provenance findProvenanceByTargetIdAndSourceIdentifiers(
 			IIdType theTargetId,
 			List<CanonicalIdentifier> theSourceIdentifiers,
-			RequestDetails theRequestDetails,
-			AbstractMergeOperationInputParameterNames theParameterNames) {
+			AbstractMergeOperationInputParameterNames theParameterNames,
+			RequestDetails theRequestDetails) {
 		String sourceIdentifierParameterName = theParameterNames.getSourceIdentifiersParameterName();
 		List<Provenance> provenances =
 				getProvenancesOfTargetsFilteredByActivity(List.of(theTargetId), theRequestDetails);

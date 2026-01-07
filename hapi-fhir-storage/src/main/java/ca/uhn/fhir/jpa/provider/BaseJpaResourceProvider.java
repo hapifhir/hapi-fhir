@@ -78,8 +78,6 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_META;
 public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends BaseJpaProvider
 		implements IResourceProvider {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaResourceProvider.class);
-
 	@Autowired(required = false)
 	private IMergeOperationProviderSvc myMergeOperationProviderSvc;
 

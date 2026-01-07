@@ -27,18 +27,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- *  Class for input parameters used in both Patient/$merge, $hapi.fhir.merge and $hapi.fhir.undo-merge operations.
+ *  Class for input parameters used in Patient/$merge, $hapi.fhir.merge and $hapi.fhir.undo-merge operations.
  */
 public class MergeOperationsCommonInputParameters {
 	private List<CanonicalIdentifier> mySourceResourceIdentifiers;
 	private List<CanonicalIdentifier> myTargetResourceIdentifiers;
 	private IBaseReference mySourceResource;
 	private IBaseReference myTargetResource;
-	private final int myResourceLimit;
+	private int myResourceLimit;
 
-	public MergeOperationsCommonInputParameters(int theResourceLimit) {
-		myResourceLimit = theResourceLimit;
-	}
+	public MergeOperationsCommonInputParameters() {}
 
 	public List<CanonicalIdentifier> getSourceIdentifiers() {
 		return mySourceResourceIdentifiers;
@@ -84,35 +82,39 @@ public class MergeOperationsCommonInputParameters {
 		return myResourceLimit;
 	}
 
+	public void setResourceLimit(int theResourceLimit) {
+		myResourceLimit = theResourceLimit;
+	}
+
 	/**
-	 * Static utility method to set common merge operation parameters.
+	 * Populates the fields with the given parameters.
 	 * Converts version-specific identifier types to version-agnostic CanonicalIdentifier.
 	 *
-	 * @param theParameters The parameter object to populate
 	 * @param theSourceIdentifiers List of source resource identifiers
 	 * @param theTargetIdentifiers List of target resource identifiers
 	 * @param theSourceResource Reference to the source resource
 	 * @param theTargetResource Reference to the target resource
 	 */
-	public static void setParameters(
-			MergeOperationsCommonInputParameters theParameters,
+	public void setCommonParameters(
 			List<IBase> theSourceIdentifiers,
 			List<IBase> theTargetIdentifiers,
 			IBaseReference theSourceResource,
-			IBaseReference theTargetResource) {
+			IBaseReference theTargetResource,
+			int theResourceLimit) {
 		if (theSourceIdentifiers != null && !theSourceIdentifiers.isEmpty()) {
 			List<CanonicalIdentifier> sourceResourceIdentifiers = theSourceIdentifiers.stream()
 					.map(CanonicalIdentifier::fromIdentifier)
 					.collect(Collectors.toList());
-			theParameters.setSourceResourceIdentifiers(sourceResourceIdentifiers);
+			setSourceResourceIdentifiers(sourceResourceIdentifiers);
 		}
 		if (theTargetIdentifiers != null && !theTargetIdentifiers.isEmpty()) {
 			List<CanonicalIdentifier> targetResourceIdentifiers = theTargetIdentifiers.stream()
 					.map(CanonicalIdentifier::fromIdentifier)
 					.collect(Collectors.toList());
-			theParameters.setTargetResourceIdentifiers(targetResourceIdentifiers);
+			setTargetResourceIdentifiers(targetResourceIdentifiers);
 		}
-		theParameters.setSourceResource(theSourceResource);
-		theParameters.setTargetResource(theTargetResource);
+		setSourceResource(theSourceResource);
+		setTargetResource(theTargetResource);
+		setResourceLimit(theResourceLimit);
 	}
 }

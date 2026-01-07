@@ -42,8 +42,8 @@ public class MergeOperationInputParameters extends MergeOperationsCommonInputPar
 	private boolean myCreateProvenance = true;
 	private IBaseResource myOriginalInputParameters;
 
-	protected MergeOperationInputParameters(int theResourceLimit) {
-		super(theResourceLimit);
+	protected MergeOperationInputParameters() {
+		super();
 	}
 
 	public boolean getPreview() {

@@ -1,9 +1,9 @@
 // Created by claude-sonnet-4-5
 /*-
  * #%L
- * HAPI-FHIR Storage Batch2 Jobs
+ * HAPI FHIR Storage
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.batch2.jobs.merge;
+package ca.uhn.fhir.merge;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
- * Factory for selecting the appropriate IResourceLinkService implementation based on resource type.
+ * Factory for selecting the appropriate IResourceLinkService based on resource type.
  *
  * This factory provides the routing logic to determine whether to use:
  * - PatientNativeLinkService: for Patient resources (uses native Patient.link field)
