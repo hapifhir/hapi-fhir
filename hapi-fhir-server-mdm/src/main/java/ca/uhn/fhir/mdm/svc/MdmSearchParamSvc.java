@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractorSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.SearchParameterUtil;
@@ -51,7 +52,7 @@ public class MdmSearchParamSvc {
 	private ISearchParamRegistry mySearchParamRegistry;
 
 	@Autowired
-	private SearchParamExtractorService mySearchParamExtractorService;
+	private ISearchParamExtractorSvc mySearchParamExtractorService;
 
 	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;

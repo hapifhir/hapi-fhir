@@ -83,7 +83,7 @@ import static ca.uhn.fhir.jpa.model.entity.ResourceLink.forLocalReference;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class SearchParamExtractorService {
+public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamExtractorService.class);
 
 	@Autowired
@@ -126,6 +126,7 @@ public class SearchParamExtractorService {
 	 * a given resource type, it extracts the associated indexes and populates
 	 * {@literal theParams}.
 	 */
+	@Override
 	public void extractFromResource(
 			RequestPartitionId theRequestPartitionId,
 			RequestDetails theRequestDetails,
@@ -1098,6 +1099,7 @@ public class SearchParamExtractorService {
 	}
 
 	@Nonnull
+	@Override
 	public List<String> extractParamValuesAsStrings(
 			RuntimeSearchParam theActiveSearchParam, IBaseResource theResource) {
 		return mySearchParamExtractor.extractParamValuesAsStrings(theActiveSearchParam, theResource);
