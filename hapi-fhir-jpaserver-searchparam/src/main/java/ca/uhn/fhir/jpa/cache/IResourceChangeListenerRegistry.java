@@ -36,7 +36,8 @@ import java.util.Set;
 public interface IResourceChangeListenerRegistry {
 
 	/**
-	 * @deprecated Use {@link #registerResourceResourceChangeListener(String, RequestPartitionId, SearchParameterMap, IResourceChangeListener, long)} instead
+	 * @deprecated Use {@link #registerResourceResourceChangeListener(String, RequestPartitionId, SearchParameterMap, IResourceChangeListener, long)}
+	 * instead. This method assumes the default partition, but will be removed in the future.
 	 */
 	@Deprecated(since = "8.8.0", forRemoval = true)
 	IResourceChangeListenerCache registerResourceResourceChangeListener(
