@@ -127,8 +127,7 @@ public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdm
 	 */
 	@Override
 	public Set<String> expandPatient(String thePatientId, RequestPartitionId theRequestPartitionId) {
-		IIdType patientIdType = myFhirContext.getVersion().newIdType(thePatientId);
-
+		IIdType patientIdType = myFhirContext.getVersion().newIdType(thePatientId).withResourceType("Patient");
 		return myMdmEidMatchOnlyLinkExpandSvc.expandMdmBySourceResourceId(theRequestPartitionId, patientIdType);
 	}
 

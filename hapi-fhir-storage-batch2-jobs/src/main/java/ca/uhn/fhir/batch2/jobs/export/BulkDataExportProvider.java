@@ -50,6 +50,7 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -73,6 +74,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters.ExportStyle;
+import static ca.uhn.fhir.util.DatatypeUtil.toBooleanValue;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -263,6 +265,8 @@ public class BulkDataExportProvider {
 					List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_PATIENT, min = 0, max = OperationParam.MAX_UNLIMITED)
 					List<IBase> thePatient,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean")
+			IPrimitiveType<Boolean> theMdm,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_INCLUDE_HISTORY, min = 0, max = 1, typeName = "boolean")
@@ -271,6 +275,16 @@ public class BulkDataExportProvider {
 
 		final List<IPrimitiveType<String>> patientIds =
 				thePatient != null ? parsePatientList(thePatient) : new ArrayList<>();
+
+		// null safe with default value
+		boolean expandMdm = ObjectUtils.getIfNull(toBooleanValue(theMdm), false);
+
+		if(patientIds.isEmpty() && expandMdm){
+			// If no patients are specified but MDM expansion is requested, we disallow it to prevent exporting a huge
+			// amount of Resources (all Patients with all associated Resources).  If requiring to export all Patients,
+			// the functionality is supported through the type-level export.
+			expandMdm = false;
+		}
 
 		doPatientExport(
 				theRequestDetails,
@@ -282,7 +296,7 @@ public class BulkDataExportProvider {
 				theTypeFilter,
 				theTypePostFetchFilterUrl,
 				patientIds,
-				new BooleanDt(false),
+				new BooleanDt(expandMdm),
 				theIncludeHistory);
 	}
 
