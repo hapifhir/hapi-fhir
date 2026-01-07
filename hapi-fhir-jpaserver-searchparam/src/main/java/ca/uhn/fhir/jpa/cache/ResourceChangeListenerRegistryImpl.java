@@ -57,9 +57,10 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
 	public ResourceChangeListenerRegistryImpl(
-		FhirContext theFhirContext,
-		PartitionSettings thePartitionSettings, ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory,
-		InMemoryResourceMatcher theInMemoryResourceMatcher) {
+			FhirContext theFhirContext,
+			PartitionSettings thePartitionSettings,
+			ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory,
+			InMemoryResourceMatcher theInMemoryResourceMatcher) {
 		myFhirContext = theFhirContext;
 		myPartitionSettings = thePartitionSettings;
 		myResourceChangeListenerCacheFactory = theResourceChangeListenerCacheFactory;
@@ -67,9 +68,18 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	}
 
 	@Override
-	public IResourceChangeListenerCache registerResourceResourceChangeListener(String theResourceName, SearchParameterMap theSearchParameterMap, IResourceChangeListener theResourceChangeListener, long theRemoteRefreshIntervalMs) {
+	public IResourceChangeListenerCache registerResourceResourceChangeListener(
+			String theResourceName,
+			SearchParameterMap theSearchParameterMap,
+			IResourceChangeListener theResourceChangeListener,
+			long theRemoteRefreshIntervalMs) {
 		RequestPartitionId defaultPartition = RequestPartitionId.defaultPartition(myPartitionSettings);
-		return registerResourceResourceChangeListener(theResourceName, defaultPartition, theSearchParameterMap, theResourceChangeListener, theRemoteRefreshIntervalMs);
+		return registerResourceResourceChangeListener(
+				theResourceName,
+				defaultPartition,
+				theSearchParameterMap,
+				theResourceChangeListener,
+				theRemoteRefreshIntervalMs);
 	}
 
 	/**

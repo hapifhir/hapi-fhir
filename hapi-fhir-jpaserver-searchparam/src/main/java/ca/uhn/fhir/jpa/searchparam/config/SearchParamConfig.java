@@ -123,7 +123,10 @@ public class SearchParamConfig {
 			ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory,
 			InMemoryResourceMatcher theInMemoryResourceMatcher) {
 		return new ResourceChangeListenerRegistryImpl(
-				theFhirContext, thePartitionSettings, theResourceChangeListenerCacheFactory, theInMemoryResourceMatcher);
+				theFhirContext,
+				thePartitionSettings,
+				theResourceChangeListenerCacheFactory,
+				theInMemoryResourceMatcher);
 	}
 
 	@Bean

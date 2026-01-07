@@ -40,10 +40,10 @@ public interface IResourceChangeListenerRegistry {
 	 */
 	@Deprecated(since = "8.8.0", forRemoval = true)
 	IResourceChangeListenerCache registerResourceResourceChangeListener(
-		String theResourceName,
-		SearchParameterMap theSearchParameterMap,
-		IResourceChangeListener theResourceChangeListener,
-		long theRemoteRefreshIntervalMs);
+			String theResourceName,
+			SearchParameterMap theSearchParameterMap,
+			IResourceChangeListener theResourceChangeListener,
+			long theRemoteRefreshIntervalMs);
 
 	/**
 	 * Register a listener in order to be notified whenever a resource matching the provided SearchParameterMap
