@@ -99,8 +99,8 @@ public class ResponseBundleBuilder {
 		String searchId = null;
 
 		Integer bundleSize = bundleProvider.containsAllResources()
-				? (Integer) bundleProvider.getResourceListComplete().size()
-				: bundleProvider.size();
+				? bundleProvider.getResourceListComplete().size()
+				: bundleProvider.getAllResources().size();
 
 		if (requestedPage.offset != null || !server.canStoreSearchResults()) {
 			pageSize = offsetCalculatePageSize(server, requestedPage, bundleSize);

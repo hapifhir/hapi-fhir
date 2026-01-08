@@ -94,10 +94,6 @@ public class SimplePreResourceShowDetails implements IPreResourceShowDetails {
 
 	@Override
 	public Iterator<IBaseResource> iterator() {
-		return Arrays.asList(myResources).iterator();
-	}
-
-	public List<IBaseResource> toList() {
-		return Lists.newArrayList(myResources);
+		return getAllResources().iterator();
 	}
 }

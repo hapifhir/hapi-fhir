@@ -218,7 +218,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId<?>> {
 			try {
 				compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 
-				retVal = accessDetails.toList().stream()
+				retVal = accessDetails.getAllResources().stream()
 						.map(resourceToPidMap::get)
 						.filter(Objects::nonNull)
 						.collect(Collectors.toSet());
