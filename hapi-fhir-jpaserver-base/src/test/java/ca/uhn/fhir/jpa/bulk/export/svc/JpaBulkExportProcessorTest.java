@@ -4,11 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.mdm.svc.IBulkExportMdmResourceExpander;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -19,13 +17,13 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.svc.IBulkExportMdmResourceExpander;
 import ca.uhn.fhir.mdm.svc.MdmExpandersHolder;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Group;
@@ -59,7 +57,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -118,9 +115,6 @@ public class JpaBulkExportProcessorTest {
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
 	@Mock
 	private BulkExportHelperService myBulkExportHelperService;
-
-	@Mock
-	private JpaStorageSettings myStorageSettings;
 
 	@Mock
 	private DaoRegistry myDaoRegistry;
@@ -198,8 +192,6 @@ public class JpaBulkExportProcessorTest {
 		// when
 		when(mySearchParamRegistry.hasActiveSearchParam(anyString(), anyString(), any()))
 			.thenReturn(true);
-		when(myStorageSettings.getIndexMissingFields())
-			.thenReturn(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(any(RuntimeResourceDefinition.class), eq(parameters), any(boolean.class)))
 			.thenReturn(maps);
 		// from getSearchBuilderForLocalResourceType
@@ -236,25 +228,6 @@ public class JpaBulkExportProcessorTest {
 			return RequestPartitionId.fromPartitionName("Partition-A");
 		} else {
 			return RequestPartitionId.allPartitions();
-		}
-	}
-
-	@Test
-	public void getResourcePidIterator_patientStyleWithIndexMissingFieldsDisabled_throws() {
-		// setup
-		ExportPIDIteratorParameters parameters = createExportParameters(BulkExportJobParameters.ExportStyle.PATIENT);
-		parameters.setResourceType("Patient");
-
-		// when
-		when(myStorageSettings.getIndexMissingFields())
-			.thenReturn(JpaStorageSettings.IndexEnabledEnum.DISABLED);
-
-		// test
-		try {
-			myProcessor.getResourcePidIterator(parameters);
-			fail();
-		} catch (InternalErrorException ex) {
-			assertThat(ex.getMessage()).contains("You attempted to start a Patient Bulk Export,");
 		}
 	}
 
