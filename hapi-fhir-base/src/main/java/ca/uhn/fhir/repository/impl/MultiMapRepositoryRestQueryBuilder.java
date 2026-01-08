@@ -82,7 +82,7 @@ public class MultiMapRepositoryRestQueryBuilder implements IRepositoryRestQueryB
 		for (IQueryParameterType nextValue : theValues) {
 			if (!nextValue.getClass().equals(firstValue.getClass())) {
 				throw new IllegalArgumentException(
-						Msg.code(2833) + "All parameters in a or-list must be of the same type. Found "
+						Msg.code(2833) + "All parameters in an or-list must be of the same type. Found "
 								+ firstValue.getClass().getSimpleName() + " and "
 								+ nextValue.getClass().getSimpleName() + " in parameter '" + theName + "'");
 			}

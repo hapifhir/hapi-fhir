@@ -267,7 +267,7 @@ class SearchParameterMapTest {
 	}
 
 	@Nonnull
-	private static SetMultimap< String,  List<IQueryParameterType>> asSetMultimap(Multimap<String, List<IQueryParameterType>> multimap) {
+	private static SetMultimap<String, List<IQueryParameterType>> asSetMultimap(Multimap<String, List<IQueryParameterType>> multimap) {
 		SetMultimap<String, List<IQueryParameterType>> result = MultimapBuilder.treeKeys().hashSetValues().build();
 		result.putAll(multimap);
 		return result;
