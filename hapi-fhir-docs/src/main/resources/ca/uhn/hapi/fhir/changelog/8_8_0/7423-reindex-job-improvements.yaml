@@ -1,6 +1,7 @@
 ---
 type: add
 issue: 7423
+backport: 8.6.2
 title: "The `$reindex` operation has been refactored to take advantage of the new Bulk Modification Batch2 framework. This means that Reindex jobs now:
 
 * Provide a more helpful response when initially starting the job
