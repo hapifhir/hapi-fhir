@@ -176,10 +176,8 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 		}
 
 		FhirTerser terser = myFhirContext.newTerser();
-		for (int resourceIdx = 0; resourceIdx < theDetails.size(); resourceIdx++) {
-			IBaseResource resource = theDetails.getResource(resourceIdx);
-			if (resource != null) {
 
+		for(IBaseResource resource: theDetails.getAllResources()) {
 				// Extract all the references in the resources we're returning
 				// in case we need to remap them to golden equivalents
 				List<ResourceReferenceInfo> referenceInfos = terser.getAllResourceReferences(resource);
@@ -203,7 +201,6 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 									.getResourceReference()
 									.setReference(nonExpandedId.get().getValue());
 						}
-					}
 				}
 			}
 		}

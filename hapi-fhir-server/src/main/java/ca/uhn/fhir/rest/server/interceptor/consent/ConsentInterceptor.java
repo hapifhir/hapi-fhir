@@ -323,11 +323,8 @@ public class ConsentInterceptor {
 		IdentityHashMap<IBaseResource, ConsentOperationStatusEnum> alreadySeenResources =
 				getAlreadySeenResourcesMap(theRequestDetails);
 
-		for (int i = 0; i < thePreResourceShowDetails.size(); i++) {
-
-			IBaseResource resource = thePreResourceShowDetails.getResource(i);
-			if (resource == null
-					|| alreadySeenResources.putIfAbsent(resource, ConsentOperationStatusEnum.PROCEED) != null) {
+		for (IBaseResource resource: thePreResourceShowDetails.getAllResources()) {
+			if (alreadySeenResources.putIfAbsent(resource, ConsentOperationStatusEnum.PROCEED) != null) {
 				continue;
 			}
 
