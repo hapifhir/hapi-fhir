@@ -21,11 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class MdmProviderVirtualizationR4Test extends BaseMdmProviderR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(MdmProviderVirtualizationR4Test.class);
-
-	public static final String NAME_GIVEN_JANET = NAME_GIVEN_JANE + "t";
-
-
 	@Autowired
 	private MdmReadVirtualizationInterceptor myMdmReadVirtualizationInterceptor;
 
