@@ -266,7 +266,7 @@ public class BulkDataExportProvider {
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_PATIENT, min = 0, max = OperationParam.MAX_UNLIMITED)
 					List<IBase> thePatient,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean")
-			IPrimitiveType<Boolean> theMdm,
+					IPrimitiveType<Boolean> theMdm,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_INCLUDE_HISTORY, min = 0, max = 1, typeName = "boolean")
@@ -279,7 +279,7 @@ public class BulkDataExportProvider {
 		// null safe with default value
 		boolean expandMdm = ObjectUtils.getIfNull(toBooleanValue(theMdm), false);
 
-		if(patientIds.isEmpty() && expandMdm){
+		if (patientIds.isEmpty() && expandMdm) {
 			// If no patients are specified but MDM expansion is requested, we disallow it to prevent exporting a huge
 			// amount of Resources (all Patients with all associated Resources).  If requiring to export all Patients,
 			// the functionality is supported through the type-level export.
