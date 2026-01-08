@@ -538,6 +538,71 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	/**
+	 * Builds undo-merge operation parameters using this scenario's configuration.
+	 * Uses resource IDs by default for both source and target.
+	 *
+	 * @return the operation input parameters
+	 */
+	@Nonnull
+	public Parameters buildUndoMergeParameters() {
+		return buildUndoMergeParameters(true, true);
+	}
+
+	/**
+	 * Builds undo-merge operation parameters using custom identifier-based resolution.
+	 *
+	 * @param theSourceById if true, use source ID; if false, use source identifiers
+	 * @param theTargetById if true, use target ID; if false, use target identifiers
+	 * @return the operation input parameters
+	 */
+	@Nonnull
+	public Parameters buildUndoMergeParameters(boolean theSourceById, boolean theTargetById) {
+		Parameters params = new Parameters();
+
+		if (theSourceById) {
+			params.addParameter().setName("source-resource").setValue(new Reference(getVersionlessSourceId()));
+		} else {
+			for (Identifier identifier : getSourceIdentifiers()) {
+				params.addParameter().setName("source-resource-identifier").setValue(identifier);
+			}
+		}
+
+		if (theTargetById) {
+			params.addParameter().setName("target-resource").setValue(new Reference(getVersionlessTargetId()));
+		} else {
+			for (Identifier identifier : getTargetIdentifiers()) {
+				params.addParameter().setName("target-resource-identifier").setValue(identifier);
+			}
+		}
+
+		return params;
+	}
+
+	/**
+	 * Executes the undo-merge operation using this scenario's configuration.
+	 * Uses resource IDs by default for both source and target.
+	 *
+	 * @return the operation output parameters
+	 */
+	@Nonnull
+	public Parameters callUndoMergeOperation() {
+		return callUndoMergeOperation(true, true);
+	}
+
+	/**
+	 * Executes the undo-merge operation using custom identifier-based resolution.
+	 *
+	 * @param theSourceById if true, use source ID; if false, use source identifiers
+	 * @param theTargetById if true, use target ID; if false, use target identifiers
+	 * @return the operation output parameters
+	 */
+	@Nonnull
+	public Parameters callUndoMergeOperation(boolean theSourceById, boolean theTargetById) {
+		Parameters undoParams = buildUndoMergeParameters(theSourceById, theTargetById);
+		return myHelper.callUndoMergeOperation(getResourceTypeName(), undoParams);
+	}
+
+	/**
 	 * Add result resource to parameters if configured.
 	 */
 	private void addResultResourceIfNeeded(@Nonnull MergeTestParameters theParams) {
@@ -560,7 +625,8 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 	@Nonnull
 	public T readResource(@Nonnull IIdType theId) {
-		IFhirResourceDao<T> dao = myDaoRegistry.getResourceDao(getResourceClass());
+		@SuppressWarnings("unchecked")
+		IFhirResourceDao<T> dao = myDaoRegistry.getResourceDao(theId.getResourceType());
 		return dao.read(theId, myRequestDetails);
 	}
 
