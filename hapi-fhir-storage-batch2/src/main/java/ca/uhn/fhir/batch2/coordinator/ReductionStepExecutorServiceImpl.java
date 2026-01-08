@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
@@ -94,6 +95,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	private final AtomicReference<String> myCurrentlyFinalizingInstanceId = new AtomicReference<>();
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
+	private final IInterceptorService myInterceptorService;
 	private Timer myHeartbeatTimer;
 
 	/**
@@ -102,12 +104,13 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	public ReductionStepExecutorServiceImpl(
 			IJobPersistence theJobPersistence,
 			IHapiTransactionService theTransactionService,
-			JobDefinitionRegistry theJobDefinitionRegistry) {
+			JobDefinitionRegistry theJobDefinitionRegistry,
+			IInterceptorService theInterceptorService) {
 		myJobPersistence = theJobPersistence;
 		myTransactionService = theTransactionService;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
-		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
-
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry, theInterceptorService);
+		myInterceptorService = theInterceptorService;
 		myReducerExecutor = Executors.newSingleThreadExecutor(new CustomizableThreadFactory("batch2-reducer"));
 
 		// This is a single thread executor because there are no guarantees that the chunk
@@ -297,7 +300,11 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 						response.getFailedChunksIds().size());
 
 				ReductionStepDataSink<PT, IT, OT> dataSink = new ReductionStepDataSink<>(
-						instance.getInstanceId(), theJobWorkCursor, myJobPersistence, myJobDefinitionRegistry);
+						instance.getInstanceId(),
+						theJobWorkCursor,
+						myJobPersistence,
+						myJobDefinitionRegistry,
+						myInterceptorService);
 				StepExecutionDetails<PT, IT> chunkDetails =
 						StepExecutionDetails.createReductionStepDetails(parameters, null, instance);
 
@@ -348,8 +355,9 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 					 */
 					IJobCompletionHandler<PT> completionHandler =
 							theJobWorkCursor.getJobDefinition().getCompletionHandler();
+					JobCompletionDetails<PT> jcd = new JobCompletionDetails<>(parameters, instance);
 					if (completionHandler != null) {
-						completionHandler.jobComplete(new JobCompletionDetails<>(parameters, instance));
+						completionHandler.jobComplete(jcd);
 					}
 				}
 

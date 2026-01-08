@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -207,6 +207,10 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setUserDataJson(theInstance.getUserDataAsString());
 
 		entity = myJobInstanceRepository.save(entity);
+		JobInstance savedJobInstance = new JobInstance(theInstance);
+		savedJobInstance.setInstanceId(entity.getId());
+		invokePostStorageBatchHooks(savedJobInstance);
+
 		return entity.getId();
 	}
 
@@ -635,6 +639,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 					.add(RequestDetails.class, new SystemRequestDetails());
 
 			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE, params);
+		}
+	}
+
+	private void invokePostStorageBatchHooks(JobInstance theJobInstance) {
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_POSTSTORAGE_BATCH_JOB_CREATE)) {
+			HookParams params = new HookParams().add(JobInstance.class, theJobInstance);
+
+			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_POSTSTORAGE_BATCH_JOB_CREATE, params);
 		}
 	}
 

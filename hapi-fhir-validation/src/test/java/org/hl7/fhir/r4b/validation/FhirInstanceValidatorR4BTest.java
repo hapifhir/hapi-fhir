@@ -1063,20 +1063,22 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 	@Test
 	public void testValidateResourceWithDefaultValuesetBadCode() {
 		String input =
-			"<Observation xmlns=\"http://hl7.org/fhir\">\n" +
-				"  <text>\n" +
-				"    <status value=\"generated\"/>\n" +
-				"    <div xmlns=\"http://www.w3.org/1999/xhtml\">AAA</div>\n" +
-				"  </text>" +
-				"   <status value=\"notvalidcode\"/>\n" +
-				"   <code>\n" +
-				"      <text value=\"No code here!\"/>\n" +
-				"   </code>\n" +
-				"</Observation>";
+			"""
+				<Observation xmlns="http://hl7.org/fhir">
+                      <text>
+                        <status value="generated"/>
+                        <div xmlns="http://www.w3.org/1999/xhtml">AAA</div>
+                      </text>
+                       <status value="notvalidcode"/>
+                       <code>
+                          <text value="No code here!"/>
+                       </code>
+                    </Observation>
+				""";
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		logResultsAndReturnAll(output);
 		assertThat(output.getMessages().get(0).getMessage()).contains("Unknown code 'http://hl7.org/fhir/observation-status#notvalidcode'");
-		assertThat(output.getMessages().get(1).getMessage()).contains("The value provided ('notvalidcode') was not found in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|4.3.0), and a code is required from this value set  (error message = Unknown code 'http://hl7.org/fhir/observation-status#notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')");
+		assertThat(output.getMessages().get(1).getMessage()).contains("The value provided ('notvalidcode') was not found in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|4.3.0), and a code is required from this value set  (error message = Unknown code 'http://hl7.org/fhir/observation-status#notvalidcode'; Unknown code 'http://hl7.org/fhir/observation-status#notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')");
 	}
 
 	@Test
@@ -1236,7 +1238,7 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 		// so first error has `Unknown code for ValueSet` error message
 		Optional<SingleValidationMessage> notFoundInVitalSignsUnitsMessage = all.stream().filter(m -> m.getMessage().contains("The Coding provided (http://unitsofmeasure.org#Heck) was not found in the value set 'Vital Signs Units' " +
 			"(http://hl7.org/fhir/ValueSet/ucum-vitals-common|4.3.0), and a code should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable). " +
-			" (error message = Unknown code 'http://unitsofmeasure.org#Heck' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/ucum-vitals-common'")).findFirst();
+			" (error message = Error processing unit 'Heck': The unit 'Heck' is unknown' at position 0 (for 'http://unitsofmeasure.org#Heck'); Unknown code 'http://unitsofmeasure.org#Heck' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/ucum-vitals-common'")).findFirst();
 		assertThat(notFoundInVitalSignsUnitsMessage.isPresent()).isTrue();
 		assertThat(notFoundInVitalSignsUnitsMessage.get().getLocationString()).contains("Observation.value.ofType(Quantity)");
 

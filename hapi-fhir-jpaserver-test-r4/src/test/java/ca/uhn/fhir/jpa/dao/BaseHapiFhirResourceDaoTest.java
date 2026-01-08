@@ -16,11 +16,14 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
@@ -59,6 +62,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationContext;
@@ -84,6 +88,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.doReturn;
@@ -139,8 +144,7 @@ class BaseHapiFhirResourceDaoTest {
 	@Mock
 	private MatchResourceUrlService<JpaPid> myMatchResourceUrlService;
 
-	@Mock
-	private HapiTransactionService myTransactionService;
+	private HapiTransactionService myTransactionService = new MockHapiTransactionService();
 
 	@Mock
 	private DeleteConflictService myDeleteConflictService;
@@ -174,6 +178,7 @@ class BaseHapiFhirResourceDaoTest {
 		// by calling setup themselves
 		mySvc.setResourceType(Patient.class);
 		mySvc.setContext(myFhirContext);
+		mySvc.setTransactionService(myTransactionService);
 		mySvc.start();
 		mySpiedSvc = spy(mySvc);
 	}
@@ -188,6 +193,38 @@ class BaseHapiFhirResourceDaoTest {
 	private void setup(Class theClazz) {
 		mySvc.setResourceType(theClazz);
 		mySvc.start();
+	}
+
+	/**
+	 * This tests that when doing a versioned read of a resource that was just expunged (and not yet expired in the "forced id" memory cache) throws a ResourceNotFoundException
+	 * This is a regression test of a bug where it was throwing a NullPointerException until the id expired in the "forced id" after 1 minute.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/7251">/hapi-fhir/issues/7251</a>
+	 * @see ca.uhn.fhir.jpa.util.MemoryCacheService.CacheEnum#RESOURCE_LOOKUP_BY_FORCED_ID
+	 */
+	@Test
+	void readEntity_withVersion_thatIsExpunged_throwsResourceNotFoundException() {
+		// ARRANGE
+		final var requestDetails = new SystemRequestDetails();
+		final var versionedId = new IdDt("Patient/1/_history/1");
+
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(eq(requestDetails), eq("Patient"), eq(versionedId)))
+			.thenReturn(RequestPartitionId.allPartitions());
+
+		MockHapiTransactionService myTransactionService = new MockHapiTransactionService();
+		mySvc.setTransactionService(myTransactionService);
+		setup(Patient.class);
+
+		IResourceLookup<JpaPid> mockDeletedResourceLookup = mock(IResourceLookup.class);
+		when(mockDeletedResourceLookup.getPersistentId()).thenReturn(JpaPid.fromIdAndVersion(1L, 1L)); // Simulate that the PID is not yet expired in the RESOURCE_LOOKUP_BY_FORCED_ID memory cache
+		when(myIdHelperService.resolveResourceIdentity(any(), eq("Patient"), eq("1"), argThat(ResolveIdentityMode::isIncludeDeleted)))
+			.thenReturn(mockDeletedResourceLookup);
+
+		when(myEntityManager.createQuery(any(), eq(ResourceHistoryTable.class))).thenReturn(mock());
+		when(myEntityManager.find(any(), any())).thenReturn(null); // Simulate that the entity is expunged and not found in the db
+
+		// ACT && ASSERT
+		assertThrows(ResourceNotFoundException.class, () -> mySvc.readEntity(versionedId, requestDetails));
 	}
 
 	@Test
@@ -306,7 +343,7 @@ class BaseHapiFhirResourceDaoTest {
 			("HAPI-2733: Failed to create/update resource [%s/%s] in partition %s because a resource of " +
 				"the same type and ID is found in another partition")
 				.formatted(RESOURCE_TYPE, RESOURCE_ID, requestPartitionId.getFirstPartitionNameOrNull()
-			));
+				));
 	}
 
 	@Test
@@ -455,7 +492,7 @@ class BaseHapiFhirResourceDaoTest {
 	}
 
 	@Test
-	public void testUpdateTags_withDuplicateTags_willNotUpdateEntityTagList(){
+	public void testUpdateTags_withDuplicateTags_willNotUpdateEntityTagList() {
 		RequestDetails sysRequest = new SystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();
 		TagDefinition duplicateTagDefinition = createTagDefinition(2);
@@ -501,17 +538,6 @@ class BaseHapiFhirResourceDaoTest {
 			when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
 			when(myMatchUrlService.getResourceSearch(URL))
 				.thenReturn(new ResourceSearch(mock(RuntimeResourceDefinition.class), SearchParameterMap.newSynchronous(), RequestPartitionId.allPartitions()));
-
-			// mocks for transaction handling:
-			final IHapiTransactionService.IExecutionBuilder mockExecutionBuilder = mock(IHapiTransactionService.IExecutionBuilder.class);
-			when(mockExecutionBuilder.withTransactionDetails(any(TransactionDetails.class))).thenReturn(mockExecutionBuilder);
-			when(myTransactionService.withRequest(REQUEST)).thenReturn(mockExecutionBuilder);
-			final Answer<DeleteMethodOutcome> answer = theInvocationOnMock -> {
-				final TransactionCallback<DeleteMethodOutcome> arg = theInvocationOnMock.getArgument(0);
-				return arg.doInTransaction(mock(TransactionStatus.class));
-			};
-			when(mockExecutionBuilder.execute(ArgumentMatchers.<TransactionCallback<DeleteMethodOutcome>>any()))
-				.thenAnswer(answer);
 		}
 
 		@ParameterizedTest
@@ -522,7 +548,7 @@ class BaseHapiFhirResourceDaoTest {
 				when(myStorageSettings.getRestDeleteByUrlResourceIdThreshold()).thenReturn(theThreshold);
 			}
 
-			 doReturn(EXPECTED_DELETE_OUTCOME).when(mySpiedSvc).deletePidList(any(), any(), any(), any(), any());
+			doReturn(EXPECTED_DELETE_OUTCOME).when(mySpiedSvc).deletePidList(any(), any(), any(), any(), any());
 
 			handleExpectedResourceIds(theResourceIds);
 
@@ -533,15 +559,15 @@ class BaseHapiFhirResourceDaoTest {
 		@ParameterizedTest
 		@MethodSource("thresholdsAndResourceIds_Fail")
 		void deleteByUrlConsiderThreshold_Over_Fail(long theThreshold, Set<Long> theResourceIds) {
-			 when(myStorageSettings.isAllowMultipleDelete()).thenReturn(true);
-			 when(myStorageSettings.getRestDeleteByUrlResourceIdThreshold()).thenReturn(theThreshold);
+			when(myStorageSettings.isAllowMultipleDelete()).thenReturn(true);
+			when(myStorageSettings.getRestDeleteByUrlResourceIdThreshold()).thenReturn(theThreshold);
 
 			final Set<JpaPid> expectedResourceIds = handleExpectedResourceIds(theResourceIds);
 
-				assertThatThrownBy(() ->
+			assertThatThrownBy(() ->
 				mySpiedSvc.deleteByUrl(URL, REQUEST))
-					.isInstanceOf(PreconditionFailedException.class)
-						.hasMessage(String.format("HAPI-2496: Failed to DELETE resources with match URL \"Patient?_lastUpdated=gt2024-01-01\" because the resolved number of resources: %s exceeds the threshold of %s", expectedResourceIds.size(), theThreshold));
+				.isInstanceOf(PreconditionFailedException.class)
+				.hasMessage(String.format("HAPI-2496: Failed to DELETE resources with match URL \"Patient?_lastUpdated=gt2024-01-01\" because the resolved number of resources: %s exceeds the threshold of %s", expectedResourceIds.size(), theThreshold));
 		}
 
 		private Set<JpaPid> handleExpectedResourceIds(Set<Long> theResourceIds) {
@@ -563,18 +589,18 @@ class BaseHapiFhirResourceDaoTest {
 				Arguments.of(3, Set.of(1L)),
 				Arguments.of(4, Set.of(1L)),
 				Arguments.of(5, Set.of(1L)),
-				Arguments.of(4, Set.of(1L,2L,3L)),
-				Arguments.of(5, Set.of(1L,2L,3L))
+				Arguments.of(4, Set.of(1L, 2L, 3L)),
+				Arguments.of(5, Set.of(1L, 2L, 3L))
 			);
 		}
 
 		static Stream<Arguments> thresholdsAndResourceIds_Fail() {
 			return Stream.of(
-				Arguments.of(0, Set.of(1L,2L)),
-				Arguments.of(1, Set.of(1L,2L)),
-				Arguments.of(0, Set.of(1L,2L,3L)),
-				Arguments.of(1, Set.of(1L,2L,3L)),
-				Arguments.of(2, Set.of(1L,2L,3L))
+				Arguments.of(0, Set.of(1L, 2L)),
+				Arguments.of(1, Set.of(1L, 2L)),
+				Arguments.of(0, Set.of(1L, 2L, 3L)),
+				Arguments.of(1, Set.of(1L, 2L, 3L)),
+				Arguments.of(2, Set.of(1L, 2L, 3L))
 			);
 		}
 	}

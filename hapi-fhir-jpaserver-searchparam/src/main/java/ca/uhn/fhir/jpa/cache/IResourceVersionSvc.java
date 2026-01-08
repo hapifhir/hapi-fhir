@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +34,6 @@ public interface IResourceVersionSvc {
 	@Nonnull
 	ResourceVersionMap getVersionMap(
 			RequestPartitionId theRequestPartitionId, String theResourceName, SearchParameterMap theSearchParamMap);
-
-	@Nonnull
-	default ResourceVersionMap getVersionMap(String theResourceName, SearchParameterMap theSearchParamMap) {
-		return getVersionMap(RequestPartitionId.allPartitions(), theResourceName, theSearchParamMap);
-	}
 
 	ResourcePersistentIdMap getLatestVersionIdsForResourceIds(RequestPartitionId thePartition, List<IIdType> theIds);
 }

@@ -1114,7 +1114,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	}
 
 	@Test
-	public void testValidateResourceContainingProfileDeclarationDoesntResolve() {
+	public void testValidateResourceContainingUnresolvedProfileDeclaration_FailsWhenErrorForUnknownProfiles() {
 		myMockSupport.addValidConcept("http://loinc.org", "12345");
 
 		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
@@ -1126,6 +1126,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		input.setStatus(ObservationStatus.FINAL);
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
+		myInstanceVal.setErrorForUnknownProfiles(true);
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
@@ -1133,6 +1134,32 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		assertThat(errors.stream())
 			.anyMatch(r ->
 				(r.getSeverity() == ResultSeverityEnum.ERROR) &&
+					(r.getMessage().equals("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found")) );
+	}
+
+	@Test
+	public void testValidateResourceContainingUnresolvedProfileDeclaration_SucceedsWhenNotErrorForUnknownProfiles() {
+		myMockSupport.addValidConcept("http://loinc.org", "12345");
+
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
+
+		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+		input.getMeta().addProfile("http://foo/structuredefinition/myprofile");
+
+		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
+		input.setStatus(ObservationStatus.FINAL);
+
+		myInstanceVal.setValidationSupport(myValidationSupport);
+		myInstanceVal.setErrorForUnknownProfiles(false);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
+		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+
+		assertThat(errors).hasSize(2);
+		assertThat(errors.stream())
+			.noneMatch(r -> (r.getSeverity() == ResultSeverityEnum.ERROR));
+		assertThat(errors.stream())
+			.anyMatch(r ->
+				(r.getSeverity() == ResultSeverityEnum.WARNING) &&
 					(r.getMessage().equals("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found")) );
 	}
 
@@ -1181,7 +1208,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		logResultsAndReturnAll(output);
 		assertThat(output.getMessages().get(0).getMessage()).contains("Unknown code 'http://hl7.org/fhir/observation-status#notvalidcode'");
-		assertThat(output.getMessages().get(1).getMessage()).contains("The value provided ('notvalidcode') was not found in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|4.0.1), and a code is required from this value set  (error message = Unknown code 'http://hl7.org/fhir/observation-status#notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status'");
+		assertThat(output.getMessages().get(1).getMessage()).contains("The value provided ('notvalidcode') was not found in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|4.0.1), and a code is required from this value set  (error message = Unknown code 'http://hl7.org/fhir/observation-status#notvalidcode'; Unknown code 'http://hl7.org/fhir/observation-status#notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status'");
 	}
 
 	@Test

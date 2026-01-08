@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.mdm.api.MdmModeEnum;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
@@ -39,7 +40,6 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Sets;
-import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -143,7 +143,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			//And Given we start a bulk export job with a specific export id
 			String pollingLocation = submitBulkExportForTypesWithExportId("im-an-export-identifier", "Patient");
-			String jobId = getJobIdFromPollingLocation(pollingLocation);
+			String jobId = Batch2JobHelper.getJobIdFromPollingLocation(pollingLocation);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
 			//Then: When the poll shows as complete, all attributes should be filled.
@@ -185,12 +185,12 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			//And Given we start a bulk export job
 			String pollingLocation = submitBulkExportForTypesWithExportId("my-export-id-", "Patient");
-			String jobId = getJobIdFromPollingLocation(pollingLocation);
+			String jobId = Batch2JobHelper.getJobIdFromPollingLocation(pollingLocation);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
 			//When we execute another batch job, it should not have the same job id.
 			String secondPollingLocation = submitBulkExportForTypes("Patient");
-			String secondJobId = getJobIdFromPollingLocation(secondPollingLocation);
+			String secondJobId = Batch2JobHelper.getJobIdFromPollingLocation(secondPollingLocation);
 
 			//Then the job id should be different
 			assertThat(secondJobId).isNotEqualTo(jobId);
@@ -209,7 +209,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			//And Given we start a bulk export job
 			String pollingLocation = submitBulkExportForTypes("Patient");
-			String jobId = getJobIdFromPollingLocation(pollingLocation);
+			String jobId = Batch2JobHelper.getJobIdFromPollingLocation(pollingLocation);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
 			//Then: When the poll shows as complete, all attributes should be filled.
@@ -231,11 +231,6 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			}
 		}
 
-		@Nonnull
-		private String getJobIdFromPollingLocation(String pollingLocation) {
-			return pollingLocation.substring(pollingLocation.indexOf("_jobId=") + 7);
-		}
-
 		@Test
 		void export_shouldExportPatientResource_whenTypeParameterOmitted() throws IOException {
 
@@ -252,7 +247,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				Header[] headers = status.getHeaders("Content-Location");
 				pollingLocation = headers[0].getValue();
 			}
-			String jobId = getJobIdFromPollingLocation(pollingLocation);
+			String jobId = Batch2JobHelper.getJobIdFromPollingLocation(pollingLocation);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
 			//Then: When the poll shows as complete, all attributes should be filled.
@@ -298,7 +293,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				Header[] headers = status.getHeaders("Content-Location");
 				pollingLocation = headers[0].getValue();
 			}
-			String jobId = getJobIdFromPollingLocation(pollingLocation);
+			String jobId = Batch2JobHelper.getJobIdFromPollingLocation(pollingLocation);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
 			HttpGet statusGet = new HttpGet(pollingLocation);
@@ -337,7 +332,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				Header[] headers = status.getHeaders("Content-Location");
 				pollingLocation = headers[0].getValue();
 			}
-			String jobId = getJobIdFromPollingLocation(pollingLocation);
+			String jobId = Batch2JobHelper.getJobIdFromPollingLocation(pollingLocation);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
 			HttpGet statusGet = new HttpGet(pollingLocation);

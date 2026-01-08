@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,8 +150,8 @@ public class ResourceChangeListenerCacheRefresherImpl
 		}
 		SearchParameterMap searchParamMap = theCache.getSearchParameterMap();
 
-		ResourceVersionMap newResourceVersionMap =
-				myResourceVersionSvc.getVersionMap(theCache.getResourceName(), searchParamMap);
+		ResourceVersionMap newResourceVersionMap = myResourceVersionSvc.getVersionMap(
+				theCache.getRequestPartitionId(), theCache.getResourceName(), searchParamMap);
 
 		retVal = retVal.plus(notifyListener(theCache, newResourceVersionMap));
 

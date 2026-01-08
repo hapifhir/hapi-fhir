@@ -2,7 +2,7 @@
  * #%L
  * HAPI-FHIR Storage Batch2 Jobs
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,8 @@
  * </ul>
  *
  * TODO:
- * - A dry run option
  * - Ability to save the output as bundles instead of writing directly to the resource tables
- * - a limit option
- * - add the ability for modification to delete resources
  * - Make retry behaviour in BaseBulkModifyResourcesStep configurable
- * - Add ability to include deleted resources
+ * - Derive "bulk consumption" framework and use it for subscription triggering, RTE submit, etc
  */
 package ca.uhn.fhir.batch2.jobs.bulkmodify;

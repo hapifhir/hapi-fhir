@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,7 +138,7 @@ public class PartitionSettings implements IDefaultPartitionSettings {
 	}
 
 	/**
-	 * Should resources references be permitted to cross partition boundaries. Default is {@link CrossPartitionReferenceMode#NOT_ALLOWED}.
+	 * Should resource references be permitted to cross partition boundaries? Default is {@link CrossPartitionReferenceMode#NOT_ALLOWED}.
 	 *
 	 * @since 5.0.0
 	 */
