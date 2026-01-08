@@ -1,0 +1,9 @@
+---
+type: add
+issue: 7456
+title: "
+
+Several new pointcuts have been added to the storage layer:
+
+  * `STORAGE_PRESTORAGE_RESOURCE_PREPATCH` - This is called immediately before a FHIR Patch operation is applied to a resource, and can be used to modify both the patch and the resource that is about to be patched.
+  * `STORAGE_PREVERIFY_CONDITIONAL_MATCH_CRITERIA` - This is called after a resource has been conditionally created or conditionally modified, but before executing the check that the resource actually matches the given conditional URL."
