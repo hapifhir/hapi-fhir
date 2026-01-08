@@ -66,7 +66,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseStorageResourceDao<T extends IBaseResource> extends BaseStorageDao
@@ -181,10 +180,10 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 
 		// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_PREPATCH
 		IInterceptorBroadcaster compositeBroadcaster =
-			CompositeInterceptorBroadcaster.newCompositeBroadcaster(
-				myInterceptorBroadcaster, theRequestDetails);
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
 		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_PREPATCH)) {
-			PrePatchDetails prePatchDetails = new PrePatchDetails(resourceToUpdate, thePatchType, thePatchBody, theFhirPatchBody);
+			PrePatchDetails prePatchDetails =
+					new PrePatchDetails(resourceToUpdate, thePatchType, thePatchBody, theFhirPatchBody);
 
 			HookParams params = new HookParams();
 			params.add(RequestDetails.class, theRequestDetails);
@@ -280,6 +279,8 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 			TransactionDetails theTransactionDetails,
 			RequestPartitionId theRequestPartitionId) {
 		IBasePersistedResource theEntityToUpdate;
+
+		// FIXME: add mask for all transactionOperationWithMultipleMatchFailure and invalidMatchUrlNoMatches
 
 		Set<IResourcePersistentId> match = getMatchResourceUrlService()
 				.processMatchUrl(

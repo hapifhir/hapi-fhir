@@ -1652,10 +1652,10 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	STORAGE_PRESTORAGE_RESOURCE_PREPATCH(
-		void.class,
-		"ca.uhn.fhir.interceptor.model.PrePatchDetails",
-		"ca.uhn.fhir.rest.api.server.RequestDetails",
-		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+			void.class,
+			"ca.uhn.fhir.interceptor.model.PrePatchDetails",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
 
 	/**
 	 * <b>Storage Hook:</b>

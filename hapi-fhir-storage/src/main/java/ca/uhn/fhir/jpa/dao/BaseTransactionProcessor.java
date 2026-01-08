@@ -184,7 +184,7 @@ public abstract class BaseTransactionProcessor {
 	private DaoRegistry myDaoRegistry;
 
 	@Autowired
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Autowired
 	protected IHapiTransactionService myHapiTransactionService;
