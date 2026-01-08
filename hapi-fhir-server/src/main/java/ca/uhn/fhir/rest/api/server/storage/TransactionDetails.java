@@ -515,4 +515,8 @@ public class TransactionDetails {
 	public <T extends IResourcePersistentId<?>> IIdType getReverseResolvedId(T thePid) {
 		return myReverseResolvedResourceIds.get(thePid);
 	}
+
+	public <T extends IResourcePersistentId<?>> boolean hasReverseResolvedId(T thePid) {
+		return myReverseResolvedResourceIds.containsKey(thePid);
+	}
 }
