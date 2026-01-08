@@ -147,13 +147,6 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			RuntimeResourceDefinition def)
 			throws IOException {
 		LinkedHashSet<JpaPid> pids = new LinkedHashSet<>();
-		// Patient
-		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.DISABLED) {
-			String errorMessage =
-					"You attempted to start a Patient Bulk Export, but the system has `Index Missing Fields` disabled. It must be enabled for Patient Bulk Export";
-			ourLog.error(errorMessage);
-			throw new IllegalStateException(Msg.code(797) + errorMessage);
-		}
 
 		Set<String> expandedPatientIds = getPatientSetForPatientExport(theParams);
 
