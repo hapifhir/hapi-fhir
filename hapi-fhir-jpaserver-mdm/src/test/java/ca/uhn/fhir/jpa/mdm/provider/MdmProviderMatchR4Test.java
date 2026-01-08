@@ -24,9 +24,9 @@ import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class MdmProviderMatchR4Test extends BaseProviderR4Test {
+public class MdmProviderMatchR4Test extends BaseMdmProviderR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(MdmProviderMatchR4Test.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(MdmProviderVirtualizationR4Test.class);
 
 	public static final String NAME_GIVEN_JANET = NAME_GIVEN_JANE + "t";
 

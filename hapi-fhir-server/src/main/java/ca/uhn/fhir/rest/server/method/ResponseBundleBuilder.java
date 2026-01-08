@@ -72,8 +72,13 @@ public class ResponseBundleBuilder {
 		final IVersionSpecificBundleFactory bundleFactory = ctx.newBundleFactory();
 		final IBundleProvider bundleProvider = theResponseBundleRequest.bundleProvider;
 
+		Integer sizeAfterOmissions = bundleProvider.size();
+		if (sizeAfterOmissions != null && pageResponse.getOmittedResourceCount() > 0) {
+			sizeAfterOmissions -= pageResponse.getOmittedResourceCount();
+		}
+
 		bundleFactory.addRootPropertiesToBundle(
-				bundleProvider.getUuid(), links, bundleProvider.size(), bundleProvider.getPublished());
+				bundleProvider.getUuid(), links, sizeAfterOmissions, bundleProvider.getPublished());
 		bundleFactory.addResourcesToBundle(
 				new ArrayList<>(pageResponse.getResourceList()),
 				theResponseBundleRequest.bundleType,
@@ -100,7 +105,7 @@ public class ResponseBundleBuilder {
 
 		Integer bundleSize = bundleProvider.containsAllResources()
 				? bundleProvider.getResourceListComplete().size()
-				: bundleProvider.getAllResources().size();
+				: bundleProvider.size();
 
 		if (requestedPage.offset != null || !server.canStoreSearchResults()) {
 			pageSize = offsetCalculatePageSize(server, requestedPage, bundleSize);

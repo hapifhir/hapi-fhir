@@ -55,7 +55,7 @@ public class SimplePreResourceShowDetails implements IPreResourceShowDetails {
 
 	@Override
 	public int size() {
-		return getAllResources().size();
+		return myResources.length;
 	}
 
 	@Override
