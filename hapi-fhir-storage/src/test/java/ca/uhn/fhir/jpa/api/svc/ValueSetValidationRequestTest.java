@@ -95,7 +95,7 @@ class ValueSetValidationRequestTest {
 				.build();
 
 		// Verify - different instances, different values
-		assertThat(request1.code()).isNotNull().returns("CODE2", IPrimitiveType::getValue);
+		assertThat(request1.code()).isNotNull().returns("CODE1", IPrimitiveType::getValue);
 		assertThat(request2.code()).isNotNull().returns("CODE2", IPrimitiveType::getValue);
 	}
 
