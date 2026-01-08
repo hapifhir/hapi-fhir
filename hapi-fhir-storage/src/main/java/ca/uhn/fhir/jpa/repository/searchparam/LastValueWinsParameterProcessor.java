@@ -24,7 +24,8 @@ class LastValueWinsParameterProcessor<T> implements ISpecialParameterProcessor {
 	}
 
 	@Override
-	public void process(String theParamName, List<IQueryParameterType> theValues, SearchParameterMap theSearchParameterMap) {
+	public void process(
+			String theParamName, List<IQueryParameterType> theValues, SearchParameterMap theSearchParameterMap) {
 
 		String lastValue = theValues.stream()
 				.map(ISpecialParameterProcessor::paramAsQueryString)
