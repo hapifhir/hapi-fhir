@@ -1895,6 +1895,57 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
+	 * Invoked during resource processing, after writing has been completed
+	 * but before the database transaction is committed, and immediately before
+	 * a conditional URL is about to be verified to ensure that it still
+	 * matches the target resource.
+	 * <p>
+	 * Under normal operation, when processing a conditional operation (e.g., conditional update)
+	 * the JPA transaction processor will verify that the final state of the resource
+	 * still matches the conditional URL supplied by the user. This avoids
+	 * potential user bugs where a client inadvertently modifies a resource so that it
+	 * doesn't match the conditional URL (which can cause unexpected behaviour given
+	 * that HAPI FHIR often caches conditional URL results internally).
+	 * </p>
+	 * <p>
+	 * This hook is helpful if you are developing an interceptor that modifies both the
+	 * resource body and the resource conditional URL prior to storage, as it can
+	 * be used to manipulate the conditional URL used for verification.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.jpa.dao.PreVerifyConditionalMatchCriteriaRequest - Contains the conditional URL that will be
+	 * used for verification and may be modified by interceptors.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks must return <code>void</code>.
+	 * </p>
+	 *
+	 * @since 8.8.0
+	 */
+	STORAGE_PREVERIFY_CONDITIONAL_MATCH_CRITERIA(
+			void.class,
+			"ca.uhn.fhir.jpa.dao.PreVerifyConditionalMatchCriteriaRequest",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+
+	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked before a FHIR transaction is processed, and allows interceptor code to
 	 * split the FHIR transaction into multiple sub-transactions which will be processed
 	 * individually. These sub-transactions will be executed in the order they are
