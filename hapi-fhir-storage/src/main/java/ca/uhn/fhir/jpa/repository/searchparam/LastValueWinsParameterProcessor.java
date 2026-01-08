@@ -2,12 +2,13 @@ package ca.uhn.fhir.jpa.repository.searchparam;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
+import static ca.uhn.fhir.jpa.repository.searchparam.ISpecialParameterProcessor.paramAsQueryString;
 
 /**
  * A processor that takes the last value of a parameter and converts it to a type T while treating null or blank as null.
@@ -27,11 +28,12 @@ class LastValueWinsParameterProcessor<T> implements ISpecialParameterProcessor {
 	public void process(
 			String theParamName, List<IQueryParameterType> theValues, SearchParameterMap theSearchParameterMap) {
 
-		String lastValue = theValues.stream()
-				.map(ISpecialParameterProcessor::paramAsQueryString)
-				.reduce(null, (l, r) -> r);
-
-		T converted = isNullOrEmpty(lastValue) ? null : myConverter.apply(lastValue);
+		T converted = null;
+		if (CollectionUtils.isNotEmpty(theValues)) {
+			IQueryParameterType lastParameter = theValues.get(theValues.size() - 1);
+			String lastValue = paramAsQueryString(lastParameter);
+			converted = myConverter.apply(lastValue);
+		}
 
 		mySearchParameterMapSetter.accept(theSearchParameterMap, converted);
 	}
