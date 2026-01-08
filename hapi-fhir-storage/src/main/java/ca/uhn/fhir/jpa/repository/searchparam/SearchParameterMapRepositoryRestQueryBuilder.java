@@ -92,7 +92,7 @@ public class SearchParameterMapRepositoryRestQueryBuilder implements IRepository
 	/**
 	 * Handlers for all the specials
 	 */
-	Map<String, ISpecialParameterProcessor> ourSpecialParamHandlers = buildHandlerTable();
+	static final Map<String, ISpecialParameterProcessor> ourSpecialParamHandlers = buildHandlerTable();
 
 	@Nonnull
 	private static Map<String, ISpecialParameterProcessor> buildHandlerTable() {

@@ -21,8 +21,9 @@ class IncludeParameterProcessor implements ISpecialParameterProcessor {
 	}
 
 	@Override
-	public void process(String theKey, List<IQueryParameterType> v, SearchParameterMap theSearchParameterMap) {
-		v.stream()
+	public void process(
+			String theKey, List<IQueryParameterType> theIncludeList, SearchParameterMap theSearchParameterMap) {
+		theIncludeList.stream()
 				.map(ISpecialParameterProcessor::paramAsQueryString)
 				.map(s -> new Include(s, myIterationFlag))
 				.forEach(i -> mySetter.accept(theSearchParameterMap, i));
