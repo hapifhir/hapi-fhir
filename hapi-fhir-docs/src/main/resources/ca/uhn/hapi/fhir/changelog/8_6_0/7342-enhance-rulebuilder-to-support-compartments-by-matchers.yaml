@@ -1,4 +1,0 @@
----
-type: add
-issue: 7342
-title: "Enhanced the bulk export RuleBuilder code to support the identification of allowable Groups/Patients to export by a FHIR query matcher."

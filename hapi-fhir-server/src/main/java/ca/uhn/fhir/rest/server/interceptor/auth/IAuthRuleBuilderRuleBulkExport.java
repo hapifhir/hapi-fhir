@@ -51,7 +51,7 @@ public interface IAuthRuleBuilderRuleBulkExport {
 	 * e.g. <code>?identifier=foo|bar</code>
 	 * Note that resource type is implied to be Group
 	 *
-	 * @since 8.6.0
+	 * @since 8.8.0
 	 */
 	IAuthRuleBuilderRuleBulkExportWithTarget groupExportOnFilter(@Nonnull String theCompartmentFilterMatcher);
 
@@ -60,7 +60,7 @@ public interface IAuthRuleBuilderRuleBulkExport {
 	 * e.g. <code>?identifier=foo|bar</code>
 	 * Note that resource type is implied to be Patient
 	 *
-	 * @since 8.6.0
+	 * @since 8.8.0
 	 */
 	IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnFilter(@Nonnull String theCompartmentFilterMatcher);
 
