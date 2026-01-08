@@ -9,6 +9,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceTypeCacheSvc;
@@ -298,6 +299,8 @@ public class GiantTransactionPerfTest {
 		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));
 
 		when(myResourceTypeCacheSvc.getResourceTypeId(anyString())).thenReturn((short)100);
+
+		when(myIdHelperService.translatePidsToForcedIds(any())).thenReturn(new PersistentIdToForcedIdMap<>(Map.of()));
 	}
 
 	@Test
