@@ -168,7 +168,7 @@ X-Retry-On-Version-Conflict: retry; max-retries=100
 
 Delete with expunge submits a job to delete and expunge the requested resources. This is done in batches. If the DELETE
 ?_expunge=true syntax is used to trigger the delete expunge, then the batch size will be determined by the value
-of [Expunge Batch Size](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#getExpungeBatchSize())
+of [Expunge Batch Size](/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#getExpungeBatchSize())
 property.
 
 # Disabling Non Resource DB History
@@ -177,12 +177,12 @@ This setting controls whether MdmLink and any other non-resource (ex: Patient is
 
 Clients may want to disable this setting for performance reasons as it populates a new set of database tables when enabled.
 
-Setting this property explicitly to false disables the feature:  [Non Resource DB History](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#isNonResourceDbHistoryEnabled())
+Setting this property explicitly to false disables the feature:  [Non Resource DB History](/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#isNonResourceDbHistoryEnabled())
 
 # Prevent Conditional Updates to Invalidate Match Criteria
 
 JPA Server prevents conditional updated to invalidate match criteria for first version of resources. 
 This setting, disabled by default, allows to configure the same behaviour for later versions.
 
-Setting this property explicitly to true enables the feature: [Prevent Conditional Updates Invalidating Match Criteria](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#isPreventInvalidatingConditionalMatchCriteria())
+Setting this property explicitly to true enables the feature: [Prevent Conditional Updates Invalidating Match Criteria](/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#isPreventInvalidatingConditionalMatchCriteria())
 
