@@ -466,6 +466,10 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 
 	@Override
 	public CodeSystem fetchCodeSystem(String system, String version, Resource sourceOfReference) {
+		if (StringUtils.isNotBlank(version)) {
+			system = system + "|" + version;
+		}
+		ourLog.info("Fetching CodeSystem for: {}", system);
 		IBaseResource fetched = myValidationSupport.fetchCodeSystem(system);
 		if (fetched == null) {
 			return null;
