@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -315,6 +316,7 @@ class TerminologyValidationSvcImplTest {
 	@SuppressWarnings("unchecked")
 	void testValidateCodeAgainstValueSet_withVersions_concatenatesVersions() {
 		// Setup
+		ArgumentCaptor<UriType> uriCaptor = ArgumentCaptor.forClass(UriType.class);
 		when(myValidationSupportChain.isRemoteTerminologyServiceConfigured()).thenReturn(false);
 		when(myDaoRegistry.getResourceDao("ValueSet")).thenReturn(myValueSetDao);
 
@@ -335,7 +337,7 @@ class TerminologyValidationSvcImplTest {
 
 		// Verify - versions should be concatenated with |
 		verify(myValueSetDao).validateCode(
-				any(IPrimitiveType.class),  // valueSetIdentifier with version
+				uriCaptor.capture(),  // valueSetIdentifier with version
 				any(),
 				any(),
 				any(IPrimitiveType.class),  // codeSystemIdentifier with version
@@ -343,5 +345,6 @@ class TerminologyValidationSvcImplTest {
 				any(),
 				any(),
 				any());
+		assertThat(uriCaptor.getValue().asStringValue()).isEqualTo("http://valueset|1.0");
 	}
 }
