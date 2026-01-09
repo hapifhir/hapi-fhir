@@ -24,6 +24,8 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.IMdmClearHelperSvc;
+import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportMdmEidMatchOnlyResourceExpander;
+import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportMdmFullResourceExpander;
 import ca.uhn.fhir.jpa.bulk.mdm.MdmClearHelperSvcImpl;
 import ca.uhn.fhir.jpa.dao.mdm.JpaMdmLinkImplFactory;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDaoJpaImpl;
@@ -32,8 +34,8 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
-import ca.uhn.fhir.mdm.svc.BulkExportMdmEidMatchOnlyResourceExpander;
-import ca.uhn.fhir.mdm.svc.BulkExportMdmResourceExpander;
+import ca.uhn.fhir.mdm.svc.IBulkExportMdmEidMatchOnlyResourceExpander;
+import ca.uhn.fhir.mdm.svc.IBulkExportMdmFullResourceExpander;
 import ca.uhn.fhir.mdm.svc.MdmEidMatchOnlyExpandSvc;
 import ca.uhn.fhir.mdm.svc.MdmExpandersHolder;
 import ca.uhn.fhir.mdm.svc.MdmExpansionCacheSvc;
@@ -51,13 +53,13 @@ public class MdmJpaConfig {
 			FhirContext theFhirContext,
 			IMdmLinkExpandSvc theMdmLinkExpandSvc,
 			MdmEidMatchOnlyExpandSvc theMdmEidMatchOnlyLinkExpandSvc,
-			BulkExportMdmEidMatchOnlyResourceExpander theBulkExportMdmEidMatchOnlyResourceExpander,
-			BulkExportMdmResourceExpander theBulkExportMdmResourceExpander) {
+			IBulkExportMdmEidMatchOnlyResourceExpander<JpaPid> theBulkExportMdmEidMatchOnlyResourceExpander,
+			IBulkExportMdmFullResourceExpander<JpaPid> theBulkExportMdmFullResourceExpander) {
 		return new MdmExpandersHolder(
 				theFhirContext,
 				theMdmLinkExpandSvc,
 				theMdmEidMatchOnlyLinkExpandSvc,
-				theBulkExportMdmResourceExpander,
+				theBulkExportMdmFullResourceExpander,
 				theBulkExportMdmEidMatchOnlyResourceExpander);
 	}
 
@@ -83,13 +85,13 @@ public class MdmJpaConfig {
 	}
 
 	@Bean
-	public BulkExportMdmResourceExpander bulkExportMDMResourceExpander(
+	public BulkExportMdmFullResourceExpander bulkExportMDMResourceExpander(
 			MdmExpansionCacheSvc theMdmExpansionCacheSvc,
 			IMdmLinkDao theMdmLinkDao,
 			IIdHelperService<JpaPid> theIdHelperService,
 			DaoRegistry theDaoRegistry,
 			FhirContext theFhirContext) {
-		return new BulkExportMdmResourceExpander(
+		return new BulkExportMdmFullResourceExpander(
 				theMdmExpansionCacheSvc, theMdmLinkDao, theIdHelperService, theDaoRegistry, theFhirContext);
 	}
 

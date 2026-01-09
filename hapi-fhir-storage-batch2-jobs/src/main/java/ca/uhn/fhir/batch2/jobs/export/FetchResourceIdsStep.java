@@ -81,8 +81,6 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		providerParams.setPatientIds(params.getPatientIds());
 		providerParams.setExpandMdm(params.isExpandMdm());
 		providerParams.setPartitionId(params.getPartitionId());
-		// This step doesn't use this param. Included here for logging purpose
-		providerParams.setIncludeHistory(params.isIncludeHistory());
 
 		/*
 		 * we set all the requested resource types here so that
