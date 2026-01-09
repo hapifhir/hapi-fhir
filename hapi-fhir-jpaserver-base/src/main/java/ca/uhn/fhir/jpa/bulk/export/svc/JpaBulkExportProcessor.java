@@ -139,7 +139,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected LinkedHashSet<JpaPid> getPidsForPatientStyleExport(
+	private LinkedHashSet<JpaPid> getPidsForPatientStyleExport(
 			ExportPIDIteratorParameters theParams,
 			String resourceType,
 			String theJobId,

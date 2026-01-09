@@ -276,7 +276,7 @@ public class BulkDataExportProvider {
 		final List<IPrimitiveType<String>> patientIds =
 				thePatient != null ? parsePatientList(thePatient) : new ArrayList<>();
 
-		// null safe with default value
+		// null safe with default to false
 		boolean expandMdm = ObjectUtils.getIfNull(toBooleanValue(theMdm), false);
 
 		if (patientIds.isEmpty() && expandMdm) {
@@ -338,7 +338,6 @@ public class BulkDataExportProvider {
 					IPrimitiveType<Boolean> theIncludeHistory,
 			ServletRequestDetails theRequestDetails) {
 
-		// Patient instance export supports MDM expansion, so call doPatientExport directly
 		doPatientExport(
 				theRequestDetails,
 				theOutputFormat,
