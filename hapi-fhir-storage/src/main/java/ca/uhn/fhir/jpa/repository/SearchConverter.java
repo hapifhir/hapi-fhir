@@ -43,22 +43,22 @@ import java.util.Map;
 public class SearchConverter {
 	// hardcoded list from FHIR specs: https://www.hl7.org/fhir/search.html
 	private final List<String> mySearchResultParameters = Arrays.asList(
-		"_sort",
-		"_count",
-		"_include",
-		"_revinclude",
-		"_summary",
-		"_total",
-		"_elements",
-		"_contained",
-		"_containedType");
+			"_sort",
+			"_count",
+			"_include",
+			"_revinclude",
+			"_summary",
+			"_total",
+			"_elements",
+			"_contained",
+			"_containedType");
 	public final Multimap<String, List<IQueryParameterType>> mySeparatedSearchParameters = ArrayListMultimap.create();
 	public final Multimap<String, List<IQueryParameterType>> mySeparatedResultParameters = ArrayListMultimap.create();
 	public final SearchParameterMap mySearchParameterMap = new SearchParameterMap();
 	public final Map<String, String[]> myResultParameters = new HashMap<>();
 
 	public void convertParameters(
-		Multimap<String, List<IQueryParameterType>> theParameters, FhirContext theFhirContext) {
+			Multimap<String, List<IQueryParameterType>> theParameters, FhirContext theFhirContext) {
 		if (theParameters == null) {
 			return;
 		}
@@ -68,7 +68,7 @@ public class SearchConverter {
 	}
 
 	public void convertToStringMap(
-		@Nonnull Multimap<String, List<IQueryParameterType>> theParameters, @Nonnull FhirContext theFhirContext) {
+			@Nonnull Multimap<String, List<IQueryParameterType>> theParameters, @Nonnull FhirContext theFhirContext) {
 		for (Map.Entry<String, List<IQueryParameterType>> entry : theParameters.entries()) {
 			String[] values = new String[entry.getValue().size()];
 			for (int i = 0; i < entry.getValue().size(); i++) {
