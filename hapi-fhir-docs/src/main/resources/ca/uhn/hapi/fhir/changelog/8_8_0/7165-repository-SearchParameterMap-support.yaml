@@ -1,0 +1,4 @@
+---
+type: add
+issue: 7165
+title: "Add support for SearchParameterMap to the IRepository interface."
