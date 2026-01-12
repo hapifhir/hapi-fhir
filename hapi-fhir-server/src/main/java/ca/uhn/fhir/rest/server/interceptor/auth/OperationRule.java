@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict
 import ca.uhn.fhir.rest.server.interceptor.auth.fetcher.IAuthorizationResourceFetcher;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -38,6 +39,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 class OperationRule extends BaseRule implements IAuthRule {
@@ -52,9 +54,9 @@ class OperationRule extends BaseRule implements IAuthRule {
 	private boolean myAppliesAtAnyLevel;
 	private boolean myAllowAllResponses;
 	private boolean myAllowAllResourcesAccess;
-	// fixme nullable String myFilter; validate that filter is only set for instance-level operations.
+
 	@Nullable
-	private String myFilter;
+	private String myInstanceFilter;
 
 	OperationRule(String theRuleName) {
 		super(theRuleName);
@@ -78,7 +80,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 
 	void appliesToAnyInstanceMatchingFilter(@Nullable String theFilter) {
 		myAppliesToAnyInstance = true;
-		myFilter = theFilter;
+		myInstanceFilter = theFilter;
 	}
 
 	void appliesToAnyType() {
@@ -96,7 +98,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 	void appliesToInstancesOfTypeMatchingFilter(
 			HashSet<Class<? extends IBaseResource>> theAppliesToTypes, @Nullable String theFilter) {
 		myAppliesToInstancesOfType = theAppliesToTypes;
-		myFilter = theFilter;
+		myInstanceFilter = theFilter;
 	}
 
 	void appliesToServer() {
@@ -118,6 +120,9 @@ class OperationRule extends BaseRule implements IAuthRule {
 			IRuleApplier theRuleApplier,
 			Set<AuthorizationFlagsEnum> theFlags,
 			Pointcut thePointcut) {
+
+		validateState();
+
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
 		boolean applies = false;
@@ -234,6 +239,14 @@ class OperationRule extends BaseRule implements IAuthRule {
 		}
 	}
 
+	private void validateState() {
+		if (isNotBlank(myInstanceFilter)) {
+			Validate.isTrue(
+					myAppliesToAnyInstance || isNotEmpty(myAppliesToInstancesOfType) || isNotEmpty(myAppliesToIds),
+					"Instance filter is only supported for instance-level operations.");
+		}
+	}
+
 	/**
 	 * Must include the leading $
 	 */
@@ -300,7 +313,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 
 	// FIXME ND - see if callers of this method can be cleaned up a bit
 	private boolean shouldTestFilter(IIdType theResourceId) {
-		return isNotBlank(myFilter) && theResourceId != null;
+		return isNotBlank(myInstanceFilter) && theResourceId != null;
 	}
 
 	private boolean isInstanceMatchingFilter(
@@ -315,18 +328,21 @@ class OperationRule extends BaseRule implements IAuthRule {
 		IAuthorizationResourceFetcher resourceFetcher = theRuleApplier.getResourceFetcher();
 		Optional<IBaseResource> oFetchedResource = resourceFetcher.fetch(theRequestResourceId, theRequestDetails);
 		if (oFetchedResource.isEmpty()) {
-			ourLog.debug("Could not find resource [{}] to apply filter [{}].", theRequestResourceId, myFilter);
+			ourLog.debug("Could not find resource [{}] to apply filter [{}].", theRequestResourceId, myInstanceFilter);
 			return false;
 		}
 
 		IBaseResource resource = oFetchedResource.get();
-		FhirQueryRuleTester tester = new FhirQueryRuleTester(myFilter);
+		FhirQueryRuleTester tester = new FhirQueryRuleTester(myInstanceFilter);
 
 		IAuthRuleTester.RuleTestRequest ruleTestRequest =
 				createRuleTestRequest(theOperation, theRequestDetails, theRequestResourceId, resource, theRuleApplier);
 		boolean result = tester.matches(ruleTestRequest);
 		ourLog.debug(
-				"Instance filter result: resourceId={}, filter={}, result={}", theRequestResourceId, myFilter, result);
+				"Instance filter result: resourceId={}, filter={}, result={}",
+				theRequestResourceId,
+				myInstanceFilter,
+				result);
 
 		return result;
 	}
