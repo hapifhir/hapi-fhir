@@ -197,7 +197,6 @@ class OperationRule extends BaseRule implements IAuthRule {
 				return null;
 		}
 
-
 		if (!applies) {
 			return null;
 		}
@@ -326,7 +325,8 @@ class OperationRule extends BaseRule implements IAuthRule {
 		IAuthRuleTester.RuleTestRequest ruleTestRequest =
 				createRuleTestRequest(theOperation, theRequestDetails, theRequestResourceId, resource, theRuleApplier);
 		boolean result = tester.matches(ruleTestRequest);
-		ourLog.debug("Instance filter result: resourceId={}, filter={}, result={}", theRequestResourceId, myFilter, result);
+		ourLog.debug(
+				"Instance filter result: resourceId={}, filter={}, result={}", theRequestResourceId, myFilter, result);
 
 		return result;
 	}

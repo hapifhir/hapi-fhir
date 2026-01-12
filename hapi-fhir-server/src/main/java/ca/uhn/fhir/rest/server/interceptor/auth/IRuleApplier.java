@@ -53,7 +53,7 @@ public interface IRuleApplier {
 		return null;
 	}
 
-	default IAuthorizationResourceFetcher getResourceFetcher(){
+	default IAuthorizationResourceFetcher getResourceFetcher() {
 		return NoOpAuthorizationResourceFetcher.INSTANCE;
 	}
 }

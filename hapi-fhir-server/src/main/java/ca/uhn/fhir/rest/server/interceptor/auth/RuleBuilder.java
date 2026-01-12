@@ -715,7 +715,8 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				}
 
 				@Override
-				public IAuthRuleBuilderOperationNamedAndScoped onAnyInstanceMatchingOptionalFilter(@Nullable String theFilter) {
+				public IAuthRuleBuilderOperationNamedAndScoped onAnyInstanceMatchingOptionalFilter(
+						@Nullable String theFilter) {
 					OperationRule rule = createRule();
 					rule.appliesToAnyInstanceMatchingFilter(theFilter);
 					return new RuleBuilderOperationNamedAndScoped(rule);

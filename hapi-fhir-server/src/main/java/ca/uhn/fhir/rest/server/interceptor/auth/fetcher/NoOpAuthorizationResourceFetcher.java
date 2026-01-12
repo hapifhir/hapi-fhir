@@ -10,9 +10,7 @@ public class NoOpAuthorizationResourceFetcher implements IAuthorizationResourceF
 
 	public static final NoOpAuthorizationResourceFetcher INSTANCE = new NoOpAuthorizationResourceFetcher();
 
-	private NoOpAuthorizationResourceFetcher(){
-
-	}
+	private NoOpAuthorizationResourceFetcher() {}
 
 	@Override
 	public Optional<IBaseResource> fetch(IIdType theResourceId, RequestDetails theRequestDetails) {
