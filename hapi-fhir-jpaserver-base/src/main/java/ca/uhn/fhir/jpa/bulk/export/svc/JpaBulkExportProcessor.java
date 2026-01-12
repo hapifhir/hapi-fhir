@@ -319,12 +319,11 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	@Nonnull
 	private List<JpaPid> translateResourceIdsToPids(ExportPIDIteratorParameters theParams) {
 		RequestPartitionId partitionId = theParams.getPartitionIdOrAllPartitions();
-		List<IIdType> patientIds = theParams
-			.getPatientIds()
-			.stream()
-			.map(t-> myContext.getVersion().newIdType(t))
-			.toList();
-		List<JpaPid> expandedMemberResourceIds = myIdHelperService.resolveResourcePids(partitionId, patientIds, ResolveIdentityMode.excludeDeleted().cacheOk());
+		List<IIdType> patientIds = theParams.getPatientIds().stream()
+				.map(t -> myContext.getVersion().newIdType(t))
+				.toList();
+		List<JpaPid> expandedMemberResourceIds = myIdHelperService.resolveResourcePids(
+				partitionId, patientIds, ResolveIdentityMode.excludeDeleted().cacheOk());
 		assert !expandedMemberResourceIds.isEmpty();
 		return expandedMemberResourceIds;
 	}
