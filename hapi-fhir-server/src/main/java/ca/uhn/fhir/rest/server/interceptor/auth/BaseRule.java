@@ -65,8 +65,8 @@ abstract class BaseRule implements IAuthRule {
 
 		boolean retVal = true;
 		if (theOutputResource == null) {
-			IAuthRuleTester.RuleTestRequest inputRequest = new IAuthRuleTester.RuleTestRequest(
-					myMode, theOperation, theRequestDetails, theInputResourceId, theInputResource, theRuleApplier);
+			IAuthRuleTester.RuleTestRequest inputRequest = createRuleTestRequest(
+					theOperation, theRequestDetails, theInputResourceId, theInputResource, theRuleApplier);
 
 			for (IAuthRuleTester next : getTesters()) {
 				if (!next.matches(inputRequest)) {
@@ -91,6 +91,16 @@ abstract class BaseRule implements IAuthRule {
 		}
 
 		return retVal;
+	}
+
+	protected IAuthRuleTester.RuleTestRequest createRuleTestRequest(
+			RestOperationTypeEnum theOperation,
+			RequestDetails theRequestDetails,
+			IIdType theInputResourceId,
+			IBaseResource theInputResource,
+			IRuleApplier theRuleApplier) {
+		return new IAuthRuleTester.RuleTestRequest(
+				myMode, theOperation, theRequestDetails, theInputResourceId, theInputResource, theRuleApplier);
 	}
 
 	PolicyEnum getMode() {

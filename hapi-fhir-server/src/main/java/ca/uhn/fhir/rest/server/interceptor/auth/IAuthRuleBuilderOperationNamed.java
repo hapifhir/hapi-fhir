@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -48,11 +49,16 @@ public interface IAuthRuleBuilderOperationNamed {
 
 	IAuthRuleBuilderOperationNamedAndScoped onInstances(Collection<IIdType> theInstanceIds);
 
-	// fixme add/rename onInstancesOfTypeMatchingOptionalFilter with Optional/nullable IOptionalFilterRestriction parameter.
 	/**
 	 * Rule applies to invocations of this operation at the <code>instance</code> level on any instance of the given type
 	 */
 	IAuthRuleBuilderOperationNamedAndScoped onInstancesOfType(Class<? extends IBaseResource> theType);
+
+	// fixme add/rename onInstancesOfTypeMatchingOptionalFilter with Optional/nullable IOptionalFilterRestriction
+	// parameter.
+	// nd - IOptionalFilterRestriction isn't accessible here. Using a @Nullable String for now instead
+	IAuthRuleBuilderOperationNamedAndScoped onInstancesOfTypeMatchingOptionalFilter(
+			Class<? extends IBaseResource> theType, @Nullable String theFilterRestriction);
 
 	/**
 	 * Rule applies to invocations of this operation at the <code>instance</code> level on any instance

@@ -24,16 +24,25 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
+import ca.uhn.fhir.rest.server.interceptor.auth.fetcher.IAuthResourceFetcher;
+import ca.uhn.fhir.rest.server.interceptor.auth.fetcher.NoOpAuthResourceFetcher;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 class OperationRule extends BaseRule implements IAuthRule {
+	private static final Logger ourLog = LoggerFactory.getLogger(OperationRule.class);
 	private String myOperationName;
 	private boolean myAppliesToServer;
 	private HashSet<Class<? extends IBaseResource>> myAppliesToTypes;
@@ -45,9 +54,14 @@ class OperationRule extends BaseRule implements IAuthRule {
 	private boolean myAllowAllResponses;
 	private boolean myAllowAllResourcesAccess;
 	// fixme nullable String myFilter; validate that filter is only set for instance-level operations.
+	@Nullable
+	private String myFilter;
 
-	OperationRule(String theRuleName) {
+	private IAuthResourceFetcher myResourceFetcher;
+
+	OperationRule(String theRuleName, IAuthResourceFetcher theAuthResourceFetcher) {
 		super(theRuleName);
+		myResourceFetcher = theAuthResourceFetcher == null ? new NoOpAuthResourceFetcher() : theAuthResourceFetcher;
 	}
 
 	void appliesAtAnyLevel(boolean theAppliesAtAnyLevel) {
@@ -76,6 +90,12 @@ class OperationRule extends BaseRule implements IAuthRule {
 
 	void appliesToInstancesOfType(HashSet<Class<? extends IBaseResource>> theAppliesToTypes) {
 		myAppliesToInstancesOfType = theAppliesToTypes;
+	}
+
+	void appliesToInstancesOfTypeMatchingFilter(
+			HashSet<Class<? extends IBaseResource>> theAppliesToTypes, @Nullable String theFilter) {
+		myAppliesToInstancesOfType = theAppliesToTypes;
+		myFilter = theFilter;
 	}
 
 	void appliesToServer() {
@@ -121,17 +141,20 @@ class OperationRule extends BaseRule implements IAuthRule {
 				}
 				break;
 			case EXTENDED_OPERATION_INSTANCE:
-				// fixme go through this block, and look for all the applies=true assignments.  That's declaring "yes, I match".
-				// if myFilter != null, then actually fetch the resource, and check if it matches.  See FhirQueryRuleTester for example.
+				// fixme go through this block, and look for all the applies=true assignments.  That's declaring "yes, I
+				// match".
+				// if myFilter != null, then actually fetch the resource, and check if it matches.  See
+				// FhirQueryRuleTester for example.
 				// cache it in RequestDetails somewhere to avoid fetching it multiple times.
+				IIdType requestResourceId = getRequestResourceId(theRequestDetails);
 
 				if (myAppliesToAnyInstance || myAppliesAtAnyLevel) {
 					applies = true;
-				} else {
-					IIdType requestResourceId = null;
-					if (theRequestDetails.getId() != null) {
-						requestResourceId = theRequestDetails.getId();
+					if (shouldTestFilter(requestResourceId)) {
+						applies = isInstanceMatchingFilter(
+								theRequestDetails, requestResourceId, theOperation, theRuleApplier);
 					}
+				} else {
 					if (requestResourceId != null) {
 						if (myAppliesToIds != null) {
 							String instanceId =
@@ -139,7 +162,13 @@ class OperationRule extends BaseRule implements IAuthRule {
 							for (IIdType next : myAppliesToIds) {
 								if (next.toUnqualifiedVersionless().getValue().equals(instanceId)) {
 									applies = true;
-									break;
+									if (shouldTestFilter(requestResourceId)) {
+										applies = isInstanceMatchingFilter(
+												theRequestDetails, requestResourceId, theOperation, theRuleApplier);
+									}
+									if (applies) {
+										break;
+									}
 								}
 							}
 						}
@@ -148,8 +177,15 @@ class OperationRule extends BaseRule implements IAuthRule {
 							for (Class<? extends IBaseResource> next : myAppliesToInstancesOfType) {
 								String resName = ctx.getResourceType(next);
 								if (resName.equals(requestResourceId.getResourceType())) {
+									// matching, apply filter if necessary
 									applies = true;
-									break;
+									if (shouldTestFilter(requestResourceId)) {
+										applies = isInstanceMatchingFilter(
+												theRequestDetails, requestResourceId, theOperation, theRuleApplier);
+									}
+									if (applies) {
+										break;
+									}
 								}
 							}
 						}
@@ -260,5 +296,38 @@ class OperationRule extends BaseRule implements IAuthRule {
 		builder.append("allowAllResponses", myAllowAllResponses);
 		builder.append("allowAllResourcesAccess", myAllowAllResourcesAccess);
 		return builder;
+	}
+
+	private boolean shouldTestFilter(IIdType theResourceId) {
+		return isNotBlank(myFilter) && theResourceId != null;
+	}
+
+	private boolean isInstanceMatchingFilter(
+			RequestDetails theRequestDetails,
+			IIdType theRequestResourceId,
+			RestOperationTypeEnum theOperation,
+			IRuleApplier theRuleApplier) {
+		Optional<IBaseResource> oFetchedResource = myResourceFetcher.fetch(theRequestResourceId, theRequestDetails);
+		if (oFetchedResource.isEmpty()) {
+			ourLog.debug("Could not find resource [{}] to apply filter [{}].", theRequestResourceId, myFilter);
+			return false;
+		}
+
+		IBaseResource resource = oFetchedResource.get();
+		FhirQueryRuleTester tester = new FhirQueryRuleTester(myFilter);
+
+		IAuthRuleTester.RuleTestRequest ruleTestRequest =
+				createRuleTestRequest(theOperation, theRequestDetails, theRequestResourceId, resource, theRuleApplier);
+		boolean result = tester.matches(ruleTestRequest);
+		ourLog.debug("Instance filter result: resourceId={}, filter={}, result={}", theRequestResourceId, myFilter, result);
+
+		return result;
+	}
+
+	private @Nullable IIdType getRequestResourceId(RequestDetails theRequestDetails) {
+		if (theRequestDetails != null && theRequestDetails.getId() != null) {
+			return theRequestDetails.getId();
+		}
+		return null;
 	}
 }
