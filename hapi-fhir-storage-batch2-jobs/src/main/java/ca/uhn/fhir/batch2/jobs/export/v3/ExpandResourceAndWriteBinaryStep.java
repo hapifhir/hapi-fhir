@@ -136,6 +136,13 @@ public class ExpandResourceAndWriteBinaryStep
 	private volatile ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
 	/**
+	 * Constructor
+	 */
+	public ExpandResourceAndWriteBinaryStep() {
+		super();
+	}
+
+	/**
 	 * Note on the design of this step:
 	 * This step takes a list of resource PIDs as input, fetches those
 	 * resources (or their history if requested), applies a bunch of filtering/consent/MDM/etc. modifications

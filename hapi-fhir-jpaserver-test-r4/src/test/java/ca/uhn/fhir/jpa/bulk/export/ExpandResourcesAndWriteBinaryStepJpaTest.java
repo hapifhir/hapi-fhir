@@ -26,6 +26,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -36,6 +37,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -61,6 +63,7 @@ import static org.mockito.Mockito.verify;
 public class ExpandResourcesAndWriteBinaryStepJpaTest extends BaseJpaR4Test {
 
 	@Autowired
+	@Qualifier("bulkExportV3ExpandResourceAndWriteBinaryStep")
 	private ExpandResourceAndWriteBinaryStep myExpandResourcesStep;
 
 	@Mock
@@ -212,9 +215,12 @@ public class ExpandResourcesAndWriteBinaryStepJpaTest extends BaseJpaR4Test {
 			List<TypedPidJson> patientJsonIds = patientIds.stream().map(id -> new TypedPidJson().setResourceType("Patient").setPid(id.getIdPart())).toList();
 			resourceList.setIds(patientJsonIds);
 
+			Date now = new Date();
 			BulkExportJobParametersBuilder paramBuilder = new BulkExportJobParametersBuilder();
 			paramBuilder.includeHistory(new BooleanDt(true));
+			paramBuilder.until(new DateType(now));
 			JobInstance jobInstance = new JobInstance();
+			jobInstance.setStartTime(now);
 			String chunkId = "ABC";
 
 			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(paramBuilder.build(), resourceList, jobInstance, new WorkChunk().setId(chunkId), myJobStepExecutionServices);
@@ -251,9 +257,12 @@ public class ExpandResourcesAndWriteBinaryStepJpaTest extends BaseJpaR4Test {
 			List<TypedPidJson> patientJsonIds = patientIds.stream().map(id -> new TypedPidJson().setResourceType("Patient").setPid(id.getIdPart())).toList();
 			resourceList.setIds(patientJsonIds);
 
+			Date now = new Date();
 			BulkExportJobParametersBuilder paramBuilder = new BulkExportJobParametersBuilder();
 			paramBuilder.includeHistory(new BooleanDt(true));
+			paramBuilder.until(new DateType(now));
 			JobInstance jobInstance = new JobInstance();
+			jobInstance.setStartTime(now);
 			String chunkId = "ABC";
 
 			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(paramBuilder.build(), resourceList, jobInstance, new WorkChunk().setId(chunkId), myJobStepExecutionServices);
@@ -312,9 +321,12 @@ public class ExpandResourcesAndWriteBinaryStepJpaTest extends BaseJpaR4Test {
 			List<TypedPidJson> patientJsonIds = patientIds.stream().map(id -> new TypedPidJson().setResourceType("Patient").setPid(id.getIdPart())).toList();
 			resourceList.setIds(patientJsonIds);
 
+			Date now = new Date();
 			BulkExportJobParametersBuilder paramBuilder = new BulkExportJobParametersBuilder();
 			paramBuilder.includeHistory(new BooleanDt(true));
+			paramBuilder.until(new DateType(now));
 			JobInstance jobInstance = new JobInstance();
+			jobInstance.setStartTime(now);
 			String chunkId = "ABC";
 
 			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(paramBuilder.build(), resourceList, jobInstance, new WorkChunk().setId(chunkId), myJobStepExecutionServices);
@@ -359,9 +371,12 @@ public class ExpandResourcesAndWriteBinaryStepJpaTest extends BaseJpaR4Test {
 			List<TypedPidJson> patientJsonIds = patientIds.stream().map(id -> new TypedPidJson().setResourceType("Patient").setPid(id.getIdPart())).toList();
 			resourceList.setIds(patientJsonIds);
 
+			Date now = new Date();
 			BulkExportJobParametersBuilder paramBuilder = new BulkExportJobParametersBuilder();
 			paramBuilder.includeHistory(new BooleanDt(true));
+			paramBuilder.until(new DateType(now));
 			JobInstance jobInstance = new JobInstance();
+			jobInstance.setStartTime(now);
 			String chunkId = "ABC";
 
 			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(paramBuilder.build(), resourceList, jobInstance, new WorkChunk().setId(chunkId), myJobStepExecutionServices);

@@ -27,6 +27,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
@@ -55,12 +56,14 @@ import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -126,7 +129,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 					String chunkId = theParams.getChunkId();
 					RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceType);
 
-					LinkedHashSet<JpaPid> pids;
+					Collection<JpaPid> pids;
 					if (theParams.getExportStyle() == BulkExportJobParameters.ExportStyle.PATIENT) {
 						pids = getPidsForPatientStyleExport(theParams, resourceType, jobId, chunkId, def);
 					} else if (theParams.getExportStyle() == BulkExportJobParameters.ExportStyle.GROUP) {
@@ -265,15 +268,13 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		return pids;
 	}
 
-	private LinkedHashSet<JpaPid> getPidsForGroupStyleExport(
+	private Collection<JpaPid> getPidsForGroupStyleExport(
 			ExportPIDIteratorParameters theParams, String theResourceType, RuntimeResourceDefinition theDef)
 			throws IOException {
-		LinkedHashSet<JpaPid> pids;
+		Collection<JpaPid> pids;
 
 		if (theResourceType.equalsIgnoreCase("Patient")) {
-			ourLog.info("Expanding Patients of a Group Bulk Export.");
-			pids = getExpandedPatientList(theParams, true);
-			ourLog.info("Obtained {} PIDs", pids.size());
+			pids = translateResourceIdsToPids(theParams);
 		} else if (theResourceType.equalsIgnoreCase("Group")) {
 			pids = getSingletonGroupList(theParams);
 		} else {
@@ -289,9 +290,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		RuntimeSearchParam activeSearchParam =
 				getActivePatientSearchParamForCurrentResourceType(theParams.getResourceType());
 		if (activeSearchParam != null) {
-			// expand the group pid -> list of patients in that group (list of patient pids)
-			Set<JpaPid> expandedMemberResourceIds = getExpandedPatientList(theParams, false);
-			assert !expandedMemberResourceIds.isEmpty();
+			List<JpaPid> expandedMemberResourceIds = translateResourceIdsToPids(theParams);
 			Logs.getBatchTroubleshootingLog()
 					.debug("{} has been expanded to members:[{}]", theParams.getGroupId(), expandedMemberResourceIds);
 
@@ -317,13 +316,26 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		return pids;
 	}
 
-	private LinkedHashSet<JpaPid> getSingletonGroupList(ExportPIDIteratorParameters theParams) {
+	@Nonnull
+	private List<JpaPid> translateResourceIdsToPids(ExportPIDIteratorParameters theParams) {
+		RequestPartitionId partitionId = theParams.getPartitionIdOrAllPartitions();
+		List<IIdType> patientIds = theParams
+			.getPatientIds()
+			.stream()
+			.map(t-> myContext.getVersion().newIdType(t))
+			.toList();
+		List<JpaPid> expandedMemberResourceIds = myIdHelperService.resolveResourcePids(partitionId, patientIds, ResolveIdentityMode.excludeDeleted().cacheOk());
+		assert !expandedMemberResourceIds.isEmpty();
+		return expandedMemberResourceIds;
+	}
+
+	private List<JpaPid> getSingletonGroupList(ExportPIDIteratorParameters theParams) {
 		RequestPartitionId partitionId = theParams.getPartitionIdOrAllPartitions();
 		IBaseResource group = myDaoRegistry
 				.getResourceDao("Group")
 				.read(new IdDt(theParams.getGroupId()), new SystemRequestDetails().setRequestPartitionId(partitionId));
 		JpaPid pidOrNull = myIdHelperService.getPidOrNull(partitionId, group);
-		LinkedHashSet<JpaPid> pids = new LinkedHashSet<>();
+		List<JpaPid> pids = new ArrayList<>(1);
 		pids.add(pidOrNull);
 		return pids;
 	}

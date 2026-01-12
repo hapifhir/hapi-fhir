@@ -85,7 +85,7 @@ public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdm
 	 */
 	@Override
 	public Set<JpaPid> expandGroup(String groupResourceId, RequestPartitionId requestPartitionId) {
-		Validate.notBlank(groupResourceId, "Group resource ID must not be blank")
+		Validate.notBlank(groupResourceId, "Group resource ID must not be blank");
 
 		// Read the Group resource
 		SystemRequestDetails srd = SystemRequestDetails.forRequestPartitionId(requestPartitionId);

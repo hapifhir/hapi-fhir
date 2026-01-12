@@ -114,10 +114,12 @@ public class GenerateWorkPackagesV3Step
 
 		ExportPIDIteratorParameters patientListParams = new ExportPIDIteratorParameters();
 		patientListParams.setGroupId(params.getGroupId());
+		patientListParams.setPatientIds(params.getPatientIds());
 		patientListParams.setPartitionId(groupReadPartition);
 		patientListParams.setStartDate(params.getSince());
 		patientListParams.setEndDate(params.getUntil());
-		patientListParams.setFilters(List.of());
+		patientListParams.setFilters(params.getFilters());
+		patientListParams.setExpandMdm(params.isExpandMdm());
 
 		Set<String> patientResourceIds = myTransactionService
 				.withSystemRequest()
