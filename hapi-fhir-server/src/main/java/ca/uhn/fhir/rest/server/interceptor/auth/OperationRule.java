@@ -40,6 +40,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 class OperationRule extends BaseRule implements IAuthRule {
@@ -151,9 +152,8 @@ class OperationRule extends BaseRule implements IAuthRule {
 
 				if (myAppliesToAnyInstance || myAppliesAtAnyLevel) {
 					applies = true;
-					if (shouldTestFilter(requestResourceId)) {
-						applies = isInstanceMatchingFilter(
-								theRequestDetails, requestResourceId, theOperation, theRuleApplier);
+					if (isBlockedByInstanceFilter(theRequestDetails, requestResourceId, theOperation, theRuleApplier)) {
+						applies = false;
 					}
 				} else {
 					if (requestResourceId != null) {
@@ -163,11 +163,9 @@ class OperationRule extends BaseRule implements IAuthRule {
 							for (IIdType next : myAppliesToIds) {
 								if (next.toUnqualifiedVersionless().getValue().equals(instanceId)) {
 									applies = true;
-									if (shouldTestFilter(requestResourceId)) {
-										applies = isInstanceMatchingFilter(
-												theRequestDetails, requestResourceId, theOperation, theRuleApplier);
-									}
-									if (applies) {
+									if (isBlockedByInstanceFilter(theRequestDetails, requestResourceId, theOperation, theRuleApplier)) {
+										applies = false;
+									} else {
 										break;
 									}
 								}
@@ -178,13 +176,10 @@ class OperationRule extends BaseRule implements IAuthRule {
 							for (Class<? extends IBaseResource> next : myAppliesToInstancesOfType) {
 								String resName = ctx.getResourceType(next);
 								if (resName.equals(requestResourceId.getResourceType())) {
-									// matching, apply filter if necessary
 									applies = true;
-									if (shouldTestFilter(requestResourceId)) {
-										applies = isInstanceMatchingFilter(
-												theRequestDetails, requestResourceId, theOperation, theRuleApplier);
-									}
-									if (applies) {
+									if (isBlockedByInstanceFilter(theRequestDetails, requestResourceId, theOperation, theRuleApplier)) {
+										applies = false;
+									} else {
 										break;
 									}
 								}
@@ -306,16 +301,16 @@ class OperationRule extends BaseRule implements IAuthRule {
 		return builder;
 	}
 
-	// FIXME ND - see if callers of this method can be cleaned up a bit
-	private boolean shouldTestFilter(IIdType theResourceId) {
-		return isNotBlank(myInstanceFilter) && theResourceId != null;
-	}
-
-	private boolean isInstanceMatchingFilter(
+	private boolean isBlockedByInstanceFilter(
 			RequestDetails theRequestDetails,
 			IIdType theRequestResourceId,
 			RestOperationTypeEnum theOperation,
 			IRuleApplier theRuleApplier) {
+
+		if (isBlank(myInstanceFilter) || theRequestResourceId == null) {
+			// nothing to block
+			return false;
+		}
 
 		// FIXME ND - we should check two things before fetching:
 		// 1. was a resource already fetched?
@@ -323,8 +318,9 @@ class OperationRule extends BaseRule implements IAuthRule {
 		IAuthorizationResourceFetcher resourceFetcher = theRuleApplier.getResourceFetcher();
 		Optional<IBaseResource> oFetchedResource = resourceFetcher.fetch(theRequestResourceId, theRequestDetails);
 		if (oFetchedResource.isEmpty()) {
+			// could not find resource, block to be safe
 			ourLog.debug("Could not find resource [{}] to apply filter [{}].", theRequestResourceId, myInstanceFilter);
-			return false;
+			return true;
 		}
 
 		IBaseResource resource = oFetchedResource.get();
@@ -332,14 +328,16 @@ class OperationRule extends BaseRule implements IAuthRule {
 
 		IAuthRuleTester.RuleTestRequest ruleTestRequest =
 				createRuleTestRequest(theOperation, theRequestDetails, theRequestResourceId, resource, theRuleApplier);
-		boolean result = tester.matches(ruleTestRequest);
+
+		// blocked if the resource does not match the filter
+		boolean blocked = !tester.matches(ruleTestRequest);
 		ourLog.debug(
-				"Instance filter result: resourceId={}, filter={}, result={}",
+				"Instance filter result: resourceId={}, filter={}, blocked={}",
 				theRequestResourceId,
 				myInstanceFilter,
-				result);
+				blocked);
 
-		return result;
+		return blocked;
 	}
 
 	private @Nullable IIdType getRequestResourceId(RequestDetails theRequestDetails) {
