@@ -147,11 +147,6 @@ class OperationRule extends BaseRule implements IAuthRule {
 				}
 				break;
 			case EXTENDED_OPERATION_INSTANCE:
-				// fixme go through this block, and look for all the applies=true assignments.  That's declaring "yes, I
-				// match".
-				// if myFilter != null, then actually fetch the resource, and check if it matches.  See
-				// FhirQueryRuleTester for example.
-				// cache it in RequestDetails somewhere to avoid fetching it multiple times.
 				IIdType requestResourceId = getRequestResourceId(theRequestDetails);
 
 				if (myAppliesToAnyInstance || myAppliesAtAnyLevel) {

@@ -54,9 +54,11 @@ public interface IAuthRuleBuilderOperationNamed {
 	 */
 	IAuthRuleBuilderOperationNamedAndScoped onInstancesOfType(Class<? extends IBaseResource> theType);
 
-	// fixme add/rename onInstancesOfTypeMatchingOptionalFilter with Optional/nullable IOptionalFilterRestriction
-	// parameter.
-	// nd - IOptionalFilterRestriction isn't accessible here. Using a @Nullable String for now instead
+	/**
+	 * Rule applies to invocations of this operation at the <code>instance</code> level on any instance of the given type.
+	 * An optional FHIR query filter can be added to ensure instances meet certain criteria.
+	 * (i.e. $meta-add?category=vital-signs for Observation resources)
+	 */
 	IAuthRuleBuilderOperationNamedAndScoped onInstancesOfTypeMatchingOptionalFilter(
 			Class<? extends IBaseResource> theType, @Nullable String theFilterRestriction);
 
@@ -65,6 +67,11 @@ public interface IAuthRuleBuilderOperationNamed {
 	 */
 	IAuthRuleBuilderOperationNamedAndScoped onAnyInstance();
 
+	/**
+	 * Rule applies to invocations of this operation at the <code>instance</code> level on any instance.
+	 * An optional FHIR query filter can be added to ensure instances meet certain criteria.
+	 * (i.e. $meta-add?category=vital-signs for Observation resources)
+	 */
 	IAuthRuleBuilderOperationNamedAndScoped onAnyInstanceMatchingOptionalFilter(@Nullable String theFilterRestriction);
 
 	/**
