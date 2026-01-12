@@ -252,7 +252,8 @@ import java.util.List;
 	SearchConfig.class,
 	PackageLoaderConfig.class,
 	EnversAuditConfig.class,
-	MdmJpaConfig.class
+	MdmJpaConfig.class,
+	ca.uhn.fhir.jpa.packages.batch.PackageInstallJobConfig.class
 })
 public class JpaConfig {
 	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";
