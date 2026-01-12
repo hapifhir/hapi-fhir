@@ -76,6 +76,11 @@ class OperationRule extends BaseRule implements IAuthRule {
 		myAppliesToAnyInstance = true;
 	}
 
+	void appliesToAnyInstanceMatchingFilter(@Nullable String theFilter) {
+		myAppliesToAnyInstance = true;
+		myFilter = theFilter;
+	}
+
 	void appliesToAnyType() {
 		myAppliesToAnyType = true;
 	}
@@ -294,6 +299,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 		return builder;
 	}
 
+	// FIXME ND - see if callers of this method can be cleaned up a bit
 	private boolean shouldTestFilter(IIdType theResourceId) {
 		return isNotBlank(myFilter) && theResourceId != null;
 	}
@@ -303,6 +309,10 @@ class OperationRule extends BaseRule implements IAuthRule {
 			IIdType theRequestResourceId,
 			RestOperationTypeEnum theOperation,
 			IRuleApplier theRuleApplier) {
+
+		// FIXME ND - we should check two things before fetching:
+		// 1. was a resource already fetched?
+		// 2. has it been added to the cache?
 		IAuthorizationResourceFetcher resourceFetcher = theRuleApplier.getResourceFetcher();
 		Optional<IBaseResource> oFetchedResource = resourceFetcher.fetch(theRequestResourceId, theRequestDetails);
 		if (oFetchedResource.isEmpty()) {

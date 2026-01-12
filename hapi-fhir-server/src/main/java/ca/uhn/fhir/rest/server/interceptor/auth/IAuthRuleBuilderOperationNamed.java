@@ -65,6 +65,8 @@ public interface IAuthRuleBuilderOperationNamed {
 	 */
 	IAuthRuleBuilderOperationNamedAndScoped onAnyInstance();
 
+	IAuthRuleBuilderOperationNamedAndScoped onAnyInstanceMatchingOptionalFilter(@Nullable String theFilterRestriction);
+
 	/**
 	 * Rule applies to invocations of this operation at any level (server, type or instance)
 	 */
