@@ -231,7 +231,6 @@ public class ExportPIDIteratorParameters {
 				.append("patientIds", myPatientIds)
 				.append("partitionId", myPartitionId)
 				.append("requestedResourceTypes", myRequestedResourceTypes)
-				.append("includeHistory", myIncludeHistory)
 				.toString();
 	}
 

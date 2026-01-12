@@ -126,7 +126,7 @@ public class GenerateWorkPackagesV3Step
 				.withRequestPartitionId(groupReadPartition)
 				.readOnly()
 				.execute(() -> {
-					Set groupMemberPids = myBulkExportProcessor.getExpandedPatientList(patientListParams, false);
+					Set groupMemberPids = myBulkExportProcessor.getPatientSetForGroupExport(patientListParams, false);
 					return myIdHelperService.translatePidsToFhirResourceIds(groupMemberPids);
 				});
 

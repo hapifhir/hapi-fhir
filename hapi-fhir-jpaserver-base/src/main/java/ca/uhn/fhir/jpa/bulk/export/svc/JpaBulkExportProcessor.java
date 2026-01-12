@@ -414,7 +414,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 * @param theConsiderDateRange - whether to apply date range filters
 	 * @return a LinkedHashSet of JpaPids representing all member patients (with MDM expansion if enabled)
 	 */
-	private HashSet<JpaPid> getPatientSetForGroupExport(
+	@Override
+	public HashSet<JpaPid> getPatientSetForGroupExport(
 			ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) throws IOException {
 
 		List<JpaPid> members = getMembersFromGroupWithFilter(theParameters, theConsiderDateRange);

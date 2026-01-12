@@ -119,8 +119,6 @@ public class FetchResourceIdsV3Step
 		}
 		providerParams.setExpandMdm(params.isExpandMdm());
 		providerParams.setPartitionId(partitionId);
-		// This step doesn't use this param. Included here for logging purpose
-		providerParams.setIncludeHistory(params.isIncludeHistory());
 
 		/*
 		 * we set all the requested resource types here so that
