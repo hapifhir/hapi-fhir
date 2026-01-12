@@ -6,9 +6,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Optional;
 
-public class NoOpAuthResourceFetcher implements IAuthResourceFetcher {
-	@Override
-	public Optional<IBaseResource> fetch(IIdType theResourceId, RequestDetails theRequestDetails) {
-		return Optional.empty();
-	}
+public interface IAuthorizationResourceFetcher {
+
+	Optional<IBaseResource> fetch(IIdType theResourceId, RequestDetails theRequestDetails);
 }

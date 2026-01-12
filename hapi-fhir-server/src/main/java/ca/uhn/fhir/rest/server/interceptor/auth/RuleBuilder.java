@@ -26,8 +26,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.interceptor.auth.fetcher.IAuthResourceFetcher;
-import ca.uhn.fhir.rest.server.interceptor.auth.fetcher.NoOpAuthResourceFetcher;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
@@ -55,15 +53,8 @@ public class RuleBuilder implements IAuthRuleBuilder {
 	private final ArrayList<IAuthRule> myRules;
 	private IAuthRuleBuilderRule myAllow;
 	private IAuthRuleBuilderRule myDeny;
-	private IAuthResourceFetcher myAuthorizationResourceFetcher;
 
 	public RuleBuilder() {
-		this(null);
-	}
-
-	public RuleBuilder(@Nullable IAuthResourceFetcher theResourceFetcher) {
-		myAuthorizationResourceFetcher =
-				theResourceFetcher == null ? new NoOpAuthResourceFetcher() : theResourceFetcher;
 		myRules = new ArrayList<>();
 	}
 
@@ -710,7 +701,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				}
 
 				private OperationRule createRule() {
-					OperationRule rule = new OperationRule(myRuleName, myAuthorizationResourceFetcher);
+					OperationRule rule = new OperationRule(myRuleName);
 					rule.setOperationName(myOperationName);
 					rule.setMode(myRuleMode);
 					return rule;

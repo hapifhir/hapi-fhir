@@ -21,10 +21,11 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
+import ca.uhn.fhir.rest.server.interceptor.auth.fetcher.IAuthorizationResourceFetcher;
+import ca.uhn.fhir.rest.server.interceptor.auth.fetcher.NoOpAuthorizationResourceFetcher;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -52,4 +53,7 @@ public interface IRuleApplier {
 		return null;
 	}
 
+	default IAuthorizationResourceFetcher getResourceFetcher(){
+		return NoOpAuthorizationResourceFetcher.INSTANCE;
+	}
 }

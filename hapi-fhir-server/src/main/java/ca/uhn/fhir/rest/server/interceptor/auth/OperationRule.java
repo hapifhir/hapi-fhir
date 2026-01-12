@@ -24,8 +24,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
-import ca.uhn.fhir.rest.server.interceptor.auth.fetcher.IAuthResourceFetcher;
-import ca.uhn.fhir.rest.server.interceptor.auth.fetcher.NoOpAuthResourceFetcher;
+import ca.uhn.fhir.rest.server.interceptor.auth.fetcher.IAuthorizationResourceFetcher;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -57,11 +56,8 @@ class OperationRule extends BaseRule implements IAuthRule {
 	@Nullable
 	private String myFilter;
 
-	private IAuthResourceFetcher myResourceFetcher;
-
-	OperationRule(String theRuleName, IAuthResourceFetcher theAuthResourceFetcher) {
+	OperationRule(String theRuleName) {
 		super(theRuleName);
-		myResourceFetcher = theAuthResourceFetcher == null ? new NoOpAuthResourceFetcher() : theAuthResourceFetcher;
 	}
 
 	void appliesAtAnyLevel(boolean theAppliesAtAnyLevel) {
@@ -307,7 +303,8 @@ class OperationRule extends BaseRule implements IAuthRule {
 			IIdType theRequestResourceId,
 			RestOperationTypeEnum theOperation,
 			IRuleApplier theRuleApplier) {
-		Optional<IBaseResource> oFetchedResource = myResourceFetcher.fetch(theRequestResourceId, theRequestDetails);
+		IAuthorizationResourceFetcher resourceFetcher = theRuleApplier.getResourceFetcher();
+		Optional<IBaseResource> oFetchedResource = resourceFetcher.fetch(theRequestResourceId, theRequestDetails);
 		if (oFetchedResource.isEmpty()) {
 			ourLog.debug("Could not find resource [{}] to apply filter [{}].", theRequestResourceId, myFilter);
 			return false;
