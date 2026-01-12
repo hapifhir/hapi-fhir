@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -84,6 +85,8 @@ public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdm
 	 */
 	@Override
 	public Set<JpaPid> expandGroup(String groupResourceId, RequestPartitionId requestPartitionId) {
+		Validate.notBlank(groupResourceId, "Group resource ID must not be blank")
+
 		// Read the Group resource
 		SystemRequestDetails srd = SystemRequestDetails.forRequestPartitionId(requestPartitionId);
 		IIdType groupId = myFhirContext.getVersion().newIdType(groupResourceId);

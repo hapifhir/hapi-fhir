@@ -483,6 +483,7 @@ public class BulkDataExportProviderR5Test {
 		info.setEndTime(InstantType.now().getValue());
 
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
+		parameters.setPartitionIdForSecurity(myRequestPartitionId);
 		info.setParameters(parameters);
 
 		ArrayList<String> ids = new ArrayList<>();
@@ -1284,6 +1285,7 @@ public class BulkDataExportProviderR5Test {
 		info.setEndTime(new Date());
 
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
+		parameters.setPartitionIdForSecurity(myRequestPartitionId);
 		info.setParameters(parameters);
 
 		// when

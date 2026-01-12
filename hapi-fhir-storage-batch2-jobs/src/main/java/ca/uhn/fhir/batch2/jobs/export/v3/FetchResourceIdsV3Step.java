@@ -81,7 +81,7 @@ public class FetchResourceIdsV3Step
 
 			theDataSink.recoveredError(ex.getMessage());
 
-			throw new JobExecutionFailedException(Msg.code(2239) + " : " + ex.getMessage());
+			throw new JobExecutionFailedException(Msg.code(2839) + " : " + ex.getMessage());
 		}
 
 		ourLog.info(
