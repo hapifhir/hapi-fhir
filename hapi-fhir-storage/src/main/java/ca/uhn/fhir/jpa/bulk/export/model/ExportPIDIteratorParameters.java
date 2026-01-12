@@ -28,6 +28,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -87,12 +88,15 @@ public class ExportPIDIteratorParameters {
 	private SystemRequestDetails myRequestDetails;
 
 	/**
+	 * Cached expanded patient ID strings for PATIENT export with MDM.
+	 */
+	private Set<String> myExpandedPatientIdsForPatientExport;
+
+	/**
 	 * The list of resource types to recurse on.
 	 * This should always have at least one resource in it (the resource being requested)!
 	 */
 	private List<String> myRequestedResourceTypes;
-
-	private boolean myIncludeHistory;
 
 	public String getChunkId() {
 		return myChunkId;
@@ -200,12 +204,16 @@ public class ExportPIDIteratorParameters {
 		myRequestedResourceTypes = theRequestedResourceTypes;
 	}
 
-	public boolean isIncludeHistory() {
-		return myIncludeHistory;
+	public Set<String> getExpandedPatientIdsForPatientExport() {
+		return myExpandedPatientIdsForPatientExport;
 	}
 
-	public void setIncludeHistory(boolean theIncludeHistory) {
-		myIncludeHistory = theIncludeHistory;
+	public void setExpandedPatientIdsForPatientExport(Set<String> theExpandedPatientIdsForPatientExport) {
+		myExpandedPatientIdsForPatientExport = theExpandedPatientIdsForPatientExport;
+	}
+
+	public boolean hasExpandedPatientIdsForPatientExport() {
+		return myExpandedPatientIdsForPatientExport != null && !myExpandedPatientIdsForPatientExport.isEmpty();
 	}
 
 	@Override

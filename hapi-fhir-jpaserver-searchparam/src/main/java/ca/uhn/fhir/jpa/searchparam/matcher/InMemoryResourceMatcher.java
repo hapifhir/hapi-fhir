@@ -33,7 +33,6 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
@@ -92,9 +91,6 @@ public class InMemoryResourceMatcher {
 
 	@Autowired
 	FhirContext myFhirContext;
-
-	@Autowired
-	SearchParamExtractorService mySearchParamExtractorService;
 
 	@Autowired
 	IndexedSearchParamExtractor myIndexedSearchParamExtractor;
@@ -332,7 +328,7 @@ public class InMemoryResourceMatcher {
 	}
 
 	private boolean matchProfile(IQueryParameterType theProfileParam, IBaseResource theResource) {
-		UriParam paramProfile = new UriParam(theProfileParam.getValueAsQueryToken(myFhirContext));
+		UriParam paramProfile = new UriParam(theProfileParam.getValueAsQueryToken());
 
 		String paramProfileValue = paramProfile.getValue();
 		if (isBlank(paramProfileValue)) {
@@ -356,7 +352,7 @@ public class InMemoryResourceMatcher {
 	}
 
 	private boolean matchSource(IQueryParameterType theSourceParam, IBaseResource theResource) {
-		SourceParam paramSource = new SourceParam(theSourceParam.getValueAsQueryToken(myFhirContext));
+		SourceParam paramSource = new SourceParam(theSourceParam.getValueAsQueryToken());
 		SourceParam resourceSource = new SourceParam(MetaUtil.getSource(myFhirContext, theResource.getMeta()));
 		boolean matches = true;
 		if (paramSource.getSourceUri() != null) {

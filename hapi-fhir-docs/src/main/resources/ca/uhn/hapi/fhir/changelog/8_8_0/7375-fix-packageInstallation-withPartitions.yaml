@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 7375
+title: "PackageInstallerSvcImpl now consistently applies the default partition when running in STORE_AND_INSTALL mode. Terminology resources imported from NPM packages no longer fail in partitioned JPA servers with the error about writing a non-partitionable resource into a partition."

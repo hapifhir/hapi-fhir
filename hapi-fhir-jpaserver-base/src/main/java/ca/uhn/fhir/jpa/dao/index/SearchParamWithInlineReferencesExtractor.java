@@ -24,9 +24,9 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractorSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import com.google.common.annotations.VisibleForTesting;
@@ -47,10 +47,10 @@ public class SearchParamWithInlineReferencesExtractor extends BaseSearchParamWit
 	protected EntityManager myEntityManager;
 
 	@Autowired
-	private SearchParamExtractorService mySearchParamExtractorService;
+	private ISearchParamExtractorSvc mySearchParamExtractorService;
 
 	@VisibleForTesting
-	public void setSearchParamExtractorService(SearchParamExtractorService theSearchParamExtractorService) {
+	public void setSearchParamExtractorService(ISearchParamExtractorSvc theSearchParamExtractorService) {
 		mySearchParamExtractorService = theSearchParamExtractorService;
 	}
 

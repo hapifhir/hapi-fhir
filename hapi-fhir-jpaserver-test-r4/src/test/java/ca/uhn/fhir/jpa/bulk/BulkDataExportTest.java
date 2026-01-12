@@ -68,6 +68,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Spy;
@@ -159,6 +160,40 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setResourceTypes(Sets.newHashSet("Patient"));
 		options.setGroupId("Group/G");
 		options.setFilters(Sets.newHashSet("Patient?gender=female"));
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		verifyBulkExportResults(options, Collections.singletonList("Patient/PF"), Collections.singletonList("Patient/PM"));
+	}
+
+	@ParameterizedTest
+	@EnumSource(JpaStorageSettings.IndexEnabledEnum.class)
+	public void testGroupBulkExportWithTypeFilterWithMissingQualifier(JpaStorageSettings.IndexEnabledEnum theIndexEnabled) {
+		myStorageSettings.setIndexMissingFields(theIndexEnabled);
+
+		// Create some resources
+		Patient patient = new Patient();
+		patient.setId("PF");
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		patient = new Patient();
+		patient.setId("PM");
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		Group group = new Group();
+		group.setId("Group/G");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/PF");
+		group.addMember().getEntity().setReference("Patient/PM");
+		myClient.update().resource(group).execute();
+
+		// set the export options
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setResourceTypes(Sets.newHashSet("Patient"));
+		options.setGroupId("Group/G");
+		options.setFilters(Sets.newHashSet("Patient?gender:missing=true"));
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 		verifyBulkExportResults(options, Collections.singletonList("Patient/PF"), Collections.singletonList("Patient/PM"));
@@ -513,6 +548,32 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
+	}
+
+	@ParameterizedTest
+	@EnumSource(JpaStorageSettings.IndexEnabledEnum.class)
+	public void testPatientTypeLevelBulkExportWithMissingQualifier(JpaStorageSettings.IndexEnabledEnum theIndexEnabled) {
+
+		myStorageSettings.setIndexMissingFields(theIndexEnabled);
+		// create some resources
+		Patient patient = new Patient();
+		patient.setId("P1");
+		myClient.update().resource(patient).execute();
+
+		// diff patient
+		patient = new Patient();
+		patient.setId("P2");
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+		myClient.update().resource(patient).execute();
+
+		// set the export options
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setResourceTypes(Sets.newHashSet("Patient"));
+		options.setFilters(Sets.newHashSet("Patient?gender:missing=true"));
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+		verifyBulkExportResults(options, List.of("Patient/P1"), List.of("Patient/P2"));
 	}
 
 	@Test
