@@ -11,10 +11,19 @@ import ca.uhn.fhir.rest.server.interceptor.auth.fetcher.IAuthorizationResourceFe
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class DaoRegistryAuthorizationResourceFetcher implements IAuthorizationResourceFetcher {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(DaoRegistryAuthorizationResourceFetcher.class);
+
+	private static final String RESOURCE_CACHE_KEY =
+			DaoRegistryAuthorizationResourceFetcher.class.getName() + "_RESOURCE_CACHE";
 
 	private final DaoRegistry myDaoRegistry;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
@@ -27,9 +36,22 @@ public class DaoRegistryAuthorizationResourceFetcher implements IAuthorizationRe
 
 	@Override
 	public Optional<IBaseResource> fetch(IIdType theResourceId, RequestDetails theRequestDetails) {
-		// FIXME ND - see if we can fallback to use RequestDetails
-		if (theResourceId == null || !theResourceId.hasResourceType()) {
+		if (theResourceId == null) {
 			return Optional.empty();
+		}
+
+		if (!theResourceId.hasResourceType()) {
+			ourLog.warn(
+					"Cannot fetch resource for authorization: resource ID {} does not have a resource type",
+					theResourceId.getValue());
+			return Optional.empty();
+		}
+
+		String resourceIdKey = theResourceId.getValue();
+
+		Map<String, IBaseResource> cache = getResourceCache(theRequestDetails);
+		if (cache.containsKey(resourceIdKey)) {
+			return Optional.ofNullable(cache.get(resourceIdKey));
 		}
 
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
@@ -39,6 +61,20 @@ public class DaoRegistryAuthorizationResourceFetcher implements IAuthorizationRe
 
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceId.getResourceType());
 		IBaseResource resource = dao.read(theResourceId, systemRequestDetails);
+		cache.put(resourceIdKey, resource);
+
 		return Optional.ofNullable(resource);
+	}
+
+	private Map<String, IBaseResource> getResourceCache(RequestDetails theRequestDetails) {
+		@SuppressWarnings("unchecked")
+		Map<String, IBaseResource> cache =
+				(Map<String, IBaseResource>) theRequestDetails.getUserData().get(RESOURCE_CACHE_KEY);
+
+		if (cache == null) {
+			cache = new HashMap<>();
+			theRequestDetails.getUserData().put(RESOURCE_CACHE_KEY, cache);
+		}
+		return cache;
 	}
 }
