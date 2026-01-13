@@ -838,7 +838,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 
 			boolean hasMatchingResourceId = false;
 			Optional<String> idPartOpt = targetResourceIdMap.get(resourceLink.getTargetResourcePk());
-			if (idPartOpt.isPresent()) {
+			if (idPartOpt != null && idPartOpt.isPresent()) {
 				String idPart = idPartOpt.get();
 				idPart = idPart.substring(idPart.indexOf('/'));
 				hasMatchingResourceId = StringUtils.equals(idPart, referenceElement.getIdPart());
@@ -1096,6 +1096,16 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 	@VisibleForTesting
 	void setInterceptorBroadcasterForUnitTest(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
+
+	@VisibleForTesting
+	void setContextForUnitTest(FhirContext theContext) {
+		myContext = theContext;
+	}
+
+	@VisibleForTesting
+	void setIdHelperServiceForUnitTest(IIdHelperService theIdHelperService) {
+		myIdHelperService = theIdHelperService;
 	}
 
 	@Nonnull
