@@ -32,15 +32,18 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.google.common.base.Strings;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -53,6 +56,9 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 
 	@Autowired
 	private JpaValidationSupportChain myValidationSupportChain;
+
+	@Autowired
+	private VersionCanonicalizer myVersionCanonicalizer;
 
 	/**
 	 * $lookup operation
@@ -134,7 +140,6 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 	/**
 	 * $validate-code operation
 	 */
-	@SuppressWarnings("unchecked")
 	@Operation(
 			name = JpaConstants.OPERATION_VALIDATE_CODE,
 			idempotent = true,
@@ -155,77 +160,108 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 					IBaseDatatype theCodeableConcept,
 			RequestDetails theRequestDetails) {
 
-		CodeValidationResult result = null;
 		startRequest(theServletRequest);
 		try {
-			// TODO: JA why not just always just the chain here? and we can then get rid of the corresponding DAO method
-			// entirely
-			// If a Remote Terminology Server has been configured, use it
-			if (myValidationSupportChain.isRemoteTerminologyServiceConfigured()) {
+			// Determine the CodeSystem URL to validate against
+			String codeSystemUrl = resolveCodeSystemUrl(theId, theUrl, theRequestDetails);
 
-				String code;
-				String display;
+			// Convert codeableConcept to canonical form
+			CodeableConcept codeableConcept = myVersionCanonicalizer.codeableConceptToCanonical(theCodeableConcept);
+			boolean haveCodeableConcept =
+					codeableConcept != null && !codeableConcept.getCoding().isEmpty();
 
-				// The specification for $validate-code says that only one of these input-param combinations should be
-				// provided:
-				// 1.- code/codeSystem url
-				// 2.- coding (which wraps one code/codeSystem url combo)
-				// 3.- a codeableConcept (which wraps potentially many code/codeSystem url combos)
-				String url = getStringFromPrimitiveType(theUrl);
+			// Convert coding to canonical form
+			Coding canonicalCoding = myVersionCanonicalizer.codingToCanonical(theCoding);
+			boolean haveCoding = canonicalCoding != null && !canonicalCoding.isEmpty();
 
-				if (theCoding != null && isNotBlank(theCoding.getSystem())) {
-					// Coding case
-					if (url != null && !url.equalsIgnoreCase(theCoding.getSystem())) {
-						throw new InvalidRequestException(Msg.code(1160) + "Coding.system '" + theCoding.getSystem()
-								+ "' does not equal param url '" + theUrl
-								+ "'. Unable to validate-code.");
-					}
-					url = theCoding.getSystem();
-					code = theCoding.getCode();
-					display = theCoding.getDisplay();
-					result = validateCodeWithTerminologyService(url, code, display)
-							.orElseGet(supplyUnableToValidateResult(url, code));
-				} else if (theCodeableConcept != null && !theCodeableConcept.isEmpty()) {
-					// CodeableConcept case
-					result = new CodeValidationResult()
-							.setMessage("Terminology service does not yet support codeable concepts.");
-				} else {
-					// code/systemUrl combo case
-					code = getStringFromPrimitiveType(theCode);
-					display = getStringFromPrimitiveType(theDisplay);
-					if (Strings.isNullOrEmpty(code) || Strings.isNullOrEmpty(url)) {
-						result = new CodeValidationResult()
-								.setMessage("When specifying systemUrl and code, neither can be empty");
-					} else {
-						result = validateCodeWithTerminologyService(url, code, display)
-								.orElseGet(supplyUnableToValidateResult(url, code));
-					}
-				}
+			boolean haveCode = theCode != null && theCode.hasValue();
 
-			} else {
-				// Otherwise, use the local DAO layer to validate the code
-				IFhirResourceDaoCodeSystem dao = (IFhirResourceDaoCodeSystem) getDao();
-				result = dao.validateCode(
-						theId,
-						theUrl,
-						theVersion,
-						theCode,
-						theDisplay,
-						theCoding,
-						theCodeableConcept,
-						theRequestDetails);
+			// Handle codeableConcept - validate each coding until one succeeds
+			if (haveCodeableConcept) {
+				return validateCodeableConcept(codeableConcept.getCoding(), codeSystemUrl, theVersion);
 			}
 
+			// Handle coding parameter
+			if (haveCoding) {
+				String systemUrl = canonicalCoding.hasSystem() ? canonicalCoding.getSystem() : codeSystemUrl;
+				validateSystemsMatch(codeSystemUrl, systemUrl);
+				String versionedSystem = createVersionedSystemIfVersionIsPresent(systemUrl, getStringValue(theVersion));
+				return validateSingleCode(versionedSystem, canonicalCoding.getCode(), canonicalCoding.getDisplay());
+			}
+
+			// Handle code/system parameters
+			if (haveCode) {
+				String versionedSystem =
+						createVersionedSystemIfVersionIsPresent(codeSystemUrl, getStringValue(theVersion));
+				return validateSingleCode(versionedSystem, theCode.getValueAsString(), getStringValue(theDisplay));
+			}
+
+			// No valid input provided
+			CodeValidationResult result =
+					new CodeValidationResult().setMessage("No code, coding, or codeableConcept provided to validate");
 			return result.toParameters(getContext());
 		} finally {
 			endRequest(theServletRequest);
 		}
 	}
 
-	private static @Nullable String getStringFromPrimitiveType(IPrimitiveType<String> thePrimitiveString) {
-		return (thePrimitiveString != null && thePrimitiveString.hasValue())
-				? thePrimitiveString.getValueAsString()
-				: null;
+	private String resolveCodeSystemUrl(
+			IIdType theId, IPrimitiveType<String> theUrl, RequestDetails theRequestDetails) {
+		// If an ID was provided, look up the CodeSystem URL from the resource
+		if (theId != null && theId.hasIdPart()) {
+			IFhirResourceDaoCodeSystem<T> dao = (IFhirResourceDaoCodeSystem<T>) getDao();
+			IBaseResource codeSystem = dao.read(theId, theRequestDetails);
+			return CommonCodeSystemsTerminologyService.getCodeSystemUrl(getContext(), codeSystem);
+		}
+		return getStringValue(theUrl);
+	}
+
+	private IBaseParameters validateCodeableConcept(
+			List<Coding> theCodings, String theCodeSystemUrl, IPrimitiveType<String> theVersion) {
+		CodeValidationResult lastResult = null;
+		for (Coding coding : theCodings) {
+			String systemUrl = coding.hasSystem() ? coding.getSystem() : theCodeSystemUrl;
+			if (theCodeSystemUrl != null && coding.hasSystem()) {
+				validateSystemsMatch(theCodeSystemUrl, coding.getSystem());
+			}
+			String versionedSystem = createVersionedSystemIfVersionIsPresent(systemUrl, getStringValue(theVersion));
+			CodeValidationResult result = validateCodeWithTerminologyService(
+							versionedSystem, coding.getCode(), coding.getDisplay())
+					.orElseGet(supplyUnableToValidateResult(versionedSystem, coding.getCode()));
+			lastResult = result;
+			if (result.isOk()) {
+				return result.toParameters(getContext());
+			}
+		}
+		// Return the last result (even if failed) or create a default error
+		if (lastResult == null) {
+			lastResult = new CodeValidationResult().setMessage("No codings found in codeableConcept");
+		}
+		return lastResult.toParameters(getContext());
+	}
+
+	private void validateSystemsMatch(String theExpectedSystem, String theActualSystem) {
+		if (theExpectedSystem != null && !theExpectedSystem.equalsIgnoreCase(theActualSystem)) {
+			throw new InvalidRequestException(Msg.code(1160) + "Coding.system '" + theActualSystem
+					+ "' does not equal param url '" + theExpectedSystem + "'. Unable to validate-code.");
+		}
+	}
+
+	private IBaseParameters validateSingleCode(String theSystem, String theCode, String theDisplay) {
+		CodeValidationResult result = validateCodeWithTerminologyService(theSystem, theCode, theDisplay)
+				.orElseGet(supplyUnableToValidateResult(theSystem, theCode));
+		return result.toParameters(getContext());
+	}
+
+	private static String createVersionedSystemIfVersionIsPresent(String theSystem, String theVersion) {
+		if (isNotBlank(theVersion)) {
+			return theSystem + "|" + theVersion;
+		}
+		return theSystem;
+	}
+
+	private static @Nullable String getStringValue(IPrimitiveType<String> thePrimitive) {
+		return (thePrimitive != null && thePrimitive.hasValue()) ? thePrimitive.getValueAsString() : null;
 	}
 
 	private Optional<CodeValidationResult> validateCodeWithTerminologyService(
