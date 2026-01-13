@@ -184,7 +184,7 @@ public abstract class BaseTransactionProcessor {
 	private DaoRegistry myDaoRegistry;
 
 	@Autowired
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Autowired
 	protected IHapiTransactionService myHapiTransactionService;
@@ -1714,7 +1714,8 @@ public abstract class BaseTransactionProcessor {
 						"Check that all conditionally created/updated entities actually match their conditionals.");
 			}
 
-			if (!myStorageSettings.isMassIngestionMode()) {
+			if (!myStorageSettings.isMassIngestionMode()
+					&& !myStorageSettings.isPreventInvalidatingConditionalMatchCriteria()) {
 				validateAllInsertsMatchTheirConditionalUrls(theIdToPersistedOutcome, conditionalUrlToIdMap, theRequest);
 			}
 			theTransactionStopWatch.endCurrentTask();
@@ -1822,6 +1823,12 @@ public abstract class BaseTransactionProcessor {
 			Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
 			Map<String, IIdType> conditionalUrlToIdMap,
 			RequestDetails theRequest) {
+
+		IInterceptorBroadcaster interceptorBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+		boolean hasPreVerifyHook =
+				interceptorBroadcaster.hasHooks(Pointcut.STORAGE_PREVERIFY_CONDITIONAL_MATCH_CRITERIA);
+
 		conditionalUrlToIdMap.entrySet().stream()
 				.filter(entry -> entry.getKey() != null)
 				.forEach(entry -> {
@@ -1831,11 +1838,35 @@ public abstract class BaseTransactionProcessor {
 					if (daoMethodOutcome != null
 							&& !daoMethodOutcome.isNop()
 							&& daoMethodOutcome.getResource() != null) {
-						InMemoryMatchResult match =
-								mySearchParamMatcher.match(matchUrl, daoMethodOutcome.getResource(), theRequest);
+
+						// Interceptor: STORAGE_PREVERIFY_CONDITIONAL_MATCH_CRITERIA
+						String matchUrlForVerification = matchUrl;
+						if (hasPreVerifyHook) {
+							PreVerifyConditionalMatchCriteriaRequest param =
+									new PreVerifyConditionalMatchCriteriaRequest(daoMethodOutcome.getResource());
+							param.setConditionalUrl(matchUrl);
+
+							HookParams params = new HookParams();
+							params.add(RequestDetails.class, theRequest);
+							params.addIfMatchesType(ServletRequestDetails.class, theRequest);
+							params.add(PreVerifyConditionalMatchCriteriaRequest.class, param);
+							interceptorBroadcaster.callHooks(
+									Pointcut.STORAGE_PREVERIFY_CONDITIONAL_MATCH_CRITERIA, params);
+
+							Validate.notBlank(
+									param.getConditionalUrl(),
+									"Interceptor for "
+											+ Pointcut.STORAGE_PREVERIFY_CONDITIONAL_MATCH_CRITERIA
+											+ " returned a blank conditional URL");
+							matchUrlForVerification = param.getConditionalUrl();
+						}
+
+						InMemoryMatchResult match = mySearchParamMatcher.match(
+								matchUrlForVerification, daoMethodOutcome.getResource(), theRequest);
 						if (ourLog.isDebugEnabled()) {
 							ourLog.debug(
-									"Checking conditional URL [{}] against resource with ID [{}]: Supported?:[{}], Matched?:[{}]",
+									"Checking conditional URL[{}] (Original[{}]) against resource with ID[{}]: Supported?:[{}], Matched?:[{}]",
+									matchUrlForVerification,
 									matchUrl,
 									value,
 									match.supported(),

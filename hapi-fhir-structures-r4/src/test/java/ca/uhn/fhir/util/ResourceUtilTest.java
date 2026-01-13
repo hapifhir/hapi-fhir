@@ -34,7 +34,7 @@ public class ResourceUtilTest {
 
 	public static final String DATA_ABSENT_REASON_EXTENSION_URI =
 		 "http://hl7.org/fhir/StructureDefinition/data-absent-reason";
-	private final FhirContext ourFhirContext = FhirContext.forR4();
+	private final FhirContext myFhirContext = FhirContext.forR4();
 
 	@Test
 	public void testRemoveNarrative() {
@@ -54,12 +54,31 @@ public class ResourceUtilTest {
 	}
 
 	@Test
+	void testClearRaw() {
+		myFhirContext.setStoreRawJson(true);
+
+		String input = "{\"resourceType\":  \"Patient\"}";
+		Patient parsed = myFhirContext.newJsonParser().parseResource(Patient.class, input);
+
+		String rawStringPreClear = ResourceUtil.getRawStringFromResourceOrNull(parsed);
+		assertEquals(input, rawStringPreClear);
+
+		// Test
+		ResourceUtil.clearRawStringFromResource(parsed);
+
+		// Verify
+		String rawStringPostClear = ResourceUtil.getRawStringFromResourceOrNull(parsed);
+		assertNull(rawStringPostClear);
+	}
+
+
+	@Test
 	void testMergeBooleanField() {
 		Patient p1 = new Patient();
 		p1.setDeceased(new BooleanType(true));
 
 		Patient p2 = new Patient();
-		ResourceUtil.mergeAllFields(ourFhirContext, p1, p2);
+		ResourceUtil.mergeAllFields(myFhirContext, p1, p2);
 
 		assertTrue(p2.hasDeceased());
 		assertEquals("true", p2.getDeceased().primitiveValue());
@@ -76,7 +95,7 @@ public class ResourceUtilTest {
 			 new Coding().setSystem("MyInternalEthnicity").setDisplay("NNN"));
 
 		Patient p2 = new Patient();
-		ResourceUtil.mergeAllFields(ourFhirContext, p1, p2);
+		ResourceUtil.mergeAllFields(myFhirContext, p1, p2);
 
 		assertThat(p2.getExtension()).hasSize(2);
 	}
@@ -99,7 +118,7 @@ public class ResourceUtilTest {
 		Patient p2 = new Patient();
 		p2.addAddress().addLine("10 Lenin Street").setCity("Severodvinsk").setCountry("Russia");
 
-		ResourceUtil.mergeField(ourFhirContext, "address", p1, p2);
+		ResourceUtil.mergeField(myFhirContext, "address", p1, p2);
 
 		assertThat(p2.getAddress()).hasSize(2);
 		assertEquals("[10 Lenin Street]", p2.getAddress().get(0).getLine().toString());
@@ -112,7 +131,7 @@ public class ResourceUtilTest {
 		p2.addAddress().addLine("10 Main Street").addExtension(
 			 new Extension("demo", new DateTimeType("2021-01-02")));
 
-		ResourceUtil.mergeField(ourFhirContext, "address", p1, p2);
+		ResourceUtil.mergeField(myFhirContext, "address", p1, p2);
 		assertThat(p2.getAddress()).hasSize(2);
 		assertTrue(p2.getAddress().get(0).hasExtension());
 		assertTrue(p2.getAddress().get(1).hasExtension());
@@ -143,7 +162,7 @@ public class ResourceUtilTest {
 			 .setCountry("Canada")
 			 .addExtension(ext);
 
-		ResourceUtil.mergeField(ourFhirContext, "address", p1, p2);
+		ResourceUtil.mergeField(myFhirContext, "address", p1, p2);
 
 		assertThat(p2.getAddress()).hasSize(2);
 		assertEquals("[10 Main Street]", p2.getAddress().get(0).getLine().toString());
@@ -162,7 +181,7 @@ public class ResourceUtilTest {
 
 		Condition c2 = new Condition();
 
-		ResourceUtil.mergeField(ourFhirContext, "recorder", c1, c2);
+		ResourceUtil.mergeField(myFhirContext, "recorder", c1, c2);
 
 		assertThat(c2.getRecorder().getResource()).isSameAs(practitioner);
 	}
@@ -179,7 +198,7 @@ public class ResourceUtilTest {
 		Observation toObservation = new Observation();
 		toObservation.setStatusElement(theToStatus);
 
-		ResourceUtil.mergeField(ourFhirContext, "status", fromObservation, toObservation);
+		ResourceUtil.mergeField(myFhirContext, "status", fromObservation, toObservation);
 
 		if (theExpectedStatus == null) {
 			assertThat(toObservation.hasStatus()).isFalse();
@@ -223,7 +242,7 @@ public class ResourceUtilTest {
 		Observation toObservation = new Observation();
 		theToIdentifiers.forEach(toObservation::addIdentifier);
 
-		ResourceUtil.mergeField(ourFhirContext, "identifier", fromObservation, toObservation);
+		ResourceUtil.mergeField(myFhirContext, "identifier", fromObservation, toObservation);
 
 		assertThat(toObservation.getIdentifier()).hasSize(theExpectedIdentifiers.size());
 		assertThat(toObservation.getIdentifier()).allMatch(t -> {
@@ -279,7 +298,7 @@ public class ResourceUtilTest {
 		category2.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
 
 		// execute
-		ResourceUtil.mergeField(ourFhirContext, "category", o1, o2);
+		ResourceUtil.mergeField(myFhirContext, "category", o1, o2);
 
 		// validate
 		assertThat(o2.getCategory()).hasSize(2);
@@ -304,7 +323,7 @@ public class ResourceUtilTest {
 		category2.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("social-history");
 
 		// execute
-		ResourceUtil.mergeField(ourFhirContext, "category", o1, o2);
+		ResourceUtil.mergeField(myFhirContext, "category", o1, o2);
 
 		// validate
 		assertThat(o2.getCategory()).hasSize(2);
@@ -327,7 +346,7 @@ public class ResourceUtilTest {
 		mergeControlParameters.setIgnoreCodeableConceptCodingOrder(true);
 
 		// execute
-		ResourceUtil.mergeField(ourFhirContext, "category", o1, o2, mergeControlParameters);
+		ResourceUtil.mergeField(myFhirContext, "category", o1, o2, mergeControlParameters);
 
 		// validate
 		assertThat(o2.getCategory()).hasSize(1);
@@ -347,7 +366,7 @@ public class ResourceUtilTest {
 		o2.getCode().addCoding().setSystem("http://loinc.org").setCode("10834-0");
 
 		// execute
-		ResourceUtil.mergeField(ourFhirContext, "code", o1, o2);
+		ResourceUtil.mergeField(myFhirContext, "code", o1, o2);
 
 		// validate
 		assertThat(o2.getCode().getCoding()).hasSize(1);
@@ -367,7 +386,7 @@ public class ResourceUtilTest {
 		o2.getCode().addCoding().setSystem("http://customlocalcodesystem.org").setCode("ABC").setDisplay("Niacin");
 
 		// execute
-		ResourceUtil.mergeField(ourFhirContext, "code", o1, o2);
+		ResourceUtil.mergeField(myFhirContext, "code", o1, o2);
 
 		// validate
 		assertThat(o2.getCode().getCoding()).hasSize(1);
@@ -388,7 +407,7 @@ public class ResourceUtilTest {
 		mergeControlParameters.setMergeCodings(true);
 
 		// execute
-		ResourceUtil.mergeField(ourFhirContext, "code", o1, o2, mergeControlParameters);
+		ResourceUtil.mergeField(myFhirContext, "code", o1, o2, mergeControlParameters);
 
 		// validate
 		assertThat(o2.getCode().getCoding()).hasSize(2);
@@ -410,7 +429,7 @@ public class ResourceUtilTest {
 		mergeControlParameters.setMergeCodings(true);
 
 		// execute
-		ResourceUtil.mergeField(ourFhirContext, "code", o1, o2, mergeControlParameters);
+		ResourceUtil.mergeField(myFhirContext, "code", o1, o2, mergeControlParameters);
 
 		// validate
 		assertThat(o2.getCode().getCoding()).hasSize(2);
@@ -435,7 +454,7 @@ public class ResourceUtilTest {
 		mergeControlParameters.setMergeCodings(true);
 
 		// execute
-		ResourceUtil.mergeField(ourFhirContext, "code", o1, o2, mergeControlParameters);
+		ResourceUtil.mergeField(myFhirContext, "code", o1, o2, mergeControlParameters);
 
 		// validate
 		assertThat(o2.getCode().getCoding()).hasSize(3);
@@ -459,7 +478,7 @@ public class ResourceUtilTest {
 		mergeControlParameters.setMergeCodings(true);
 
 		// execute
-		ResourceUtil.mergeField(ourFhirContext, "code", o1, o2, mergeControlParameters);
+		ResourceUtil.mergeField(myFhirContext, "code", o1, o2, mergeControlParameters);
 
 		// validate
 		assertThat(o2.getCode().getCoding()).hasSize(2);
@@ -483,7 +502,7 @@ public class ResourceUtilTest {
 		category2.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("survey");
 
 		// execute
-		ResourceUtil.mergeField(ourFhirContext, "category", o1, o2);
+		ResourceUtil.mergeField(myFhirContext, "category", o1, o2);
 
 		// validate
 		assertThat(o2.getCategory()).hasSize(2);
@@ -506,7 +525,7 @@ public class ResourceUtilTest {
 		category2.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("survey");
 
 		// execute
-		ResourceUtil.mergeField(ourFhirContext, "category", o1, o2);
+		ResourceUtil.mergeField(myFhirContext, "category", o1, o2);
 
 		// validate
 		assertThat(o2.getCategory()).hasSize(2);
@@ -533,7 +552,7 @@ public class ResourceUtilTest {
 		mergeControlParameters.setMergeCodings(true);
 
 		// execute
-		ResourceUtil.mergeField(ourFhirContext, "category", o1, o2, mergeControlParameters);
+		ResourceUtil.mergeField(myFhirContext, "category", o1, o2, mergeControlParameters);
 
 		// validate
 		assertThat(o2.getCategory()).hasSize(1);
@@ -558,7 +577,7 @@ public class ResourceUtilTest {
 		mergeControlParameters.setMergeCodings(true);
 
 		// execute
-		ResourceUtil.mergeField(ourFhirContext, "category", o1, o2, mergeControlParameters);
+		ResourceUtil.mergeField(myFhirContext, "category", o1, o2, mergeControlParameters);
 
 		// validate
 		assertThat(o2.getCategory()).hasSize(1);
@@ -586,7 +605,7 @@ public class ResourceUtilTest {
 		mergeControlParameters.setMergeCodings(true);
 
 		// execute
-		ResourceUtil.mergeField(ourFhirContext, "category", o1, o2, mergeControlParameters);
+		ResourceUtil.mergeField(myFhirContext, "category", o1, o2, mergeControlParameters);
 
 		// validate
 		assertThat(o2.getCategory()).hasSize(1);
@@ -613,7 +632,7 @@ public class ResourceUtilTest {
 		mergeControlParameters.setMergeCodings(true);
 
 		// execute
-		ResourceUtil.mergeField(ourFhirContext, "category", o1, o2, mergeControlParameters);
+		ResourceUtil.mergeField(myFhirContext, "category", o1, o2, mergeControlParameters);
 
 		// validate
 		assertThat(o2.getCategory()).hasSize(2);
@@ -631,7 +650,7 @@ public class ResourceUtilTest {
 		o2.getCode().addCoding().setSystem("http://loinc.org").setCode("10836-5").setDisplay("Niacin [Mass/volume] in Blood");
 
 		// execute
-		ResourceUtil.mergeField(ourFhirContext, "code", o1, o2);
+		ResourceUtil.mergeField(myFhirContext, "code", o1, o2);
 
 		// validate
 		assertThat(o2.getCode().getCodingFirstRep().hasDisplay()).isFalse();
@@ -653,7 +672,7 @@ public class ResourceUtilTest {
 		mergeControlParameters.setMergeCodings(true);
 
 		// execute
-		ResourceUtil.mergeField(ourFhirContext, "code", o1, o2, mergeControlParameters);
+		ResourceUtil.mergeField(myFhirContext, "code", o1, o2, mergeControlParameters);
 
 		// validate
 		assertThat(o2.getCode().getCoding()).hasSize(1);
@@ -675,7 +694,7 @@ public class ResourceUtilTest {
 		mergeControlParameters.setMergeCodingDetails(true);
 
 		// execute
-		ResourceUtil.mergeField(ourFhirContext, "code", o1, o2, mergeControlParameters);
+		ResourceUtil.mergeField(myFhirContext, "code", o1, o2, mergeControlParameters);
 
 		// validate
 		assertThat(o2.getCode().getCoding()).hasSize(1);
@@ -695,7 +714,7 @@ public class ResourceUtilTest {
 		mergeControlParameters.setMergeCodingDetails(true);
 
 		// execute
-		ResourceUtil.mergeField(ourFhirContext, "code", o1, o2, mergeControlParameters);
+		ResourceUtil.mergeField(myFhirContext, "code", o1, o2, mergeControlParameters);
 
 		// validate
 		assertThat(o2.getCode().getCoding()).hasSize(1);
@@ -715,7 +734,7 @@ public class ResourceUtilTest {
 		mergeControlParameters.setMergeCodingDetails(true);
 
 		// execute
-		ResourceUtil.mergeField(ourFhirContext, "code", o1, o2, mergeControlParameters);
+		ResourceUtil.mergeField(myFhirContext, "code", o1, o2, mergeControlParameters);
 
 		// validate
 		assertThat(o2.getCode().getCoding()).hasSize(1);

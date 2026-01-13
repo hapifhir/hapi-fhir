@@ -151,6 +151,13 @@ public class ResourceUtil {
 		return (EncodingEnum) theResource.getUserData(ENCODING);
 	}
 
+	public static void clearRawStringFromResource(@Nonnull IBaseResource theResource) {
+		EncodingEnum type = (EncodingEnum) theResource.getUserData(ENCODING);
+		if (type != null) {
+			theResource.setUserData(getRawUserDataKey(type), null);
+		}
+	}
+
 	public static String getRawStringFromResourceOrNull(@Nonnull IBaseResource theResource) {
 		EncodingEnum type = (EncodingEnum) theResource.getUserData(ENCODING);
 		if (type != null) {
