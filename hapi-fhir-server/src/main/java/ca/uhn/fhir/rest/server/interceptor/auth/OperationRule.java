@@ -363,14 +363,20 @@ class OperationRule extends BaseRule implements IAuthRule {
 			RequestDetails theRequestDetails,
 			IRuleApplier theRuleApplier) {
 
+		// see if resource body is available from request
 		if (theInputResource != null && targetResourceIdMatchesInputResource(theTargetResourceId, theInputResource)) {
 			return Optional.of(theInputResource);
+		}
+
+		// resource body not available, try to resolve
+		IAuthResourceResolver resourceResolver = theRuleApplier.getAuthResourceResolver();
+		if (resourceResolver == null) {
+			return Optional.empty();
 		}
 
 		// This would happen for Observation/123/$meta-add:
 		// theTargetResourceId = Observation/123
 		// theInputResource = Parameters
-		IAuthResourceResolver resourceResolver = theRuleApplier.getAuthResourceResolver();
 		IBaseResource resource = resourceResolver.resolveResourceById(theTargetResourceId, theRequestDetails);
 		return Optional.ofNullable(resource);
 	}
