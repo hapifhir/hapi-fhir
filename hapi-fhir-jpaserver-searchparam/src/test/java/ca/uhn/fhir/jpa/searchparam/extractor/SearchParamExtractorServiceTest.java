@@ -96,7 +96,8 @@ public class SearchParamExtractorServiceTest {
 		ResourceTable table = new ResourceTable();
 		table.setResourceType("Group");
 		table.setId(JpaPid.fromId(123L));
-		ResourceLink resourceLink = ResourceLink.forLogicalReference("Group.member.entity", table, "http://example.com", Date.from(Instant.now()));
+		ResourceLink resourceLink = ResourceLink.forLogicalReference("Group.member.entity", table,
+			"http://example.com", Date.from(Instant.now()));
 
 		List<ResourceLink> existingResourceLinks = new ArrayList<>();
 		existingResourceLinks.add(resourceLink);

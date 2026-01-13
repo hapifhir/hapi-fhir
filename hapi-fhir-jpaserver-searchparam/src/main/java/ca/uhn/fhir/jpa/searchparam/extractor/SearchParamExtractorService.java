@@ -820,8 +820,9 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 
 		if (thePathAndRef.isCanonical()) {
 			return resourceLinks.stream()
-				.filter(r -> r.getTargetResourceUrl().equals(thePathAndRef.getPath()))
-				.findFirst();
+					.filter(r -> r.getTargetResourceUrl() != null
+							&& r.getTargetResourceUrl().equals(thePathAndRef.getPath()))
+					.findFirst();
 		}
 
 		Set<JpaPid> pids = new HashSet<>();
