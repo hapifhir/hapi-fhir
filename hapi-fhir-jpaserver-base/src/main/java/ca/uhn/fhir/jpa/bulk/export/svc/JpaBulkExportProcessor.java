@@ -26,6 +26,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
@@ -47,7 +48,6 @@ import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.SearchParameterUtil;
@@ -55,6 +55,7 @@ import ca.uhn.fhir.util.TaskChunker;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -72,7 +73,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 
 public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
@@ -411,20 +411,17 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 * across multiple resource type iterations.
 	 *
 	 * @param theParameters - export parameters containing group ID and MDM flag
-	 * @param theConsiderDateRange - whether to apply date range filters
 	 * @return a LinkedHashSet of JpaPids representing all member patients (with MDM expansion if enabled)
 	 */
 	@Override
-	public HashSet<JpaPid> getPatientSetForGroupExport(
-			ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) throws IOException {
+	public Set<String> getPatientSetForGroupExport(ExportPIDIteratorParameters theParameters) {
 
-		List<JpaPid> members = getMembersFromGroupWithFilter(theParameters, theConsiderDateRange);
+		Set<String> members = getMembersFromGroupWithFilter(theParameters);
 		ourLog.debug(
-				"Group with ID [{}] has {} members, member JpaIds: {}",
+				"Group with ID [{}] has {} members, member IDs: {}",
 				theParameters.getGroupId(),
 				members.size(),
 				members);
-		LinkedHashSet<JpaPid> patientPidsToExport = new LinkedHashSet<>(members);
 
 		if (theParameters.isExpandMdm()) {
 			RequestPartitionId partitionId = theParameters.getPartitionIdOrAllPartitions();
@@ -433,16 +430,18 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 					.getBulkExportMDMResourceExpanderInstance()
 					.expandGroup(theParameters.getGroupId(), partitionId);
 
-			patientPidsToExport.addAll(singlePatientExpandedSet);
+			Set<String> resourceIds = myIdHelperService.translatePidsToFhirResourceIds(singlePatientExpandedSet);
+			members.addAll(resourceIds);
 
-			ourLog.debug(
-					"Group with ID [{}] has been expanded to {} members, member JpaIds: {}",
-					theParameters.getGroupId(),
-					singlePatientExpandedSet.size(),
-					singlePatientExpandedSet);
+			ourLog.atDebug()
+					.setMessage("Group with ID [{}] has been expanded to {} members, member JpaIds: {}")
+					.addArgument(theParameters.getGroupId())
+					.addArgument(singlePatientExpandedSet.size())
+					.addArgument(singlePatientExpandedSet)
+					.log();
 		}
 
-		return patientPidsToExport;
+		return members;
 	}
 
 	Set<String> getPatientSetForPatientExport(ExportPIDIteratorParameters theParams) {
@@ -504,59 +503,31 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 *
 	 * @return A list of strings representing the Patient IDs of the members (e.g. ["P1", "P2", "P3"]
 	 */
-	private List<JpaPid> getMembersFromGroupWithFilter(
-			ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) {
-		final List<SearchParameterMap> maps = makeSearchParameterMaps(theParameters, theConsiderDateRange);
-		final List<JpaPid> resPids = new ArrayList<>();
-		for (SearchParameterMap map : maps) {
-			ISearchBuilder<JpaPid> searchBuilder = getSearchBuilderForResourceType("Patient");
-			ourLog.debug(
-					"Searching for members of group {} with job instance {} with map {}",
-					theParameters.getGroupId(),
-					theParameters.getInstanceId(),
-					map);
-			try (IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(
-					map,
-					new SearchRuntimeDetails(null, theParameters.getInstanceId()),
-					null,
-					theParameters.getPartitionIdOrAllPartitions())) {
+	private Set<String> getMembersFromGroupWithFilter(ExportPIDIteratorParameters theParameters) {
+		Validate.notBlank(theParameters.getGroupId(), "Group ID must be specified");
+		Set<String> retVal = new HashSet<>();
 
-				while (resultIterator.hasNext()) {
-					resPids.add(resultIterator.next());
+		String groupIdString = theParameters.getGroupId();
+		IIdType groupId = myContext.getVersion().newIdType(groupIdString);
+
+		IFhirResourceDao groupDap = myDaoRegistry.getResourceDao("Group");
+		SystemRequestDetails requestDetails =
+				new SystemRequestDetails().setRequestPartitionId(theParameters.getPartitionIdOrAllPartitions());
+		IBaseResource group = groupDap.read(groupId, requestDetails);
+
+		List<IBaseReference> references = myContext.newTerser().getValues(group, "member.entity", IBaseReference.class);
+		for (IBaseReference reference : references) {
+			if ("Patient".equals(reference.getReferenceElement().getResourceType())) {
+				if (reference.getReferenceElement().hasIdPart()) {
+					retVal.add(reference
+							.getReferenceElement()
+							.toUnqualifiedVersionless()
+							.getValue());
 				}
-			} catch (IOException e) {
-				throw new InternalErrorException(Msg.code(2837) + e.getMessage(), e);
 			}
 		}
-		return resPids;
-	}
 
-	@Nonnull
-	private List<SearchParameterMap> makeSearchParameterMaps(
-			@Nonnull ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) {
-		final RuntimeResourceDefinition def = myContext.getResourceDefinition("Patient");
-		final List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(
-				def, theParameters, theConsiderDateRange);
-		maps.forEach(map -> {
-			final List<String> patientIds = theParameters.getPatientIds();
-			if (theParameters.getGroupId() != null) {
-				// Job V1/V2
-				map.add(PARAM_HAS, makeGroupMemberHasOrListParam(theParameters.getGroupId()));
-			} else {
-				// Job V3
-				Validate.isTrue(patientIds != null && !patientIds.isEmpty());
-			}
-			if (patientIds != null && !patientIds.isEmpty()) {
-				map.add(PARAM_ID, makeReferenceOrListParam(patientIds));
-			}
-		});
-		return maps;
-	}
-
-	@Nonnull
-	private HasOrListParam makeGroupMemberHasOrListParam(@Nonnull String theGroupId) {
-		final HasParam hasParam = new HasParam("Group", "member", "_id", theGroupId);
-		return new HasOrListParam().addOr(hasParam);
+		return retVal;
 	}
 
 	// gets all the resources related to each patient provided in the list of thePatientPids

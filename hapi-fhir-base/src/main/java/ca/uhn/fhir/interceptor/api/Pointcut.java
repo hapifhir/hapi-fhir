@@ -3291,7 +3291,7 @@ public enum Pointcut implements IPointcut {
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>
-	 * ca.uhn.fhir.batch2.model.JobInstance
+	 * ca.uhn.fhir.batch2.model.JobInstance - The job instance that is about to be started. Hooks may modify this object.
 	 * </li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that lead to the creation

@@ -28,26 +28,38 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportWorkPackageJson;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
+import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportHelperService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.search.SearchConstants;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.IResourceSupportedSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.SearchParameterUtil;
+import ca.uhn.fhir.util.TaskChunker;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -79,6 +91,12 @@ public class GenerateWorkPackagesV3Step
 	@Autowired
 	private IHapiTransactionService myTransactionService;
 
+	@Autowired
+	private BulkExportHelperService myBulkExportHelperService;
+
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+
 	@Nonnull
 	@Override
 	public RunOutcome run(
@@ -102,32 +120,32 @@ public class GenerateWorkPackagesV3Step
 	private void handleGroupLevelExport(
 			StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
 			IJobDataSink<BulkExportWorkPackageJson> theDataSink,
-			BulkExportJobParameters params) {
-		Validate.notNull(params.getGroupId(), "groupId must be set for export style GROUP");
+			BulkExportJobParameters jobParams) {
+		Validate.notNull(jobParams.getGroupId(), "groupId must be set for export style GROUP");
 		Validate.isTrue(
-				params.getGroupId().contains("/"),
+				jobParams.getGroupId().contains("/"),
 				"groupId must be a typed FHIR ID (Group/XYZ) for export style GROUP");
 
-		IIdType groupId = myFhirContext.getVersion().newIdType(params.getGroupId());
+		IIdType groupId = myFhirContext.getVersion().newIdType(jobParams.getGroupId());
 		RequestPartitionId groupReadPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
 				theStepExecutionDetails.newSystemRequestDetails(), groupId);
 
 		ExportPIDIteratorParameters patientListParams = new ExportPIDIteratorParameters();
-		patientListParams.setGroupId(params.getGroupId());
-		patientListParams.setPatientIds(params.getPatientIds());
+		patientListParams.setGroupId(jobParams.getGroupId());
+		patientListParams.setPatientIds(jobParams.getPatientIds());
 		patientListParams.setPartitionId(groupReadPartition);
-		patientListParams.setStartDate(params.getSince());
-		patientListParams.setEndDate(params.getUntil());
-		patientListParams.setFilters(params.getFilters());
-		patientListParams.setExpandMdm(params.isExpandMdm());
+		patientListParams.setStartDate(jobParams.getSince());
+		patientListParams.setEndDate(jobParams.getUntil());
+		patientListParams.setExpandMdm(jobParams.isExpandMdm());
+		// Filters are applied later on
+		patientListParams.setFilters(List.of());
 
 		Set<String> patientResourceIds = myTransactionService
 				.withSystemRequest()
 				.withRequestPartitionId(groupReadPartition)
 				.readOnly()
 				.execute(() -> {
-					Set groupMemberPids = myBulkExportProcessor.getPatientSetForGroupExport(patientListParams, false);
-					return myIdHelperService.translatePidsToFhirResourceIds(groupMemberPids);
+					return myBulkExportProcessor.getPatientSetForGroupExport(patientListParams);
 				});
 
 		/*
@@ -142,31 +160,73 @@ public class GenerateWorkPackagesV3Step
 
 		ListMultimap<RequestPartitionId, String> patientResourceIdsByPartition =
 				Multimaps.index(patientResourceIds, t -> determinePatientPartition(theStepExecutionDetails, t));
-		List<String> resourceTypes = getResourceTypes(theStepExecutionDetails, params);
+		List<String> resourceTypes = getResourceTypes(theStepExecutionDetails, jobParams);
 
 		boolean includesGroup = resourceTypes.remove("Group");
 		for (RequestPartitionId nextPartitionChunk : patientResourceIdsByPartition.keySet()) {
 
-			List<String> chunkPatientIds = patientResourceIdsByPartition.get(nextPartitionChunk);
+			List<String> patientIds = patientResourceIdsByPartition.get(nextPartitionChunk);
+			patientIds = applyTypeFiltersToPatientIdList(jobParams, nextPartitionChunk, patientIds);
 
-			BulkExportWorkPackageJson workPackage = new BulkExportWorkPackageJson();
-			workPackage.setPatientIds(chunkPatientIds);
-			workPackage.setResourceTypes(resourceTypes);
-			workPackage.setPartitionId(nextPartitionChunk);
-			theDataSink.accept(workPackage);
+			if (!patientIds.isEmpty()) {
+				BulkExportWorkPackageJson workPackage = new BulkExportWorkPackageJson();
+				workPackage.setPatientIds(patientIds);
+				workPackage.setResourceTypes(resourceTypes);
+				workPackage.setPartitionId(nextPartitionChunk);
+				theDataSink.accept(workPackage);
+			}
 		}
 
 		if (includesGroup) {
 			BulkExportWorkPackageJson workPackage = new BulkExportWorkPackageJson();
 			workPackage.setResourceTypes(List.of("Group"));
 			workPackage.setPartitionId(groupReadPartition);
-			workPackage.setGroupId(params.getGroupId());
+			workPackage.setGroupId(jobParams.getGroupId());
 			theDataSink.accept(workPackage);
 		}
 	}
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	@Nonnull
+	private List<String> applyTypeFiltersToPatientIdList(
+			BulkExportJobParameters theJobParams, RequestPartitionId thePartitionId, List<String> thePatientIds) {
+		List<String> newPatientIdList = new ArrayList<>(thePatientIds.size());
+		TaskChunker.chunk(thePatientIds, SearchConstants.MAX_PAGE_SIZE, idChunk -> {
+			RuntimeResourceDefinition patientDef = myFhirContext.getResourceDefinition("Patient");
+			ExportPIDIteratorParameters pidParams = new ExportPIDIteratorParameters();
+			pidParams.setPatientIds(idChunk);
+			pidParams.setFilters(theJobParams.getFilters());
+			List<SearchParameterMap> maps =
+					myBulkExportHelperService.createSearchParameterMapsForResourceType(patientDef, pidParams, false);
+			for (SearchParameterMap map : maps) {
+				if (maps.isEmpty()) {
+					newPatientIdList.addAll(idChunk);
+				} else {
+					TokenOrListParam idParamOrList = new TokenOrListParam();
+					idChunk.forEach(id -> idParamOrList.add(new TokenParam(null, id)));
+					map.add(IAnyResource.SP_RES_ID, idParamOrList);
+
+					List<IIdType> filteredIds = myTransactionService
+							.withSystemRequest()
+							.withRequestPartitionId(thePartitionId)
+							.execute(() -> {
+								IFhirResourceDao patientDao = myDaoRegistry.getResourceDao("Patient");
+								SystemRequestDetails requestDetails =
+										new SystemRequestDetails().setRequestPartitionId(thePartitionId);
+								return patientDao.searchForResourceIds(map, requestDetails);
+							});
+					for (IIdType filteredId : filteredIds) {
+						newPatientIdList.add(
+								filteredId.toUnqualifiedVersionless().getValue());
+					}
+				}
+			}
+		});
+		return newPatientIdList;
+	}
+
 	private RequestPartitionId determinePatientPartition(
-			StepExecutionDetails theStepExecutionDetails, String thePatientId) {
+			StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails, String thePatientId) {
 		return myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
 				theStepExecutionDetails.newSystemRequestDetails(),
 				"Patient",

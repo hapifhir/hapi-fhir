@@ -20,14 +20,12 @@
 package ca.uhn.fhir.jpa.bulk.export.api;
 
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.io.IOException;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public interface IBulkExportProcessor<T extends IResourcePersistentId<?>> {
 
@@ -42,6 +40,5 @@ public interface IBulkExportProcessor<T extends IResourcePersistentId<?>> {
 	 */
 	void expandMdmResources(List<IBaseResource> theResources);
 
-	HashSet<JpaPid> getPatientSetForGroupExport(ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange)
-			throws IOException;
+	Set<String> getPatientSetForGroupExport(ExportPIDIteratorParameters theParameters);
 }

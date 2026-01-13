@@ -1981,24 +1981,20 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	}
 
 	private Group createGroupWithPatients() {
-		Patient patient = new Patient();
-		patient.setId("PF");
-		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
-		patient.setActive(true);
-		myClient.update().resource(patient).execute();
-
-		patient = new Patient();
-		patient.setId("PM");
-		patient.setGender(Enumerations.AdministrativeGender.MALE);
-		patient.setActive(true);
-		myClient.update().resource(patient).execute();
+		createPatient(withId("PF"), withGender("female"), withActiveTrue());
+		createPatient(withId("PM"), withGender("male"), withActiveTrue());
 
 		Group group = new Group();
 		group.setId("Group/G");
 		group.setActive(true);
 		group.addMember().getEntity().setReference("Patient/PF");
 		group.addMember().getEntity().setReference("Patient/PM");
-		myClient.update().resource(group).execute();
+		doUpdateResource(group);
+
+		// Create 2 more patients not in the group
+
+		createPatient(withId("OPF"), withGender("female"), withActiveTrue());
+		createPatient(withId("OPM"), withGender("male"), withActiveTrue());
 
 		return group;
 	}

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -98,6 +99,7 @@ import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TYPE;
 import static ca.uhn.fhir.rest.api.Constants.VALID_MODIFIERS;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder implements ICanMakeMissingParamPredicate {
@@ -118,6 +120,9 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
+
+	@Autowired
+	private FhirContext myFhirContext;
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -235,10 +240,28 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		 */
 		RequestPartitionId requestPartitionId = theRequestPartitionId;
 		if (myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()) {
-			SearchParameterMap map = new SearchParameterMap();
-			map.addOrList(theParamName, theReferenceOrParamList);
-			requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-					theRequest, theResourceType, map);
+			for (IQueryParameterType next : theReferenceOrParamList) {
+
+				if (next instanceof ReferenceParam refParam) {
+					if (isNotBlank(refParam.getResourceType()) && isNotBlank(refParam.getIdPart())) {
+						String resourceType = refParam.getResourceType();
+						String resourceId = refParam.getIdPart();
+
+						IIdType id = myFhirContext.getVersion().newIdType(resourceType, resourceId);
+						RequestPartitionId nextPartitionId =
+								myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, id);
+						requestPartitionId = requestPartitionId.mergeIds(nextPartitionId);
+						continue;
+					}
+				}
+
+				SearchParameterMap map = new SearchParameterMap();
+				map.add(theParamName, next);
+				RequestPartitionId nextPartitionId =
+						myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+								theRequest, theResourceType, map);
+				requestPartitionId = requestPartitionId.mergeIds(nextPartitionId);
+			}
 		}
 
 		for (int orIdx = 0; orIdx < theReferenceOrParamList.size(); orIdx++) {

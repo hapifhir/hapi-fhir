@@ -93,6 +93,11 @@ public class RequestTenantPartitionInterceptor {
 		return extractPartitionIdFromRequest(theRequestDetails);
 	}
 
+	/**
+	 * This method is invoked at the kickoff of a Batch2 job - It takes the request tenant from the
+	 * RequestDetails object in the operation being used to kick off the job, and stashes it so that
+	 * it's available later on to figure out the partitions during batch2 job exection steps.
+	 */
 	@Hook(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE)
 	public void createBatchJob(RequestDetails theRequestDetails, JobInstance theJobInstance) {
 		theJobInstance.addUserData(INITIATING_TENANT_KEY, theRequestDetails.getTenantId());
