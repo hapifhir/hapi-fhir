@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -152,7 +153,8 @@ class OperationRule extends BaseRule implements IAuthRule {
 
 				if (myAppliesToAnyInstance || myAppliesAtAnyLevel) {
 					applies = true;
-					if (isBlockedByInstanceFilter(theRequestDetails, requestResourceId, theOperation, theRuleApplier)) {
+					if (isBlockedByInstanceFilter(
+							theRequestDetails, requestResourceId, theInputResource, theOperation, theRuleApplier)) {
 						applies = false;
 					}
 				} else {
@@ -163,7 +165,12 @@ class OperationRule extends BaseRule implements IAuthRule {
 							for (IIdType next : myAppliesToIds) {
 								if (next.toUnqualifiedVersionless().getValue().equals(instanceId)) {
 									applies = true;
-									if (isBlockedByInstanceFilter(theRequestDetails, requestResourceId, theOperation, theRuleApplier)) {
+									if (isBlockedByInstanceFilter(
+											theRequestDetails,
+											requestResourceId,
+											theInputResource,
+											theOperation,
+											theRuleApplier)) {
 										applies = false;
 									} else {
 										break;
@@ -177,7 +184,12 @@ class OperationRule extends BaseRule implements IAuthRule {
 								String resName = ctx.getResourceType(next);
 								if (resName.equals(requestResourceId.getResourceType())) {
 									applies = true;
-									if (isBlockedByInstanceFilter(theRequestDetails, requestResourceId, theOperation, theRuleApplier)) {
+									if (isBlockedByInstanceFilter(
+											theRequestDetails,
+											requestResourceId,
+											theInputResource,
+											theOperation,
+											theRuleApplier)) {
 										applies = false;
 									} else {
 										break;
@@ -303,41 +315,76 @@ class OperationRule extends BaseRule implements IAuthRule {
 
 	private boolean isBlockedByInstanceFilter(
 			RequestDetails theRequestDetails,
-			IIdType theRequestResourceId,
+			IIdType theTargetResourceId,
+			IBaseResource theInputResource,
 			RestOperationTypeEnum theOperation,
 			IRuleApplier theRuleApplier) {
 
-		if (isBlank(myInstanceFilter) || theRequestResourceId == null) {
+		if (isBlank(myInstanceFilter) || theTargetResourceId == null) {
 			// nothing to block
 			return false;
 		}
 
-		// FIXME ND - we should check two things before fetching:
-		// 1. was a resource already fetched?
-		// 2. has it been added to the cache?
-		IAuthorizationResourceFetcher resourceFetcher = theRuleApplier.getResourceFetcher();
-		Optional<IBaseResource> oFetchedResource = resourceFetcher.fetch(theRequestResourceId, theRequestDetails);
-		if (oFetchedResource.isEmpty()) {
+		Optional<IBaseResource> oResource =
+				getResourceForFilterCheck(theTargetResourceId, theInputResource, theRequestDetails, theRuleApplier);
+		if (oResource.isEmpty()) {
 			// could not find resource, block to be safe
-			ourLog.debug("Could not find resource [{}] to apply filter [{}].", theRequestResourceId, myInstanceFilter);
+			ourLog.debug("Could not find resource [{}] to apply filter [{}].", theTargetResourceId, myInstanceFilter);
 			return true;
 		}
 
-		IBaseResource resource = oFetchedResource.get();
+		IBaseResource resource = oResource.get();
 		FhirQueryRuleTester tester = new FhirQueryRuleTester(myInstanceFilter);
 
 		IAuthRuleTester.RuleTestRequest ruleTestRequest =
-				createRuleTestRequest(theOperation, theRequestDetails, theRequestResourceId, resource, theRuleApplier);
+				createRuleTestRequest(theOperation, theRequestDetails, theTargetResourceId, resource, theRuleApplier);
 
 		// blocked if the resource does not match the filter
 		boolean blocked = !tester.matches(ruleTestRequest);
 		ourLog.debug(
 				"Instance filter result: resourceId={}, filter={}, blocked={}",
-				theRequestResourceId,
+				theTargetResourceId,
 				myInstanceFilter,
 				blocked);
 
 		return blocked;
+	}
+
+	/**
+	 * <p>Returns the resource that will be used for the instance filter check.</p>
+	 * <p>Outcomes:</p>
+	 * <ol>
+	 *     <li>theTargetResourceId == theInputResource -> use theInputResource</li>
+	 *     <li>theTargetResourceId != theInputResource -> try to fetch the full resource body using theTargetResourceId.</li>
+	 * </ol>
+	 */
+	private Optional<IBaseResource> getResourceForFilterCheck(
+			@Nonnull IIdType theTargetResourceId,
+			@Nullable IBaseResource theInputResource,
+			RequestDetails theRequestDetails,
+			IRuleApplier theRuleApplier) {
+
+		if (theInputResource != null && targetResourceIdMatchesInputResource(theTargetResourceId, theInputResource)) {
+			return Optional.of(theInputResource);
+		}
+
+		// This would happen for Observation/123/$meta-add:
+		// theTargetResourceId = Observation/123
+		// theInputResource = Parameters
+		IAuthorizationResourceFetcher resourceFetcher = theRuleApplier.getResourceFetcher();
+		return resourceFetcher.fetch(theTargetResourceId, theRequestDetails);
+	}
+
+	private boolean targetResourceIdMatchesInputResource(
+			@Nonnull IIdType theTargetResourceId, @Nonnull IBaseResource theInputResource) {
+		IIdType inputResourceId = theInputResource.getIdElement();
+		if (inputResourceId == null || !inputResourceId.hasIdPart()) {
+			return false;
+		}
+
+		return Objects.equals(
+				theTargetResourceId.toUnqualifiedVersionless().getValue(),
+				inputResourceId.toUnqualifiedVersionless().getValue());
 	}
 
 	private @Nullable IIdType getRequestResourceId(RequestDetails theRequestDetails) {
