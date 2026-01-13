@@ -47,6 +47,24 @@ public interface IAuthRuleBuilderRuleBulkExport {
 	IAuthRuleBuilderRuleBulkExportWithTarget groupExportOnGroup(@Nonnull String theFocusResourceId);
 
 	/**
+	 * Allow/deny <b>group-level</b> export rule applies to the Group by matching on the provided FHIR query filter,
+	 * e.g. <code>?identifier=foo|bar</code>
+	 * Note that resource type is implied to be Group
+	 *
+	 * @since 8.8.0
+	 */
+	IAuthRuleBuilderRuleBulkExportWithTarget groupExportOnFilter(@Nonnull String theCompartmentFilterMatcher);
+
+	/**
+	 * Allow/deny <b>patient-level</b> export rule applies to the Patient by matching on the provided FHIR query filter,
+	 * e.g. <code>?identifier=foo|bar</code>
+	 * Note that resource type is implied to be Patient
+	 *
+	 * @since 8.8.0
+	 */
+	IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnFilter(@Nonnull String theCompartmentFilterMatcher);
+
+	/**
 	 * Allow/deny <b>patient-level</b> export rule applies to the Group with the given resource ID, e.g. <code>Group/123</code>
 	 *
 	 * @since 5.5.0

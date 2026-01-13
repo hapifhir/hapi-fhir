@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
@@ -66,7 +67,7 @@ class ResourceChangeListenerRegistryImplTest {
 
 		@Bean
 		public IResourceChangeListenerRegistry resourceChangeListenerRegistry(InMemoryResourceMatcher theInMemoryResourceMatcher) {
-			return new ResourceChangeListenerRegistryImpl(ourFhirContext, myResourceChangeListenerCacheFactory, theInMemoryResourceMatcher);
+			return new ResourceChangeListenerRegistryImpl(ourFhirContext, new PartitionSettings(), myResourceChangeListenerCacheFactory, theInMemoryResourceMatcher);
 		}
 
 		@Bean
@@ -112,6 +113,20 @@ class ResourceChangeListenerRegistryImplTest {
 	public void after() {
 		myResourceChangeListenerRegistry.clearListenersForUnitTest();
 			ResourceChangeListenerCache.setNowForUnitTests(null);
+	}
+
+	/**
+	 * Calling the deprecated registerResourceResourceChangeListener method should still
+	 * register a listener
+	 */
+	@Test
+	public void testRegisterListenerWithNoPartitionSpecified() {
+		IResourceChangeListener listener1 = mock(IResourceChangeListener.class);
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(PATIENT_RESOURCE_NAME, ourMap, listener1, TEST_REFRESH_INTERVAL_MS);
+
+		when(mySearchParamMatcher.match(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
+
+		assertEquals(1, myResourceChangeListenerRegistry.size());
 	}
 
 	@Test

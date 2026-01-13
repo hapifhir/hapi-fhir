@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.api;
 
 import ca.uhn.fhir.i18n.Msg;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -30,6 +31,7 @@ import java.util.Objects;
  */
 public class SortSpec implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 2866833099879713467L;
 
 	private SortSpec myChain;
@@ -160,5 +162,22 @@ public class SortSpec implements Serializable {
 	@Override
 	public int hashCode() {
 		return Objects.hash(myChain, myParamName, myOrder);
+	}
+
+	/**
+	 * Convert strings like "-date" into a SortSpec object.
+	 * Note: this does not account for DSTU2-style sort modifiers like "date:desc" or "date:asc"
+	 * since those are on the parameter name, not the value.
+	 *
+	 * @param theParamValue a string like "-date" or "date"
+	 * @return a parsed SortSpec object
+	 */
+	public static SortSpec fromR3OrLaterParameterValue(String theParamValue) {
+		SortOrderEnum direction = SortOrderEnum.ASC;
+		if (theParamValue.startsWith("-")) {
+			direction = SortOrderEnum.DESC;
+			theParamValue = theParamValue.substring(1);
+		}
+		return new SortSpec(theParamValue, direction);
 	}
 }
