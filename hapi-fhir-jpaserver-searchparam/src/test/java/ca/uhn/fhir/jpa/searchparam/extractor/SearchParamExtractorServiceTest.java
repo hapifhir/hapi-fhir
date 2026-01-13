@@ -8,8 +8,10 @@ import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.MockInvoker;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,8 +20,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Method;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,9 +93,10 @@ public class SearchParamExtractorServiceTest {
 		PathAndRef pathAndRef = new PathAndRef("member", "Group.member.entity", reference, false);
 
 		// Create a ResourceLink with a target PID that won't be in the map
-		ResourceLink resourceLink = new ResourceLink();
-		resourceLink.setSourcePath("Group.member.entity");
-		resourceLink.setTargetResource("Patient", 999L, "Patient/999");
+		ResourceTable table = new ResourceTable();
+		table.setResourceType("Group");
+		table.setId(JpaPid.fromId(123L));
+		ResourceLink resourceLink = ResourceLink.forLogicalReference("Group.member.entity", table, "http://example.com", Date.from(Instant.now()));
 
 		List<ResourceLink> existingResourceLinks = new ArrayList<>();
 		existingResourceLinks.add(resourceLink);
@@ -100,10 +105,6 @@ public class SearchParamExtractorServiceTest {
 		Map<JpaPid, Optional<String>> idMap = new HashMap<>();
 		JpaPid differentPid = JpaPid.fromId(888L);
 		idMap.put(differentPid, Optional.of("Patient/888"));
-		PersistentIdToForcedIdMap<JpaPid> targetResourceIdMap = new PersistentIdToForcedIdMap<>(idMap);
-
-		// Mock the IdHelperService to return our map
-		when(myIdHelperService.translatePidsToForcedIds(any())).thenReturn(targetResourceIdMap);
 
 		// Use reflection to call the private method
 		Method method = SearchParamExtractorService.class.getDeclaredMethod(

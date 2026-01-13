@@ -818,6 +818,12 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 		IIdType referenceElement = thePathAndRef.getRef().getReferenceElement();
 		List<ResourceLink> resourceLinks = new ArrayList<>(theResourceLinks);
 
+		if (thePathAndRef.isCanonical()) {
+			return resourceLinks.stream()
+				.filter(r -> r.getTargetResourceUrl().equals(thePathAndRef.getPath()))
+				.findFirst();
+		}
+
 		Set<JpaPid> pids = new HashSet<>();
 		for (ResourceLink resourceLink : resourceLinks) {
 			JpaPid targetResourceJpaPid = resourceLink.getTargetResourcePk();
@@ -825,6 +831,11 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 				pids.add(targetResourceJpaPid);
 			}
 		}
+
+		if (pids.isEmpty()) {
+			return Optional.empty();
+		}
+
 		PersistentIdToForcedIdMap<JpaPid> targetResourceIdMap = myIdHelperService.translatePidsToForcedIds(pids);
 
 		for (ResourceLink resourceLink : resourceLinks) {
@@ -838,7 +849,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 
 			boolean hasMatchingResourceId = false;
 			Optional<String> idPartOpt = targetResourceIdMap.get(resourceLink.getTargetResourcePk());
-			if (idPartOpt != null && idPartOpt.isPresent()) {
+			if (idPartOpt.isPresent()) {
 				String idPart = idPartOpt.get();
 				idPart = idPart.substring(idPart.indexOf('/'));
 				hasMatchingResourceId = StringUtils.equals(idPart, referenceElement.getIdPart());
