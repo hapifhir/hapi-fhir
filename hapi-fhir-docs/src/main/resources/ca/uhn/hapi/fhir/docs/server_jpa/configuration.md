@@ -184,5 +184,5 @@ Setting this property explicitly to false disables the feature:  [Non Resource D
 JPA Server prevents conditional updated to invalidate match criteria for first version of resources. 
 This setting, disabled by default, allows to configure the same behaviour for later versions.
 
-Setting this property explicitly to true enables the feature: [Prevent Conditional Updates Invalidating Match Criteria](/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#isPreventInvalidatingConditionalMatchCriteria())
+Setting this property explicitly to true enables the feature: [Prevent Conditional Updates Invalidating Match Criteria](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#isPreventInvalidatingConditionalMatchCriteria())
 
