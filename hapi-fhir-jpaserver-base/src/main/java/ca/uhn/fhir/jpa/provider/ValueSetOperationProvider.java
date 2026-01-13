@@ -73,11 +73,6 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	private ITerminologyValidationSvc myTerminologyValidationSvc;
 
 	@VisibleForTesting
-	public void setTerminologyValidationSvc(ITerminologyValidationSvc theTerminologyValidationSvc) {
-		myTerminologyValidationSvc = theTerminologyValidationSvc;
-	}
-
-	@VisibleForTesting
 	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
 		myDaoRegistry = theDaoRegistry;
 	}
