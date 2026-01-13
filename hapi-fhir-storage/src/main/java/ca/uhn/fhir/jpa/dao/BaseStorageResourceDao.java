@@ -280,8 +280,6 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 			RequestPartitionId theRequestPartitionId) {
 		IBasePersistedResource theEntityToUpdate;
 
-		// FIXME: add mask for all transactionOperationWithMultipleMatchFailure and invalidMatchUrlNoMatches
-
 		Set<IResourcePersistentId> match = getMatchResourceUrlService()
 				.processMatchUrl(
 						theConditionalUrl,
