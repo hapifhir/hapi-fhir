@@ -95,8 +95,9 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRuleBulkE
 			}
 		}
 
-		List<IBaseResource> patients =
-				theRuleApplier.getAuthResourceResolver().resolveResourcesByIds(patientIdOptions, "Patient");
+		List<IBaseResource> patients = theRuleApplier
+				.getAuthResourceResolver()
+				.resolveResourcesByIds(patientIdOptions, "Patient", theRequestDetails);
 
 		return applyTestersToPatientResources(theOperation, theRequestDetails, theRuleApplier, patients);
 	}

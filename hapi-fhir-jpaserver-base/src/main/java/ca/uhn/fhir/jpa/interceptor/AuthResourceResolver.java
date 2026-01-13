@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -33,9 +34,12 @@ import ca.uhn.fhir.rest.server.interceptor.auth.IAuthResourceResolver;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 /**
  * Small service class to inject DB access into an interceptor. Some examples include:
@@ -66,7 +70,7 @@ public class AuthResourceResolver implements IAuthResourceResolver {
 		}
 
 		SystemRequestDetails systemRequestDetails =
-				newSystemRequestDetailsWithPartitionInfo(theRequestDetails, theResourceId);
+				newSystemRequestDetailsWithPartitionInfoForRead(theRequestDetails, theResourceId);
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceId.getResourceType());
 		IBaseResource resource = dao.read(theResourceId, systemRequestDetails);
 		cache.put(resourceIdKey, resource);
@@ -75,18 +79,61 @@ public class AuthResourceResolver implements IAuthResourceResolver {
 	}
 
 	@Override
-	public List<IBaseResource> resolveResourcesByIds(List<String> theResourceIds, String theResourceType) {
-		TokenOrListParam t = new TokenOrListParam(null, theResourceIds.toArray(String[]::new));
+	public List<IBaseResource> resolveResourcesByIds(
+			List<String> theResourceIds, String theResourceType, RequestDetails theRequestDetails) {
 
-		SearchParameterMap m = new SearchParameterMap();
-		m.add(Constants.PARAM_ID, t);
-		return myDaoRegistry.getResourceDao(theResourceType).searchForResources(m, new SystemRequestDetails());
+		Map<String, IBaseResource> cache = getResourceCache(theRequestDetails);
+		List<IBaseResource> results = new ArrayList<>();
+		List<String> idsToFetch = new ArrayList<>();
+
+		for (String id : theResourceIds) {
+			String cacheKey = toCacheKey(theResourceType, id);
+			if (cache.containsKey(cacheKey) && cache.get(cacheKey) != null) {
+				results.add(cache.get(cacheKey));
+			} else {
+				idsToFetch.add(id);
+			}
+		}
+
+		if (isNotEmpty(idsToFetch)) {
+			List<IBaseResource> fetched = doSearch(idsToFetch, theResourceType, theRequestDetails);
+			for (IBaseResource resource : fetched) {
+				String cacheKey =
+						toCacheKey(theResourceType, resource.getIdElement().getIdPart());
+				cache.put(cacheKey, resource);
+				results.add(resource);
+			}
+		}
+
+		return results;
 	}
 
-	private SystemRequestDetails newSystemRequestDetailsWithPartitionInfo(
+	private List<IBaseResource> doSearch(
+			List<String> theResourceIds, String theResourceType, RequestDetails theRequestDetails) {
+		TokenOrListParam orListParam = new TokenOrListParam(null, theResourceIds.toArray(String[]::new));
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(Constants.PARAM_ID, orListParam);
+
+		SystemRequestDetails systemRequestDetails =
+				newSystemRequestDetailsWithPartitionInfoForSearch(theRequestDetails, theResourceType, params);
+
+		return myDaoRegistry.getResourceDao(theResourceType).searchForResources(params, systemRequestDetails);
+	}
+
+	private SystemRequestDetails newSystemRequestDetailsWithPartitionInfoForRead(
 			RequestDetails theRequestDetails, IIdType theResourceId) {
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
 				theRequestDetails, ReadPartitionIdRequestDetails.forRead(theResourceId));
+
+		return SystemRequestDetails.forRequestPartitionId(requestPartitionId);
+	}
+
+	private SystemRequestDetails newSystemRequestDetailsWithPartitionInfoForSearch(
+			RequestDetails theRequestDetails, String theResourceType, SearchParameterMap theParams) {
+		RequestPartitionId requestPartitionId =
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+						theRequestDetails, theResourceType, theParams);
 
 		return SystemRequestDetails.forRequestPartitionId(requestPartitionId);
 	}
@@ -101,5 +148,13 @@ public class AuthResourceResolver implements IAuthResourceResolver {
 			theRequestDetails.getUserData().put(RESOURCE_CACHE_KEY, cache);
 		}
 		return cache;
+	}
+
+	private String toCacheKey(String theResourceType, String theId) {
+		IdDt id = new IdDt(theId);
+		if (!id.hasResourceType()) {
+			id = new IdDt(theResourceType, theId);
+		}
+		return id.toUnqualifiedVersionless().getValue();
 	}
 }

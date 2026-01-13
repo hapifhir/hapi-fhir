@@ -50,5 +50,6 @@ public interface IAuthResourceResolver {
 	 * @param theResourceType the type of resource
 	 * @return A list of resources resolved by ID
 	 */
-	List<IBaseResource> resolveResourcesByIds(List<String> theResourceIds, String theResourceType);
+	List<IBaseResource> resolveResourcesByIds(
+			List<String> theResourceIds, String theResourceType, RequestDetails theRequestDetails);
 }
