@@ -39,6 +39,7 @@ import ca.uhn.fhir.util.MultimapCollector;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
+import jakarta.annotation.Generated;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
@@ -479,6 +480,32 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false)).contains("PARTITION_ID=?");
 	}
 
+	@Test
+	public void testTransactionWithPlaceholderReferencesToNormallyUpdatedResource() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+
+		String patientFullUrl = "urn:uuid:123-456-789";
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(
+			buildPatient(withId("A"), withActiveTrue()),
+			"Patient/A",
+			patientFullUrl
+		);
+		bb.addTransactionCreateEntry(
+			buildEncounter(withSubject(patientFullUrl), withStatus("cancelled"))
+		);
+		Bundle request = bb.getBundleTyped();
+
+		Bundle result = mySystemDao.transaction(mySrd, request);
+		TransactionUtil.TransactionResponse parsedResult = TransactionUtil.parseTransactionResponse(myFhirContext, request, result);
+		assertEquals(2, parsedResult.getStorageOutcomes().size());
+		assertEquals("Patient/A/_history/1", parsedResult.getStorageOutcomes().get(0).getTargetId().getValue());
+		assertThat(parsedResult.getStorageOutcomes().get(1).getTargetId().getValue()).matches("Encounter/.*/_history/1");
+
+		Encounter actual = myEncounterDao.read(new IdType(parsedResult.getStorageOutcomes().get(1).getTargetId().getValue()), mySrd);
+		assertEquals("Patient/A", actual.getSubject().getReference());
+	}
 
 	@Test
 	public void testTransaction_NoRequestDetails() throws IOException {
