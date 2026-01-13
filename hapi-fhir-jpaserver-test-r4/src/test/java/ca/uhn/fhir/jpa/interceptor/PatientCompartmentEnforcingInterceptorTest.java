@@ -25,6 +25,8 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 	public static final int ALTERNATE_DEFAULT_ID = -1;
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
+	@Autowired
+	private ISearchParamExtractor myRequestPartitionHelperSvc;
 	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
 	private PatientIdPartitionInterceptor myPatientIdPartitionInterceptor;
 	private PatientCompartmentEnforcingInterceptor mySvc;
@@ -35,7 +37,7 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 		super.before();
 		myForceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
 		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
-		mySvc = new PatientCompartmentEnforcingInterceptor(getFhirContext(), mySearchParamExtractor);
+		mySvc = new PatientCompartmentEnforcingInterceptor(getFhirContext(), myRequestPartitionHelperSvc);
 
 		myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 		myInterceptorRegistry.registerInterceptor(myForceOffsetSearchModeInterceptor);
