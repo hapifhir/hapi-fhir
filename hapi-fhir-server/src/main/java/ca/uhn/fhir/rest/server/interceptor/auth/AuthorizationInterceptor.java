@@ -31,8 +31,6 @@ import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
-import ca.uhn.fhir.rest.server.interceptor.auth.fetcher.IAuthorizationResourceFetcher;
-import ca.uhn.fhir.rest.server.interceptor.auth.fetcher.NoOpAuthorizationResourceFetcher;
 import ca.uhn.fhir.util.BundleUtil;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
@@ -99,7 +97,6 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	private IValidationSupport myValidationSupport;
 
 	private IAuthorizationSearchParamMatcher myAuthorizationSearchParamMatcher;
-	private IAuthorizationResourceFetcher myResourceFetcher;
 	private Logger myTroubleshootingLog;
 
 	/**
@@ -235,20 +232,6 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	@Nullable
 	public IAuthorizationSearchParamMatcher getSearchParamMatcher() {
 		return myAuthorizationSearchParamMatcher;
-	}
-
-	/**
-	 * Sets a resource fetcher used to retrieve resources during authorization.
-	 *
-	 * @param theResourceFetcher - The resource fetcher. Defaults to null.
-	 */
-	public void setResourceFetcher(@Nullable IAuthorizationResourceFetcher theResourceFetcher) {
-		myResourceFetcher = theResourceFetcher;
-	}
-
-	@Override
-	public IAuthorizationResourceFetcher getResourceFetcher() {
-		return myResourceFetcher == null ? NoOpAuthorizationResourceFetcher.INSTANCE : myResourceFetcher;
 	}
 
 	/**

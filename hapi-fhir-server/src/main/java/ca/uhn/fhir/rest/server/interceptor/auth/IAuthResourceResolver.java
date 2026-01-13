@@ -19,17 +19,30 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.List;
 
 /**
- * Small service class to inject DB access into an interceptor
- * For example, used in bulk export security to allow querying for resource to match against permission argument filters
+ * Small service class to inject DB access into an interceptor. Some examples include:
+ * <ul>
+ *     <li>bulk export security to allow querying for resource to match against permission argument filters</li>
+ *     <li>instance $meta operations where only the instance id is known at the time of the request</li>
+ * </ul>
  */
 public interface IAuthResourceResolver {
-	IBaseResource resolveResourceById(IIdType theResourceId);
+
+	/**
+	 * Resolve a resource by ID.
+	 * @param theResourceId - The FHIR id of the resource
+	 * @param theRequestDetails - The request details
+	 * @return A resource resolved by ID
+	 */
+	@Nullable
+	IBaseResource resolveResourceById(IIdType theResourceId, RequestDetails theRequestDetails);
 
 	/**
 	 * Resolve a list of resources by ID. All resources should be the same type.

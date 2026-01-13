@@ -24,7 +24,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
-import ca.uhn.fhir.rest.server.interceptor.auth.fetcher.IAuthorizationResourceFetcher;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
@@ -371,8 +370,9 @@ class OperationRule extends BaseRule implements IAuthRule {
 		// This would happen for Observation/123/$meta-add:
 		// theTargetResourceId = Observation/123
 		// theInputResource = Parameters
-		IAuthorizationResourceFetcher resourceFetcher = theRuleApplier.getResourceFetcher();
-		return resourceFetcher.fetch(theTargetResourceId, theRequestDetails);
+		IAuthResourceResolver resourceResolver = theRuleApplier.getAuthResourceResolver();
+		IBaseResource resource = resourceResolver.resolveResourceById(theTargetResourceId, theRequestDetails);
+		return Optional.ofNullable(resource);
 	}
 
 	private boolean targetResourceIdMatchesInputResource(
