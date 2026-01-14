@@ -240,7 +240,7 @@ public class RuleBuilderTest {
 	class OperationRuleWithInstanceFilterTest {
 
 		// Used because FHIR structure classes aren't accessible here
-		Class<? extends IBaseResource> STUB_RESOURCE_TYPE = IBaseResource.class;
+		Class<IBaseResource> STUB_RESOURCE_TYPE = IBaseResource.class;
 
 		static Stream<String> filterParams() {
 			return Stream.of("param=value", "", null);

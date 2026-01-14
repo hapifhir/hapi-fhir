@@ -31,11 +31,15 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthResourceResolver;
+import com.google.common.collect.Sets;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -49,6 +53,7 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
  * </ul>
  */
 public class AuthResourceResolver implements IAuthResourceResolver {
+	private static final Logger ourLog = LoggerFactory.getLogger(AuthResourceResolver.class);
 
 	private static final String RESOURCE_CACHE_KEY = AuthResourceResolver.class.getName() + "_RESOURCE_CACHE";
 
@@ -63,11 +68,15 @@ public class AuthResourceResolver implements IAuthResourceResolver {
 	@Override
 	public IBaseResource resolveResourceById(IIdType theResourceId, RequestDetails theRequestDetails) {
 		String resourceIdKey = theResourceId.getValue();
+		ourLog.debug("Resolving resource: {}.", resourceIdKey);
 
 		Map<String, IBaseResource> cache = getResourceCache(theRequestDetails);
 		if (cache.containsKey(resourceIdKey)) {
+			ourLog.debug("Cache hit for resource: {}", resourceIdKey);
 			return cache.get(resourceIdKey);
 		}
+
+		ourLog.debug("No cache found for resource: {} - Reading from database", resourceIdKey);
 
 		SystemRequestDetails systemRequestDetails =
 				newSystemRequestDetailsWithPartitionInfoForRead(theRequestDetails, theResourceId);
@@ -82,6 +91,8 @@ public class AuthResourceResolver implements IAuthResourceResolver {
 	public List<IBaseResource> resolveResourcesByIds(
 			List<String> theResourceIds, String theResourceType, RequestDetails theRequestDetails) {
 
+		ourLog.debug("Resolving {} {} resource(s): {}", theResourceIds.size(), theResourceType, theResourceIds);
+
 		Map<String, IBaseResource> cache = getResourceCache(theRequestDetails);
 		List<IBaseResource> results = new ArrayList<>();
 		List<String> idsToFetch = new ArrayList<>();
@@ -95,7 +106,13 @@ public class AuthResourceResolver implements IAuthResourceResolver {
 			}
 		}
 
+		if (idsToFetch.size() < theResourceIds.size()) {
+			ourLog.debug(
+					"Cache hits for resource(s): {}", Sets.difference(new HashSet<>(theResourceIds), new HashSet<>(idsToFetch)));
+		}
+
 		if (isNotEmpty(idsToFetch)) {
+			ourLog.debug("Query for resource(s): {}", idsToFetch);
 			List<IBaseResource> fetched = doSearch(idsToFetch, theResourceType, theRequestDetails);
 			for (IBaseResource resource : fetched) {
 				String cacheKey =
