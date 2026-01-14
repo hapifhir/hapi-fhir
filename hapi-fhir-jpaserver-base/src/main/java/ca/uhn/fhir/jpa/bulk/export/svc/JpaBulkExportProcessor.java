@@ -317,7 +317,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	}
 
 	@Nonnull
-	private List<JpaPid> translatePatientIdsToPids(ExportPIDIteratorParameters theParams, boolean theConsiderDateRange) {
+	private List<JpaPid> translatePatientIdsToPids(
+			ExportPIDIteratorParameters theParams, boolean theConsiderDateRange) {
 		RequestPartitionId partitionId = theParams.getPartitionIdOrAllPartitions();
 		List<IIdType> patientIds;
 
@@ -326,15 +327,19 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			QueryChunker.chunk(theParams.getPatientIds(), QUERY_CHUNK_SIZE, patientIdsChunk -> {
 				SearchParameterMap map = new SearchParameterMap();
 				map.setLoadSynchronous(true);
-				map.add(IAnyResource.SP_RES_ID, new TokenOrListParam(null, theParams.getPatientIds().toArray(new String[0])));
+				map.add(
+						IAnyResource.SP_RES_ID,
+						new TokenOrListParam(null, theParams.getPatientIds().toArray(new String[0])));
 				map.setLastUpdated(new DateRangeParam(theParams.getStartDate(), theParams.getEndDate()));
-				List<IIdType> chunkPatientIds = myDaoRegistry.getResourceDao("Patient").searchForResourceIds(map, newSystemRequestDetails(theParams));
+				List<IIdType> chunkPatientIds = myDaoRegistry
+						.getResourceDao("Patient")
+						.searchForResourceIds(map, newSystemRequestDetails(theParams));
 				patientIds.addAll(chunkPatientIds);
 			});
 		} else {
 			patientIds = theParams.getPatientIds().stream()
-				.map(t -> myContext.getVersion().newIdType(t))
-				.toList();
+					.map(t -> myContext.getVersion().newIdType(t))
+					.toList();
 		}
 
 		return myIdHelperService.resolveResourcePids(

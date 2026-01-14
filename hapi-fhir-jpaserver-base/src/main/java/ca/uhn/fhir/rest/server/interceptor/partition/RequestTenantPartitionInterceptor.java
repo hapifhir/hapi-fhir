@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.partition;
 
+import ca.uhn.fhir.batch2.api.IJobInstance;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
@@ -101,6 +102,17 @@ public class RequestTenantPartitionInterceptor {
 	@Hook(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE)
 	public void createBatchJob(RequestDetails theRequestDetails, JobInstance theJobInstance) {
 		theJobInstance.addUserData(INITIATING_TENANT_KEY, theRequestDetails.getTenantId());
+	}
+
+	/**
+	 * During batch2 step execution, restore the tenant ID to any new RequestDetails objects
+	 */
+	@Hook(Pointcut.STORAGE_BATCH_TASK_NEW_REQUEST_DETAILS)
+	public void createBatchJob(RequestDetails theRequestDetails, IJobInstance theJobInstance) {
+		String tenantId = (String) theJobInstance.getUserData().get(INITIATING_TENANT_KEY);
+		if (tenantId != null) {
+			theRequestDetails.setTenantId(tenantId);
+		}
 	}
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)

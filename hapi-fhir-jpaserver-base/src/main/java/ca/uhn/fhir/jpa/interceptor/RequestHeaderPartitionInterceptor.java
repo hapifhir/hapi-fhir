@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.interceptor;
 
+import ca.uhn.fhir.batch2.api.IJobInstance;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
@@ -80,6 +81,14 @@ public class RequestHeaderPartitionInterceptor {
 		theJobInstance.addUserData(INITIATING_HEADER_KEY, partitionHeader);
 	}
 
+	@Hook(Pointcut.STORAGE_BATCH_TASK_NEW_REQUEST_DETAILS)
+	public void createBatchJob(RequestDetails theRequestDetails, IJobInstance theJobInstance) {
+		String partitionHeader = (String) theJobInstance.getUserData().get(INITIATING_HEADER_KEY);
+		if (partitionHeader != null) {
+			theRequestDetails.addHeader(Constants.HEADER_X_REQUEST_PARTITION_IDS, partitionHeader);
+		}
+	}
+
 	/**
 	 * Core logic to identify a request's storage partition. It retrieves the partition header,
 	 * and if the header is blank for a system request, it uses the partition id in the system request if present or
@@ -90,10 +99,6 @@ public class RequestHeaderPartitionInterceptor {
 			RequestDetails theRequestDetails,
 			BiFunction<String, IDefaultPartitionSettings, RequestPartitionId> aHeaderParser) {
 		String partitionHeader = getPartitionHeader(theRequestDetails);
-		if (partitionHeader == null) {
-			partitionHeader = (String) theRequestDetails.getUserData().get(INITIATING_HEADER_KEY);
-		}
-
 		if (isBlank(partitionHeader)) {
 			if (theRequestDetails instanceof SystemRequestDetails systemRequestDetails) {
 				if (systemRequestDetails.getRequestPartitionId() != null) {
@@ -112,7 +117,6 @@ public class RequestHeaderPartitionInterceptor {
 	}
 
 	private static String getPartitionHeader(RequestDetails theRequestDetails) {
-		String partitionHeader = theRequestDetails.getHeader(Constants.HEADER_X_REQUEST_PARTITION_IDS);
-		return partitionHeader;
+		return theRequestDetails.getHeader(Constants.HEADER_X_REQUEST_PARTITION_IDS);
 	}
 }

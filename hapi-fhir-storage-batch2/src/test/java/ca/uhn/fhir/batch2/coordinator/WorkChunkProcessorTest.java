@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.ILastJobStepWorker;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
@@ -430,7 +431,7 @@ public class WorkChunkProcessorTest {
 	private class TestWorkChunkProcessor extends WorkChunkProcessor {
 
 		public TestWorkChunkProcessor(IJobPersistence thePersistence, BatchJobSender theSender) {
-			super(thePersistence, theSender, new NonTransactionalHapiTransactionService(), new DefaultJobStepExecutionServices());
+			super(thePersistence, theSender, new NonTransactionalHapiTransactionService(), mock(IJobStepExecutionServices.class));
 		}
 
 		@Override

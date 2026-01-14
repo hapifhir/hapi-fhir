@@ -185,7 +185,7 @@ public abstract class BaseBatch2Config {
 	}
 
 	@Bean
-	public IJobStepExecutionServices jobStepExecutionServices() {
-		return new DefaultJobStepExecutionServices();
+	public IJobStepExecutionServices jobStepExecutionServices(IInterceptorBroadcaster theInterceptorBroadcaster) {
+		return new DefaultJobStepExecutionServices(theInterceptorBroadcaster);
 	}
 }

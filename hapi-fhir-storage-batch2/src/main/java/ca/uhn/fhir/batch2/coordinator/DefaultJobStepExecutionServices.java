@@ -21,14 +21,31 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobInstance;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 
 public class DefaultJobStepExecutionServices implements IJobStepExecutionServices {
 
+	private final IInterceptorBroadcaster myInterceptorBroadcaster;
+
+	public DefaultJobStepExecutionServices(IInterceptorBroadcaster theInterceptorBroadcaster) {
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
+
 	@Override
 	public SystemRequestDetails newRequestDetails(IJobInstance theJobInstance) {
 		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
-		systemRequestDetails.getUserData().putAll(theJobInstance.getUserData());
+
+		myInterceptorBroadcaster.ifHasCallHooks(Pointcut.STORAGE_BATCH_TASK_NEW_REQUEST_DETAILS, () -> {
+			HookParams params = new HookParams();
+			params.add(IJobInstance.class, theJobInstance);
+			params.add(RequestDetails.class, systemRequestDetails);
+			return params;
+		});
+
 		return systemRequestDetails;
 	}
 }
