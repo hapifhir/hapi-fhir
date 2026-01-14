@@ -40,6 +40,7 @@ import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.servlet.http.HttpServletRequest;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -235,10 +236,19 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		if (theId != null && theId.hasIdPart()) {
 			IFhirResourceDaoValueSet<IBaseResource> dao = getDao();
 			IBaseResource valueSet = dao.read(theId, theRequestDetails);
-			return extractValueSetUrl(valueSet);
+
+			// Extract URL
+			String url = extractValueSetUrl(valueSet);
+
+			// Extract and append version from the resource if present
+			String version = CommonCodeSystemsTerminologyService.getValueSetVersion(getContext(), valueSet);
+			if (version != null) {
+				return url + "|" + version;
+			}
+			return url;
 		}
 
-		// Build URL with version if provided
+		// Build URL with version if provided via parameter
 		String valueSetUrlString = getStringValue(theValueSetUrl);
 		if (valueSetUrlString != null && theValueSetVersion != null && theValueSetVersion.hasValue()) {
 			valueSetUrlString = valueSetUrlString + "|" + theValueSetVersion.getValueAsString();
