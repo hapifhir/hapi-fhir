@@ -2,7 +2,7 @@
  * #%L
  * HAPI-FHIR Storage Batch2 Jobs
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,8 +81,6 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		providerParams.setPatientIds(params.getPatientIds());
 		providerParams.setExpandMdm(params.isExpandMdm());
 		providerParams.setPartitionId(params.getPartitionId());
-		// This step doesn't use this param. Included here for logging purpose
-		providerParams.setIncludeHistory(params.isIncludeHistory());
 
 		/*
 		 * we set all the requested resource types here so that

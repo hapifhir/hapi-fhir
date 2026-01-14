@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,10 @@ package ca.uhn.fhir.jpa.repository;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRestfulResponse;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -53,7 +55,12 @@ class RequestDetailsCloner {
 		newDetails.setParameters(new HashMap<>());
 		newDetails.setResourceName(null);
 		newDetails.setCompartmentName(null);
-		newDetails.setResponse(theDetails.getResponse());
+		IRestfulResponse response = theDetails.getResponse();
+		// we need IRestfulResponse because RestfulServer uses it during extended operation processing.
+		if (response == null && newDetails instanceof SystemRequestDetails systemDetails) {
+			response = new SystemRestfulResponse(systemDetails);
+		}
+		newDetails.setResponse(response);
 
 		return new DetailsBuilder(newDetails);
 	}
@@ -82,8 +89,12 @@ class RequestDetailsCloner {
 
 		DetailsBuilder setParameters(IBaseParameters theParameters) {
 			IParser parser = myDetails.getServer().getFhirContext().newJsonParser();
-			myDetails.setRequestContents(
-					parser.encodeResourceToString(theParameters).getBytes());
+			if (theParameters != null) {
+				myDetails.setRequestContents(
+						parser.encodeResourceToString(theParameters).getBytes());
+			} else {
+				myDetails.setRequestContents(new byte[0]);
+			}
 
 			return this;
 		}

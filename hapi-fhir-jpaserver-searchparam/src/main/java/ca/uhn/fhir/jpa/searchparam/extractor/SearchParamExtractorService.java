@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -81,7 +83,7 @@ import static ca.uhn.fhir.jpa.model.entity.ResourceLink.forLocalReference;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class SearchParamExtractorService {
+public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamExtractorService.class);
 
 	@Autowired
@@ -108,6 +110,9 @@ public class SearchParamExtractorService {
 	@Autowired(required = false)
 	private IResourceLinkResolver myResourceLinkResolver;
 
+	@Autowired
+	private IIdHelperService myIdHelperService;
+
 	private SearchParamExtractionUtil mySearchParamExtractionUtil;
 
 	@VisibleForTesting
@@ -121,6 +126,7 @@ public class SearchParamExtractorService {
 	 * a given resource type, it extracts the associated indexes and populates
 	 * {@literal theParams}.
 	 */
+	@Override
 	public void extractFromResource(
 			RequestPartitionId theRequestPartitionId,
 			RequestDetails theRequestDetails,
@@ -811,6 +817,28 @@ public class SearchParamExtractorService {
 			PathAndRef thePathAndRef, Collection<ResourceLink> theResourceLinks) {
 		IIdType referenceElement = thePathAndRef.getRef().getReferenceElement();
 		List<ResourceLink> resourceLinks = new ArrayList<>(theResourceLinks);
+
+		if (thePathAndRef.isCanonical()) {
+			return resourceLinks.stream()
+					.filter(r -> r.getTargetResourceUrl() != null
+							&& r.getTargetResourceUrl().equals(thePathAndRef.getPath()))
+					.findFirst();
+		}
+
+		Set<JpaPid> pids = new HashSet<>();
+		for (ResourceLink resourceLink : resourceLinks) {
+			JpaPid targetResourceJpaPid = resourceLink.getTargetResourcePk();
+			if (targetResourceJpaPid != null) {
+				pids.add(targetResourceJpaPid);
+			}
+		}
+
+		if (pids.isEmpty()) {
+			return Optional.empty();
+		}
+
+		PersistentIdToForcedIdMap<JpaPid> targetResourceIdMap = myIdHelperService.translatePidsToForcedIds(pids);
+
 		for (ResourceLink resourceLink : resourceLinks) {
 
 			// comparing the searchParam path ex: Group.member.entity
@@ -820,8 +848,13 @@ public class SearchParamExtractorService {
 			boolean hasMatchingResourceType =
 					StringUtils.equals(resourceLink.getTargetResourceType(), referenceElement.getResourceType());
 
-			boolean hasMatchingResourceId =
-					StringUtils.equals(resourceLink.getTargetResourceId(), referenceElement.getIdPart());
+			boolean hasMatchingResourceId = false;
+			Optional<String> idPartOpt = targetResourceIdMap.get(resourceLink.getTargetResourcePk());
+			if (idPartOpt.isPresent()) {
+				String idPart = idPartOpt.get();
+				idPart = idPart.substring(idPart.indexOf('/'));
+				hasMatchingResourceId = StringUtils.equals(idPart, referenceElement.getIdPart());
+			}
 
 			boolean hasMatchingResourceVersion = myContext.getParserOptions().isStripVersionsFromReferences()
 					|| referenceElement.getVersionIdPartAsLong() == null
@@ -1077,7 +1110,18 @@ public class SearchParamExtractorService {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 	}
 
+	@VisibleForTesting
+	void setContextForUnitTest(FhirContext theContext) {
+		myContext = theContext;
+	}
+
+	@VisibleForTesting
+	void setIdHelperServiceForUnitTest(IIdHelperService theIdHelperService) {
+		myIdHelperService = theIdHelperService;
+	}
+
 	@Nonnull
+	@Override
 	public List<String> extractParamValuesAsStrings(
 			RuntimeSearchParam theActiveSearchParam, IBaseResource theResource) {
 		return mySearchParamExtractor.extractParamValuesAsStrings(theActiveSearchParam, theResource);

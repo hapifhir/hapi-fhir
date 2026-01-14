@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -70,9 +71,8 @@ public class RuleBulkExportImpl extends BaseRule {
 			return null;
 		}
 
-		BulkExportJobParameters inboundBulkExportRequestOptions = (BulkExportJobParameters) theRequestDetails
-				.getUserData()
-				.get(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS);
+		BulkExportJobParameters inboundBulkExportRequestOptions = (BulkExportJobParameters)
+				theRequestDetails.getUserData().get(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS);
 		// if style doesn't match - abstain
 		if (!myWantAnyStyle && inboundBulkExportRequestOptions.getExportStyle() != myWantExportStyle) {
 			return null;
@@ -120,11 +120,12 @@ public class RuleBulkExportImpl extends BaseRule {
 
 		// 1. If each of the requested resource IDs in the parameters are present in the users permissions, Approve
 		// 2. If any requested ID is not present in the users permissions, Deny.
-		if (myWantExportStyle == BulkExportJobParameters.ExportStyle.PATIENT)
+		if (myWantExportStyle == BulkExportJobParameters.ExportStyle.PATIENT) {
 			// Unfiltered Type Level
 			if (myAppliesToAllPatients) {
 				return allowVerdict;
 			}
+		}
 
 		// Instance level, or filtered type level
 		if (isNotEmpty(myPatientIds)) {

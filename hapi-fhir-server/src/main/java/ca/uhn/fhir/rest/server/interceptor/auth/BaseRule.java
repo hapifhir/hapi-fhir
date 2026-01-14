@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,6 +87,31 @@ abstract class BaseRule implements IAuthRule {
 					retVal = false;
 					break;
 				}
+			}
+		}
+
+		return retVal;
+	}
+
+	/**
+	 * Apply testers, and return true if at least 1 tester matches.
+	 * Returns false if all testers do not match.
+	 */
+	boolean atLeastOneTesterMatches(
+			RestOperationTypeEnum theOperation,
+			RequestDetails theRequestDetails,
+			IBaseResource theInputResource,
+			IRuleApplier theRuleApplier) {
+
+		boolean retVal = false;
+
+		IAuthRuleTester.RuleTestRequest inputRequest = new IAuthRuleTester.RuleTestRequest(
+				myMode, theOperation, theRequestDetails, null, theInputResource, theRuleApplier);
+
+		for (IAuthRuleTester next : getTesters()) {
+			if (next.matches(inputRequest)) {
+				retVal = true;
+				break;
 			}
 		}
 

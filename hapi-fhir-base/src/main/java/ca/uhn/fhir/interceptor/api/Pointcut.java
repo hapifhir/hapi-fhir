@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1623,6 +1623,42 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
+	 * Invoked when a resource is being modified using a FHIR <code>PATCH</code> operation, right after the
+	 * existing resource has been loaded from the database, and right before the patch document is applied
+	 * to the resource.
+	 * <p>
+	 * Hooks will have access to the contents of the resource that is about to be patched as well
+	 * as to the patch document being applied. Hooks may make modifications to both of these things.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.interceptor.model.PrePatchDetails - Contains details about the patch being performed</li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_PRESTORAGE_RESOURCE_PREPATCH(
+			void.class,
+			"ca.uhn.fhir.interceptor.model.PrePatchDetails",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+
+	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked before a resource will be updated, immediately before the resource
 	 * is persisted to the database.
 	 * <p>
@@ -1856,6 +1892,57 @@ public enum Pointcut implements IPointcut {
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails",
 			"ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum"),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked during resource processing, after writing has been completed
+	 * but before the database transaction is committed, and immediately before
+	 * a conditional URL is about to be verified to ensure that it still
+	 * matches the target resource.
+	 * <p>
+	 * Under normal operation, when processing a conditional operation (e.g., conditional update)
+	 * the JPA transaction processor will verify that the final state of the resource
+	 * still matches the conditional URL supplied by the user. This avoids
+	 * potential user bugs where a client inadvertently modifies a resource so that it
+	 * doesn't match the conditional URL (which can cause unexpected behaviour given
+	 * that HAPI FHIR often caches conditional URL results internally).
+	 * </p>
+	 * <p>
+	 * This hook is helpful if you are developing an interceptor that modifies both the
+	 * resource body and the resource conditional URL prior to storage, as it can
+	 * be used to manipulate the conditional URL used for verification.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.jpa.dao.PreVerifyConditionalMatchCriteriaRequest - Contains the conditional URL that will be
+	 * used for verification and may be modified by interceptors.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks must return <code>void</code>.
+	 * </p>
+	 *
+	 * @since 8.8.0
+	 */
+	STORAGE_PREVERIFY_CONDITIONAL_MATCH_CRITERIA(
+			void.class,
+			"ca.uhn.fhir.jpa.dao.PreVerifyConditionalMatchCriteriaRequest",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -3304,6 +3391,38 @@ public enum Pointcut implements IPointcut {
 	 */
 	STORAGE_PRESTORAGE_BATCH_JOB_CREATE(
 			void.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.rest.api.server.RequestDetails"),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked after a batch job is persisted to the database.
+	 * <p>
+	 * Hooks will have access to the content of the job created
+	 * and the id set to it.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.batch2.model.JobInstance
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_POSTSTORAGE_BATCH_JOB_CREATE(void.class, "ca.uhn.fhir.batch2.model.JobInstance"),
+
+	/**
+	 * <b>Batch2 Hook:</b>
+	 * <p>Invoked after the job instance is completed. JobInstance is immutable here.</p>
+	 * <p>Parameters:</p>
+	 * <ul>
+	 *     <li>ca.uhn.fhir.batch2.model.JobInstance - The job instance</li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_POSTCOMPLETE_BATCH_JOB(void.class, "ca.uhn.fhir.batch2.model.JobInstance"),
 
 	/**
 	 * <b>CDS Hooks Prefetch Hook:</b>

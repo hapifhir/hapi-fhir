@@ -1,8 +1,8 @@
 /*-
  * #%L
- * HAPI FHIR - Master Data Management
+ * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.svc;
+package ca.uhn.fhir.jpa.bulk.export.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -26,6 +26,9 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.mdm.svc.IBulkExportMdmEidMatchOnlyResourceExpander;
+import ca.uhn.fhir.mdm.svc.IBulkExportMdmResourceExpander;
+import ca.uhn.fhir.mdm.svc.MdmEidMatchOnlyExpandSvc;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -45,7 +48,7 @@ import java.util.stream.Collectors;
  * MDM matching resources for the members in the group. Resources are
  * matched based on just eids rather than the full MDM golden resource relationships.</p>
  */
-public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdmResourceExpander {
+public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdmEidMatchOnlyResourceExpander<JpaPid> {
 
 	private final DaoRegistry myDaoRegistry;
 	private final MdmEidMatchOnlyExpandSvc myMdmEidMatchOnlyLinkExpandSvc;
@@ -113,6 +116,20 @@ public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdm
 				idTypes,
 				ResolveIdentityMode.excludeDeleted().cacheOk());
 		return new HashSet<>(pidList);
+	}
+
+	/**
+	 * Expands a single patient ID to include all patients linked via EID matching.
+	 *
+	 * @param thePatientId Patient ID to expand (e.g., "Patient/123")
+	 * @param theRequestPartitionId Partition context for the request
+	 * @return Set of String patient IDs including the original patient and all EID-matched patients
+	 */
+	@Override
+	public Set<String> expandPatient(String thePatientId, RequestPartitionId theRequestPartitionId) {
+		IIdType patientIdType =
+				myFhirContext.getVersion().newIdType(thePatientId).withResourceType("Patient");
+		return myMdmEidMatchOnlyLinkExpandSvc.expandMdmBySourceResourceId(theRequestPartitionId, patientIdType);
 	}
 
 	@Override

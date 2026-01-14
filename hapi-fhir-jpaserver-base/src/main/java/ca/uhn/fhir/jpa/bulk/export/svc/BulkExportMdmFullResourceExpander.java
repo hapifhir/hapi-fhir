@@ -1,8 +1,8 @@
 /*-
  * #%L
- * HAPI FHIR - Master Data Management
+ * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.svc;
+package ca.uhn.fhir.jpa.bulk.export.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -31,6 +31,8 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
+import ca.uhn.fhir.mdm.svc.IBulkExportMdmFullResourceExpander;
+import ca.uhn.fhir.mdm.svc.MdmExpansionCacheSvc;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.ExtensionUtil;
@@ -43,14 +45,20 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Implementation of MDM resource expansion for bulk export operations.
  * Expands group memberships via MDM links and annotates exported resources with golden resource references.
  */
-public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpander {
-	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportMdmResourceExpander.class);
+public class BulkExportMdmFullResourceExpander implements IBulkExportMdmFullResourceExpander<JpaPid> {
+	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportMdmFullResourceExpander.class);
 
 	private final MdmExpansionCacheSvc myMdmExpansionCacheSvc;
 	private final IMdmLinkDao myMdmLinkDao;
@@ -59,7 +67,7 @@ public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpa
 	private final FhirContext myContext;
 	private IFhirPath myFhirPath;
 
-	public BulkExportMdmResourceExpander(
+	public BulkExportMdmFullResourceExpander(
 			MdmExpansionCacheSvc theMdmExpansionCacheSvc,
 			IMdmLinkDao theMdmLinkDao,
 			IIdHelperService<JpaPid> theIdHelperService,
@@ -81,6 +89,63 @@ public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpa
 		JpaPid pidOrNull = myIdHelperService.getPidOrNull(theRequestPartitionId, group);
 		// Attempt to perform MDM Expansion of membership
 		return performMembershipExpansionViaMdmTable(pidOrNull);
+	}
+
+	@Override
+	public Set<String> expandPatient(String thePatientId, RequestPartitionId theRequestPartitionId) {
+		Set<String> expandedPatientIdsAsString = new HashSet<>();
+		Set<JpaPid> expandedPatientJpaPids = new HashSet<>();
+
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setRequestPartitionId(theRequestPartitionId);
+
+		IdDt patientIdDt = new IdDt(thePatientId);
+
+		IBaseResource patient;
+		try {
+			patient = myDaoRegistry.getResourceDao("Patient").read(patientIdDt, requestDetails);
+		} catch (Exception e) {
+			ourLog.warn("Failed to read patient {} for MDM expansion: {}", thePatientId, e.getMessage());
+			return expandedPatientIdsAsString;
+		}
+
+		JpaPid patientPid = myIdHelperService.getPidOrNull(theRequestPartitionId, patient);
+		if (patientPid == null) {
+			ourLog.warn("Failed to resolve PID for patient {}", thePatientId);
+			return expandedPatientIdsAsString;
+		}
+
+		List<MdmPidTuple<JpaPid>> allLinkedPatients =
+				myMdmLinkDao.expandPidsBySourcePidAndMatchResult(patientPid, MdmMatchResultEnum.MATCH);
+
+		if (allLinkedPatients.isEmpty()) {
+			expandedPatientJpaPids.add(patientPid);
+			ourLog.debug("Patient {} has no MDM links, including only this patient", thePatientId);
+		} else {
+
+			ourLog.debug("Patient {} expanded to {} linked patients", thePatientId, allLinkedPatients.size());
+			List<MdmPidTuple<JpaPid>> goldenPidSourcePidTuples = new ArrayList<>(allLinkedPatients);
+
+			populateMdmResourceCache(goldenPidSourcePidTuples);
+
+			for (MdmPidTuple<JpaPid> tuple : goldenPidSourcePidTuples) {
+				expandedPatientJpaPids.add(tuple.getGoldenPid());
+				expandedPatientJpaPids.add(tuple.getSourcePid());
+			}
+		}
+
+		for (JpaPid pid : expandedPatientJpaPids) {
+			String patientIdString;
+
+			Optional<String> forcedIdOpt = myIdHelperService.translatePidIdToForcedIdWithCache(pid);
+			patientIdString = forcedIdOpt.orElse("Patient/" + pid.getId().toString());
+
+			expandedPatientIdsAsString.add(patientIdString);
+		}
+
+		ourLog.debug(
+				"Expanded patient {} to {} total patient IDs via MDM", thePatientId, expandedPatientIdsAsString.size());
+		return expandedPatientIdsAsString;
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
@@ -151,7 +216,7 @@ public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpa
 	private RuntimeSearchParam getRuntimeSearchParam(IBaseResource theResource) {
 		Optional<RuntimeSearchParam> oPatientSearchParam =
 				SearchParameterUtil.getOnlyPatientSearchParamForResourceType(myContext, theResource.fhirType());
-		if (!oPatientSearchParam.isPresent()) {
+		if (oPatientSearchParam.isEmpty()) {
 			String errorMessage = String.format(
 					"[%s] has  no search parameters that are for patients, so it is invalid for Group Bulk Export!",
 					theResource.fhirType());
@@ -186,8 +251,10 @@ public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpa
 			Optional<IBaseReference> optionalReference =
 					getFhirParser().evaluateFirst(iBaseResource, fhirPath, IBaseReference.class);
 			if (optionalReference.isPresent()) {
-				return optionalReference.map(theIBaseReference ->
-						theIBaseReference.getReferenceElement().getIdPart());
+				return optionalReference.map(theIBaseReference -> theIBaseReference
+						.getReferenceElement()
+						.toUnqualifiedVersionless()
+						.toString());
 			} else {
 				return Optional.empty();
 			}
@@ -195,16 +262,13 @@ public class BulkExportMdmResourceExpander implements IBulkExportMdmResourceExpa
 	}
 
 	private void addGoldenResourceExtension(IBaseResource iBaseResource, String sourceResourceId) {
-		String goldenResourceId = myMdmExpansionCacheSvc.getGoldenResourceId(sourceResourceId);
-		IBaseExtension<?, ?> extension = ExtensionUtil.getOrCreateExtension(
-				iBaseResource, HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
+		// EHP: reimplement this, it is currently completely broken given the distributed nature of the job.
+		String goldenResourceId = ""; // TODO we must be able to fetch this, for now, will be no-op
 		if (!StringUtils.isBlank(goldenResourceId)) {
-			ExtensionUtil.setExtension(myContext, extension, "reference", prefixPatient(goldenResourceId));
+			IBaseExtension<?, ?> extension = ExtensionUtil.getOrCreateExtension(
+					iBaseResource, HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
+			ExtensionUtil.setExtension(myContext, extension, "reference", goldenResourceId);
 		}
-	}
-
-	private String prefixPatient(String theResourceId) {
-		return "Patient/" + theResourceId;
 	}
 
 	private IFhirPath getFhirParser() {

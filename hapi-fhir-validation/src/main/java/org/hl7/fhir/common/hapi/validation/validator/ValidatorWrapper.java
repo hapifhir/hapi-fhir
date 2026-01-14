@@ -40,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 class ValidatorWrapper {
@@ -56,6 +57,7 @@ class ValidatorWrapper {
 	private Collection<? extends String> myExtensionDomains;
 	private IValidatorResourceFetcher myValidatorResourceFetcher;
 	private IValidationPolicyAdvisor myValidationPolicyAdvisor;
+	private IHostApplicationServices hostApplicationServices;
 	private boolean myAllowExamples;
 
 	/**
@@ -124,17 +126,15 @@ class ValidatorWrapper {
 		return this;
 	}
 
+	public ValidatorWrapper setHostApplicationServices(IHostApplicationServices evaluationContext) {
+		this.hostApplicationServices = evaluationContext;
+		return this;
+	}
+
 	public List<ValidationMessage> validate(
 			IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
-		InstanceValidator v;
-		IHostApplicationServices evaluationCtx = new FhirInstanceValidator.NullEvaluationContext();
-		XVerExtensionManager xverManager = new XVerExtensionManagerOld(theWorkerContext);
-		try {
-			v = new InstanceValidator(
-					theWorkerContext, evaluationCtx, xverManager, new ValidatorSession(), new ValidatorSettings());
-		} catch (Exception e) {
-			throw new ConfigurationException(Msg.code(648) + e.getMessage(), e);
-		}
+
+		InstanceValidator v = buildInstanceValidator(theWorkerContext);
 
 		v.setAssumeValidRestReferences(isAssumeValidRestReferences());
 		v.setBestPracticeWarningLevel(myBestPracticeWarningLevel);
@@ -232,6 +232,23 @@ class ValidatorWrapper {
 								: ValidationMessage.IssueSeverity.WARNING));
 
 		return messages;
+	}
+
+	private InstanceValidator buildInstanceValidator(IWorkerContext theWorkerContext) {
+
+		final IHostApplicationServices hostApplicationServices = Objects.requireNonNullElseGet(
+				this.hostApplicationServices, FhirInstanceValidator.NullEvaluationContext::new);
+		XVerExtensionManager xverManager = new XVerExtensionManagerOld(theWorkerContext);
+		try {
+			return new InstanceValidator(
+					theWorkerContext,
+					hostApplicationServices,
+					xverManager,
+					new ValidatorSession(),
+					new ValidatorSettings());
+		} catch (Exception e) {
+			throw new ConfigurationException(Msg.code(648) + e.getMessage(), e);
+		}
 	}
 
 	private ReaderInputStream constructNewReaderInputStream(Reader theReader) {
