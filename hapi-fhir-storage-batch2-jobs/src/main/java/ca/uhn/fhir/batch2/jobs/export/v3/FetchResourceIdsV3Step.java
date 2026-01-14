@@ -117,8 +117,10 @@ public class FetchResourceIdsV3Step
 			providerParams.setGroupId(params.getGroupId());
 			providerParams.setPatientIds(params.getPatientIds());
 		}
-		providerParams.setExpandMdm(params.isExpandMdm());
 		providerParams.setPartitionId(partitionId);
+
+		/// We do MDM expansion in {@link GenerateWorkPackagesV3Step}, no need to do it again in this step
+		providerParams.setExpandMdm(false);
 
 		/*
 		 * we set all the requested resource types here so that
