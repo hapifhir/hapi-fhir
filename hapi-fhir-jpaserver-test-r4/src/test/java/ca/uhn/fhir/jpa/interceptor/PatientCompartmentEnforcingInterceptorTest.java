@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.Observation;
@@ -13,12 +12,11 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProviderR4Test {
 
@@ -27,21 +25,18 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 	private ISearchParamExtractor mySearchParamExtractor;
 	@Autowired
 	private ISearchParamExtractor myRequestPartitionHelperSvc;
-	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
-	private PatientIdPartitionInterceptor myPatientIdPartitionInterceptor;
+	@Autowired
 	private PatientCompartmentEnforcingInterceptor mySvc;
 
 	@Override
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		myForceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
-		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
-		mySvc = new PatientCompartmentEnforcingInterceptor(getFhirContext(), myRequestPartitionHelperSvc);
+		ForceOffsetSearchModeInterceptor forceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
+		PatientIdPartitionInterceptor patientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
 
-		myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
-		myInterceptorRegistry.registerInterceptor(myForceOffsetSearchModeInterceptor);
-		myInterceptorRegistry.registerInterceptor(mySvc);
+		registerInterceptor(patientIdPartitionInterceptor);
+		registerInterceptor(forceOffsetSearchModeInterceptor);
 
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
@@ -52,9 +47,6 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 	@AfterEach
 	public void after() throws Exception {
 		super.after();
-		myInterceptorRegistry.unregisterInterceptor(myPatientIdPartitionInterceptor);
-		myInterceptorRegistry.unregisterInterceptor(myForceOffsetSearchModeInterceptor);
-		myInterceptorRegistry.unregisterInterceptor(mySvc);
 
 		myPartitionSettings.setPartitioningEnabled(false);
 		PartitionSettings defaultPartitionSettings = new PartitionSettings();
@@ -66,8 +58,13 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 	}
 
 	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	public void testUpdateResource_whenCrossingPatientCompartment_throws(boolean theMassIngestionEnabled) {
+	@CsvSource({
+		"true,  true",
+		"true,  false",
+		"false, true",
+		"false, false"})
+	public void testUpdateResource_whenCrossingPatientCompartment_throws(boolean theMassIngestionEnabled, boolean theUseNewInterceptor) {
+		registerInterceptor(theUseNewInterceptor);
 		myStorageSettings.setMassIngestionMode(theMassIngestionEnabled);
 		createPatientA();
 
@@ -97,8 +94,13 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 	}
 
 	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	public void testUpdateResource_whenNotCrossingPatientCompartment_allows(boolean theMassIngestionEnabled) {
+	@CsvSource({
+		"true,  true",
+		"true,  false",
+		"false, true",
+		"false, false"})
+	public void testUpdateResource_whenNotCrossingPatientCompartment_allows(boolean theMassIngestionEnabled, boolean theUseNewInterceptor) {
+		registerInterceptor(theUseNewInterceptor);
 		myStorageSettings.setMassIngestionMode(theMassIngestionEnabled);
 		createPatientA();
 
@@ -113,16 +115,19 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 		assertEquals("Patient/A", ((Observation) outcome.getResource()).getSubject().getReference());
 	}
 
+	@SuppressWarnings("removal")
+	private void registerInterceptor(boolean theUseNewInterceptor) {
+		if (theUseNewInterceptor) {
+			registerInterceptor(mySvc);
+		} else {
+			PatientCompartmentEnforcingInterceptor interceptor = new PatientCompartmentEnforcingInterceptor(getFhirContext(), myRequestPartitionHelperSvc);
+			registerInterceptor(interceptor);
+		}
+	}
+
 	private void createPatientA() {
 		Patient patient = new Patient();
 		patient.setId("Patient/A");
-		patient.setActive(true);
-		myPatientDao.update(patient, new SystemRequestDetails());
-	}
-
-	private void createPatientB() {
-		Patient patient = new Patient();
-		patient.setId("Patient/B");
 		patient.setActive(true);
 		myPatientDao.update(patient, new SystemRequestDetails());
 	}

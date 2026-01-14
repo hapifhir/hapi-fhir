@@ -41,9 +41,14 @@ import java.util.Objects;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**
- * This interceptor can be used to block resource updates which would make resource patient compartment change.
- * <p/>
- * This could be used when the JPA server has partitioning enabled, and Tenant Identification Strategy is PATIENT_ID.
+ * This interceptor can be used to block resource updates which would make the resource compartment change.
+ * <p>
+ * This could be used when the JPA server has partitioning enabled, and the partition interceptor being used
+ * is partitioning based on some property of the resource (such as Patient ID, with {@link PatientIdPartitionInterceptor}).
+ * Note that the name of this class (<code>PatientCompartmentEnforcingInterceptor</code>) refers to the patient
+ * compartment, but this interceptor can now be used to enforce any partitioning as long as it is
+ * based on some property of the resource.
+ * </p>
  */
 @Interceptor
 public class PatientCompartmentEnforcingInterceptor {
@@ -55,14 +60,22 @@ public class PatientCompartmentEnforcingInterceptor {
 
 	/**
 	 * Constructor
+	 *
+	 * @since 8.8.0
 	 */
-	public PatientCompartmentEnforcingInterceptor(FhirContext theFhirContext, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+	public PatientCompartmentEnforcingInterceptor(
+			FhirContext theFhirContext, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 		myFhirContext = theFhirContext;
 		mySearchParamExtractor = null;
 	}
 
 	/**
+	 * This interceptor formerly used {@link ISearchParamExtractor} to determine the patient compartment,
+	 * but this isn't a great strategy since {@link PatientIdPartitionInterceptor} has logic beyond just
+	 * determining the partition based on the Patient ID, and because people can extend that class to
+	 * add additional logic that the interceptor wouldn't know about.
+	 *
 	 * @deprecated Use {@link #PatientCompartmentEnforcingInterceptor(FhirContext, IRequestPartitionHelperSvc)} instead
 	 */
 	@Deprecated(since = "8.8.0", forRemoval = true)
@@ -79,7 +92,8 @@ public class PatientCompartmentEnforcingInterceptor {
 	 * @param theResource the updated resource state
 	 */
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
-	public void storagePreStorageResourceUpdated(RequestDetails theRequestDetails, IBaseResource theOldResource, IBaseResource theResource) {
+	public void storagePreStorageResourceUpdated(
+			RequestDetails theRequestDetails, IBaseResource theOldResource, IBaseResource theResource) {
 
 		ourLog.debug("Interceptor STORAGE_PRESTORAGE_RESOURCE_UPDATED - started");
 		StopWatch stopWatch = new StopWatch();
@@ -92,11 +106,11 @@ public class PatientCompartmentEnforcingInterceptor {
 				patientCompartmentCurrent = determinePartition(theRequestDetails, theResource, resourceType);
 			} else {
 				patientCompartmentOld = ResourceCompartmentUtil.getPatientCompartmentIdentity(
-						theOldResource, myFhirContext, mySearchParamExtractor)
-					.orElse(EMPTY);
+								theOldResource, myFhirContext, mySearchParamExtractor)
+						.orElse(EMPTY);
 				patientCompartmentCurrent = ResourceCompartmentUtil.getPatientCompartmentIdentity(
-						theResource, myFhirContext, mySearchParamExtractor)
-					.orElse(EMPTY);
+								theResource, myFhirContext, mySearchParamExtractor)
+						.orElse(EMPTY);
 			}
 
 			if (!Objects.equals(patientCompartmentOld, patientCompartmentCurrent)) {
@@ -110,13 +124,22 @@ public class PatientCompartmentEnforcingInterceptor {
 		}
 	}
 
-	private String determinePartition(RequestDetails theRequestDetails, IBaseResource theResource, String resourceType) {
+	/**
+	 * The {@link IRequestPartitionHelperSvc} caches the partition ID for a resource in UserData.
+	 * We temporarily clear that cache just to ensure that we recalculate a fresh partition ID
+	 * instead of returning the cached one, just in case the resource is being updated in a way that
+	 * causes it to use a different partition.
+	 */
+	private String determinePartition(
+			RequestDetails theRequestDetails, IBaseResource theResource, String resourceType) {
 		Object stashedPartition = theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
 		if (stashedPartition != null) {
 			theResource.setUserData(Constants.RESOURCE_PARTITION_ID, null);
 		}
 		try {
-			RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineCreatePartitionForRequest(theRequestDetails, theResource, resourceType);
+			assert myRequestPartitionHelperSvc != null;
+			RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineCreatePartitionForRequest(
+					theRequestDetails, theResource, resourceType);
 			return requestPartition.toJson();
 		} finally {
 			if (stashedPartition != null) {
