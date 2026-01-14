@@ -811,6 +811,28 @@ public class SearchParamExtractorService {
 			PathAndRef thePathAndRef, Collection<ResourceLink> theResourceLinks) {
 		IIdType referenceElement = thePathAndRef.getRef().getReferenceElement();
 		List<ResourceLink> resourceLinks = new ArrayList<>(theResourceLinks);
+
+		if (thePathAndRef.isCanonical()) {
+			return resourceLinks.stream()
+					.filter(r -> r.getTargetResourceUrl() != null
+							&& r.getTargetResourceUrl().equals(thePathAndRef.getPath()))
+					.findFirst();
+		}
+
+		Set<JpaPid> pids = new HashSet<>();
+		for (ResourceLink resourceLink : resourceLinks) {
+			JpaPid targetResourceJpaPid = resourceLink.getTargetResourcePk();
+			if (targetResourceJpaPid != null) {
+				pids.add(targetResourceJpaPid);
+			}
+		}
+
+		if (pids.isEmpty()) {
+			return Optional.empty();
+		}
+
+		PersistentIdToForcedIdMap<JpaPid> targetResourceIdMap = myIdHelperService.translatePidsToForcedIds(pids);
+
 		for (ResourceLink resourceLink : resourceLinks) {
 
 			// comparing the searchParam path ex: Group.member.entity
@@ -1075,6 +1097,16 @@ public class SearchParamExtractorService {
 	@VisibleForTesting
 	void setInterceptorBroadcasterForUnitTest(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
+
+	@VisibleForTesting
+	void setContextForUnitTest(FhirContext theContext) {
+		myContext = theContext;
+	}
+
+	@VisibleForTesting
+	void setIdHelperServiceForUnitTest(IIdHelperService theIdHelperService) {
+		myIdHelperService = theIdHelperService;
 	}
 
 	@Nonnull
