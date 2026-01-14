@@ -97,6 +97,7 @@ import ca.uhn.fhir.jpa.interceptor.AuthResourceResolver;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.interceptor.OverridePathBasedReferentialIntegrityForDeletesInterceptor;
+import ca.uhn.fhir.jpa.interceptor.PatientCompartmentEnforcingInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -378,6 +379,13 @@ public class JpaConfig {
 	@Lazy
 	public SubscriptionTriggeringProvider subscriptionTriggeringProvider() {
 		return new SubscriptionTriggeringProvider();
+	}
+
+	@Bean
+	@Lazy
+	public PatientCompartmentEnforcingInterceptor patientCompartmentEnforcingInterceptor(
+			FhirContext theFhirContext, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		return new PatientCompartmentEnforcingInterceptor(theFhirContext, theRequestPartitionHelperSvc);
 	}
 
 	@Bean
