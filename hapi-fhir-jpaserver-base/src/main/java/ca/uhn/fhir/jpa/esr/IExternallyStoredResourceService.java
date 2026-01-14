@@ -21,6 +21,9 @@ package ca.uhn.fhir.jpa.esr;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.util.Collection;
+import java.util.Map;
+
 public interface IExternallyStoredResourceService {
 
 	/**
@@ -37,4 +40,15 @@ public interface IExternallyStoredResourceService {
 	 * @return HAPI FHIR may modify the returned object, so it is important to always return a new object for every call here (careful with caching!)
 	 */
 	IBaseResource fetchResource(String theAddress);
+
+	/**
+	 * Fetches multiple resources in a single bulk operation.
+	 * Override this method to perform bulk fetching for optimal performance.
+	 *
+	 * @param theAddresses Collection of address strings. The address format is entirely up to the
+	 *                     individual provider. HAPI FHIR doesn't try to understand it.
+	 * @return Map of addresses to resources. HAPI FHIR may modify the returned objects, so it is important to
+	 * 	always return new objects for every call
+	 */
+	Map<String, IBaseResource> fetchResources(Collection<String> theAddresses);
 }

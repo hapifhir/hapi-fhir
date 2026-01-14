@@ -37,7 +37,6 @@ import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
-import ca.uhn.fhir.jpa.search.reindex.BlockPolicy;
 import ca.uhn.fhir.jpa.util.ResourceParserUtil;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
@@ -46,37 +45,28 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.IMetaTagSorter;
 import ca.uhn.fhir.util.MetaUtil;
-import ca.uhn.fhir.util.ThreadPoolUtil;
-import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.util.ResourceParserUtil.EsrResourceDetails;
 import static ca.uhn.fhir.jpa.util.ResourceParserUtil.getEsrResourceDetails;
 
 /**
  * Batch loader for efficiently loading FHIR resources during search operations.
- * Optimizes performance by loading externally stored resources in parallel and
- * batch-extracting metadata (tags, provenance) for all resources.
+ * Optimizes performance by batch-loading externally stored resources and their metadata
+ * (tags, provenance) instead of loading resources individually.
  */
 public class BatchResourceLoader {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(BatchResourceLoader.class);
 	private static final LenientErrorHandler LENIENT_ERROR_HANDLER = new LenientErrorHandler(false).disableAllErrors();
-	private static final String EXTERNALLY_STORED_RESOURCE_LOADING_THREAD_PREFIX =
-			"externally-stored-resource-loading-";
-	private static final int THREAD_POOL_DEFAULT_CORE_POOL_SIZE = 5;
-	private static final int THREAD_POOL_DEFAULT_MAX_POOL_SIZE = 50;
 
 	private final FhirContext myFhirContext;
 	private final IResourceMetadataExtractorSvc myResourceMetadataExtractorSvc;
@@ -85,7 +75,6 @@ public class BatchResourceLoader {
 	private final IMetaTagSorter myMetaTagSorter;
 	private final PartitionSettings myPartitionSettings;
 	private final IPartitionLookupSvc myPartitionLookupSvc;
-	private final ThreadPoolTaskExecutor myThreadPoolTaskExecutor;
 
 	public BatchResourceLoader(
 			FhirContext theFhirContext,
@@ -102,41 +91,19 @@ public class BatchResourceLoader {
 		myMetaTagSorter = theMetaTagSorter;
 		myPartitionSettings = thePartitionSettings;
 		myPartitionLookupSvc = thePartitionLookupSvc;
-		myThreadPoolTaskExecutor = createExecutor();
-	}
-
-	/**
-	 * Creates a thread pool executor for fetching externally stored resources in parallel.
-	 * Uses 5 core threads, max 50 threads, no queue.
-	 * When all threads are busy, the calling thread blocks until a worker becomes available.
-	 * Max 50 threads was chosen based on performance testing with external storage.
-	 * Higher thread counts lead to degradation due to network overhead and storage throttling.
-	 */
-	private ThreadPoolTaskExecutor createExecutor() {
-		return ThreadPoolUtil.newThreadPool(
-				THREAD_POOL_DEFAULT_CORE_POOL_SIZE,
-				THREAD_POOL_DEFAULT_MAX_POOL_SIZE,
-				EXTERNALLY_STORED_RESOURCE_LOADING_THREAD_PREFIX,
-				0,
-				new BlockPolicy());
-	}
-
-	@PreDestroy
-	public void destroy() {
-		myThreadPoolTaskExecutor.shutdown();
 	}
 
 	public record ResourceLoadResult(JpaPid id, IBaseResource resource, boolean isDeleted) {}
 
 	private record EntityResourceHolder(ResourceHistoryTable entity, IBaseResource resource) {}
 
-	private record EsrEntityResourceHolder(ResourceHistoryTable entity, Future<IBaseResource> future) {}
+	private record EsrEntityResourceHolder(ResourceHistoryTable entity, String address) {}
 
 	/**
 	 * Loads and parses FHIR resources from resource history entities with performance optimizations.
-	 * Externally stored resources are loaded in parallel, database-stored resources are parsed sequentially,
-	 * and metadata (tags, provenance) is extracted in batch operations. All resources are populated
-	 * with metadata, partition information, and tags.
+	 * Externally stored resources are batch-loaded per provider, metadata (tags, provenance) is
+	 * batch-extracted for all resources, and database-stored resources are parsed sequentially.
+	 * All resources are populated with metadata, partition information, and tags.
 	 *
 	 * @param theResourceHistoryEntities List of resource history entities to load
 	 * @param theForHistoryOperation Whether this is for a history operation (affects metadata population)
@@ -146,13 +113,13 @@ public class BatchResourceLoader {
 			List<ResourceHistoryTable> theResourceHistoryEntities, boolean theForHistoryOperation) {
 		// 1. Iterate over history entities and split them into ESR and non-ESR lists
 		List<ResourceLoadResult> result = new ArrayList<>(theResourceHistoryEntities.size());
-		List<EntityResourceHolder> esrEntities = new ArrayList<>();
+		Map<String, List<EsrEntityResourceHolder>> esrEntities = new HashMap<>();
 		List<EntityResourceHolder> preloadedEntities = new ArrayList<>();
 		theResourceHistoryEntities.forEach(
 				historyEntity -> preProcessEntities(historyEntity, esrEntities, preloadedEntities, result));
 
 		// 2. Submit ESR entities for parallel processing
-		List<EsrEntityResourceHolder> esrFutures = processEsrEntities(esrEntities);
+		List<EntityResourceHolder> esrFutures = processEsrEntities(esrEntities);
 
 		// 3. Batch extract tags for all entities
 		Map<JpaPid, Collection<BaseTag>> tagsMap =
@@ -161,46 +128,17 @@ public class BatchResourceLoader {
 		// 4. Parse non-ESR entities sequentially
 		List<EntityResourceHolder> preloadedResources = processPreloadedEntities(preloadedEntities, tagsMap);
 
-		// 5. Non-ESR resources post-processing
-		preloadedResources.forEach(holder -> {
+		// 5. ESR and Non-ESR resources post-processing
+		Stream.concat(preloadedResources.stream(), esrFutures.stream()).forEach(holder -> {
 			Collection<BaseTag> tags = tagsMap.get(holder.entity().getPersistentId());
 			postProcessResource(holder.resource(), holder.entity(), tags, result, theForHistoryOperation);
-		});
-
-		// 6. ESR resources post-processing
-		esrFutures.forEach(holder -> {
-			ResourceHistoryTable historyEntity = holder.entity();
-			Future<IBaseResource> futureResource = holder.future();
-			Collection<BaseTag> tags = tagsMap.get(historyEntity.getPersistentId());
-			postProcessEsrFutures(historyEntity, futureResource, tags, result, theForHistoryOperation);
 		});
 		return result;
 	}
 
-	private void postProcessEsrFutures(
-			ResourceHistoryTable theHistoryEntity,
-			Future<IBaseResource> theFutureResource,
-			Collection<BaseTag> theTags,
-			List<ResourceLoadResult> theResult,
-			boolean theForHistoryOperation) {
-		try {
-			IBaseResource resource = theFutureResource.get();
-			postProcessResource(resource, theHistoryEntity, theTags, theResult, theForHistoryOperation);
-		} catch (InterruptedException theException) {
-			Thread.currentThread().interrupt();
-			String message = "Thread interrupted while loading externally stored resource:";
-			String formattedMessage = getDetailedErrorMessage(theHistoryEntity, message, theException);
-			throw new InternalErrorException(Msg.code(2835) + formattedMessage, theException);
-		} catch (ExecutionException theException) {
-			String message = "Failed to load externally stored resource:";
-			String formattedMessage = getDetailedErrorMessage(theHistoryEntity, message, theException);
-			throw new InternalErrorException(Msg.code(2836) + formattedMessage, theException);
-		}
-	}
-
 	private void preProcessEntities(
 			ResourceHistoryTable theHistoryEntity,
-			List<EntityResourceHolder> theEsrEntities,
+			Map<String, List<EsrEntityResourceHolder>> theEsrEntities,
 			List<EntityResourceHolder> thePreloadedEntities,
 			List<ResourceLoadResult> theResult) {
 		// Skip parsing for deleted resources
@@ -210,9 +148,12 @@ public class BatchResourceLoader {
 		}
 		// Add to externally stored resources list for parallel processing
 		if (theHistoryEntity.getEncoding() == ResourceEncodingEnum.ESR) {
-			theEsrEntities.add(new EntityResourceHolder(theHistoryEntity, null));
+			EsrResourceDetails resourceDetails = getResourceDetails(theHistoryEntity);
+			List<EsrEntityResourceHolder> list =
+					theEsrEntities.computeIfAbsent(resourceDetails.providerId(), k -> new ArrayList<>());
+			list.add(new EsrEntityResourceHolder(theHistoryEntity, resourceDetails.address()));
 		} else {
-			// Add to non-ESR list for sequential processing
+			// Add to a non-ESR list for sequential processing
 			thePreloadedEntities.add(new EntityResourceHolder(theHistoryEntity, null));
 		}
 	}
@@ -270,7 +211,7 @@ public class BatchResourceLoader {
 				result.add(new EntityResourceHolder(historyEntity, resource));
 			} catch (Exception theException) {
 				String message = "Failed to parse database resource:";
-				String formattedMessage = getDetailedErrorMessage(historyEntity, message, theException);
+				String formattedMessage = getDetailedErrorMessage(historyEntity, message);
 				throw new DataFormatException(Msg.code(2631) + formattedMessage, theException);
 			}
 		});
@@ -285,27 +226,51 @@ public class BatchResourceLoader {
 		return FhirContext.forCached(theVersion);
 	}
 
-	private List<EsrEntityResourceHolder> processEsrEntities(List<EntityResourceHolder> theEsrEntities) {
-		List<EsrEntityResourceHolder> retVal = new ArrayList<>(theEsrEntities.size());
-		theEsrEntities.forEach(holder -> {
-			Future<IBaseResource> future = myThreadPoolTaskExecutor.submit(() -> {
-				// 1. Get ESR resource details (providerId, address)
-				ResourceHistoryTable historyEntity = holder.entity();
-				byte[] resourceBytes = historyEntity.getResource();
-				String resourceText = historyEntity.getResourceTextVc();
-				ResourceEncodingEnum resourceEncoding = historyEntity.getEncoding();
-				String decodedText = ResourceParserUtil.getResourceText(resourceBytes, resourceText, resourceEncoding);
-				EsrResourceDetails resourceDetails = getEsrResourceDetails(decodedText);
+	private List<EntityResourceHolder> processEsrEntities(Map<String, List<EsrEntityResourceHolder>> theEsrEntities) {
+		List<EntityResourceHolder> result = new ArrayList<>();
+		for (Map.Entry<String, List<EsrEntityResourceHolder>> entry : theEsrEntities.entrySet()) {
+			String providerId = entry.getKey();
+			List<EsrEntityResourceHolder> holders = entry.getValue();
 
-				// 2. Get parsed ESR resource from provider
-				IExternallyStoredResourceService provider =
-						myExternallyStoredResourceServiceRegistry.getProvider(resourceDetails.providerId());
-				return provider.fetchResource(resourceDetails.address());
-			});
-			retVal.add(new EsrEntityResourceHolder(holder.entity(), future));
-		});
+			IExternallyStoredResourceService provider =
+					myExternallyStoredResourceServiceRegistry.getProvider(providerId);
 
-		return retVal;
+			Collection<String> addresses =
+					holders.stream().map(EsrEntityResourceHolder::address).collect(Collectors.toList());
+
+			Map<String, IBaseResource> resourceMap;
+			try {
+				resourceMap = provider.fetchResources(addresses);
+			} catch (Exception theException) {
+				String message = String.format(
+						"Failed to load %d externally stored resources from %s provider.",
+						addresses.size(), providerId);
+				throw new InternalErrorException(Msg.code(2835) + message, theException);
+			}
+
+			for (EsrEntityResourceHolder holder : holders) {
+				String address = holder.address();
+				IBaseResource resource = resourceMap.get(address);
+				if (resource != null) {
+					result.add(new EntityResourceHolder(holder.entity(), resource));
+				} else {
+					String message =
+							String.format("Failed to load externally stored resource from %s provider:", providerId);
+					String formattedMessage = getDetailedErrorMessage(holder.entity(), message);
+					throw new InternalErrorException(Msg.code(2836) + formattedMessage);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	private EsrResourceDetails getResourceDetails(ResourceHistoryTable theResourceHistoryEntity) {
+		byte[] resourceBytes = theResourceHistoryEntity.getResource();
+		String resourceText = theResourceHistoryEntity.getResourceTextVc();
+		ResourceEncodingEnum resourceEncoding = theResourceHistoryEntity.getEncoding();
+		String decodedText = ResourceParserUtil.getResourceText(resourceBytes, resourceText, resourceEncoding);
+		return getEsrResourceDetails(decodedText);
 	}
 
 	private void populateResourcePartitionInformation(
@@ -326,15 +291,14 @@ public class BatchResourceLoader {
 		}
 	}
 
-	private String getDetailedErrorMessage(ResourceHistoryTable theEntity, String theMessage, Exception theException) {
+	private String getDetailedErrorMessage(ResourceHistoryTable theEntity, String theMessage) {
 		return String.format(
-				"%s %s/%s/_history/%s, pid: %s, encoding: %s, reason: %s",
+				"%s %s/%s/_history/%s, pid: %s, encoding: %s",
 				theMessage,
 				theEntity.getResourceType(),
 				theEntity.getIdDt().getIdPart(),
 				theEntity.getVersion(),
 				theEntity.getId(),
-				theEntity.getEncoding(),
-				theException.getMessage());
+				theEntity.getEncoding());
 	}
 }
