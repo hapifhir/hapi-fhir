@@ -94,7 +94,7 @@ public class FetchResourceIdsV3Step
 	private void fetchResourceIdsAndSubmitWorkChunksForResourceType(
 			@Nonnull IJobDataSink<ResourceIdList> theDataSink,
 			StepExecutionDetails<BulkExportJobParameters, BulkExportWorkPackageJson> theStepExecutionDetails,
-			String resourceType,
+			String theResourceType,
 			Set<TypedPidJson> submittedBatchResourceIds,
 			ActivityCounter theActivityCounter) {
 		BulkExportWorkPackageJson data = theStepExecutionDetails.getData();
@@ -129,13 +129,13 @@ public class FetchResourceIdsV3Step
 		 */
 		providerParams.setRequestedResourceTypes(params.getResourceTypes());
 
-		providerParams.setResourceType(resourceType);
+		providerParams.setResourceType(theResourceType);
 
 		// filters are the filters for searching
 		ourLog.info(
 				"Running {} for InstanceID[{}] ChunkID[{}] with ResourceType[{}] Partition[{}]",
 				getClass().getSimpleName(),
-				resourceType,
+				theResourceType,
 				theStepExecutionDetails.getInstance().getInstanceId(),
 				theStepExecutionDetails.getChunkId(),
 				data.getPartitionId());
@@ -157,7 +157,7 @@ public class FetchResourceIdsV3Step
 			if (pid.getResourceType() != null) {
 				batchResourceId = new TypedPidJson(pid.getResourceType(), pid);
 			} else {
-				batchResourceId = new TypedPidJson(resourceType, pid);
+				batchResourceId = new TypedPidJson(theResourceType, pid);
 			}
 
 			if (!submittedBatchResourceIds.add(batchResourceId)) {
@@ -176,7 +176,7 @@ public class FetchResourceIdsV3Step
 			// Make sure resources stored in each batch does not go over the max capacity
 			if (idsToSubmit.size() >= myStorageSettings.getBulkExportFileMaximumCapacity()
 					|| estimatedChunkSize >= myStorageSettings.getBulkExportFileMaximumSize()) {
-				submitWorkChunk(partitionId, resourceType, idsToSubmit, theDataSink);
+				submitWorkChunk(partitionId, theResourceType, idsToSubmit, theDataSink);
 				theActivityCounter.incrementSubmissionChunkCount();
 				idsToSubmit = new ArrayList<>();
 				estimatedChunkSize = 0;
@@ -185,7 +185,7 @@ public class FetchResourceIdsV3Step
 
 		// if we have any other Ids left, submit them now
 		if (!idsToSubmit.isEmpty()) {
-			submitWorkChunk(partitionId, resourceType, idsToSubmit, theDataSink);
+			submitWorkChunk(partitionId, theResourceType, idsToSubmit, theDataSink);
 			theActivityCounter.incrementSubmissionChunkCount();
 		}
 	}
