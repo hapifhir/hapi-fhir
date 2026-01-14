@@ -132,7 +132,7 @@ public interface IBinaryStorageSvc {
 	boolean writeBinaryContent(IIdType theResourceId, String theBlobId, OutputStream theOutputStream)
 			throws IOException;
 
-	void expungeBinaryContent(IIdType theResourceId, String theBlobId) throws IOException;
+	void expungeBinaryContent(IIdType theResourceId, String theBlobId);
 
 	/**
 	 * Fetch the contents of the given blob
