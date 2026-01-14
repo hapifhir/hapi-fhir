@@ -1,6 +1,0 @@
----
-type: fix
-issue: 7468
-title: "Previously, saving a MeasureReport with one or more evaluatedResources resulted in a NullPointerException.
-        This has been fixed."
-
