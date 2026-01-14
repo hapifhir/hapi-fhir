@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.esr;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 public interface IExternallyStoredResourceService {
@@ -50,5 +51,12 @@ public interface IExternallyStoredResourceService {
 	 * @return Map of addresses to resources. HAPI FHIR may modify the returned objects, so it is important to
 	 * 	always return new objects for every call
 	 */
-	Map<String, IBaseResource> fetchResources(Collection<String> theAddresses);
+	default Map<String, IBaseResource> fetchResources(Collection<String> theAddresses) {
+		Map<String, IBaseResource> result = new HashMap<>();
+		for (String address : theAddresses) {
+			IBaseResource resource = fetchResource(address);
+			result.put(address, resource);
+		}
+		return result;
+	}
 }
