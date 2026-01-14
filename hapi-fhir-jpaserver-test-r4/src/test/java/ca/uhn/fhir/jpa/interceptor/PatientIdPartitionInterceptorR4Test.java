@@ -27,7 +27,6 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.BulkDataExportProvider;
@@ -39,7 +38,6 @@ import ca.uhn.fhir.util.MultimapCollector;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
-import jakarta.annotation.Generated;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
@@ -142,7 +140,6 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true)).contains("rt1_0.PARTITION_ID='65'");
 	}
-
 
 
 	@Test
@@ -269,7 +266,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		Group group = new Group();
 		group.setActual(false);
 
-		Long id =  myGroupDao.create(group, mySrd).getId().getIdPartAsLong();
+		Long id = myGroupDao.create(group, mySrd).getId().getIdPartAsLong();
 		//Verify: Group is successfully created and put in the default partition
 		runInTransaction(() -> {
 			ResourceTable table = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
@@ -309,7 +306,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	public void testReadPatientHistory_Good() {
 		Patient patientA = createPatientA();
 		patientA.setGender(Enumerations.AdministrativeGender.MALE);
-		myPatientDao.update(patientA);
+		myPatientDao.update(patientA, newSrd());
 
 
 		IdType patientVersionOne = new IdType("Patient", "A", "1");
@@ -469,7 +466,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 		logAllResources();
 
-		myOrganizationDao.update(org);
+		myOrganizationDao.update(org, newSrd());
 
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myOrganizationDao.history(new IdType("Organization/C"), null, null, null, mySrd);
@@ -652,9 +649,6 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 	}
 
-
-
-
 	@Test
 	public void testSearch() throws IOException {
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
@@ -727,7 +721,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		patient.setId("Patient/A");
 		patient.setActive(true);
 		DaoMethodOutcome update = myPatientDao.update(patient);
-		return (Patient)update.getResource();
+		return (Patient) update.getResource();
 	}
 
 	@Test
@@ -743,8 +737,8 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 
-		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)){
-			ourLog.info("Response: {}",postResponse);
+		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)) {
+			ourLog.info("Response: {}", postResponse);
 			assertEquals(202, postResponse.getStatusLine().getStatusCode());
 			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
 		}
@@ -757,8 +751,8 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE, "Patient");
 		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE_FILTER, "Patient?");
 
-		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)){
-			ourLog.info("Response: {}",postResponse);
+		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)) {
+			ourLog.info("Response: {}", postResponse);
 			assertEquals(202, postResponse.getStatusLine().getStatusCode());
 			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
 		}
@@ -777,8 +771,8 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 		String locationUrl;
 
-		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)){
-			ourLog.info("Response: {}",postResponse);
+		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)) {
+			ourLog.info("Response: {}", postResponse);
 			assertEquals(202, postResponse.getStatusLine().getStatusCode());
 			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
 
@@ -800,8 +794,8 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 
-		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)){
-			ourLog.info("Response: {}",postResponse);
+		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)) {
+			ourLog.info("Response: {}", postResponse);
 			assertEquals(202, postResponse.getStatusLine().getStatusCode());
 			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
 		}
@@ -815,7 +809,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 			registerInterceptor(new MyTransactionSplitInterceptor());
 		}
 
-	    // given
+		// given
 		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 
@@ -831,10 +825,10 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		TransactionUtil.TransactionResponse mainParsedResponse = performTransactionAndParseResponse(loadResourceFromClasspath(Bundle.class, "transaction-bundles/synthea/Sherise735_Zofia65_Swaniawski813_e0f7758e-a749-4357-858c-53e1db808e37.json"));
 
 		// verify
-        // This bundle contains 517 resources.
-        assertEquals(27, myCaptureQueriesListener.countSelectQueries());
-        // this is so high because we limit Hibernate to batches of 30 rows.
-        if (theSplitTransaction) {
+		// This bundle contains 517 resources.
+		assertEquals(27, myCaptureQueriesListener.countSelectQueries());
+		// this is so high because we limit Hibernate to batches of 30 rows.
+		if (theSplitTransaction) {
 			assertEquals(328, myCaptureQueriesListener.getInsertQueries().size());
 			assertEquals(9379, myCaptureQueriesListener.countInsertQueries());
 			assertEquals(36, myCaptureQueriesListener.getUpdateQueries().size());
@@ -865,14 +859,14 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 	private void assertResourceIsInPartition(int theExpectedPartitionId, IIdType theResourceId) {
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			ResourceTable entity = myResourceTableDao.findByTypeAndFhirId(theResourceId.getResourceType(), theResourceId.getIdPart()).orElseThrow();
 			assertEquals(theExpectedPartitionId, entity.getPartitionId().getPartitionId());
 		});
 	}
 
 	private int getResourcePartition(IIdType theResourceId) {
-		return runInTransaction(()->{
+		return runInTransaction(() -> {
 			ResourceTable entity = myResourceTableDao.findByTypeAndFhirId(theResourceId.getResourceType(), theResourceId.getIdPart()).orElseThrow();
 			return entity.getPartitionId().getPartitionId();
 		});
@@ -886,7 +880,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 	@Test
 	void testIdReferenceToDefaultPartition_resolvesWithoutError() {
-	    // given
+		// given
 		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 		IIdType practitionerId = createPractitioner();
