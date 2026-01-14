@@ -83,6 +83,21 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		myDaoRegistry = theDaoRegistry;
 	}
 
+	@VisibleForTesting
+	public void setVersionCanonicalizerForUnitTest(VersionCanonicalizer theVersionCanonicalizer) {
+		myVersionCanonicalizer = theVersionCanonicalizer;
+	}
+
+	@VisibleForTesting
+	public void setTermReadSvcForUnitTest(ITermReadSvc theTermReadSvc) {
+		myTermReadSvc = theTermReadSvc;
+	}
+
+	@VisibleForTesting
+	public void setValidationSupportChainForUnitTest(ValidationSupportChain theValidationSupportChain) {
+		myValidationSupportChain = theValidationSupportChain;
+	}
+
 	@Operation(name = JpaConstants.OPERATION_EXPAND, idempotent = true, typeName = "ValueSet")
 	public IBaseResource expand(
 			HttpServletRequest theServletRequest,
