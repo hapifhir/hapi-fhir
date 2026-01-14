@@ -4,13 +4,21 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.util.FhirPatchBuilder;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.Annotation;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,6 +121,65 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 
 		DaoMethodOutcome outcome = myObservationDao.update(obs, new SystemRequestDetails());
 		assertEquals("Patient/A", ((Observation) outcome.getResource()).getSubject().getReference());
+	}
+
+	/**
+	 * Updating a member of a group should not cause any issues
+	 */
+	@Test
+	public void testCompartmentEnforcement_GroupUpdate() {
+		registerInterceptor(mySvc);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+
+		createPatient(withId("A"), withActiveTrue());
+		createPatient(withId("B"), withActiveTrue());
+
+		logAllResources();
+
+		Group group = new Group();
+		group.setId("G");
+		group.addMember().setEntity(new Reference("Patient/A"));
+		doUpdateResource(group);
+
+		// Test
+		group = new Group();
+		group.setId("G");
+		group.addMember().setEntity(new Reference("Patient/B"));
+		group.addMember().setEntity(new Reference("Patient/A"));
+		doUpdateResource(group);
+
+		// Verify
+		Group actual = myGroupDao.read(new IdType("G"), mySrd);
+		assertEquals(2, actual.getMember().size());
+		assertEquals("Patient/B", actual.getMember().get(0).getEntity().getReference());
+		assertEquals("Patient/A", actual.getMember().get(1).getEntity().getReference());
+	}
+
+	/**
+	 * Updating an encounter's patient should be blocked
+	 */
+	@Test
+	public void testCompartmentEnforcement_EncounterUpdate() {
+		registerInterceptor(mySvc);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+
+		createPatient(withId("A"), withActiveTrue());
+		createPatient(withId("B"), withActiveTrue());
+		createEncounter(withId("E"), withSubject("Patient/A"), withIdentifier("http://foo", "123"));
+
+		// Test
+		FhirPatchBuilder pb = new FhirPatchBuilder(myFhirContext);
+		pb.replace()
+			.path("Encounter.subject")
+			.value(new Reference("Patient/B"));
+		IBaseParameters patch = pb.build();
+		assertThatThrownBy(() -> myEncounterDao.patch(new IdType("Encounter/E"), null, PatchTypeEnum.FHIR_PATCH_JSON, null, patch, newSrd()))
+			.isInstanceOf(PreconditionFailedException.class)
+			.hasMessageContaining("HAPI-2476: Resource compartment changed. Was a referenced Patient changed?");
+
+		// Verify
+		Encounter actual = myEncounterDao.read(new IdType("E"), mySrd);
+		assertEquals("Patient/A", actual.getSubject().getReference());
 	}
 
 	@SuppressWarnings("removal")
