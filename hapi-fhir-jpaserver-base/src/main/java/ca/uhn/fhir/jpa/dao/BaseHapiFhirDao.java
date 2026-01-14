@@ -204,9 +204,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	protected DeleteConflictService myDeleteConflictService;
 
 	@Autowired
-	protected IInterceptorBroadcaster myInterceptorBroadcaster;
-
-	@Autowired
 	protected InMemoryResourceMatcher myInMemoryResourceMatcher;
 
 	@Autowired
@@ -855,8 +852,31 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			ResourceIndexedSearchParams theParams,
 			RequestDetails theRequestDetails) {
 		// Make sure that the match URL was actually appropriate for the supplied resource
+		String matchUrlForVerification = theIfNoneExist;
+
+		// Interceptor: STORAGE_PREVERIFY_CONDITIONAL_MATCH_CRITERIA
+		IInterceptorBroadcaster interceptorBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (interceptorBroadcaster.hasHooks(Pointcut.STORAGE_PREVERIFY_CONDITIONAL_MATCH_CRITERIA)) {
+			PreVerifyConditionalMatchCriteriaRequest param = new PreVerifyConditionalMatchCriteriaRequest(theResource);
+			param.setConditionalUrl(matchUrlForVerification);
+
+			HookParams params = new HookParams();
+			params.add(RequestDetails.class, theRequestDetails);
+			params.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			params.add(PreVerifyConditionalMatchCriteriaRequest.class, param);
+			interceptorBroadcaster.callHooks(Pointcut.STORAGE_PREVERIFY_CONDITIONAL_MATCH_CRITERIA, params);
+
+			Validate.notBlank(
+					param.getConditionalUrl(),
+					"Interceptor for "
+							+ Pointcut.STORAGE_PREVERIFY_CONDITIONAL_MATCH_CRITERIA
+							+ " returned a blank conditional URL");
+			matchUrlForVerification = param.getConditionalUrl();
+		}
+
 		InMemoryMatchResult outcome =
-				myInMemoryResourceMatcher.match(theIfNoneExist, theResource, theParams, theRequestDetails);
+				myInMemoryResourceMatcher.match(matchUrlForVerification, theResource, theParams, theRequestDetails);
 
 		if (outcome.supported() && !outcome.matched()) {
 			String errorMsg =
