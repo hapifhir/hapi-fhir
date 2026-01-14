@@ -86,8 +86,6 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	private HapiTransactionService myTransactionService;
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
-	@Autowired
-	private PatientCompartmentEnforcingInterceptor myPatientCompartmentEnforcingInterceptor;
 	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
 	private PatientIdPartitionInterceptor mySvc;
 
