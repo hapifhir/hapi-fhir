@@ -295,6 +295,11 @@ class OperationRule extends BaseRule implements IAuthRule {
 		return myAllowAllResourcesAccess;
 	}
 
+	@Nullable
+	public String getInstanceFilter() {
+		return myInstanceFilter;
+	}
+
 	@Override
 	@Nonnull
 	protected ToStringBuilder toStringBuilder() {
