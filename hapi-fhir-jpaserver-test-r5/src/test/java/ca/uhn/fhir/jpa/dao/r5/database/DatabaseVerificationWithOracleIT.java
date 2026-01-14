@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r5.database;
 
-import ca.uhn.fhir.jpa.embedded.OracleEmbeddedDatabase;
+import ca.uhn.fhir.jpa.embedded.Oracle21EmbeddedDatabase;
 import ca.uhn.fhir.jpa.annotation.OracleTest;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirOracleDialect;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +18,7 @@ public class DatabaseVerificationWithOracleIT extends BaseDatabaseVerificationIT
 		@Bean
 		public JpaDatabaseContextConfigParamObject jpaDatabaseParamObject(){
 			return new JpaDatabaseContextConfigParamObject(
-				new OracleEmbeddedDatabase(),
+				new Oracle21EmbeddedDatabase(),
 				HapiFhirOracleDialect.class.getName()
 			);
 		}
