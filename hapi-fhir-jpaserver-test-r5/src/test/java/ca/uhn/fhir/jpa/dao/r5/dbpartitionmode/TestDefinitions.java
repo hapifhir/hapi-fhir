@@ -1015,13 +1015,18 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	@Test
 	public void testSearch_ListParam() {
 		// Setup
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+
 		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
 		IIdType patId0 = createPatient(withActiveTrue()).toUnqualifiedVersionless();
 		IIdType patId1 = createPatient(withActiveTrue()).toUnqualifiedVersionless();
+
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_2);
 		IIdType listId = createList(withListItem(patId0), withListItem(patId1)).toUnqualifiedVersionless();
 		Long listIdLong = listId.getIdPartAsLong();
 
 		// Test
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1, PARTITION_2);
 		myCaptureQueriesListener.clear();
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
@@ -1031,20 +1036,25 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(getSelectSql(0)).contains(" FROM HFJ_RESOURCE t1 ");
+		myMemoryCache.invalidateAllCaches();
+
+		// If partitioning is enabled, the first query is to look up "Patient/A" in Partition[1 | 2]
+		int searchQueryIndex = myPartitionSettings.isPartitioningEnabled() ? 1 : 0;
+
+		assertThat(getSelectSql(searchQueryIndex)).contains(" FROM HFJ_RESOURCE t1 ");
 		if (myIncludePartitionIdsInPks) {
-			assertThat(getSelectSql(0)).contains(" INNER JOIN HFJ_RES_LINK t0 ON ((t1.PARTITION_ID = t0.PARTITION_ID) AND (t1.RES_ID = t0.TARGET_RESOURCE_ID)) ");
-			assertThat(getSelectSql(0)).endsWith(" WHERE ((t0.SRC_PATH = 'List.entry.item') AND (t0.TARGET_RESOURCE_TYPE = 'Patient') AND ((t0.PARTITION_ID,t0.SRC_RESOURCE_ID) IN (('1','" + listIdLong + "')) )) fetch first '10000' rows only");
+			assertThat(getSelectSql(searchQueryIndex)).contains(" INNER JOIN HFJ_RES_LINK t0 ON ((t1.PARTITION_ID = t0.TARGET_RES_PARTITION_ID) AND (t1.RES_ID = t0.TARGET_RESOURCE_ID)) ");
+			assertThat(getSelectSql(searchQueryIndex)).endsWith(" WHERE ((t0.SRC_PATH = 'List.entry.item') AND (t0.TARGET_RESOURCE_TYPE = 'Patient') AND ((t0.PARTITION_ID,t0.SRC_RESOURCE_ID) IN (('2','" + listIdLong + "')) )) fetch first '10000' rows only");
 		} else {
-			assertThat(getSelectSql(0)).contains(" INNER JOIN HFJ_RES_LINK t0 ON (t1.RES_ID = t0.TARGET_RESOURCE_ID) ");
+			assertThat(getSelectSql(searchQueryIndex)).contains(" INNER JOIN HFJ_RES_LINK t0 ON (t1.RES_ID = t0.TARGET_RESOURCE_ID) ");
 			if (myIncludePartitionIdsInSql) {
-				assertThat(getSelectSql(0)).endsWith(" WHERE ((t0.PARTITION_ID = '1') AND (t0.SRC_PATH = 'List.entry.item') AND (t0.TARGET_RESOURCE_TYPE = 'Patient') AND (t0.SRC_RESOURCE_ID = '" + listIdLong + "')) fetch first '10000' rows only");
+				assertThat(getSelectSql(searchQueryIndex)).endsWith(" WHERE ((t0.TARGET_RES_PARTITION_ID IN ('1','2') ) AND (t0.SRC_PATH = 'List.entry.item') AND (t0.TARGET_RESOURCE_TYPE = 'Patient') AND (t0.SRC_RESOURCE_ID = '" + listIdLong + "')) fetch first '10000' rows only");
 			} else {
-				assertThat(getSelectSql(0)).endsWith(" WHERE ((t0.SRC_PATH = 'List.entry.item') AND (t0.TARGET_RESOURCE_TYPE = 'Patient') AND (t0.SRC_RESOURCE_ID = '" + listIdLong + "')) fetch first '10000' rows only");
+				assertThat(getSelectSql(searchQueryIndex)).endsWith(" WHERE ((t0.SRC_PATH = 'List.entry.item') AND (t0.TARGET_RESOURCE_TYPE = 'Patient') AND (t0.SRC_RESOURCE_ID = '" + listIdLong + "')) fetch first '10000' rows only");
 			}
 		}
 
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(searchQueryIndex + 2, myCaptureQueriesListener.countSelectQueries());
 	}
 
 	/**
