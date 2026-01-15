@@ -108,7 +108,8 @@ public class AuthResourceResolver implements IAuthResourceResolver {
 
 		if (idsToFetch.size() < theResourceIds.size()) {
 			ourLog.debug(
-					"Cache hits for resource(s): {}", Sets.difference(new HashSet<>(theResourceIds), new HashSet<>(idsToFetch)));
+					"Cache hits for resource(s): {}",
+					Sets.difference(new HashSet<>(theResourceIds), new HashSet<>(idsToFetch)));
 		}
 
 		if (isNotEmpty(idsToFetch)) {
