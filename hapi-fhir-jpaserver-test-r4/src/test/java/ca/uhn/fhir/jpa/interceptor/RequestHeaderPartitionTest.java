@@ -97,6 +97,8 @@ public class RequestHeaderPartitionTest extends BaseJpaR4Test {
 		myPatientDao.update((Patient) buildPatient(withId("C")), createRequestDetailsWithPartitionHeader("3"));
 		myObservationDao.update((Observation) buildObservation(withId("CO"), withSubject("Patient/C")), createRequestDetailsWithPartitionHeader("3"));
 
+		logAllResources();
+
 		BulkExportJobParameters jobParameters = new BulkExportJobParameters();
 		jobParameters.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
 		jobParameters.setOutputFormat(CT_FHIR_NDJSON);
@@ -118,7 +120,7 @@ public class RequestHeaderPartitionTest extends BaseJpaR4Test {
 		helper.setRequestDetailsSupplier(()->createRequestDetailsWithPartitionHeader("1"));
 
 		BulkExportJobHelper.BulkExportContents fetchedResults = helper.fetchJobResults(result);
-		assertThat(fetchedResults.getResourceIdPartsForType("Patient")).containsExactlyInAnyOrder("A", "B", "1000");
+		assertThat(fetchedResults.getResourceIdPartsForType("Patient")).containsExactlyInAnyOrder("A", "B", myPatientIdInPartition1.getIdPart());
 		assertThat(fetchedResults.getResourceIdPartsForType("Observation")).containsExactlyInAnyOrder("AO", "BO");
 
 	}

@@ -129,6 +129,9 @@ public class JpaBulkExportProcessorTest {
 	private IIdHelperService<JpaPid> myIdHelperService;
 
 	@Mock
+	private IFhirResourceDao<Patient> myPatientDao;
+
+	@Mock
 	private MdmExpandersHolder myMdmExpandersHolder;
 
 	@Mock
@@ -257,6 +260,8 @@ public class JpaBulkExportProcessorTest {
 		}
 		when(myIdHelperService.resolveResourcePids(any(), any(), any())).thenReturn(pids);
 
+		when(myDaoRegistry.getResourceDao(eq("Patient"))).thenReturn(myPatientDao);
+		when(myPatientDao.searchForResourceIds(any(), any())).thenReturn(patientTypes);
 
 		parameters.setPartitionId(getPartitionIdFromParams(thePartitioned));
 
