@@ -268,7 +268,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 
 	public String createAndStoreJobInstance(JobDefinition<?> theJobDefinition) {
 		JobInstance jobInstance = createInstance(theJobDefinition);
-		return mySvc.storeNewInstance(jobInstance);
+		return mySvc.storeNewInstance(null, jobInstance);
 	}
 
 	public String createAndDequeueWorkChunk(String theJobInstanceId) {

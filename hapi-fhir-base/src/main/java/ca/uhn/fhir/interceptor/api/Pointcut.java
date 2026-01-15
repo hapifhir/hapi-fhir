@@ -1094,6 +1094,36 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
+	 * This hook is invoked during batch processing when a new RequestDetails object is about to be
+	 * created and used for work done by a task. Hooks may modify this object, e.g. by adding headers or other metadata
+	 * which an interceptor needs. For example, a partitioning interceptor that looks at a request header might
+	 * stash the header value it cares about in the JobDetails within the {@link #STORAGE_PRESTORAGE_BATCH_JOB_CREATE}
+	 * pointcut, and re-add it to the RequestDetails in this pointcut.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.batch2.api.IJobInstance - The executing job instance. Hooks should not modify this object.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - The newly created request details object that will be used for
+	 * work done by a task. Hooks may modify this object, e.g. by adding headers or other metadata.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 *
+	 * @since 8.8.0
+	 * @see #STORAGE_PRESTORAGE_BATCH_JOB_CREATE If a hook for the {@link #STORAGE_PRESTORAGE_BATCH_JOB_CREATE} pointcut
+	 *      adds userdata to the JobInstance, it will be available later to the {@link #STORAGE_BATCH_TASK_NEW_REQUEST_DETAILS}.
+	 */
+	STORAGE_BATCH_TASK_NEW_REQUEST_DETAILS(
+			void.class, "ca.uhn.fhir.batch2.api.IJobInstance", "ca.uhn.fhir.rest.api.server.RequestDetails"),
+
+	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked when we are about to <a href="https://smilecdr.com/docs/fhir_repository/creating_data.html#auto-create-placeholder-reference-targets">Auto-Create a Placeholder Reference</a>.
 	 * Hooks may modify/enhance the placeholder reference target that is about to be created, or
 	 * reject the creation of the resource, which generally means that the transaction will be
@@ -3378,7 +3408,7 @@ public enum Pointcut implements IPointcut {
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>
-	 * ca.uhn.fhir.batch2.model.JobInstance
+	 * ca.uhn.fhir.batch2.model.JobInstance - The job instance that is about to be started. Hooks may modify this object.
 	 * </li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that lead to the creation
@@ -3388,6 +3418,9 @@ public enum Pointcut implements IPointcut {
 	 * <p>
 	 * Hooks should return <code>void</code>.
 	 * </p>
+	 *
+	 * @see #STORAGE_BATCH_TASK_NEW_REQUEST_DETAILS If a hook for the {@link #STORAGE_PRESTORAGE_BATCH_JOB_CREATE} pointcut
+	 *      adds userdata to the JobInstance, it will be available later to the {@link #STORAGE_BATCH_TASK_NEW_REQUEST_DETAILS}.
 	 */
 	STORAGE_PRESTORAGE_BATCH_JOB_CREATE(
 			void.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.rest.api.server.RequestDetails"),

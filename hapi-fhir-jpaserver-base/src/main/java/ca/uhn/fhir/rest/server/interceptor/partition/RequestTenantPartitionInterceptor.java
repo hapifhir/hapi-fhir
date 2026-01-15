@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA - Search Parameters
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.partition;
 
+import ca.uhn.fhir.batch2.api.IJobInstance;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -53,6 +55,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 @Interceptor
 public class RequestTenantPartitionInterceptor {
+	private static final String INITIATING_TENANT_KEY =
+			RequestTenantPartitionInterceptor.class.getName() + "_INITIATING_TENANT";
 
 	@Autowired
 	private PartitionSettings myPartitionSettings;
@@ -90,6 +94,27 @@ public class RequestTenantPartitionInterceptor {
 		return extractPartitionIdFromRequest(theRequestDetails);
 	}
 
+	/**
+	 * This method is invoked at the kickoff of a Batch2 job - It takes the request tenant from the
+	 * RequestDetails object in the operation being used to kick off the job, and stashes it so that
+	 * it's available later on to figure out the partitions during batch2 job exection steps.
+	 */
+	@Hook(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE)
+	public void createBatchJob(RequestDetails theRequestDetails, JobInstance theJobInstance) {
+		theJobInstance.addUserData(INITIATING_TENANT_KEY, theRequestDetails.getTenantId());
+	}
+
+	/**
+	 * During batch2 step execution, restore the tenant ID to any new RequestDetails objects
+	 */
+	@Hook(Pointcut.STORAGE_BATCH_TASK_NEW_REQUEST_DETAILS)
+	public void createBatchJob(RequestDetails theRequestDetails, IJobInstance theJobInstance) {
+		String tenantId = (String) theJobInstance.getUserData().get(INITIATING_TENANT_KEY);
+		if (tenantId != null) {
+			theRequestDetails.setTenantId(tenantId);
+		}
+	}
+
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 	public RequestPartitionId partitionIdentifyCreate(RequestDetails theRequestDetails) {
 		return extractPartitionIdFromRequest(theRequestDetails);
@@ -97,9 +122,12 @@ public class RequestTenantPartitionInterceptor {
 
 	@Nonnull
 	protected RequestPartitionId extractPartitionIdFromRequest(RequestDetails theRequestDetails) {
+		String tenantId = theRequestDetails.getTenantId();
+		if (tenantId == null) {
+			tenantId = (String) theRequestDetails.getUserData().get(INITIATING_TENANT_KEY);
+		}
 
 		// We will use the tenant ID that came from the request as the partition name
-		String tenantId = theRequestDetails.getTenantId();
 		if (isBlank(tenantId)) {
 			// this branch is no-op happen when "partitioning.tenant_identification_strategy" is set to URL_BASED
 			if (theRequestDetails instanceof SystemRequestDetails requestDetails) {

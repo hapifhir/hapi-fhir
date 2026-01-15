@@ -55,7 +55,7 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 	@Test
 	default void testStoreAndFetchWorkChunk_NoData() {
 		JobInstance instance = createInstance();
-		String instanceId = getTestManager().getSvc().storeNewInstance(instance);
+		String instanceId = getTestManager().getSvc().storeNewInstance(null, instance);
 
 		String id = getTestManager().storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, null, false);
 
@@ -72,7 +72,7 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 	})
 	default void testWorkChunkCreate_inExpectedStatus(boolean theGatedExecution, WorkChunkStatusEnum expectedStatus) {
 		JobInstance instance = createInstance();
-		String instanceId = getTestManager().getSvc().storeNewInstance(instance);
+		String instanceId = getTestManager().getSvc().storeNewInstance(null, instance);
 
 		String id = getTestManager().storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA, theGatedExecution);
 		assertNotNull(id);
@@ -111,7 +111,7 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 		getTestManager().disableWorkChunkMessageHandler();
 		JobDefinition<?> jobDefinition = getTestManager().withJobDefinition(false);
 		JobInstance instance = createInstance();
-		String instanceId = getTestManager().getSvc().storeNewInstance(instance);
+		String instanceId = getTestManager().getSvc().storeNewInstance(null, instance);
 
 		// we're not transitioning this state; we're just checking storage of data
 		JobMaintenanceStateInformation info = new JobMaintenanceStateInformation(instanceId, jobDefinition, "1|QUEUED");
