@@ -19,19 +19,15 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
-import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.util.ValidationInvocationHelper;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,16 +38,13 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+@SuppressWarnings("DefaultAnnotationParam")
 public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource> extends BaseJpaResourceProvider<T> {
 
 	@Autowired
@@ -59,6 +52,9 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 
 	@Autowired
 	private VersionCanonicalizer myVersionCanonicalizer;
+
+	@Autowired
+	private ValidationInvocationHelper myValidationInvocationHelper;
 
 	/**
 	 * $lookup operation
@@ -165,41 +161,9 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 			// Determine the CodeSystem URL to validate against
 			String codeSystemUrl = resolveCodeSystemUrl(theId, theUrl, theRequestDetails);
 
-			// Convert codeableConcept to canonical form
-			CodeableConcept codeableConcept = myVersionCanonicalizer.codeableConceptToCanonical(theCodeableConcept);
-			boolean haveCodeableConcept =
-					codeableConcept != null && !codeableConcept.getCoding().isEmpty();
-
-			// Convert coding to canonical form
-			Coding canonicalCoding = myVersionCanonicalizer.codingToCanonical(theCoding);
-			boolean haveCoding = canonicalCoding != null && !canonicalCoding.isEmpty();
-
-			boolean haveCode = theCode != null && theCode.hasValue();
-
-			// Handle codeableConcept - validate each coding until one succeeds
-			if (haveCodeableConcept) {
-				return validateCodeableConcept(codeableConcept.getCoding(), codeSystemUrl, theVersion);
-			}
-
-			// Handle coding parameter
-			if (haveCoding) {
-				String systemUrl = canonicalCoding.hasSystem() ? canonicalCoding.getSystem() : codeSystemUrl;
-				validateSystemsMatch(codeSystemUrl, systemUrl);
-				String versionedSystem = createVersionedSystemIfVersionIsPresent(systemUrl, getStringValue(theVersion));
-				return validateSingleCode(versionedSystem, canonicalCoding.getCode(), canonicalCoding.getDisplay());
-			}
-
-			// Handle code/system parameters
-			if (haveCode) {
-				String versionedSystem =
-						createVersionedSystemIfVersionIsPresent(codeSystemUrl, getStringValue(theVersion));
-				return validateSingleCode(versionedSystem, theCode.getValueAsString(), getStringValue(theDisplay));
-			}
-
-			// No valid input provided
-			CodeValidationResult result =
-					new CodeValidationResult().setMessage("No code, coding, or codeableConcept provided to validate");
-			return result.toParameters(getContext());
+			// Delegate to the validation helper
+			return myValidationInvocationHelper.invokeValidateCodeForCodeSystem(
+					theCode, theVersion, theDisplay, theCoding, theCodeableConcept, codeSystemUrl);
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -216,68 +180,7 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 		return getStringValue(theUrl);
 	}
 
-	private IBaseParameters validateCodeableConcept(
-			List<Coding> theCodings, String theCodeSystemUrl, IPrimitiveType<String> theVersion) {
-		CodeValidationResult lastResult = null;
-		for (Coding coding : theCodings) {
-			String systemUrl = coding.hasSystem() ? coding.getSystem() : theCodeSystemUrl;
-			if (theCodeSystemUrl != null && coding.hasSystem()) {
-				validateSystemsMatch(theCodeSystemUrl, coding.getSystem());
-			}
-			String versionedSystem = createVersionedSystemIfVersionIsPresent(systemUrl, getStringValue(theVersion));
-			CodeValidationResult result = validateCodeWithTerminologyService(
-							versionedSystem, coding.getCode(), coding.getDisplay())
-					.orElseGet(supplyUnableToValidateResult(versionedSystem, coding.getCode()));
-			lastResult = result;
-			if (result.isOk()) {
-				return result.toParameters(getContext());
-			}
-		}
-		// Return the last result (even if failed) or create a default error
-		if (lastResult == null) {
-			lastResult = new CodeValidationResult().setMessage("No codings found in codeableConcept");
-		}
-		return lastResult.toParameters(getContext());
-	}
-
-	private void validateSystemsMatch(String theExpectedSystem, String theActualSystem) {
-		if (theExpectedSystem != null && !theExpectedSystem.equalsIgnoreCase(theActualSystem)) {
-			throw new InvalidRequestException(Msg.code(1160) + "Coding.system '" + theActualSystem
-					+ "' does not equal param url '" + theExpectedSystem + "'. Unable to validate-code.");
-		}
-	}
-
-	private IBaseParameters validateSingleCode(String theSystem, String theCode, String theDisplay) {
-		CodeValidationResult result = validateCodeWithTerminologyService(theSystem, theCode, theDisplay)
-				.orElseGet(supplyUnableToValidateResult(theSystem, theCode));
-		return result.toParameters(getContext());
-	}
-
-	private static String createVersionedSystemIfVersionIsPresent(String theSystem, String theVersion) {
-		if (isNotBlank(theVersion)) {
-			return theSystem + "|" + theVersion;
-		}
-		return theSystem;
-	}
-
 	private static @Nullable String getStringValue(IPrimitiveType<String> thePrimitive) {
 		return (thePrimitive != null && thePrimitive.hasValue()) ? thePrimitive.getValueAsString() : null;
-	}
-
-	private Optional<CodeValidationResult> validateCodeWithTerminologyService(
-			String theCodeSystemUrl, String theCode, String theDisplay) {
-		return Optional.ofNullable(myValidationSupportChain.validateCode(
-				new ValidationSupportContext(myValidationSupportChain),
-				new ConceptValidationOptions(),
-				theCodeSystemUrl,
-				theCode,
-				theDisplay,
-				null));
-	}
-
-	private Supplier<CodeValidationResult> supplyUnableToValidateResult(String theCodeSystemUrl, String theCode) {
-		return () -> new CodeValidationResult()
-				.setMessage(
-						"Terminology service was unable to provide validation for " + theCodeSystemUrl + "#" + theCode);
 	}
 }

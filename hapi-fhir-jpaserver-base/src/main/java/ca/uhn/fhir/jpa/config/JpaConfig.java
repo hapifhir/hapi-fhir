@@ -192,6 +192,7 @@ import ca.uhn.fhir.jpa.util.JpaHapiTransactionService;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.PartitionedIdModeVerificationSvc;
 import ca.uhn.fhir.jpa.util.PersistenceContextProvider;
+import ca.uhn.fhir.jpa.util.ValidationInvocationHelper;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
@@ -223,6 +224,7 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -257,6 +259,7 @@ import java.util.List;
 	EnversAuditConfig.class,
 	MdmJpaConfig.class
 })
+@SuppressWarnings("unused")
 public class JpaConfig {
 	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";
 	public static final String JPA_VALIDATION_SUPPORT = "myJpaValidationSupport";
@@ -398,6 +401,14 @@ public class JpaConfig {
 	}
 
 	@Bean
+	public ValidationInvocationHelper validationInvocationHelper(
+			FhirContext theFhirContext,
+			@Qualifier(JPA_VALIDATION_SUPPORT_CHAIN) IValidationSupport theValidationSupportChain,
+			VersionCanonicalizer theVersionCanonicalizer) {
+		return new ValidationInvocationHelper(theFhirContext, theValidationSupportChain, theVersionCanonicalizer);
+	}
+
+	@Bean
 	public IJpaStorageResourceParser jpaStorageResourceParser() {
 		return new JpaStorageResourceParser();
 	}
@@ -467,18 +478,16 @@ public class JpaConfig {
 
 	@Bean
 	public TaskScheduler taskScheduler() {
-		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler(
+		return new ConcurrentTaskScheduler(
 				scheduledExecutorService().getObject(),
 				scheduledExecutorService().getObject());
-		return retVal;
 	}
 
 	@Bean(name = TASK_EXECUTOR_NAME)
 	public AsyncTaskExecutor taskExecutor() {
-		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler(
+		return new ConcurrentTaskScheduler(
 				scheduledExecutorService().getObject(),
 				scheduledExecutorService().getObject());
-		return retVal;
 	}
 
 	@Bean

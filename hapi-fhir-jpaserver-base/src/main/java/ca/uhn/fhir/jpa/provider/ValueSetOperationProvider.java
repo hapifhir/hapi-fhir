@@ -19,9 +19,7 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
-import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -30,6 +28,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.util.ValidationInvocationHelper;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -48,19 +47,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
+@SuppressWarnings("DefaultAnnotationParam")
 public class ValueSetOperationProvider extends BaseJpaProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetOperationProvider.class);
@@ -77,6 +69,9 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	@Autowired
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
 	private ValidationSupportChain myValidationSupportChain;
+
+	@Autowired
+	private ValidationInvocationHelper myValidationInvocationHelper;
 
 	@VisibleForTesting
 	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
@@ -185,60 +180,18 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			// Determine the ValueSet URL to validate against
 			String valueSetUrlString = resolveValueSetUrl(theId, theValueSetUrl, theValueSetVersion, theRequestDetails);
 
-			// Convert codeableConcept to canonical form
-			CodeableConcept codeableConcept = myVersionCanonicalizer.codeableConceptToCanonical(theCodeableConcept);
-			boolean haveCodeableConcept =
-					codeableConcept != null && !codeableConcept.getCoding().isEmpty();
-
-			// Convert coding to canonical form
-			Coding canonicalCoding = myVersionCanonicalizer.codingToCanonical(theCoding);
-			boolean haveCoding = canonicalCoding != null && !canonicalCoding.isEmpty();
-
-			boolean haveCode = theCode != null && theCode.hasValue();
-
-			// Handle codeableConcept
-			if (haveCodeableConcept) {
-				return validateCodeableConcept(codeableConcept.getCoding(), valueSetUrlString);
+			// Validate that a ValueSet identifier was provided
+			if (valueSetUrlString == null) {
+				throw new InvalidRequestException(
+						Msg.code(901)
+								+ "Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.");
 			}
 
-			// Handle coding parameter
-			if (haveCoding) {
-				validateSystemsMatch(theSystem, canonicalCoding);
-				String systemString = createVersionedSystemIfVersionIsPresent(
-						canonicalCoding.getSystem(), canonicalCoding.getVersion());
-				return validateSingleCode(
-						systemString, canonicalCoding.getCode(), canonicalCoding.getDisplay(), valueSetUrlString);
-			}
-
-			// Handle code/system parameters
-			if (haveCode) {
-				String systemString = getStringValue(theSystem);
-				if (systemString != null && theSystemVersion != null && theSystemVersion.hasValue()) {
-					systemString = systemString + "|" + theSystemVersion.getValueAsString();
-				}
-				return validateSingleCode(
-						systemString, theCode.getValueAsString(), getStringValue(theDisplay), valueSetUrlString);
-			}
-
-			// No valid input provided
-			CodeValidationResult result =
-					new CodeValidationResult().setMessage("No code, coding, or codeableConcept provided to validate");
-			return result.toParameters(getContext());
+			// Delegate to the validation helper
+			return myValidationInvocationHelper.invokeValidateCodeForValueSet(
+					theCode, theSystem, theSystemVersion, theDisplay, theCoding, theCodeableConcept, valueSetUrlString);
 		} finally {
 			endRequest(theServletRequest);
-		}
-	}
-
-	/**
-	 * Validate system parameter matches coding.system if both are provided
-	 */
-	private void validateSystemsMatch(IPrimitiveType<String> theSystem, Coding canonicalCoding) {
-		String paramSystemString = getStringValue(theSystem);
-		if (isNotBlank(canonicalCoding.getSystem())
-				&& paramSystemString != null
-				&& !paramSystemString.equalsIgnoreCase(canonicalCoding.getSystem())) {
-			throw new InvalidRequestException(Msg.code(2352) + "Coding.system '" + canonicalCoding.getSystem()
-					+ "' does not equal param system '" + paramSystemString + "'. Unable to validate-code.");
 		}
 	}
 
@@ -264,70 +217,16 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		}
 
 		// Build URL with version if provided via parameter
-		String valueSetUrlString = getStringValue(theValueSetUrl);
+		String valueSetUrlString =
+				(theValueSetUrl != null && theValueSetUrl.hasValue()) ? theValueSetUrl.getValueAsString() : null;
 		if (valueSetUrlString != null && theValueSetVersion != null && theValueSetVersion.hasValue()) {
 			valueSetUrlString = valueSetUrlString + "|" + theValueSetVersion.getValueAsString();
 		}
 		return valueSetUrlString;
 	}
 
-	private IBaseParameters validateCodeableConcept(List<Coding> theCodings, String theValueSetUrl) {
-		CodeValidationResult lastResult = null;
-		for (Coding coding : theCodings) {
-			String systemString = createVersionedSystemIfVersionIsPresent(coding.getSystem(), coding.getVersion());
-			CodeValidationResult result = validateCodeWithTerminologyService(
-							systemString, coding.getCode(), coding.getDisplay(), theValueSetUrl)
-					.orElseGet(supplyUnableToValidateResult(systemString, coding.getCode(), theValueSetUrl));
-			lastResult = result;
-			if (result.isOk()) {
-				return result.toParameters(getContext());
-			}
-		}
-		// Return the last result (even if failed) or create a default error
-		if (lastResult == null) {
-			lastResult = new CodeValidationResult().setMessage("No codings found in codeableConcept");
-		}
-		return lastResult.toParameters(getContext());
-	}
-
-	private IBaseParameters validateSingleCode(
-			String theSystem, String theCode, String theDisplay, String theValueSetUrl) {
-		CodeValidationResult result = validateCodeWithTerminologyService(theSystem, theCode, theDisplay, theValueSetUrl)
-				.orElseGet(supplyUnableToValidateResult(theSystem, theCode, theValueSetUrl));
-		return result.toParameters(getContext());
-	}
-
-	private static String createVersionedSystemIfVersionIsPresent(String theSystem, String theVersion) {
-		if (isNotBlank(theVersion)) {
-			return theSystem + "|" + theVersion;
-		}
-		return theSystem;
-	}
-
 	private String extractValueSetUrl(IBaseResource theValueSet) {
 		return getContext().newTerser().getSinglePrimitiveValueOrNull(theValueSet, "url");
-	}
-
-	private static String getStringValue(IPrimitiveType<String> thePrimitive) {
-		return (thePrimitive != null && thePrimitive.hasValue()) ? thePrimitive.getValueAsString() : null;
-	}
-
-	private Optional<CodeValidationResult> validateCodeWithTerminologyService(
-			String theSystem, String theCode, String theDisplay, String theValueSetUrl) {
-		return Optional.ofNullable(myValidationSupportChain.validateCode(
-				new ValidationSupportContext(myValidationSupportChain),
-				new ConceptValidationOptions(),
-				theSystem,
-				theCode,
-				theDisplay,
-				theValueSetUrl));
-	}
-
-	private Supplier<CodeValidationResult> supplyUnableToValidateResult(
-			String theSystem, String theCode, String theValueSetUrl) {
-		return () -> new CodeValidationResult()
-				.setMessage("Validator is unable to provide validation for " + theCode + "#" + theSystem
-						+ " - Unknown or unusable ValueSet[" + theValueSetUrl + "]");
 	}
 
 	@Operation(
