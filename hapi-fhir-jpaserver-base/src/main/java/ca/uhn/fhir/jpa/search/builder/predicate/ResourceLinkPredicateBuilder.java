@@ -170,6 +170,15 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		}
 	}
 
+	@Override
+	public DbColumn getPartitionIdColumn() {
+		if (myReversed) {
+			return myColumnTargetPartitionId;
+		} else {
+			return myColumnSrcPartitionId;
+		}
+	}
+
 	public DbColumn getColumnSourcePath() {
 		return myColumnSrcPath;
 	}
@@ -187,7 +196,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	}
 
 	public DbColumn[] getJoinColumnsForSource() {
-		return getSearchQueryBuilder().toJoinColumns(getPartitionIdColumn(), myColumnSrcResourceId);
+		return getSearchQueryBuilder().toJoinColumns(myColumnSrcPartitionId, myColumnSrcResourceId);
 	}
 
 	/**
