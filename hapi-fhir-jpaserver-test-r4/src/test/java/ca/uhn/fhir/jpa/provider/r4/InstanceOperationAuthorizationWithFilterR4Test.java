@@ -222,9 +222,10 @@ class InstanceOperationAuthorizationWithFilterR4Test extends BaseResourceProvide
 
 			Observation observation = createObservationWithCategory(CATEGORY_VITAL_SIGNS);
 
-			myCaptureQueriesListener.clear();
 
 			// FIRST REQUEST
+			myCaptureQueriesListener.clear();
+			Mockito.reset(myAuthResolverSpy);
 			Parameters result  = myServer.getFhirClient()
 					.operation()
 					.onInstance(observation.getIdElement())

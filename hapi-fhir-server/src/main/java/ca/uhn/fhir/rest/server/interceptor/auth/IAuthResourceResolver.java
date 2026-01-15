@@ -48,6 +48,7 @@ public interface IAuthResourceResolver {
 	 * Resolve a list of resources by ID. All resources should be the same type.
 	 * @param theResourceIds the FHIR id of the resource(s)
 	 * @param theResourceType the type of resource
+	 * @param theRequestDetails - The request details
 	 * @return A list of resources resolved by ID
 	 */
 	List<IBaseResource> resolveResourcesByIds(

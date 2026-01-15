@@ -216,7 +216,7 @@ class AuthResourceResolverTest {
 			Patient patient2 = new Patient();
 			patient2.setId("Patient/456");
 
-			// First call fetches patient1
+			// First call fetches patient1, second call patient2
 			when(myPatientDao.searchForResources(any(), any()))
 				.thenReturn(List.of(patient1))
 				.thenReturn(List.of(patient2));
