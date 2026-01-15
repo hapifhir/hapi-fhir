@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPre
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkForHasParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityNormalizedPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
@@ -322,16 +323,16 @@ public class SearchQueryBuilder {
 	 * Create a predicate builder for selecting on a REFERENCE search parameter
 	 */
 	public ResourceLinkPredicateBuilder createReferencePredicateBuilder(QueryStack theQueryStack) {
-		return mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, false);
+		return mySqlBuilderFactory.resourceLinkIndexTable(theQueryStack, this);
 	}
 
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a resource link where the
 	 * source and target are reversed. This is used for _has queries.
 	 */
-	public ResourceLinkPredicateBuilder addReferencePredicateBuilderReversed(
+	public ResourceLinkPredicateBuilder addResourceLinkForHasParameterPredicateBuilderReversed(
 			QueryStack theQueryStack, DbColumn[] theSourceJoinColumn) {
-		ResourceLinkPredicateBuilder retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, true);
+		ResourceLinkForHasParameterPredicateBuilder retVal = mySqlBuilderFactory.resourceLinkForHasParameterIndexTable(theQueryStack, this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}

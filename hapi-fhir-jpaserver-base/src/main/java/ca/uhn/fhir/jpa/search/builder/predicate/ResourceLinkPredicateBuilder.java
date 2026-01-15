@@ -106,14 +106,12 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	private static final Pattern MODIFIER_REPLACE_PATTERN = Pattern.compile(".*:");
 	private final DbColumn myColumnSrcType;
 	private final DbColumn myColumnSrcPath;
-	private final DbColumn myColumnTargetResourceId;
+	protected final DbColumn myColumnTargetResourceId;
 	private final DbColumn myColumnTargetResourceUrl;
 	private final DbColumn myColumnSrcResourceId;
-	private final DbColumn myColumnTargetResourceType;
+	protected final DbColumn myColumnTargetResourceType;
 	private final QueryStack myQueryStack;
-	private final boolean myReversed;
-
-	private final DbColumn myColumnTargetPartitionId;
+	protected final DbColumn myColumnTargetPartitionId;
 	private final DbColumn myColumnSrcPartitionId;
 
 	@Autowired
@@ -141,7 +139,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	 * Constructor
 	 */
 	public ResourceLinkPredicateBuilder(
-			QueryStack theQueryStack, SearchQueryBuilder theSearchSqlBuilder, boolean theReversed) {
+			QueryStack theQueryStack, SearchQueryBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_LINK"));
 		myColumnSrcResourceId = getTable().addColumn("SRC_RESOURCE_ID");
 		myColumnSrcPartitionId = getTable().addColumn("PARTITION_ID");
@@ -152,26 +150,22 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		myColumnTargetResourceUrl = getTable().addColumn("TARGET_RESOURCE_URL");
 		myColumnTargetResourceType = getTable().addColumn("TARGET_RESOURCE_TYPE");
 
-		myReversed = theReversed;
 		myQueryStack = theQueryStack;
 	}
 
 	@Override
 	public DbColumn getResourceTypeColumn() {
-		if (myReversed) {
-			return myColumnTargetResourceType;
-		} else {
-			return myColumnSrcType;
-		}
+		return myColumnSrcType;
 	}
 
 	@Override
 	public DbColumn getPartitionIdColumn() {
-		if (myReversed) {
-			return myColumnTargetPartitionId;
-		} else {
-			return myColumnSrcPartitionId;
-		}
+		return myColumnSrcPartitionId;
+	}
+
+	@Override
+	public DbColumn getResourceIdColumn() {
+		return myColumnSrcResourceId;
 	}
 
 	public DbColumn getColumnSourcePath() {
@@ -204,25 +198,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		return super.getJoinColumns();
 	}
 
-	public DbColumn getColumnSrcResourceId() {
-		return myColumnSrcResourceId;
-	}
-
-	public DbColumn getColumnSrcPartitionId() {
-		return myColumnSrcPartitionId;
-	}
-
 	public DbColumn getColumnTargetResourceType() {
 		return myColumnTargetResourceType;
-	}
-
-	@Override
-	public DbColumn getResourceIdColumn() {
-		if (myReversed) {
-			return myColumnTargetResourceId;
-		} else {
-			return myColumnSrcResourceId;
-		}
 	}
 
 	@Nullable
@@ -253,8 +230,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		for (int orIdx = 0; orIdx < theReferenceOrParamList.size(); orIdx++) {
 			IQueryParameterType nextOr = theReferenceOrParamList.get(orIdx);
 
-			if (nextOr instanceof ReferenceParam) {
-				ReferenceParam ref = (ReferenceParam) nextOr;
+			if (nextOr instanceof ReferenceParam ref) {
 
 				if (isBlank(ref.getChain())) {
 
@@ -306,12 +282,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		}
 
 		List<String> pathsToMatch = createResourceLinkPaths(theResourceType, theParamName, theQualifiers);
-		boolean inverse;
-		if ((theOperation == null) || (theOperation == SearchFilterParser.CompareOperation.eq)) {
-			inverse = false;
-		} else {
-			inverse = true;
-		}
+		boolean inverse = (theOperation != null) && (theOperation != SearchFilterParser.CompareOperation.eq);
 
 		List<JpaPid> pids = myIdHelperService.resolveResourcePids(
 				requestPartitionId,

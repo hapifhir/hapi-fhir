@@ -67,7 +67,7 @@ public class ResourceLinkPredicateBuilderTest {
 		DbTable table = new DbTable(schema, "table");
 		when(mySearchQueryBuilder.addTable(Mockito.anyString())).thenReturn(table);
 		when(mySearchQueryBuilder.getPartitionSettings()).thenReturn(myPartitionSettings);
-		myResourceLinkPredicateBuilder = new ResourceLinkPredicateBuilder(null, mySearchQueryBuilder, false);
+		myResourceLinkPredicateBuilder = new ResourceLinkPredicateBuilder(null, mySearchQueryBuilder);
 		myResourceLinkPredicateBuilder.setSearchParamRegistryForUnitTest(mySearchParamRegistry);
 		myResourceLinkPredicateBuilder.setIdHelperServiceForUnitTest(myIdHelperService);
 	}

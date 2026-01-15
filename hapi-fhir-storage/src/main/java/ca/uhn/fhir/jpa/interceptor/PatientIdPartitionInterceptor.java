@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -187,46 +188,48 @@ public class PatientIdPartitionInterceptor {
 		}
 
 		//noinspection EnumSwitchStatementWhichMissesCases
-		switch (theReadDetails.getRestOperationType()) {
-			case DELETE:
-			case PATCH:
-			case READ:
-			case VREAD:
-			case SEARCH_TYPE:
-				if (theReadDetails.getSearchParams() != null) {
-					SearchParameterMap params = theReadDetails.getSearchParams();
-					if ("Patient".equals(theReadDetails.getResourceType())) {
-						List<String> idParts = getResourceIdList(params, "_id", false);
-						if (idParts.size() == 1) {
-							return provideCompartmentMemberInstanceResponse(theRequestDetails, idParts.get(0));
-						} else {
-							return RequestPartitionId.allPartitions();
-						}
-					} else {
-						for (RuntimeSearchParam nextCompartmentSp : compartmentSps) {
-							List<String> idParts = getResourceIdList(params, nextCompartmentSp.getName(), true);
-							if (!idParts.isEmpty()) {
+		if (theReadDetails.getRestOperationType() != null) {
+			switch (theReadDetails.getRestOperationType()) {
+				case DELETE:
+				case PATCH:
+				case READ:
+				case VREAD:
+				case SEARCH_TYPE:
+					if (theReadDetails.getSearchParams() != null) {
+						SearchParameterMap params = theReadDetails.getSearchParams();
+						if ("Patient".equals(theReadDetails.getResourceType())) {
+							List<String> idParts = getResourceIdList(params, "_id", false);
+							if (idParts.size() == 1) {
 								return provideCompartmentMemberInstanceResponse(theRequestDetails, idParts.get(0));
+							} else {
+								return RequestPartitionId.allPartitions();
+							}
+						} else {
+							for (RuntimeSearchParam nextCompartmentSp : compartmentSps) {
+								List<String> idParts = getResourceIdList(params, nextCompartmentSp.getName(), true);
+								if (!idParts.isEmpty()) {
+									return provideCompartmentMemberInstanceResponse(theRequestDetails, idParts.get(0));
+								}
 							}
 						}
-					}
-				} else if (theReadDetails.getReadResourceId() != null) {
-					if ("Patient".equals(theReadDetails.getResourceType())) {
-						return provideCompartmentMemberInstanceResponse(
+					} else if (theReadDetails.getReadResourceId() != null) {
+						if ("Patient".equals(theReadDetails.getResourceType())) {
+							return provideCompartmentMemberInstanceResponse(
 								theRequestDetails,
 								theReadDetails.getReadResourceId().getIdPart());
+						}
 					}
-				}
-				break;
-			case EXTENDED_OPERATION_SERVER:
-				String extendedOp = theReadDetails.getExtendedOperationName();
-				if (ProviderConstants.OPERATION_EXPORT.equals(extendedOp)
+					break;
+				case EXTENDED_OPERATION_SERVER:
+					String extendedOp = theReadDetails.getExtendedOperationName();
+					if (ProviderConstants.OPERATION_EXPORT.equals(extendedOp)
 						|| ProviderConstants.OPERATION_EXPORT_POLL_STATUS.equals(extendedOp)) {
-					return provideNonPatientSpecificQueryResponse();
-				}
-				break;
-			default:
-				// nothing
+						return provideNonPatientSpecificQueryResponse();
+					}
+					break;
+				default:
+					// nothing
+			}
 		}
 
 		if (isBlank(theReadDetails.getResourceType())) {

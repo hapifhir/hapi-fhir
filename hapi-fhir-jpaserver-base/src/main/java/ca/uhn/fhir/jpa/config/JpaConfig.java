@@ -140,6 +140,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPre
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkForHasParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityNormalizedPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
@@ -783,11 +784,18 @@ public class JpaConfig {
 		return new QuantityNormalizedPredicateBuilder(theSearchBuilder);
 	}
 
-	@Bean
+	@Bean("newResourceLinkPredicateBuilder")
 	@Scope("prototype")
 	public ResourceLinkPredicateBuilder newResourceLinkPredicateBuilder(
-			QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder, boolean theReversed) {
-		return new ResourceLinkPredicateBuilder(theQueryStack, theSearchBuilder, theReversed);
+			QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder) {
+		return new ResourceLinkPredicateBuilder(theQueryStack, theSearchBuilder);
+	}
+
+	@Bean("newHasLinkPredicateBuilder")
+	@Scope("prototype")
+	public ResourceLinkForHasParameterPredicateBuilder newHasLinkPredicateBuilder(
+			QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder) {
+		return new ResourceLinkForHasParameterPredicateBuilder(theQueryStack, theSearchBuilder);
 	}
 
 	@Bean

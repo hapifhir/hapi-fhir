@@ -783,7 +783,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateIdPresentForDelete(theId);
 		validateDeleteEnabled();
 
-		return myTransactionService.execute(theRequestDetails, transactionDetails, tx -> {
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
+			theRequestDetails, getResourceName(), theId);
+
+		return myTransactionService
+			.withRequest(theRequestDetails)
+			.withRequestPartitionId(requestPartitionId)
+			.execute(tx -> {
 			DeleteConflictList deleteConflicts = new DeleteConflictList();
 			if (isNotBlank(theId.getValue())) {
 				deleteConflicts.setResourceIdMarkedForDeletion(theId);
