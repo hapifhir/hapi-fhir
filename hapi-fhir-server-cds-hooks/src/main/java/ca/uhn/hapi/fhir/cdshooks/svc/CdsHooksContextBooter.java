@@ -85,8 +85,12 @@ public class CdsHooksContextBooter {
 				cdsServiceJson.setId(annotation.value());
 				cdsServiceJson.setHook(annotation.hook());
 				cdsServiceJson.setDescription(annotation.description());
-				cdsServiceJson.setUsageRequirements(annotation.usageRequirements());
-				cdsServiceJson.setTitle(annotation.title());
+				if (StringUtils.isNotEmpty(annotation.usageRequirements())) {
+					cdsServiceJson.setUsageRequirements(annotation.usageRequirements());
+				}
+				if (StringUtils.isNotEmpty(annotation.title())) {
+					cdsServiceJson.setTitle(annotation.title());
+				}
 				cdsServiceJson.setExtension(serializeExtensions(annotation.extension(), annotation.extensionClass()));
 				cdsServiceJson.setExtensionClass(annotation.extensionClass());
 				for (CdsServicePrefetch prefetch : annotation.prefetch()) {
