@@ -89,7 +89,7 @@ public class SimplePreResourceShowDetails implements IPreResourceShowDetails {
 	public List<IBaseResource> getAllResources() {
 		ArrayList<IBaseResource> retVal = new ArrayList<>(myResources.length);
 		Arrays.stream(myResources).filter(Objects::nonNull).forEach(retVal::add);
-		return Collections.unmodifiableList(retVal);
+		return retVal;
 	}
 
 	@Override
