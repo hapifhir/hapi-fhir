@@ -24,13 +24,13 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPre
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkForHasParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityNormalizedPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryProvenancePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkForHasParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
@@ -81,8 +81,8 @@ public class SqlObjectFactory {
 
 	public ResourceLinkPredicateBuilder resourceLinkIndexTable(
 			QueryStack theQueryStack, SearchQueryBuilder theSearchSqlBuilder) {
-		return (ResourceLinkPredicateBuilder) myApplicationContext.getBean(
-				"newResourceLinkPredicateBuilder", theQueryStack, theSearchSqlBuilder);
+		return (ResourceLinkPredicateBuilder)
+				myApplicationContext.getBean("newResourceLinkPredicateBuilder", theQueryStack, theSearchSqlBuilder);
 	}
 
 	public ResourceLinkForHasParameterPredicateBuilder resourceLinkForHasParameterIndexTable(

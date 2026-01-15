@@ -35,7 +35,6 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -215,15 +214,15 @@ public class PatientIdPartitionInterceptor {
 					} else if (theReadDetails.getReadResourceId() != null) {
 						if ("Patient".equals(theReadDetails.getResourceType())) {
 							return provideCompartmentMemberInstanceResponse(
-								theRequestDetails,
-								theReadDetails.getReadResourceId().getIdPart());
+									theRequestDetails,
+									theReadDetails.getReadResourceId().getIdPart());
 						}
 					}
 					break;
 				case EXTENDED_OPERATION_SERVER:
 					String extendedOp = theReadDetails.getExtendedOperationName();
 					if (ProviderConstants.OPERATION_EXPORT.equals(extendedOp)
-						|| ProviderConstants.OPERATION_EXPORT_POLL_STATUS.equals(extendedOp)) {
+							|| ProviderConstants.OPERATION_EXPORT_POLL_STATUS.equals(extendedOp)) {
 						return provideNonPatientSpecificQueryResponse();
 					}
 					break;

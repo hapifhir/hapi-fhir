@@ -63,7 +63,7 @@ public class PatientCompartmentEnforcingInterceptor {
 	 * @since 8.8.0
 	 */
 	public PatientCompartmentEnforcingInterceptor(
-		FhirContext theFhirContext, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+			FhirContext theFhirContext, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 		myFhirContext = theFhirContext;
 		mySearchParamExtractor = null;
@@ -79,7 +79,7 @@ public class PatientCompartmentEnforcingInterceptor {
 	 */
 	@Deprecated(since = "8.8.0", forRemoval = true)
 	public PatientCompartmentEnforcingInterceptor(
-		FhirContext theFhirContext, ISearchParamExtractor theSearchParamExtractor) {
+			FhirContext theFhirContext, ISearchParamExtractor theSearchParamExtractor) {
 		myFhirContext = theFhirContext;
 		mySearchParamExtractor = theSearchParamExtractor;
 		myRequestPartitionHelperSvc = null;
@@ -93,7 +93,7 @@ public class PatientCompartmentEnforcingInterceptor {
 	 */
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
 	public void storagePreStorageResourceUpdated(
-		RequestDetails theRequestDetails, IBaseResource theOldResource, IBaseResource theResource) {
+			RequestDetails theRequestDetails, IBaseResource theOldResource, IBaseResource theResource) {
 
 		String patientCompartmentOld;
 		String patientCompartmentCurrent;
@@ -103,21 +103,25 @@ public class PatientCompartmentEnforcingInterceptor {
 			patientCompartmentCurrent = determinePartition(theRequestDetails, theResource, resourceType);
 		} else {
 			patientCompartmentOld = ResourceCompartmentUtil.getPatientCompartmentIdentity(
-					theOldResource, myFhirContext, mySearchParamExtractor)
-				.orElse(EMPTY);
+							theOldResource, myFhirContext, mySearchParamExtractor)
+					.orElse(EMPTY);
 			patientCompartmentCurrent = ResourceCompartmentUtil.getPatientCompartmentIdentity(
-					theResource, myFhirContext, mySearchParamExtractor)
-				.orElse(EMPTY);
+							theResource, myFhirContext, mySearchParamExtractor)
+					.orElse(EMPTY);
 		}
 
 		if (!Objects.equals(patientCompartmentOld, patientCompartmentCurrent)) {
-			ourLog.warn("Resource compartment for {} changed from {} to {}", theOldResource.getIdElement().toUnqualifiedVersionless().getValue(), patientCompartmentOld, patientCompartmentCurrent);
+			ourLog.warn(
+					"Resource compartment for {} changed from {} to {}",
+					theOldResource.getIdElement().toUnqualifiedVersionless().getValue(),
+					patientCompartmentOld,
+					patientCompartmentCurrent);
 
 			// Avoid disclosing compartments in message, which could have security implications
-			throw new PreconditionFailedException(
-				Msg.code(2476) + "Resource compartment for " + theOldResource.getIdElement().toUnqualifiedVersionless().getValue() + " changed. Was a referenced Patient changed?");
+			throw new PreconditionFailedException(Msg.code(2476) + "Resource compartment for "
+					+ theOldResource.getIdElement().toUnqualifiedVersionless().getValue()
+					+ " changed. Was a referenced Patient changed?");
 		}
-
 	}
 
 	/**
@@ -127,7 +131,7 @@ public class PatientCompartmentEnforcingInterceptor {
 	 * causes it to use a different partition.
 	 */
 	private String determinePartition(
-		RequestDetails theRequestDetails, IBaseResource theResource, String resourceType) {
+			RequestDetails theRequestDetails, IBaseResource theResource, String resourceType) {
 		Object stashedPartition = theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
 		if (stashedPartition != null) {
 			theResource.setUserData(Constants.RESOURCE_PARTITION_ID, null);
@@ -135,7 +139,7 @@ public class PatientCompartmentEnforcingInterceptor {
 		try {
 			assert myRequestPartitionHelperSvc != null;
 			RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineCreatePartitionForRequest(
-				theRequestDetails, theResource, resourceType);
+					theRequestDetails, theResource, resourceType);
 			return requestPartition.toJson();
 		} finally {
 			if (stashedPartition != null) {
