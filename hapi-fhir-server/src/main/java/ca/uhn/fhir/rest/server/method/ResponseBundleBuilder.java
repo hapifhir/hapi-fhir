@@ -104,7 +104,7 @@ public class ResponseBundleBuilder {
 		String searchId = null;
 
 		Integer bundleSize;
-		if (bundleProvider.containsAllResources()){
+		if (bundleProvider.containsAllResources()) {
 			bundleSize = bundleProvider.getResourceListComplete().size();
 		} else {
 			bundleSize = bundleProvider.size();
