@@ -37,6 +37,7 @@ public class CdsServiceJson extends BaseCdsServiceJson {
 	public static final String HOOK = "hook";
 	public static final String TITLE = "title";
 	public static final String DESCRIPTION = "description";
+	public static final String USAGE_REQUIREMENTS = "usageRequirements";
 	public static final String ID = "id";
 	public static final String PREFETCH = "prefetch";
 
@@ -48,6 +49,9 @@ public class CdsServiceJson extends BaseCdsServiceJson {
 
 	@JsonProperty(value = DESCRIPTION, required = true)
 	String myDescription;
+
+	@JsonProperty(value = USAGE_REQUIREMENTS)
+	String myUsageRequirements;
 
 	@JsonProperty(value = ID, required = true)
 	String myId;
@@ -83,6 +87,15 @@ public class CdsServiceJson extends BaseCdsServiceJson {
 
 	public CdsServiceJson setDescription(String theDescription) {
 		myDescription = theDescription;
+		return this;
+	}
+
+	public String getUsageRequirements() {
+		return myUsageRequirements;
+	}
+
+	public CdsServiceJson setUsageRequirements(String theUsageRequirements) {
+		myUsageRequirements = theUsageRequirements;
 		return this;
 	}
 
