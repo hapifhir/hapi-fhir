@@ -21,16 +21,19 @@ package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.api.ResourceModificationRequest;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.api.ResourceModificationResponse;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionJson;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -69,8 +72,7 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 
 	@Override
 	protected void processPidsInTransaction(
-			String theInstanceId,
-			String theChunkId,
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
 			PT theJobParameters,
 			State theState,
 			List<TypedPidAndVersionJson> thePids,
@@ -79,7 +81,7 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 		HapiTransactionService.requireTransaction();
 
 		// Fetch all the resources in the chunk
-		fetchResourcesInTransaction(theState, thePids);
+		fetchResourcesInTransaction(theStepExecutionDetails, theState, thePids);
 
 		// Perform the modification (handled by subclasses)
 		C modificationContext;
@@ -92,7 +94,8 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 
 		// Store the modified resources to the DB
 		if (!theJobParameters.isDryRun()) {
-			storeResourcesInTransaction(modificationContext, theState, thePids, theTransactionDetails);
+			storeResourcesInTransaction(
+					theStepExecutionDetails, modificationContext, theState, thePids, theTransactionDetails);
 		} else {
 			theState.moveUnsavedToSaved();
 		}
@@ -102,7 +105,10 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	 * Fetches the given resources by PID from the database, and stores the fetched
 	 * resources in the {@link State}.
 	 */
-	private void fetchResourcesInTransaction(State theState, List<TypedPidAndVersionJson> thePids) {
+	private void fetchResourcesInTransaction(
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
+			State theState,
+			List<TypedPidAndVersionJson> thePids) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		Multimap<TypedPidJson, TypedPidAndVersionJson> pidsToVersions =
@@ -139,7 +145,8 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 					// individually here. This could be made more efficient with some kind
 					// of bulk versioned fetch in the future.
 					IIdType nextVersionedId = resource.getIdElement().withVersion(Long.toString(nextVersion));
-					IBaseResource resourceVersion = dao.read(nextVersionedId, new SystemRequestDetails(), true);
+					RequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+					IBaseResource resourceVersion = dao.read(nextVersionedId, requestDetails, true);
 
 					// Don't try to modify resource versions that are already deleted
 					if (ResourceMetadataKeyEnum.DELETED_AT.get(resourceVersion) != null) {
@@ -227,6 +234,7 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	}
 
 	private void storeResourcesInTransaction(
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
 			C theModificationContext,
 			State theState,
 			List<TypedPidAndVersionJson> thePids,
@@ -241,7 +249,8 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 				Validate.isTrue(resource != null, "Resource for PID[%s] is null", pid);
 				IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(resource);
 
-				SystemRequestDetails requestDetails = createRequestDetails(theModificationContext, resource);
+				SystemRequestDetails requestDetails =
+						createRequestDetails(theStepExecutionDetails, theModificationContext, resource);
 
 				DaoMethodOutcome outcome =
 						dao.update(resource, null, true, false, requestDetails, theTransactionDetails);
@@ -258,7 +267,8 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 				IBaseResource resource = theState.getResourceForPid(pid);
 				Validate.isTrue(resource != null, "Resource for PID[%s] is null", pid);
 
-				SystemRequestDetails requestDetails = createRequestDetails(theModificationContext, resource);
+				SystemRequestDetails requestDetails =
+						createRequestDetails(theStepExecutionDetails, theModificationContext, resource);
 				if (requestDetails.isRewriteHistory()) {
 					throw new JobExecutionFailedException(
 							Msg.code(2806) + "Can't store deleted resources as history rewrites");
@@ -277,8 +287,11 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	}
 
 	@Nonnull
-	private SystemRequestDetails createRequestDetails(C theModificationContext, IBaseResource theResource) {
-		SystemRequestDetails requestDetails = new SystemRequestDetails();
+	private SystemRequestDetails createRequestDetails(
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
+			C theModificationContext,
+			IBaseResource theResource) {
+		SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 		requestDetails.setRewriteHistory(isRewriteHistory(theModificationContext, theResource));
 		return requestDetails;
 	}
