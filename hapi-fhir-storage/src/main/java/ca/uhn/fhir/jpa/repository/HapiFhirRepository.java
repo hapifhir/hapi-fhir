@@ -165,7 +165,7 @@ public class HapiFhirRepository implements IRepository {
 			Map<String, String> theHeaders) {
 
 		SearchParameterMap searchParameterMap =
-			SearchParameterMapRepositoryRestQueryBuilder.buildFromQueryContributor(theQueryContributor);
+				SearchParameterMapRepositoryRestQueryBuilder.buildFromQueryContributor(theQueryContributor);
 
 		RequestDetails details = createRequestDetails(buidler -> {
 			buidler.setAction(RestOperationTypeEnum.SEARCH_TYPE);
@@ -184,7 +184,7 @@ public class HapiFhirRepository implements IRepository {
 		return createBundle(details, bundleProvider, null);
 	}
 
-	protected  <B extends IBaseBundle> B createBundle(
+	protected <B extends IBaseBundle> B createBundle(
 			RequestDetails theRequestDetails, @Nonnull IBundleProvider theBundleProvider, String thePagingAction) {
 		Integer count = RestfulServerUtils.extractCountParameter(theRequestDetails);
 		String linkSelf = RestfulServerUtils.createLinkSelf(theRequestDetails.getFhirServerBase(), theRequestDetails);
