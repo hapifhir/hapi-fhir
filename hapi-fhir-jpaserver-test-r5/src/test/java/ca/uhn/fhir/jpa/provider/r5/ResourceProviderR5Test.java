@@ -47,11 +47,14 @@ import org.hl7.fhir.r5.model.Observation.ObservationComponentComponent;
 import org.hl7.fhir.r5.model.Organization;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Patient;
+import org.hl7.fhir.r5.model.Practitioner;
 import org.hl7.fhir.r5.model.Quantity;
+import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.SearchParameter;
 import org.hl7.fhir.r5.model.StringType;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -750,6 +753,47 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		actualIdentifiers.sort(Comparators.comparable());
 
 		assertEquals(expectedIdentifiers, actualIdentifiers);
+	}
+
+	@Test
+	void testMergeOperation_throwsNotImplementedOperationException() {
+		// Test with Patient
+		Parameters patientParams = new Parameters();
+		patientParams.addParameter("source-resource", new Reference("Patient/source"));
+		patientParams.addParameter("target-resource", new Reference("Patient/target"));
+
+		NotImplementedOperationException patientException = Assertions.assertThrows(
+			NotImplementedOperationException.class,
+			() -> myClient
+				.operation()
+				.onType(Patient.class)
+				.named("$hapi.fhir.merge")
+				.withParameters(patientParams)
+				.execute()
+		);
+
+		assertThat(patientException.getMessage())
+			.contains("HAPI-2834")
+			.contains("This operation is not supported for the FHIR version used by this server");
+
+		// Test with Practitioner
+		Parameters practitionerParams = new Parameters();
+		practitionerParams.addParameter("source-resource", new Reference("Practitioner/source"));
+		practitionerParams.addParameter("target-resource", new Reference("Practitioner/target"));
+
+		NotImplementedOperationException practitionerException = Assertions.assertThrows(
+			NotImplementedOperationException.class,
+			() -> myClient
+				.operation()
+				.onType(Practitioner.class)
+				.named("$hapi.fhir.merge")
+				.withParameters(practitionerParams)
+				.execute()
+		);
+
+		assertThat(practitionerException.getMessage())
+			.contains("HAPI-2834")
+			.contains("This operation is not supported for the FHIR version used by this server");
 	}
 
 

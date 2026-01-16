@@ -92,6 +92,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ReplaceReferencesTestHelper {
 	private static final Logger ourLog = LoggerFactory.getLogger(ReplaceReferencesTestHelper.class);
 
+	private static final String RESULT_PATIENT_PARAM = "result-patient";
+	private static final String SOURCE_PATIENT_PARAM = "source-patient";
+	private static final String SOURCE_PATIENT_IDENTIFIER_PARAM = "source-patient-identifier";
+	private static final String TARGET_PATIENT_PARAM = "target-patient";
+	private static final String TARGET_PATIENT_IDENTIFIER_PARAM = "target-patient-identifier";
+	private static final String PREVIEW_PARAM = "preview";
+	private static final String DELETE_SOURCE_PARAM = "delete-source";
+	private static final String RESOURCE_LIMIT_PARAM = "resource-limit";
+
 	private final IFhirResourceDaoPatient<Patient> myPatientDao;
 	private final IFhirResourceDao<Task> myTaskDao;
 	private final IFhirResourceDao<Provenance> myProvenanceDao;
@@ -191,12 +200,14 @@ public class ReplaceReferencesTestHelper {
 		assertThat(period.getStart()).isBetween(oneMinuteAgo, now);
 		assertThat(period.getEnd()).isEqualTo(provenance.getRecorded());
 
-		// validate provenance.reason
+		// validate provenance.reason - dynamic based on resource type
+		String resourceType = theTargetResourceIdWithExpectedVersion.getResourceType();
+		String expectedReasonCode = "Patient".equals(resourceType) ? "PATADMIN" : "RECORDMGT";
 		assertThat(provenance.getReason()).hasSize(1);
 		Coding reasonCoding = provenance.getReason().get(0).getCodingFirstRep();
 		assertThat(reasonCoding).isNotNull();
 		assertThat(reasonCoding.getSystem()).isEqualTo("http://terminology.hl7.org/CodeSystem/v3-ActReason");
-		assertThat(reasonCoding.getCode()).isEqualTo("PATADMIN");
+		assertThat(reasonCoding.getCode()).isEqualTo(expectedReasonCode);
 
 		// validate provenance.activity
 		Coding activityCoding = provenance.getActivity().getCodingFirstRep();
@@ -257,12 +268,14 @@ public class ReplaceReferencesTestHelper {
 		assertThat(period.getStart()).isBetween(oneMinuteAgo, now);
 		assertThat(period.getEnd()).isEqualTo(provenance.getRecorded());
 
-		// validate provenance.reason
+		// validate provenance.reason - dynamic based on resource type
+		String resourceType = theTargetPatientIdWithExpectedVersion.getResourceType();
+		String expectedReasonCode = "Patient".equals(resourceType) ? "PATADMIN" : "RECORDMGT";
 		assertThat(provenance.getReason()).hasSize(1);
 		Coding reasonCoding = provenance.getReason().get(0).getCodingFirstRep();
 		assertThat(reasonCoding).isNotNull();
 		assertThat(reasonCoding.getSystem()).isEqualTo("http://terminology.hl7.org/CodeSystem/v3-ActReason");
-		assertThat(reasonCoding.getCode()).isEqualTo("PATADMIN");
+		assertThat(reasonCoding.getCode()).isEqualTo(expectedReasonCode);
 
 		// validate provenance.activity
 		Coding activityCoding = provenance.getActivity().getCodingFirstRep();
@@ -527,19 +540,19 @@ public class ReplaceReferencesTestHelper {
 		private Parameters asCommonParameters() {
 			Parameters inParams = new Parameters();
 			if (sourcePatient != null) {
-				inParams.addParameter().setName("source-patient").setValue(sourcePatient);
+				inParams.addParameter().setName(SOURCE_PATIENT_PARAM).setValue(sourcePatient);
 			}
 			if (sourcePatientIdentifiers != null) {
 				sourcePatientIdentifiers.forEach(i -> inParams.addParameter()
-						.setName("source-patient-identifier")
+						.setName(SOURCE_PATIENT_IDENTIFIER_PARAM)
 						.setValue(i));
 			}
 			if (targetPatient != null) {
-				inParams.addParameter().setName("target-patient").setValue(targetPatient);
+				inParams.addParameter().setName(TARGET_PATIENT_PARAM).setValue(targetPatient);
 			}
 			if (targetPatientIdentifiers != null) {
 				targetPatientIdentifiers.forEach(i -> inParams.addParameter()
-						.setName("target-patient-identifier")
+						.setName(TARGET_PATIENT_IDENTIFIER_PARAM)
 						.setValue(i));
 			}
 			return inParams;
@@ -548,16 +561,16 @@ public class ReplaceReferencesTestHelper {
 		public Parameters asParametersResource() {
 			Parameters inParams = asCommonParameters();
 			if (resultPatient != null) {
-				inParams.addParameter().setName("result-patient").setResource(resultPatient);
+				inParams.addParameter().setName(RESULT_PATIENT_PARAM).setResource(resultPatient);
 			}
 			if (preview != null) {
-				inParams.addParameter().setName("preview").setValue(new BooleanType(preview));
+				inParams.addParameter().setName(PREVIEW_PARAM).setValue(new BooleanType(preview));
 			}
 			if (deleteSource != null) {
-				inParams.addParameter().setName("delete-source").setValue(new BooleanType(deleteSource));
+				inParams.addParameter().setName(DELETE_SOURCE_PARAM).setValue(new BooleanType(deleteSource));
 			}
 			if (resourceLimit != null) {
-				inParams.addParameter().setName("batch-size").setValue(new IntegerType(resourceLimit));
+				inParams.addParameter().setName(RESOURCE_LIMIT_PARAM).setValue(new IntegerType(resourceLimit));
 			}
 			return inParams;
 		}
@@ -737,9 +750,16 @@ public class ReplaceReferencesTestHelper {
 		}
 	}
 
-	public @Nonnull String extractFailureMessageFromOutcomeParameter(BaseServerResponseException ex) {
-		String body = ex.getResponseBody();
-		IParser jsonParser = myFhirContext.newJsonParser();
+	@Nonnull
+	public String extractFailureMessageFromOutcomeParameter(@Nonnull BaseServerResponseException ex) {
+		return extractFailureMessageFromOutcomeParameter(myFhirContext, ex);
+	}
+
+	@Nonnull
+	public static String extractFailureMessageFromOutcomeParameter(
+			@Nonnull FhirContext theFhirContext, @Nonnull BaseServerResponseException theException) {
+		String body = theException.getResponseBody();
+		IParser jsonParser = theFhirContext.newJsonParser();
 		if (body != null) {
 			Parameters outParams = jsonParser.parseResource(Parameters.class, body);
 			OperationOutcome outcome =
