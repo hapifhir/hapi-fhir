@@ -69,7 +69,7 @@ public class RuleGroupBulkExportByCompartmentMatcherImpl extends BaseRuleBulkExp
 
 		IBaseResource theGroupResource = theRuleApplier
 				.getAuthResourceResolver()
-				.resolveResourceById(new IdDt(inboundBulkExportRequestOptions.getGroupId()), theRequestDetails);
+				.resolveResourceById(theRequestDetails, new IdDt(inboundBulkExportRequestOptions.getGroupId()));
 
 		// Apply the FhirQueryTester (which contains a inMemoryResourceMatcher) to the found Group compartment resource,
 		// and return the verdict

@@ -4,6 +4,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -18,7 +19,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -69,7 +72,7 @@ class AuthResourceResolverTest {
 
 			when(myPatientDao.read(eq(resourceId), any(SystemRequestDetails.class))).thenReturn(patient);
 
-			IBaseResource result = myResourceResolver.resolveResourceById(resourceId, myRequestDetails);
+			IBaseResource result = myResourceResolver.resolveResourceById(myRequestDetails, resourceId);
 			assertThat(result).isEqualTo(patient);
 		}
 
@@ -82,9 +85,9 @@ class AuthResourceResolverTest {
 			when(myPatientDao.read(eq(resourceId), any(SystemRequestDetails.class))).thenReturn(patient);
 
 			// First fetch
-			IBaseResource result1 = myResourceResolver.resolveResourceById(resourceId, myRequestDetails);
+			IBaseResource result1 = myResourceResolver.resolveResourceById(myRequestDetails, resourceId);
 			// Second fetch (should use cache)
-			IBaseResource result2 = myResourceResolver.resolveResourceById(resourceId, myRequestDetails);
+			IBaseResource result2 = myResourceResolver.resolveResourceById(myRequestDetails, resourceId);
 
 			assertThat(result1).isNotNull();
 			assertThat(result2).isNotNull();
@@ -101,9 +104,9 @@ class AuthResourceResolverTest {
 			when(myPatientDao.read(eq(resourceId), any(SystemRequestDetails.class))).thenReturn(null);
 
 			// First fetch
-			IBaseResource result1 = myResourceResolver.resolveResourceById(resourceId, myRequestDetails);
+			IBaseResource result1 = myResourceResolver.resolveResourceById(myRequestDetails, resourceId);
 			// Second fetch (should use cached negative result)
-			IBaseResource result2 = myResourceResolver.resolveResourceById(resourceId, myRequestDetails);
+			IBaseResource result2 = myResourceResolver.resolveResourceById(myRequestDetails, resourceId);
 
 			assertThat(result1).isNull();
 			assertThat(result2).isNull();
@@ -125,8 +128,8 @@ class AuthResourceResolverTest {
 			when(myPatientDao.read(eq(patientId1), any(SystemRequestDetails.class))).thenReturn(patient1);
 			when(myPatientDao.read(eq(patientId2), any(SystemRequestDetails.class))).thenReturn(patient2);
 
-			IBaseResource result1 = myResourceResolver.resolveResourceById(patientId1, myRequestDetails);
-			IBaseResource result2 = myResourceResolver.resolveResourceById(patientId2, myRequestDetails);
+			IBaseResource result1 = myResourceResolver.resolveResourceById(myRequestDetails, patientId1);
+			IBaseResource result2 = myResourceResolver.resolveResourceById(myRequestDetails, patientId2);
 
 			assertThat(result1).isEqualTo(patient1);
 			assertThat(result2).isEqualTo(patient2);
@@ -153,7 +156,7 @@ class AuthResourceResolverTest {
 				.thenReturn(List.of(patient1));
 
 			List<IBaseResource> results = myResourceResolver.resolveResourcesByIds(
-				List.of("Patient/123"), "Patient", myRequestDetails);
+				myRequestDetails, newPatientIdList("123"));
 
 			assertThat(results).containsExactlyInAnyOrder(patient1);
 		}
@@ -169,7 +172,7 @@ class AuthResourceResolverTest {
 				.thenReturn(List.of(patient1, patient2));
 
 			List<IBaseResource> results = myResourceResolver.resolveResourcesByIds(
-				List.of("Patient/123", "Patient/456"), "Patient", myRequestDetails);
+				myRequestDetails, newPatientIdList("123", "456"));
 
 			assertThat(results).containsExactlyInAnyOrder(patient1, patient2);
 		}
@@ -180,7 +183,7 @@ class AuthResourceResolverTest {
 				.thenReturn(List.of());
 
 			List<IBaseResource> results = myResourceResolver.resolveResourcesByIds(
-				List.of("Patient/123"), "Patient", myRequestDetails);
+				myRequestDetails, newPatientIdList("123"));
 
 			assertThat(results).isEmpty();
 		}
@@ -197,10 +200,10 @@ class AuthResourceResolverTest {
 
 			// First call
 			List<IBaseResource> results1 = myResourceResolver.resolveResourcesByIds(
-				List.of("Patient/123", "Patient/456"), "Patient", myRequestDetails);
+				myRequestDetails, newPatientIdList("123", "456"));
 			// Second call (should use cache)
 			List<IBaseResource> results2 = myResourceResolver.resolveResourcesByIds(
-				List.of("Patient/123", "Patient/456"), "Patient", myRequestDetails);
+				myRequestDetails, newPatientIdList("123", "456"));
 
 			assertThat(results1).containsExactlyInAnyOrder(patient1, patient2);
 			assertThat(results2).containsExactlyInAnyOrder(patient1, patient2);
@@ -222,10 +225,10 @@ class AuthResourceResolverTest {
 				.thenReturn(List.of(patient2));
 
 			// First call - fetch patient1
-			myResourceResolver.resolveResourcesByIds(List.of("Patient/123"), "Patient", myRequestDetails);
+			myResourceResolver.resolveResourcesByIds(myRequestDetails, newPatientIdList("123"));
 			// Second call - patient1 cached, only fetch patient2
 			List<IBaseResource> results = myResourceResolver.resolveResourcesByIds(
-				List.of("Patient/123", "Patient/456"), "Patient", myRequestDetails);
+				myRequestDetails, newPatientIdList("123", "456"));
 
 			assertThat(results).containsExactlyInAnyOrder(patient1, patient2);
 
@@ -239,5 +242,9 @@ class AuthResourceResolverTest {
 				argThat(params -> params.toNormalizedQueryString().equals("?_id=Patient/456")),
 				any());
 		}
+	}
+
+	private List<IIdType> newPatientIdList(String... theId){
+		return Arrays.stream(theId).map(id -> new IdDt("Patient", id)).collect(Collectors.toList());
 	}
 }

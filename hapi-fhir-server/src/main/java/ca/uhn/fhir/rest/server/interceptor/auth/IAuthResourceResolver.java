@@ -20,6 +20,7 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -37,20 +38,20 @@ public interface IAuthResourceResolver {
 
 	/**
 	 * Resolve a resource by ID.
-	 * @param theResourceId - The FHIR id of the resource
 	 * @param theRequestDetails - The request details
+	 * @param theResourceId     - The resource id to resolve
 	 * @return A resource resolved by ID
 	 */
 	@Nullable
-	IBaseResource resolveResourceById(IIdType theResourceId, RequestDetails theRequestDetails);
+	IBaseResource resolveResourceById(RequestDetails theRequestDetails, IIdType theResourceId);
 
 	/**
-	 * Resolve a list of resources by ID. All resources should be the same type.
-	 * @param theResourceIds the FHIR id of the resource(s)
-	 * @param theResourceType the type of resource
+	 * Resolve a list of resources by IDs.
+	 *
 	 * @param theRequestDetails - The request details
-	 * @return A list of resources resolved by ID
+	 * @param theResourceIds    - The resource ids to resolve
+	 * @return A list of resources that were resolved
 	 */
-	List<IBaseResource> resolveResourcesByIds(
-			List<String> theResourceIds, String theResourceType, RequestDetails theRequestDetails);
+	@Nonnull
+	List<IBaseResource> resolveResourcesByIds(RequestDetails theRequestDetails, List<IIdType> theResourceIds);
 }

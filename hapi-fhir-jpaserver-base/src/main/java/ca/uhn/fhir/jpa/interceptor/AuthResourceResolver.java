@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthResourceResolver;
 import com.google.common.collect.Sets;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -42,6 +43,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
@@ -51,6 +53,7 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
  *     <li>bulk export security to allow querying for resource to match against permission argument filters</li>
  *     <li>instance $meta operations where only the instance id is known at the time of the request</li>
  * </ul>
+ * TODO - if this is a hotspot in the future, use IdHelperService
  */
 public class AuthResourceResolver implements IAuthResourceResolver {
 	private static final Logger ourLog = LoggerFactory.getLogger(AuthResourceResolver.class);
@@ -66,7 +69,7 @@ public class AuthResourceResolver implements IAuthResourceResolver {
 	}
 
 	@Override
-	public IBaseResource resolveResourceById(IIdType theResourceId, RequestDetails theRequestDetails) {
+	public IBaseResource resolveResourceById(RequestDetails theRequestDetails, IIdType theResourceId) {
 		String resourceIdKey = theResourceId.getValue();
 		ourLog.debug("Resolving resource: {}.", resourceIdKey);
 
@@ -88,8 +91,28 @@ public class AuthResourceResolver implements IAuthResourceResolver {
 	}
 
 	@Override
-	public List<IBaseResource> resolveResourcesByIds(
-			List<String> theResourceIds, String theResourceType, RequestDetails theRequestDetails) {
+	public @Nonnull List<IBaseResource> resolveResourcesByIds(
+			RequestDetails theRequestDetails, List<IIdType> theResourceIds) {
+		List<IBaseResource> results = new ArrayList<>();
+
+		// Group IDs by resource type
+		Map<String, List<IIdType>> idsByType =
+				theResourceIds.stream().collect(Collectors.groupingBy(IIdType::getResourceType));
+
+		// Perform one search per resource type
+		for (Map.Entry<String, List<IIdType>> entry : idsByType.entrySet()) {
+			String resourceType = entry.getKey();
+			List<String> ids = entry.getValue().stream().map(IIdType::getValue).toList();
+
+			List<IBaseResource> fetched = resolveResourcesByIds(theRequestDetails, resourceType, ids);
+			results.addAll(fetched);
+		}
+
+		return results;
+	}
+
+	private List<IBaseResource> resolveResourcesByIds(
+			RequestDetails theRequestDetails, String theResourceType, List<String> theResourceIds) {
 
 		ourLog.debug("Resolving {} {} resource(s): {}", theResourceIds.size(), theResourceType, theResourceIds);
 
@@ -166,7 +189,7 @@ public class AuthResourceResolver implements IAuthResourceResolver {
 	private String toCacheKey(String theResourceType, String theId) {
 		IdDt id = new IdDt(theId);
 		if (!id.hasResourceType()) {
-			id = new IdDt(theResourceType, theId);
+			id = id.withResourceType(theResourceType);
 		}
 		return id.toUnqualifiedVersionless().getValue();
 	}

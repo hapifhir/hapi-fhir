@@ -382,7 +382,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 		// This would happen for Observation/123/$meta-add:
 		// theTargetResourceId = Observation/123
 		// theInputResource = Parameters
-		IBaseResource resource = resourceResolver.resolveResourceById(theTargetResourceId, theRequestDetails);
+		IBaseResource resource = resourceResolver.resolveResourceById(theRequestDetails, theTargetResourceId);
 		return Optional.ofNullable(resource);
 	}
 
