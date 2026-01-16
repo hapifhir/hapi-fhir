@@ -20,6 +20,7 @@
 package ca.uhn.hapi.fhir.batch2.test.inline;
 
 import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
@@ -44,14 +45,17 @@ class InlineStepRunner<PT extends IModelJson, IT extends IModelJson, OT extends 
     private final JobDefinitionStep<PT, IT, OT> myStep;
     private final PT myParameter;
     private final List<WorkChunkData<OT>> myCurrentOutput = new ArrayList<>();
+	private final IJobStepExecutionServices myJobStepExecutionServices;
 
-    InlineStepRunner(
-            JobDefinitionStep<PT, IT, OT> theStep,
-            PT theParameter,
-            JobInstance theInstance) {
+	InlineStepRunner(
+		JobDefinitionStep<PT, IT, OT> theStep,
+		PT theParameter,
+		JobInstance theInstance,
+		IJobStepExecutionServices theJobStepExecutionServices) {
         myStep = theStep;
         myParameter = theParameter;
         myInstance = theInstance;
+		myJobStepExecutionServices = theJobStepExecutionServices;
     }
 
     List<WorkChunkData<OT>> getCurrentOutput() {
@@ -87,7 +91,7 @@ class InlineStepRunner<PT extends IModelJson, IT extends IModelJson, OT extends 
             }
         }
         final StepExecutionDetails<PT, IT> stepExecutionDetails =
-                new StepExecutionDetails<>(myParameter, null, myInstance, workChunk);
+                new StepExecutionDetails<>(myParameter, null, myInstance, workChunk, myJobStepExecutionServices);
         myStep.getJobStepWorker().run(stepExecutionDetails, sink);
     }
 
@@ -96,7 +100,7 @@ class InlineStepRunner<PT extends IModelJson, IT extends IModelJson, OT extends 
         for (WorkChunkData<IT> nextChunk : theCurrentInput) {
             final IT data = nextChunk.getData();
             final StepExecutionDetails<PT, IT> stepExecutionDetails =
-                    new StepExecutionDetails<>(myParameter, data, myInstance, workChunk);
+                    new StepExecutionDetails<>(myParameter, data, myInstance, workChunk, myJobStepExecutionServices);
             myStep.getJobStepWorker().run(stepExecutionDetails, sink);
         }
     }
