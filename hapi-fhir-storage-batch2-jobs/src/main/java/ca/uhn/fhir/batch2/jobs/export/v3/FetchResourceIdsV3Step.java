@@ -114,8 +114,10 @@ public class FetchResourceIdsV3Step
 			providerParams.setGroupId(data.getGroupId());
 			providerParams.setPatientIds(data.getPatientIds());
 		} else if (params.getExportStyle() == BulkExportJobParameters.ExportStyle.PATIENT) {
-			providerParams.setPatientIds(data.getPatientIds());
-			providerParams.setExpandedPatientIdsForPatientExport(Set.copyOf(data.getPatientIds()));
+			if (data.getPatientIds() != null && !data.getPatientIds().isEmpty()) {
+				providerParams.setPatientIds(data.getPatientIds());
+				providerParams.setExpandedPatientIdsForPatientExport(Set.copyOf(data.getPatientIds()));
+			}
 		} else {
 			providerParams.setGroupId(data.getGroupId());
 			providerParams.setPatientIds(data.getPatientIds());
