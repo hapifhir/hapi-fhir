@@ -42,7 +42,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -72,8 +71,6 @@ class BaseBulkModifyResourcesIndividuallyStepTest {
 	private MySvc mySvc = new MySvc();
 	@Mock
 	private IFhirResourceDaoPatient<Patient> myResourceDao;
-	@Mock
-	private IJobStepExecutionServices myJobStepExecutionServices;
 	@Captor
 	private ArgumentCaptor<BulkModifyResourcesChunkOutcomeJson> myDataCaptor;
 

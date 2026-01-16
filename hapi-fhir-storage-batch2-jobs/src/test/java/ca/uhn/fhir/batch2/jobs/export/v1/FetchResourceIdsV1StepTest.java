@@ -70,9 +70,6 @@ public class FetchResourceIdsV1StepTest {
 	@Mock
 	private IJobStepExecutionServices myJobStepExecutionServices;
 
-	@Mock
-	private IJobStepExecutionServices myJobStepExecutionServices;
-
 	@BeforeEach
 	public void init() {
 		ourLog.addAppender(myAppender);

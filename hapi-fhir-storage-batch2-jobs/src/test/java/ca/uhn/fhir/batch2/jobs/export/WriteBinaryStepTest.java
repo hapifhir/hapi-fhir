@@ -85,9 +85,6 @@ public class WriteBinaryStepTest {
 	@Mock
 	private ListAppender<ILoggingEvent> myAppender;
 
-	@Mock
-	private IJobStepExecutionServices myJobStepExecutionServices;
-
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
 

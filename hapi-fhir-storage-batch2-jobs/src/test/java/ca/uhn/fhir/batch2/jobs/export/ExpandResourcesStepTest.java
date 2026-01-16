@@ -70,9 +70,6 @@ public class ExpandResourcesStepTest {
 	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
 	@Mock
-	private IJobStepExecutionServices myJobStepExecutionServices;
-
-	@Mock
 	IIdHelperService<JpaPid> myIdHelperService;
 
 	@Mock
