@@ -33,8 +33,10 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 
 	public static final int TENANT_A_ID = 1;
 	public static final int TENANT_B_ID = 2;
-	public static final String TENANT_B = "TENANT-B";
+	public static final int TENANT_C_ID = 3;
 	public static final String TENANT_A = "TENANT-A";
+	public static final String TENANT_B = "TENANT-B";
+	public static final String TENANT_C = "TENANT-C";
 	@Autowired
 	private RequestTenantPartitionInterceptor myRequestTenantPartitionInterceptor;
 	@Autowired
@@ -105,6 +107,14 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 			.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
 			.withParameter(Parameters.class, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, new IntegerType(TENANT_B_ID))
 			.andParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, new CodeType(TENANT_B))
+			.execute();
+
+		myClient
+			.operation()
+			.onServer()
+			.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
+			.withParameter(Parameters.class, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, new IntegerType(TENANT_C_ID))
+			.andParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, new CodeType(TENANT_C))
 			.execute();
 	}
 

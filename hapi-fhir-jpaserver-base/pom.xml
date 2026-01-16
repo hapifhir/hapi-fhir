@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>8.7.7-SNAPSHOT</version>
+		<version>8.7.8-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -305,6 +305,11 @@
 		<dependency>
 			<groupId>org.glassfish</groupId>
 			<artifactId>jakarta.el</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 		<!-- Note that we need this dependency to send log4j logging requests to slf4j -->

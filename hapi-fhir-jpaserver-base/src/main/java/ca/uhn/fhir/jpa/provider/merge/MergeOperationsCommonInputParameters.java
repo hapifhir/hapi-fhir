@@ -20,23 +20,23 @@
 package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.util.CanonicalIdentifier;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- *  Class for input parameters used in both $merge and $hapi.fhir.undo-merge operations.
+ *  Class for input parameters used in Patient/$merge, $hapi.fhir.merge and $hapi.fhir.undo-merge operations.
  */
 public class MergeOperationsCommonInputParameters {
 	private List<CanonicalIdentifier> mySourceResourceIdentifiers;
 	private List<CanonicalIdentifier> myTargetResourceIdentifiers;
 	private IBaseReference mySourceResource;
 	private IBaseReference myTargetResource;
-	private final int myResourceLimit;
+	private int myResourceLimit;
 
-	public MergeOperationsCommonInputParameters(int theResourceLimit) {
-		myResourceLimit = theResourceLimit;
-	}
+	public MergeOperationsCommonInputParameters() {}
 
 	public List<CanonicalIdentifier> getSourceIdentifiers() {
 		return mySourceResourceIdentifiers;
@@ -80,5 +80,41 @@ public class MergeOperationsCommonInputParameters {
 
 	public int getResourceLimit() {
 		return myResourceLimit;
+	}
+
+	public void setResourceLimit(int theResourceLimit) {
+		myResourceLimit = theResourceLimit;
+	}
+
+	/**
+	 * Populates the fields with the given parameters.
+	 * Converts version-specific identifier types to version-agnostic CanonicalIdentifier.
+	 *
+	 * @param theSourceIdentifiers List of source resource identifiers
+	 * @param theTargetIdentifiers List of target resource identifiers
+	 * @param theSourceResource Reference to the source resource
+	 * @param theTargetResource Reference to the target resource
+	 */
+	public void setCommonParameters(
+			List<IBase> theSourceIdentifiers,
+			List<IBase> theTargetIdentifiers,
+			IBaseReference theSourceResource,
+			IBaseReference theTargetResource,
+			int theResourceLimit) {
+		if (theSourceIdentifiers != null && !theSourceIdentifiers.isEmpty()) {
+			List<CanonicalIdentifier> sourceResourceIdentifiers = theSourceIdentifiers.stream()
+					.map(CanonicalIdentifier::fromIdentifier)
+					.collect(Collectors.toList());
+			setSourceResourceIdentifiers(sourceResourceIdentifiers);
+		}
+		if (theTargetIdentifiers != null && !theTargetIdentifiers.isEmpty()) {
+			List<CanonicalIdentifier> targetResourceIdentifiers = theTargetIdentifiers.stream()
+					.map(CanonicalIdentifier::fromIdentifier)
+					.collect(Collectors.toList());
+			setTargetResourceIdentifiers(targetResourceIdentifiers);
+		}
+		setSourceResource(theSourceResource);
+		setTargetResource(theTargetResource);
+		setResourceLimit(theResourceLimit);
 	}
 }

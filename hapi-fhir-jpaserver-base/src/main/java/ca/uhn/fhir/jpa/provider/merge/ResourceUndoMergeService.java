@@ -25,8 +25,9 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.merge.MergeOperationInputParameterNames;
+import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
+import ca.uhn.fhir.merge.PatientMergeOperationInputParameterNames;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.replacereferences.PreviousResourceVersionRestorer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -50,8 +51,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper.addErrorToOperationOutcome;
-import static ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper.addInfoToOperationOutcome;
+import static ca.uhn.fhir.merge.MergeResourceHelper.addErrorToOperationOutcome;
+import static ca.uhn.fhir.merge.MergeResourceHelper.addInfoToOperationOutcome;
 import static ca.uhn.fhir.model.api.StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CHANGE;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_200_OK;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_400_BAD_REQUEST;
@@ -79,7 +80,7 @@ public class ResourceUndoMergeService {
 	private final MergeValidationService myMergeValidationService;
 	private final FhirContext myFhirContext;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-	private final MergeOperationInputParameterNames myInputParamNames;
+	private final AbstractMergeOperationInputParameterNames myInputParamNames;
 
 	public ResourceUndoMergeService(
 			DaoRegistry theDaoRegistry,
@@ -92,7 +93,9 @@ public class ResourceUndoMergeService {
 		myFhirContext = theDaoRegistry.getFhirContext();
 		myMergeValidationService = theMergeValidationService;
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
-		myInputParamNames = new MergeOperationInputParameterNames();
+		// Currently undo-merge only supports Patient undo-merge operations
+		// we will need to change this when generic undo-merge operation is implemented
+		myInputParamNames = new PatientMergeOperationInputParameterNames();
 	}
 
 	public OperationOutcomeWithStatusCode undoMerge(
@@ -122,13 +125,14 @@ public class ResourceUndoMergeService {
 
 		IBaseOperationOutcome opOutcome = undoMergeOutcome.getOperationOutcome();
 
-		if (!myMergeValidationService.validateCommonMergeOperationParameters(inputParameters, opOutcome)) {
+		if (!myMergeValidationService.validateCommonMergeOperationParameters(
+				inputParameters, opOutcome, myInputParamNames, theRequestDetails)) {
 			undoMergeOutcome.setHttpStatusCode(STATUS_HTTP_400_BAD_REQUEST);
 			return undoMergeOutcome;
 		}
 
-		Patient targetPatient =
-				(Patient) myMergeValidationService.resolveTargetResource(inputParameters, theRequestDetails, opOutcome);
+		Patient targetPatient = (Patient) myMergeValidationService.resolveTargetResource(
+				inputParameters, theRequestDetails, opOutcome, myInputParamNames);
 		IIdType targetId = targetPatient.getIdElement();
 
 		Provenance provenance = null;
@@ -141,7 +145,7 @@ public class ResourceUndoMergeService {
 		} else {
 			// the client provided source identifiers, find a provenance using those identifiers and the target id
 			provenance = myMergeProvenanceSvc.findProvenanceByTargetIdAndSourceIdentifiers(
-					targetId, inputParameters.getSourceIdentifiers(), theRequestDetails);
+					targetId, inputParameters.getSourceIdentifiers(), myInputParamNames, theRequestDetails);
 		}
 
 		if (provenance == null) {
