@@ -23,6 +23,8 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.hibernate.dialect.OracleDialect;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
+import java.sql.Types;
+
 /**
  * Dialect for Oracle database.
  * Minimum version: 12.2 (Oracle 12c R2)
@@ -48,5 +50,10 @@ public class HapiFhirOracleDialect extends OracleDialect implements IHapiFhirDia
 	@Override
 	public DriverTypeEnum getDriverType() {
 		return DriverTypeEnum.ORACLE_12C;
+	}
+
+	@Override
+	public int getPreferredSqlTypeCodeForBoolean() {
+		return Types.NUMERIC;
 	}
 }
