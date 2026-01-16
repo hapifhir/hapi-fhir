@@ -94,7 +94,8 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 
 		// Store the modified resources to the DB
 		if (!theJobParameters.isDryRun()) {
-			storeResourcesInTransaction(modificationContext, theState, thePids, theTransactionDetails);
+			storeResourcesInTransaction(
+					theStepExecutionDetails, modificationContext, theState, thePids, theTransactionDetails);
 		} else {
 			theState.moveUnsavedToSaved();
 		}
@@ -233,6 +234,7 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	}
 
 	private void storeResourcesInTransaction(
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
 			C theModificationContext,
 			State theState,
 			List<TypedPidAndVersionJson> thePids,
@@ -247,7 +249,8 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 				Validate.isTrue(resource != null, "Resource for PID[%s] is null", pid);
 				IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(resource);
 
-				SystemRequestDetails requestDetails = createRequestDetails(theModificationContext, resource);
+				SystemRequestDetails requestDetails =
+						createRequestDetails(theStepExecutionDetails, theModificationContext, resource);
 
 				DaoMethodOutcome outcome =
 						dao.update(resource, null, true, false, requestDetails, theTransactionDetails);
@@ -264,7 +267,8 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 				IBaseResource resource = theState.getResourceForPid(pid);
 				Validate.isTrue(resource != null, "Resource for PID[%s] is null", pid);
 
-				SystemRequestDetails requestDetails = createRequestDetails(theModificationContext, resource);
+				SystemRequestDetails requestDetails =
+						createRequestDetails(theStepExecutionDetails, theModificationContext, resource);
 				if (requestDetails.isRewriteHistory()) {
 					throw new JobExecutionFailedException(
 							Msg.code(2806) + "Can't store deleted resources as history rewrites");
@@ -283,8 +287,11 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	}
 
 	@Nonnull
-	private SystemRequestDetails createRequestDetails(C theModificationContext, IBaseResource theResource) {
-		SystemRequestDetails requestDetails = new SystemRequestDetails();
+	private SystemRequestDetails createRequestDetails(
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
+			C theModificationContext,
+			IBaseResource theResource) {
+		SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 		requestDetails.setRewriteHistory(isRewriteHistory(theModificationContext, theResource));
 		return requestDetails;
 	}
