@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.jobs.export;
 
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
@@ -117,6 +118,9 @@ public class ExpandResourceAndWriteBinaryStepTest {
 	@Mock
 	IIdHelperService<JpaPid> myIdHelperService;
 
+	@Mock
+	IJobStepExecutionServices myJobStepExecutionServices;
+
 	@SuppressWarnings("unused")
 	@Spy
 	private InterceptorService myInterceptorService = new InterceptorService();
@@ -165,7 +169,8 @@ public class ExpandResourceAndWriteBinaryStepTest {
 			theParameters,
 			theData,
 			theInstance,
-			new WorkChunk().setId("1")
+			new WorkChunk().setId("1"),
+			myJobStepExecutionServices
 		);
 	}
 

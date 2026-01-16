@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r5.dbpartitionmode;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
@@ -182,6 +183,8 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private DeleteExpungeStep myDeleteExpungeStep;
+	@Autowired
+	private IJobStepExecutionServices myJobStepExecutionServices;
 
 	@Mock
 	private IJobDataSink<VoidModel> myVoidSink;
@@ -228,7 +231,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		);
 		ResourceIdListWorkChunkJson workChunk = new ResourceIdListWorkChunkJson(typedPids, RequestPartitionId.fromPartitionId(PARTITION_1));
 		JobInstance jobInstance = new JobInstance();
-		StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson> executionDetails = new StepExecutionDetails<>(params, workChunk, jobInstance, new WorkChunk().setId("123"));
+		StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson> executionDetails = new StepExecutionDetails<>(params, workChunk, jobInstance, new WorkChunk().setId("123"), myJobStepExecutionServices);
 		myDeleteExpungeStep.run(executionDetails, myVoidSink);
 
 		// Verify

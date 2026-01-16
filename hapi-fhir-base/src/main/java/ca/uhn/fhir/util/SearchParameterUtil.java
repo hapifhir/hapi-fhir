@@ -245,7 +245,7 @@ public class SearchParameterUtil {
 		if (CollectionUtils.isEmpty(searchParams)) {
 			String errorMessage = String.format(
 					"Resource type [%s] is not eligible for this type of export, as it contains no Patient compartment, and no `patient` or `subject` search parameter",
-					runtimeResourceDefinition.getId());
+					runtimeResourceDefinition.getName());
 			throw new IllegalArgumentException(Msg.code(2222) + errorMessage);
 		}
 		// deduplicate list of searchParams and get their names

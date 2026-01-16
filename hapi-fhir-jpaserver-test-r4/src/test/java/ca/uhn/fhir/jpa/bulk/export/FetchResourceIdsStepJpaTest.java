@@ -67,7 +67,7 @@ public class FetchResourceIdsStepJpaTest  extends BaseJpaR4Test {
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("instance-id");
 		String chunkId = "chunk-id";
-		StepExecutionDetails<BulkExportJobParameters, VoidModel> executionDetails = new StepExecutionDetails<>(params, data, instance, new WorkChunk().setId(chunkId));
+		StepExecutionDetails<BulkExportJobParameters, VoidModel> executionDetails = new StepExecutionDetails<>(params, data, instance, new WorkChunk().setId(chunkId), myJobStepExecutionServices);
 		myCaptureQueriesListener.clear();
 
 		// Test
@@ -95,7 +95,7 @@ public class FetchResourceIdsStepJpaTest  extends BaseJpaR4Test {
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("instance-id");
 		String chunkId = "chunk-id";
-		StepExecutionDetails<BulkExportJobParameters, VoidModel> executionDetails = new StepExecutionDetails<>(params, data, instance, new WorkChunk().setId(chunkId));
+		StepExecutionDetails<BulkExportJobParameters, VoidModel> executionDetails = new StepExecutionDetails<>(params, data, instance, new WorkChunk().setId(chunkId), myJobStepExecutionServices);
 
 		// Test
 		myFetchResourceIdsStep.run(executionDetails, mySink);

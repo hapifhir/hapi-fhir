@@ -74,7 +74,7 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 		BulkPatchJobParameters jobParameters = new BulkPatchJobParameters();
 		jobParameters.setDryRun(theDryRun);
 		WorkChunk chunk = new WorkChunk().setId("my-chunk-id");
-		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(jobParameters, data, new JobInstance(), chunk);
+		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(jobParameters, data, new JobInstance(), chunk, myJobStepExecutionServices);
 
 		when(myMockStep.modifyResource(any(), any(), any())).thenAnswer(t->{
 			ResourceModificationRequest request = t.getArgument(2, ResourceModificationRequest.class);
@@ -111,7 +111,7 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 		createPatient(withId("P1"), withFamily("Family1"));
 		TypedPidAndVersionListWorkChunkJson data = createWorkChunkForAllResources();
 		WorkChunk chunk = new WorkChunk().setId("my-chunk-id");
-		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(new BulkPatchJobParameters(), data, new JobInstance(), chunk);
+		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(new BulkPatchJobParameters(), data, new JobInstance(), chunk, myJobStepExecutionServices);
 
 		when(myMockStep.isRewriteHistory(any(), any())).thenReturn(true);
 		when(myMockStep.modifyResource(any(), any(), any())).thenReturn(ResourceModificationResponse.delete());

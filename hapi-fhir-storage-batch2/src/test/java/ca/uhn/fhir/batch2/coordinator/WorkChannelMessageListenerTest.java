@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
@@ -43,6 +44,8 @@ class WorkChannelMessageListenerTest extends BaseBatch2Test {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Mock
 	private IInterceptorService myInterceptorService;
+	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
 	private final IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
 	private WorkChunkProcessor jobStepExecutorSvc;
 
@@ -53,7 +56,7 @@ class WorkChannelMessageListenerTest extends BaseBatch2Test {
 
 	@BeforeEach
 	public void beforeEach() {
-		jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender, new NonTransactionalHapiTransactionService());
+		jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender, new NonTransactionalHapiTransactionService(), myJobStepExecutionServices);
 	}
 
 	@Test

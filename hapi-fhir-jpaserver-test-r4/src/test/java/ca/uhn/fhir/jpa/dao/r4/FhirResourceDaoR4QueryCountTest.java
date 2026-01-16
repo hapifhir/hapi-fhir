@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
@@ -192,6 +193,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	private WorkChunk myMockWorkChunk;
 	@Mock
 	private IJobDataSink<ReindexResults> myMockJobDataSinkReindexResults;
+	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
 	private AuthorizationInterceptor myAuthInterceptor;
 	private ConsentInterceptor myConsentInterceptor;
 
@@ -1276,7 +1279,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			params,
 			data,
 			instance,
-			myMockWorkChunk
+			myMockWorkChunk,
+			myJobStepExecutionServices
 		);
 		RunOutcome outcome = myReindexStep.run(stepExecutionDetails, myMockJobDataSinkReindexResults);
 
@@ -1341,7 +1345,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			params,
 			data,
 			instance,
-			myMockWorkChunk
+			myMockWorkChunk,
+			myJobStepExecutionServices
 		);
 		RunOutcome outcome = myReindexStep.run(stepExecutionDetails, myMockJobDataSinkReindexResults);
 
@@ -1405,7 +1410,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			params,
 			data,
 			instance,
-			myMockWorkChunk
+			myMockWorkChunk,
+			myJobStepExecutionServices
 		);
 		RunOutcome outcome = myReindexStep.run(stepExecutionDetails, myMockJobDataSinkReindexResults);
 		assertEquals(20, outcome.getRecordsProcessed());
