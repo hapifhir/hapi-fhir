@@ -19,13 +19,13 @@
  */
 package ca.uhn.fhir.batch2.jobs.export;
 
-import ca.uhn.fhir.batch2.jobs.export.v1.BulkExportV1AppCtx;
+import ca.uhn.fhir.batch2.jobs.export.v2.BulkExportV2AppCtx;
 import ca.uhn.fhir.batch2.jobs.export.v3.BulkExportV3AppCtx;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({BulkExportV1AppCtx.class, BulkExportV3AppCtx.class})
+@Import({BulkExportV2AppCtx.class, BulkExportV3AppCtx.class})
 public class BulkExportAppCtx {
 
 	public static final String WRITE_TO_BINARIES = "write-to-binaries";

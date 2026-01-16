@@ -528,7 +528,7 @@ public class ExpandResourceAndWriteBinaryStep
 			}
 
 			// if necessary, expand resources
-			if (parameters.isExpandMdm()) {
+			if (isV2Job() && parameters.isExpandMdm()) {
 				myBulkExportProcessor.expandMdmResources(theResources);
 			}
 
@@ -667,6 +667,13 @@ public class ExpandResourceAndWriteBinaryStep
 			// see WriteBinaryStep as well
 			return myFhirContext.newJsonParser().setPrettyPrint(false);
 		}
+	}
+
+	/**
+	 * Overridden in the V2 step
+	 */
+	protected boolean isV2Job() {
+		return false;
 	}
 
 	/**

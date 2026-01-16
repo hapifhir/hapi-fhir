@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.batch2.jobs.export.v1;
+package ca.uhn.fhir.batch2.jobs.export.v2;
 
 import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
@@ -48,8 +48,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-public class FetchResourceIdsV1Step implements IFirstJobStepWorker<BulkExportJobParameters, ResourceIdList> {
-	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsV1Step.class);
+public class FetchResourceIdsV2Step implements IFirstJobStepWorker<BulkExportJobParameters, ResourceIdList> {
+	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsV2Step.class);
 
 	@Autowired
 	private IBulkExportProcessor<?> myBulkExportProcessor;

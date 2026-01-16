@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportSupport;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -108,8 +107,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
-	@Autowired
-	private IJobPersistence myJobPersistence;
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
@@ -576,9 +573,9 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		verifyBulkExportResults(options, List.of("Patient/P1"), List.of("Patient/P2"));
 	}
 
-	@Test
-	public void testPatientBulkExportWithMultiIds() {
-		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testPatientBulkExportWithMultiIds(boolean theMdm) {
 		// create some resources
 		Patient patient = new Patient();
 		patient.setId("P1");
@@ -634,6 +631,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		options.setExpandMdm(theMdm);
 
 		verifyBulkExportResults(options, List.of("Patient/P1", obsId, encId, "Patient/P2", obsId2, encId2), List.of("Patient/P3", obsId3, encId3));
 	}

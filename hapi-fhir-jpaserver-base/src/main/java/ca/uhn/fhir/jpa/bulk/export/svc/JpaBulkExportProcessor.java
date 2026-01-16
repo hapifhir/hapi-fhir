@@ -376,6 +376,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		return searchParam;
 	}
 
+	/**
+	 * Note: This is only used for the V2 job
+	 */
 	@Override
 	public void expandMdmResources(List<IBaseResource> theResources) {
 		for (IBaseResource resource : theResources) {
@@ -425,7 +428,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 * across multiple resource type iterations.
 	 *
 	 * @param theParameters - export parameters containing group ID and MDM flag
-	 * @return a LinkedHashSet of JpaPids representing all member patients (with MDM expansion if enabled)
+	 * @return a Set of resource IDs representing all member patients
 	 */
 	@Override
 	public Set<String> getPatientSetForGroupExport(ExportPIDIteratorParameters theParameters) {
@@ -458,7 +461,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		return members;
 	}
 
-	Set<String> getPatientSetForPatientExport(ExportPIDIteratorParameters theParams) {
+	@Override
+	public Set<String> getPatientSetForPatientExport(ExportPIDIteratorParameters theParams) {
 		if (theParams.hasExpandedPatientIdsForPatientExport()) {
 			ourLog.debug(
 					"Using cached expanded patient ID set with {} patients",
@@ -498,9 +502,13 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			ourLog.debug("MDM expansion enabled - expanding {} patients", patientIds.size());
 
 			for (String patientId : patientIds) {
-				Set<String> mdmExpandedIds = myMdmExpandersHolder
-						.getBulkExportMDMResourceExpanderInstance()
-						.expandPatient(patientId, partitionId);
+
+				Set<String> mdmExpandedIds = myHapiTransactionService
+						.withSystemRequest()
+						.withRequestPartitionId(partitionId)
+						.execute(() -> myMdmExpandersHolder
+								.getBulkExportMDMResourceExpanderInstance()
+								.expandPatient(patientId, partitionId));
 				expandedPatientIds.addAll(mdmExpandedIds);
 			}
 		}

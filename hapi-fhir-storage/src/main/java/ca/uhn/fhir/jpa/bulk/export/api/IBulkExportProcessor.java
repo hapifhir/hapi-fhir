@@ -41,4 +41,6 @@ public interface IBulkExportProcessor<T extends IResourcePersistentId<?>> {
 	void expandMdmResources(List<IBaseResource> theResources);
 
 	Set<String> getPatientSetForGroupExport(ExportPIDIteratorParameters theParameters);
+
+	Set<String> getPatientSetForPatientExport(ExportPIDIteratorParameters theParameters);
 }

@@ -7,6 +7,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
+import ca.uhn.fhir.batch2.jobs.export.v2.FetchResourceIdsV2Step;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -51,8 +52,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class FetchResourceIdsV1StepTest {
-	private static final Logger ourLog = (Logger) LoggerFactory.getLogger(FetchResourceIdsV1Step.class);
+public class FetchResourceIdsV2StepTest {
+	private static final Logger ourLog = (Logger) LoggerFactory.getLogger(FetchResourceIdsV2Step.class);
 
 	@Mock
 	private ListAppender<ILoggingEvent> myAppender;
@@ -61,7 +62,7 @@ public class FetchResourceIdsV1StepTest {
 	private IBulkExportProcessor<JpaPid> myBulkExportProcessor;
 
 	@InjectMocks
-	private FetchResourceIdsV1Step myFirstStep;
+	private FetchResourceIdsV2Step myFirstStep;
 	@Mock
 	private JpaStorageSettings myStorageSettings;
 

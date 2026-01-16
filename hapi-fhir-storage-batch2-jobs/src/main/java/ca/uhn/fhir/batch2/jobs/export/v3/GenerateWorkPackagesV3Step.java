@@ -32,7 +32,6 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportHelperService;
@@ -60,6 +59,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -86,9 +86,6 @@ public class GenerateWorkPackagesV3Step
 	private IBulkExportProcessor<?> myBulkExportProcessor;
 
 	@Autowired
-	private IIdHelperService<?> myIdHelperService;
-
-	@Autowired
 	private IHapiTransactionService myTransactionService;
 
 	@Autowired
@@ -108,15 +105,18 @@ public class GenerateWorkPackagesV3Step
 				"Generating work packages for bulk export job instance[{}]",
 				theStepExecutionDetails.getInstance().getInstanceId());
 
-		if (params.getExportStyle() == BulkExportJobParameters.ExportStyle.GROUP) {
-			handleGroupLevelExport(theStepExecutionDetails, theDataSink, params);
-		} else {
-			handleSystemOrPatientLevelExport(theStepExecutionDetails, theDataSink, params);
+		switch (params.getExportStyle()) {
+			case GROUP -> handleGroupLevelExport(theStepExecutionDetails, theDataSink, params);
+			case PATIENT -> handlePatientLevelExport(theStepExecutionDetails, theDataSink, params);
+			case SYSTEM -> handleSystemLevelExport(theStepExecutionDetails, theDataSink, params);
 		}
 
 		return RunOutcome.SUCCESS;
 	}
 
+	/**
+	 * Generate work packages for GROUP type export
+	 */
 	private void handleGroupLevelExport(
 			StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
 			IJobDataSink<BulkExportWorkPackageJson> theDataSink,
@@ -144,9 +144,7 @@ public class GenerateWorkPackagesV3Step
 				.withSystemRequest()
 				.withRequestPartitionId(groupReadPartition)
 				.readOnly()
-				.execute(() -> {
-					return myBulkExportProcessor.getPatientSetForGroupExport(patientListParams);
-				});
+				.execute(() -> myBulkExportProcessor.getPatientSetForGroupExport(patientListParams));
 
 		/*
 		 * Patient ID parameters are validated by BulkExportJobParametersValidator to ensure
@@ -159,7 +157,7 @@ public class GenerateWorkPackagesV3Step
 		}
 
 		ListMultimap<RequestPartitionId, String> patientResourceIdsByPartition =
-				Multimaps.index(patientResourceIds, t -> determinePatientPartition(theStepExecutionDetails, t));
+				indexPatientIdsByPartition(theStepExecutionDetails, patientResourceIds);
 		List<String> resourceTypes = getResourceTypes(theStepExecutionDetails, jobParams);
 
 		boolean includesGroup = resourceTypes.remove("Group");
@@ -186,10 +184,95 @@ public class GenerateWorkPackagesV3Step
 		}
 	}
 
+	/**
+	 * Generate work packages for PATIENT type export
+	 */
+	private void handlePatientLevelExport(
+			@Nonnull StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
+			@Nonnull IJobDataSink<BulkExportWorkPackageJson> theDataSink,
+			BulkExportJobParameters theParams) {
+
+		List<String> requestedPatientIds = theParams.getPatientIds();
+		if (requestedPatientIds == null || requestedPatientIds.isEmpty()) {
+			handleSystemOrPatientTypeLevelExport(theStepExecutionDetails, theDataSink, theParams);
+			return;
+		}
+
+		handlePatientInstanceLevelExport(theStepExecutionDetails, theDataSink, theParams, requestedPatientIds);
+	}
+
+	/**
+	 * Generate work packages for SYSTEM type export
+	 */
+	private void handleSystemLevelExport(
+			StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
+			IJobDataSink<BulkExportWorkPackageJson> theDataSink,
+			BulkExportJobParameters theParams) {
+		handleSystemOrPatientTypeLevelExport(theStepExecutionDetails, theDataSink, theParams);
+	}
+
+	/**
+	 * Generate work packages for PATIENT type export with patient ID parameters specified
+	 */
+	private void handlePatientInstanceLevelExport(
+			@Nonnull StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
+			@Nonnull IJobDataSink<BulkExportWorkPackageJson> theDataSink,
+			BulkExportJobParameters theParams,
+			List<String> requestedPatientIds) {
+		List<String> resourceTypes = getResourceTypes(theStepExecutionDetails, theParams);
+
+		ListMultimap<RequestPartitionId, String> partitions =
+				indexPatientIdsByPartition(theStepExecutionDetails, requestedPatientIds);
+		for (RequestPartitionId partition : partitions.keySet()) {
+			List<String> patientIds = partitions.get(partition);
+
+			ExportPIDIteratorParameters parameters = new ExportPIDIteratorParameters();
+			parameters.setPatientIds(patientIds);
+			parameters.setPartitionId(partition);
+			parameters.setExpandMdm(theParams.isExpandMdm());
+			Set<String> expandedPatientIds = myBulkExportProcessor.getPatientSetForPatientExport(parameters);
+			if (!expandedPatientIds.isEmpty()) {
+
+				BulkExportWorkPackageJson workPackage = new BulkExportWorkPackageJson();
+				workPackage.setPatientIds(List.copyOf(expandedPatientIds));
+				workPackage.setPartitionId(partition);
+				workPackage.setResourceTypes(resourceTypes);
+				theDataSink.accept(workPackage);
+			}
+		}
+	}
+
+	/**
+	 * Generate work packages for SYSTEM type export or for PATIENT type export without
+	 * any patient ID parameters specified
+	 */
+	private void handleSystemOrPatientTypeLevelExport(
+			@Nonnull StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
+			@Nonnull IJobDataSink<BulkExportWorkPackageJson> theDataSink,
+			BulkExportJobParameters theParams) {
+
+		RequestDetails srd = theStepExecutionDetails.newSystemRequestDetails();
+		RequestPartitionId requestPartitionId =
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
+						srd, ProviderConstants.OPERATION_EXPORT);
+
+		List<RequestPartitionId> requestPartitions =
+				myJobPartitionProvider.splitPartitionsForJobExecution(requestPartitionId);
+
+		List<String> resourceTypes = getResourceTypes(theStepExecutionDetails, theParams);
+
+		for (RequestPartitionId requestPartition : requestPartitions) {
+			BulkExportWorkPackageJson workPackage = new BulkExportWorkPackageJson();
+			workPackage.setResourceTypes(resourceTypes);
+			workPackage.setPartitionId(requestPartition);
+			theDataSink.accept(workPackage);
+		}
+	}
+
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Nonnull
 	private List<String> applyTypeFiltersToPatientIdList(
-			BulkExportJobParameters theJobParams, RequestPartitionId thePartitionId, List<String> thePatientIds) {
+			BulkExportJobParameters theJobParams, RequestPartitionId thePartitionId, Collection<String> thePatientIds) {
 		List<String> newPatientIdList = new ArrayList<>(thePatientIds.size());
 		TaskChunker.chunk(thePatientIds, SearchConstants.MAX_PAGE_SIZE, idChunk -> {
 			RuntimeResourceDefinition patientDef = myFhirContext.getResourceDefinition("Patient");
@@ -225,35 +308,19 @@ public class GenerateWorkPackagesV3Step
 		return newPatientIdList;
 	}
 
+	@Nonnull
+	private ListMultimap<RequestPartitionId, String> indexPatientIdsByPartition(
+			StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
+			Collection<String> patientResourceIds) {
+		return Multimaps.index(patientResourceIds, t -> determinePatientPartition(theStepExecutionDetails, t));
+	}
+
 	private RequestPartitionId determinePatientPartition(
 			StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails, String thePatientId) {
 		return myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
 				theStepExecutionDetails.newSystemRequestDetails(),
 				"Patient",
 				myFhirContext.getVersion().newIdType(thePatientId));
-	}
-
-	private void handleSystemOrPatientLevelExport(
-			@Nonnull StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
-			@Nonnull IJobDataSink<BulkExportWorkPackageJson> theDataSink,
-			BulkExportJobParameters params) {
-
-		RequestDetails srd = theStepExecutionDetails.newSystemRequestDetails();
-		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
-						srd, ProviderConstants.OPERATION_EXPORT);
-
-		List<RequestPartitionId> requestPartitions =
-				myJobPartitionProvider.splitPartitionsForJobExecution(requestPartitionId);
-
-		List<String> resourceTypes = getResourceTypes(theStepExecutionDetails, params);
-
-		for (RequestPartitionId requestPartition : requestPartitions) {
-			BulkExportWorkPackageJson workPackage = new BulkExportWorkPackageJson();
-			workPackage.setResourceTypes(resourceTypes);
-			workPackage.setPartitionId(requestPartition);
-			theDataSink.accept(workPackage);
-		}
 	}
 
 	@Nonnull

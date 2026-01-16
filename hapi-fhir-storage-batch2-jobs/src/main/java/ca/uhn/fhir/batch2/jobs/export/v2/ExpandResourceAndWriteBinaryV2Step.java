@@ -36,4 +36,9 @@ public class ExpandResourceAndWriteBinaryV2Step extends ExpandResourceAndWriteBi
 		RequestPartitionId partitionId = jobParameters.getPartitionIdForSecurity();
 		return new SystemRequestDetails().setRequestPartitionId(partitionId);
 	}
+
+	@Override
+	protected boolean isV2Job() {
+		return true;
+	}
 }

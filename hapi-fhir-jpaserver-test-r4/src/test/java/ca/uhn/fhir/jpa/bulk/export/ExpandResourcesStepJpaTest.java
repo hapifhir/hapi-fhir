@@ -4,7 +4,7 @@ import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
-import ca.uhn.fhir.batch2.jobs.export.v1.ExpandResourcesStep;
+import ca.uhn.fhir.batch2.jobs.export.v1.ExpandResourcesV1Step;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.verify;
 public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 
 	@Autowired
-	private ExpandResourcesStep myExpandResourcesStep;
+	private ExpandResourcesV1Step myExpandResourcesStep;
 
 	@Mock
 	private IJobDataSink<ExpandedResourcesList> mySink;
