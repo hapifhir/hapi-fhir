@@ -19,19 +19,16 @@
  */
 package ca.uhn.hapi.fhir.batch2.test.inline;
 
-import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
-import ca.uhn.fhir.batch2.coordinator.DefaultJobStepExecutionServices;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.hapi.fhir.batch2.test.MockJobStepExecutiojnDetails;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
 import java.util.List;
-
-import static org.mockito.Mockito.mock;
 
 /**
  * Test utility class used to trigger all steps in a batch {@link JobDefinition} in a lightweight way, leveraging the
@@ -56,7 +53,7 @@ class InlineJobRunner<PT extends IModelJson> {
         final List<JobDefinitionStep<PT, ?, ?>> steps = myJobDefinition.getSteps();
         for (JobDefinitionStep<PT, ?, ?> step : steps) {
             final InlineStepRunner<PT, ?, ?> ptInlineStepRunner =
-                    new InlineStepRunner<>(step, theParameter, instance, mock(IJobStepExecutionServices.class));
+                    new InlineStepRunner<>(step, theParameter, instance, new MockJobStepExecutiojnDetails());
             ptInlineStepRunner.run(unsafeCast(currentInput));
 
             final List<? extends WorkChunkData<?>> currentOutput = ptInlineStepRunner.getCurrentOutput();

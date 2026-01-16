@@ -123,9 +123,6 @@ public class RequestTenantPartitionInterceptor {
 	@Nonnull
 	protected RequestPartitionId extractPartitionIdFromRequest(RequestDetails theRequestDetails) {
 		String tenantId = theRequestDetails.getTenantId();
-		if (tenantId == null) {
-			tenantId = (String) theRequestDetails.getUserData().get(INITIATING_TENANT_KEY);
-		}
 
 		// We will use the tenant ID that came from the request as the partition name
 		if (isBlank(tenantId)) {

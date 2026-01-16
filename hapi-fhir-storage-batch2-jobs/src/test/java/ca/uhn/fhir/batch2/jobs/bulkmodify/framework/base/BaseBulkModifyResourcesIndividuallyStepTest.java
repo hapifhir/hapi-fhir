@@ -63,6 +63,8 @@ class BaseBulkModifyResourcesIndividuallyStepTest {
 	@Mock
 	private IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
 	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
+	@Mock
 	private IJobDataSink<BulkModifyResourcesChunkOutcomeJson> mySink;
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();

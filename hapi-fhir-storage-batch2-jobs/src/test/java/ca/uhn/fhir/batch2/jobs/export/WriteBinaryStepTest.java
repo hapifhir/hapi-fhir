@@ -94,6 +94,9 @@ public class WriteBinaryStepTest {
 	@Mock
 	private DaoRegistry myDaoRegistry;
 
+	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
+
 	@InjectMocks
 	private TestWriteBinaryStep myFinalStep;
 

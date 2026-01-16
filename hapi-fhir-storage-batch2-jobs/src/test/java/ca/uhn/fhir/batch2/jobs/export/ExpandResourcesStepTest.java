@@ -75,6 +75,9 @@ public class ExpandResourcesStepTest {
 	@Mock
 	IIdHelperService<JpaPid> myIdHelperService;
 
+	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
+
 	@Spy
 	private InterceptorService myInterceptorService = new InterceptorService();
 

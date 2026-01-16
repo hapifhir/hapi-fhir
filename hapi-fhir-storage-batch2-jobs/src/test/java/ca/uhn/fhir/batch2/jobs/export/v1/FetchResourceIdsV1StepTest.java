@@ -67,6 +67,8 @@ public class FetchResourceIdsV1StepTest {
 
 	@Mock
 	private IResourceSupportedSvc myResourceSupportedSvc;
+	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
 
 	@Mock
 	private IJobStepExecutionServices myJobStepExecutionServices;
