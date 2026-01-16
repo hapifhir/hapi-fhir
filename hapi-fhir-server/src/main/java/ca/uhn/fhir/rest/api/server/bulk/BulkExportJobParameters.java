@@ -110,7 +110,7 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 	 * whether or not to expand mdm
 	 */
 	@JsonProperty("expandMdm")
-	private boolean myExpandMdm;
+	private Boolean myExpandMdm;
 
 	/**
 	 * The partition for the request if applicable.
@@ -235,7 +235,15 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 		return myExpandMdm;
 	}
 
-	public void setExpandMdm(boolean theExpandMdm) {
+	/**
+	 * Checks if the _mdm parameter was explicitly omitted from the request Parameters.
+	 * @return true if myExpandMdm is null (parameter was not provided), false otherwise
+	 */
+	public boolean isExpandMdmExplicitlyEmpty() {
+		return this.myExpandMdm == null;
+	}
+
+	public void setExpandMdm(Boolean theExpandMdm) {
 		myExpandMdm = theExpandMdm;
 	}
 
