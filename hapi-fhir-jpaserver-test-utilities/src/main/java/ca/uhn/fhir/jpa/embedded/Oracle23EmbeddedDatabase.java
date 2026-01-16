@@ -27,9 +27,8 @@ import org.testcontainers.utility.DockerImageName;
  * For testing purposes.
  * <br/><br/>
  * Embedded Oracle 23 database that uses a {@link DriverTypeEnum#ORACLE_12C} driver
- * and a dockerized Testcontainer with lazy initialization.
+ * and a dockerized Testcontainer.
  *
- * @see <a href="https://www.testcontainers.org/modules/databases/oraclexe/">Oracle TestContainer</a>
  */
 public class Oracle23EmbeddedDatabase extends OracleEmbeddedDatabase {
 
@@ -40,7 +39,7 @@ public class Oracle23EmbeddedDatabase extends OracleEmbeddedDatabase {
 	private static OracleContainer createOracle23Container() {
 
 		DockerImageName dockerImageName = DockerImageName.parse("gvenzl/oracle-free:23.4-slim-faststart")
-			.asCompatibleSubstituteFor("gvenzl/oracle-xe");
+				.asCompatibleSubstituteFor("gvenzl/oracle-xe");
 
 		Oracle23Container oracle23Container = new Oracle23Container(dockerImageName);
 		oracle23Container.withPrivilegedMode(true);
@@ -48,7 +47,7 @@ public class Oracle23EmbeddedDatabase extends OracleEmbeddedDatabase {
 		return oracle23Container;
 	}
 
-	static class Oracle23Container extends OracleContainer{
+	static class Oracle23Container extends OracleContainer {
 
 		public Oracle23Container(DockerImageName dockerImageName) {
 			super(dockerImageName);
@@ -57,16 +56,15 @@ public class Oracle23EmbeddedDatabase extends OracleEmbeddedDatabase {
 		@Override
 		public String getJdbcUrl() {
 			// By default, OracleContainer use db name 'xepdb1' in the JDBC URL when connecting to the instance running
-			// in the docker container. that works fine with container gvenzl/oracle-xe:21-slim-faststart (see Oracle21EmbeddedDatabase)
-			// since the default db name running within the containe is 'xepdb1'.
+			// in the docker container. that works fine with container gvenzl/oracle-xe:21-slim-faststart (see
+			// Oracle21EmbeddedDatabase) since the default db name running within that containe is 'xepdb1'.
 			//
- 			// On the other hand, container gvenzl/oracle-free:23.4-slim-faststart creates a default db called
+			// On the other hand, container gvenzl/oracle-free:23.4-slim-faststart creates a default db called
 			// 'FREEPDB1'.  as a result, we need to tell OracleContainer to use that name when attempting to connect.
-			// i've tried invoking method `withDatabaseName` but that has the side effect of attempting to create
+			// i've tried invoking method `withDatabaseName` but that has the side effect of trying to create
 			// a new db named 'FREEPDB1' which fails due to the default one already existing.
 			// at last, i resolved to swapping the name in this method overwrite.
 			return super.getJdbcUrl().replace("/xepdb1", "/FREEPDB1");
 		}
 	}
-
 }

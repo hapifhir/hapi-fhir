@@ -35,5 +35,4 @@ public class Oracle21EmbeddedDatabase extends OracleEmbeddedDatabase {
 	public Oracle21EmbeddedDatabase() {
 		super(new OracleContainer("gvenzl/oracle-xe:21-slim-faststart").withPrivilegedMode(true));
 	}
-
 }
