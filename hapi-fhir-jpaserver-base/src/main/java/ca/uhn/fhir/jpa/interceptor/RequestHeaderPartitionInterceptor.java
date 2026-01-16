@@ -77,7 +77,7 @@ public class RequestHeaderPartitionInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE)
 	public void createBatchJob(RequestDetails theRequestDetails, JobInstance theJobInstance) {
-		String partitionHeader = getPartitionHeader(theRequestDetails);
+		String partitionHeader = theRequestDetails.getHeader(Constants.HEADER_X_REQUEST_PARTITION_IDS);
 		theJobInstance.addUserData(INITIATING_HEADER_KEY, partitionHeader);
 	}
 
@@ -98,7 +98,7 @@ public class RequestHeaderPartitionInterceptor {
 	private RequestPartitionId identifyPartitionOrThrowException(
 			RequestDetails theRequestDetails,
 			BiFunction<String, IDefaultPartitionSettings, RequestPartitionId> aHeaderParser) {
-		String partitionHeader = getPartitionHeader(theRequestDetails);
+		String partitionHeader = theRequestDetails.getHeader(Constants.HEADER_X_REQUEST_PARTITION_IDS);
 		if (isBlank(partitionHeader)) {
 			if (theRequestDetails instanceof SystemRequestDetails systemRequestDetails) {
 				if (systemRequestDetails.getRequestPartitionId() != null) {
@@ -114,9 +114,5 @@ public class RequestHeaderPartitionInterceptor {
 		}
 
 		return aHeaderParser.apply(partitionHeader, myDefaultPartitionSettings);
-	}
-
-	private static String getPartitionHeader(RequestDetails theRequestDetails) {
-		return theRequestDetails.getHeader(Constants.HEADER_X_REQUEST_PARTITION_IDS);
 	}
 }

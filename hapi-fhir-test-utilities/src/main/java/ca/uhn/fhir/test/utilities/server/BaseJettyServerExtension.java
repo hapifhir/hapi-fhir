@@ -166,6 +166,10 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 			return;
 		}
 
+		/*
+		 * By default, Jetty spins up 200 worker threads, which makes thread
+		 * dumps a nightmare to read. Use a smaller but growable pool.
+		 */
 		QueuedThreadPool threadPool = new QueuedThreadPool();
 		threadPool.setMinThreads(5);
 		threadPool.setMaxThreads(50);
