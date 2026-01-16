@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 7479
+title: "The expandMdm field in bulk export operations now properly supports 
+  tri-state logic to distinguish between explicitly disabled (false), 
+  explicitly enabled (true), and not specified (null). This allows the system 
+  to apply appropriate default behavior when the _mdm parameter set explicitly 
+  to false as opposed to being omitted"
