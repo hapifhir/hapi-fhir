@@ -158,13 +158,8 @@ public class AuthResourceResolver implements IAuthResourceResolver {
 
 	private Map<String, IBaseResource> getResourceCache(RequestDetails theRequestDetails) {
 		@SuppressWarnings("unchecked")
-		Map<String, IBaseResource> cache =
-				(Map<String, IBaseResource>) theRequestDetails.getUserData().get(RESOURCE_CACHE_KEY);
-
-		if (cache == null) {
-			cache = new HashMap<>();
-			theRequestDetails.getUserData().put(RESOURCE_CACHE_KEY, cache);
-		}
+		Map<String, IBaseResource> cache = (Map<String, IBaseResource>)
+				theRequestDetails.getUserData().computeIfAbsent(RESOURCE_CACHE_KEY, key -> new HashMap<>());
 		return cache;
 	}
 
