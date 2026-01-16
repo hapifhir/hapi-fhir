@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI-FHIR Storage Batch2 Jobs
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%

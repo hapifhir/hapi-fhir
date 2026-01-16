@@ -1,7 +1,7 @@
 // Created by claude-sonnet-4-5
 /*-
  * #%L
- * HAPI FHIR Storage
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%

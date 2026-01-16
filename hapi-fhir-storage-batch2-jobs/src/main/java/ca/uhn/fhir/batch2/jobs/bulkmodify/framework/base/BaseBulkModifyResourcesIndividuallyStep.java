@@ -21,16 +21,19 @@ package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.api.ResourceModificationRequest;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.api.ResourceModificationResponse;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionJson;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -69,8 +72,7 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 
 	@Override
 	protected void processPidsInTransaction(
-			String theInstanceId,
-			String theChunkId,
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
 			PT theJobParameters,
 			State theState,
 			List<TypedPidAndVersionJson> thePids,
@@ -79,7 +81,7 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 		HapiTransactionService.requireTransaction();
 
 		// Fetch all the resources in the chunk
-		fetchResourcesInTransaction(theState, thePids);
+		fetchResourcesInTransaction(theStepExecutionDetails, theState, thePids);
 
 		// Perform the modification (handled by subclasses)
 		C modificationContext;
@@ -102,7 +104,10 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	 * Fetches the given resources by PID from the database, and stores the fetched
 	 * resources in the {@link State}.
 	 */
-	private void fetchResourcesInTransaction(State theState, List<TypedPidAndVersionJson> thePids) {
+	private void fetchResourcesInTransaction(
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
+			State theState,
+			List<TypedPidAndVersionJson> thePids) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		Multimap<TypedPidJson, TypedPidAndVersionJson> pidsToVersions =
@@ -139,7 +144,8 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 					// individually here. This could be made more efficient with some kind
 					// of bulk versioned fetch in the future.
 					IIdType nextVersionedId = resource.getIdElement().withVersion(Long.toString(nextVersion));
-					IBaseResource resourceVersion = dao.read(nextVersionedId, new SystemRequestDetails(), true);
+					RequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+					IBaseResource resourceVersion = dao.read(nextVersionedId, requestDetails, true);
 
 					// Don't try to modify resource versions that are already deleted
 					if (ResourceMetadataKeyEnum.DELETED_AT.get(resourceVersion) != null) {
