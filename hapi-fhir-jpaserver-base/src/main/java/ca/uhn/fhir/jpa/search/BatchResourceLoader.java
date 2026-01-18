@@ -118,7 +118,7 @@ public class BatchResourceLoader {
 		theResourceHistoryEntities.forEach(
 				historyEntity -> preProcessEntities(historyEntity, esrEntities, preloadedEntities, result));
 
-		// 2. Submit ESR entities for parallel processing
+		// 2. Process ESR entities in batch per provider
 		List<EntityResourceHolder> esrFutures = processEsrEntities(esrEntities);
 
 		// 3. Batch extract tags for all entities
@@ -156,7 +156,7 @@ public class BatchResourceLoader {
 			theResult.add(new ResourceLoadResult(theHistoryEntity.getPersistentId(), null, true));
 			return;
 		}
-		// Add to externally stored resources list for parallel processing
+		// Add to externally stored resources list for batch processing
 		if (theHistoryEntity.getEncoding() == ResourceEncodingEnum.ESR) {
 			EsrResourceDetails resourceDetails = getResourceDetails(theHistoryEntity);
 			List<EsrEntityResourceHolder> list =

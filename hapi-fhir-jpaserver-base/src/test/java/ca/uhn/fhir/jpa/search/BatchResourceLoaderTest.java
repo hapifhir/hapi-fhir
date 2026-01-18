@@ -350,7 +350,7 @@ class BatchResourceLoaderTest {
 	private void mockEsrProvider(Patient thePatient) {
 		when(myExternallyStoredResourceServiceRegistry.getProvider("testProvider"))
 			.thenReturn(myExternallyStoredResourceService);
-		when(myExternallyStoredResourceService.fetchResources(any())).thenReturn(Map.of("address1",thePatient));
+		when(myExternallyStoredResourceService.fetchResources(any())).thenReturn(Map.of("address1", thePatient));
 	}
 
 	private ResourceHistoryTable createDeletedResourceEntity(Long thePid) {
