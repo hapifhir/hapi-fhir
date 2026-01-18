@@ -27,6 +27,12 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ * Service for extracting metadata from FHIR resource entities.
+ * Provides methods to extract tags, provenance details (source URI and request ID),
+ * and other metadata from both resource history and resource table entities.
+ * Supports batch operations for improved performance when processing multiple resources.
+ */
 @SuppressWarnings("java:S1452") // Generic wildcard types are necessary here due to entity method return types
 public interface IResourceMetadataExtractorSvc {
 

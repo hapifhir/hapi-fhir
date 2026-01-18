@@ -136,7 +136,7 @@ class BatchResourceLoaderTest {
 		// verify
 		assertThat(results).hasSize(1);
 		ResourceLoadResult result = results.get(0);
-		assertThat(result.id()).isEqualTo(entity.getPersistentId());
+		assertThat(result.pid()).isEqualTo(entity.getPersistentId());
 		assertThat(result.isDeleted()).as(theMessage).isTrue();
 		assertThat(result.resource()).as(theMessage).isNull();
 	}
@@ -199,7 +199,7 @@ class BatchResourceLoaderTest {
 	}
 
 	private Optional<ResourceLoadResult> getResultOpt(List<ResourceLoadResult> theResults, JpaPid thePid) {
-		return theResults.stream().filter(result -> result.id().equals(thePid)).findFirst();
+		return theResults.stream().filter(result -> result.pid().equals(thePid)).findFirst();
 	}
 
 	@ParameterizedTest

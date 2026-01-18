@@ -1315,14 +1315,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 		}
 
-		List<ResourceLoadResult> resourceParseDetails =
+		List<ResourceLoadResult> resourceLoadResults =
 				myBatchResourceLoader.loadResources(resourceSearchViewList, theForHistoryOperation);
 
-		for (ResourceLoadResult next : resourceParseDetails) {
+		for (ResourceLoadResult next : resourceLoadResults) {
 			if (next.isDeleted()) {
 				continue;
 			}
-			JpaPid resourceId = next.id();
+			JpaPid resourceId = next.pid();
 
 			if (resourcePidToVersion != null) {
 				Long version = resourcePidToVersion.get(resourceId);

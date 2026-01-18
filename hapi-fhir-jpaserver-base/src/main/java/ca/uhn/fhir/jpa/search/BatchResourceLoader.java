@@ -93,7 +93,7 @@ public class BatchResourceLoader {
 		myPartitionLookupSvc = thePartitionLookupSvc;
 	}
 
-	public record ResourceLoadResult(JpaPid id, IBaseResource resource, boolean isDeleted) {}
+	public record ResourceLoadResult(JpaPid pid, IBaseResource resource, boolean isDeleted) {}
 
 	private record EntityResourceHolder(ResourceHistoryTable entity, IBaseResource resource) {}
 
@@ -126,7 +126,7 @@ public class BatchResourceLoader {
 				myResourceMetadataExtractorSvc.getTagsBatch(theResourceHistoryEntities);
 
 		// 4. Parse non-ESR entities sequentially
-		List<EntityResourceHolder> preloadedResources = processPreloadedEntities(preloadedEntities, tagsMap);
+		List<EntityResourceHolder> preloadedResources = parsePreloadedEntities(preloadedEntities, tagsMap);
 
 		// 5. ESR and Non-ESR resources post-processing
 		Stream.concat(preloadedResources.stream(), esrFutures.stream()).forEach(holder -> {
@@ -136,6 +136,16 @@ public class BatchResourceLoader {
 		return result;
 	}
 
+	/**
+	 * Pre-processes a resource history entity by categorizing it based on encoding type and deletion status.
+	 * Externally stored resources (ESR) are grouped by provider ID for batch fetching. Database-stored resources
+	 * are added to a list for sequential parsing.
+	 *
+	 * @param theHistoryEntity The resource history entity to pre-process
+	 * @param theEsrEntities Map of provider IDs to lists of ESR entities
+	 * @param thePreloadedEntities List of database-stored entities
+	 * @param theResult Result list
+	 */
 	private void preProcessEntities(
 			ResourceHistoryTable theHistoryEntity,
 			Map<String, List<EsrEntityResourceHolder>> theEsrEntities,
@@ -158,6 +168,17 @@ public class BatchResourceLoader {
 		}
 	}
 
+	/**
+	 * Performs post-processing on a parsed FHIR resource to populate metadata and prepare it for return.
+	 * This method enriches the resource with metadata, provenance information, partition details, and ensures proper
+	 * sorting of metadata elements.
+	 *
+	 * @param theResource            The parsed FHIR resource to post-process
+	 * @param theHistoryEntity       The resource history entity containing metadata
+	 * @param theTags                Collection of tags associated with the resource
+	 * @param theResult              The result list to which the processed resource will be added
+	 * @param theForHistoryOperation Whether this is for a history operation (affects metadata population)
+	 */
 	private void postProcessResource(
 			IBaseResource theResource,
 			ResourceHistoryTable theHistoryEntity,
@@ -185,7 +206,17 @@ public class BatchResourceLoader {
 		theResult.add(new ResourceLoadResult(theHistoryEntity.getPersistentId(), theResource, false));
 	}
 
-	private List<EntityResourceHolder> processPreloadedEntities(
+	/**
+	 * Parses database-stored (non-ESR) FHIR resources from resource history entities.
+	 * For each entity, decodes the stored resource text, determines the appropriate resource type,
+	 * and parses the JSON content into an IBaseResource object.
+	 *
+	 * @param thePreloadedEntities List of entity holders containing resource history entities to parse
+	 * @param theTagsMap           Map of resource PIDs to their associated tags
+	 * @return List of entity holders with parsed resources
+	 * @throws DataFormatException If resource parsing fails for any entity
+	 */
+	private List<EntityResourceHolder> parsePreloadedEntities(
 			List<EntityResourceHolder> thePreloadedEntities, Map<JpaPid, Collection<BaseTag>> theTagsMap) {
 		List<EntityResourceHolder> result = new ArrayList<>(thePreloadedEntities.size());
 		thePreloadedEntities.forEach(holder -> {
