@@ -119,7 +119,7 @@ public class BatchResourceLoader {
 				historyEntity -> preProcessEntities(historyEntity, esrEntities, preloadedEntities, result));
 
 		// 2. Process ESR entities in batch per provider
-		List<EntityResourceHolder> esrFutures = processEsrEntities(esrEntities);
+		List<EntityResourceHolder> esrResources = processEsrEntities(esrEntities);
 
 		// 3. Batch extract tags for all entities
 		Map<JpaPid, Collection<BaseTag>> tagsMap =
@@ -129,7 +129,7 @@ public class BatchResourceLoader {
 		List<EntityResourceHolder> preloadedResources = parsePreloadedEntities(preloadedEntities, tagsMap);
 
 		// 5. ESR and Non-ESR resources post-processing
-		Stream.concat(preloadedResources.stream(), esrFutures.stream()).forEach(holder -> {
+		Stream.concat(preloadedResources.stream(), esrResources.stream()).forEach(holder -> {
 			Collection<BaseTag> tags = tagsMap.get(holder.entity().getPersistentId());
 			postProcessResource(holder.resource(), holder.entity(), tags, result, theForHistoryOperation);
 		});
