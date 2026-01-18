@@ -544,8 +544,9 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public IAuthResourceResolver authResourceResolver(DaoRegistry theDaoRegistry) {
-		return new AuthResourceResolver(theDaoRegistry);
+	public IAuthResourceResolver authResourceResolver(
+			DaoRegistry theDaoRegistry, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		return new AuthResourceResolver(theDaoRegistry, theRequestPartitionHelperSvc);
 	}
 
 	@Bean
