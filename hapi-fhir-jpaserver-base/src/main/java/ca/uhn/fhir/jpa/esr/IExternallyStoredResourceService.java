@@ -49,7 +49,7 @@ public interface IExternallyStoredResourceService {
 	 * @param theAddresses Collection of address strings. The address format is entirely up to the
 	 *                     individual provider. HAPI FHIR doesn't try to understand it.
 	 * @return Map of addresses to resources. HAPI FHIR may modify the returned objects, so it is important to
-	 * 	always return new objects for every call
+	 *        always return new objects for every call
 	 */
 	default Map<String, IBaseResource> fetchResources(Collection<String> theAddresses) {
 		Map<String, IBaseResource> result = new HashMap<>();
