@@ -57,7 +57,9 @@ public interface IAuthRuleBuilderOperationNamed {
 	/**
 	 * Rule applies to invocations of this operation at the <code>instance</code> level on any instance of the given type.
 	 * An optional FHIR query filter can be added to ensure instances meet certain criteria.
-	 * (i.e. $meta-add?category=vital-signs for Observation resources)
+	 *
+	 * @param theType The resource type (i.e. {@code org.hl7.fhir.r4.model.Observation.class})
+	 * @param theFilterRestriction The FHIR query filter to apply (i.e. {@code category=vital-signs})
 	 */
 	IAuthRuleBuilderOperationNamedAndScoped onInstancesOfTypeMatchingOptionalFilter(
 			Class<? extends IBaseResource> theType, @Nullable String theFilterRestriction);
@@ -70,7 +72,8 @@ public interface IAuthRuleBuilderOperationNamed {
 	/**
 	 * Rule applies to invocations of this operation at the <code>instance</code> level on any instance.
 	 * An optional FHIR query filter can be added to ensure instances meet certain criteria.
-	 * (i.e. $meta-add?category=vital-signs for Observation resources)
+	 *
+	 * @param theFilterRestriction The FHIR query filter to apply (i.e. {@code _tag=http://example.org|some-tag})
 	 */
 	IAuthRuleBuilderOperationNamedAndScoped onAnyInstanceMatchingOptionalFilter(@Nullable String theFilterRestriction);
 
