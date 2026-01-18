@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
@@ -41,6 +42,9 @@ public class ReindexV3ModifyResourcesStepTest extends BaseJpaR4Test {
 	@Mock
 	private IJobDataSink<BulkModifyResourcesChunkOutcomeJson> myDataSink;
 
+	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
+
 	@Captor
 	private ArgumentCaptor<String> myErrorCaptor;
 
@@ -70,7 +74,8 @@ public class ReindexV3ModifyResourcesStepTest extends BaseJpaR4Test {
 			params,
 			data,
 			instance,
-			chunk
+			chunk,
+			myJobStepExecutionServices
 		);
 		RunOutcome outcome = myReindexStepV1.run(stepExecutionDetails, myDataSink);
 
@@ -105,7 +110,8 @@ public class ReindexV3ModifyResourcesStepTest extends BaseJpaR4Test {
 			params,
 			data,
 			instance,
-			new WorkChunk().setId("chunk-id")
+			new WorkChunk().setId("chunk-id"),
+			myJobStepExecutionServices
 		);
 		RunOutcome outcome = myReindexStepV1.run(stepExecutionDetails, myDataSink);
 
@@ -145,7 +151,8 @@ public class ReindexV3ModifyResourcesStepTest extends BaseJpaR4Test {
 			params,
 			data,
 			instance,
-			new WorkChunk().setId("chunk-id")
+			new WorkChunk().setId("chunk-id"),
+			myJobStepExecutionServices
 		);
 		RunOutcome outcome = myReindexStepV1.run(stepExecutionDetails, myDataSink);
 
@@ -217,7 +224,8 @@ public class ReindexV3ModifyResourcesStepTest extends BaseJpaR4Test {
 			params,
 			data,
 			instance,
-			new WorkChunk().setId("chunk-id")
+			new WorkChunk().setId("chunk-id"),
+			myJobStepExecutionServices
 		);
 		RunOutcome outcome = myReindexStepV1.run(stepExecutionDetails, myDataSink);
 
@@ -270,7 +278,8 @@ public class ReindexV3ModifyResourcesStepTest extends BaseJpaR4Test {
 			params,
 			data,
 			instance,
-			workChunk
+			workChunk,
+			myJobStepExecutionServices
 		);
 		RunOutcome outcome = myReindexStepV1.run(stepExecutionDetails, myDataSink);
 
@@ -280,8 +289,8 @@ public class ReindexV3ModifyResourcesStepTest extends BaseJpaR4Test {
 		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.getCommitCount());
-		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		verify(myDataSink, times(1)).recoveredError(myErrorCaptor.capture());
 		String message = myErrorCaptor.getValue();

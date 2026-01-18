@@ -22,6 +22,7 @@ package ca.uhn.fhir.batch2.coordinator;
 import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
@@ -95,6 +96,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	private final AtomicReference<String> myCurrentlyFinalizingInstanceId = new AtomicReference<>();
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
+	private final IJobStepExecutionServices myJobStepExecutionServices;
 	private final IInterceptorService myInterceptorService;
 	private Timer myHeartbeatTimer;
 
@@ -105,10 +107,12 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 			IJobPersistence theJobPersistence,
 			IHapiTransactionService theTransactionService,
 			JobDefinitionRegistry theJobDefinitionRegistry,
+			IJobStepExecutionServices theJobStepExecutionServices,
 			IInterceptorService theInterceptorService) {
 		myJobPersistence = theJobPersistence;
 		myTransactionService = theTransactionService;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
+		myJobStepExecutionServices = theJobStepExecutionServices;
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry, theInterceptorService);
 		myInterceptorService = theInterceptorService;
 		myReducerExecutor = Executors.newSingleThreadExecutor(new CustomizableThreadFactory("batch2-reducer"));
@@ -305,8 +309,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 						myJobPersistence,
 						myJobDefinitionRegistry,
 						myInterceptorService);
-				StepExecutionDetails<PT, IT> chunkDetails =
-						StepExecutionDetails.createReductionStepDetails(parameters, null, instance);
+				StepExecutionDetails<PT, IT> chunkDetails = StepExecutionDetails.createReductionStepDetails(
+						parameters, null, instance, myJobStepExecutionServices);
 
 				if (response.isSuccessful()) {
 					try {
