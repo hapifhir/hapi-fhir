@@ -18,9 +18,11 @@ import ch.qos.logback.classic.Logger;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Type;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -55,6 +57,10 @@ class InstanceOperationAuthorizationWithFilterR4Test extends BaseResourceProvide
 
 	private static final String CATEGORY_IMAGING = "imaging";
 	private static final String FILTER_IMAGING = "category=" + CATEGORY_IMAGING;
+
+	private static final String TAG_SYSTEM = "some-system";
+	private static final String TAG_CODE = "some-code";
+	private static final String TAG_FILTER = "_tag=" + TAG_SYSTEM + "|" + TAG_CODE;
 
 	@Autowired
 	private IAuthResourceResolver myAuthResolver;
@@ -100,8 +106,8 @@ class InstanceOperationAuthorizationWithFilterR4Test extends BaseResourceProvide
 
 		@ParameterizedTest
 		@ArgumentsSource(VitalSignsAndBlankFilters.class)
-		void wrongOperation_operationDenied() {
-			registerAuthInterceptorForAnyInstanceOfType(OPERATION_META, Observation.class, FILTER_VITAL_SIGNS);
+		void wrongOperation_operationDenied(String theFilter) {
+			registerAuthInterceptorForAnyInstanceOfType(OPERATION_META, Observation.class, theFilter);
 
 			Observation observation = createObservationWithCategory(CATEGORY_VITAL_SIGNS);
 
@@ -200,6 +206,46 @@ class InstanceOperationAuthorizationWithFilterR4Test extends BaseResourceProvide
 							.execute()
 			).isInstanceOf(ForbiddenOperationException.class);
 		}
+
+		@Test
+		void multipleResourceTypesWithSameInstanceFilter_operationAllowed(){
+			registerAuthInterceptorForAnyInstance(OPERATION_META, TAG_FILTER);
+
+			// Observation with _tag filter
+			Observation observation = createObservationWithTag(TAG_SYSTEM, TAG_CODE);
+
+			Parameters result1 = myServer.getFhirClient()
+				.operation()
+				.onInstance(observation.getIdElement())
+				.named(OPERATION_META)
+				.withNoParameters(Parameters.class)
+				.execute();
+
+			assertHasSingleTag(result1, TAG_SYSTEM, TAG_CODE);
+
+			// Patient with _tag filter
+			Patient patient = createPatientWithTag(TAG_SYSTEM, TAG_CODE);
+
+			Parameters result2 = myServer.getFhirClient()
+				.operation()
+				.onInstance(patient.getIdElement())
+				.named(OPERATION_META)
+				.withNoParameters(Parameters.class)
+				.execute();
+
+			assertHasSingleTag(result2, TAG_SYSTEM, TAG_CODE);
+		}
+
+		private void assertHasSingleTag(Parameters theParameters, String theSystem, String theCode) {
+			assertThat(theParameters).isNotNull();
+			Type returnValue = theParameters.getParameter("return").getValue();
+			assertThat(returnValue).isInstanceOf(Meta.class);
+
+			Meta meta = (Meta) returnValue;
+			assertThat(meta.getTag()).hasSize(1);
+			assertThat(meta.getTag().get(0).getSystem()).isEqualTo(theSystem);
+			assertThat(meta.getTag().get(0).getCode()).isEqualTo(theCode);
+		}
 	}
 
 	@Nested
@@ -267,10 +313,29 @@ class InstanceOperationAuthorizationWithFilterR4Test extends BaseResourceProvide
 		return (Observation) myObservationDao.create(obs, mySrd).getResource();
 	}
 
+	private Observation createObservationWithTag(String theSystem, String theCode) {
+		Observation obs = new Observation();
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		obs.addCategory(new CodeableConcept()
+			.addCoding(new Coding()
+				.setSystem("http://terminology.hl7.org/CodeSystem/observation-category")
+				.setCode("some-category")));
+
+		obs.getMeta().getTag().add(new Coding().setSystem(theSystem).setCode(theCode));
+		return (Observation) myObservationDao.create(obs, mySrd).getResource();
+	}
+
 	private Patient createPatient(){
 		Patient patient = new Patient();
 		patient.setActive(true);
-		return (Patient) myPatientDao.create(patient, new SystemRequestDetails()).getResource();
+		return (Patient) myPatientDao.create(patient, mySrd).getResource();
+	}
+
+	private Patient createPatientWithTag(String theSystem, String theCode){
+		Patient patient = new Patient();
+		patient.setActive(true);
+		patient.getMeta().addTag(new Coding().setSystem(theSystem).setCode(theCode));
+		return (Patient) myPatientDao.create(patient, mySrd).getResource();
 	}
 
 	private void assertHfjResVerSelectQueriesMade(CircularQueueCaptureQueriesListener theCaptureQueriesListener, int theNumExpected){
