@@ -410,10 +410,7 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 					IPrimitiveType<Integer> theResourceLimit,
 			ServletRequestDetails theRequestDetails) {
 
-		if (getMergeOperationProviderSvc() == null) {
-			throw new NotImplementedOperationException(
-					Msg.code(2834) + "This operation is not supported for the FHIR version used by this server");
-		}
+		validateMergeOperationSupported();
 
 		return getMergeOperationProviderSvc()
 				.merge(
@@ -426,5 +423,49 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 						theResultResource,
 						theResourceLimit,
 						theRequestDetails);
+	}
+
+	/**
+	 * /$hapi.fhir.undo-merge
+	 */
+	@Operation(name = ProviderConstants.OPERATION_UNDO_MERGE)
+	public IBaseParameters resourceUndoMerge(
+			HttpServletRequest theServletRequest,
+			ServletRequestDetails theRequestDetails,
+			@OperationParam(
+							name = ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_RESOURCE_IDENTIFIER,
+							typeName = "Identifier")
+					List<IBase> theSourceResourceIdentifier,
+			@OperationParam(
+							name = ProviderConstants.OPERATION_MERGE_PARAM_TARGET_RESOURCE_IDENTIFIER,
+							typeName = "Identifier")
+					List<IBase> theTargetResourceIdentifier,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_RESOURCE, max = 1)
+					IBaseReference theSourceResource,
+			@OperationParam(name = ProviderConstants.OPERATION_MERGE_PARAM_TARGET_RESOURCE, max = 1)
+					IBaseReference theTargetResource) {
+
+		startRequest(theServletRequest);
+
+		try {
+			validateMergeOperationSupported();
+
+			return getMergeOperationProviderSvc()
+					.undoMerge(
+							theSourceResourceIdentifier,
+							theTargetResourceIdentifier,
+							theSourceResource,
+							theTargetResource,
+							theRequestDetails);
+		} finally {
+			endRequest(theServletRequest);
+		}
+	}
+
+	private void validateMergeOperationSupported() {
+		if (getMergeOperationProviderSvc() == null) {
+			throw new NotImplementedOperationException(
+					Msg.code(2834) + "This operation is not supported for the FHIR version used by this server");
+		}
 	}
 }

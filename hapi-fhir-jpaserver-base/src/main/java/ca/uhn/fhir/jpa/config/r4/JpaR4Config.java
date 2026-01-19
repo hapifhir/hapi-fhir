@@ -197,21 +197,24 @@ public class JpaR4Config {
 	public IMergeOperationProviderSvc mergeOperationProviderSvc(
 			FhirContext theFhirContext,
 			ResourceMergeService theResourceMergeService,
+			ResourceUndoMergeService theResourceUndoMergeService,
 			IInterceptorBroadcaster theInterceptorBroadcaster,
 			JpaStorageSettings theStorageSettings) {
 
 		return new MergeOperationProviderSvc(
-				theFhirContext, theResourceMergeService, theInterceptorBroadcaster, theStorageSettings);
+				theFhirContext,
+				theResourceMergeService,
+				theResourceUndoMergeService,
+				theInterceptorBroadcaster,
+				theStorageSettings);
 	}
 
 	@Bean
 	public PatientMergeProvider patientMergeProvider(
 			FhirContext theFhirContext,
 			DaoRegistry theDaoRegistry,
-			IMergeOperationProviderSvc theMergeOperationProviderSvc,
-			ResourceUndoMergeService theResourceUndoMergeService) {
+			IMergeOperationProviderSvc theMergeOperationProviderSvc) {
 
-		return new PatientMergeProvider(
-				theFhirContext, theDaoRegistry, theMergeOperationProviderSvc, theResourceUndoMergeService);
+		return new PatientMergeProvider(theFhirContext, theDaoRegistry, theMergeOperationProviderSvc);
 	}
 }

@@ -1,5 +1,5 @@
 // Created by claude-sonnet-4-5
-package ca.uhn.fhir.jpa.provider.r4;
+package ca.uhn.fhir.jpa.provider.merge;
 
 /*-
  * #%L
@@ -22,32 +22,33 @@ package ca.uhn.fhir.jpa.provider.r4;
  */
 
 import ca.uhn.fhir.jpa.merge.AbstractMergeTestScenario;
-import ca.uhn.fhir.jpa.merge.PatientMergeTestScenario;
+import ca.uhn.fhir.jpa.merge.ObservationMergeTestScenario;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Observation;
 
 /**
- * Integration tests for the Patient/$hapi.fhir.merge operation.
- *
- * <p>This test class validates the HAPI FHIR generic merge endpoint that works with any
- * resource type, using generic parameter names (e.g., "source-resource", "target-resource").
+ * Integration tests for generic merge operations on Observation resources.
  *
  * <p>All common test methods are inherited from {@link AbstractGenericMergeR4Test}.
- * This class only configures the Patient-specific scenario and resource type name.
+ * This class only configures the Observation-specific scenario and resource type name.
  *
- * <p>For tests of the standard FHIR Patient/$merge endpoint, see {@link PatientMergeR4Test}.
+ * <p><b>Key difference from Practitioner</b>: Observation resources do NOT have
+ * an "active" field, so the merge operation does not set source.active=false.
  */
-public class PatientMergeGenericEndpointR4Test extends AbstractGenericMergeR4Test<Patient> {
+public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observation> {
 
 	@Nonnull
 	@Override
-	protected AbstractMergeTestScenario<Patient> createScenario() {
-		return new PatientMergeTestScenario(myDaoRegistry, myFhirContext, myLinkServiceFactory, mySrd, myHelper);
+	protected AbstractMergeTestScenario<Observation> createScenario() {
+		return new ObservationMergeTestScenario(myDaoRegistry, myFhirContext, myLinkServiceFactory, mySrd, myHelper);
 	}
 
 	@Nonnull
 	@Override
 	protected String getResourceTypeName() {
-		return "Patient";
+		return "Observation";
 	}
+
+	// All test methods are inherited from AbstractGenericMergeR4Test
+	// Add Observation-specific tests here if needed
 }
