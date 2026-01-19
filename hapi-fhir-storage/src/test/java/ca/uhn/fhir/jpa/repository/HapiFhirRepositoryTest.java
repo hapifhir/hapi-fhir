@@ -207,6 +207,7 @@ public class HapiFhirRepositoryTest {
 
 				repository.setConsumerLatch(editedDetails -> {
 					Map<String, String[]> providedParams = editedDetails.getParameters();
+					latch.set(true);
 
 					HashMap<String, String[]> newParams = new HashMap<>(providedParams);
 					// preserve our parameters please

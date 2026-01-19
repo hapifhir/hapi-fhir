@@ -119,10 +119,10 @@ public class HapiFhirRepository implements IRepository {
 	@Override
 	public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
 			I theId, P thePatchParameters, Map<String, String> theHeaders) {
-		RequestDetails details = startWith(myRequestDetails)
-				.setAction(RestOperationTypeEnum.PATCH)
-				.addHeaders(theHeaders)
-				.create();
+		RequestDetails details = createRequestDetails(builder -> {
+			builder.setAction(RestOperationTypeEnum.PATCH);
+			builder.addHeaders(theHeaders);
+		});
 
 		return myDaoRegistry
 				.getResourceDao(theId.getResourceType())
