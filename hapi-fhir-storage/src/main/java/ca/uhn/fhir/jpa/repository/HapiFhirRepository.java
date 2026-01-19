@@ -32,6 +32,7 @@ import ca.uhn.fhir.repository.impl.MultiMapRepositoryRestQueryBuilder;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -376,14 +377,15 @@ public class HapiFhirRepository implements IRepository {
 	@Override
 	public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
 			I theId, String theName, P theParameters, Class<R> theReturnType, Map<String, String> theHeaders) {
-		RequestDetails details = startWith(myRequestDetails)
-				.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER)
-				.addHeaders(theHeaders)
-				.setOperation(theName)
-				.setResourceType(theId.getResourceType())
-				.setId(theId)
-				.setRequestContents(theParameters)
-				.create();
+		RequestDetails details = createRequestDetails(builder -> {
+			builder.setRequestType(RequestTypeEnum.POST);
+			builder.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER);
+			builder.addHeaders(theHeaders);
+			builder.setOperation(theName);
+			builder.setResourceType(theId.getResourceType());
+			builder.setId(theId);
+			builder.setRequestContents(theParameters);
+		});
 
 		return invoke(details);
 	}
@@ -391,14 +393,15 @@ public class HapiFhirRepository implements IRepository {
 	@Override
 	public <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(
 			I theId, String theName, P theParameters, Map<String, String> theHeaders) {
-		RequestDetails details = startWith(myRequestDetails)
-				.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER)
-				.addHeaders(theHeaders)
-				.setOperation(theName)
-				.setResourceType(theId.getResourceType())
-				.setId(theId)
-				.setRequestContents(theParameters)
-				.create();
+		RequestDetails details = createRequestDetails(builder -> {
+			builder.setRequestType(RequestTypeEnum.POST);
+			builder.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER);
+			builder.addHeaders(theHeaders);
+			builder.setOperation(theName);
+			builder.setResourceType(theId.getResourceType());
+			builder.setId(theId);
+			builder.setRequestContents(theParameters);
+		});
 
 		return invoke(details);
 	}

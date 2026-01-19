@@ -50,6 +50,15 @@ class RequestDetailsCloner {
 			newDetails = new SystemRequestDetails(theDetails);
 		}
 
+		IRestfulResponse response = theDetails.getResponse();
+
+		// we need IRestfulResponse because RestfulServer uses it during extended operation processing.
+		if (response == null && theDetails instanceof SystemRequestDetails systemDetails) {
+			response = new SystemRestfulResponse(systemDetails);
+		}
+		newDetails.setResponse(response);
+
+
 		return new DetailsBuilder(newDetails);
 	}
 
@@ -62,6 +71,11 @@ class RequestDetailsCloner {
 
 		DetailsBuilder setAction(RestOperationTypeEnum theRestOperationType) {
 			myDetails.setRestOperationType(theRestOperationType);
+			return this;
+		}
+
+		DetailsBuilder setRequestType(RequestTypeEnum theRequestType) {
+			myDetails.setRequestType(theRequestType);
 			return this;
 		}
 
@@ -140,13 +154,6 @@ class RequestDetailsCloner {
 			myDetails.setParameters(new HashMap<>());
 			myDetails.setResourceName(null);
 			myDetails.setCompartmentName(null);
-			IRestfulResponse response = myDetails.getResponse();
-
-			// we need IRestfulResponse because RestfulServer uses it during extended operation processing.
-			if (response == null && myDetails instanceof SystemRequestDetails systemDetails) {
-				response = new SystemRestfulResponse(systemDetails);
-			}
-			myDetails.setResponse(response);
 
 			return this;
 		}
