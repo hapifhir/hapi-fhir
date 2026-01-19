@@ -538,17 +538,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	/**
-	 * Builds undo-merge operation parameters using this scenario's configuration.
-	 * Uses resource IDs by default for both source and target.
-	 *
-	 * @return the operation input parameters
-	 */
-	@Nonnull
-	public Parameters buildUndoMergeParameters() {
-		return buildUndoMergeParameters(true, true);
-	}
-
-	/**
 	 * Builds undo-merge operation parameters using custom identifier-based resolution.
 	 *
 	 * @param theSourceById if true, use source ID; if false, use source identifiers
