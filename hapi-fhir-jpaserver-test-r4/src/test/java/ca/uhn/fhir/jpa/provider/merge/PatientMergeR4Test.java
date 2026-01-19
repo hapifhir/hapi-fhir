@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.provider.r4;
+package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -46,7 +46,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.DEFAULT_PRESERVE_VERSION_REFS_R4_AND_LATER;
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
@@ -64,6 +63,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Integration tests for the standard FHIR Patient/$merge operation.
+ *
+ * <p>This test class validates the FHIR-standard Patient-specific merge endpoint using
+ * Patient-specific parameter names (e.g., "source-patient", "target-patient") using the Patient/$merge endpoint.
+ *
+ * <p>For tests of the generic merge endpoint (Patient/$hapi.fhir.merge), see
+ * {@link PatientMergeGenericEndpointR4Test}.
+ *
+ * <p><b>Note:</b> This test class could be refactored to use the {@link AbstractGenericMergeR4Test}
+ * framework after the generic merge operation is merged, which would reduce code duplication.
+ * But currently, this class serves as a regression test suite to ensure that the introduction of
+ * the generic merge operation ({resourceType}/$hapi.fhir.merge) did not break the existing Patient/$merge endpoint.
+ */
 public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PatientMergeR4Test.class);
 

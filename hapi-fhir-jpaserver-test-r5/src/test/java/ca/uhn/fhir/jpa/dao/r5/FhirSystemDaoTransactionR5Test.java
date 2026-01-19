@@ -6,12 +6,15 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.PreVerifyConditionalMatchCriteriaRequest;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -19,6 +22,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeSystem;
@@ -973,6 +977,45 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		}
 
 	}
+
+	@Test
+	public void testInterceptorModifiesResourceAndConditionalUrl() {
+
+		createPatient(withId("A"), withFamily("HELLO"), withActiveTrue());
+
+		class MyInterceptor {
+			@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
+			public void onResourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
+				Patient patient = (Patient) theNewResource;
+				patient.getNameFirstRep().setFamily("HELLO");
+			}
+			@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
+			public void onPreSearch(SearchParameterMap theSearchParameterMap) {
+				theSearchParameterMap.remove("family");
+				theSearchParameterMap.add("family", new StringParam("HELLO"));
+			}
+			@Hook(Pointcut.STORAGE_PREVERIFY_CONDITIONAL_MATCH_CRITERIA)
+			public void onPreVerifyConditionalUrl(PreVerifyConditionalMatchCriteriaRequest theRequest) {
+				theRequest.setConditionalUrl("Patient?family=HELLO");
+				assertEquals("Patient", myFhirCtx.getResourceType(theRequest.getResource()));
+			}
+		}
+		registerInterceptor(new MyInterceptor());
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(buildPatient(withFamily("GOODBYE"), withActiveFalse())).conditional("Patient?family=GOODBYE");
+		Bundle requestBundle = bb.getBundleTyped();
+
+		Bundle responseBundle = mySystemDao.transaction(mySrd, requestBundle);
+
+		assertThat(responseBundle.getEntry().get(0).getResponse().getLocation()).endsWith("/_history/2");
+
+		// Verify
+		Patient actual = myPatientDao.read(new IdType("Patient/A"), mySrd);
+		assertEquals("HELLO", actual.getNameFirstRep().getFamily());
+	}
+
+
 
 	@Nonnull
 	private static CodeSystem newDummyCodeSystem() {

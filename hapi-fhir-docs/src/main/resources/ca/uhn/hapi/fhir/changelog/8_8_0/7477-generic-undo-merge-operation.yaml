@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7477
+title: "Extended the `$hapi.fhir.undo-merge` operation to support any resource type. Previously only available
+for Patient resources, the undo-merge operation can now be invoked on any resource type via
+`{resourceType}/$hapi.fhir.undo-merge`."

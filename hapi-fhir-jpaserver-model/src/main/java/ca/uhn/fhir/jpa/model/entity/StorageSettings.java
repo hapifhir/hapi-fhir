@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
@@ -52,6 +53,8 @@ public class StorageSettings {
 	 */
 	// Thread Pool size used by batch in bundle
 	public static final int DEFAULT_BUNDLE_BATCH_POOL_SIZE = 20; // 1 for single thread
+
+	private static final boolean DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA = false;
 
 	public static final int DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE = 100; // 1 for single thread
 	/**
@@ -85,6 +88,15 @@ public class StorageSettings {
 	protected static final String DEFAULT_PERIOD_INDEX_START_OF_TIME = "1001-01-01";
 	protected static final String DEFAULT_PERIOD_INDEX_END_OF_TIME = "9000-01-01";
 	private static final Integer DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE = null;
+	/**
+	 * This setting allows preventing a conditional update to invalidate the match criteria.
+	 * <p/>
+	 * By default, this is disabled unless explicitly enabled.
+	 *
+	 * @since 6.8.2
+	 */
+	private boolean myPreventInvalidatingConditionalMatchCriteria =
+			DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA;
 	/**
 	 * @since 5.5.0
 	 */
@@ -167,6 +179,10 @@ public class StorageSettings {
 		setPeriodIndexStartOfTime(new DateTimeType(DEFAULT_PERIOD_INDEX_START_OF_TIME));
 		setPeriodIndexEndOfTime(new DateTimeType(DEFAULT_PERIOD_INDEX_END_OF_TIME));
 		setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+
+		if (HapiSystemProperties.isPreventInvalidatingConditionalMatchCriteria()) {
+			setPreventInvalidatingConditionalMatchCriteria(true);
+		}
 	}
 
 	/**
@@ -978,6 +994,26 @@ public class StorageSettings {
 	public void setPeriodIndexEndOfTime(IPrimitiveType<Date> thePeriodIndexEndOfTime) {
 		Validate.notNull(thePeriodIndexEndOfTime, "thePeriodIndexEndOfTime must not be null");
 		myPeriodIndexEndOfTime = thePeriodIndexEndOfTime;
+	}
+
+	/**
+	 * Should the server validate that a conditional create/update/patch isn't creating/modifying
+	 * a resource with values that prevent it from being matched by the supplied conditional URL?
+	 *
+	 * @see ca.uhn.fhir.interceptor.api.Pointcut#STORAGE_PREVERIFY_CONDITIONAL_MATCH_CRITERIA
+	 */
+	public void setPreventInvalidatingConditionalMatchCriteria(boolean theCriteria) {
+		myPreventInvalidatingConditionalMatchCriteria = theCriteria;
+	}
+
+	/**
+	 * Should the server validate that a conditional create/update/patch isn't creating/modifying
+	 * a resource with values that prevent it from being matched by the supplied conditional URL?
+	 *
+	 * @see ca.uhn.fhir.interceptor.api.Pointcut#STORAGE_PREVERIFY_CONDITIONAL_MATCH_CRITERIA
+	 */
+	public boolean isPreventInvalidatingConditionalMatchCriteria() {
+		return myPreventInvalidatingConditionalMatchCriteria;
 	}
 
 	/**

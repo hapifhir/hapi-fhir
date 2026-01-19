@@ -38,7 +38,7 @@ public class JpaJobPersistenceImplIT extends BaseJpaR4Test {
 		jobInstance.setJobDefinitionId("job-def-id");
 		jobInstance.setStatus(StatusEnum.IN_PROGRESS);
 		jobInstance.setJobDefinitionVersion(1);
-		String instanceId = myJobPersistence.storeNewInstance(jobInstance);
+		String instanceId = myJobPersistence.storeNewInstance(newSrd(), jobInstance);
 
 		WorkChunk chunk = new WorkChunk();
 		chunk.setId("id");
@@ -69,7 +69,7 @@ public class JpaJobPersistenceImplIT extends BaseJpaR4Test {
 		jobInstance.setJobDefinitionId("job-def-id");
 		jobInstance.setStatus(StatusEnum.IN_PROGRESS);
 		jobInstance.setJobDefinitionVersion(1);
-		String instanceId = myJobPersistence.storeNewInstance(jobInstance);
+		String instanceId = myJobPersistence.storeNewInstance(newSrd(), jobInstance);
 
 		Batch2WorkChunkEntity workChunk = new Batch2WorkChunkEntity();
 		workChunk.setId("id");

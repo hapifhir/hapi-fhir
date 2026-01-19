@@ -110,7 +110,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	private static final Integer DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE = 10000;
 
-	private static final boolean DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA = false;
 	private static final long DEFAULT_REST_DELETE_BY_URL_RESOURCE_ID_THRESHOLD = 10000;
 
 	/**
@@ -364,16 +363,6 @@ public class JpaStorageSettings extends StorageSettings {
 			IValidationSupport.IssueSeverity.WARNING;
 
 	/**
-	 * This setting allows preventing a conditional update to invalidate the match criteria.
-	 * <p/>
-	 * By default, this is disabled unless explicitly enabled.
-	 *
-	 * @since 6.8.2
-	 */
-	private boolean myPreventInvalidatingConditionalMatchCriteria =
-			DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA;
-
-	/**
 	 * This setting helps to enforce a threshold in number of resolved resources for DELETE by URL REST calls
 	 *
 	 * @since 7.2.0
@@ -444,6 +433,7 @@ public class JpaStorageSettings extends StorageSettings {
 	 * Constructor
 	 */
 	public JpaStorageSettings() {
+		super();
 		setMarkResourcesForReindexingUponSearchParameterChange(true);
 		setReindexThreadCount(Runtime.getRuntime().availableProcessors());
 		setExpungeThreadCount(Runtime.getRuntime().availableProcessors());
@@ -462,9 +452,6 @@ public class JpaStorageSettings extends StorageSettings {
 		}
 		if (HapiSystemProperties.isUnitTestModeEnabled()) {
 			setJobFastTrackingEnabled(true);
-		}
-		if (HapiSystemProperties.isPreventInvalidatingConditionalMatchCriteria()) {
-			setPreventInvalidatingConditionalMatchCriteria(true);
 		}
 	}
 
@@ -2674,14 +2661,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public void setNonResourceDbHistoryEnabled(boolean theNonResourceDbHistoryEnabled) {
 		myNonResourceDbHistoryEnabled = theNonResourceDbHistoryEnabled;
-	}
-
-	public void setPreventInvalidatingConditionalMatchCriteria(boolean theCriteria) {
-		myPreventInvalidatingConditionalMatchCriteria = theCriteria;
-	}
-
-	public boolean isPreventInvalidatingConditionalMatchCriteria() {
-		return myPreventInvalidatingConditionalMatchCriteria;
 	}
 
 	public long getRestDeleteByUrlResourceIdThreshold() {

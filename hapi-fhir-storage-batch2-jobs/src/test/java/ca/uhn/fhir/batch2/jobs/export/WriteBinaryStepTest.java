@@ -3,6 +3,7 @@ package ca.uhn.fhir.batch2.jobs.export;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
@@ -90,6 +91,9 @@ public class WriteBinaryStepTest {
 	@Mock
 	private DaoRegistry myDaoRegistry;
 
+	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
+
 	@InjectMocks
 	private TestWriteBinaryStep myFinalStep;
 
@@ -114,7 +118,8 @@ public class WriteBinaryStepTest {
 			parameters,
 			theData,
 			theInstance,
-			new WorkChunk().setId("1")
+			new WorkChunk().setId("1"),
+			myJobStepExecutionServices
 		);
 	}
 
