@@ -1,0 +1,4 @@
+---
+type: add
+issue: 7472
+title: "Batch2 job execution on partitioned systems is currently handled piecemeal. A new pointcut called `STORAGE_BATCH_TASK_NEW_REQUEST_DETAILS` has been added which can be used in combination with the existing `STORAGE_PRESTORAGE_BATCH_JOB_CREATE` pointcut to keep track of request details necessary to determine the appropriate partition during batch job execution. Existing partition interceptors and some batch tasks have been reworked to use this new mechanism, leading to better partition support in general for batch job execution."

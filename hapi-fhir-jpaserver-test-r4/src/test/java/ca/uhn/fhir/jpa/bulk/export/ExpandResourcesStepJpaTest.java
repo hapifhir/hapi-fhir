@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.bulk.export;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.export.ExpandResourcesStep;
@@ -39,6 +40,8 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 
 	@Mock
 	private IJobDataSink<ExpandedResourcesList> mySink;
+	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
 	@Captor
 	private ArgumentCaptor<ExpandedResourcesList> myWorkChunkCaptor;
 
@@ -80,7 +83,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 		JobInstance jobInstance = new JobInstance();
 		String chunkId = "ABC";
 
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, new WorkChunk().setId(chunkId));
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, new WorkChunk().setId(chunkId), myJobStepExecutionServices);
 
 		// Test
 
@@ -137,7 +140,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 		JobInstance jobInstance = new JobInstance();
 		String chunkId = "ABC";
 
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, new WorkChunk().setId(chunkId));
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, new WorkChunk().setId(chunkId), myJobStepExecutionServices);
 
 		// Test
 
@@ -179,7 +182,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 		JobInstance jobInstance = new JobInstance();
 		String chunkId = "ABC";
 
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, new WorkChunk().setId(chunkId));
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, new WorkChunk().setId(chunkId), myJobStepExecutionServices);
 
 		// Test
 
@@ -227,7 +230,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 		JobInstance jobInstance = new JobInstance();
 		String chunkId = "ABC";
 
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, new WorkChunk().setId(chunkId));
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, new WorkChunk().setId(chunkId), myJobStepExecutionServices);
 
 		// Test
 

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
@@ -66,6 +67,8 @@ public class FetchResourceIdsStepTest {
 
 	@Mock
 	private IResourceSupportedSvc myResourceSupportedSvc;
+	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
 
 	@BeforeEach
 	public void init() {
@@ -98,7 +101,8 @@ public class FetchResourceIdsStepTest {
 			theParameters,
 			null,
 			theInstance,
-			new WorkChunk().setId("1")
+			new WorkChunk().setId("1"),
+			myJobStepExecutionServices
 		);
 	}
 

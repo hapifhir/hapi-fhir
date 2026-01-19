@@ -25,6 +25,8 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.hapi.fhir.batch2.test.support.JobMaintenanceStateInformation;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.google.common.collect.ImmutableList;
@@ -55,7 +57,7 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 	@Test
 	default void testStoreAndFetchWorkChunk_NoData() {
 		JobInstance instance = createInstance();
-		String instanceId = getTestManager().getSvc().storeNewInstance(instance);
+		String instanceId = getTestManager().getSvc().storeNewInstance(newSrd(), instance);
 
 		String id = getTestManager().storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, null, false);
 
@@ -72,7 +74,7 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 	})
 	default void testWorkChunkCreate_inExpectedStatus(boolean theGatedExecution, WorkChunkStatusEnum expectedStatus) {
 		JobInstance instance = createInstance();
-		String instanceId = getTestManager().getSvc().storeNewInstance(instance);
+		String instanceId = getTestManager().getSvc().storeNewInstance(newSrd(), instance);
 
 		String id = getTestManager().storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA, theGatedExecution);
 		assertNotNull(id);
@@ -111,7 +113,7 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 		getTestManager().disableWorkChunkMessageHandler();
 		JobDefinition<?> jobDefinition = getTestManager().withJobDefinition(false);
 		JobInstance instance = createInstance();
-		String instanceId = getTestManager().getSvc().storeNewInstance(instance);
+		String instanceId = getTestManager().getSvc().storeNewInstance(newSrd(), instance);
 
 		// we're not transitioning this state; we're just checking storage of data
 		JobMaintenanceStateInformation info = new JobMaintenanceStateInformation(instanceId, jobDefinition, "1|QUEUED");
@@ -263,4 +265,9 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 			assertEquals(WorkChunkStatusEnum.COMPLETED, reducedChunk.getStatus());
 		}
 	}
+
+	private static SystemRequestDetails newSrd() {
+		return new SystemRequestDetails();
+	}
+
 }

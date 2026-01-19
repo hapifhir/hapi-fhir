@@ -97,6 +97,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	private IValidationSupport myValidationSupport;
 
 	private IAuthorizationSearchParamMatcher myAuthorizationSearchParamMatcher;
+	private IAuthResourceResolver myAuthResourceResolver;
 	private Logger myTroubleshootingLog;
 
 	/**
@@ -232,6 +233,21 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	@Nullable
 	public IAuthorizationSearchParamMatcher getSearchParamMatcher() {
 		return myAuthorizationSearchParamMatcher;
+	}
+
+	/**
+	 * Sets a resource resolver to resolve resources during authorization rule evaluation.
+	 *
+	 * @param theAuthResourceResolver The resource resolver. Defaults to null.
+	 */
+	public void setAuthResourceResolver(@Nullable IAuthResourceResolver theAuthResourceResolver) {
+		this.myAuthResourceResolver = theAuthResourceResolver;
+	}
+
+	@Nullable
+	@Override
+	public IAuthResourceResolver getAuthResourceResolver() {
+		return myAuthResourceResolver;
 	}
 
 	/**
