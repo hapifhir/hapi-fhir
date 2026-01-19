@@ -58,7 +58,6 @@ class RequestDetailsCloner {
 		}
 		newDetails.setResponse(response);
 
-
 		return new DetailsBuilder(newDetails);
 	}
 
