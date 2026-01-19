@@ -1,5 +1,5 @@
 // Created by Claude Code
-package ca.uhn.fhir.jpa.provider.r4;
+package ca.uhn.fhir.jpa.provider.merge;
 
 /*-
  * #%L

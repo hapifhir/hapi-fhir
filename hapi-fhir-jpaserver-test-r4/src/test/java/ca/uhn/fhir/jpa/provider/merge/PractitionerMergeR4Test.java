@@ -1,5 +1,5 @@
 // Created by claude-sonnet-4-5
-package ca.uhn.fhir.jpa.provider.r4;
+package ca.uhn.fhir.jpa.provider.merge;
 
 /*-
  * #%L
@@ -22,33 +22,30 @@ package ca.uhn.fhir.jpa.provider.r4;
  */
 
 import ca.uhn.fhir.jpa.merge.AbstractMergeTestScenario;
-import ca.uhn.fhir.jpa.merge.ObservationMergeTestScenario;
+import ca.uhn.fhir.jpa.merge.PractitionerMergeTestScenario;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Practitioner;
 
 /**
- * Integration tests for generic merge operations on Observation resources.
+ * Integration tests for generic merge operations on Practitioner resources.
  *
  * <p>All common test methods are inherited from {@link AbstractGenericMergeR4Test}.
- * This class only configures the Observation-specific scenario and resource type name.
- *
- * <p><b>Key difference from Practitioner</b>: Observation resources do NOT have
- * an "active" field, so the merge operation does not set source.active=false.
+ * This class only configures the Practitioner-specific scenario and resource type name.
  */
-public class ObservationMergeR4Test extends AbstractGenericMergeR4Test<Observation> {
+public class PractitionerMergeR4Test extends AbstractGenericMergeR4Test<Practitioner> {
 
 	@Nonnull
 	@Override
-	protected AbstractMergeTestScenario<Observation> createScenario() {
-		return new ObservationMergeTestScenario(myDaoRegistry, myFhirContext, myLinkServiceFactory, mySrd, myHelper);
+	protected AbstractMergeTestScenario<Practitioner> createScenario() {
+		return new PractitionerMergeTestScenario(myDaoRegistry, myFhirContext, myLinkServiceFactory, mySrd, myHelper);
 	}
 
 	@Nonnull
 	@Override
 	protected String getResourceTypeName() {
-		return "Observation";
+		return "Practitioner";
 	}
 
 	// All test methods are inherited from AbstractGenericMergeR4Test
-	// Add Observation-specific tests here if needed
+	// Add Practitioner-specific tests here if needed
 }

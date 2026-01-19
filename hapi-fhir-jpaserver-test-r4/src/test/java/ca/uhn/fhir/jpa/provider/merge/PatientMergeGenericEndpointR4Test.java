@@ -1,5 +1,5 @@
 // Created by claude-sonnet-4-5
-package ca.uhn.fhir.jpa.provider.r4;
+package ca.uhn.fhir.jpa.provider.merge;
 
 /*-
  * #%L
@@ -22,30 +22,32 @@ package ca.uhn.fhir.jpa.provider.r4;
  */
 
 import ca.uhn.fhir.jpa.merge.AbstractMergeTestScenario;
-import ca.uhn.fhir.jpa.merge.PractitionerMergeTestScenario;
+import ca.uhn.fhir.jpa.merge.PatientMergeTestScenario;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Patient;
 
 /**
- * Integration tests for generic merge operations on Practitioner resources.
+ * Integration tests for the Patient/$hapi.fhir.merge operation.
+ *
+ * <p>This test class validates the HAPI FHIR generic merge endpoint that works with any
+ * resource type, using generic parameter names (e.g., "source-resource", "target-resource").
  *
  * <p>All common test methods are inherited from {@link AbstractGenericMergeR4Test}.
- * This class only configures the Practitioner-specific scenario and resource type name.
+ * This class only configures the Patient-specific scenario and resource type name.
+ *
+ * <p>For tests of the standard FHIR Patient/$merge endpoint, see {@link PatientMergeR4Test}.
  */
-public class PractitionerMergeR4Test extends AbstractGenericMergeR4Test<Practitioner> {
+public class PatientMergeGenericEndpointR4Test extends AbstractGenericMergeR4Test<Patient> {
 
 	@Nonnull
 	@Override
-	protected AbstractMergeTestScenario<Practitioner> createScenario() {
-		return new PractitionerMergeTestScenario(myDaoRegistry, myFhirContext, myLinkServiceFactory, mySrd, myHelper);
+	protected AbstractMergeTestScenario<Patient> createScenario() {
+		return new PatientMergeTestScenario(myDaoRegistry, myFhirContext, myLinkServiceFactory, mySrd, myHelper);
 	}
 
 	@Nonnull
 	@Override
 	protected String getResourceTypeName() {
-		return "Practitioner";
+		return "Patient";
 	}
-
-	// All test methods are inherited from AbstractGenericMergeR4Test
-	// Add Practitioner-specific tests here if needed
 }
