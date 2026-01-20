@@ -428,9 +428,6 @@ public class BulkDataExportProviderR4Test {
 		info.setReport(JsonUtil.serialize(results));
 
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		if (partitioningEnabled) {
-			parameters.setPartitionId(myRequestPartitionId);
-		}
 		info.setParameters(parameters);
 
 		// when
@@ -487,7 +484,7 @@ public class BulkDataExportProviderR4Test {
 		info.setEndTime(InstantType.now().getValue());
 
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		parameters.setPartitionId(myRequestPartitionId);
+		parameters.setPartitionIdForSecurity(myRequestPartitionId);
 		info.setParameters(parameters);
 
 		ArrayList<String> ids = new ArrayList<>();
@@ -1046,9 +1043,6 @@ public class BulkDataExportProviderR4Test {
 		// setup
 
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		if (partitioningEnabled) {
-			parameters.setPartitionId(myRequestPartitionId);
-		}
 
 		JobInstance info = new JobInstance();
 		info.setParameters(parameters);
@@ -1346,9 +1340,6 @@ public class BulkDataExportProviderR4Test {
 		info.setEndTime(InstantType.now().getValue());
 
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		if (partititioningEnabled) {
-			parameters.setPartitionId(myRequestPartitionId);
-		}
 		info.setParameters(parameters);
 
 		// when
@@ -1445,7 +1436,7 @@ public class BulkDataExportProviderR4Test {
 		info.setEndTime(new Date());
 
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		parameters.setPartitionId(myRequestPartitionId);
+		parameters.setPartitionIdForSecurity(myRequestPartitionId);
 		info.setParameters(parameters);
 
 		// when

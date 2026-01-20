@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 class JobParameterJsonValidator {
 	private final ValidatorFactory myValidatorFactory = Validation.buildDefaultValidatorFactory();
@@ -60,9 +60,13 @@ class JobParameterJsonValidator {
 		IJobParametersValidator<PT> parametersValidator = theJobDefinition.getParametersValidator();
 		if (parametersValidator != null) {
 			List<String> outcome = parametersValidator.validate(theRequestDetails, parameters);
-			outcome = defaultIfNull(outcome, Collections.emptyList());
+			outcome = getIfNull(outcome, Collections.emptyList());
 			errorStrings.addAll(outcome);
 		}
+
+		// In case the validator made any changes to the parameters.
+		// E.g. the bulk export validator normalizes the "patient ID" parameter values
+		theStartRequest.setParameters(parameters);
 
 		if (!errorStrings.isEmpty()) {
 			String message = "Failed to validate parameters for job of type " + theJobDefinition.getJobDefinitionId()
