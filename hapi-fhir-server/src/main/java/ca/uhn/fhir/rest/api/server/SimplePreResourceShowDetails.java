@@ -95,4 +95,9 @@ public class SimplePreResourceShowDetails implements IPreResourceShowDetails {
 	public Iterator<IBaseResource> iterator() {
 		return getAllResources().iterator();
 	}
+
+	@Deprecated
+	public List<IBaseResource> toList() {
+		return Lists.newArrayList(myResources);
+	}
 }
