@@ -56,7 +56,6 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 			myEmbeddedDatabases.add(new PostgresEmbeddedDatabase());
 			myEmbeddedDatabases.add(new MsSqlEmbeddedDatabase());
 			if (DatabaseSupportUtil.canUseOracle()) {
-				myEmbeddedDatabases.add(new Oracle21EmbeddedDatabase());
 				myEmbeddedDatabases.add(new Oracle23EmbeddedDatabase());
 			} else {
 				String message =
