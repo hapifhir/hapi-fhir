@@ -54,6 +54,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * HapiFhirRepository.
  */
 @SuppressWarnings("java:S107")
+@Deprecated
 public class BundleProviderUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BundleProviderUtil.class);
 

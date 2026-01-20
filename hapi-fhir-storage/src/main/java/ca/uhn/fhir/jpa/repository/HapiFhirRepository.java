@@ -45,6 +45,8 @@ import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.server.method.PageMethodBinding;
+import ca.uhn.fhir.rest.server.method.ResponseBundleBuilder;
+import ca.uhn.fhir.rest.server.method.ResponseBundleRequest;
 import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -182,6 +184,8 @@ public class HapiFhirRepository implements IRepository {
 			return null;
 		}
 
+
+
 		return createBundle(details, bundleProvider, null);
 	}
 
@@ -216,16 +220,20 @@ public class HapiFhirRepository implements IRepository {
 			bundleType = BundleTypeEnum.SEARCHSET;
 		}
 
-		return unsafeCast(BundleProviderUtil.createBundleFromBundleProvider(
-				myRestfulServer,
-				theRequestDetails,
-				count,
-				linkSelf,
-				includes,
-				theBundleProvider,
-				start,
-				bundleType,
-				thePagingAction));
+		ResponseBundleRequest bundleRequest = new ResponseBundleRequest(
+			myRestfulServer,
+			theBundleProvider,
+			theRequestDetails,
+			start,
+			count,
+			linkSelf,
+			includes,
+			bundleType,
+			null // searchid
+		);
+
+		ResponseBundleBuilder builder = new ResponseBundleBuilder(false);
+		return unsafeCast(builder.buildResponseBundle(bundleRequest));
 	}
 
 	// TODO: The main use case for this is paging through Bundles, but I suppose that technically
@@ -349,13 +357,14 @@ public class HapiFhirRepository implements IRepository {
 			P theParameters,
 			Class<R> theReturnType,
 			Map<String, String> theHeaders) {
-		RequestDetails details = startWith(myRequestDetails)
-				.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER)
-				.addHeaders(theHeaders)
-				.setOperation(theName)
-				.setResourceType(theResourceType.getSimpleName())
-				.setRequestContents(theParameters)
-				.create();
+		RequestDetails details = createRequestDetails(builder -> {
+			builder.setRequestType(RequestTypeEnum.POST);
+			builder.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER);
+			builder.setOperation(theName);
+			builder.setResourceType(theResourceType.getSimpleName());
+			builder.setRequestContents(theParameters);
+			builder.addHeaders(theHeaders);
+		});
 
 		return invoke(details);
 	}
@@ -363,13 +372,13 @@ public class HapiFhirRepository implements IRepository {
 	@Override
 	public <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(
 			Class<T> theResourceType, String theName, P theParameters, Map<String, String> theHeaders) {
-		RequestDetails details = startWith(myRequestDetails)
-				.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER)
-				.addHeaders(theHeaders)
-				.setOperation(theName)
-				.setResourceType(theResourceType.getSimpleName())
-				.setRequestContents(theParameters)
-				.create();
+		RequestDetails details = createRequestDetails(builder -> {
+			builder.setRequestType(RequestTypeEnum.POST);
+			builder.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER);
+			builder.setResourceType(theResourceType.getSimpleName());
+			builder.setRequestContents(theParameters);
+			builder.setOperation(theName);
+		});
 
 		return invoke(details);
 	}
