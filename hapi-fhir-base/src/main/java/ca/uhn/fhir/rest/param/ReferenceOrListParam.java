@@ -23,6 +23,26 @@ import ca.uhn.fhir.util.CoverageIgnore;
 
 public class ReferenceOrListParam extends BaseOrListParam<ReferenceOrListParam, ReferenceParam> {
 
+	/**
+	 * Constructor
+	 */
+	public ReferenceOrListParam() {
+		super();
+	}
+
+	/**
+	 * Constructor
+	 *
+	 * @since 8.8.0
+	 */
+	public ReferenceOrListParam(String... theValues) {
+		if (theValues != null) {
+			for (String next : theValues) {
+				add(new ReferenceParam(next));
+			}
+		}
+	}
+
 	@CoverageIgnore
 	@Override
 	ReferenceParam newInstance() {

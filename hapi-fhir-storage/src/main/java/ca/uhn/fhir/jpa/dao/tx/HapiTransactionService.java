@@ -578,6 +578,14 @@ public class HapiTransactionService implements IHapiTransactionService {
 			return execute(() -> theCallback.call(myRequestPartitionId));
 		}
 
+		@Override
+		public void executeWithoutResult(IExecutionCallable<Void> theCallback) {
+			execute(() -> {
+				theCallback.call(myRequestPartitionId);
+				return null;
+			});
+		}
+
 		@VisibleForTesting
 		public RequestPartitionId getRequestPartitionIdForTesting() {
 			return myRequestPartitionId;

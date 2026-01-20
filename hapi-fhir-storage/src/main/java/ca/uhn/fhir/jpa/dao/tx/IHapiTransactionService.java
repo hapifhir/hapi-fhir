@@ -163,6 +163,8 @@ public interface IHapiTransactionService {
 		 * Search for concrete List.
 		 */
 		<T> List<T> searchList(IExecutionCallable<List<T>> theCallback);
+
+		void executeWithoutResult(IExecutionCallable<Void> theCallback);
 	}
 
 	interface IExecutionCallable<T> {

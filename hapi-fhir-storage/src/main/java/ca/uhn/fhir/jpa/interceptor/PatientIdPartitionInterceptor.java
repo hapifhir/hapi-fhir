@@ -194,12 +194,7 @@ public class PatientIdPartitionInterceptor {
 
 			Collection<String> oCompartmentIdentity = ResourceCompartmentUtil.getResourceCompartments(
 					"Patient", theResource, compartmentSps, mySearchParamExtractor);
-
-			// De-duplicate if we have more than 1 (some resource types can have the patient in
-			// multiple fields, so it's possible to get the same patient more than once here)
-			if (oCompartmentIdentity.size() > 1) {
-				oCompartmentIdentity = new HashSet<>(oCompartmentIdentity);
-			}
+			oCompartmentIdentity = deDuplicateCompartmentList(oCompartmentIdentity);
 
 			if (!oCompartmentIdentity.isEmpty()) {
 
@@ -240,6 +235,18 @@ public class PatientIdPartitionInterceptor {
 				return throwNonCompartmentMemberInstanceFailureResponse(theResource);
 			}
 		}
+	}
+
+	/**
+	 * De-duplicate if we have more than 1 (some resource types can have the patient in
+	 * multiple fields, so it's possible to get the same patient more than once here)
+	 */
+	@Nonnull
+	private static Collection<String> deDuplicateCompartmentList(Collection<String> oCompartmentIdentity) {
+		if (oCompartmentIdentity.size() > 1) {
+			oCompartmentIdentity = new HashSet<>(oCompartmentIdentity);
+		}
+		return oCompartmentIdentity;
 	}
 
 	/**
@@ -347,10 +354,23 @@ public class PatientIdPartitionInterceptor {
 						List<RuntimeSearchParam> compartmentSps =
 								ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef, true);
 						for (RuntimeSearchParam nextCompartmentSp : compartmentSps) {
-							// FIXME: handle multiple
-							List<String> idParts = getResourceIdList(params, nextCompartmentSp.getName(), true);
+							// FIXME: remove "only 1" param
+
+							Collection<String> idParts = getResourceIdList(params, nextCompartmentSp.getName(), false);
+							idParts = deDuplicateCompartmentList(idParts);
+
 							if (!idParts.isEmpty()) {
-								return provideCompartmentMemberInstanceResponse(theRequestDetails, idParts.get(0));
+								RequestPartitionId partitionId = null;
+								for (String compartmentId : idParts) {
+									RequestPartitionId compartmentPartition =
+											provideCompartmentMemberInstanceResponse(theRequestDetails, compartmentId);
+									if (partitionId != null) {
+										partitionId = partitionId.mergeIds(compartmentPartition);
+									} else {
+										partitionId = compartmentPartition;
+									}
+								}
+								return partitionId;
 							}
 						}
 					}

@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -579,6 +580,41 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(2);
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("t0.PARTITION_ID = ?");
 	}
+
+	@Test
+	public void testSearch_MultipleCompartments() {
+		// Setup
+
+		createPatient(withId("PAT-0"), withIdentifier("http://patient", "0"));
+		createEncounter(withId("ENC-0"), withSubject("Patient/PAT-0"));
+
+		createPatient(withId("PAT-1"), withIdentifier("http://patient", "1"));
+		createEncounter(withId("ENC-1"), withSubject("Patient/PAT-1"));
+
+		createPatient(withId("PAT-2"), withIdentifier("http://patient", "2"));
+		createEncounter(withId("ENC-2"), withSubject("Patient/PAT-2"));
+
+		// Test
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Encounter.SP_PATIENT, new ReferenceOrListParam("Patient/PAT-0", "Patient/PAT-1"));
+		myCaptureQueriesListener.clear();
+		IBundleProvider actual = myEncounterDao.search(map, newSrd());
+		myCaptureQueriesListener.logSelectQueries();
+
+		// Verify
+
+		SqlQuery searchQuery = myCaptureQueriesListener.getSelectQueries().get(1);
+		assertThat(searchQuery.getRequestPartitionId().getPartitionIds()).contains(262, 263);
+		assertThat(searchQuery.getSql(true, true)).contains("PARTITION_ID IN ('262', '263')");
+
+		List<String> actualIds = toUnqualifiedVersionlessIdValues(actual);
+		assertThat(actualIds).containsExactlyInAnyOrder(
+			"Encounter/ENC-0",
+			"Encounter/ENC-1"
+		);
+	}
+
 
 	@Test
 	public void testHistory_Instance() {
