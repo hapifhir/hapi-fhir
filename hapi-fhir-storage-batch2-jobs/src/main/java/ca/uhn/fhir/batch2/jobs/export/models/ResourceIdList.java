@@ -39,10 +39,18 @@ public class ResourceIdList extends BulkExportJobBase {
 	@JsonProperty("resourceType")
 	private String myResourceType;
 
+	/**
+	 * @deprecated Partition IDs are stored in the individual {@link TypedPidJson}
+	 */
+	@Deprecated
 	public RequestPartitionId getPartitionId() {
 		return myPartitionId;
 	}
 
+	/**
+	 * @deprecated Partition IDs are stored in the individual {@link TypedPidJson}
+	 */
+	@Deprecated
 	public void setPartitionId(RequestPartitionId thePartitionId) {
 		myPartitionId = thePartitionId;
 	}

@@ -43,6 +43,7 @@ import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
@@ -105,6 +106,9 @@ public class ExpandResourceAndWriteBinaryStep
 
 	@Autowired
 	private FhirContext myFhirContext;
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -195,15 +199,32 @@ public class ExpandResourceAndWriteBinaryStep
 			Consumer<List<IBaseResource>> theResourceListConsumer,
 			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails) {
 
-		RequestPartitionId requestPartitionId = theIds.getPartitionId();
-		ArrayListMultimap<String, TypedPidJson> typeToIds = ArrayListMultimap.create();
-		theIds.getIds().forEach(t -> typeToIds.put(t.getResourceType(), t));
+		Map<RequestPartitionId, ArrayListMultimap<String, TypedPidJson>> partitionTotypeToIds = new HashMap<>();
 
-		if (theJobParameters.isIncludeHistory()) {
-			adjustJobParameters(theJobParameters, theStepExecutionDetails);
-			processHistoryResources(theResourceListConsumer, typeToIds, requestPartitionId, theJobParameters);
-		} else {
-			processResources(theResourceListConsumer, typeToIds, requestPartitionId);
+		for (TypedPidJson id : theIds.getIds()) {
+			Integer partitionId = id.getPartitionId();
+			RequestPartitionId requestPartitionId;
+			if (partitionId == null) {
+				requestPartitionId = RequestPartitionId.defaultPartition(myPartitionSettings);
+			} else {
+				requestPartitionId = RequestPartitionId.fromPartitionId(partitionId);
+			}
+			ArrayListMultimap<String, TypedPidJson> typeToPids =
+					partitionTotypeToIds.computeIfAbsent(requestPartitionId, k -> ArrayListMultimap.create());
+			typeToPids.put(id.getResourceType(), id);
+		}
+
+		for (Map.Entry<RequestPartitionId, ArrayListMultimap<String, TypedPidJson>> entry :
+				partitionTotypeToIds.entrySet()) {
+			RequestPartitionId requestPartitionId = entry.getKey();
+			ArrayListMultimap<String, TypedPidJson> typeToPids = entry.getValue();
+
+			if (theJobParameters.isIncludeHistory()) {
+				adjustJobParameters(theJobParameters, theStepExecutionDetails);
+				processHistoryResources(theResourceListConsumer, typeToPids, requestPartitionId, theJobParameters);
+			} else {
+				processResources(theResourceListConsumer, typeToPids, requestPartitionId);
+			}
 		}
 	}
 
