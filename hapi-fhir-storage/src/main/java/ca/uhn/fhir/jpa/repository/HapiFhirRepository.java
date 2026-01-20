@@ -184,8 +184,6 @@ public class HapiFhirRepository implements IRepository {
 			return null;
 		}
 
-
-
 		return createBundle(details, bundleProvider, null);
 	}
 
@@ -221,16 +219,16 @@ public class HapiFhirRepository implements IRepository {
 		}
 
 		ResponseBundleRequest bundleRequest = new ResponseBundleRequest(
-			myRestfulServer,
-			theBundleProvider,
-			theRequestDetails,
-			start,
-			count,
-			linkSelf,
-			includes,
-			bundleType,
-			null // searchid
-		);
+				myRestfulServer,
+				theBundleProvider,
+				theRequestDetails,
+				start,
+				count,
+				linkSelf,
+				includes,
+				bundleType,
+				null // searchid
+				);
 
 		ResponseBundleBuilder builder = new ResponseBundleBuilder(false);
 		return unsafeCast(builder.buildResponseBundle(bundleRequest));
