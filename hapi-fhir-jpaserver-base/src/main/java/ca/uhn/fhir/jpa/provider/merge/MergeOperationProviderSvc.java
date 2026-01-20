@@ -25,9 +25,14 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.svc.IMergeOperationProviderSvc;
 import ca.uhn.fhir.jpa.interceptor.ProvenanceAgentsPointcutUtil;
+import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
+import ca.uhn.fhir.merge.GenericMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.MergeResourceHelper;
+import ca.uhn.fhir.merge.PatientMergeOperationInputParameterNames;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -55,16 +60,19 @@ public class MergeOperationProviderSvc implements IMergeOperationProviderSvc {
 
 	private final FhirContext myFhirContext;
 	private final ResourceMergeService myResourceMergeService;
+	private final ResourceUndoMergeService myResourceUndoMergeService;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 	private final JpaStorageSettings myStorageSettings;
 
 	public MergeOperationProviderSvc(
 			FhirContext theFhirContext,
 			ResourceMergeService theResourceMergeService,
+			ResourceUndoMergeService theResourceUndoMergeService,
 			IInterceptorBroadcaster theInterceptorBroadcaster,
 			JpaStorageSettings theStorageSettings) {
 		myFhirContext = theFhirContext;
 		myResourceMergeService = theResourceMergeService;
+		myResourceUndoMergeService = theResourceUndoMergeService;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 		myStorageSettings = theStorageSettings;
 	}
@@ -125,6 +133,79 @@ public class MergeOperationProviderSvc implements IMergeOperationProviderSvc {
 			servletResponse.setStatus(mergeOutcome.getHttpStatusCode());
 			return MergeOperationParametersUtil.buildMergeOperationOutputParameters(
 					myFhirContext, mergeOutcome, theRequestDetails.getResource());
+		} finally {
+			endRequest(servletRequest);
+		}
+	}
+
+	/**
+	 * Executes an undo-merge operation for any resource type.
+	 *
+	 * @param theSourceIdentifiers Source resource identifiers
+	 * @param theTargetIdentifiers Target resource identifiers
+	 * @param theSourceReference   Source resource reference
+	 * @param theTargetReference   Target resource reference
+	 * @param theRequestDetails    Servlet request details containing HTTP request/response and context
+	 * @return Parameters resource containing undo-merge operation results
+	 */
+	@Override
+	public IBaseParameters undoMerge(
+			List<IBase> theSourceIdentifiers,
+			List<IBase> theTargetIdentifiers,
+			IBaseReference theSourceReference,
+			IBaseReference theTargetReference,
+			ServletRequestDetails theRequestDetails) {
+
+		HttpServletRequest servletRequest = theRequestDetails.getServletRequest();
+		HttpServletResponse servletResponse = theRequestDetails.getServletResponse();
+
+		startRequest(servletRequest);
+		try {
+			int resourceLimit = myStorageSettings.getInternalSynchronousSearchSize();
+
+			UndoMergeOperationInputParameters undoMergeOperationParameters;
+			AbstractMergeOperationInputParameterNames parameterNames;
+
+			// Check if all parameters are null
+			boolean allParamsNull = theSourceIdentifiers == null
+					&& theTargetIdentifiers == null
+					&& theSourceReference == null
+					&& theTargetReference == null;
+
+			if (allParamsNull
+					&& "Patient".equals(theRequestDetails.getResourceName())
+					&& theRequestDetails.getResource() instanceof IBaseParameters requestBody) {
+				// Backward compatibility: Patient resources could call this with patient specific parameter names
+				// so check for them if all generic parameters are null.
+				parameterNames = new PatientMergeOperationInputParameterNames();
+				undoMergeOperationParameters = MergeOperationParametersUtil.undoInputParametersFromParameters(
+						myFhirContext, requestBody, parameterNames, resourceLimit);
+
+			} else {
+				// Standard case: use generic parameter names for all resource types
+				// if all parameters are null the service validator will reject the request, so no need to reject it
+				// here.
+				parameterNames = new GenericMergeOperationInputParameterNames();
+				undoMergeOperationParameters = MergeOperationParametersUtil.undoInputParametersFromOperationParameters(
+						theSourceIdentifiers,
+						theTargetIdentifiers,
+						theSourceReference,
+						theTargetReference,
+						resourceLimit);
+			}
+
+			OperationOutcomeWithStatusCode undomergeOutcome = myResourceUndoMergeService.undoMerge(
+					undoMergeOperationParameters, theRequestDetails, parameterNames);
+
+			servletResponse.setStatus(undomergeOutcome.getHttpStatusCode());
+			IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
+
+			ParametersUtil.addParameterToParameters(
+					myFhirContext,
+					retVal,
+					ProviderConstants.OPERATION_UNDO_MERGE_OUTCOME,
+					undomergeOutcome.getOperationOutcome());
+			return retVal;
 		} finally {
 			endRequest(servletRequest);
 		}

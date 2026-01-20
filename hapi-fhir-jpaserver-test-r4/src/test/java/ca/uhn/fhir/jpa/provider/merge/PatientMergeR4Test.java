@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.provider.r4;
+package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
