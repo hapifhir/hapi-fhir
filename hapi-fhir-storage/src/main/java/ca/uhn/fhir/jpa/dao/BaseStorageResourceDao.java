@@ -20,6 +20,10 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.PrePatchDetails;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -49,6 +53,8 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -170,6 +176,20 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 			// same
 			// resource. This is weird but not impossible.
 			resourceToUpdate = theTransactionDetails.getResolvedResource(resourceId);
+		}
+
+		// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_PREPATCH
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_PREPATCH)) {
+			PrePatchDetails prePatchDetails =
+					new PrePatchDetails(resourceToUpdate, thePatchType, thePatchBody, theFhirPatchBody);
+
+			HookParams params = new HookParams();
+			params.add(RequestDetails.class, theRequestDetails);
+			params.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			params.add(prePatchDetails);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_PREPATCH, params);
 		}
 
 		IBaseResource destination =

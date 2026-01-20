@@ -134,6 +134,9 @@ public abstract class BaseStorageDao {
 	@Autowired
 	protected IMetaTagSorter myMetaTagSorter;
 
+	@Autowired
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	@VisibleForTesting
 	public void setSearchParamRegistry(ISearchParamRegistry theSearchParamRegistry) {
 		mySearchParamRegistry = theSearchParamRegistry;

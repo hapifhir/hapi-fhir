@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
@@ -57,6 +58,8 @@ class JobDataSinkTest {
 	private BatchJobSender myBatchJobSender;
 	@Mock
 	private IJobPersistence myJobPersistence;
+	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
 	@Captor
 	private ArgumentCaptor<JobWorkNotification> myJobWorkNotificationCaptor;
 	@Captor
@@ -109,7 +112,7 @@ class JobDataSinkTest {
 			return 1;
 		}).when(myJobPersistence).enqueueWorkChunkForProcessing(anyString(), any());
 		JobInstance instance = JobInstance.fromInstanceId(JOB_INSTANCE_ID);
-		StepExecutionDetails<TestJobParameters, VoidModel> details = new StepExecutionDetails<>(new TestJobParameters().setParam1("" + PID_COUNT), null, instance, new WorkChunk().setId(CHUNK_ID));
+		StepExecutionDetails<TestJobParameters, VoidModel> details = new StepExecutionDetails<>(new TestJobParameters().setParam1("" + PID_COUNT), null, instance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
 		JobWorkCursor<TestJobParameters, VoidModel, Step1Output> cursor = new JobWorkCursor<>(job, true, firstStep, lastStep);
 		JobDataSink<TestJobParameters, VoidModel, Step1Output> sink = new JobDataSink<>(myBatchJobSender, myJobPersistence, job, JOB_INSTANCE_ID, cursor, myHapiTransactionService);
 
@@ -148,11 +151,6 @@ class JobDataSinkTest {
 				myPids = new ArrayList<>();
 			}
 			return myPids;
-		}
-
-		public Step1Output setPids(List<Long> thePids) {
-			myPids = thePids;
-			return this;
 		}
 
 		public void addPid(long thePid) {

@@ -4,6 +4,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -550,6 +551,7 @@ public class RuleBulkExportImplTest {
 		final BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setFilters(Set.of("Patient?_id=123","Patient?_id=456"));
+
 		options.setResourceTypes(Set.of("Patient"));
 		when(myRequestDetails.getUserData()).thenReturn(Map.of(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, options));
 

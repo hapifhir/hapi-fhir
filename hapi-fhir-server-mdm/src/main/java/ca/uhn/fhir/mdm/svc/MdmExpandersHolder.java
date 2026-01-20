@@ -76,10 +76,10 @@ public class MdmExpandersHolder {
 	private final MdmEidMatchOnlyExpandSvc myMdmEidMatchOnlyExpandSvc;
 
 	/** Full MDM bulk export resource expander implementation */
-	private final BulkExportMdmResourceExpander myBulkExportMDMResourceExpander;
+	private final IBulkExportMdmFullResourceExpander myBulkExportMDMResourceExpander;
 
 	/** EID-only match bulk export resource expander implementation */
-	private final BulkExportMdmEidMatchOnlyResourceExpander myBulkExportMDMEidMatchOnlyResourceExpander;
+	private final IBulkExportMdmEidMatchOnlyResourceExpander myBulkExportMDMEidMatchOnlyResourceExpander;
 
 	private final FhirContext myFhirContext;
 
@@ -87,14 +87,14 @@ public class MdmExpandersHolder {
 			FhirContext theFhirContext,
 			IMdmLinkExpandSvc theMdmLinkExpandSvc,
 			MdmEidMatchOnlyExpandSvc theMdmEidMatchOnlyLinkExpandSvc,
-			BulkExportMdmResourceExpander theBulkExportMDMResourceExpander,
-			BulkExportMdmEidMatchOnlyResourceExpander theBulkExportMDMEidMatchOnlyResourceExpander) {
+			IBulkExportMdmFullResourceExpander theBulkExportMdmFullResourceExpander,
+			IBulkExportMdmEidMatchOnlyResourceExpander theBulkExportMdmEidMatchOnlyResourceExpander) {
 
 		myFhirContext = theFhirContext;
 		myMdmLinkExpandSvc = theMdmLinkExpandSvc;
 		myMdmEidMatchOnlyExpandSvc = theMdmEidMatchOnlyLinkExpandSvc;
-		myBulkExportMDMResourceExpander = theBulkExportMDMResourceExpander;
-		myBulkExportMDMEidMatchOnlyResourceExpander = theBulkExportMDMEidMatchOnlyResourceExpander;
+		myBulkExportMDMResourceExpander = theBulkExportMdmFullResourceExpander;
+		myBulkExportMDMEidMatchOnlyResourceExpander = theBulkExportMdmEidMatchOnlyResourceExpander;
 	}
 
 	/**

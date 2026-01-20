@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesAppCtx;
@@ -245,6 +246,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
 	public static final String URL_MY_CODE_SYSTEM_2 = "http://example.com/my_code_system_2";
 
+	@Autowired
+	protected IJobStepExecutionServices myJobStepExecutionServices;
 	@Autowired
 	protected IPackageInstallerSvc myPackageInstallerSvc;
 	@Autowired
