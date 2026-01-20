@@ -92,7 +92,8 @@ public class ResourceCompartmentUtil {
 			List<RuntimeSearchParam> theCompartmentSps,
 			ISearchParamExtractor mySearchParamExtractor) {
 		return getResourceCompartments(theCompartmentName, theResource, theCompartmentSps, mySearchParamExtractor)
-				.stream().findFirst();
+				.stream()
+				.findFirst();
 	}
 
 	/**

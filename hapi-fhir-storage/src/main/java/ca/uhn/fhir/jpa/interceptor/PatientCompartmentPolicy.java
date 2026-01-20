@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI FHIR Storage api
+ * %%
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.util.UrlUtil;
@@ -20,14 +39,16 @@ public class PatientCompartmentPolicy {
 	 * The given resource type should always be placed in the
 	 * {@link ca.uhn.fhir.jpa.model.config.PartitionSettings#setDefaultPartitionId(Integer) default partition}.
 	 */
-	public static final PatientCompartmentPolicy ALWAYS_USE_DEFAULT_PARTITION = new PatientCompartmentPolicy(ALWAYS_USE_DEFAULT_PARTITION_NAME, null);
+	public static final PatientCompartmentPolicy ALWAYS_USE_DEFAULT_PARTITION =
+			new PatientCompartmentPolicy(ALWAYS_USE_DEFAULT_PARTITION_NAME, null);
 
 	/**
 	 * The given resource type must contain exactly one reference to a Patient placing it in a single
 	 * patient compartment. If the resource is found to belong to multiple patient compartments or no Patient
 	 * compartment, an error will be raised and the resource will not be stored.
 	 */
-	public static final PatientCompartmentPolicy MANDATORY_SINGLE_COMPARTMENT = new PatientCompartmentPolicy(MANDATORY_SINGLE_COMPARTMENT_NAME, null);
+	public static final PatientCompartmentPolicy MANDATORY_SINGLE_COMPARTMENT =
+			new PatientCompartmentPolicy(MANDATORY_SINGLE_COMPARTMENT_NAME, null);
 
 	/**
 	 * The given resource type may contain zero or one references to a Patient placing it in a single
@@ -36,7 +57,8 @@ public class PatientCompartmentPolicy {
 	 * If the resource is found to belong to multiple patient compartments, an error will be
 	 * raised and the resource will not be stored.
 	 */
-	public static final PatientCompartmentPolicy OPTIONAL_SINGLE_COMPARTMENT = new PatientCompartmentPolicy(OPTIONAL_SINGLE_COMPARTMENT_NAME, null);
+	public static final PatientCompartmentPolicy OPTIONAL_SINGLE_COMPARTMENT =
+			new PatientCompartmentPolicy(OPTIONAL_SINGLE_COMPARTMENT_NAME, null);
 
 	public static final String NON_UNIQUE_COMPARTMENT_IN_DEFAULT_NAME = "NON_UNIQUE_COMPARTMENT_IN_DEFAULT";
 	/**
@@ -44,7 +66,8 @@ public class PatientCompartmentPolicy {
 	 * (either because it has zero compartments, or because it has multiple compartments) will be placed
 	 * in the {@link ca.uhn.fhir.jpa.model.config.PartitionSettings#setDefaultPartitionId(Integer) default partition}.
 	 */
-	public static final PatientCompartmentPolicy NON_UNIQUE_COMPARTMENT_IN_DEFAULT = new PatientCompartmentPolicy(NON_UNIQUE_COMPARTMENT_IN_DEFAULT_NAME, null);
+	public static final PatientCompartmentPolicy NON_UNIQUE_COMPARTMENT_IN_DEFAULT =
+			new PatientCompartmentPolicy(NON_UNIQUE_COMPARTMENT_IN_DEFAULT_NAME, null);
 
 	private final String myName;
 	private final Integer myAlwaysUsePartitionId;
@@ -67,12 +90,13 @@ public class PatientCompartmentPolicy {
 	 * All resources of the given type will be stored in the partition with the given ID.
 	 */
 	public static PatientCompartmentPolicy alwaysUsePartitionId(int theAlwaysUsePartitionId) {
-		return new PatientCompartmentPolicy(ALWAYS_USE_PARTITION_ID_PREFIX + theAlwaysUsePartitionId, theAlwaysUsePartitionId);
+		return new PatientCompartmentPolicy(
+				ALWAYS_USE_PARTITION_ID_PREFIX + theAlwaysUsePartitionId, theAlwaysUsePartitionId);
 	}
 
 	public static PatientCompartmentPolicy parse(String theName) {
 		return switch (theName) {
-			// FIXME: add methods and make the constants be default access?
+				// FIXME: add methods and make the constants be default access?
 			case ALWAYS_USE_DEFAULT_PARTITION_NAME -> ALWAYS_USE_DEFAULT_PARTITION;
 			case MANDATORY_SINGLE_COMPARTMENT_NAME -> MANDATORY_SINGLE_COMPARTMENT;
 			case OPTIONAL_SINGLE_COMPARTMENT_NAME -> OPTIONAL_SINGLE_COMPARTMENT;
@@ -84,12 +108,12 @@ public class PatientCompartmentPolicy {
 						int partitionId = Integer.parseInt(partitionIdStr);
 						yield alwaysUsePartitionId(partitionId);
 					} catch (NumberFormatException e) {
-						throw new IllegalArgumentException("Invalid partition ID string: " + ALWAYS_USE_PARTITION_ID_PREFIX + UrlUtil.sanitizeUrlPart(partitionIdStr));
+						throw new IllegalArgumentException("Invalid partition ID string: "
+								+ ALWAYS_USE_PARTITION_ID_PREFIX + UrlUtil.sanitizeUrlPart(partitionIdStr));
 					}
 				}
 				throw new IllegalArgumentException("Unknown policy name: " + theName);
 			}
 		};
 	}
-
 }

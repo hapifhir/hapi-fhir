@@ -56,7 +56,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
@@ -254,12 +253,15 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 					String idPart = referenceParam.getIdPart();
 					if (isBlank(resourceType) || isBlank(idPart)) {
 						// FIXME: add code / remove? Also add test
-						throw new InvalidRequestException(Msg.code(1) + "Parameter \"" + UrlUtil.sanitizeUrlPart(theParamName) + "\" must be in the format [resourceType]/[id]");
+						throw new InvalidRequestException(
+								Msg.code(1) + "Parameter \"" + UrlUtil.sanitizeUrlPart(theParamName)
+										+ "\" must be in the format [resourceType]/[id]");
 					}
 					SearchParameterMap map = new SearchParameterMap();
 					map.add(IAnyResource.SP_RES_ID, new TokenParam(resourceType + "/" + idPart));
-					RequestPartitionId paramRequestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-						theRequest, resourceType, map);
+					RequestPartitionId paramRequestPartitionId =
+							myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+									theRequest, resourceType, map);
 					if (predicateTargetPartitionId == null) {
 						predicateTargetPartitionId = paramRequestPartitionId;
 					} else {
