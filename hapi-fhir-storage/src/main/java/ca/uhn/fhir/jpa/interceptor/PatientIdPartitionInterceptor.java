@@ -187,48 +187,46 @@ public class PatientIdPartitionInterceptor {
 		}
 
 		//noinspection EnumSwitchStatementWhichMissesCases
-		if (theReadDetails.getRestOperationType() != null) {
-			switch (theReadDetails.getRestOperationType()) {
-				case DELETE:
-				case PATCH:
-				case READ:
-				case VREAD:
-				case SEARCH_TYPE:
-					if (theReadDetails.getSearchParams() != null) {
-						SearchParameterMap params = theReadDetails.getSearchParams();
-						if ("Patient".equals(theReadDetails.getResourceType())) {
-							List<String> idParts = getResourceIdList(params, "_id", false);
-							if (idParts.size() == 1) {
-								return provideCompartmentMemberInstanceResponse(theRequestDetails, idParts.get(0));
-							} else {
-								return RequestPartitionId.allPartitions();
-							}
+		switch (theReadDetails.getRestOperationType()) {
+			case DELETE:
+			case PATCH:
+			case READ:
+			case VREAD:
+			case SEARCH_TYPE:
+				if (theReadDetails.getSearchParams() != null) {
+					SearchParameterMap params = theReadDetails.getSearchParams();
+					if ("Patient".equals(theReadDetails.getResourceType())) {
+						List<String> idParts = getResourceIdList(params, "_id", false);
+						if (idParts.size() == 1) {
+							return provideCompartmentMemberInstanceResponse(theRequestDetails, idParts.get(0));
 						} else {
-							for (RuntimeSearchParam nextCompartmentSp : compartmentSps) {
-								List<String> idParts = getResourceIdList(params, nextCompartmentSp.getName(), true);
-								if (!idParts.isEmpty()) {
-									return provideCompartmentMemberInstanceResponse(theRequestDetails, idParts.get(0));
-								}
+							return RequestPartitionId.allPartitions();
+						}
+					} else {
+						for (RuntimeSearchParam nextCompartmentSp : compartmentSps) {
+							List<String> idParts = getResourceIdList(params, nextCompartmentSp.getName(), true);
+							if (!idParts.isEmpty()) {
+								return provideCompartmentMemberInstanceResponse(theRequestDetails, idParts.get(0));
 							}
 						}
-					} else if (theReadDetails.getReadResourceId() != null) {
-						if ("Patient".equals(theReadDetails.getResourceType())) {
-							return provideCompartmentMemberInstanceResponse(
-									theRequestDetails,
-									theReadDetails.getReadResourceId().getIdPart());
-						}
 					}
-					break;
-				case EXTENDED_OPERATION_SERVER:
-					String extendedOp = theReadDetails.getExtendedOperationName();
-					if (ProviderConstants.OPERATION_EXPORT.equals(extendedOp)
-							|| ProviderConstants.OPERATION_EXPORT_POLL_STATUS.equals(extendedOp)) {
-						return provideNonPatientSpecificQueryResponse();
+				} else if (theReadDetails.getReadResourceId() != null) {
+					if ("Patient".equals(theReadDetails.getResourceType())) {
+						return provideCompartmentMemberInstanceResponse(
+								theRequestDetails,
+								theReadDetails.getReadResourceId().getIdPart());
 					}
-					break;
-				default:
-					// nothing
-			}
+				}
+				break;
+			case EXTENDED_OPERATION_SERVER:
+				String extendedOp = theReadDetails.getExtendedOperationName();
+				if (ProviderConstants.OPERATION_EXPORT.equals(extendedOp)
+						|| ProviderConstants.OPERATION_EXPORT_POLL_STATUS.equals(extendedOp)) {
+					return provideNonPatientSpecificQueryResponse();
+				}
+				break;
+			default:
+				// nothing
 		}
 
 		if (isBlank(theReadDetails.getResourceType())) {
