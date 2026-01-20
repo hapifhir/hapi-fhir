@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.batch2.jobs.export;
+package ca.uhn.fhir.batch2.jobs.export.v3;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -43,6 +43,7 @@ import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
@@ -51,6 +52,7 @@ import ca.uhn.fhir.jpa.util.RandomTextUtils;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.bulk.IBulkDataExportHistoryHelper;
@@ -85,7 +87,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -105,6 +106,9 @@ public class ExpandResourceAndWriteBinaryStep
 
 	@Autowired
 	private FhirContext myFhirContext;
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -134,6 +138,13 @@ public class ExpandResourceAndWriteBinaryStep
 	private IBulkDataExportHistoryHelper myExportHelper;
 
 	private volatile ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
+
+	/**
+	 * Constructor
+	 */
+	public ExpandResourceAndWriteBinaryStep() {
+		super();
+	}
 
 	/**
 	 * Note on the design of this step:
@@ -188,16 +199,32 @@ public class ExpandResourceAndWriteBinaryStep
 			Consumer<List<IBaseResource>> theResourceListConsumer,
 			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails) {
 
-		RequestPartitionId requestPartitionId = theJobParameters.getPartitionId();
+		Map<RequestPartitionId, ArrayListMultimap<String, TypedPidJson>> partitionTotypeToIds = new HashMap<>();
 
-		ArrayListMultimap<String, TypedPidJson> typeToIds = ArrayListMultimap.create();
-		theIds.getIds().forEach(t -> typeToIds.put(t.getResourceType(), t));
+		for (TypedPidJson id : theIds.getIds()) {
+			Integer partitionId = id.getPartitionId();
+			RequestPartitionId requestPartitionId;
+			if (partitionId == null) {
+				requestPartitionId = RequestPartitionId.defaultPartition(myPartitionSettings);
+			} else {
+				requestPartitionId = RequestPartitionId.fromPartitionId(partitionId);
+			}
+			ArrayListMultimap<String, TypedPidJson> typeToPids =
+					partitionTotypeToIds.computeIfAbsent(requestPartitionId, k -> ArrayListMultimap.create());
+			typeToPids.put(id.getResourceType(), id);
+		}
 
-		if (theJobParameters.isIncludeHistory()) {
-			adjustJobParameters(theJobParameters, theStepExecutionDetails);
-			processHistoryResources(theResourceListConsumer, typeToIds, requestPartitionId, theJobParameters);
-		} else {
-			processResources(theResourceListConsumer, typeToIds, requestPartitionId);
+		for (Map.Entry<RequestPartitionId, ArrayListMultimap<String, TypedPidJson>> entry :
+				partitionTotypeToIds.entrySet()) {
+			RequestPartitionId requestPartitionId = entry.getKey();
+			ArrayListMultimap<String, TypedPidJson> typeToPids = entry.getValue();
+
+			if (theJobParameters.isIncludeHistory()) {
+				adjustJobParameters(theJobParameters, theStepExecutionDetails);
+				processHistoryResources(theResourceListConsumer, typeToPids, requestPartitionId, theJobParameters);
+			} else {
+				processResources(theResourceListConsumer, typeToPids, requestPartitionId);
+			}
 		}
 	}
 
@@ -522,7 +549,7 @@ public class ExpandResourceAndWriteBinaryStep
 			}
 
 			// if necessary, expand resources
-			if (parameters.isExpandMdm()) {
+			if (isV2Job() && parameters.isExpandMdm()) {
 				myBulkExportProcessor.expandMdmResources(theResources);
 			}
 
@@ -664,6 +691,13 @@ public class ExpandResourceAndWriteBinaryStep
 	}
 
 	/**
+	 * Overridden in the V2 step
+	 */
+	protected boolean isV2Job() {
+		return false;
+	}
+
+	/**
 	 * This class takes a collection of expanded resources, and expands it to
 	 * an NDJSON file, which is written to a Binary resource.
 	 */
@@ -719,10 +753,7 @@ public class ExpandResourceAndWriteBinaryStep
 				throw new JobExecutionFailedException(Msg.code(2431) + errorMsg);
 			}
 
-			SystemRequestDetails srd = new SystemRequestDetails();
 			BulkExportJobParameters jobParameters = myStepExecutionDetails.getParameters();
-			RequestPartitionId partitionId = jobParameters.getPartitionId();
-			srd.setRequestPartitionId(Objects.requireNonNullElseGet(partitionId, RequestPartitionId::defaultPartition));
 
 			binary.setContentType(jobParameters.getOutputFormat());
 
@@ -737,7 +768,8 @@ public class ExpandResourceAndWriteBinaryStep
 				// Make sure we don't accidentally reuse an ID. This should be impossible given the
 				// amount of entropy in the IDs but might as well be sure.
 				try {
-					IBaseBinary output = binaryDao.read(binary.getIdElement(), new SystemRequestDetails(), true);
+					RequestDetails requestDetails = myStepExecutionDetails.newSystemRequestDetails();
+					IBaseBinary output = binaryDao.read(binary.getIdElement(), requestDetails, true);
 					if (output != null) {
 						continue;
 					}
@@ -763,6 +795,11 @@ public class ExpandResourceAndWriteBinaryStep
 				}
 			}
 
+			ourLog.info(
+					"Writing Bulk Export Binary resource with ID: Binary/{}",
+					binary.getIdElement().getIdPart());
+
+			RequestDetails srd = newRequestDetails(myStepExecutionDetails, jobParameters);
 			DaoMethodOutcome outcome = binaryDao.update(binary, srd);
 			IIdType id = outcome.getId();
 
@@ -776,5 +813,11 @@ public class ExpandResourceAndWriteBinaryStep
 					processedRecordsCount,
 					theExpandedResourcesList.getResourceType());
 		}
+	}
+
+	protected RequestDetails newRequestDetails(
+			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
+			BulkExportJobParameters jobParameters) {
+		return theStepExecutionDetails.newSystemRequestDetails();
 	}
 }

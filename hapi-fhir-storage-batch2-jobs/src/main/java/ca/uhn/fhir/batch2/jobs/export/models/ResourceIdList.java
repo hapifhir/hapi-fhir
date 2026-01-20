@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.jobs.export.models;
 
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
@@ -32,8 +33,27 @@ public class ResourceIdList extends BulkExportJobBase {
 	@JsonProperty("ids")
 	private List<TypedPidJson> myBatchResourceIds;
 
+	@JsonProperty("partitionId")
+	private RequestPartitionId myPartitionId;
+
 	@JsonProperty("resourceType")
 	private String myResourceType;
+
+	/**
+	 * @deprecated Partition IDs are stored in the individual {@link TypedPidJson}
+	 */
+	@Deprecated
+	public RequestPartitionId getPartitionId() {
+		return myPartitionId;
+	}
+
+	/**
+	 * @deprecated Partition IDs are stored in the individual {@link TypedPidJson}
+	 */
+	@Deprecated
+	public void setPartitionId(RequestPartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
+	}
 
 	public List<TypedPidJson> getIds() {
 		return myBatchResourceIds;
