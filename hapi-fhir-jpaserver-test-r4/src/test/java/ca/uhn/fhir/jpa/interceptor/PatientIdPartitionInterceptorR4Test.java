@@ -60,7 +60,9 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +81,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+@TestMethodOrder(MethodOrderer.MethodName.class)
 public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4Test {
 	public static final int ALTERNATE_DEFAULT_ID = -1;
 
@@ -124,7 +127,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 
 	@Test
-	public void testDeletePatient_InTransaction_ById() {
+	public void testDeleteResource_Patient_InTransaction_ById() {
 		// Setup
 		createPatientA();
 		myMemoryCacheService.invalidateAllCaches();
@@ -139,6 +142,36 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true)).contains("rt1_0.PARTITION_ID='65'");
+	}
+
+
+
+	@Test
+	public void testDeleteResource_InPatientCompartment() {
+		// Setup
+		createPatient(withId("A"), withActiveTrue());
+		createObservation(withId("O"), withSubject("Patient/A"));
+
+		// Test
+		myCaptureQueriesListener.clear();
+		myObservationDao.delete(new IdType("Observation/O"), newSrd());
+		myCaptureQueriesListener.logSelectQueries();
+
+		// Verify
+		assertGone("Observation/O");
+	}
+
+	@Test
+	public void testDeleteResource_NotInPatientCompartment() {
+		createOrganization(withId("O"), withName("Org O"));
+
+		// Test
+		myCaptureQueriesListener.clear();
+		myOrganizationDao.delete(new IdType("Organization/O"), newSrd());
+		myCaptureQueriesListener.logSelectQueries();
+
+		// Verify
+		assertGone("Organization/O");
 	}
 
 
