@@ -136,7 +136,6 @@ public class FetchResourceIdsV3Step
 
 		providerParams.setResourceType(theResourceType);
 
-		// filters are the filters for searching
 		ourLog.info(
 				"Running {} for InstanceID[{}] ChunkID[{}] with ResourceType[{}] Partition[{}]",
 				getClass().getSimpleName(),

@@ -78,6 +78,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -251,17 +252,21 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		if (myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()) {
 			for (IQueryParameterType next : theReferenceOrParamList) {
 
-				if (next instanceof ReferenceParam refParam) {
-					if (isNotBlank(refParam.getResourceType()) && isNotBlank(refParam.getIdPart())) {
-						String resourceType = refParam.getResourceType();
-						String resourceId = refParam.getIdPart();
+				Validate.isTrue(
+						next instanceof ReferenceParam,
+						"Unexpected type %s for param %s",
+						next.getClass(),
+						theParamName);
+				ReferenceParam refParam = (ReferenceParam) next;
+				if (isNotBlank(refParam.getResourceType()) && isNotBlank(refParam.getIdPart())) {
+					String resourceType = refParam.getResourceType();
+					String resourceId = refParam.getIdPart();
 
-						IIdType id = myFhirContext.getVersion().newIdType(resourceType, resourceId);
-						RequestPartitionId nextPartitionId =
-								myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, id);
-						requestPartitionId = requestPartitionId.mergeIds(nextPartitionId);
-						continue;
-					}
+					IIdType id = myFhirContext.getVersion().newIdType(resourceType, resourceId);
+					RequestPartitionId nextPartitionId =
+							myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, id);
+					requestPartitionId = requestPartitionId.mergeIds(nextPartitionId);
+					continue;
 				}
 
 				SearchParameterMap map = new SearchParameterMap();

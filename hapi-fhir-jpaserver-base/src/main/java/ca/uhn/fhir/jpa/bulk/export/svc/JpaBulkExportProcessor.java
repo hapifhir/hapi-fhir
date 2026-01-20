@@ -424,16 +424,13 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 * Given the local myGroupId, perform an expansion to retrieve all resource IDs of member patients.
 	 * If myMdmEnabled is set to true, we also expand into MDM-matched patients.
 	 *
-	 * CACHING: Results are cached in theParameters.myExpandedPatientIdsForGroupExport to avoid redundant expansion
-	 * across multiple resource type iterations.
-	 *
 	 * @param theParameters - export parameters containing group ID and MDM flag
 	 * @return a Set of resource IDs representing all member patients
 	 */
 	@Override
 	public Set<String> getPatientSetForGroupExport(ExportPIDIteratorParameters theParameters) {
 
-		Set<String> members = getMembersFromGroupWithFilter(theParameters);
+		Set<String> members = getMembersFromGroup(theParameters);
 		ourLog.debug(
 				"Group with ID [{}] has {} members, member IDs: {}",
 				theParameters.getGroupId(),
@@ -521,11 +518,11 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	}
 
 	/**
-	 * Given the parameters, find all members' patient references in the group with the typeFilter applied.
+	 * Given the parameters, find all members' patient references in the group
 	 *
 	 * @return A list of strings representing the Patient IDs of the members (e.g. ["P1", "P2", "P3"]
 	 */
-	private Set<String> getMembersFromGroupWithFilter(ExportPIDIteratorParameters theParameters) {
+	private Set<String> getMembersFromGroup(ExportPIDIteratorParameters theParameters) {
 		Validate.notBlank(theParameters.getGroupId(), "Group ID must be specified");
 		Set<String> retVal = new HashSet<>();
 

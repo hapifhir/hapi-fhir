@@ -48,7 +48,8 @@ public class BulkExportV3AppCtx {
 				// validator
 				.setParametersValidator(bulkExportJobParametersValidator())
 				.gatedExecution()
-				// first step - load in (all) ids and create id chunks of 1000 each
+				// Generate partitioned work packages containing chunks of patients (if
+				// applicable) and resource types
 				.addFirstStep(
 						"generate-work-packages",
 						"Generate export work packages for processing",
