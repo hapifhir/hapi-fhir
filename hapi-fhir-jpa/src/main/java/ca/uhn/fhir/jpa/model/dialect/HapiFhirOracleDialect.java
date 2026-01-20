@@ -72,8 +72,8 @@ public class HapiFhirOracleDialect extends OracleDialect implements IHapiFhirDia
 		// What follows is necessary for Oracle 23+ which would otherwise try to use
 		// native BOOLEAN type that causes conversion issues with existing
 		// NUMERIC(1,0) schemas.
-		JdbcTypeRegistry jdbcTypeRegistry = typeContributions.getTypeConfiguration()
-				.getJdbcTypeRegistry();
+		JdbcTypeRegistry jdbcTypeRegistry =
+				typeContributions.getTypeConfiguration().getJdbcTypeRegistry();
 
 		// Use TINYINT type descriptor which handles Boolean <-> Integer conversion
 		JdbcType tinyIntType = jdbcTypeRegistry.getDescriptor(SqlTypes.TINYINT);
