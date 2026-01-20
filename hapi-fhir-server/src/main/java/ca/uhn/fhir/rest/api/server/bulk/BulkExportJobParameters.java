@@ -232,7 +232,7 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 	}
 
 	public boolean isExpandMdm() {
-		return myExpandMdm;
+		return Boolean.TRUE.equals(myExpandMdm);
 	}
 
 	/**
