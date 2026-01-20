@@ -3,7 +3,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,5 +60,22 @@ public interface IMergeOperationProviderSvc {
 			IPrimitiveType<Boolean> theDeleteSource,
 			IBaseResource theResultResource,
 			IPrimitiveType<Integer> theResourceLimit,
+			ServletRequestDetails theRequestDetails);
+
+	/**
+	 * Executes an undo-merge operation for any resource type.
+	 *
+	 * @param theSourceIdentifiers Source resource identifiers
+	 * @param theTargetIdentifiers Target resource identifiers
+	 * @param theSourceReference   Source resource reference
+	 * @param theTargetReference   Target resource reference
+	 * @param theRequestDetails    Servlet request details containing HTTP request/response and context
+	 * @return Parameters resource containing undo-merge operation results
+	 */
+	IBaseParameters undoMerge(
+			List<IBase> theSourceIdentifiers,
+			List<IBase> theTargetIdentifiers,
+			IBaseReference theSourceReference,
+			IBaseReference theTargetReference,
 			ServletRequestDetails theRequestDetails);
 }

@@ -164,7 +164,8 @@ public class BulkDataExportAuthorizationQueryCountTest extends BaseResourceProvi
 		performTypeBulkExportAndAwaitCompletion(ourPatientExportServer.getFhirClient(), "Patient", parameters);
 
 		// Then
-		assertNoAuthorizationSelectQueriesCaptured(1);
+		// When no patient filters are specified, there should be no authorization queries
+		assertThat(myCaptureQueriesListener.getSelectQueries()).isEmpty();
 	}
 
 	public static Stream<Arguments> paramsIdentifierAuthorizedUnauthorized() {
@@ -239,13 +240,6 @@ public class BulkDataExportAuthorizationQueryCountTest extends BaseResourceProvi
 		// Verify the SELECT queries the actual expected resource PID
 		List<String> queries = myCaptureQueriesListener.getSelectQueries().stream().map(t -> t.getSql(true, false)).toList();
 		assertThat(queries).allMatch(query -> theExpectedQueriedResourcePids.stream().map(String::valueOf).anyMatch(query::contains));
-	}
-
-	private void assertNoAuthorizationSelectQueriesCaptured(int theNumberOfResources) {
-		// Expect only 2 select queries per resource for
-		// validating the target exists before exporting (resolve PID, resolve resource)
-		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(2 * theNumberOfResources , myCaptureQueriesListener.countSelectQueries());
 	}
 
 	/**

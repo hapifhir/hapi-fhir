@@ -5,7 +5,7 @@ package ca.uhn.fhir.jpa.merge;
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,25 @@ public class MergeOperationTestHelper {
 		}
 
 		return operation.execute();
+	}
+
+	/**
+	 * Invoke the generic undo-merge operation.
+	 *
+	 * @param theResourceType The resource type (e.g., "Practitioner", "Observation")
+	 * @param theParams       The undo-merge parameters
+	 * @return The operation output parameters
+	 */
+	@Nonnull
+	public Parameters callUndoMergeOperation(@Nonnull String theResourceType, @Nonnull Parameters theParams) {
+		ourLog.info("Calling $hapi.fhir.undo-merge on {}", theResourceType);
+
+		return myClient.operation()
+				.onType(theResourceType)
+				.named("$hapi.fhir.undo-merge")
+				.withParameters(theParams)
+				.returnResourceType(Parameters.class)
+				.execute();
 	}
 
 	// Async job tracking

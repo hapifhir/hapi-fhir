@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
-import ca.uhn.fhir.merge.PatientMergeOperationInputParameterNames;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.replacereferences.PreviousResourceVersionRestorer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -37,10 +36,10 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -62,11 +61,14 @@ import static java.lang.String.format;
 
 /**
  * This service implements the $hapi.fhir.undo-merge operation.
- * It reverts the changes made by a previous $merge operation based on the Provenance resource
- * that was created as part of the $merge operation.
+ * It reverts the changes made by a previous merge (Patient/$merge or {resourceType}/$hapi.fhir.merge) operation based on the Provenance resource
+ * that was created as part of the merge operation.
+ *
+ * Supports both Patient-specific ($hapi.fhir.undo-merge on Patient) and generic
+ * ($hapi.fhir.undo-merge on any resource type with 'identifier' element) operations.
  *
  * Current limitations:
- * - It fails if any resources to be restored have been subsequently changed since the `$merge` operation was performed.
+ * - It fails if any resources to be restored have been subsequently changed since the merge operation was performed.
  * - It can only run synchronously.
  * - It fails if the number of resources to restore exceeds a specified resource limit
  * (currently set to same size as getInternalSynchronousSearchSize in JPAStorageSettings by the operation provider).
@@ -80,7 +82,6 @@ public class ResourceUndoMergeService {
 	private final MergeValidationService myMergeValidationService;
 	private final FhirContext myFhirContext;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-	private final AbstractMergeOperationInputParameterNames myInputParamNames;
 
 	public ResourceUndoMergeService(
 			DaoRegistry theDaoRegistry,
@@ -93,19 +94,18 @@ public class ResourceUndoMergeService {
 		myFhirContext = theDaoRegistry.getFhirContext();
 		myMergeValidationService = theMergeValidationService;
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
-		// Currently undo-merge only supports Patient undo-merge operations
-		// we will need to change this when generic undo-merge operation is implemented
-		myInputParamNames = new PatientMergeOperationInputParameterNames();
 	}
 
 	public OperationOutcomeWithStatusCode undoMerge(
-			UndoMergeOperationInputParameters inputParameters, RequestDetails theRequestDetails) {
+			UndoMergeOperationInputParameters inputParameters,
+			RequestDetails theRequestDetails,
+			AbstractMergeOperationInputParameterNames theInputParamNames) {
 
 		OperationOutcomeWithStatusCode undoMergeOutcome = new OperationOutcomeWithStatusCode();
 		IBaseOperationOutcome opOutcome = OperationOutcomeUtil.newInstance(myFhirContext);
 		undoMergeOutcome.setOperationOutcome(opOutcome);
 		try {
-			return undoMergeInternal(inputParameters, theRequestDetails, undoMergeOutcome);
+			return undoMergeInternal(inputParameters, theRequestDetails, undoMergeOutcome, theInputParamNames);
 		} catch (Exception e) {
 			ourLog.error("Undo resource merge failed with an exception", e);
 			if (e instanceof BaseServerResponseException) {
@@ -121,19 +121,20 @@ public class ResourceUndoMergeService {
 	private OperationOutcomeWithStatusCode undoMergeInternal(
 			UndoMergeOperationInputParameters inputParameters,
 			RequestDetails theRequestDetails,
-			OperationOutcomeWithStatusCode undoMergeOutcome) {
+			OperationOutcomeWithStatusCode undoMergeOutcome,
+			AbstractMergeOperationInputParameterNames theInputParamNames) {
 
 		IBaseOperationOutcome opOutcome = undoMergeOutcome.getOperationOutcome();
 
 		if (!myMergeValidationService.validateCommonMergeOperationParameters(
-				inputParameters, opOutcome, myInputParamNames, theRequestDetails)) {
+				inputParameters, opOutcome, theInputParamNames, theRequestDetails)) {
 			undoMergeOutcome.setHttpStatusCode(STATUS_HTTP_400_BAD_REQUEST);
 			return undoMergeOutcome;
 		}
 
-		Patient targetPatient = (Patient) myMergeValidationService.resolveTargetResource(
-				inputParameters, theRequestDetails, opOutcome, myInputParamNames);
-		IIdType targetId = targetPatient.getIdElement();
+		IBaseResource targetResource = myMergeValidationService.resolveTargetResource(
+				inputParameters, theRequestDetails, opOutcome, theInputParamNames);
+		IIdType targetId = targetResource.getIdElement();
 
 		Provenance provenance = null;
 
@@ -145,7 +146,7 @@ public class ResourceUndoMergeService {
 		} else {
 			// the client provided source identifiers, find a provenance using those identifiers and the target id
 			provenance = myMergeProvenanceSvc.findProvenanceByTargetIdAndSourceIdentifiers(
-					targetId, inputParameters.getSourceIdentifiers(), myInputParamNames, theRequestDetails);
+					targetId, inputParameters.getSourceIdentifiers(), theRequestDetails);
 		}
 
 		if (provenance == null) {
@@ -168,10 +169,10 @@ public class ResourceUndoMergeService {
 		}
 
 		RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
-				theRequestDetails, ReadPartitionIdRequestDetails.forRead(targetPatient.getIdElement()));
+				theRequestDetails, ReadPartitionIdRequestDetails.forRead(targetId));
 
 		Set<Reference> allowedToUndelete = new HashSet<>();
-		if (wasSourceResourceDeletedByMergeOperation(provenance)) {
+		if (wasSourceResourceDeletedByMergeOperation(provenance, theInputParamNames)) {
 			// If the source resource was deleted by the merge operation,
 			// let the version restorer know it can be undeleted.
 			Reference sourceReference = provenance.getTarget().get(1);
@@ -200,12 +201,13 @@ public class ResourceUndoMergeService {
 		return undoMergeOutcome;
 	}
 
-	private boolean wasSourceResourceDeletedByMergeOperation(Provenance provenance) {
+	private boolean wasSourceResourceDeletedByMergeOperation(
+			Provenance provenance, AbstractMergeOperationInputParameterNames theInputParamNames) {
 		if (provenance.hasContained()) {
 			List<Resource> containedResources = provenance.getContained();
 			if (!containedResources.isEmpty() && containedResources.get(0) instanceof Parameters parameters) {
-				if (parameters.hasParameter(myInputParamNames.getDeleteSourceParameterName())) {
-					return parameters.getParameterBool(myInputParamNames.getDeleteSourceParameterName());
+				if (parameters.hasParameter(theInputParamNames.getDeleteSourceParameterName())) {
+					return parameters.getParameterBool(theInputParamNames.getDeleteSourceParameterName());
 				}
 				// by default the source resource is not deleted by the merge operation
 				return false;

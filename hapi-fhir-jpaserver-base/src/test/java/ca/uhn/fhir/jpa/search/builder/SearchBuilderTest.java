@@ -4,11 +4,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.search.BatchResourceLoader;
+import ca.uhn.fhir.jpa.search.BatchResourceLoader.ResourceLoadResult;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
@@ -50,9 +51,6 @@ class SearchBuilderTest {
 	@Mock
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 
-	@Mock
-	private IJpaStorageResourceParser myJpaStorageResourceParser;
-
 	@Spy
 	private FhirContext myFhirContext = ourCtx;
 
@@ -67,6 +65,9 @@ class SearchBuilderTest {
 
 	@Mock
 	private IFulltextSearchSvc myFulltextSearchSvc;
+
+	@Mock
+	private BatchResourceLoader myBatchResourceLoader;
 
 	@Mock(strictness = Mock.Strictness.LENIENT)
 	private DaoRegistry myDaoRegistry;
@@ -119,7 +120,7 @@ class SearchBuilderTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(booleans = { true, false })
+	@ValueSource(booleans = {true, false})
 	@SuppressWarnings("unchecked")
 	public void loadResourcesByPid_containsNoNullElements(boolean theUseElasticSearch) {
 		// setup
@@ -150,8 +151,8 @@ class SearchBuilderTest {
 
 			when(myResourceHistoryTableDao.findCurrentVersionsByResourcePidsAndFetchResourceTable(any()))
 				.thenReturn(List.of(ht));
-			when(myJpaStorageResourceParser.toResource(any(), any(Class.class), any(ResourceHistoryTable.class), any(), anyBoolean()))
-				.thenReturn(patient);
+			ResourceLoadResult result = new ResourceLoadResult(ht.getPersistentId(), patient, false);
+			when(myBatchResourceLoader.loadResources(any(List.class), anyBoolean())).thenReturn(List.of(result));
 		} else {
 			when(myFulltextSearchSvc.getResources(any(List.class)))
 				.thenReturn(List.of(patient));

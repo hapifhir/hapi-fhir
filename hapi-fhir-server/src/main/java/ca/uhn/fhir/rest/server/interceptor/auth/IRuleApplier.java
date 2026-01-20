@@ -58,6 +58,7 @@ public interface IRuleApplier {
 	 * It is currently used for bulk-export, to support permissible Group/Patient exports by matching a FHIR query.
 	 * This is ok, since bulk-export is a slow and (relatively) rare operation.
 	 */
+	@Nullable
 	default IAuthResourceResolver getAuthResourceResolver() {
 		return null;
 	}

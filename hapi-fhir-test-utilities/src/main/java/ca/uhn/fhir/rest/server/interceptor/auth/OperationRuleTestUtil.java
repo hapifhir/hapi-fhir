@@ -20,6 +20,7 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -71,5 +72,10 @@ public final class OperationRuleTestUtil {
 
 	public static BulkExportJobParameters.ExportStyle getWantExportStyle(IAuthRule theRule) {
 		return ((RuleBulkExportImpl) theRule).getWantExportStyle();
+	}
+
+	@Nullable
+	public static String getInstanceFilter(IAuthRule theRule) {
+		return ((OperationRule) theRule).getInstanceFilter();
 	}
 }

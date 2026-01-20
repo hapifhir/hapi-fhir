@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.merge;
 
+import java.util.List;
+
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_DELETE_SOURCE;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_UNDO_MERGE;
 
 /**
  * Abstract base class for merge operation input parameter names.
@@ -38,13 +39,29 @@ public abstract class AbstractMergeOperationInputParameterNames {
 	 * @return the appropriate implementation for the operation
 	 */
 	public static AbstractMergeOperationInputParameterNames forOperation(String theOperationName) {
-		if (theOperationName == null
-				|| OPERATION_MERGE.equals(theOperationName)
-				|| OPERATION_UNDO_MERGE.equals(theOperationName)) {
+		if (theOperationName == null || OPERATION_MERGE.equals(theOperationName)) {
 			return new PatientMergeOperationInputParameterNames();
 		} else {
 			return new GenericMergeOperationInputParameterNames();
 		}
+	}
+
+	/**
+	 * Returns a list of parameter name implementations applicable for the given resource type.
+	 * For Patient resources, returns both patient-specific and generic parameter names
+	 * as patients can be merged by both Patient specific merge endpoint and generic endpoint.
+	 * For other resource types, returns only generic parameter names.
+	 *
+	 * @param theResourceType the FHIR resource type name (e.g., "Patient", "Practitioner")
+	 * @return list of parameter name implementations to try
+	 */
+	public static List<AbstractMergeOperationInputParameterNames> getParameterNamesForResourceType(
+			String theResourceType) {
+		if ("Patient".equalsIgnoreCase(theResourceType)) {
+			return List.of(
+					new PatientMergeOperationInputParameterNames(), new GenericMergeOperationInputParameterNames());
+		}
+		return List.of(new GenericMergeOperationInputParameterNames());
 	}
 
 	/**
