@@ -185,6 +185,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -3628,9 +3629,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertFalse(patient.getManagingOrganization().getReferenceElement().hasVersionIdPart());
 
 		ae = myClient.read().resource(AuditEvent.class).withId(aeId).execute();
-		assertTrue(ae.getEntityFirstRep().getWhat().getReferenceElement().hasIdPart());
-		assertTrue(ae.getEntityFirstRep().getWhat().getReferenceElement().hasVersionIdPart());
-
+		assertTrue(ae.getEntityFirstRep().getWhat().getReferenceElement().hasIdPart(), ae.getEntityFirstRep().getWhat().getReference());
+		assertTrue(ae.getEntityFirstRep().getWhat().getReferenceElement().hasVersionIdPart(), ae.getEntityFirstRep().getWhat().getReference());
 	}
 
 	/**
