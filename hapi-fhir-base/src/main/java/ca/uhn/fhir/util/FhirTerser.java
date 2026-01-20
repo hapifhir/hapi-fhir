@@ -1035,8 +1035,8 @@ public class FhirTerser {
 			additionalSPNames = theModifications.getAdditionalSearchParamNamesForResourceType(resourceType);
 			omittedSPNames = theModifications.getOmittedSPNamesForResourceType(resourceType);
 		} else {
-			additionalSPNames = new HashSet<>();
-			omittedSPNames = new HashSet<>();
+			additionalSPNames = Set.of();
+			omittedSPNames = Set.of();
 		}
 
 		RuntimeResourceDefinition sourceDef = myContext.getResourceDefinition(theSource);

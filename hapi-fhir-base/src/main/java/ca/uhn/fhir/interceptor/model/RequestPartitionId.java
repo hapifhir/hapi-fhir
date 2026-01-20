@@ -112,7 +112,7 @@ public class RequestPartitionId implements IModelJson {
 	}
 
 	@Nonnull
-	public static Optional<RequestPartitionId> getPartitionIfAssigned(IBaseResource theFromResource) {
+	public static Optional<RequestPartitionId> getPartitionFromUserDataIfPresent(IBaseResource theFromResource) {
 		return Optional.ofNullable((RequestPartitionId) theFromResource.getUserData(Constants.RESOURCE_PARTITION_ID));
 	}
 
@@ -130,7 +130,7 @@ public class RequestPartitionId implements IModelJson {
 			return RequestPartitionId.allPartitions();
 		}
 
-		// don't know why this is required - otherwise PartitionedStrictTransactionR4Test fails
+		// Short circuit if we're merging something identical in
 		if (this.equals(theOther)) {
 			return this;
 		}
