@@ -64,7 +64,7 @@ class RuleGroupBulkExportByCompartmentMatcherImplTest {
 
 		if (theSearchParamMatcherMatchResult != null) {
 			when(myRuleApplier.getAuthResourceResolver()).thenReturn(myAuthResourceResolver);
-			when(myAuthResourceResolver.resolveResourceById(any())).thenReturn(myResource);
+			when(myAuthResourceResolver.resolveResourceById(any(), any())).thenReturn(myResource);
 			when(myRuleApplier.getSearchParamMatcher()).thenReturn(mySearchParamMatcher);
 			when(myResource.fhirType()).thenReturn("Group");
 			when(mySearchParamMatcher.match("Group?identifier=foo|bar", myResource)).thenReturn(theSearchParamMatcherMatchResult);
