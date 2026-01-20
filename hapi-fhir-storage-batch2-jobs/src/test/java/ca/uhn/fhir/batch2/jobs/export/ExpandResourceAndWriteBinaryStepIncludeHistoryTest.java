@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.jobs.export;
 
 
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
+import ca.uhn.fhir.batch2.jobs.export.v3.ExpandResourceAndWriteBinaryStep;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;

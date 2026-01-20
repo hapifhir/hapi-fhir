@@ -29,7 +29,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import java.io.IOException;
 import java.util.Date;
 
-public class BulkDataExportProvider {
+public class MockBulkDataExportProvider {
 
 	public static final String PARAM_EXPORT_POLL_STATUS_JOB_ID = "_jobId";
 	public static final String PARAM_EXPORT_OUTPUT_FORMAT = "_outputFormat";

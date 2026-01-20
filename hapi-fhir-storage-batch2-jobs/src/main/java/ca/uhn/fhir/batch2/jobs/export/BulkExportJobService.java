@@ -114,7 +114,7 @@ public class BulkExportJobService {
 				myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
 						theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 		myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
-		theBulkExportJobParameters.setPartitionId(partitionId);
+		theBulkExportJobParameters.setPartitionIdForSecurity(partitionId);
 	}
 
 	/**

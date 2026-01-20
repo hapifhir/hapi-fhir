@@ -982,15 +982,19 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 
 				// Extract search params for resource
-				mySearchParamWithInlineReferencesExtractor.populateFromResource(
-						requestPartitionId,
-						newParams,
-						theTransactionDetails,
-						entity,
-						theResource,
-						existingParams,
-						theRequest,
-						thePerformIndexing);
+				boolean skipIndexing =
+						Boolean.TRUE.equals(theResource.getUserData(JpaConstants.RESOURCE_SKIP_INDEXING));
+				if (!skipIndexing) {
+					mySearchParamWithInlineReferencesExtractor.populateFromResource(
+							requestPartitionId,
+							newParams,
+							theTransactionDetails,
+							entity,
+							theResource,
+							existingParams,
+							theRequest,
+							thePerformIndexing);
+				}
 
 				if (CollectionUtils.isNotEmpty(newParams.myLinks)) {
 					setTargetResourceTypeIdForResourceLinks(newParams.myLinks);
@@ -1107,7 +1111,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		/*
 		 * Indexing
 		 */
-		if (thePerformIndexing) {
+		boolean skipIndexing = theResource != null
+				&& Boolean.TRUE.equals(theResource.getUserData(JpaConstants.RESOURCE_SKIP_INDEXING));
+		if (thePerformIndexing && !skipIndexing) {
 			if (newParams == null) {
 				myExpungeService.deleteAllSearchParams(entity.getPersistentId());
 				entity.clearAllParamsPopulated();

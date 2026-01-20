@@ -783,21 +783,27 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateIdPresentForDelete(theId);
 		validateDeleteEnabled();
 
-		return myTransactionService.execute(theRequestDetails, transactionDetails, tx -> {
-			DeleteConflictList deleteConflicts = new DeleteConflictList();
-			if (isNotBlank(theId.getValue())) {
-				deleteConflicts.setResourceIdMarkedForDeletion(theId);
-			}
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
+				theRequestDetails, getResourceName(), theId);
 
-			StopWatch w = new StopWatch();
+		return myTransactionService
+				.withRequest(theRequestDetails)
+				.withRequestPartitionId(requestPartitionId)
+				.execute(tx -> {
+					DeleteConflictList deleteConflicts = new DeleteConflictList();
+					if (isNotBlank(theId.getValue())) {
+						deleteConflicts.setResourceIdMarkedForDeletion(theId);
+					}
 
-			DaoMethodOutcome retVal = delete(theId, deleteConflicts, theRequestDetails, transactionDetails);
+					StopWatch w = new StopWatch();
 
-			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
+					DaoMethodOutcome retVal = delete(theId, deleteConflicts, theRequestDetails, transactionDetails);
 
-			ourLog.debug("Processed delete on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
-			return retVal;
-		});
+					DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
+
+					ourLog.debug("Processed delete on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
+					return retVal;
+				});
 	}
 
 	@Override

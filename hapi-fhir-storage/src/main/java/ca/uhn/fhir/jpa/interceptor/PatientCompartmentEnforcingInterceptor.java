@@ -31,7 +31,6 @@ import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.util.StopWatch;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,39 +87,40 @@ public class PatientCompartmentEnforcingInterceptor {
 
 	/**
 	 * Blocks resource updates which would make the resource change Patient Compartment.
+	 *
 	 * @param theOldResource the original resource state
-	 * @param theResource the updated resource state
+	 * @param theResource    the updated resource state
 	 */
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
 	public void storagePreStorageResourceUpdated(
 			RequestDetails theRequestDetails, IBaseResource theOldResource, IBaseResource theResource) {
 
-		ourLog.debug("Interceptor STORAGE_PRESTORAGE_RESOURCE_UPDATED - started");
-		StopWatch stopWatch = new StopWatch();
-		try {
-			String patientCompartmentOld;
-			String patientCompartmentCurrent;
-			if (myRequestPartitionHelperSvc != null) {
-				String resourceType = myFhirContext.getResourceType(theOldResource);
-				patientCompartmentOld = determinePartition(theRequestDetails, theOldResource, resourceType);
-				patientCompartmentCurrent = determinePartition(theRequestDetails, theResource, resourceType);
-			} else {
-				patientCompartmentOld = ResourceCompartmentUtil.getPatientCompartmentIdentity(
-								theOldResource, myFhirContext, mySearchParamExtractor)
-						.orElse(EMPTY);
-				patientCompartmentCurrent = ResourceCompartmentUtil.getPatientCompartmentIdentity(
-								theResource, myFhirContext, mySearchParamExtractor)
-						.orElse(EMPTY);
-			}
+		String patientCompartmentOld;
+		String patientCompartmentCurrent;
+		if (myRequestPartitionHelperSvc != null) {
+			String resourceType = myFhirContext.getResourceType(theOldResource);
+			patientCompartmentOld = determinePartition(theRequestDetails, theOldResource, resourceType);
+			patientCompartmentCurrent = determinePartition(theRequestDetails, theResource, resourceType);
+		} else {
+			patientCompartmentOld = ResourceCompartmentUtil.getPatientCompartmentIdentity(
+							theOldResource, myFhirContext, mySearchParamExtractor)
+					.orElse(EMPTY);
+			patientCompartmentCurrent = ResourceCompartmentUtil.getPatientCompartmentIdentity(
+							theResource, myFhirContext, mySearchParamExtractor)
+					.orElse(EMPTY);
+		}
 
-			if (!Objects.equals(patientCompartmentOld, patientCompartmentCurrent)) {
-				// Avoid disclosing compartments in message, which could have security implications
-				throw new PreconditionFailedException(
-						Msg.code(2476) + "Resource compartment changed. Was a referenced Patient changed?");
-			}
+		if (!Objects.equals(patientCompartmentOld, patientCompartmentCurrent)) {
+			ourLog.warn(
+					"Resource compartment for {} changed from {} to {}",
+					theOldResource.getIdElement().toUnqualifiedVersionless().getValue(),
+					patientCompartmentOld,
+					patientCompartmentCurrent);
 
-		} finally {
-			ourLog.debug("Interceptor STORAGE_PRESTORAGE_RESOURCE_UPDATED - ended, execution took {}", stopWatch);
+			// Avoid disclosing compartments in message, which could have security implications
+			throw new PreconditionFailedException(Msg.code(2476) + "Resource compartment for "
+					+ theOldResource.getIdElement().toUnqualifiedVersionless().getValue()
+					+ " changed. Was a referenced Patient changed?");
 		}
 	}
 

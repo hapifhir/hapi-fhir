@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -98,7 +100,7 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 
 		assertThatThrownBy(() -> myObservationDao.update(obs, new SystemRequestDetails()))
 			.isInstanceOf(PreconditionFailedException.class)
-			.hasMessageContaining("HAPI-2476: Resource compartment changed. Was a referenced Patient changed?");
+			.hasMessageContaining("HAPI-2476: Resource compartment for Observation/O changed. Was a referenced Patient changed?");
 	}
 
 	@ParameterizedTest
@@ -175,7 +177,7 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 		IBaseParameters patch = pb.build();
 		assertThatThrownBy(() -> myEncounterDao.patch(new IdType("Encounter/E"), null, PatchTypeEnum.FHIR_PATCH_JSON, null, patch, newSrd()))
 			.isInstanceOf(PreconditionFailedException.class)
-			.hasMessageContaining("HAPI-2476: Resource compartment changed. Was a referenced Patient changed?");
+			.hasMessageContaining("HAPI-2476: Resource compartment for Encounter/E changed. Was a referenced Patient changed?");
 
 		// Verify
 		Encounter actual = myEncounterDao.read(new IdType("E"), mySrd);

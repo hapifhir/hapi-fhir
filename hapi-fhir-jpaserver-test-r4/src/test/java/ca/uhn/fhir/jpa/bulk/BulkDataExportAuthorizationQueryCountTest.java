@@ -10,6 +10,7 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.batch2.jobs.export.BulkExportAppCtx;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
+import ca.uhn.fhir.batch2.jobs.export.v3.BulkExportV3AppCtx;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -311,31 +312,14 @@ public class BulkDataExportAuthorizationQueryCountTest extends BaseResourceProvi
 	 * bulk export. If bulk export starts before getting the query count, then there could be extra queries counted.
 	 */
 	@Configuration
-	public static class MockBulkExportJobConfig extends BulkExportAppCtx {
+	public static class MockBulkExportJobConfig extends BulkExportV3AppCtx {
 		@Bean
 		@Override
 		public JobDefinition bulkExportJobDefinition() {
 			JobDefinition.Builder<IModelJson, VoidModel> builder = JobDefinition.newBuilder();
 			builder.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
 			builder.setJobDescription("Mock FHIR Bulk Export");
-			builder.setJobDefinitionVersion(1);
-
-			return builder.setParametersType(BulkExportJobParameters.class)
-				// validator
-				.setParametersValidator(bulkExportJobParametersValidator())
-				.gatedExecution()
-				.addFirstStep("stepA", "mock step A", ResourceIdList.class, new MockStepA())
-				.addLastStep("stepB", "mock step B", new MockStepB())
-				.build();
-		}
-
-		@Bean
-		@Override
-		public JobDefinition bulkExportJobV2Definition() {
-			JobDefinition.Builder<IModelJson, VoidModel> builder = JobDefinition.newBuilder();
-			builder.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
-			builder.setJobDescription("Mock FHIR Bulk Export");
-			builder.setJobDefinitionVersion(2);
+			builder.setJobDefinitionVersion(9999);
 
 			return builder.setParametersType(BulkExportJobParameters.class)
 				// validator
