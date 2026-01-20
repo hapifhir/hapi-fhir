@@ -3628,7 +3628,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertTrue(patient.getManagingOrganization().getReferenceElement().hasIdPart());
 		assertFalse(patient.getManagingOrganization().getReferenceElement().hasVersionIdPart());
 
-		ae = myClient.read().resource(AuditEvent.class).withId(aeId).execute();
+		ae = myClient.read().resource(AuditEvent.class).withId(aeId.toUnqualifiedVersionless()).execute();
 		assertTrue(ae.getEntityFirstRep().getWhat().getReferenceElement().hasIdPart(), ae.getEntityFirstRep().getWhat().getReference());
 		assertTrue(ae.getEntityFirstRep().getWhat().getReferenceElement().hasVersionIdPart(), ae.getEntityFirstRep().getWhat().getReference());
 	}
