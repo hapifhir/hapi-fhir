@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -122,6 +123,9 @@ public class ExpandResourceAndWriteBinaryStepTest {
 	@SuppressWarnings("unused")
 	@Spy
 	private InterceptorService myInterceptorService = new InterceptorService();
+
+	@Spy
+	private PartitionSettings myPartitionSettings = new PartitionSettings();
 
 	@SuppressWarnings("unused")
 	@Spy
