@@ -64,6 +64,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
@@ -77,6 +78,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -239,22 +241,40 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		List<String> targetQualifiedUrls = new ArrayList<>();
 
 		/*
-		 * If we're allowing cross-partition references, we should first figure out what partition the
-		 * link search should be able to touch
+		 * If we're allowing cross-partition references, we first need to figure out which
+		 * partition(s) the target of the reference could be in
 		 */
-		RequestPartitionId requestPartitionId = theRequestPartitionId;
+		RequestPartitionId predicateTargetPartitionId = theRequestPartitionId;
 		if (myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()) {
-			SearchParameterMap map = new SearchParameterMap();
-			map.addOrList(theParamName, theReferenceOrParamList);
-			requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-					theRequest, theResourceType, map);
+			predicateTargetPartitionId = null;
+			for (IQueryParameterType untypedParam : theReferenceOrParamList) {
+				if (untypedParam instanceof ReferenceParam referenceParam) {
+					String resourceType = referenceParam.getResourceType();
+					String idPart = referenceParam.getIdPart();
+					if (isBlank(resourceType) || isBlank(idPart)) {
+						// FIXME: add code / remove? Also add test
+						throw new InvalidRequestException(
+								Msg.code(1) + "Parameter \"" + UrlUtil.sanitizeUrlPart(theParamName)
+										+ "\" must be in the format [resourceType]/[id]");
+					}
+					SearchParameterMap map = new SearchParameterMap();
+					map.add(IAnyResource.SP_RES_ID, new TokenParam(resourceType + "/" + idPart));
+					RequestPartitionId paramRequestPartitionId =
+							myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+									theRequest, resourceType, map);
+					if (predicateTargetPartitionId == null) {
+						predicateTargetPartitionId = paramRequestPartitionId;
+					} else {
+						predicateTargetPartitionId = predicateTargetPartitionId.mergeIds(paramRequestPartitionId);
+					}
+				}
+			}
 		}
 
 		for (int orIdx = 0; orIdx < theReferenceOrParamList.size(); orIdx++) {
 			IQueryParameterType nextOr = theReferenceOrParamList.get(orIdx);
 
-			if (nextOr instanceof ReferenceParam) {
-				ReferenceParam ref = (ReferenceParam) nextOr;
+			if (nextOr instanceof ReferenceParam ref) {
 
 				if (isBlank(ref.getChain())) {
 
@@ -290,7 +310,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 							theReferenceOrParamList,
 							ref,
 							theRequest,
-							requestPartitionId);
+							predicateTargetPartitionId);
 				}
 
 			} else {
@@ -314,7 +334,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		}
 
 		List<JpaPid> pids = myIdHelperService.resolveResourcePids(
-				requestPartitionId,
+				predicateTargetPartitionId,
 				targetIds,
 				ResolveIdentityMode.includeDeleted().cacheOk());
 		List<Long> targetPidList = pids.stream().map(JpaPid::getId).collect(Collectors.toList());

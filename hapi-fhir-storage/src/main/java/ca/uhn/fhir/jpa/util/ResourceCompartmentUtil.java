@@ -83,6 +83,20 @@ public class ResourceCompartmentUtil {
 	}
 
 	/**
+	 * @deprecated Use {@link #getResourceCompartments(String, IBaseResource, List, ISearchParamExtractor)} instead. It's dangerous to assume there will only ever be 1 compartment.
+	 */
+	@Deprecated(since = "8.8.0", forRemoval = true)
+	public static Optional<String> getResourceCompartment(
+			String theCompartmentName,
+			IBaseResource theResource,
+			List<RuntimeSearchParam> theCompartmentSps,
+			ISearchParamExtractor mySearchParamExtractor) {
+		return getResourceCompartments(theCompartmentName, theResource, theCompartmentSps, mySearchParamExtractor)
+				.stream()
+				.findFirst();
+	}
+
+	/**
 	 * Extracts and returns an optional compartment of the received resource
 	 * @param theCompartmentName     the name of the compartment
 	 * @param theResource            source resource which compartment is extracted
@@ -90,7 +104,7 @@ public class ResourceCompartmentUtil {
 	 * @param mySearchParamExtractor the ISearchParamExtractor to be used to extract the parameter values
 	 * @return optional compartment of the received resource
 	 */
-	public static Optional<String> getResourceCompartment(
+	public static List<String> getResourceCompartments(
 			String theCompartmentName,
 			IBaseResource theResource,
 			List<RuntimeSearchParam> theCompartmentSps,
@@ -103,7 +117,7 @@ public class ResourceCompartmentUtil {
 						t.getResourceType())) // assume the compartment name matches the resource type
 				.map(IdType::getIdPart)
 				.filter(StringUtils::isNotBlank)
-				.findFirst();
+				.toList();
 	}
 
 	@Nonnull

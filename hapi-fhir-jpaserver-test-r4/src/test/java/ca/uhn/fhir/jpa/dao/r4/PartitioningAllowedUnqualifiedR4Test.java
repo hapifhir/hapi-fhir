@@ -2,9 +2,13 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import net.sourceforge.plantuml.klimt.creole.Sea;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import static ca.uhn.fhir.jpa.model.config.PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -86,6 +91,25 @@ public class PartitioningAllowedUnqualifiedR4Test extends BasePartitioningR4Test
 		// Verify
 		assertThat(exception.getMessage()).contains("client-assigned ID constraint failure");
 	}
+
+
+	@Test
+	void testSearch_UnqualifiedTarget() {
+		// Setup
+
+		addNextTargetPartitionForReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
+
+		// Test / Verify
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(AuditEvent.SP_ENTITY, new ReferenceParam("A"));
+
+		assertThatThrownBy(()->myAuditEventDao.search(map, mySrd))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("Parameter \"entity\" must be in the format [resourceType]/[id]");
+	}
+
 
 	private Patient createPatient(String theId) {
 		Patient p = new Patient();

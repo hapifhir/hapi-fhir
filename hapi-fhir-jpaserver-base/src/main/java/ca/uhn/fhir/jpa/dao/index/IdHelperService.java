@@ -232,8 +232,10 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			myTransactionService
 					.withSystemRequest()
 					.withRequestPartitionId(requestPartitionId)
-					.execute(() ->
-							resolveResourceIdentitiesForFhirIdsUsingDatabase(requestPartitionId, ids, idToLookup));
+					.executeWithoutResult(partition -> {
+						resolveResourceIdentitiesForFhirIdsUsingDatabase(partition, ids, idToLookup);
+						return null;
+					});
 		}
 
 		// Convert the multimap into a simple map

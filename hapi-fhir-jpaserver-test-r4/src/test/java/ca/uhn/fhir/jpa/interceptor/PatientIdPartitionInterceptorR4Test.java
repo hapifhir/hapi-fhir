@@ -28,7 +28,9 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -47,6 +49,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -56,12 +59,14 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
@@ -70,9 +75,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -81,6 +89,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4Test {
 	public static final int ALTERNATE_DEFAULT_ID = -1;
+	public static final int PATIENT_A_COMPARTMENT_ID = 65;
 
 	@Autowired
 	private HapiTransactionService myTransactionService;
@@ -141,6 +150,39 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true)).contains("rt1_0.PARTITION_ID='65'");
 	}
 
+
+	@Test
+	void testCreateProvenance_InPatientCompartmentThroughSecondTargetReference() {
+		// Setup
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		createResource("Bundle", withId("B"), withResourcePrimitiveAttribute("type", "collection"));
+		createPatient(withId("A"), withActiveTrue());
+
+		// Test
+		Provenance provenance = new Provenance();
+		provenance.addTarget().setReference("Bundle/B");
+		provenance.addTarget().setReference("Patient/A");
+		IIdType provenanceId = myProvenanceDao.create(provenance, newSrd()).getId();
+
+		// Verify
+		assertResourceIsInPartition(PATIENT_A_COMPARTMENT_ID, provenanceId);
+	}
+
+	@Test
+	void testCreateProvenance_InMultiplePatientCompartments() {
+		// Setup
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		createPatient(withId("A"), withActiveTrue());
+		createPatient(withId("B"), withActiveTrue());
+
+		// Test / Verify
+		Provenance provenance = new Provenance();
+		provenance.addTarget().setReference("Patient/A");
+		provenance.addTarget().setReference("Patient/B");
+		assertThatThrownBy(()->myProvenanceDao.create(provenance, newSrd()))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("Policy does not allow resource of type \"Provenance\" to be created in multiple Patient compartments: Patient/A, Patient/B");
+	}
 
 	@Test
 	public void testCreatePatient_ClientAssignedId() {
@@ -323,6 +365,86 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		assertThat(selectQueriesForCurrentThread.get(1).getSql(false, false)).doesNotContain("PARTITION_ID in");
 	}
 
+	@SuppressWarnings("GrazieInspection")
+	@ParameterizedTest
+	@CsvSource(textBlock =
+		//  Policy                            , DocRefWithPatient , DocRefNoPatient , IncludePatientIdInSearch, ExpectedSearchPartition
+		"""
+			ALWAYS_USE_DEFAULT_PARTITION      , -1                , -1              , false                   , -1
+			OPTIONAL_SINGLE_COMPARTMENT       , 65                , -1              , false                   , ALL
+			MANDATORY_SINGLE_COMPARTMENT      , 65                , FAIL            , false                   , ALL
+			ALWAYS_USE_PARTITION_ID/5         , 5                 , 5               , false                   , 5
+			ALWAYS_USE_DEFAULT_PARTITION      , -1                , -1              , true                    , -1
+			OPTIONAL_SINGLE_COMPARTMENT       , 65                , -1              , true                    , 65
+			MANDATORY_SINGLE_COMPARTMENT      , 65                , FAIL            , true                    , 65
+			ALWAYS_USE_PARTITION_ID/5         , 5                 , 5               , true                    , 5
+			NON_UNIQUE_COMPARTMENT_IN_DEFAULT , 65                , -1              , false                   , ALL
+			NON_UNIQUE_COMPARTMENT_IN_DEFAULT , 65                , -1              , true                    , ALL
+			""")
+	void testResourceTypePolicies_PatientCompartmentResource(String thePolicyString, int thePatientSpecificDocRefCompartmentId, String theDocRefNoPatientCompartmentString, boolean theIncludePatientIdInSearch, String theExpectedSearchPartitionString) {
+		// Setup
+		PatientCompartmentPolicy policy = PatientCompartmentPolicy.parse(thePolicyString);
+
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		mySvc.setResourceTypePolicies(Map.of("DocumentReference", policy));
+		createPatient(withId("A"), withActiveTrue());
+
+		// Test
+
+		// Create a DocRef in the patient compartment
+		DocumentReference docRef = new DocumentReference();
+		docRef.setSubject(new Reference("Patient/A"));
+		docRef.getContentFirstRep().getAttachment().setContentType("text/plain");
+		IIdType ptCompartmentDocRefId = myDocumentReferenceDao.create(docRef, newSrd()).getId().toUnqualifiedVersionless();
+		assertResourceIsInPartition(thePatientSpecificDocRefCompartmentId, ptCompartmentDocRefId);
+
+		// Create a DocRef NOT in the patient compartment
+		DocumentReference nonCompartmentDocRef = new DocumentReference();
+		nonCompartmentDocRef.getContentFirstRep().getAttachment().setContentType("text/plain");
+		IIdType nonCompartmentDocRefId;
+		if (theDocRefNoPatientCompartmentString.equals("FAIL")) {
+			assertThatThrownBy(() -> myDocumentReferenceDao.create(nonCompartmentDocRef, newSrd()))
+				.isInstanceOf(MethodNotAllowedException.class)
+				.hasMessageContaining("Resource of type DocumentReference has no values placing it in the Patient compartment");
+			nonCompartmentDocRefId = null;
+		} else {
+			nonCompartmentDocRefId = myDocumentReferenceDao.create(nonCompartmentDocRef, newSrd()).getId().toUnqualifiedVersionless();
+			int partition = Integer.parseInt(theDocRefNoPatientCompartmentString);
+			assertResourceIsInPartition(partition, nonCompartmentDocRefId);
+		}
+		logAllResources();
+
+		// Search for DocRefs with no parameters
+		SearchParameterMap paramMap = SearchParameterMap.newSynchronous();
+		if (theIncludePatientIdInSearch) {
+			paramMap.add(DocumentReference.SP_PATIENT, new ReferenceParam("Patient/A"));
+		}
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome = myDocumentReferenceDao.search(paramMap, newSrd());
+		myCaptureQueriesListener.logSelectQueries();
+
+		// Verify: All compartments searched
+		SqlQuery searchQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0);
+		if (theExpectedSearchPartitionString.equals("ALL")) {
+			assertTrue(searchQuery.getRequestPartitionId().isAllPartitions());
+			assertThat(searchQuery.getSql(true, true)).doesNotContain("PARTITION_ID =");
+			assertThat(searchQuery.getSql(true, true)).doesNotContain("PARTITION_ID IN");
+		} else {
+			int partition = Integer.parseInt(theExpectedSearchPartitionString);
+			assertThat(searchQuery.getRequestPartitionId().getPartitionIds()).containsExactly(partition);
+			assertThat(searchQuery.getSql(true, true)).containsAnyOf(
+				"PARTITION_ID = '" + partition + "'",
+				"PARTITION_ID='" + partition + "'"
+			);
+		}
+
+		// Verify: Both DocRefs should be found
+		if (nonCompartmentDocRefId != null && !theIncludePatientIdInSearch) {
+			assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(ptCompartmentDocRefId.getValue(), nonCompartmentDocRefId.getValue());
+		} else {
+			assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(ptCompartmentDocRefId.getValue());
+		}
+	}
 
 	@Test
 	public void testSearchPatient_Good() {
@@ -458,6 +580,41 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(2);
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("t0.PARTITION_ID = ?");
 	}
+
+	@Test
+	public void testSearch_MultipleCompartments() {
+		// Setup
+
+		createPatient(withId("PAT-0"), withIdentifier("http://patient", "0"));
+		createEncounter(withId("ENC-0"), withSubject("Patient/PAT-0"));
+
+		createPatient(withId("PAT-1"), withIdentifier("http://patient", "1"));
+		createEncounter(withId("ENC-1"), withSubject("Patient/PAT-1"));
+
+		createPatient(withId("PAT-2"), withIdentifier("http://patient", "2"));
+		createEncounter(withId("ENC-2"), withSubject("Patient/PAT-2"));
+
+		// Test
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Encounter.SP_PATIENT, new ReferenceOrListParam("Patient/PAT-0", "Patient/PAT-1"));
+		myCaptureQueriesListener.clear();
+		IBundleProvider actual = myEncounterDao.search(map, newSrd());
+		myCaptureQueriesListener.logSelectQueries();
+
+		// Verify
+
+		SqlQuery searchQuery = myCaptureQueriesListener.getSelectQueries().get(1);
+		assertThat(searchQuery.getRequestPartitionId().getPartitionIds()).contains(262, 263);
+		assertThat(searchQuery.getSql(true, true)).contains("PARTITION_ID IN ('262', '263')");
+
+		List<String> actualIds = toUnqualifiedVersionlessIdValues(actual);
+		assertThat(actualIds).containsExactlyInAnyOrder(
+			"Encounter/ENC-0",
+			"Encounter/ENC-1"
+		);
+	}
+
 
 	@Test
 	public void testHistory_Instance() {
@@ -679,7 +836,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		map.add(ExplanationOfBenefit.SP_PATIENT, new ReferenceParam(patientId));
 		map.addInclude(new Include("*"));
 		myCaptureQueriesListener.clear();
-		IBundleProvider result = myExplanationOfBenefitDao.search(map);
+		IBundleProvider result = myExplanationOfBenefitDao.search(map, newSrd());
 		List<String> resultIds = toUnqualifiedVersionlessIdValues(result);
 		assertThat(resultIds).as(resultIds.toString()).containsExactlyInAnyOrder(resourceIds.get("Coverage").get(0), resourceIds.get("Organization").get(0), resourceIds.get("ExplanationOfBenefit").get(0), resourceIds.get("Patient").get(0), resourceIds.get("Practitioner").get(0), resourceIds.get("Practitioner").get(1), resourceIds.get("Practitioner").get(2));
 
@@ -859,9 +1016,13 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 	private void assertResourceIsInPartition(int theExpectedPartitionId, IIdType theResourceId) {
+		assert theResourceId != null;
+		assert theResourceId.hasResourceType();
+		assert theResourceId.hasIdPart();
+
 		runInTransaction(() -> {
-			ResourceTable entity = myResourceTableDao.findByTypeAndFhirId(theResourceId.getResourceType(), theResourceId.getIdPart()).orElseThrow();
-			assertEquals(theExpectedPartitionId, entity.getPartitionId().getPartitionId());
+			ResourceTable table = myResourceTableDao.findByTypeAndFhirId(theResourceId.getResourceType(), theResourceId.getIdPart()).orElseThrow();
+			assertEquals(theExpectedPartitionId, Objects.requireNonNull(table.getPartitionId().getPartitionId()).intValue());
 		});
 	}
 
@@ -931,7 +1092,6 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		Bundle search = myServer.getFhirClient().search().forResource("Encounter").where(Encounter.PATIENT.hasId(patientId)).and(Encounter.SERVICE_PROVIDER.hasId(orgId)).returnBundle(Bundle.class).execute();
 		assertEquals(1, search.getEntry().size(), "we find the Encounter linked to the organization and the patient");
 	}
-
 
 	@Interceptor
 	public class MyTransactionSplitInterceptor {
