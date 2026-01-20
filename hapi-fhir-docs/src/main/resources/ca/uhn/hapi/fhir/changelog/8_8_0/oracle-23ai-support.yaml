@@ -1,0 +1,10 @@
+---
+type: add
+issue: 7485
+title: "Added support for Oracle Database 23ai. The HapiFhirOracleDialect has been updated to properly handle boolean 
+type mapping for Oracle 23, which introduced a native BOOLEAN type. The dialect now specifically maps boolean fields to
+NUMERIC(1,0) columns for compatibility with existing schemas. Additionally, Oracle 23 embedded database support has 
+been added to the test infrastructure, and the Oracle JDBC driver was upgraded to version 23.6.0.24.10."
+  
+  
+  
