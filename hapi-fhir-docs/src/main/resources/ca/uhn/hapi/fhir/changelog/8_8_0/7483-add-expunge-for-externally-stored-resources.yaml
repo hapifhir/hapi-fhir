@@ -1,0 +1,4 @@
+---
+type: add
+issue: 7483
+title: "Added support for removing externally stored resources from storage providers during instance-level and type-level `$expunge` operations."

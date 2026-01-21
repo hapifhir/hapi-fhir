@@ -112,11 +112,8 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 	@JsonProperty("expandMdm")
 	private Boolean myExpandMdm;
 
-	/**
-	 * The partition for the request if applicable.
-	 */
 	@JsonProperty("partitionId")
-	private RequestPartitionId myPartitionId;
+	private RequestPartitionId myPartitionIdForSecurity;
 
 	@JsonProperty("binarySecurityContextIdentifierSystem")
 	private String myBinarySecurityContextIdentifierSystem;
@@ -255,16 +252,30 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 		this.myOriginalRequestUrl = theOriginalRequestUrl;
 	}
 
-	public RequestPartitionId getPartitionId() {
-		return myPartitionId;
+	/**
+	 * The partition ID associated with the initial job initiation. This partition ID is only used for
+	 * security checks to ensure that the calling user has appropriate permissions to access the data. As of
+	 * version 3 of the Bulk Export Batch2 job, we no longer use this element at runtime while actually
+	 * running the export and building the results - the job
+	 * calculates the partition(s) used for those activities whenever it needs to.
+	 */
+	public RequestPartitionId getPartitionIdForSecurity() {
+		return myPartitionIdForSecurity;
+	}
+
+	/**
+	 * The partition ID associated with the initial job initiation. This partition ID is only used for
+	 * security checks to ensure that the calling user has appropriate permissions to access the data. As of
+	 * version 3 of the Bulk Export Batch2 job, we no longer use this element at runtime while actually
+	 * running the export and building the results - the job
+	 * calculates the partition(s) used for those activities whenever it needs to.
+	 */
+	public void setPartitionIdForSecurity(RequestPartitionId thePartitionIdForSecurity) {
+		myPartitionIdForSecurity = thePartitionIdForSecurity;
 	}
 
 	public boolean isIncludeHistory() {
 		return myIncludeHistory;
-	}
-
-	public void setPartitionId(RequestPartitionId thePartitionId) {
-		this.myPartitionId = thePartitionId;
 	}
 
 	/**

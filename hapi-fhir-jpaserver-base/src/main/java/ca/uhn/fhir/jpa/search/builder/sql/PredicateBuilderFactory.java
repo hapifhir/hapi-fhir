@@ -53,10 +53,10 @@ public class PredicateBuilderFactory {
 			case URI:
 				return createUriPredicateBuilder(theBuilder);
 			case REFERENCE:
-				return createReferencePredicateBuilder(theQueryStack, theBuilder);
-			case HAS:
+				return createResourceLinkPredicateBuilder(theQueryStack, theBuilder);
 			case SPECIAL:
 				return createCoordsPredicateBuilder(theBuilder);
+			case HAS:
 			case COMPOSITE:
 			default:
 				throw new InternalErrorException(Msg.code(2593) + "Invalid param type " + theParamType.name());
@@ -91,8 +91,8 @@ public class PredicateBuilderFactory {
 		return theBuilder.getSqlBuilderFactory().uriIndexTable(theBuilder);
 	}
 
-	private static ResourceLinkPredicateBuilder createReferencePredicateBuilder(
+	private static ResourceLinkPredicateBuilder createResourceLinkPredicateBuilder(
 			QueryStack theQueryStack, SearchQueryBuilder theBuilder) {
-		return theBuilder.getSqlBuilderFactory().referenceIndexTable(theQueryStack, theBuilder, false);
+		return theBuilder.getSqlBuilderFactory().resourceLinkIndexTable(theQueryStack, theBuilder);
 	}
 }
