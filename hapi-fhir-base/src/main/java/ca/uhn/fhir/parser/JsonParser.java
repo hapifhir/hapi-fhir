@@ -1486,6 +1486,10 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	}
 
 	private void parseExtension(ParserState<?> theState, BaseJsonLikeArray theValues, boolean theIsModifier) {
+		if (theValues == null) {
+			return;
+		}
+
 		int allUnderscoreNames = 0;
 		int handledUnderscoreNames = 0;
 
