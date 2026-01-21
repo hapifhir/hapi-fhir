@@ -25,7 +25,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import com.google.common.collect.ArrayListMultimap;
@@ -155,8 +155,8 @@ public class RepositoryValidatingInterceptor {
 		if (theOutcome.getOperationOutcome() != null) {
 			String firstIssue =
 					OperationOutcomeUtil.getFirstIssueDiagnostics(myFhirContext, theOutcome.getOperationOutcome());
-			throw new PreconditionFailedException(Msg.code(574) + firstIssue, theOutcome.getOperationOutcome());
+			throw new UnprocessableEntityException(Msg.code(574) + firstIssue, theOutcome.getOperationOutcome());
 		}
-		throw new PreconditionFailedException(Msg.code(575) + theOutcome.getFailureDescription());
+		throw new UnprocessableEntityException(Msg.code(575) + theOutcome.getFailureDescription());
 	}
 }
