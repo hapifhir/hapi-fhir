@@ -1,4 +1,4 @@
 ---
-type: fix
+type: security
 issue: 3394
 title: "Bulk export permissions were over-permissive in RuleBulkExportImpl. This has been corrected."
