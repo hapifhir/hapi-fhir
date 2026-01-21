@@ -9,6 +9,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
+import ca.uhn.fhir.batch2.jobs.export.v3.ExpandResourceAndWriteBinaryStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
@@ -22,6 +23,7 @@ import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -44,8 +46,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -67,7 +67,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static org.apache.commons.lang3.StringUtils.leftPad;
@@ -125,6 +124,9 @@ public class ExpandResourceAndWriteBinaryStepTest {
 	@Spy
 	private InterceptorService myInterceptorService = new InterceptorService();
 
+	@Spy
+	private PartitionSettings myPartitionSettings = new PartitionSettings();
+
 	@SuppressWarnings("unused")
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
@@ -150,15 +152,12 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		ourLog.detachAppender(myAppender);
 	}
 
-	private BulkExportJobParameters createParameters(boolean thePartitioned) {
+	private BulkExportJobParameters createParameters() {
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
 		parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
 		parameters.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		parameters.setOutputFormat("json");
 		parameters.setSince(new Date());
-		if (thePartitioned) {
-			parameters.setPartitionId(RequestPartitionId.fromPartitionName("Partition-A"));
-		}
 		return parameters;
 	}
 
@@ -212,7 +211,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 
 		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> input = createInput(
 			idList,
-			createParameters(false),
+			createParameters(),
 			instance
 		);
 
@@ -248,6 +247,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 				methodOutcome.setId(binaryId);
 				return methodOutcome;
 			});
+		when(myJobStepExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
 
 		// test
 		RunOutcome outcome = myFinalStep.run(input, sink);
@@ -279,7 +279,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 
 		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> input = createInput(
 			idList,
-			createParameters(false),
+			createParameters(),
 			instance
 		);
 
@@ -315,6 +315,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 				methodOutcome.setId(binaryId);
 				return methodOutcome;
 			});
+		when(myJobStepExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
 
 		// test
 		RunOutcome outcome = myFinalStep.run(input, sink);
@@ -346,9 +347,8 @@ public class ExpandResourceAndWriteBinaryStepTest {
 	}
 
 
-	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	public void run_validInputNoErrors_succeeds(boolean thePartitioned) {
+	@Test
+	public void run_validInputNoErrors_succeeds() {
 		// setup
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("1");
@@ -359,7 +359,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 
 		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> input = createInput(
 			idList,
-			createParameters(thePartitioned),
+			createParameters(),
 			instance
 		);
 
@@ -383,6 +383,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 			.thenReturn(binaryDao);
 		when(binaryDao.update(any(IBaseBinary.class), any(RequestDetails.class)))
 			.thenReturn(methodOutcome);
+		when(myJobStepExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
 
 		// test
 		RunOutcome outcome = myFinalStep.run(input, sink);
@@ -394,9 +395,6 @@ public class ExpandResourceAndWriteBinaryStepTest {
 			.update(binaryCaptor.capture(), binaryDaoCreateRequestDetailsCaptor.capture());
 		String outputString = new String(binaryCaptor.getValue().getContent());
 		assertEquals(resources.size(), StringUtils.countOccurrencesOf(outputString, "\n"));
-		if (thePartitioned) {
-			assertEquals(getPartitionId(thePartitioned), binaryDaoCreateRequestDetailsCaptor.getValue().getRequestPartitionId());
-		}
 
 		ArgumentCaptor<BulkExportBinaryFileId> fileIdArgumentCaptor = ArgumentCaptor.forClass(BulkExportBinaryFileId.class);
 		verify(sink)
@@ -442,7 +440,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 
 		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> input = createInput(
 			idList,
-			createParameters(false),
+			createParameters(),
 			instance
 		);
 		ourLog.setLevel(Level.ERROR);
