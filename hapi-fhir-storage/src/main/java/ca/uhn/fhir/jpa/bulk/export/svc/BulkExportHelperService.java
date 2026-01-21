@@ -56,11 +56,11 @@ public class BulkExportHelperService {
 			RuntimeResourceDefinition theDef, ExportPIDIteratorParameters theParams, boolean theConsiderDateRange) {
 		String resourceType = theDef.getName();
 		List<String> typeFilters = theParams.getFilters();
-		List<SearchParameterMap> spMaps = null;
+		List<SearchParameterMap> spMaps;
 		spMaps = typeFilters.stream()
 				.filter(typeFilter -> typeFilter.startsWith(resourceType + "?"))
 				.map(filter -> buildSearchParameterMapForTypeFilter(
-						filter, theDef, theParams.getStartDate(), theParams.getEndDate()))
+						filter, theDef, theParams.getStartDate(), theParams.getEndDate(), theConsiderDateRange))
 				.collect(Collectors.toList());
 
 		typeFilters.stream().filter(filter -> !filter.contains("?")).forEach(filter -> {
@@ -82,9 +82,15 @@ public class BulkExportHelperService {
 	}
 
 	private SearchParameterMap buildSearchParameterMapForTypeFilter(
-			String theFilter, RuntimeResourceDefinition theDef, Date theStartDate, Date theEndDate) {
+			String theFilter,
+			RuntimeResourceDefinition theDef,
+			Date theStartDate,
+			Date theEndDate,
+			boolean theConsiderDateRange) {
 		SearchParameterMap searchParameterMap = myMatchUrlService.translateMatchUrl(theFilter, theDef);
-		addLastUpdatedFilter(searchParameterMap, theStartDate, theEndDate);
+		if (theConsiderDateRange) {
+			addLastUpdatedFilter(searchParameterMap, theStartDate, theEndDate);
+		}
 		return searchParameterMap;
 	}
 

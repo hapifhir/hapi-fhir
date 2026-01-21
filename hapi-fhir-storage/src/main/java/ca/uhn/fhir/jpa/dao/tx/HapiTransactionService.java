@@ -266,32 +266,36 @@ public class HapiTransactionService implements IHapiTransactionService {
 			previousRequestPartitionId = ourRequestPartitionThreadLocal.get();
 			ourRequestPartitionThreadLocal.set(requestPartitionId);
 		}
-
-		ourLog.trace("Starting doExecute for RequestPartitionId {}", requestPartitionId);
-		if (isCompatiblePartition(previousRequestPartitionId, requestPartitionId)) {
-			if (ourExistingTransaction.get() == this && canReuseExistingTransaction(theExecutionBuilder)) {
-				/*
-				 * If we're already in an active transaction, and it's for the right partition,
-				 * and it's not a read-only transaction, we don't need to open a new transaction
-				 * so let's just add a method to the stack trace that makes this obvious.
-				 */
-				return executeInExistingTransaction(theCallback);
-			}
-		}
-
-		HapiTransactionService previousExistingTransaction = ourExistingTransaction.get();
 		try {
-			ourExistingTransaction.set(this);
 
-			if (isRequiresNewTransactionWhenChangingPartitions()) {
-				return executeInNewTransactionForPartitionChange(
-						theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
-			} else {
-				return doExecuteInTransaction(
-						theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+			ourLog.trace("Starting doExecute for RequestPartitionId {}", requestPartitionId);
+			if (isCompatiblePartition(previousRequestPartitionId, requestPartitionId)) {
+				if (ourExistingTransaction.get() == this && canReuseExistingTransaction(theExecutionBuilder)) {
+					/*
+					 * If we're already in an active transaction, and it's for the right partition,
+					 * and it's not a read-only transaction, we don't need to open a new transaction
+					 * so let's just add a method to the stack trace that makes this obvious.
+					 */
+					return executeInExistingTransaction(theCallback);
+				}
+			}
+
+			HapiTransactionService previousExistingTransaction = ourExistingTransaction.get();
+			try {
+				ourExistingTransaction.set(this);
+
+				if (isRequiresNewTransactionWhenChangingPartitions()) {
+					return executeInNewTransactionForPartitionChange(
+							theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+				} else {
+					return doExecuteInTransaction(
+							theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+				}
+			} finally {
+				ourExistingTransaction.set(previousExistingTransaction);
 			}
 		} finally {
-			ourExistingTransaction.set(previousExistingTransaction);
+			ourRequestPartitionThreadLocal.set(previousRequestPartitionId);
 		}
 	}
 

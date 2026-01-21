@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.export;
+package ca.uhn.fhir.batch2.jobs.export.v1;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
@@ -7,6 +7,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
+import ca.uhn.fhir.batch2.jobs.export.v2.FetchResourceIdsV2Step;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -51,8 +52,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class FetchResourceIdsStepTest {
-	private static final Logger ourLog = (Logger) LoggerFactory.getLogger(FetchResourceIdsStep.class);
+public class FetchResourceIdsV2StepTest {
+	private static final Logger ourLog = (Logger) LoggerFactory.getLogger(FetchResourceIdsV2Step.class);
 
 	@Mock
 	private ListAppender<ILoggingEvent> myAppender;
@@ -61,7 +62,7 @@ public class FetchResourceIdsStepTest {
 	private IBulkExportProcessor<JpaPid> myBulkExportProcessor;
 
 	@InjectMocks
-	private FetchResourceIdsStep myFirstStep;
+	private FetchResourceIdsV2Step myFirstStep;
 	@Mock
 	private JpaStorageSettings myStorageSettings;
 
@@ -88,9 +89,9 @@ public class FetchResourceIdsStepTest {
 		jobParameters.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		jobParameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
 		if (thePartitioned) {
-			jobParameters.setPartitionId(RequestPartitionId.fromPartitionName("Partition-A"));
+			jobParameters.setPartitionIdForSecurity(RequestPartitionId.fromPartitionName("Partition-A"));
 		} else {
-			jobParameters.setPartitionId(RequestPartitionId.allPartitions());
+			jobParameters.setPartitionIdForSecurity(RequestPartitionId.allPartitions());
 		}
 		return jobParameters;
 	}
@@ -182,8 +183,8 @@ public class FetchResourceIdsStepTest {
 		ArgumentCaptor<ExportPIDIteratorParameters> mapppedParamsCaptor = ArgumentCaptor.forClass(ExportPIDIteratorParameters.class);
 		verify(myBulkExportProcessor, times(2)).getResourcePidIterator(mapppedParamsCaptor.capture());
 		List<ExportPIDIteratorParameters> capturedParameters = mapppedParamsCaptor.getAllValues();
-		assertEquals(parameters.getPartitionId(), capturedParameters.get(0).getPartitionIdOrAllPartitions());
-		assertEquals(parameters.getPartitionId(), capturedParameters.get(1).getPartitionIdOrAllPartitions());
+		assertEquals(parameters.getPartitionIdForSecurity(), capturedParameters.get(0).getPartitionIdOrAllPartitions());
+		assertEquals(parameters.getPartitionIdForSecurity(), capturedParameters.get(1).getPartitionIdOrAllPartitions());
 	}
 
 	@Test
