@@ -43,6 +43,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -167,9 +168,11 @@ public class ResourceMergeServiceTest {
 			myMergeResourceHelper);
 	}
 
-	// SUCCESS CASES
-	@Test
-	void testMerge_WithoutResultResource_Success() {
+	@Nested
+	class SuccessfulMerge {
+
+		@Test
+		void testMerge_WithoutResultResource_Success() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
 		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
@@ -483,7 +486,7 @@ public class ResourceMergeServiceTest {
 		"true, true",
 		"false, false"
 	})
-	void testMerge_AsyncBecauseOfPreferHeader_Success(boolean theWithResultResource, boolean theWithDeleteSource) {
+	void testMerge_Async_Success(boolean theWithResultResource, boolean theWithDeleteSource) {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
 		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
@@ -515,16 +518,20 @@ public class ResourceMergeServiceTest {
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
-	//  ERROR CASES
-	@ParameterizedTest
-	@CsvSource({
-		"true, false",
-		"false, true",
-		"true, true",
-		"false, false"
-	})
-	void testMerge_SyncRequest_ReplaceReferencesThrowsPreconditionFailedException_TheExceptionReturnedToClientInOutcome(boolean theWithResultResource,
-																														boolean theWithDeleteSource) {
+	}
+
+	@Nested
+	class ExceptionHandling {
+
+		@ParameterizedTest
+		@CsvSource({
+			"true, false",
+			"false, true",
+			"true, true",
+			"false, false"
+		})
+		void testMerge_SyncRequest_ReplaceReferencesThrowsPreconditionFailedException_TheExceptionReturnedToClientInOutcome(boolean theWithResultResource,
+																															boolean theWithDeleteSource) {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
 		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
@@ -614,9 +621,14 @@ public class ResourceMergeServiceTest {
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
-	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	void testMerge_ValidatesInputParameters_MissingSourcePatientParams_ReturnsErrorWith400Status(boolean thePreview) {
+	}
+
+	@Nested
+	class InputParameterValidation {
+
+		@ParameterizedTest
+		@ValueSource(booleans = {true, false})
+		void testMerge_ValidatesInputParameters_MissingSourcePatientParams_ReturnsErrorWith400Status(boolean thePreview) {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
 		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
@@ -807,9 +819,14 @@ public class ResourceMergeServiceTest {
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
-	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	void testMerge_ResolvesSourceResourceByReference_ResourceNotFound_ReturnsErrorWith422Status(boolean thePreview) {
+	}
+
+	@Nested
+	class ResourceResolution {
+
+		@ParameterizedTest
+		@ValueSource(booleans = {true, false})
+		void testMerge_ResolvesSourceResourceByReference_ResourceNotFound_ReturnsErrorWith422Status(boolean thePreview) {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
 		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
@@ -1061,9 +1078,14 @@ public class ResourceMergeServiceTest {
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
-	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	void testMerge_SourceAndTargetResolvesToSameResource_ReturnsErrorWith422Status(boolean thePreview) {
+	}
+
+	@Nested
+	class ResourceStateValidation {
+
+		@ParameterizedTest
+		@ValueSource(booleans = {true, false})
+		void testMerge_SourceAndTargetResolvesToSameResource_ReturnsErrorWith422Status(boolean thePreview) {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
 		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
@@ -1211,9 +1233,14 @@ public class ResourceMergeServiceTest {
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
-	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	void testMerge_ValidatesResultResource_ResultResourceHasDifferentIdThanTargetResource_ReturnsErrorWith400Status(boolean thePreview) {
+	}
+
+	@Nested
+	class ResultResourceValidation {
+
+		@ParameterizedTest
+		@ValueSource(booleans = {true, false})
+		void testMerge_ValidatesResultResource_ResultResourceHasDifferentIdThanTargetResource_ReturnsErrorWith400Status(boolean thePreview) {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
 		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
@@ -1421,6 +1448,8 @@ public class ResourceMergeServiceTest {
 		assertThat(issue.getDiagnostics()).contains("'result-patient' has multiple 'replaces' links to the source resource. There should be only one.");
 
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
+	}
+
 	}
 
 	private void verifySuccessfulOutcomeForSync(MergeOperationOutcome theMergeOutcome, Patient theExpectedTargetResource) {
