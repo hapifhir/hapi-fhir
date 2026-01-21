@@ -141,8 +141,9 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 		ChannelProducerSettings channelSettings = new ChannelProducerSettings();
 		channelSettings.setQualifyChannelName(false);
 
-		IChannelProducer<ResourceModifiedMessage> producer = myChannelProducerMap
-			.computeIfAbsent(queueName, key -> myBrokerClient.getOrCreateProducer(key, ResourceModifiedJsonMessage.class, channelSettings));
+		IChannelProducer<ResourceModifiedMessage> producer = myChannelProducerMap.computeIfAbsent(
+				queueName,
+				key -> myBrokerClient.getOrCreateProducer(key, ResourceModifiedJsonMessage.class, channelSettings));
 
 		// Grab the payload type (encoding mimetype) from the subscription
 		String payloadString = subscription.getPayloadString();
