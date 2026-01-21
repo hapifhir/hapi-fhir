@@ -75,7 +75,7 @@ public class ExportPIDIteratorParameters {
 	/**
 	 * For group export - whether or not to expand mdm
 	 */
-	private Boolean myExpandMdm;
+	private boolean myExpandMdm;
 	/**
 	 * The patient id
 	 */
@@ -163,10 +163,10 @@ public class ExportPIDIteratorParameters {
 	}
 
 	public boolean isExpandMdm() {
-		return Boolean.TRUE.equals(myExpandMdm);
+		return myExpandMdm;
 	}
 
-	public void setExpandMdm(Boolean theExpandMdm) {
+	public void setExpandMdm(boolean theExpandMdm) {
 		myExpandMdm = theExpandMdm;
 	}
 
