@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTablePk;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -16,9 +17,11 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -55,5 +58,26 @@ public class JpaResourceExpungeServiceTest {
 		when(resourceTable.getId()).thenReturn(new JpaPid());
 		myService.expungeCurrentVersionOfResource(myRequestDetails, JpaPid.fromId(1L), new AtomicInteger(1));
 		verify(myService, never()).deleteAllSearchParams(any());
+	}
+
+
+	@Test
+	public void testExpungeHistoricalVersions_missingEntry_throwsWithContextualMessage() {
+		// given
+		ResourceHistoryTablePk pk = new ResourceHistoryTablePk();
+		pk.setPartitionIdValue(42);
+		pk.setId(123L);
+
+		when(myResourceHistoryTableDao.findById(pk)).thenReturn(Optional.empty());
+
+		AtomicInteger remaining = new AtomicInteger(1);
+
+		// when + then
+		assertThatThrownBy(() ->
+			myService.expungeHistoricalVersions(myRequestDetails, Collections.singletonList(pk), remaining))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("No historical version found")
+			.hasMessageContaining("ResourceHistoryTablePk: 123")
+			.hasMessageContaining("partition 42");
 	}
 }
