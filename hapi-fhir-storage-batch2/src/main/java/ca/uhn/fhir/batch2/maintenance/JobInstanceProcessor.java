@@ -34,7 +34,6 @@ import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.model.api.PagingIterator;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
 import jakarta.annotation.Nonnull;
@@ -43,7 +42,6 @@ import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -275,17 +273,6 @@ public class JobInstanceProcessor {
 		return workChunkStatuses.equals(Set.of(WorkChunkStatusEnum.COMPLETED));
 	}
 
-	protected PagingIterator<WorkChunkMetadata> getReadyChunks() {
-		return new PagingIterator<>(WORK_CHUNK_METADATA_BATCH_SIZE, (index, batchsize, consumer) -> {
-			Pageable pageable = Pageable.ofSize(batchsize).withPage(index);
-			Page<WorkChunkMetadata> results = myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(
-					pageable, myInstanceId, Set.of(WorkChunkStatusEnum.READY));
-			for (WorkChunkMetadata metadata : results) {
-				consumer.accept(metadata);
-			}
-		});
-	}
-
 	/**
 	 * Trigger the reduction step for the given job instance. Reduction step chunks should never be queued.
 	 */
@@ -301,27 +288,56 @@ public class JobInstanceProcessor {
 	 * for processing.
 	 */
 	private void enqueueReadyChunks(JobInstance theJobInstance, JobDefinition<?> theJobDefinition) {
-		Iterator<WorkChunkMetadata> iter = getReadyChunks();
+		// timebox to prevent unusual amount of time updating resources
+		long minuteMS = 60 * 1000;
+		long deadline = System.currentTimeMillis() + DateUtils.MILLIS_PER_MINUTE;
+		boolean done = false;
+		do {
+			// Paginator has an issue keeping worker nodes saturated due to processing workloads a page at a time
+			// PageNumber '0' is hardcoded to re-saturate 10k records to process at a time instead
+			// Each consecutive request for results will be the next 10k records needing updating (no paging needed)
+			// Recommend this eventually moves to java stream once architecture supports the change
+			Pageable pageable = Pageable.ofSize(WORK_CHUNK_METADATA_BATCH_SIZE).withPage(0);
+			Page<WorkChunkMetadata> results = myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(
+					pageable, myInstanceId, Set.of(WorkChunkStatusEnum.READY));
+			if (results.isEmpty()) {
+				done = true;
+			}
+			int counter = 0;
 
-		int counter = 0;
-		while (iter.hasNext()) {
-			WorkChunkMetadata metadata = iter.next();
+			if (!done) {
+				for (WorkChunkMetadata metadata : results) {
+					/*
+					 * For each chunk id
+					 * * Move to QUEUE'd
+					 * * Send to topic
+					 * * flush changes
+					 * * commit
+					 */
+					updateChunkAndSendToQueue(metadata);
+					counter++;
+				}
+			}
+			// catch to prevent unlimited looping
+			if (counter < WORK_CHUNK_METADATA_BATCH_SIZE) {
+				done = true;
+			}
+			ourLog.debug(
+					"Encountered {} READY work chunks for job {} of type {}",
+					counter,
+					theJobInstance.getInstanceId(),
+					theJobDefinition.getJobDefinitionId());
 
-			/*
-			 * For each chunk id
-			 * * Move to QUEUE'd
-			 * * Send to topic
-			 * * flush changes
-			 * * commit
-			 */
-			updateChunkAndSendToQueue(metadata);
-			counter++;
-		}
-		ourLog.debug(
-				"Encountered {} READY work chunks for job {} of type {}",
-				counter,
-				theJobInstance.getInstanceId(),
-				theJobDefinition.getJobDefinitionId());
+			// Log warning and exit if deadline is exceeded
+			if (System.currentTimeMillis() >= deadline) {
+				ourLog.warn(
+						"Deadline exceeded while processing job {} of type {}. Some chunks may not have been processed.",
+						theJobInstance.getInstanceId(),
+						theJobDefinition.getJobDefinitionId());
+				break;
+			}
+
+		} while (!done);
 	}
 
 	/**
