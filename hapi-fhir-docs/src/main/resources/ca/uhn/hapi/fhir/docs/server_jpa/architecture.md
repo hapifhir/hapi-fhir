@@ -14,7 +14,7 @@ The HAPI JPA Server has the following components:
 
 * **Hibernate:** The HAPI JPA Server uses the JPA library, implemented by Hibernate. No Hibernate specific features are used, so the library should also work with other providers (e.g. Eclipselink) but it is not tested regularly with them.
 
-* **Database:** The RESTful server uses an embedded Derby database, but can be configured to talk to [any database supported by Hibernate](https://developer.jboss.org/wiki/SupportedDatabases2?_sscc=t).
+* **Database:** The RESTful server uses an embedded Derby database, but can be configured to talk to [any database supported by Hibernate](https://github.com/hibernate/hibernate-orm/blob/main/dialects.adoc).
 
 # Schema
 
