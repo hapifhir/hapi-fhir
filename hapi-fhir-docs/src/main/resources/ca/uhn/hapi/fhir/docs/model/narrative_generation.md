@@ -140,3 +140,14 @@ For example:
 ```html
 {{snippet:classpath:ca/uhn/fhir/narrative/narratives-with-fhirpath-evaluate-single-primitive.html}}
 ```
+
+
+# Utilities in Thymeleaf Templates
+## Null-Safe Access
+
+Thymeleaf doesn't have a built-in way to avoid `null` values, so the `nullSafeAccess` utility can be used as follows:
+
+```html
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/snippet/null-safe-narrativeutil.html}}
+```
+to optimistically access deeply nested values succinctly.
