@@ -167,12 +167,12 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 					counter.addAndGet(doExpungeEverythingQuery(
 							"UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null"));
 				});
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, Batch2WorkChunkEntity.class, requestPartitionId));
+		// Delete Batch2 entities together in a loop to handle FK constraints.
+		// Work chunks have FK to job instances, so both must be deleted in the same
+		// transaction to prevent race conditions with job maintenance creating new chunks.
+		counter.addAndGet(expungeBatch2EntitiesInSingleTransaction(theRequest, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
 				theRequest, ResourceIdentifierPatientUniqueEntity.class, requestPartitionId));
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, Batch2JobInstanceEntity.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
 				theRequest, NpmPackageVersionResourceEntity.class, requestPartitionId));
 		counter.addAndGet(
@@ -403,6 +403,48 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		StopWatch sw = new StopWatch();
 		int outcome = myEntityManager.createQuery(theQuery).executeUpdate();
 		ourLog.debug("SqlQuery affected {} rows in {}: {}", outcome, sw, theQuery);
+		return outcome;
+	}
+
+	/**
+	 * Deletes Batch2WorkChunkEntity and Batch2JobInstanceEntity together in the same transaction
+	 * to avoid FK constraint violations from race conditions with job maintenance.
+	 * Work chunks have a foreign key (FK_BT2WC_INSTANCE) referencing job instances.
+	 *
+	 * The race condition occurs when job maintenance creates new work chunks for completed
+	 * jobs (that haven't had chunks purged yet) between the separate delete transactions.
+	 */
+	// Created by claude-sonnet-4-5
+	private int expungeBatch2EntitiesInSingleTransaction(
+			RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+		HapiTransactionService.noTransactionAllowed();
+
+		int outcome = 0;
+		while (true) {
+			StopWatch sw = new StopWatch();
+
+			int count = myTxService
+					.withRequest(theRequest)
+					.withPropagation(Propagation.REQUIRES_NEW)
+					.withRequestPartitionId(theRequestPartitionId)
+					.execute(() -> {
+						int deleted = 0;
+						// Delete work chunks first (child with FK), then job instances (parent)
+						// Both in same transaction to prevent race condition
+						deleted +=
+								doExpungeEverythingQuery("DELETE FROM " + Batch2WorkChunkEntity.class.getSimpleName());
+						deleted += doExpungeEverythingQuery(
+								"DELETE FROM " + Batch2JobInstanceEntity.class.getSimpleName());
+						return deleted;
+					});
+
+			outcome += count;
+			if (count == 0) {
+				break;
+			}
+
+			ourLog.info("Have deleted {} Batch2 entities in {}", outcome, sw);
+		}
 		return outcome;
 	}
 }
