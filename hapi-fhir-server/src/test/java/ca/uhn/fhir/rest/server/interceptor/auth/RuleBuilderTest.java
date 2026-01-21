@@ -3,7 +3,9 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import com.google.common.collect.Lists;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -234,4 +236,64 @@ public class RuleBuilderTest {
 		ruleBuilder.allow().createConditional().resourcesOfType("anystring").withTester(writeAccessTester).andThen();
 	}
 
+	@Nested
+	class OperationRuleWithInstanceFilterTest {
+
+		// Used because FHIR structure classes aren't accessible here
+		Class<IBaseResource> STUB_RESOURCE_TYPE = IBaseResource.class;
+
+		static Stream<String> filterParams() {
+			return Stream.of("param=value", "", null);
+		}
+
+		@ParameterizedTest
+		@MethodSource("filterParams")
+		void testOperation_onInstancesOfTypeMatchingOptionalFilter_withFilter(String theFilter) {
+			// Given
+			RuleBuilder builder = new RuleBuilder();
+			builder.allow()
+				.operation()
+				.named("$some-operation")
+				.onInstancesOfTypeMatchingOptionalFilter(STUB_RESOURCE_TYPE, theFilter)
+				.andAllowAllResponses()
+				.andThen();
+
+			// When
+			OperationRule rule = buildSingleOperationRule(builder);
+
+			// Then
+			assertThat(rule.getOperationName()).isEqualTo("$some-operation");
+			assertThat(rule.getAppliesToInstancesOfType()).containsExactly(STUB_RESOURCE_TYPE);
+			assertThat(rule.getInstanceFilter()).isEqualTo(theFilter);
+		}
+
+		@ParameterizedTest
+		@MethodSource("filterParams")
+		void testOperation_onAnyInstanceMatchingOptionalFilter_withFilter(String theFilter) {
+			// Given
+			RuleBuilder builder = new RuleBuilder();
+			builder.allow()
+				.operation()
+				.named("$some-operation")
+				.onAnyInstanceMatchingOptionalFilter(theFilter)
+				.andAllowAllResponses()
+				.andThen();
+
+			// When
+			OperationRule operationRule = buildSingleOperationRule(builder);
+
+			// then
+			assertThat(operationRule.getOperationName()).isEqualTo("$some-operation");
+			assertThat(operationRule.isAppliesToAnyInstance()).isTrue();
+			assertThat(operationRule.getInstanceFilter()).isEqualTo(theFilter);
+		}
+
+		private OperationRule buildSingleOperationRule(RuleBuilder theBuilder){
+			List<IAuthRule> rules = theBuilder.build();
+			assertThat(rules).hasSize(1);
+			IAuthRule rule = rules.get(0);
+			assertInstanceOf(OperationRule.class, rule);
+			return (OperationRule) rule;
+		}
+	}
 }

@@ -20,6 +20,7 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
@@ -29,17 +30,23 @@ import com.google.common.annotations.VisibleForTesting;
 import org.apache.http.NameValuePair;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS;
 import static ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum.ALLOW;
 import static ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum.DENY;
 
 public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRuleBulkExportByCompartmentMatcher {
+	private static final Logger ourLog = LoggerFactory.getLogger(RulePatientBulkExportByCompartmentMatcherImpl.class);
+
 	private List<String> myPatientMatcherFilter;
 	private List<Set<NameValuePair>> myTokenizedPatientMatcherFilter;
 
@@ -95,10 +102,26 @@ public class RulePatientBulkExportByCompartmentMatcherImpl extends BaseRuleBulkE
 			}
 		}
 
-		List<IBaseResource> patients =
-				theRuleApplier.getAuthResourceResolver().resolveResourcesByIds(patientIdOptions, "Patient");
+		List<IBaseResource> patients;
+		IAuthResourceResolver resourceResolver = theRuleApplier.getAuthResourceResolver();
+		if (resourceResolver == null) {
+			ourLog.warn("No IAuthResourceResolver is configured.");
+			patients = Collections.emptyList();
+		} else {
+			List<IIdType> patientIds = toPatientIds(patientIdOptions);
+			patients = resourceResolver.resolveResourcesByIds(theRequestDetails, patientIds);
+		}
 
 		return applyTestersToPatientResources(theOperation, theRequestDetails, theRuleApplier, patients);
+	}
+
+	private List<IIdType> toPatientIds(List<String> theIds) {
+		return theIds.stream()
+				.map(id -> {
+					IdDt idType = new IdDt(id);
+					return idType.hasResourceType() ? idType : idType.withResourceType("Patient");
+				})
+				.collect(Collectors.toList());
 	}
 
 	/**

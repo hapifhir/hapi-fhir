@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.jobs.imprt;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
@@ -59,6 +60,8 @@ public class FetchFilesStepTest {
 
 	@Mock
 	private IJobDataSink<NdJsonFileJson> myJobDataSink;
+	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
 	@Captor
 	private ArgumentCaptor<NdJsonFileJson> myFileCaptorCaptor;
 
@@ -78,7 +81,7 @@ public class FetchFilesStepTest {
 		BulkImportJobParameters parameters = new BulkImportJobParameters()
 			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
 			.setHttpBasicCredentials("admin:password");
-		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, ourTestInstance, new WorkChunk().setId(CHUNK_ID));
+		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
 
 		// Test
 
@@ -106,7 +109,7 @@ public class FetchFilesStepTest {
 		BulkImportJobParameters parameters = new BulkImportJobParameters()
 			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
 			.setMaxBatchResourceCount(3);
-		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, ourTestInstance, new WorkChunk().setId(CHUNK_ID));
+		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
 
 		// Test
 
@@ -128,7 +131,7 @@ public class FetchFilesStepTest {
 		BulkImportJobParameters parameters = new BulkImportJobParameters()
 			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
 			.setHttpBasicCredentials("admin");
-		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, ourTestInstance, new WorkChunk().setId(CHUNK_ID));
+		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
 
 		// Test & Verify
 
@@ -163,7 +166,7 @@ public class FetchFilesStepTest {
 			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + id)
 			.setMaxBatchResourceCount(2)
 			.setChunkByCompartmentName("Patient");
-		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, ourTestInstance, new WorkChunk().setId(CHUNK_ID));
+		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
 
 		// Test
 
@@ -172,7 +175,7 @@ public class FetchFilesStepTest {
 		// Verify
 
 		verify(myJobDataSink, times(2)).accept(myFileCaptorCaptor.capture());
-		List<String> idBatches = myFileCaptorCaptor.getAllValues().stream().map(t -> toIdsString(t)).toList();
+		List<String> idBatches = myFileCaptorCaptor.getAllValues().stream().map(this::toIdsString).toList();
 		assertThat(idBatches).containsExactlyInAnyOrder(
 			"Encounter/encPatientANumber0 Encounter/encPatientANumber1",
 			"Encounter/encPatientBNumber0 Encounter/encPatientBNumber1"

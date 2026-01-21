@@ -21,9 +21,11 @@ package ca.uhn.fhir.batch2.jobs.bulkmodify.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyResourcesStep;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionJson;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexWarningProcessor;
@@ -61,8 +63,7 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 
 	@Override
 	protected void processPidsOutsideTransaction(
-			String theInstanceId,
-			String theChunkId,
+			StepExecutionDetails<ReindexJobParameters, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
 			ReindexJobParameters theJobParameters,
 			State theState,
 			List<TypedPidAndVersionJson> thePids,
@@ -86,8 +87,7 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 
 	@Override
 	protected void processPidsInTransaction(
-			String theInstanceId,
-			String theChunkId,
+			StepExecutionDetails<ReindexJobParameters, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
 			ReindexJobParameters theJobParameters,
 			State theState,
 			List<TypedPidAndVersionJson> thePids,
@@ -116,8 +116,8 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 				"Prefetched {} resources in {} - Instance[{}] Chunk[{}]",
 				persistentIds.size(),
 				sw,
-				theInstanceId,
-				theChunkId);
+				theStepExecutionDetails.getInstance().getInstanceId(),
+				theStepExecutionDetails.getChunkId());
 
 		ReindexParameters parameters = new ReindexParameters()
 				.setReindexSearchParameters(theJobParameters.getReindexSearchParameters())

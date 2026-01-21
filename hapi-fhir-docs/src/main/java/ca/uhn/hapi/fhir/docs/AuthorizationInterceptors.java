@@ -279,6 +279,31 @@ public class AuthorizationInterceptors {
 			}
 		};
 		// END SNIPPET: advancedCompartmentOmission
+
+		// START SNIPPET: instanceOperationWithFilter
+		new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+						// Allow the $meta operation on any Observation that has category=vital-signs
+						.allow()
+						.operation()
+						.named("$meta")
+						.onInstancesOfTypeMatchingOptionalFilter(
+								org.hl7.fhir.r4.model.Observation.class, "category=vital-signs")
+						.andAllowAllResponses()
+						.andThen()
+						// Allow the $meta operation on any resource instance that has a specific tag
+						.allow()
+						.operation()
+						.named("$meta")
+						.onAnyInstanceMatchingOptionalFilter("_tag=http://example.org|some-tag")
+						.andAllowAllResponses()
+						.andThen()
+						.build();
+			}
+		};
+		// END SNIPPET: instanceOperationWithFilter
 	}
 
 	@SuppressWarnings("InnerClassMayBeStatic")

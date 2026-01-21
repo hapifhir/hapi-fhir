@@ -147,7 +147,7 @@ public class BulkExportJobParametersBuilder {
 		result.setFilters(myFilters);
 		result.setGroupId(myGroupId);
 		result.setOutputFormat(myOutputFormat);
-		result.setPartitionId(myPartitionId);
+		result.setPartitionIdForSecurity(myPartitionId);
 		result.setPatientIds(myPatientIds);
 		result.setResourceTypes(myResourceTypes);
 		result.setSince(mySince);
