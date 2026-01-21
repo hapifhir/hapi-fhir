@@ -582,14 +582,7 @@ public class ResourceMergeServiceTest {
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(403);
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains("this is the exception message");
-		assertThat(issue.getCode().toCode()).isEqualTo("exception");
-
+		verifyErrorOutcome(mergeOutcome, 403, "this is the exception message", "exception");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -610,14 +603,7 @@ public class ResourceMergeServiceTest {
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(500);
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains("this is the exception message");
-		assertThat(issue.getCode().toCode()).isEqualTo("exception");
-
+		verifyErrorOutcome(mergeOutcome, 500, "this is the exception message", "exception");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -639,15 +625,7 @@ public class ResourceMergeServiceTest {
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(400);
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains(MISSING_SOURCE_PARAMS_MSG);
-		assertThat(issue.getCode().toCode()).isEqualTo("required");
-
+		verifyErrorOutcome(mergeOutcome, 400, MISSING_SOURCE_PARAMS_MSG, "required");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -665,16 +643,7 @@ public class ResourceMergeServiceTest {
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(400);
-
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains(MISSING_TARGET_PARAMS_MSG);
-		assertThat(issue.getCode().toCode()).isEqualTo("required");
-
+		verifyErrorOutcome(mergeOutcome, 400, MISSING_TARGET_PARAMS_MSG, "required");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -720,17 +689,7 @@ public class ResourceMergeServiceTest {
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(400);
-
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains(BOTH_SOURCE_PARAMS_PROVIDED_MSG);
-		assertThat(issue.getCode().toCode()).isEqualTo("required");
-
-
+		verifyErrorOutcome(mergeOutcome, 400, BOTH_SOURCE_PARAMS_PROVIDED_MSG, "required");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -749,16 +708,7 @@ public class ResourceMergeServiceTest {
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(400);
-
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains(BOTH_TARGET_PARAMS_PROVIDED_MSG);
-		assertThat(issue.getCode().toCode()).isEqualTo("required");
-
+		verifyErrorOutcome(mergeOutcome, 400, BOTH_TARGET_PARAMS_PROVIDED_MSG, "required");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -777,16 +727,7 @@ public class ResourceMergeServiceTest {
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(400);
-
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains("Reference specified in 'source-patient' parameter does not have a reference element.");
-		assertThat(issue.getCode().toCode()).isEqualTo("required");
-
+		verifyErrorOutcome(mergeOutcome, 400, "Reference specified in 'source-patient' parameter does not have a reference element.", "required");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -805,17 +746,7 @@ public class ResourceMergeServiceTest {
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(400);
-
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains("Reference specified in 'target-patient' parameter does not have " +
-			"a reference element.");
-		assertThat(issue.getCode().toCode()).isEqualTo("required");
-
+		verifyErrorOutcome(mergeOutcome, 400, "Reference specified in 'target-patient' parameter does not have a reference element.", "required");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -839,15 +770,7 @@ public class ResourceMergeServiceTest {
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(422);
-
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains("Resource not found for the reference specified in 'source-patient'");
-		assertThat(issue.getCode().toCode()).isEqualTo("not-found");
-
+		verifyErrorOutcome(mergeOutcome, 422, "Resource not found for the reference specified in 'source-patient'", "not-found");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -868,15 +791,7 @@ public class ResourceMergeServiceTest {
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(422);
-
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains("Resource not found for the reference specified in 'target-patient'");
-		assertThat(issue.getCode().toCode()).isEqualTo("not-found");
-
+		verifyErrorOutcome(mergeOutcome, 422, "Resource not found for the reference specified in 'target-patient'", "not-found");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -898,16 +813,7 @@ public class ResourceMergeServiceTest {
 
 		// Then
 		verifySearchParametersOnDaoSearchInvocations(List.of(List.of("sys|val1","sys|val2")));
-
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(422);
-
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains("No resources found matching the identifier(s) specified in 'source-patient-identifier'");
-		assertThat(issue.getCode().toCode()).isEqualTo("not-found");
-
+		verifyErrorOutcome(mergeOutcome, 422, "No resources found matching the identifier(s) specified in 'source-patient-identifier'", "not-found");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -932,17 +838,7 @@ public class ResourceMergeServiceTest {
 
 		// Then
 		verifySearchParametersOnDaoSearchInvocations(List.of(List.of("sys|val1")));
-
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(422);
-
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains("Multiple resources found matching the identifier(s) specified in" +
-			" 'source-patient-identifier'");
-		assertThat(issue.getCode().toCode()).isEqualTo("multiple-matches");
-
+		verifyErrorOutcome(mergeOutcome, 422, "Multiple resources found matching the identifier(s) specified in 'source-patient-identifier'", "multiple-matches");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -967,17 +863,7 @@ public class ResourceMergeServiceTest {
 
 		// Then
 		verifySearchParametersOnDaoSearchInvocations(List.of(List.of("sys|val1", "sys|val2")));
-
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(422);
-
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains("No resources found matching the identifier(s) specified in " +
-			"'target-patient-identifier'");
-		assertThat(issue.getCode().toCode()).isEqualTo("not-found");
-
+		verifyErrorOutcome(mergeOutcome, 422, "No resources found matching the identifier(s) specified in 'target-patient-identifier'", "not-found");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -1004,16 +890,7 @@ public class ResourceMergeServiceTest {
 
 		// Then
 		verifySearchParametersOnDaoSearchInvocations(List.of(List.of("sys|val1")));
-
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(422);
-
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains("Multiple resources found matching the identifier(s) specified in 'target-patient-identifier'");
-		assertThat(issue.getCode().toCode()).isEqualTo("multiple-matches");
-
+		verifyErrorOutcome(mergeOutcome, 422, "Multiple resources found matching the identifier(s) specified in 'target-patient-identifier'", "multiple-matches");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -1034,15 +911,7 @@ public class ResourceMergeServiceTest {
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(422);
-
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains("The reference in 'source-patient' parameter has a version specified, but it is not the latest version of the resource");
-		assertThat(issue.getCode().toCode()).isEqualTo("conflict");
-
+		verifyErrorOutcome(mergeOutcome, 422, "The reference in 'source-patient' parameter has a version specified, but it is not the latest version of the resource", "conflict");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -1065,16 +934,7 @@ public class ResourceMergeServiceTest {
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(422);
-
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains("The reference in 'target-patient' parameter has a version " +
-			"specified, but it is not the latest version of the resource");
-		assertThat(issue.getCode().toCode()).isEqualTo("conflict");
-
+		verifyErrorOutcome(mergeOutcome, 422, "The reference in 'target-patient' parameter has a version specified, but it is not the latest version of the resource", "conflict");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -1100,16 +960,8 @@ public class ResourceMergeServiceTest {
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
-
 		verifySearchParametersOnDaoSearchInvocations(List.of(List.of("sys|val1"), List.of("sys|val2")));
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(422);
-
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains("Source and target resources are the same resource.");
-
+		verifyErrorOutcome(mergeOutcome, 422, "Source and target resources are the same resource.", "invalid");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -1132,14 +984,7 @@ public class ResourceMergeServiceTest {
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(422);
-
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains("Target resource is not active, it must be active to be the target of a merge operation");
-
+		verifyErrorOutcome(mergeOutcome, 422, "Target resource is not active, it must be active to be the target of a merge operation", "invalid");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -1162,16 +1007,7 @@ public class ResourceMergeServiceTest {
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(422);
-
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains("Target resource was previously replaced by a resource with " +
-			"reference 'Patient/replacing-res-id', it is " +
-			"not a suitable target for merging.");
-
+		verifyErrorOutcome(mergeOutcome, 422, "Target resource was previously replaced by a resource with reference 'Patient/replacing-res-id', it is not a suitable target for merging.", "invalid");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -1194,15 +1030,7 @@ public class ResourceMergeServiceTest {
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(422);
-
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains("Source resource was previously replaced by a resource with " +
-			"reference 'Patient/replacing-res-id', it is not a suitable source for merging.");
-
+		verifyErrorOutcome(mergeOutcome, 422, "Source resource was previously replaced by a resource with reference 'Patient/replacing-res-id', it is not a suitable source for merging.", "invalid");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -1221,15 +1049,7 @@ public class ResourceMergeServiceTest {
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 		// Then
-		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
-		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(422);
-
-		assertThat(operationOutcome.getIssue()).hasSize(1);
-		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
-		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(issue.getDiagnostics()).contains("Merge operation cannot be performed on resource type 'OperationOutcome' because it does not have an 'identifier' element.");
-		assertThat(issue.getCode().toCode()).isEqualTo("invalid");
-
+		verifyErrorOutcome(mergeOutcome, 422, "Merge operation cannot be performed on resource type 'OperationOutcome' because it does not have an 'identifier' element.", "invalid");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
 
@@ -1461,6 +1281,17 @@ public class ResourceMergeServiceTest {
 		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
 		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
 		assertThat(issue.getDetails().getText()).contains(SUCCESSFUL_SYNC_MERGE_MSG);
+	}
+
+	private void verifyErrorOutcome(MergeOperationOutcome theMergeOutcome, int theExpectedStatus,
+									String theExpectedMessageContains, String theExpectedIssueCode) {
+		OperationOutcome operationOutcome = (OperationOutcome) theMergeOutcome.getOperationOutcome();
+		assertThat(theMergeOutcome.getHttpStatusCode()).isEqualTo(theExpectedStatus);
+		assertThat(operationOutcome.getIssue()).hasSize(1);
+		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
+		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+		assertThat(issue.getDiagnostics()).contains(theExpectedMessageContains);
+		assertThat(issue.getCode().toCode()).isEqualTo(theExpectedIssueCode);
 	}
 
 	private void verifySuccessfulOutcomeForAsync(MergeOperationOutcome theMergeOutcome, Task theExpectedTask) {
