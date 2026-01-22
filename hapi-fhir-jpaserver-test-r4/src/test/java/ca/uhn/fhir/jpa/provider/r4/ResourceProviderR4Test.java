@@ -3714,6 +3714,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				myResourceHistoryTableDao.delete(version);
 			}
 		});
+
 		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
 		Bundle bundle = myClient
