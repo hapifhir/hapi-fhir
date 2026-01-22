@@ -225,8 +225,7 @@ public class HapiFhirRepository implements IRepository {
 				theBundleProvider,
 				start,
 				bundleType,
-				thePagingAction
-		));
+				thePagingAction));
 	}
 
 	// TODO: The main use case for this is paging through Bundles, but I suppose that technically
