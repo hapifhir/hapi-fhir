@@ -260,21 +260,23 @@ public class HapiSchemaMigrationTest {
 			final DatabaseMetaData tableMetaData = connection.getMetaData();
 
 			final List<Map<String, String>> actualColumnResults = new ArrayList<>();
-			try (final ResultSet columnsResultSet = tableMetaData.getColumns(null, null, TABLE_HFJ_RES_SEARCH_URL, null)) {
+			try (final ResultSet columnsResultSet = tableMetaData.getColumns(null, null, getTableNameWithDbSpecificCase(driverType, TABLE_HFJ_RES_SEARCH_URL), null)) {
 				while (columnsResultSet.next()) {
 					final Map<String, String> columnMap = new HashMap<>();
 					actualColumnResults.add(columnMap);
 
+					// Oracle: COLUMN_DEF is a LONG column and must be read FIRST before other columns
+					// to avoid "ORA-17027: Stream has already been closed" error
+					extractAndAddToMap(columnsResultSet, columnMap, METADATA_DEFAULT_VALUE);
 					extractAndAddToMap(columnsResultSet, columnMap, METADATA_COLUMN_NAME);
 					extractAndAddToMap(columnsResultSet, columnMap, METADATA_DATA_TYPE);
 					extractAndAddToMap(columnsResultSet, columnMap, METADATA_IS_NULLABLE);
-					extractAndAddToMap(columnsResultSet, columnMap, METADATA_DEFAULT_VALUE);
 				}
 			}
 
 			final List<Map<String, String>> actualPrimaryKeyResults = new ArrayList<>();
 
-			try (final ResultSet primaryKeyResultSet = tableMetaData.getPrimaryKeys(null, null, TABLE_HFJ_RES_SEARCH_URL)) {
+			try (final ResultSet primaryKeyResultSet = tableMetaData.getPrimaryKeys(null, null, getTableNameWithDbSpecificCase(driverType, TABLE_HFJ_RES_SEARCH_URL))) {
 				while (primaryKeyResultSet.next()) {
 					final Map<String, String> primaryKeyMap = new HashMap<>();
 					actualPrimaryKeyResults.add(primaryKeyMap);
@@ -287,7 +289,7 @@ public class HapiSchemaMigrationTest {
 				Map.of(METADATA_COLUMN_NAME, COLUMN_PARTITION_ID)
 			);
 
-			assertThat(expectedPrimaryKeyResults).containsAll(actualPrimaryKeyResults);
+			assertThat(actualPrimaryKeyResults).containsAll(expectedPrimaryKeyResults);
 
 			final List<Map<String, String>> expectedColumnResults = List.of(
 				addExpectedColumnMetadata(COLUMN_RES_SEARCH_URL, Integer.toString(Types.VARCHAR), METADATA_IS_NULLABLE_NO, null),
@@ -297,7 +299,7 @@ public class HapiSchemaMigrationTest {
 				addExpectedColumnMetadata(COLUMN_PARTITION_DATE, getExpectedSqlTypeForPartitionDate(driverType), METADATA_IS_NULLABLE_YES, null)
 			);
 
-			assertThat(expectedColumnResults).containsAll(actualColumnResults);
+			assertThat(actualColumnResults).containsAll(expectedColumnResults);
 		}
 	}
 
@@ -339,10 +341,12 @@ public class HapiSchemaMigrationTest {
 					final Map<String, String> columnMap = new HashMap<>();
 					actualColumnResults.add(columnMap);
 
+					// Oracle: COLUMN_DEF is a LONG column and must be read FIRST before other columns
+					// to avoid "ORA-17027: Stream has already been closed" error
+					extractAndAddToMap(columnsResultSet, columnMap, METADATA_DEFAULT_VALUE);
 					extractAndAddToMap(columnsResultSet, columnMap, METADATA_COLUMN_NAME);
 					extractAndAddToMap(columnsResultSet, columnMap, METADATA_DATA_TYPE);
 					extractAndAddToMap(columnsResultSet, columnMap, METADATA_IS_NULLABLE);
-					extractAndAddToMap(columnsResultSet, columnMap, METADATA_DEFAULT_VALUE);
 				}
 
 				assertThat(actualColumnResults).contains(addExpectedColumnMetadata(COLUMN_VAL, Integer.toString(Types.VARCHAR), METADATA_IS_NULLABLE_YES, null));
@@ -393,6 +397,7 @@ public class HapiSchemaMigrationTest {
 	private void extractAndAddToMap(ResultSet theResultSet, Map<String, String> theMap, String theColumn) throws SQLException {
 		theMap.put(theColumn, Optional.ofNullable(theResultSet.getString(theColumn))
 			.map(defaultValueNonNull -> defaultValueNonNull.equals("((-1))") ? "-1" : defaultValueNonNull) // MSSQL returns "((-1))" for default value
+			.map(defaultValueNonNull -> defaultValueNonNull.equals("'-1'::integer") ? "-1" : defaultValueNonNull) // Postgres returns "'-1'::integer" for default value
 			.map(String::toUpperCase)
 			.orElse(NULL_PLACEHOLDER));
 	}
