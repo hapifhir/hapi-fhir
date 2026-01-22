@@ -45,8 +45,6 @@ import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.server.method.PageMethodBinding;
-import ca.uhn.fhir.rest.server.method.ResponseBundleBuilder;
-import ca.uhn.fhir.rest.server.method.ResponseBundleRequest;
 import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -218,20 +216,17 @@ public class HapiFhirRepository implements IRepository {
 			bundleType = BundleTypeEnum.SEARCHSET;
 		}
 
-		ResponseBundleRequest bundleRequest = new ResponseBundleRequest(
+		return unsafeCast(BundleProviderUtil.createBundleFromBundleProvider(
 				myRestfulServer,
-				theBundleProvider,
 				theRequestDetails,
-				start,
 				count,
 				linkSelf,
 				includes,
+				theBundleProvider,
+				start,
 				bundleType,
-				null // searchid
-				);
-
-		ResponseBundleBuilder builder = new ResponseBundleBuilder(false);
-		return unsafeCast(builder.buildResponseBundle(bundleRequest));
+				thePagingAction
+		));
 	}
 
 	// TODO: The main use case for this is paging through Bundles, but I suppose that technically

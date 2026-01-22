@@ -54,7 +54,7 @@ public class ResponseBundleBuilder {
 		myIsOffsetModeHistory = theIsOffsetModeHistory;
 	}
 
-	public IBaseBundle buildResponseBundle(ResponseBundleRequest theResponseBundleRequest) {
+	IBaseBundle buildResponseBundle(ResponseBundleRequest theResponseBundleRequest) {
 		final ResponsePage responsePage = buildResponsePage(theResponseBundleRequest);
 
 		removeNulls(responsePage.getResourceList());
