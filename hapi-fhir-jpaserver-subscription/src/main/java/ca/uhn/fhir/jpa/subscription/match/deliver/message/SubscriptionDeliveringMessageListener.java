@@ -180,7 +180,8 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 		try {
 			myChannelProducerMap.values().forEach(producer -> {
 				if (producer instanceof AutoCloseable closeable) {
-					Logs.getSubscriptionTroubleshootingLog().debug("Destroying channel producer {}", producer.getChannelName());
+					Logs.getSubscriptionTroubleshootingLog()
+							.debug("Destroying channel producer {}", producer.getChannelName());
 					IoUtils.closeQuietly(closeable, ourLog);
 				}
 			});
