@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.IoUtils;
+import ca.uhn.fhir.util.Logs;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -179,7 +180,7 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 		try {
 			myChannelProducerMap.values().forEach(producer -> {
 				if (producer instanceof AutoCloseable closeable) {
-					ourLog.info("Destroying channel producer {}", producer.getChannelName());
+					Logs.getSubscriptionTroubleshootingLog().debug("Destroying channel producer {}", producer.getChannelName());
 					IoUtils.closeQuietly(closeable, ourLog);
 				}
 			});
