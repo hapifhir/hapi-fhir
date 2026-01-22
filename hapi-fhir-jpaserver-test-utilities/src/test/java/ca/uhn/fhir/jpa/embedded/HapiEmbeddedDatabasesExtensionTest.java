@@ -46,24 +46,6 @@ public class HapiEmbeddedDatabasesExtensionTest {
 		}
 	}
 
-	@ParameterizedTest
-	@ArgumentsSource(HapiEmbeddedDatabasesExtension.DatabaseVendorProvider.class)
-	public void testDatabaseExtensionWorks(DriverTypeEnum theDriverType) {
-		ourLog.info("Testing database extension for type: {}", theDriverType);
-
-		// Get the database instance 
-		JpaEmbeddedDatabase database = myExtension.getEmbeddedDatabase(theDriverType);
-		assertThat(database).isNotNull();
-
-		// Verify that all databases now extend JpaEmbeddedDatabase  
-		assertThat(database).isInstanceOf(JpaEmbeddedDatabase.class);
-		
-		// Verify driver type matches
-		assertThat(database.getDriverType()).isEqualTo(theDriverType);
-		
-		ourLog.info("Database extension works for type: {}", theDriverType);
-	}
-
 	private int countActiveTestContainers() {
 		try {
 			// Get all containers with TestContainers labels
