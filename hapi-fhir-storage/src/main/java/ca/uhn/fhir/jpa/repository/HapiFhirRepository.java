@@ -170,10 +170,10 @@ public class HapiFhirRepository implements IRepository {
 		SearchParameterMap searchParameterMap =
 				SearchParameterMapRepositoryRestQueryBuilder.buildFromQueryContributor(theQueryContributor);
 
-		RequestDetails details = createRequestDetails(buidler -> {
-			buidler.setAction(RestOperationTypeEnum.SEARCH_TYPE);
-			buidler.addHeaders(theHeaders);
-			buidler.setParameters(MultiMapRepositoryRestQueryBuilder.toFlatMap(searchParameterMap));
+		RequestDetails details = createRequestDetails(builder -> {
+			builder.setAction(RestOperationTypeEnum.SEARCH_TYPE);
+			builder.addHeaders(theHeaders);
+			builder.setParameters(MultiMapRepositoryRestQueryBuilder.toFlatMap(searchParameterMap));
 		});
 
 		details.setResourceName(myDaoRegistry.getFhirContext().getResourceType(theResourceType));
@@ -325,12 +325,13 @@ public class HapiFhirRepository implements IRepository {
 	@Override
 	public <R extends IBaseResource, P extends IBaseParameters> R invoke(
 			String theName, P theParameters, Class<R> theReturnType, Map<String, String> theHeaders) {
-		RequestDetails details = startWith(myRequestDetails)
-				.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER)
-				.addHeaders(theHeaders)
-				.setOperation(theName)
-				.setRequestContents(theParameters)
-				.create();
+		RequestDetails details = createRequestDetails(builder -> {
+			builder.setRequestType(RequestTypeEnum.POST);
+			builder.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER);
+			builder.addHeaders(theHeaders);
+			builder.setOperation(theName);
+			builder.setRequestContents(theParameters);
+		});
 
 		return invoke(details);
 	}
@@ -338,12 +339,13 @@ public class HapiFhirRepository implements IRepository {
 	@Override
 	public <P extends IBaseParameters> MethodOutcome invoke(
 			String theName, P theParameters, Map<String, String> theHeaders) {
-		RequestDetails details = startWith(myRequestDetails)
-				.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER)
-				.addHeaders(theHeaders)
-				.setOperation(theName)
-				.setRequestContents(theParameters)
-				.create();
+		RequestDetails details = createRequestDetails(builder -> {
+			builder.setRequestType(RequestTypeEnum.POST);
+			builder.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER);
+			builder.addHeaders(theHeaders);
+			builder.setOperation(theName);
+			builder.setRequestContents(theParameters);
+		});
 
 		return invoke(details);
 	}
