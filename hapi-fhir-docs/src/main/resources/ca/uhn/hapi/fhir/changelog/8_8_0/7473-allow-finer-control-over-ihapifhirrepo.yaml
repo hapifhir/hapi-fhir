@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 7473
+title: "Fixed an issue with HapiFhirRepository that prevented
+       it from using the pre-sets in the RequestDetails
+       passed in in the constructor.
+       Also allowed for implementers to overwrite and better control
+       the parameters.
+"
