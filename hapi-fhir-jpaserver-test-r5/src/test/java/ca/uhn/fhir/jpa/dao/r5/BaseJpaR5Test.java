@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -57,6 +58,7 @@ import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IInstanceReindexService;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
@@ -152,6 +154,8 @@ import static org.mockito.Mockito.mock;
 @ContextConfiguration(classes = {TestR5Config.class, TestDaoSearch.Config.class})
 public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuilder {
 	@Autowired
+	protected IJobStepExecutionServices myJobStepExecutionServices;
+	@Autowired
 	protected IResourceIdentifierCacheSvc myResourceIdentifierCacheSvc;
 	@Autowired
 	protected MemoryCacheService myMemoryCacheSvc;
@@ -176,6 +180,8 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	protected IResourceLinkDao myResourceLinkDao;
 	@Autowired
 	protected ISearchParamPresentDao mySearchParamPresentDao;
+	@Autowired
+	protected ISearchParamExtractor mySearchParamExtractor;
 	@Autowired
 	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
 	@Autowired

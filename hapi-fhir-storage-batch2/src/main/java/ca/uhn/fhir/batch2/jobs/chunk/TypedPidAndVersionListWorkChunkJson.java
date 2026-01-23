@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,5 +74,10 @@ public class TypedPidAndVersionListWorkChunkJson implements IModelJson {
 			myTypedPidAndVersions = new ArrayList<>();
 		}
 		myTypedPidAndVersions.add(new TypedPidAndVersionJson(theResourceType, null, thePid.toString(), theVersionId));
+	}
+
+	@VisibleForTesting
+	public void addTypedPidWithNullPartitionForUnitTest(String theResourceType, Long thePid) {
+		addTypedPidWithNullPartitionForUnitTest(theResourceType, thePid, null);
 	}
 }

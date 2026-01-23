@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchUrlJobMaintenanceSvc;
+import ca.uhn.fhir.jpa.api.svc.ITerminologyValidationSvc;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
@@ -57,20 +58,25 @@ import ca.uhn.fhir.jpa.dao.HistoryBuilder;
 import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
+import ca.uhn.fhir.jpa.dao.IResourceMetadataExtractorSvc;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.JpaBulkDataExportHistoryHelper;
 import ca.uhn.fhir.jpa.dao.JpaDaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.JpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.ResourceHistoryCalculator;
+import ca.uhn.fhir.jpa.dao.ResourceMetadataExtractorSvcImpl;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIdentifierPatientUniqueEntityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIdentifierSystemEntityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamIdentityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTypeDao;
 import ca.uhn.fhir.jpa.dao.data.ITagDefinitionDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
@@ -93,9 +99,11 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.graphql.DaoRegistryGraphQLStorageServices;
+import ca.uhn.fhir.jpa.interceptor.AuthResourceResolver;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.interceptor.OverridePathBasedReferentialIntegrityForDeletesInterceptor;
+import ca.uhn.fhir.jpa.interceptor.PatientCompartmentEnforcingInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -143,6 +151,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryProvenancePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkForHasParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
@@ -179,6 +188,7 @@ import ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
+import ca.uhn.fhir.jpa.term.TerminologyValidationSvcImpl;
 import ca.uhn.fhir.jpa.term.ValueSetConceptAccumulator;
 import ca.uhn.fhir.jpa.term.ValueSetConceptAccumulatorFactory;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
@@ -205,6 +215,7 @@ import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
+import ca.uhn.fhir.rest.server.interceptor.auth.IAuthResourceResolver;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -220,6 +231,7 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -380,6 +392,13 @@ public class JpaConfig {
 
 	@Bean
 	@Lazy
+	public PatientCompartmentEnforcingInterceptor patientCompartmentEnforcingInterceptor(
+			FhirContext theFhirContext, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		return new PatientCompartmentEnforcingInterceptor(theFhirContext, theRequestPartitionHelperSvc);
+	}
+
+	@Bean
+	@Lazy
 	public ValueSetOperationProvider valueSetOperationProvider(FhirContext theFhirContext) {
 		if (theFhirContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2)) {
 			return new ValueSetOperationProviderDstu2();
@@ -390,6 +409,16 @@ public class JpaConfig {
 	@Bean
 	public IJpaStorageResourceParser jpaStorageResourceParser() {
 		return new JpaStorageResourceParser();
+	}
+
+	@Bean
+	public IResourceMetadataExtractorSvc resourceMetadataExtractorSvc(
+			JpaStorageSettings theStorageSettings,
+			IResourceHistoryTagDao theResourceHistoryTagDao,
+			IResourceTagDao theResourceTagDao,
+			IResourceHistoryProvenanceDao theResourceHistoryProvenanceDao) {
+		return new ResourceMetadataExtractorSvcImpl(
+				theStorageSettings, theResourceHistoryTagDao, theResourceTagDao, theResourceHistoryProvenanceDao);
 	}
 
 	@Bean
@@ -528,6 +557,12 @@ public class JpaConfig {
 	@Bean
 	public IConsentContextServices consentContextServices() {
 		return new JpaConsentContextServices();
+	}
+
+	@Bean
+	public IAuthResourceResolver authResourceResolver(
+			DaoRegistry theDaoRegistry, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		return new AuthResourceResolver(theDaoRegistry, theRequestPartitionHelperSvc);
 	}
 
 	@Bean
@@ -765,11 +800,18 @@ public class JpaConfig {
 		return new QuantityNormalizedPredicateBuilder(theSearchBuilder);
 	}
 
-	@Bean
+	@Bean("newResourceLinkPredicateBuilder")
 	@Scope("prototype")
 	public ResourceLinkPredicateBuilder newResourceLinkPredicateBuilder(
-			QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder, boolean theReversed) {
-		return new ResourceLinkPredicateBuilder(theQueryStack, theSearchBuilder, theReversed);
+			QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder) {
+		return new ResourceLinkPredicateBuilder(theQueryStack, theSearchBuilder);
+	}
+
+	@Bean("newHasLinkPredicateBuilder")
+	@Scope("prototype")
+	public ResourceLinkForHasParameterPredicateBuilder newHasLinkPredicateBuilder(
+			QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder) {
+		return new ResourceLinkForHasParameterPredicateBuilder(theQueryStack, theSearchBuilder);
 	}
 
 	@Bean
@@ -973,6 +1015,14 @@ public class JpaConfig {
 	@Bean
 	public ITermReadSvc terminologyService() {
 		return new TermReadSvcImpl();
+	}
+
+	@Bean
+	public ITerminologyValidationSvc terminologyValidationSvc(
+			FhirContext theFhirContext,
+			@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN) IValidationSupport theValidationSupportChain,
+			DaoRegistry theDaoRegistry) {
+		return new TerminologyValidationSvcImpl(theFhirContext, theValidationSupportChain, theDaoRegistry);
 	}
 
 	@Bean

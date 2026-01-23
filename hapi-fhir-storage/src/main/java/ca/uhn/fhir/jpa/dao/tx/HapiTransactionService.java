@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.stream.Stream;
 
 /**
  * @see IHapiTransactionService for an explanation of this class
@@ -188,7 +189,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
 	 */
 	@Deprecated
-	@SuppressWarnings("ConstantConditions")
+	@SuppressWarnings({"ConstantConditions", "removal"})
 	public <T> T execute(
 			@Nullable RequestDetails theRequestDetails,
 			@Nullable TransactionDetails theTransactionDetails,
@@ -207,6 +208,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 	/**
 	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
 	 */
+	@SuppressWarnings("removal")
 	@Deprecated
 	public <T> T execute(
 			@Nullable RequestDetails theRequestDetails,
@@ -264,32 +266,36 @@ public class HapiTransactionService implements IHapiTransactionService {
 			previousRequestPartitionId = ourRequestPartitionThreadLocal.get();
 			ourRequestPartitionThreadLocal.set(requestPartitionId);
 		}
-
-		ourLog.trace("Starting doExecute for RequestPartitionId {}", requestPartitionId);
-		if (isCompatiblePartition(previousRequestPartitionId, requestPartitionId)) {
-			if (ourExistingTransaction.get() == this && canReuseExistingTransaction(theExecutionBuilder)) {
-				/*
-				 * If we're already in an active transaction, and it's for the right partition,
-				 * and it's not a read-only transaction, we don't need to open a new transaction
-				 * so let's just add a method to the stack trace that makes this obvious.
-				 */
-				return executeInExistingTransaction(theCallback);
-			}
-		}
-
-		HapiTransactionService previousExistingTransaction = ourExistingTransaction.get();
 		try {
-			ourExistingTransaction.set(this);
 
-			if (isRequiresNewTransactionWhenChangingPartitions()) {
-				return executeInNewTransactionForPartitionChange(
-						theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
-			} else {
-				return doExecuteInTransaction(
-						theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+			ourLog.trace("Starting doExecute for RequestPartitionId {}", requestPartitionId);
+			if (isCompatiblePartition(previousRequestPartitionId, requestPartitionId)) {
+				if (ourExistingTransaction.get() == this && canReuseExistingTransaction(theExecutionBuilder)) {
+					/*
+					 * If we're already in an active transaction, and it's for the right partition,
+					 * and it's not a read-only transaction, we don't need to open a new transaction
+					 * so let's just add a method to the stack trace that makes this obvious.
+					 */
+					return executeInExistingTransaction(theCallback);
+				}
+			}
+
+			HapiTransactionService previousExistingTransaction = ourExistingTransaction.get();
+			try {
+				ourExistingTransaction.set(this);
+
+				if (isRequiresNewTransactionWhenChangingPartitions()) {
+					return executeInNewTransactionForPartitionChange(
+							theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+				} else {
+					return doExecuteInTransaction(
+							theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+				}
+			} finally {
+				ourExistingTransaction.set(previousExistingTransaction);
 			}
 		} finally {
-			ourExistingTransaction.set(previousExistingTransaction);
+			ourRequestPartitionThreadLocal.set(previousRequestPartitionId);
 		}
 	}
 
@@ -533,6 +539,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 			return this;
 		}
 
+		@SuppressWarnings("removal")
 		@Override
 		public ExecutionBuilder onRollback(Runnable theOnRollback) {
 			assert myOnRollback == null;
@@ -558,6 +565,21 @@ public class HapiTransactionService implements IHapiTransactionService {
 		@Override
 		public <T> T execute(@Nonnull TransactionCallback<T> callback) {
 			return doExecute(this, callback);
+		}
+
+		@Override
+		public <T> T read(IExecutionCallable<T> theCallback) {
+			return execute(() -> theCallback.call(myRequestPartitionId));
+		}
+
+		@Override
+		public <T> Stream<T> search(IExecutionCallable<Stream<T>> theCallback) {
+			return execute(() -> theCallback.call(myRequestPartitionId));
+		}
+
+		@Override
+		public <T> List<T> searchList(IExecutionCallable<List<T>> theCallback) {
+			return execute(() -> theCallback.call(myRequestPartitionId));
 		}
 
 		@VisibleForTesting

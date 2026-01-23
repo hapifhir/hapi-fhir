@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,15 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
-import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.api.svc.ITerminologyValidationSvc;
+import ca.uhn.fhir.jpa.api.svc.ValueSetValidationRequest;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -52,11 +52,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.util.Optional;
-import java.util.function.Supplier;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 public class ValueSetOperationProvider extends BaseJpaProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetOperationProvider.class);
@@ -73,6 +68,14 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	@Autowired
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
 	private ValidationSupportChain myValidationSupportChain;
+
+	@Autowired
+	private ITerminologyValidationSvc myTerminologyValidationSvc;
+
+	@VisibleForTesting
+	public void setTerminologyValidationSvc(ITerminologyValidationSvc theTerminologyValidationSvc) {
+		myTerminologyValidationSvc = theTerminologyValidationSvc;
+	}
 
 	@VisibleForTesting
 	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
@@ -138,7 +141,6 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		return (IFhirResourceDaoValueSet<IBaseResource>) myDaoRegistry.getResourceDao("ValueSet");
 	}
 
-	@SuppressWarnings("unchecked")
 	@Operation(
 			name = JpaConstants.OPERATION_VALIDATE_CODE,
 			idempotent = true,
@@ -166,86 +168,25 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 					ICompositeType theCodeableConcept,
 			RequestDetails theRequestDetails) {
 
-		CodeValidationResult result;
 		startRequest(theServletRequest);
 		try {
-			// If a Remote Terminology Server has been configured, use it
-			if (myValidationSupportChain != null && myValidationSupportChain.isRemoteTerminologyServiceConfigured()) {
-				String theSystemString =
-						(theSystem != null && theSystem.hasValue()) ? theSystem.getValueAsString() : null;
-				String theCodeString = (theCode != null && theCode.hasValue()) ? theCode.getValueAsString() : null;
-				String theDisplayString =
-						(theDisplay != null && theDisplay.hasValue()) ? theDisplay.getValueAsString() : null;
-				String theValueSetUrlString = (theValueSetUrl != null && theValueSetUrl.hasValue())
-						? theValueSetUrl.getValueAsString()
-						: null;
-				if (theCoding != null) {
-					if (isNotBlank(theCoding.getSystem())) {
-						if (theSystemString != null && !theSystemString.equalsIgnoreCase(theCoding.getSystem())) {
-							throw new InvalidRequestException(Msg.code(2352) + "Coding.system '" + theCoding.getSystem()
-									+ "' does not equal param system '" + theSystemString
-									+ "'. Unable to validate-code.");
-						}
-						theSystemString = theCoding.getSystem();
-						theCodeString = theCoding.getCode();
-						theDisplayString = theCoding.getDisplay();
-					}
-				}
-
-				result = validateCodeWithTerminologyService(
-								theSystemString, theCodeString, theDisplayString, theValueSetUrlString)
-						.orElseGet(supplyUnableToValidateResult(theSystemString, theCodeString, theValueSetUrlString));
-			} else {
-				// Otherwise, use the local DAO layer to validate the code
-				IFhirResourceDaoValueSet<IBaseResource> dao = getDao();
-				IPrimitiveType<String> valueSetIdentifier;
-				if (theValueSetUrl != null && theValueSetVersion != null) {
-					valueSetIdentifier = (IPrimitiveType<String>)
-							getContext().getElementDefinition("uri").newInstance();
-					valueSetIdentifier.setValue(theValueSetUrl.getValue() + "|" + theValueSetVersion);
-				} else {
-					valueSetIdentifier = theValueSetUrl;
-				}
-				IPrimitiveType<String> codeSystemIdentifier;
-				if (theSystem != null && theSystemVersion != null) {
-					codeSystemIdentifier = (IPrimitiveType<String>)
-							getContext().getElementDefinition("uri").newInstance();
-					codeSystemIdentifier.setValue(theSystem.getValue() + "|" + theSystemVersion);
-				} else {
-					codeSystemIdentifier = theSystem;
-				}
-				result = dao.validateCode(
-						valueSetIdentifier,
-						theId,
-						theCode,
-						codeSystemIdentifier,
-						theDisplay,
-						theCoding,
-						theCodeableConcept,
-						theRequestDetails);
-			}
+			ValueSetValidationRequest request = ValueSetValidationRequest.builder()
+					.valueSetId(theId)
+					.valueSetUrl(theValueSetUrl)
+					.valueSetVersion(theValueSetVersion)
+					.code(theCode)
+					.system(theSystem)
+					.systemVersion(theSystemVersion)
+					.display(theDisplay)
+					.coding(theCoding)
+					.codeableConcept(theCodeableConcept)
+					.requestDetails(theRequestDetails)
+					.build();
+			CodeValidationResult result = myTerminologyValidationSvc.validateCodeAgainstValueSet(request);
 			return result.toParameters(getContext());
 		} finally {
 			endRequest(theServletRequest);
 		}
-	}
-
-	private Optional<CodeValidationResult> validateCodeWithTerminologyService(
-			String theSystem, String theCode, String theDisplay, String theValueSetUrl) {
-		return Optional.ofNullable(myValidationSupportChain.validateCode(
-				new ValidationSupportContext(myValidationSupportChain),
-				new ConceptValidationOptions(),
-				theSystem,
-				theCode,
-				theDisplay,
-				theValueSetUrl));
-	}
-
-	private Supplier<CodeValidationResult> supplyUnableToValidateResult(
-			String theSystem, String theCode, String theValueSetUrl) {
-		return () -> new CodeValidationResult()
-				.setMessage("Validator is unable to provide validation for " + theCode + "#" + theSystem
-						+ " - Unknown or unusable ValueSet[" + theValueSetUrl + "]");
 	}
 
 	@Operation(

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
@@ -9,11 +10,13 @@ import ca.uhn.fhir.rest.api.Constants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -41,6 +44,56 @@ public class BulkExportJobParametersValidatorTest {
 		parameters.setOutputFormat(Constants.CT_FHIR_NDJSON);
 		parameters.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
 		return parameters;
+	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		Patient/A              , Patient/B , true  , Patient/A , Patient/B
+		A                      ,           , true  , Patient/A , Patient/B
+		Organization/A         ,           , false , Invalid Patient ID (values should use the format "Patient/[id]"): Organization/A ,
+		Patient/A/_history/1   ,           , false , Invalid Patient ID: Patient/A/_history/1 ,
+		Patient/A B            ,           , false , Invalid Patient ID: Patient/A B ,
+		A B                    ,           , false , Invalid Patient ID (values should use the format "Patient/[id]"): A B ,
+		""")
+	public void validate_PatientIdParameters(String theInput0, String theInput1, boolean theExpectedPass, String theExpectedOutput0, String theExpectedOutput1) {
+		// setup
+		when(myDaoRegistry.isResourceTypeSupported(anyString()))
+			.thenReturn(true);
+
+		BulkExportJobParameters parameters = createSystemExportParameters();
+		parameters.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+
+		List<String> patientIds = new ArrayList<>();
+		if (isNotBlank(theInput0)) {
+			patientIds.add(theInput0.trim());
+		}
+		if (isNotBlank(theInput1)) {
+			patientIds.add(theInput1.trim());
+		}
+		parameters.setPatientIds(patientIds);
+
+		// Test
+		List<String> errors = myValidator.validate(null, parameters);
+
+		// Verify
+		if (theExpectedPass) {
+			assertThat(errors).isEmpty();
+			if (isNotBlank(theInput0)) {
+				assertEquals(theExpectedOutput0, parameters.getPatientIds().get(0));
+			}
+			if (isNotBlank(theInput1)) {
+				assertEquals(theExpectedOutput1, parameters.getPatientIds().get(1));
+			}
+		} else {
+			assertThat(errors).isNotEmpty();
+			if (isNotBlank(theInput0)) {
+				assertEquals(theExpectedOutput0, errors.get(0));
+			}
+			if (isNotBlank(theInput1)) {
+				assertEquals(theExpectedOutput1, errors.get(1));
+			}
+		}
+		assertEquals(theExpectedPass, errors.isEmpty());
 	}
 
 	@Test

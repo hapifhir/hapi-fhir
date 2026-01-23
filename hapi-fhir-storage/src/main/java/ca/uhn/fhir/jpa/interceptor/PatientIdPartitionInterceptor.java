@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -281,6 +281,12 @@ public class PatientIdPartitionInterceptor {
 						terser.setElement(request, "method", "PUT");
 						terser.setElement(request, "url", "Patient/" + newId);
 					}
+				} else if (nextEntry.getMethod() == RequestTypeEnum.PUT
+						&& isNotBlank(nextEntry.getFullUrl())
+						&& isNotBlank(nextEntry.getUrl())
+						&& isBlank(nextEntry.getConditionalUrl())
+						&& !Strings.CS.equals(nextEntry.getFullUrl(), nextEntry.getUrl())) {
+					idSubstitutions.put(nextEntry.getFullUrl(), nextEntry.getUrl());
 				}
 			}
 		}
@@ -391,10 +397,12 @@ public class PatientIdPartitionInterceptor {
 	 * <code>Math.abs(theResourceIdPart.hashCode()) % 15000</code>.
 	 * <p>
 	 * This logic can be replaced with other logic of your choosing.
+	 *
+	 * @see #defaultPartitionAlgorithm(String)
 	 */
 	@SuppressWarnings("unused")
 	protected int providePartitionIdForPatientId(RequestDetails theRequestDetails, String theResourceIdPart) {
-		return Math.abs(theResourceIdPart.hashCode() % 15000);
+		return defaultPartitionAlgorithm(theResourceIdPart);
 	}
 
 	/**
@@ -418,5 +426,13 @@ public class PatientIdPartitionInterceptor {
 	@Nonnull
 	protected RequestPartitionId provideNonCompartmentMemberTypeResponse(IBaseResource theResource) {
 		return myPartitionSettings.getDefaultRequestPartitionId();
+	}
+
+	/**
+	 * This method supplies the default algorithm used for partitioning, if {@link #providePartitionIdForPatientId(RequestDetails, String)}
+	 * has not been overridden.
+	 */
+	public static int defaultPartitionAlgorithm(String theResourceIdPart) {
+		return Math.abs(theResourceIdPart.hashCode() % 15000);
 	}
 }

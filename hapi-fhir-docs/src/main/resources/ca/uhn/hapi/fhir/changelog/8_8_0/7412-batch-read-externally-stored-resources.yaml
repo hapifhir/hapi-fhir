@@ -1,0 +1,7 @@
+---
+type: perf
+issue: 7412
+title: "Optimized resource loading during search operations. Previously, externally stored
+  resources were loaded sequentially (one by one) during search result processing. With this enhancement,
+  resources are now loaded in batches (in parallel), significantly improving performance for large search
+  results."

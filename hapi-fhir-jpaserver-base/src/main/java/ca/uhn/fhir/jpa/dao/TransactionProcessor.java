@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,9 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -48,6 +51,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
@@ -806,7 +812,23 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		Set<Long> systemAndValueHashes = new HashSet<>();
 		Set<Long> valueHashes = new HashSet<>();
 
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		boolean hasPreSearchHook = compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESEARCH_REGISTERED);
+
 		for (MatchUrlToResolve next : theInputParameters) {
+
+			// Interceptor call: STORAGE_PRESEARCH_REGISTERED
+			if (hasPreSearchHook) {
+				HookParams params = new HookParams();
+				params.add(RequestDetails.class, theRequestDetails);
+				params.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+				params.add(RequestPartitionId.class, theRequestPartitionId);
+				params.add(SearchParameterMap.class, next.myMatchUrlSearchMap);
+				params.add(ICachedSearchDetails.class, new NonPersistedSearch(next.myResourceDefinition.getName()));
+				compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
+			}
+
 			Collection<List<List<IQueryParameterType>>> values = next.myMatchUrlSearchMap.values();
 
 			/*
@@ -823,11 +845,13 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 			if (values.size() == 1) {
 				List<List<IQueryParameterType>> andList = values.iterator().next();
-				IQueryParameterType param = andList.get(0).get(0);
+				if (andList.size() == 1 || andList.get(0).size() == 1) {
+					IQueryParameterType param = andList.get(0).get(0);
 
-				if (param instanceof TokenParam tokenParam) {
-					canBeHandledInAggregateQuery = buildHashPredicateFromTokenParam(
-							tokenParam, theRequestPartitionId, next, systemAndValueHashes, valueHashes);
+					if (param instanceof TokenParam tokenParam) {
+						canBeHandledInAggregateQuery = buildHashPredicateFromTokenParam(
+								tokenParam, theRequestPartitionId, next, systemAndValueHashes, valueHashes);
+					}
 				}
 			}
 

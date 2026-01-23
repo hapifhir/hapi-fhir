@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Patient;
 
 import java.util.List;
 
@@ -43,8 +42,8 @@ public class MergeOperationInputParameters extends MergeOperationsCommonInputPar
 	private boolean myCreateProvenance = true;
 	private IBaseResource myOriginalInputParameters;
 
-	protected MergeOperationInputParameters(int theResourceLimit) {
-		super(theResourceLimit);
+	protected MergeOperationInputParameters() {
+		super();
 	}
 
 	public boolean getPreview() {
@@ -98,9 +97,10 @@ public class MergeOperationInputParameters extends MergeOperationsCommonInputPar
 	public MergeJobParameters asMergeJobParameters(
 			FhirContext theFhirContext,
 			JpaStorageSettings theStorageSettings,
-			Patient theSourceResource,
-			Patient theTargetResource,
-			RequestPartitionId thePartitionId) {
+			IBaseResource theSourceResource,
+			IBaseResource theTargetResource,
+			RequestPartitionId thePartitionId,
+			String theOperationName) {
 		MergeJobParameters retval = new MergeJobParameters();
 		retval.setOriginalInputParameters(
 				theFhirContext.newJsonParser().encodeResourceToString(myOriginalInputParameters));
@@ -110,6 +110,7 @@ public class MergeOperationInputParameters extends MergeOperationsCommonInputPar
 		retval.setPartitionId(thePartitionId);
 		retval.setProvenanceAgents(ProvenanceAgentJson.from(myProvenanceAgents, theFhirContext));
 		retval.setCreateProvenance(myCreateProvenance);
+		retval.setOperationName(theOperationName);
 		return retval;
 	}
 }

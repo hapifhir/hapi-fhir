@@ -1,0 +1,358 @@
+/*-
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package ca.uhn.fhir.jpa.provider.merge;
+
+// Created by claude-sonnet-4-5
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
+import ca.uhn.fhir.model.api.IProvenanceAgent;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.ParametersUtil;
+import jakarta.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Identifier;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_DELETE_SOURCE;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_PREVIEW;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_RESULT_PATIENT;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_PATIENT;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_TARGET_PATIENT;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER;
+
+/**
+ * Utility class for building FHIR Parameters resources for merge operations.
+ */
+public class MergeOperationParametersUtil {
+
+	private MergeOperationParametersUtil() {
+		// Utility class
+	}
+
+	/**
+	 * Builds the output Parameters resource for a Patient $merge operation following the FHIR specification.
+	 * <p>
+	 * The output Parameters includes:
+	 * <ul>
+	 *   <li>input - The original input parameters</li>
+	 *   <li>outcome - OperationOutcome describing the merge result</li>
+	 *   <li>result - Updated target patient (optional, not included in preview mode)</li>
+	 *   <li>task - Task resource tracking the merge (optional)</li>
+	 * </ul>
+	 * </p>
+	 *
+	 * @param theFhirContext FHIR context for building Parameters resource
+	 * @param theMergeOutcome Merge operation outcome containing the result
+	 * @param theInputParameters Original input parameters to include in output
+	 * @return Parameters resource with merge operation output in FHIR $merge format
+	 */
+	public static IBaseParameters buildMergeOperationOutputParameters(
+			FhirContext theFhirContext, MergeOperationOutcome theMergeOutcome, IBaseResource theInputParameters) {
+
+		// Extract components from MergeOperationOutcome and delegate to overloaded method
+		return buildMergeOperationOutputParameters(
+				theFhirContext,
+				theMergeOutcome.getOperationOutcome(),
+				theMergeOutcome.getUpdatedTargetResource(),
+				theMergeOutcome.getTask(),
+				theInputParameters);
+	}
+
+	/**
+	 * Builds the output Parameters resource for a Patient $merge operation from individual components.
+	 * <p>
+	 * This overload is useful when you have the merge result components separately rather than
+	 * wrapped in a {@link MergeOperationOutcome} object.
+	 * </p>
+	 *
+	 * @param theFhirContext FHIR context for building Parameters resource
+	 * @param theOperationOutcome Operation outcome describing the merge result
+	 * @param theUpdatedTargetResource Updated target patient resource (may be null in preview mode)
+	 * @param theTask Task resource tracking the merge operation (may be null)
+	 * @param theInputParameters Original input parameters to include in output
+	 * @return Parameters resource with merge operation output in FHIR $merge format
+	 */
+	public static IBaseParameters buildMergeOperationOutputParameters(
+			FhirContext theFhirContext,
+			IBaseResource theOperationOutcome,
+			IBaseResource theUpdatedTargetResource,
+			IBaseResource theTask,
+			IBaseResource theInputParameters) {
+
+		IBaseParameters retVal = ParametersUtil.newInstance(theFhirContext);
+
+		// Add input parameters
+		ParametersUtil.addParameterToParameters(
+				theFhirContext, retVal, ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_INPUT, theInputParameters);
+
+		// Add operation outcome
+		ParametersUtil.addParameterToParameters(
+				theFhirContext, retVal, ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_OUTCOME, theOperationOutcome);
+
+		// Add updated target resource if present
+		if (theUpdatedTargetResource != null) {
+			ParametersUtil.addParameterToParameters(
+					theFhirContext,
+					retVal,
+					ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_RESULT,
+					theUpdatedTargetResource);
+		}
+
+		// Add task if present
+		if (theTask != null) {
+			ParametersUtil.addParameterToParameters(
+					theFhirContext, retVal, ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK, theTask);
+		}
+
+		return retVal;
+	}
+
+	/**
+	 * Build MergeOperationInputParameters from REST operation parameters.
+	 * This method is used by REST providers that receive individual operation parameters.
+	 *
+	 * @param theSourceIdentifiers list of source resource identifiers
+	 * @param theTargetIdentifiers list of target resource identifiers
+	 * @param theSourceResource source resource reference
+	 * @param theTargetResource target resource reference
+	 * @param thePreview preview flag
+	 * @param theDeleteSource delete source flag
+	 * @param theResultResource result resource
+	 * @param theProvenanceAgents provenance agents for audit
+	 * @param theOriginalInputParameters original input parameters for provenance
+	 * @return MergeOperationInputParameters ready for use with ResourceMergeService
+	 */
+	public static MergeOperationInputParameters inputParamsFromOperationParams(
+			FhirContext theFhirContext,
+			List<IBase> theSourceIdentifiers,
+			List<IBase> theTargetIdentifiers,
+			IBaseReference theSourceResource,
+			IBaseReference theTargetResource,
+			IPrimitiveType<Boolean> thePreview,
+			IPrimitiveType<Boolean> theDeleteSource,
+			IBaseResource theResultResource,
+			List<IProvenanceAgent> theProvenanceAgents,
+			IBaseResource theOriginalInputParameters,
+			int theResourceLimit) {
+
+		MergeOperationInputParameters result = new MergeOperationInputParameters();
+
+		// Set common parameters (identifiers and resource references), common with undo-merge operation
+		result.setCommonParameters(
+				theSourceIdentifiers, theTargetIdentifiers, theSourceResource, theTargetResource, theResourceLimit);
+
+		// Set merge-specific parameters
+		// Set flags
+		result.setPreview(thePreview != null && thePreview.getValue());
+		result.setDeleteSource(theDeleteSource != null && theDeleteSource.getValue());
+
+		FhirTerser terser = theFhirContext.newTerser();
+		// pass in a copy of the result patient as we don't want it to be modified. It will be
+		// returned back to the client as part of the response.
+		if (theResultResource != null) {
+			result.setResultResource(terser.clone(theResultResource));
+		}
+
+		// Set provenance and original parameters
+		result.setProvenanceAgents(theProvenanceAgents);
+		if (theOriginalInputParameters != null) {
+			result.setOriginalInputParameters(terser.clone(theOriginalInputParameters));
+		}
+
+		return result;
+	}
+
+	/**
+	 * Build MergeOperationInputParameters from a FHIR Parameters resource.
+	 * Extracts all merge operation parameters according to the FHIR spec.
+	 *
+	 * @param theParameters       FHIR Parameters resource containing merge operation inputs
+	 * @param theProvenanceAgents the obtained provenance agents
+	 * @return MergeOperationInputParameters ready for use with ResourceMergeService
+	 */
+	public static MergeOperationInputParameters inputParamsFromParameters(
+			FhirContext theFhirContext,
+			IBaseParameters theParameters,
+			int theResourceLimit,
+			List<IProvenanceAgent> theProvenanceAgents) {
+
+		// Extract source-identifier (list of identifiers)
+		List<IBase> sourceIdentifiers =
+				extractIdentifierList(theFhirContext, theParameters, OPERATION_MERGE_PARAM_SOURCE_PATIENT_IDENTIFIER);
+
+		// Extract target-patient-identifier (list of identifiers)
+		List<IBase> targetIdentifiers =
+				extractIdentifierList(theFhirContext, theParameters, OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER);
+
+		// Extract source-patient reference
+		IBaseReference sourcePatient =
+				extractReferenceParam(theFhirContext, theParameters, OPERATION_MERGE_PARAM_SOURCE_PATIENT);
+
+		// Extract target-patient reference
+		IBaseReference targetPatient =
+				extractReferenceParam(theFhirContext, theParameters, OPERATION_MERGE_PARAM_TARGET_PATIENT);
+
+		// Extract preview flag
+		IPrimitiveType<Boolean> previewValue = ParametersUtil.getNamedParameterValueAsString(
+						theFhirContext, theParameters, OPERATION_MERGE_PARAM_PREVIEW)
+				.map(b -> new BooleanDt(Boolean.parseBoolean(b)))
+				.orElse(new BooleanDt(false));
+
+		// Extract delete-source flag
+		IPrimitiveType<Boolean> deleteSourceValue = ParametersUtil.getNamedParameterValueAsString(
+						theFhirContext, theParameters, OPERATION_MERGE_PARAM_DELETE_SOURCE)
+				.map(b -> new BooleanDt(Boolean.parseBoolean(b)))
+				.orElse(new BooleanDt(false));
+
+		// Extract result-patient
+		IBaseResource resultPatient = ParametersUtil.getNamedParameterResource(
+						theFhirContext, theParameters, OPERATION_MERGE_PARAM_RESULT_PATIENT)
+				.orElse(null);
+
+		return inputParamsFromOperationParams(
+				theFhirContext,
+				sourceIdentifiers,
+				targetIdentifiers,
+				sourcePatient,
+				targetPatient,
+				previewValue,
+				deleteSourceValue,
+				resultPatient,
+				theProvenanceAgents,
+				theParameters,
+				theResourceLimit);
+	}
+
+	/**
+	 * Build UndoMergeOperationInputParameters from a FHIR Parameters resource.
+	 * Extracts undo-merge operation parameters using the provided parameter names.
+	 *
+	 * @param theFhirContext FHIR context
+	 * @param theParameters FHIR Parameters resource containing undo-merge operation inputs
+	 * @param theParameterNames Parameter names to use for extraction
+	 * @param theResourceLimit Resource limit for the operation
+	 * @return UndoMergeOperationInputParameters ready for use with ResourceUndoMergeService
+	 */
+	public static UndoMergeOperationInputParameters undoInputParametersFromParameters(
+			FhirContext theFhirContext,
+			IBaseParameters theParameters,
+			AbstractMergeOperationInputParameterNames theParameterNames,
+			int theResourceLimit) {
+
+		List<IBase> sourceIdentifiers = extractIdentifierList(
+				theFhirContext, theParameters, theParameterNames.getSourceIdentifiersParameterName());
+		List<IBase> targetIdentifiers = extractIdentifierList(
+				theFhirContext, theParameters, theParameterNames.getTargetIdentifiersParameterName());
+		IBaseReference sourceReference = extractReferenceParam(
+				theFhirContext, theParameters, theParameterNames.getSourceResourceParameterName());
+		IBaseReference targetReference = extractReferenceParam(
+				theFhirContext, theParameters, theParameterNames.getTargetResourceParameterName());
+
+		return undoInputParametersFromOperationParameters(
+				sourceIdentifiers, targetIdentifiers, sourceReference, targetReference, theResourceLimit);
+	}
+
+	/**
+	 * Build UndoMergeOperationInputParameters from individual REST operation parameters.
+	 * This method is used by REST providers that receive individual operation parameters.
+	 *
+	 * @param theSourceIdentifiers Source resource identifiers
+	 * @param theTargetIdentifiers Target resource identifiers
+	 * @param theSourceReference Source resource reference
+	 * @param theTargetReference Target resource reference
+	 * @param theResourceLimit Resource limit for the operation
+	 * @return UndoMergeOperationInputParameters ready for use with ResourceUndoMergeService
+	 */
+	public static UndoMergeOperationInputParameters undoInputParametersFromOperationParameters(
+			List<IBase> theSourceIdentifiers,
+			List<IBase> theTargetIdentifiers,
+			IBaseReference theSourceReference,
+			IBaseReference theTargetReference,
+			int theResourceLimit) {
+
+		UndoMergeOperationInputParameters result = new UndoMergeOperationInputParameters();
+		result.setCommonParameters(
+				theSourceIdentifiers, theTargetIdentifiers, theSourceReference, theTargetReference, theResourceLimit);
+
+		return result;
+	}
+
+	/**
+	 * Extracts a list of Identifier values from a Parameters resource.
+	 *
+	 * @param theFhirContext FHIR context
+	 * @param theParameters Parameters resource
+	 * @param theParamName Parameter name to extract
+	 * @return List of Identifier values, or an empty list if parameter not found
+	 */
+	private static List<IBase> extractIdentifierList(
+			FhirContext theFhirContext, IBaseParameters theParameters, String theParamName) {
+
+		List<IBase> identifierParams = ParametersUtil.getNamedParameters(theFhirContext, theParameters, theParamName);
+
+		return identifierParams.stream()
+				.map(param -> extractIdentifierFromParameter(theFhirContext, param))
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Extracts a single Reference value from a Parameters resource.
+	 *
+	 * @param theFhirContext FHIR context
+	 * @param theParameters Parameters resource
+	 * @param theParamName Parameter name to extract
+	 * @return Reference value, or null if parameter not found
+	 */
+	@Nullable
+	private static IBaseReference extractReferenceParam(
+			FhirContext theFhirContext, IBaseParameters theParameters, String theParamName) {
+
+		List<IBaseReference> refs =
+				ParametersUtil.getNamedParameterReferences(theFhirContext, theParameters, theParamName);
+
+		if (refs.isEmpty()) {
+			return null;
+		}
+
+		return refs.get(0);
+	}
+
+	/**
+	 * Extract Identifier value from a Parameters.parameter element.
+	 *
+	 * @param theParameter the parameter element
+	 * @return the child value or null if not found
+	 */
+	private static Identifier extractIdentifierFromParameter(FhirContext theFhirContext, IBase theParameter) {
+		return theFhirContext.newTerser().getSingleValueOrNull(theParameter, "valueIdentifier", Identifier.class);
+	}
+}

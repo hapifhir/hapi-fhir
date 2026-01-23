@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ package ca.uhn.fhir.batch2.api;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import com.google.common.annotations.Beta;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
@@ -34,29 +36,36 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 	private final IT myData;
 	private final IJobInstance myInstance;
 	private final WorkChunk myChunk;
+	private final IJobStepExecutionServices myJobStepExecutionServices;
 
 	/**
 	 * Create and returns a step execution details for a reduction job
 	 */
 	public static <P1 extends IModelJson, I1 extends IModelJson>
 			StepExecutionDetails<P1, I1> createReductionStepDetails(
-					P1 theParameters, I1 theIntermediateParams, JobInstance theInstance) {
+					P1 theParameters,
+					I1 theIntermediateParams,
+					JobInstance theInstance,
+					IJobStepExecutionServices theJobStepExecutionServices) {
 		WorkChunk reductionChunk = new WorkChunk().setId(REDUCTION_STEP_CHUNK_ID_PLACEHOLDER);
 
-		return new StepExecutionDetails<>(theParameters, theIntermediateParams, theInstance, reductionChunk);
+		return new StepExecutionDetails<>(
+				theParameters, theIntermediateParams, theInstance, reductionChunk, theJobStepExecutionServices);
 	}
 
 	public StepExecutionDetails(
 			@Nonnull PT theParameters,
 			@Nullable IT theData,
 			@Nonnull JobInstance theInstance,
-			@Nonnull WorkChunk theChunk) {
+			@Nonnull WorkChunk theChunk,
+			@Nonnull IJobStepExecutionServices theJobStepExecutionServices) {
 		Validate.notNull(theParameters, "theParameters must not be null");
 		myParameters = theParameters;
 		myData = theData;
 		// Make a copy so the step worker can't change the one passed in
 		myInstance = new JobInstance(theInstance);
 		myChunk = theChunk;
+		myJobStepExecutionServices = theJobStepExecutionServices;
 	}
 
 	/**
@@ -111,5 +120,16 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 	 */
 	public boolean hasAssociatedWorkChunk() {
 		return myChunk != null && !myChunk.isReductionWorkChunk();
+	}
+
+	/**
+	 * Returns a new {@link SystemRequestDetails} object pre-populated with the user data from the job instance.
+	 * <b>This is an experimental internal API, use with caution</b>
+	 *
+	 * @since 8.8.0
+	 */
+	@Beta
+	public SystemRequestDetails newSystemRequestDetails() {
+		return myJobStepExecutionServices.newRequestDetails(myInstance);
 	}
 }

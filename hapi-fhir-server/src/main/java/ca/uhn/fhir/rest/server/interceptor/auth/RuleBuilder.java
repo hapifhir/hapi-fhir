@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -259,7 +260,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		private final String myRuleName;
 		private RuleBuilderRuleOp myReadRuleBuilder;
 		private RuleBuilderRuleOp myWriteRuleBuilder;
-		private RuleBuilderBulkExport ruleBuilderBulkExport;
+		private RuleBuilderBulkExport myRuleBuilderBulkExport;
 
 		RuleBuilderRule(PolicyEnum theRuleMode, String theRuleName) {
 			myRuleMode = theRuleMode;
@@ -341,10 +342,10 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		@Override
 		public IAuthRuleBuilderRuleBulkExport bulkExport() {
-			if (ruleBuilderBulkExport == null) {
-				ruleBuilderBulkExport = new RuleBuilderBulkExport();
+			if (myRuleBuilderBulkExport == null) {
+				myRuleBuilderBulkExport = new RuleBuilderBulkExport();
 			}
-			return ruleBuilderBulkExport;
+			return myRuleBuilderBulkExport;
 		}
 
 		@Override
@@ -714,6 +715,14 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				}
 
 				@Override
+				public IAuthRuleBuilderOperationNamedAndScoped onAnyInstanceMatchingOptionalFilter(
+						@Nullable String theFilter) {
+					OperationRule rule = createRule();
+					rule.appliesToAnyInstanceMatchingFilter(theFilter);
+					return new RuleBuilderOperationNamedAndScoped(rule);
+				}
+
+				@Override
 				public IAuthRuleBuilderOperationNamedAndScoped atAnyLevel() {
 					OperationRule rule = createRule();
 					rule.appliesAtAnyLevel(true);
@@ -761,6 +770,16 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 					OperationRule rule = createRule();
 					rule.appliesToInstancesOfType(toTypeSet(theType));
+					return new RuleBuilderOperationNamedAndScoped(rule);
+				}
+
+				@Override
+				public IAuthRuleBuilderOperationNamedAndScoped onInstancesOfTypeMatchingOptionalFilter(
+						Class<? extends IBaseResource> theType, @Nullable String theFilter) {
+					validateType(theType);
+
+					OperationRule rule = createRule();
+					rule.appliesToInstancesOfTypeMatchingFilter(toTypeSet(theType), theFilter);
 					return new RuleBuilderOperationNamedAndScoped(rule);
 				}
 
@@ -888,6 +907,8 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		private class RuleBuilderBulkExport implements IAuthRuleBuilderRuleBulkExport {
 			private RuleBulkExportImpl myRuleBulkExport;
+			private RuleGroupBulkExportByCompartmentMatcherImpl myRuleGroupBulkExportByCompartmentMatcher;
+			private RulePatientBulkExportByCompartmentMatcherImpl myRulePatientBulkExportByCompartmentMatcher;
 
 			@Override
 			public IAuthRuleBuilderRuleBulkExportWithTarget groupExportOnGroup(@Nonnull String theFocusResourceId) {
@@ -985,11 +1006,72 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				return new RuleBuilderBulkExportWithTarget(rule);
 			}
 
+			@Override
+			public IAuthRuleBuilderRuleBulkExportWithTarget groupExportOnFilter(
+					@Nonnull String theCompartmentFilterMatcher) {
+				if (myRuleGroupBulkExportByCompartmentMatcher == null) {
+					RuleGroupBulkExportByCompartmentMatcherImpl rule =
+							new RuleGroupBulkExportByCompartmentMatcherImpl(myRuleName);
+					rule.setAppliesToGroupExportOnGroup(theCompartmentFilterMatcher);
+					rule.setMode(myRuleMode);
+					myRuleGroupBulkExportByCompartmentMatcher = rule;
+				} else {
+					myRuleGroupBulkExportByCompartmentMatcher.setAppliesToGroupExportOnGroup(
+							theCompartmentFilterMatcher);
+				}
+
+				// prevent duplicate rules from being added
+				if (!myRules.contains(myRuleGroupBulkExportByCompartmentMatcher)) {
+					myRules.add(myRuleGroupBulkExportByCompartmentMatcher);
+				}
+
+				return new RuleBuilderBulkExportWithFilter(myRuleGroupBulkExportByCompartmentMatcher);
+			}
+
+			@Override
+			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnFilter(
+					@Nonnull String theCompartmentFilterMatcher) {
+				if (myRulePatientBulkExportByCompartmentMatcher == null) {
+					RulePatientBulkExportByCompartmentMatcherImpl rule =
+							new RulePatientBulkExportByCompartmentMatcherImpl(myRuleName);
+
+					rule.addAppliesToPatientExportOnPatient(theCompartmentFilterMatcher);
+					rule.setMode(myRuleMode);
+					myRulePatientBulkExportByCompartmentMatcher = rule;
+				} else {
+					myRulePatientBulkExportByCompartmentMatcher.addAppliesToPatientExportOnPatient(
+							theCompartmentFilterMatcher);
+				}
+
+				// prevent duplicate rules from being added
+				if (!myRules.contains(myRulePatientBulkExportByCompartmentMatcher)) {
+					myRules.add(myRulePatientBulkExportByCompartmentMatcher);
+				}
+
+				return new RuleBuilderBulkExportWithFilter(myRulePatientBulkExportByCompartmentMatcher);
+			}
+
 			private class RuleBuilderBulkExportWithTarget extends RuleBuilderFinished
 					implements IAuthRuleBuilderRuleBulkExportWithTarget {
 				private final RuleBulkExportImpl myRule;
 
 				private RuleBuilderBulkExportWithTarget(RuleBulkExportImpl theRule) {
+					super(theRule);
+					myRule = theRule;
+				}
+
+				@Override
+				public IAuthRuleBuilderRuleBulkExportWithTarget withResourceTypes(Collection<String> theResourceTypes) {
+					myRule.setResourceTypes(theResourceTypes);
+					return this;
+				}
+			}
+
+			private class RuleBuilderBulkExportWithFilter extends RuleBuilderFinished
+					implements IAuthRuleBuilderRuleBulkExportWithTarget {
+				private final BaseRuleBulkExportByCompartmentMatcher myRule;
+
+				private RuleBuilderBulkExportWithFilter(BaseRuleBulkExportByCompartmentMatcher theRule) {
 					super(theRule);
 					myRule = theRule;
 				}

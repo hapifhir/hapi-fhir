@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 7415
+backport: 8.6.1
+title: "The `FhirTerser.visit(IBase, IModelVisitor2)` method had inconsistent
+  handling of extensions between DSTU2 structures and DSTU3+ structures. The
+  `IModelVisitor2.acceptUndeclaredExtension` method has been deprecated
+  (since it is only invoked for DSTU2 structures) and the
+  `IModelVisitor2.accept` method is now always called for extensions. Previously  the latter was called for extensions on composite elements but not for
+  extensions on primitive elements."

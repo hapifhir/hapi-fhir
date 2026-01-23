@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryProvenancePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkForHasParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
@@ -322,16 +323,17 @@ public class SearchQueryBuilder {
 	 * Create a predicate builder for selecting on a REFERENCE search parameter
 	 */
 	public ResourceLinkPredicateBuilder createReferencePredicateBuilder(QueryStack theQueryStack) {
-		return mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, false);
+		return mySqlBuilderFactory.resourceLinkIndexTable(theQueryStack, this);
 	}
 
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a resource link where the
 	 * source and target are reversed. This is used for _has queries.
 	 */
-	public ResourceLinkPredicateBuilder addReferencePredicateBuilderReversed(
+	public ResourceLinkPredicateBuilder addResourceLinkForHasParameterPredicateBuilderReversed(
 			QueryStack theQueryStack, DbColumn[] theSourceJoinColumn) {
-		ResourceLinkPredicateBuilder retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, true);
+		ResourceLinkForHasParameterPredicateBuilder retVal =
+				mySqlBuilderFactory.resourceLinkForHasParameterIndexTable(theQueryStack, this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Collection;
 
 public interface IResourceTagDao extends JpaRepository<ResourceTag, Long>, IHapiFhirJpaRepository {
-	@Query("SELECT t FROM ResourceTag t INNER JOIN FETCH t.myTag td WHERE t.myResource.myPid in (:pids)")
+	@Query("SELECT t FROM ResourceTag t LEFT JOIN FETCH t.myTag td WHERE t.myResource.myPid in (:pids)")
 	Collection<ResourceTag> findByResourceIds(@Param("pids") Collection<JpaPid> pids);
 
 	@Modifying

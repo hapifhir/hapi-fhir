@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -45,7 +46,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 /**
  * @since 5.0.0
@@ -72,10 +73,7 @@ public class RequestPartitionId implements IModelJson {
 	 */
 	private RequestPartitionId(
 			@Nullable String thePartitionName, @Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
-		myPartitionIds = toListOrNull(thePartitionId);
-		myPartitionNames = toListOrNull(thePartitionName);
-		myPartitionDate = thePartitionDate;
-		myAllPartitions = false;
+		this(toListOrNull(thePartitionName), toListOrNull(thePartitionId), thePartitionDate);
 	}
 
 	/**
@@ -85,10 +83,21 @@ public class RequestPartitionId implements IModelJson {
 			@Nullable List<String> thePartitionName,
 			@Nullable List<Integer> thePartitionId,
 			@Nullable LocalDate thePartitionDate) {
+		this(thePartitionName, thePartitionId, thePartitionDate, false);
+	}
+
+	/**
+	 * Constructor for a multiple partitions with explicit "all partitions" flag
+	 */
+	private RequestPartitionId(
+			@Nullable List<String> thePartitionName,
+			@Nullable List<Integer> thePartitionId,
+			@Nullable LocalDate thePartitionDate,
+			boolean theAllPartitions) {
 		myPartitionIds = toListOrNull(thePartitionId);
 		myPartitionNames = toListOrNull(thePartitionName);
 		myPartitionDate = thePartitionDate;
-		myAllPartitions = false;
+		myAllPartitions = theAllPartitions;
 	}
 
 	/**
@@ -117,7 +126,7 @@ public class RequestPartitionId implements IModelJson {
 	 * @since 7.4.0
 	 */
 	public RequestPartitionId mergeIds(RequestPartitionId theOther) {
-		if (isAllPartitions() || theOther.isAllPartitions()) {
+		if ((isAllPartitions() && !hasPartitionIds()) || (theOther.isAllPartitions() && !theOther.hasPartitionIds())) {
 			return RequestPartitionId.allPartitions();
 		}
 
@@ -131,7 +140,12 @@ public class RequestPartitionId implements IModelJson {
 		List<Integer> newPartitionIds = Stream.concat(thisPartitionIds.stream(), otherPartitionIds.stream())
 				.distinct()
 				.collect(Collectors.toList());
-		return RequestPartitionId.fromPartitionIds(newPartitionIds);
+		boolean newAllPartitions = isAllPartitions() || theOther.isAllPartitions();
+		if (newAllPartitions) {
+			return RequestPartitionId.allPartitionsWithPartitionIds(newPartitionIds);
+		} else {
+			return RequestPartitionId.fromPartitionIds(newPartitionIds);
+		}
 	}
 
 	public static RequestPartitionId fromJson(String theJson) throws JsonProcessingException {
@@ -185,10 +199,17 @@ public class RequestPartitionId implements IModelJson {
 	public boolean contains(RequestPartitionId theOther) {
 		if (this.isAllPartitions()) {
 			return true;
-		} else if (theOther.isAllPartitions()) {
+		}
+		if (theOther.isAllPartitions()) {
 			return false;
 		}
-		return this.myPartitionIds.containsAll(theOther.myPartitionIds);
+		if (hasPartitionNames() && theOther.hasPartitionNames()) {
+			return CollectionUtils.containsAll(myPartitionNames, theOther.myPartitionNames);
+		}
+		if (hasPartitionNames() || theOther.hasPartitionNames()) {
+			return false;
+		}
+		return CollectionUtils.containsAll(this.myPartitionIds, theOther.myPartitionIds);
 	}
 
 	@Override
@@ -260,7 +281,7 @@ public class RequestPartitionId implements IModelJson {
 	 *         <code>thePartitionId</code>.
 	 */
 	public boolean isPartition(@Nullable Integer thePartitionId) {
-		if (isAllPartitions()) {
+		if (isAllPartitions() && !hasPartitionIds()) {
 			return false;
 		}
 		return hasPartitionIds()
@@ -346,6 +367,26 @@ public class RequestPartitionId implements IModelJson {
 	@Nonnull
 	public static RequestPartitionId allPartitions() {
 		return ALL_PARTITIONS;
+	}
+
+	/**
+	 * Creates a new RequestPartitionId which indicates "all partitions" and explicitly lists them
+	 *
+	 * @since 8.8.0
+	 */
+	@Nonnull
+	public static RequestPartitionId allPartitionsWithPartitionIds(Integer... thePartitionIds) {
+		return allPartitionsWithPartitionIds(toListOrNull(thePartitionIds));
+	}
+
+	/**
+	 * Creates a new RequestPartitionId which indicates "all partitions" and explicitly lists them
+	 *
+	 * @since 8.8.0
+	 */
+	@Nonnull
+	public static RequestPartitionId allPartitionsWithPartitionIds(List<Integer> thePartitionIds) {
+		return new RequestPartitionId(null, thePartitionIds, null, true);
 	}
 
 	/**
@@ -443,18 +484,32 @@ public class RequestPartitionId implements IModelJson {
 		return new RequestPartitionId(thePartitionNames, thePartitionIds, thePartitionDate);
 	}
 
+	@Nonnull
+	public static RequestPartitionId forPartitionIdsAndNames(
+			List<String> thePartitionNames,
+			List<Integer> thePartitionIds,
+			LocalDate thePartitionDate,
+			boolean theAllPartitions) {
+		return new RequestPartitionId(thePartitionNames, thePartitionIds, thePartitionDate, theAllPartitions);
+	}
+
 	/**
 	 * Create a string representation suitable for use as a cache key. Null aware.
 	 * <p>
 	 * Returns the partition IDs (numeric) as a joined string with a space between, using the string "null" for any null values
 	 */
 	public static String stringifyForKey(@Nonnull RequestPartitionId theRequestPartitionId) {
-		String retVal = "(all)";
-		if (!theRequestPartitionId.isAllPartitions()) {
+		String retVal;
+		if (theRequestPartitionId.hasPartitionIds()) {
 			assert theRequestPartitionId.hasPartitionIds();
 			retVal = theRequestPartitionId.getPartitionIds().stream()
-					.map(t -> defaultIfNull(t, "null").toString())
+					.map(t -> getIfNull(t, "null").toString())
 					.collect(Collectors.joining(" "));
+			if (theRequestPartitionId.isAllPartitions()) {
+				retVal = "(all) " + retVal;
+			}
+		} else {
+			retVal = "(all)";
 		}
 		return retVal;
 	}

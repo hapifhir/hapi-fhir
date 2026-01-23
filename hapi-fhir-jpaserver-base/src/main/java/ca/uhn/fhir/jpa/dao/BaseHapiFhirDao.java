@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IJpaDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.cache.IResourceTypeCacheSvc;
@@ -77,7 +78,6 @@ import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
-import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
@@ -140,6 +140,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.function.Consumer;
@@ -199,9 +202,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	@Autowired
 	protected DeleteConflictService myDeleteConflictService;
-
-	@Autowired
-	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Autowired
 	protected InMemoryResourceMatcher myInMemoryResourceMatcher;
@@ -852,8 +852,31 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			ResourceIndexedSearchParams theParams,
 			RequestDetails theRequestDetails) {
 		// Make sure that the match URL was actually appropriate for the supplied resource
+		String matchUrlForVerification = theIfNoneExist;
+
+		// Interceptor: STORAGE_PREVERIFY_CONDITIONAL_MATCH_CRITERIA
+		IInterceptorBroadcaster interceptorBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (interceptorBroadcaster.hasHooks(Pointcut.STORAGE_PREVERIFY_CONDITIONAL_MATCH_CRITERIA)) {
+			PreVerifyConditionalMatchCriteriaRequest param = new PreVerifyConditionalMatchCriteriaRequest(theResource);
+			param.setConditionalUrl(matchUrlForVerification);
+
+			HookParams params = new HookParams();
+			params.add(RequestDetails.class, theRequestDetails);
+			params.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			params.add(PreVerifyConditionalMatchCriteriaRequest.class, param);
+			interceptorBroadcaster.callHooks(Pointcut.STORAGE_PREVERIFY_CONDITIONAL_MATCH_CRITERIA, params);
+
+			Validate.notBlank(
+					param.getConditionalUrl(),
+					"Interceptor for "
+							+ Pointcut.STORAGE_PREVERIFY_CONDITIONAL_MATCH_CRITERIA
+							+ " returned a blank conditional URL");
+			matchUrlForVerification = param.getConditionalUrl();
+		}
+
 		InMemoryMatchResult outcome =
-				myInMemoryResourceMatcher.match(theIfNoneExist, theResource, theParams, theRequestDetails);
+				myInMemoryResourceMatcher.match(matchUrlForVerification, theResource, theParams, theRequestDetails);
 
 		if (outcome.supported() && !outcome.matched()) {
 			String errorMsg =
@@ -938,21 +961,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			existingParams = existingSearchParams.get(entity);
 			if (existingParams == null) {
 				existingParams = ResourceIndexedSearchParams.withLists(entity);
-				/*
-				 * If we have lots of resource links, this proactively fetches the targets so
-				 * that we don't look them up one-by-one when comparing the new set to the
-				 * old set later on
-				 */
-				if (existingParams.getResourceLinks().size() >= 10) {
-					List<Long> allPids = existingParams.getResourceLinks().stream()
-							.map(ResourceLink::getId)
-							.collect(Collectors.toList());
-					new QueryChunker<Long>().chunk(allPids, chunkPids -> {
-						List<ResourceLink> targets = myResourceLinkDao.findByPidAndFetchTargetDetails(chunkPids);
-						ourLog.trace("Prefetched targets: {}", targets);
-					});
-				}
 				existingSearchParams.put(entity, existingParams);
+
+				preResolveExistingReferences(theTransactionDetails, existingParams);
 			}
 			entity.setDeleted(null);
 
@@ -971,15 +982,19 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 
 				// Extract search params for resource
-				mySearchParamWithInlineReferencesExtractor.populateFromResource(
-						requestPartitionId,
-						newParams,
-						theTransactionDetails,
-						entity,
-						theResource,
-						existingParams,
-						theRequest,
-						thePerformIndexing);
+				boolean skipIndexing =
+						Boolean.TRUE.equals(theResource.getUserData(JpaConstants.RESOURCE_SKIP_INDEXING));
+				if (!skipIndexing) {
+					mySearchParamWithInlineReferencesExtractor.populateFromResource(
+							requestPartitionId,
+							newParams,
+							theTransactionDetails,
+							entity,
+							theResource,
+							existingParams,
+							theRequest,
+							thePerformIndexing);
+				}
 
 				if (CollectionUtils.isNotEmpty(newParams.myLinks)) {
 					setTargetResourceTypeIdForResourceLinks(newParams.myLinks);
@@ -1096,7 +1111,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		/*
 		 * Indexing
 		 */
-		if (thePerformIndexing) {
+		boolean skipIndexing = theResource != null
+				&& Boolean.TRUE.equals(theResource.getUserData(JpaConstants.RESOURCE_SKIP_INDEXING));
+		if (thePerformIndexing && !skipIndexing) {
 			if (newParams == null) {
 				myExpungeService.deleteAllSearchParams(entity.getPersistentId());
 				entity.clearAllParamsPopulated();
@@ -1139,6 +1156,35 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		return entity;
+	}
+
+	/**
+	 * If we have any existing resource links in an existing resource being updated,
+	 * (i.e., we're updating a resource and the previous version already had references in it)
+	 * look up those references and add them to the TransactionDetails. This avoids a
+	 * target existence check later, which makes sense: if an existing reference was
+	 * stored, then we should be able to trust that the target exists and isn't deleted.
+	 */
+	private void preResolveExistingReferences(
+			TransactionDetails theTransactionDetails, ResourceIndexedSearchParams existingParams) {
+		Collection<ResourceLink> existingLinks = existingParams.getResourceLinks();
+		Set<JpaPid> existingLinkTargetPids = existingLinks.stream()
+				.map(ResourceLink::getTargetResourcePk)
+				.filter(Objects::nonNull)
+				.filter(pid -> !theTransactionDetails.hasReverseResolvedId(pid))
+				.collect(Collectors.toSet());
+		PersistentIdToForcedIdMap<JpaPid> existingLinkTargetMap =
+				myIdHelperService.translatePidsToForcedIds(existingLinkTargetPids);
+		for (Map.Entry<JpaPid, Optional<String>> existingTarget :
+				existingLinkTargetMap.getResourcePersistentIdOptionalMap().entrySet()) {
+			if (existingTarget.getValue().isPresent()) {
+				JpaPid pid = existingTarget.getKey();
+				IIdType id = myContext
+						.getVersion()
+						.newIdType(existingTarget.getValue().get());
+				theTransactionDetails.addResolvedResourceId(id, pid);
+			}
+		}
 	}
 
 	private static IdentityHashMap<ResourceTable, ResourceIndexedSearchParams> getSearchParamsMapFromTransaction(

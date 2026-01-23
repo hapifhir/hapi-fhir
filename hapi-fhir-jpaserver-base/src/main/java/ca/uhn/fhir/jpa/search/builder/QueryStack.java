@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1219,7 +1219,7 @@ public class QueryStack {
 			}
 
 			ResourceLinkPredicateBuilder resourceLinkTableJoin =
-					mySqlBuilder.addReferencePredicateBuilderReversed(this, theSourceJoinColumn);
+					mySqlBuilder.addResourceLinkForHasParameterPredicateBuilderReversed(this, theSourceJoinColumn);
 
 			List<String> paths = resourceLinkTableJoin.createResourceLinkPaths(
 					targetResourceType, paramReference, new ArrayList<>());

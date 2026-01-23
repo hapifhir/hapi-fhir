@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,12 +128,12 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 
 	@Override
 	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
-		if (Constants.PARAMQUALIFIER_MDM.equals(theQualifier)) {
+		String q = theQualifier;
+		if (q != null && q.endsWith(Constants.PARAMQUALIFIER_MDM)) {
 			myMdmExpand = true;
-			theQualifier = "";
+			q = q.substring(0, q.length() - Constants.PARAMQUALIFIER_MDM.length());
 		}
 
-		String q = theQualifier;
 		if (isNotBlank(q)) {
 			if (q.startsWith(":")) {
 				int nextIdx = q.indexOf('.');

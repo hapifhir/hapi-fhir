@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
-import ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper;
 import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
@@ -33,7 +32,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
-import ca.uhn.fhir.merge.MergeProvenanceSvc;
+import ca.uhn.fhir.merge.MergeResourceHelper;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -43,7 +42,6 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,21 +50,21 @@ import java.util.Date;
 import java.util.List;
 
 import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
-import static ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper.addInfoToOperationOutcome;
+import static ca.uhn.fhir.merge.MergeResourceHelper.addInfoToOperationOutcome;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_200_OK;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_202_ACCEPTED;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_500_INTERNAL_ERROR;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
 
 /**
- * Service for the FHIR $merge operation. Currently only supports Patient/$merge. The plan is to expand to other resource types.
+ * Service for the FHIR Patient/$merge and [ResourceType]/$hapi.fhir.merge (generic merge) operations.
  */
 public class ResourceMergeService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceMergeService.class);
 
 	private final FhirContext myFhirContext;
 	private final JpaStorageSettings myStorageSettings;
-	private final IFhirResourceDao<Patient> myPatientDao;
+	private final DaoRegistry myDaoRegistry;
 	private final IReplaceReferencesSvc myReplaceReferencesSvc;
 	private final IHapiTransactionService myHapiTransactionService;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
@@ -75,7 +73,6 @@ public class ResourceMergeService {
 	private final MergeResourceHelper myMergeResourceHelper;
 	private final Batch2TaskHelper myBatch2TaskHelper;
 	private final MergeValidationService myMergeValidationService;
-	private final MergeProvenanceSvc myMergeProvenanceSvc;
 
 	public ResourceMergeService(
 			JpaStorageSettings theStorageSettings,
@@ -86,19 +83,18 @@ public class ResourceMergeService {
 			IJobCoordinator theJobCoordinator,
 			Batch2TaskHelper theBatch2TaskHelper,
 			MergeValidationService theMergeValidationService,
-			MergeProvenanceSvc theMergeProvenanceSvc) {
+			MergeResourceHelper theMergeResourceHelper) {
 		myStorageSettings = theStorageSettings;
+		myDaoRegistry = theDaoRegistry;
 
-		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);
 		myTaskDao = theDaoRegistry.getResourceDao(Task.class);
 		myReplaceReferencesSvc = theReplaceReferencesSvc;
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 		myJobCoordinator = theJobCoordinator;
 		myBatch2TaskHelper = theBatch2TaskHelper;
-		myFhirContext = myPatientDao.getContext();
+		myFhirContext = theDaoRegistry.getFhirContext();
 		myHapiTransactionService = theHapiTransactionService;
-		myMergeProvenanceSvc = theMergeProvenanceSvc;
-		myMergeResourceHelper = new MergeResourceHelper(theDaoRegistry, myMergeProvenanceSvc);
+		myMergeResourceHelper = theMergeResourceHelper;
 		myMergeValidationService = theMergeValidationService;
 	}
 
@@ -147,8 +143,8 @@ public class ResourceMergeService {
 				myMergeValidationService.validate(theMergeOperationParameters, theRequestDetails, theMergeOutcome);
 
 		if (mergeValidationResult.isValid) {
-			Patient sourceResource = mergeValidationResult.sourceResource;
-			Patient targetResource = mergeValidationResult.targetResource;
+			IBaseResource sourceResource = mergeValidationResult.sourceResource;
+			IBaseResource targetResource = mergeValidationResult.targetResource;
 
 			if (theMergeOperationParameters.getPreview()) {
 				handlePreview(
@@ -171,8 +167,8 @@ public class ResourceMergeService {
 	}
 
 	private void handlePreview(
-			Patient theSourceResource,
-			Patient theTargetResource,
+			IBaseResource theSourceResource,
+			IBaseResource theTargetResource,
 			MergeOperationInputParameters theMergeOperationParameters,
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome) {
@@ -181,8 +177,8 @@ public class ResourceMergeService {
 				theSourceResource.getIdElement().toVersionless(), theRequestDetails);
 
 		// in preview mode, we should also return what the target would look like
-		Patient theResultResource = (Patient) theMergeOperationParameters.getResultResource();
-		Patient targetPatientAsIfUpdated = myMergeResourceHelper.prepareTargetPatientForUpdate(
+		IBaseResource theResultResource = theMergeOperationParameters.getResultResource();
+		IBaseResource targetPatientAsIfUpdated = myMergeResourceHelper.prepareTargetResourceForUpdate(
 				theTargetResource, theSourceResource, theResultResource, theMergeOperationParameters.getDeleteSource());
 		theMergeOutcome.setUpdatedTargetResource(targetPatientAsIfUpdated);
 
@@ -194,8 +190,8 @@ public class ResourceMergeService {
 
 	private void doMerge(
 			MergeOperationInputParameters theMergeOperationParameters,
-			Patient theSourceResource,
-			Patient theTargetResource,
+			IBaseResource theSourceResource,
+			IBaseResource theTargetResource,
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome) {
 
@@ -223,8 +219,8 @@ public class ResourceMergeService {
 
 	private void doMergeSync(
 			MergeOperationInputParameters theMergeOperationParameters,
-			Patient theSourceResource,
-			Patient theTargetResource,
+			IBaseResource theSourceResource,
+			IBaseResource theTargetResource,
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome,
 			RequestPartitionId partitionId) {
@@ -254,11 +250,11 @@ public class ResourceMergeService {
 					DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
 							theSourceResource,
 							theTargetResource,
-							(Patient) theMergeOperationParameters.getResultResource(),
+							theMergeOperationParameters.getResultResource(),
 							theMergeOperationParameters.getDeleteSource(),
 							theRequestDetails);
 
-					Patient updatedTargetResource = (Patient) outcome.getResource();
+					IBaseResource updatedTargetResource = outcome.getResource();
 					theMergeOutcome.setUpdatedTargetResource(updatedTargetResource);
 
 					if (theMergeOperationParameters.getCreateProvenance()) {
@@ -282,7 +278,10 @@ public class ResourceMergeService {
 					if (theMergeOperationParameters.getDeleteSource()) {
 						// by using an id with versionId, the delete fails if
 						// the resource was updated since we last read it
-						myPatientDao.delete(theSourceResource.getIdElement(), theRequestDetails);
+						@SuppressWarnings("unchecked")
+						IFhirResourceDao<IBaseResource> dao =
+								myDaoRegistry.getResourceDao(theRequestDetails.getResourceName());
+						dao.delete(theSourceResource.getIdElement(), theRequestDetails);
 					}
 				});
 
@@ -292,14 +291,15 @@ public class ResourceMergeService {
 
 	private void doMergeAsync(
 			MergeOperationInputParameters theMergeOperationParameters,
-			Patient theSourceResource,
-			Patient theTargetResource,
+			IBaseResource theSourceResource,
+			IBaseResource theTargetResource,
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome,
 			RequestPartitionId thePartitionId) {
 
+		String operationName = theRequestDetails.getOperation();
 		MergeJobParameters mergeJobParameters = theMergeOperationParameters.asMergeJobParameters(
-				myFhirContext, myStorageSettings, theSourceResource, theTargetResource, thePartitionId);
+				myFhirContext, myStorageSettings, theSourceResource, theTargetResource, thePartitionId, operationName);
 
 		Task task = myBatch2TaskHelper.startJobAndCreateAssociatedTask(
 				myTaskDao, theRequestDetails, myJobCoordinator, JOB_MERGE, mergeJobParameters);

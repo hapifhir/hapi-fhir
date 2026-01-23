@@ -2,7 +2,7 @@
  * #%L
  * HAPI-FHIR Storage Batch2 Jobs
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils;
-import ca.uhn.fhir.batch2.jobs.reindex.models.ReindexResults;
 import ca.uhn.fhir.batch2.jobs.reindex.svcs.ReindexJobService;
 import ca.uhn.fhir.i18n.Msg;
 import jakarta.annotation.Nonnull;

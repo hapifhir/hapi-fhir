@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -188,7 +187,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 				boolean exists = myTxService
 						.withSystemRequest()
-						.withRequestPartitionId(RequestPartitionId.defaultPartition())
+						.withRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId())
 						.execute(() -> {
 							Optional<NpmPackageVersionEntity> existing = myPackageVersionDao.findByPackageIdAndVersion(
 									theInstallationSpec.getName(), theInstallationSpec.getVersion());
@@ -550,10 +549,11 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		return outcome;
 	}
 
-	private RequestDetails createRequestDetails() {
+	@VisibleForTesting
+	RequestDetails createRequestDetails() {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			requestDetails.setRequestPartitionId(RequestPartitionId.defaultPartition());
+			requestDetails.setRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId());
 		}
 		return requestDetails;
 	}

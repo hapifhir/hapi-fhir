@@ -2,7 +2,7 @@
  * #%L
  * HAPI-FHIR Storage Batch2 Jobs
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,12 +138,14 @@ public abstract class BaseBulkModifyOrRewriteGenerateReportStep<PT extends BaseB
 				.append(changedPerSecond)
 				.append("/sec)")
 				.append('\n');
-		report.append("Total Resources Unchanged : ")
-				.append(myUnchangedCount)
-				.append(" (")
-				.append(unchangedPerSecond)
-				.append("/sec)")
-				.append('\n');
+		if (myUnchangedCount > 0) {
+			report.append("Total Resources Unchanged : ")
+					.append(myUnchangedCount)
+					.append(" (")
+					.append(unchangedPerSecond)
+					.append("/sec)")
+					.append('\n');
+		}
 		if (myDeletedCount > 0) {
 			report.append("Total Resources Deleted   : ")
 					.append(myDeletedCount)
@@ -153,7 +155,7 @@ public abstract class BaseBulkModifyOrRewriteGenerateReportStep<PT extends BaseB
 					.append('\n');
 		}
 		if (myFailureCount > 0) {
-			report.append("Total Failed Changes      : ")
+			report.append("Total Resources Failed    : ")
 					.append(myFailureCount)
 					.append(" (")
 					.append(failedPerSecond)

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -248,8 +248,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 
 					prefetchByJoinClause(
 							"resourceLinks",
-							// fetch the ResourceLink but also the target resource for that link
-							"LEFT JOIN FETCH r.myResourceLinks l LEFT JOIN FETCH l.myTargetResource",
+							"LEFT JOIN FETCH r.myResourceLinks l",
 							ResourceTable::isHasLinks,
 							entityChunk);
 

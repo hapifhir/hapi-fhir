@@ -28,6 +28,8 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
@@ -638,38 +640,56 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 				callLatch(myLastStepLatch, theStepExecutionDetails);
 			}
 		});
+		IAnonymousInterceptor poststorageBatchJobCreateInterceptor = (pointcut, params) -> {
+			JobInstance jobInstance = params.get(JobInstance.class);
+			assertNotNull(jobInstance.getInstanceId());
+		};
 
-		// test
-		JobInstanceStartRequest request = buildRequest(jobId);
-		myFirstStepLatch.setExpectedCount(1);
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
+		IAnonymousInterceptor postBatchJobCcompletionInterceptor = (pointcut, params) -> {
+			JobInstance jobInstance = params.get(JobInstance.class);
+			assertNotNull(jobInstance.getInstanceId());
+		};
 
-		String instanceId = startResponse.getInstanceId();
-		myBatch2JobHelper.runMaintenancePass();
-		myFirstStepLatch.awaitExpected();
-		assertNotNull(instanceId);
+		try {
 
-		myBatch2JobHelper.awaitGatedStepId(SECOND_STEP_ID, instanceId);
+			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_POSTSTORAGE_BATCH_JOB_CREATE, poststorageBatchJobCreateInterceptor);
+			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_POSTCOMPLETE_BATCH_JOB, postBatchJobCcompletionInterceptor);
 
-		// wait for last step to finish
-		ourLog.info("Setting last step latch");
-		myLastStepLatch.setExpectedCount(1);
+			// test
+			JobInstanceStartRequest request = buildRequest(jobId);
+			myFirstStepLatch.setExpectedCount(1);
+			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
 
-		// waiting
-		myBatch2JobHelper.awaitJobCompletion(instanceId);
-		ourLog.info("awaited the last step");
-		myLastStepLatch.awaitExpected();
+			String instanceId = startResponse.getInstanceId();
+			myBatch2JobHelper.runMaintenancePass();
+			myFirstStepLatch.awaitExpected();
+			assertNotNull(instanceId);
 
-		// verify
-		Optional<JobInstance> instanceOp = myJobPersistence.fetchInstance(instanceId);
-		assertTrue(instanceOp.isPresent());
-		JobInstance jobInstance = instanceOp.get();
+			myBatch2JobHelper.awaitGatedStepId(SECOND_STEP_ID, instanceId);
 
-		// ensure our completion handler fired
-		assertTrue(completionBool.get());
+			// wait for last step to finish
+			ourLog.info("Setting last step latch");
+			myLastStepLatch.setExpectedCount(1);
 
-		assertEquals(StatusEnum.COMPLETED, jobInstance.getStatus());
-		assertEquals(1.0, jobInstance.getProgress());
+			// waiting
+			myBatch2JobHelper.awaitJobCompletion(instanceId);
+			ourLog.info("awaited the last step");
+			myLastStepLatch.awaitExpected();
+
+			// verify
+			Optional<JobInstance> instanceOp = myJobPersistence.fetchInstance(instanceId);
+			assertTrue(instanceOp.isPresent());
+			JobInstance jobInstance = instanceOp.get();
+
+			// ensure our completion handler fired
+			assertTrue(completionBool.get());
+
+			assertEquals(StatusEnum.COMPLETED, jobInstance.getStatus());
+			assertEquals(1.0, jobInstance.getProgress());
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(poststorageBatchJobCreateInterceptor);
+			myInterceptorRegistry.unregisterInterceptor(postBatchJobCcompletionInterceptor);
+		}
 	}
 
 	@ParameterizedTest

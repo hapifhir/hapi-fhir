@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,9 @@ public class ValidationMessagePostProcessingInterceptor {
 			newMessages.add(inputMessage);
 		}
 
-		return new ValidationResult(theResult.getContext(), newMessages);
+		theResult.setMessages(newMessages);
+
+		return null; // keep processing
 	}
 
 	private int logResult(

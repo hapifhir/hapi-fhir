@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,12 +171,13 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		ISearchBuilder<JpaPid> builder = mySearchBuilderFactory.newSearchBuilder(null, null);
 		return myTransactionService
 				.withRequest(theRequestDetails)
-				.search(() -> builder.createQueryStream(
+				.withRequestPartitionId(theRequestPartitionId)
+				.search(partition -> builder.createQueryStream(
 						theSearchParams,
 						new SearchRuntimeDetails(
 								theRequestDetails, UUID.randomUUID().toString()),
 						theRequestDetails,
-						theRequestPartitionId))
+						partition))
 				.map(pid -> new TypedResourcePid(pid.getResourceType(), pid));
 	}
 

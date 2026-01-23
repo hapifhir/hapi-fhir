@@ -2,7 +2,7 @@
  * #%L
  * HAPI-FHIR Storage Batch2 Jobs
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ public class BulkExportJobService {
 				myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
 						theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 		myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
-		theBulkExportJobParameters.setPartitionId(partitionId);
+		theBulkExportJobParameters.setPartitionIdForSecurity(partitionId);
 	}
 
 	/**

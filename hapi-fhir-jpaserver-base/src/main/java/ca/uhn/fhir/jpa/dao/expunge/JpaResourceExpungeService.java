@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,12 +42,16 @@ import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
+import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
+import ca.uhn.fhir.jpa.esr.IExternallyStoredResourceService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTablePk;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.jpa.util.ResourceParserUtil.EsrResourceDetails;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -73,6 +77,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static ca.uhn.fhir.jpa.util.ResourceParserUtil.getEsrResourceDetails;
+import static ca.uhn.fhir.jpa.util.ResourceParserUtil.getResourceText;
 
 @Service
 public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid, ResourceHistoryTablePk> {
@@ -140,6 +147,9 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 
 	@Autowired
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
+
+	@Autowired
+	private ExternallyStoredResourceServiceRegistry myExternallyStoredResourceServiceRegistry;
 
 	@Override
 	@Transactional
@@ -235,6 +245,8 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 
 		callHooks(theRequestDetails, theRemainingCount, version, id);
 
+		expungeExternallyStoredResource(version);
+
 		if (myStorageSettings.isAccessMetaSourceInformationFromProvenanceTable()) {
 			Optional<ResourceHistoryProvenanceEntity> provenanceOpt =
 					myResourceHistoryProvenanceTableDao.findById(theNextVersionId.asIdAndPartitionId());
@@ -245,6 +257,19 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 		myResourceHistoryTableDao.deleteByPid(version.getId());
 
 		theRemainingCount.decrementAndGet();
+	}
+
+	private void expungeExternallyStoredResource(ResourceHistoryTable theResourceHistoryEntity) {
+		if (theResourceHistoryEntity.getEncoding() == ResourceEncodingEnum.ESR) {
+			byte[] resourceBytes = theResourceHistoryEntity.getResource();
+			String resourceText = theResourceHistoryEntity.getResourceTextVc();
+			ResourceEncodingEnum resourceEncoding = theResourceHistoryEntity.getEncoding();
+			String decodedText = getResourceText(resourceBytes, resourceText, resourceEncoding);
+			EsrResourceDetails esrResourceDetails = getEsrResourceDetails(decodedText);
+			IExternallyStoredResourceService provider =
+					myExternallyStoredResourceServiceRegistry.getProvider(esrResourceDetails.providerId());
+			provider.deleteResource(esrResourceDetails.address());
+		}
 	}
 
 	private void callHooks(

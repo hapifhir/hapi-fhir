@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -165,7 +166,17 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 			return;
 		}
 
-		myServer = new Server();
+		/*
+		 * By default, Jetty spins up 200 worker threads, which makes thread
+		 * dumps a nightmare to read. Use a smaller but growable pool.
+		 */
+		QueuedThreadPool threadPool = new QueuedThreadPool();
+		threadPool.setMinThreads(5);
+		threadPool.setMaxThreads(50);
+		threadPool.setIdleTimeout(1000);
+		threadPool.setName("HAPI-Jetty-Server");
+
+		myServer = new Server(threadPool);
 		myConnectionsOpenedCounter = new AtomicLong(0);
 
 		ServerConnector connector = new ServerConnector(myServer);

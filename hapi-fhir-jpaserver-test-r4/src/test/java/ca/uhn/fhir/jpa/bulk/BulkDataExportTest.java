@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportSupport;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -12,8 +11,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.batch2.JpaJobPersistenceImpl;
-import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -28,9 +25,9 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.LineIterator;
@@ -70,6 +67,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Spy;
@@ -110,12 +108,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
 	@Autowired
-	private IBatch2WorkChunkRepository myWorkChunkRepository;
-	@Autowired
-	private IJobPersistence myJobPersistence;
-	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-	private JpaJobPersistenceImpl myJobPersistenceImpl;
 
 	@AfterEach
 	void afterEach() {
@@ -129,7 +122,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	@BeforeEach
 	public void beforeEach() {
 		myStorageSettings.setJobFastTrackingEnabled(false);
-		myJobPersistenceImpl = ProxyUtil.getSingletonTarget(myJobPersistence, JpaJobPersistenceImpl.class);
 	}
 
 	@Spy
@@ -165,6 +157,40 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setResourceTypes(Sets.newHashSet("Patient"));
 		options.setGroupId("Group/G");
 		options.setFilters(Sets.newHashSet("Patient?gender=female"));
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		verifyBulkExportResults(options, Collections.singletonList("Patient/PF"), Collections.singletonList("Patient/PM"));
+	}
+
+	@ParameterizedTest
+	@EnumSource(JpaStorageSettings.IndexEnabledEnum.class)
+	public void testGroupBulkExportWithTypeFilterWithMissingQualifier(JpaStorageSettings.IndexEnabledEnum theIndexEnabled) {
+		myStorageSettings.setIndexMissingFields(theIndexEnabled);
+
+		// Create some resources
+		Patient patient = new Patient();
+		patient.setId("PF");
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		patient = new Patient();
+		patient.setId("PM");
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		Group group = new Group();
+		group.setId("Group/G");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/PF");
+		group.addMember().getEntity().setReference("Patient/PM");
+		myClient.update().resource(group).execute();
+
+		// set the export options
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setResourceTypes(Sets.newHashSet("Patient"));
+		options.setGroupId("Group/G");
+		options.setFilters(Sets.newHashSet("Patient?gender:missing=true"));
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 		verifyBulkExportResults(options, Collections.singletonList("Patient/PF"), Collections.singletonList("Patient/PM"));
@@ -521,9 +547,35 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		}
 	}
 
-	@Test
-	public void testPatientBulkExportWithMultiIds() {
-		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
+	@ParameterizedTest
+	@EnumSource(JpaStorageSettings.IndexEnabledEnum.class)
+	public void testPatientTypeLevelBulkExportWithMissingQualifier(JpaStorageSettings.IndexEnabledEnum theIndexEnabled) {
+
+		myStorageSettings.setIndexMissingFields(theIndexEnabled);
+		// create some resources
+		Patient patient = new Patient();
+		patient.setId("P1");
+		myClient.update().resource(patient).execute();
+
+		// diff patient
+		patient = new Patient();
+		patient.setId("P2");
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+		myClient.update().resource(patient).execute();
+
+		// set the export options
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setResourceTypes(Sets.newHashSet("Patient"));
+		options.setFilters(Sets.newHashSet("Patient?gender:missing=true"));
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+		verifyBulkExportResults(options, List.of("Patient/P1"), List.of("Patient/P2"));
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testPatientBulkExportWithMultiIds(boolean theMdm) {
 		// create some resources
 		Patient patient = new Patient();
 		patient.setId("P1");
@@ -579,6 +631,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		options.setExpandMdm(theMdm);
 
 		verifyBulkExportResults(options, List.of("Patient/P1", obsId, encId, "Patient/P2", obsId2, encId2), List.of("Patient/P3", obsId3, encId3));
 	}
@@ -664,6 +717,19 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		verifyBulkExportResults(options, List.of("Patient/P1", practId, orgId, encId, encId2), List.of("Patient/P2", orgId2, encId3));
 	}
 
+	/**
+	 * In this test, a Practitioner is a part of two separate compartments, which can cause it
+	 * to appear twice in a single export (i.e. a duplicate practitioner will show up).
+	 * We used to guard against this with a giant hashset, but it's really not scalable to
+	 * be defending in this way. Other FHIR servers also don't guarantee against this
+	 * kind of duplicate. E.g. the Microsoft FHIR server
+	 * <a href="https://learn.microsoft.com/en-us/azure/healthcare-apis/fhir/export-data">says this</a>:
+	 * <blockquote>
+	 * Note:
+	 * Patient/$export and Group/[ID]/$export can export duplicate resources if
+	 * a resource is in multiple groups or in a compartment of more than one resource.
+	 * </blockquote>
+	 */
 	@Test
 	public void testGroupBulkExportGroupIncludePractitionerLinkedFromTwoResourceTypes() {
 		// Create some resources
@@ -702,7 +768,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		verifyBulkExportResults(options, List.of("Patient/P1", practId, encId, obsId), Collections.emptyList());
+		verifyBulkExportResults(options, List.of("Patient/P1", practId, encId, obsId), Collections.emptyList(), Set.of(practId));
 	}
 
 	@Test
@@ -763,8 +829,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testGroupBulkExport_QualifiedSubResourcesOfUnqualifiedPatientShouldShowUp() throws InterruptedException {
-
+	public void testGroupBulkExport_QualifiedSubResourcesOfUnqualifiedPatientShouldShowUp() {
 		// Patient with lastUpdated before _since
 		Patient patient = new Patient();
 		patient.setId("A");
@@ -772,7 +837,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		// Sleep for 1 sec
 		ourLog.info("Patient lastUpdated: " + InstantType.withCurrentTime().getValueAsString());
-		Thread.sleep(1000);
+		TestUtil.sleepAtLeast(1000);
 
 		// LastUpdated since now
 		Date timeDate = InstantType.now().getValue();
@@ -920,7 +985,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	* This interceptor was needed so that similar GET and POST export requests return the same jobID
 	* The test testBulkExportReuse_withGetAndPost_expectSameJobIds() tests this functionality
 	*/
-	private class BulkExportReuseInterceptor{
+	private static class BulkExportReuseInterceptor{
 		@Hook(Pointcut.STORAGE_INITIATE_BULK_EXPORT)
 		public void initiateBulkExport(RequestDetails theRequestDetails, BulkExportJobParameters theBulkExportOptions){
 				if(theRequestDetails.getRequestType().equals(RequestTypeEnum.GET)) {
@@ -936,7 +1001,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		patient.setActive(true);
 		myClient.update().resource(patient).execute();
 
-		BulkExportReuseInterceptor newInterceptor = new  BulkExportReuseInterceptor();
+		BulkExportReuseInterceptor newInterceptor = new BulkExportReuseInterceptor();
 		myInterceptorRegistry.registerInterceptor(newInterceptor);
 
 		Parameters input = new Parameters();
@@ -1245,6 +1310,10 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 
 	private JobInstance verifyBulkExportResults(BulkExportJobParameters theOptions, List<String> theContainedList, List<String> theExcludedList) {
+		return verifyBulkExportResults(theOptions, theContainedList, theExcludedList, Set.of());
+	}
+
+	private JobInstance verifyBulkExportResults(BulkExportJobParameters theOptions, List<String> theContainedList, List<String> theExcludedList, Collection<String> theAcceptableDuplicates) {
 		Batch2JobStartResponse startResponse = startNewJob(theOptions);
 
 		assertNotNull(startResponse);
@@ -1265,7 +1334,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 				String nextBinaryIdPart = new IdType(nextBinaryId).getIdPart();
 				assertThat(nextBinaryIdPart).matches("[a-zA-Z0-9]{32}");
 
-				Binary binary = myBinaryDao.read(new IdType(nextBinaryId));
+				Binary binary = myBinaryDao.read(new IdType(nextBinaryId), newSrd());
 				assertEquals(theOptions.getOutputFormat(), binary.getContentType());
 
 				String nextNdJsonFileContent = new String(binary.getContent(), Constants.CHARSET_UTF8);
@@ -1279,7 +1348,9 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 								fail("Found resource of type " + nextId.getResourceType() + " in file for type " + resourceType);
 							} else {
 								if (!foundIds.add(nextId.getValue())) {
-									fail("Found duplicate ID: " + nextId.getValue());
+									if (!theAcceptableDuplicates.contains(nextId.getValue())) {
+										fail("Found duplicate ID: " + nextId.getValue());
+									}
 								}
 							}
 						}

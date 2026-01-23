@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -39,12 +39,13 @@ public class JpaResourceDaoEncounter<T extends IBaseResource> extends BaseHapiFh
 
 	@Override
 	public IBundleProvider encounterInstanceEverything(
-			HttpServletRequest theServletRequest,
+			RequestDetails theRequest,
 			IIdType theId,
 			IPrimitiveType<Integer> theCount,
 			IPrimitiveType<Integer> theOffset,
 			DateRangeParam theLastUpdated,
 			SortSpec theSort) {
+
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {
 			paramMap.setCount(theCount.getValue());
@@ -63,17 +64,21 @@ public class JpaResourceDaoEncounter<T extends IBaseResource> extends BaseHapiFh
 		if (theId != null) {
 			paramMap.add("_id", new StringParam(theId.getIdPart()));
 		}
-		IBundleProvider retVal = search(paramMap);
-		return retVal;
+
+		if (!isPagingProviderDatabaseBacked(theRequest)) {
+			paramMap.setLoadSynchronous(true);
+		}
+
+		return search(paramMap, theRequest);
 	}
 
 	@Override
 	public IBundleProvider encounterTypeEverything(
-			HttpServletRequest theServletRequest,
+			RequestDetails theRequest,
 			IPrimitiveType<Integer> theCount,
 			IPrimitiveType<Integer> theOffset,
 			DateRangeParam theLastUpdated,
 			SortSpec theSort) {
-		return encounterInstanceEverything(theServletRequest, null, theCount, theOffset, theLastUpdated, theSort);
+		return encounterInstanceEverything(theRequest, null, theCount, theOffset, theLastUpdated, theSort);
 	}
 }

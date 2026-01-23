@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,6 +133,9 @@ public abstract class BaseStorageDao {
 
 	@Autowired
 	protected IMetaTagSorter myMetaTagSorter;
+
+	@Autowired
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@VisibleForTesting
 	public void setSearchParamRegistry(ISearchParamRegistry theSearchParamRegistry) {
