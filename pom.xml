@@ -1099,6 +1099,7 @@
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<elastic_apm_version>1.52.0</elastic_apm_version>
 		<elasticsearch_version>8.16.2</elasticsearch_version>
+		<snowflake_jdbc_version>3.27.1</snowflake_jdbc_version>
 		<ucum_version>1.0.9</ucum_version>
 
 		<!-- Site properties -->
@@ -2132,6 +2133,11 @@
 				<groupId>com.oracle.database.jdbc</groupId>
 				<artifactId>ojdbc11</artifactId>
 				<version>23.6.0.24.10</version>
+			</dependency>
+			<dependency>
+				<groupId>net.snowflake</groupId>
+				<artifactId>snowflake-jdbc</artifactId>
+				<version>${snowflake_jdbc_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
