@@ -769,10 +769,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				for (IQueryParameterType nextValue : nextValues) {
 					String value = nextValue.getValueAsQueryToken(myContext);
 					String qualifier = nextValue.getQueryParameterQualifier();
+					String parameterName = nextKey;
 					if (isNotBlank(qualifier)) {
-						nextKey = nextKey + qualifier;
+						parameterName += qualifier;
 					}
-					addParam(myParams, nextKey, value);
+					addParam(myParams, parameterName, value);
 				}
 			}
 			return (QUERY) this;
