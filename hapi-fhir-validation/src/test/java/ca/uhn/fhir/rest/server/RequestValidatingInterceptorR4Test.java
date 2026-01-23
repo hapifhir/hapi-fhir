@@ -294,8 +294,30 @@ public class RequestValidatingInterceptorR4Test extends BaseValidationTestWithIn
 			ourLog.info("Response was:\n{}", status);
 			ourLog.info("Response was:\n{}", responseContent);
 
-			assertEquals(422, status.getStatusLine().getStatusCode());
+			assertEquals(400, status.getStatusLine().getStatusCode());
 			assertThat(responseContent).contains("DOCTYPE");
+		}
+
+	}
+
+	@Test
+	public void testValidateMalformedJsonPayload_InstanceValidator() throws IOException {
+		IValidatorModule module = new FhirInstanceValidator(ourCtx);
+		myInterceptor.addValidatorModule(module);
+
+		String encoded = "{ \"resourceType\": \"Patient\", \"id\": ";
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+
+		try (CloseableHttpResponse status = ourClient.getClient().execute(httpPost)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+
+			ourLog.info("Response was:\n{}", status);
+			ourLog.info("Response was:\n{}", responseContent);
+
+			assertEquals(400, status.getStatusLine().getStatusCode());
+			assertThat(responseContent).contains("Failed to parse");
 		}
 
 	}
