@@ -383,10 +383,17 @@ public class TransactionDetails {
 	 * @see #getUserData(String)
 	 */
 	public void putUserData(String theKey, Object theValue) {
+		getUserData().put(theKey, theValue);
+	}
+
+	/**
+	 * Gets the user data map, creating it if it doesn't already exist
+	 */
+	public Map<String, Object> getUserData() {
 		if (myUserData == null) {
 			myUserData = new HashMap<>();
 		}
-		myUserData.put(theKey, theValue);
+		return myUserData;
 	}
 
 	/**

@@ -240,6 +240,8 @@ public abstract class BaseTransactionProcessor {
 			RequestDetails theRequestDetails, BUNDLE theRequest, boolean theNestedMode) {
 		String actionName = "Transaction";
 
+		TransactionDetails transactionDetails = new TransactionDetails();
+
 		IInterceptorBroadcaster compositeBroadcaster =
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
 
@@ -248,7 +250,8 @@ public abstract class BaseTransactionProcessor {
 			HookParams params = new HookParams()
 					.add(RequestDetails.class, theRequestDetails)
 					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-					.add(IBaseBundle.class, theRequest);
+					.add(IBaseBundle.class, theRequest)
+					.add(TransactionDetails.class, transactionDetails);
 			compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING, params);
 		}
 
@@ -256,10 +259,17 @@ public abstract class BaseTransactionProcessor {
 		// Interceptor call: STORAGE_TRANSACTION_PRE_PARTITION
 		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PRE_PARTITION)) {
 			response = new TransactionPartitionProcessor<BUNDLE>(
-							this, myContext, theRequestDetails, theNestedMode, compositeBroadcaster, actionName)
+							this,
+							myContext,
+							theRequestDetails,
+							theNestedMode,
+							compositeBroadcaster,
+							actionName,
+							transactionDetails)
 					.execute(theRequest);
 		} else {
-			response = processTransactionAsSubRequest(theRequestDetails, theRequest, actionName, theNestedMode);
+			response = processTransactionAsSubRequest(
+					theRequestDetails, transactionDetails, theRequest, actionName, theNestedMode);
 		}
 
 		List<IBase> entries = myVersionAdapter.getEntries(response);
@@ -396,12 +406,6 @@ public abstract class BaseTransactionProcessor {
 
 	private Date getLastModified(IBaseResource theRes) {
 		return theRes.getMeta().getLastUpdated();
-	}
-
-	IBaseBundle processTransactionAsSubRequest(
-			RequestDetails theRequestDetails, IBaseBundle theRequest, String theActionName, boolean theNestedMode) {
-		return processTransactionAsSubRequest(
-				theRequestDetails, new TransactionDetails(), theRequest, theActionName, theNestedMode);
 	}
 
 	IBaseBundle processTransactionAsSubRequest(
@@ -2646,17 +2650,20 @@ public abstract class BaseTransactionProcessor {
 			IInterceptorBroadcaster compositeBroadcaster =
 					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, myRequestDetails);
 
+			TransactionDetails transactionDetails = new TransactionDetails();
+
 			// Interceptor call: STORAGE_TRANSACTION_PROCESSING
 			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING)) {
 				HookParams params = new HookParams()
 						.add(RequestDetails.class, myRequestDetails)
 						.addIfMatchesType(ServletRequestDetails.class, myRequestDetails)
-						.add(IBaseBundle.class, subRequestBundle);
+						.add(IBaseBundle.class, subRequestBundle)
+						.add(TransactionDetails.class, transactionDetails);
 				compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING, params);
 			}
 
 			IBaseBundle nextResponseBundle = processTransactionAsSubRequest(
-					myRequestDetails, subRequestBundle, "Batch sub-request", myNestedMode);
+					myRequestDetails, transactionDetails, subRequestBundle, "Batch sub-request", myNestedMode);
 
 			IBase subResponseEntry =
 					(IBase) myVersionAdapter.getEntries(nextResponseBundle).get(0);

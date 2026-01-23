@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.dao.r5.FhirSystemDaoTransactionPartitionR5Test;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -46,7 +47,8 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 	@BeforeEach
 	public void beforeEach() {
 		myInterceptorBroadcaster.registerInterceptor(myInterceptor);
-		mySvc = new TransactionPartitionProcessor<>(myTransactionProcessor, myFhirContext, newSrd(), false, myInterceptorBroadcaster, "transaction");
+		mySvc = new TransactionPartitionProcessor<>(myTransactionProcessor, myFhirContext, newSrd(), false, myInterceptorBroadcaster,
+				"transaction", new TransactionDetails());
 	}
 
 	@Test
