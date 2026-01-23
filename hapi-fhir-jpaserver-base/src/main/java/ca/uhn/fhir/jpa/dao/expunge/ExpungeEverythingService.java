@@ -82,6 +82,7 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.StopWatch;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
 import jakarta.persistence.Query;
@@ -167,12 +168,12 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 					counter.addAndGet(doExpungeEverythingQuery(
 							"UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null"));
 				});
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, Batch2WorkChunkEntity.class, requestPartitionId));
+		// Delete Batch2 entities together in a loop to handle FK constraints.
+		// Work chunks have FK to job instances, so both must be deleted in the same
+		// transaction to prevent race conditions with job maintenance creating new chunks.
+		counter.addAndGet(expungeBatch2EntitiesInSingleTransaction(theRequest, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
 				theRequest, ResourceIdentifierPatientUniqueEntity.class, requestPartitionId));
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, Batch2JobInstanceEntity.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
 				theRequest, NpmPackageVersionResourceEntity.class, requestPartitionId));
 		counter.addAndGet(
@@ -403,6 +404,81 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		StopWatch sw = new StopWatch();
 		int outcome = myEntityManager.createQuery(theQuery).executeUpdate();
 		ourLog.debug("SqlQuery affected {} rows in {}: {}", outcome, sw, theQuery);
+		return outcome;
+	}
+
+	/**
+	 * Deletes Batch2WorkChunkEntity and Batch2JobInstanceEntity together in the same transaction
+	 * to avoid both FK constraint violations from race conditions with job maintenance AND potential
+	 * deadlocks from opposite lock ordering.
+	 *
+	 * <p>Work chunks have a foreign key (FK_BT2WC_INSTANCE) referencing job instances, so we must
+	 * delete work chunks before job instances. However, job maintenance operations acquire locks
+	 * in the opposite order (job instance first, then work chunks). To prevent deadlocks, we use
+	 * SELECT FOR UPDATE to acquire locks on job instances FIRST (matching maintenance's lock order),
+	 * then delete work chunks, then delete job instances.
+	 *
+	 * <p>Lock ordering:
+	 * <ul>
+	 *   <li>This method: SELECT FOR UPDATE JobInstances → DELETE WorkChunks → DELETE JobInstances</li>
+	 *   <li>Maintenance: UPDATE/SELECT JobInstance → UPDATE/DELETE WorkChunks</li>
+	 * </ul>
+	 */
+	// Created by claude-opus-4-5
+	private int expungeBatch2EntitiesInSingleTransaction(
+			RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+		HapiTransactionService.noTransactionAllowed();
+
+		int outcome = 0;
+		while (true) {
+			StopWatch sw = new StopWatch();
+
+			int count = myTxService
+					.withRequest(theRequest)
+					.withPropagation(Propagation.REQUIRES_NEW)
+					.withRequestPartitionId(theRequestPartitionId)
+					.execute(() -> {
+						// Step 1: Lock job instance IDs first using SELECT FOR UPDATE
+						// This establishes consistent lock ordering with maintenance operations
+						// which also lock job instances before work chunks
+						@SuppressWarnings("unchecked")
+						List<String> instanceIds = myEntityManager
+								.createQuery(
+										"SELECT e.myId FROM " + Batch2JobInstanceEntity.class.getSimpleName() + " e")
+								.setMaxResults(SearchBuilder.getMaximumPageSize() / 2)
+								.setLockMode(LockModeType.PESSIMISTIC_WRITE)
+								.getResultList();
+
+						if (instanceIds.isEmpty()) {
+							return 0;
+						}
+
+						int deleted = 0;
+
+						// Step 2: Delete work chunks for these instances (child table with FK)
+						deleted += myEntityManager
+								.createQuery("DELETE FROM " + Batch2WorkChunkEntity.class.getSimpleName()
+										+ " e WHERE e.myInstanceId IN (:instanceIds)")
+								.setParameter("instanceIds", instanceIds)
+								.executeUpdate();
+
+						// Step 3: Delete job instances (parent table, locks already held)
+						deleted += myEntityManager
+								.createQuery("DELETE FROM " + Batch2JobInstanceEntity.class.getSimpleName()
+										+ " e WHERE e.myId IN (:instanceIds)")
+								.setParameter("instanceIds", instanceIds)
+								.executeUpdate();
+
+						return deleted;
+					});
+
+			outcome += count;
+			if (count == 0) {
+				break;
+			}
+
+			ourLog.info("Have deleted {} Batch2 entities in {}", outcome, sw);
+		}
 		return outcome;
 	}
 }
