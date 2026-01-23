@@ -104,6 +104,7 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		 *  - If use a serializing queue, we aren't behaving differently (and therefore possibly missing things
 		 *    in tests)
 		 */
+		myPayloadDecoded = null;
 		myPayloadString = theEncoding.newParser(theCtx).encodeResourceToString(thePayload);
 		myPayloadId = thePayload.getIdElement().toUnqualifiedVersionless().getValue();
 	}
