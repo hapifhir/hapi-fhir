@@ -1,0 +1,7 @@
+---
+type: add
+issue: 7031
+title: "ValueSet expansion operations now support the EQUAL filter operator. When using filters 
+  in ValueSet.compose.include elements, the EQUAL operator can be used to filter concepts 
+  based on exact matches for the 'code' property or custom properties defined in the CodeSystem.
+  This allows for more precise ValueSet expansions when working with large terminology systems."
