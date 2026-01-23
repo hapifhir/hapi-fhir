@@ -56,6 +56,7 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -127,6 +128,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	@Autowired
 	private VersionCanonicalizer myVersionCanonicalizer;
+
+	@Autowired
+	private CommonCodeSystemsTerminologyService myCommonCodeSystemsTerminologyService;
 
 	/**
 	 * Constructor
@@ -565,6 +569,14 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			return false;
 		}
 
+		if ("CodeSystem".equals(resourceType) && isEmbeddedCodeSystem(theResource)) {
+			return false;
+		}
+
+		if ("ValueSet".equals(resourceType) && isEmbeddedValueSet(theResource)) {
+			return false;
+		}
+
 		if (!isValidResourceStatusForPackageUpload(theResource)) {
 			ourLog.warn(
 					"Failed to validate resource of type {} with ID {} - Error: Resource status not accepted value.",
@@ -574,6 +586,19 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 
 		return true;
+	}
+
+	private boolean isEmbeddedValueSet(IBaseResource theResource) {
+		org.hl7.fhir.r4.model.ValueSet valueSet = myVersionCanonicalizer.valueSetToCanonical(theResource);
+		if (!valueSet.hasUrl()) return false;
+		return myCommonCodeSystemsTerminologyService.isValueSetSupported(null, valueSet.getUrl());
+	}
+
+	private boolean isEmbeddedCodeSystem(IBaseResource theResource) {
+
+		org.hl7.fhir.r4.model.CodeSystem codeSystem = myVersionCanonicalizer.codeSystemToCanonical(theResource);
+		if (!codeSystem.hasUrl()) return false;
+		return myCommonCodeSystemsTerminologyService.isCodeSystemSupported(null, codeSystem.getUrl());
 	}
 
 	private boolean isValidSearchParameter(IBaseResource theResource) {
