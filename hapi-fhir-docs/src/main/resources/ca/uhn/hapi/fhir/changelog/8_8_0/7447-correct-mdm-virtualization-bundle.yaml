@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7447
+title: "When using the MDM endpoint with virtualization enabled with the $everything operation, the `bundle.total` 
+  is now correctly calculated by considering the filtered resources."

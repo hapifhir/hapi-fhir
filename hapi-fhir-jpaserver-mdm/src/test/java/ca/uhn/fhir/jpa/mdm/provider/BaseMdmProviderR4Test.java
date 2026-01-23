@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseProviderR4Test extends BaseMdmR4Test {
+public abstract class BaseMdmProviderR4Test extends BaseMdmR4Test {
 	protected MdmProviderDstu3Plus myMdmProvider;
 	protected PatientMatchProvider myPatientMatchProvider;
 	@Autowired

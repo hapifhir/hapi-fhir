@@ -307,11 +307,6 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 			offset += count;
 		}
 	}
-
-	private List<Parameters.ParametersParameterComponent> getParametersByName(Parameters theParams, String theName) {
-		return theParams.getParameter().stream().filter(p -> p.getName().equals(theName)).collect(Collectors.toList());
-	}
-
 	@Test
 	public void testQueryWithIllegalPagingValuesFails() {
 		//Given

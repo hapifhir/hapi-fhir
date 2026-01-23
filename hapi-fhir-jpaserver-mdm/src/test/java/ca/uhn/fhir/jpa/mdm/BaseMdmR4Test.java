@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
@@ -70,7 +71,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 	TestMdmConfigR4.class,
 	SubscriptionProcessorConfig.class
 })
-abstract public class BaseMdmR4Test extends BaseJpaR4Test {
+abstract public class BaseMdmR4Test extends BaseResourceProviderR4Test {
 
 	protected static final String PARTITION_1 = "PART-1";
 	protected static final String PARTITION_2 = "PART-2";

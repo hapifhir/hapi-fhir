@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test {
+public class MdmProviderCrossPartitionR4Test extends BaseMdmProviderR4Test {
 	@Autowired
 	private IMdmSettings myMdmSettings;
 

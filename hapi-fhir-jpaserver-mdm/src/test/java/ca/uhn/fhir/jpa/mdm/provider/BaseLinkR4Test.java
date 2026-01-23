@@ -20,7 +20,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public abstract class BaseLinkR4Test extends BaseProviderR4Test {
+public abstract class BaseLinkR4Test extends BaseMdmProviderR4Test {
 	protected static final StringType NO_MATCH_RESULT = new StringType(MdmMatchResultEnum.NO_MATCH.name());
 	protected static final StringType MATCH_RESULT = new StringType(MdmMatchResultEnum.MATCH.name());
 	protected static final StringType POSSIBLE_MATCH_RESULT = new StringType(MdmMatchResultEnum.POSSIBLE_MATCH.name());

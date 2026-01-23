@@ -176,33 +176,30 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 		}
 
 		FhirTerser terser = myFhirContext.newTerser();
-		for (int resourceIdx = 0; resourceIdx < theDetails.size(); resourceIdx++) {
-			IBaseResource resource = theDetails.getResource(resourceIdx);
-			if (resource != null) {
 
-				// Extract all the references in the resources we're returning
-				// in case we need to remap them to golden equivalents
-				List<ResourceReferenceInfo> referenceInfos = terser.getAllResourceReferences(resource);
-				for (ResourceReferenceInfo referenceInfo : referenceInfos) {
-					IIdType referenceId = referenceInfo
-							.getResourceReference()
-							.getReferenceElement()
-							.toUnqualifiedVersionless();
-					if (referenceId.hasResourceType()
-							&& referenceId.hasIdPart()
-							&& !referenceId.isLocal()
-							&& !referenceId.isUuid()) {
-						Optional<IIdType> nonExpandedId = expansionResults.getOriginalIdForExpandedId(referenceId);
-						if (nonExpandedId != null && nonExpandedId.isPresent()) {
-							ourMdmTroubleshootingLog.debug(
-									"MDM virtualization is replacing reference at {} value {} with {}",
-									referenceInfo.getName(),
-									referenceInfo.getResourceReference().getReferenceElement(),
-									nonExpandedId.get().getValue());
-							referenceInfo
-									.getResourceReference()
-									.setReference(nonExpandedId.get().getValue());
-						}
+		for (IBaseResource resource : theDetails.getAllResources()) {
+			// Extract all the references in the resources we're returning
+			// in case we need to remap them to golden equivalents
+			List<ResourceReferenceInfo> referenceInfos = terser.getAllResourceReferences(resource);
+			for (ResourceReferenceInfo referenceInfo : referenceInfos) {
+				IIdType referenceId = referenceInfo
+						.getResourceReference()
+						.getReferenceElement()
+						.toUnqualifiedVersionless();
+				if (referenceId.hasResourceType()
+						&& referenceId.hasIdPart()
+						&& !referenceId.isLocal()
+						&& !referenceId.isUuid()) {
+					Optional<IIdType> nonExpandedId = expansionResults.getOriginalIdForExpandedId(referenceId);
+					if (nonExpandedId != null && nonExpandedId.isPresent()) {
+						ourMdmTroubleshootingLog.debug(
+								"MDM virtualization is replacing reference at {} value {} with {}",
+								referenceInfo.getName(),
+								referenceInfo.getResourceReference().getReferenceElement(),
+								nonExpandedId.get().getValue());
+						referenceInfo
+								.getResourceReference()
+								.setReference(nonExpandedId.get().getValue());
 					}
 				}
 			}

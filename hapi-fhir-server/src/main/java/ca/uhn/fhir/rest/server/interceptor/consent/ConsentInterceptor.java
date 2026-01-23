@@ -324,7 +324,6 @@ public class ConsentInterceptor {
 				getAlreadySeenResourcesMap(theRequestDetails);
 
 		for (int i = 0; i < thePreResourceShowDetails.size(); i++) {
-
 			IBaseResource resource = thePreResourceShowDetails.getResource(i);
 			if (resource == null
 					|| alreadySeenResources.putIfAbsent(resource, ConsentOperationStatusEnum.PROCEED) != null) {

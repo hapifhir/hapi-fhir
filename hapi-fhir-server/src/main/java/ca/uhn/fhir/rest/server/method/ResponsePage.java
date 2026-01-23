@@ -271,6 +271,10 @@ public class ResponsePage {
 		return false;
 	}
 
+	public int getOmittedResourceCount() {
+		return myOmittedResourceCount;
+	}
+
 	public void setNextPageIfNecessary(BundleLinks theLinks) {
 		if (hasNextPage()) {
 			String next;
