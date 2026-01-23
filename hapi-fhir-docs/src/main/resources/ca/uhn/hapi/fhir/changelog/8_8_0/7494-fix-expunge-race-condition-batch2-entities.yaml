@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 7494
+title: "Fixed race condition in ExpungeEverything by making it delete batch2 entities transactionally."
