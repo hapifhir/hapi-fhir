@@ -1,0 +1,4 @@
+---
+type: change
+issue: 7059
+title: "Added support for optional resourceType scoping in MDM_SUBMIT job parameters."
