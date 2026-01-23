@@ -19,18 +19,16 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
-import ca.uhn.fhir.jpa.api.svc.ITerminologyValidationSvc;
-import ca.uhn.fhir.jpa.api.svc.ValueSetValidationRequest;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.util.ValidationInvocationHelper;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -38,8 +36,10 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.servlet.http.HttpServletRequest;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -52,12 +52,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+@SuppressWarnings("DefaultAnnotationParam")
 public class ValueSetOperationProvider extends BaseJpaProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetOperationProvider.class);
-
-	@Autowired
-	protected IValidationSupport myValidationSupport;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -66,24 +64,33 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	private ITermReadSvc myTermReadSvc;
 
 	@Autowired
+	private VersionCanonicalizer myVersionCanonicalizer;
+
+	@Autowired
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
 	private ValidationSupportChain myValidationSupportChain;
 
 	@Autowired
-	private ITerminologyValidationSvc myTerminologyValidationSvc;
-
-	@VisibleForTesting
-	public void setTerminologyValidationSvc(ITerminologyValidationSvc theTerminologyValidationSvc) {
-		myTerminologyValidationSvc = theTerminologyValidationSvc;
-	}
+	private ValidationInvocationHelper myValidationInvocationHelper;
 
 	@VisibleForTesting
 	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
 		myDaoRegistry = theDaoRegistry;
 	}
 
-	public void setValidationSupport(IValidationSupport theValidationSupport) {
-		myValidationSupport = theValidationSupport;
+	@VisibleForTesting
+	public void setVersionCanonicalizerForUnitTest(VersionCanonicalizer theVersionCanonicalizer) {
+		myVersionCanonicalizer = theVersionCanonicalizer;
+	}
+
+	@VisibleForTesting
+	public void setTermReadSvcForUnitTest(ITermReadSvc theTermReadSvc) {
+		myTermReadSvc = theTermReadSvc;
+	}
+
+	@VisibleForTesting
+	public void setValidationSupportChainForUnitTest(ValidationSupportChain theValidationSupportChain) {
+		myValidationSupportChain = theValidationSupportChain;
 	}
 
 	@Operation(name = JpaConstants.OPERATION_EXPAND, idempotent = true, typeName = "ValueSet")
@@ -170,23 +177,56 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 
 		startRequest(theServletRequest);
 		try {
-			ValueSetValidationRequest request = ValueSetValidationRequest.builder()
-					.valueSetId(theId)
-					.valueSetUrl(theValueSetUrl)
-					.valueSetVersion(theValueSetVersion)
-					.code(theCode)
-					.system(theSystem)
-					.systemVersion(theSystemVersion)
-					.display(theDisplay)
-					.coding(theCoding)
-					.codeableConcept(theCodeableConcept)
-					.requestDetails(theRequestDetails)
-					.build();
-			CodeValidationResult result = myTerminologyValidationSvc.validateCodeAgainstValueSet(request);
-			return result.toParameters(getContext());
+			// Determine the ValueSet URL to validate against
+			String valueSetUrlString = resolveValueSetUrl(theId, theValueSetUrl, theValueSetVersion, theRequestDetails);
+
+			// Validate that a ValueSet identifier was provided
+			if (valueSetUrlString == null) {
+				throw new InvalidRequestException(
+						Msg.code(901)
+								+ "Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.");
+			}
+
+			// Delegate to the validation helper
+			return myValidationInvocationHelper.invokeValidateCodeForValueSet(
+					theCode, theSystem, theSystemVersion, theDisplay, theCoding, theCodeableConcept, valueSetUrlString);
 		} finally {
 			endRequest(theServletRequest);
 		}
+	}
+
+	private String resolveValueSetUrl(
+			IIdType theId,
+			IPrimitiveType<String> theValueSetUrl,
+			IPrimitiveType<String> theValueSetVersion,
+			RequestDetails theRequestDetails) {
+		// If an ID was provided, look up the ValueSet URL from the resource
+		if (theId != null && theId.hasIdPart()) {
+			IFhirResourceDaoValueSet<IBaseResource> dao = getDao();
+			IBaseResource valueSet = dao.read(theId, theRequestDetails);
+
+			// Extract URL
+			String url = extractValueSetUrl(valueSet);
+
+			// Extract and append version from the resource if present
+			String version = CommonCodeSystemsTerminologyService.getValueSetVersion(getContext(), valueSet);
+			if (version != null) {
+				return url + "|" + version;
+			}
+			return url;
+		}
+
+		// Build URL with version if provided via parameter
+		String valueSetUrlString =
+				(theValueSetUrl != null && theValueSetUrl.hasValue()) ? theValueSetUrl.getValueAsString() : null;
+		if (valueSetUrlString != null && theValueSetVersion != null && theValueSetVersion.hasValue()) {
+			valueSetUrlString = valueSetUrlString + "|" + theValueSetVersion.getValueAsString();
+		}
+		return valueSetUrlString;
+	}
+
+	private String extractValueSetUrl(IBaseResource theValueSet) {
+		return getContext().newTerser().getSinglePrimitiveValueOrNull(theValueSet, "url");
 	}
 
 	@Operation(

@@ -20,16 +20,18 @@
 package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
-import ca.uhn.fhir.jpa.api.svc.CodeSystemValidationRequest;
-import ca.uhn.fhir.jpa.api.svc.ITerminologyValidationSvc;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.util.ValidationInvocationHelper;
+import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -42,14 +44,22 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+@SuppressWarnings("DefaultAnnotationParam")
 public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource> extends BaseJpaResourceProvider<T> {
 
 	@Autowired
-	private ITerminologyValidationSvc myTerminologyValidationSvc;
+	private JpaValidationSupportChain myValidationSupportChain;
+
+	@Autowired
+	private VersionCanonicalizer myVersionCanonicalizer;
+
+	@Autowired
+	private ValidationInvocationHelper myValidationInvocationHelper;
 
 	/**
 	 * $lookup operation
 	 */
+	@SuppressWarnings("unchecked")
 	@Operation(
 			name = JpaConstants.OPERATION_LOOKUP,
 			idempotent = true,
@@ -74,7 +84,7 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 
 		startRequest(theServletRequest);
 		try {
-			IFhirResourceDaoCodeSystem<?> dao = (IFhirResourceDaoCodeSystem<?>) getDao();
+			IFhirResourceDaoCodeSystem dao = (IFhirResourceDaoCodeSystem) getDao();
 			IValidationSupport.LookupCodeResult result;
 			applyVersionToSystem(theSystem, theVersion);
 			result = dao.lookupCode(
@@ -107,7 +117,7 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 
 		startRequest(theServletRequest);
 		try {
-			IFhirResourceDaoCodeSystem<?> dao = (IFhirResourceDaoCodeSystem<?>) getDao();
+			IFhirResourceDaoCodeSystem dao = (IFhirResourceDaoCodeSystem) getDao();
 			IFhirResourceDaoCodeSystem.SubsumesResult result;
 			applyVersionToSystem(theSystem, theVersion);
 			result = dao.subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB, theRequestDetails);
@@ -148,20 +158,29 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 
 		startRequest(theServletRequest);
 		try {
-			CodeSystemValidationRequest request = CodeSystemValidationRequest.builder()
-					.codeSystemId(theId)
-					.codeSystemUrl(theUrl)
-					.version(theVersion)
-					.code(theCode)
-					.display(theDisplay)
-					.coding(theCoding)
-					.codeableConcept(theCodeableConcept)
-					.requestDetails(theRequestDetails)
-					.build();
-			CodeValidationResult result = myTerminologyValidationSvc.validateCodeAgainstCodeSystem(request);
-			return result.toParameters(getContext());
+			// Determine the CodeSystem URL to validate against
+			String codeSystemUrl = resolveCodeSystemUrl(theId, theUrl, theRequestDetails);
+
+			// Delegate to the validation helper
+			return myValidationInvocationHelper.invokeValidateCodeForCodeSystem(
+					theCode, theVersion, theDisplay, theCoding, theCodeableConcept, codeSystemUrl);
 		} finally {
 			endRequest(theServletRequest);
 		}
+	}
+
+	private String resolveCodeSystemUrl(
+			IIdType theId, IPrimitiveType<String> theUrl, RequestDetails theRequestDetails) {
+		// If an ID was provided, look up the CodeSystem URL from the resource
+		if (theId != null && theId.hasIdPart()) {
+			IFhirResourceDaoCodeSystem<T> dao = (IFhirResourceDaoCodeSystem<T>) getDao();
+			IBaseResource codeSystem = dao.read(theId, theRequestDetails);
+			return CommonCodeSystemsTerminologyService.getCodeSystemUrl(getContext(), codeSystem);
+		}
+		return getStringValue(theUrl);
+	}
+
+	private static @Nullable String getStringValue(IPrimitiveType<String> thePrimitive) {
+		return (thePrimitive != null && thePrimitive.hasValue()) ? thePrimitive.getValueAsString() : null;
 	}
 }
