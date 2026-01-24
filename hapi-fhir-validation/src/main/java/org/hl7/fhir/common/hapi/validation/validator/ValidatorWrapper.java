@@ -311,9 +311,6 @@ class ValidatorWrapper {
 		return profileNames;
 	}
 
-	/**
-	 * Down-grade unknown CodeSystem issues for known preferred/example paths.
-	 */
 	private void adjustUnknownCodeSystemIssueLevels(
 			List<StructureDefinition> theProfiles,
 			IWorkerContext theWorkerContext,
@@ -342,13 +339,6 @@ class ValidatorWrapper {
 						break;
 					default:
 						// no-op
-				}
-			} else {
-				// Fallback: only down-grade the known preferred/example slice on DocumentReference.content.format
-				boolean likelyPreferredFormat =
-						path != null && path.contains("DocumentReference.content") && path.contains("format");
-				if (likelyPreferredFormat && next.getLevel() == ValidationMessage.IssueSeverity.ERROR) {
-					next.setLevel(ValidationMessage.IssueSeverity.WARNING);
 				}
 			}
 		}
