@@ -37,8 +37,8 @@ import org.w3c.dom.NodeList;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -133,6 +133,7 @@ class ValidatorWrapper {
 		this.myHostApplicationServices = theEvaluationContext;
 		return this;
 	}
+
 	public List<ValidationMessage> validate(
 			IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
 		InstanceValidator v = buildInstanceValidator(theWorkerContext);
@@ -244,15 +245,15 @@ class ValidatorWrapper {
 	private InstanceValidator buildInstanceValidator(IWorkerContext theWorkerContext) {
 
 		final IHostApplicationServices hostApplicationServices = Objects.requireNonNullElseGet(
-			this.myHostApplicationServices, FhirInstanceValidator.NullEvaluationContext::new);
+				this.myHostApplicationServices, FhirInstanceValidator.NullEvaluationContext::new);
 		XVerExtensionManager xverManager = new XVerExtensionManagerOld(theWorkerContext);
 		try {
 			return new InstanceValidator(
-				theWorkerContext,
-				hostApplicationServices,
-				xverManager,
-				new ValidatorSession(),
-				new ValidatorSettings());
+					theWorkerContext,
+					hostApplicationServices,
+					xverManager,
+					new ValidatorSession(),
+					new ValidatorSettings());
 		} catch (Exception e) {
 			throw new ConfigurationException(Msg.code(648) + e.getMessage(), e);
 		}
@@ -314,7 +315,9 @@ class ValidatorWrapper {
 	 * Down-grade unknown CodeSystem issues for known preferred/example paths.
 	 */
 	private void adjustUnknownCodeSystemIssueLevels(
-			List<StructureDefinition> theProfiles, IWorkerContext theWorkerContext, List<ValidationMessage> theMessages) {
+			List<StructureDefinition> theProfiles,
+			IWorkerContext theWorkerContext,
+			List<ValidationMessage> theMessages) {
 		for (ValidationMessage next : theMessages) {
 			if (!isUnknownCodeSystemIssue(next)) {
 				continue;
@@ -329,18 +332,18 @@ class ValidatorWrapper {
 					case EXTENSIBLE:
 						if (next.getLevel().ordinal() < ValidationMessage.IssueSeverity.ERROR.ordinal()) {
 							next.setLevel(ValidationMessage.IssueSeverity.ERROR);
-					}
-					break;
-				case PREFERRED:
-				case EXAMPLE:
-					if (next.getLevel() == ValidationMessage.IssueSeverity.ERROR) {
-						next.setLevel(ValidationMessage.IssueSeverity.WARNING);
-					}
-					break;
-				default:
-					// no-op
-			}
-		} else {
+						}
+						break;
+					case PREFERRED:
+					case EXAMPLE:
+						if (next.getLevel() == ValidationMessage.IssueSeverity.ERROR) {
+							next.setLevel(ValidationMessage.IssueSeverity.WARNING);
+						}
+						break;
+					default:
+						// no-op
+				}
+			} else {
 				// Fallback: only down-grade the known preferred/example slice on DocumentReference.content.format
 				boolean likelyPreferredFormat =
 						path != null && path.contains("DocumentReference.content") && path.contains("format");
@@ -381,7 +384,8 @@ class ValidatorWrapper {
 			Method m2 = ValidationMessage.class.getMethod("getLocation");
 			Object out = m2.invoke(theMessage);
 			if (out instanceof Collection) {
-				return ((Collection<?>) out).stream().findFirst().map(Object::toString).orElse(null);
+				return ((Collection<?>) out)
+						.stream().findFirst().map(Object::toString).orElse(null);
 			}
 			if (out instanceof String) {
 				return (String) out;
