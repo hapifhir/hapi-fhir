@@ -60,7 +60,7 @@ class ValidatorWrapper {
 	private Collection<? extends String> myExtensionDomains;
 	private IValidatorResourceFetcher myValidatorResourceFetcher;
 	private IValidationPolicyAdvisor myValidationPolicyAdvisor;
-	private IHostApplicationServices myHostApplicationServices;
+	private IHostApplicationServices hostApplicationServices;
 	private boolean myAllowExamples;
 
 	/**
@@ -130,7 +130,7 @@ class ValidatorWrapper {
 	}
 
 	public ValidatorWrapper setHostApplicationServices(IHostApplicationServices evaluationContext) {
-		this.myHostApplicationServices = evaluationContext;
+		this.hostApplicationServices = evaluationContext;
 		return this;
 	}
 
@@ -245,7 +245,7 @@ class ValidatorWrapper {
 	private InstanceValidator buildInstanceValidator(IWorkerContext theWorkerContext) {
 
 		final IHostApplicationServices hostApplicationServices = Objects.requireNonNullElseGet(
-				this.myHostApplicationServices, FhirInstanceValidator.NullEvaluationContext::new);
+				this.hostApplicationServices, FhirInstanceValidator.NullEvaluationContext::new);
 		XVerExtensionManager xverManager = new XVerExtensionManagerOld(theWorkerContext);
 		try {
 			return new InstanceValidator(
