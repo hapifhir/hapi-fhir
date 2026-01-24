@@ -62,6 +62,7 @@ class ValidatorWrapper {
 	private IValidationPolicyAdvisor myValidationPolicyAdvisor;
 	private IHostApplicationServices hostApplicationServices;
 	private boolean myAllowExamples;
+	private boolean downgradeExampleAndPreferredBindingsError = false;
 
 	/**
 	 * Constructor
@@ -217,7 +218,8 @@ class ValidatorWrapper {
 			throw new IllegalArgumentException(Msg.code(649) + "Unknown encoding: " + encoding);
 		}
 
-		adjustUnknownCodeSystemIssueLevels(profiles, theWorkerContext, messages);
+		if(isDowngradeExampleAndPreferredBindingsError())
+			adjustUnknownCodeSystemIssueLevels(profiles, theWorkerContext, messages);
 
 		if (profiles.isEmpty() && !invalidProfileValidationMessages.isEmpty()) {
 			messages.addAll(invalidProfileValidationMessages);
@@ -420,5 +422,14 @@ class ValidatorWrapper {
 				.filter(ed -> ed.hasBinding() && ed.getBinding().hasStrength())
 				.map(ed -> ed.getBinding().getStrength())
 				.findFirst();
+	}
+
+	public boolean isDowngradeExampleAndPreferredBindingsError() {
+		return downgradeExampleAndPreferredBindingsError;
+	}
+
+	public ValidatorWrapper setDowngradeExampleAndPreferredBindingsError(boolean downgradeExampleAndPreferredBindingsError) {
+		this.downgradeExampleAndPreferredBindingsError = downgradeExampleAndPreferredBindingsError;
+		return this;
 	}
 }

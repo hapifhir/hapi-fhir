@@ -45,6 +45,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private IValidationPolicyAdvisor validatorPolicyAdvisor = new FhirDefaultPolicyAdvisor();
 	private boolean myAllowExamples;
 	private IHostApplicationServices hostApplicationServices;
+	private boolean downgradeExampleAndPreferredBindingsError;
 
 	/**
 	 * Constructor
@@ -257,7 +258,16 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 				.setAssumeValidRestReferences(isAssumeValidRestReferences())
 				.setAllowExamples(isAllowExamples())
 				.setHostApplicationServices(getHostApplicationServices())
+				.setDowngradeExampleAndPreferredBindingsError(isDowngradeExampleAndPreferredBindingsError())
 				.validate(wrappedWorkerContext, theValidationCtx);
+	}
+
+	private boolean isDowngradeExampleAndPreferredBindingsError() {
+		return downgradeExampleAndPreferredBindingsError;
+	}
+
+	public void setDowngradeExampleAndPreferredBindingsError(boolean downgradeExampleAndPreferredBindingsError) {
+		this.downgradeExampleAndPreferredBindingsError = downgradeExampleAndPreferredBindingsError;
 	}
 
 	@Nonnull

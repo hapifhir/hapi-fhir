@@ -1804,7 +1804,11 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	}
 
 	@Test
-	void testUnknownCodeSystemExtensibleBindingIsError() {
+	void testUnknownCodeSystemExtensibleBindingIsWarning() {
+
+		myInstanceVal.setDowngradeExampleAndPreferredBindingsError(false);
+		buildValidationSupportWithLogicalAndSupport(false);
+
 		Observation obs = createObservationWithDefaultSubjectPerfomerEffective();
 		obs.setStatus(ObservationStatus.FINAL);
 		obs.getCode().addCoding().setSystem("http://loinc.org").setCode("1234-5").setDisplay("placeholder");
@@ -1823,7 +1827,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		assertThat(categoryIssues)
 			.as("Unknown CodeSystem on extensible binding should be an ERROR")
-			.anyMatch(m -> m.getSeverity() == ResultSeverityEnum.ERROR || m.getSeverity() == ResultSeverityEnum.FATAL);
+				.anyMatch(m -> m.getSeverity() == ResultSeverityEnum.WARNING);
 	}
 
 	@Test
@@ -1867,6 +1871,122 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		assertThat(categoryIssues).isNotEmpty();
 		assertThat(categoryIssues)
 			.noneMatch(m -> m.getSeverity() == ResultSeverityEnum.FATAL);
+	}
+
+	@Test
+	void testUnknownCodeSystemExtensibleBinding_withDowngradeDisabled_isWarning() {
+		// When downgrade flag is disabled (default), extensible bindings with unknown
+		// code systems should produce WARNING (not upgraded to ERROR)
+		buildValidationSupportWithLogicalAndSupport(false);
+		myInstanceVal.setDowngradeExampleAndPreferredBindingsError(false);
+
+		Observation obs = createObservationWithDefaultSubjectPerfomerEffective();
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.getCode().addCoding().setSystem("http://loinc.org").setCode("1234-5").setDisplay("placeholder");
+		obs.getCategory().clear();
+		obs.addCategory().addCoding()
+			.setSystem("http://unknown.example.org/obs-category")
+			.setCode("foo")
+			.setDisplay("Unknown category");
+
+		ValidationResult result = myFhirValidator.validateWithResult(obs);
+
+		List<SingleValidationMessage> categoryIssues = result.getMessages().stream()
+			.filter(m -> m.getLocationString() != null && m.getLocationString().contains("Observation.category"))
+			.filter(m -> m.getMessage() != null && m.getMessage().toLowerCase().contains("codesystem"))
+			.collect(Collectors.toList());
+
+		assertThat(categoryIssues)
+			.as("Unknown CodeSystem on extensible binding should be WARNING when downgrade flag is disabled")
+			.isNotEmpty()
+			.anyMatch(m -> m.getSeverity() == ResultSeverityEnum.WARNING);
+	}
+
+	@Test
+	void testUnknownCodeSystemExtensibleBinding_withDowngradeEnabled_isStillProcessed() {
+		// When downgrade flag is enabled, the adjustment logic runs.
+		// Unknown code system issues should still be reported (at WARNING or ERROR depending on binding lookup)
+		buildValidationSupportWithLogicalAndSupport(false);
+		myInstanceVal.setDowngradeExampleAndPreferredBindingsError(true);
+
+		Observation obs = createObservationWithDefaultSubjectPerfomerEffective();
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.getCode().addCoding().setSystem("http://loinc.org").setCode("1234-5").setDisplay("placeholder");
+		obs.getCategory().clear();
+		obs.addCategory().addCoding()
+			.setSystem("http://unknown.example.org/obs-category")
+			.setCode("foo")
+			.setDisplay("Unknown category");
+
+		ValidationResult result = myFhirValidator.validateWithResult(obs);
+
+		List<SingleValidationMessage> categoryIssues = result.getMessages().stream()
+			.filter(m -> m.getLocationString() != null && m.getLocationString().contains("Observation.category"))
+			.filter(m -> m.getMessage() != null && m.getMessage().toLowerCase().contains("codesystem"))
+			.collect(Collectors.toList());
+
+		// Verify issues are still detected - the downgrade flag enables post-processing
+		// but doesn't change that unknown code systems are reported
+		assertThat(categoryIssues)
+			.as("Unknown CodeSystem issues should still be reported when downgrade flag is enabled")
+			.isNotEmpty();
+	}
+
+	@Test
+	void testUnknownCodeSystemPreferredBinding_withDowngradeEnabled_isWarning() {
+		buildValidationSupportWithLogicalAndSupport(false);
+		myInstanceVal.setDowngradeExampleAndPreferredBindingsError(true);
+
+		// DocumentReference.content.format has a PREFERRED binding
+		DocumentReference docRef = new DocumentReference();
+		docRef.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
+		docRef.addContent()
+			.getAttachment()
+			.setContentType("text/plain");
+		docRef.getContentFirstRep()
+			.setFormat(new Coding()
+				.setSystem("http://unknown.example.org/format")
+				.setCode("unknown-format")
+				.setDisplay("Unknown Format"));
+
+		ValidationResult result = myFhirValidator.validateWithResult(docRef);
+
+		List<SingleValidationMessage> formatIssues = result.getMessages().stream()
+			.filter(m -> m.getLocationString() != null && m.getLocationString().contains("DocumentReference.content"))
+			.filter(m -> m.getMessage() != null && m.getMessage().toLowerCase().contains("codesystem"))
+			.collect(Collectors.toList());
+
+		// All unknown code system issues on preferred binding should be WARNING (not ERROR)
+		assertThat(formatIssues)
+			.as("Unknown CodeSystem on preferred binding should be WARNING when downgrade flag is enabled")
+			.isNotEmpty()
+			.noneMatch(m -> m.getSeverity() == ResultSeverityEnum.ERROR);
+	}
+
+	@Test
+	void testUnknownCodeSystemRequiredBinding_withDowngradeEnabled_remainsError() {
+		buildValidationSupportWithLogicalAndSupport(false);
+		myInstanceVal.setDowngradeExampleAndPreferredBindingsError(true);
+
+		// Patient.gender has a REQUIRED binding - use an invalid code
+		String patientJson = """
+			{
+			  "resourceType": "Patient",
+			  "name": [{ "family": "Test" }],
+			  "gender": "invalid-gender"
+			}
+			""";
+
+		ValidationResult result = myFhirValidator.validateWithResult(patientJson);
+
+		List<SingleValidationMessage> genderIssues = result.getMessages().stream()
+			.filter(m -> m.getLocationString() != null && m.getLocationString().contains("Patient.gender"))
+			.collect(Collectors.toList());
+
+		// Required bindings should remain as errors even with downgrade enabled
+		assertThat(genderIssues)
+			.as("Required bindings should still produce errors")
+			.anyMatch(m -> m.getSeverity() == ResultSeverityEnum.ERROR || m.getSeverity() == ResultSeverityEnum.FATAL);
 	}
 
 
