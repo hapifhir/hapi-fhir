@@ -218,7 +218,7 @@ class ValidatorWrapper {
 			throw new IllegalArgumentException(Msg.code(649) + "Unknown encoding: " + encoding);
 		}
 
-		if(isDowngradeExampleAndPreferredBindingsError())
+		if (isDowngradeExampleAndPreferredBindingsError())
 			adjustUnknownCodeSystemIssueLevels(profiles, theWorkerContext, messages);
 
 		if (profiles.isEmpty() && !invalidProfileValidationMessages.isEmpty()) {
@@ -428,7 +428,8 @@ class ValidatorWrapper {
 		return downgradeExampleAndPreferredBindingsError;
 	}
 
-	public ValidatorWrapper setDowngradeExampleAndPreferredBindingsError(boolean downgradeExampleAndPreferredBindingsError) {
+	public ValidatorWrapper setDowngradeExampleAndPreferredBindingsError(
+			boolean downgradeExampleAndPreferredBindingsError) {
 		this.downgradeExampleAndPreferredBindingsError = downgradeExampleAndPreferredBindingsError;
 		return this;
 	}
