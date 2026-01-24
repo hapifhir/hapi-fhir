@@ -129,8 +129,8 @@ class ValidatorWrapper {
 		return this;
 	}
 
-	public ValidatorWrapper setHostApplicationServices(IHostApplicationServices theEvaluationContext) {
-		this.myHostApplicationServices = theEvaluationContext;
+	public ValidatorWrapper setHostApplicationServices(IHostApplicationServices evaluationContext) {
+		this.myHostApplicationServices = evaluationContext;
 		return this;
 	}
 
