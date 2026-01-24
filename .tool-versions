@@ -1,0 +1,3 @@
+// .tool-versions configures the asdf version manager https://asdf-vm.com/
+maven 3.8.1
+java openjdk-17
