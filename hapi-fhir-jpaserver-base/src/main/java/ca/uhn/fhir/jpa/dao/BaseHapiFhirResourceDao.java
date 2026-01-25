@@ -135,6 +135,7 @@ import jakarta.persistence.TypedQuery;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.function.TriFunction;
+import org.hibernate.JDBCException;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -2198,16 +2199,22 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			cacheControlDirective.parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL));
 		}
 
-		IBundleProvider retVal = mySearchCoordinatorSvc.registerSearch(
-				this, theParams, getResourceName(), cacheControlDirective, theRequest);
+		IBundleProvider retVal = null;
+		try {
+			retVal = mySearchCoordinatorSvc.registerSearch(
+					this, theParams, getResourceName(), cacheControlDirective, theRequest);
 
+		} catch (JDBCException e) {
+			String trackingUUID = UUID.randomUUID().toString();
+			ourLog.error("JDBCException during search, tracking uuid: {}", trackingUUID, e);
+			throw new InternalErrorException(Msg.code(2819) + "JDBCException during search, tracking uuid: " + trackingUUID);
+		}
 		if (retVal instanceof PersistedJpaBundleProvider provider) {
 			// Note: we calculate the partition -after- calling registerSearch, since that
 			// method invokes several interceptors that can affect the partition selection.
 			RequestPartitionId requestPartitionId =
 					myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
 							theRequest, getResourceName(), theParams);
-
 			provider.setRequestPartitionId(requestPartitionId);
 			if (provider.getCacheStatus() == SearchCacheStatusEnum.HIT) {
 				if (theServletResponse != null && theRequest != null) {
