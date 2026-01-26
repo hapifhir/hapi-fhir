@@ -415,6 +415,11 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			IBaseResource theResource,
 			IBaseResource theExistingResource,
 			PackageInstallationSpec thePackageInstallationSpec) {
+		// Normalize numeric IDs early, before any ID comparisons
+		// If the resource to be installed has a client-provided, purely numeric id,
+		// then add a prefix to the id, since we don't allow purely numeric IDs by default
+		prefixNumericIdIfNeeded(theResource);
+
 		if (theExistingResource == null) {
 			return createNewResource(theDao, theResource, thePackageInstallationSpec);
 		} else {
@@ -439,8 +444,6 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			theDao.create(theResource, createRequestDetails());
 			return true;
 		} else {
-			// When using the given FHIR ID, add a prefix since we don't allow purely numeric IDs by default
-			prefixNumericIdIfNeeded(theResource);
 			ourLog.debug("Installing resource {} with client-assigned ID", theResource.getIdElement());
 			DaoMethodOutcome outcome = updateResource(theDao, theResource);
 			return outcome != null && !outcome.isNop();
@@ -475,8 +478,6 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 		if (wasBaseSplit) {
 			// Base was split - create new SP with client ID
-			// When using the given FHIR ID, add a prefix since we don't allow purely numeric IDs by default
-			prefixNumericIdIfNeeded(theResource);
 			ourLog.debug("Creating new SearchParameter {} after base split", theResource.getIdElement());
 		} else {
 			ourLog.debug("Overwriting existing SearchParameter {}", theExistingResource.getIdElement());
