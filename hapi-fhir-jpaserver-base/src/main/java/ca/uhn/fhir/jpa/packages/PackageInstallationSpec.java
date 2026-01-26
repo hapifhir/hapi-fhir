@@ -41,7 +41,8 @@ import java.util.function.Supplier;
 	"installResourceTypes",
 	"validationMode",
 	"reloadExisting",
-	"additionalResourceFolders"
+	"additionalResourceFolders",
+	"versionPolicy"
 })
 @ExampleSupplier({PackageInstallationSpec.ExampleSupplier.class, PackageInstallationSpec.ExampleSupplier2.class})
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -97,6 +98,12 @@ public class PackageInstallationSpec {
 					"List of folders in the package to extract additional resources from. Each folder listed will be scanned for resources which will be installed as part of package installation.")
 	@JsonProperty("additionalResourceFolders")
 	private Set<String> myAdditionalResourceFolders;
+
+	@Schema(
+			description =
+					"Controls whether multiple versions of installed resources can coexist in the repository during STORE_AND_INSTALL installation")
+	@JsonProperty("versionPolicy")
+	private VersionPolicyEnum myVersionPolicy = VersionPolicyEnum.MULTI_VERSION;
 
 	@JsonIgnore
 	private byte[] myPackageContents;
@@ -205,6 +212,15 @@ public class PackageInstallationSpec {
 		return this;
 	}
 
+	public VersionPolicyEnum getVersionPolicy() {
+		return myVersionPolicy;
+	}
+
+	public PackageInstallationSpec setVersionPolicy(VersionPolicyEnum theVersionPolicy) {
+		myVersionPolicy = theVersionPolicy;
+		return this;
+	}
+
 	public enum InstallModeEnum {
 		STORE_ONLY,
 		STORE_AND_INSTALL
@@ -213,6 +229,21 @@ public class PackageInstallationSpec {
 	public enum ValidationModeEnum {
 		NOT_AVAILABLE,
 		AVAILABLE
+	}
+
+	public enum VersionPolicyEnum {
+		/**
+		 * Default. Uses server-assigned IDs for new resources. Existing resources matched
+		 * by canonical URL + version. Supports multiple versions of installed resources.
+		 */
+		MULTI_VERSION,
+
+		/**
+		 * Uses client-assigned IDs from package. Existing resources
+		 * matched by canonical URL only (ignoring version), so installing a new version
+		 * of the same resource will overwrite the existing one.
+		 */
+		SINGLE_VERSION
 	}
 
 	public static class ExampleSupplier implements Supplier<PackageInstallationSpec> {
