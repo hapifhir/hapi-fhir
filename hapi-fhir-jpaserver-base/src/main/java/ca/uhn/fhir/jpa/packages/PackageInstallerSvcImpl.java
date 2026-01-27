@@ -375,7 +375,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
-		SearchParameterMap map = createSearchParameterMapFor(theResource);
+		SearchParameterMap map = createSearchParameterMapFor(theResource, theInstallationSpec);
 		IBundleProvider searchResult = searchResource(dao, map);
 
 		String resourceQuery = map.toNormalizedQueryString(myFhirContext);
@@ -415,7 +415,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			IBaseResource theResource,
 			IBaseResource theExistingResource,
 			PackageInstallationSpec thePackageInstallationSpec) {
-		// Normalize numeric IDs early, before any ID comparisons
+
 		// If the resource to be installed has a client-provided, purely numeric id,
 		// then add a prefix to the id, since we don't allow purely numeric IDs by default
 		prefixNumericIdIfNeeded(theResource);
@@ -429,10 +429,11 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private boolean createNewResource(
 			IFhirResourceDao theDao, IBaseResource theResource, PackageInstallationSpec thePackageInstallationSpec) {
-		if (useServerAssignedId(theResource)) {
-			// For any resource type except SearchParameter, we will use a server-assigned ID
-			// This prevents FHIR ID conflicts for multiple versions of Conformance/Canonical resources (e.g.
-			// StructureDefinition.version)
+		PackageInstallationSpec.VersionPolicyEnum versionPolicy = thePackageInstallationSpec.getVersionPolicy();
+
+		if (allowMultipleVersionsForResource(theResource, versionPolicy)) {
+			// Use a server-assigned ID to prevent FHIR ID conflicts for multiple versions of
+			// Conformance/Canonical resources (e.g. StructureDefinition.version),
 			// which is helpful for validation against versioned profiles.
 			// (Note: This is not to be confused with meta.versionId)
 			theResource.setId(new IdDt());
@@ -492,9 +493,13 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		return theResource.fhirType().equals(ResourceType.SearchParameter.name());
 	}
 
-	private boolean useServerAssignedId(IBaseResource theResource) {
-		// All resources use server-assigned IDs except SearchParameter
-		return !isSearchParameter(theResource);
+	private boolean allowMultipleVersionsForResource(
+			IBaseResource theResource, PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) {
+		// SearchParameter always uses client ID (single version per URL + base)
+		if (isSearchParameter(theResource)) {
+			return false;
+		}
+		return theVersionPolicy == PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION;
 	}
 
 	private void setPackageMetaSource(IBaseResource theResource, PackageInstallationSpec thePackageInstallationSpec) {
@@ -705,7 +710,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 	}
 
-	private SearchParameterMap createSearchParameterMapFor(IBaseResource theResource) {
+	private SearchParameterMap createSearchParameterMapFor(IBaseResource theResource, PackageInstallationSpec theSpec) {
 		String resourceType = theResource.getClass().getSimpleName();
 		if ("NamingSystem".equals(resourceType)) {
 			String uniqueId = extractUniqeIdFromNamingSystem(theResource);
@@ -718,9 +723,13 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		} else if (resourceHasUrlElement(theResource)) {
 			SearchParameterMap retVal = SearchParameterMap.newSynchronous();
 			retVal.add("url", new UriParam(extractSimpleValueIfPresent(theResource, "url")));
-			String version = extractSimpleValueIfPresent(theResource, "version");
-			if (!version.isEmpty()) {
-				retVal.add("version", new TokenParam(version));
+			// If multiple versions are allowed, include version in search to avoid overwriting
+			PackageInstallationSpec.VersionPolicyEnum versionPolicy = theSpec.getVersionPolicy();
+			if (allowMultipleVersionsForResource(theResource, versionPolicy)) {
+				String version = extractSimpleValueIfPresent(theResource, "version");
+				if (!version.isEmpty()) {
+					retVal.add("version", new TokenParam(version));
+				}
 			}
 			return retVal;
 		} else {

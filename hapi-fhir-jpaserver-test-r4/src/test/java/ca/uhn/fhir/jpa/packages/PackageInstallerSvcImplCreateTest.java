@@ -22,6 +22,8 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.npm.PackageGenerator;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.annotation.Nonnull;
@@ -158,6 +160,81 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 			.add(SearchParameter.SP_CODE, new TokenParam(spCode));
 		IBundleProvider outcome = mySearchParameterDao.search(map, mySrd);
 		assertEquals(1, outcome.size());
+	}
+
+	@ParameterizedTest
+	@EnumSource(PackageInstallationSpec.VersionPolicyEnum.class)
+	void versionPolicyControlsIdAssignment(PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) throws IOException {
+		// Given: A ValueSet with a client-provided ID
+		ValueSet valueSet = createValueSet("my-valueset-id", null, "1.0", "http://example.org/vs", "copyright");
+
+		// When: Installing with the given version policy
+		PackageInstallationSpec spec = createInstallationSpec(packageToBytes());
+		spec.setVersionPolicy(theVersionPolicy);
+		mySvc.install(valueSet, spec, new PackageInstallOutcomeJson());
+
+		// Then: ID assignment follows the policy
+		ValueSet actual = getFirstValueSet();
+		if (theVersionPolicy == PackageInstallationSpec.VersionPolicyEnum.SINGLE_VERSION) {
+			assertThat(actual.getIdElement().getIdPart()).isEqualTo("my-valueset-id");
+		} else {
+			assertThat(actual.getIdElement().getIdPart()).matches("[0-9]+");
+		}
+	}
+
+	@ParameterizedTest
+	@EnumSource(PackageInstallationSpec.VersionPolicyEnum.class)
+	void versionPolicyControlsUrlMatchingBehavior(PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) throws IOException {
+		String url = "http://example.org/vs";
+
+		// Given: Install first version
+		ValueSet vs1 = createValueSet("vs-id", null, "1.0", url, "copyright-v1");
+		PackageInstallationSpec spec1 = createInstallationSpec(packageToBytes());
+		spec1.setVersionPolicy(theVersionPolicy);
+		mySvc.install(vs1, spec1, new PackageInstallOutcomeJson());
+
+		// When: Install second version with same URL but different version
+		ValueSet vs2 = createValueSet("vs-id", null, "2.0", url, "copyright-v2");
+		PackageInstallationSpec spec2 = createInstallationSpec(packageToBytes());
+		spec2.setVersionPolicy(theVersionPolicy);
+		mySvc.install(vs2, spec2, new PackageInstallOutcomeJson());
+
+		// Then: Resource count depends on policy
+		List<ValueSet> allValueSets = getAllValueSets();
+		if (theVersionPolicy == PackageInstallationSpec.VersionPolicyEnum.SINGLE_VERSION) {
+			// SINGLE_VERSION: v2 overwrites v1
+			assertThat(allValueSets).hasSize(1);
+			assertThat(allValueSets.get(0).getVersion()).isEqualTo("2.0");
+		} else {
+			// MULTI_VERSION: both versions coexist
+			assertThat(allValueSets).hasSize(2);
+			assertThat(allValueSets).extracting(ValueSet::getVersion).containsExactlyInAnyOrder("1.0", "2.0");
+		}
+	}
+
+	@ParameterizedTest
+	@EnumSource(PackageInstallationSpec.VersionPolicyEnum.class)
+	void searchParameterAlwaysUsesClientId_regardlessOfPolicy(
+			PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) throws IOException {
+		// Given: A SearchParameter with client-provided ID
+		SearchParameter sp = new SearchParameter();
+		sp.setId("my-sp-id");
+		sp.setUrl("http://example.org/sp");
+		sp.setCode("mycode");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.getBase().add(new CodeType("Patient"));
+		sp.setExpression("Patient.name");
+
+		// When: Installing with the given version policy
+		PackageInstallationSpec spec = createInstallationSpec(packageToBytes());
+		spec.setVersionPolicy(theVersionPolicy);
+		mySvc.install(sp, spec, new PackageInstallOutcomeJson());
+
+		// Then: SearchParameter keeps client ID regardless of policy
+		IBundleProvider results = mySearchParameterDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS);
+		SearchParameter actual = (SearchParameter) results.getAllResources().get(0);
+		assertThat(actual.getIdElement().getIdPart()).isEqualTo("my-sp-id");
 	}
 
 	@Nonnull

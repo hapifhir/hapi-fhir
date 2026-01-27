@@ -52,6 +52,8 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -514,15 +516,21 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		});
 	}
 
-	@Test
-	void testSearchParametersWithNumericIds_installedWithNpmPrefix() throws Exception {
+	@ParameterizedTest
+	@EnumSource(PackageInstallationSpec.VersionPolicyEnum.class)
+	void testSearchParametersWithNumericIds_installedWithNpmPrefix(
+			PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) throws Exception {
 		myStorageSettings.setAllowExternalReferences(true);
 
-		// Load a copy of hl7.fhir.uv.shorthand-0.12.0, but with id set to 1 instead of "shorthand-code-system"
+		// Load a copy of hl7.fhir.uv.shorthand-0.12.0, but with id set to 1234 instead of "shorthand-code-system"
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/test_sp_numeric_id.tgz");
 		myFakeNpmServlet.responses.put("/test-exchange.fhir.us.com/2.1.1", bytes);
 
-		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-exchange.fhir.us.com").setVersion("2.1.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		PackageInstallationSpec spec = new PackageInstallationSpec()
+			.setName("test-exchange.fhir.us.com")
+			.setVersion("2.1.1")
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setVersionPolicy(theVersionPolicy);
 		myPackageInstallerSvc.install(spec);
 		// Be sure no further communication with the server
 		myServer.stopServer();
@@ -534,6 +542,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			IBundleProvider result = mySearchParameterDao.search(map);
 			assertEquals(1, result.sizeOrThrowNpe());
 			IBaseResource resource = result.getResources(0, 1).get(0);
+			// npm- prefix should be applied regardless of version policy
 			assertThat(resource.getIdElement().toString()).matches("SearchParameter/npm-1234/_history/1");
 		});
 	}
