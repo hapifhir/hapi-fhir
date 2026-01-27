@@ -29,6 +29,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -36,6 +37,7 @@ import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -46,6 +48,7 @@ import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -89,16 +92,21 @@ public class PatientIdPartitionInterceptor {
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
+	@Autowired
+	private IIdHelperService<IResourcePersistentId<?>> myIIdHelperService;
+
 	/**
 	 * Constructor
 	 */
 	public PatientIdPartitionInterceptor(
 			FhirContext theFhirContext,
 			ISearchParamExtractor theSearchParamExtractor,
-			PartitionSettings thePartitionSettings) {
+			PartitionSettings thePartitionSettings,
+			IIdHelperService theIIdHelperService) {
 		myFhirContext = theFhirContext;
 		mySearchParamExtractor = theSearchParamExtractor;
 		myPartitionSettings = thePartitionSettings;
+		myIIdHelperService = theIIdHelperService;
 	}
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
@@ -126,9 +134,27 @@ public class PatientIdPartitionInterceptor {
 			if (oCompartmentIdentity.isPresent()) {
 				return provideCompartmentMemberInstanceResponse(theRequestDetails, oCompartmentIdentity.get());
 			} else {
-				return getPartitionViaPartiallyProcessedReference(theRequestDetails, theResource)
-						// or give up and fail
-						.orElseGet(() -> throwNonCompartmentMemberInstanceFailureResponse(theResource));
+
+				if (theResource.isDeleted()) {
+					// this conditional statement covers the edge case where a resource was deleted and is being
+					// re-created.
+					// in such scenario, theResource (which is of the latest version) is empty, ie, has no references to
+					// a Patient resource.  So we don't have a reference to a Patient Id but we're operating in
+					// PatientId
+					// partitioning mode.  As a result we can obtain/deduct which patient compartment theResource
+					// belongs
+					// to by extracting it from its iResourcePersistedId.
+					IResourcePersistentId<?> pidOrNull =
+							myIIdHelperService.getPidOrThrowException((IAnyResource) theResource);
+					return RequestPartitionId.fromPartitionId(pidOrNull.getPartitionId());
+				}
+
+				Optional<RequestPartitionId> partitionIdOptional =
+						getPartitionViaPartiallyProcessedReference(theRequestDetails, theResource);
+
+				// hopefully, we were able to get a requestPartitionId.  if not, let's be lenient and store the resource
+				// in the default partition.
+				return partitionIdOptional.orElse(RequestPartitionId.defaultPartition(myPartitionSettings));
 			}
 		}
 	}
