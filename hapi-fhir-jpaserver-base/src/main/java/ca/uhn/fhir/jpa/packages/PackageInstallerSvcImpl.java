@@ -419,6 +419,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		// If the resource to be installed has a client-provided, purely numeric id,
 		// then add a prefix to the id, since we don't allow purely numeric IDs by default
 		prefixNumericIdIfNeeded(theResource);
+		setPackageMetaSource(theResource, thePackageInstallationSpec);
 
 		if (theExistingResource == null) {
 			return createNewResource(theDao, theResource, thePackageInstallationSpec);
@@ -437,7 +438,6 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			// which is helpful for validation against versioned profiles.
 			// (Note: This is not to be confused with meta.versionId)
 			theResource.setId(new IdDt());
-			setPackageMetaSource(theResource, thePackageInstallationSpec);
 		}
 
 		if (theResource.getIdElement().isEmpty()) {

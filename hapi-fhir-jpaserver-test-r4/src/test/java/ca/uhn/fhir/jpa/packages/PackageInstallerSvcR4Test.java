@@ -391,6 +391,9 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 				// ID is preserved from v1 (the updated resource keeps the original ID)
 				assertThat(sdV2.getIdElement().getIdPart()).isEqualTo("profile-EndoPractitioner-1-0-0");
+
+				// meta.source should be set to the latest package version
+				assertThat(sdV2.getMeta().getSource()).isEqualTo("test-profile|2.0.0");
 			}
 		});
 	}

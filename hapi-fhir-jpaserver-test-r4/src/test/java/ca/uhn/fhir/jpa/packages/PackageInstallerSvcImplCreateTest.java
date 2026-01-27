@@ -180,6 +180,9 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 		} else {
 			assertThat(actual.getIdElement().getIdPart()).matches("[0-9]+");
 		}
+
+		// meta.source should be set regardless of version policy
+		assertThat(actual.getMeta().getSource()).isEqualTo(PACKAGE_ID_1 + "|" + PACKAGE_VERSION);
 	}
 
 	@ParameterizedTest
@@ -210,6 +213,11 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 			assertThat(allValueSets).hasSize(2);
 			assertThat(allValueSets).extracting(ValueSet::getVersion).containsExactlyInAnyOrder("1.0", "2.0");
 		}
+
+		// meta.source should be set regardless of version policy
+		for (ValueSet vs : allValueSets) {
+			assertThat(vs.getMeta().getSource()).isEqualTo(PACKAGE_ID_1 + "|" + PACKAGE_VERSION);
+		}
 	}
 
 	@ParameterizedTest
@@ -235,6 +243,9 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 		IBundleProvider results = mySearchParameterDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS);
 		SearchParameter actual = (SearchParameter) results.getAllResources().get(0);
 		assertThat(actual.getIdElement().getIdPart()).isEqualTo("my-sp-id");
+
+		// meta.source should be set regardless of version policy
+		assertThat(actual.getMeta().getSource()).isEqualTo(PACKAGE_ID_1 + "|" + PACKAGE_VERSION);
 	}
 
 	@Nonnull
