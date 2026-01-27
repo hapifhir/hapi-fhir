@@ -164,7 +164,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 	@ParameterizedTest
 	@EnumSource(PackageInstallationSpec.VersionPolicyEnum.class)
-	void versionPolicyControlsIdAssignment(PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) throws IOException {
+	void testVersionPolicyControlsIdAssignment(PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) throws IOException {
 		// Given: A ValueSet with a client-provided ID
 		ValueSet valueSet = createValueSet("my-valueset-id", null, "1.0", "http://example.org/vs", "copyright");
 
@@ -184,7 +184,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 	@ParameterizedTest
 	@EnumSource(PackageInstallationSpec.VersionPolicyEnum.class)
-	void versionPolicyControlsUrlMatchingBehavior(PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) throws IOException {
+	void testVersionPolicyControlsUrlMatchingBehavior(PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) throws IOException {
 		String url = "http://example.org/vs";
 
 		// Given: Install first version
@@ -214,7 +214,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 	@ParameterizedTest
 	@EnumSource(PackageInstallationSpec.VersionPolicyEnum.class)
-	void searchParameterAlwaysUsesClientId_regardlessOfPolicy(
+	void testSearchParameterAlwaysUsesClientId_regardlessOfPolicy(
 			PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) throws IOException {
 		// Given: A SearchParameter with client-provided ID
 		SearchParameter sp = new SearchParameter();
