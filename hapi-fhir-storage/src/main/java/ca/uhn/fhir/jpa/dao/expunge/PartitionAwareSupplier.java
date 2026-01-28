@@ -19,9 +19,12 @@
  */
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 
 import java.util.function.Supplier;
@@ -33,16 +36,26 @@ import java.util.function.Supplier;
 public class PartitionAwareSupplier {
 	private final HapiTransactionService myTransactionService;
 	private final RequestDetails myRequestDetails;
+	private final RequestPartitionId myRequestPartitionId;
 
-	public PartitionAwareSupplier(HapiTransactionService theTxService, RequestDetails theRequestDetails) {
+	public PartitionAwareSupplier(
+			HapiTransactionService theTxService,
+			RequestDetails theRequestDetails,
+			@Nullable RequestPartitionId theRequestPartitionId) {
 		myTransactionService = theTxService;
 		myRequestDetails = theRequestDetails;
+		myRequestPartitionId = theRequestPartitionId;
 	}
 
 	@Nonnull
 	public <T> T supplyInPartitionedContext(Supplier<T> theResourcePersistentIdSupplier) {
-		T retVal =
-				myTransactionService.withRequest(myRequestDetails).execute(tx -> theResourcePersistentIdSupplier.get());
+		IHapiTransactionService.IExecutionBuilder executionBuilder = myTransactionService.withRequest(myRequestDetails);
+		// use explicit partition ID if provided
+		if (myRequestPartitionId != null) {
+			executionBuilder.withRequestPartitionId(myRequestPartitionId);
+		}
+		T retVal = executionBuilder.execute(tx -> theResourcePersistentIdSupplier.get());
+
 		Validate.notNull(retVal, "No resource persistent id supplied by supplier %s", theResourcePersistentIdSupplier);
 		return retVal;
 	}
