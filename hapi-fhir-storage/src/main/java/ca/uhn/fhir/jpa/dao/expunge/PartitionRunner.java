@@ -20,7 +20,9 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -55,12 +57,13 @@ public class PartitionRunner {
 	private final int myThreadCount;
 	private final HapiTransactionService myTransactionService;
 	private final RequestDetails myRequestDetails;
+	private final RequestPartitionId myRequestPartitionId;
 
 	/**
 	 * Constructor - Use this constructor if you do not want any transaction management
 	 */
 	public PartitionRunner(String theProcessName, String theThreadPrefix, int theBatchSize, int theThreadCount) {
-		this(theProcessName, theThreadPrefix, theBatchSize, theThreadCount, null, null);
+		this(theProcessName, theThreadPrefix, theBatchSize, theThreadCount, null, null, null);
 	}
 
 	/**
@@ -73,13 +76,15 @@ public class PartitionRunner {
 			int theBatchSize,
 			int theThreadCount,
 			@Nullable HapiTransactionService theTransactionService,
-			@Nullable RequestDetails theRequestDetails) {
+			@Nullable RequestDetails theRequestDetails,
+			@Nullable RequestPartitionId theRequestPartitionId) {
 		myProcessName = theProcessName;
 		myThreadPrefix = theThreadPrefix;
 		myBatchSize = theBatchSize;
 		myThreadCount = theThreadCount;
 		myTransactionService = theTransactionService;
 		myRequestDetails = theRequestDetails;
+		myRequestPartitionId = theRequestPartitionId;
 	}
 
 	public <T> void runInPartitionedThreads(List<T> theResourceIds, Consumer<List<T>> partitionConsumer) {
@@ -92,8 +97,14 @@ public class PartitionRunner {
 		if (myTransactionService != null) {
 			// Wrap each Callable task in an invocation to HapiTransactionService#execute
 			runnableTasks = runnableTasks.stream()
-					.map(t -> (Callable<Void>) () ->
-							myTransactionService.withRequest(myRequestDetails).execute(t))
+					.map(t -> (Callable<Void>) () -> {
+						IHapiTransactionService.IExecutionBuilder builder =
+								myTransactionService.withRequest(myRequestDetails);
+						if (myRequestPartitionId != null) {
+							builder = builder.withRequestPartitionId(myRequestPartitionId);
+						}
+						return builder.execute(t);
+					})
 					.toList();
 		}
 
