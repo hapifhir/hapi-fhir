@@ -20,6 +20,7 @@
 package ca.uhn.fhir.rest.server.provider;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -76,6 +77,8 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -428,7 +431,9 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 					terser.addElement(searchParam, "name", next.getName());
 					terser.addElement(searchParam, "type", next.getParamType().getCode());
 					if (isNotBlank(next.getDescription())) {
-						terser.addElement(searchParam, "documentation", next.getDescription());
+						String documentation = transformRelativeUrls(
+								next.getDescription(), myContext.getVersion().getVersion());
+						terser.addElement(searchParam, "documentation", documentation);
 					}
 
 					String spUri = next.getUri();
@@ -927,5 +932,57 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 	public void setRestResourceRevIncludesEnabled(boolean theRestResourceRevIncludesEnabled) {
 		myRestResourceRevIncludesEnabled = theRestResourceRevIncludesEnabled;
+	}
+
+	/**
+	 * Pattern to match relative markdown links like [text](resourcename.html) or [text](resourcename.html#fragment)
+	 * These are links that don't start with http://, https://, or /
+	 */
+	private static final Pattern RELATIVE_LINK_PATTERN =
+			Pattern.compile("\\]\\(([a-z][a-z0-9-]*\\.html(?:#[^)]*)?)\\)");
+
+	/**
+	 * Returns the HL7 FHIR specification base URL for the given FHIR version.
+	 *
+	 * @param theFhirVersion the FHIR version
+	 * @return the base URL for the HL7 FHIR specification (e.g., "https://hl7.org/fhir/R4/")
+	 */
+	public static String getHl7BaseUrl(FhirVersionEnum theFhirVersion) {
+		switch (theFhirVersion) {
+			case DSTU2:
+			case DSTU2_HL7ORG:
+				return "https://hl7.org/fhir/DSTU2/";
+			case DSTU2_1:
+				return "https://hl7.org/fhir/2016May/";
+			case DSTU3:
+				return "https://hl7.org/fhir/STU3/";
+			case R4:
+				return "https://hl7.org/fhir/R4/";
+			case R4B:
+				return "https://hl7.org/fhir/R4B/";
+			case R5:
+				return "https://hl7.org/fhir/R5/";
+			default:
+				return "https://hl7.org/fhir/";
+		}
+	}
+
+	/**
+	 * Transforms relative markdown links in a description to absolute HL7 FHIR specification URLs.
+	 * <p>
+	 * For example, transforms:
+	 * <code>[CarePlan](careplan.html)</code> to <code>[CarePlan](https://hl7.org/fhir/R4/careplan.html)</code>
+	 *
+	 * @param theDescription the description text that may contain relative markdown links
+	 * @param theFhirVersion the FHIR version to use for constructing the absolute URL
+	 * @return the description with relative links converted to absolute HL7 FHIR specification URLs
+	 */
+	public static String transformRelativeUrls(String theDescription, FhirVersionEnum theFhirVersion) {
+		if (theDescription == null) {
+			return null;
+		}
+		String baseUrl = getHl7BaseUrl(theFhirVersion);
+		Matcher matcher = RELATIVE_LINK_PATTERN.matcher(theDescription);
+		return matcher.replaceAll("](" + baseUrl + "$1)");
 	}
 }
