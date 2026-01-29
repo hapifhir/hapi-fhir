@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.api.ResourceModificationRequest;
@@ -41,7 +42,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -61,6 +61,8 @@ class BaseBulkModifyResourcesIndividuallyStepTest {
 	private IFhirSystemDao<?,?> mySystemDao;
 	@Mock
 	private IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
+	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
 	@Mock
 	private IJobDataSink<BulkModifyResourcesChunkOutcomeJson> mySink;
 	@Spy
@@ -103,7 +105,7 @@ class BaseBulkModifyResourcesIndividuallyStepTest {
 
 		// Test
 		WorkChunk workChunk = new WorkChunk().setId("my-chunk-id");
-		assertThatThrownBy(() -> mySvc.run(new StepExecutionDetails<>(params, data, instance, workChunk), mySink))
+		assertThatThrownBy(() -> mySvc.run(new StepExecutionDetails<>(params, data, instance, workChunk, myJobStepExecutionServices), mySink))
 			.isInstanceOf(JobExecutionFailedException.class)
 			.hasMessage(theExpectedMessage);
 
@@ -128,7 +130,7 @@ class BaseBulkModifyResourcesIndividuallyStepTest {
 
 		// Test
 		WorkChunk chunk = new WorkChunk().setId("my-chunk-id");
-		mySvc.run(new StepExecutionDetails<>(params, data, instance, chunk), mySink);
+		mySvc.run(new StepExecutionDetails<>(params, data, instance, chunk, myJobStepExecutionServices), mySink);
 
 		// Verify
 		verify(mySink, times(1)).accept(myDataCaptor.capture());

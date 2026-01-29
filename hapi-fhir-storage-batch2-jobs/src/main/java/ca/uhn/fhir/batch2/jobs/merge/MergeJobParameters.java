@@ -32,6 +32,9 @@ public class MergeJobParameters extends ReplaceReferencesJobParameters {
 	@JsonProperty("originalInputParameters")
 	private String myOriginalInputParameters;
 
+	@JsonProperty("operationName")
+	private String myOperationName;
+
 	/**
 	 * @deprecated we have the whole original input parameters object now,
 	 * which contains this as well,  look up resultsResource from there
@@ -73,5 +76,13 @@ public class MergeJobParameters extends ReplaceReferencesJobParameters {
 
 	public void setOriginalInputParameters(String myOriginalInputParameters) {
 		this.myOriginalInputParameters = myOriginalInputParameters;
+	}
+
+	public String getOperationName() {
+		return myOperationName;
+	}
+
+	public void setOperationName(String theOperationName) {
+		myOperationName = theOperationName;
 	}
 }

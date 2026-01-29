@@ -281,6 +281,12 @@ public class PatientIdPartitionInterceptor {
 						terser.setElement(request, "method", "PUT");
 						terser.setElement(request, "url", "Patient/" + newId);
 					}
+				} else if (nextEntry.getMethod() == RequestTypeEnum.PUT
+						&& isNotBlank(nextEntry.getFullUrl())
+						&& isNotBlank(nextEntry.getUrl())
+						&& isBlank(nextEntry.getConditionalUrl())
+						&& !Strings.CS.equals(nextEntry.getFullUrl(), nextEntry.getUrl())) {
+					idSubstitutions.put(nextEntry.getFullUrl(), nextEntry.getUrl());
 				}
 			}
 		}

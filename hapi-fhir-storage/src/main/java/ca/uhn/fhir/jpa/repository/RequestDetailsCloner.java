@@ -49,15 +49,11 @@ class RequestDetailsCloner {
 		} else {
 			newDetails = new SystemRequestDetails(theDetails);
 		}
-		newDetails.setRequestType(RequestTypeEnum.POST);
-		newDetails.setOperation(null);
-		newDetails.setResource(null);
-		newDetails.setParameters(new HashMap<>());
-		newDetails.setResourceName(null);
-		newDetails.setCompartmentName(null);
+
 		IRestfulResponse response = theDetails.getResponse();
+
 		// we need IRestfulResponse because RestfulServer uses it during extended operation processing.
-		if (response == null && newDetails instanceof SystemRequestDetails systemDetails) {
+		if (response == null && theDetails instanceof SystemRequestDetails systemDetails) {
 			response = new SystemRestfulResponse(systemDetails);
 		}
 		newDetails.setResponse(response);
@@ -65,7 +61,7 @@ class RequestDetailsCloner {
 		return new DetailsBuilder(newDetails);
 	}
 
-	static class DetailsBuilder {
+	protected static class DetailsBuilder {
 		private final RequestDetails myDetails;
 
 		DetailsBuilder(RequestDetails theDetails) {
@@ -74,6 +70,11 @@ class RequestDetailsCloner {
 
 		DetailsBuilder setAction(RestOperationTypeEnum theRestOperationType) {
 			myDetails.setRestOperationType(theRestOperationType);
+			return this;
+		}
+
+		DetailsBuilder setRequestType(RequestTypeEnum theRequestType) {
+			myDetails.setRequestType(theRequestType);
 			return this;
 		}
 
@@ -87,7 +88,18 @@ class RequestDetailsCloner {
 			return this;
 		}
 
-		DetailsBuilder setParameters(IBaseParameters theParameters) {
+		DetailsBuilder withCompleteUrl(String theCompleteUrl) {
+			myDetails.setCompleteUrl(theCompleteUrl);
+
+			return this;
+		}
+
+		/**
+		 * Sets the RequestContents for the request details
+		 * @param theParameters - an IBaseParameters object to serialize into the contents of the request
+		 * @return
+		 */
+		DetailsBuilder setRequestContents(IBaseParameters theParameters) {
 			IParser parser = myDetails.getServer().getFhirContext().newJsonParser();
 			if (theParameters != null) {
 				myDetails.setRequestContents(
@@ -99,13 +111,18 @@ class RequestDetailsCloner {
 			return this;
 		}
 
+		/**
+		 * sets the request parameters for the request details
+		 * @param theParameters
+		 * @return
+		 */
 		DetailsBuilder setParameters(Map<String, String[]> theParameters) {
 			myDetails.setParameters(theParameters);
 
 			return this;
 		}
 
-		DetailsBuilder withRestOperationType(RequestTypeEnum theType) {
+		DetailsBuilder withRequestType(RequestTypeEnum theType) {
 			myDetails.setRequestType(theType);
 
 			return this;
@@ -125,6 +142,17 @@ class RequestDetailsCloner {
 
 		DetailsBuilder setId(IIdType theId) {
 			myDetails.setId(theId);
+
+			return this;
+		}
+
+		DetailsBuilder clear() {
+			myDetails.setRequestType(null);
+			myDetails.setOperation(null);
+			myDetails.setResource(null);
+			myDetails.setParameters(new HashMap<>());
+			myDetails.setResourceName(null);
+			myDetails.setCompartmentName(null);
 
 			return this;
 		}

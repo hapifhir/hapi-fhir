@@ -292,7 +292,7 @@ public class ProviderConstants {
 	 */
 	public static final String OPERATION_MERGE = "$merge";
 	/**
-	 * Patient $merge operation parameters
+	 * Patient $merge operation parameters (specific to Patient/$merge)
 	 */
 	public static final String OPERATION_MERGE_PARAM_SOURCE_PATIENT = "source-patient";
 
@@ -300,13 +300,33 @@ public class ProviderConstants {
 	public static final String OPERATION_MERGE_PARAM_TARGET_PATIENT = "target-patient";
 	public static final String OPERATION_MERGE_PARAM_TARGET_PATIENT_IDENTIFIER = "target-patient-identifier";
 	public static final String OPERATION_MERGE_PARAM_RESULT_PATIENT = "result-patient";
-	public static final String OPERATION_MERGE_PARAM_BATCH_SIZE = "batch-size";
+
+	/**
+	 * Generic resource $hapi.fhir.merge operation parameters (resource-agnostic)
+	 */
+	public static final String OPERATION_MERGE_PARAM_SOURCE_RESOURCE = "source-resource";
+
+	public static final String OPERATION_MERGE_PARAM_SOURCE_RESOURCE_IDENTIFIER = "source-resource-identifier";
+	public static final String OPERATION_MERGE_PARAM_TARGET_RESOURCE = "target-resource";
+	public static final String OPERATION_MERGE_PARAM_TARGET_RESOURCE_IDENTIFIER = "target-resource-identifier";
+	public static final String OPERATION_MERGE_PARAM_RESULT_RESOURCE = "result-resource";
+
+	/**
+	 * The following are common to Patient/$merge and  {ResourceType}/$hapi.fhir.merge (generic resource merge)
+	 */
+	public static final String OPERATION_MERGE_PARAM_RESOURCE_LIMIT = OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT;
+
 	public static final String OPERATION_MERGE_PARAM_PREVIEW = "preview";
 	public static final String OPERATION_MERGE_PARAM_DELETE_SOURCE = "delete-source";
 	public static final String OPERATION_MERGE_OUTPUT_PARAM_INPUT = "input";
 	public static final String OPERATION_MERGE_OUTPUT_PARAM_OUTCOME = OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
 	public static final String OPERATION_MERGE_OUTPUT_PARAM_RESULT = "result";
 	public static final String OPERATION_MERGE_OUTPUT_PARAM_TASK = OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK;
+
+	/**
+	 * Operation name for the {ResourceType}/$hapi.fhir.merge operation (generic resource merge)
+	 */
+	public static final String OPERATION_HAPI_FHIR_MERGE = "$hapi.fhir.merge";
 
 	public static final String OPERATION_UNDO_MERGE = "$hapi.fhir.undo-merge";
 	public static final String OPERATION_UNDO_MERGE_OUTCOME = "outcome";

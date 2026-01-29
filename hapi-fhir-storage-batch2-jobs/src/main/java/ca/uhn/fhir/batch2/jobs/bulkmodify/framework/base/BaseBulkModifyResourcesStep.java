@@ -62,7 +62,7 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * Bulk modification/rewrite jobs should subclass {@link BaseBulkModifyResourcesIndividuallyStep} if they want to make modifications
  * to individual resources one-at-a-time. If they want to make modifications to multiple resources in a batch, they should subclass
- * this class and implement {@link #processPidsInTransaction(String, String, BaseBulkModifyJobParameters, State, List, TransactionDetails, IJobDataSink)}
+ * this class and implement {@link #processPidsInTransaction(StepExecutionDetails, BaseBulkModifyJobParameters, State, List, TransactionDetails, IJobDataSink)}
  * </p>
  *
  * @param <PT> The job parameters type
@@ -124,7 +124,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		state.addPids(pids);
 
 		// Try to update the whole chunk in a single database transaction for fast performance
-		processPids(instanceId, chunkId, jobParameters, state, pids, requestPartitionId, theDataSink);
+		processPids(theStepExecutionDetails, jobParameters, state, pids, requestPartitionId, theDataSink);
 
 		// If our attempt to process as a single DB transaction failed, we will try each
 		// resource individually in a separate DB transaction so that any failures on one
@@ -138,8 +138,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 				while (state.hasPidsInInitialState()) {
 					TypedPidAndVersionJson singlePid = state.getSinglePidInState(StateEnum.INITIAL);
 					processPids(
-							instanceId,
-							chunkId,
+							theStepExecutionDetails,
 							jobParameters,
 							state,
 							List.of(singlePid),
@@ -179,8 +178,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	 * @param thePids If <code>true</code>, attempt to modify all resources in the {@link State}. If <code>false</code>, only attempt to modify a single resource.
 	 */
 	private void processPids(
-			String theInstanceId,
-			String theChunkId,
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
 			PT theJobParameters,
 			State theState,
 			List<TypedPidAndVersionJson> thePids,
@@ -192,15 +190,14 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		try {
 
 			processPidsOutsideTransaction(
-					theInstanceId, theChunkId, theJobParameters, theState, thePids, transactionDetails, theDataSink);
+					theStepExecutionDetails, theJobParameters, theState, thePids, transactionDetails, theDataSink);
 
 			myTransactionService
 					.withSystemRequestOnPartition(theRequestPartitionId)
 					.withTransactionDetails(transactionDetails)
 					.readOnly(theJobParameters.isDryRun())
 					.execute(() -> processPidsInTransaction(
-							theInstanceId,
-							theChunkId,
+							theStepExecutionDetails,
 							theJobParameters,
 							theState,
 							thePids,
@@ -227,21 +224,19 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 
 	/**
 	 * For each group of PIDs, this method is called outside of any FHIR transaction, prior to
-	 * {@link #processPidsInTransaction(String, String, BaseBulkModifyJobParameters, State, List, TransactionDetails, IJobDataSink)}
+	 * {@link #processPidsInTransaction(StepExecutionDetails, BaseBulkModifyJobParameters, State, List, TransactionDetails, IJobDataSink)}
 	 * being called. It can handle any pre-processing that needs to happen outside of a DB transaction.
 	 *
-	 * @param theInstanceId         The job instance ID
-	 * @param theChunkId            The work chunk ID
+	 * @param theStepExecutionDetails The step execution details for this work chunk
 	 * @param theJobParameters      The job parameters for this job instance
 	 * @param theState              The modification state object, which must be updated for all PIDs
 	 * @param thePids               The PIDs to modify.
 	 * @param theTransactionDetails A TransactionDetails associated with the current DB transaction.
 	 * @param theDataSink           The sink that will ultimately be written to
-	 * @see #processPidsInTransaction(String, String, BaseBulkModifyJobParameters, State, List, TransactionDetails, IJobDataSink)
+	 * @see #processPidsInTransaction(StepExecutionDetails, BaseBulkModifyJobParameters, State, List, TransactionDetails, IJobDataSink)
 	 */
 	protected void processPidsOutsideTransaction(
-			String theInstanceId,
-			String theChunkId,
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
 			PT theJobParameters,
 			State theState,
 			List<TypedPidAndVersionJson> thePids,
@@ -261,18 +256,16 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	 * this class.
 	 * </p>
 	 *
-	 * @param theInstanceId         The job instance ID
-	 * @param theChunkId            The work chunk ID
+	 * @param theStepExecutionDetails The step execution details for this work chunk
 	 * @param theJobParameters      The job parameters for this job instance
 	 * @param theState              The modification state object, which must be updated for all PIDs
 	 * @param thePids               The PIDs to modify.
 	 * @param theTransactionDetails A TransactionDetails associated with the current DB transaction.
 	 * @param theDataSink           The sink that will ultimately be written to
-	 * @see #processPidsOutsideTransaction(String, String, BaseBulkModifyJobParameters, State, List, TransactionDetails, IJobDataSink)
+	 * @see #processPidsOutsideTransaction(StepExecutionDetails, BaseBulkModifyJobParameters, State, List, TransactionDetails, IJobDataSink)
 	 */
 	protected abstract void processPidsInTransaction(
-			String theInstanceId,
-			String theChunkId,
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
 			PT theJobParameters,
 			State theState,
 			List<TypedPidAndVersionJson> thePids,

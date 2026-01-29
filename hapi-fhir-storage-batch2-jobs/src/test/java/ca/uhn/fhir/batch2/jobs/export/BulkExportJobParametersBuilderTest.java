@@ -187,7 +187,7 @@ class BulkExportJobParametersBuilderTest {
 		// Act
 		myFixture.partitionId(expected);
 		// Assert
-		assertThat(myFixture.build().getPartitionId()).isEqualTo(expected);
+		assertThat(myFixture.build().getPartitionIdForSecurity()).isEqualTo(expected);
 	}
 
 	@Test

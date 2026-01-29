@@ -25,15 +25,26 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 class OperationRule extends BaseRule implements IAuthRule {
+	private static final Logger ourLog = LoggerFactory.getLogger(OperationRule.class);
 	private String myOperationName;
 	private boolean myAppliesToServer;
 	private HashSet<Class<? extends IBaseResource>> myAppliesToTypes;
@@ -44,6 +55,9 @@ class OperationRule extends BaseRule implements IAuthRule {
 	private boolean myAppliesAtAnyLevel;
 	private boolean myAllowAllResponses;
 	private boolean myAllowAllResourcesAccess;
+
+	@Nullable
+	private String myInstanceFilter;
 
 	OperationRule(String theRuleName) {
 		super(theRuleName);
@@ -65,6 +79,11 @@ class OperationRule extends BaseRule implements IAuthRule {
 		myAppliesToAnyInstance = true;
 	}
 
+	void appliesToAnyInstanceMatchingFilter(@Nullable String theFilter) {
+		myAppliesToAnyInstance = true;
+		myInstanceFilter = theFilter;
+	}
+
 	void appliesToAnyType() {
 		myAppliesToAnyType = true;
 	}
@@ -75,6 +94,12 @@ class OperationRule extends BaseRule implements IAuthRule {
 
 	void appliesToInstancesOfType(HashSet<Class<? extends IBaseResource>> theAppliesToTypes) {
 		myAppliesToInstancesOfType = theAppliesToTypes;
+	}
+
+	void appliesToInstancesOfTypeMatchingFilter(
+			HashSet<Class<? extends IBaseResource>> theAppliesToTypes, @Nullable String theFilter) {
+		myAppliesToInstancesOfType = theAppliesToTypes;
+		myInstanceFilter = theFilter;
 	}
 
 	void appliesToServer() {
@@ -96,6 +121,9 @@ class OperationRule extends BaseRule implements IAuthRule {
 			IRuleApplier theRuleApplier,
 			Set<AuthorizationFlagsEnum> theFlags,
 			Pointcut thePointcut) {
+
+		validateState();
+
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
 		boolean applies = false;
@@ -120,13 +148,15 @@ class OperationRule extends BaseRule implements IAuthRule {
 				}
 				break;
 			case EXTENDED_OPERATION_INSTANCE:
+				IIdType requestResourceId = getRequestResourceId(theRequestDetails);
+
 				if (myAppliesToAnyInstance || myAppliesAtAnyLevel) {
 					applies = true;
-				} else {
-					IIdType requestResourceId = null;
-					if (theRequestDetails.getId() != null) {
-						requestResourceId = theRequestDetails.getId();
+					if (isBlockedByInstanceFilter(
+							theRequestDetails, requestResourceId, theInputResource, theOperation, theRuleApplier)) {
+						applies = false;
 					}
+				} else {
 					if (requestResourceId != null) {
 						if (myAppliesToIds != null) {
 							String instanceId =
@@ -134,7 +164,16 @@ class OperationRule extends BaseRule implements IAuthRule {
 							for (IIdType next : myAppliesToIds) {
 								if (next.toUnqualifiedVersionless().getValue().equals(instanceId)) {
 									applies = true;
-									break;
+									if (isBlockedByInstanceFilter(
+											theRequestDetails,
+											requestResourceId,
+											theInputResource,
+											theOperation,
+											theRuleApplier)) {
+										applies = false;
+									} else {
+										break;
+									}
 								}
 							}
 						}
@@ -144,7 +183,16 @@ class OperationRule extends BaseRule implements IAuthRule {
 								String resName = ctx.getResourceType(next);
 								if (resName.equals(requestResourceId.getResourceType())) {
 									applies = true;
-									break;
+									if (isBlockedByInstanceFilter(
+											theRequestDetails,
+											requestResourceId,
+											theInputResource,
+											theOperation,
+											theRuleApplier)) {
+										applies = false;
+									} else {
+										break;
+									}
 								}
 							}
 						}
@@ -189,6 +237,14 @@ class OperationRule extends BaseRule implements IAuthRule {
 				return RuleImplOp.applyRulesToResponseResources(
 						theRequestDetails, theRuleApplier, thePointcut, outputResources);
 			}
+		}
+	}
+
+	private void validateState() {
+		if (isNotBlank(myInstanceFilter)) {
+			Validate.isTrue(
+					myAppliesToAnyInstance || isNotEmpty(myAppliesToInstancesOfType) || isNotEmpty(myAppliesToIds),
+					"Instance filter is only supported for instance-level operations.");
 		}
 	}
 
@@ -239,6 +295,11 @@ class OperationRule extends BaseRule implements IAuthRule {
 		return myAllowAllResourcesAccess;
 	}
 
+	@Nullable
+	public String getInstanceFilter() {
+		return myInstanceFilter;
+	}
+
 	@Override
 	@Nonnull
 	protected ToStringBuilder toStringBuilder() {
@@ -254,5 +315,93 @@ class OperationRule extends BaseRule implements IAuthRule {
 		builder.append("allowAllResponses", myAllowAllResponses);
 		builder.append("allowAllResourcesAccess", myAllowAllResourcesAccess);
 		return builder;
+	}
+
+	private boolean isBlockedByInstanceFilter(
+			RequestDetails theRequestDetails,
+			IIdType theTargetResourceId,
+			IBaseResource theInputResource,
+			RestOperationTypeEnum theOperation,
+			IRuleApplier theRuleApplier) {
+
+		if (isBlank(myInstanceFilter) || theTargetResourceId == null) {
+			// nothing to block
+			return false;
+		}
+
+		Optional<IBaseResource> oResource =
+				getResourceForFilterCheck(theTargetResourceId, theInputResource, theRequestDetails, theRuleApplier);
+		if (oResource.isEmpty()) {
+			// could not find resource, block to be safe
+			ourLog.debug("Could not find resource [{}] to apply filter [{}].", theTargetResourceId, myInstanceFilter);
+			return true;
+		}
+
+		IBaseResource resource = oResource.get();
+		FhirQueryRuleTester tester = new FhirQueryRuleTester(myInstanceFilter);
+
+		IAuthRuleTester.RuleTestRequest ruleTestRequest =
+				createRuleTestRequest(theOperation, theRequestDetails, theTargetResourceId, resource, theRuleApplier);
+
+		// blocked if the resource does not match the filter
+		boolean blocked = !tester.matches(ruleTestRequest);
+		ourLog.debug(
+				"Instance filter result: resourceId={}, filter={}, blocked={}",
+				theTargetResourceId,
+				myInstanceFilter,
+				blocked);
+
+		return blocked;
+	}
+
+	/**
+	 * <p>Returns the resource that will be used for the instance filter check.</p>
+	 * <p>Outcomes:</p>
+	 * <ol>
+	 *     <li>theTargetResourceId == theInputResource -> use theInputResource</li>
+	 *     <li>theTargetResourceId != theInputResource -> try to fetch the full resource body using theTargetResourceId.</li>
+	 * </ol>
+	 */
+	private Optional<IBaseResource> getResourceForFilterCheck(
+			@Nonnull IIdType theTargetResourceId,
+			@Nullable IBaseResource theInputResource,
+			RequestDetails theRequestDetails,
+			IRuleApplier theRuleApplier) {
+
+		// see if resource body is available from request
+		if (theInputResource != null && targetResourceIdMatchesInputResource(theTargetResourceId, theInputResource)) {
+			return Optional.of(theInputResource);
+		}
+
+		// resource body not available, try to resolve
+		IAuthResourceResolver resourceResolver = theRuleApplier.getAuthResourceResolver();
+		if (resourceResolver == null) {
+			return Optional.empty();
+		}
+
+		// This would happen for Observation/123/$meta-add:
+		// theTargetResourceId = Observation/123
+		// theInputResource = Parameters
+		IBaseResource resource = resourceResolver.resolveResourceById(theRequestDetails, theTargetResourceId);
+		return Optional.ofNullable(resource);
+	}
+
+	private boolean targetResourceIdMatchesInputResource(
+			@Nonnull IIdType theTargetResourceId, @Nonnull IBaseResource theInputResource) {
+		IIdType inputResourceId = theInputResource.getIdElement();
+		if (inputResourceId == null || !inputResourceId.hasIdPart()) {
+			return false;
+		}
+
+		return Objects.equals(
+				theTargetResourceId.toUnqualifiedVersionless().getValue(),
+				inputResourceId.toUnqualifiedVersionless().getValue());
+	}
+
+	private @Nullable IIdType getRequestResourceId(RequestDetails theRequestDetails) {
+		if (theRequestDetails != null && theRequestDetails.getId() != null) {
+			return theRequestDetails.getId();
+		}
+		return null;
 	}
 }

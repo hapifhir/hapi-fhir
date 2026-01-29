@@ -1219,7 +1219,7 @@ public class QueryStack {
 			}
 
 			ResourceLinkPredicateBuilder resourceLinkTableJoin =
-					mySqlBuilder.addReferencePredicateBuilderReversed(this, theSourceJoinColumn);
+					mySqlBuilder.addResourceLinkForHasParameterPredicateBuilderReversed(this, theSourceJoinColumn);
 
 			List<String> paths = resourceLinkTableJoin.createResourceLinkPaths(
 					targetResourceType, paramReference, new ArrayList<>());

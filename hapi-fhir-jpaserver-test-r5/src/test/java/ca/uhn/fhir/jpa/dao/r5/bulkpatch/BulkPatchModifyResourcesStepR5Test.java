@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.dao.r5.bulkpatch;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyResourcesStep;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchJobParameters;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchModifyResourcesStep;
@@ -11,7 +10,6 @@ import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -60,7 +58,7 @@ public class BulkPatchModifyResourcesStepR5Test extends BaseBulkPatchR5Test {
 		WorkChunk workChunk = new WorkChunk().setId("my-chunk-id");
 		JobInstance jobInstance = new JobInstance();
 
-		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> parameters = new StepExecutionDetails<>(jobParameters, data, jobInstance, workChunk);
+		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> parameters = new StepExecutionDetails<>(jobParameters, data, jobInstance, workChunk, myJobStepExecutionServices);
 		myCaptureQueriesListener.clear();
 		mySvcNonRewrite.run(parameters, myDataSink);
 
@@ -103,7 +101,7 @@ public class BulkPatchModifyResourcesStepR5Test extends BaseBulkPatchR5Test {
 		WorkChunk workChunk = new WorkChunk().setId("my-chunk-id");
 		JobInstance jobInstance = new JobInstance();
 
-		StepExecutionDetails<BulkPatchRewriteJobParameters, TypedPidAndVersionListWorkChunkJson> parameters = new StepExecutionDetails<>(jobParameters, data, jobInstance, workChunk);
+		StepExecutionDetails<BulkPatchRewriteJobParameters, TypedPidAndVersionListWorkChunkJson> parameters = new StepExecutionDetails<>(jobParameters, data, jobInstance, workChunk, myJobStepExecutionServices);
 		myCaptureQueriesListener.clear();
 		mySvcRewrite.run(parameters, myDataSink);
 
@@ -158,7 +156,7 @@ public class BulkPatchModifyResourcesStepR5Test extends BaseBulkPatchR5Test {
 		WorkChunk workChunk = new WorkChunk().setId("my-chunk-id");
 		JobInstance jobInstance = new JobInstance();
 
-		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> parameters = new StepExecutionDetails<>(jobParameters, data, jobInstance, workChunk);
+		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> parameters = new StepExecutionDetails<>(jobParameters, data, jobInstance, workChunk, myJobStepExecutionServices);
 		myCaptureQueriesListener.clear();
 		mySvcNonRewrite.run(parameters, myDataSink);
 

@@ -37,11 +37,9 @@ import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
@@ -49,17 +47,15 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTablePk;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
-import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.search.BatchResourceLoader;
+import ca.uhn.fhir.jpa.search.BatchResourceLoader.ResourceLoadResult;
 import ca.uhn.fhir.jpa.search.SearchConstants;
 import ca.uhn.fhir.jpa.search.builder.models.ResolvedSearchQueryExecutor;
 import ca.uhn.fhir.jpa.search.builder.models.SearchQueryProperties;
@@ -213,7 +209,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private final JpaStorageSettings myStorageSettings;
 	private final SearchQueryProperties mySearchProperties;
 	private final IResourceHistoryTableDao myResourceHistoryTableDao;
-	private final IJpaStorageResourceParser myJpaStorageResourceParser;
+	private final BatchResourceLoader myBatchResourceLoader;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -244,9 +240,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private IElasticsearchSvc myIElasticsearchSvc;
 
 	@Autowired
-	private IResourceHistoryTagDao myResourceHistoryTagDao;
-
-	@Autowired
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 
 	/**
@@ -267,7 +260,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			FhirContext theContext,
 			IIdHelperService theIdHelperService,
 			IResourceHistoryTableDao theResourceHistoryTagDao,
-			IJpaStorageResourceParser theIJpaStorageResourceParser,
+			BatchResourceLoader theBatchResourceLoader,
 			Class<? extends IBaseResource> theResourceType) {
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
@@ -284,7 +277,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		myContext = theContext;
 		myIdHelperService = theIdHelperService;
 		myResourceHistoryTableDao = theResourceHistoryTagDao;
-		myJpaStorageResourceParser = theIJpaStorageResourceParser;
+		myBatchResourceLoader = theBatchResourceLoader;
 
 		mySearchProperties = new SearchQueryProperties();
 	}
@@ -1322,34 +1315,18 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 		}
 
-		// -- preload all tags with tag definition if any
-		Map<JpaPid, Collection<BaseTag>> tagMap = getResourceTagMap(resourceSearchViewList);
+		List<ResourceLoadResult> resourceLoadResults =
+				myBatchResourceLoader.loadResources(resourceSearchViewList, theForHistoryOperation);
 
-		for (ResourceHistoryTable next : resourceSearchViewList) {
-			if (next.getDeleted() != null) {
+		for (ResourceLoadResult next : resourceLoadResults) {
+			if (next.isDeleted()) {
 				continue;
 			}
-
-			Class<? extends IBaseResource> resourceType =
-					myContext.getResourceDefinition(next.getResourceType()).getImplementingClass();
-
-			JpaPid resourceId = next.getPersistentId();
+			JpaPid resourceId = next.pid();
 
 			if (resourcePidToVersion != null) {
 				Long version = resourcePidToVersion.get(resourceId);
 				resourceId.setVersion(version);
-			}
-
-			IBaseResource resource;
-			resource = myJpaStorageResourceParser.toResource(
-					theRequest, resourceType, next, tagMap.get(next.getResourceId()), theForHistoryOperation);
-			if (resource == null) {
-				ourLog.warn(
-						"Unable to find resource {}/{}/_history/{} in database",
-						next.getResourceType(),
-						next.getIdDt().getIdPart(),
-						next.getVersion());
-				continue;
 			}
 
 			Integer index = thePosition.get(resourceId.getId());
@@ -1359,16 +1336,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 
 			if (theIncludedPids.contains(resourceId)) {
-				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, BundleEntrySearchModeEnum.INCLUDE);
+				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(next.resource(), BundleEntrySearchModeEnum.INCLUDE);
 			} else {
-				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, BundleEntrySearchModeEnum.MATCH);
+				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(next.resource(), BundleEntrySearchModeEnum.MATCH);
 			}
 
 			// ensure there's enough space; "<=" because of 0-indexing
 			while (theResourceListToPopulate.size() <= index) {
 				theResourceListToPopulate.add(null);
 			}
-			theResourceListToPopulate.set(index, resource);
+			theResourceListToPopulate.set(index, next.resource());
 		}
 	}
 
@@ -1397,11 +1374,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		IInterceptorBroadcaster interceptorBroadcaster =
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(interceptorBroadcaster1, theRequest);
-		logAndBoradcastWarning(theRequest, warning, interceptorBroadcaster);
+		logAndBroadcastWarning(theRequest, warning, interceptorBroadcaster);
 		return latestVersion;
 	}
 
-	private static void logAndBoradcastWarning(
+	private static void logAndBroadcastWarning(
 			RequestDetails theRequest, String warning, IInterceptorBroadcaster interceptorBroadcaster) {
 		ourLog.warn(warning);
 
@@ -1412,96 +1389,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			params.add(StorageProcessingMessage.class, new StorageProcessingMessage().setMessage(warning));
 			interceptorBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_WARNING, params);
 		}
-	}
-
-	private Map<JpaPid, Collection<BaseTag>> getResourceTagMap(Collection<ResourceHistoryTable> theHistoryTables) {
-		return switch (myStorageSettings.getTagStorageMode()) {
-			case VERSIONED -> getPidToTagMapVersioned(theHistoryTables);
-			case NON_VERSIONED -> getPidToTagMapUnversioned(theHistoryTables);
-			case INLINE -> Map.of();
-		};
-	}
-
-	@Nonnull
-	private Map<JpaPid, Collection<BaseTag>> getPidToTagMapVersioned(
-			Collection<ResourceHistoryTable> theHistoryTables) {
-		List<ResourceHistoryTablePk> idList = new ArrayList<>(theHistoryTables.size());
-
-		// -- find all resource has tags
-		for (ResourceHistoryTable resource : theHistoryTables) {
-			if (resource.isHasTags()) {
-				idList.add(resource.getId());
-			}
-		}
-
-		Map<JpaPid, Collection<BaseTag>> tagMap = new HashMap<>();
-
-		// -- no tags
-		if (idList.isEmpty()) {
-			return tagMap;
-		}
-
-		// -- get all tags for the idList
-		Collection<ResourceHistoryTag> tagList = myResourceHistoryTagDao.findByVersionIds(idList);
-
-		// -- build the map, key = resourceId, value = list of ResourceTag
-		JpaPid resourceId;
-		Collection<BaseTag> tagCol;
-		for (ResourceHistoryTag tag : tagList) {
-
-			resourceId = tag.getResourcePid();
-			tagCol = tagMap.get(resourceId);
-			if (tagCol == null) {
-				tagCol = new ArrayList<>();
-				tagCol.add(tag);
-				tagMap.put(resourceId, tagCol);
-			} else {
-				tagCol.add(tag);
-			}
-		}
-
-		return tagMap;
-	}
-
-	@Nonnull
-	private Map<JpaPid, Collection<BaseTag>> getPidToTagMapUnversioned(
-			Collection<ResourceHistoryTable> theHistoryTables) {
-		List<JpaPid> idList = new ArrayList<>(theHistoryTables.size());
-
-		// -- find all resource has tags
-		for (ResourceHistoryTable resource : theHistoryTables) {
-			if (resource.isHasTags()) {
-				idList.add(resource.getResourceId());
-			}
-		}
-
-		Map<JpaPid, Collection<BaseTag>> tagMap = new HashMap<>();
-
-		// -- no tags
-		if (idList.isEmpty()) {
-			return tagMap;
-		}
-
-		// -- get all tags for the idList
-		Collection<ResourceTag> tagList = myResourceTagDao.findByResourceIds(idList);
-
-		// -- build the map, key = resourceId, value = list of ResourceTag
-		JpaPid resourceId;
-		Collection<BaseTag> tagCol;
-		for (ResourceTag tag : tagList) {
-
-			resourceId = tag.getResourceId();
-			tagCol = tagMap.get(resourceId);
-			if (tagCol == null) {
-				tagCol = new ArrayList<>();
-				tagCol.add(tag);
-				tagMap.put(resourceId, tagCol);
-			} else {
-				tagCol.add(tag);
-			}
-		}
-
-		return tagMap;
 	}
 
 	@Override

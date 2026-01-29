@@ -56,8 +56,8 @@ public class TestPartitionSelectorInterceptor {
 		return this;
 	}
 
-	public void setNextPartitionId(Integer theNextPartitionId) {
-		myNextPartition = RequestPartitionId.fromPartitionId(theNextPartitionId);
+	public void setNextPartitionId(Integer... theNextPartitionId) {
+		myNextPartition = RequestPartitionId.fromPartitionIds(theNextPartitionId);
 	}
 
 	public void setNextPartition(RequestPartitionId theNextPartition) {

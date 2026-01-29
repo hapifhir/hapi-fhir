@@ -57,20 +57,25 @@ import ca.uhn.fhir.jpa.dao.HistoryBuilder;
 import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
+import ca.uhn.fhir.jpa.dao.IResourceMetadataExtractorSvc;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.JpaBulkDataExportHistoryHelper;
 import ca.uhn.fhir.jpa.dao.JpaDaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.JpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.ResourceHistoryCalculator;
+import ca.uhn.fhir.jpa.dao.ResourceMetadataExtractorSvcImpl;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIdentifierPatientUniqueEntityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIdentifierSystemEntityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamIdentityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTypeDao;
 import ca.uhn.fhir.jpa.dao.data.ITagDefinitionDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
@@ -97,6 +102,7 @@ import ca.uhn.fhir.jpa.interceptor.AuthResourceResolver;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.interceptor.OverridePathBasedReferentialIntegrityForDeletesInterceptor;
+import ca.uhn.fhir.jpa.interceptor.PatientCompartmentEnforcingInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -144,6 +150,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryProvenancePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkForHasParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
@@ -382,6 +389,13 @@ public class JpaConfig {
 
 	@Bean
 	@Lazy
+	public PatientCompartmentEnforcingInterceptor patientCompartmentEnforcingInterceptor(
+			FhirContext theFhirContext, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		return new PatientCompartmentEnforcingInterceptor(theFhirContext, theRequestPartitionHelperSvc);
+	}
+
+	@Bean
+	@Lazy
 	public ValueSetOperationProvider valueSetOperationProvider(FhirContext theFhirContext) {
 		if (theFhirContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2)) {
 			return new ValueSetOperationProviderDstu2();
@@ -392,6 +406,16 @@ public class JpaConfig {
 	@Bean
 	public IJpaStorageResourceParser jpaStorageResourceParser() {
 		return new JpaStorageResourceParser();
+	}
+
+	@Bean
+	public IResourceMetadataExtractorSvc resourceMetadataExtractorSvc(
+			JpaStorageSettings theStorageSettings,
+			IResourceHistoryTagDao theResourceHistoryTagDao,
+			IResourceTagDao theResourceTagDao,
+			IResourceHistoryProvenanceDao theResourceHistoryProvenanceDao) {
+		return new ResourceMetadataExtractorSvcImpl(
+				theStorageSettings, theResourceHistoryTagDao, theResourceTagDao, theResourceHistoryProvenanceDao);
 	}
 
 	@Bean
@@ -533,8 +557,9 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public IAuthResourceResolver authResourceResolver(DaoRegistry theDaoRegistry) {
-		return new AuthResourceResolver(theDaoRegistry);
+	public IAuthResourceResolver authResourceResolver(
+			DaoRegistry theDaoRegistry, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		return new AuthResourceResolver(theDaoRegistry, theRequestPartitionHelperSvc);
 	}
 
 	@Bean
@@ -772,11 +797,18 @@ public class JpaConfig {
 		return new QuantityNormalizedPredicateBuilder(theSearchBuilder);
 	}
 
-	@Bean
+	@Bean("newResourceLinkPredicateBuilder")
 	@Scope("prototype")
 	public ResourceLinkPredicateBuilder newResourceLinkPredicateBuilder(
-			QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder, boolean theReversed) {
-		return new ResourceLinkPredicateBuilder(theQueryStack, theSearchBuilder, theReversed);
+			QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder) {
+		return new ResourceLinkPredicateBuilder(theQueryStack, theSearchBuilder);
+	}
+
+	@Bean("newHasLinkPredicateBuilder")
+	@Scope("prototype")
+	public ResourceLinkForHasParameterPredicateBuilder newHasLinkPredicateBuilder(
+			QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder) {
+		return new ResourceLinkForHasParameterPredicateBuilder(theQueryStack, theSearchBuilder);
 	}
 
 	@Bean

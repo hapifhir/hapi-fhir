@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -54,9 +55,27 @@ public interface IAuthRuleBuilderOperationNamed {
 	IAuthRuleBuilderOperationNamedAndScoped onInstancesOfType(Class<? extends IBaseResource> theType);
 
 	/**
+	 * Rule applies to invocations of this operation at the <code>instance</code> level on any instance of the given type.
+	 * An optional FHIR query filter can be added to ensure instances meet certain criteria.
+	 *
+	 * @param theType The resource type (i.e. {@code org.hl7.fhir.r4.model.Observation.class})
+	 * @param theFilterRestriction The FHIR query filter to apply (i.e. {@code category=vital-signs})
+	 */
+	IAuthRuleBuilderOperationNamedAndScoped onInstancesOfTypeMatchingOptionalFilter(
+			Class<? extends IBaseResource> theType, @Nullable String theFilterRestriction);
+
+	/**
 	 * Rule applies to invocations of this operation at the <code>instance</code> level on any instance
 	 */
 	IAuthRuleBuilderOperationNamedAndScoped onAnyInstance();
+
+	/**
+	 * Rule applies to invocations of this operation at the <code>instance</code> level on any instance.
+	 * An optional FHIR query filter can be added to ensure instances meet certain criteria.
+	 *
+	 * @param theFilterRestriction The FHIR query filter to apply (i.e. {@code _tag=http://example.org|some-tag})
+	 */
+	IAuthRuleBuilderOperationNamedAndScoped onAnyInstanceMatchingOptionalFilter(@Nullable String theFilterRestriction);
 
 	/**
 	 * Rule applies to invocations of this operation at any level (server, type or instance)

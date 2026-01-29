@@ -24,7 +24,7 @@ package ca.uhn.fhir.jpa.provider.merge;
  */
 public class UndoMergeOperationInputParameters extends MergeOperationsCommonInputParameters {
 
-	public UndoMergeOperationInputParameters(int theResourceLimit) {
-		super(theResourceLimit);
+	public UndoMergeOperationInputParameters() {
+		super();
 	}
 }

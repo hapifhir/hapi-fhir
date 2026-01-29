@@ -52,7 +52,7 @@ public class BulkExportJobParametersBuilder {
 	private BulkExportJobParameters.ExportStyle myExportStyle;
 	private List<String> myPatientIds = new ArrayList<>();
 	private String myGroupId;
-	private boolean myExpandMdm;
+	private Boolean myExpandMdm;
 	private RequestPartitionId myPartitionId;
 	private String myExportIdentifier;
 	private Set<String> myPostFetchFilterUrls;
@@ -113,8 +113,7 @@ public class BulkExportJobParametersBuilder {
 	}
 
 	public BulkExportJobParametersBuilder expandMdm(IPrimitiveType<Boolean> theExpandMdm) {
-		final Boolean booleanValue = DatatypeUtil.toBooleanValue(theExpandMdm);
-		myExpandMdm = booleanValue != null && booleanValue;
+		myExpandMdm = DatatypeUtil.toBooleanValue(theExpandMdm);
 		return this;
 	}
 
@@ -147,7 +146,7 @@ public class BulkExportJobParametersBuilder {
 		result.setFilters(myFilters);
 		result.setGroupId(myGroupId);
 		result.setOutputFormat(myOutputFormat);
-		result.setPartitionId(myPartitionId);
+		result.setPartitionIdForSecurity(myPartitionId);
 		result.setPatientIds(myPatientIds);
 		result.setResourceTypes(myResourceTypes);
 		result.setSince(mySince);

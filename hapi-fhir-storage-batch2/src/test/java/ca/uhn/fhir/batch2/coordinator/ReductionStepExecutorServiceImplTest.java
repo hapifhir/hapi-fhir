@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.RunOutcome;
@@ -65,6 +66,8 @@ public class ReductionStepExecutorServiceImplTest {
 	@Mock
 	private IJobPersistence myJobPersistence;
 	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
+	@Mock
 	private IReductionStepWorker<TestJobParameters, StepInputData, StepOutputData> myReductionStepWorker;
 	@Mock
 	private IInterceptorService myInterceptorService;
@@ -73,7 +76,7 @@ public class ReductionStepExecutorServiceImplTest {
 
 	@BeforeEach
 	public void before() {
-		mySvc = new ReductionStepExecutorServiceImpl(myJobPersistence, myTransactionService, myJobDefinitionRegistry, myInterceptorService);
+		mySvc = new ReductionStepExecutorServiceImpl(myJobPersistence, myTransactionService, myJobDefinitionRegistry, myJobStepExecutionServices , myInterceptorService);
 	}
 
 	// QUEUED, IN_PROGRESS are supported because of backwards compatibility

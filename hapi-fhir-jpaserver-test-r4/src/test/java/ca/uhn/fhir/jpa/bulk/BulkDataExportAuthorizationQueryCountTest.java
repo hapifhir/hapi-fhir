@@ -10,6 +10,7 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.batch2.jobs.export.BulkExportAppCtx;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
+import ca.uhn.fhir.batch2.jobs.export.v3.BulkExportV3AppCtx;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -164,7 +165,8 @@ public class BulkDataExportAuthorizationQueryCountTest extends BaseResourceProvi
 		performTypeBulkExportAndAwaitCompletion(ourPatientExportServer.getFhirClient(), "Patient", parameters);
 
 		// Then
-		assertNoAuthorizationSelectQueriesCaptured(1);
+		// When no patient filters are specified, there should be no authorization queries
+		assertThat(myCaptureQueriesListener.getSelectQueries()).isEmpty();
 	}
 
 	public static Stream<Arguments> paramsIdentifierAuthorizedUnauthorized() {
@@ -241,13 +243,6 @@ public class BulkDataExportAuthorizationQueryCountTest extends BaseResourceProvi
 		assertThat(queries).allMatch(query -> theExpectedQueriedResourcePids.stream().map(String::valueOf).anyMatch(query::contains));
 	}
 
-	private void assertNoAuthorizationSelectQueriesCaptured(int theNumberOfResources) {
-		// Expect only 2 select queries per resource for
-		// validating the target exists before exporting (resolve PID, resolve resource)
-		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(2 * theNumberOfResources , myCaptureQueriesListener.countSelectQueries());
-	}
-
 	/**
 	 * Ignore capturing SELECT queries to the batch tables (BT2_...)
 	 */
@@ -317,31 +312,14 @@ public class BulkDataExportAuthorizationQueryCountTest extends BaseResourceProvi
 	 * bulk export. If bulk export starts before getting the query count, then there could be extra queries counted.
 	 */
 	@Configuration
-	public static class MockBulkExportJobConfig extends BulkExportAppCtx {
+	public static class MockBulkExportJobConfig extends BulkExportV3AppCtx {
 		@Bean
 		@Override
 		public JobDefinition bulkExportJobDefinition() {
 			JobDefinition.Builder<IModelJson, VoidModel> builder = JobDefinition.newBuilder();
 			builder.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
 			builder.setJobDescription("Mock FHIR Bulk Export");
-			builder.setJobDefinitionVersion(1);
-
-			return builder.setParametersType(BulkExportJobParameters.class)
-				// validator
-				.setParametersValidator(bulkExportJobParametersValidator())
-				.gatedExecution()
-				.addFirstStep("stepA", "mock step A", ResourceIdList.class, new MockStepA())
-				.addLastStep("stepB", "mock step B", new MockStepB())
-				.build();
-		}
-
-		@Bean
-		@Override
-		public JobDefinition bulkExportJobV2Definition() {
-			JobDefinition.Builder<IModelJson, VoidModel> builder = JobDefinition.newBuilder();
-			builder.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
-			builder.setJobDescription("Mock FHIR Bulk Export");
-			builder.setJobDefinitionVersion(2);
+			builder.setJobDefinitionVersion(9999);
 
 			return builder.setParametersType(BulkExportJobParameters.class)
 				// validator

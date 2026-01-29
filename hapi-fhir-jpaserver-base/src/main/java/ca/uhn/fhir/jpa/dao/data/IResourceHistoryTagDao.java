@@ -35,6 +35,6 @@ public interface IResourceHistoryTagDao extends JpaRepository<ResourceHistoryTag
 	void deleteByPid(@Param("historyPid") ResourceHistoryTablePk theResourceHistoryTablePid);
 
 	@Query(
-			"SELECT t FROM ResourceHistoryTag t INNER JOIN FETCH t.myTag WHERE t.myResourceHistory.myId IN (:historyPids)")
+			"SELECT t FROM ResourceHistoryTag t LEFT JOIN FETCH t.myTag WHERE t.myResourceHistory.myId IN (:historyPids)")
 	Collection<ResourceHistoryTag> findByVersionIds(@Param("historyPids") Collection<ResourceHistoryTablePk> theIdList);
 }

@@ -35,29 +35,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 class HapiFhirRepositoryTest extends BaseJpaR4Test implements IRepositoryTest {
 
 	private HapiFhirRepository myRepository;
+	private RestfulServer myRestfulServer;
 
 	@BeforeEach
 	public void beforeResetDao() {
 
 		// We need to set up a RestfulServer since Hapi DAOs don't actually implement search Bundle paging.
-		RestfulServer restfulServer = new RestfulServer(myFhirContext);
+		myRestfulServer = new RestfulServer(myFhirContext);
 
 		// The tests defined in IRepositoryTest and here search Patient, so we need a resource provider.
 		PatientResourceProvider patientResourceProvider = new PatientResourceProvider();
 		patientResourceProvider.setDao(myPatientDao);
 		patientResourceProvider.setContext(myFhirContext);
 
-		restfulServer.setResourceProviders(patientResourceProvider);
+		myRestfulServer.setResourceProviders(patientResourceProvider);
 		try {
-			restfulServer.init();
+			myRestfulServer.init();
 		} catch (ServletException e) {
 			throw new RuntimeException(e);
 		}
 		// And our RequestDetails needs a handle RestfulServer for internal reasons.
-		var srd = new SystemRequestDetails(restfulServer.getInterceptorService());
+		var srd = new SystemRequestDetails(myRestfulServer.getInterceptorService());
 		srd.setFhirContext(myFhirContext);
-		srd.setServer(restfulServer);
-		myRepository = new HapiFhirRepository(myDaoRegistry, srd, restfulServer);
+		srd.setServer(myRestfulServer);
+		myRepository = new HapiFhirRepository(myDaoRegistry, srd, myRestfulServer);
 	}
 
 	@AfterEach
@@ -105,7 +106,7 @@ class HapiFhirRepositoryTest extends BaseJpaR4Test implements IRepositoryTest {
 	}
 
 	@Test
-	void testInstanceOperation() {
+	void testInstanceOperation_withSuppliedReturnType() {
 		IIdType patientId = getTestDataBuilder().createPatient(withId("abc"));
 
 		Parameters result = getRepository().invoke(patientId, "$meta", null, Parameters.class, Map.of());
@@ -114,5 +115,4 @@ class HapiFhirRepositoryTest extends BaseJpaR4Test implements IRepositoryTest {
 		Meta meta = (Meta) result.getParameter("return").getValue();
 		assertThat(meta.getVersionId()).isEqualTo("1");
 	}
-
 }

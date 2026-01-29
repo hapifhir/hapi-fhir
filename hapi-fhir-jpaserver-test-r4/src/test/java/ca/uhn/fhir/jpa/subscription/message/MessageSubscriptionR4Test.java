@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
 import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryChannelNamer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookListener;
@@ -34,11 +35,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -54,22 +57,36 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 
 /**
  * Test the rest-hook subscriptions
  */
 public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
+	public static final String PATIENT_CHANNEL_NAME = "my-pat-queue";
+	public static final String ORGANIZATION_CHANNEL_NAME = "my-org-queue";
+	public static final String DEFAULT_CHANNEL_NAME = "my-queue-name";
+	private static final Logger ourLog = LoggerFactory.getLogger(MessageSubscriptionR4Test.class);
+
+	private TestMessageListenerWithLatch<ResourceModifiedJsonMessage, ResourceModifiedMessage> myTestMessageListenerWithLatchWithLatch;
+	private TestMessageListenerWithLatch<ResourceModifiedJsonMessage, ResourceModifiedMessage> myPatientQueueListenerWithLatch;
+	private TestMessageListenerWithLatch<ResourceModifiedJsonMessage, ResourceModifiedMessage> myOrganizationQueueListenerWithLatch;
+	private IChannelConsumer<ResourceModifiedMessage> myConsumer;
+	private IChannelConsumer<ResourceModifiedMessage> myPatientConsumer;
+	private IChannelConsumer<ResourceModifiedMessage> myOrganizationConsumer;
+
 	@Autowired
 	private SubscriptionChannelFactory myChannelFactory ;
-	private static final Logger ourLog = LoggerFactory.getLogger(MessageSubscriptionR4Test.class);
-	private TestMessageListenerWithLatch<ResourceModifiedJsonMessage, ResourceModifiedMessage> myTestMessageListenerWithLatchWithLatch;
 
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookListener;
-	private IChannelConsumer<ResourceModifiedMessage> myConsumer;
+
+	@MockitoSpyBean
+	private SubscriptionDeliveryChannelNamer mySubscriptionDeliveryChannelNamer;
 
 	@AfterEach
 	public void cleanupStoppableSubscriptionDeliveringRestHookListener() {
@@ -78,6 +95,10 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 		myConsumer.close();
+		myPatientConsumer.close();
+		myOrganizationConsumer.close();
+
+		Mockito.reset(mySubscriptionDeliveryChannelNamer);
 	}
 
 	@Override
@@ -86,10 +107,21 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		mySubscriptionTestUtil.registerMessageInterceptor();
 
 		myTestMessageListenerWithLatchWithLatch = new TestMessageListenerWithLatch<>(ResourceModifiedJsonMessage.class, ResourceModifiedMessage.class);
-		myConsumer = myChannelFactory.newMatchingConsumer("my-queue-name", myTestMessageListenerWithLatchWithLatch, new ChannelConsumerSettings());
+		myConsumer = myChannelFactory.newMatchingConsumer(DEFAULT_CHANNEL_NAME, myTestMessageListenerWithLatchWithLatch, new ChannelConsumerSettings());
+
+		myPatientQueueListenerWithLatch = new TestMessageListenerWithLatch<>(ResourceModifiedJsonMessage.class, ResourceModifiedMessage.class);
+		myPatientConsumer = myChannelFactory.newMatchingConsumer(PATIENT_CHANNEL_NAME, myPatientQueueListenerWithLatch, new ChannelConsumerSettings());
+
+		myOrganizationQueueListenerWithLatch = new TestMessageListenerWithLatch<>(ResourceModifiedJsonMessage.class, ResourceModifiedMessage.class);
+		myOrganizationConsumer = myChannelFactory.newMatchingConsumer(ORGANIZATION_CHANNEL_NAME, myOrganizationQueueListenerWithLatch, new ChannelConsumerSettings());
+
 	}
 
 	private Subscription createSubscriptionWithCriteria(String theCriteria) {
+		return createSubscriptionWithCriteriaOnQueue(theCriteria, "channel:" + DEFAULT_CHANNEL_NAME);
+	}
+
+	private Subscription createSubscriptionWithCriteriaOnQueue(String theCriteria, String theQueueName) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
@@ -98,7 +130,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		Subscription.SubscriptionChannelComponent channel = subscription.getChannel();
 		channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
 		channel.setPayload("application/fhir+json");
-		channel.setEndpoint("channel:my-queue-name");
+		channel.setEndpoint(theQueueName);
 
 		subscription.setChannel(channel);
 		postOrPutSubscription(subscription);
@@ -329,6 +361,34 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 	}
 
+	@Test
+	void testDeliveryMessage_withSharedDeliveryQueue_deliversMessageOnCorrectChannels() throws Exception {
+		// Given: Simulate a shared delivery channel that has multiple configured delivery endpoints
+		createSubscriptionWithCriteriaOnQueue("[Patient]", "channel:" + PATIENT_CHANNEL_NAME);
+		createSubscriptionWithCriteriaOnQueue("[Organization]", "channel:" + ORGANIZATION_CHANNEL_NAME);
+		doReturn("my-shared-delivery-channel").when(mySubscriptionDeliveryChannelNamer).nameFromSubscription(any());
+
+		waitForActivatedSubscriptionCount(2);
+
+		// When
+		myPatientQueueListenerWithLatch.setExpectedCount(1);
+		sendPatient("pat");
+		myPatientQueueListenerWithLatch.awaitExpected();
+
+		// Then: Patient delivered to configured endpoint in Patient Subscription
+		IBaseResource resource = fetchSingleResourceFromPatientEndpoint();
+		assertThat(resource).isInstanceOf(Patient.class);
+
+		// When
+		myOrganizationQueueListenerWithLatch.setExpectedCount(1);
+		sendOrganization("org");
+
+		// Then: Organization delivered to configured endpoint in Organization Subscription
+		myOrganizationQueueListenerWithLatch.awaitExpected();
+		resource = fetchSingleResourceFromOrganizationEndpoint();
+		assertThat(resource).isInstanceOf(Organization.class);
+	}
+
 	private ResourceModifiedMessage createResourceModifiedMessage(Observation theObservation){
 		ResourceModifiedMessage retVal = new ResourceModifiedMessage(myFhirContext, theObservation, BaseResourceMessage.OperationTypeEnum.CREATE);
 		retVal.setSubscriptionId("subId");
@@ -369,12 +429,24 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	private <T> T fetchSingleResourceFromSubscriptionTerminalEndpoint() {
-		assertThat(myTestMessageListenerWithLatchWithLatch.getReceivedMessages()).hasSize(1);
-		ResourceModifiedMessage payload = myTestMessageListenerWithLatchWithLatch.getLastReceivedMessagePayload();
+		return fetchSingleResourceFromEndpoint(myTestMessageListenerWithLatchWithLatch);
+	}
+
+	private <T> T fetchSingleResourceFromEndpoint(TestMessageListenerWithLatch<ResourceModifiedJsonMessage, ResourceModifiedMessage> theMessageListenerWithLatch) {
+		assertThat(theMessageListenerWithLatch.getReceivedMessages()).hasSize(1);
+		ResourceModifiedMessage payload = theMessageListenerWithLatch.getLastReceivedMessagePayload();
 		String payloadString = payload.getPayloadString();
 		IBaseResource resource = myFhirContext.newJsonParser().parseResource(payloadString);
-		myTestMessageListenerWithLatchWithLatch.clear();
+		theMessageListenerWithLatch.clear();
 		return (T) resource;
+	}
+
+	private <T> T fetchSingleResourceFromPatientEndpoint() {
+		return fetchSingleResourceFromEndpoint(myPatientQueueListenerWithLatch);
+	}
+
+	private <T> T fetchSingleResourceFromOrganizationEndpoint() {
+		return fetchSingleResourceFromEndpoint(myOrganizationQueueListenerWithLatch);
 	}
 
 	private static String toJson(Object theRequest) {
