@@ -41,6 +41,9 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -731,6 +734,14 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					retVal.add("version", new TokenParam(version));
 				}
 			}
+			// Always sort by _pid DESC for deterministic results.
+			// This is particularly important in SINGLE_VERSION mode when multiple versions
+			// already exist (e.g., user switched from MULTI_VERSION to SINGLE_VERSION) - we want
+			// to consistently update the most recently created resource.
+			// Note: _pid sorts by internal RES_ID (database sequence), not the
+			// client-visible FHIR ID (_id), ensuring true creation-order sorting
+			// regardless of whether resources have server-assigned or client-assigned IDs.
+			retVal.setSort(new SortSpec(Constants.PARAM_PID, SortOrderEnum.DESC));
 			return retVal;
 		} else {
 			TokenParam identifierToken = extractIdentifierFromOtherResourceTypes(theResource);

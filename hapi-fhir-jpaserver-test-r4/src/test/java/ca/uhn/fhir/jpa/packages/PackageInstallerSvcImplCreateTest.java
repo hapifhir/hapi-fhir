@@ -248,6 +248,49 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 		assertThat(actual.getMeta().getSource()).isEqualTo(PACKAGE_ID_1 + "|" + PACKAGE_VERSION);
 	}
 
+	@Test
+	void testSingleVersionMode_withMultipleExistingVersions_updatesNewestCreated() throws IOException {
+		String url = "http://example.org/ValueSet/test";
+
+		// Given: Two versions already exist using MULTI_VERSION policy
+		// Install v1.0 first (older RES_ID)
+		ValueSet vs1 = createValueSet("vs-v1", null, "1.0", url, "copyright-v1");
+		PackageInstallationSpec spec1 = createInstallationSpec(packageToBytes());
+		spec1.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION);
+		mySvc.install(vs1, spec1, new PackageInstallOutcomeJson());
+
+		// Install v2.0 second (newer RES_ID)
+		ValueSet vs2 = createValueSet("vs-v2", null, "2.0", url, "copyright-v2");
+		PackageInstallationSpec spec2 = createInstallationSpec(packageToBytes());
+		spec2.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION);
+		mySvc.install(vs2, spec2, new PackageInstallOutcomeJson());
+
+		// Capture the ID of the second (newer) resource
+		List<ValueSet> existing = getAllValueSets();
+		assertThat(existing).hasSize(2);
+		String newerResourceId = existing.stream()
+			.filter(vs -> "2.0".equals(vs.getVersion()))
+			.findFirst()
+			.map(vs -> vs.getIdElement().toUnqualifiedVersionless().getValue())
+			.orElseThrow();
+
+		// When: Install v3.0 with SINGLE_VERSION policy (simulating user switched modes)
+		ValueSet vs3 = createValueSet("vs-v3", null, "3.0", url, "copyright-v3");
+		PackageInstallationSpec spec3 = createInstallationSpec(packageToBytes());
+		spec3.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.SINGLE_VERSION);
+		mySvc.install(vs3, spec3, new PackageInstallOutcomeJson());
+
+		// Then: The most recently created resource (v2.0's ID) should be updated to v3.0
+		ValueSet updated = myValueSetDao.read(new IdDt(newerResourceId), REQUEST_DETAILS);
+		assertThat(updated.getVersion()).isEqualTo("3.0");
+
+		// And: v1.0 should still exist unchanged
+		List<ValueSet> all = getAllValueSets();
+		assertThat(all).hasSize(2);
+		assertThat(all).extracting(ValueSet::getVersion)
+			.containsExactlyInAnyOrder("1.0", "3.0");
+	}
+
 	@Nonnull
 	private List<ValueSet> getAllValueSets() {
 		final List<IBaseResource> allResources = myValueSetDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS).getAllResources();

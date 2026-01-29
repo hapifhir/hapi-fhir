@@ -237,7 +237,7 @@ public class PackageInstallationSpec {
 		MULTI_VERSION,
 
 		/**
-		 * Legacy behavior. Uses client-assigned IDs from package. Existing resources
+		 * Uses client-assigned IDs from package. Existing resources
 		 * matched by canonical URL only (ignoring version), so installing a new version
 		 * of the same profile will overwrite the existing one.
 		 */
