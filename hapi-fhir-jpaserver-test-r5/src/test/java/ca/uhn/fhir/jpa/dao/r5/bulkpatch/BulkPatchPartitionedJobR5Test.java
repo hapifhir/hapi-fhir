@@ -56,7 +56,7 @@ public class BulkPatchPartitionedJobR5Test extends BaseBulkPatchR5Test {
 		myPartitionSettings.setDefaultPartitionId(0);
 		myPartitionSettings.setUnnamedPartitionMode(true);
 
-		registerInterceptor(new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myIIdHelperService));
+		registerInterceptor(new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry));
 
 		myFhirClient = myRestfulServerExtension.getFhirClient();
 	}

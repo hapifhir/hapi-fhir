@@ -97,7 +97,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	public void before() throws Exception {
 		super.before();
 		myForceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
-		mySvc = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myIdHelperService);
+		mySvc = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
 
 		myInterceptorRegistry.registerInterceptor(mySvc);
 		myInterceptorRegistry.registerInterceptor(myForceOffsetSearchModeInterceptor);
@@ -162,32 +162,6 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 	@Test
-	public void testDeleteAndRecreateResource_InPatientCompartment() {
-		// Setup
-		createPatient(withId("A"), withActiveTrue());
-		createObservation(withId("O"), withSubject("Patient/A"));
-
-		// Test - Delete the observation
-		myCaptureQueriesListener.clear();
-		DaoMethodOutcome deleteOutcome = myObservationDao.delete(new IdType("Observation/O"), newSrd());
-		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
-		assertGone("Observation/O");
-		long deletedVersion = deleteOutcome.getId().getVersionIdPartAsLong();
-
-		// Test - Re-create the same observation
-		myCaptureQueriesListener.clear();
-		createObservation(withId("O"), withSubject("Patient/A"));
-		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
-
-		// Verify - Assert the observation exists and version is incremented
-		Observation recreated = myObservationDao.read(new IdType("Observation/O"), mySrd);
-		assertThat(recreated).isNotNull();
-		assertThat(recreated.getSubject().getReference()).isEqualTo("Patient/A");
-
-		assertThat(recreated.getIdElement().getVersionIdPartAsLong()).isEqualTo(deletedVersion + 2);
-	}
-
-	@Test
 	public void testDeleteResource_NotInPatientCompartment() {
 		createOrganization(withId("O"), withName("Org O"));
 
@@ -199,7 +173,6 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		// Verify
 		assertGone("Organization/O");
 	}
-
 
 	@Test
 	public void testCreatePatient_ClientAssignedId() {

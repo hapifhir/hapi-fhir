@@ -3,13 +3,12 @@ package ca.uhn.fhir.jpa.interceptor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
@@ -32,7 +31,7 @@ class PatientIdPartitionInterceptorTest {
 	private PatientIdPartitionInterceptor mySvc;
 
 	@Mock
-	private IIdHelperService<IResourcePersistentId<?>> myIIdHelperService;
+	private DaoRegistry myDaoRegistry;
 
 	@BeforeEach
 	void beforeEach() {
@@ -40,7 +39,7 @@ class PatientIdPartitionInterceptorTest {
 		StorageSettings storageSettings = new StorageSettings();
 		PartitionSettings partitionSettings = new PartitionSettings();
 		ISearchParamExtractor searchParamExtractor = new SearchParamExtractorR4(storageSettings, partitionSettings, myFhirContext, searchParamRegistry);
-		mySvc = new PatientIdPartitionInterceptor(myFhirContext, searchParamExtractor, partitionSettings, myIIdHelperService);
+		mySvc = new PatientIdPartitionInterceptor(myFhirContext, searchParamExtractor, partitionSettings, myDaoRegistry);
 	}
 
 	@ParameterizedTest
