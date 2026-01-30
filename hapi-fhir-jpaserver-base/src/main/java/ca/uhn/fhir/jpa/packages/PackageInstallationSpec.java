@@ -99,7 +99,9 @@ public class PackageInstallationSpec {
 	@JsonProperty("additionalResourceFolders")
 	private Set<String> myAdditionalResourceFolders;
 
-	@Schema(description = "Controls how resource versions are handled during installation")
+	@Schema(
+			description =
+					"Controls whether multiple versions of conformance resources can coexist in the repository during STORE_AND_INSTALL installation")
 	@JsonProperty("versionPolicy")
 	private VersionPolicyEnum myVersionPolicy = VersionPolicyEnum.MULTI_VERSION;
 
