@@ -69,6 +69,12 @@ public class PartitionRunner {
 	/**
 	 * Constructor - Use this constructor and provide a {@link RequestDetails} and {@link HapiTransactionService} if
 	 * you want each individual callable task to be performed in a managed transaction.
+	 *
+	 * @param theTransactionService The transaction service for transaction management.
+	 * @param theRequestDetails The request details to use for transaction context.
+	 *                          May be null if no transaction management is needed.
+	 * @param theRequestPartitionId The partition ID to use for all operations. When provided, this
+	 *                              overrides any partition that would be determined from theRequestDetails.
 	 */
 	public PartitionRunner(
 			String theProcessName,

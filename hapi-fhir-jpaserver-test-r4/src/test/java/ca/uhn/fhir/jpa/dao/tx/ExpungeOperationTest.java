@@ -41,15 +41,15 @@ public class ExpungeOperationTest {
 	private static final Integer PARTITION_ID = 10;
 
 	@BeforeEach
-	public void beforeEach(){
+	void beforeEach(){
 		myStorageSettings = new JpaStorageSettings();
 	}
 
 	@Test
-	public void testExpunge_onSpecificTenant_willPerformExpungeOnSpecificTenant() {
+	void testExpunge_onSpecificTenant_willPerformExpungeOnSpecificTenant() {
 		// given
-		when(myIResourceExpungeService.findHistoricalVersionsOfDeletedResources(any(), any(), anyInt())).thenReturn(List.of(JpaPid.fromId(1l)));
-		when(myIResourceExpungeService.findHistoricalVersionsOfNonDeletedResources(any(), any(), anyInt())).thenReturn(List.of(JpaPid.fromId(1l)));
+		when(myIResourceExpungeService.findHistoricalVersionsOfDeletedResources(any(), any(), anyInt())).thenReturn(List.of(JpaPid.fromId(1L)));
+		when(myIResourceExpungeService.findHistoricalVersionsOfNonDeletedResources(any(), any(), anyInt())).thenReturn(List.of(JpaPid.fromId(1L)));
 		myStorageSettings.setExpungeBatchSize(5);
 
 		RequestDetails requestDetails = getRequestDetails();
@@ -90,12 +90,12 @@ public class ExpungeOperationTest {
 	}
 
 	@Test
-	public void testExpunge_withResourceIdHavingPartitionId_usesPartitionIdFromResource() {
+	void testExpunge_withResourceIdHavingPartitionId_usesPartitionIdFromResource() {
 		// setup
 		JpaPid resourceIdWithPartition = new JpaPid(PARTITION_ID, 123L);
 
 		when(myIResourceExpungeService.findHistoricalVersionsOfDeletedResources(any(), any(), anyInt()))
-			.thenReturn(List.of(JpaPid.fromId(1l)));
+			.thenReturn(List.of(JpaPid.fromId(1L)));
 		when(myIResourceExpungeService.findHistoricalVersionsOfNonDeletedResources(any(), any(), anyInt()))
 			.thenReturn(List.of(JpaPid.fromId(1L)));
 		myStorageSettings.setExpungeBatchSize(5);

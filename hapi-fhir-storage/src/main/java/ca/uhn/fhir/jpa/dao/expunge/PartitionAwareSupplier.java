@@ -38,6 +38,13 @@ public class PartitionAwareSupplier {
 	private final RequestDetails myRequestDetails;
 	private final RequestPartitionId myRequestPartitionId;
 
+	/**
+	 * @param theTxService The transaction service for transaction management
+	 * @param theRequestDetails The request details to use for transaction context
+	 * @param theRequestPartitionId The partition ID to use for all operations. When provided, this
+	 *                              overrides any partition that would be determined from theRequestDetails.
+	 *                              May be null to use the partition from theRequestDetails.
+	 */
 	public PartitionAwareSupplier(
 			HapiTransactionService theTxService,
 			RequestDetails theRequestDetails,
