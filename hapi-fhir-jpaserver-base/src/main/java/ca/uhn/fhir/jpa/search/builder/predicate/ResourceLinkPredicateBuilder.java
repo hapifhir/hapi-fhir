@@ -50,7 +50,6 @@ import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTuples;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -80,7 +79,6 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -102,7 +100,6 @@ import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TYPE;
 import static ca.uhn.fhir.rest.api.Constants.VALID_MODIFIERS;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder implements ICanMakeMissingParamPredicate {
@@ -228,7 +225,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		 */
 		RequestPartitionId predicateTargetPartitionId = theRequestPartitionId;
 		if (myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()) {
-            predicateTargetPartitionId = null;
+			predicateTargetPartitionId = null;
 			for (IQueryParameterType next : theReferenceOrParamList) {
 
 				Validate.isTrue(
@@ -237,29 +234,22 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 						next.getClass(),
 						theParamName);
 				ReferenceParam refParam = (ReferenceParam) next;
-				if (isNotBlank(refParam.getResourceType()) && isNotBlank(refParam.getIdPart())) {
-					String resourceType = refParam.getResourceType();
-					String resourceId = refParam.getIdPart();
-                    if (isBlank(resourceType) || isBlank(idPart)) {
-                        // FIXME: add code / remove? Also add test
-                        throw new InvalidRequestException(
-                                                          Msg.code(1) + "Parameter \"" + UrlUtil.sanitizeUrlPart(theParamName)
-                                                          + "\" must be in the format [resourceType]/[id]");
-                    }
-                    
-					IIdType id = myFhirContext.getVersion().newIdType(resourceType, resourceId);
-					RequestPartitionId nextPartitionId =
-							myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, id);
-					requestPartitionId = requestPartitionId.mergeIds(nextPartitionId);
-					continue;
+				String resourceType = refParam.getResourceType();
+				String resourceId = refParam.getIdPart();
+				if (isBlank(resourceType) || isBlank(resourceId)) {
+					// FIXME: add code
+					throw new InvalidRequestException(Msg.code(1) + "Parameter \""
+							+ UrlUtil.sanitizeUrlPart(theParamName) + "\" must be in the format [resourceType]/[id]");
 				}
 
-				SearchParameterMap map = new SearchParameterMap();
-				map.add(theParamName, next);
+				IIdType id = myFhirContext.getVersion().newIdType(resourceType, resourceId);
 				RequestPartitionId nextPartitionId =
-						myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-								theRequest, theResourceType, map);
-				requestPartitionId = requestPartitionId.mergeIds(nextPartitionId);
+						myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, id);
+				if (predicateTargetPartitionId == null) {
+					predicateTargetPartitionId = nextPartitionId;
+				} else {
+					predicateTargetPartitionId = predicateTargetPartitionId.mergeIds(nextPartitionId);
+				}
 			}
 		}
 

@@ -28,7 +28,6 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -412,11 +411,11 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 			MANDATORY_SINGLE_COMPARTMENT      , 65                , FAIL            , true                    , 65
 			ALWAYS_USE_PARTITION_ID/5         , 5                 , 5               , true                    , 5
 			NON_UNIQUE_COMPARTMENT_IN_DEFAULT , 65                , -1              , false                   , ALL
-			NON_UNIQUE_COMPARTMENT_IN_DEFAULT , 65                , -1              , true                    , ALL
+			NON_UNIQUE_COMPARTMENT_IN_DEFAULT , 65                , -1              , true                    , 65
 			""")
 	void testResourceTypePolicies_PatientCompartmentResource(String thePolicyString, int thePatientSpecificDocRefCompartmentId, String theDocRefNoPatientCompartmentString, boolean theIncludePatientIdInSearch, String theExpectedSearchPartitionString) {
 		// Setup
-		PatientCompartmentPolicy policy = PatientCompartmentPolicy.parse(thePolicyString);
+		ResourceCompartmentStoragePolicy policy = ResourceCompartmentStoragePolicy.parse(thePolicyString);
 
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 		mySvc.setResourceTypePolicies(Map.of("DocumentReference", policy));

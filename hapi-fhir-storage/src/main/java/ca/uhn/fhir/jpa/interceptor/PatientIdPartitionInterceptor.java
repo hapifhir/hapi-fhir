@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.interceptor;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
@@ -45,6 +47,7 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -54,6 +57,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Constants;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -69,10 +73,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.getPartitionFromUserDataIfPresent;
-import static ca.uhn.fhir.jpa.interceptor.PatientCompartmentPolicy.ALWAYS_USE_DEFAULT_PARTITION;
-import static ca.uhn.fhir.jpa.interceptor.PatientCompartmentPolicy.MANDATORY_SINGLE_COMPARTMENT;
-import static ca.uhn.fhir.jpa.interceptor.PatientCompartmentPolicy.NON_UNIQUE_COMPARTMENT_IN_DEFAULT;
-import static ca.uhn.fhir.jpa.interceptor.PatientCompartmentPolicy.OPTIONAL_SINGLE_COMPARTMENT;
+import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.ALWAYS_USE_DEFAULT_PARTITION;
+import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.MANDATORY_SINGLE_COMPARTMENT;
+import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.NON_UNIQUE_COMPARTMENT_IN_DEFAULT;
+import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.OPTIONAL_SINGLE_COMPARTMENT;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -81,7 +85,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * This interceptor allows JPA servers to be partitioned by Patient ID. It selects the compartment for read/create operations
  * based on the patient ID associated with the resource (and uses a default partition ID for any resources
  * not in the patient compartment).
- * This works better with IdStrategyEnum.UUID and CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED.
+ * This works better with {@link ca.uhn.fhir.jpa.api.config.JpaStorageSettings.IdStrategyEnum#UUID} and
+ * {@link ca.uhn.fhir.jpa.model.config.PartitionSettings.CrossPartitionReferenceMode#ALLOWED_UNQUALIFIED}.
  */
 @Interceptor
 public class PatientIdPartitionInterceptor {
@@ -98,7 +103,7 @@ public class PatientIdPartitionInterceptor {
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
-	private Map<String, PatientCompartmentPolicy> myResourceTypeToCompartmentStrictness = Map.of();
+	private Map<String, ResourceCompartmentStoragePolicy> myResourceTypeToCompartmentStrictness = Map.of();
 
 	/**
 	 * Constructor
@@ -113,22 +118,25 @@ public class PatientIdPartitionInterceptor {
 	}
 
 	/**
-	 * Supplies a map of resource types to modes specifying how that resource type will be
-	 * handled by the interceptor. Any resource types that are not found in the map will be
+	 * Supplies a map of resource types to policies specifying how the interceptor will
+	 * handle that resource type. Any resource types that are not found in the map will be
 	 * assumed to have the following default behaviour:
 	 * <ul>
 	 * <li>
-	 * Any resources not in the Patient Compartment: {@link PatientCompartmentPolicy#ALWAYS_USE_DEFAULT_PARTITION}
+	 * Any resources not in the
+	 * <a href="https://hl7.org/fhir/compartmentdefinition-patient.html">Patient Compartment</a>:
+	 * {@link ResourceCompartmentStoragePolicy#ALWAYS_USE_DEFAULT_PARTITION}
 	 * </li>
 	 * <li>
-	 * The <b>Group</b> resource: {@link PatientCompartmentPolicy#ALWAYS_USE_DEFAULT_PARTITION}
+	 * The <b>Group</b> and <b>List</b> resource: {@link ResourceCompartmentStoragePolicy#ALWAYS_USE_DEFAULT_PARTITION}
 	 * </li>
 	 * <li>
-	 * Any other resources in the <a href="https://hl7.org/fhir/compartmentdefinition-patient.html">Patient Compartment</a>:
-	 * {@link PatientCompartmentPolicy#MANDATORY_SINGLE_COMPARTMENT}
+	 * Any other resources in the
+	 * <a href="https://hl7.org/fhir/compartmentdefinition-patient.html">Patient Compartment</a>:
+	 * {@link ResourceCompartmentStoragePolicy#MANDATORY_SINGLE_COMPARTMENT}
 	 * </li>
 	 * </ul>
-	 * {@link PatientCompartmentPolicy#MANDATORY_SINGLE_COMPARTMENT} behaviour.
+	 * {@link ResourceCompartmentStoragePolicy#MANDATORY_SINGLE_COMPARTMENT} behaviour.
 	 * Other modes can be specified if you need to allow specific Patient Compartment resource
 	 * types to be created and found even if they do not have a valid patient reference.
 	 * <p>
@@ -136,32 +144,47 @@ public class PatientIdPartitionInterceptor {
 	 * <a href="https://hl7.org/fhir/compartmentdefinition-patient.html">Patient Compartment</a>.
 	 * </p>
 	 *
-	 * @since 8.8.0
-	 * @throws NullPointerException if the map is null or any entries in the map contain null values
+	 * @throws NullPointerException     if the map is null or any entries in the map contain null values
 	 * @throws IllegalArgumentException if any of the resource types in the map are not valid Patient Compartment resource types
+	 * @since 8.8.0
 	 */
 	public void setResourceTypePolicies(
-			@Nonnull Map<String, PatientCompartmentPolicy> thePatientCompartmentOptionalResourceTypes)
+			@Nonnull Map<String, ResourceCompartmentStoragePolicy> thePatientCompartmentOptionalResourceTypes)
 			throws NullPointerException, IllegalArgumentException {
 		Validate.notNull(
 				thePatientCompartmentOptionalResourceTypes,
 				"thePatientCompartmentOptionalResourceTypes must not be null");
-		for (Map.Entry<String, PatientCompartmentPolicy> entry :
+		for (Map.Entry<String, ResourceCompartmentStoragePolicy> entry :
 				thePatientCompartmentOptionalResourceTypes.entrySet()) {
 			String resourceType = entry.getKey();
+			ResourceCompartmentStoragePolicy policy = entry.getValue();
+
+			// FIXME: add message codes
+			if ("Patient".equals(resourceType)) {
+				throw new ConfigurationException("Can not provide a resource type policy for resource type 'Patient'");
+			}
+
+			if (BaseRequestPartitionHelperSvc.NON_PARTITIONABLE_RESOURCE_NAMES.contains(resourceType)) {
+				throw new ConfigurationException(String.format("Can not provide a resource type policy for non-partitionable resource type: %s", resourceType));
+			}
 
 			RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(resourceType);
-			Validate.isTrue(resourceDef != null, "Resource type '%s' is not a valid resource type", resourceType);
+			if (resourceDef == null) {
+				throw new ConfigurationException(String.format("Resource type '%s' is not a valid resource type, can not apply resource type policy", resourceType));
+			}
 
-			PatientCompartmentPolicy strictnessMode = entry.getValue();
-			Validate.notNull(strictnessMode, "Strictness mode for resource type '%s' must not be null", resourceType);
+			ResourceCompartmentStoragePolicy strictnessMode = entry.getValue();
+			if (strictnessMode == null) {
+				throw new ConfigurationException(String.format("Empty resource type policy for resource type: %s", resourceType));
+			}
 
-			List<RuntimeSearchParam> compartmentSps =
+			if (policy.isOnlyAppliesToCompartmentResourceTypes()) {
+				List<RuntimeSearchParam> compartmentSps =
 					ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
-			Validate.isTrue(
-					!compartmentSps.isEmpty(),
-					"Resource type '%s' is not a Patient Compartment resource type",
-					resourceType);
+				if ( compartmentSps.isEmpty()) {
+					throw new ConfigurationException(String.format("Resource type '%s' is not a Patient Compartment resource type, can not apply policy: %s", resourceType, policy.getName()));
+				}
+			}
 		}
 
 		myResourceTypeToCompartmentStrictness = Map.copyOf(thePatientCompartmentOptionalResourceTypes);
@@ -170,10 +193,10 @@ public class PatientIdPartitionInterceptor {
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 	public RequestPartitionId identifyForCreate(IBaseResource theResource, RequestDetails theRequestDetails) {
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResource);
-		PatientCompartmentPolicy policy = getPolicyForResourceType(resourceDef);
+		ResourceCompartmentStoragePolicy policy = getPolicyForResourceType(resourceDef);
 
 		if (policy == ALWAYS_USE_DEFAULT_PARTITION) {
-			return provideNonCompartmentMemberTypeResponse(theResource);
+			return provideNonCompartmentMemberTypeResponse(theRequestDetails, policy, theResource);
 		}
 
 		if (policy.getAlwaysUsePartitionId() != null) {
@@ -187,7 +210,7 @@ public class PatientIdPartitionInterceptor {
 						Msg.code(1321)
 								+ "Patient resource IDs must be client-assigned in patient compartment mode, or server id strategy must be UUID");
 			}
-			return provideCompartmentMemberInstanceResponse(theRequestDetails, idElement.getIdPart());
+			return provideSingleCompartmentPartition(theRequestDetails, idElement.getIdPart());
 		} else {
 			List<RuntimeSearchParam> compartmentSps =
 					ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
@@ -200,9 +223,7 @@ public class PatientIdPartitionInterceptor {
 
 				// One compartment
 				if (oCompartmentIdentity.size() == 1) {
-					int partitionId = providePartitionIdForPatientId(
-							theRequestDetails, oCompartmentIdentity.iterator().next());
-					return RequestPartitionId.fromPartitionId(partitionId);
+					return provideMultipleCompartmentPartition(theRequestDetails, policy, oCompartmentIdentity);
 				}
 
 				// Multiple compartments
@@ -217,13 +238,13 @@ public class PatientIdPartitionInterceptor {
 
 			} else {
 				Set<RequestPartitionId> compartments =
-						getPartitionViaPartiallyProcessedReference(theRequestDetails, theResource);
+						getPartitionViaPartiallyProcessedReference(theRequestDetails, policy, theResource);
 				if (compartments.size() == 1) {
 					return compartments.iterator().next();
 				}
 
 				if (compartments.isEmpty() && policy == OPTIONAL_SINGLE_COMPARTMENT) {
-					return provideNonCompartmentMemberTypeResponse(theResource);
+					return provideNonCompartmentMemberTypeResponse(theRequestDetails, policy, theResource);
 				}
 
 				// If we get here, we have either 0 or 2+ compartments
@@ -238,34 +259,36 @@ public class PatientIdPartitionInterceptor {
 	}
 
 	/**
-	 * De-duplicate if we have more than 1 (some resource types can have the patient in
-	 * multiple fields, so it's possible to get the same patient more than once here)
+	 * @see #setResourceTypePolicies(Map) for a description of the default policies
 	 */
 	@Nonnull
-	private static Collection<String> deDuplicateCompartmentList(Collection<String> oCompartmentIdentity) {
-		if (oCompartmentIdentity.size() > 1) {
-			oCompartmentIdentity = new HashSet<>(oCompartmentIdentity);
+	protected ResourceCompartmentStoragePolicy getPolicyForResourceType(ReadPartitionIdRequestDetails theReadDetails) {
+		String resourceType = theReadDetails.getResourceType();
+		if (isBlank(resourceType)) {
+			return ALWAYS_USE_DEFAULT_PARTITION;
 		}
-		return oCompartmentIdentity;
+		return getPolicyForResourceType(myFhirContext.getResourceDefinition(resourceType));
 	}
 
 	/**
-	 * @see #setResourceTypePolicies(Map)
+	 * @see #setResourceTypePolicies(Map) for a description of the default policies
 	 */
-	@SuppressWarnings("SwitchStatementWithTooFewBranches")
 	@Nonnull
-	private PatientCompartmentPolicy getPolicyForResourceType(RuntimeResourceDefinition resourceDef) {
-		List<RuntimeSearchParam> compartmentSps =
-				ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
-		if (compartmentSps.isEmpty()) {
-			return ALWAYS_USE_DEFAULT_PARTITION;
-		}
-
-		PatientCompartmentPolicy retVal = myResourceTypeToCompartmentStrictness.get(resourceDef.getName());
+	private ResourceCompartmentStoragePolicy getPolicyForResourceType(RuntimeResourceDefinition resourceDef) {
+		ResourceCompartmentStoragePolicy retVal = myResourceTypeToCompartmentStrictness.get(resourceDef.getName());
 		if (retVal == null) {
 			retVal = switch (resourceDef.getName()) {
-				case "Group" -> ALWAYS_USE_DEFAULT_PARTITION;
-				default -> MANDATORY_SINGLE_COMPARTMENT;};
+				case "Group", "List" -> ALWAYS_USE_DEFAULT_PARTITION;
+				case "Patient" -> MANDATORY_SINGLE_COMPARTMENT;
+				default -> {
+					List<RuntimeSearchParam> compartmentSps =
+							ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
+					if (compartmentSps.isEmpty()) {
+						yield ALWAYS_USE_DEFAULT_PARTITION;
+					} else {
+						yield MANDATORY_SINGLE_COMPARTMENT;
+					}
+				}};
 		}
 		return retVal;
 	}
@@ -278,7 +301,7 @@ public class PatientIdPartitionInterceptor {
 	@SuppressWarnings("unchecked")
 	@Nonnull
 	private Set<RequestPartitionId> getPartitionViaPartiallyProcessedReference(
-			RequestDetails theRequestDetails, IBaseResource theResource) {
+		RequestDetails theRequestDetails, ResourceCompartmentStoragePolicy thePolicy, IBaseResource theResource) {
 		Map<String, IBaseResource> placeholderToReference = null;
 		if (theRequestDetails != null) {
 			placeholderToReference =
@@ -304,7 +327,7 @@ public class PatientIdPartitionInterceptor {
 					retVal.add(partition.get());
 				} else if ("Patient".equals(target.getIdElement().getResourceType())) {
 					if (!target.getIdElement().isUuid() && target.getIdElement().hasIdPart()) {
-						retVal.add(provideCompartmentMemberInstanceResponse(
+						retVal.add(provideSingleCompartmentPartition(
 								theRequestDetails, target.getIdElement().getIdPart()));
 					}
 				}
@@ -317,15 +340,11 @@ public class PatientIdPartitionInterceptor {
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
 	public RequestPartitionId identifyForRead(
 			@Nonnull ReadPartitionIdRequestDetails theReadDetails, RequestDetails theRequestDetails) {
+		ResourceCompartmentStoragePolicy policy = getPolicyForResourceType(theReadDetails);
+
 		if (!isEmpty(theReadDetails.getResourceType())) {
-			RuntimeResourceDefinition resourceDef =
-					myFhirContext.getResourceDefinition(theReadDetails.getResourceType());
-			PatientCompartmentPolicy policy = getPolicyForResourceType(resourceDef);
 			if (policy == ALWAYS_USE_DEFAULT_PARTITION) {
-				return provideNonCompartmentMemberTypeResponse(null);
-			}
-			if (policy == NON_UNIQUE_COMPARTMENT_IN_DEFAULT) {
-				return RequestPartitionId.allPartitions();
+				return provideNonCompartmentMemberTypeResponse(theRequestDetails, policy, null);
 			}
 			if (policy.getAlwaysUsePartitionId() != null) {
 				return RequestPartitionId.fromPartitionId(policy.getAlwaysUsePartitionId());
@@ -343,40 +362,23 @@ public class PatientIdPartitionInterceptor {
 					SearchParameterMap params = theReadDetails.getSearchParams();
 					if ("Patient".equals(theReadDetails.getResourceType())) {
 						List<String> idParts = getResourceIdList(params, "_id", false);
-						if (idParts.size() == 1) {
-							return provideCompartmentMemberInstanceResponse(theRequestDetails, idParts.get(0));
-						} else {
-							return RequestPartitionId.allPartitions();
-						}
+						return provideMultipleCompartmentPartition(
+								theRequestDetails, MANDATORY_SINGLE_COMPARTMENT, idParts);
 					} else if (isNotBlank(theReadDetails.getResourceType())) {
 						RuntimeResourceDefinition resourceDef =
 								myFhirContext.getResourceDefinition(theReadDetails.getResourceType());
 						List<RuntimeSearchParam> compartmentSps =
 								ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef, true);
 						for (RuntimeSearchParam nextCompartmentSp : compartmentSps) {
-							// FIXME: remove "only 1" param
-
 							Collection<String> idParts = getResourceIdList(params, nextCompartmentSp.getName(), false);
-							idParts = deDuplicateCompartmentList(idParts);
-
 							if (!idParts.isEmpty()) {
-								RequestPartitionId partitionId = null;
-								for (String compartmentId : idParts) {
-									RequestPartitionId compartmentPartition =
-											provideCompartmentMemberInstanceResponse(theRequestDetails, compartmentId);
-									if (partitionId != null) {
-										partitionId = partitionId.mergeIds(compartmentPartition);
-									} else {
-										partitionId = compartmentPartition;
-									}
-								}
-								return partitionId;
+								return provideMultipleCompartmentPartition(theRequestDetails, policy, idParts);
 							}
 						}
 					}
 				} else if (theReadDetails.getReadResourceId() != null) {
 					if ("Patient".equals(theReadDetails.getResourceType())) {
-						return provideCompartmentMemberInstanceResponse(
+						return provideSingleCompartmentPartition(
 								theRequestDetails,
 								theReadDetails.getReadResourceId().getIdPart());
 					}
@@ -386,7 +388,7 @@ public class PatientIdPartitionInterceptor {
 				String extendedOp = theReadDetails.getExtendedOperationName();
 				if (ProviderConstants.OPERATION_EXPORT.equals(extendedOp)
 						|| ProviderConstants.OPERATION_EXPORT_POLL_STATUS.equals(extendedOp)) {
-					return provideNonPatientSpecificQueryResponse();
+					return provideNonPatientSpecificCompartment();
 				}
 				break;
 			default:
@@ -394,7 +396,7 @@ public class PatientIdPartitionInterceptor {
 		}
 
 		if (isBlank(theReadDetails.getResourceType())) {
-			return provideNonCompartmentMemberTypeResponse(null);
+			return provideNonCompartmentMemberTypeResponse(theRequestDetails, policy, null);
 		}
 
 		// If we couldn't identify a patient ID by the URL, let's try using the
@@ -403,7 +405,7 @@ public class PatientIdPartitionInterceptor {
 			return identifyForCreate(theReadDetails.getConditionalTargetOrNull(), theRequestDetails);
 		}
 
-		return provideNonPatientSpecificQueryResponse();
+		return provideNonPatientSpecificCompartment();
 	}
 
 	/**
@@ -514,7 +516,8 @@ public class PatientIdPartitionInterceptor {
 				}
 
 				String valueAsQueryToken = idParam.getValueAsQueryToken();
-				if (Strings.CS.startsWith(valueAsQueryToken, "Patient/")) {
+				if (Strings.CS.startsWith(valueAsQueryToken, "Patient/")
+						|| Strings.CS.contains(valueAsQueryToken, "/Patient/")) {
 					IdType id = new IdType(valueAsQueryToken);
 					if (id.getResourceType().equals("Patient")) {
 						idParts.add(id.getIdPart());
@@ -539,7 +542,7 @@ public class PatientIdPartitionInterceptor {
 	/**
 	 * Return a partition or throw an error for FHIR operations that can not be used with this interceptor
 	 */
-	protected RequestPartitionId provideNonPatientSpecificQueryResponse() {
+	protected RequestPartitionId provideNonPatientSpecificCompartment() {
 		return RequestPartitionId.allPartitions();
 	}
 
@@ -548,25 +551,45 @@ public class PatientIdPartitionInterceptor {
 	 * may be easier to override {@link #providePartitionIdForPatientId(RequestDetails, String)} instead.
 	 */
 	@Nonnull
-	protected RequestPartitionId provideCompartmentMemberInstanceResponse(
-			RequestDetails theRequestDetails, String theResourceIdPart) {
-		int partitionId = providePartitionIdForPatientId(theRequestDetails, theResourceIdPart);
+	protected RequestPartitionId provideSingleCompartmentPartition(
+			RequestDetails theRequestDetails, String thePatientIdPart) {
+		int partitionId = providePartitionIdForPatientId(theRequestDetails, thePatientIdPart);
 		return RequestPartitionId.fromPartitionId(partitionId);
+	}
+
+	@SuppressWarnings("unused")
+	@Nullable
+	protected RequestPartitionId provideMultipleCompartmentPartition(
+			RequestDetails theRequestDetails,
+			ResourceCompartmentStoragePolicy thePolicy,
+			Collection<String> thePatientIdParts) {
+		thePatientIdParts = deDuplicateCompartmentList(thePatientIdParts);
+		RequestPartitionId partitionId = null;
+		for (String compartmentId : thePatientIdParts) {
+			RequestPartitionId compartmentPartition =
+					provideSingleCompartmentPartition(theRequestDetails, compartmentId);
+			if (partitionId != null) {
+				partitionId = partitionId.mergeIds(compartmentPartition);
+			} else {
+				partitionId = compartmentPartition;
+			}
+		}
+		return partitionId;
 	}
 
 	/**
 	 * Translates an ID (e.g. "ABC") into a compartment ID number.
 	 * <p>
 	 * The default implementation of this method returns:
-	 * <code>Math.abs(theResourceIdPart.hashCode()) % 15000</code>.
+	 * <code>Math.abs(thePatientIdPart.hashCode()) % 15000</code>.
 	 * <p>
 	 * This logic can be replaced with other logic of your choosing.
 	 *
 	 * @see #defaultPartitionAlgorithm(String)
 	 */
 	@SuppressWarnings("unused")
-	protected int providePartitionIdForPatientId(RequestDetails theRequestDetails, String theResourceIdPart) {
-		return defaultPartitionAlgorithm(theResourceIdPart);
+	protected int providePartitionIdForPatientId(RequestDetails theRequestDetails, String thePatientIdPart) {
+		return defaultPartitionAlgorithm(thePatientIdPart);
 	}
 
 	/**
@@ -588,8 +611,21 @@ public class PatientIdPartitionInterceptor {
 	 */
 	@SuppressWarnings("unused")
 	@Nonnull
-	protected RequestPartitionId provideNonCompartmentMemberTypeResponse(IBaseResource theResource) {
+	protected RequestPartitionId provideNonCompartmentMemberTypeResponse(
+		RequestDetails theRequestDetails, ResourceCompartmentStoragePolicy thePolicy, IBaseResource theResource) {
 		return myPartitionSettings.getDefaultRequestPartitionId();
+	}
+
+	/**
+	 * De-duplicate if we have more than 1 (some resource types can have the patient in
+	 * multiple fields, so it's possible to get the same patient more than once here)
+	 */
+	@Nonnull
+	private static Collection<String> deDuplicateCompartmentList(Collection<String> oCompartmentIdentity) {
+		if (oCompartmentIdentity.size() > 1) {
+			oCompartmentIdentity = new HashSet<>(oCompartmentIdentity);
+		}
+		return oCompartmentIdentity;
 	}
 
 	/**

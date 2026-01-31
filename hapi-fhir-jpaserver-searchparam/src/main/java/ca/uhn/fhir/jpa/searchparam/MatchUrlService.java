@@ -359,5 +359,9 @@ public class MatchUrlService {
 	}
 
 	public record ResourceTypeAndSearchParameterMap(
-			RuntimeResourceDefinition resourceDefinition, SearchParameterMap searchParameterMap) {}
+			RuntimeResourceDefinition resourceDefinition, SearchParameterMap searchParameterMap) {
+		public String resourceType() {
+			return resourceDefinition().getName();
+		}
+	}
 }
