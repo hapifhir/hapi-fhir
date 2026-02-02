@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.tx;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
@@ -20,7 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
@@ -37,24 +37,26 @@ public class ExpungeOperationTest {
 	private JpaStorageSettings myStorageSettings;
 	@Mock
 	private IResourceExpungeService myIResourceExpungeService;
-	private static final String ourExpectedTenantId = "TenantA";
+	private static final String TENANT_A = "TenantA";
+	private static final Integer PARTITION_ID = 10;
 
 	@BeforeEach
-	public void beforeEach(){
+	void beforeEach(){
 		myStorageSettings = new JpaStorageSettings();
 	}
 
 	@Test
-	public void testExpunge_onSpecificTenant_willPerformExpungeOnSpecificTenant(){
+	void testExpunge_onSpecificTenant_willPerformExpungeOnSpecificTenant() {
 		// given
-		when(myIResourceExpungeService.findHistoricalVersionsOfDeletedResources(any(), any(), anyInt())).thenReturn(List.of(JpaPid.fromId(1l)));
-		when(myIResourceExpungeService.findHistoricalVersionsOfNonDeletedResources(any(), any(), anyInt())).thenReturn(List.of(JpaPid.fromId(1l)));
+		when(myIResourceExpungeService.findHistoricalVersionsOfDeletedResources(any(), any(), anyInt())).thenReturn(List.of(JpaPid.fromId(1L)));
+		when(myIResourceExpungeService.findHistoricalVersionsOfNonDeletedResources(any(), any(), anyInt())).thenReturn(List.of(JpaPid.fromId(1L)));
 		myStorageSettings.setExpungeBatchSize(5);
 
 		RequestDetails requestDetails = getRequestDetails();
+		JpaPid resourceId = new JpaPid(null, 1L);
 		ExpungeOptions expungeOptions = new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(true);
 
-		ExpungeOperation expungeOperation = new ExpungeOperation("Patient", null, expungeOptions, requestDetails);
+		ExpungeOperation expungeOperation = new ExpungeOperation("Patient", resourceId, expungeOptions, requestDetails);
 
 		expungeOperation.setHapiTransactionServiceForTesting(myHapiTransactionService);
 		expungeOperation.setStorageSettingsForTesting(myStorageSettings);
@@ -63,7 +65,7 @@ public class ExpungeOperationTest {
 		expungeOperation.call();
 
 		// then
-		assertTransactionServiceWasInvokedWithTenantId(ourExpectedTenantId);
+		assertTransactionServiceWasInvokedWithTenantId(TENANT_A);
 	}
 
 	private void assertTransactionServiceWasInvokedWithTenantId(String theExpectedTenantId) {
@@ -78,13 +80,61 @@ public class ExpungeOperationTest {
 			.map(RequestDetails::getTenantId)
 			.allMatch(theExpectedTenantId::equals);
 
-		assertEquals(true, allMatching);
+		assertTrue(allMatching);
 	}
 
 	private RequestDetails getRequestDetails() {
 		RequestDetails requestDetails =	new ServletRequestDetails();
-		requestDetails.setTenantId(ourExpectedTenantId);
+		requestDetails.setTenantId(TENANT_A);
 		return requestDetails;
 	}
 
+	@Test
+	void testExpunge_withResourceIdHavingPartitionId_usesPartitionIdFromResource() {
+		// setup
+		JpaPid resourceIdWithPartition = new JpaPid(PARTITION_ID, 123L);
+
+		when(myIResourceExpungeService.findHistoricalVersionsOfDeletedResources(any(), any(), anyInt()))
+			.thenReturn(List.of(JpaPid.fromId(1L)));
+		when(myIResourceExpungeService.findHistoricalVersionsOfNonDeletedResources(any(), any(), anyInt()))
+			.thenReturn(List.of(JpaPid.fromId(1L)));
+		myStorageSettings.setExpungeBatchSize(5);
+
+		RequestDetails requestDetails = new ServletRequestDetails();
+		ExpungeOptions expungeOptions = new ExpungeOptions()
+			.setExpungeOldVersions(true)
+			.setExpungeDeletedResources(true);
+
+		ExpungeOperation expungeOperation = new ExpungeOperation(
+			"Observation",
+			resourceIdWithPartition,
+			expungeOptions,
+			requestDetails
+		);
+
+		expungeOperation.setHapiTransactionServiceForTesting(myHapiTransactionService);
+		expungeOperation.setStorageSettingsForTesting(myStorageSettings);
+		expungeOperation.setExpungeDaoServiceForTesting(myIResourceExpungeService);
+
+		// execute
+		expungeOperation.call();
+
+		// verify
+		assertTransactionServiceWasInvokedWithPartitionId(PARTITION_ID);
+	}
+
+	private void assertTransactionServiceWasInvokedWithPartitionId(Integer theExpectedPartitionId) {
+		// we have set the expungeOptions to setExpungeDeletedResources and SetExpungeOldVersions to true.
+		// as a result, we will be making 5 trips to the db.  let's make sure that each trip was done with
+		// the hapiTransaction service and that the requestPartitionId was specified.
+		verify(myHapiTransactionService, times(5)).doExecute(myBuilderArgumentCaptor.capture(), any());
+		List<HapiTransactionService.ExecutionBuilder> methodArgumentExecutionBuilders = myBuilderArgumentCaptor.getAllValues();
+
+		boolean allMatching = methodArgumentExecutionBuilders.stream()
+			.map(HapiTransactionService.ExecutionBuilder::getRequestPartitionIdForTesting)
+			.map(RequestPartitionId::getFirstPartitionIdOrNull)
+			.allMatch(theExpectedPartitionId::equals);
+
+		assertTrue(allMatching);
+	}
 }

@@ -3601,6 +3601,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPreserveVersionsOnAuditEvent() {
+		// ehp: this test is riddled with logs to try to figure out why it fail intermittently
+		ourLog.info("AutoVersionReferenceAtPaths: {}", myStorageSettings.getAutoVersionReferenceAtPaths());
+		ourLog.info("DontStripVersionsFromReferencesAtPaths: {}", myFhirContext.getParserOptions().getDontStripVersionsFromReferencesAtPaths());
+
 		Organization org = new Organization();
 		org.setName("ORG");
 		IIdType orgId = myClient.create().resource(org).execute().getId();
@@ -3613,8 +3617,16 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals("1", patientId.getVersionIdPart());
 
 		AuditEvent ae = new org.hl7.fhir.r4.model.AuditEvent();
-		ae.addEntity().getWhat().setReference(patientId.toUnqualified().getValue());
+		String unqualifiedReference = patientId.toUnqualified().getValue();
+		ourLog.info("patientId: {}", patientId.getValue());
+		ourLog.info("patientId.toUnqualified(): {}", patientId.toUnqualified().getValue());
+		ourLog.info("patientId.toVersionless(): {}", patientId.toVersionless().getValue());
+		ourLog.info("patientId.toUnqualifiedVersionless(): {}", patientId.toUnqualifiedVersionless().getValue());
+		ourLog.info("Setting reference to: {}", unqualifiedReference);
+		ae.addEntity().getWhat().setReference(unqualifiedReference);
+		ourLog.info("BEFORE CREATE - AuditEvent reference: {}", ae.getEntityFirstRep().getWhat().getReference());
 		IIdType aeId = myClient.create().resource(ae).execute().getId();
+		ourLog.info("AFTER CREATE - AuditEvent reference in returned resource: {}", ae.getEntityFirstRep().getWhat().getReference());
 		assertEquals("1", aeId.getVersionIdPart());
 
 		patient = myClient.read().resource(Patient.class).withId(patientId).execute();
@@ -3622,6 +3634,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertFalse(patient.getManagingOrganization().getReferenceElement().hasVersionIdPart());
 
 		ae = myClient.read().resource(AuditEvent.class).withId(aeId.toUnqualifiedVersionless()).execute();
+
+		String reference = ae.getEntityFirstRep().getWhat().getReference();
+		IIdType referenceElement = ae.getEntityFirstRep().getWhat().getReferenceElement();
+		ourLog.info("AuditEvent reference: {}", reference);
+		ourLog.info("Reference hasIdPart: {}", referenceElement.hasIdPart());
+		ourLog.info("Reference hasVersionIdPart: {}", referenceElement.hasVersionIdPart());
+		ourLog.info("Reference getVersionIdPart: {}", referenceElement.getVersionIdPart());
+
 		assertTrue(ae.getEntityFirstRep().getWhat().getReferenceElement().hasIdPart(), ae.getEntityFirstRep().getWhat().getReference());
 		assertTrue(ae.getEntityFirstRep().getWhat().getReferenceElement().hasVersionIdPart(), ae.getEntityFirstRep().getWhat().getReference());
 	}
