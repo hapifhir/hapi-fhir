@@ -36,7 +36,7 @@ class PartitionAwareSupplierTest {
 	private static final int PARTITION_ID = 10;
 
 	@Test
-	public void testMethodFindInPartitionedContext_withRequestDetailsHavingTenantId_willExecuteOnSpecifiedPartition() {
+	void testMethodFindInPartitionedContext_withRequestDetailsHavingTenantId_willExecuteOnSpecifiedPartition() {
 		RequestDetails requestDetails = getRequestDetails();
 
 		PartitionAwareSupplier partitionAwareSupplier =
