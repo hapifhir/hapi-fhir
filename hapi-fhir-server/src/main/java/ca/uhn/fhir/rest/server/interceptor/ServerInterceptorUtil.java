@@ -65,8 +65,7 @@ public class ServerInterceptorUtil {
 						.addIfMatchesType(ServletRequestDetails.class, theRequest);
 				compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 
-				retVal = accessDetails.toList();
-				retVal.removeIf(Objects::isNull);
+				retVal = accessDetails.getAllResources();
 			}
 		}
 

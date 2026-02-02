@@ -619,7 +619,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 					.add(IPreResourceShowDetails.class, preResourceShowDetails);
 			interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, preShowParams);
-			resourcesToReturn = preResourceShowDetails.toList();
+			resourcesToReturn = preResourceShowDetails.getAllResources();
 		}
 
 		return resourcesToReturn;
