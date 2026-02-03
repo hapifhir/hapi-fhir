@@ -1,10 +1,10 @@
 # Upgrade Notes
 
-## Major Database Change Breaking Zero-Downtime 
+## Major Database Change Breaking Zero-Downtime for some Sql Server users
 This release introduces a database migration that breaks zero-downtime for a subset of users matching all the following
 criteria:
 * using SQL Server
-* upgrading from HAPI-FHIR versions 7.4.0 and later
+* the first install of HAPI-FHIR was 7.4.0 or later (i.e. 7.4, 7.6, or any 8.x release in 2025).
 * users who use or wish to use case-sensitive FHIR IDs (client-assigned resource IDs that differ only in case)
 
 ### The Issue
