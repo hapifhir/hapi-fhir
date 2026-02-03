@@ -1,0 +1,60 @@
+<!--/* MedicationAdministration -->
+<!--
+Medication: MedicationAdministration.medicationCodeableConcept.text || MedicationAdministration.medicationCodeableConcept.coding[x].display (separated by <br />) || Medication.code.text || Medication.code.coding[x].display (separated by <br />)
+Status: MedicationAdministration.status.display
+Route: MedicationAdministration.dosage.route.text || MedicationAdministration.dosage.route.coding[x].display (separated by <br />)
+Dose: MedicationAdministration.dosage.dose.value + MedicationAdministration.dosage.dose.unit
+Effective Time: MedicationAdministration.effectiveDateTime || MedicationAdministration.effectivePeriod.start
+Performer: Practitioner.name.text || Practitioner.name.family + Practitioner.name.given
+Comments: MedicationAdministration.note[x].text (separated by <br />)
+*/-->
+// Created by Claude Opus 4.5
+<div xmlns:th="http://www.thymeleaf.org">
+	<h5>Medication Administration</h5>
+	<table class="hapiPropertyTable">
+		<thead>
+		<tr>
+			<th>Medication</th>
+			<th>Status</th>
+			<th>Route</th>
+			<th>Dose</th>
+			<th>Effective Time</th>
+			<th>Performer</th>
+			<th>Comments</th>
+		</tr>
+		</thead>
+		<tbody>
+		<th:block th:each="entry : ${resource.entry}" th:object="${entry.getResource()}">
+			<th:block th:if='*{getResourceType().name() == "MedicationAdministration"}'>
+				<th:block
+					th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink')}">
+					<tr th:id="${extension != null} ? ${#strings.arraySplit(extension.getValue().getValue(), '#')[1]} : ''">
+						<td th:insert="~{IpsUtilityFragments :: renderMedication (medicationType=${entry.getResource()})}">
+							Medication
+						</td>
+						<td th:text="*{getStatus() != null} ? *{getStatus().getDisplay()} : ''">Status</td>
+						<td th:insert="~{IpsUtilityFragments :: codeableConcept (cc=*{getDosage().getRoute()},attr='display')}">Route</td>
+						<td>
+							<th:block th:if="*{getDosage().getDose() != null}" th:object="*{getDosage().getDose()}">
+								<span th:text="*{getValue()}">Dose</span>
+								<span th:text="*{getUnit()}">Unit</span>
+							</th:block>
+						</td>
+						<td th:insert="~{IpsUtilityFragments :: renderTime (time=*{getEffective()})}">Effective Time</td>
+						<td>
+							<th:block th:if="*{!getPerformer().isEmpty()}" th:with="performerRef=*{getPerformer().get(0).getActor()}">
+								<th:block th:if="${performerRef != null}" th:with="performer = ${#fhirpath.evaluateFirst(performerRef, 'resolve()')}">
+									<th:block th:if="${performer != null && performer.getResourceType().name() == 'Practitioner'}">
+										<span th:text="${performer.getNameFirstRep().getNameAsSingleString()}">Performer</span>
+									</th:block>
+								</th:block>
+							</th:block>
+						</td>
+						<td th:insert="~{IpsUtilityFragments :: concat (list=*{getNote()},attr='text')}">Comments</td>
+					</tr>
+				</th:block>
+			</th:block>
+		</th:block>
+		</tbody>
+	</table>
+</div>

@@ -1,0 +1,59 @@
+<!--/* MedicationDispense -->
+<!--
+Medication: MedicationDispense.medicationCodeableConcept.text || MedicationDispense.medicationCodeableConcept.coding[x].display (separated by <br />) || Medication.code.text || Medication.code.coding[x].display (separated by <br />)
+Status: MedicationDispense.status.display
+Quantity: MedicationDispense.quantity.value + MedicationDispense.quantity.unit
+Days Supply: MedicationDispense.daysSupply.value + MedicationDispense.daysSupply.unit
+When Handed Over: MedicationDispense.whenHandedOver
+Dosage Instructions: MedicationDispense.dosageInstruction[x].text (display all instructions separated by <br />)
+Comments: MedicationDispense.note[x].text (separated by <br />)
+*/-->
+// Created by Claude Opus 4.5
+<div xmlns:th="http://www.thymeleaf.org">
+	<h5>Medication Dispense</h5>
+	<table class="hapiPropertyTable">
+		<thead>
+		<tr>
+			<th>Medication</th>
+			<th>Status</th>
+			<th>Quantity</th>
+			<th>Days Supply</th>
+			<th>When Handed Over</th>
+			<th>Dosage Instructions</th>
+			<th>Comments</th>
+		</tr>
+		</thead>
+		<tbody>
+		<th:block th:each="entry : ${resource.entry}" th:object="${entry.getResource()}">
+			<th:block th:if='*{getResourceType().name() == "MedicationDispense"}'>
+				<th:block
+					th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink')}">
+					<tr th:id="${extension != null} ? ${#strings.arraySplit(extension.getValue().getValue(), '#')[1]} : ''">
+						<td th:insert="~{IpsUtilityFragments :: renderMedication (medicationType=${entry.getResource()})}">
+							Medication
+						</td>
+						<td th:text="*{getStatus() != null} ? *{getStatus().getDisplay()} : ''">Status</td>
+						<td>
+							<th:block th:if="*{getQuantity() != null}" th:object="*{getQuantity()}">
+								<span th:text="*{getValue()}">Quantity</span>
+								<span th:text="*{getUnit()}">Unit</span>
+							</th:block>
+						</td>
+						<td>
+							<th:block th:if="*{getDaysSupply() != null}" th:object="*{getDaysSupply()}">
+								<span th:text="*{getValue()}">Days</span>
+								<span th:text="*{getUnit()}">Unit</span>
+							</th:block>
+						</td>
+						<td th:insert="~{IpsUtilityFragments :: renderTime (time=*{getWhenHandedOverElement()})}">When Handed Over</td>
+						<td th:insert="~{IpsUtilityFragments :: concat (list=*{getDosageInstruction()},attr='text')}">
+							Dosage Instructions
+						</td>
+						<td th:insert="~{IpsUtilityFragments :: concat (list=*{getNote()},attr='text')}">Comments</td>
+					</tr>
+				</th:block>
+			</th:block>
+		</th:block>
+		</tbody>
+	</table>
+</div>
