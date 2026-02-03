@@ -745,7 +745,8 @@ public abstract class BaseTransactionProcessor {
 
 					IBaseResource resource = methodBinding.doInvokeServer(srd.getServer(), requestDetailsForEntry);
 					if (paramValues.containsKey(Constants.PARAM_SUMMARY)
-							|| paramValues.containsKey(Constants.PARAM_CONTENT)) {
+							|| paramValues.containsKey(Constants.PARAM_CONTENT)
+							|| paramValues.containsKey(Constants.PARAM_ELEMENTS)) {
 						resource = filterNestedBundle(requestDetailsForEntry, resource);
 					}
 					myVersionAdapter.setResource(nextRespEntry, resource);

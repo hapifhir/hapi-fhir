@@ -384,4 +384,53 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		assertFalse(result.isEmpty());
 	}
 
+	/**
+	 * Test for issue #6169: _elements parameter should be honored in batch bundles
+	 */
+	// Created by Claude Opus 4.5
+	@Test
+	void testBatchBundleHonorsElementsParameter() {
+		// Create a patient with multiple fields
+		Patient patient = new Patient();
+		patient.setActive(true);
+		patient.addName().setFamily("TestFamily").addGiven("TestGiven");
+		patient.setGender(AdministrativeGender.MALE);
+		patient.addAddress().setCity("TestCity").setState("TestState");
+		patient.addIdentifier().setSystem("urn:system").setValue("12345");
+		IIdType patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+
+		// Test regular GET request with _elements parameter
+		Patient regularGetPatient = myClient.read()
+			.resource(Patient.class)
+			.withId(patientId)
+			.elementsSubset("identifier")
+			.execute();
+
+		// Verify regular GET honors _elements - should only have id, meta, and identifier
+		assertThat(regularGetPatient.getName()).isEmpty();
+		assertThat(regularGetPatient.getAddress()).isEmpty();
+		assertThat(regularGetPatient.hasGender()).isFalse();
+		assertThat(regularGetPatient.getIdentifier()).hasSize(1);
+
+		// Test batch bundle with _elements parameter
+		Bundle batchBundle = new Bundle();
+		batchBundle.setType(BundleType.BATCH);
+		batchBundle.addEntry()
+			.getRequest()
+			.setMethod(HTTPVerb.GET)
+			.setUrl(patientId.getResourceType() + "/" + patientId.getIdPart() + "?_elements=identifier");
+
+		Bundle responseBundle = myClient.transaction().withBundle(batchBundle).execute();
+
+		// Verify batch GET also honors _elements
+		assertThat(responseBundle.getEntry()).hasSize(1);
+		Patient batchGetPatient = (Patient) responseBundle.getEntry().get(0).getResource();
+
+		// This should pass but currently fails - batch bundle doesn't honor _elements
+		assertThat(batchGetPatient.getName()).as("Batch bundle should filter out name field when _elements=identifier").isEmpty();
+		assertThat(batchGetPatient.getAddress()).as("Batch bundle should filter out address field when _elements=identifier").isEmpty();
+		assertThat(batchGetPatient.hasGender()).as("Batch bundle should filter out gender field when _elements=identifier").isFalse();
+		assertThat(batchGetPatient.getIdentifier()).hasSize(1);
+	}
+
 }
