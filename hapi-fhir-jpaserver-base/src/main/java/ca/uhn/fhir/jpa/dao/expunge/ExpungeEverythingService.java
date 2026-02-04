@@ -448,11 +448,11 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 							// which also lock job instances before work chunks
 							@SuppressWarnings("unchecked")
 							List<String> instanceIds = myEntityManager
-								.createQuery(
-									"SELECT e.myId FROM " + Batch2JobInstanceEntity.class.getSimpleName() + " e")
-								.setMaxResults(SearchBuilder.getMaximumPageSize() / 2)
-								.setLockMode(LockModeType.PESSIMISTIC_WRITE)
-								.getResultList();
+									.createQuery("SELECT e.myId FROM " + Batch2JobInstanceEntity.class.getSimpleName()
+											+ " e")
+									.setMaxResults(SearchBuilder.getMaximumPageSize() / 2)
+									.setLockMode(LockModeType.PESSIMISTIC_WRITE)
+									.getResultList();
 
 							if (instanceIds.isEmpty()) {
 								return 0;
