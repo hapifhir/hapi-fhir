@@ -852,7 +852,8 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 			Optional<String> idPartOpt = targetResourceIdMap.get(resourceLink.getTargetResourcePk());
 
 			if (idPartOpt == null) {
-				ourLog.warn("Cannot find id part in the target resource ID Map: {}", resourceLink.getTargetResourcePk());
+				ourLog.warn(
+						"Cannot find id part in the target resource ID Map: {}", resourceLink.getTargetResourcePk());
 				idPartOpt = Optional.empty();
 			}
 
