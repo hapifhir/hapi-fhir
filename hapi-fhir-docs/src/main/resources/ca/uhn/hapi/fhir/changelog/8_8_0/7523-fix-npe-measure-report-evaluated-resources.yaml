@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7523
+title: "Attempting to load certain IG resources in some circumstances in clinical-reasoning results in an NPE.
+        This has been fixed"
+
