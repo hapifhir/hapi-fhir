@@ -5,7 +5,7 @@
 	<parent>
 		<artifactId>hapi-deployable-pom</artifactId>
 		<groupId>ca.uhn.hapi.fhir</groupId>
-		<version>8.7.11-SNAPSHOT</version>
+		<version>8.7.12-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
