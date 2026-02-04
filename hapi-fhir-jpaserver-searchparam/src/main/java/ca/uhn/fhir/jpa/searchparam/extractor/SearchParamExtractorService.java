@@ -853,8 +853,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 
 			// DON'T REMOVE THIS CHECK:  In some circumstances, clinical-reasoning code will trigger a null value here:
 			if (idPartOpt == null) {
-				ourLog.warn(
-						"Cannot find id: {} in the target resource ID Map", resourceLink.getTargetResourcePk());
+				ourLog.warn("Cannot find id: {} in the target resource ID Map", resourceLink.getTargetResourcePk());
 				idPartOpt = Optional.empty();
 			}
 
