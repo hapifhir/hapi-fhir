@@ -130,7 +130,13 @@
 		</dependency>
 		<dependency>
 			<groupId>org.testcontainers</groupId>
+			<!-- Oracle 21	-->
 			<artifactId>testcontainers-oracle-xe</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<!-- Oracle 23	-->
+			<artifactId>testcontainers-oracle-free</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
@@ -143,7 +149,7 @@
 		<dependency>
 			<groupId>com.oracle.database.jdbc</groupId>
 			<artifactId>ojdbc11</artifactId>
-			<version>21.5.0.0</version>
+			<version>23.6.0.24.10</version>
 		</dependency>
 		<dependency>
 			<groupId>org.testcontainers</groupId>
