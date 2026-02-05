@@ -66,8 +66,9 @@ class PartitionAwareSupplierTest {
 		verify(myHapiTransactionService, times(1)).doExecute(myBuilderArgumentCaptor.capture(), any());
 		verify(myRequestPartitionHelperSvc, times(1)).determineGenericPartitionForRequest(any());
 		RequestPartitionId actualPartitionId = myBuilderArgumentCaptor.getValue().getRequestPartitionIdForTesting();
-		assertThat(actualPartitionId).isNotNull();
-		assertThat(actualPartitionId.getFirstPartitionIdOrNull()).isEqualTo(PARTITION_ID);
+		assertThat(actualPartitionId).isNotNull()
+			.extracting(RequestPartitionId::getFirstPartitionIdOrNull)
+			.isEqualTo(PARTITION_ID);
 	}
 
 	@Test

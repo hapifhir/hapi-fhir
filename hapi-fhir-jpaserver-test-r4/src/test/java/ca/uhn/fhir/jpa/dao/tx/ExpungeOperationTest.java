@@ -91,13 +91,15 @@ public class ExpungeOperationTest {
 		List<HapiTransactionService.ExecutionBuilder> methodArgumentExecutionBuilders = myBuilderArgumentCaptor.getAllValues();
 
 		List<String> requestTenantIdList = getRequestTenantIdList(methodArgumentExecutionBuilders);
-		assertThat(requestTenantIdList).hasSize(5);
-		requestTenantIdList.forEach(tenantId -> assertThat(tenantId).isEqualTo(TENANT_A));
+		assertThat(requestTenantIdList)
+			.hasSize(5)
+			.containsOnly(TENANT_A);
 
 		if (theIsDeterminePartitionIdFromRequest) {
 			List<Integer> requestPartitionIdList = getRequestPartitionIdList(methodArgumentExecutionBuilders);
-			assertThat(requestPartitionIdList).hasSize(5);
-			requestPartitionIdList.forEach(partitionId -> assertThat(partitionId).isEqualTo(PARTITION_ID));
+			assertThat(requestPartitionIdList)
+				.hasSize(5)
+				.containsOnly(PARTITION_ID);
 		}
 	}
 
@@ -142,8 +144,9 @@ public class ExpungeOperationTest {
 		List<HapiTransactionService.ExecutionBuilder> methodArgumentExecutionBuilders = myBuilderArgumentCaptor.getAllValues();
 
 		List<Integer> requestPartitionIdList = getRequestPartitionIdList(methodArgumentExecutionBuilders);
-		assertThat(requestPartitionIdList).hasSize(5);
-		requestPartitionIdList.forEach(partitionId -> assertThat(partitionId).isEqualTo(PARTITION_ID));
+		assertThat(requestPartitionIdList)
+			.hasSize(5)
+			.containsOnly(PARTITION_ID);
 	}
 
 	private List<Integer> getRequestPartitionIdList(List<HapiTransactionService.ExecutionBuilder> theExecutionBuilders) {
