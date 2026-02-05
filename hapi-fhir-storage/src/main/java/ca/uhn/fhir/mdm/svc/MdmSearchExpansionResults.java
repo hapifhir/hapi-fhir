@@ -62,7 +62,7 @@ public class MdmSearchExpansionResults {
 		return Optional.ofNullable(originalId);
 	}
 
-	public Set<IIdType> getExpandedIds(){
+	public Set<IIdType> getExpandedIds() {
 		return Set.copyOf(myExpandedIdToOriginalId.keySet());
 	}
 

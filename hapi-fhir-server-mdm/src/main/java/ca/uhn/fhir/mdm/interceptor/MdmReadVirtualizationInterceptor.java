@@ -138,7 +138,8 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
 	public void preShowResources(RequestDetails theRequestDetails, IPreResourceShowDetails theDetails) {
-		MdmSearchExpansionResults expansionResults = MdmSearchExpansionResults.getCachedExpansionResults(theRequestDetails);
+		MdmSearchExpansionResults expansionResults =
+				MdmSearchExpansionResults.getCachedExpansionResults(theRequestDetails);
 		if (expansionResults == null) {
 			// This means the PRESEARCH hook didn't save anything, which probably means
 			// no RequestDetails is available

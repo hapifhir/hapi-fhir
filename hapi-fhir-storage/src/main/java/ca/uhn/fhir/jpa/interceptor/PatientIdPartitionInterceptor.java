@@ -256,32 +256,35 @@ public class PatientIdPartitionInterceptor {
 		return provideNonPatientSpecificQueryResponse();
 	}
 
-	private void validateMultipleIdsAreAllowedOrThrow(List<String> theIdParts, RequestDetails theRequestDetails, String theParamName) {
+	private void validateMultipleIdsAreAllowedOrThrow(
+			List<String> theIdParts, RequestDetails theRequestDetails, String theParamName) {
 		boolean expectOnlyOne = true;
 		int patientIdCount = theIdParts.size();
 
-		if(patientIdCount < 2){
+		if (patientIdCount < 2) {
 			return;
 		}
 
-		MdmSearchExpansionResults expansionResults = MdmSearchExpansionResults.getCachedExpansionResults(theRequestDetails);
+		MdmSearchExpansionResults expansionResults =
+				MdmSearchExpansionResults.getCachedExpansionResults(theRequestDetails);
 
 		if (nonNull(expansionResults)) {
 			Set<IIdType> expandedPatientIds = expansionResults.getExpandedIds().stream()
-				.filter(aIIdType -> "Patient".equals(aIIdType.getResourceType()))
-				.collect(Collectors.toSet());
+					.filter(aIIdType -> "Patient".equals(aIIdType.getResourceType()))
+					.collect(Collectors.toSet());
 
 			// we are here because the searchParameter with name 'theParamName' has at least 2 id's to search
 			// ex: Observation?subject=Patient/1,Patient/2.  we are operating in PatientId partitioning mode so
 			// the only way that such scenario is acceptable is if the above search was initially invoked as a search
-			// with MDM expansion (Observation?subject:mdm=Patient/1) and expansion was performed by the {@link MdmSearchExpandingInterceptor}.
+			// with MDM expansion (Observation?subject:mdm=Patient/1) and expansion was performed by the {@link
+			// MdmSearchExpandingInterceptor}.
 			// for now, we throw an exception if what is requested and what was expanded differs.
 			expectOnlyOne = expandedPatientIds.size() != patientIdCount;
 		}
 
 		if (expectOnlyOne) {
 			throw new MethodNotAllowedException(Msg.code(1324) + "Multiple values for parameter " + theParamName
-				+ " is not supported in patient compartment mode");
+					+ " is not supported in patient compartment mode");
 		}
 	}
 
@@ -370,8 +373,7 @@ public class PatientIdPartitionInterceptor {
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private List<String> getResourceIdsForSearchParam(
-			SearchParameterMap theParams, String theParamName) {
+	private List<String> getResourceIdsForSearchParam(SearchParameterMap theParams, String theParamName) {
 		List<List<IQueryParameterType>> paramAndListForParamName = theParams.get(theParamName);
 		if (paramAndListForParamName == null) {
 			return Collections.emptyList();

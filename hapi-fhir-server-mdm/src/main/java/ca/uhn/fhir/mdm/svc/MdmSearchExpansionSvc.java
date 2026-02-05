@@ -103,7 +103,8 @@ public class MdmSearchExpansionSvc {
 			}
 		}
 
-		MdmSearchExpansionResults expansionResults = MdmSearchExpansionResults.getCachedExpansionResults(theRequestDetails);
+		MdmSearchExpansionResults expansionResults =
+				MdmSearchExpansionResults.getCachedExpansionResults(theRequestDetails);
 		if (expansionResults != null) {
 			return expansionResults;
 		}
