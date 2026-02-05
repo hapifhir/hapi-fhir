@@ -445,6 +445,30 @@ public class FhirPatchTest implements ITestDataBuilder {
 			);
 	}
 
+	@Test
+	void testFailure_PatchReplaceWithExtensionFilter() {
+		FhirPatchBuilder builder = new FhirPatchBuilder(myFhirContext);
+
+		Patient input = (Patient) buildPatient(
+			withGiven("Sunny"),
+			withFamily("Day")
+		);
+		input.addExtension()
+			.setUrl("http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName")
+			.setValue(new StringType("One"));
+
+		IBaseParameters patch = builder
+			.replace()
+			.path("Patient.extension('http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName').value")
+			.value(new StringType("Two"))
+			.andThen()
+			.build();
+
+		assertThatThrownBy(()->myPatch.apply(input, patch))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("HAPI-2761: No element matches the specified path: Patient.extension('http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName').value");
+	}
+
 	/**
 	 * Returns a list of parameters for the
 	 * patchApply_withValidParams_works test.
