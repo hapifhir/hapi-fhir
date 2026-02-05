@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.svc.MockHapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -14,9 +15,12 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionCallback;
@@ -29,12 +33,20 @@ import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class PartitionRunnerTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitionRunnerTest.class);
 	private static final String TEST_THREADNAME_1 = "test-1";
 	private static final String TEST_THREADNAME_2 = "test-2";
 	private static final String TENANT_A = "TENANT_A";
+
+	@Mock
+	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	private final PointcutLatch myLatch = new PointcutLatch("partition call");
 
@@ -69,8 +81,8 @@ public class PartitionRunnerTest {
 											   RequestDetails theRequestDetails,
 											   RequestPartitionId theRequestPartitionId) {
 		return new PartitionRunner("TEST", "test", JpaStorageSettings.DEFAULT_EXPUNGE_BATCH_SIZE,
-			Runtime.getRuntime().availableProcessors(), theTransactionService, theRequestDetails,
-			theRequestPartitionId);
+			Runtime.getRuntime().availableProcessors(), theTransactionService, myRequestPartitionHelperSvc,
+			theRequestDetails, theRequestPartitionId);
 	}
 
 	private List<IResourcePersistentId> buildPidList(int size) {
@@ -224,6 +236,39 @@ public class PartitionRunnerTest {
 		PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(myLatch.awaitExpected());
 		assertEquals("main", partitionCall.threadName);
 		assertEquals(1, partitionCall.size);
+	}
+
+	@Test
+	void runInPartitionedThreads_withPartitionHelperSvc_determinesPartitionFromRequestDetails() throws InterruptedException {
+		// setup: create requestDetails and requestPartitionId
+		RequestDetails requestDetails = new ServletRequestDetails();
+		requestDetails.setTenantId(TENANT_A);
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(2);
+		CapturingMockTxService mockTxService = new CapturingMockTxService();
+
+		// setup: create PartitionRunner and PartitionConsumer, mock determineGenericPartitionForRequest
+		when(myRequestPartitionHelperSvc.determineGenericPartitionForRequest(any())).thenReturn(requestPartitionId);
+		PartitionRunner partitionRunner = getPartitionRunner(mockTxService, requestDetails, null);
+		Consumer<List<IResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
+		myLatch.setExpectedCount(1);
+
+		// execute
+		partitionRunner.runInPartitionedThreads(buildPidList(1), partitionConsumer);
+
+		// verify partition helper was called to determine partition
+		verify(myRequestPartitionHelperSvc, times(1)).determineGenericPartitionForRequest(any());
+
+		// verify determined partition ID is used in transaction
+		assertEquals(requestPartitionId, mockTxService.getRequestPartitionId());
+
+		// verify request details are preserved
+		RequestDetails capturedRequestDetails = mockTxService.getRequestDetails();
+		assertThat(capturedRequestDetails.getTenantId()).isEqualTo(TENANT_A);
+
+		// verify the consumer was called
+		List<HookParams> calls = myLatch.awaitExpected();
+		PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
+		assertEquals("main", partitionCall.threadName);
 	}
 
 	/**
