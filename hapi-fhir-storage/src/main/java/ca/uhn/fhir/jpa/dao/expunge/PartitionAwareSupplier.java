@@ -66,7 +66,7 @@ public class PartitionAwareSupplier {
 		// use explicit partition ID if provided
 		if (myRequestPartitionId != null) {
 			executionBuilder.withRequestPartitionId(myRequestPartitionId);
-		} else if (myRequestPartitionHelperSvc != null) {
+		} else if (myRequestPartitionHelperSvc != null && myRequestDetails != null) {
 			executionBuilder.withRequestPartitionId(
 					myRequestPartitionHelperSvc.determineGenericPartitionForRequest(myRequestDetails));
 		}

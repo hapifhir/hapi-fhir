@@ -161,7 +161,7 @@ public class PartitionRunner {
 	private RequestPartitionId determineRequestPartitionId() {
 		if (myRequestPartitionId != null) {
 			return myRequestPartitionId;
-		} else if (myRequestPartitionHelperSvc != null) {
+		} else if (myRequestPartitionHelperSvc != null && myRequestDetails != null) {
 			return myRequestPartitionHelperSvc.determineGenericPartitionForRequest(myRequestDetails);
 		}
 		return null;
