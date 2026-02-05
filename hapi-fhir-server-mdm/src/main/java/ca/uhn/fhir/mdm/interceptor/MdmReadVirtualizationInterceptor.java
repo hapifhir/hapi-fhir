@@ -138,7 +138,7 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
 	public void preShowResources(RequestDetails theRequestDetails, IPreResourceShowDetails theDetails) {
-		MdmSearchExpansionResults expansionResults = MdmSearchExpansionSvc.getCachedExpansionResults(theRequestDetails);
+		MdmSearchExpansionResults expansionResults = MdmSearchExpansionResults.getCachedExpansionResults(theRequestDetails);
 		if (expansionResults == null) {
 			// This means the PRESEARCH hook didn't save anything, which probably means
 			// no RequestDetails is available
@@ -191,7 +191,7 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 						&& !referenceId.isLocal()
 						&& !referenceId.isUuid()) {
 					Optional<IIdType> nonExpandedId = expansionResults.getOriginalIdForExpandedId(referenceId);
-					if (nonExpandedId != null && nonExpandedId.isPresent()) {
+					if (nonExpandedId.isPresent()) {
 						ourMdmTroubleshootingLog.debug(
 								"MDM virtualization is replacing reference at {} value {} with {}",
 								referenceInfo.getName(),

@@ -33,7 +33,9 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
+import ca.uhn.fhir.mdm.svc.MdmSearchExpansionResults;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -61,9 +63,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.getPartitionIfAssigned;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -196,7 +201,7 @@ public class PatientIdPartitionInterceptor {
 				if (theReadDetails.getSearchParams() != null) {
 					SearchParameterMap params = theReadDetails.getSearchParams();
 					if ("Patient".equals(theReadDetails.getResourceType())) {
-						List<String> idParts = getResourceIdList(params, "_id", false);
+						List<String> idParts = getResourceIdsForSearchParam(params, "_id");
 						if (idParts.size() == 1) {
 							return provideCompartmentMemberInstanceResponse(theRequestDetails, idParts.get(0));
 						} else {
@@ -204,8 +209,17 @@ public class PatientIdPartitionInterceptor {
 						}
 					} else {
 						for (RuntimeSearchParam nextCompartmentSp : compartmentSps) {
-							List<String> idParts = getResourceIdList(params, nextCompartmentSp.getName(), true);
+							String paramName = nextCompartmentSp.getName();
+							List<String> idParts = getResourceIdsForSearchParam(params, paramName);
 							if (!idParts.isEmpty()) {
+
+								// In PatientID partitioning mode, the only way for a compartment reference SP
+								// (ex: Observation.subject, Observation.performer) to have multiple references is if
+								// we have previously performed MDM expansion across partitions
+								if (idParts.size() > 1) {
+									validateMultipleIdsAreAllowedOrThrow(idParts, theRequestDetails, paramName);
+									return RequestPartitionId.allPartitions();
+								}
 								return provideCompartmentMemberInstanceResponse(theRequestDetails, idParts.get(0));
 							}
 						}
@@ -240,6 +254,35 @@ public class PatientIdPartitionInterceptor {
 		}
 
 		return provideNonPatientSpecificQueryResponse();
+	}
+
+	private void validateMultipleIdsAreAllowedOrThrow(List<String> theIdParts, RequestDetails theRequestDetails, String theParamName) {
+		boolean expectOnlyOne = true;
+		int patientIdCount = theIdParts.size();
+
+		if(patientIdCount < 2){
+			return;
+		}
+
+		MdmSearchExpansionResults expansionResults = MdmSearchExpansionResults.getCachedExpansionResults(theRequestDetails);
+
+		if (nonNull(expansionResults)) {
+			Set<IIdType> expandedPatientIds = expansionResults.getExpandedIds().stream()
+				.filter(aIIdType -> "Patient".equals(aIIdType.getResourceType()))
+				.collect(Collectors.toSet());
+
+			// we are here because the searchParameter with name 'theParamName' has at least 2 id's to search
+			// ex: Observation?subject=Patient/1,Patient/2.  we are operating in PatientId partitioning mode so
+			// the only way that such scenario is acceptable is if the above search was initially invoked as a search
+			// with MDM expansion (Observation?subject:mdm=Patient/1) and expansion was performed by the {@link MdmSearchExpandingInterceptor}.
+			// for now, we throw an exception if what is requested and what was expanded differs.
+			expectOnlyOne = expandedPatientIds.size() != patientIdCount;
+		}
+
+		if (expectOnlyOne) {
+			throw new MethodNotAllowedException(Msg.code(1324) + "Multiple values for parameter " + theParamName
+				+ " is not supported in patient compartment mode");
+		}
 	}
 
 	/**
@@ -327,29 +370,30 @@ public class PatientIdPartitionInterceptor {
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private List<String> getResourceIdList(
-			SearchParameterMap theParams, String theParamName, boolean theExpectOnlyOneBool) {
-		List<List<IQueryParameterType>> idParamAndList = theParams.get(theParamName);
-		if (idParamAndList == null) {
+	private List<String> getResourceIdsForSearchParam(
+			SearchParameterMap theParams, String theParamName) {
+		List<List<IQueryParameterType>> paramAndListForParamName = theParams.get(theParamName);
+		if (paramAndListForParamName == null) {
 			return Collections.emptyList();
 		}
 
 		List<String> idParts = new ArrayList<>();
-		for (List<IQueryParameterType> iQueryParameterTypes : idParamAndList) {
-			for (IQueryParameterType idParam : iQueryParameterTypes) {
-				if (isNotBlank(idParam.getQueryParameterQualifier())) {
-					throw new MethodNotAllowedException(Msg.code(1322) + "The parameter " + theParamName
-							+ idParam.getQueryParameterQualifier() + " is not supported in patient compartment mode");
+		for (List<IQueryParameterType> iQueryParameterTypes : paramAndListForParamName) {
+			for (IQueryParameterType aParam : iQueryParameterTypes) {
+				String qualifier = aParam.getQueryParameterQualifier();
+				if (isNotBlank(qualifier) && !Constants.PARAMQUALIFIER_MDM.equals(qualifier)) {
+					throw new MethodNotAllowedException(Msg.code(1322) + "The parameter " + theParamName + qualifier
+							+ " is not supported in patient compartment mode");
 				}
-				if (idParam instanceof ReferenceParam) {
-					String chain = ((ReferenceParam) idParam).getChain();
+				if (aParam instanceof ReferenceParam) {
+					String chain = ((ReferenceParam) aParam).getChain();
 					if (chain != null) {
 						throw new MethodNotAllowedException(Msg.code(1323) + "The parameter " + theParamName + "."
 								+ chain + " is not supported in patient compartment mode");
 					}
 				}
 
-				String valueAsQueryToken = idParam.getValueAsQueryToken();
+				String valueAsQueryToken = aParam.getValueAsQueryToken();
 				if (Strings.CS.startsWith(valueAsQueryToken, "Patient/")) {
 					IdType id = new IdType(valueAsQueryToken);
 					if (id.getResourceType().equals("Patient")) {
@@ -362,11 +406,6 @@ public class PatientIdPartitionInterceptor {
 					}
 				}
 			}
-		}
-
-		if (theExpectOnlyOneBool && idParts.size() > 1) {
-			throw new MethodNotAllowedException(Msg.code(1324) + "Multiple values for parameter " + theParamName
-					+ " is not supported in patient compartment mode");
 		}
 
 		return idParts;
