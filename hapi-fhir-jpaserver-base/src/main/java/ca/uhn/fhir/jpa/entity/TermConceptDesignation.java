@@ -139,7 +139,6 @@ public class TermConceptDesignation extends BasePartitionable implements Seriali
 	@GenericField(name = "myCodeSystemVersionPid")
 	private Long myCodeSystemVersionPid;
 
-
 	public String getLanguage() {
 		return myLanguage;
 	}
@@ -197,6 +196,7 @@ public class TermConceptDesignation extends BasePartitionable implements Seriali
 
 	public TermConceptDesignation setCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
 		myCodeSystemVersion = theCodeSystemVersion;
+		myCodeSystemVersionPid = theCodeSystemVersion.getPid();
 		return this;
 	}
 
