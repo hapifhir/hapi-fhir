@@ -41,6 +41,7 @@ import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Length;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -120,7 +121,7 @@ public class TermConceptDesignation extends BasePartitionable implements Seriali
 			value = {
 				@JoinColumn(
 						name = "CS_VER_PID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false,
 						referencedColumnName = "PID"),
@@ -133,6 +134,11 @@ public class TermConceptDesignation extends BasePartitionable implements Seriali
 			},
 			foreignKey = @ForeignKey(name = "FK_CONCEPTDESIG_CSV"))
 	private TermCodeSystemVersion myCodeSystemVersion;
+
+	@Column(name = "CS_VER_PID", nullable = false, insertable = true, updatable = true)
+	@GenericField(name = "myCodeSystemVersionPid")
+	private Long myCodeSystemVersionPid;
+
 
 	public String getLanguage() {
 		return myLanguage;
