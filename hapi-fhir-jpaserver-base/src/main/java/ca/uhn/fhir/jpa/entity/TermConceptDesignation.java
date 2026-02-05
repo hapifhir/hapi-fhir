@@ -127,7 +127,7 @@ public class TermConceptDesignation extends BasePartitionable implements Seriali
 				@JoinColumn(
 						name = "PARTITION_ID",
 						referencedColumnName = "PARTITION_ID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false)
 			},

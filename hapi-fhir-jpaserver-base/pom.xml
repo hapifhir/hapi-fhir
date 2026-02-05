@@ -525,16 +525,18 @@
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
 				<version>${project.version}</version>
-				<executions><execution><id>generate-ddl-legacy</id>
-					<phase>process-classes</phase>
-				<goals>
-					<goal>generate-ddl</goal>
-				</goals>
-					<configuration>
-						<databasePartitionMode>false</databasePartitionMode>
-						<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/nonpartitioned</outputDirectory>
-					</configuration>
-				</execution>
+				<executions>
+					<execution>
+						<id>generate-ddl-legacy</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>generate-ddl</goal>
+						</goals>
+						<configuration>
+							<databasePartitionMode>false</databasePartitionMode>
+							<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/nonpartitioned</outputDirectory>
+						</configuration>
+					</execution>
 				<execution>
 					<id>generate-ddl-partitioned</id>
 					<phase>process-classes</phase>
