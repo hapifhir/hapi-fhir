@@ -134,6 +134,10 @@ public class TermConceptDesignation extends BasePartitionable implements Seriali
 			foreignKey = @ForeignKey(name = "FK_CONCEPTDESIG_CSV"))
 	private TermCodeSystemVersion myCodeSystemVersion;
 
+	@Column(name = "CS_VER_PID", nullable = false, insertable = true, updatable = true)
+	@GenericField(name = "myCodeSystemVersionPid")
+	private Long myCodeSystemVersionPid;
+
 	public String getLanguage() {
 		return myLanguage;
 	}
@@ -191,6 +195,7 @@ public class TermConceptDesignation extends BasePartitionable implements Seriali
 
 	public TermConceptDesignation setCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
 		myCodeSystemVersion = theCodeSystemVersion;
+		myCodeSystemVersionPid = theCodeSystemVersion.getPid();
 		return this;
 	}
 
