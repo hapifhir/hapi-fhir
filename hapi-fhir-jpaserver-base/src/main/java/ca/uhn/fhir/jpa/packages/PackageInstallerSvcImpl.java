@@ -41,6 +41,9 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -54,6 +57,7 @@ import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -375,7 +379,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
-		SearchParameterMap map = createSearchParameterMapFor(theResource);
+		SearchParameterMap map = createSearchParameterMapFor(theResource, theInstallationSpec);
 		IBundleProvider searchResult = searchResource(dao, map);
 
 		String resourceQuery = map.toNormalizedQueryString(myFhirContext);
@@ -414,62 +418,127 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			IFhirResourceDao theDao,
 			IBaseResource theResource,
 			IBaseResource theExistingResource,
-			PackageInstallationSpec thePackageInstallationSpec) {
-		final IIdType id = theResource.getIdElement();
+			@Nonnull PackageInstallationSpec thePackageInstallationSpec) {
+
+		// If the resource to be installed has a client-provided, purely numeric id,
+		// then add a prefix to the id, since we don't allow purely numeric IDs by default
+		prefixNumericIdIfNeeded(theResource);
+		setPackageMetaSource(theResource, thePackageInstallationSpec);
 
 		if (theExistingResource == null) {
-			if (!theResource.fhirType().equals(ResourceType.SearchParameter.name())) {
-				// For any resource type except SearchParameter, we will use a server-assigned ID
-				// This prevents FHIR ID conflicts for multiple versions of Conformance/Canonical resources (e.g.
-				// StructureDefinition.version)
-				// which is helpful for validation against versioned profiles.
-				// (Note: This is not to be confused with meta.versionId)
-				theResource.setId(new IdDt()); // Ignore the given ID
-				if (thePackageInstallationSpec != null) {
-					String metaSourceUrl = thePackageInstallationSpec.getName()
-							+ OUR_PIPE_CHARACTER
-							+ thePackageInstallationSpec.getVersion();
-					MetaUtil.setSource(myFhirContext, theResource, metaSourceUrl);
-				}
-			}
-
-			if (theResource.getIdElement().isEmpty()) {
-				ourLog.debug("Installing resource with a server-assigned id");
-				theDao.create(theResource, createRequestDetails());
-				return true;
-			}
-		}
-
-		if (theExistingResource == null && !id.isEmpty() && id.isIdPartValidLong()) {
-			// When using the given FHIR ID, add a prefix since we don't allow purely numeric IDs by default
-			String newIdPart = "npm-" + id.getIdPart();
-			id.setParts(id.getBaseUrl(), id.getResourceType(), newIdPart, id.getVersionIdPart());
-		}
-
-		boolean isExistingUpdated =
-				updateExistingSearchParameterBaseIfNecessary(theDao, theResource, theExistingResource);
-		// When an existing resource is found with the same URL/version, we will update this resource and force-use the
-		// old ID
-		// Except when we are updating a SearchParameter by changing its base
-		boolean shouldOverrideId = theExistingResource != null && !isExistingUpdated;
-
-		if (shouldOverrideId) {
-			ourLog.debug(
-					"Existing resource {} will be overridden with installed resource {}",
-					theExistingResource.getIdElement(),
-					id);
-			theResource.setId(theExistingResource.getIdElement().toUnqualifiedVersionless());
+			return createNewResource(theDao, theResource, thePackageInstallationSpec);
 		} else {
-			ourLog.debug("Install resource {} will be created", id);
+			return updateExistingResource(theDao, theResource, theExistingResource);
+		}
+	}
+
+	private boolean createNewResource(
+			IFhirResourceDao theDao,
+			IBaseResource theResource,
+			@Nonnull PackageInstallationSpec thePackageInstallationSpec) {
+		PackageInstallationSpec.VersionPolicyEnum versionPolicy = thePackageInstallationSpec.getVersionPolicy();
+
+		if (allowMultipleVersionsForResource(theResource, versionPolicy)) {
+			// Use a server-assigned ID to prevent FHIR ID conflicts for multiple versions of
+			// Conformance/Canonical resources (e.g. StructureDefinition.version),
+			// which is helpful for validation against versioned profiles.
+			// (Note: This is not to be confused with meta.versionId)
+			theResource.setId(new IdDt());
 		}
 
+		if (theResource.getIdElement().isEmpty()) {
+			ourLog.debug("Installing resource with server-assigned id");
+			theDao.create(theResource, createRequestDetails());
+			return true;
+		} else {
+			ourLog.debug("Installing resource {} with client-assigned ID", theResource.getIdElement());
+			DaoMethodOutcome outcome = updateResource(theDao, theResource);
+			return outcome != null && !outcome.isNop();
+		}
+	}
+
+	private boolean updateExistingResource(
+			IFhirResourceDao theDao, IBaseResource theResource, IBaseResource theExistingResource) {
+		if (isSearchParameter(theResource)) {
+			return updateExistingSearchParameter(theDao, theResource, theExistingResource);
+		} else {
+			return updateExistingNonSearchParameter(theDao, theResource, theExistingResource);
+		}
+	}
+
+	private boolean updateExistingNonSearchParameter(
+			IFhirResourceDao theDao, IBaseResource theResource, IBaseResource theExistingResource) {
+		// An existing resource is found,
+		// update this resource and force-use the old ID
+		ourLog.debug(
+				"Existing resource {} will be overridden with installed resource {}",
+				theExistingResource.getIdElement(),
+				theResource.getIdElement());
+		theResource.setId(theExistingResource.getIdElement().toUnqualifiedVersionless());
 		DaoMethodOutcome outcome = updateResource(theDao, theResource);
 		return outcome != null && !outcome.isNop();
 	}
 
+	private boolean updateExistingSearchParameter(
+			IFhirResourceDao theDao, IBaseResource theResource, IBaseResource theExistingResource) {
+		boolean wasBaseSplitAndExistingUpdated =
+				updateExistingSearchParameterBaseIfNecessary(theDao, theResource, theExistingResource);
+
+		if (wasBaseSplitAndExistingUpdated) {
+			// The incoming SP has a different ID and its base set is different from the existing SP.
+			// The existing SP was narrowed to retain only the base types NOT covered by the incoming SP.
+			// Now create the incoming SP to cover its specified base types.
+			// Use client-assigned ID if provided, otherwise server-assigned.
+			if (theResource.getIdElement().isEmpty()) {
+				ourLog.info(
+						"Creating new SearchParameter with server-assigned ID after base split (no client-assigned ID in package)");
+				theDao.create(theResource, createRequestDetails());
+				return true;
+			} else {
+				ourLog.debug("Creating new SearchParameter {} after base split", theResource.getIdElement());
+				DaoMethodOutcome outcome = updateResource(theDao, theResource);
+				return outcome != null && !outcome.isNop();
+			}
+		} else {
+			ourLog.debug("Overwriting existing SearchParameter {}", theExistingResource.getIdElement());
+			theResource.setId(theExistingResource.getIdElement().toUnqualifiedVersionless());
+			DaoMethodOutcome outcome = updateResource(theDao, theResource);
+			return outcome != null && !outcome.isNop();
+		}
+	}
+
+	private boolean isSearchParameter(IBaseResource theResource) {
+		return theResource.fhirType().equals(ResourceType.SearchParameter.name());
+	}
+
+	private boolean allowMultipleVersionsForResource(
+			IBaseResource theResource, PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) {
+		// For Search parameters don't allow multi version
+		if (isSearchParameter(theResource)) {
+			return false;
+		}
+		return theVersionPolicy == PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION;
+	}
+
+	private void setPackageMetaSource(IBaseResource theResource, PackageInstallationSpec thePackageInstallationSpec) {
+		if (thePackageInstallationSpec != null) {
+			String metaSourceUrl =
+					thePackageInstallationSpec.getName() + OUR_PIPE_CHARACTER + thePackageInstallationSpec.getVersion();
+			MetaUtil.setSource(myFhirContext, theResource, metaSourceUrl);
+		}
+	}
+
+	private void prefixNumericIdIfNeeded(IBaseResource theResource) {
+		IIdType id = theResource.getIdElement();
+		if (!id.isEmpty() && id.isIdPartValidLong()) {
+			String newIdPart = "npm-" + id.getIdPart();
+			id.setParts(id.getBaseUrl(), id.getResourceType(), newIdPart, id.getVersionIdPart());
+		}
+	}
+
 	/*
 	 * This function helps preserve the resource types in the base of an existing SP when an overriding SP's base
-	 * covers only a subset of the existing base.
+	 * differs from the existing base.
 	 *
 	 * For example, say for an existing SP,
 	 *  -  the current base is: [ResourceTypeA, ResourceTypeB]
@@ -486,7 +555,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 */
 	private boolean updateExistingSearchParameterBaseIfNecessary(
 			IFhirResourceDao theDao, IBaseResource theResource, IBaseResource theExistingResource) {
-		if (!"SearchParameter".equals(theResource.getClass().getSimpleName())) {
+		if (!isSearchParameter(theResource)) {
 			return false;
 		}
 		if (theExistingResource == null) {
@@ -659,7 +728,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 	}
 
-	private SearchParameterMap createSearchParameterMapFor(IBaseResource theResource) {
+	private SearchParameterMap createSearchParameterMapFor(IBaseResource theResource, PackageInstallationSpec theSpec) {
 		String resourceType = theResource.getClass().getSimpleName();
 		if ("NamingSystem".equals(resourceType)) {
 			String uniqueId = extractUniqeIdFromNamingSystem(theResource);
@@ -672,10 +741,22 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		} else if (resourceHasUrlElement(theResource)) {
 			SearchParameterMap retVal = SearchParameterMap.newSynchronous();
 			retVal.add("url", new UriParam(extractSimpleValueIfPresent(theResource, "url")));
-			String version = extractSimpleValueIfPresent(theResource, "version");
-			if (!version.isEmpty()) {
-				retVal.add("version", new TokenParam(version));
+			// If multiple versions are allowed, include version in search to avoid overwriting
+			PackageInstallationSpec.VersionPolicyEnum versionPolicy = theSpec.getVersionPolicy();
+			if (allowMultipleVersionsForResource(theResource, versionPolicy)) {
+				String version = extractSimpleValueIfPresent(theResource, "version");
+				if (!version.isEmpty()) {
+					retVal.add("version", new TokenParam(version));
+				}
 			}
+			// Always sort by _pid DESC for deterministic results.
+			// This is particularly important in SINGLE_VERSION mode when multiple versions
+			// already exist (e.g., user switched from MULTI_VERSION to SINGLE_VERSION) - we want
+			// to consistently update the most recently created resource.
+			// Note: _pid sorts by internal RES_ID (database sequence), not the
+			// client-visible FHIR ID (_id), ensuring true creation-order sorting
+			// regardless of whether resources have server-assigned or client-assigned IDs.
+			retVal.setSort(new SortSpec(Constants.PARAM_PID, SortOrderEnum.DESC));
 			return retVal;
 		} else {
 			TokenParam identifierToken = extractIdentifierFromOtherResourceTypes(theResource);
