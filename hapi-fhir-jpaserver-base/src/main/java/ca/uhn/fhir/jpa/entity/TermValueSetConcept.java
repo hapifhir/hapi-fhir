@@ -166,10 +166,14 @@ public class TermValueSetConcept extends BasePartitionable implements Serializab
 
 	public TermValueSetConcept setValueSet(TermValueSet theValueSet) {
 		myValueSet = theValueSet;
-		myValueSetPid = theValueSet.getId();
-		assert myValueSetPid != null;
 		setPartitionId(theValueSet.getPartitionId());
 		return this;
+	}
+	@PrePersist
+	public void prePersist() {
+		if (myValueSetPid == null) {
+			myValueSetPid = getValueSet().getId();
+		}
 	}
 
 	public int getOrder() {
