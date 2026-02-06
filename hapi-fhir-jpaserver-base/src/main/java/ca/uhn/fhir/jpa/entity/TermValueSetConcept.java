@@ -37,6 +37,7 @@ import jakarta.persistence.JoinColumns;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -165,6 +166,8 @@ public class TermValueSetConcept extends BasePartitionable implements Serializab
 
 	public TermValueSetConcept setValueSet(TermValueSet theValueSet) {
 		myValueSet = theValueSet;
+		myValueSetPid = theValueSet.getId();
+		assert myValueSetPid != null;
 		setPartitionId(theValueSet.getPartitionId());
 		return this;
 	}
