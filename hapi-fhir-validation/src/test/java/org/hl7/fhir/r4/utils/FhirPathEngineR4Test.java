@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
@@ -69,7 +70,14 @@ public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 		assertEquals("2011-01-01", ((DateTimeType) value.get(0)).getValueAsString());
 	}
 
-
+	@Test
+	public void testPathEvalulationofWhere(){
+		Extension extension = new Extension();
+		extension.setUrl("http://mysystem.com");
+		extension.setValue(new StringType("One"));
+		List<Base> value = ourCtx.newFhirPath().evaluate(extension, "where(url='http://mysystem.com').value", Base.class);
+		assertThat(value).isNotEmpty();
+	}
 
 
 	@Test
