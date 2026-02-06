@@ -38,9 +38,6 @@ public class DbpmEnabledTest extends BaseDbpmResourceProviderR5Test {
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
 
-	@Autowired
-	private IPackageInstallerSvc myIPackageInstallerSvc;
-
 	@Override
 	@BeforeEach
 	public void before() throws Exception {
