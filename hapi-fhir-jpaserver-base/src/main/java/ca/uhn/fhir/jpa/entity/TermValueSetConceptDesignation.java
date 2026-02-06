@@ -154,6 +154,8 @@ public class TermValueSetConceptDesignation extends BasePartitionable implements
 
 	public TermValueSetConceptDesignation setConcept(TermValueSetConcept theConcept) {
 		myConcept = theConcept;
+		myConceptPid= theConcept.getId();
+		assert myConceptPid != null;
 		setPartitionId(theConcept.getPartitionId());
 		return this;
 	}
