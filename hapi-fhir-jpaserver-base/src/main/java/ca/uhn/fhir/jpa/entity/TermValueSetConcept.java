@@ -87,20 +87,20 @@ public class TermValueSetConcept extends BasePartitionable implements Serializab
 				@JoinColumn(
 						name = "VALUESET_PID",
 						referencedColumnName = "PID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false),
 				@JoinColumn(
 						name = "PARTITION_ID",
 						referencedColumnName = "PARTITION_ID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TRM_VALUESET_PID"))
 	private TermValueSet myValueSet;
 
-	@Column(name = "VALUESET_PID", insertable = false, updatable = false, nullable = false)
+	@Column(name = "VALUESET_PID", insertable = true, updatable = true, nullable = false)
 	private Long myValueSetPid;
 
 	@Column(name = "INDEX_STATUS", nullable = true)

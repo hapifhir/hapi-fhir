@@ -213,6 +213,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		myParentTest.myHapiTransactionService.setTransactionPropagationWhenChangingPartitions(HapiTransactionService.DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
 	}
 
+
 	@Test
 	public void testBatch_DeleteExpungeStep() {
 		// Setup
