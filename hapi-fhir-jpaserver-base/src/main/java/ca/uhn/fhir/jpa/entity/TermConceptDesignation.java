@@ -194,7 +194,7 @@ public class TermConceptDesignation extends BasePartitionable implements Seriali
 		return this;
 	}
 
-	public TermConceptDesignation setCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
+	public TermConceptDesignation setCodeSystemVersion(@Nonnull TermCodeSystemVersion theCodeSystemVersion) {
 		myCodeSystemVersion = theCodeSystemVersion;
 		myCodeSystemVersionPid = theCodeSystemVersion.getPid();
 		return this;
