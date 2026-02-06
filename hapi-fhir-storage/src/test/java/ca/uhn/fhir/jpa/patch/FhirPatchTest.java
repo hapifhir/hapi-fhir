@@ -445,8 +445,11 @@ public class FhirPatchTest implements ITestDataBuilder {
 			);
 	}
 
-	@Test
-	void testFailure_PatchReplaceWithExtensionFilter() {
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"Patient.extension('http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName').value",
+		"Patient.extension.where(url='http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName').value"})
+	void testFailure_PatchReplaceWithExtensionFilter(String patchPath) {
 		FhirPatchBuilder builder = new FhirPatchBuilder(myFhirContext);
 
 		Patient input = (Patient) buildPatient(
@@ -459,14 +462,14 @@ public class FhirPatchTest implements ITestDataBuilder {
 
 		IBaseParameters patch = builder
 			.replace()
-			.path("Patient.extension('http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName').value")
+			.path(patchPath)
 			.value(new StringType("Two"))
 			.andThen()
 			.build();
 
 		assertThatThrownBy(()->myPatch.apply(input, patch))
 			.isInstanceOf(InvalidRequestException.class)
-			.hasMessageContaining("HAPI-2761: No element matches the specified path: Patient.extension('http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName').value");
+			.hasMessageContaining("HAPI-2761: No element matches the specified path: Patient.extension");
 	}
 
 	/**
