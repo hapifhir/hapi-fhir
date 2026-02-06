@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Nested;
  * This is a test verifying that we emit the right SQL for HAPI FHIR running in
  * full legacy mode - No partitioning, no partition IDs in PKs.
  */
-public class DbpmDisabledPartitioningDisabledTest extends BaseDbpmJpaR5Test {
+public class DbpmDisabledPartitioningDisabledTest extends BaseDbpmResourceProviderR5Test {
 
 	@Nested
 	public class MyTestDefinitions extends TestDefinitions {

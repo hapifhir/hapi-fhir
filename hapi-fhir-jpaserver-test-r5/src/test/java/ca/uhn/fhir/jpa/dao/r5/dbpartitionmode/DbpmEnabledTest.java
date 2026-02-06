@@ -6,12 +6,20 @@ import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.ClasspathUtil;
+import org.hl7.fhir.r5.model.Attachment;
+import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.Parameters;
+import org.hl7.fhir.r5.model.UriType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
+
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -24,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @TestPropertySource(properties = {
 	JpaConstants.HAPI_DATABASE_PARTITION_MODE + "=true"
 })
-public class DbpmEnabledTest extends BaseDbpmJpaR5Test {
+public class DbpmEnabledTest extends BaseDbpmResourceProviderR5Test {
 
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
@@ -41,6 +49,21 @@ public class DbpmEnabledTest extends BaseDbpmJpaR5Test {
 		initResourceTypeCacheFromConfig();
 	}
 
+	@Test
+	public void testUploadIcd10cm() {
+		byte[] packageBytes = ClasspathUtil.loadResourceAsByteArray("/icd/icd10cm_tabular_2021.xml");
+
+		Parameters respParam = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named("upload-external-code-system")
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.ICD10CM_URI))
+			.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("icd10cm_tabular_2021.xml").setData(packageBytes))
+			.execute();
+
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+	}
 
 	@Test
 	public void testIdHelperSvc_resolveResourceIdentityPid() {
