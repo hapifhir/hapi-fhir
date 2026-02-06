@@ -210,8 +210,9 @@ public class TermConceptParentChildLink implements Serializable {
 		}
 
 		// TODO GGG/JA. Eventually, this class should extend base partitionable.
-		if (myPartitionIdValue == null) {
-			getPid().myPartitionIdValue = myParent.getPartitionId().getPartitionId();
+		if (myPartitionIdValue == null && myParent != null) {
+			myPartitionIdValue = myParent.getPartitionId().getPartitionId();
+			getPid().myPartitionIdValue = myPartitionIdValue;
 		}
 	}
 

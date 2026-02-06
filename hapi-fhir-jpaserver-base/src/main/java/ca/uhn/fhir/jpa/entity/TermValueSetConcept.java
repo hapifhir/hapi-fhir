@@ -143,7 +143,7 @@ public class TermValueSetConcept extends BasePartitionable implements Serializab
 	private List<TermValueSetConceptDesignation> myDesignations;
 
 	@Transient
-	private transient Integer myHashCode;
+	private transient Integer myHashCode1;
 
 	/**
 	 * Constructor
@@ -164,7 +164,7 @@ public class TermValueSetConcept extends BasePartitionable implements Serializab
 		return myValueSet;
 	}
 
-	public TermValueSetConcept setValueSet(TermValueSet theValueSet) {
+	public TermValueSetConcept setValueSet(@Nonnull TermValueSet theValueSet) {
 		myValueSet = theValueSet;
 		setPartitionId(theValueSet.getPartitionId());
 		return this;

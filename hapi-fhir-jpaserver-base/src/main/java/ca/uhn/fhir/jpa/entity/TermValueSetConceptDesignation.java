@@ -164,7 +164,7 @@ public class TermValueSetConceptDesignation extends BasePartitionable implements
 		return myValueSet;
 	}
 
-	public TermValueSetConceptDesignation setValueSet(TermValueSet theValueSet) {
+	public TermValueSetConceptDesignation setValueSet(@Nonnull TermValueSet theValueSet) {
 		myValueSet = theValueSet;
 		myValueSetPid = theValueSet.getId();
 		assert myValueSetPid != null;
