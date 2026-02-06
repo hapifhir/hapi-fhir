@@ -2,9 +2,11 @@ package ca.uhn.fhir.jpa.dao.r5.bulkpatch;
 
 import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchProvider;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -32,6 +34,9 @@ public class BulkPatchPartitionedJobR5Test extends BaseBulkPatchR5Test {
 	@Autowired
 	private BulkPatchProvider myBulkPatchProvider = new BulkPatchProvider();
 
+	@Autowired
+	private IIdHelperService<JpaPid> myIIdHelperService;
+
 	@RegisterExtension
 	private RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(FhirContext.forR5Cached())
 		.withServer(server -> {
@@ -51,7 +56,7 @@ public class BulkPatchPartitionedJobR5Test extends BaseBulkPatchR5Test {
 		myPartitionSettings.setDefaultPartitionId(0);
 		myPartitionSettings.setUnnamedPartitionMode(true);
 
-		registerInterceptor(new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings));
+		registerInterceptor(new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry));
 
 		myFhirClient = myRestfulServerExtension.getFhirClient();
 	}
