@@ -666,6 +666,31 @@ public class FhirPatchTest implements ITestDataBuilder {
 		assertThat(((StringType) input.getExtension().get(0).getValue()).getValue()).isEqualTo("New");
 	}
 
+	@Test
+	void testReplace_ModifierExtensionFilterSyntax_StringValue() {
+		// Setup: Patient with a modifierExtension containing a string value
+		Patient input = new Patient();
+		input.addModifierExtension()
+			.setUrl("http://example.org/fhir/mod-ext")
+			.setValue(new StringType("Old"));
+
+		IBaseParameters patch = new FhirPatchBuilder(myFhirContext)
+			.replace()
+			.path("Patient.modifierExtension('http://example.org/fhir/mod-ext').value")
+			.value(new StringType("New"))
+			.andThen()
+			.build();
+
+		// Test
+		myPatch.apply(input, patch);
+
+		// Verify
+		assertThat(input.getModifierExtension()).hasSize(1);
+		Extension ext = input.getModifierExtension().get(0);
+		assertThat(ext.getUrl()).isEqualTo("http://example.org/fhir/mod-ext");
+		assertThat(((StringType) ext.getValue()).getValue()).isEqualTo("New");
+	}
+
 	/**
 	 * Returns a list of parameters for the
 	 * patchApply_withValidParams_works test.
