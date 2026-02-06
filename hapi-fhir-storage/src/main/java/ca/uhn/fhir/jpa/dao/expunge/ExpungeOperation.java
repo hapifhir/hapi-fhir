@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.IResourceVersionPersistentId;
@@ -52,6 +53,9 @@ public class ExpungeOperation<T extends IResourcePersistentId<?>, V extends IRes
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
+
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	private final String myResourceName;
 	private final T myResourceId;
@@ -140,7 +144,8 @@ public class ExpungeOperation<T extends IResourcePersistentId<?>, V extends IRes
 	}
 
 	private PartitionAwareSupplier getPartitionAwareSupplier() {
-		return new PartitionAwareSupplier(myTxService, myRequestDetails, myRequestPartitionId);
+		return new PartitionAwareSupplier(
+				myTxService, myRequestPartitionHelperSvc, myRequestDetails, myRequestPartitionId);
 	}
 
 	private PartitionRunner getPartitionRunner() {
@@ -150,6 +155,7 @@ public class ExpungeOperation<T extends IResourcePersistentId<?>, V extends IRes
 				myStorageSettings.getExpungeBatchSize(),
 				myStorageSettings.getExpungeThreadCount(),
 				myTxService,
+				myRequestPartitionHelperSvc,
 				myRequestDetails,
 				myRequestPartitionId);
 	}
@@ -188,5 +194,10 @@ public class ExpungeOperation<T extends IResourcePersistentId<?>, V extends IRes
 	@VisibleForTesting
 	public void setExpungeDaoServiceForTesting(IResourceExpungeService theIResourceExpungeService) {
 		myResourceExpungeService = theIResourceExpungeService;
+	}
+
+	@VisibleForTesting
+	public void setRequestPartitionHelperSvcForTesting(IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 	}
 }

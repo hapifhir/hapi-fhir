@@ -6,12 +6,15 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
 import ca.uhn.fhir.jpa.dao.expunge.IResourceExpungeService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.svc.MockHapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -19,8 +22,10 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
@@ -37,19 +42,27 @@ public class ExpungeOperationTest {
 	private JpaStorageSettings myStorageSettings;
 	@Mock
 	private IResourceExpungeService myIResourceExpungeService;
+	@Mock
+	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	private static final String TENANT_A = "TenantA";
 	private static final Integer PARTITION_ID = 10;
 
 	@BeforeEach
-	void beforeEach(){
+	void beforeEach() {
 		myStorageSettings = new JpaStorageSettings();
 	}
 
-	@Test
-	void testExpunge_onSpecificTenant_willPerformExpungeOnSpecificTenant() {
-		// given
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testExpunge_onSpecificTenant_willPerformExpungeOnSpecificTenant(boolean theIsDeterminePartitionIdFromRequest) {
+		// setup
 		when(myIResourceExpungeService.findHistoricalVersionsOfDeletedResources(any(), any(), anyInt())).thenReturn(List.of(JpaPid.fromId(1L)));
 		when(myIResourceExpungeService.findHistoricalVersionsOfNonDeletedResources(any(), any(), anyInt())).thenReturn(List.of(JpaPid.fromId(1L)));
+		if (theIsDeterminePartitionIdFromRequest) {
+			RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(PARTITION_ID);
+			when(myRequestPartitionHelperSvc.determineGenericPartitionForRequest(any()))
+				.thenReturn(requestPartitionId);
+		}
 		myStorageSettings.setExpungeBatchSize(5);
 
 		RequestDetails requestDetails = getRequestDetails();
@@ -61,26 +74,33 @@ public class ExpungeOperationTest {
 		expungeOperation.setHapiTransactionServiceForTesting(myHapiTransactionService);
 		expungeOperation.setStorageSettingsForTesting(myStorageSettings);
 		expungeOperation.setExpungeDaoServiceForTesting(myIResourceExpungeService);
+		expungeOperation.setRequestPartitionHelperSvcForTesting(myRequestPartitionHelperSvc);
 
+		// execute
 		expungeOperation.call();
 
 		// then
-		assertTransactionServiceWasInvokedWithTenantId(TENANT_A);
+		assertTransactionServiceWasInvokedWithTenantId(theIsDeterminePartitionIdFromRequest);
 	}
 
-	private void assertTransactionServiceWasInvokedWithTenantId(String theExpectedTenantId) {
+	private void assertTransactionServiceWasInvokedWithTenantId(boolean theIsDeterminePartitionIdFromRequest) {
 		// we have set the expungeOptions to setExpungeDeletedResources and SetExpungeOldVersions to true.
 		// as a result, we will be making 5 trips to the db.  let's make sure that each trip was done with
 		// the hapiTransaction service and that the tenantId was specified.
 		verify(myHapiTransactionService, times(5)).doExecute(myBuilderArgumentCaptor.capture(), any());
 		List<HapiTransactionService.ExecutionBuilder> methodArgumentExecutionBuilders = myBuilderArgumentCaptor.getAllValues();
 
-		boolean allMatching = methodArgumentExecutionBuilders.stream()
-			.map(HapiTransactionService.ExecutionBuilder::getRequestDetailsForTesting)
-			.map(RequestDetails::getTenantId)
-			.allMatch(theExpectedTenantId::equals);
+		List<String> requestTenantIdList = getRequestTenantIdList(methodArgumentExecutionBuilders);
+		assertThat(requestTenantIdList)
+			.hasSize(5)
+			.containsOnly(TENANT_A);
 
-		assertTrue(allMatching);
+		if (theIsDeterminePartitionIdFromRequest) {
+			List<Integer> requestPartitionIdList = getRequestPartitionIdList(methodArgumentExecutionBuilders);
+			assertThat(requestPartitionIdList)
+				.hasSize(5)
+				.containsOnly(PARTITION_ID);
+		}
 	}
 
 	private RequestDetails getRequestDetails() {
@@ -120,21 +140,28 @@ public class ExpungeOperationTest {
 		expungeOperation.call();
 
 		// verify
-		assertTransactionServiceWasInvokedWithPartitionId(PARTITION_ID);
-	}
-
-	private void assertTransactionServiceWasInvokedWithPartitionId(Integer theExpectedPartitionId) {
-		// we have set the expungeOptions to setExpungeDeletedResources and SetExpungeOldVersions to true.
-		// as a result, we will be making 5 trips to the db.  let's make sure that each trip was done with
-		// the hapiTransaction service and that the requestPartitionId was specified.
 		verify(myHapiTransactionService, times(5)).doExecute(myBuilderArgumentCaptor.capture(), any());
 		List<HapiTransactionService.ExecutionBuilder> methodArgumentExecutionBuilders = myBuilderArgumentCaptor.getAllValues();
 
-		boolean allMatching = methodArgumentExecutionBuilders.stream()
-			.map(HapiTransactionService.ExecutionBuilder::getRequestPartitionIdForTesting)
-			.map(RequestPartitionId::getFirstPartitionIdOrNull)
-			.allMatch(theExpectedPartitionId::equals);
+		List<Integer> requestPartitionIdList = getRequestPartitionIdList(methodArgumentExecutionBuilders);
+		assertThat(requestPartitionIdList)
+			.hasSize(5)
+			.containsOnly(PARTITION_ID);
+	}
 
-		assertTrue(allMatching);
+	private List<Integer> getRequestPartitionIdList(List<HapiTransactionService.ExecutionBuilder> theExecutionBuilders) {
+		return theExecutionBuilders.stream()
+			.map(HapiTransactionService.ExecutionBuilder::getRequestPartitionIdForTesting)
+			.filter(Objects::nonNull)
+			.map(RequestPartitionId::getFirstPartitionIdOrNull)
+			.collect(Collectors.toList());
+	}
+
+	private List<String> getRequestTenantIdList(List<HapiTransactionService.ExecutionBuilder> theExecutionBuilders) {
+		return theExecutionBuilders.stream()
+			.map(HapiTransactionService.ExecutionBuilder::getRequestDetailsForTesting)
+			.filter(Objects::nonNull)
+			.map(RequestDetails::getTenantId)
+			.collect(Collectors.toList());
 	}
 }
