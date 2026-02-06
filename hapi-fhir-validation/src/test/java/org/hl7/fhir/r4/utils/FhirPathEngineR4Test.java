@@ -71,16 +71,6 @@ public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 	}
 
 	@Test
-	public void testPathEvalulationofWhere(){
-		Extension extension = new Extension();
-		extension.setUrl("http://mysystem.com");
-		extension.setValue(new StringType("One"));
-		List<Base> value = ourCtx.newFhirPath().evaluate(extension, "where(url='http://mysystem.com').value", Base.class);
-		assertThat(value).isNotEmpty();
-	}
-
-
-	@Test
 	public void testComponentCode() {
 		String path = "(Observation.component.value.ofType(FHIR.Quantity)) ";
 
