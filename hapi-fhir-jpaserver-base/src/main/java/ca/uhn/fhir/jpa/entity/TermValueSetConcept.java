@@ -143,7 +143,7 @@ public class TermValueSetConcept extends BasePartitionable implements Serializab
 	private List<TermValueSetConceptDesignation> myDesignations;
 
 	@Transient
-	private transient Integer myHashCode1;
+	private transient Integer myHashCode;
 
 	/**
 	 * Constructor
