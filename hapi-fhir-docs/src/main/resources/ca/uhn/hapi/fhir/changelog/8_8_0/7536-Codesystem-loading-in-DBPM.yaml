@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7536
+backport: 6.8.5
+title: "When running in Database Partition mode (see PartitionSettings#isDatabasePartitionMode), Code System expansion would fail with a duplicate column error. This has been corrected."
