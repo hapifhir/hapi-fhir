@@ -41,7 +41,6 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
-import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.SqlQuery;
@@ -133,7 +132,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 	private final TestPartitionSelectorInterceptor myPartitionSelectorInterceptor;
 	private final boolean myIncludePartitionIdsInSql;
-	private final BaseDbpmJpaR5Test myParentTest;
+	private final BaseDbpmResourceProviderR5Test myParentTest;
 	private final boolean myIncludePartitionIdsInPks;
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
@@ -195,7 +194,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
 
-	public TestDefinitions(@Nonnull BaseDbpmJpaR5Test theParentTest, @Nonnull TestPartitionSelectorInterceptor thePartitionSelectorInterceptor, boolean theIncludePartitionIdsInSql, boolean theIncludePartitionIdsInPks) {
+	public TestDefinitions(@Nonnull BaseDbpmResourceProviderR5Test theParentTest, @Nonnull TestPartitionSelectorInterceptor thePartitionSelectorInterceptor, boolean theIncludePartitionIdsInSql, boolean theIncludePartitionIdsInPks) {
 		myParentTest = theParentTest;
 		myPartitionSelectorInterceptor = thePartitionSelectorInterceptor;
 		myIncludePartitionIdsInSql = theIncludePartitionIdsInSql;
@@ -217,6 +216,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 		myParentTest.myHapiTransactionService.setTransactionPropagationWhenChangingPartitions(HapiTransactionService.DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
 	}
+
 
 	@Test
 	public void testBatch_DeleteExpungeStep() {
@@ -1780,6 +1780,183 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	}
 
 
+	@Test
+	public void testLargeCodeSystemExpansion() {
+		String thePayload = "{\n" +
+			"  \"resourceType\": \"CodeSystem\",\n" +
+			"  \"id\": \"d9ece1b5-2ad7-498d-ba8e-d6fdd078b5fb\",\n" +
+			"  \"meta\": {\n" +
+			"    \"versionId\": \"1\",\n" +
+			"    \"lastUpdated\": \"2024-06-19T04:15:14.144+00:00\",\n" +
+			"    \"source\": \"#42cb18b4b3b718e4\"\n" +
+			"  },\n" +
+			"  \"url\": \"https://example.com/config/obs-tier-settings\",\n" +
+			"  \"version\": \"1\",\n" +
+			"  \"name\": \"obs_tier_settings\",\n" +
+			"  \"title\": \"Obs Tier Settings\",\n" +
+			"  \"status\": \"active\",\n" +
+			"  \"description\": \"Configuration for Obs Tier\",\n" +
+			"  \"compositional\": false,\n" +
+			"  \"content\": \"complete\",\n" +
+			"  \"property\": [\n" +
+			"    {\n" +
+			"      \"code\": \"name\",\n" +
+			"      \"description\": \"Name of this tier\",\n" +
+			"      \"type\": \"string\"\n" +
+			"    },\n" +
+			"    {\n" +
+			"      \"code\": \"chart\",\n" +
+			"      \"description\": \"The name of the chart to which this setting is linked\",\n" +
+			"      \"type\": \"string\"\n" +
+			"    }\n" +
+			"  ],\n" +
+			"  \"concept\": [\n" +
+			"    {\n" +
+			"      \"code\": \"red-tier\",\n" +
+			"      \"display\": \"Red Tier\",\n" +
+			"      \"designation\": [\n" +
+			"        {\n" +
+			"          \"language\": \"dev\",\n" +
+			"          \"use\": {\n" +
+			"            \"code\": \"message\"\n" +
+			"          },\n" +
+			"          \"value\": \"CALL FOR A RAPID RESPONSE (Refer to local escalation protocol) AND 1. You MUST INITIATE APPROPRIATE CLINICAL CARE 2. Remain with the patient 3. Inform the Nurse in Charge 4. Repeat observations every 5 minutes until team arrives 5. Repeat observations as indicated by the patient's condition (at least every 4 hours for a minimum of 24 hours)\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"language\": \"dev\",\n" +
+			"          \"use\": {\n" +
+			"            \"code\": \"zone-details\"\n" +
+			"          },\n" +
+			"          \"value\": \"<div class=\\\" msg-zone red-zone-msg\\\" ><p><b>IF PATIENT- REPORTED VITAL SIGN OBSERVATIONS ARE IN THE RED ZONE OF THE OBSERVATIONS CHART IN THE TELSTRA HEALTH VIRTUAL HEALTH PLATFORM (VHP), YOU MUST: </b></p><p>Review previous information in VHP and NSW Health patient health care record. If repeated vital sign observations are still in the Red Zone, contact the patient to obtain further information and validate self-measurements.</p><p><b>REFER TO YOUR LOCAL CLINICAL EMERGENCY RESPONSE SYSTEM (CERS) PROTOCOL FOR INSTRUCTIONS ON HOW TO MAKE A CALL TO ESCALATE CARE FOR YOUR PATIENT</b></p><p><b>CHECK THE HEALTH CARE RECORD FOR AN END OF LIFE CARE PLAN WHICH MAY ALTER THE MANAGEMENT OF YOUR PATIENT</b></p><p><strong>CONSIDER IF YOUR PATIENT’S DETERIORATION COULD BE DUE TO SEPSIS, A NEW ARRHYTHMIA, HYPOVOLAEMIA/HAEMORRHAGE, PULMONARY EMBOLUS/DVT, PNEUMONIA/ATELECTASIS, AN AMI, STROKE, OR AN OVERDOSE/OVER SEDATION</strong></p><p></p><p><strong>IF YOUR PATIENT HAS ANY RED ZONE OBSERVATIONS OR ADDITIONAL CRITERIA YOU MUST CALL FOR A RAPID RESPONSE (as per local CERS) <u>AND</u></strong></p><ol><li>Initiate appropriate clinical care</li><li>Inform the <strong>NURSE IN CHARGE</strong>that you have called for a <strong>RAPID RESPONSE</strong></li><li>Repeat and increase the frequency of observations, as indicated by your patient’s condition</li><li>Document an A-G assessment, reason for escalation, treatment and outcome in your patient’s health care record</li><li>Inform the Attending Medical Officer that a call was made as soon as it is practicable</li></ol><table border=\\\" 1\\\"  cellpadding=\\\" 0\\\"  cellspacing=\\\" 0\\\" ><tbody><tr><td colspan=\\\" 2\\\"  style=\\\" background-color: rgb(251, 213, 205);\\\"  valign=\\\" top\\\"  width=\\\" 283\\\" ><p><b>  *Additional RED ZONE Criteria</b></p></td></tr><tr><td style=\\\" background-color: rgb(253, 152, 131);\\\"  valign=\\\" top\\\"  width=\\\" 283\\\" ><ul><li>Cardiac or respiratory arrest</li><li>Airway obstruction or stridor</li><li>Patient unresponsive</li></ul></td><td rowspan=\\\" 2\\\"  style=\\\" background-color: rgb(251, 213, 205);\\\"  valign=\\\" top\\\"  width=\\\" 318\\\" ><ul><li>Sudden decrease in Level of Consciousness (a drop of 2 or more points on the GCS)</li><li>Seizures</li><li>Low urine output persistent for 8 hours (< 200mLs over 8 hours or < 0.5mL/kg/hr via an IDC)</li><li>Blood Glucose Level < 4mmol/L or > 20mmol/L with a decreased Level of Consciousness</li><li>Lactate ≥ 4mmol/L</li><li><strong>Serious concern by any patient or family member </strong></li><li><strong>Serious concern by you or any staff member</strong></li></ul></td></tr><tr><td style=\\\" background-color: rgb(251, 213, 205);\\\"  valign=\\\" top\\\"  width=\\\" 283\\\" ><ul><li>Deterioration not reversed within 1 hour of Clinical Review</li><li>Increasing oxygen requirements to maintain oxygen saturation > 90%</li><li>Arterial Blood Gas: PaO2 < 60 or PaCO2 > 60 or pH < 7.2 or BE < -5</li><li>Venous Blood Gas: PvCO2 > 65 or pH < 7.2</li><li>Only responds to Pain (P) on the AVPU scale</li></ul></td></tr></tbody></table></div>\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"language\": \"dev\",\n" +
+			"          \"use\": {\n" +
+			"            \"code\": \"display-name\"\n" +
+			"          },\n" +
+			"          \"value\": \"Red Zone\"\n" +
+			"        }\n" +
+			"      ],\n" +
+			"      \"property\": [\n" +
+			"        {\n" +
+			"          \"code\": \"name\",\n" +
+			"          \"valueString\": \"red-tier\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"code\": \"chart\",\n" +
+			"          \"valueString\": \"Vitals Signs\"\n" +
+			"        }\n" +
+			"      ]\n" +
+			"    },\n" +
+			"    {\n" +
+			"      \"code\": \"yellow-tier\",\n" +
+			"      \"display\": \"Yellow Tier\",\n" +
+			"      \"designation\": [\n" +
+			"        {\n" +
+			"          \"language\": \"dev\",\n" +
+			"          \"use\": {\n" +
+			"            \"code\": \"message\"\n" +
+			"          },\n" +
+			"          \"value\": \"INITIATE CLINICAL REVIEW CONSULT PROMPTLY WITH THE NURSE IN CHARGE. ASSESS IF A CLINCIAL REVIEW IS NEEDED AND REFER TO YOUR LOCAL ESCALATION PROTOCOL 1.  Initiate clinical care 2.  Repeat and record observations within at least 30 minutes 3.  Activate your local rapid response if clinical review has not been completed within 30 minutes\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"language\": \"dev\",\n" +
+			"          \"use\": {\n" +
+			"            \"code\": \"zone-details\"\n" +
+			"          },\n" +
+			"          \"value\": \"<div class=\\\"msg-zone yellow-zone-msg\\\"><h1>Clinical Review Criteria</h1><h4>Response Criteria:</h4><div><br/><ul><li>Any observation in the yellow zone</li><li>Stridor or respiratory difficulty</li><li>Excess or increasing blood loss</li><li>New, increasing or uncontrolled pain (including chest pain)</li><li>Protracted nausea</li><li>Decrease level of consciousness</li><li>Inadequate urine output < 30 ml/hr</li></ul></div><h4>Action Required:</h4><ul><li>Notify anaesthetist / surgeon</li><li>If you called for a Clinical Review and it has not been attended within 30 minutes, you <strong>MUST</strong> ACTIVATE YOUR LOCAL RAPID RESPONSE</li><li>If the patient's observations enter the RED Zone while you are waiting for a Clinical Review, you <strong>MUST</strong> ACTIVATE YOUR LOCAL RAPID RESPONSE (see below)</li><li>You may call for a Clinical Review at any time if worried about a patient</li></ul></div>\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"language\": \"dev\",\n" +
+			"          \"use\": {\n" +
+			"            \"code\": \"display-name\"\n" +
+			"          },\n" +
+			"          \"value\": \"Yellow Zone\"\n" +
+			"        }\n" +
+			"      ],\n" +
+			"      \"property\": [\n" +
+			"        {\n" +
+			"          \"code\": \"name\",\n" +
+			"          \"valueString\": \"yellow-tier\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"code\": \"chart\",\n" +
+			"          \"valueString\": \"Vitals Signs\"\n" +
+			"        }\n" +
+			"      ]\n" +
+			"    },\n" +
+			"    {\n" +
+			"      \"code\": \"blue-tier\",\n" +
+			"      \"display\": \"Blue Tier\",\n" +
+			"      \"designation\": [\n" +
+			"        {\n" +
+			"          \"language\": \"dev\",\n" +
+			"          \"use\": {\n" +
+			"            \"code\": \"message\"\n" +
+			"          },\n" +
+			"          \"value\": \"INCREASE OBSERVATIONS FREQUENCY YOU MUST INCREASE THE FREQUENCY OF OBSERVATIONS AS CLINICALLY APPROPRIATE, AND 1. You MUST initiate appropriate clinical care 2. Manage anxiety, pain and review oxygenation in consultation with the nurse in charge 3. You may call for a Clinical Review or Rapid Response at any time if worried about a patient or are unsure whether to call\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"language\": \"dev\",\n" +
+			"          \"use\": {\n" +
+			"            \"code\": \"zone-details\"\n" +
+			"          },\n" +
+			"          \"value\": \"<div class=\\\"msg-zone blue-zone-msg\\\"><h1>BLUE ZONE RESPONSE</h1><ul><li>Initiate appropriate clinical care</li><li>Repeat and increase the frequency of observations as indicated by your patient's conditions</li><li>Consider whether there is an adverse trend in other observation</li></ul></div>\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"language\": \"dev\",\n" +
+			"          \"use\": {\n" +
+			"            \"code\": \"display-name\"\n" +
+			"          },\n" +
+			"          \"value\": \"Blue Zone\"\n" +
+			"        }\n" +
+			"      ],\n" +
+			"      \"property\": [\n" +
+			"        {\n" +
+			"          \"code\": \"name\",\n" +
+			"          \"valueString\": \"blue-tier\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"code\": \"chart\",\n" +
+			"          \"valueString\": \"Vitals Signs\"\n" +
+			"        }\n" +
+			"      ]\n" +
+			"    },\n" +
+			"    {\n" +
+			"      \"code\": \"normal-tier\",\n" +
+			"      \"display\": \"Normal Tier\",\n" +
+			"      \"designation\": [\n" +
+			"        {\n" +
+			"          \"language\": \"dev\",\n" +
+			"          \"use\": {\n" +
+			"            \"code\": \"display-name\"\n" +
+			"          },\n" +
+			"          \"value\": \"Normal Zone\"\n" +
+			"        }\n" +
+			"      ],\n" +
+			"      \"property\": [\n" +
+			"        {\n" +
+			"          \"code\": \"name\",\n" +
+			"          \"valueString\": \"normal-tier\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"code\": \"chart\",\n" +
+			"          \"valueString\": \"Vitals Signs\"\n" +
+			"        }\n" +
+			"      ]\n" +
+			"    }\n" +
+			"  ]\n" +
+			"}";
+		CodeSystem codeSystem = myFhirCtx.newJsonParser().parseResource(CodeSystem.class, thePayload);
+
+		//When:
+		myCodeSystemDao.create(codeSystem, new SystemRequestDetails());
+
+		//Then: that this does not throw any exceptions
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+
+	}
 	@Test
 	public void testValuesetExpansion_IncludePreExpandedVsWithFilter() {
 		// Setup

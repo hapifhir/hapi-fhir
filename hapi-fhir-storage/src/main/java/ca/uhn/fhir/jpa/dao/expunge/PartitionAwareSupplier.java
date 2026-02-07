@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -37,9 +38,12 @@ public class PartitionAwareSupplier {
 	private final HapiTransactionService myTransactionService;
 	private final RequestDetails myRequestDetails;
 	private final RequestPartitionId myRequestPartitionId;
+	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	/**
 	 * @param theTxService The transaction service for transaction management
+	 * @param theRequestPartitionHelperSvc The partition helper service used to determine partition from request details
+	 *                                     when theRequestPartitionId is null.
 	 * @param theRequestDetails The request details to use for transaction context
 	 * @param theRequestPartitionId The partition ID to use for all operations. When provided, this
 	 *                              overrides any partition that would be determined from theRequestDetails.
@@ -47,9 +51,11 @@ public class PartitionAwareSupplier {
 	 */
 	public PartitionAwareSupplier(
 			HapiTransactionService theTxService,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
 			RequestDetails theRequestDetails,
 			@Nullable RequestPartitionId theRequestPartitionId) {
 		myTransactionService = theTxService;
+		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 		myRequestDetails = theRequestDetails;
 		myRequestPartitionId = theRequestPartitionId;
 	}
@@ -60,6 +66,9 @@ public class PartitionAwareSupplier {
 		// use explicit partition ID if provided
 		if (myRequestPartitionId != null) {
 			executionBuilder.withRequestPartitionId(myRequestPartitionId);
+		} else if (myRequestPartitionHelperSvc != null && myRequestDetails != null) {
+			executionBuilder.withRequestPartitionId(
+					myRequestPartitionHelperSvc.determineGenericPartitionForRequest(myRequestDetails));
 		}
 		T retVal = executionBuilder.execute(tx -> theResourcePersistentIdSupplier.get());
 
