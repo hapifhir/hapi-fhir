@@ -502,7 +502,7 @@ public class FhirPatch {
 					replaceSingleValue(theFhirPath, theParsedFhirPath, ct, theReplacementValue, theOutcome);
 				} else if (!Objects.equals(target.fhirType(), source.fhirType())) {
 					ourLog.debug(
-							"source and target types do not match ({} vs {}) ", source.fhirType(), target.fhirType());
+							"source and target types do not match ({} vs {})", source.fhirType(), target.fhirType());
 					setChoiceTargetValue(theTargetChildDefinition, theReplacementValue);
 
 				} else {
