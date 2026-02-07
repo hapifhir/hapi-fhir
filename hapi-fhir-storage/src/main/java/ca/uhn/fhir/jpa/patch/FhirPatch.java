@@ -500,6 +500,11 @@ public class FhirPatch {
 					// there's subchildren (possibly we're setting an 'extension' value
 					FhirPathChildDefinition ct = findChildDefinitionAtEndOfPath(theTargetChildDefinition);
 					replaceSingleValue(theFhirPath, theParsedFhirPath, ct, theReplacementValue, theOutcome);
+				} else if (!Objects.equals(target.fhirType(), source.fhirType())) {
+					ourLog.debug(
+							"source and target types do not match ({} vs {}) ", source.fhirType(), target.fhirType());
+					setChoiceTargetValue(theTargetChildDefinition, theReplacementValue);
+
 				} else {
 					if (theTargetChildDefinition.getBaseRuntimeDefinition() != null
 							&& !theTargetChildDefinition
@@ -511,18 +516,7 @@ public class FhirPatch {
 					}
 
 					// the primitive can have multiple value types
-					BaseRuntimeElementDefinition<?> parentEl =
-							theTargetChildDefinition.getParent().getElementDefinition();
-					String childFhirPath = theTargetChildDefinition.getFhirPath();
-
-					BaseRuntimeChildDefinition choiceTarget = parentEl.getChildByName(childFhirPath);
-					if (choiceTarget == null) {
-						// possibly a choice type
-						choiceTarget = parentEl.getChildByName(childFhirPath + "[x]");
-					}
-					choiceTarget
-							.getMutator()
-							.setValue(theTargetChildDefinition.getParent().getBase(), theReplacementValue);
+					setChoiceTargetValue(theTargetChildDefinition, theReplacementValue);
 				}
 			}
 			return;
@@ -591,6 +585,20 @@ public class FhirPatch {
 			// a single element
 			runtimeDef.getMutator().setValue(containingElement, theReplacementValue);
 		}
+	}
+
+	private void setChoiceTargetValue(FhirPathChildDefinition theTargetChildDefinition, IBase theReplacementValue) {
+		// the primitive can have multiple value types
+		BaseRuntimeElementDefinition<?> parentEl =
+				theTargetChildDefinition.getParent().getElementDefinition();
+		String childFhirPath = theTargetChildDefinition.getFhirPath();
+
+		BaseRuntimeChildDefinition choiceTarget = parentEl.getChildByName(childFhirPath);
+		if (choiceTarget == null) {
+			// possibly a choice type
+			choiceTarget = parentEl.getChildByName(childFhirPath + "[x]");
+		}
+		choiceTarget.getMutator().setValue(theTargetChildDefinition.getParent().getBase(), theReplacementValue);
 	}
 
 	private List<IBase> applySubsettingFilter(
