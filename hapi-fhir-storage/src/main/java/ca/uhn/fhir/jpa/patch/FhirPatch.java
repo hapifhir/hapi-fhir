@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildPrimitiveDatatypeDefinition;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.Msg;
@@ -501,9 +502,16 @@ public class FhirPatch {
 					FhirPathChildDefinition ct = findChildDefinitionAtEndOfPath(theTargetChildDefinition);
 					replaceSingleValue(theFhirPath, theParsedFhirPath, ct, theReplacementValue, theOutcome);
 				} else {
-					ourLog.debug(
-							"source and target types do not match ({} vs {})", source.fhirType(), target.fhirType());
-					// the primitive can have multiple value types
+					BaseRuntimeChildDefinition runtimeDef = theTargetChildDefinition.getBaseRuntimeDefinition();
+					if (runtimeDef != null
+							&& !runtimeDef.isMultipleCardinality()
+							&& !(runtimeDef instanceof RuntimeChildChoiceDefinition)) {
+						// non-choice, single-cardinality: lenient string assignment
+						target.setValueAsString(source.getValueAsString());
+						return;
+					}
+
+					// choice type - the primitive can have multiple value types
 					BaseRuntimeElementDefinition<?> parentEl =
 							theTargetChildDefinition.getParent().getElementDefinition();
 					String childFhirPath = theTargetChildDefinition.getFhirPath();
