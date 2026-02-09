@@ -29,6 +29,8 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -39,6 +41,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.storage.PreviousVersionReader;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
@@ -89,16 +92,21 @@ public class PatientIdPartitionInterceptor {
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+
 	/**
 	 * Constructor
 	 */
 	public PatientIdPartitionInterceptor(
 			FhirContext theFhirContext,
 			ISearchParamExtractor theSearchParamExtractor,
-			PartitionSettings thePartitionSettings) {
+			PartitionSettings thePartitionSettings,
+			DaoRegistry theDaoRegistry) {
 		myFhirContext = theFhirContext;
 		mySearchParamExtractor = theSearchParamExtractor;
 		myPartitionSettings = thePartitionSettings;
+		myDaoRegistry = theDaoRegistry;
 	}
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
@@ -120,17 +128,39 @@ public class PatientIdPartitionInterceptor {
 			}
 			return provideCompartmentMemberInstanceResponse(theRequestDetails, idElement.getIdPart());
 		} else {
+
+			IBaseResource resource = theResource;
+			if (theResource.isDeleted()) {
+				// when a resource is deleted, the current version of the deleted resource is empty
+				// and will definitely not have references to a patient.  in order to determine the
+				// patient compartment of a deleted resource, we need to get its previous version.
+				resource = getPreviousVersion(theResource);
+			}
+
 			Optional<String> oCompartmentIdentity = ResourceCompartmentUtil.getResourceCompartment(
-					"Patient", theResource, compartmentSps, mySearchParamExtractor);
+					"Patient", resource, compartmentSps, mySearchParamExtractor);
 
 			if (oCompartmentIdentity.isPresent()) {
 				return provideCompartmentMemberInstanceResponse(theRequestDetails, oCompartmentIdentity.get());
 			} else {
-				return getPartitionViaPartiallyProcessedReference(theRequestDetails, theResource)
-						// or give up and fail
-						.orElseGet(() -> throwNonCompartmentMemberInstanceFailureResponse(theResource));
+
+				Optional<RequestPartitionId> partitionIdOptional =
+						getPartitionViaPartiallyProcessedReference(theRequestDetails, theResource);
+
+				// hopefully, we were able to get a requestPartitionId.  if not, let's be lenient and store the resource
+				// in the default partition.
+				return partitionIdOptional.orElse(RequestPartitionId.defaultPartition(myPartitionSettings));
 			}
 		}
+	}
+
+	private IBaseResource getPreviousVersion(IBaseResource theResource) {
+		IFhirResourceDao<IBaseResource> resourceDao = myDaoRegistry.getResourceDao(theResource);
+		PreviousVersionReader<IBaseResource> reader = new PreviousVersionReader<>(resourceDao);
+
+		Optional<IBaseResource> oPreviousVersion = reader.readPreviousVersion(theResource);
+
+		return oPreviousVersion.orElse(theResource);
 	}
 
 	/**

@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.interceptor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -13,17 +14,24 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(MockitoExtension.class)
 class PatientIdPartitionInterceptorTest {
 
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 	private PatientIdPartitionInterceptor mySvc;
+
+	@Mock
+	private DaoRegistry myDaoRegistry;
 
 	@BeforeEach
 	void beforeEach() {
@@ -31,7 +39,7 @@ class PatientIdPartitionInterceptorTest {
 		StorageSettings storageSettings = new StorageSettings();
 		PartitionSettings partitionSettings = new PartitionSettings();
 		ISearchParamExtractor searchParamExtractor = new SearchParamExtractorR4(storageSettings, partitionSettings, myFhirContext, searchParamRegistry);
-		mySvc = new PatientIdPartitionInterceptor(myFhirContext, searchParamExtractor, partitionSettings);
+		mySvc = new PatientIdPartitionInterceptor(myFhirContext, searchParamExtractor, partitionSettings, myDaoRegistry);
 	}
 
 	@ParameterizedTest
