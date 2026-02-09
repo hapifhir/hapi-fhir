@@ -145,7 +145,6 @@ public class SubscriptionActivatingListener implements IMessageListener<Resource
 	private boolean activateSubscription(final IBaseResource theSubscription) {
 		IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
 		IBaseResource subscription = null;
-
 		try {
 			// read can throw ResourceGoneException
 			// if this happens, we will treat this as a failure to activate
