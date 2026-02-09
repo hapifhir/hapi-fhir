@@ -61,7 +61,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.URL_TOKEN_METADATA;
-import static ca.uhn.fhir.rest.server.interceptor.consent.ConsentConstants.USER_DATA_SHOULD_SKIP_CONSENT_FOR_SYSTEM_OPERATIONS;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_META;
 
 /**
@@ -586,15 +585,14 @@ public class ConsentInterceptor {
 		return retVal;
 	}
 
-	private boolean isSkipServiceForRequest(RequestDetails theRequestDetails) {
+	/**
+	 * Determine if consent verification should be skipped for the current request of type {@link RequestDetails}.
+	 * @param theRequestDetails the request details
+	 * @return true if consent should be skipped, false otherwise
+	 */
+	protected boolean isSkipServiceForRequest(RequestDetails theRequestDetails) {
 		// TODO MM: we could potentially aggregate all checks to skip consent into a single method
 		// isRequestAuthorized, isAllowListed into isSkipServiceForRequest
-		if (Boolean.TRUE.equals(theRequestDetails
-				.getUserData()
-				.getOrDefault(USER_DATA_SHOULD_SKIP_CONSENT_FOR_SYSTEM_OPERATIONS, Boolean.FALSE))) {
-
-			return true;
-		}
 		return isMetadataPath(theRequestDetails) || isMetaOperation(theRequestDetails);
 	}
 
