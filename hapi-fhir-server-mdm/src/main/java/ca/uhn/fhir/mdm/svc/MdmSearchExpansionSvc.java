@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class MdmSearchExpansionSvc {
@@ -63,7 +64,6 @@ public class MdmSearchExpansionSvc {
 	@Autowired
 	private MdmExpandersHolder myMdmExpandersHolder;
 
-	@Autowired
 	private IMdmSettings myMdmSettings;
 
 	/**
@@ -115,7 +115,7 @@ public class MdmSearchExpansionSvc {
 		// When search_all_partition is enabled, MDM expansion should search across all partitions
 		// This is essential for PATIENT_ID partition mode where each patient exists in its own partition
 		final RequestPartitionId requestPartitionId;
-		if (myMdmSettings.getSearchAllPartitionForMatch()) {
+		if (shouldSearchAllPartitionForMatch()) {
 			requestPartitionId = RequestPartitionId.allPartitions();
 		} else {
 			requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
@@ -144,6 +144,10 @@ public class MdmSearchExpansionSvc {
 		theRequestDetails.getUserData().put(QUERY_STRING, queryString);
 
 		return expansionResults;
+	}
+
+	private boolean shouldSearchAllPartitionForMatch() {
+		return nonNull(myMdmSettings) ? myMdmSettings.getSearchAllPartitionForMatch() : false;
 	}
 
 	private void expandAnyReferenceParameters(
