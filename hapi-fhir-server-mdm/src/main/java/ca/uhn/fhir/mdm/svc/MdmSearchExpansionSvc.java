@@ -305,7 +305,7 @@ public class MdmSearchExpansionSvc {
 		boolean shouldExpand(String theParamName, BaseParam theParam);
 	}
 
-	public void setMdmSettings(@Nonnull IMdmSettings theMdmSettings) {
+	public void setMdmSettings(IMdmSettings theMdmSettings) {
 		myMdmSettings = theMdmSettings;
 	}
 }
