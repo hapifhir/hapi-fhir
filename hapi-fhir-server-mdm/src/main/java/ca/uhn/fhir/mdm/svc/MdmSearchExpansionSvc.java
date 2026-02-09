@@ -39,6 +39,7 @@ import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
+import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -112,15 +113,8 @@ public class MdmSearchExpansionSvc {
 
 		expansionResults = new MdmSearchExpansionResults();
 
-		// When search_all_partition is enabled, MDM expansion should search across all partitions
-		// This is essential for PATIENT_ID partition mode where each patient exists in its own partition
-		final RequestPartitionId requestPartitionId;
-		if (shouldSearchAllPartitionForMatch()) {
-			requestPartitionId = RequestPartitionId.allPartitions();
-		} else {
-			requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-					theRequestDetails, theRequestDetails.getResourceName(), theSearchParameterMap);
-		}
+		final RequestPartitionId requestPartitionId =
+				determineReadPartitionForSearch(theRequestDetails, theSearchParameterMap);
 
 		for (Map.Entry<String, List<List<IQueryParameterType>>> set : theSearchParameterMap.entrySet()) {
 			String paramName = set.getKey();
@@ -146,8 +140,24 @@ public class MdmSearchExpansionSvc {
 		return expansionResults;
 	}
 
+	private RequestPartitionId determineReadPartitionForSearch(
+			RequestDetails theRequestDetails, SearchParameterMap theSearchParameterMap) {
+		RequestPartitionId retVal;
+
+		// When search_all_partition is enabled, MDM expansion should search across all partitions
+		// This is essential for PATIENT_ID partition mode where each patient exists in its own partition
+		if (shouldSearchAllPartitionForMatch()) {
+			retVal = RequestPartitionId.allPartitions();
+		} else {
+			retVal = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+					theRequestDetails, theRequestDetails.getResourceName(), theSearchParameterMap);
+		}
+
+		return retVal;
+	}
+
 	private boolean shouldSearchAllPartitionForMatch() {
-		return nonNull(myMdmSettings) ? myMdmSettings.getSearchAllPartitionForMatch() : false;
+		return nonNull(myMdmSettings) && myMdmSettings.getSearchAllPartitionForMatch();
 	}
 
 	private void expandAnyReferenceParameters(
@@ -183,7 +193,8 @@ public class MdmSearchExpansionSvc {
 
 					// Rebuild the search param list.
 					if (!expandedResourceIds.isEmpty()) {
-						ourLog.debug("Parameter has been expanded to: {}", String.join(", ", expandedResourceIds));
+						ourLog.atLevel(Level.DEBUG)
+								.log("Parameter has been expanded to: {}", String.join(", ", expandedResourceIds));
 						toRemove.add(refParam);
 						for (String resourceId : expandedResourceIds) {
 							IIdType nextReference =
@@ -239,8 +250,7 @@ public class MdmSearchExpansionSvc {
 		IIdType id;
 		Creator<? extends IQueryParameterType> creator;
 		boolean mdmExpand = false;
-		if (theIdParameter instanceof TokenParam) {
-			TokenParam param = (TokenParam) theIdParameter;
+		if (theIdParameter instanceof TokenParam param) {
 			mdmExpand = theParamTester.shouldExpand(IAnyResource.SP_RES_ID, param);
 			String value = param.getValue();
 			value = addResourceTypeIfNecessary(theResourceName, value);
