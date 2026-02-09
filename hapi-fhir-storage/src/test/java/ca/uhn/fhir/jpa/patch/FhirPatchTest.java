@@ -9,6 +9,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Appointment;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -689,6 +690,27 @@ public class FhirPatchTest implements ITestDataBuilder {
 		Extension ext = input.getModifierExtension().get(0);
 		assertThat(ext.getUrl()).isEqualTo("http://example.org/fhir/mod-ext");
 		assertThat(((StringType) ext.getValue()).getValue()).isEqualTo("New");
+	}
+
+	@Test
+	public void testReplace_ChoiceType() {
+		// Setup: Patient with a choice type element (deceased[x]) initially set to a dateTime value
+		Patient input = new Patient();
+		input.setDeceased(new DateTimeType("2025-01-01"));
+
+		IBaseParameters patch = new FhirPatchBuilder(myFhirContext)
+			.replace()
+			.path("Patient.deceased")
+			.value(new BooleanType(true))
+			.andThen()
+			.build();
+
+		// Test
+		myPatch.apply(input, patch);
+
+		// Verify
+		assertThat(input.getDeceased()).isInstanceOf(BooleanType.class);
+		assertThat(((BooleanType) input.getDeceased()).getValue()).isTrue();
 	}
 
 	/**
