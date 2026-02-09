@@ -36,7 +36,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.interceptor.consent.ConsentConstants;
+import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -158,9 +158,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		SystemRequestDetails systemRequestDetails =
 				new SystemRequestDetails().setRequestPartitionId(retVal.getPartitionId());
 		// Consent has already been checked when the resource was created/updated, so bypass it this time
-		systemRequestDetails
-				.getUserData()
-				.put(ConsentConstants.USER_DATA_SHOULD_SKIP_CONSENT_FOR_SYSTEM_OPERATIONS, true);
+		ConsentInterceptor.skipAllConsentForRequest(systemRequestDetails);
 
 		IdDt resourceIdDt = createIdDtFromResourceModifiedEntity(theResourceModifiedEntity);
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);

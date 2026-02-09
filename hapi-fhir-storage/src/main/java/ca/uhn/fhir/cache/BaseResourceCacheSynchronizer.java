@@ -34,7 +34,7 @@ import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.interceptor.consent.ConsentConstants;
+import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.util.IResourceRepositoryCache;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
@@ -95,9 +95,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 
 		mySystemRequestDetails = SystemRequestDetails.forAllPartitions();
 		// bypass consent checks for reading Subscription resources since this is a system action
-		mySystemRequestDetails
-				.getUserData()
-				.put(ConsentConstants.USER_DATA_SHOULD_SKIP_CONSENT_FOR_SYSTEM_OPERATIONS, true);
+		ConsentInterceptor.skipAllConsentForRequest(mySystemRequestDetails);
 	}
 
 	/**

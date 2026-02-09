@@ -29,11 +29,10 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.interceptor.consent.ConsentConstants;
+import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
@@ -150,7 +149,7 @@ public class SubscriptionActivatingListener implements IMessageListener<Resource
 			// if this happens, we will treat this as a failure to activate
 
 			SystemRequestDetails srdForRead = SystemRequestDetails.forAllPartitions();
-			setSkipConsentForRequest(srdForRead);
+			ConsentInterceptor.skipAllConsentForRequest(srdForRead);
 			subscription = subscriptionDao.read(theSubscription.getIdElement(), srdForRead);
 			subscription.setId(subscription.getIdElement().toVersionless());
 
@@ -164,7 +163,7 @@ public class SubscriptionActivatingListener implements IMessageListener<Resource
 			RequestPartitionId partitionId =
 					(RequestPartitionId) subscription.getUserData(Constants.RESOURCE_PARTITION_ID);
 			SystemRequestDetails srdForUpdate = new SystemRequestDetails().setRequestPartitionId(partitionId);
-			setSkipConsentForRequest(srdForUpdate);
+			ConsentInterceptor.skipAllConsentForRequest(srdForUpdate);
 			subscriptionDao.update(subscription, srdForUpdate);
 			return true;
 		} catch (final UnprocessableEntityException | ResourceGoneException e) {
@@ -175,17 +174,10 @@ public class SubscriptionActivatingListener implements IMessageListener<Resource
 			SubscriptionUtil.setReason(myFhirContext, subscription, e.getMessage());
 
 			SystemRequestDetails srd = SystemRequestDetails.forAllPartitions();
-			setSkipConsentForRequest(srd);
-			// bypass consent checking for Subscription resource activation since it is a system action
-			srd.getUserData().put(ConsentConstants.USER_DATA_SHOULD_SKIP_CONSENT_FOR_SYSTEM_OPERATIONS, true);
+			ConsentInterceptor.skipAllConsentForRequest(srd);
 			subscriptionDao.update(subscription, srd);
 			return false;
 		}
-	}
-
-	private void setSkipConsentForRequest(RequestDetails theRequestDetails) {
-		// bypass consent checking for Subscription resources creation and activation
-		theRequestDetails.getUserData().put(ConsentConstants.USER_DATA_SHOULD_SKIP_CONSENT_FOR_SYSTEM_OPERATIONS, true);
 	}
 
 	public boolean isChannelTypeSupported(IBaseResource theSubscription) {
