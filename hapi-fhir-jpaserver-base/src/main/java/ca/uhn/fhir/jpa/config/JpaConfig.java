@@ -37,7 +37,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchUrlJobMaintenanceSvc;
-import ca.uhn.fhir.jpa.api.svc.ITerminologyValidationSvc;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
@@ -188,7 +187,6 @@ import ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
-import ca.uhn.fhir.jpa.term.TerminologyValidationSvcImpl;
 import ca.uhn.fhir.jpa.term.ValueSetConceptAccumulator;
 import ca.uhn.fhir.jpa.term.ValueSetConceptAccumulatorFactory;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
@@ -200,6 +198,7 @@ import ca.uhn.fhir.jpa.util.JpaHapiTransactionService;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.PartitionedIdModeVerificationSvc;
 import ca.uhn.fhir.jpa.util.PersistenceContextProvider;
+import ca.uhn.fhir.jpa.util.ValidationInvocationHelper;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
@@ -266,6 +265,7 @@ import java.util.List;
 	EnversAuditConfig.class,
 	MdmJpaConfig.class
 })
+@SuppressWarnings("unused")
 public class JpaConfig {
 	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";
 	public static final String JPA_VALIDATION_SUPPORT = "myJpaValidationSupport";
@@ -407,6 +407,14 @@ public class JpaConfig {
 	}
 
 	@Bean
+	public ValidationInvocationHelper validationInvocationHelper(
+			FhirContext theFhirContext,
+			@Qualifier(JPA_VALIDATION_SUPPORT_CHAIN) IValidationSupport theValidationSupportChain,
+			VersionCanonicalizer theVersionCanonicalizer) {
+		return new ValidationInvocationHelper(theFhirContext, theValidationSupportChain, theVersionCanonicalizer);
+	}
+
+	@Bean
 	public IJpaStorageResourceParser jpaStorageResourceParser() {
 		return new JpaStorageResourceParser();
 	}
@@ -486,18 +494,16 @@ public class JpaConfig {
 
 	@Bean
 	public TaskScheduler taskScheduler() {
-		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler(
+		return new ConcurrentTaskScheduler(
 				scheduledExecutorService().getObject(),
 				scheduledExecutorService().getObject());
-		return retVal;
 	}
 
 	@Bean(name = TASK_EXECUTOR_NAME)
 	public AsyncTaskExecutor taskExecutor() {
-		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler(
+		return new ConcurrentTaskScheduler(
 				scheduledExecutorService().getObject(),
 				scheduledExecutorService().getObject());
-		return retVal;
 	}
 
 	@Bean
@@ -1015,14 +1021,6 @@ public class JpaConfig {
 	@Bean
 	public ITermReadSvc terminologyService() {
 		return new TermReadSvcImpl();
-	}
-
-	@Bean
-	public ITerminologyValidationSvc terminologyValidationSvc(
-			FhirContext theFhirContext,
-			@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN) IValidationSupport theValidationSupportChain,
-			DaoRegistry theDaoRegistry) {
-		return new TerminologyValidationSvcImpl(theFhirContext, theValidationSupportChain, theDaoRegistry);
 	}
 
 	@Bean
