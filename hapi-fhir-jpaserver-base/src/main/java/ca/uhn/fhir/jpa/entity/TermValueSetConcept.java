@@ -37,6 +37,7 @@ import jakarta.persistence.JoinColumns;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -87,20 +88,20 @@ public class TermValueSetConcept extends BasePartitionable implements Serializab
 				@JoinColumn(
 						name = "VALUESET_PID",
 						referencedColumnName = "PID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false),
 				@JoinColumn(
 						name = "PARTITION_ID",
 						referencedColumnName = "PARTITION_ID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TRM_VALUESET_PID"))
 	private TermValueSet myValueSet;
 
-	@Column(name = "VALUESET_PID", insertable = false, updatable = false, nullable = false)
+	@Column(name = "VALUESET_PID", insertable = true, updatable = true, nullable = false)
 	private Long myValueSetPid;
 
 	@Column(name = "INDEX_STATUS", nullable = true)
@@ -163,10 +164,17 @@ public class TermValueSetConcept extends BasePartitionable implements Serializab
 		return myValueSet;
 	}
 
-	public TermValueSetConcept setValueSet(TermValueSet theValueSet) {
+	public TermValueSetConcept setValueSet(@Nonnull TermValueSet theValueSet) {
 		myValueSet = theValueSet;
 		setPartitionId(theValueSet.getPartitionId());
 		return this;
+	}
+
+	@PrePersist
+	public void prePersist() {
+		if (myValueSetPid == null) {
+			myValueSetPid = getValueSet().getId();
+		}
 	}
 
 	public int getOrder() {

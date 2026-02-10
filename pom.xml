@@ -1042,13 +1042,13 @@
 		<jaxb_runtime_version>4.0.4</jaxb_runtime_version>
 		<jena_version>5.5.0</jena_version>
 		<jersey_version>3.0.3</jersey_version>
-		<jetty_version>12.0.17</jetty_version>
+		<jetty_version>12.0.25</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.11.4</junit_version>
 		<flexmark_version>0.64.8</flexmark_version>
 		<flyway_version>10.20.1</flyway_version>
 		<hibernate_version>6.6.4.Final</hibernate_version>
-		<logback_version>1.5.19</logback_version>
+		<logback_version>1.5.25</logback_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
 		<hibernate_search_version>7.2.1.Final</hibernate_search_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
@@ -1098,7 +1098,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<elastic_apm_version>1.52.0</elastic_apm_version>
-		<elasticsearch_version>8.16.2</elasticsearch_version>
+		<elasticsearch_version>8.19.9</elasticsearch_version>
 		<ucum_version>1.0.9</ucum_version>
 
 		<!-- Site properties -->
@@ -1235,7 +1235,7 @@
 			<dependency>
 				<groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
 				<artifactId>owasp-java-html-sanitizer</artifactId>
-				<version>20240325.1</version>
+				<version>20260102.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.graphql-java</groupId>
@@ -1267,12 +1267,6 @@
 				<groupId>jakarta.mail</groupId>
 				<artifactId>jakarta.mail-api</artifactId>
 				<version>2.1.3</version>
-			</dependency>
-			<!-- Pinned for CVE-2025-5222, used by org.hl7.fhir.utilities -->
-			<dependency>
-				<groupId>com.ibm.icu</groupId>
-				<artifactId>icu4j</artifactId>
-				<version>78.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.icegreen</groupId>
@@ -1525,17 +1519,17 @@
 				<artifactId>elasticsearch-java</artifactId>
 				<version>${elasticsearch_version}</version>
 			</dependency>
-			<!-- Pinned for CVE-2024-52979, used by hibernate_search v7.2.1 -->
+			<!-- Pinned for CVE-2025-68384, used by hibernate_search v7.2.1 -->
 			<dependency>
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-client</artifactId>
-				<version>8.16.2</version>
+				<version>8.19.9</version>
 			</dependency>
-			<!-- Pinned for CVE-2024-52979, used by hibernate_search v7.2.1 -->
+			<!-- Pinned for CVE-2025-68384, used by hibernate_search v7.2.1 -->
 			<dependency>
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-client-sniffer</artifactId>
-				<version>8.16.2</version>
+				<version>8.19.9</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
@@ -1608,6 +1602,13 @@
 				<artifactId>json-lib</artifactId>
 				<version>2.4</version>
 				<classifier>jdk15-sources</classifier>
+			</dependency>
+			<!-- Pinned for CVE-2026-0858, used by org.hl7.fhir.r5
+			TODO this should be removed on the next core bump -->
+			<dependency>
+				<groupId>net.sourceforge.plantuml</groupId>
+				<artifactId>plantuml-mit</artifactId>
+				<version>1.2026.1</version>
 			</dependency>
 			<dependency>
 				<groupId>net.ttddyy</groupId>
@@ -1891,6 +1892,11 @@
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
 				<artifactId>jetty-websocket-jetty-server</artifactId>
+				<version>${jetty_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-jmx</artifactId>
 				<version>${jetty_version}</version>
 			</dependency>
 			<dependency>
