@@ -76,6 +76,7 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
@@ -430,48 +431,65 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		HapiTransactionService.noTransactionAllowed();
 
 		int outcome = 0;
+		int maxRetries = 10;
+		int consecutiveFailures = 0;
 		while (true) {
 			StopWatch sw = new StopWatch();
 
-			int count = myTxService
-					.withRequest(theRequest)
-					.withPropagation(Propagation.REQUIRES_NEW)
-					.withRequestPartitionId(theRequestPartitionId)
-					.execute(() -> {
-						// Step 1: Lock job instance IDs first using SELECT FOR UPDATE
-						// This establishes consistent lock ordering with maintenance operations
-						// which also lock job instances before work chunks
-						@SuppressWarnings("unchecked")
-						List<String> instanceIds = myEntityManager
-								.createQuery(
-										"SELECT e.myId FROM " + Batch2JobInstanceEntity.class.getSimpleName() + " e")
-								.setMaxResults(SearchBuilder.getMaximumPageSize() / 2)
-								.setLockMode(LockModeType.PESSIMISTIC_WRITE)
-								.getResultList();
+			int count;
+			try {
+				count = myTxService
+						.withRequest(theRequest)
+						.withPropagation(Propagation.REQUIRES_NEW)
+						.withRequestPartitionId(theRequestPartitionId)
+						.execute(() -> {
+							// Step 1: Lock job instance IDs first using SELECT FOR UPDATE
+							// This establishes consistent lock ordering with maintenance operations
+							// which also lock job instances before work chunks
+							@SuppressWarnings("unchecked")
+							List<String> instanceIds = myEntityManager
+									.createQuery("SELECT e.myId FROM " + Batch2JobInstanceEntity.class.getSimpleName()
+											+ " e")
+									.setMaxResults(SearchBuilder.getMaximumPageSize() / 2)
+									.setLockMode(LockModeType.PESSIMISTIC_WRITE)
+									.getResultList();
 
-						if (instanceIds.isEmpty()) {
-							return 0;
-						}
+							if (instanceIds.isEmpty()) {
+								return 0;
+							}
 
-						int deleted = 0;
+							int deleted = 0;
 
-						// Step 2: Delete work chunks for these instances (child table with FK)
-						deleted += myEntityManager
-								.createQuery("DELETE FROM " + Batch2WorkChunkEntity.class.getSimpleName()
-										+ " e WHERE e.myInstanceId IN (:instanceIds)")
-								.setParameter("instanceIds", instanceIds)
-								.executeUpdate();
+							// Step 2: Delete work chunks for these instances (child table with FK)
+							deleted += myEntityManager
+									.createQuery("DELETE FROM " + Batch2WorkChunkEntity.class.getSimpleName()
+											+ " e WHERE e.myInstanceId IN (:instanceIds)")
+									.setParameter("instanceIds", instanceIds)
+									.executeUpdate();
 
-						// Step 3: Delete job instances (parent table, locks already held)
-						deleted += myEntityManager
-								.createQuery("DELETE FROM " + Batch2JobInstanceEntity.class.getSimpleName()
-										+ " e WHERE e.myId IN (:instanceIds)")
-								.setParameter("instanceIds", instanceIds)
-								.executeUpdate();
+							// Step 3: Delete job instances (parent table, locks already held)
+							deleted += myEntityManager
+									.createQuery("DELETE FROM " + Batch2JobInstanceEntity.class.getSimpleName()
+											+ " e WHERE e.myId IN (:instanceIds)")
+									.setParameter("instanceIds", instanceIds)
+									.executeUpdate();
 
-						return deleted;
-					});
+							return deleted;
+						});
+			} catch (ResourceVersionConflictException e) {
+				consecutiveFailures++;
+				if (consecutiveFailures > maxRetries) {
+					ourLog.error("Failed to delete Batch2 entities after {} retries", maxRetries);
+					throw e;
+				}
+				ourLog.info(
+						"Retrying Batch2 entity deletion due to constraint conflict (attempt {}/{})",
+						consecutiveFailures,
+						maxRetries);
+				continue;
+			}
 
+			consecutiveFailures = 0;
 			outcome += count;
 			if (count == 0) {
 				break;
