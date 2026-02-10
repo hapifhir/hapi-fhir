@@ -104,7 +104,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	private IMdmSettings myMdmSettings;
 
 	@Autowired
-	private IIdHelperService<IResourcePersistentId<?>> myIdHelperSvc;
+	private IIdHelperService myIdHelperSvc;
 
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
@@ -320,6 +320,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	 *  since they are no longer "real matches"
 	 *  Possible match resources are resubmitted for matching
 	 */
+	@SuppressWarnings("unchecked")
 	private void cleanUpPossibleMatches(
 			List<IMdmLink> possibleMatches,
 			IFhirResourceDao<?> theDao,

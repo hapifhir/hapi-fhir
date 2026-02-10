@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7541
+title: "Previously, MDM delete cleanup operations would prevent interceptors from being invoked when reading 
+the golden resource and possible match resources. This has been fixed."
