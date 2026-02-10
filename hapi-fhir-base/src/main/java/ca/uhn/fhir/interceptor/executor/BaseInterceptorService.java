@@ -27,6 +27,7 @@ import ca.uhn.fhir.interceptor.api.IBaseInterceptorService;
 import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ReflectionUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -43,6 +44,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -605,11 +607,18 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 				return invokeMethod(args);
 			} catch (InvocationTargetException e) {
 				Throwable targetException = e.getTargetException();
-				ourLog.error(
-						"Exception thrown by interceptor for pointcut {}: {}",
-						getPointcut(),
-						targetException.toString(),
-						targetException);
+
+				Level level = Level.WARN;
+				if (targetException instanceof BaseServerResponseException) {
+					level = Level.DEBUG;
+				}
+
+				ourLog.atLevel(level)
+						.setMessage("Exception thrown by interceptor for pointcut {}: {}")
+						.addArgument(getPointcut())
+						.addArgument(targetException.toString())
+						.setCause(targetException)
+						.log();
 				if (myPointcut.isShouldLogAndSwallowException(targetException)) {
 					return null;
 				}

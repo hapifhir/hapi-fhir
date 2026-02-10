@@ -329,5 +329,4 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	 */
 	protected abstract ResourceModificationResponse modifyResource(
 			PT theJobParameters, C theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest);
-
 }
