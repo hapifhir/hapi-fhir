@@ -1,0 +1,22 @@
+# Nightly SNAPSHOT publish for release branches.
+#
+# HOW TO USE:
+# 1. Update the branch name below to the current release branch
+# 2. Enable this pipeline in Azure DevOps UI
+# 3. When the release is done, disable this pipeline in Azure DevOps UI
+#
+schedules:
+  - cron: "0 2 * * *"           # 2 AM UTC (offset from master's midnight)
+    displayName: Nightly Release Branch SNAPSHOT Publish
+    branches:
+      include:
+        - rel_8_8               # <-- UPDATE THIS EACH CYCLE
+    always: false
+
+# This is manually run to deploy SNAPSHOT versions of HAPI to oss.sonaypte.org
+# We don't need to trigger on any pull request or branch change, so we disable such behavior
+pr: none
+trigger: none
+
+jobs:
+  - template: snapshot-deploy-job.yml
