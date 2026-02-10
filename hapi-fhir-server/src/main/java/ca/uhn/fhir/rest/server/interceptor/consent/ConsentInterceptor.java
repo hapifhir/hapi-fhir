@@ -616,14 +616,15 @@ public class ConsentInterceptor {
 	 * {@see https://github.com/hapifhir/hapi-fhir/issues/7542}
 	 * @param theRequestDetails the request
 	 */
-	public static void skipAllConsentForRequest(RequestDetails theRequestDetails) {
+	public static void skipAllConsentForRequest(@Nonnull RequestDetails theRequestDetails) {
 		theRequestDetails.getUserData().put(USER_DATA_SHOULD_SKIP_CONSENT_FOR_SYSTEM_OPERATIONS, true);
 	}
 
-	private static boolean shouldSkipAllConsent(RequestDetails theRequestDetails) {
-		return (Boolean) theRequestDetails
-				.getUserData()
-				.getOrDefault(USER_DATA_SHOULD_SKIP_CONSENT_FOR_SYSTEM_OPERATIONS, Boolean.FALSE);
+	private static boolean shouldSkipAllConsent(@Nullable RequestDetails theRequestDetails) {
+		return theRequestDetails != null
+				&& (Boolean) theRequestDetails
+						.getUserData()
+						.getOrDefault(USER_DATA_SHOULD_SKIP_CONSENT_FOR_SYSTEM_OPERATIONS, Boolean.FALSE);
 	}
 
 	private void validateParameter(Map<String, String[]> theParameterMap) {
@@ -652,6 +653,9 @@ public class ConsentInterceptor {
 	@SuppressWarnings("unchecked")
 	private IdentityHashMap<IBaseResource, ConsentOperationStatusEnum> getAlreadySeenResourcesMap(
 			RequestDetails theRequestDetails) {
+		if (theRequestDetails == null) {
+			return new IdentityHashMap<>();
+		}
 		IdentityHashMap<IBaseResource, ConsentOperationStatusEnum> alreadySeenResources =
 				(IdentityHashMap<IBaseResource, ConsentOperationStatusEnum>)
 						theRequestDetails.getUserData().get(myRequestSeenResourcesKey);
