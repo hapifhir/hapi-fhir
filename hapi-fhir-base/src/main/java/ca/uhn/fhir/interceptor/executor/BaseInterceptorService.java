@@ -44,7 +44,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.event.Level;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -608,16 +607,12 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 			} catch (InvocationTargetException e) {
 				Throwable targetException = e.getTargetException();
 
-				Level level = Level.WARN;
-				if (targetException instanceof BaseServerResponseException) {
-					level = Level.DEBUG;
-				}
-
-				ourLog.atLevel(level)
+				ourLog.atWarn()
 						.setMessage("Exception thrown by interceptor for pointcut {}: {}")
 						.addArgument(getPointcut())
 						.addArgument(targetException.toString())
-						.setCause(targetException)
+						// Don't include a stack trace if the exception is a HAPI FHIR exception
+						.setCause(targetException instanceof BaseServerResponseException ? null : targetException)
 						.log();
 				if (myPointcut.isShouldLogAndSwallowException(targetException)) {
 					return null;

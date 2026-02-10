@@ -112,12 +112,12 @@ public class MemoryBasedDuplicateBlockingInterceptor {
 
 		String resourceId = getResourceId(theResource);
 		ourLog.warn(
-			"Blocked creating a duplicate resource to {} existing: {} ({}/hr)",
-			resourceId,
-			existingId,
-			throughputPerHour);
+				"Blocked creating a duplicate resource to {} existing: {} ({}/hr)",
+				resourceId,
+				existingId,
+				throughputPerHour);
 		throw new PreconditionFailedException(
-			Msg.code(2840) + "Can not create resource duplicating existing resource: " + existingId);
+				Msg.code(2840) + "Can not create resource duplicating existing resource: " + existingId);
 	}
 
 	private int incrementCounterAndCalculateThroughputPerHour() {
@@ -129,7 +129,7 @@ public class MemoryBasedDuplicateBlockingInterceptor {
 			}
 			Instant cutoff = now.minus(1, ChronoUnit.HOURS);
 			while (!myBlockedTimestamps.isEmpty()
-				&& myBlockedTimestamps.getFirst().isBefore(cutoff)) {
+					&& myBlockedTimestamps.getFirst().isBefore(cutoff)) {
 				myBlockedTimestamps.removeFirst();
 			}
 
@@ -138,7 +138,7 @@ public class MemoryBasedDuplicateBlockingInterceptor {
 			if (myBlockedTimestamps.size() > 1) {
 				Duration allTimestampDuration = Duration.between(cutoff, now);
 				TimeUnit unit = TimeUnit.HOURS;
-				return (int)StopWatch.getThroughput(myBlockedTimestamps.size(), allTimestampDuration.toMillis(), unit);
+				return (int) StopWatch.getThroughput(myBlockedTimestamps.size(), allTimestampDuration.toMillis(), unit);
 			}
 		}
 
@@ -148,7 +148,7 @@ public class MemoryBasedDuplicateBlockingInterceptor {
 	private void storeResourceHashInCacheOnCommit(IBaseResource theResource, HashCode hashCode) {
 		String resourceId = getResourceId(theResource);
 		TransactionSynchronizationManager.registerSynchronization(
-			new NewResourceStoredSynchronization(hashCode, resourceId));
+				new NewResourceStoredSynchronization(hashCode, resourceId));
 	}
 
 	private String getResourceId(IBaseResource theResource) {

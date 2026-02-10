@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7548
+title: "A new interceptor called MemoryBasedDuplicateBlockingInterceptor has been added. This interceptor
+  does a basic check upon resource creation to detect other duplicate resources recently created, and
+  blocks them."
