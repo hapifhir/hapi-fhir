@@ -14,6 +14,7 @@ import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.IdType;
@@ -137,7 +138,7 @@ public class PartitionedStrictTransactionR4Test extends BasePartitioningR4Test {
 		operation
 			.addPart()
 			.setName("value")
-			.setValue(new CodeType("false"));
+			.setValue(new BooleanType("false"));
 
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		bb.addTransactionFhirPatchEntry(new IdType("Patient/A"), patch);
