@@ -104,7 +104,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	private IMdmSettings myMdmSettings;
 
 	@Autowired
-	private IIdHelperService myIdHelperSvc;
+	private IIdHelperService<IResourcePersistentId<?>> myIdHelperSvc;
 
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
@@ -325,10 +325,14 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 			IFhirResourceDao<?> theDao,
 			IResourcePersistentId theGoldenPid,
 			RequestDetails theRequestDetails) {
-		IAnyResource goldenResource = (IAnyResource) theDao.readByPid(theGoldenPid);
+		String resourceType = theDao.getResourceType().getSimpleName();
+		IIdType goldenId = myIdHelperSvc.resourceIdFromPidOrThrowException(theGoldenPid, resourceType);
+		IAnyResource goldenResource = (IAnyResource) theDao.read(goldenId, theRequestDetails);
 		for (IMdmLink possibleMatch : possibleMatches) {
 			if (possibleMatch.getGoldenResourcePersistenceId().equals(theGoldenPid)) {
-				IBaseResource sourceResource = theDao.readByPid(possibleMatch.getSourcePersistenceId());
+				IIdType sourceId = myIdHelperSvc.resourceIdFromPidOrThrowException(
+						possibleMatch.getSourcePersistenceId(), resourceType);
+				IBaseResource sourceResource = theDao.read(sourceId, theRequestDetails);
 				MdmCreateOrUpdateParams params = new MdmCreateOrUpdateParams();
 				params.setGoldenResource(goldenResource);
 				params.setSourceResource((IAnyResource) sourceResource);
