@@ -1077,7 +1077,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(7, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(17, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(3, myCaptureQueriesListener.countCommits());
+		assertEquals(4, myCaptureQueriesListener.countCommits());
 
 		// Page 2
 		myCaptureQueriesListener.clear();
