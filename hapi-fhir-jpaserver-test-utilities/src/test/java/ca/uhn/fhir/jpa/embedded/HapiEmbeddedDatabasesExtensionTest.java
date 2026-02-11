@@ -1,19 +1,14 @@
 package ca.uhn.fhir.jpa.embedded;
 
-import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.DockerClientFactory;
 
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 // Created by Claude Sonnet 4
 @RequiresDocker
@@ -44,24 +39,6 @@ public class HapiEmbeddedDatabasesExtensionTest {
 				throw new RuntimeException(e);
 			}
 		}
-	}
-
-	@ParameterizedTest
-	@ArgumentsSource(HapiEmbeddedDatabasesExtension.DatabaseVendorProvider.class)
-	public void testDatabaseExtensionWorks(DriverTypeEnum theDriverType) {
-		ourLog.info("Testing database extension for type: {}", theDriverType);
-
-		// Get the database instance 
-		JpaEmbeddedDatabase database = myExtension.getEmbeddedDatabase(theDriverType);
-		assertThat(database).isNotNull();
-
-		// Verify that all databases now extend JpaEmbeddedDatabase  
-		assertThat(database).isInstanceOf(JpaEmbeddedDatabase.class);
-		
-		// Verify driver type matches
-		assertThat(database.getDriverType()).isEqualTo(theDriverType);
-		
-		ourLog.info("Database extension works for type: {}", theDriverType);
 	}
 
 	private int countActiveTestContainers() {

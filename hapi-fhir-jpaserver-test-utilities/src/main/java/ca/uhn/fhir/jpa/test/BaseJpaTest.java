@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.cache.IResourceTypeCacheSvc;
 import ca.uhn.fhir.jpa.config.JpaConfig;
+import ca.uhn.fhir.jpa.config.r4.FhirContextR4Config;
 import ca.uhn.fhir.jpa.config.util.ResourceTypeUtil;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
@@ -481,6 +482,8 @@ public abstract class BaseJpaTest extends BaseTest {
 
 		ParserOptions defaultParserOptions = new ParserOptions();
 		BeanUtils.copyProperties(defaultParserOptions, myFhirContext.getParserOptions());
+		// version stripping parser options configured through this function, not in the class itself, so apply them, this function supports multiple fhir versions
+		FhirContextR4Config.configureDefaultParserOptions(myFhirContext);
 
 		PartitionSettings defaultPartConfig = new PartitionSettings();
 		BeanUtils.copyProperties(defaultPartConfig, myPartitionSettings);
