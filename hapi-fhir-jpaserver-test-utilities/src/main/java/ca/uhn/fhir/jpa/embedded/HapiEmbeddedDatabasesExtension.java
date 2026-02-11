@@ -19,28 +19,27 @@
  */
 package ca.uhn.fhir.jpa.embedded;
 
-import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.util.DatabaseSupportUtil;
 import ca.uhn.fhir.test.utilities.docker.DockerRequiredCondition;
 import ca.uhn.fhir.util.VersionEnum;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
-import javax.sql.DataSource;
 
 public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
+
+	public final JpaEmbeddedDatabase h2Database = new H2EmbeddedDatabase();
+	public final JpaEmbeddedDatabase postgresDatabase = new PostgresEmbeddedDatabase();
+	public final JpaEmbeddedDatabase mssql2012Database = new MsSqlEmbeddedDatabase();
+	public final JpaEmbeddedDatabase oracle21Database = new Oracle21EmbeddedDatabase();
+	public final JpaEmbeddedDatabase oracle23Database = new Oracle23EmbeddedDatabase();
 
 	public static final VersionEnum FIRST_TESTED_VERSION = VersionEnum.V5_1_0;
 
@@ -52,14 +51,15 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 
 	public HapiEmbeddedDatabasesExtension() {
 		if (DockerRequiredCondition.isDockerAvailable()) {
-			myEmbeddedDatabases.add(new H2EmbeddedDatabase());
-			myEmbeddedDatabases.add(new PostgresEmbeddedDatabase());
-			myEmbeddedDatabases.add(new MsSqlEmbeddedDatabase());
+			myEmbeddedDatabases.add(h2Database);
+			myEmbeddedDatabases.add(postgresDatabase);
+			myEmbeddedDatabases.add(mssql2012Database);
 			if (DatabaseSupportUtil.canUseOracle()) {
-				myEmbeddedDatabases.add(new OracleEmbeddedDatabase());
+				myEmbeddedDatabases.add(oracle21Database);
+				myEmbeddedDatabases.add(oracle23Database);
 			} else {
 				String message =
-						"Cannot add OracleEmbeddedDatabase. If you are using a Mac you must configure the TestContainers API to run using Colima (https://www.testcontainers.org/supported_docker_environment#using-colima)";
+						"Cannot add any of the Oracle Databases. If you are using a Mac you must configure the TestContainers API to run using Colima (https://www.testcontainers.org/supported_docker_environment#using-colima)";
 				ourLog.warn(message);
 			}
 		} else {
@@ -74,13 +74,6 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 		}
 	}
 
-	public JpaEmbeddedDatabase getEmbeddedDatabase(DriverTypeEnum theDriverType) {
-		return getAllEmbeddedDatabases().stream()
-				.filter(db -> theDriverType.equals(db.getDriverType()))
-				.findFirst()
-				.orElseThrow();
-	}
-
 	public void clearDatabases() {
 		for (JpaEmbeddedDatabase database : getAllEmbeddedDatabases()) {
 			// Only clear databases that are actually initialized
@@ -93,39 +86,31 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 		}
 	}
 
-	public DataSource getDataSource(DriverTypeEnum theDriverTypeEnum) {
-		return getEmbeddedDatabase(theDriverTypeEnum).getDataSource();
-	}
-
-	private Set<JpaEmbeddedDatabase> getAllEmbeddedDatabases() {
+	public Set<JpaEmbeddedDatabase> getAllEmbeddedDatabases() {
 		return myEmbeddedDatabases;
 	}
 
-	public void initializePersistenceSchema(DriverTypeEnum theDriverType) {
-		initializePersistenceSchema(theDriverType, FIRST_TESTED_VERSION);
+	public void initializePersistenceSchema(VersionEnum theSchemaVersion, JpaEmbeddedDatabase theDatabase) {
+		myDatabaseInitializerHelper.initializePersistenceSchema(theDatabase, theSchemaVersion);
 	}
 
-	public void initializePersistenceSchema(DriverTypeEnum theDriverType, VersionEnum theSchemaVersion) {
-		myDatabaseInitializerHelper.initializePersistenceSchema(getEmbeddedDatabase(theDriverType), theSchemaVersion);
-	}
-
-	public void insertPersistenceTestData(DriverTypeEnum theDriverType, VersionEnum theVersionEnum) {
-		myDatabaseInitializerHelper.insertPersistenceTestData(getEmbeddedDatabase(theDriverType), theVersionEnum);
+	public void insertPersistenceTestData(VersionEnum theVersionEnum, JpaEmbeddedDatabase embeddedDatabase) {
+		myDatabaseInitializerHelper.insertPersistenceTestData(embeddedDatabase, theVersionEnum);
 	}
 
 	public DatabaseInitializerHelper getDatabaseInitializerHelper() {
 		return myDatabaseInitializerHelper;
 	}
 
-	public void maybeInsertPersistenceTestData(DriverTypeEnum theDriverType, VersionEnum theVersionEnum) {
+	public void maybeInsertPersistenceTestData(JpaEmbeddedDatabase theDatabase, VersionEnum theVersionEnum) {
 		try {
-			myDatabaseInitializerHelper.insertPersistenceTestData(getEmbeddedDatabase(theDriverType), theVersionEnum);
+			insertPersistenceTestData(theVersionEnum, theDatabase);
 		} catch (Exception theE) {
 			if (theE.getMessage().contains("Error loading file: migration/releases/")) {
 				ourLog.info(
 						"Could not insert persistence test data most likely because we don't have any for version {} and driver {}",
 						theVersionEnum,
-						theDriverType);
+						theDatabase.getDriverType());
 			} else {
 				// throw sql execution Exceptions
 				throw theE;
@@ -140,22 +125,6 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 			return Files.readString(Paths.get(resource.toURI()));
 		} catch (Exception e) {
 			throw new RuntimeException("Error loading file: " + theFileName, e);
-		}
-	}
-
-	public static class DatabaseVendorProvider implements ArgumentsProvider {
-		@Override
-		public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-			List<Arguments> arguments = new ArrayList<>();
-			arguments.add(Arguments.of(DriverTypeEnum.H2_EMBEDDED));
-			arguments.add(Arguments.of(DriverTypeEnum.POSTGRES_9_4));
-			arguments.add(Arguments.of(DriverTypeEnum.MSSQL_2012));
-
-			if (DatabaseSupportUtil.canUseOracle()) {
-				arguments.add(Arguments.of(DriverTypeEnum.ORACLE_12C));
-			}
-
-			return arguments.stream();
 		}
 	}
 }

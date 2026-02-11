@@ -850,6 +850,13 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 
 			boolean hasMatchingResourceId = false;
 			Optional<String> idPartOpt = targetResourceIdMap.get(resourceLink.getTargetResourcePk());
+
+			// DON'T REMOVE THIS CHECK:  In some circumstances, clinical-reasoning code will trigger a null value here:
+			if (idPartOpt == null) {
+				ourLog.warn("Cannot find id: {} in the target resource ID Map", resourceLink.getTargetResourcePk());
+				idPartOpt = Optional.empty();
+			}
+
 			if (idPartOpt.isPresent()) {
 				String idPart = idPartOpt.get();
 				idPart = idPart.substring(idPart.indexOf('/'));

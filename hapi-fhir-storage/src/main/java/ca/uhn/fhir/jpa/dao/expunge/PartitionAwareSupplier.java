@@ -19,9 +19,13 @@
  */
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 
 import java.util.function.Supplier;
@@ -33,16 +37,41 @@ import java.util.function.Supplier;
 public class PartitionAwareSupplier {
 	private final HapiTransactionService myTransactionService;
 	private final RequestDetails myRequestDetails;
+	private final RequestPartitionId myRequestPartitionId;
+	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
-	public PartitionAwareSupplier(HapiTransactionService theTxService, RequestDetails theRequestDetails) {
+	/**
+	 * @param theTxService The transaction service for transaction management
+	 * @param theRequestPartitionHelperSvc The partition helper service used to determine partition from request details
+	 *                                     when theRequestPartitionId is null.
+	 * @param theRequestDetails The request details to use for transaction context
+	 * @param theRequestPartitionId The partition ID to use for all operations. When provided, this
+	 *                              overrides any partition that would be determined from theRequestDetails.
+	 *                              May be null to use the partition from theRequestDetails.
+	 */
+	public PartitionAwareSupplier(
+			HapiTransactionService theTxService,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+			RequestDetails theRequestDetails,
+			@Nullable RequestPartitionId theRequestPartitionId) {
 		myTransactionService = theTxService;
+		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 		myRequestDetails = theRequestDetails;
+		myRequestPartitionId = theRequestPartitionId;
 	}
 
 	@Nonnull
 	public <T> T supplyInPartitionedContext(Supplier<T> theResourcePersistentIdSupplier) {
-		T retVal =
-				myTransactionService.withRequest(myRequestDetails).execute(tx -> theResourcePersistentIdSupplier.get());
+		IHapiTransactionService.IExecutionBuilder executionBuilder = myTransactionService.withRequest(myRequestDetails);
+		// use explicit partition ID if provided
+		if (myRequestPartitionId != null) {
+			executionBuilder.withRequestPartitionId(myRequestPartitionId);
+		} else if (myRequestPartitionHelperSvc != null && myRequestDetails != null) {
+			executionBuilder.withRequestPartitionId(
+					myRequestPartitionHelperSvc.determineGenericPartitionForRequest(myRequestDetails));
+		}
+		T retVal = executionBuilder.execute(tx -> theResourcePersistentIdSupplier.get());
+
 		Validate.notNull(retVal, "No resource persistent id supplied by supplier %s", theResourcePersistentIdSupplier);
 		return retVal;
 	}

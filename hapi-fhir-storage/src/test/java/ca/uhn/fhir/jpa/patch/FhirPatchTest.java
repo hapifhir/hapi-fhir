@@ -9,8 +9,12 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Appointment;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.EpisodeOfCare;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
@@ -443,6 +447,270 @@ public class FhirPatchTest implements ITestDataBuilder {
 			containsExactly(
 				"Unknown patch parameter name: foo"
 			);
+	}
+
+	@Test
+	void testReplace_ExtensionFilterSyntax_StringValue() {
+		// Setup: Patient with an extension containing a string value
+		Patient input = (Patient) buildPatient(withGiven("Sunny"), withFamily("Day"));
+		input.addExtension()
+			.setUrl("http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName")
+			.setValue(new StringType("One"));
+
+		IBaseParameters patch = new FhirPatchBuilder(myFhirContext)
+			.replace()
+			.path("Patient.extension('http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName').value")
+			.value(new StringType("Two"))
+			.andThen()
+			.build();
+
+		// Test
+		myPatch.apply(input, patch);
+
+		// Verify
+		Extension ext = input.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName");
+		assertThat(ext).isNotNull();
+		assertThat(ext.getValue()).isInstanceOf(StringType.class);
+		assertThat(((StringType) ext.getValue()).getValue()).isEqualTo("Two");
+	}
+
+	@Test
+	void testReplace_ExtensionFilterSyntax_DateTimeValue() {
+		// Setup: EpisodeOfCare with an extension containing a dateTime value (mirrors original bug report)
+		EpisodeOfCare input = new EpisodeOfCare();
+		input.addExtension()
+			.setUrl("http://example.org/fhir/StructureDefinition/episodeOfCare-nextReviewDate")
+			.setValue(new DateTimeType("2025-01-01"));
+
+		IBaseParameters patch = new FhirPatchBuilder(myFhirContext)
+			.replace()
+			.path("EpisodeOfCare.extension('http://example.org/fhir/StructureDefinition/episodeOfCare-nextReviewDate').value")
+			.value(new DateTimeType("2026-06-15"))
+			.andThen()
+			.build();
+
+		// Test
+		myPatch.apply(input, patch);
+
+		// Verify
+		Extension ext = input.getExtensionByUrl("http://example.org/fhir/StructureDefinition/episodeOfCare-nextReviewDate");
+		assertThat(ext).isNotNull();
+		assertThat(ext.getValue()).isInstanceOf(DateTimeType.class);
+		assertThat(((DateTimeType) ext.getValue()).getValueAsString()).isEqualTo("2026-06-15");
+	}
+
+	@Test
+	void testReplace_ExtensionFilterSyntax_MultipleExtensions() {
+		// Setup: Patient with multiple extensions, replace only the targeted one
+		Patient input = (Patient) buildPatient(withGiven("Sunny"), withFamily("Day"));
+		input.addExtension()
+			.setUrl("http://example.org/fhir/ext-a")
+			.setValue(new StringType("ValueA"));
+		input.addExtension()
+			.setUrl("http://example.org/fhir/ext-b")
+			.setValue(new StringType("ValueB"));
+
+		IBaseParameters patch = new FhirPatchBuilder(myFhirContext)
+			.replace()
+			.path("Patient.extension('http://example.org/fhir/ext-b').value")
+			.value(new StringType("ValueB-Updated"))
+			.andThen()
+			.build();
+
+		// Test
+		myPatch.apply(input, patch);
+
+		// Verify: ext-a unchanged, ext-b updated
+		assertThat(((StringType) input.getExtensionByUrl("http://example.org/fhir/ext-a").getValue()).getValue())
+			.isEqualTo("ValueA");
+		assertThat(((StringType) input.getExtensionByUrl("http://example.org/fhir/ext-b").getValue()).getValue())
+			.isEqualTo("ValueB-Updated");
+	}
+
+	@Test
+	void testReplace_ExtensionFilterSyntax_ReferenceValue() {
+		// Setup: Patient with an extension containing a Reference value
+		Patient input = (Patient) buildPatient(withGiven("Sunny"), withFamily("Day"));
+		input.addExtension()
+			.setUrl("http://example.org/fhir/ext-ref")
+			.setValue(new Reference("Practitioner/old"));
+
+		IBaseParameters patch = new FhirPatchBuilder(myFhirContext)
+			.replace()
+			.path("Patient.extension('http://example.org/fhir/ext-ref').value")
+			.value(new Reference("Practitioner/new"))
+			.andThen()
+			.build();
+
+		// Test
+		myPatch.apply(input, patch);
+
+		// Verify
+		Extension ext = input.getExtensionByUrl("http://example.org/fhir/ext-ref");
+		assertThat(ext).isNotNull();
+		assertThat(((Reference) ext.getValue()).getReference()).isEqualTo("Practitioner/new");
+	}
+
+	@Test
+	void testDelete_ExtensionWhereUrlSyntax() {
+		// Control test: delete extension using .where(url='...') syntax (should already work)
+		Patient input = (Patient) buildPatient(withGiven("Sunny"), withFamily("Day"));
+		input.addExtension()
+			.setUrl("http://example.org/fhir/ext-delete")
+			.setValue(new StringType("ToDelete"));
+
+		IBaseParameters patch = new FhirPatchBuilder(myFhirContext)
+			.delete()
+			.path("Patient.extension.where(url='http://example.org/fhir/ext-delete')")
+			.andThen()
+			.build();
+
+		// Test
+		myPatch.apply(input, patch);
+
+		// Verify
+		assertThat(input.getExtensionByUrl("http://example.org/fhir/ext-delete")).isNull();
+	}
+
+	@Test
+	void testReplace_ExtensionWhereUrlSyntax_StringValue() {
+		// Replace extension value using .where(url='...') syntax
+		Patient input = (Patient) buildPatient(withGiven("Sunny"), withFamily("Day"));
+		input.addExtension()
+			.setUrl("http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName")
+			.setValue(new StringType("One"));
+
+		IBaseParameters patch = new FhirPatchBuilder(myFhirContext)
+			.replace()
+			.path("Patient.extension.where(url='http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName').value")
+			.value(new StringType("Two"))
+			.andThen()
+			.build();
+
+		// Test
+		myPatch.apply(input, patch);
+
+		// Verify
+		Extension ext = input.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName");
+		assertThat(ext).isNotNull();
+		assertThat(((StringType) ext.getValue()).getValue()).isEqualTo("Two");
+	}
+
+	@Test
+	void fail_Replace_ExtensionFilterSyntax_UrlNotFound() {
+		// Negative test: extension URL that does not exist should give HAPI-2761
+		Patient input = (Patient) buildPatient(withGiven("Sunny"), withFamily("Day"));
+		input.addExtension()
+			.setUrl("http://example.org/fhir/ext-exists")
+			.setValue(new StringType("Value"));
+
+		IBaseParameters patch = new FhirPatchBuilder(myFhirContext)
+			.replace()
+			.path("Patient.extension('http://example.org/fhir/ext-nonexistent').value")
+			.value(new StringType("NewValue"))
+			.andThen()
+			.build();
+
+		assertThatThrownBy(() -> myPatch.apply(input, patch))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("HAPI-2761");
+	}
+
+	@Test
+	void testReplace_ExtensionFilterSyntax_NestedExtension() {
+		// Setup: Patient with nested extensions: extension('url1').extension('url2').value
+		Patient input = (Patient) buildPatient(withGiven("Sunny"), withFamily("Day"));
+		Extension outerExt = input.addExtension();
+		outerExt.setUrl("http://example.org/fhir/ext-outer");
+		outerExt.addExtension()
+			.setUrl("http://example.org/fhir/ext-inner")
+			.setValue(new StringType("InnerOld"));
+
+		IBaseParameters patch = new FhirPatchBuilder(myFhirContext)
+			.replace()
+			.path("Patient.extension('http://example.org/fhir/ext-outer').extension('http://example.org/fhir/ext-inner').value")
+			.value(new StringType("InnerNew"))
+			.andThen()
+			.build();
+
+		// Test
+		myPatch.apply(input, patch);
+
+		// Verify
+		Extension outer = input.getExtensionByUrl("http://example.org/fhir/ext-outer");
+		assertThat(outer).isNotNull();
+		Extension inner = outer.getExtensionByUrl("http://example.org/fhir/ext-inner");
+		assertThat(inner).isNotNull();
+		assertThat(((StringType) inner.getValue()).getValue()).isEqualTo("InnerNew");
+	}
+
+	@Test
+	void testReplace_ExtensionFilterSyntax_SingleExtension() {
+		// Minimal case: resource with exactly one extension, replace its value
+		Patient input = new Patient();
+		input.addExtension()
+			.setUrl("http://example.org/fhir/ext-only")
+			.setValue(new StringType("Old"));
+
+		IBaseParameters patch = new FhirPatchBuilder(myFhirContext)
+			.replace()
+			.path("Patient.extension('http://example.org/fhir/ext-only').value")
+			.value(new StringType("New"))
+			.andThen()
+			.build();
+
+		// Test
+		myPatch.apply(input, patch);
+
+		// Verify
+		assertThat(input.getExtension()).hasSize(1);
+		assertThat(((StringType) input.getExtension().get(0).getValue()).getValue()).isEqualTo("New");
+	}
+
+	@Test
+	void testReplace_ModifierExtensionFilterSyntax_StringValue() {
+		// Setup: Patient with a modifierExtension containing a string value
+		Patient input = new Patient();
+		input.addModifierExtension()
+			.setUrl("http://example.org/fhir/mod-ext")
+			.setValue(new StringType("Old"));
+
+		IBaseParameters patch = new FhirPatchBuilder(myFhirContext)
+			.replace()
+			.path("Patient.modifierExtension('http://example.org/fhir/mod-ext').value")
+			.value(new StringType("New"))
+			.andThen()
+			.build();
+
+		// Test
+		myPatch.apply(input, patch);
+
+		// Verify
+		assertThat(input.getModifierExtension()).hasSize(1);
+		Extension ext = input.getModifierExtension().get(0);
+		assertThat(ext.getUrl()).isEqualTo("http://example.org/fhir/mod-ext");
+		assertThat(((StringType) ext.getValue()).getValue()).isEqualTo("New");
+	}
+
+	@Test
+	public void testReplace_ChoiceType() {
+		// Setup: Patient with a choice type element (deceased[x]) initially set to a dateTime value
+		Patient input = new Patient();
+		input.setDeceased(new DateTimeType("2025-01-01"));
+
+		IBaseParameters patch = new FhirPatchBuilder(myFhirContext)
+			.replace()
+			.path("Patient.deceased")
+			.value(new BooleanType(true))
+			.andThen()
+			.build();
+
+		// Test
+		myPatch.apply(input, patch);
+
+		// Verify
+		assertThat(input.getDeceased()).isInstanceOf(BooleanType.class);
+		assertThat(((BooleanType) input.getDeceased()).getValue()).isTrue();
 	}
 
 	/**
