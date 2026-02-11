@@ -103,8 +103,8 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 	private MdmSearchExpansionSvc myMdmSearchExpansionSvc;
 
 	@Hook(
-			value = Pointcut.STORAGE_PRESEARCH_REGISTERED,
-			order = MdmConstants.ORDER_PRESEARCH_REGISTERED_MDM_READ_VIRTUALIZATION_INTERCEPTOR)
+			value = Pointcut.STORAGE_PRESEARCH_PARTITION_SELECTED,
+			order = MdmConstants.STORAGE_PRESEARCH_PARTITION_SELECTED_MDM_READ_VIRTUALIZATION_INTERCEPTOR)
 	public void preSearchRegistered(
 			RequestDetails theRequestDetails,
 			SearchParameterMap theSearchParameterMap,
@@ -113,7 +113,7 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 				.atTrace()
 				.setMessage("MDM virtualization original search: {}{}")
 				.addArgument(theRequestDetails.getResourceName())
-				.addArgument(() -> theSearchParameterMap.toNormalizedQueryString(myFhirContext))
+				.addArgument(() -> theSearchParameterMap.toNormalizedQueryString())
 				.log();
 
 		String resourceType = theSearchDetails.getResourceType();
@@ -132,7 +132,7 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 				.atDebug()
 				.setMessage("MDM virtualization remapped search: {}{}")
 				.addArgument(theRequestDetails.getResourceName())
-				.addArgument(() -> theSearchParameterMap.toNormalizedQueryString(myFhirContext))
+				.addArgument(() -> theSearchParameterMap.toNormalizedQueryString())
 				.log();
 	}
 
