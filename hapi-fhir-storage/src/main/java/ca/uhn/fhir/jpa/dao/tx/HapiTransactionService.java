@@ -58,6 +58,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionOperations;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -728,5 +729,23 @@ public class HapiTransactionService implements IHapiTransactionService {
 		Validate.isTrue(
 				TransactionSynchronizationManager.isActualTransactionActive(),
 				"Transaction required here but no active transaction found");
+	}
+
+	/**
+	 * Registers a {@link Runnable} to be executed after the current active transaction is successfully committed,
+	 * using the {@link TransactionSynchronization#afterCommit()} callback. If no transaction is active, the runnable
+	 * is executed immediately.
+	 */
+	public static void executeAfterCommitOrExecuteNowIfNoTransactionIsActive(Runnable theRunnable) {
+		if (TransactionSynchronizationManager.isActualTransactionActive()) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCommit() {
+					theRunnable.run();
+				}
+			});
+		} else {
+			theRunnable.run();
+		}
 	}
 }

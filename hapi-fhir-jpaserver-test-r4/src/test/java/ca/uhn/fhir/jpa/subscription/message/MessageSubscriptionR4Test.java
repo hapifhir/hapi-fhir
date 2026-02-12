@@ -31,7 +31,9 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -63,6 +65,7 @@ import static org.mockito.Mockito.doReturn;
 /**
  * Test the rest-hook subscriptions
  */
+@TestMethodOrder(MethodOrderer.MethodName.class)
 public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	public static final String PATIENT_CHANNEL_NAME = "my-pat-queue";
 	public static final String ORGANIZATION_CHANNEL_NAME = "my-org-queue";

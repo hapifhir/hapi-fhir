@@ -59,7 +59,7 @@ class MemoryBasedDuplicateBlockingInterceptorTest implements ITestDataBuilder {
 		List<ILoggingEvent> logEvents = myLogbackTestExtension.getLogEvents();
 		ILoggingEvent lastEvent = logEvents.get(logEvents.size() - 1);
 		assertThat(lastEvent.getFormattedMessage())
-			.contains("Patient/B (30.0/min)");
+			.contains("Blocked creating a duplicate resource to Patient/B existing: Patient/A (30/hr)");
 	}
 
 	@Test

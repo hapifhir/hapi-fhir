@@ -24,6 +24,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.HashingWriter;
@@ -35,8 +36,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -145,10 +144,19 @@ public class MemoryBasedDuplicateBlockingInterceptor {
 		return 1;
 	}
 
-	private void storeResourceHashInCacheOnCommit(IBaseResource theResource, HashCode hashCode) {
+	private void storeResourceHashInCacheOnCommit(IBaseResource theResource, HashCode theResourceHashCode) {
 		String resourceId = getResourceId(theResource);
-		TransactionSynchronizationManager.registerSynchronization(
-				new NewResourceStoredSynchronization(hashCode, resourceId));
+
+		HapiTransactionService.executeAfterCommitOrExecuteNowIfNoTransactionIsActive(() -> {
+			synchronized (myLock) {
+				while (myResourceHashDeque.size() >= ENTRY_COUNT) {
+					HashCode removed = myResourceHashDeque.removeFirst();
+					myResourceHashSet.remove(removed);
+				}
+				myResourceHashSet.put(theResourceHashCode, resourceId);
+				myResourceHashDeque.add(theResourceHashCode);
+			}
+		});
 	}
 
 	private String getResourceId(IBaseResource theResource) {
@@ -168,27 +176,5 @@ public class MemoryBasedDuplicateBlockingInterceptor {
 			hashCode = hashingWriter.getHash();
 		}
 		return hashCode;
-	}
-
-	private class NewResourceStoredSynchronization implements TransactionSynchronization {
-		private final HashCode myResourceHashCode;
-		private final String myResourceId;
-
-		public NewResourceStoredSynchronization(HashCode theResourceHashCode, String theResourceId) {
-			myResourceHashCode = theResourceHashCode;
-			myResourceId = theResourceId;
-		}
-
-		@Override
-		public void afterCommit() {
-			synchronized (myLock) {
-				while (myResourceHashDeque.size() >= ENTRY_COUNT) {
-					HashCode removed = myResourceHashDeque.removeFirst();
-					myResourceHashSet.remove(removed);
-				}
-				myResourceHashSet.put(myResourceHashCode, myResourceId);
-				myResourceHashDeque.add(myResourceHashCode);
-			}
-		}
 	}
 }
