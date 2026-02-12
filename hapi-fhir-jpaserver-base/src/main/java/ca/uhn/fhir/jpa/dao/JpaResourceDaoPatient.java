@@ -140,6 +140,9 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 			RequestDetails theRequestDetails,
 			PatientEverythingParameters theQueryParams,
 			IIdType theId) {
+
+		read(theId, theRequestDetails);
+
 		TokenOrListParam id = new TokenOrListParam().add(new TokenParam(theId.getIdPart()));
 		return doEverythingOperation(
 				id,

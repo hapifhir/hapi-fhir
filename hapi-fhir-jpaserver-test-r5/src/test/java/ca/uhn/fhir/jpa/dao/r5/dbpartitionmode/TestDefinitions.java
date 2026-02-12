@@ -641,43 +641,45 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		List<String> actualIds = toUnqualifiedVersionlessIdValues(outcome);
 		assertThat(actualIds).asList().containsExactlyInAnyOrder(ids.allIdValues().toArray(new String[0]));
 
-		assertEquals(6, myCaptureQueriesListener.countSelectQueries());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(8, myCaptureQueriesListener.countSelectQueries());
+
 		assertThat(getSelectSql(0)).doesNotContainIgnoringCase("union");
 		if (myIncludePartitionIdsInSql) {
-			assertThat(getSelectSql(0)).endsWith(" where rt1_0.PARTITION_ID='1' and (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='" + ids.patientPid + "')");
+			assertThat(getSelectSql(2)).endsWith(" where rt1_0.PARTITION_ID='1' and (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='" + ids.patientPid + "')");
 		} else {
-			assertThat(getSelectSql(0)).endsWith(" where (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='" + ids.patientPid + "')");
+			assertThat(getSelectSql(2)).endsWith(" where (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='" + ids.patientPid + "')");
 		}
 
 		if (myIncludePartitionIdsInSql) {
-			assertThat(getSelectSql(1)).startsWith("SELECT DISTINCT t0.PARTITION_ID,t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK");
+			assertThat(getSelectSql(3)).startsWith("SELECT DISTINCT t0.PARTITION_ID,t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK");
 		} else {
-			assertThat(getSelectSql(1)).startsWith("SELECT DISTINCT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK");
+			assertThat(getSelectSql(3)).startsWith("SELECT DISTINCT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK");
 		}
 		if (myIncludePartitionIdsInPks) {
-			assertThat(getSelectSql(1)).contains("WHERE (((t0.TARGET_RES_PARTITION_ID,t0.TARGET_RESOURCE_ID) IN (('1','" + ids.patientPid + "')) )");
-			assertThat(getSelectSql(1)).contains("GROUP BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
-			assertThat(getSelectSql(1)).contains("ORDER BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
-			assertThat(getSelectSql(2)).containsAnyOf(
+			assertThat(getSelectSql(3)).contains("WHERE (((t0.TARGET_RES_PARTITION_ID,t0.TARGET_RESOURCE_ID) IN (('1','" + ids.patientPid + "')) )");
+			assertThat(getSelectSql(3)).contains("GROUP BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
+			assertThat(getSelectSql(3)).contains("ORDER BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
+			assertThat(getSelectSql(4)).containsAnyOf(
 				"from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.patientPid() + "','" + ids.encounterPid() + "') ",
 				"from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.encounterPid() + "','" + ids.patientPid() + "') "
 			);
-			assertThat(getSelectSql(3)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.childOrgPid() + "') ");
-			assertThat(getSelectSql(4)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.parentOrgPid() + "') ");
+			assertThat(getSelectSql(5)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.childOrgPid() + "') ");
+			assertThat(getSelectSql(6)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.PARTITION_ID='1' and rl1_0.SRC_RESOURCE_ID in ('" + ids.parentOrgPid() + "') ");
 		} else {
-			assertThat(getSelectSql(1)).contains("WHERE ((t0.TARGET_RESOURCE_ID = '" + ids.patientPid() + "') ");
+			assertThat(getSelectSql(3)).contains("WHERE ((t0.TARGET_RESOURCE_ID = '" + ids.patientPid() + "') ");
 			if (myIncludePartitionIdsInSql) {
-				assertThat(getSelectSql(1)).contains(" GROUP BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
+				assertThat(getSelectSql(3)).contains(" GROUP BY t0.PARTITION_ID,t0.SRC_RESOURCE_ID ");
 			} else {
-				assertThat(getSelectSql(1)).contains(" GROUP BY t0.SRC_RESOURCE_ID ");
+				assertThat(getSelectSql(3)).contains(" GROUP BY t0.SRC_RESOURCE_ID ");
 			}
-			assertThat(getSelectSql(1)).endsWith(" ORDER BY t0.SRC_RESOURCE_ID fetch first '10000' rows only");
-			assertThat(getSelectSql(2)).containsAnyOf(
+			assertThat(getSelectSql(3)).endsWith(" ORDER BY t0.SRC_RESOURCE_ID fetch first '10000' rows only");
+			assertThat(getSelectSql(4)).containsAnyOf(
 				"from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.patientPid() + "','" + ids.encounterPid() + "') ",
 				"from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.encounterPid() + "','" + ids.patientPid() + "') "
 			);
-			assertThat(getSelectSql(3)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.childOrgPid() + "') ");
-			assertThat(getSelectSql(4)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.parentOrgPid() + "') ");
+			assertThat(getSelectSql(5)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.childOrgPid() + "') ");
+			assertThat(getSelectSql(6)).contains("from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID in ('" + ids.parentOrgPid() + "') ");
 		}
 
 	}
