@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7555
+title: "The jpaserver-base POM had duplicate plugin entries that made it incompatible with recent versions of maven. 
+This has been corrected."
