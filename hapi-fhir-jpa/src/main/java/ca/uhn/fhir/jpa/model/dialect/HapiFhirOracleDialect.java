@@ -20,8 +20,15 @@
 package ca.uhn.fhir.jpa.model.dialect;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import org.hibernate.boot.model.TypeContributions;
 import org.hibernate.dialect.OracleDialect;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.type.SqlTypes;
+import org.hibernate.type.descriptor.jdbc.JdbcType;
+import org.hibernate.type.descriptor.jdbc.spi.JdbcTypeRegistry;
+
+import java.sql.Types;
 
 /**
  * Dialect for Oracle database.
@@ -48,5 +55,28 @@ public class HapiFhirOracleDialect extends OracleDialect implements IHapiFhirDia
 	@Override
 	public DriverTypeEnum getDriverType() {
 		return DriverTypeEnum.ORACLE_12C;
+	}
+
+	@Override
+	public int getPreferredSqlTypeCodeForBoolean() {
+		// Use Types.BIT instead of native Oracle 23 BOOLEAN type to maintain
+		// compatibility with existing NUMERIC(1,0) schema and match behavior
+		// of Oracle versions < 23
+		return Types.BIT;
+	}
+
+	@Override
+	public void contributeTypes(TypeContributions typeContributions, ServiceRegistry serviceRegistry) {
+		super.contributeTypes(typeContributions, serviceRegistry);
+
+		// What follows is necessary for Oracle 23+ which would otherwise try to use
+		// native BOOLEAN type that causes conversion issues with existing
+		// NUMERIC(1,0) schemas.
+		JdbcTypeRegistry jdbcTypeRegistry =
+				typeContributions.getTypeConfiguration().getJdbcTypeRegistry();
+
+		// Use TINYINT type descriptor which handles Boolean <-> Integer conversion
+		JdbcType tinyIntType = jdbcTypeRegistry.getDescriptor(SqlTypes.TINYINT);
+		jdbcTypeRegistry.addDescriptor(SqlTypes.BOOLEAN, tinyIntType);
 	}
 }

@@ -78,20 +78,20 @@ public class TermValueSetConceptDesignation extends BasePartitionable implements
 				@JoinColumn(
 						name = "VALUESET_CONCEPT_PID",
 						referencedColumnName = "PID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false),
 				@JoinColumn(
 						name = "PARTITION_ID",
 						referencedColumnName = "PARTITION_ID",
-						insertable = true,
+						insertable = false,
 						updatable = false,
 						nullable = false)
 			},
 			foreignKey = @ForeignKey(name = "FK_TRM_VALUESET_CONCEPT_PID"))
 	private TermValueSetConcept myConcept;
 
-	@Column(name = "VALUESET_CONCEPT_PID", insertable = false, updatable = false, nullable = false)
+	@Column(name = "VALUESET_CONCEPT_PID", insertable = true, updatable = false, nullable = false)
 	private Long myConceptPid;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -113,7 +113,7 @@ public class TermValueSetConceptDesignation extends BasePartitionable implements
 			foreignKey = @ForeignKey(name = "FK_TRM_VSCD_VS_PID"))
 	private TermValueSet myValueSet;
 
-	@Column(name = "VALUESET_PID", insertable = true, updatable = true, nullable = false)
+	@Column(name = "VALUESET_PID", nullable = false)
 	private Long myValueSetPid;
 
 	@Transient
@@ -154,6 +154,8 @@ public class TermValueSetConceptDesignation extends BasePartitionable implements
 
 	public TermValueSetConceptDesignation setConcept(TermValueSetConcept theConcept) {
 		myConcept = theConcept;
+		myConceptPid = theConcept.getId();
+		assert myConceptPid != null;
 		setPartitionId(theConcept.getPartitionId());
 		return this;
 	}
@@ -162,7 +164,7 @@ public class TermValueSetConceptDesignation extends BasePartitionable implements
 		return myValueSet;
 	}
 
-	public TermValueSetConceptDesignation setValueSet(TermValueSet theValueSet) {
+	public TermValueSetConceptDesignation setValueSet(@Nonnull TermValueSet theValueSet) {
 		myValueSet = theValueSet;
 		myValueSetPid = theValueSet.getId();
 		assert myValueSetPid != null;

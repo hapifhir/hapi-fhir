@@ -46,6 +46,10 @@ public class JpaResourceDaoEncounter<T extends IBaseResource> extends BaseHapiFh
 			DateRangeParam theLastUpdated,
 			SortSpec theSort) {
 
+		if (theId != null) {
+			read(theId, theRequest);
+		}
+
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {
 			paramMap.setCount(theCount.getValue());
