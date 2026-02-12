@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 7555
+title: "Previously, building HAPI-FHIR could potentially cause a compatibility error. This has been fixed."
