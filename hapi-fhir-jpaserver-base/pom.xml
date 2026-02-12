@@ -427,126 +427,75 @@
 				<executions>
 					<execution>
 						<id>build_dstu2</id>
-						<goals>
-							<goal>generate-jparest-server</goal>
-						</goals>
+						<goals><goal>generate-jparest-server</goal></goals>
 						<configuration>
 							<version>dstu2</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.dstu2</packageBase>
 							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu2.xml</targetResourceSpringBeansFile>
-							<baseResourceNames/>
-							<excludeResourceNames/>
 						</configuration>
 					</execution>
 					<execution>
 						<id>build_dstu3</id>
-						<goals>
-							<goal>generate-jparest-server</goal>
-						</goals>
+						<goals><goal>generate-jparest-server</goal></goals>
 						<configuration>
 							<version>dstu3</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.dstu3</packageBase>
 							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu3.xml</targetResourceSpringBeansFile>
-							<baseResourceNames/>
-							<excludeResourceNames/>
 						</configuration>
 					</execution>
 					<execution>
 						<id>build_r4</id>
-						<goals>
-							<goal>generate-jparest-server</goal>
-						</goals>
+						<goals><goal>generate-jparest-server</goal></goals>
 						<configuration>
 							<version>r4</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.r4</packageBase>
 							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r4.xml</targetResourceSpringBeansFile>
-							<baseResourceNames/>
-							<excludeResourceNames/>
 						</configuration>
 					</execution>
 					<execution>
 						<id>build_r4b</id>
-						<goals>
-							<goal>generate-jparest-server</goal>
-						</goals>
+						<goals><goal>generate-jparest-server</goal></goals>
 						<configuration>
 							<version>r4b</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.r4b</packageBase>
 							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r4b.xml</targetResourceSpringBeansFile>
-							<baseResourceNames/>
-							<excludeResourceNames/>
 						</configuration>
 					</execution>
 					<execution>
 						<id>build_r5</id>
-						<goals>
-							<goal>generate-jparest-server</goal>
-						</goals>
+						<goals><goal>generate-jparest-server</goal></goals>
 						<configuration>
 							<version>r5</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.r5</packageBase>
-							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r5.xml
-							</targetResourceSpringBeansFile>
-							<baseResourceNames></baseResourceNames>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r5.xml</targetResourceSpringBeansFile>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>generate-ddl-legacy</id>
+						<phase>process-classes</phase>
+						<goals><goal>generate-ddl</goal></goals>
+						<configuration>
+							<databasePartitionMode>false</databasePartitionMode>
+							<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/nonpartitioned</outputDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate-ddl-partitioned</id>
+						<phase>process-classes</phase>
+						<goals><goal>generate-ddl</goal></goals>
+						<configuration>
+							<databasePartitionMode>true</databasePartitionMode>
+							<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/partitioned</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>ca.uhn.hapi.fhir</groupId>
-						<artifactId>hapi-fhir-structures-dstu2</artifactId>
-						<version>${project.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>ca.uhn.hapi.fhir</groupId>
-						<artifactId>hapi-fhir-structures-dstu3</artifactId>
-						<version>${project.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>ca.uhn.hapi.fhir</groupId>
-						<artifactId>hapi-fhir-structures-r4</artifactId>
-						<version>${project.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>ca.uhn.hapi.fhir</groupId>
-						<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
-						<version>${project.version}</version>
-					</dependency>
-				</dependencies>
-			</plugin>
 
-			<!-- Generate the DDL schema files -->
-			<plugin>
-				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>${project.version}</version>
-				<executions><execution><id>generate-ddl-legacy</id>
-					<phase>process-classes</phase>
-				<goals>
-					<goal>generate-ddl</goal>
-				</goals>
-					<configuration>
-						<databasePartitionMode>false</databasePartitionMode>
-						<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/nonpartitioned</outputDirectory>
-					</configuration>
-				</execution>
-				<execution>
-					<id>generate-ddl-partitioned</id>
-					<phase>process-classes</phase>
-				<goals>
-					<goal>generate-ddl</goal>
-				</goals>
-					<configuration>
-						<databasePartitionMode>true</databasePartitionMode>
-						<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/partitioned</outputDirectory>
-					</configuration>
-				</execution>
-				</executions>
 				<configuration>
 					<packageNames>
 						<packageName>ca.uhn.fhir.jpa.entity</packageName>
@@ -588,7 +537,28 @@
 						</dialect>
 					</dialects>
 				</configuration>
+
 				<dependencies>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-structures-dstu2</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-structures-dstu3</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-structures-r4</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
+						<version>${project.version}</version>
+					</dependency>
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-jpaserver-model</artifactId>
@@ -600,30 +570,8 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>add-source</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>add-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>target/generated-sources/tinder</source>
-							</sources>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
-		<resources>
-			<resource>
-				<directory>${project.basedir}/src/main/resources</directory>
-			</resource>
-			<resource>
-				<directory>${project.basedir}/target/generated-resources/tinder</directory>
-			</resource>
-		</resources>
 	</build>
 
 </project>
