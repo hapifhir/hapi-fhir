@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
@@ -149,7 +150,8 @@ public class ResourceMergeServiceTest {
 		ExtensionBasedLinkService extensionBasedLinkService = new ExtensionBasedLinkService();
 		ResourceLinkServiceFactory resourceLinkServiceFactory = new ResourceLinkServiceFactory(patientNativeLinkService, extensionBasedLinkService);
 
-		MergeValidationService myMergeValidationService = new MergeValidationService(myFhirContext, myDaoRegistryMock, resourceLinkServiceFactory);
+		ISearchParamExtractor searchParamExtractor = mock(ISearchParamExtractor.class);
+		MergeValidationService myMergeValidationService = new MergeValidationService(myFhirContext, myDaoRegistryMock, resourceLinkServiceFactory, searchParamExtractor);
 		MergeProvenanceSvc myMergeProvenanceService = new MergeProvenanceSvc(myDaoRegistryMock);
 		MergeResourceHelper myMergeResourceHelper = new MergeResourceHelper(myDaoRegistryMock, myMergeProvenanceService, resourceLinkServiceFactory);
 
