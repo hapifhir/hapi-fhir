@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -468,7 +467,8 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 			}
 			return outcome;
 		} catch (IOException e) {
-			throw new InternalErrorException(Msg.code(2842) + "Error releasing maintenance hold", e);
+			// MaintenanceHold.close() never throws IOException — this catch is required by Closeable's declaration
+			throw new InternalErrorException(e);
 		}
 	}
 }

@@ -227,13 +227,13 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 		try {
 			if (!myRunMaintenanceSemaphore.tryAcquire(HOLD_MAINTENANCE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
 				throw new InternalErrorException(
-						Msg.code(2840) + "Timed out waiting to acquire maintenance hold for expunge after "
+						Msg.code(2842) + "Timed out waiting to acquire maintenance hold for expunge after "
 								+ HOLD_MAINTENANCE_TIMEOUT_SECONDS + " seconds");
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new InternalErrorException(
-					Msg.code(2841) + "Interrupted while waiting to acquire maintenance hold for expunge", e);
+					Msg.code(2843) + "Interrupted while waiting to acquire maintenance hold for expunge", e);
 		}
 		ourLog.info("Acquired hold on maintenance for expunge operation");
 		return new MaintenanceHold(myRunMaintenanceSemaphore);
