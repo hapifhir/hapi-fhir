@@ -236,18 +236,23 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 					Msg.code(2841) + "Interrupted while waiting to acquire maintenance hold for expunge", e);
 		}
 		ourLog.info("Acquired hold on maintenance for expunge operation");
-		return new MaintenanceHold();
+		return new MaintenanceHold(myRunMaintenanceSemaphore);
 	}
 
 	// Created by claude-opus-4-6
-	private class MaintenanceHold implements Closeable {
+	private static class MaintenanceHold implements Closeable {
 		private final AtomicBoolean myClosed = new AtomicBoolean(false);
+		private final Semaphore mySemaphore;
+
+		MaintenanceHold(Semaphore theSemaphore) {
+			mySemaphore = theSemaphore;
+		}
 
 		@Override
 		public void close() {
 			if (myClosed.compareAndSet(false, true)) {
 				ourLog.info("Releasing maintenance hold for expunge operation");
-				myRunMaintenanceSemaphore.release();
+				mySemaphore.release();
 			}
 		}
 	}

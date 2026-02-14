@@ -44,6 +44,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -54,9 +55,10 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -595,7 +597,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Collections.emptyList());
 
 		// Acquire the hold — this takes the semaphore
-		try (java.io.Closeable hold = mySvc.holdMaintenanceForExpunge()) {
+		try (Closeable hold = mySvc.holdMaintenanceForExpunge()) {
 			// runMaintenancePass() tries tryAcquire(), fails, and returns immediately
 			mySvc.runMaintenancePass();
 			verify(myJobPersistence, never()).fetchInstances(anyInt(), anyInt());
@@ -643,7 +645,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			return Collections.emptyList();
 		});
 
-		java.util.concurrent.atomic.AtomicBoolean holdAcquired = new java.util.concurrent.atomic.AtomicBoolean(false);
+		AtomicBoolean holdAcquired = new AtomicBoolean(false);
 		ExecutorService maintenanceExecutor = Executors.newSingleThreadExecutor();
 		ExecutorService holdExecutor = Executors.newSingleThreadExecutor();
 		try {
@@ -652,8 +654,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			maintenanceStarted.await();
 
 			// Thread C: try to acquire hold — blocks because Thread B holds the semaphore
-			Future<java.io.Closeable> holdFuture = holdExecutor.submit(() -> {
-				java.io.Closeable hold = mySvc.holdMaintenanceForExpunge();
+			Future<Closeable> holdFuture = holdExecutor.submit(() -> {
+				Closeable hold = mySvc.holdMaintenanceForExpunge();
 				holdAcquired.set(true);
 				return hold;
 			});
@@ -668,7 +670,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			maintenanceFuture.get(5, TimeUnit.SECONDS);
 
 			// Thread C has acquired the hold
-			java.io.Closeable hold = holdFuture.get(5, TimeUnit.SECONDS);
+			Closeable hold = holdFuture.get(5, TimeUnit.SECONDS);
 			assertThat(holdAcquired.get()).isTrue();
 			hold.close();
 		} finally {
@@ -688,7 +690,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	// Created by claude-opus-4-6
 	@Test
 	void holdMaintenanceForExpunge_closeMultipleTimes_noError() throws Exception {
-		java.io.Closeable hold = mySvc.holdMaintenanceForExpunge();
+		Closeable hold = mySvc.holdMaintenanceForExpunge();
 		hold.close();
 		hold.close(); // Must not double-release the semaphore
 
