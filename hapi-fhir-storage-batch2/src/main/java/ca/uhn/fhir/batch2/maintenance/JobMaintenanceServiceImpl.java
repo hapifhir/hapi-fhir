@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.Logs;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
@@ -42,11 +43,13 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.Closeable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class performs regular polls of the stored jobs in order to
@@ -83,6 +86,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	public static final int INSTANCES_PER_PASS = 100;
 	public static final String SCHEDULED_JOB_ID = JobMaintenanceScheduledJob.class.getName();
 	public static final int MAINTENANCE_TRIGGER_RUN_WITHOUT_SCHEDULER_TIMEOUT = 5;
+	private static final long HOLD_MAINTENANCE_TIMEOUT_SECONDS = 300;
 
 	private long myFailedJobLifetimeOverride = -1;
 
@@ -207,6 +211,38 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	@Override
 	public void enableMaintenancePass(boolean theToEnable) {
 		myEnabledBool = theToEnable;
+	}
+
+	// Created by claude-opus-4-6
+	@Override
+	public Closeable holdMaintenanceForExpunge() {
+		ourLog.info("Requesting hold on maintenance for expunge operation");
+		try {
+			if (!myRunMaintenanceSemaphore.tryAcquire(HOLD_MAINTENANCE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+				throw new InternalErrorException(
+						Msg.code(2840) + "Timed out waiting to acquire maintenance hold for expunge after "
+								+ HOLD_MAINTENANCE_TIMEOUT_SECONDS + " seconds");
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new InternalErrorException(
+					Msg.code(2841) + "Interrupted while waiting to acquire maintenance hold for expunge", e);
+		}
+		ourLog.info("Acquired hold on maintenance for expunge operation");
+		return new MaintenanceHold();
+	}
+
+	// Created by claude-opus-4-6
+	private class MaintenanceHold implements Closeable {
+		private final AtomicBoolean myClosed = new AtomicBoolean(false);
+
+		@Override
+		public void close() {
+			if (myClosed.compareAndSet(false, true)) {
+				ourLog.info("Releasing maintenance hold for expunge operation");
+				myRunMaintenanceSemaphore.release();
+			}
+		}
 	}
 
 	@Override

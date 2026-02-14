@@ -579,6 +579,77 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		assertTrue(result2.get());
 	}
 
+	// Created by claude-opus-4-6
+	@Test
+	void holdMaintenanceForExpunge_whileHeld_maintenancePassSkips() throws Exception {
+		// Setup
+		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Collections.emptyList());
+
+		// Execute: acquire the hold
+		try (java.io.Closeable hold = mySvc.holdMaintenanceForExpunge()) {
+			// Maintenance should skip because semaphore is held
+			mySvc.runMaintenancePass();
+			// Verify maintenance did NOT run (fetchInstances not called because semaphore was unavailable)
+			verify(myJobPersistence, never()).fetchInstances(anyInt(), anyInt());
+		}
+
+		// After release, maintenance should work
+		mySvc.runMaintenancePass();
+		verify(myJobPersistence, times(1)).fetchInstances(anyInt(), eq(0));
+	}
+
+	// Created by claude-opus-4-6
+	@Test
+	void holdMaintenanceForExpunge_whileMaintenanceRunning_blocksUntilComplete() throws Exception {
+		// Setup: maintenance blocks on a latch
+		CountDownLatch maintenanceStarted = new CountDownLatch(1);
+		CountDownLatch maintenanceCanFinish = new CountDownLatch(1);
+
+		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenAnswer(t -> {
+			maintenanceStarted.countDown();
+			maintenanceCanFinish.await();
+			return Collections.emptyList();
+		});
+
+		// Start maintenance in background
+		java.util.concurrent.atomic.AtomicBoolean holdAcquired = new java.util.concurrent.atomic.AtomicBoolean(false);
+		Future<?> maintenanceFuture = Executors.newSingleThreadExecutor().submit(() -> mySvc.runMaintenancePass());
+		maintenanceStarted.await();
+
+		// Try to acquire hold in background - should block
+		Future<java.io.Closeable> holdFuture = Executors.newSingleThreadExecutor().submit(() -> {
+			java.io.Closeable hold = mySvc.holdMaintenanceForExpunge();
+			holdAcquired.set(true);
+			return hold;
+		});
+
+		// Give it a moment - hold should NOT be acquired yet
+		Thread.sleep(200);
+		assertThat(holdAcquired.get()).isFalse();
+
+		// Release maintenance
+		maintenanceCanFinish.countDown();
+		maintenanceFuture.get(5, java.util.concurrent.TimeUnit.SECONDS);
+
+		// Now the hold should be acquired
+		java.io.Closeable hold = holdFuture.get(5, java.util.concurrent.TimeUnit.SECONDS);
+		assertThat(holdAcquired.get()).isTrue();
+		hold.close();
+	}
+
+	// Created by claude-opus-4-6
+	@Test
+	void holdMaintenanceForExpunge_closeMultipleTimes_noError() throws Exception {
+		java.io.Closeable hold = mySvc.holdMaintenanceForExpunge();
+		hold.close();
+		hold.close(); // Should not throw or double-release
+
+		// Verify maintenance still works after double-close
+		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Collections.emptyList());
+		mySvc.runMaintenancePass();
+		verify(myJobPersistence, times(1)).fetchInstances(anyInt(), eq(0));
+	}
+
 	private static Date parseTime(String theDate) {
 		return new DateTimeType(theDate).getValue();
 	}
