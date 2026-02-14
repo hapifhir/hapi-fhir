@@ -205,7 +205,12 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	public void forceMaintenancePass() {
 		// to simulate a long running job!
 		ourLog.info("Forcing a maintenance pass run; semaphore at {}", getQueueLength());
-		doMaintenancePass();
+		myRunMaintenanceSemaphore.acquireUninterruptibly();
+		try {
+			doMaintenancePass();
+		} finally {
+			myRunMaintenanceSemaphore.release();
+		}
 	}
 
 	@Override
