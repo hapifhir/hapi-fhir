@@ -183,15 +183,17 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			// it is requested
 			if (myRunMaintenanceSemaphore.tryAcquire(
 					MAINTENANCE_TRIGGER_RUN_WITHOUT_SCHEDULER_TIMEOUT, TimeUnit.MINUTES)) {
-				ourLog.debug("Semaphore acquired.  Starting maintenance pass.");
-				doMaintenancePass();
+				try {
+					ourLog.debug("Semaphore acquired.  Starting maintenance pass.");
+					doMaintenancePass();
+				} finally {
+					ourLog.debug("Maintenance pass complete.  Releasing semaphore.");
+					myRunMaintenanceSemaphore.release();
+				}
 			}
 			return true;
 		} catch (InterruptedException e) {
 			throw new RuntimeException(Msg.code(2134) + "Timed out waiting to run a maintenance pass", e);
-		} finally {
-			ourLog.debug("Maintenance pass complete.  Releasing semaphore.");
-			myRunMaintenanceSemaphore.release();
 		}
 	}
 
