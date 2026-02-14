@@ -50,7 +50,11 @@ public interface IJobMaintenanceService {
 
 	/**
 	 * Forces a second maintenance run.
-	 * Only to be used in tests to simulate a long running maintenance step
+	 * Only to be used in tests to simulate a long running maintenance step.
+	 *
+	 * <p><b>Warning:</b> This method acquires the maintenance semaphore with an uninterruptible
+	 * blocking wait. Do not call this while {@link #holdMaintenanceForExpunge()} is held on the
+	 * same thread — it will deadlock.
 	 */
 	@VisibleForTesting
 	void forceMaintenancePass();
