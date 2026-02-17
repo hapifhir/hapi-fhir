@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -76,14 +78,15 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.StopWatch;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
 import jakarta.persistence.Query;
@@ -100,6 +103,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.util.comparator.Comparators;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -124,6 +129,9 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
+	@Autowired
+	private IJobMaintenanceService myJobMaintenanceService;
 
 	private int deletedResourceEntityCount;
 
@@ -169,10 +177,7 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 					counter.addAndGet(doExpungeEverythingQuery(
 							"UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null"));
 				});
-		// Delete Batch2 entities together in a loop to handle FK constraints.
-		// Work chunks have FK to job instances, so both must be deleted in the same
-		// transaction to prevent race conditions with job maintenance creating new chunks.
-		counter.addAndGet(expungeBatch2EntitiesInSingleTransaction(theRequest, requestPartitionId));
+		counter.addAndGet(expungeBatch2Entities(theRequest, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
 				theRequest, ResourceIdentifierPatientUniqueEntity.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
@@ -408,95 +413,62 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		return outcome;
 	}
 
+	private static final int EXPUNGE_BATCH2_MAX_RETRIES = 10;
+
 	/**
-	 * Deletes Batch2WorkChunkEntity and Batch2JobInstanceEntity together in the same transaction
-	 * to avoid both FK constraint violations from race conditions with job maintenance AND potential
-	 * deadlocks from opposite lock ordering.
+	 * Deletes Batch2WorkChunkEntity and Batch2JobInstanceEntity while holding the maintenance
+	 * semaphore (via {@link IJobMaintenanceService#holdMaintenanceForExpunge()}) to prevent any
+	 * concurrent maintenance pass from inserting or updating batch2 entities during deletion.
 	 *
-	 * <p>Work chunks have a foreign key (FK_BT2WC_INSTANCE) referencing job instances, so we must
-	 * delete work chunks before job instances. However, job maintenance operations acquire locks
-	 * in the opposite order (job instance first, then work chunks). To prevent deadlocks, we use
-	 * SELECT FOR UPDATE to acquire locks on job instances FIRST (matching maintenance's lock order),
-	 * then delete work chunks, then delete job instances.
+	 * <p>The semaphore hold prevents maintenance on the local JVM. In clustered deployments,
+	 * maintenance on another node could still create new work chunks between passes. The retry
+	 * loop catches FK constraint violations and retries the deletion cycle.
 	 *
-	 * <p>Lock ordering:
-	 * <ul>
-	 *   <li>This method: SELECT FOR UPDATE JobInstances → DELETE WorkChunks → DELETE JobInstances</li>
-	 *   <li>Maintenance: UPDATE/SELECT JobInstance → UPDATE/DELETE WorkChunks</li>
-	 * </ul>
+	 * <p>Work chunks have a foreign key (FK_BT2WC_INSTANCE) referencing job instances, so we
+	 * delete work chunks before job instances.
 	 */
-	// Created by claude-opus-4-5
-	private int expungeBatch2EntitiesInSingleTransaction(
-			RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+	// Created by claude-opus-4-6
+	@VisibleForTesting
+	int expungeBatch2Entities(RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 		HapiTransactionService.noTransactionAllowed();
 
-		int outcome = 0;
-		int maxRetries = 10;
-		int consecutiveFailures = 0;
-		while (true) {
-			StopWatch sw = new StopWatch();
-
-			int count;
-			try {
-				count = myTxService
-						.withRequest(theRequest)
-						.withPropagation(Propagation.REQUIRES_NEW)
-						.withRequestPartitionId(theRequestPartitionId)
-						.execute(() -> {
-							// Step 1: Lock job instance IDs first using SELECT FOR UPDATE
-							// This establishes consistent lock ordering with maintenance operations
-							// which also lock job instances before work chunks
-							@SuppressWarnings("unchecked")
-							List<String> instanceIds = myEntityManager
-									.createQuery("SELECT e.myId FROM " + Batch2JobInstanceEntity.class.getSimpleName()
-											+ " e")
-									.setMaxResults(SearchBuilder.getMaximumPageSize() / 2)
-									.setLockMode(LockModeType.PESSIMISTIC_WRITE)
-									.getResultList();
-
-							if (instanceIds.isEmpty()) {
-								return 0;
-							}
-
-							int deleted = 0;
-
-							// Step 2: Delete work chunks for these instances (child table with FK)
-							deleted += myEntityManager
-									.createQuery("DELETE FROM " + Batch2WorkChunkEntity.class.getSimpleName()
-											+ " e WHERE e.myInstanceId IN (:instanceIds)")
-									.setParameter("instanceIds", instanceIds)
-									.executeUpdate();
-
-							// Step 3: Delete job instances (parent table, locks already held)
-							deleted += myEntityManager
-									.createQuery("DELETE FROM " + Batch2JobInstanceEntity.class.getSimpleName()
-											+ " e WHERE e.myId IN (:instanceIds)")
-									.setParameter("instanceIds", instanceIds)
-									.executeUpdate();
-
-							return deleted;
-						});
-			} catch (ResourceVersionConflictException e) {
-				consecutiveFailures++;
-				if (consecutiveFailures > maxRetries) {
-					ourLog.error("Failed to delete Batch2 entities after {} retries", maxRetries);
-					throw e;
+		// Hold the maintenance semaphore while deleting batch2 entities.
+		// This prevents the local maintenance job from inserting/updating work chunks and job
+		// instances while we are deleting them, eliminating FK violations and deadlocks.
+		try (Closeable ignored = myJobMaintenanceService.holdMaintenanceForExpunge()) {
+			int outcome = 0;
+			int consecutiveFailures = 0;
+			while (true) {
+				int deleted;
+				try {
+					// Delete work chunks first (child FK), then job instances (parent)
+					deleted = 0;
+					deleted += expungeEverythingByTypeWithoutPurging(
+							theRequest, Batch2WorkChunkEntity.class, theRequestPartitionId);
+					deleted += expungeEverythingByTypeWithoutPurging(
+							theRequest, Batch2JobInstanceEntity.class, theRequestPartitionId);
+				} catch (ResourceVersionConflictException e) {
+					// In clustered deployments, maintenance on another node may create new
+					// work chunks, causing FK violations when we delete job instances.
+					consecutiveFailures++;
+					if (consecutiveFailures > EXPUNGE_BATCH2_MAX_RETRIES) {
+						throw e;
+					}
+					ourLog.info(
+							"Retrying batch2 entity deletion due to constraint conflict (attempt {}/{})",
+							consecutiveFailures,
+							EXPUNGE_BATCH2_MAX_RETRIES);
+					continue;
 				}
-				ourLog.info(
-						"Retrying Batch2 entity deletion due to constraint conflict (attempt {}/{})",
-						consecutiveFailures,
-						maxRetries);
-				continue;
+				consecutiveFailures = 0;
+				outcome += deleted;
+				if (deleted == 0) {
+					break;
+				}
 			}
-
-			consecutiveFailures = 0;
-			outcome += count;
-			if (count == 0) {
-				break;
-			}
-
-			ourLog.info("Have deleted {} Batch2 entities in {}", outcome, sw);
+			return outcome;
+		} catch (IOException e) {
+			throw new InternalErrorException(Msg.code(2844) + "Error releasing maintenance hold", e);
 		}
-		return outcome;
 	}
 }

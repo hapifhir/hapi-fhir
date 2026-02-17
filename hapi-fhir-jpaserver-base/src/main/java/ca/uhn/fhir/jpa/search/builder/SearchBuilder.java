@@ -887,6 +887,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			extractTargetPidsFromIdParams(targetPids);
 
+			if (targetPids.isEmpty()) {
+				// An _id parameter was provided to perform an instance $everything operation,
+				// but the ID could not be resoled to any PIDs --> throw ResourceNotFoundException as per FHIR spec
+				throw new ResourceNotFoundException(
+						Msg.code(2841) + "Resource " + myParams.get(IAnyResource.SP_RES_ID) + " is not known.");
+			}
+
 			// add the target pids to our executors as the first
 			// results iterator to go through
 			theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(new ArrayList<>(targetPids)));

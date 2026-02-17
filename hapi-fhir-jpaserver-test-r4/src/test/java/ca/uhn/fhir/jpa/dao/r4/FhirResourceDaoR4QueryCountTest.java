@@ -1074,10 +1074,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		params.setCount(new IntegerType(10));
 		IBundleProvider outcome = myPatientDao.patientInstanceEverything(null, mySrd, params, pid);
 		assertEquals(10, outcome.getResources(0, 10).size());
-		assertEquals(7, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(17, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(4, myCaptureQueriesListener.countCommits());
+		assertEquals(3, myCaptureQueriesListener.countCommits());
 
 		// Page 2
 		myCaptureQueriesListener.clear();
