@@ -35,13 +35,14 @@
 
 package ca.uhn.fhir.test.utilities;
 
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.text.MessageFormat;
 
 /**
  * This JUnit rule generates log messages to delineate the start and finish of a JUnit test case and also to note any exceptions
@@ -50,17 +51,34 @@ import java.text.MessageFormat;
  * @author <a href="mailto:brian@btmatthews.com">Brian Matthews</a>
  * @version 1.0.0
  */
-public class LoggingExtension implements BeforeEachCallback, AfterEachCallback {
-
-	@Override
-	public void afterEach(ExtensionContext context) {
-		final Logger logger = LoggerFactory.getLogger(context.getTestClass().get());
-		logger.info(MessageFormat.format("Finished test case [{0}]", context.getTestMethod().get().getName()));
-	}
+public class LoggingExtension implements BeforeEachCallback, BeforeTestExecutionCallback, AfterEachCallback, AfterTestExecutionCallback {
 
 	@Override
 	public void beforeEach(ExtensionContext context) {
-		final Logger logger = LoggerFactory.getLogger(context.getTestClass().get());
-		logger.info(MessageFormat.format("Starting test case [{0}]", context.getTestMethod().get().getName()));
+		getLoggerForTestClass(context).info("Starting setup for test case [{}]", getMethodName(context));
 	}
+
+	@Override
+	public void beforeTestExecution(ExtensionContext context) {
+		getLoggerForTestClass(context).info("Starting test case [{}]", getMethodName(context));
+
+	}
+	@Override
+	public void afterTestExecution(ExtensionContext context) {
+		getLoggerForTestClass(context).info("Finished test case [{}]", getMethodName(context));
+	}
+
+	@Override
+	public void afterEach(ExtensionContext context) {
+		getLoggerForTestClass(context).info("Finished teardown for test case [{}]", getMethodName(context));
+	}
+
+	private static Logger getLoggerForTestClass(ExtensionContext context) {
+		return LoggerFactory.getLogger(context.getTestClass().orElseThrow());
+	}
+
+	private static @Nonnull String getMethodName(ExtensionContext context) {
+		return context.getTestMethod().orElseThrow().getName();
+	}
+
 }
