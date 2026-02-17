@@ -2259,7 +2259,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				}
 			}
 
-			final Integer offset = RestfulServerUtils.extractOffsetParameter(theRequest);
+			final Integer offset = theParams.getOffset() != null ? theParams.getOffset() : RestfulServerUtils.extractOffsetParameter(theRequest);
 			if (offset != null || !isPagingProviderDatabaseBacked(theRequest)) {
 				theParams.setLoadSynchronous(true);
 				if (offset != null) {
@@ -2268,7 +2268,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				theParams.setOffset(offset);
 			}
 
-			Integer count = RestfulServerUtils.extractCountParameter(theRequest);
+			Integer count = theParams.getCount() != null ? theParams.getCount() : RestfulServerUtils.extractCountParameter(theRequest);
 			if (count != null) {
 				Integer maxPageSize = theRequest.getServer().getMaximumPageSize();
 				if (maxPageSize != null && count > maxPageSize) {
