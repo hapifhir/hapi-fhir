@@ -76,14 +76,16 @@ public class PrefetchTemplateUtil {
 				fhirPath.setEvaluationContext(new IFhirPathEvaluationContext() {
 					@Override
 					public IBase resolveReference(@Nonnull IIdType theReference, @Nullable IBase theContext) {
-						return BundleUtil.getResourceByReferenceAndResourceType(theFhirContext, (IBaseBundle) resource, (IBaseReference) theContext);
+						return BundleUtil.getResourceByReferenceAndResourceType(
+								theFhirContext, (IBaseBundle) resource, (IBaseReference) theContext);
 					}
 				});
-				final List<IBase> results = fhirPath.evaluate(resource, resource.fhirType() + "." + fhirPathExpression, IBase.class);
+				final List<IBase> results =
+						fhirPath.evaluate(resource, resource.fhirType() + "." + fhirPathExpression, IBase.class);
 				final String resourceIds = results.stream()
 						.map(result -> {
 							if (result instanceof IBaseResource baseResource) {
-								return  baseResource.getIdElement().getIdPart();
+								return baseResource.getIdElement().getIdPart();
 							} else if (result instanceof IPrimitiveType) {
 								return ((IPrimitiveType<?>) result).getValueAsString();
 							} else {
