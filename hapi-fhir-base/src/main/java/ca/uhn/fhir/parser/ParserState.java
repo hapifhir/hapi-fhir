@@ -1468,7 +1468,68 @@ class ParserState<T> {
 						myInstance.setValueAsString(value);
 					} catch (DataFormatException | IllegalArgumentException e) {
 						ParseLocation location = ParseLocation.fromElementName(myChildName);
-						myErrorHandler.invalidValue(location, value, e.getMessage());
+
+						// If this primitive is an enumeration, attempt a case-insensitive match against the enum
+						// factory. If a match is found, emit an invalidValue
+						// to the parser error handler (so callers can decide fatal vs recoverable) and set the
+						// corrected enum value on the datatype.
+						if (myInstance instanceof org.hl7.fhir.instance.model.api.IBaseEnumeration) {
+							org.hl7.fhir.instance.model.api.IBaseEnumFactory<?> factory =
+									((org.hl7.fhir.instance.model.api.IBaseEnumeration<?>) myInstance).getEnumFactory();
+
+							boolean corrected = false;
+							if (factory != null && value != null) {
+								// Use raw factory to avoid generic signature issues when calling toCode/fromCode
+								@SuppressWarnings("rawtypes")
+								org.hl7.fhir.instance.model.api.IBaseEnumFactory rawFactory =
+										(org.hl7.fhir.instance.model.api.IBaseEnumFactory) factory;
+
+								// Try a reasonable case-normalization: enum codes are all lowercase
+								String attempt = value.toLowerCase();
+								try {
+									Object enumValue = rawFactory.fromCode(attempt);
+									if (enumValue != null) {
+										// Call toCode via reflection to avoid generic type mismatch at compile time
+										String correctedCode;
+										try {
+											java.lang.reflect.Method toCodeMethod =
+													rawFactory.getClass().getMethod("toCode", java.lang.Enum.class);
+											correctedCode =
+													(String) toCodeMethod.invoke(rawFactory, (Enum<?>) enumValue);
+										} catch (Exception reflectEx) {
+											// Fall back to calling toCode on the original factory reference with an
+											// unchecked cast
+											@SuppressWarnings({"unchecked", "rawtypes"})
+											String tmp = ((org.hl7.fhir.instance.model.api.IBaseEnumFactory) rawFactory)
+													.toCode((Enum) enumValue);
+											correctedCode = tmp;
+										}
+
+										// Notify the error handler first so Strict handlers can abort parsing
+										myErrorHandler.invalidValue(
+												location,
+												value,
+												"Invalid enumeration value (corrected to '" + correctedCode + "')");
+
+										// Set the corrected enum value onto the primitive instance using raw types
+										@SuppressWarnings({"rawtypes", "unchecked"})
+										org.hl7.fhir.instance.model.api.IPrimitiveType enumPrimitive =
+												(org.hl7.fhir.instance.model.api.IPrimitiveType) myInstance;
+										enumPrimitive.setValue(enumValue);
+
+										corrected = true;
+									}
+								} catch (IllegalArgumentException ex) {
+									// no-op - we'll fall through and emit invalidValue below
+								}
+							}
+
+							if (!corrected) {
+								myErrorHandler.invalidValue(location, value, e.getMessage());
+							}
+						} else {
+							myErrorHandler.invalidValue(location, value, e.getMessage());
+						}
 					}
 				}
 			} else if ("id".equals(theName)) {
