@@ -5,8 +5,11 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
+import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -18,7 +21,7 @@ class PrefetchTemplateUtilTest {
 	private static final String SERVICE_ID2 = "serviceId2";
 
 	@Test
-	public void testShouldInterpolatePrefetchTokensWithContextValues() {
+	void testShouldInterpolatePrefetchTokensWithContextValues() {
 		String template = "{{context.userId}} a {{context.patientId}} b {{context.patientId}}";
 		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
 		context.put("patientId", TEST_PATIENT_ID);
@@ -28,7 +31,7 @@ class PrefetchTemplateUtilTest {
 	}
 
 	@Test
-	public void testShouldThrowForMissingPrefetchTokens() {
+	void testShouldThrowForMissingPrefetchTokens() {
 		String template = "{{context.userId}} a {{context.patientId}}";
 		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
 		context.put("patientId", TEST_PATIENT_ID);
@@ -41,7 +44,7 @@ class PrefetchTemplateUtilTest {
 	}
 
 	@Test
-	public void testShouldThrow400ForMissingContext() {
+	void testShouldThrow400ForMissingContext() {
 		String template = "{{context.userId}} a {{context.patientId}}";
 		//Leave the context empty for the test.
 		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
@@ -55,7 +58,7 @@ class PrefetchTemplateUtilTest {
 	}
 
 	@Test
-	public void testShouldThrowForMissingNestedPrefetchTokens() {
+	void testShouldThrowForMissingNestedPrefetchTokens() {
 		String template = "{{context.draftOrders.ServiceRequest.id}} a {{context.patientId}}";
 		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
 		context.put("patientId", TEST_PATIENT_ID);
@@ -68,7 +71,7 @@ class PrefetchTemplateUtilTest {
 	}
 
 	@Test
-	public void testShouldSupportNestedPrefetchTokensForSTU3() {
+	void testShouldSupportNestedPrefetchTokensForSTU3() {
 		String template = "{{context.draftOrders.Observation.id}} a {{context.patientId}}";
 		BundleBuilder builder = new BundleBuilder(new FhirContext(FhirVersionEnum.DSTU3));
 		org.hl7.fhir.dstu3.model.Observation observation = new org.hl7.fhir.dstu3.model.Observation();
@@ -82,7 +85,7 @@ class PrefetchTemplateUtilTest {
 	}
 
 	@Test
-	public void testShouldReturnCSVForMultipleSupportNestedPrefetchTokensForR4() {
+	void testShouldReturnCSVForMultipleSupportNestedPrefetchTokensForR4() {
 		String template = "{{context.draftOrders.ServiceRequest.id}} a {{context.patientId}}";
 		BundleBuilder builder = new BundleBuilder(new FhirContext(FhirVersionEnum.R4));
 		builder.addCollectionEntry(new org.hl7.fhir.r4.model.ServiceRequest().setId(SERVICE_ID1));
@@ -95,7 +98,7 @@ class PrefetchTemplateUtilTest {
 	}
 
 	@Test
-	public void testShouldSupportMultipleDaVincePrefetchTokensForR5() {
+	void testShouldSupportMultipleDaVincePrefetchTokensForR5() {
 		String template = "{{context.draftOrders.ServiceRequest.id}} a {{context.draftOrders.Observation.id}} a {{context.patientId}}";
 		BundleBuilder builder = new BundleBuilder(new FhirContext(FhirVersionEnum.R5));
 		builder.addCollectionEntry(new org.hl7.fhir.r5.model.ServiceRequest().setId(SERVICE_ID1));
@@ -109,7 +112,7 @@ class PrefetchTemplateUtilTest {
 	}
 
 	@Test
-	public void testShouldThrowForDaVinciTemplateIfResourcesAreNotFoundInContextForR4() {
+	void testShouldThrowForDaVinciTemplateIfResourcesAreNotFoundInContextForR4() {
 		String template = "{{context.draftOrders.ServiceRequest.id}} a {{context.patientId}}";
 		BundleBuilder builder = new BundleBuilder(new FhirContext(FhirVersionEnum.R4));
 		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
@@ -124,7 +127,7 @@ class PrefetchTemplateUtilTest {
 	}
 
 	@Test
-	public void testShouldThrowForDaVinciTemplateIfResourceIsNotBundle() {
+	void testShouldThrowForDaVinciTemplateIfResourceIsNotBundle() {
 		String template = "{{context.draftOrders.ServiceRequest.id}} a {{context.patientId}}";
 		FhirContext fhirContextR4 = new FhirContext(FhirVersionEnum.R4);
 		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
@@ -137,5 +140,61 @@ class PrefetchTemplateUtilTest {
 			assertEquals("HAPI-2374: Request context did not provide valid " + fhirContextR4.getVersion().getVersion() + " Bundle resource for template key <draftOrders>", e.getMessage());
 		}
 	}
+
+	/** TODO:
+	 * working test cases for
+	 * R3 -> single nested
+	 * R4 -> multiple nested
+	 * R5 -> multiple nested with multiple replacement templates
+	 * failing test case for resource not in bundle
+	 * ofType, resolve, OR operator, context operator,
+	 */
+	@Test
+	void testShouldSupportTemplateWithFhirPathUsingOfTypeMethodForR4() {
+		// setup
+		final String deviceId1 = "Device/1";
+		final String deviceId2 = "Device/2";
+		final String template = "{{context.draftOrders.entry.resource.ofType(DeviceRequest).code.reference}} a {{context.patientId}}";
+		final BundleBuilder builder = new BundleBuilder(new FhirContext(FhirVersionEnum.R4));
+		final org.hl7.fhir.r4.model.DeviceRequest deviceRequest1 = new org.hl7.fhir.r4.model.DeviceRequest();
+		deviceRequest1.setCode(new Reference(deviceId1));
+		final org.hl7.fhir.r4.model.DeviceRequest deviceRequest2 = new org.hl7.fhir.r4.model.DeviceRequest();
+		deviceRequest2.setCode(new Reference(deviceId2));
+		builder.addCollectionEntry(deviceRequest1);
+		builder.addCollectionEntry(deviceRequest2);
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put("patientId", TEST_PATIENT_ID);
+		context.put("draftOrders", builder.getBundle());
+		// execute
+		final String actual = PrefetchTemplateUtil.substituteTemplate(template, context, FhirContext.forR4());
+		// validate
+		assertThat(actual).isEqualTo(deviceId1 + "," + deviceId2 + " a " + TEST_PATIENT_ID);
+	}
+
+	@Test
+	void testShouldSupportTemplateWithFhirPathUsingResolveMethodForR4() {
+		// setup
+		final String deviceId1 = "Device/1";
+		final String deviceId2 = "Device/2";
+		final String template = "{{context.draftOrders.entry.resource.ofType(DeviceRequest).code.resolve().as(Device).id}} a {{context.patientId}}";
+		final BundleBuilder builder = new BundleBuilder(new FhirContext(FhirVersionEnum.R4));
+		final org.hl7.fhir.r4.model.DeviceRequest deviceRequest1 = new org.hl7.fhir.r4.model.DeviceRequest();
+		deviceRequest1.setCode(new Reference(deviceId1));
+		final org.hl7.fhir.r4.model.DeviceRequest deviceRequest2 = new org.hl7.fhir.r4.model.DeviceRequest();
+		deviceRequest2.setCode(new Reference(deviceId2));
+		builder.addCollectionEntry(deviceRequest1);
+		builder.addCollectionEntry(deviceRequest2);
+		builder.addCollectionEntry(new Device().setId(deviceId1));
+		builder.addCollectionEntry(new Device().setId(deviceId2));
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put("patientId", TEST_PATIENT_ID);
+		context.put("draftOrders", builder.getBundle());
+		// execute
+		final String actual = PrefetchTemplateUtil.substituteTemplate(template, context, FhirContext.forR4());
+		// validate
+		assertThat(actual).isEqualTo(1 + "," + 2 + " a " + TEST_PATIENT_ID);
+	}
+
+
 
 }
