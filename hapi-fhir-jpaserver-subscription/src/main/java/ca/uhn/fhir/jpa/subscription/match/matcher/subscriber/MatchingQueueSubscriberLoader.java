@@ -70,7 +70,7 @@ public class MatchingQueueSubscriberLoader {
 	@Order(IHapiBootOrder.SUBSCRIPTION_MATCHING_CHANNEL_HANDLER)
 	public void subscribeToMatchingChannel() {
 		if (myMatchingConsumer == null) {
-			myMultiplexingListener = new MultiplexingListener<>(ResourceModifiedMessage.class);
+			myMultiplexingListener = newDeliveryListener();
 
 			myMatchingConsumer = mySubscriptionChannelFactory.newMatchingConsumer(
 					SUBSCRIPTION_MATCHING_CHANNEL_NAME, myMultiplexingListener, getChannelConsumerSettings());
@@ -91,6 +91,10 @@ public class MatchingQueueSubscriberLoader {
 						SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 			}
 		}
+	}
+
+	protected MultiplexingListener<ResourceModifiedMessage> newDeliveryListener() {
+		return new MultiplexingListener<>(ResourceModifiedMessage.class);
 	}
 
 	private ChannelConsumerSettings getChannelConsumerSettings() {

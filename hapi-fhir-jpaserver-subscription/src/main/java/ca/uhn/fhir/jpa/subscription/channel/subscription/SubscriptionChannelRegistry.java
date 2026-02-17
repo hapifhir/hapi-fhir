@@ -118,8 +118,7 @@ public class SubscriptionChannelRegistry {
 	@Nonnull
 	private SubscriptionResourceDeliveryMessageConsumer buildSubscriptionResourceDeliveryMessageConsumer(
 			ActiveSubscription theActiveSubscription, ReceivingChannelParameters receivingParameters) {
-		MultiplexingListener<ResourceDeliveryMessage> multiplexingListener =
-				new MultiplexingListener<>(ResourceDeliveryMessage.class);
+		MultiplexingListener<ResourceDeliveryMessage> multiplexingListener = newDeliveryListener();
 		IChannelConsumer<ResourceDeliveryMessage> deliveryConsumer =
 				newDeliveryConsumer(multiplexingListener, receivingParameters);
 		Optional<IMessageListener<ResourceDeliveryMessage>> oDeliveryListener =
@@ -132,6 +131,10 @@ public class SubscriptionChannelRegistry {
 		subscriptionResourceDeliveryMessageConsumer.addListener(subscriptionValidatingListener);
 		oDeliveryListener.ifPresent(subscriptionResourceDeliveryMessageConsumer::addListener);
 		return subscriptionResourceDeliveryMessageConsumer;
+	}
+
+	protected MultiplexingListener<ResourceDeliveryMessage> newDeliveryListener() {
+		return new MultiplexingListener<>(ResourceDeliveryMessage.class);
 	}
 
 	protected IChannelConsumer<ResourceDeliveryMessage> newDeliveryConsumer(
