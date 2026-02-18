@@ -96,8 +96,8 @@ public class PrefetchTemplateUtil {
 						.filter(id -> id != null && !id.isEmpty())
 						.collect(Collectors.joining(","));
 				if (StringUtils.isEmpty(resourceIds)) {
-					throw new InvalidRequestException(
-							Msg.code(2377) + "FHIRPath expression did not return any results for query: " + fhirPathExpression);
+					throw new InvalidRequestException(Msg.code(2377)
+							+ "FHIRPath expression did not return any results for query: " + fhirPathExpression);
 				}
 				String templateToReplace = "{{context." + key + "." + fhirPathExpression + "}}";
 				returnValue = returnValue.replace(templateToReplace, resourceIds);
@@ -106,8 +106,9 @@ public class PrefetchTemplateUtil {
 						+ theFhirContext.getVersion().getVersion() + " Bundle resource for FHIRPath template key <"
 						+ key + ">");
 			} catch (FhirPathExecutionException e) {
-				throw new InvalidRequestException("Unable to evaluate FHIRPath for prefetch template with expression " +  theTemplate + " for FHIR version " + theFhirContext.getVersion().getVersion());
-
+				throw new InvalidRequestException("Unable to evaluate FHIRPath for prefetch template with expression "
+						+ theTemplate + " for FHIR version "
+						+ theFhirContext.getVersion().getVersion());
 			}
 		}
 		return returnValue;
