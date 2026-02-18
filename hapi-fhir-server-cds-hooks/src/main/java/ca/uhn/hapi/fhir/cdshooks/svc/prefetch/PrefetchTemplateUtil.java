@@ -20,6 +20,7 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -96,7 +97,7 @@ public class PrefetchTemplateUtil {
 						.collect(Collectors.joining(","));
 				if (StringUtils.isEmpty(resourceIds)) {
 					throw new InvalidRequestException(
-							Msg.code(2377) + "FHIRPath expression did not return any results: " + fhirPathExpression);
+							Msg.code(2377) + "FHIRPath expression did not return any results for query: " + fhirPathExpression);
 				}
 				String templateToReplace = "{{context." + key + "." + fhirPathExpression + "}}";
 				returnValue = returnValue.replace(templateToReplace, resourceIds);
@@ -104,6 +105,9 @@ public class PrefetchTemplateUtil {
 				throw new InvalidRequestException(Msg.code(2378) + "Request context did not provide valid "
 						+ theFhirContext.getVersion().getVersion() + " Bundle resource for FHIRPath template key <"
 						+ key + ">");
+			} catch (FhirPathExecutionException e) {
+				throw new InvalidRequestException("Unable to evaluate FHIRPath for prefetch template with expression " +  theTemplate + " for FHIR version " + theFhirContext.getVersion().getVersion());
+
 			}
 		}
 		return returnValue;
