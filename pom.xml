@@ -1987,6 +1987,11 @@
 						<groupId>org.eclipse.jetty.websocket</groupId>
 						<artifactId>websocket-client</artifactId>
 					</exclusion>
+					<exclusion>
+						<!-- spring-jcl already provides the commons-logging API -->
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>
