@@ -573,8 +573,10 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 				if (nextValue == null || nextValue.isEmpty()) {
 					// PrimitiveType.isEmpty() uses isBlank() which treats whitespace-only
-					// values as empty, but whitespace is valid FHIR content that should
-					// be encoded. Only skip primitives with truly empty (null/"") values.
+					// values as empty. Per the FHIR spec, the string type regex is
+					// [ \r\n\t\S]+ which includes spaces as valid content
+					// (see http://hl7.org/fhir/R4/datatypes.html#string).
+					// Only skip primitives with truly empty (null/"") values.
 					if (nextValue instanceof IPrimitiveType<?> primitive && !isEmpty(primitive.getValueAsString())) {
 						// fall through - encode primitive with whitespace-only value
 					} else if (nextValue instanceof BaseContainedDt) {
