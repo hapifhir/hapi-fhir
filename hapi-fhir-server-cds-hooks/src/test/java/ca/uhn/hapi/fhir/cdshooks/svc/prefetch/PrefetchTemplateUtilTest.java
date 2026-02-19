@@ -4,9 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
-import org.hl7.fhir.r4.model.Device;
-import org.hl7.fhir.r4.model.Reference;
+import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.Test;
+
+import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -149,24 +150,27 @@ class PrefetchTemplateUtilTest {
 	/** TODO:
 	 * working test cases for
 	 * DSTU3 -> Bundle test -> done
-	 *       -> resource test
-	 *       -> unsupported function test
+	 *       -> resource test -> done
+	 *       -> unsupported function test -> done
 	 * R4 -> Bundle test -> done
-	 * 	  -> resource test
-	 * 	  -> invalid function test
+	 * 	  -> resource test -> done
+	 * 	  -> invalid function test -> done
 	 * R5 -> Bundle test
 	 *    -> resource test
 	 *    -> invalid function test
+	 * failing test case for invalid path -> done
 	 * failing test case for resource not in bundle -> done
 	 * failing test case for method not supported like dstu3 ofType() -> done
 	 * ofType -> done, resolve -> done, OR operator, context operator,
+	 * make templates more realistic -> done
 	 * add-on : Support for using resolve() using contained resources
+	 * check if array references can be directly evaluated.
 	 */
 	@Test
-	void substituteTemplateWithFhirPathUsingOfTypeMethodForDSTU3ShouldFail() {
+	void substituteTemplateWithFhirPathUsingUnsupportedMethodForDSTU3ShouldFail() {
 		// setup
 		final String deviceId1 = "Device/1";
-		final String template = "{{context.draftOrders.entry.resource.ofType(DeviceRequest).code.reference}} a {{context.patientId}}";
+		final String template = "Device?_id={{context.draftOrders.entry.resource.ofType(DeviceRequest).code.reference}}";
 		final BundleBuilder builder = new BundleBuilder(ourFhirContextDstu3);
 		final org.hl7.fhir.dstu3.model.DeviceRequest deviceRequest1 = new org.hl7.fhir.dstu3.model.DeviceRequest();
 		deviceRequest1.setCode(new org.hl7.fhir.dstu3.model.Reference(deviceId1));
@@ -177,7 +181,7 @@ class PrefetchTemplateUtilTest {
 		// execute & validate
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContextDstu3))
 			.isInstanceOf(InvalidRequestException.class)
-			.hasMessageContaining("Unable to evaluate FHIRPath for prefetch template with expression {{context.draftOrders.entry.resource.ofType(DeviceRequest).code.reference}} a P2401 for FHIR version DSTU3");
+			.hasMessageContaining("Unable to evaluate FHIRPath for prefetch template with expression Device?_id={{context.draftOrders.entry.resource.ofType(DeviceRequest).code.reference}} for FHIR version DSTU3");
 	}
 
 	@Test
@@ -185,7 +189,7 @@ class PrefetchTemplateUtilTest {
 		// setup
 		final String deviceId1 = "Device/1";
 		final String deviceId2 = "Device/2";
-		final String template = "{{context.draftOrders.entry.resource.where(id = 'Device/1').id}} a {{context.patientId}}";
+		final String template = "DeviceRequest?device={{context.draftOrders.entry.resource.where(id = 'Device/1').id}}";
 		final BundleBuilder builder = new BundleBuilder(ourFhirContextDstu3);
 		builder.addCollectionEntry(new org.hl7.fhir.dstu3.model.Device().setId(deviceId1));
 		builder.addCollectionEntry(new org.hl7.fhir.dstu3.model.Device().setId(deviceId2));
@@ -195,14 +199,14 @@ class PrefetchTemplateUtilTest {
 		// execute
 		final String actual = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContextDstu3);
 		// validate
-		assertThat(actual).isEqualTo(deviceId1 + " a " + TEST_PATIENT_ID);
+		assertThat(actual).isEqualTo("DeviceRequest?device=" + deviceId1);
 	}
 
 	@Test
-	void substituteTemplateWithFhirPathUsingResolveMethodForDSTU3WhenContextIsBundleAndResultIsNotPartOfBundleShouldFail() {
+	void substituteTemplateWithFhirPathUsingWhereMethodForDSTU3WhenContextIsBundleAndResultIsNotPartOfBundleShouldFail() {
 		// setup
 		final String deviceId1 = "Device/1";
-		final String template = "{{context.draftOrders.entry.resource.where(id = 'Device/2').id}} a {{context.patientId}}";
+		final String template = "DeviceRequest?device={{context.draftOrders.entry.resource.where(id = 'Device/2').id}}";
 		final BundleBuilder builder = new BundleBuilder(ourFhirContextDstu3);
 		builder.addCollectionEntry(new org.hl7.fhir.dstu3.model.Device().setId(deviceId1));
 		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
@@ -215,16 +219,43 @@ class PrefetchTemplateUtilTest {
 	}
 
 	@Test
+	void substituteTemplateWithFhirPathForDSTU3WhenContextIsResourceAndPathExistShouldParseSuccessfully() {
+		// setup
+		final String encounterId = "Encounter/1";
+		final String template = "Condition?patient={{context.patientId}}&context={{context.encounter.id}}";
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		context.put("encounter", new org.hl7.fhir.dstu3.model.Encounter().setId(encounterId));
+		// execute
+		final String actual = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContextDstu3);
+		// validate
+		assertThat(actual).isEqualTo("Condition?patient=" + TEST_PATIENT_ID + "&context=" + encounterId);
+	}
+
+	@Test
+	void substituteTemplateWithFhirPathForDSTU3WhenContextIsResourceAndPathDoesNotExistShouldFail() {
+		// setup
+		final String template = "Condition?patient={{context.patientId}}&context={{context.encounter.id}}";
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		context.put("encounter", new org.hl7.fhir.dstu3.model.Encounter());
+		// execute & validate
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContextDstu3))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("FHIRPath expression did not return any results for query: id");
+	}
+
+	@Test
 	void substituteTemplateWithFhirPathUsingOfTypeMethodForR4WhenContextIsBundleAndResultIsPartOfBundleShouldParseSuccessfully() {
 		// setup
 		final String deviceId1 = "Device/1";
 		final String deviceId2 = "Device/2";
-		final String template = "{{context.draftOrders.entry.resource.ofType(DeviceRequest).code.reference}} a {{context.patientId}}";
+		final String template = "Device?_id={{context.draftOrders.entry.resource.ofType(DeviceRequest).code.reference}}";
 		final BundleBuilder builder = new BundleBuilder(ourFhirContextR4);
 		final org.hl7.fhir.r4.model.DeviceRequest deviceRequest1 = new org.hl7.fhir.r4.model.DeviceRequest();
-		deviceRequest1.setCode(new Reference(deviceId1));
+		deviceRequest1.setCode(new org.hl7.fhir.r4.model.Reference(deviceId1));
 		final org.hl7.fhir.r4.model.DeviceRequest deviceRequest2 = new org.hl7.fhir.r4.model.DeviceRequest();
-		deviceRequest2.setCode(new Reference(deviceId2));
+		deviceRequest2.setCode(new org.hl7.fhir.r4.model.Reference(deviceId2));
 		builder.addCollectionEntry(deviceRequest1);
 		builder.addCollectionEntry(deviceRequest2);
 		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
@@ -233,7 +264,7 @@ class PrefetchTemplateUtilTest {
 		// execute
 		final String actual = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContextR4);
 		// validate
-		assertThat(actual).isEqualTo(deviceId1 + "," + deviceId2 + " a " + TEST_PATIENT_ID);
+		assertThat(actual).isEqualTo("Device?_id=" + deviceId1 + "," + deviceId2);
 	}
 
 	@Test
@@ -241,33 +272,32 @@ class PrefetchTemplateUtilTest {
 		// setup
 		final String deviceId1 = "Device/1";
 		final String deviceId2 = "Device/2";
-		final String template = "{{context.draftOrders.entry.resource.ofType(DeviceRequest).code.resolve().as(Device).id}} a {{context.patientId}}";
+		final String template = "Device?_id={{context.draftOrders.entry.resource.ofType(DeviceRequest).code.resolve().as(Device).id}}";
 		final BundleBuilder builder = new BundleBuilder(ourFhirContextR4);
 		final org.hl7.fhir.r4.model.DeviceRequest deviceRequest1 = new org.hl7.fhir.r4.model.DeviceRequest();
-		deviceRequest1.setCode(new Reference(deviceId1));
+		deviceRequest1.setCode(new org.hl7.fhir.r4.model.Reference(deviceId1));
 		final org.hl7.fhir.r4.model.DeviceRequest deviceRequest2 = new org.hl7.fhir.r4.model.DeviceRequest();
-		deviceRequest2.setCode(new Reference(deviceId2));
+		deviceRequest2.setCode(new org.hl7.fhir.r4.model.Reference(deviceId2));
 		builder.addCollectionEntry(deviceRequest1);
 		builder.addCollectionEntry(deviceRequest2);
-		builder.addCollectionEntry(new Device().setId(deviceId1));
-		builder.addCollectionEntry(new Device().setId(deviceId2));
+		builder.addCollectionEntry(new org.hl7.fhir.r4.model.Device().setId(deviceId1));
+		builder.addCollectionEntry(new org.hl7.fhir.r4.model.Device().setId(deviceId2));
 		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
-		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
 		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
 		// execute
 		final String actual = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContextR4);
 		// validate
-		assertThat(actual).isEqualTo(1 + "," + 2 + " a " + TEST_PATIENT_ID);
+		assertThat(actual).isEqualTo("Device?_id=" + 1 + "," + 2);
 	}
 
 	@Test
 	void substituteTemplateWithFhirPathUsingResolveMethodForR4WhenContextIsBundleAndResultIsNotPartOfBundleShouldFail() {
 		// setup
 		final String deviceId1 = "Device/1";
-		final String template = "{{context.draftOrders.entry.resource.ofType(DeviceRequest).code.resolve().as(Device).id}} a {{context.patientId}}";
+		final String template = "Device?_id={{context.draftOrders.entry.resource.ofType(DeviceRequest).code.resolve().as(Device).id}}";
 		final BundleBuilder builder = new BundleBuilder(ourFhirContextR4);
 		final org.hl7.fhir.r4.model.DeviceRequest deviceRequest1 = new org.hl7.fhir.r4.model.DeviceRequest();
-		deviceRequest1.setCode(new Reference(deviceId1));
+		deviceRequest1.setCode(new org.hl7.fhir.r4.model.Reference(deviceId1));
 		builder.addCollectionEntry(deviceRequest1);
 		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
 		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
@@ -277,5 +307,44 @@ class PrefetchTemplateUtilTest {
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("FHIRPath expression did not return any results for query: entry.resource.ofType(DeviceRequest).code.resolve().as(Device).id");
 	}
+
+	@Test
+	void substituteTemplateWithFhirPathUsingInvalidMethodForR4ShouldFail() {
+		// setup
+		final String deviceId1 = "Device/1";
+		final String template = "Device?_id={{context.draftOrders.entry.resource.RandomMethod(DeviceRequest).code.reference}}";
+		final BundleBuilder builder = new BundleBuilder(ourFhirContextR4);
+		final org.hl7.fhir.r4.model.DeviceRequest deviceRequest1 = new org.hl7.fhir.r4.model.DeviceRequest();
+		deviceRequest1.setCode(new org.hl7.fhir.r4.model.Reference(deviceId1));
+		builder.addCollectionEntry(deviceRequest1);
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
+		// execute & validate
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContextR4))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("Unable to evaluate FHIRPath for prefetch template with expression Device?_id={{context.draftOrders.entry.resource.RandomMethod(DeviceRequest).code.reference}} for FHIR version R4");
+	}
+
+	@Test
+	void substituteTemplateWithFhirPathForR4WithComplexQueryWhenContextIsResourceAndPathExistShouldParseSuccessfully() {
+		// setup
+		final String encounterId = "Encounter/1";
+		final String template = "Condition?patient={{context.patientId}}&context={{context.encounter.id}}&recorded-date={{context.encounter.period.start + 2 days}}";
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		final org.hl7.fhir.r4.model.Encounter encounter = new org.hl7.fhir.r4.model.Encounter();
+		encounter.setId(encounterId);
+		final Date encounterStartDate = new Date();
+		encounter.setPeriod(new org.hl7.fhir.r4.model.Period().setStart(encounterStartDate));
+		context.put("encounter", encounter);
+		final org.hl7.fhir.r4.model.DateTimeType expectedDateTime = new org.hl7.fhir.r4.model.DateTimeType(DateUtils.addDays(encounterStartDate, 2));
+		// execute
+		final String actual = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContextR4);
+		// validate
+		assertThat(actual).isEqualTo("Condition?patient=" + TEST_PATIENT_ID + "&context=" + 1 + "&recorded-date=" + expectedDateTime.getValueAsString());
+	}
+
+
 
 }
