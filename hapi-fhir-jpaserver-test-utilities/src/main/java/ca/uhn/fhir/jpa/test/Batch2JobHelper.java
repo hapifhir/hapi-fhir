@@ -301,7 +301,7 @@ public class Batch2JobHelper {
 		}
 
 		for (JobInstance job : jobs) {
-			if (job.getStatus().isIncomplete()) {
+			if (!job.getStatus().isEnded()) {
 				map.put(job.getInstanceId(), job.getJobDefinitionId() + " : " + job.getStatus().name());
 			}
 		}
@@ -328,7 +328,7 @@ public class Batch2JobHelper {
 				}
 
 				for (JobInstance job : jobs) {
-					if (job.getStatus() != StatusEnum.COMPLETED) {
+					if (!job.getStatus().isEnded()) {
 						map.put(job.getInstanceId(), job.getStatus().name());
 					} else {
 						map.remove(job.getInstanceId());
