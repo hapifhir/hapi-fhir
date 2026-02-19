@@ -258,8 +258,12 @@ public class Batch2JobHelper {
 			theJobDefinitionId,
 			BATCH_SIZE,
 			0);
-		// then await completion status
-		awaitJobCompletions(instances);
+		// Only wait for jobs that haven't reached a terminal state yet.
+		// Stale FAILED/CANCELLED jobs from previous tests should not cause the current test to fail.
+		List<JobInstance> activeInstances = instances.stream()
+			.filter(i -> !i.getStatus().isEnded())
+			.toList();
+		awaitJobCompletions(activeInstances);
 	}
 
 	protected void awaitJobCompletions(Collection<JobInstance> theJobInstances) {
