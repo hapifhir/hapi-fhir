@@ -39,6 +39,7 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.MSSQL_2012, "int");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.ORACLE_12C, "number(10,0)");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.POSTGRES_9_4, "int4");
+		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.SNOWFLAKE, "integer");
 
 		setColumnType(ColumnTypeEnum.SMALLINT, DriverTypeEnum.H2_EMBEDDED, "smallint");
 		setColumnType(ColumnTypeEnum.SMALLINT, DriverTypeEnum.DERBY_EMBEDDED, "smallint");
@@ -47,6 +48,7 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.SMALLINT, DriverTypeEnum.MSSQL_2012, "smallint");
 		setColumnType(ColumnTypeEnum.SMALLINT, DriverTypeEnum.ORACLE_12C, "number(5,0)");
 		setColumnType(ColumnTypeEnum.SMALLINT, DriverTypeEnum.POSTGRES_9_4, "int2");
+		setColumnType(ColumnTypeEnum.SMALLINT, DriverTypeEnum.SNOWFLAKE, "smallint");
 
 		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.H2_EMBEDDED, "tinyint");
 		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.DERBY_EMBEDDED, "smallint");
@@ -55,6 +57,7 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.MSSQL_2012, "smallint");
 		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.ORACLE_12C, "number(3,0)");
 		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.POSTGRES_9_4, "int2");
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.SNOWFLAKE, "smallint");
 
 		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.H2_EMBEDDED, "float");
 		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.DERBY_EMBEDDED, "float");
@@ -63,6 +66,7 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.MSSQL_2012, "float");
 		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.ORACLE_12C, "float");
 		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.POSTGRES_9_4, "float");
+		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.SNOWFLAKE, "float");
 
 		setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.H2_EMBEDDED, "double");
 		setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.DERBY_EMBEDDED, "double");
@@ -71,6 +75,7 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.MSSQL_2012, "double precision");
 		setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.ORACLE_12C, "double precision");
 		setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.POSTGRES_9_4, "double precision");
+		setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.SNOWFLAKE, "double precision");
 
 		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.H2_EMBEDDED, "bigint");
 		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.DERBY_EMBEDDED, "bigint");
@@ -79,6 +84,7 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.MSSQL_2012, "bigint");
 		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.ORACLE_12C, "number(19,0)");
 		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.POSTGRES_9_4, "int8");
+		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.SNOWFLAKE, "bigint");
 
 		setColumnType(ColumnTypeEnum.STRING, DriverTypeEnum.H2_EMBEDDED, "varchar(?)");
 		setColumnType(ColumnTypeEnum.STRING, DriverTypeEnum.DERBY_EMBEDDED, "varchar(?)");
@@ -87,6 +93,7 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.STRING, DriverTypeEnum.MSSQL_2012, "varchar(?)");
 		setColumnType(ColumnTypeEnum.STRING, DriverTypeEnum.ORACLE_12C, "varchar2(? char)");
 		setColumnType(ColumnTypeEnum.STRING, DriverTypeEnum.POSTGRES_9_4, "varchar(?)");
+		setColumnType(ColumnTypeEnum.STRING, DriverTypeEnum.SNOWFLAKE, "varchar(?)");
 
 		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.H2_EMBEDDED, "timestamp");
 		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.DERBY_EMBEDDED, "timestamp");
@@ -95,6 +102,7 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.MSSQL_2012, "datetime2");
 		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.ORACLE_12C, "timestamp");
 		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.POSTGRES_9_4, "timestamp");
+		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.SNOWFLAKE, "timestamp");
 
 		setColumnType(ColumnTypeEnum.DATE_ONLY, DriverTypeEnum.H2_EMBEDDED, "date");
 		setColumnType(ColumnTypeEnum.DATE_ONLY, DriverTypeEnum.DERBY_EMBEDDED, "date");
@@ -103,6 +111,7 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.DATE_ONLY, DriverTypeEnum.MSSQL_2012, "date");
 		setColumnType(ColumnTypeEnum.DATE_ONLY, DriverTypeEnum.ORACLE_12C, "date");
 		setColumnType(ColumnTypeEnum.DATE_ONLY, DriverTypeEnum.POSTGRES_9_4, "date");
+		setColumnType(ColumnTypeEnum.DATE_ONLY, DriverTypeEnum.SNOWFLAKE, "date");
 
 		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.H2_EMBEDDED, "boolean");
 		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.DERBY_EMBEDDED, "boolean");
@@ -111,6 +120,7 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.ORACLE_12C, "number(1,0)");
 		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.POSTGRES_9_4, "boolean");
 		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.MYSQL_5_7, "bit");
+		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.SNOWFLAKE, "boolean");
 
 		setColumnType(ColumnTypeEnum.BLOB, DriverTypeEnum.H2_EMBEDDED, "blob");
 		setColumnType(ColumnTypeEnum.BLOB, DriverTypeEnum.DERBY_EMBEDDED, "blob");
@@ -119,6 +129,7 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.BLOB, DriverTypeEnum.ORACLE_12C, "blob");
 		setColumnType(ColumnTypeEnum.BLOB, DriverTypeEnum.POSTGRES_9_4, "oid");
 		setColumnType(ColumnTypeEnum.BLOB, DriverTypeEnum.MSSQL_2012, "varbinary(MAX)");
+		setColumnType(ColumnTypeEnum.BLOB, DriverTypeEnum.SNOWFLAKE, "binary");
 
 		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.H2_EMBEDDED, "clob");
 		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.DERBY_EMBEDDED, "clob(100000)");
@@ -130,6 +141,7 @@ public final class ColumnTypeToDriverTypeToSqlType {
 				DriverTypeEnum.POSTGRES_9_4,
 				"oid"); // the PG driver will write oid into a `text` column
 		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.MSSQL_2012, "varchar(MAX)");
+		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.SNOWFLAKE, "varchar(16777216)");
 
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.H2_EMBEDDED, "clob");
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.DERBY_EMBEDDED, "clob");
@@ -138,6 +150,7 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.ORACLE_12C, "clob");
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.POSTGRES_9_4, "text");
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.MSSQL_2012, "varchar(MAX)");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.SNOWFLAKE, "varchar(16777216)");
 
 		setColumnType(ColumnTypeEnum.BINARY, DriverTypeEnum.H2_EMBEDDED, "blob");
 		setColumnType(ColumnTypeEnum.BINARY, DriverTypeEnum.DERBY_EMBEDDED, "blob");
@@ -146,6 +159,7 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.BINARY, DriverTypeEnum.ORACLE_12C, "blob");
 		setColumnType(ColumnTypeEnum.BINARY, DriverTypeEnum.POSTGRES_9_4, "bytea");
 		setColumnType(ColumnTypeEnum.BINARY, DriverTypeEnum.MSSQL_2012, "varbinary(MAX)");
+		setColumnType(ColumnTypeEnum.BINARY, DriverTypeEnum.SNOWFLAKE, "binary");
 
 		setColumnType(ColumnTypeEnum.BIG_DECIMAL, DriverTypeEnum.H2_EMBEDDED, "numeric(38,2)");
 		setColumnType(ColumnTypeEnum.BIG_DECIMAL, DriverTypeEnum.DERBY_EMBEDDED, "decimal(31,2)");
@@ -154,6 +168,7 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.BIG_DECIMAL, DriverTypeEnum.ORACLE_12C, "number(38,2)");
 		setColumnType(ColumnTypeEnum.BIG_DECIMAL, DriverTypeEnum.POSTGRES_9_4, "numeric(38,2)");
 		setColumnType(ColumnTypeEnum.BIG_DECIMAL, DriverTypeEnum.MSSQL_2012, "numeric(38,2)");
+		setColumnType(ColumnTypeEnum.BIG_DECIMAL, DriverTypeEnum.SNOWFLAKE, "number(38,2)");
 	}
 
 	public static Map<ColumnTypeEnum, Map<DriverTypeEnum, String>> getColumnTypeToDriverTypeToSqlType() {
@@ -175,6 +190,7 @@ public final class ColumnTypeToDriverTypeToSqlType {
 			case H2_EMBEDDED:
 			case DERBY_EMBEDDED:
 			case POSTGRES_9_4:
+			case SNOWFLAKE:
 				return theBoolean.toString();
 			default:
 				return theBoolean ? "1" : "0";
