@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
@@ -106,6 +107,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	private Runnable myMaintenanceJobFinishedCallback = () -> {};
 
 	private boolean myEnabledBool = true;
+	private IJobStepExecutionServices myJobStepExecutionServices;
 
 	/**
 	 * Constructor
@@ -118,7 +120,8 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			@Nonnull BatchJobSender theBatchJobSender,
 			@Nonnull WorkChunkProcessor theExecutor,
 			@Nonnull IReductionStepExecutorService theReductionStepExecutorService,
-			@Nonnull IInterceptorService theInterceptorService) {
+			@Nonnull IInterceptorService theInterceptorService,
+			@Nonnull IJobStepExecutionServices theJobStepExecutionServices) {
 		myStorageSettings = theStorageSettings;
 		myReductionStepExecutorService = theReductionStepExecutorService;
 		Validate.notNull(theSchedulerService);
@@ -132,6 +135,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 		myBatchJobSender = theBatchJobSender;
 		myJobExecutorSvc = theExecutor;
 		myInterceptorService = theInterceptorService;
+		myJobStepExecutionServices = theJobStepExecutionServices;
 	}
 
 	@Override
@@ -323,7 +327,8 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 				theAccumulator,
 				myReductionStepExecutorService,
 				myJobDefinitionRegistry,
-				myInterceptorService);
+				myInterceptorService,
+				myJobStepExecutionServices);
 		if (myFailedJobLifetimeOverride >= 0) {
 			processor.setPurgeThreshold(myFailedJobLifetimeOverride);
 		}

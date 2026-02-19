@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.merge.MergeResourceHelper;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
@@ -77,8 +78,11 @@ public class MergeAppCtx {
 
 	@Bean
 	public ReplaceReferencesQueryIdsStep<MergeJobParameters> mergeQueryIdsStep(
-			HapiTransactionService theHapiTransactionService, IBatch2DaoSvc theBatch2DaoSvc) {
-		return new ReplaceReferencesQueryIdsStep<>(theHapiTransactionService, theBatch2DaoSvc);
+			HapiTransactionService theHapiTransactionService,
+			IBatch2DaoSvc theBatch2DaoSvc,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		return new ReplaceReferencesQueryIdsStep<>(
+				theHapiTransactionService, theBatch2DaoSvc, theRequestPartitionHelperSvc);
 	}
 
 	@Bean

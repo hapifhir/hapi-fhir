@@ -113,7 +113,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		myTransactionService = theTransactionService;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myJobStepExecutionServices = theJobStepExecutionServices;
-		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry, theInterceptorService);
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(
+				theJobDefinitionRegistry, theInterceptorService, theJobStepExecutionServices);
 		myInterceptorService = theInterceptorService;
 		myReducerExecutor = Executors.newSingleThreadExecutor(new CustomizableThreadFactory("batch2-reducer"));
 
@@ -308,7 +309,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 						theJobWorkCursor,
 						myJobPersistence,
 						myJobDefinitionRegistry,
-						myInterceptorService);
+						myInterceptorService,
+						myJobStepExecutionServices);
 				StepExecutionDetails<PT, IT> chunkDetails = StepExecutionDetails.createReductionStepDetails(
 						parameters, null, instance, myJobStepExecutionServices);
 
@@ -359,7 +361,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 					 */
 					IJobCompletionHandler<PT> completionHandler =
 							theJobWorkCursor.getJobDefinition().getCompletionHandler();
-					JobCompletionDetails<PT> jcd = new JobCompletionDetails<>(parameters, instance);
+					JobCompletionDetails<PT> jcd =
+							new JobCompletionDetails<>(parameters, instance, myJobStepExecutionServices);
 					if (completionHandler != null) {
 						completionHandler.jobComplete(jcd);
 					}

@@ -1102,7 +1102,8 @@ public class JpaConfig {
 			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundle,
 			Batch2TaskHelper theBatch2TaskHelper,
 			JpaStorageSettings theStorageSettings,
-			ReplaceReferencesProvenanceSvc theProvenanceSvc) {
+			ReplaceReferencesProvenanceSvc theProvenanceSvc,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		return new ReplaceReferencesSvcImpl(
 				theDaoRegistry,
 				theHapiTransactionService,
@@ -1111,7 +1112,8 @@ public class JpaConfig {
 				theReplaceReferencesPatchBundle,
 				theBatch2TaskHelper,
 				theStorageSettings,
-				theProvenanceSvc);
+				theProvenanceSvc,
+				theRequestPartitionHelperSvc);
 	}
 
 	@Primary

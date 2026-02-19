@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
@@ -113,6 +114,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	private IReductionStepExecutorService myReductionStepExecutorService;
 	@Mock
 	private IInterceptorService myInterceptorService;
+	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
 
 	@BeforeEach
 	public void beforeEach() {
@@ -125,7 +128,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			batchJobSender,
 			myJobExecutorSvc,
 			myReductionStepExecutorService,
-			myInterceptorService
+			myInterceptorService,
+			myJobStepExecutionServices
 		);
 		myStorageSettings.setJobFastTrackingEnabled(true);
 	}

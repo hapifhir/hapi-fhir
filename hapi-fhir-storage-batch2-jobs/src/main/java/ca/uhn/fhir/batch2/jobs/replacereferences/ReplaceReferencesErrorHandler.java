@@ -46,8 +46,10 @@ public class ReplaceReferencesErrorHandler<PT extends ReplaceReferencesJobParame
 
 		PT jobParameters = theDetails.getParameters();
 
-		SystemRequestDetails requestDetails =
-				SystemRequestDetails.forRequestPartitionId(jobParameters.getPartitionId());
+		// FIXME: clean
+		//		SystemRequestDetails requestDetails =
+		//				SystemRequestDetails.forRequestPartitionId(jobParameters.getTargetPartitionId());
+		SystemRequestDetails requestDetails = theDetails.newSystemRequestDetails();
 
 		myBatch2TaskHelper.updateTaskStatusOnJobCompletion(myTaskDao, requestDetails, theDetails);
 	}

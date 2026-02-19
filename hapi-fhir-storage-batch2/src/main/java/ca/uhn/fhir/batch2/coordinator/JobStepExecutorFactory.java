@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
@@ -36,6 +37,7 @@ public class JobStepExecutorFactory {
 	private final IJobMaintenanceService myJobMaintenanceService;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final IInterceptorService myInterceptorService;
+	private final IJobStepExecutionServices myJobStepExecutionServices;
 
 	public JobStepExecutorFactory(
 			@Nonnull IJobPersistence theJobPersistence,
@@ -43,13 +45,15 @@ public class JobStepExecutorFactory {
 			@Nonnull WorkChunkProcessor theExecutorSvc,
 			@Nonnull IJobMaintenanceService theJobMaintenanceService,
 			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
-			@Nonnull IInterceptorService theInterceptorService) {
+			@Nonnull IInterceptorService theInterceptorService,
+			@Nonnull IJobStepExecutionServices theJobStepExecutionServices) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myJobStepExecutorSvc = theExecutorSvc;
 		myJobMaintenanceService = theJobMaintenanceService;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myInterceptorService = theInterceptorService;
+		myJobStepExecutionServices = theJobStepExecutionServices;
 	}
 
 	public <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
@@ -65,6 +69,7 @@ public class JobStepExecutorFactory {
 				myJobStepExecutorSvc,
 				myJobMaintenanceService,
 				myJobDefinitionRegistry,
-				myInterceptorService);
+				myInterceptorService,
+				myJobStepExecutionServices);
 	}
 }

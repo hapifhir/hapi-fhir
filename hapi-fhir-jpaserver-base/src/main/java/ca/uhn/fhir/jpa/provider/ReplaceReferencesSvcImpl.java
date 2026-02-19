@@ -25,11 +25,13 @@ import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesJobParameters;
 import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
@@ -68,6 +70,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	private final JpaStorageSettings myStorageSettings;
 	private final ReplaceReferencesProvenanceSvc myReplaceReferencesProvenanceSvc;
 	private final FhirContext myFhirContext;
+	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	public ReplaceReferencesSvcImpl(
 			DaoRegistry theDaoRegistry,
@@ -77,7 +80,8 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc,
 			Batch2TaskHelper theBatch2TaskHelper,
 			JpaStorageSettings theStorageSettings,
-			ReplaceReferencesProvenanceSvc theReplaceReferencesProvenanceSvc) {
+			ReplaceReferencesProvenanceSvc theReplaceReferencesProvenanceSvc,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		myDaoRegistry = theDaoRegistry;
 		myHapiTransactionService = theHapiTransactionService;
 		myResourceLinkDao = theResourceLinkDao;
@@ -87,6 +91,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		myStorageSettings = theStorageSettings;
 		myReplaceReferencesProvenanceSvc = theReplaceReferencesProvenanceSvc;
 		myFhirContext = theDaoRegistry.getFhirContext();
+		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 	}
 
 	@Override
@@ -159,9 +164,12 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 		Date startTime = new Date();
 
+		RequestPartitionId partition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
+				theRequestDetails, theTargetResource.getIdElement());
+
 		StopLimitAccumulator<IdDt> accumulator = myHapiTransactionService
 				.withRequest(theRequestDetails)
-				.withRequestPartitionId(theReplaceReferencesRequest.partitionId)
+				.withRequestPartitionId(partition)
 				.execute(() -> getAllPidsWithLimit(theReplaceReferencesRequest));
 
 		if (accumulator.isTruncated()) {
