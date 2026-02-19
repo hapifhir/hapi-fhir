@@ -361,7 +361,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		assignServerAssignedUuidIfRequired(theResource);
 
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
-				theRequestDetails, theResource, getResourceName());
+			theRequestDetails, theResource, getResourceName());
 
 		return myTransactionService
 				.withRequest(theRequestDetails)
@@ -2074,8 +2074,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Nonnull
 	protected ResourceTable readEntityLatestVersion(
 			IIdType theId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
-				theRequestDetails, getResourceName(), theId);
+		RequestPartitionId requestPartitionId = determineReadPartitionForId(theId, theRequestDetails, theTransactionDetails);
 
 		return myTransactionService
 				.withRequest(theRequestDetails)
@@ -2536,8 +2535,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		};
 		theTransactionDetails.addRollbackUndoAction(onRollback);
 
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
-				theRequest, theResource, getResourceName());
+		RequestPartitionId requestPartitionId = determineCreatePartitionForResource(theResource, theRequest, theTransactionDetails);
 
 		boolean rewriteHistory = theRequest != null && theRequest.isRewriteHistory();
 		if (rewriteHistory && !myStorageSettings.isUpdateWithHistoryRewriteEnabled()) {
@@ -2567,6 +2565,26 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.withTransactionDetails(theTransactionDetails)
 				.withRequestPartitionId(requestPartitionId)
 				.execute(updateCallback);
+	}
+
+	@Nonnull
+	private RequestPartitionId determineReadPartitionForId(IIdType theId, RequestDetails theRequestDetails, @Nonnull TransactionDetails theTransactionDetails) {
+		RequestPartitionId requestPartitionId = theTransactionDetails.getResolvedPartition(theId);
+		if (requestPartitionId == null) {
+			requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
+				theRequestDetails, getResourceName(), theId);
+		}
+		return requestPartitionId;
+	}
+
+	@Nonnull
+	private RequestPartitionId determineCreatePartitionForResource(T theResource, RequestDetails theRequest, @Nonnull TransactionDetails theTransactionDetails) {
+		RequestPartitionId requestPartitionId = theTransactionDetails.getResolvedPartition(getResourceName() + "/" + theResource.getIdElement().getIdPart());
+		if (requestPartitionId == null) {
+			requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
+				theRequest, theResource, getResourceName());
+		}
+		return requestPartitionId;
 	}
 
 	private DaoMethodOutcome doUpdate(

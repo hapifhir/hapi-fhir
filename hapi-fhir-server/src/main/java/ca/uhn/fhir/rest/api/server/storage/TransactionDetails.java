@@ -210,6 +210,20 @@ public class TransactionDetails {
 		return myResolvedPartitions.get(theId);
 	}
 
+
+	/**
+	 * If a resource has been resolved within the current transaction to a specific partition, we
+	 * cache it here to avoid repeated lookups.
+	 *
+	 * @since 8.10.0
+	 */
+	public RequestPartitionId getResolvedPartition(IIdType theId) {
+		Validate.notNull(theId, "theId must not be null");
+		Validate.isTrue(theId.hasResourceType(), "theId must have a resource type");
+		Validate.isTrue(theId.hasIdPart(), "theId must have an ID part");
+		return getResolvedPartition(theId.getResourceType() + "/" + theId.getIdPart());
+	}
+
 	/**
 	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
 	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
@@ -519,4 +533,5 @@ public class TransactionDetails {
 	public <T extends IResourcePersistentId<?>> boolean hasReverseResolvedId(T thePid) {
 		return myReverseResolvedResourceIds.containsKey(thePid);
 	}
+
 }
