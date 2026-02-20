@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.ServiceRequest;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,7 +23,8 @@ class PrefetchTemplateUtilR5Test {
 	private static final String DRAFT_ORDERS_CONTEXT_KEY = "draftOrders";
 
 	@Test
-	void substituteTemplateShouldSupportMultipleDaVincePrefetchTokens() {
+	@DisplayName("Should support multiple DaVinci prefetch tokens for different resource types")
+	void substituteTemplateMultipleDaVinciPrefetchTokens() {
 		String template =
 				"{{context.draftOrders.ServiceRequest.id}} a {{context.draftOrders.Observation.id}} a {{context.patientId}}";
 		BundleBuilder builder = new BundleBuilder(ourFhirContext);

@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
@@ -37,7 +38,8 @@ class PrefetchTemplateUtilR4Test {
 	private static final String DRAFT_ORDERS_CONTEXT_KEY = "draftOrders";
 
 	@Test
-	void substituteTemplateShouldReturnCSVForMultipleSupportNestedPrefetchTokens() {
+	@DisplayName("Should return all matches for DaVinci prefetch tokens")
+	void substituteTemplateMultipleMatchesPrefetchTokens() {
 		String template = "{{context.draftOrders.ServiceRequest.id}} a {{context.patientId}}";
 		BundleBuilder builder = new BundleBuilder(ourFhirContext);
 		builder.addCollectionEntry(new ServiceRequest().setId(SERVICE_ID1));
@@ -50,7 +52,8 @@ class PrefetchTemplateUtilR4Test {
 	}
 
 	@Test
-	void substituteTemplateShouldThrowForDaVinciTemplateIfResourcesAreNotFoundInContext() {
+	@DisplayName("Should throw exception when DaVinci template resources are not found in context")
+	void substituteTemplateDaVinciTemplateResourcesNotFoundInContext() {
 		String template = "{{context.draftOrders.ServiceRequest.id}} a {{context.patientId}}";
 		BundleBuilder builder = new BundleBuilder(ourFhirContext);
 		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
@@ -67,7 +70,8 @@ class PrefetchTemplateUtilR4Test {
 	}
 
 	@Test
-	void substituteTemplateShouldThrowForDaVinciTemplateIfResourceIsNotBundle() {
+	@DisplayName("Should throw exception when DaVinci template context is not a Bundle")
+	void substituteTemplateDaVinciTemplateResourceIsNotBundle() {
 		String template = "{{context.draftOrders.ServiceRequest.id}} a {{context.patientId}}";
 		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
 		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
@@ -85,7 +89,8 @@ class PrefetchTemplateUtilR4Test {
 	}
 
 	@Test
-	void substituteTemplateWithFhirPathUsingOfTypeMethodWhenContextIsBundleAndResultIsPartOfBundleShouldParseSuccessfully() {
+	@DisplayName("Should successfully evaluate ofType() method when context is Bundle and results are in Bundle")
+	void substituteTemplateWithFhirPathOfTypeMethodWithBundleContext() {
 		// setup
 		final String deviceId1 = "Device/1";
 		final String deviceId2 = "Device/2";
@@ -108,7 +113,8 @@ class PrefetchTemplateUtilR4Test {
 	}
 
 	@Test
-	void substituteTemplateWithFhirPathUsingResolveMethodWhenContextIsBundleAndResultIsPartOfBundleShouldParseSuccessfully() {
+	@DisplayName("Should successfully resolve references within Bundle when using resolve() method")
+	void substituteTemplateWithFhirPathResolveMethodWithBundleContext() {
 		// setup
 		final String deviceId1 = "Device/1";
 		final String deviceId2 = "Device/2";
@@ -132,7 +138,45 @@ class PrefetchTemplateUtilR4Test {
 	}
 
 	@Test
-	void substituteTemplateWithFhirPathUsingResolveMethodWhenContextIsBundleAndResultIsNotPartOfBundleShouldFail() {
+	@DisplayName("Should successfully resolve contained resources when using resolve() method with hash reference")
+	void substituteTemplateWithFhirPathResolveMethodWithContainedResource() {
+		// setup
+		final String deviceRequestKey = "deviceRequest";
+		final String deviceId1 = "Device/1";
+		final String template = "Device?_id={{context.deviceRequest.code.resolve().as(Device).id}}";
+		final DeviceRequest deviceRequest1 = new DeviceRequest();
+		deviceRequest1.setCode(new Reference("#" + deviceId1));
+		deviceRequest1.addContained(new Device().setId(deviceId1));
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put(deviceRequestKey, deviceRequest1);
+		// execute
+		final String actual = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
+		// validate
+		assertThat(actual).isEqualTo("Device?_id=" + 1);
+	}
+
+	@Test
+	@DisplayName("Should fail to resolve external references when resource has only contained resources")
+	void substituteTemplateWithFhirPathResolveMethodWithExternalReferenceFailure() {
+		// setup
+		final String deviceRequestKey = "deviceRequest";
+		final String deviceId1 = "Device/1";
+		final String template = "Device?_id={{context.deviceRequest.code.resolve().as(Device).id}}";
+		final DeviceRequest deviceRequest1 = new DeviceRequest();
+		deviceRequest1.setCode(new Reference(deviceId1));
+		deviceRequest1.addContained(new Device().setId(deviceId1));
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put(deviceRequestKey, deviceRequest1);
+		// execute & validate
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining(
+						"FHIRPath expression did not return any results for query: code.resolve().as(Device).id");
+	}
+
+	@Test
+	@DisplayName("Should throw exception when using resolve() method and referenced resource is not in Bundle")
+	void substituteTemplateWithFhirPathResolveMethodReferencedResourceNotInBundle() {
 		// setup
 		final String deviceId1 = "Device/1";
 		final String template =
@@ -152,7 +196,8 @@ class PrefetchTemplateUtilR4Test {
 	}
 
 	@Test
-	void substituteTemplateWithFhirPathUsingInvalidMethodShouldFail() {
+	@DisplayName("Should throw exception when using invalid FHIRPath method")
+	void substituteTemplateWithFhirPathInvalidMethod() {
 		// setup
 		final String deviceId1 = "Device/1";
 		final String template =
@@ -172,7 +217,8 @@ class PrefetchTemplateUtilR4Test {
 	}
 
 	@Test
-	void substituteTemplateWithFhirPathWithComplexQueryWhenContextIsResourceAndPathExistShouldParseSuccessfully() {
+	@DisplayName("Should successfully evaluate complex FHIRPath query with date on resource context")
+	void substituteTemplateWithFhirPathComplexQueryWithDateArithmetic() {
 		// setup
 		final String encounterId = "Encounter/1";
 		final String template =
@@ -194,7 +240,8 @@ class PrefetchTemplateUtilR4Test {
 	}
 
 	@Test
-	void substituteTemplateWithFhirPathWithOrConditionWhenContextIsBundleAndPathExistShouldParseSuccessfully() {
+	@DisplayName("Should successfully evaluate FHIRPath OR expressions combining multiple paths")
+	void substituteTemplateWithFhirPathOrCondition() {
 		// setup
 		final String encounterId = "Encounter/1";
 		final String pracRoleReference1 = "PractitionerRole/PR1";

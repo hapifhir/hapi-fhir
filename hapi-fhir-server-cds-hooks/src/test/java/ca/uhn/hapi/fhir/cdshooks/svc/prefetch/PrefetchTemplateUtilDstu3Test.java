@@ -9,6 +9,7 @@ import org.hl7.fhir.dstu3.model.DeviceRequest;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,7 +27,8 @@ class PrefetchTemplateUtilDstu3Test {
 	private static final String DRAFT_ORDERS_CONTEXT_KEY = "draftOrders";
 
 	@Test
-	void substituteTemplateShouldSupportNestedPrefetchTokens() {
+	@DisplayName("Should support nested DaVinci prefetch tokens for DSTU3")
+	void substituteTemplateNestedPrefetchTokens() {
 		String template = "{{context.draftOrders.Observation.id}} a {{context.patientId}}";
 		BundleBuilder builder = new BundleBuilder(ourFhirContext);
 		Observation observation = new Observation();
@@ -40,7 +42,8 @@ class PrefetchTemplateUtilDstu3Test {
 	}
 
 	@Test
-	void substituteTemplateWithFhirPathUsingUnsupportedMethodShouldFail() {
+	@DisplayName("Should throw exception when using unsupported FHIRPath method ofType() in DSTU3")
+	void substituteTemplateWithFhirPathUnsupportedOfTypeMethod() {
 		// setup
 		final String deviceId1 = "Device/1";
 		final String template =
@@ -60,7 +63,8 @@ class PrefetchTemplateUtilDstu3Test {
 	}
 
 	@Test
-	void substituteTemplateWithFhirPathUsingWhereMethodWhenContextIsBundleAndResultIsPartOfBundleShouldParseSuccessFully() {
+	@DisplayName("Should successfully evaluate where() method when matching resource exists in Bundle")
+	void substituteTemplateWithFhirPathWhereMethodWithMatchingResult() {
 		// setup
 		final String deviceId1 = "Device/1";
 		final String deviceId2 = "Device/2";
@@ -79,7 +83,8 @@ class PrefetchTemplateUtilDstu3Test {
 	}
 
 	@Test
-	void substituteTemplateWithFhirPathUsingWhereMethodWhenContextIsBundleAndResultIsNotPartOfBundleShouldFail() {
+	@DisplayName("Should throw exception with where() method when no matching resource in Bundle")
+	void substituteTemplateWithFhirPathWhereMethodWithNoMatchingResult() {
 		// setup
 		final String deviceId1 = "Device/1";
 		final String template =
@@ -97,7 +102,8 @@ class PrefetchTemplateUtilDstu3Test {
 	}
 
 	@Test
-	void substituteTemplateWithFhirPathWhenContextIsResourceAndPathExistShouldParseSuccessfully() {
+	@DisplayName("Should successfully evaluate FHIRPath when context is a resource with valid path")
+	void substituteTemplateWithFhirPathResourceContextWithValidPath() {
 		// setup
 		final String encounterId = "Encounter/1";
 		final String template = "Condition?patient={{context.patientId}}&context={{context.encounter.id}}";
@@ -111,7 +117,8 @@ class PrefetchTemplateUtilDstu3Test {
 	}
 
 	@Test
-	void substituteTemplateWithFhirPathWhenContextIsResourceAndPathDoesNotExistShouldFail() {
+	@DisplayName("Should throw exception when FHIRPath references non-existent property on resource")
+	void substituteTemplateWithFhirPathResourceContextWithInvalidPath() {
 		// setup
 		final String template = "Condition?patient={{context.patientId}}&context={{context.encounter.id}}";
 		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
