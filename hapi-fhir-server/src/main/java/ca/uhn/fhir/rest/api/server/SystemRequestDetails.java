@@ -73,8 +73,10 @@ public class SystemRequestDetails extends RequestDetails {
 	public SystemRequestDetails(RequestDetails theDetails) {
 		super(theDetails);
 
+		copyGenericRequestDetails(theDetails);
+
 		if (theDetails instanceof SystemRequestDetails systemRequestDetails) {
-			init(systemRequestDetails);
+			copySystemRequestDetails(systemRequestDetails);
 		}
 	}
 
@@ -84,19 +86,18 @@ public class SystemRequestDetails extends RequestDetails {
 	 */
 	public SystemRequestDetails(SystemRequestDetails theOther) {
 		super(theOther);
-		if (nonNull(theOther.getServer())) {
-			myServer = theOther.getServer();
-			myFhirContext = theOther.getFhirContext();
-		}
-		init(theOther);
+		copyGenericRequestDetails(theOther);
+		copySystemRequestDetails(theOther);
 	}
 
-	private void init(SystemRequestDetails theOther) {
+	private void copyGenericRequestDetails(RequestDetails theOther) {
 		if (nonNull(theOther.getServer())) {
 			myServer = theOther.getServer();
 			myFhirContext = theOther.getFhirContext();
 		}
+	}
 
+	private void copySystemRequestDetails(SystemRequestDetails theOther) {
 		if (nonNull(theOther.myHeaders)) {
 			initHeaderMap();
 			myHeaders.putAll(theOther.myHeaders);

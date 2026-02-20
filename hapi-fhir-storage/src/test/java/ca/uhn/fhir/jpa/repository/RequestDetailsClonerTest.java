@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -132,12 +133,15 @@ public class RequestDetailsClonerTest {
 	public void addHeaders_clonedRequestDetails_setsNewHeaderValues(RequestDetailsType theReqType) {
 		// setup
 		RequestDetails requestDetails = createFilledInRequestDetails(theReqType);
+		final String parentHeaderKey = "parentHeaderKey";
+		final String parentHeaderValue = "parentHeaderValue";
+
 		if (requestDetails instanceof ServletRequestDetails srd) {
-			HttpServletRequest mockServletRequest = mock(HttpServletRequest.class);
-			// when
-			when(mockServletRequest.getHeaderNames())
-				.thenReturn(Collections.enumeration(new ArrayList<>()));
+			MockHttpServletRequest mockServletRequest = new MockHttpServletRequest();
+			mockServletRequest.addHeader(parentHeaderKey, parentHeaderValue);
 			srd.setServletRequest(mockServletRequest);
+		} else {
+			requestDetails.addHeader(parentHeaderKey, parentHeaderValue);
 		}
 
 		for (String value : List.of("value1", "value2")) {
@@ -159,6 +163,9 @@ public class RequestDetailsClonerTest {
 		assertTrue(newValues.contains("value3"));
 		assertEquals(1, newHeaderValues.size());
 		assertEquals("newval1", newHeaderValues.get(0));
+
+		final List<String> httpHeaderValues = requestDetails.getHeaders(parentHeaderKey);
+		assertEquals(List.of(parentHeaderValue), httpHeaderValues);
 	}
 
 	@ParameterizedTest
