@@ -166,6 +166,24 @@ class PrefetchTemplateUtilR4Test {
 	}
 
 	@Test
+	@DisplayName("Should fail as contained reference resource is not present")
+	void substituteTemplateWithFhirPathResolveMethodWithNoContainedResourceFailure() {
+		// setup
+		final String deviceRequestKey = "deviceRequest";
+		final String deviceId1 = "#Device/1";
+		final String template = "Device?_id={{context.deviceRequest.code.resolve().as(Device).id}}";
+		final DeviceRequest deviceRequest1 = new DeviceRequest();
+		deviceRequest1.setCode(new Reference(deviceId1));
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put(deviceRequestKey, deviceRequest1);
+		// execute & validate
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining(
+				"FHIRPath expression did not return any results for query: code.resolve().as(Device).id");
+	}
+
+	@Test
 	@DisplayName("Should throw exception when using resolve() method and referenced resource is not in Bundle")
 	void substituteTemplateWithFhirPathResolveMethodReferencedResourceNotInBundle() {
 		// setup
