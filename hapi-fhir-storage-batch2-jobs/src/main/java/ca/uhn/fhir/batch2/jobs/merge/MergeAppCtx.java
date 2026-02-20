@@ -96,9 +96,14 @@ public class MergeAppCtx {
 			DaoRegistry theDaoRegistry,
 			IHapiTransactionService theHapiTransactionService,
 			MergeResourceHelper theMergeResourceHelper,
-			MergeProvenanceSvc theMergeProvenanceSvc) {
+			MergeProvenanceSvc theMergeProvenanceSvc,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		return new MergeUpdateTaskReducerStep(
-				theDaoRegistry, theHapiTransactionService, theMergeResourceHelper, theMergeProvenanceSvc);
+				theDaoRegistry,
+				theHapiTransactionService,
+				theMergeResourceHelper,
+				theMergeProvenanceSvc,
+				theRequestPartitionHelperSvc);
 	}
 
 	@Bean
