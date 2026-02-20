@@ -89,41 +89,17 @@ public class PrefetchTemplateUtil {
 						// Strip "context.KEY." from the beginning of each OR part if present
 						orPart = orPart.replaceFirst("^" + contextPrefix, "");
 						// Create a fresh FhirPath instance for each OR part to avoid state issues
-						final IFhirPath fhirPathPart = theFhirContext.newFhirPath();
-						fhirPathPart.setEvaluationContext(new IFhirPathEvaluationContext() {
-							@Override
-							public IBase resolveReference(@Nonnull IIdType theReference, @Nullable IBase theContext) {
-								return BundleUtil.getReferenceInBundle(
-										theFhirContext, theReference.getValue(), resource);
-							}
-						});
+						final IFhirPath fhirPathPart = createFhirPathWithReferenceResolution(theFhirContext, resource);
 						String fullExpression = resourceType + "." + orPart;
 						List<IBase> partResults = fhirPathPart.evaluate(resource, fullExpression, IBase.class);
 						results.addAll(partResults);
 					}
 				} else {
-					final IFhirPath fhirPath = theFhirContext.newFhirPath();
-					fhirPath.setEvaluationContext(new IFhirPathEvaluationContext() {
-						@Override
-						public IBase resolveReference(@Nonnull IIdType theReference, @Nullable IBase theContext) {
-							return BundleUtil.getReferenceInBundle(theFhirContext, theReference.getValue(), resource);
-						}
-					});
+					final IFhirPath fhirPath = createFhirPathWithReferenceResolution(theFhirContext, resource);
 					String fullFhirPathExpression = resource.fhirType() + "." + fhirPathExpression;
 					results = fhirPath.evaluate(resource, fullFhirPathExpression, IBase.class);
 				}
-				final String resourceIds = results.stream()
-						.map(result -> {
-							if (result instanceof IBaseResource baseResource) {
-								return baseResource.getIdElement().getIdPart();
-							} else if (result instanceof IPrimitiveType) {
-								return ((IPrimitiveType<?>) result).getValueAsString();
-							} else {
-								return result.toString();
-							}
-						})
-						.filter(id -> id != null && !id.isEmpty())
-						.collect(Collectors.joining(","));
+				final String resourceIds = convertResultsToIds(results);
 				if (StringUtils.isEmpty(resourceIds)) {
 					throw new InvalidRequestException(Msg.code(2377)
 							+ "FHIRPath expression did not return any results for query: " + fhirPathExpression);
@@ -248,32 +224,13 @@ public class PrefetchTemplateUtil {
 
 					resource = theContext.getResource(key);
 					// Create a fresh FhirPath instance for each OR part
-					final IFhirPath fhirPath = theFhirContext.newFhirPath();
-					final IBaseResource finalResource = resource;
-					fhirPath.setEvaluationContext(new IFhirPathEvaluationContext() {
-						@Override
-						public IBase resolveReference(@Nonnull IIdType theReference, @Nullable IBase theContext) {
-							return BundleUtil.getReferenceInBundle(
-									theFhirContext, theReference.getValue(), finalResource);
-						}
-					});
+					final IFhirPath fhirPath = createFhirPathWithReferenceResolution(theFhirContext, resource);
 					String fullExpression = resource.fhirType() + "." + fhirPathExpression;
 					List<IBase> partResults = fhirPath.evaluate(resource, fullExpression, IBase.class);
 					results.addAll(partResults);
 				}
 
-				final String resourceIds = results.stream()
-						.map(result -> {
-							if (result instanceof IBaseResource baseResource) {
-								return baseResource.getIdElement().getIdPart();
-							} else if (result instanceof IPrimitiveType) {
-								return ((IPrimitiveType<?>) result).getValueAsString();
-							} else {
-								return result.toString();
-							}
-						})
-						.filter(id -> id != null && !id.isEmpty())
-						.collect(Collectors.joining(","));
+				final String resourceIds = convertResultsToIds(results);
 				if (StringUtils.isEmpty(resourceIds)) {
 					throw new InvalidRequestException(
 							Msg.code(2380) + "FHIRPath expression did not return any results for query: " + expression);
@@ -295,5 +252,39 @@ public class PrefetchTemplateUtil {
 
 	private static String substitute(String theString, String theKey, String theValue) {
 		return theString.replaceAll("\\{\\{context\\." + theKey + "}}", theValue);
+	}
+
+	/**
+	 * Converts a list of FHIRPath evaluation results to a comma-separated string of IDs.
+	 * Handles IBaseResource, IPrimitiveType, and other IBase types.
+	 */
+	private static String convertResultsToIds(List<IBase> theResults) {
+		return theResults.stream()
+				.map(result -> {
+					if (result instanceof IBaseResource baseResource) {
+						return baseResource.getIdElement().getIdPart();
+					} else if (result instanceof IPrimitiveType) {
+						return ((IPrimitiveType<?>) result).getValueAsString();
+					} else {
+						return result.toString();
+					}
+				})
+				.filter(id -> id != null && !id.isEmpty())
+				.collect(Collectors.joining(","));
+	}
+
+	/**
+	 * Creates a FhirPath instance configured with reference resolution within a Bundle or contained resources.
+	 */
+	private static IFhirPath createFhirPathWithReferenceResolution(
+			FhirContext theFhirContext, IBaseResource theResource) {
+		final IFhirPath fhirPath = theFhirContext.newFhirPath();
+		fhirPath.setEvaluationContext(new IFhirPathEvaluationContext() {
+			@Override
+			public IBase resolveReference(@Nonnull IIdType theReference, @Nullable IBase theContext) {
+				return BundleUtil.getReferenceInBundle(theFhirContext, theReference.getValue(), theResource);
+			}
+		});
+		return fhirPath;
 	}
 }

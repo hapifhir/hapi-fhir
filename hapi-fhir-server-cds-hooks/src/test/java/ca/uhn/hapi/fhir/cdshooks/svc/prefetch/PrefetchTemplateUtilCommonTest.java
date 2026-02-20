@@ -82,5 +82,6 @@ class PrefetchTemplateUtilCommonTest {
 	 * test for OR operator returning nothing
 	 * check if array references can be directly evaluated.
 	 * remove invalid request exception and replace with 412
+	 * one incorrect in OR condition
 	 */
 }
