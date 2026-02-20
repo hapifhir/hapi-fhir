@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.replacereferences;
 
-import ca.uhn.fhir.jpa.api.pid.FhirIdJson;
 import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceResultsJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -28,6 +27,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
+import ca.uhn.fhir.jpa.api.pid.FhirIdJson;
 import ca.uhn.fhir.jpa.interceptor.ex.ProvenanceAgentTestInterceptor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IProvenanceAgent;

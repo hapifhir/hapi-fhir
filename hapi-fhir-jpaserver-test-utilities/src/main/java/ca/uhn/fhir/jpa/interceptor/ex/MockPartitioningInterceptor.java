@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -44,7 +43,7 @@ public class MockPartitioningInterceptor {
 	private static final Logger ourLog = LoggerFactory.getLogger(MockPartitioningInterceptor.class);
 
 	// FIXME: needed?
-//	private final Map<String, RequestPartitionId> myPartitionIdByResourceName = new HashMap<>();
+	//	private final Map<String, RequestPartitionId> myPartitionIdByResourceName = new HashMap<>();
 	private final List<RequestPartitionId> myReadRequestPartitionIds = new ArrayList<>();
 	private final List<RequestPartitionId> myCreateRequestPartitionIds = new ArrayList<>();
 	private RequestPartitionId myAlwaysReturnPartition;
@@ -60,7 +59,9 @@ public class MockPartitioningInterceptor {
 
 		RequestPartitionId retVal = myAlwaysReturnPartition;
 		if (retVal == null) {
-			assertThat(myReadRequestPartitionIds).describedAs("read partition ids").isNotEmpty();
+			assertThat(myReadRequestPartitionIds)
+					.describedAs("read partition ids")
+					.isNotEmpty();
 			retVal = myReadRequestPartitionIds.remove(0);
 		}
 		ourLog.info("Returning partition {} for read at: {}", retVal, stack);
@@ -69,21 +70,23 @@ public class MockPartitioningInterceptor {
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 	public RequestPartitionId PartitionIdentifyCreate(
-		IBaseResource theResource, ServletRequestDetails theRequestDetails) {
+			IBaseResource theResource, ServletRequestDetails theRequestDetails) {
 		assertNotNull(theResource);
 		String stack = getCallerStackLine();
 		RequestPartitionId retVal = myAlwaysReturnPartition;
 		if (retVal == null) {
-			assertThat(myCreateRequestPartitionIds).describedAs("create partitions").isNotEmpty();
+			assertThat(myCreateRequestPartitionIds)
+					.describedAs("create partitions")
+					.isNotEmpty();
 			retVal = myCreateRequestPartitionIds.remove(0);
 		}
 
 		ourLog.info(
-			"Returning partition [{}] for create of resource {} with date {}: {}",
-			retVal,
-			theResource,
-			retVal.getPartitionDate(),
-			stack);
+				"Returning partition [{}] for create of resource {} with date {}: {}",
+				retVal,
+				theResource,
+				retVal.getPartitionDate(),
+				stack);
 		return retVal;
 	}
 
@@ -100,7 +103,7 @@ public class MockPartitioningInterceptor {
 	public void addNextIterceptorReadResult(RequestPartitionId theRequestPartitionId) {
 		myReadRequestPartitionIds.add(theRequestPartitionId);
 		ourLog.info(
-			"Adding partition {} for read (not have {})", theRequestPartitionId, myReadRequestPartitionIds.size());
+				"Adding partition {} for read (not have {})", theRequestPartitionId, myReadRequestPartitionIds.size());
 	}
 
 	public void clearPartitions() {
