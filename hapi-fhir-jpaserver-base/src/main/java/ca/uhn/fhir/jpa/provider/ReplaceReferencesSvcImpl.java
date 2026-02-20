@@ -164,12 +164,12 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 		Date startTime = new Date();
 
-		RequestPartitionId partition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
-				theRequestDetails, theTargetResource.getIdElement());
+		RequestPartitionId sourcePartition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
+				theRequestDetails, theSourceResource.getIdElement());
 
 		StopLimitAccumulator<FhirIdJson> accumulator = myHapiTransactionService
 				.withRequest(theRequestDetails)
-				.withRequestPartitionId(partition)
+				.withRequestPartitionId(sourcePartition)
 				.execute(() -> getAllPidsWithLimit(theReplaceReferencesRequest));
 
 		if (accumulator.isTruncated()) {
