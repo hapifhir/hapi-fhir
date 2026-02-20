@@ -72,9 +72,9 @@ public class SystemRequestDetails extends RequestDetails {
 
 	public SystemRequestDetails(RequestDetails theDetails) {
 		super(theDetails);
-		if (nonNull(theDetails.getServer())) {
-			myServer = theDetails.getServer();
-			myFhirContext = theDetails.getFhirContext();
+
+		if (theDetails instanceof SystemRequestDetails systemRequestDetails) {
+			init(systemRequestDetails);
 		}
 	}
 
@@ -88,10 +88,20 @@ public class SystemRequestDetails extends RequestDetails {
 			myServer = theOther.getServer();
 			myFhirContext = theOther.getFhirContext();
 		}
+		init(theOther);
+	}
+
+	private void init(SystemRequestDetails theOther) {
+		if (nonNull(theOther.getServer())) {
+			myServer = theOther.getServer();
+			myFhirContext = theOther.getFhirContext();
+		}
+
 		if (nonNull(theOther.myHeaders)) {
 			initHeaderMap();
 			myHeaders.putAll(theOther.myHeaders);
 		}
+
 		myRequestPartitionId = theOther.myRequestPartitionId;
 	}
 

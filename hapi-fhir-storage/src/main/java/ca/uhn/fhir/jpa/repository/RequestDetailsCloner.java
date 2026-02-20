@@ -46,10 +46,8 @@ class RequestDetailsCloner {
 		RequestDetails newDetails;
 		if (theDetails instanceof ServletRequestDetails servletDetails) {
 			newDetails = new ServletRequestDetails(servletDetails);
-		} else if (theDetails instanceof SystemRequestDetails systemDetails) {
-			newDetails = new SystemRequestDetails(systemDetails);
 		} else {
-			throw new IllegalArgumentException("Unknown RequestDetails type: " + theDetails.getClass());
+			newDetails = new SystemRequestDetails(theDetails);
 		}
 
 		IRestfulResponse response = theDetails.getResponse();

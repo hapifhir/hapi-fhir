@@ -29,7 +29,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -132,9 +131,6 @@ public class RequestDetailsClonerTest {
 	@EnumSource(RequestDetailsType.class)
 	public void addHeaders_clonedRequestDetails_setsNewHeaderValues(RequestDetailsType theReqType) {
 		// setup
-		String headerName = "name";
-		List<String> valueArray = Arrays.asList("value1", "value2");
-		String headerName2 = "name2";
 		RequestDetails requestDetails = createFilledInRequestDetails(theReqType);
 		if (requestDetails instanceof ServletRequestDetails srd) {
 			HttpServletRequest mockServletRequest = mock(HttpServletRequest.class);
@@ -143,21 +139,22 @@ public class RequestDetailsClonerTest {
 				.thenReturn(Collections.enumeration(new ArrayList<>()));
 			srd.setServletRequest(mockServletRequest);
 		}
-		for (String value : valueArray) {
-			requestDetails.addHeader(headerName, value);
+
+		for (String value : List.of("value1", "value2")) {
+			requestDetails.addHeader("name", value);
 		}
 
 		// test
 		RequestDetails clone = RequestDetailsCloner.startWith(requestDetails)
-			.addHeaders(Map.of(headerName2, "newval1"))
-			.addHeaders(Map.of(headerName, "value3"))
+			.addHeaders(Map.of("name2", "newval1"))
+			.addHeaders(Map.of("name", "value3"))
 			.create();
 
 		// validate
-		assertEquals(2, requestDetails.getHeaders(headerName).size());
+		assertEquals(2, requestDetails.getHeaders("name").size());
 
-		List<String> newValues = clone.getHeaders(headerName);
-		List<String> newHeaderValues = clone.getHeaders(headerName2);
+		List<String> newValues = clone.getHeaders("name");
+		List<String> newHeaderValues = clone.getHeaders("name2");
 		assertEquals(3, newValues.size());
 		assertTrue(newValues.contains("value3"));
 		assertEquals(1, newHeaderValues.size());
@@ -345,16 +342,5 @@ public class RequestDetailsClonerTest {
 		assertThat(clone).isInstanceOf(SystemRequestDetails.class);
 		SystemRequestDetails clonedSystem = (SystemRequestDetails) clone;
 		assertThat(clonedSystem.getRequestPartitionId()).isEqualTo(partitionId);
-	}
-
-	@Test
-	void startWith_unknownRequestDetailsSubtype_shouldThrowIllegalArgumentException() {
-		// setup
-		RequestDetails unknown = mock(RequestDetails.class);
-
-		// test + validate
-		assertThatThrownBy(() -> RequestDetailsCloner.startWith(unknown))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessageContaining("Unknown RequestDetails type");
 	}
 }
