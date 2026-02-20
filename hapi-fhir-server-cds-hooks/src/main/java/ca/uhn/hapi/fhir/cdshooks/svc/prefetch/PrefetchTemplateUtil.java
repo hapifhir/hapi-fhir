@@ -32,7 +32,6 @@ import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -73,16 +72,42 @@ public class PrefetchTemplateUtil {
 			try {
 				final IBaseResource resource = theContext.getResource(key);
 				final String fhirPathExpression = matcher.group(2);
-				final IFhirPath fhirPath = theFhirContext.newFhirPath();
-				fhirPath.setEvaluationContext(new IFhirPathEvaluationContext() {
-					@Override
-					public IBase resolveReference(@Nonnull IIdType theReference, @Nullable IBase theContext) {
-						return BundleUtil.getResourceByReferenceAndResourceType(
-								theFhirContext, (IBaseBundle) resource, (IBaseReference) theContext);
+				// Handle OR operator in FHIRPath expressions by evaluating each part separately
+				final List<IBase> results;
+				if (fhirPathExpression.contains("|")) {
+					String resourceType = resource.fhirType();
+					String[] orParts = fhirPathExpression.split("\\|");
+					results = new java.util.ArrayList<>();
+					// Pattern to match "context.KEY." at the start of an OR part
+					String contextPrefix = "context\\." + key + "\\.";
+					for (String theOrPart : orParts) {
+						String orPart = theOrPart.trim();
+						// Strip "context.KEY." from the beginning of each OR part if present
+						orPart = orPart.replaceFirst("^" + contextPrefix, "");
+						// Create a fresh FhirPath instance for each OR part to avoid state issues
+						final IFhirPath fhirPathPart = theFhirContext.newFhirPath();
+						fhirPathPart.setEvaluationContext(new IFhirPathEvaluationContext() {
+							@Override
+							public IBase resolveReference(@Nonnull IIdType theReference, @Nullable IBase theContext) {
+								return BundleUtil.getReferenceInBundle(
+										theFhirContext, theReference.getValue(), resource);
+							}
+						});
+						String fullExpression = resourceType + "." + orPart;
+						List<IBase> partResults = fhirPathPart.evaluate(resource, fullExpression, IBase.class);
+						results.addAll(partResults);
 					}
-				});
-				final List<IBase> results =
-						fhirPath.evaluate(resource, resource.fhirType() + "." + fhirPathExpression, IBase.class);
+				} else {
+					final IFhirPath fhirPath = theFhirContext.newFhirPath();
+					fhirPath.setEvaluationContext(new IFhirPathEvaluationContext() {
+						@Override
+						public IBase resolveReference(@Nonnull IIdType theReference, @Nullable IBase theContext) {
+							return BundleUtil.getReferenceInBundle(theFhirContext, theReference.getValue(), resource);
+						}
+					});
+					String fullFhirPathExpression = resource.fhirType() + "." + fhirPathExpression;
+					results = fhirPath.evaluate(resource, fullFhirPathExpression, IBase.class);
+				}
 				final String resourceIds = results.stream()
 						.map(result -> {
 							if (result instanceof IBaseResource baseResource) {
