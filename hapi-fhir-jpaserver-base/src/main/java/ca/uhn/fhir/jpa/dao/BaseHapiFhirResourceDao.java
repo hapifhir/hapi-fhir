@@ -360,9 +360,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		assignServerAssignedIdFromUserDataIfRequired(theResource);
 		assignServerAssignedUuidIfRequired(theResource);
 
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
-			theRequestDetails, theResource, getResourceName());
-
+		RequestPartitionId requestPartitionId = determineCreatePartitionForResource(theResource, theRequestDetails, theTransactionDetails);
 		return myTransactionService
 				.withRequest(theRequestDetails)
 				.withTransactionDetails(theTransactionDetails)
@@ -815,8 +813,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateIdPresentForDelete(theId);
 		validateDeleteEnabled();
 
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
-				theRequestDetails, getResourceName(), theId);
+		RequestPartitionId requestPartitionId = determineReadPartitionForId(theId, theRequestDetails, theTransactionDetails);
 
 		final ResourceTable entity;
 		try {

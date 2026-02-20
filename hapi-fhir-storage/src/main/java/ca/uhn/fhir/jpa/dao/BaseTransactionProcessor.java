@@ -982,24 +982,37 @@ public abstract class BaseTransactionProcessor {
 					String requestUrl = myVersionAdapter.getEntryRequestUrl(theEntry);
 					if (isNotBlank(requestUrl)) {
 						if (requestUrl.indexOf('?') != -1) {
-							MatchUrlService.ResourceTypeAndSearchParameterMap typeAndParams =
+							if (nextWriteEntryRequestPartitionId == null) {
+								MatchUrlService.ResourceTypeAndSearchParameterMap typeAndParams =
 									myMatchUrlService.parseAndTranslateMatchUrl(requestUrl);
-							SearchParameterMap params = typeAndParams.searchParameterMap();
-							String resourceType =
+								SearchParameterMap params = typeAndParams.searchParameterMap();
+								String resourceType =
 									typeAndParams.resourceDefinition().getName();
-							ReadPartitionIdRequestDetails details =
+								ReadPartitionIdRequestDetails details =
 									ReadPartitionIdRequestDetails.forDelete(resourceType, params);
-							nextWriteEntryRequestPartitionId =
+								nextWriteEntryRequestPartitionId =
 									myRequestPartitionHelperService.determineReadPartitionForRequest(
-											requestDetailsForEntry, details);
+										requestDetailsForEntry, details);
+							} else {
+								/*
+								 * We don't currently support an explicit partition stored on the Bundle.entry userdata map for conditional
+								 * deletes. The reason is that there's no easy way to pass the selected partition into the DAO from here.
+								 * If any use cases come up which require this, we could consider finding a way to smuggle it in the
+								 * TransactionDetails, but for now we'll leave this use case unaddressed and just throw an error.
+								 */
+								throw new InternalErrorException(Msg.code(2845) + "Can not specify explicit partition for conditional delete");
+							}
 						} else {
 							IdType id = new IdType(requestUrl);
-							String resourceType = id.getResourceType();
-							ReadPartitionIdRequestDetails details =
+							if (nextWriteEntryRequestPartitionId == null) {
+								String resourceType = id.getResourceType();
+								ReadPartitionIdRequestDetails details =
 									ReadPartitionIdRequestDetails.forDelete(resourceType, id);
-							nextWriteEntryRequestPartitionId =
+								nextWriteEntryRequestPartitionId =
 									myRequestPartitionHelperService.determineReadPartitionForRequest(
-											requestDetailsForEntry, details);
+										requestDetailsForEntry, details);
+							}
+							theTransactionDetails.addResolvedPartition(id.getResourceType() + "/" + id.getIdPart(), nextWriteEntryRequestPartitionId);
 						}
 					}
 					break;
@@ -1008,16 +1021,18 @@ public abstract class BaseTransactionProcessor {
 					String requestUrl = myVersionAdapter.getEntryRequestUrl(theEntry);
 					if (isNotBlank(requestUrl)) {
 						if (requestUrl.indexOf('?') != -1) {
-							MatchUrlService.ResourceTypeAndSearchParameterMap typeAndParams =
+							if (nextWriteEntryRequestPartitionId == null) {
+								MatchUrlService.ResourceTypeAndSearchParameterMap typeAndParams =
 									myMatchUrlService.parseAndTranslateMatchUrl(requestUrl);
-							SearchParameterMap params = typeAndParams.searchParameterMap();
-							String resourceType =
+								SearchParameterMap params = typeAndParams.searchParameterMap();
+								String resourceType =
 									typeAndParams.resourceDefinition().getName();
-							ReadPartitionIdRequestDetails details =
+								ReadPartitionIdRequestDetails details =
 									ReadPartitionIdRequestDetails.forPatch(resourceType, params);
-							nextWriteEntryRequestPartitionId =
+								nextWriteEntryRequestPartitionId =
 									myRequestPartitionHelperService.determineReadPartitionForRequest(
-											requestDetailsForEntry, details);
+										requestDetailsForEntry, details);
+							}
 						} else {
 							IdType id = new IdType(requestUrl);
 							String resourceType = id.getResourceType();

@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.interceptor.ex.MockPartitioningInterceptor;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.SqlParsingUtil;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -14,11 +15,10 @@ import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Parameters;
+import org.hl7.fhir.r5.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.Map;
@@ -54,9 +54,75 @@ public class FhirSystemDaoTransactionExplicitPartitionR5Test extends BaseJpaR5Te
 
 	@ParameterizedTest
 	@CsvSource(textBlock = """
-		false, false
-		true,  false
-		true,  true
+		# Conditional , AlreadyExists
+		  true        , false
+		  false       , true
+		""")
+	void testDelete(boolean theConditional, boolean theAlreadyExists) {
+		/*
+		 * Setup
+		 */
+
+		myPartitionInterceptor.setAlwaysReturnPartition(PARTITION_1);
+		String id;
+		if (theAlreadyExists) {
+			id = createPatient(withActiveTrue(), withIdentifier("http://foo", "bar")).getIdPart();
+		} else {
+			id = "999999";
+		}
+
+		/*
+		 * Test
+		 */
+
+		// Create a bundle with an explicit partition on the entry
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		if (theConditional) {
+			bb.addTransactionDeleteEntry("Patient?identifier=http://foo|bar");
+		} else {
+			bb.addTransactionDeleteEntry(new IdType("Patient/" + id));
+		}
+		Bundle requestBundle = bb.getBundleTyped();
+		requestBundle.getEntry().get(0).setUserData(Constants.RESOURCE_PARTITION_ID, PARTITION_1);
+
+		myPartitionInterceptor.clearPartitions();
+
+		// Execute transaction
+		myCaptureQueriesListener.clear();
+		if (theConditional) {
+			/*
+			 * We don't currently support an explicit partition stored on the Bundle.entry userdata map for conditional
+			 * deletes. The reason is that there's no easy way to pass the selected partition into the DAO from here.
+			 * If any use cases come up which require this, we could consider finding a way to smuggle it in the
+			 * TransactionDetails, but for now we'll leave this use case unaddressed and just throw an error.
+			 */
+			assertThatThrownBy(()->mySystemDao.transaction(newSrd(), requestBundle))
+				.isInstanceOf(InternalErrorException.class)
+				.hasMessageContaining("Can not specify explicit partition for conditional delete");
+			return;
+		} else {
+			mySystemDao.transaction(newSrd(), requestBundle);
+		}
+
+		/*
+		 * Verify
+		 */
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		int queryIndex = 0;
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(queryIndex++).getSql(true, false)).endsWith(" where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in (('" + id + "','1'))");
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(queryIndex++).getSql(true, false)).endsWith(" where (rht1_0.RES_ID,rht1_0.PARTITION_ID)=('" + id + "','1') and rht1_0.RES_VER='1'");
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(queryIndex++).getSql(true, false)).contains(" where (rl1_0.TARGET_RESOURCE_ID,rl1_0.TARGET_RES_PARTITION_ID)=('" + id + "','1') ");
+		assertEquals(queryIndex, myCaptureQueriesListener.countSelectQueries());
+
+	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		# Conditional , AlreadyExists
+		  false       , false
+		  true        , false
+		  true        , true
 		""")
 	void testCreate(boolean theConditional, boolean theAlreadyExists) throws JSQLParserException {
 		/*
@@ -64,7 +130,9 @@ public class FhirSystemDaoTransactionExplicitPartitionR5Test extends BaseJpaR5Te
 		 */
 		String existingId = null;
 		if (theAlreadyExists) {
-			existingId = createPatient(withIdentifier("http://foo", "bar")).getIdPart();
+			Patient patient = (Patient) buildPatient(withIdentifier("http://foo", "bar"));
+			patient.setUserData(Constants.RESOURCE_PARTITION_ID, PARTITION_1);
+			existingId = doCreateResource(patient).getIdPart();
 		}
 
 		// Create a bundle with an explicit partition on the entry
@@ -89,26 +157,41 @@ public class FhirSystemDaoTransactionExplicitPartitionR5Test extends BaseJpaR5Te
 		TransactionUtil.TransactionResponse outcome = TransactionUtil.parseTransactionResponse(myFhirContext, requestBundle, responseBundle);
 		String id = outcome.getStorageOutcomes().get(0).getTargetId().getIdPart();
 		if (theAlreadyExists) {
-			assertEquals("", outcome.getStorageOutcomes().get(0).getStatusCode());
+			assertEquals(200, outcome.getStorageOutcomes().get(0).getStatusCode());
 			assertEquals(existingId, id);
 		} else {
 			assertEquals(201, outcome.getStorageOutcomes().get(0).getStatusCode());
 		}
 
-		assertEquals(0, myCaptureQueriesListener.logSelectQueries().size());
-		myCaptureQueriesListener.logInsertQueries();
-		assertEquals("HFJ_RESOURCE", SqlParsingUtil.parseInsertStatementTableName(myCaptureQueriesListener.getInsertQueries().get(0).getSql(true, false)));
-		Map<String, String> parsedInsert = SqlParsingUtil.parseInsertStatementParams(myCaptureQueriesListener.getInsertQueries().get(0).getSql(true, false));
-		assertEquals("'" + id + "'", parsedInsert.get("RES_ID"));
-		assertEquals("'1'", parsedInsert.get("PARTITION_ID"));
+		// Verify Select Queries
+		int queryIndex = 0;
+		if (theConditional) {
+			assertThat(myCaptureQueriesListener.getSelectQueries().get(queryIndex++).getSql(true, false)).contains("rispt1_0.PARTITION_ID in ('1')");
+		}
+		if (theAlreadyExists) {
+			assertThat(myCaptureQueriesListener.getSelectQueries().get(queryIndex++).getSql(true, false)).endsWith(" where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in (('" + id + "','1'))");
+		}
+		assertEquals(queryIndex, myCaptureQueriesListener.logSelectQueries().size());
 
+		// Verify Insert Queries
+		myCaptureQueriesListener.logInsertQueries();
+		if (theAlreadyExists) {
+			assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		} else {
+			assertEquals("HFJ_RESOURCE", SqlParsingUtil.parseInsertStatementTableName(myCaptureQueriesListener.getInsertQueries().get(0).getSql(true, false)));
+			Map<String, String> parsedInsert = SqlParsingUtil.parseInsertStatementParams(myCaptureQueriesListener.getInsertQueries().get(0).getSql(true, false));
+			assertEquals("'" + id + "'", parsedInsert.get("RES_ID"));
+			assertEquals("'1'", parsedInsert.get("PARTITION_ID"));
+		}
 	}
 
 	@ParameterizedTest
 	@CsvSource(textBlock = """
-		false, false
-		true,  false
-		true,  true
+		# Conditional , AlreadyExists
+		  true        , true
+		  true        , false
+		  false       , true
+		  false       , false
 		""")
 	void testPatch(boolean theConditional, boolean theAlreadyExists) {
 		/*
@@ -159,19 +242,23 @@ public class FhirSystemDaoTransactionExplicitPartitionR5Test extends BaseJpaR5Te
 		 */
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false)).endsWith(" where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in (('" + id + "','1'))");
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(true, false)).endsWith(" where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in (('" + id + "','1'))");
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		int queryIndex = 0;
+		if (theConditional) {
+			assertThat(myCaptureQueriesListener.getSelectQueries().get(queryIndex++).getSql(true, false)).contains("rispt1_0.PARTITION_ID in ('1')");
+		}
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(queryIndex++).getSql(true, false)).endsWith(" where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in (('" + id + "','1'))");
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(queryIndex++).getSql(true, false)).endsWith(" where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in (('" + id + "','1'))");
+		assertEquals(queryIndex, myCaptureQueriesListener.countSelectQueries());
 
 	}
 
 	@ParameterizedTest
 	@CsvSource(textBlock = """
 		# Conditional , AlreadyExists
-		  false       , false
-		  false       , true
-		  true        , false
 		  true        , true
+		  true        , false
+		  false       , true
+		  false       , false
 		""")
 	void testUpdate(boolean theConditional, boolean theAlreadyExists) {
 		/*
@@ -203,17 +290,26 @@ public class FhirSystemDaoTransactionExplicitPartitionR5Test extends BaseJpaR5Te
 
 		// Execute transaction
 		myCaptureQueriesListener.clear();
-		mySystemDao.transaction(newSrd(), requestBundle);
+		Bundle responseBundle = mySystemDao.transaction(newSrd(), requestBundle);
 
 		/*
 		 * Verify
 		 */
-
+		int queryIndex = 0;
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false)).endsWith(" where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in (('" + id + "','1'))");
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(true, false)).endsWith(" where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in (('" + id + "','1'))");
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		if (theConditional) {
+			assertThat(myCaptureQueriesListener.getSelectQueries().get(queryIndex++).getSql(true, false)).contains("rispt1_0.PARTITION_ID in ('1')");
+		}
+		if (!theAlreadyExists) {
+			if (!theConditional) {
+				assertThat(myCaptureQueriesListener.getSelectQueries().get(queryIndex++).getSql(true, false)).endsWith(" where rt1_0.PARTITION_ID='1' and (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='A')");
+			}
+		} else {
+			assertThat(myCaptureQueriesListener.getSelectQueries().get(queryIndex++).getSql(true, false)).endsWith(" where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in (('" + id + "','1'))");
+			assertThat(myCaptureQueriesListener.getSelectQueries().get(queryIndex++).getSql(true, false)).endsWith(" where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in (('" + id + "','1'))");
+		}
 
+		assertEquals(queryIndex, myCaptureQueriesListener.countSelectQueries());
 	}
 
 
