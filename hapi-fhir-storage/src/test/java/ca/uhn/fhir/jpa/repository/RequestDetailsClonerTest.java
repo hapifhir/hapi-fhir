@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.repository;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -13,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -26,6 +28,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -154,7 +158,7 @@ public class RequestDetailsClonerTest {
 
 		List<String> newValues = clone.getHeaders(headerName);
 		List<String> newHeaderValues = clone.getHeaders(headerName2);
-		assertEquals(1, newValues.size());
+		assertEquals(3, newValues.size());
 		assertTrue(newValues.contains("value3"));
 		assertEquals(1, newHeaderValues.size());
 		assertEquals("newval1", newHeaderValues.get(0));
@@ -308,5 +312,49 @@ public class RequestDetailsClonerTest {
 		assertFalse(requestDetails.getParameters().isEmpty());
 		assertNotNull(requestDetails.getResourceName());
 		assertNotNull(requestDetails.getCompartmentName());
+	}
+
+	@Test
+	void startWith_systemRequestDetailsWithHeaders_shouldPreserveHeaders() {
+		// setup
+		SystemRequestDetails original = new SystemRequestDetails();
+		original.addHeader("X-Custom-Header", "value1");
+		original.addHeader("X-Custom-Header", "value2");
+		original.addHeader("Authorization", "Bearer token123");
+
+		// test
+		RequestDetails clone = RequestDetailsCloner.startWith(original).create();
+
+		// validate
+		assertThat(clone).isInstanceOf(SystemRequestDetails.class);
+		assertThat(clone.getHeaders("X-Custom-Header")).containsExactly("value1", "value2");
+		assertThat(clone.getHeader("Authorization")).isEqualTo("Bearer token123");
+	}
+
+	@Test
+	void startWith_systemRequestDetailsWithRequestPartitionId_shouldPreservePartitionId() {
+		// setup
+		RequestPartitionId partitionId = RequestPartitionId.fromPartitionId(123);
+		SystemRequestDetails original = new SystemRequestDetails();
+		original.setRequestPartitionId(partitionId);
+
+		// test
+		RequestDetails clone = RequestDetailsCloner.startWith(original).create();
+
+		// validate
+		assertThat(clone).isInstanceOf(SystemRequestDetails.class);
+		SystemRequestDetails clonedSystem = (SystemRequestDetails) clone;
+		assertThat(clonedSystem.getRequestPartitionId()).isEqualTo(partitionId);
+	}
+
+	@Test
+	void startWith_unknownRequestDetailsSubtype_shouldThrowIllegalArgumentException() {
+		// setup
+		RequestDetails unknown = mock(RequestDetails.class);
+
+		// test + validate
+		assertThatThrownBy(() -> RequestDetailsCloner.startWith(unknown))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("Unknown RequestDetails type");
 	}
 }
