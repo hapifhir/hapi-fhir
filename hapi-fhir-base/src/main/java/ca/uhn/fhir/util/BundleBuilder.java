@@ -194,13 +194,13 @@ public class BundleBuilder {
 		Validate.notBlank(theTarget.getResourceType(), "theTarget must contain a resource type");
 		Validate.notBlank(theTarget.getIdPart(), "theTarget must contain an ID");
 
-		IPrimitiveType<?> url = addAndPopulateTransactionBundleEntryRequest(
+		EntryAndChildren entryAndChildren = addAndPopulateTransactionBundleEntryRequest(
 				thePatch,
 				theTarget.getValue(),
 				theTarget.toUnqualifiedVersionless().getValue(),
 				"PATCH");
 
-		return new PatchBuilder(url);
+		return new PatchBuilder(entryAndChildren);
 	}
 
 	/**
@@ -213,9 +213,8 @@ public class BundleBuilder {
 	 * @since 6.3.0
 	 */
 	public PatchBuilder addTransactionFhirPatchEntry(IBaseParameters thePatch) {
-		IPrimitiveType<?> url = addAndPopulateTransactionBundleEntryRequest(thePatch, null, null, "PATCH");
-
-		return new PatchBuilder(url);
+		EntryAndChildren entryAndChildren = addAndPopulateTransactionBundleEntryRequest(thePatch, null, null, "PATCH");
+		return new PatchBuilder(entryAndChildren);
 	}
 
 	/**
@@ -263,24 +262,25 @@ public class BundleBuilder {
 				? id.toUnqualifiedVersionless().getValue()
 				: theRequestUrl;
 
-		IPrimitiveType<?> url = addAndPopulateTransactionBundleEntryRequest(theResource, theFullUrl, requestUrl, verb);
-
-		return new UpdateBuilder(url);
+		EntryAndChildren entryAndChildren =
+				addAndPopulateTransactionBundleEntryRequest(theResource, theFullUrl, requestUrl, verb);
+		return new UpdateBuilder(entryAndChildren);
 	}
 
 	@Nonnull
-	private IPrimitiveType<?> addAndPopulateTransactionBundleEntryRequest(
+	private EntryAndChildren addAndPopulateTransactionBundleEntryRequest(
 			IBaseResource theResource, String theFullUrl, String theRequestUrl, String theHttpVerb) {
 		setBundleFieldIfNotAlreadySet("type", "transaction");
 
-		IBase request = addEntryAndReturnRequest(theResource, theFullUrl);
+		EntryAndChildren request = addEntryAndReturnRequest(theResource, theFullUrl);
 
 		// Bundle.entry.request.url
-		IPrimitiveType<?> url = addRequestUrl(request, theRequestUrl);
+		IPrimitiveType<String> url = addRequestUrl(request, theRequestUrl);
 
 		// Bundle.entry.request.method
 		addRequestMethod(request, theHttpVerb);
-		return url;
+
+		return new EntryAndChildren(request.entry(), request.request(), url);
 	}
 
 	/**
@@ -322,19 +322,19 @@ public class BundleBuilder {
 	public CreateBuilder addTransactionCreateEntry(IBaseResource theResource, @Nullable String theFullUrl) {
 		setBundleFieldIfNotAlreadySet("type", "transaction");
 
-		IBase request = addEntryAndReturnRequest(
+		EntryAndChildren entry = addEntryAndReturnRequest(
 				theResource,
 				theFullUrl != null ? theFullUrl : theResource.getIdElement().getValue());
 
 		String resourceType = myContext.getResourceType(theResource);
 
 		// Bundle.entry.request.url
-		addRequestUrl(request, resourceType);
+		addRequestUrl(entry, resourceType);
 
 		// Bundle.entry.request.method
-		addRequestMethod(request, "POST");
+		addRequestMethod(entry, "POST");
 
-		return new CreateBuilder(request);
+		return new CreateBuilder(entry);
 	}
 
 	/**
@@ -360,11 +360,13 @@ public class BundleBuilder {
 		IBase request = myEntryRequestDef.newInstance();
 		myEntryRequestChild.getMutator().setValue(entry, request);
 
+		EntryAndChildren entryAndChildren = new EntryAndChildren(entry, request);
+
 		// Bundle.entry.request.url
-		addRequestUrl(request, theRequestUrl);
+		addRequestUrl(entryAndChildren, theRequestUrl);
 
 		// Bundle.entry.request.method
-		addRequestMethod(request, theHttpMethod);
+		addRequestMethod(entryAndChildren, theHttpMethod);
 
 		// Bundle.entry.fullUrl
 		addFullUrl(entry, theFullUrl);
@@ -453,15 +455,15 @@ public class BundleBuilder {
 	@Nonnull
 	public DeleteBuilder addTransactionDeleteEntry(String theDeleteUrl) {
 		Validate.notBlank(theDeleteUrl, "theDeleteUrl must not be null or blank");
-		IBase request = addEntryAndReturnRequest();
+		EntryAndChildren request = addEntryAndReturnRequest();
 
 		// Bundle.entry.request.url
-		addRequestUrl(request, theDeleteUrl);
+		IPrimitiveType<String> requestUrl = addRequestUrl(request, theDeleteUrl);
 
 		// Bundle.entry.request.method
 		addRequestMethod(request, "DELETE");
 
-		return new DeleteBuilder();
+		return new DeleteBuilder(new EntryAndChildren(request.entry(), request.request(), requestUrl));
 	}
 
 	private IIdType getIdTypeForUpdate(IBaseResource theResource) {
@@ -480,19 +482,20 @@ public class BundleBuilder {
 		myEntryFullUrlChild.getMutator().setValue(theEntry, fullUrl);
 	}
 
-	private IPrimitiveType<?> addRequestUrl(IBase request, String theRequestUrl) {
-		IPrimitiveType<?> url =
-				(IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
+	@SuppressWarnings("unchecked")
+	private IPrimitiveType<String> addRequestUrl(EntryAndChildren theEntry, String theRequestUrl) {
+		IPrimitiveType<String> url =
+				(IPrimitiveType<String>) myContext.getElementDefinition("uri").newInstance();
 		url.setValueAsString(theRequestUrl);
-		myEntryRequestUrlChild.getMutator().setValue(request, url);
+		myEntryRequestUrlChild.getMutator().setValue(theEntry.request(), url);
 		return url;
 	}
 
-	private void addRequestMethod(IBase theRequest, String theMethod) {
+	private void addRequestMethod(EntryAndChildren theEntry, String theMethod) {
 		IPrimitiveType<?> method = (IPrimitiveType<?>)
 				myEntryRequestMethodDef.newInstance(myEntryRequestMethodChild.getInstanceConstructorArguments());
 		method.setValueAsString(theMethod);
-		myEntryRequestMethodChild.getMutator().setValue(theRequest, method);
+		myEntryRequestMethodChild.getMutator().setValue(theEntry.request(), method);
 	}
 
 	/**
@@ -576,7 +579,7 @@ public class BundleBuilder {
 		return (IBaseBackboneElement) searchInstance;
 	}
 
-	private IBase addEntryAndReturnRequest(IBaseResource theResource) {
+	private EntryAndChildren addEntryAndReturnRequest(IBaseResource theResource) {
 		IIdType id = theResource.getIdElement();
 		if (id.hasVersionIdPart()) {
 			id = id.toVersionless();
@@ -584,30 +587,27 @@ public class BundleBuilder {
 		return addEntryAndReturnRequest(theResource, id.getValue());
 	}
 
-	private IBase addEntryAndReturnRequest(IBaseResource theResource, String theFullUrl) {
-		Validate.notNull(theResource, "theResource must not be null");
-
+	private EntryAndChildren addEntryAndReturnRequest(IBaseResource theResource, String theFullUrl) {
 		IBase entry = addEntry();
 
 		// Bundle.entry.fullUrl
-		addFullUrl(entry, theFullUrl);
+		if (theFullUrl != null) {
+			addFullUrl(entry, theFullUrl);
+		}
 
 		// Bundle.entry.resource
-		myEntryResourceChild.getMutator().setValue(entry, theResource);
+		if (theResource != null) {
+			myEntryResourceChild.getMutator().setValue(entry, theResource);
+		}
 
 		// Bundle.entry.request
 		IBase request = myEntryRequestDef.newInstance();
 		myEntryRequestChild.getMutator().setValue(entry, request);
-		return request;
+		return new EntryAndChildren(entry, request);
 	}
 
-	public IBase addEntryAndReturnRequest() {
-		IBase entry = addEntry();
-
-		// Bundle.entry.request
-		IBase request = myEntryRequestDef.newInstance();
-		myEntryRequestChild.getMutator().setValue(entry, request);
-		return request;
+	private EntryAndChildren addEntryAndReturnRequest() {
+		return addEntryAndReturnRequest(null, null);
 	}
 
 	public IBaseBundle getBundle() {
@@ -752,28 +752,28 @@ public class BundleBuilder {
 
 	public class DeleteBuilder extends BaseOperationBuilder {
 
-		// nothing yet
-
+		private DeleteBuilder(EntryAndChildren theEntryAndChildren) {
+			super(theEntryAndChildren);
+		}
 	}
 
 	public class PatchBuilder extends BaseOperationBuilderWithConditionalUrl<PatchBuilder> {
 
-		PatchBuilder(IPrimitiveType<?> theUrl) {
-			super(theUrl);
+		PatchBuilder(EntryAndChildren theEntryAndChildren) {
+			super(theEntryAndChildren);
 		}
 	}
 
 	public class UpdateBuilder extends BaseOperationBuilderWithConditionalUrl<UpdateBuilder> {
-		UpdateBuilder(IPrimitiveType<?> theUrl) {
-			super(theUrl);
+		UpdateBuilder(EntryAndChildren theEntryAndChildren) {
+			super(theEntryAndChildren);
 		}
 	}
 
 	public class CreateBuilder extends BaseOperationBuilder {
-		private final IBase myRequest;
 
-		CreateBuilder(IBase theRequest) {
-			myRequest = theRequest;
+		CreateBuilder(EntryAndChildren theEntryAndChildren) {
+			super(theEntryAndChildren);
 		}
 
 		/**
@@ -785,13 +785,19 @@ public class BundleBuilder {
 			IPrimitiveType<?> ifNoneExist = (IPrimitiveType<?>) stringDefinition.newInstance();
 			ifNoneExist.setValueAsString(theConditionalUrl);
 
-			myEntryRequestIfNoneExistChild.getMutator().setValue(myRequest, ifNoneExist);
+			myEntryRequestIfNoneExistChild.getMutator().setValue(myEntryAndChildren.request(), ifNoneExist);
 
 			return this;
 		}
 	}
 
 	public abstract class BaseOperationBuilder {
+
+		protected final EntryAndChildren myEntryAndChildren;
+
+		private BaseOperationBuilder(EntryAndChildren theEntryAndChildren) {
+			myEntryAndChildren = theEntryAndChildren;
+		}
 
 		/**
 		 * Returns a reference to the BundleBuilder instance.
@@ -805,15 +811,24 @@ public class BundleBuilder {
 		public BundleBuilder andThen() {
 			return BundleBuilder.this;
 		}
+
+		/**
+		 * Returns the underlying model <code>Bundle.entry</code> that was
+		 * created for the added operation.
+		 *
+		 * @since 8.10.0
+		 */
+		public IBase getEntry() {
+			return myEntryAndChildren.entry();
+		}
 	}
 
 	public abstract class BaseOperationBuilderWithConditionalUrl<T extends BaseOperationBuilder>
 			extends BaseOperationBuilder {
 
-		private final IPrimitiveType<?> myUrl;
-
-		BaseOperationBuilderWithConditionalUrl(IPrimitiveType<?> theUrl) {
-			myUrl = theUrl;
+		BaseOperationBuilderWithConditionalUrl(EntryAndChildren theEntryAndChildren) {
+			super(theEntryAndChildren);
+			assert theEntryAndChildren.requestUrl() != null;
 		}
 
 		/**
@@ -821,8 +836,15 @@ public class BundleBuilder {
 		 */
 		@SuppressWarnings("unchecked")
 		public T conditional(String theConditionalUrl) {
-			myUrl.setValueAsString(theConditionalUrl);
+			myEntryAndChildren.requestUrl().setValueAsString(theConditionalUrl);
 			return (T) this;
+		}
+	}
+
+	private record EntryAndChildren(IBase entry, IBase request, IPrimitiveType<String> requestUrl) {
+
+		private EntryAndChildren(IBase entry, IBase request) {
+			this(entry, request, null);
 		}
 	}
 }

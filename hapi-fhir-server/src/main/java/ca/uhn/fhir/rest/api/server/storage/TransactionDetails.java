@@ -210,7 +210,6 @@ public class TransactionDetails {
 		return myResolvedPartitions.get(theId);
 	}
 
-
 	/**
 	 * If a resource has been resolved within the current transaction to a specific partition, we
 	 * cache it here to avoid repeated lookups.
@@ -533,5 +532,4 @@ public class TransactionDetails {
 	public <T extends IResourcePersistentId<?>> boolean hasReverseResolvedId(T thePid) {
 		return myReverseResolvedResourceIds.containsKey(thePid);
 	}
-
 }

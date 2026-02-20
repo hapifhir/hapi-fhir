@@ -360,7 +360,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		assignServerAssignedIdFromUserDataIfRequired(theResource);
 		assignServerAssignedUuidIfRequired(theResource);
 
-		RequestPartitionId requestPartitionId = determineCreatePartitionForResource(theResource, theRequestDetails, theTransactionDetails);
+		RequestPartitionId requestPartitionId =
+				determineCreatePartitionForResource(theResource, theRequestDetails, theTransactionDetails);
 		return myTransactionService
 				.withRequest(theRequestDetails)
 				.withTransactionDetails(theTransactionDetails)
@@ -813,7 +814,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateIdPresentForDelete(theId);
 		validateDeleteEnabled();
 
-		RequestPartitionId requestPartitionId = determineReadPartitionForId(theId, theRequestDetails, theTransactionDetails);
+		RequestPartitionId requestPartitionId =
+				determineReadPartitionForId(theId, theRequestDetails, theTransactionDetails);
 
 		final ResourceTable entity;
 		try {
@@ -2071,7 +2073,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Nonnull
 	protected ResourceTable readEntityLatestVersion(
 			IIdType theId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
-		RequestPartitionId requestPartitionId = determineReadPartitionForId(theId, theRequestDetails, theTransactionDetails);
+		RequestPartitionId requestPartitionId =
+				determineReadPartitionForId(theId, theRequestDetails, theTransactionDetails);
 
 		return myTransactionService
 				.withRequest(theRequestDetails)
@@ -2532,7 +2535,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		};
 		theTransactionDetails.addRollbackUndoAction(onRollback);
 
-		RequestPartitionId requestPartitionId = determineCreatePartitionForResource(theResource, theRequest, theTransactionDetails);
+		RequestPartitionId requestPartitionId =
+				determineCreatePartitionForResource(theResource, theRequest, theTransactionDetails);
 
 		boolean rewriteHistory = theRequest != null && theRequest.isRewriteHistory();
 		if (rewriteHistory && !myStorageSettings.isUpdateWithHistoryRewriteEnabled()) {
@@ -2565,21 +2569,24 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Nonnull
-	private RequestPartitionId determineReadPartitionForId(IIdType theId, RequestDetails theRequestDetails, @Nonnull TransactionDetails theTransactionDetails) {
+	private RequestPartitionId determineReadPartitionForId(
+			IIdType theId, RequestDetails theRequestDetails, @Nonnull TransactionDetails theTransactionDetails) {
 		RequestPartitionId requestPartitionId = theTransactionDetails.getResolvedPartition(theId);
 		if (requestPartitionId == null) {
 			requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
-				theRequestDetails, getResourceName(), theId);
+					theRequestDetails, getResourceName(), theId);
 		}
 		return requestPartitionId;
 	}
 
 	@Nonnull
-	private RequestPartitionId determineCreatePartitionForResource(T theResource, RequestDetails theRequest, @Nonnull TransactionDetails theTransactionDetails) {
-		RequestPartitionId requestPartitionId = theTransactionDetails.getResolvedPartition(getResourceName() + "/" + theResource.getIdElement().getIdPart());
+	private RequestPartitionId determineCreatePartitionForResource(
+			T theResource, RequestDetails theRequest, @Nonnull TransactionDetails theTransactionDetails) {
+		RequestPartitionId requestPartitionId = theTransactionDetails.getResolvedPartition(
+				getResourceName() + "/" + theResource.getIdElement().getIdPart());
 		if (requestPartitionId == null) {
 			requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
-				theRequest, theResource, getResourceName());
+					theRequest, theResource, getResourceName());
 		}
 		return requestPartitionId;
 	}

@@ -21,10 +21,10 @@ package ca.uhn.fhir.jpa.api.svc;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.pid.FhirIdJson;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.jpa.api.pid.ListWrappingPidStream;
-import ca.uhn.fhir.model.primitive.IdDt;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -85,7 +85,7 @@ public interface IBatch2DaoSvc {
 	 *
 	 * @param theTargetId the id of the resource we are searching for references to
 	 */
-	default Stream<IdDt> streamSourceIdsThatReferenceTargetId(IIdType theTargetId) {
+	default Stream<FhirIdJson> streamSourceIdsThatReferenceTargetId(IIdType theTargetId) {
 		throw new UnsupportedOperationException(Msg.code(2594) + "Not implemented unless explicitly overridden");
 	}
 }

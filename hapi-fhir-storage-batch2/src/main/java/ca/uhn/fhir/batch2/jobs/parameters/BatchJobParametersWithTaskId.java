@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.batch2.jobs.parameters;
 
-import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
+import ca.uhn.fhir.jpa.api.pid.FhirIdJson;
 import ca.uhn.fhir.model.api.BaseBatchJobParameters;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hl7.fhir.instance.model.api.IIdType;

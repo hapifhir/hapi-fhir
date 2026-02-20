@@ -25,9 +25,9 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
 import ca.uhn.fhir.batch2.jobs.chunk.FhirIdListWorkChunkJson;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.pid.FhirIdJson;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -70,14 +70,11 @@ public class ReplaceReferencesQueryIdsStep<PT extends ReplaceReferencesJobParame
 				myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(requestDetails, sourceIdType);
 
 		// Warning: It is a little confusing that source/target are reversed in the resource link table from the meaning
-		// in
-		// the replace references request
+		// in the replace-references request
 
 		AtomicInteger totalCount = new AtomicInteger();
 		myHapiTransactionService.withSystemRequestOnPartition(partitionId).execute(() -> {
-			Stream<FhirIdJson> stream = myBatch2DaoSvc
-					.streamSourceIdsThatReferenceTargetId(sourceIdType)
-					.map(FhirIdJson::new);
+			Stream<FhirIdJson> stream = myBatch2DaoSvc.streamSourceIdsThatReferenceTargetId(sourceIdType);
 
 			StreamUtil.partition(stream, params.getBatchSize())
 					.forEach(chunk -> totalCount.addAndGet(processChunk(theDataSink, chunk, partitionId)));

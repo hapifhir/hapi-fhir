@@ -29,10 +29,10 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.pid.FhirIdJson;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
@@ -167,7 +167,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		RequestPartitionId partition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
 				theRequestDetails, theTargetResource.getIdElement());
 
-		StopLimitAccumulator<IdDt> accumulator = myHapiTransactionService
+		StopLimitAccumulator<FhirIdJson> accumulator = myHapiTransactionService
 				.withRequest(theRequestDetails)
 				.withRequestPartitionId(partition)
 				.execute(() -> getAllPidsWithLimit(theReplaceReferencesRequest));
@@ -202,13 +202,13 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		return retval;
 	}
 
-	private @Nonnull StopLimitAccumulator<IdDt> getAllPidsWithLimit(
+	private @Nonnull StopLimitAccumulator<FhirIdJson> getAllPidsWithLimit(
 			ReplaceReferencesRequest theReplaceReferencesRequest) {
 
-		Stream<IdDt> idStream = myResourceLinkDao.streamSourceIdsForTargetFhirId(
+		Stream<FhirIdJson> idStream = myResourceLinkDao.streamSourceIdsForTargetFhirId(
 				theReplaceReferencesRequest.sourceId.getResourceType(),
 				theReplaceReferencesRequest.sourceId.getIdPart());
-		StopLimitAccumulator<IdDt> accumulator =
+		StopLimitAccumulator<FhirIdJson> accumulator =
 				StopLimitAccumulator.fromStreamAndLimit(idStream, theReplaceReferencesRequest.resourceLimit);
 		return accumulator;
 	}

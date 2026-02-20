@@ -25,6 +25,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.pid.FhirIdJson;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.jpa.api.pid.StreamTemplate;
@@ -41,7 +42,6 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -121,7 +121,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	}
 
 	@Override
-	public Stream<IdDt> streamSourceIdsThatReferenceTargetId(IIdType theTargetId) {
+	public Stream<FhirIdJson> streamSourceIdsThatReferenceTargetId(IIdType theTargetId) {
 		return myResourceLinkDao.streamSourceIdsForTargetFhirId(theTargetId.getResourceType(), theTargetId.getIdPart());
 	}
 
