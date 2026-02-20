@@ -3,12 +3,14 @@ package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.DeviceRequest;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.PractitionerRole;
@@ -282,4 +284,103 @@ class PrefetchTemplateUtilR4Test {
 		// validate
 		assertThat(actual).isEqualTo("PractitionerRole?_id=PR1,PR2,PR3");
 	}
+
+	@Test
+	@DisplayName("Should successfully evaluate referenced prefetch with OR operator")
+	void substituteTemplateForReferencedPrefetch() {
+		// setup
+		final String location1 = "Location/L1";
+		final String location2 = "Location/L2";
+		final PractitionerRole practitionerRole = new PractitionerRole();
+		practitionerRole.addLocation(new Reference("#" + location1));
+		practitionerRole.addContained(new Location().setId(location1));
+		final Encounter encounter = new Encounter();
+		encounter.addLocation(new Encounter.EncounterLocationComponent().setLocation(new Reference("#" + location2)));
+		encounter.addContained(new Location().setId(location2));
+		final String template = "Location?_id={{%practitionerRoles.location.resolve().id|%encounter.location.location.resolve().ofType(Location).id}}";
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put("encounter", encounter);
+		context.put("practitionerRoles", practitionerRole);
+		// execute
+		final String actual = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
+		// validate
+		assertThat(actual).isEqualTo("Location?_id=L1,L2");
+	}
+
+	@Test
+	@DisplayName("Should throw exception when referenced prefetch key is not in context")
+	void substituteTemplateForReferencedPrefetchMissingKey() {
+		// setup
+		final String template = "Location?_id={{%practitionerRoles.location.resolve().id}}";
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put("some-key", "some-value");
+		// execute
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+			.isInstanceOf(PreconditionFailedException.class)
+			.hasMessageContaining("Request context did not provide a value for key <practitionerRoles>.  Available keys in context are: [some-key]");
+	}
+
+	@Test
+	@DisplayName("Should successfully evaluate OR expression combining context-based and referenced prefetch patterns")
+	void substituteTemplateComboContextAndReferencedPrefetch() {
+		// setup
+		final String encounterId = "Encounter/1";
+		final String pracRoleReference1 = "PractitionerRole/PR1";
+		final String pracRoleReference2 = "PractitionerRole/PR2";
+		final String pracRoleReference3 = "PractitionerRole/PR3";
+		final String template =
+			"PractitionerRole?_id={{context.draftOrders.entry.resource.ofType(Encounter).participant.individual.resolve().ofType(PractitionerRole).id|%observation.performer.reference}}";
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		final Encounter encounter = new Encounter();
+		encounter.setId(encounterId);
+		encounter.addParticipant(
+			new Encounter.EncounterParticipantComponent().setIndividual(new Reference(pracRoleReference1)));
+		encounter.setServiceProvider(new Reference(pracRoleReference2));
+		final Observation observation = new Observation();
+		observation.addPerformer(new Reference(pracRoleReference2));
+		observation.addPerformer(new Reference(pracRoleReference3));
+		final BundleBuilder builder = new BundleBuilder(ourFhirContext);
+		builder.addCollectionEntry(encounter);
+		builder.addCollectionEntry(new PractitionerRole().setId(pracRoleReference1));
+		context.put("observation", observation);
+		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
+		// execute
+		final String actual = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
+		// validate
+		assertThat(actual).isEqualTo("PractitionerRole?_id=PR1,PractitionerRole/PR2,PractitionerRole/PR3");
+	}
+
+	@Test
+	@DisplayName("Should successfully evaluate OR expression with flipped order (referenced then context-based)")
+	void substituteTemplateComboFlippedContextAndReferencedPrefetch() {
+		// setup
+		final String encounterId = "Encounter/1";
+		final String pracRoleReference1 = "PractitionerRole/PR1";
+		final String pracRoleReference2 = "PractitionerRole/PR2";
+		final String pracRoleReference3 = "PractitionerRole/PR3";
+		final String template =
+			"PractitionerRole?_id={{%observation.performer.reference|context.draftOrders.entry.resource.ofType(Encounter).participant.individual.resolve().ofType(PractitionerRole).id}}";
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		final Encounter encounter = new Encounter();
+		encounter.setId(encounterId);
+		encounter.addParticipant(
+			new Encounter.EncounterParticipantComponent().setIndividual(new Reference(pracRoleReference1)));
+		encounter.setServiceProvider(new Reference(pracRoleReference2));
+		final Observation observation = new Observation();
+		observation.addPerformer(new Reference(pracRoleReference2));
+		observation.addPerformer(new Reference(pracRoleReference3));
+		final BundleBuilder builder = new BundleBuilder(ourFhirContext);
+		builder.addCollectionEntry(encounter);
+		builder.addCollectionEntry(new PractitionerRole().setId(pracRoleReference1));
+		context.put("observation", observation);
+		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
+		// execute
+		final String actual = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
+		// validate
+		assertThat(actual).isEqualTo("PractitionerRole?_id=PractitionerRole/PR2,PractitionerRole/PR3,PR1");
+	}
 }
+
+

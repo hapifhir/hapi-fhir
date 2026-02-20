@@ -76,9 +76,11 @@ class PrefetchTemplateUtilCommonTest {
 	 * failing test case for invalid path -> done
 	 * failing test case for resource not in bundle -> done
 	 * failing test case for method not supported like dstu3 ofType() -> done
-	 * ofType -> done, resolve -> done, OR operator, context operator,
+	 * ofType -> done, resolve -> done, OR operator -> done, context operator -> done, % operator -> done
 	 * make templates more realistic -> done
-	 * add-on : Support for using resolve() using contained resources
+	 * add-on : Support for using resolve() using contained resources -> done
+	 * test for OR operator returning nothing
 	 * check if array references can be directly evaluated.
+	 * remove invalid request exception and replace with 412
 	 */
 }
