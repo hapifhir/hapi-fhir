@@ -5,8 +5,8 @@ import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Common tests for PrefetchTemplateUtil that are FHIR version-agnostic.
@@ -33,14 +33,10 @@ class PrefetchTemplateUtilCommonTest {
 		String template = "{{context.userId}} a {{context.patientId}}";
 		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
 		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
-		try {
-			PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HAPI-2375: Either request context was empty or it did not provide a value for key <userId>.  Please make sure you are including a context with valid keys.",
-					e.getMessage());
-		}
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage(
+						"HAPI-2375: Either request context was empty or it did not provide a value for key <userId>.  Please make sure you are including a context with valid keys.");
 	}
 
 	@Test
@@ -49,14 +45,10 @@ class PrefetchTemplateUtilCommonTest {
 		// Leave the context empty for the test.
 		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
 
-		try {
-			PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HAPI-2375: Either request context was empty or it did not provide a value for key <userId>.  Please make sure you are including a context with valid keys.",
-					e.getMessage());
-		}
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage(
+						"HAPI-2375: Either request context was empty or it did not provide a value for key <userId>.  Please make sure you are including a context with valid keys.");
 	}
 
 	@Test
@@ -64,14 +56,10 @@ class PrefetchTemplateUtilCommonTest {
 		String template = "{{context.draftOrders.ServiceRequest.id}} a {{context.patientId}}";
 		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
 		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
-		try {
-			PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HAPI-2372: Request context did not provide a value for key <draftOrders>.  Available keys in context are: [patientId]",
-					e.getMessage());
-		}
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage(
+						"HAPI-2372: Request context did not provide a value for key <draftOrders>.  Available keys in context are: [patientId]");
 	}
 
 	/** TODO:

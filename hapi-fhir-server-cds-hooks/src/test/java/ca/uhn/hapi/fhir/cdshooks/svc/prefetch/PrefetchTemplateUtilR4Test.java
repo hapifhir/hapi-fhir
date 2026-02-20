@@ -23,7 +23,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * R4-specific tests for PrefetchTemplateUtil.
@@ -59,14 +58,10 @@ class PrefetchTemplateUtilR4Test {
 		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
 		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
 		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
-		try {
-			PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
-			fail("substituteTemplate call was successful with a null context field.");
-		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HAPI-2373: Request context did not provide for resource(s) matching template. ResourceType missing is: ServiceRequest",
-					e.getMessage());
-		}
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage(
+						"HAPI-2373: Request context did not provide for resource(s) matching template. ResourceType missing is: ServiceRequest");
 	}
 
 	@Test
@@ -76,16 +71,12 @@ class PrefetchTemplateUtilR4Test {
 		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
 		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
 		context.put(DRAFT_ORDERS_CONTEXT_KEY, new Observation().setId(OBSERVATION_ID));
-		try {
-			PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HAPI-2374: Request context did not provide valid "
-							+ ourFhirContext.getVersion().getVersion()
-							+ " Bundle resource for template key <draftOrders>",
-					e.getMessage());
-		}
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage(
+						"HAPI-2374: Request context did not provide valid "
+								+ ourFhirContext.getVersion().getVersion()
+								+ " Bundle resource for template key <draftOrders>");
 	}
 
 	@Test
