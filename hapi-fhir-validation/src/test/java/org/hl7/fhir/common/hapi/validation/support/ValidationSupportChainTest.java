@@ -748,6 +748,86 @@ public class ValidationSupportChainTest extends BaseTest {
 		assertFalse(actual);
 	}
 
+	@Test
+	void testRemoveValidationSupport_removesValidatorAndInvalidatesCache() {
+		// Setup with caching enabled
+		prepareMock(myValidationSupport0, myValidationSupport1);
+		ValidationSupportChain chain = new ValidationSupportChain(
+			ValidationSupportChain.CacheConfiguration.defaultValues(),
+			myValidationSupport0,
+			myValidationSupport1
+		);
+
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(false);
+		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
+		when(myValidationSupport1.validateCode(any(), any(), any(), any(), any(), any()))
+			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
+
+		// First validation call - should use support1 and cache result
+		IValidationSupport.CodeValidationResult result1 = chain.validateCode(
+			newValidationCtx(chain),
+			new ConceptValidationOptions(),
+			CODE_SYSTEM_URL_0,
+			CODE_0,
+			DISPLAY_0,
+			null
+		);
+		assertNotNull(result1);
+		verify(myValidationSupport1, times(1)).validateCode(any(), any(), any(), any(), any(), any());
+
+		// Second validation call - should hit cache
+		prepareMock(myValidationSupport0, myValidationSupport1);
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(false);
+		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
+
+		IValidationSupport.CodeValidationResult result2 = chain.validateCode(
+			newValidationCtx(chain),
+			new ConceptValidationOptions(),
+			CODE_SYSTEM_URL_0,
+			CODE_0,
+			DISPLAY_0,
+			null
+		);
+
+		// Should be same instance from cache
+		assertSame(result1, result2);
+		verifyNoInteractions(myValidationSupport0, myValidationSupport1);
+
+		// Remove myValidationSupport1 - this should invalidate caches AND remove from chain
+		chain.removeValidationSupport(myValidationSupport1);
+
+		// Setup BOTH validators to support the code system - only support0 should be called
+		// since support1 was removed from the chain
+		prepareMock(myValidationSupport0, myValidationSupport1);
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
+		when(myValidationSupport0.validateCode(any(), any(), any(), any(), any(), any()))
+			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
+		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
+		when(myValidationSupport1.validateCode(any(), any(), any(), any(), any(), any()))
+			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
+
+		// Third validation call - cache invalidated, should only call support0
+		IValidationSupport.CodeValidationResult result3 = chain.validateCode(
+			newValidationCtx(chain),
+			new ConceptValidationOptions(),
+			CODE_SYSTEM_URL_0,
+			CODE_0,
+			DISPLAY_0,
+			null
+		);
+
+		// Verify cache was invalidated (different instance)
+		assertNotSame(result1, result3);
+
+		// Verify support0 was called (it's still in the chain)
+		verify(myValidationSupport0, times(1)).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0));
+		verify(myValidationSupport0, times(1)).validateCode(any(), any(), any(), any(), any(), any());
+
+		// Verify support1 was NOT called (it was removed from the chain)
+		verify(myValidationSupport1, never()).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0));
+		verify(myValidationSupport1, never()).validateCode(any(), any(), any(), any(), any(), any());
+	}
+
 
 	private static long getLastMetricValue(LibraryTestRunner libraryTestRunner, String metricName) {
 		List<MetricData> metrics = libraryTestRunner.getExportedMetrics();

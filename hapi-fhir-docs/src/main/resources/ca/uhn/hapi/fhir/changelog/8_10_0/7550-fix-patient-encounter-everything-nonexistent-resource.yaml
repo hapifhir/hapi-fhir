@@ -2,5 +2,6 @@
 type: fix
 issue: 7550
 jira: SMILE-11625
+backport: 8.8.0
 title: "Previously, Patient and Encounter $everything operations would return 200 OK with non-related resources when
 invoked on non-existent resources. These operations now correctly return 404 Not Found per FHIR HTTP specification."
