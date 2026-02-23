@@ -43,46 +43,41 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class PrefetchTemplateUtil {
-	// Matches any {{...}} placeholder in the template
 	private static final Pattern SURROUNDING_CURLY_BRACES_PART = Pattern.compile("\\{\\{([^}]+)}}");
 	private static final Pattern DA_VINCI_PART = Pattern.compile("^context\\.(\\w+)\\.(\\w+)\\.id$");
 	private static final Pattern DEFAULT_PART = Pattern.compile("^context\\.(\\w+)$");
 	private static final Pattern FHIR_PATH_PART = Pattern.compile("^context\\.(\\w+)\\.(.+)$");
 	private static final Pattern REFERENCED_PREFETCH_PART = Pattern.compile("^%(\\w+)\\.(.+)$");
+	private static final String UNION_OPERATOR = "\\|";
 
 	private PrefetchTemplateUtil() {}
 
 	public static String substituteTemplate(
-			String theTemplate, CdsServiceRequestContextJson theContext, FhirContext theFhirContext) {
-		final Matcher matcher = SURROUNDING_CURLY_BRACES_PART.matcher(theTemplate);
-		final StringBuilder resolvedTemplate = new StringBuilder();
-		while (matcher.find()) {
-			final String rawExpression = matcher.group(1);
-			final List<String> parts =
-					Stream.of(rawExpression.split("\\|")).map(String::trim).toList();
-			final List<String> substitutedPrefetchQueryParts = new ArrayList<>();
-			for (String part : parts) {
-				Matcher m;
-				if ((m = DA_VINCI_PART.matcher(part)).matches()) {
-					substitutedPrefetchQueryParts.addAll(handleDaVinciPart(m, theContext, theFhirContext));
-				} else if ((m = DEFAULT_PART.matcher(part)).matches()) {
-					substitutedPrefetchQueryParts.addAll(handleDefaultPart(m, theContext));
-				} else if ((m = FHIR_PATH_PART.matcher(part)).matches()
-						|| (m = REFERENCED_PREFETCH_PART.matcher(part)).matches()) {
-					substitutedPrefetchQueryParts.addAll(convertResultsToIds(
-							evaluateFhirPathOnContextKey(m.group(1), m.group(2), theContext, theFhirContext),
-							m.group(1)));
-				}
-			}
-			if (substitutedPrefetchQueryParts.isEmpty()) {
-				throw new PreconditionFailedException(Msg.code(2377) + "Unable to resolve prefetch template : "
-						+ rawExpression + ". No result was found for the prefetch query.");
-			}
-			matcher.appendReplacement(
-					resolvedTemplate, Matcher.quoteReplacement(String.join(",", substitutedPrefetchQueryParts)));
+			String theTemplate, @Nonnull CdsServiceRequestContextJson theContext, @Nonnull FhirContext theFhirContext) {
+		return SURROUNDING_CURLY_BRACES_PART
+				.matcher(theTemplate)
+				.replaceAll(match ->
+						Matcher.quoteReplacement(resolveExpression(match.group(1), theContext, theFhirContext)));
+	}
+
+	private static String resolveExpression(
+			String theRawExpression,
+			@Nonnull CdsServiceRequestContextJson theContext,
+			@Nonnull FhirContext theFhirContext) {
+		final List<String> parts = Stream.of(theRawExpression.split(UNION_OPERATOR))
+				.map(String::trim)
+				.toList();
+		final List<String> results = new ArrayList<>();
+		for (String part : parts) {
+			results.addAll(handleDaVinciPart(part, theContext, theFhirContext));
+			results.addAll(handleDefaultPart(part, theContext));
+			results.addAll(handleFhirPathAndReferencedPrefetchPart(part, theContext, theFhirContext));
 		}
-		matcher.appendTail(resolvedTemplate);
-		return resolvedTemplate.toString();
+		if (results.isEmpty()) {
+			throw new PreconditionFailedException(Msg.code(2377) + "Unable to resolve prefetch template : "
+					+ theRawExpression + ". No result was found for the prefetch query.");
+		}
+		return String.join(",", results);
 	}
 
 	/**
@@ -91,9 +86,11 @@ public class PrefetchTemplateUtil {
 	 * This is subject to change as the IG can be updated by the working committee.
 	 */
 	private static List<String> handleDaVinciPart(
-			Matcher theMatcher, CdsServiceRequestContextJson theContext, FhirContext theFhirContext) {
-		final String key = theMatcher.group(1);
-		final String resourceType = theMatcher.group(2);
+			String thePart, @Nonnull CdsServiceRequestContextJson theContext, @Nonnull FhirContext theFhirContext) {
+		final Matcher m = DA_VINCI_PART.matcher(thePart);
+		if (!m.matches()) return List.of();
+		final String key = m.group(1);
+		final String resourceType = m.group(2);
 		validateContextKeyExists(key, theContext);
 		try {
 			final IBaseBundle bundle = (IBaseBundle) theContext.getResource(key);
@@ -109,8 +106,10 @@ public class PrefetchTemplateUtil {
 	}
 
 	@Nonnull
-	private static List<String> handleDefaultPart(Matcher theMatcher, CdsServiceRequestContextJson theContext) {
-		final String key = theMatcher.group(1);
+	private static List<String> handleDefaultPart(String thePart, @Nonnull CdsServiceRequestContextJson theContext) {
+		final Matcher m = DEFAULT_PART.matcher(thePart);
+		if (!m.matches()) return List.of();
+		final String key = m.group(1);
 		validateContextKeyExists(key, theContext);
 		try {
 			return List.of(theContext.getString(key));
@@ -119,10 +118,17 @@ public class PrefetchTemplateUtil {
 		}
 	}
 
-	/**
-	 * Core FHIRPath evaluation used by both {@code context.KEY.expression} and {@code %KEY.expression} parts.
-	 * Validates the key exists, retrieves the resource, and evaluates the expression.
-	 */
+	@Nonnull
+	private static List<String> handleFhirPathAndReferencedPrefetchPart(
+			String thePart, @Nonnull CdsServiceRequestContextJson theContext, @Nonnull FhirContext theFhirContext) {
+		Matcher m = FHIR_PATH_PART.matcher(thePart);
+		if (!m.matches()) m = REFERENCED_PREFETCH_PART.matcher(thePart);
+		if (!m.matches()) return List.of();
+		return convertPrimitiveResultsToString(
+				evaluateFhirPathOnContextKey(m.group(1), m.group(2), theContext, theFhirContext), m.group(1));
+	}
+
+	@Nonnull
 	private static List<IBase> evaluateFhirPathOnContextKey(
 			String thePrefetchKey,
 			String theFhirPathExpression,
@@ -131,7 +137,7 @@ public class PrefetchTemplateUtil {
 		validateContextKeyExists(thePrefetchKey, theContext);
 		try {
 			final IBaseResource resource = theContext.getResource(thePrefetchKey);
-			final IFhirPath fhirPath = createFhirPathWithReferenceResolution(theFhirContext, resource);
+			final IFhirPath fhirPath = createFhirPathWithReferenceLocalResolution(theFhirContext, resource);
 			final String fullExpression = resource.fhirType() + "." + theFhirPathExpression;
 			return fhirPath.evaluate(resource, fullExpression, IBase.class);
 		} catch (ClassCastException e) {
@@ -145,18 +151,16 @@ public class PrefetchTemplateUtil {
 		}
 	}
 
-	private static void validateContextKeyExists(String theKey, CdsServiceRequestContextJson theContext) {
+	private static void validateContextKeyExists(String theKey, @Nonnull CdsServiceRequestContextJson theContext) {
 		if (!theContext.containsKey(theKey)) {
 			throw new PreconditionFailedException(Msg.code(2379) + "Request context did not provide a value for key <"
 					+ theKey + ">.  Available keys in context are: " + theContext.getKeys());
 		}
 	}
 
-	/**
-	 * Converts a list of FHIRPath evaluation results to a list of strings.
-	 * Anything other than a primitive type throws an exception
-	 */
-	private static List<String> convertResultsToIds(List<IBase> theResults, String thePrefetchKey) {
+	@Nonnull
+	private static List<String> convertPrimitiveResultsToString(
+			@Nonnull List<IBase> theResults, String thePrefetchKey) {
 		return theResults.stream()
 				.map(result -> {
 					if (result instanceof IPrimitiveType) {
@@ -170,11 +174,7 @@ public class PrefetchTemplateUtil {
 				.toList();
 	}
 
-	/**
-	 * Creates a FhirPath instance configured with reference resolution within a Bundle or contained resources.
-	 */
-	@Nonnull
-	private static IFhirPath createFhirPathWithReferenceResolution(
+	private static IFhirPath createFhirPathWithReferenceLocalResolution(
 			@Nonnull FhirContext theFhirContext, IBaseResource theResource) {
 		final IFhirPath fhirPath = theFhirContext.newFhirPath();
 		fhirPath.setEvaluationContext(new IFhirPathEvaluationContext() {
