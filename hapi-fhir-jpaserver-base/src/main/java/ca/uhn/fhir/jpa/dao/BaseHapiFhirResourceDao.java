@@ -2093,9 +2093,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		IIdType id = theId;
 		validateResourceTypeAndThrowInvalidRequestException(id);
-		if (!id.hasResourceType()) {
-			id = id.withResourceType(getResourceName());
-		}
+		id = addResourceTypeIdNecessary(id);
 
 		JpaPid persistentId = null;
 		if (theTransactionDetails != null) {
@@ -2568,13 +2566,22 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.execute(updateCallback);
 	}
 
+	private IIdType addResourceTypeIdNecessary(IIdType resourceId) {
+		if (!resourceId.hasResourceType()) {
+			resourceId = resourceId.withResourceType(getResourceName());
+		}
+		return resourceId;
+	}
+
 	@Nonnull
 	private RequestPartitionId determineReadPartitionForId(
 			IIdType theId, RequestDetails theRequestDetails, @Nonnull TransactionDetails theTransactionDetails) {
-		RequestPartitionId requestPartitionId = theTransactionDetails.getResolvedPartition(theId);
+		IIdType id = addResourceTypeIdNecessary(theId);
+
+		RequestPartitionId requestPartitionId = theTransactionDetails.getResolvedPartition(id);
 		if (requestPartitionId == null) {
 			requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
-					theRequestDetails, getResourceName(), theId);
+					theRequestDetails, getResourceName(), id);
 		}
 		return requestPartitionId;
 	}
@@ -2582,8 +2589,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Nonnull
 	private RequestPartitionId determineCreatePartitionForResource(
 			T theResource, RequestDetails theRequest, @Nonnull TransactionDetails theTransactionDetails) {
-		RequestPartitionId requestPartitionId = theTransactionDetails.getResolvedPartition(
-				getResourceName() + "/" + theResource.getIdElement().getIdPart());
+		RequestPartitionId requestPartitionId = null;
+		if (theResource.getIdElement().hasIdPart()) {
+			IIdType id = addResourceTypeIdNecessary(theResource.getIdElement());
+			requestPartitionId = theTransactionDetails.getResolvedPartition(id);
+		}
 		if (requestPartitionId == null) {
 			requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
 					theRequest, theResource, getResourceName());
@@ -2672,10 +2682,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			resourceId = theResource.getIdElement();
 			assert resourceId != null;
 			assert resourceId.hasIdPart();
-
-			if (!resourceId.hasResourceType()) {
-				resourceId = resourceId.withResourceType(getResourceName());
-			}
+			resourceId = addResourceTypeIdNecessary(resourceId);
 
 			boolean create = false;
 
