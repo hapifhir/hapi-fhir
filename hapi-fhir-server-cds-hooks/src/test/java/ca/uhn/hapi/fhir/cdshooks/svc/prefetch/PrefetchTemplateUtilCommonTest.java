@@ -89,28 +89,4 @@ class PrefetchTemplateUtilCommonTest {
 				.hasMessageContaining("encounter");
 	}
 
-	/** TODO:
-	 * working test cases for
-	 * DSTU3 -> Bundle test -> done
-	 *       -> resource test -> done
-	 *       -> unsupported function test -> done
-	 * R4 -> Bundle test -> done
-	 * 	  -> resource test -> done
-	 * 	  -> invalid function test -> done
-	 * R5 -> Bundle test
-	 *    -> resource test
-	 *    -> invalid function test
-	 * failing test case for invalid path -> done
-	 * failing test case for resource not in bundle -> done
-	 * failing test case for method not supported like dstu3 ofType() -> done
-	 * ofType -> done, resolve -> done, OR operator -> done, context operator -> done, % operator -> done
-	 * make templates more realistic -> done
-	 * add-on : Support for using resolve() using contained resources -> done
-	 * test for OR operator returning nothing -> done
-	 * check if array references can be directly evaluated.
-	 * remove invalid request exception and replace with 412 -> done
-	 * one incorrect in OR condition
-	 * its not OR its Union
-	 * documentation update on Smile CDR
-	 */
 }
