@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -127,7 +128,7 @@ public class JpaResourceExpungeServiceTest {
 
 	@Test
 	public void testExpungeHistoricalVersions_missingEntry_throwsWithContextualMessage() {
-		// given
+
 		ResourceHistoryTablePk pk = new ResourceHistoryTablePk();
 		pk.setPartitionIdValue(42);
 		pk.setId(123L);
@@ -136,7 +137,6 @@ public class JpaResourceExpungeServiceTest {
 
 		AtomicInteger remaining = new AtomicInteger(1);
 
-		// when + then
 		assertThatThrownBy(() ->
 			myService.expungeHistoricalVersions(myRequestDetails, Collections.singletonList(pk), remaining))
 			.isInstanceOf(IllegalArgumentException.class)
