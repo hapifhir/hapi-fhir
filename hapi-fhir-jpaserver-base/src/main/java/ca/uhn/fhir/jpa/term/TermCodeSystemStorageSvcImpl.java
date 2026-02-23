@@ -803,8 +803,9 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		// Throw exception if the TermCodeSystemVersion is being duplicated.
 		if (codeSystemVersionEntity != null) {
 			if (!ObjectUtil.equals(codeSystemVersionEntity.getResource().getId(), theCodeSystemResourceTable.getId())) {
-				if (myConceptDao.countByCodeSystemVersion(codeSystemVersionEntity.getPid()) == 0) {
-					// The existing version is a 0-concept placeholder (e.g. from a NOTPRESENT
+				if (myConceptDao.countByCodeSystemVersion(codeSystemVersionEntity.getPid()) == 0
+						&& isExistingCodeSystemNotPresent(theSystemUri)) {
+					// The existing version is a 0-concept NOTPRESENT placeholder (e.g. from a
 					// pre-seed). Re-point it to the new resource instead of rejecting.
 					codeSystemVersionEntity.setResource(theCodeSystemResourceTable);
 					myCodeSystemVersionDao.save(codeSystemVersionEntity);
@@ -813,6 +814,17 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Checks whether the existing CodeSystem resource for the given system URI has
+	 * content mode NOTPRESENT. This is used to distinguish genuine NOTPRESENT placeholders
+	 * (e.g. from pre-seeding) from intentionally empty COMPLETE CodeSystems.
+	 */
+	private boolean isExistingCodeSystemNotPresent(String theSystemUri) {
+		CodeSystem existingCodeSystem = myTerminologySvc.fetchCanonicalCodeSystemFromCompleteContext(theSystemUri);
+		return existingCodeSystem != null
+				&& existingCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT;
 	}
 
 	private void populateCodeSystemVersionProperties(
