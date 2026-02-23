@@ -74,8 +74,8 @@ public class PrefetchTemplateUtil {
 				}
 			}
 			if (substitutedPrefetchQueryParts.isEmpty()) {
-				throw new PreconditionFailedException(
-						Msg.code(2377) + "Unable to resolve prefetch template : " + rawExpression + ". No result was found for the prefetch query.");
+				throw new PreconditionFailedException(Msg.code(2377) + "Unable to resolve prefetch template : "
+						+ rawExpression + ". No result was found for the prefetch query.");
 			}
 			matcher.appendReplacement(sb, Matcher.quoteReplacement(String.join(",", substitutedPrefetchQueryParts)));
 		}
