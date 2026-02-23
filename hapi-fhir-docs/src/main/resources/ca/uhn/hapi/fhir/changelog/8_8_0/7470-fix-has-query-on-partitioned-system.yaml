@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 7470
+title: "When using the JPA server with a partitioned configuration, `_has` queries failed if the source and target were in different partitions. This has been corrected."

@@ -1,7 +1,8 @@
 package ca.uhn.fhir.jpa.dao.tx;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.expunge.PartitionAwareSupplier;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.svc.MockHapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -18,33 +19,81 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class PartitionAwareSupplierTest {
+class PartitionAwareSupplierTest {
 
 	@Spy
 	private MockHapiTransactionService myHapiTransactionService;
 
+	@Spy
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
 	@Captor
 	private ArgumentCaptor<HapiTransactionService.ExecutionBuilder> myBuilderArgumentCaptor;
 
-	private static final String ourExpectedTenantId = "TenantA";
+	private static final String TENANT_A = "TenantA";
+	private static final int PARTITION_ID = 10;
 
 	@Test
-	public void testMethodFindInPartitionedContext_withRequestDetailsHavingTenantId_willExecuteOnSpecifiedPartition(){
+	void testMethodFindInPartitionedContext_withRequestDetailsHavingTenantId_willExecuteOnSpecifiedPartition() {
 		RequestDetails requestDetails = getRequestDetails();
 
-		PartitionAwareSupplier partitionAwareSupplier = new PartitionAwareSupplier(myHapiTransactionService, requestDetails);
+		PartitionAwareSupplier partitionAwareSupplier =
+			new PartitionAwareSupplier(myHapiTransactionService,null, requestDetails, null);
 		partitionAwareSupplier.supplyInPartitionedContext(getResourcePersistentIdSupplier());
 
-		assertTransactionServiceWasInvokedWithTenantId(ourExpectedTenantId);
+		assertTransactionServiceWasInvokedWithTenantId(TENANT_A);
 
 	}
 
-	private Supplier<List<IResourcePersistentId>> getResourcePersistentIdSupplier(){
+	@Test
+	void supplyInPartitionedContext_withPartitionIdDeterminedByPartitionHelper_partitionIdIsUsed() {
+		RequestDetails requestDetails = getRequestDetails();
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(PARTITION_ID);
+		when(myRequestPartitionHelperSvc.determineGenericPartitionForRequest(any())).thenReturn(requestPartitionId);
+
+		PartitionAwareSupplier partitionAwareSupplier =
+			new PartitionAwareSupplier(myHapiTransactionService, myRequestPartitionHelperSvc, requestDetails, null);
+		partitionAwareSupplier.supplyInPartitionedContext(getResourcePersistentIdSupplier());
+
+		// verify requestPartitionId is used for transaction
+		verify(myHapiTransactionService, times(1)).doExecute(myBuilderArgumentCaptor.capture(), any());
+		verify(myRequestPartitionHelperSvc, times(1)).determineGenericPartitionForRequest(any());
+		RequestPartitionId actualPartitionId = myBuilderArgumentCaptor.getValue().getRequestPartitionIdForTesting();
+		assertThat(actualPartitionId).isNotNull()
+			.extracting(RequestPartitionId::getFirstPartitionIdOrNull)
+			.isEqualTo(PARTITION_ID);
+	}
+
+	@Test
+	void supplyInPartitionedContext_withPartitionIdAndTenantId_partitionIdIsUsed() {
+		// setup
+		RequestDetails requestDetails = getRequestDetails();
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(PARTITION_ID);
+
+		// execute
+		PartitionAwareSupplier partitionAwareSupplier =
+			new PartitionAwareSupplier(myHapiTransactionService, null, requestDetails, requestPartitionId);
+		partitionAwareSupplier.supplyInPartitionedContext(getResourcePersistentIdSupplier());
+
+		// verify requestPartitionId is used for transaction
+		verify(myHapiTransactionService, times(1)).doExecute(myBuilderArgumentCaptor.capture(), any());
+		RequestPartitionId actualPartitionId = myBuilderArgumentCaptor.getValue().getRequestPartitionIdForTesting();
+		assertThat(actualPartitionId).isNotNull();
+		assertThat(actualPartitionId.getFirstPartitionIdOrNull()).isEqualTo(PARTITION_ID);
+
+		// verify Tenant ID should still present in request details
+		String actualTenantId = myBuilderArgumentCaptor.getValue().getRequestDetailsForTesting().getTenantId();
+		assertThat(actualTenantId).isEqualTo(TENANT_A);
+	}
+
+	private Supplier<List<IResourcePersistentId>> getResourcePersistentIdSupplier() {
 		return () -> Collections.emptyList();
 	}
 
@@ -58,8 +107,8 @@ public class PartitionAwareSupplierTest {
 	}
 
 	private RequestDetails getRequestDetails() {
-		RequestDetails requestDetails =	new ServletRequestDetails();
-		requestDetails.setTenantId(ourExpectedTenantId);
+		RequestDetails requestDetails = new ServletRequestDetails();
+		requestDetails.setTenantId(TENANT_A);
 		return requestDetails;
 	}
 

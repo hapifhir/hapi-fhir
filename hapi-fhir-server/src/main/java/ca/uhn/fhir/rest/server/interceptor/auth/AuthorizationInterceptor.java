@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,13 +53,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
-import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -74,6 +74,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  *
  * @see SearchNarrowingInterceptor
  */
+@SuppressWarnings("unused")
 @Interceptor(order = AuthorizationConstants.ORDER_AUTH_INTERCEPTOR)
 public class AuthorizationInterceptor implements IRuleApplier {
 
@@ -82,7 +83,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	private static final AtomicInteger ourInstanceCount = new AtomicInteger(0);
 	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptor.class);
 	private static final Set<BundleTypeEnum> STANDALONE_BUNDLE_RESOURCE_TYPES =
-			Set.of(BundleTypeEnum.DOCUMENT, BundleTypeEnum.MESSAGE);
+			Set.of(BundleTypeEnum.DOCUMENT, BundleTypeEnum.MESSAGE, BundleTypeEnum.COLLECTION);
 
 	private final int myInstanceIndex = ourInstanceCount.incrementAndGet();
 	private final String myRequestSeenResourcesKey =
@@ -96,6 +97,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	private IValidationSupport myValidationSupport;
 
 	private IAuthorizationSearchParamMatcher myAuthorizationSearchParamMatcher;
+	private IAuthResourceResolver myAuthResourceResolver;
 	private Logger myTroubleshootingLog;
 
 	/**
@@ -231,6 +233,21 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	@Nullable
 	public IAuthorizationSearchParamMatcher getSearchParamMatcher() {
 		return myAuthorizationSearchParamMatcher;
+	}
+
+	/**
+	 * Sets a resource resolver to resolve resources during authorization rule evaluation.
+	 *
+	 * @param theAuthResourceResolver The resource resolver. Defaults to null.
+	 */
+	public void setAuthResourceResolver(@Nullable IAuthResourceResolver theAuthResourceResolver) {
+		this.myAuthResourceResolver = theAuthResourceResolver;
+	}
+
+	@Nullable
+	@Override
+	public IAuthResourceResolver getAuthResourceResolver() {
+		return myAuthResourceResolver;
 	}
 
 	/**
@@ -382,7 +399,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	 */
 	protected void handleDeny(Verdict decision) {
 		if (decision.getDecidingRule() != null) {
-			String ruleName = defaultString(decision.getDecidingRule().getName(), "(unnamed rule)");
+			String ruleName = Objects.toString(decision.getDecidingRule().getName(), "(unnamed rule)");
 			throw new ForbiddenOperationException(Msg.code(333) + "Access denied by rule: " + ruleName);
 		}
 		throw new ForbiddenOperationException(Msg.code(334) + "Access denied by default policy (no applicable rules)");
@@ -426,9 +443,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
 	public void hookPreShow(
 			RequestDetails theRequestDetails, IPreResourceShowDetails theDetails, Pointcut thePointcut) {
-		for (int i = 0; i < theDetails.size(); i++) {
-			IBaseResource next = theDetails.getResource(i);
-			checkOutgoingResourceAndFailIfDeny(theRequestDetails, next, thePointcut);
+		for (IBaseResource resource : theDetails.getAllResources()) {
+			checkOutgoingResourceAndFailIfDeny(theRequestDetails, resource, thePointcut);
 		}
 	}
 
@@ -441,7 +457,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	@Hook(Pointcut.STORAGE_CASCADE_DELETE)
 	public void hookCascadeDeleteForConflict(
 			RequestDetails theRequestDetails, Pointcut thePointcut, IBaseResource theResourceToDelete) {
-		Validate.notNull(theResourceToDelete); // just in case
+		Objects.requireNonNull(theResourceToDelete); // just in case
 		checkPointcutAndFailIfDeny(theRequestDetails, thePointcut, theResourceToDelete);
 	}
 
@@ -472,9 +488,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			BulkExportJobParameters theBulkExportOptions) {
 		RestOperationTypeEnum restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
 		BulkExportJobParameters.ExportStyle exportStyle = theBulkExportOptions.getExportStyle();
-		if (exportStyle.equals(BulkExportJobParameters.ExportStyle.SYSTEM)) {
-			restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
-		} else if (exportStyle.equals(BulkExportJobParameters.ExportStyle.PATIENT)) {
+		if (exportStyle.equals(BulkExportJobParameters.ExportStyle.PATIENT)) {
 			if (theBulkExportOptions.getPatientIds().size() == 1) {
 				restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
 			} else {
@@ -637,21 +651,24 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	/**
-	 * This method determines if the given Resource should have permissions applied to the resources inside or
-	 * to the Resource itself.
+	 * This method determines if the given Resource should have permissions applied
+	 * to the resources inside or to the Resource itself.
 	 * For Parameters resources, we include child resources when checking the permissions.
-	 * For Bundle resources, we only look at resources inside if the Bundle is of type document, collection, or message.
+	 * For Bundle resources, we look at resources inside if the Bundle type is not in
+	 * STANDALONE_BUNDLE_RESOURCE_TYPES set.
 	 */
 	protected static boolean shouldExamineChildResources(IBaseResource theResource, FhirContext theFhirContext) {
 		if (theResource instanceof IBaseParameters) {
 			return true;
 		}
-		if (theResource instanceof IBaseBundle) {
-			BundleTypeEnum bundleType = BundleUtil.getBundleTypeEnum(theFhirContext, ((IBaseBundle) theResource));
+
+		if (theResource instanceof IBaseBundle baseBundle) {
+			BundleTypeEnum bundleType = BundleUtil.getBundleTypeEnum(theFhirContext, baseBundle);
 			boolean isStandaloneBundleResource =
 					bundleType != null && STANDALONE_BUNDLE_RESOURCE_TYPES.contains(bundleType);
 			return !isStandaloneBundleResource;
 		}
+
 		return false;
 	}
 
@@ -661,7 +678,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		private final PolicyEnum myDecision;
 
 		public Verdict(PolicyEnum theDecision, IAuthRule theDecidingRule) {
-			Validate.notNull(theDecision);
+			Objects.requireNonNull(theDecision);
 
 			myDecision = theDecision;
 			myDecidingRule = theDecidingRule;

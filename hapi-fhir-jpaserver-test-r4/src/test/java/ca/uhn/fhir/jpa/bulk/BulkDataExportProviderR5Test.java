@@ -17,9 +17,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -71,7 +69,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -430,9 +427,6 @@ public class BulkDataExportProviderR5Test {
 		info.setReport(JsonUtil.serialize(results));
 
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		if (partitioningEnabled) {
-			parameters.setPartitionId(myRequestPartitionId);
-		}
 		info.setParameters(parameters);
 
 		// when
@@ -489,7 +483,7 @@ public class BulkDataExportProviderR5Test {
 		info.setEndTime(InstantType.now().getValue());
 
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		parameters.setPartitionId(myRequestPartitionId);
+		parameters.setPartitionIdForSecurity(myRequestPartitionId);
 		info.setParameters(parameters);
 
 		ArrayList<String> ids = new ArrayList<>();
@@ -991,9 +985,6 @@ public class BulkDataExportProviderR5Test {
 		// setup
 
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		if (partitioningEnabled) {
-			parameters.setPartitionId(myRequestPartitionId);
-		}
 
 		JobInstance info = new JobInstance();
 		info.setParameters(parameters);
@@ -1197,9 +1188,6 @@ public class BulkDataExportProviderR5Test {
 		info.setEndTime(InstantType.now().getValue());
 
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		if (partititioningEnabled) {
-			parameters.setPartitionId(myRequestPartitionId);
-		}
 		info.setParameters(parameters);
 
 		// when
@@ -1297,7 +1285,7 @@ public class BulkDataExportProviderR5Test {
 		info.setEndTime(new Date());
 
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		parameters.setPartitionId(myRequestPartitionId);
+		parameters.setPartitionIdForSecurity(myRequestPartitionId);
 		info.setParameters(parameters);
 
 		// when
@@ -1326,7 +1314,7 @@ public class BulkDataExportProviderR5Test {
 	private class MyRequestPartitionHelperSvc extends RequestPartitionHelperSvc {
 
 		@Override
-		public @Nonnull RequestPartitionId determineReadPartitionForRequest(@Nonnull RequestDetails theRequest, @Nonnull ReadPartitionIdRequestDetails theDetails) {
+		public @Nonnull RequestPartitionId determineReadPartitionForRequest(RequestDetails theRequest, @Nonnull ReadPartitionIdRequestDetails theDetails) {
 			assert theRequest != null;
 			if (myPartitionName.equals(theRequest.getTenantId())) {
 				return myRequestPartitionId;

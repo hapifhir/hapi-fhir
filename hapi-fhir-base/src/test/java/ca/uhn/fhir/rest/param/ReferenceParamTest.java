@@ -1,8 +1,10 @@
 package ca.uhn.fhir.rest.param;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ReferenceParamTest {
@@ -34,4 +36,13 @@ class ReferenceParamTest {
 		}
 	}
 
+	@Test
+	void testChainedParamWithMdmExpand() {
+		ReferenceParam param = new ReferenceParam();
+		param.setValueAsQueryToken(null, "patient", ".name:mdm", "Smith");
+
+		assertThat(param.isMdmExpand()).isTrue();
+		assertThat(param.getChain()).isEqualTo("name");
+		assertThat(param.getValue()).isEqualTo("Smith");
+	}
 }

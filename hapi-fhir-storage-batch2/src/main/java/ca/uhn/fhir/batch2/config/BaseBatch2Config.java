@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,11 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.DefaultJobPartitionProvider;
+import ca.uhn.fhir.batch2.coordinator.DefaultJobStepExecutionServices;
 import ca.uhn.fhir.batch2.coordinator.JobCoordinatorImpl;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.coordinator.ReductionStepExecutorServiceImpl;
@@ -41,6 +43,7 @@ import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -65,14 +68,19 @@ public abstract class BaseBatch2Config {
 	@Autowired
 	IHapiTransactionService myHapiTransactionService;
 
+	@Autowired
+	private IInterceptorService myInterceptorService;
+
 	@Bean
 	public JobDefinitionRegistry batch2JobDefinitionRegistry() {
 		return new JobDefinitionRegistry();
 	}
 
 	@Bean
-	public WorkChunkProcessor jobStepExecutorService(BatchJobSender theBatchJobSender) {
-		return new WorkChunkProcessor(myPersistence, theBatchJobSender, myHapiTransactionService);
+	public WorkChunkProcessor jobStepExecutorService(
+			BatchJobSender theBatchJobSender, IJobStepExecutionServices theJobStepExecutionServices) {
+		return new WorkChunkProcessor(
+				myPersistence, theBatchJobSender, myHapiTransactionService, theJobStepExecutionServices);
 	}
 
 	@Bean
@@ -83,15 +91,22 @@ public abstract class BaseBatch2Config {
 	@Bean
 	public IJobCoordinator batch2JobCoordinator(
 			JobDefinitionRegistry theJobDefinitionRegistry, IHapiTransactionService theTransactionService) {
-		return new JobCoordinatorImpl(myPersistence, theJobDefinitionRegistry, theTransactionService);
+		return new JobCoordinatorImpl(
+				myPersistence, theJobDefinitionRegistry, theTransactionService, myInterceptorService);
 	}
 
 	@Bean
 	public IReductionStepExecutorService reductionStepExecutorService(
 			IJobPersistence theJobPersistence,
 			IHapiTransactionService theTransactionService,
-			JobDefinitionRegistry theJobDefinitionRegistry) {
-		return new ReductionStepExecutorServiceImpl(theJobPersistence, theTransactionService, theJobDefinitionRegistry);
+			JobDefinitionRegistry theJobDefinitionRegistry,
+			IJobStepExecutionServices theJobStepExecutionServices) {
+		return new ReductionStepExecutorServiceImpl(
+				theJobPersistence,
+				theTransactionService,
+				theJobDefinitionRegistry,
+				theJobStepExecutionServices,
+				myInterceptorService);
 	}
 
 	@Bean
@@ -109,7 +124,8 @@ public abstract class BaseBatch2Config {
 				theJobDefinitionRegistry,
 				theBatchJobSender,
 				theExecutor,
-				theReductionStepExecutorService);
+				theReductionStepExecutorService,
+				myInterceptorService);
 	}
 
 	@Bean
@@ -135,7 +151,8 @@ public abstract class BaseBatch2Config {
 				theExecutorSvc,
 				theJobMaintenanceService,
 				theHapiTransactionService,
-				theInterceptorBroadcaster);
+				theInterceptorBroadcaster,
+				myInterceptorService);
 	}
 
 	@Bean
@@ -165,5 +182,10 @@ public abstract class BaseBatch2Config {
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
 			MatchUrlService theMatchUrlService) {
 		return new DefaultJobPartitionProvider(theFhirContext, theRequestPartitionHelperSvc, theMatchUrlService);
+	}
+
+	@Bean
+	public IJobStepExecutionServices jobStepExecutionServices(IInterceptorBroadcaster theInterceptorBroadcaster) {
+		return new DefaultJobStepExecutionServices(theInterceptorBroadcaster);
 	}
 }

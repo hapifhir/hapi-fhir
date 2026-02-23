@@ -245,7 +245,7 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 		addNextTargetPartitionForCreateDefaultPartition();
 		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
 		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
-		addNextTargetPartitionForReadDefaultPartition(); // and one for the reindex job
+
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -261,12 +261,10 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 		});
 
 		// Search on Token
-		addNextTargetPartitionForReadDefaultPartition();
 		List<String> outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(SearchParameterMap.newSynchronous().add("code", new TokenParam("extpatorg")), mySrd));
 		assertThat(outcome).containsExactly("SearchParameter/" + id);
 
 		// Search on All Resources
-		addNextTargetPartitionForReadDefaultPartition();
 		outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(SearchParameterMap.newSynchronous(), mySrd));
 		assertThat(outcome).containsExactly("SearchParameter/" + id);
 
@@ -275,8 +273,6 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 	@Test
 	public void testCreateAndSearch_NonPartitionable_ForcedId() {
 		addNextTargetPartitionForCreateWithIdDefaultPartition();
-		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
-		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
 		addNextTargetPartitionForReadDefaultPartition(); // and one for the reindex job
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/A");
@@ -294,12 +290,10 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 		});
 
 		// Search on Token
-		addNextTargetPartitionForReadDefaultPartition();
 		List<String> outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(SearchParameterMap.newSynchronous().add("code", new TokenParam("extpatorg")), mySrd));
 		assertThat(outcome).containsExactly("SearchParameter/A");
 
 		// Search on All Resources
-		addNextTargetPartitionForReadDefaultPartition();
 		outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(SearchParameterMap.newSynchronous(), mySrd));
 		assertThat(outcome).containsExactly("SearchParameter/A");
 

@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
+import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
@@ -24,6 +26,7 @@ import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -57,6 +60,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED;
@@ -446,6 +450,79 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		assertThat(resources).hasSize(2);
 
 		assertLinksMatchResult(MdmMatchResultEnum.MATCH);
+	}
+
+	/**
+	 * Verifies that the STORAGE_PRESHOW_RESOURCES interceptor is properly invoked for all related resources
+	 * when deleting a match patient that has a golden resource and a possible match.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/7541">Issue #7541</a>
+	 */
+	@Test
+	void testDeleteMatch_preShowResourcesCalledForAllRelatedResources() throws InterruptedException {
+		// setup: create match patient
+		Patient matchPatient = buildPaulPatient();
+		matchPatient.setActive(true);
+		myMdmHelper.createWithLatch(matchPatient);
+		assertLinksMatchResult(MdmMatchResultEnum.MATCH);
+		Patient goldenPatient = getOnlyGoldenPatient();
+
+		// setup: create a possible match patient
+		Patient possibleMatchPatient = buildPaulPatient();
+		possibleMatchPatient.getNameFirstRep().setFamily(JANE_ID);
+		myMdmHelper.createWithLatch(possibleMatchPatient);
+		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
+
+		// setup: register interceptor to capture STORAGE_PRESHOW_RESOURCES invocation per resource
+		CapturingPreShowResourcesInterceptor interceptor = new CapturingPreShowResourcesInterceptor();
+		myInterceptorService.registerInterceptor(interceptor);
+
+		// execute delete
+		try {
+			myPatientDao.delete(matchPatient.getIdElement(), new SystemRequestDetails());
+
+			// verify: total of 3 invocations
+			assertEquals(3, interceptor.getTotalInvocations());
+			// verify: STORAGE_PRESHOW_RESOURCES called for match Patient
+			String matchPatientId = matchPatient.getIdElement().toVersionless().getValue();
+			assertEquals(1, interceptor.getInvocationCountForResource(matchPatientId));
+
+			// verify: STORAGE_PRESHOW_RESOURCES called for golden resource Patient
+			String goldenPatientId = goldenPatient.getIdElement().toVersionless().getValue();
+			assertEquals(1, interceptor.getInvocationCountForResource(goldenPatientId));
+
+			// verify: STORAGE_PRESHOW_RESOURCES called for possible match Patient
+			String possibleMatchPatientId = possibleMatchPatient.getIdElement().toVersionless().getValue();
+			assertEquals(1, interceptor.getInvocationCountForResource(possibleMatchPatientId));
+		} finally {
+			myInterceptorService.unregisterInterceptor(interceptor);
+		}
+	}
+
+	private static class CapturingPreShowResourcesInterceptor {
+		private final Map<String, Integer> invocationCountByResourceId = new HashMap<>();
+
+		@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
+		public void onPreShow(RequestDetails theRequestDetails, IPreResourceShowDetails theDetails) {
+			if (theDetails == null) {
+				return;
+			}
+
+			for (IBaseResource resource : theDetails.getAllResources()) {
+				if (resource != null && resource.getIdElement() != null) {
+					String resourceId = resource.getIdElement().toVersionless().getValue();
+					invocationCountByResourceId.merge(resourceId, 1, Integer::sum);
+				}
+			}
+		}
+
+		public int getInvocationCountForResource(String resourceId) {
+			return invocationCountByResourceId.getOrDefault(resourceId, 0);
+		}
+
+		public int getTotalInvocations() {
+			return invocationCountByResourceId.size();
+		}
 	}
 
 	@Test

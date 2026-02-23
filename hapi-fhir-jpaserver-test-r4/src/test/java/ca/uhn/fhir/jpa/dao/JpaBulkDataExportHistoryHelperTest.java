@@ -3,14 +3,15 @@ package ca.uhn.fhir.jpa.dao;
 // Created by Sonnet 4
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -32,7 +33,11 @@ class JpaBulkDataExportHistoryHelperTest {
 	void fetchHistoryForResourceIds_callsBundleProviderFactory() {
 		// Given
 		String resourceType = "Patient";
-		List<String> resourceIds = Arrays.asList("123", "456", "789");
+		List<IResourcePersistentId<?>> resourceIds =List.of(
+			JpaPid.fromId(123L),
+			JpaPid.fromId(456L),
+			JpaPid.fromId(789L)
+		);
 		RequestPartitionId partitionId = RequestPartitionId.allPartitions();
 
 		// When

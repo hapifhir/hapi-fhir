@@ -20,6 +20,7 @@ import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -609,8 +610,12 @@ public class ValidationSupportChainTest extends BaseTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	public void testTranslateCode(boolean theUseCache) {
+	@CsvSource({
+		"false, false",
+		"false, true",
+		"true, true",
+		"true, false"})
+	public void testTranslateCode(boolean theUseCache, boolean theWithCodingInInput) {
 		// Setup
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(theUseCache), myValidationSupport0, myValidationSupport1, myValidationSupport2);
@@ -628,7 +633,8 @@ public class ValidationSupportChainTest extends BaseTest {
 		when(myValidationSupport2.translateConcept(any())).thenReturn(backingResult2);
 
 		// Test
-		TranslateConceptResults result = chain.translateConcept(new IValidationSupport.TranslateCodeRequest(List.of(), CODE_SYSTEM_URL_0));
+
+		TranslateConceptResults result = chain.translateConcept(createTranslateCodeRequest(theWithCodingInInput));
 
 		// Verify
 		assertEquals("Message 1", result.getMessage());
@@ -638,8 +644,8 @@ public class ValidationSupportChainTest extends BaseTest {
 		verify(myValidationSupport1, times(1)).translateConcept(any());
 		verify(myValidationSupport2, times(1)).translateConcept(any());
 
-		// Test again (should use cache)
-		TranslateConceptResults result2 = chain.translateConcept(new IValidationSupport.TranslateCodeRequest(List.of(), CODE_SYSTEM_URL_0));
+		// Test again
+		TranslateConceptResults result2 = chain.translateConcept(createTranslateCodeRequest(theWithCodingInInput));
 
 		// Verify
 		if (theUseCache) {
@@ -653,6 +659,21 @@ public class ValidationSupportChainTest extends BaseTest {
 			verify(myValidationSupport1, times(2)).translateConcept(any());
 			verify(myValidationSupport2, times(2)).translateConcept(any());
 		}
+	}
+
+	private  IValidationSupport.TranslateCodeRequest createTranslateCodeRequest(boolean theWithCodingInInput) {
+		IValidationSupport.TranslateCodeRequest request;
+		if (theWithCodingInInput) {
+			Coding coding = new Coding()
+				.setSystem("coding_system")
+				.setCode("coding_code");
+
+			request = new IValidationSupport.TranslateCodeRequest(List.of(coding), CODE_SYSTEM_URL_0);
+		}
+		else {
+			request = new IValidationSupport.TranslateCodeRequest(List.of(), CODE_SYSTEM_URL_0);
+		}
+		return request;
 	}
 
 	/**
@@ -725,6 +746,86 @@ public class ValidationSupportChainTest extends BaseTest {
 
 		// Verify
 		assertFalse(actual);
+	}
+
+	@Test
+	void testRemoveValidationSupport_removesValidatorAndInvalidatesCache() {
+		// Setup with caching enabled
+		prepareMock(myValidationSupport0, myValidationSupport1);
+		ValidationSupportChain chain = new ValidationSupportChain(
+			ValidationSupportChain.CacheConfiguration.defaultValues(),
+			myValidationSupport0,
+			myValidationSupport1
+		);
+
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(false);
+		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
+		when(myValidationSupport1.validateCode(any(), any(), any(), any(), any(), any()))
+			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
+
+		// First validation call - should use support1 and cache result
+		IValidationSupport.CodeValidationResult result1 = chain.validateCode(
+			newValidationCtx(chain),
+			new ConceptValidationOptions(),
+			CODE_SYSTEM_URL_0,
+			CODE_0,
+			DISPLAY_0,
+			null
+		);
+		assertNotNull(result1);
+		verify(myValidationSupport1, times(1)).validateCode(any(), any(), any(), any(), any(), any());
+
+		// Second validation call - should hit cache
+		prepareMock(myValidationSupport0, myValidationSupport1);
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(false);
+		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
+
+		IValidationSupport.CodeValidationResult result2 = chain.validateCode(
+			newValidationCtx(chain),
+			new ConceptValidationOptions(),
+			CODE_SYSTEM_URL_0,
+			CODE_0,
+			DISPLAY_0,
+			null
+		);
+
+		// Should be same instance from cache
+		assertSame(result1, result2);
+		verifyNoInteractions(myValidationSupport0, myValidationSupport1);
+
+		// Remove myValidationSupport1 - this should invalidate caches AND remove from chain
+		chain.removeValidationSupport(myValidationSupport1);
+
+		// Setup BOTH validators to support the code system - only support0 should be called
+		// since support1 was removed from the chain
+		prepareMock(myValidationSupport0, myValidationSupport1);
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
+		when(myValidationSupport0.validateCode(any(), any(), any(), any(), any(), any()))
+			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
+		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
+		when(myValidationSupport1.validateCode(any(), any(), any(), any(), any(), any()))
+			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
+
+		// Third validation call - cache invalidated, should only call support0
+		IValidationSupport.CodeValidationResult result3 = chain.validateCode(
+			newValidationCtx(chain),
+			new ConceptValidationOptions(),
+			CODE_SYSTEM_URL_0,
+			CODE_0,
+			DISPLAY_0,
+			null
+		);
+
+		// Verify cache was invalidated (different instance)
+		assertNotSame(result1, result3);
+
+		// Verify support0 was called (it's still in the chain)
+		verify(myValidationSupport0, times(1)).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0));
+		verify(myValidationSupport0, times(1)).validateCode(any(), any(), any(), any(), any(), any());
+
+		// Verify support1 was NOT called (it was removed from the chain)
+		verify(myValidationSupport1, never()).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0));
+		verify(myValidationSupport1, never()).validateCode(any(), any(), any(), any(), any(), any());
 	}
 
 

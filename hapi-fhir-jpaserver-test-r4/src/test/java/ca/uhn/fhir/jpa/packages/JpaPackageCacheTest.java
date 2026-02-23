@@ -97,7 +97,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	public void testSaveAndDeletePackagePartitionsEnabled() throws IOException {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setDefaultPartitionId(1);
-		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
+		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
 		myInterceptorService.registerInterceptor(myPatientIdPartitionInterceptor);
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
 		try {
@@ -137,7 +137,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		myPartitionSettings.setDefaultPartitionId(0);
 		boolean isUnnamed = myPartitionSettings.isUnnamedPartitionMode();
 		myPartitionSettings.setUnnamedPartitionMode(true);
-		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
+		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
 		myInterceptorService.registerInterceptor(myPatientIdPartitionInterceptor);
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
 		try {

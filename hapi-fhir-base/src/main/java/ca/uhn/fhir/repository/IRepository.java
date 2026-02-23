@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.repository;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.repository.impl.MultiMapRepositoryRestQueryBuilder;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -80,6 +81,18 @@ import java.util.Map;
  * repository will try to invoke operations with "sensible" defaults. For example, by using the
  * standard FHIR search parameters. Discussion is on-going to determine what a "sensible" minimal
  * level of support for interactions should be.
+ * </p>
+ *
+ * <p>
+ *     Note to implementors: this interface exposes several search() methods.
+ *     Several are deprecated and present for source-compatibility with previous versions
+ *     of this interface used by the clinical reasoning project.
+ *     They will be removed at a future date.
+ *     We provide two main apis with different payloads for the query parameters: a Multimap method,
+ *     and an abstract builder callback which is compatible with SearchParameterMap.
+ *     Implementations must implement at least one of these two.
+ *     We provide default implementations of each in terms of the other so you only need to implement one.
+ *     Note that the SearchParameterMap used by the JPA repository implements the interface, and can be used as is.
  * </p>
  *
  * @see <a href="https://www.hl7.org/fhir/http.html">FHIR REST API</a>
@@ -262,10 +275,62 @@ public interface IRepository {
 	 * @param resourceType the class of the Resource type to search
 	 * @param searchParameters the searchParameters for this search
 	 * @return a Bundle with the results of the search
+	 * @deprecated since 8.4 use Multimap or IRepositoryRestQueryContributor with SearchParameterMap instead
 	 */
+	@Deprecated(since = "8.4.0")
 	default <B extends IBaseBundle, T extends IBaseResource> B search(
 			Class<B> bundleType, Class<T> resourceType, Map<String, List<IQueryParameterType>> searchParameters) {
 		return this.search(bundleType, resourceType, searchParameters, Collections.emptyMap());
+	}
+
+	/**
+	 * Searches this repository
+	 *
+	 * @see <a href="https://www.hl7.org/fhir/http.html#search">FHIR search</a>
+	 *
+	 * @param <B> a Bundle type
+	 * @param <T> a Resource type
+	 * @param theBundleType the class of the Bundle type to return
+	 * @param theResourceType the class of the Resource type to search
+	 * @param theSearchParameters the searchParameters for this search
+	 * @param theHeaders headers for this request, typically key-value pairs of HTTP headers
+	 * @return a Bundle with the results of the search
+	 */
+	default <B extends IBaseBundle, T extends IBaseResource> B search(
+			Class<B> theBundleType,
+			Class<T> theResourceType,
+			Multimap<String, List<IQueryParameterType>> theSearchParameters,
+			Map<String, String> theHeaders) {
+		// we have a cycle of default implementations between this and the search builder version.
+		// Implementors MUST implement one or the other or both.
+		return this.search(theBundleType, theResourceType, sb -> sb.addAll(theSearchParameters), theHeaders);
+	}
+
+	/**
+	 * Searches this repository
+	 *
+	 * @see <a href="https://www.hl7.org/fhir/http.html#search">FHIR search</a>
+	 *
+	 * @param <B> a Bundle type
+	 * @param <T> a Resource type
+	 * @param theBundleType the class of the Bundle type to return
+	 * @param theResourceType the class of the Resource type to search
+	 * @param theQueryContributor the searchParameters for this search
+	 * @param theHeaders headers for this request, typically key-value pairs of HTTP headers
+	 * @return a Bundle with the results of the search
+	 */
+	default <B extends IBaseBundle, T extends IBaseResource> B search(
+			Class<B> theBundleType,
+			Class<T> theResourceType,
+			IRepositoryRestQueryContributor theQueryContributor,
+			Map<String, String> theHeaders) {
+		// we have a cycle of default implementations between this and the multi-map version.
+		// Implementors MUST implement one or the other for now.
+		return this.search(
+				theBundleType,
+				theResourceType,
+				MultiMapRepositoryRestQueryBuilder.contributorToMultimap(theQueryContributor),
+				theHeaders);
 	}
 
 	/**
@@ -280,26 +345,9 @@ public interface IRepository {
 	 * @param searchParameters the searchParameters for this search
 	 * @param headers headers for this request, typically key-value pairs of HTTP headers
 	 * @return a Bundle with the results of the search
+	 * @deprecated since 8.4 use Multimap or IRepositoryRestQueryContributor with SearchParameterMap instead
 	 */
-	<B extends IBaseBundle, T extends IBaseResource> B search(
-			Class<B> bundleType,
-			Class<T> resourceType,
-			Multimap<String, List<IQueryParameterType>> searchParameters,
-			Map<String, String> headers);
-
-	/**
-	 * Searches this repository
-	 *
-	 * @see <a href="https://www.hl7.org/fhir/http.html#search">FHIR search</a>
-	 *
-	 * @param <B> a Bundle type
-	 * @param <T> a Resource type
-	 * @param bundleType the class of the Bundle type to return
-	 * @param resourceType the class of the Resource type to search
-	 * @param searchParameters the searchParameters for this search
-	 * @param headers headers for this request, typically key-value pairs of HTTP headers
-	 * @return a Bundle with the results of the search
-	 */
+	@Deprecated(since = "8.4.0")
 	default <B extends IBaseBundle, T extends IBaseResource> B search(
 			Class<B> bundleType,
 			Class<T> resourceType,
@@ -736,5 +784,13 @@ public interface IRepository {
 
 	private static <T> T throwNotImplementedOperationException(String theMessage) {
 		throw new NotImplementedOperationException(Msg.code(2542) + theMessage);
+	}
+
+	/**
+	 * Callback interface for search() methods that use a builder to construct the query.
+	 */
+	@FunctionalInterface
+	interface IRepositoryRestQueryContributor {
+		void contributeToQuery(IRepositoryRestQueryBuilder theBuilder);
 	}
 }

@@ -111,3 +111,18 @@ which omits `group.member` from the Patient compartment, even if it's in the sta
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/AuthorizationInterceptors.java|advancedCompartmentOmission}}
 ```
+
+# Authorizing Instance Operations Using FHIR Query Filters
+
+Instance-level operations (i.e. `$meta`, `$meta-add`, etc.) can be authorized based on the content of the target resource. 
+The `onInstancesOfTypeMatchingOptionalFilter()` and `onAnyInstanceMatchingOptionalFilter()` methods allow specifying a 
+FHIR query filter that the target resource must match for the operation to be authorized.
+
+* `onInstancesOfTypeMatchingOptionalFilter(Class, String)` - Restricts to instances of a specific resource type that match the filter
+* `onAnyInstanceMatchingOptionalFilter(String)` - Restricts to any resource instance (regardless of type) that matches the filter
+
+The filter parameter uses standard FHIR query syntax (e.g., `category=vital-signs` or `_tag=http://example.org|some-tag`).
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/AuthorizationInterceptors.java|instanceOperationWithFilter}}
+```

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7567
+title: "Previously, query string parameters on POST _search requests without a form-encoded body
+  were silently ignored (e.g. POST /Patient/_search?_id=aaa). This has been fixed so that
+  query string parameters are now correctly parsed for both GET and POST search requests."

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7382
+title: "When the fetchSizeDefaultMaximum setting was configured, streaming queries would have a limit clause that restricted the results.
+  This has been corrected.  To ensure streaming, use SearchParameterMap.setLoadSynchronous(true) when calling the dao searchForIdStream() method."

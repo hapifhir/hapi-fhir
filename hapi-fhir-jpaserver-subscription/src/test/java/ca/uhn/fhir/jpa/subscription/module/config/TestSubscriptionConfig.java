@@ -37,7 +37,7 @@ public class TestSubscriptionConfig {
 	@Bean
 	public IResourceVersionSvc resourceVersionSvc() {
 		IResourceVersionSvc retval = mock(IResourceVersionSvc.class);
-		when(retval.getVersionMap(any(), any())).thenReturn(ResourceVersionMap.empty());
+		when(retval.getVersionMap(any(), any(), any())).thenReturn(ResourceVersionMap.empty());
 		return retval;
 	}
 }

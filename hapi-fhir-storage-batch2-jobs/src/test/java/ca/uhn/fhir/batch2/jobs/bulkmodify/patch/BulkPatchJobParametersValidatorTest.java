@@ -4,6 +4,7 @@ import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyJobParame
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
+import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
@@ -32,13 +33,15 @@ class BulkPatchJobParametersValidatorTest {
 
 	@Mock
 	private IDaoRegistry myDaoRegistry;
+	@Mock
+	private IBatch2DaoSvc myBatch2DaoSvc;
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private BulkPatchJobParametersValidator<BulkPatchJobParameters> mySvc;
 
 	@BeforeEach
 	public void beforeEach() {
-		mySvc = new BulkPatchJobParametersValidator<>(ourCtx, myDaoRegistry);
+		mySvc = new BulkPatchJobParametersValidator<>(ourCtx, myDaoRegistry, myBatch2DaoSvc);
 	}
 
 	@Test
@@ -77,8 +80,6 @@ class BulkPatchJobParametersValidatorTest {
 
 	@Test
 	void testValidate_InvalidPatchSpecified_BadDocument() {
-		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
-
 		Parameters patch = new Parameters();
 		patch.addParameter("foo", new StringType("bar"));
 

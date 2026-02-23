@@ -2,6 +2,10 @@ package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
+import ca.uhn.fhir.merge.ExtensionBasedLinkService;
+import ca.uhn.fhir.merge.MergeResourceHelper;
+import ca.uhn.fhir.merge.PatientNativeLinkService;
+import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.batch2.jobs.parameters.BatchJobParametersWithTaskId;
 import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
@@ -58,6 +62,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -134,12 +139,20 @@ public class ResourceMergeServiceTest {
 
 	@BeforeEach
 	void setup() {
-		when(myDaoRegistryMock.getResourceDao(Patient.class)).thenReturn(myPatientDaoMock);
+		lenient().when(myDaoRegistryMock.getResourceDao("Patient")).thenReturn(myPatientDaoMock);
 		when(myDaoRegistryMock.getResourceDao(Task.class)).thenReturn(myTaskDaoMock);
 		when(myDaoRegistryMock.getResourceDao("Provenance")).thenReturn(myProvenanceDaoMock);
-		when(myPatientDaoMock.getContext()).thenReturn(myFhirContext);
-		MergeValidationService myMergeValidationService = new MergeValidationService(myFhirContext, myDaoRegistryMock);
+		when(myDaoRegistryMock.getFhirContext()).thenReturn(myFhirContext);
+		lenient().when(myRequestDetailsMock.getResourceName()).thenReturn("Patient");
+
+		PatientNativeLinkService patientNativeLinkService = new PatientNativeLinkService();
+		ExtensionBasedLinkService extensionBasedLinkService = new ExtensionBasedLinkService();
+		ResourceLinkServiceFactory resourceLinkServiceFactory = new ResourceLinkServiceFactory(patientNativeLinkService, extensionBasedLinkService);
+
+		MergeValidationService myMergeValidationService = new MergeValidationService(myFhirContext, myDaoRegistryMock, resourceLinkServiceFactory);
 		MergeProvenanceSvc myMergeProvenanceService = new MergeProvenanceSvc(myDaoRegistryMock);
+		MergeResourceHelper myMergeResourceHelper = new MergeResourceHelper(myDaoRegistryMock, myMergeProvenanceService, resourceLinkServiceFactory);
+
 		myResourceMergeService = new ResourceMergeService(
 			myStorageSettingsMock,
 			myDaoRegistryMock,
@@ -149,14 +162,15 @@ public class ResourceMergeServiceTest {
 			myJobCoordinatorMock,
 			myBatch2TaskHelperMock,
 			myMergeValidationService,
-			myMergeProvenanceService);
+			myMergeResourceHelper);
 	}
 
 	// SUCCESS CASES
 	@Test
 	void testMerge_WithoutResultResource_Success() {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 		setOriginalInputParameters(mergeOperationParameters);
@@ -196,17 +210,35 @@ public class ResourceMergeServiceTest {
 	}
 
 
-	@Test
-	void testMerge_WithoutResultResource_TargetSetToActiveExplicitly_Success() {
+	@ParameterizedTest
+	@CsvSource(value = {
+		"true,  true",   // Both explicitly active
+		"true,  null",   // Source active, target not set
+		"false, true",   // Source inactive, target active
+		"false, null",   // Source inactive, target not set
+		"null,  true",   // Source not set, target active
+		"null,  null"    // Neither explicitly set
+		// Note: target.active=false is excluded - tested separately as failure case
+	}, nullValues = {"null"})
+	void testMerge_WithoutResultResource_VariousActiveStates_Success(
+			Boolean isSourceActive, Boolean isTargetActive) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 		setOriginalInputParameters(mergeOperationParameters);
 
 		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID_WITH_VERSION_1);
+		if (isSourceActive != null) {
+			sourcePatient.setActive(isSourceActive);
+		}
+
 		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID_WITH_VERSION_1);
-		targetPatient.setActive(true);
+		if (isTargetActive != null) {
+			targetPatient.setActive(isTargetActive);
+		}
+
 		setupDaoMockForSuccessfulRead(sourcePatient);
 		setupDaoMockForSuccessfulRead(targetPatient);
 		setupDaoMockForSuccessfulSourcePatientUpdate(sourcePatient, createPatient(SOURCE_PATIENT_TEST_ID_WITH_VERSION_2));
@@ -222,6 +254,11 @@ public class ResourceMergeServiceTest {
 		verifySuccessfulOutcomeForSync(mergeOutcome, patientReturnedFromDaoAfterTargetUpdate);
 		verifyUpdatedSourcePatient();
 		verifyUpdatedTargetPatient(true, Collections.emptyList());
+
+		// Verify target active field preserved
+		boolean activeWasSetExplicitlyOnTarget = (isTargetActive != null);
+		verifyTargetActiveFieldPreserved(activeWasSetExplicitlyOnTarget);
+
 		verifyProvenanceCreated();
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
 	}
@@ -229,7 +266,8 @@ public class ResourceMergeServiceTest {
 	@Test
 	void testMerge_WithResultResource_Success() {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 		Patient resultPatient = createPatient(TARGET_PATIENT_TEST_ID);
@@ -266,7 +304,8 @@ public class ResourceMergeServiceTest {
 	@Test
 	void testMerge_WithResultResource_ResultHasAllTargetIdentifiers_Success() {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResourceIdentifiers(List.of(
 			new CanonicalIdentifier().setSystem("sys").setValue("val1"),
@@ -309,7 +348,8 @@ public class ResourceMergeServiceTest {
 	@Test
 	void testMerge_WithDeleteSourceTrue_Success() {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setDeleteSource(true);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -340,7 +380,8 @@ public class ResourceMergeServiceTest {
 	@Test
 	void testMerge_WithDeleteSourceTrue_And_WithResultResource_Success() {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setDeleteSource(true);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -373,7 +414,8 @@ public class ResourceMergeServiceTest {
 	@Test
 	void testMerge_WithPreviewTrue_Success() {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(true);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -404,7 +446,8 @@ public class ResourceMergeServiceTest {
 	@Test
 	void testMerge_ResolvesResourcesByReferenceThatHasVersions_CurrentResourceVersionAreTheSame_Success() {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID_WITH_VERSION_2));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID_WITH_VERSION_2));
 		setOriginalInputParameters(mergeOperationParameters);
@@ -440,7 +483,8 @@ public class ResourceMergeServiceTest {
 	})
 	void testMerge_AsyncBecauseOfPreferHeader_Success(boolean theWithResultResource, boolean theWithDeleteSource) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 		mergeOperationParameters.setDeleteSource(theWithDeleteSource);
@@ -480,7 +524,8 @@ public class ResourceMergeServiceTest {
 	void testMerge_SyncRequest_ReplaceReferencesThrowsPreconditionFailedException_TheExceptionReturnedToClientInOutcome(boolean theWithResultResource,
 																														boolean theWithDeleteSource) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 		mergeOperationParameters.setDeleteSource(theWithDeleteSource);
@@ -515,7 +560,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_UnhandledServerResponseExceptionThrown_UsesStatusCodeOfTheException(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -542,7 +588,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_UnhandledExceptionThrown_Uses500StatusCode(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -569,7 +616,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_ValidatesInputParameters_MissingSourcePatientParams_ReturnsErrorWith400Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 
@@ -594,7 +642,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_ValidatesInputParameters_MissingTargetPatientParams_ReturnsErrorWith400Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 
@@ -619,7 +668,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_ValidatesInputParameters_MissingBothSourceAndTargetPatientParams_ReturnsErrorsWith400Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 
 		// When
@@ -646,7 +696,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_ValidatesInputParameters_BothSourceResourceAndSourceIdentifierParamsProvided_ReturnsErrorWith400Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setSourceResourceIdentifiers(List.of(new CanonicalIdentifier().setSystem("sys").setValue( "val")));
@@ -674,7 +725,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_ValidatesInputParameters_BothTargetResourceAndTargetIdentifiersParamsProvided_ReturnsErrorWith400Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResourceIdentifiers(List.of(new CanonicalIdentifier().setSystem("sys").setValue( "val")));
@@ -701,7 +753,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_ValidatesInputParameters_SourceResourceParamHasNoReferenceElement_ReturnsErrorWith400Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference());
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -728,7 +781,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_ValidatesInputParameters_TargetResourceParamHasNoReferenceElement_ReturnsErrorWith400Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference());
@@ -755,7 +809,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_ResolvesSourceResourceByReference_ResourceNotFound_ReturnsErrorWith422Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -781,7 +836,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_ResolvesTargetResourceByReference_ResourceNotFound_ReturnsErrorWith422Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -809,7 +865,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_ResolvesSourceResourceByIdentifiers_NoMatchFound_ReturnsErrorWith422Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResourceIdentifiers(List.of(
 			new CanonicalIdentifier().setSystem("sys").setValue("val1"),
@@ -840,7 +897,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_ResolvesSourceResourceByIdentifiers_MultipleMatchesFound_ReturnsErrorWith422Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResourceIdentifiers(List.of(new CanonicalIdentifier().setSystem("sys").setValue("val1")));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -874,7 +932,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_ResolvesTargetResourceByIdentifiers_NoMatchFound_ReturnsErrorWith422Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResourceIdentifiers(List.of(
@@ -907,7 +966,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_ResolvesTargetResourceByIdentifiers_MultipleMatchesFound_ReturnsErrorWith422Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResourceIdentifiers(List.of(new CanonicalIdentifier().setSystem("sys").setValue("val1")));
@@ -942,7 +1002,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_ResolvesSourceResourceByReferenceThatHasVersion_CurrentResourceVersionIsDifferent_ReturnsErrorWith422Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID_WITH_VERSION_1));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -970,7 +1031,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_ResolvesTargetResourceByReferenceThatHasVersion_CurrentResourceVersionIsDifferent_ReturnsErrorWith422Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID_WITH_VERSION_1));
@@ -1001,7 +1063,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_SourceAndTargetResolvesToSameResource_ReturnsErrorWith422Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResourceIdentifiers(List.of(new CanonicalIdentifier().setSystem("sys").setValue("val1")));
 		mergeOperationParameters.setTargetResourceIdentifiers(List.of(new CanonicalIdentifier().setSystem("sys").setValue("val2")));
@@ -1030,7 +1093,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_TargetResourceIsInactive_ReturnsErrorWith422Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -1059,7 +1123,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_TargetResourceWasPreviouslyReplacedByAnotherResource_ReturnsErrorWith422Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -1090,7 +1155,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_SourceResourceWasPreviouslyReplacedByAnotherResource_ReturnsErrorWith422Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -1118,9 +1184,37 @@ public class ResourceMergeServiceTest {
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
+	void testMerge_ResourceTypeWithoutIdentifierElement_ReturnsErrorWith422Status(boolean thePreview) {
+		// Given
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
+		mergeOperationParameters.setPreview(thePreview);
+		mergeOperationParameters.setSourceResource(new Reference("OperationOutcome/source-id"));
+		mergeOperationParameters.setTargetResource(new Reference("OperationOutcome/target-id"));
+		when(myRequestDetailsMock.getResourceName()).thenReturn("OperationOutcome");
+
+		// When
+		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+
+		// Then
+		OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
+		assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(422);
+
+		assertThat(operationOutcome.getIssue()).hasSize(1);
+		OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
+		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+		assertThat(issue.getDiagnostics()).contains("Merge operation cannot be performed on resource type 'OperationOutcome' because it does not have an 'identifier' element.");
+		assertThat(issue.getCode().toCode()).isEqualTo("invalid");
+
+		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock);
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
 	void testMerge_ValidatesResultResource_ResultResourceHasDifferentIdThanTargetResource_ReturnsErrorWith400Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -1155,7 +1249,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_ValidatesResultResource_ResultResourceDoesNotHaveAllIdentifiersProvidedInTargetIdentifiers_ReturnsErrorWith400Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResourceIdentifiers(List.of(
@@ -1194,7 +1289,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_ValidatesResultResource_ResultResourceHasNoReplacesLinkAtAll_ReturnsErrorWith400Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -1225,7 +1321,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_ValidatesResultResource_ResultResourceHasNoReplacesLinkToSource_ReturnsErrorWith400Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -1258,7 +1355,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_ValidatesResultResource_ResultResourceHasReplacesLinkAndDeleteSourceIsTrue_ReturnsErrorWith400Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -1291,7 +1389,8 @@ public class ResourceMergeServiceTest {
 	@ValueSource(booleans = {true, false})
 	void testMerge_ValidatesResultResource_ResultResourceHasRedundantReplacesLinksToSource_ReturnsErrorWith400Status(boolean thePreview) {
 		// Given
-		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters(PAGE_SIZE);
+		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -1414,6 +1513,9 @@ public class ResourceMergeServiceTest {
 		assertThat(myCapturedSourcePatientForUpdate.getLink()).hasSize(1);
 		assertThat(myCapturedSourcePatientForUpdate.getLinkFirstRep().getType()).isEqualTo(Patient.LinkType.REPLACEDBY);
 		assertThat(myCapturedSourcePatientForUpdate.getLinkFirstRep().getOther().getReference()).isEqualTo(TARGET_PATIENT_TEST_ID);
+
+		// Validate source active field set to false after merge
+		assertThat(myCapturedSourcePatientForUpdate.getActive()).isFalse();
 	}
 
 	private void setupDaoMockForSuccessfulSourcePatientUpdate(Patient thePatientExpectedAsInput,
@@ -1449,6 +1551,17 @@ public class ResourceMergeServiceTest {
 			assertThat(expectedIdentifier.equalsDeep(actualIdentifier)).isTrue();
 		}
 
+	}
+
+	private void verifyTargetActiveFieldPreserved(boolean theActiveWasSetExplicitly) {
+		Patient updatedTarget = myCapturedTargetPatientForUpdate;
+		if (theActiveWasSetExplicitly) {
+			// If active was set, it must be true (false is failure case tested separately)
+			assertThat(updatedTarget.getActive()).isTrue();
+		} else {
+			// If active was not set, verify it remains unset
+			assertThat(updatedTarget.hasActive()).isFalse();
+		}
 	}
 
 	private void verifyProvenanceCreated() {

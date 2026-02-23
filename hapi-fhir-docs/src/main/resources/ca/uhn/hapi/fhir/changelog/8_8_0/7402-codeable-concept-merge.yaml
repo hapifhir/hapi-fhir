@@ -1,0 +1,8 @@
+---
+type: change
+issue: 7402
+title: "The API for merging FHIR resources has moved from `TerserUtil` to `ResourceUtil`. The API has been
+updated to allow optional lenient matching and merging of `CodeableConcept` fields. These lenient matching
+options include insensitivity to the order of the `Coding`s; allowing a match where one list of `Coding`s
+is a subset of the other; and allowing a match where two `Coding`s have the same system and code,
+but differ in other detail fields."

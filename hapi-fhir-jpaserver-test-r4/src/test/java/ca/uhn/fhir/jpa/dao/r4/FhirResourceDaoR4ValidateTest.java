@@ -1577,6 +1577,45 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).hasWarnMessage("Unrecognized profile uri");
 	}
 
+
+	@Test
+	public void validateResource_AgainstUnknownTargetProfile_FailValidation_EvenWhenNotErrorForUnknownProfiles() {
+		// ARRANGE
+		// setup to not error on unknown profiles
+		FhirInstanceValidator instanceValidator = AopTestUtils.getTargetObject(myValidatorModule);
+		var previousSetting = instanceValidator.isErrorForUnknownProfiles();
+		instanceValidator.setErrorForUnknownProfiles(false);
+
+		// Valid Observation resource that conforms to base R4 profile
+		Observation observation = new Observation();
+		observation.setStatus(ObservationStatus.FINAL);
+		observation.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
+
+		// ACT
+		final String targetProfile = "http://example.com/fhir/StructureDefinition/vitalsigns-2";
+		MethodOutcome outcome = myObservationDao.validate(
+			/* theResource */ observation,
+			/* theId */ null,
+			/* theRawResource */ null,
+			/* theEncoding */ EncodingEnum.JSON,
+			/* theMode */ ValidationModeEnum.CREATE,
+			/* theProfile */ targetProfile,
+			/* theRequestDetails */ mySrd
+		);
+		instanceValidator.setErrorForUnknownProfiles(previousSetting);
+
+		// ASSERT
+		assertNotNull(outcome);
+		assertInstanceOf(OperationOutcome.class, outcome.getOperationOutcome());
+		List<OperationOutcome.OperationOutcomeIssueComponent> issues = ((OperationOutcome) outcome.getOperationOutcome()).getIssue();
+		assertThat(issues.stream())
+			.anyMatch(i -> i.getSeverity() == OperationOutcome.IssueSeverity.ERROR
+				&& i.getExtensionString("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id").equals(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN)
+				&& i.getDiagnostics().contains(targetProfile)
+			);
+
+	}
+
 	@Test
 	public void validateResource_withMetaProfileWithVersion_validatesAsExpected() {
 		// setup

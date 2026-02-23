@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7542
+title: "Previously, consent could interfere with system processes related to `Subscriptions` such as 
+subscription registration, subscription activation and resource matching for triggering `ResourceModifiedEvent`. 
+This has been fixed by introducing a flag in the `RequestDetails#userData` which marks the request for skipping consent."

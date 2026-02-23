@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,9 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
@@ -32,9 +35,12 @@ import org.slf4j.Logger;
 public class JobInstanceStatusUpdater {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
+	private final IInterceptorService myInterceptorService;
 
-	public JobInstanceStatusUpdater(JobDefinitionRegistry theJobDefinitionRegistry) {
+	public JobInstanceStatusUpdater(
+			JobDefinitionRegistry theJobDefinitionRegistry, IInterceptorService theInterceptorService) {
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
+		myInterceptorService = theInterceptorService;
 	}
 
 	/**
@@ -94,6 +100,10 @@ public class JobInstanceStatusUpdater {
 			JobInstance theJobInstance,
 			JobDefinition<PT> theJobDefinition,
 			IJobCompletionHandler<PT> theJobCompletionHandler) {
+		if (myInterceptorService.hasHooks(Pointcut.STORAGE_POSTCOMPLETE_BATCH_JOB)) {
+			final HookParams params = new HookParams().add(JobInstance.class, theJobInstance);
+			myInterceptorService.callHooks(Pointcut.STORAGE_POSTCOMPLETE_BATCH_JOB, params);
+		}
 		if (theJobCompletionHandler == null) {
 			return;
 		}

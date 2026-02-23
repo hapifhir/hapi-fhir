@@ -82,6 +82,7 @@ public class SubscriptionLoaderTest {
 	public void init() {
 		when(myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
 			anyString(),
+			any(),
 			any(SearchParameterMap.class),
 			any(SubscriptionLoader.class),
 			anyLong()

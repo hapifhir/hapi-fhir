@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -667,6 +667,16 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		return JpaPid.fromId((Long) thePid, thePartitionId);
 	}
 
+	/**
+	 * Creates a new JpaPid from partition, PK, and resource name.
+	 * The PK is passed as a String here, but this must parse as a long.  Do not mistake this for the FHIR Id
+	 * - aka forced-id/client-assigned-id.
+	 *
+	 * @param thePartitionId The partition ID
+	 * @param thePid The persistent ID as a string
+	 * @param theResourceName The resource type name
+	 * @return A JpaPid with the associated resource ID populated
+	 */
 	@Override
 	public JpaPid newPidFromStringIdAndResourceName(Integer thePartitionId, String thePid, String theResourceName) {
 		JpaPid retVal = JpaPid.fromId(Long.parseLong(thePid), thePartitionId);

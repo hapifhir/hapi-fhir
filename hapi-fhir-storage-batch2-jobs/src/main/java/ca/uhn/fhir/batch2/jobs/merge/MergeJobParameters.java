@@ -2,7 +2,7 @@
  * #%L
  * HAPI-FHIR Storage Batch2 Jobs
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,9 @@ public class MergeJobParameters extends ReplaceReferencesJobParameters {
 
 	@JsonProperty("originalInputParameters")
 	private String myOriginalInputParameters;
+
+	@JsonProperty("operationName")
+	private String myOperationName;
 
 	/**
 	 * @deprecated we have the whole original input parameters object now,
@@ -73,5 +76,13 @@ public class MergeJobParameters extends ReplaceReferencesJobParameters {
 
 	public void setOriginalInputParameters(String myOriginalInputParameters) {
 		this.myOriginalInputParameters = myOriginalInputParameters;
+	}
+
+	public String getOperationName() {
+		return myOperationName;
+	}
+
+	public void setOperationName(String theOperationName) {
+		myOperationName = theOperationName;
 	}
 }
