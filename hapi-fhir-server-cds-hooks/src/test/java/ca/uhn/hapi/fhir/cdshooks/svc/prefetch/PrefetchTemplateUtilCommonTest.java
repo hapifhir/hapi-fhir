@@ -3,8 +3,10 @@ package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import org.hl7.fhir.r4.model.Encounter;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -62,6 +64,31 @@ class PrefetchTemplateUtilCommonTest {
 						"HAPI-2379: Request context did not provide a value for key <draftOrders>.  Available keys in context are: [patientId]");
 	}
 
+	@Test
+	void substituteTemplateShouldHandleWhitespaceAroundUnionOperator() {
+		// setup
+		final String template = "{{context.userId | context.patientId}}";
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		context.put("userId", TEST_USER_ID);
+        // execute
+		final String actual = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
+        // validate
+		assertThat(actual).isEqualTo(TEST_USER_ID + "," + TEST_PATIENT_ID);
+	}
+
+	@Test
+	void substituteTemplateShouldThrowWhenDefaultPartKeyHoldsResourceInsteadOfString() {
+		// setup
+		final String template = "Condition?encounter={{context.encounter}}";
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put("encounter", new Encounter().setId("enc1"));
+        // setup & execute
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+				.isInstanceOf(PreconditionFailedException.class)
+				.hasMessageContaining("encounter");
+	}
+
 	/** TODO:
 	 * working test cases for
 	 * DSTU3 -> Bundle test -> done
@@ -79,9 +106,9 @@ class PrefetchTemplateUtilCommonTest {
 	 * ofType -> done, resolve -> done, OR operator -> done, context operator -> done, % operator -> done
 	 * make templates more realistic -> done
 	 * add-on : Support for using resolve() using contained resources -> done
-	 * test for OR operator returning nothing
+	 * test for OR operator returning nothing -> done
 	 * check if array references can be directly evaluated.
-	 * remove invalid request exception and replace with 412
+	 * remove invalid request exception and replace with 412 -> done
 	 * one incorrect in OR condition
 	 * its not OR its Union
 	 * documentation update on Smile CDR

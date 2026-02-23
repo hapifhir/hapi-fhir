@@ -25,11 +25,11 @@ import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.BundleUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -37,10 +37,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class PrefetchTemplateUtil {
 	// Matches any {{...}} placeholder in the template
@@ -55,12 +55,12 @@ public class PrefetchTemplateUtil {
 	public static String substituteTemplate(
 			String theTemplate, CdsServiceRequestContextJson theContext, FhirContext theFhirContext) {
 		final Matcher matcher = SURROUNDING_CURLY_BRACES_PART.matcher(theTemplate);
-		final StringBuilder sb = new StringBuilder();
+		final StringBuilder resolvedTemplate = new StringBuilder();
 		while (matcher.find()) {
-			String rawExpression = matcher.group(1);
-			List<String> parts =
-					Arrays.stream(rawExpression.split("\\|")).map(String::trim).toList();
-			List<String> substitutedPrefetchQueryParts = new ArrayList<>();
+			final String rawExpression = matcher.group(1);
+			final List<String> parts =
+					Stream.of(rawExpression.split("\\|")).map(String::trim).toList();
+			final List<String> substitutedPrefetchQueryParts = new ArrayList<>();
 			for (String part : parts) {
 				Matcher m;
 				if ((m = DA_VINCI_PART.matcher(part)).matches()) {
@@ -69,18 +69,20 @@ public class PrefetchTemplateUtil {
 					substitutedPrefetchQueryParts.addAll(handleDefaultPart(m, theContext));
 				} else if ((m = FHIR_PATH_PART.matcher(part)).matches()
 						|| (m = REFERENCED_PREFETCH_PART.matcher(part)).matches()) {
-					substitutedPrefetchQueryParts.addAll(
-							convertResultsToIds(handleFhirPathPart(m, theContext, theFhirContext)));
+					substitutedPrefetchQueryParts.addAll(convertResultsToIds(
+							evaluateFhirPathOnContextKey(m.group(1), m.group(2), theContext, theFhirContext),
+							m.group(1)));
 				}
 			}
 			if (substitutedPrefetchQueryParts.isEmpty()) {
 				throw new PreconditionFailedException(Msg.code(2377) + "Unable to resolve prefetch template : "
 						+ rawExpression + ". No result was found for the prefetch query.");
 			}
-			matcher.appendReplacement(sb, Matcher.quoteReplacement(String.join(",", substitutedPrefetchQueryParts)));
+			matcher.appendReplacement(
+					resolvedTemplate, Matcher.quoteReplacement(String.join(",", substitutedPrefetchQueryParts)));
 		}
-		matcher.appendTail(sb);
-		return sb.toString();
+		matcher.appendTail(resolvedTemplate);
+		return resolvedTemplate.toString();
 	}
 
 	/**
@@ -98,10 +100,10 @@ public class PrefetchTemplateUtil {
 			return BundleUtil.toListOfResources(theFhirContext, bundle).stream()
 					.filter(x -> x.fhirType().equals(resourceType))
 					.map(x -> x.getIdElement().getIdPart())
-					.filter(id -> id != null && !id.isEmpty())
+					.filter(StringUtils::isNotBlank)
 					.toList();
 		} catch (ClassCastException e) {
-			throw new InvalidRequestException(Msg.code(2374) + "Request context did not provide valid "
+			throw new PreconditionFailedException(Msg.code(2374) + "Request context did not provide valid "
 					+ theFhirContext.getVersion().getVersion() + " Bundle resource for template key <" + key + ">");
 		}
 	}
@@ -110,14 +112,11 @@ public class PrefetchTemplateUtil {
 	private static List<String> handleDefaultPart(Matcher theMatcher, CdsServiceRequestContextJson theContext) {
 		final String key = theMatcher.group(1);
 		validateContextKeyExists(key, theContext);
-		return List.of(theContext.getString(key));
-	}
-
-	private static List<IBase> handleFhirPathPart(
-			Matcher theMatcher, CdsServiceRequestContextJson theContext, FhirContext theFhirContext) {
-		final String key = theMatcher.group(1);
-		final String fhirPathExpression = theMatcher.group(2);
-		return evaluateFhirPathOnContextKey(key, fhirPathExpression, theContext, theFhirContext);
+		try {
+			return List.of(theContext.getString(key));
+		} catch (ClassCastException e) {
+			throw new PreconditionFailedException("Request context value for key <" + key + "> is not a string.");
+		}
 	}
 
 	/**
@@ -136,38 +135,38 @@ public class PrefetchTemplateUtil {
 			final String fullExpression = resource.fhirType() + "." + theFhirPathExpression;
 			return fhirPath.evaluate(resource, fullExpression, IBase.class);
 		} catch (ClassCastException e) {
-			throw new InvalidRequestException(Msg.code(2378) + "Request context did not provide valid "
+			throw new PreconditionFailedException(Msg.code(2378) + "Request context did not provide valid "
 					+ theFhirContext.getVersion().getVersion() + " Bundle resource for FHIRPath template key <"
 					+ thePrefetchKey + ">");
 		} catch (FhirPathExecutionException e) {
-			throw new InvalidRequestException("Unable to evaluate FHIRPath for prefetch template key <" + thePrefetchKey
-					+ "> for FHIR version " + theFhirContext.getVersion().getVersion());
+			throw new PreconditionFailedException(
+					"Unable to evaluate FHIRPath for prefetch template key <" + thePrefetchKey + "> for FHIR version "
+							+ theFhirContext.getVersion().getVersion());
 		}
 	}
 
 	private static void validateContextKeyExists(String theKey, CdsServiceRequestContextJson theContext) {
 		if (!theContext.containsKey(theKey)) {
 			throw new PreconditionFailedException(Msg.code(2379) + "Request context did not provide a value for key <"
-					+ theKey + ">" + ".  Available keys in context are: " + theContext.getKeys());
+					+ theKey + ">.  Available keys in context are: " + theContext.getKeys());
 		}
 	}
 
 	/**
-	 * Converts a list of FHIRPath evaluation results to a list of ID strings.
-	 * Handles IBaseResource, IPrimitiveType, and other IBase types.
+	 * Converts a list of FHIRPath evaluation results to a list of strings.
+	 * Anything other than a primitive type throws an exception
 	 */
-	private static List<String> convertResultsToIds(List<IBase> theResults) {
+	private static List<String> convertResultsToIds(List<IBase> theResults, String thePrefetchKey) {
 		return theResults.stream()
 				.map(result -> {
-					if (result instanceof IBaseResource baseResource) {
-						return baseResource.getIdElement().getIdPart();
-					} else if (result instanceof IPrimitiveType) {
+					if (result instanceof IPrimitiveType) {
 						return ((IPrimitiveType<?>) result).getValueAsString();
 					} else {
-						return result.toString();
+						throw new PreconditionFailedException("FHIR path expression returned a non-primitive result: "
+								+ result.getClass().getSimpleName() + " for Prefetch Key : <" + thePrefetchKey + ">");
 					}
 				})
-				.filter(id -> id != null && !id.isEmpty())
+				.filter(StringUtils::isNotBlank)
 				.toList();
 	}
 
