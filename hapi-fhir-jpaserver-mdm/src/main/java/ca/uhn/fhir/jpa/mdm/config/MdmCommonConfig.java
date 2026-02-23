@@ -27,6 +27,8 @@ import ca.uhn.fhir.mdm.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
 import ca.uhn.fhir.mdm.rules.matcher.MdmMatcherFactory;
+import ca.uhn.fhir.mdm.rules.similarity.ISimilarityFactory;
+import ca.uhn.fhir.mdm.rules.similarity.MdmSimilarityFactory;
 import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.mdm.svc.MdmLinkDeleteSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -37,8 +39,12 @@ import org.springframework.context.annotation.Lazy;
 @Configuration
 public class MdmCommonConfig {
 	@Bean
-	MdmRuleValidator mdmRuleValidator(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
-		return new MdmRuleValidator(theFhirContext, theSearchParamRetriever);
+	MdmRuleValidator mdmRuleValidator(
+			FhirContext theFhirContext,
+			ISearchParamRegistry theSearchParamRetriever,
+			IMatcherFactory theMatcherFactory,
+			ISimilarityFactory theSimilarityFactory) {
+		return new MdmRuleValidator(theFhirContext, theSearchParamRetriever, theMatcherFactory, theSimilarityFactory);
 	}
 
 	@Bean
@@ -61,8 +67,11 @@ public class MdmCommonConfig {
 	@Bean
 	@Lazy
 	MdmResourceMatcherSvc mdmResourceComparatorSvc(
-			FhirContext theFhirContext, IMatcherFactory theIMatcherFactory, IMdmSettings theMdmSettings) {
-		return new MdmResourceMatcherSvc(theFhirContext, theIMatcherFactory, theMdmSettings);
+			FhirContext theFhirContext,
+			IMatcherFactory theIMatcherFactory,
+			ISimilarityFactory theSimilarityFactory,
+			IMdmSettings theMdmSettings) {
+		return new MdmResourceMatcherSvc(theFhirContext, theIMatcherFactory, theSimilarityFactory, theMdmSettings);
 	}
 
 	@Bean
@@ -70,5 +79,11 @@ public class MdmCommonConfig {
 	public IMatcherFactory matcherFactory(
 			FhirContext theFhirContext, IMdmSettings theSettings, INicknameSvc theNicknameSvc) {
 		return new MdmMatcherFactory(theFhirContext, theSettings, theNicknameSvc);
+	}
+
+	@Bean
+	@Lazy
+	public ISimilarityFactory similarityFactory() {
+		return new MdmSimilarityFactory();
 	}
 }

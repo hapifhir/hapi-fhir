@@ -14,6 +14,7 @@ import org.springframework.core.io.Resource;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -172,8 +173,33 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 		}
 	}
 
+	@Test
+	void testUnknownMatcherAlgorithm() throws IOException {
+		assertThatThrownBy(() -> setMdmRuleJsonWithFactories("bad-rules-unknown-matcher-algorithm.json"))
+			.isInstanceOf(ConfigurationException.class)
+			.hasMessageContaining(Msg.code(2846))
+			.hasMessageContaining("DOES_NOT_EXIST");
+	}
+
+	@Test
+	void testUnknownSimilarityAlgorithm() throws IOException {
+		assertThatThrownBy(() -> setMdmRuleJsonWithFactories("bad-rules-unknown-similarity-algorithm.json"))
+			.isInstanceOf(ConfigurationException.class)
+			.hasMessageContaining(Msg.code(2847))
+			.hasMessageContaining("DOES_NOT_EXIST");
+	}
+
 	private void setMdmRuleJson(String theTheS) throws IOException {
-		MdmRuleValidator mdmRuleValidator = new MdmRuleValidator(ourFhirContext, mySearchParamRetriever);
+		MdmRuleValidator mdmRuleValidator = new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, null, null);
+		MdmSettings mdmSettings = new MdmSettings(mdmRuleValidator);
+		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
+		Resource resource = resourceLoader.getResource(theTheS);
+		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
+		mdmSettings.setScriptText(json);
+	}
+
+	private void setMdmRuleJsonWithFactories(String theTheS) throws IOException {
+		MdmRuleValidator mdmRuleValidator = new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, myIMatcherFactory, mySimilarityFactory);
 		MdmSettings mdmSettings = new MdmSettings(mdmRuleValidator);
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
 		Resource resource = resourceLoader.getResource(theTheS);

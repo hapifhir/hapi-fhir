@@ -10,6 +10,8 @@ import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
 import ca.uhn.fhir.mdm.rules.matcher.MdmMatcherFactory;
+import ca.uhn.fhir.mdm.rules.similarity.ISimilarityFactory;
+import ca.uhn.fhir.mdm.rules.similarity.MdmSimilarityFactory;
 import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.r4.model.Patient;
@@ -28,6 +30,7 @@ public abstract class BaseR4Test {
 	protected ISearchParamRegistry mySearchParamRetriever = mock(ISearchParamRegistry.class);
 
 	protected IMatcherFactory myIMatcherFactory;
+	protected ISimilarityFactory mySimilarityFactory;
 
 	protected IMdmSettings myMdmSettings;
 
@@ -39,6 +42,7 @@ public abstract class BaseR4Test {
 			myMdmSettings,
 			new NicknameSvc()
 		);
+		mySimilarityFactory = new MdmSimilarityFactory();
 	}
 
 	protected Patient buildJohn() {
@@ -58,7 +62,8 @@ public abstract class BaseR4Test {
 	protected MdmResourceMatcherSvc buildMatcher(MdmRulesJson theMdmRulesJson) {
 		return new MdmResourceMatcherSvc(ourFhirContext,
 			myIMatcherFactory,
-			new MdmSettings(new MdmRuleValidator(ourFhirContext, mySearchParamRetriever)).setMdmRules(theMdmRulesJson)
+			mySimilarityFactory,
+			new MdmSettings(new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, myIMatcherFactory, mySimilarityFactory)).setMdmRules(theMdmRulesJson)
 		);
 	}
 

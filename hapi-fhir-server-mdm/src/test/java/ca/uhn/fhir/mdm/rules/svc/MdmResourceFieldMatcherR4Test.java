@@ -30,6 +30,7 @@ public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 		myComparator = new MdmResourceFieldMatcher(
 			ourFhirContext,
 			myIMatcherFactory,
+			mySimilarityFactory,
 			myGivenNameMatchField,
 			myMdmRulesJson
 		);
@@ -50,6 +51,7 @@ public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 		myComparator = new MdmResourceFieldMatcher(
 			ourFhirContext,
 			myIMatcherFactory,
+			mySimilarityFactory,
 			myGivenNameMatchField,
 			myMdmRulesJson
 		);

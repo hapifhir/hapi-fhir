@@ -141,6 +141,6 @@ public class TestJPAConfig {
 
 	@Bean
 	public IMdmRuleValidator mdmRuleValidator(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
-		return new MdmRuleValidator(theFhirContext, theSearchParamRetriever);
+		return new MdmRuleValidator(theFhirContext, theSearchParamRetriever, null, null);
 	}
 }

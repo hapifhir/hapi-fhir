@@ -31,6 +31,7 @@ import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
+import ca.uhn.fhir.mdm.rules.similarity.ISimilarityFactory;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -50,14 +51,19 @@ public class MdmResourceMatcherSvc {
 
 	private final FhirContext myFhirContext;
 	private final IMatcherFactory myMatcherFactory;
+	private final ISimilarityFactory mySimilarityFactory;
 	private final List<MdmResourceFieldMatcher> myFieldMatchers = new ArrayList<>();
 
 	private MdmRulesJson myMdmRulesJson;
 
 	public MdmResourceMatcherSvc(
-			FhirContext theFhirContext, IMatcherFactory theIMatcherFactory, IMdmSettings theMdmSettings) {
+			FhirContext theFhirContext,
+			IMatcherFactory theIMatcherFactory,
+			ISimilarityFactory theSimilarityFactory,
+			IMdmSettings theMdmSettings) {
 		myFhirContext = theFhirContext;
 		myMatcherFactory = theIMatcherFactory;
+		mySimilarityFactory = theSimilarityFactory;
 		myMdmRulesJson = theMdmSettings.getMdmRules();
 
 		addFieldMatchers();
@@ -70,8 +76,8 @@ public class MdmResourceMatcherSvc {
 		}
 		myFieldMatchers.clear();
 		for (MdmFieldMatchJson matchFieldJson : myMdmRulesJson.getMatchFields()) {
-			myFieldMatchers.add(
-					new MdmResourceFieldMatcher(myFhirContext, myMatcherFactory, matchFieldJson, myMdmRulesJson));
+			myFieldMatchers.add(new MdmResourceFieldMatcher(
+					myFhirContext, myMatcherFactory, mySimilarityFactory, matchFieldJson, myMdmRulesJson));
 		}
 	}
 

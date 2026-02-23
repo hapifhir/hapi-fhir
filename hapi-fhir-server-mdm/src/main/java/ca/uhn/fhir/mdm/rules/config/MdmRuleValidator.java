@@ -29,13 +29,17 @@ import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmFilterSearchParamJson;
+import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.mdm.rules.json.MdmSimilarityJson;
+import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
+import ca.uhn.fhir.mdm.rules.similarity.ISimilarityFactory;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.SearchParameterUtil;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,9 +61,15 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	private final ISearchParamRegistry mySearchParamRetriever;
 	private final FhirTerser myTerser;
 	private final IFhirPath myFhirPath;
+	private final IMatcherFactory myMatcherFactory;
+	private final ISimilarityFactory mySimilarityFactory;
 
 	@Autowired
-	public MdmRuleValidator(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
+	public MdmRuleValidator(
+			FhirContext theFhirContext,
+			ISearchParamRegistry theSearchParamRetriever,
+			@Nullable IMatcherFactory theMatcherFactory,
+			@Nullable ISimilarityFactory theSimilarityFactory) {
 		myFhirContext = theFhirContext;
 		myTerser = myFhirContext.newTerser();
 		if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
@@ -69,6 +79,8 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 			myFhirPath = null;
 		}
 		mySearchParamRetriever = theSearchParamRetriever;
+		myMatcherFactory = theMatcherFactory;
+		mySimilarityFactory = theSimilarityFactory;
 	}
 
 	@Override
@@ -189,7 +201,27 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 				throw new ConfigurationException(Msg.code(1513) + "MatchField " + fieldMatch.getName()
 						+ " has neither a similarity nor a matcher.  At least one must be present.");
 			}
+			validateAlgorithmNames(fieldMatch);
 			validatePath(theMdmRulesJson.getMdmTypes(), fieldMatch);
+		}
+	}
+
+	private void validateAlgorithmNames(MdmFieldMatchJson theFieldMatch) {
+		MdmMatcherJson matcher = theFieldMatch.getMatcher();
+		if (matcher != null && myMatcherFactory != null) {
+			String algorithmName = matcher.getAlgorithm();
+			if (algorithmName != null && myMatcherFactory.getFieldMatcherForName(algorithmName) == null) {
+				throw new ConfigurationException(Msg.code(2846) + "MatchField " + theFieldMatch.getName()
+						+ " uses unknown matcher algorithm '" + algorithmName + "'");
+			}
+		}
+		MdmSimilarityJson similarity = theFieldMatch.getSimilarity();
+		if (similarity != null && mySimilarityFactory != null) {
+			String algorithmName = similarity.getAlgorithm();
+			if (algorithmName != null && mySimilarityFactory.getSimilarityForName(algorithmName) == null) {
+				throw new ConfigurationException(Msg.code(2847) + "MatchField " + theFieldMatch.getName()
+						+ " uses unknown similarity algorithm '" + algorithmName + "'");
+			}
 		}
 	}
 
