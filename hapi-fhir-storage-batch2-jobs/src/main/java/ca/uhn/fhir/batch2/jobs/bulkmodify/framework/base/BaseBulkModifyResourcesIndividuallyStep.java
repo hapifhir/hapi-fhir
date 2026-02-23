@@ -39,8 +39,6 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import com.google.common.hash.Hasher;
-import com.google.common.hash.Hashing;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
@@ -50,8 +48,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.Collection;
 import java.util.List;
 
@@ -176,7 +172,7 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 			String resourceId = resource.getIdElement().getIdPart();
 			String resourceVersion = resource.getIdElement().getVersionIdPart();
 
-			try (HashingWriter preModificationHash = hashResource(resource)) {
+			try (ca.uhn.fhir.util.HashingWriter preModificationHash = hashResource(resource)) {
 
 				ResourceModificationRequest modificationRequest = new ResourceModificationRequest(resource);
 				ResourceModificationResponse modificationResponse =
@@ -197,7 +193,7 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 					continue;
 				}
 
-				HashingWriter postModificationHash = hashResource(updatedResource);
+				ca.uhn.fhir.util.HashingWriter postModificationHash = hashResource(updatedResource);
 				if (preModificationHash.matches(postModificationHash)) {
 					theState.moveToState(pid, StateEnum.UNCHANGED);
 					continue;
@@ -226,9 +222,9 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	}
 
 	@Nonnull
-	private HashingWriter hashResource(IBaseResource resource) {
-		try (HashingWriter preModificationHash = new HashingWriter()) {
-			preModificationHash.append(resource);
+	private ca.uhn.fhir.util.HashingWriter hashResource(IBaseResource resource) {
+		try (ca.uhn.fhir.util.HashingWriter preModificationHash = new ca.uhn.fhir.util.HashingWriter()) {
+			preModificationHash.append(myFhirContext, resource);
 			return preModificationHash;
 		}
 	}
@@ -333,40 +329,4 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	 */
 	protected abstract ResourceModificationResponse modifyResource(
 			PT theJobParameters, C theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest);
-
-	@SuppressWarnings("UnstableApiUsage")
-	private class HashingWriter extends Writer {
-
-		private final Hasher myHasher = Hashing.goodFastHash(128).newHasher();
-
-		@Override
-		public void write(@Nonnull char[] cbuf, final int off, final int len) {
-			for (int i = off; i < off + len; i++) {
-				myHasher.putChar(cbuf[i]);
-			}
-		}
-
-		@Override
-		public void flush() {
-			// nothing
-		}
-
-		@Override
-		public void close() {
-			// nothing
-		}
-
-		public void append(IBaseResource theResource) {
-			try {
-				myFhirContext.newJsonParser().setPrettyPrint(false).encodeResourceToWriter(theResource, this);
-			} catch (IOException e) {
-				// This shouldn't happen since we don't do any IO in this writer
-				throw new JobExecutionFailedException(Msg.code(2785) + "Failed to calculate resource hash", e);
-			}
-		}
-
-		public boolean matches(HashingWriter thePostModificationHash) {
-			return myHasher.hash().equals(thePostModificationHash.myHasher.hash());
-		}
-	}
 }

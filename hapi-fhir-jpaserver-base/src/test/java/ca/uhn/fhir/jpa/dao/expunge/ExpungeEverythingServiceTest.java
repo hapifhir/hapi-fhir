@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -10,18 +11,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.io.Closeable;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-// Created by claude-opus-4-5
+// Created by claude-opus-4-6
 @ExtendWith(MockitoExtension.class)
 class ExpungeEverythingServiceTest {
 
@@ -31,103 +31,72 @@ class ExpungeEverythingServiceTest {
 	@Mock
 	private HapiTransactionService myTxService;
 
-	@Test
-	void testExpungeBatch2Entities_retriesOnResourceVersionConflict() throws Exception {
-		// Setup: first call throws ResourceVersionConflictException, second call returns 5, third returns 0
-		AtomicInteger callCount = new AtomicInteger(0);
-		IHapiTransactionService.IExecutionBuilder mockBuilder = mock(IHapiTransactionService.IExecutionBuilder.class);
+	@Mock
+	private IJobMaintenanceService myJobMaintenanceService;
 
+	@Test
+	void testExpungeBatch2_acquiresAndReleasesMaintenanceHold() throws Exception {
+		// Setup
+		Closeable mockHold = mock(Closeable.class);
+		when(myJobMaintenanceService.holdMaintenanceForExpunge()).thenReturn(mockHold);
+
+		IHapiTransactionService.IExecutionBuilder mockBuilder = mock(IHapiTransactionService.IExecutionBuilder.class);
 		when(myTxService.withRequest(any())).thenReturn(mockBuilder);
 		when(mockBuilder.withPropagation(any())).thenReturn(mockBuilder);
 		when(mockBuilder.withRequestPartitionId(any())).thenReturn(mockBuilder);
-		when(mockBuilder.execute(any(Callable.class))).thenAnswer(invocation -> {
-			int call = callCount.incrementAndGet();
-			if (call == 1) {
-				throw new ResourceVersionConflictException("FK constraint violation");
-			} else if (call == 2) {
-				return 5;
-			} else {
-				return 0;
-			}
-		});
+		when(mockBuilder.execute(any(Callable.class))).thenReturn(5).thenReturn(0);
 
 		// Execute
-		int result = invokeExpungeBatch2EntitiesInSingleTransaction(null, RequestPartitionId.allPartitions());
+		int result = myExpungeEverythingService.expungeBatch2Entities(null, RequestPartitionId.allPartitions());
 
-		// Verify: retried once, then succeeded with 5 entities deleted
-		assertThat(callCount.get()).isEqualTo(3);
+		// Verify hold was acquired and released
+		verify(myJobMaintenanceService).holdMaintenanceForExpunge();
+		verify(mockHold).close();
 		assertThat(result).isEqualTo(5);
 	}
 
 	@Test
-	void testExpungeBatch2Entities_rethrowsAfterMaxRetries() {
-		// Setup: always throw ResourceVersionConflictException
-		IHapiTransactionService.IExecutionBuilder mockBuilder = mock(IHapiTransactionService.IExecutionBuilder.class);
+	void testExpungeBatch2_retriesOnFkViolationThenSucceeds() throws Exception {
+		// Setup: first call throws FK violation, second call succeeds, third returns 0
+		Closeable mockHold = mock(Closeable.class);
+		when(myJobMaintenanceService.holdMaintenanceForExpunge()).thenReturn(mockHold);
 
+		IHapiTransactionService.IExecutionBuilder mockBuilder = mock(IHapiTransactionService.IExecutionBuilder.class);
 		when(myTxService.withRequest(any())).thenReturn(mockBuilder);
 		when(mockBuilder.withPropagation(any())).thenReturn(mockBuilder);
 		when(mockBuilder.withRequestPartitionId(any())).thenReturn(mockBuilder);
 		when(mockBuilder.execute(any(Callable.class)))
-				.thenThrow(new ResourceVersionConflictException("FK constraint violation"));
+				.thenThrow(new ResourceVersionConflictException("FK violation"))
+				.thenReturn(5)
+				.thenReturn(0);
 
-		// Execute & Verify: should rethrow after 11 attempts (1 initial + 10 retries)
-		assertThatThrownBy(() -> invokeExpungeBatch2EntitiesInSingleTransaction(null, RequestPartitionId.allPartitions()))
-				.isInstanceOf(ResourceVersionConflictException.class)
-				.hasMessageContaining("FK constraint violation");
+		// Execute
+		int result = myExpungeEverythingService.expungeBatch2Entities(null, RequestPartitionId.allPartitions());
+
+		// Verify: retried after FK violation, then succeeded
+		assertThat(result).isEqualTo(5);
+		verify(mockHold).close();
 	}
 
 	@Test
-	void testExpungeBatch2Entities_resetsRetryCounterOnSuccess() throws Exception {
-		// Setup: fail once, succeed twice (returning 3 then 0), fail once, succeed twice (returning 2 then 0)
-		AtomicInteger callCount = new AtomicInteger(0);
-		IHapiTransactionService.IExecutionBuilder mockBuilder = mock(IHapiTransactionService.IExecutionBuilder.class);
+	void testExpungeBatch2_throwsAfterMaxRetries() throws Exception {
+		// Setup: always throw FK violation
+		Closeable mockHold = mock(Closeable.class);
+		when(myJobMaintenanceService.holdMaintenanceForExpunge()).thenReturn(mockHold);
 
+		IHapiTransactionService.IExecutionBuilder mockBuilder = mock(IHapiTransactionService.IExecutionBuilder.class);
 		when(myTxService.withRequest(any())).thenReturn(mockBuilder);
 		when(mockBuilder.withPropagation(any())).thenReturn(mockBuilder);
 		when(mockBuilder.withRequestPartitionId(any())).thenReturn(mockBuilder);
-		when(mockBuilder.execute(any(Callable.class))).thenAnswer(invocation -> {
-			int call = callCount.incrementAndGet();
-			switch (call) {
-				case 1:
-					throw new ResourceVersionConflictException("conflict 1");
-				case 2:
-					return 3;
-				case 3:
-					throw new ResourceVersionConflictException("conflict 2");
-				case 4:
-					return 2;
-				case 5:
-					return 0;
-				default:
-					return 0;
-			}
-		});
+		when(mockBuilder.execute(any(Callable.class)))
+				.thenThrow(new ResourceVersionConflictException("FK violation"));
 
-		// Execute
-		int result = invokeExpungeBatch2EntitiesInSingleTransaction(null, RequestPartitionId.allPartitions());
+		// Execute & Verify: throws after exhausting retries
+		assertThatThrownBy(
+						() -> myExpungeEverythingService.expungeBatch2Entities(null, RequestPartitionId.allPartitions()))
+				.isInstanceOf(ResourceVersionConflictException.class);
 
-		// Verify: total of 5 calls, 5 entities deleted (3 + 2)
-		assertThat(callCount.get()).isEqualTo(5);
-		assertThat(result).isEqualTo(5);
-	}
-
-	@SuppressWarnings("unchecked")
-	private int invokeExpungeBatch2EntitiesInSingleTransaction(
-			@SuppressWarnings("SameParameterValue") Object theRequest,
-			RequestPartitionId theRequestPartitionId) throws Exception {
-
-		Method method = ExpungeEverythingService.class.getDeclaredMethod(
-				"expungeBatch2EntitiesInSingleTransaction",
-				ca.uhn.fhir.rest.api.server.RequestDetails.class,
-				RequestPartitionId.class);
-		method.setAccessible(true);
-		try {
-			return (int) method.invoke(myExpungeEverythingService, theRequest, theRequestPartitionId);
-		} catch (InvocationTargetException e) {
-			if (e.getCause() instanceof RuntimeException) {
-				throw (RuntimeException) e.getCause();
-			}
-			throw e;
-		}
+		// Hold is still released even on exception
+		verify(mockHold).close();
 	}
 }

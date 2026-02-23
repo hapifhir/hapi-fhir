@@ -41,6 +41,7 @@ import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.storage.interceptor.MemoryBasedDuplicateBlockingInterceptor;
 import ca.uhn.fhirtest.config.SqlCaptureInterceptor;
 import ca.uhn.fhirtest.config.TestAuditConfig;
 import ca.uhn.fhirtest.config.TestDstu2Config;
@@ -291,6 +292,11 @@ public class TestRestfulServer extends RestfulServer {
 		 * Enable version conversion
 		 */
 		registerInterceptor(new VersionedApiConverterInterceptor());
+
+		/*
+		 * Block duplicate resources
+		 */
+		registerInterceptor(new MemoryBasedDuplicateBlockingInterceptor(getFhirContext()));
 
 		/*
 		 * We want to format the response using nice HTML if it's a browser, since this

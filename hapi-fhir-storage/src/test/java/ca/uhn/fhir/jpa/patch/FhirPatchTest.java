@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.EpisodeOfCare;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
@@ -711,6 +712,162 @@ public class FhirPatchTest implements ITestDataBuilder {
 		// Verify
 		assertThat(input.getDeceased()).isInstanceOf(BooleanType.class);
 		assertThat(((BooleanType) input.getDeceased()).getValue()).isTrue();
+	}
+
+	/**
+	 * Reproduces GitHub issue #7578: JSON Patch "add" operation fails with HAPI-1272
+	 * when adding a member to a Group resource that has no existing members.
+	 * The "member" field is absent from the serialized JSON when the Group has no members.
+	 * JSON Patch should still be able to add a member at /member/0.
+	 *
+	 * @author Claude Opus 4.6
+	 */
+	@Test
+	void testJsonPatch_AddMemberToEmptyGroup() {
+		// Setup: Group with no members
+		Group group = new Group();
+		group.setId("Group/test-group");
+		group.setType(Group.GroupType.PERSON);
+		group.setActual(true);
+		group.setActive(true);
+
+		// JSON Patch: add a member at /member/0
+		@Language("JSON")
+		String patchBody = """
+			[{
+				"op": "add",
+				"path": "/member/0",
+				"value": {
+					"entity": { "reference": "Patient/123" },
+					"period": { "start": "2025-01-01" },
+					"inactive": false
+				}
+			}]
+			""";
+
+		// Test: adding a member to an empty group should succeed
+		Group result = JsonPatchUtils.apply(myFhirContext, group, patchBody);
+
+		// Verify: the group should now have one member
+		assertThat(result.getMember()).hasSize(1);
+		assertThat(result.getMember().get(0).getEntity().getReference()).isEqualTo("Patient/123");
+		assertThat(result.getMember().get(0).getPeriod().getStartElement().getValueAsString()).isEqualTo("2025-01-01");
+		assertThat(result.getMember().get(0).getInactive()).isFalse();
+	}
+
+	/**
+	 * Verifies that JSON Patch "add" with the append path ({@code /-}) works on an empty
+	 * repeating element, complementing {@link #testJsonPatch_AddMemberToEmptyGroup()}.
+	 *
+	 * @author Claude Opus 4.6
+	 */
+	@Test
+	void testJsonPatch_AddMemberToEmptyGroup_AppendPath() {
+		// Setup: Group with no members
+		Group group = new Group();
+		group.setId("Group/test-group");
+		group.setType(Group.GroupType.PERSON);
+		group.setActual(true);
+
+		// JSON Patch: add a member using "-" (append to end) path
+		@Language("JSON")
+		String patchBody = """
+			[{
+				"op": "add",
+				"path": "/member/-",
+				"value": {
+					"entity": { "reference": "Patient/456" },
+					"inactive": false
+				}
+			}]
+			""";
+
+		// Test: adding via append path on empty array should succeed
+		Group result = JsonPatchUtils.apply(myFhirContext, group, patchBody);
+
+		// Verify
+		assertThat(result.getMember()).hasSize(1);
+		assertThat(result.getMember().get(0).getEntity().getReference()).isEqualTo("Patient/456");
+	}
+
+	/**
+	 * Verifies that JSON Patch "replace" on an empty repeating element still fails with HAPI-1272,
+	 * since only "add" operations trigger parent array pre-population. Per RFC 6902, "replace"
+	 * requires the target to already exist.
+	 *
+	 * @author Claude Opus 4.6
+	 */
+	@Test
+	void testJsonPatch_ReplaceMemberOnEmptyGroup_Fails() {
+		// Setup: Group with no members
+		Group group = new Group();
+		group.setId("Group/test-group");
+		group.setType(Group.GroupType.PERSON);
+		group.setActual(true);
+
+		// JSON Patch: replace a member at /member/0 — but there are no members
+		@Language("JSON")
+		String patchBody = """
+			[{
+				"op": "replace",
+				"path": "/member/0",
+				"value": {
+					"entity": { "reference": "Patient/123" },
+					"inactive": false
+				}
+			}]
+			""";
+
+		// Test: replace on a missing parent should still fail
+		assertThatThrownBy(() -> JsonPatchUtils.apply(myFhirContext, group, patchBody))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("HAPI-1272");
+	}
+
+	/**
+	 * Verifies that two "add" operations in a single JSON Patch can add two members
+	 * to a Group that has no existing members.
+	 *
+	 * @author Claude Opus 4.6
+	 */
+	@Test
+	void testJsonPatch_AddTwoMembersToEmptyGroup() {
+		// Setup: Group with no members
+		Group group = new Group();
+		group.setId("Group/test-group");
+		group.setType(Group.GroupType.PERSON);
+		group.setActual(true);
+
+		// JSON Patch: add two members in a single patch
+		@Language("JSON")
+		String patchBody = """
+			[{
+				"op": "add",
+				"path": "/member/0",
+				"value": {
+					"entity": { "reference": "Patient/123" },
+					"inactive": false
+				}
+			},
+			{
+				"op": "add",
+				"path": "/member/1",
+				"value": {
+					"entity": { "reference": "Patient/456" },
+					"inactive": true
+				}
+			}]
+			""";
+
+		// Test: both members should be added
+		Group result = JsonPatchUtils.apply(myFhirContext, group, patchBody);
+
+		// Verify
+		assertThat(result.getMember()).hasSize(2);
+		assertThat(result.getMember().get(0).getEntity().getReference()).isEqualTo("Patient/123");
+		assertThat(result.getMember().get(0).getInactive()).isFalse();
+		assertThat(result.getMember().get(1).getEntity().getReference()).isEqualTo("Patient/456");
+		assertThat(result.getMember().get(1).getInactive()).isTrue();
 	}
 
 	/**

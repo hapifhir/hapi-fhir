@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 7571
+jira: SMILE-11340
+title: "Previously, when the `Populate Response Coding Displays` property was enabled on the FHIR endpoint, requests 
+to retrieve a Consent resource would fail if the Consent contained a CodeSystem concept with a BOOLEAN-typed property. 
+This issue has now been fixed."
