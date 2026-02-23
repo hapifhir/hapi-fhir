@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.packages;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -17,6 +18,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
@@ -61,6 +63,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -231,6 +234,40 @@ public class PackageInstallerSvcImplTest {
 
 
 	@Test
+	public void testCreateRequestDetailsUsesDefaultPartition() {
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setDefaultPartitionId(42);
+
+		RequestDetails requestDetails = mySvc.createRequestDetails();
+		assertTrue(requestDetails instanceof SystemRequestDetails);
+		SystemRequestDetails systemRequestDetails = (SystemRequestDetails) requestDetails;
+
+		assertEquals(RequestPartitionId.fromPartitionId(42), systemRequestDetails.getRequestPartitionId());
+	}
+
+	@Test
+	public void testInstallPackageUsesDefaultPartition() throws IOException {
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setDefaultPartitionId(7);
+
+		CodeSystem newCodeSystem = new CodeSystem();
+		newCodeSystem.setId("CodeSystem/newcs");
+		newCodeSystem.setUrl("http://partitioned-code-system");
+		newCodeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+
+		PackageInstallationSpec spec = setupResourceInPackage(null, newCodeSystem, myCodeSystemDao);
+
+		mySvc.install(spec);
+
+		verify(myCodeSystemDao).create(any(CodeSystem.class), myRequestDetailsCaptor.capture());
+		RequestDetails requestDetails = myRequestDetailsCaptor.getValue();
+
+		assertTrue(requestDetails instanceof SystemRequestDetails);
+		SystemRequestDetails systemRequestDetails = (SystemRequestDetails) requestDetails;
+		assertEquals(RequestPartitionId.fromPartitionId(7), systemRequestDetails.getRequestPartitionId());
+	}
+
+	@Test
 	public void testDontTryToInstallDuplicateCodeSystem_CodeSystemAlreadyExistsWithDifferentId() throws IOException {
 		// Setup
 
@@ -255,7 +292,7 @@ public class PackageInstallerSvcImplTest {
 		// Verify
 		verify(myCodeSystemDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertEquals("?url=http%3A//my-code-system", map.toNormalizedQueryString(myCtx));
+		assertThat(map.toNormalizedQueryString(myCtx)).startsWith("?url=http%3A//my-code-system");
 
 		verify(myCodeSystemDao, times(1)).update(myCodeSystemCaptor.capture(), any(RequestDetails.class));
 		CodeSystem codeSystem = myCodeSystemCaptor.getValue();
@@ -263,23 +300,24 @@ public class PackageInstallerSvcImplTest {
 	}
 
 	public enum InstallType {
-		CREATE, UPDATE_WITH_EXISTING, UPDATE, UPDATE_OVERRIDE
+		CREATE, SPLIT_AND_CREATE, UPDATE, UPDATE_OVERRIDE
 	}
 
 	public static List<Object[]> parameters() {
 		return List.of(
 			new Object[]{null, null, null, List.of("Patient"), InstallType.CREATE},
 			new Object[]{null, null, "us-core-patient-given", List.of("Patient"), InstallType.UPDATE},
-			new Object[]{"individual-given",  List.of("Patient", "Practitioner"), "us-core-patient-given", List.of("Patient"), InstallType.UPDATE_WITH_EXISTING},
-			new Object[]{"patient-given",  List.of("Patient"), "us-core-patient-given", List.of("Patient"), InstallType.UPDATE_OVERRIDE}
+			new Object[]{"individual-given", List.of("Patient", "Practitioner"), "us-core-patient-given", List.of("Patient"), InstallType.SPLIT_AND_CREATE},
+			new Object[]{"patient-given", List.of("Patient"), "us-core-patient-given", List.of("Patient"), InstallType.UPDATE_OVERRIDE},
+			new Object[]{"individual-given", List.of("Patient", "Practitioner"), null, List.of("Patient"), InstallType.SPLIT_AND_CREATE}
 		);
 	}
 
 	@ParameterizedTest
 	@MethodSource("parameters")
-	public void testCreateOrUpdate_withSearchParameter(String theExistingId, Collection<String> theExistingBase,
+	void testCreateOrUpdate_withSearchParameter(String theExistingId, Collection<String> theExistingBase,
 													   String theInstallId, Collection<String> theInstallBase,
-													   InstallType theInstallType) throws IOException {
+													   InstallType theExpectedInstallType) throws IOException {
 		// Setup
 		SearchParameter existingSP = null;
 		if (theExistingId != null) {
@@ -292,16 +330,23 @@ public class PackageInstallerSvcImplTest {
 		mySvc.install(spec);
 
 		// Verify
-		if (theInstallType == InstallType.CREATE) {
+		if (theExpectedInstallType == InstallType.CREATE) {
 			verify(mySearchParameterDao, times(1)).create(mySearchParameterCaptor.capture(), myRequestDetailsCaptor.capture());
-		} else if (theInstallType == InstallType.UPDATE_WITH_EXISTING){
-			verify(mySearchParameterDao, times(2)).update(mySearchParameterCaptor.capture(), myRequestDetailsCaptor.capture());
+		} else if (theExpectedInstallType == InstallType.SPLIT_AND_CREATE) {
+			if (theInstallId == null) {
+				// 1 update for existing SP (base narrowing), 1 create for incoming SP (no ID)
+				verify(mySearchParameterDao, times(1)).update(mySearchParameterCaptor.capture(), myRequestDetailsCaptor.capture());
+				verify(mySearchParameterDao, times(1)).create(mySearchParameterCaptor.capture(), myRequestDetailsCaptor.capture());
+			} else {
+				// 2 updates: 1 for existing SP (base narrowing), 1 for incoming SP (has ID)
+				verify(mySearchParameterDao, times(2)).update(mySearchParameterCaptor.capture(), myRequestDetailsCaptor.capture());
+			}
 		} else {
 			verify(mySearchParameterDao, times(1)).update(mySearchParameterCaptor.capture(), myRequestDetailsCaptor.capture());
 		}
 
 		Iterator<SearchParameter> iteratorSP = mySearchParameterCaptor.getAllValues().iterator();
-		if (theInstallType == InstallType.UPDATE_WITH_EXISTING) {
+		if (theExpectedInstallType == InstallType.SPLIT_AND_CREATE) {
 			SearchParameter capturedSP = iteratorSP.next();
 			assertEquals(theExistingId, capturedSP.getIdPart());
 			List<String> expectedBase = new ArrayList<>(theExistingBase);
@@ -309,7 +354,7 @@ public class PackageInstallerSvcImplTest {
 			assertEquals(expectedBase, capturedSP.getBase().stream().map(CodeType::getCode).toList());
 		}
 		SearchParameter capturedSP = iteratorSP.next();
-		if (theInstallType == InstallType.UPDATE_OVERRIDE) {
+		if (theExpectedInstallType == InstallType.UPDATE_OVERRIDE) {
 			assertEquals(theExistingId, capturedSP.getIdPart());
 		} else {
 			assertEquals(theInstallId, capturedSP.getIdPart());

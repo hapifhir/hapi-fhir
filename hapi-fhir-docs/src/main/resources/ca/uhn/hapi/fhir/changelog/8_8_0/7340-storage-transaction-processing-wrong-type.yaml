@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 7340
+title: "The JPA FHIR transaction processor had a bug when processing the
+   `STORAGE_TRANSACTION_PROCESSING` interceptor pointcut, preventing
+   hook methods from supplying parameter values of type ServletRequestDetails.
+   Thanks to Elliott Lavy for the contribution!"

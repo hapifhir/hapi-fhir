@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -246,6 +246,7 @@ public class HapiMigrator {
 
 	public void addTasks(Iterable<BaseTask> theMigrationTasks) {
 		if (HapiSystemProperties.isUnitTestModeEnabled()) {
+			ourLog.info("Skipping tasks because unit test mode is enabled");
 			// Tests only need to initialize the schemas. No need to run all the migrations for every test.
 			for (BaseTask task : theMigrationTasks) {
 				if (task instanceof InitializeSchemaTask) {

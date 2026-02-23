@@ -30,8 +30,8 @@ This interceptor will then produce output similar to the following:
 
 If the JPA server has [partitioning](/docs/server_jpa_partitioning/partitioning.html) enabled, the RequestTenantPartitionInterceptor can be used in combination with a [Tenant Identification Strategy](/docs/server_plain/multitenancy.html) in order to achieve a multitenant solution. See [JPA Server Partitioning](/docs/server_jpa_partitioning/partitioning.html) for more information on partitioning.
 
-* [RequestTenantPartitionInterceptor JavaDoc](/apidocs/hapi-fhir-jpaserver-searchparam/ca/uhn/fhir/rest/server/interceptor/partition/RequestTenantPartitionInterceptor.html)
-* [RequestTenantPartitionInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-searchparam/src/main/java/ca/uhn/fhir/rest/server/interceptor/partition/RequestTenantPartitionInterceptor.java)
+* [RequestTenantPartitionInterceptor JavaDoc](/apidocs/hapi-fhir-jpaserver-base/ca/uhn/fhir/rest/server/interceptor/partition/RequestTenantPartitionInterceptor.html)
+* [RequestTenantPartitionInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/rest/server/interceptor/partition/RequestTenantPartitionInterceptor.java)
 
 
 # Response Customizing: Syntax Highlighting

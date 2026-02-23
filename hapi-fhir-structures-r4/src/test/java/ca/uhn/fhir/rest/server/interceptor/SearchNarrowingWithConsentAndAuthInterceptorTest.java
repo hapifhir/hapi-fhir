@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.server.interceptor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -487,7 +488,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 		}
 
 
-		@Operation(name = "$everything")
+		@Operation(name = "$everything", bundleType = BundleTypeEnum.SEARCHSET)
 		public IBundleProvider everything(RequestDetails theRequestDetails, @IdParam IdType theId) {
 			assertNotNull(myNextPatientResponse);
 			myNextPatientResponse = ServerInterceptorUtil.fireStoragePreshowResource(myNextPatientResponse, theRequestDetails, myServer.getRestfulServer().getInterceptorService());

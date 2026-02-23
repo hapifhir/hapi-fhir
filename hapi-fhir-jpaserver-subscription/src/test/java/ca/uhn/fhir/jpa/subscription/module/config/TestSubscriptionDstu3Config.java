@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
@@ -45,6 +47,11 @@ public class TestSubscriptionDstu3Config {
 	@Bean
 	public ISchedulerService schedulerService() {
 		return mock(ISchedulerService.class);
+	}
+
+	@Bean
+	public IIdHelperService<JpaPid> idHelperService() {
+		return mock(IIdHelperService.class);
 	}
 
 	@Bean

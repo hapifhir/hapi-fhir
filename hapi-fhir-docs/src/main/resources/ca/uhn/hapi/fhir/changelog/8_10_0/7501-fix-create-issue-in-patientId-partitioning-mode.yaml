@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7501
+title: "Previously, re-creating a deleted resource with the same id would raise an exception when the system operates in PatientID 
+partitioning mode.  This issue has been fixed."

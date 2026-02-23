@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7457
+title: "A method on `IResourceChangeListenerRegistry` now requires a partition
+   ID to be supplied with new listeners being registered. This previous method
+   was removed, but has been restored and deprecated."

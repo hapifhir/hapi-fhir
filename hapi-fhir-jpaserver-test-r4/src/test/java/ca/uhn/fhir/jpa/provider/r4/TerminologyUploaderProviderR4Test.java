@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ClasspathUtil;
@@ -29,6 +30,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
@@ -56,6 +58,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -313,6 +316,88 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				String failureMessage = String.format("Concept %s did not contain property with key %s and value %s ", code.getCode(), "property1", "property1Value");
 				fail(failureMessage);
 			}
+		});
+	}
+
+	@Test
+	public void testApplyDeltaAdd_sameKeyWithDifferentValuePropertiesShouldBeSaved() throws IOException {
+		String inputParamJson = loadResource("/custom_term/codeSystem-duplicatePropertyKeys.json");
+		Parameters inputParameters = myFhirContext.newJsonParser().parseResource(Parameters.class, inputParamJson);
+
+		LoggingInterceptor interceptor = new LoggingInterceptor(true);
+		myClient.registerInterceptor(interceptor);
+		Parameters outcome = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+			.withParameters(inputParameters)
+			.prettyPrint()
+			.execute();
+		myClient.unregisterInterceptor(interceptor);
+
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		ourLog.info(encoded);
+		assertThat(encoded).containsSubsequence(
+			"\"name\": \"conceptCount\"",
+			"\"valueInteger\": 1",
+			"\"name\": \"target\"",
+			"\"reference\": \"CodeSystem/"
+		);
+		runInTransaction(() -> {
+			TermCodeSystem cs = myTermCodeSystemDao.findByCodeSystemUri("http://www.nlm.nih.gov/research/umls/rxnorm_resource");
+			TermCodeSystemVersion version = cs.getCurrentVersion();
+			Optional<TermConcept> optional = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "748856");
+			assertThat(optional).isPresent();
+
+			TermConcept concept = optional.get();
+			Collection<TermConceptProperty> properties = concept.getProperties();
+
+			assertThat(properties).hasSize(3);
+
+			// Check that two properties were saved with key "STY" having different values
+			List<String> valuesForSTY = properties.stream()
+				.filter(p -> "STY".equalsIgnoreCase(p.getKey()))
+				.map(TermConceptProperty::getValue)
+				.toList();
+			assertThat(valuesForSTY).hasSize(2);
+			assertThat(valuesForSTY).containsExactlyInAnyOrder("STN:A1.3.1.1", "STY:Drug Delivery Device");
+		});
+	}
+
+	@Test
+	public void testApplyDeltaAdd_noDuplicateConceptPropertySaved() throws IOException {
+		String inputParamJson = loadResource("/custom_term/codeSystem-duplicateConceptProperties.json");
+		Parameters inputParameters = myFhirContext.newJsonParser().parseResource(Parameters.class, inputParamJson);
+
+		LoggingInterceptor interceptor = new LoggingInterceptor(true);
+		myClient.registerInterceptor(interceptor);
+		myClient.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+			.withParameters(inputParameters)
+			.prettyPrint()
+			.execute();
+		myClient.unregisterInterceptor(interceptor);
+
+		runInTransaction(() -> {
+			TermCodeSystem cs = myTermCodeSystemDao.findByCodeSystemUri("http://www.nlm.nih.gov/research/umls/rxnorm_resource");
+			TermCodeSystemVersion version = cs.getCurrentVersion();
+			Optional<TermConcept> optional = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "748856");
+			assertThat(optional).isPresent();
+
+			TermConcept concept = optional.get();
+			Collection<TermConceptProperty> properties = concept.getProperties();
+
+			properties.forEach(prop -> ourLog.info("Property: {} = {}", prop.getKey(), prop.getValue()));
+			assertThat(properties).hasSize(2);
+
+			// Check that a property with key "STY" and value "XYZ" was only saved once
+			List<String> valuesForSTY = properties.stream()
+				.filter(p -> "STY".equalsIgnoreCase(p.getKey()))
+				.map(TermConceptProperty::getValue)
+				.toList();
+			assertThat(valuesForSTY).hasSize(1);
+			assertThat(valuesForSTY).containsExactlyInAnyOrder("XYZ");
 		});
 	}
 
@@ -753,6 +838,41 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		);
 	}
 
+	@Test
+	public void testUploadExternalCodeSystemAsZip_tempConceptPropertyIsLinkedToTermConcept() {
+
+		// Insert external code system as zip
+		createCodeSystemFromZipFile(myClient);
+
+		// Execute a "$lookup" operation on one of the codes created in the code system created above
+		String myLookupParametersJson = """
+              {
+                "resourceType" : "Parameters",
+                "parameter": [
+                  {
+                    "name": "system",
+                    "valueUri": "http://www.nlm.nih.gov/research/umls/rxnorm"
+                  },
+                  {
+                    "name": "code",
+                    "valueCode": "748856"
+                  }
+                ]
+              }
+              """;
+		Parameters inputParameters = myFhirContext.newJsonParser().parseResource(Parameters.class, myLookupParametersJson);
+		Parameters response;
+		response = myClient
+			.operation()
+			.onType(myFhirContext.getResourceDefinition("CodeSystem").getImplementingClass())
+			.named("$lookup")
+			.withParameters(inputParameters)
+			.returnResourceType(Parameters.class).execute();
+
+		// verify that property is returned (therefore retrieved by the internal join)
+		assertTrue(response.hasParameter("property"));
+	}
+
 
 	private Attachment createCsvAttachment(String theData, String theUrl) {
 		return new Attachment()
@@ -827,5 +947,39 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 
 		return bos.toByteArray();
+	}
+
+	private void createCodeSystemFromZipFile(IGenericClient theFhirClient){
+		// Create a parameters resource for the $upload-external-code-system operation.
+		// The data section in the attachment is a base64 zip file containing two files, "properties.csv" and "concepts.csv".
+		// The concepts.csv contains two code values. The properties.csv contains two properties each for each code in the concepts.csv.
+		String myInputParametersJson = """
+              {
+                "resourceType" : "Parameters",
+                "parameter": [
+                  {
+                    "name": "system",
+                    "valueUri": "http://www.nlm.nih.gov/research/umls/rxnorm"
+                  },
+                  {
+                    "name": "file",
+                    "valueAttachment": {
+                      "contentType": "application/zip",
+                      "language": "en-US",
+                      "url": "file:rx_norm_simplified.zip",
+                      "data": "UEsDBBQAAAAAADN8HFsAAAAAAAAAAAAAAAATACAAcnhfbm9ybV9zaW1wbGlmaWVkL3V4CwABBPUBAAAEFAAAAFVUDQAHEq+waBKvsGgSr7BoUEsDBBQACAAIADN8HFsAAAAAAAAAAAAAAAAhACAAcnhfbm9ybV9zaW1wbGlmaWVkL3Byb3BlcnRpZXMuY3N2dXgLAAEE9QEAAAQUAAAAVVQNAAcSr7BoFK+waBKvsGhz9ndx1fF2jdQJc/QJddUJiQxw5TI3sbAwNtIJDonUCQn1tAoxMjDWCS4pysxLh0mFAKXcA5y9kYVNzXDqAEqBdDgh6QAAUEsHCJ/XFg9GAAAAeAAAAFBLAwQUAAgACAAVfBxbAAAAAAAAAAAAAAAAHwAgAHJ4X25vcm1fc2ltcGxpZmllZC9jb25jZXB0cy5jc3Z1eAsAAQT1AQAABBQAAABVVA0AB9uusGjdrrBo266waJWQTQuCQBRF9/6KtzSQ0nH82EZGBIVCbSRaTPmwoWEmxiEw6b+X0q5x4fpezj3cVZ6tvWx7KHbL0klomobE62Jw0dy4bAVgYzSruBLgz/0Q9htYgMCnkkrXfYZDEPVBrpmAI7sINLNvK/AnUgJiw0QjFDrmktgoCbhcojbAZa2x4ihNA8Ff8Q0Fu96HH6LY6wgFt9KqeXCNUkmEn7pViFhm6ZRZOJXsBSSFjLVn5wNQSwcIZXHlH68AAACZAQAAUEsDBBQACAAIABV8HFsAAAAAAAAAAAAAAAAqACAAX19NQUNPU1gvcnhfbm9ybV9zaW1wbGlmaWVkLy5fY29uY2VwdHMuY3N2dXgLAAEE9QEAAAQUAAAAVVQNAAfbrrBo3a6waImvsGhjYBVjZ2BiYPBNTFbwD1aIUIACkBgDJxAbAfE2IAbxXzAQBRxDQoKgTJCOA0CsgaaECSouwMAglZyfq5dYUJCTqpeTWFxSWpyakpJYkqocEAxVewGIJRgYRBHqCksTixLzSjLzUhkmrd2QAVLU8zJAG0QX6hsYWBham1mYmaUZJltYO2cU5eemWjMAAFBLBwh3Nm0XjAAAAOgAAABQSwECFAMUAAAAAAAzfBxbAAAAAAAAAAAAAAAAEwAYAAAAAAAAAAAA7UEAAAAAcnhfbm9ybV9zaW1wbGlmaWVkL3V4CwABBPUBAAAEFAAAAFVUBQABEq+waFBLAQIUAxQACAAIADN8HFuf1xYPRgAAAHgAAAAhABgAAAAAAAAAAACkgVEAAAByeF9ub3JtX3NpbXBsaWZpZWQvcHJvcGVydGllcy5jc3Z1eAsAAQT1AQAABBQAAABVVAUAARKvsGhQSwECFAMUAAgACAAVfBxbZXHlH68AAACZAQAAHwAYAAAAAAAAAAAApIEGAQAAcnhfbm9ybV9zaW1wbGlmaWVkL2NvbmNlcHRzLmNzdnV4CwABBPUBAAAEFAAAAFVUBQAB266waFBLAQIUAxQACAAIABV8HFt3Nm0XjAAAAOgAAAAqABgAAAAAAAAAAACkgSICAABfX01BQ09TWC9yeF9ub3JtX3NpbXBsaWZpZWQvLl9jb25jZXB0cy5jc3Z1eAsAAQT1AQAABBQAAABVVAUAAduusGhQSwUGAAAAAAQABACVAQAAJgMAAAAA"
+                  }
+                  }
+                ]
+              }
+              """;
+		Parameters inputParameters = myFhirContext.newJsonParser().parseResource(Parameters.class, myInputParametersJson);
+		theFhirClient
+			.operation()
+			.onType(myFhirContext.getResourceDefinition("CodeSystem").getImplementingClass())
+			.named("$upload-external-code-system")
+			.withParameters(inputParameters)
+			.execute();
+
 	}
 }

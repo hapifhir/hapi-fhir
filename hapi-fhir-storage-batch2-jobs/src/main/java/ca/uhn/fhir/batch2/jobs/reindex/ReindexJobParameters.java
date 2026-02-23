@@ -2,7 +2,7 @@
  * #%L
  * HAPI-FHIR Storage Batch2 Jobs
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,14 @@
  */
 package ca.uhn.fhir.batch2.jobs.reindex;
 
-import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyJobParameters;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nullable;
 
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
-public class ReindexJobParameters extends PartitionedUrlJobParameters {
+public class ReindexJobParameters extends BaseBulkModifyJobParameters {
 
 	public static final String OPTIMIZE_STORAGE = "optimizeStorage";
 	public static final String REINDEX_SEARCH_PARAMETERS = "reindexSearchParameters";

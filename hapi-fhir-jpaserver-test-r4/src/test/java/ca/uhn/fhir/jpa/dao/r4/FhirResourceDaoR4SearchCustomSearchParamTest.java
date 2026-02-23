@@ -29,6 +29,7 @@ import ca.uhn.fhir.util.HapiExtensions;
 
 import java.util.Objects;
 
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.Appointment.AppointmentStatus;
@@ -1170,14 +1171,14 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg0) {
 				mySearchParameterDao.create(siblingSp, mySrd);
 			}
 		});
 
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg0) {
 				mySearchParamRegistry.forceRefresh();
 			}
 		});

@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 7467
+title: "The PatientCompartmentEnforcingInterceptor incorrectly prevented changes to the members of a Group resource, even though the PatientIdPartitionInterceptor does not consider this resource to be patient-specitic. This has been corrected."

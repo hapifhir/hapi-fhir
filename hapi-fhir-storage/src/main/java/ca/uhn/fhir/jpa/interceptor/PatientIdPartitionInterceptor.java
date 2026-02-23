@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,21 +29,27 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
+import ca.uhn.fhir.mdm.MdmSearchExpansionResults;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.storage.PreviousVersionReader;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -54,16 +60,18 @@ import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.getPartitionIfAssigned;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -76,7 +84,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 @Interceptor
 public class PatientIdPartitionInterceptor {
-
+	private static final String PATIENT_STR = "Patient";
 	public static final String PLACEHOLDER_TO_REFERENCE_KEY =
 			PatientIdPartitionInterceptor.class.getName() + "_placeholderToResource";
 
@@ -89,16 +97,21 @@ public class PatientIdPartitionInterceptor {
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+
 	/**
 	 * Constructor
 	 */
 	public PatientIdPartitionInterceptor(
 			FhirContext theFhirContext,
 			ISearchParamExtractor theSearchParamExtractor,
-			PartitionSettings thePartitionSettings) {
+			PartitionSettings thePartitionSettings,
+			DaoRegistry theDaoRegistry) {
 		myFhirContext = theFhirContext;
 		mySearchParamExtractor = theSearchParamExtractor;
 		myPartitionSettings = thePartitionSettings;
+		myDaoRegistry = theDaoRegistry;
 	}
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
@@ -111,7 +124,7 @@ public class PatientIdPartitionInterceptor {
 			return provideNonCompartmentMemberTypeResponse(theResource);
 		}
 
-		if (resourceDef.getName().equals("Patient")) {
+		if (resourceDef.getName().equals(PATIENT_STR)) {
 			IIdType idElement = theResource.getIdElement();
 			if (idElement.getIdPart() == null || idElement.isUuid()) {
 				throw new MethodNotAllowedException(
@@ -120,17 +133,39 @@ public class PatientIdPartitionInterceptor {
 			}
 			return provideCompartmentMemberInstanceResponse(theRequestDetails, idElement.getIdPart());
 		} else {
+
+			IBaseResource resource = theResource;
+			if (theResource.isDeleted()) {
+				// when a resource is deleted, the current version of the deleted resource is empty
+				// and will definitely not have references to a patient.  in order to determine the
+				// patient compartment of a deleted resource, we need to get its previous version.
+				resource = getPreviousVersion(theResource);
+			}
+
 			Optional<String> oCompartmentIdentity = ResourceCompartmentUtil.getResourceCompartment(
-					"Patient", theResource, compartmentSps, mySearchParamExtractor);
+					PATIENT_STR, resource, compartmentSps, mySearchParamExtractor);
 
 			if (oCompartmentIdentity.isPresent()) {
 				return provideCompartmentMemberInstanceResponse(theRequestDetails, oCompartmentIdentity.get());
 			} else {
-				return getPartitionViaPartiallyProcessedReference(theRequestDetails, theResource)
-						// or give up and fail
-						.orElseGet(() -> throwNonCompartmentMemberInstanceFailureResponse(theResource));
+
+				Optional<RequestPartitionId> partitionIdOptional =
+						getPartitionViaPartiallyProcessedReference(theRequestDetails, theResource);
+
+				// hopefully, we were able to get a requestPartitionId.  if not, let's be lenient and store the resource
+				// in the default partition.
+				return partitionIdOptional.orElse(RequestPartitionId.defaultPartition(myPartitionSettings));
 			}
 		}
+	}
+
+	private IBaseResource getPreviousVersion(IBaseResource theResource) {
+		IFhirResourceDao<IBaseResource> resourceDao = myDaoRegistry.getResourceDao(theResource);
+		PreviousVersionReader<IBaseResource> reader = new PreviousVersionReader<>(resourceDao);
+
+		Optional<IBaseResource> oPreviousVersion = reader.readPreviousVersion(theResource);
+
+		return oPreviousVersion.orElse(theResource);
 	}
 
 	/**
@@ -154,13 +189,13 @@ public class PatientIdPartitionInterceptor {
 		List<IBaseReference> references = myFhirContext
 				.newTerser()
 				.getCompartmentReferencesForResource(
-						"Patient", theResource, new CompartmentSearchParameterModifications())
+						PATIENT_STR, theResource, new CompartmentSearchParameterModifications())
 				.toList();
 		for (IBaseReference reference : references) {
 			String referenceString = reference.getReferenceElement().getValue();
 			IBaseResource target = placeholderToReference.get(referenceString);
-			if (target != null && Objects.equals(myFhirContext.getResourceType(target), "Patient")) {
-				if ("Patient".equals(target.getIdElement().getResourceType())) {
+			if (target != null && Objects.equals(myFhirContext.getResourceType(target), PATIENT_STR)) {
+				if (PATIENT_STR.equals(target.getIdElement().getResourceType())) {
 					if (!target.getIdElement().isUuid() && target.getIdElement().hasIdPart()) {
 						return Optional.of(provideCompartmentMemberInstanceResponse(
 								theRequestDetails, target.getIdElement().getIdPart()));
@@ -180,7 +215,7 @@ public class PatientIdPartitionInterceptor {
 		if (!isEmpty(theReadDetails.getResourceType())) {
 			RuntimeResourceDefinition resourceDef =
 					myFhirContext.getResourceDefinition(theReadDetails.getResourceType());
-			compartmentSps = ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
+			compartmentSps = ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef, true);
 			if (compartmentSps.isEmpty()) {
 				return provideNonCompartmentMemberTypeResponse(null);
 			}
@@ -195,8 +230,8 @@ public class PatientIdPartitionInterceptor {
 			case SEARCH_TYPE:
 				if (theReadDetails.getSearchParams() != null) {
 					SearchParameterMap params = theReadDetails.getSearchParams();
-					if ("Patient".equals(theReadDetails.getResourceType())) {
-						List<String> idParts = getResourceIdList(params, "_id", "Patient", false);
+					if (PATIENT_STR.equals(theReadDetails.getResourceType())) {
+						List<String> idParts = getResourceIdsForSearchParam(params, "_id");
 						if (idParts.size() == 1) {
 							return provideCompartmentMemberInstanceResponse(theRequestDetails, idParts.get(0));
 						} else {
@@ -204,15 +239,23 @@ public class PatientIdPartitionInterceptor {
 						}
 					} else {
 						for (RuntimeSearchParam nextCompartmentSp : compartmentSps) {
-							List<String> idParts =
-									getResourceIdList(params, nextCompartmentSp.getName(), "Patient", true);
+							String paramName = nextCompartmentSp.getName();
+							List<String> idParts = getResourceIdsForSearchParam(params, paramName);
 							if (!idParts.isEmpty()) {
+
+								// In PatientID partitioning mode, the only way for a compartment reference SP
+								// (ex: Observation.subject, Observation.performer) to have multiple references is if
+								// we have previously performed MDM expansion across partitions
+								if (idParts.size() > 1) {
+									validateMultipleIdsAreAllowedOrThrow(idParts, theRequestDetails, paramName);
+									return RequestPartitionId.allPartitions();
+								}
 								return provideCompartmentMemberInstanceResponse(theRequestDetails, idParts.get(0));
 							}
 						}
 					}
 				} else if (theReadDetails.getReadResourceId() != null) {
-					if ("Patient".equals(theReadDetails.getResourceType())) {
+					if (PATIENT_STR.equals(theReadDetails.getResourceType())) {
 						return provideCompartmentMemberInstanceResponse(
 								theRequestDetails,
 								theReadDetails.getReadResourceId().getIdPart());
@@ -243,6 +286,40 @@ public class PatientIdPartitionInterceptor {
 		return provideNonPatientSpecificQueryResponse();
 	}
 
+	private void validateMultipleIdsAreAllowedOrThrow(
+			List<String> theIdsToSearch, RequestDetails theRequestDetails, String theParamName) {
+		boolean throwWithMsg = true;
+		String errorMsg =
+				"Multiple values for parameter " + theParamName + " is not supported in patient compartment mode";
+
+		MdmSearchExpansionResults cachedExpansionResults =
+				MdmSearchExpansionResults.getCachedExpansionResults(theRequestDetails);
+
+		if (nonNull(cachedExpansionResults)) {
+			Set<String> cachedExpandedPatientIds = cachedExpansionResults.getExpandedIds().stream()
+					.filter(aIIdType -> PATIENT_STR.equals(aIIdType.getResourceType()))
+					.map(IIdType::toUnqualifiedVersionless)
+					.map(IIdType::getIdPart)
+					.collect(Collectors.toSet());
+
+			// we are here because the searchParameter with name 'theParamName' has at least 2 id's to search
+			// ex: Observation?subject=Patient/1,Patient/2.  we are operating in PatientId partitioning mode so
+			// the only way that such scenario is acceptable is if the above search was initially invoked as a search
+			// with MDM expansion (Observation?subject:mdm=Patient/1) and expansion was performed by the {@link
+			// MdmSearchExpandingInterceptor}.
+			// it is highly unlikely that theIdsToSearch will differ from the cachedExpandedPatientIds but let's be
+			// extra careful and make sure that theIdsToSearch are part of the expanded list.
+			boolean cachedExpandedIdsIncludeIdsToSearch = cachedExpandedPatientIds.containsAll(theIdsToSearch);
+			// just to make it extra clear
+			throwWithMsg = !cachedExpandedIdsIncludeIdsToSearch;
+			errorMsg = "Values for parameters " + theParamName + " are inconsistent with expansion results";
+		}
+
+		if (throwWithMsg) {
+			throw new MethodNotAllowedException(Msg.code(1324) + errorMsg);
+		}
+	}
+
 	/**
 	 * If we're about to process a FHIR transaction, we want to note the mappings between placeholder IDs
 	 * and their resources and stuff them into a userdata map where we can access them later. We do this
@@ -269,7 +346,7 @@ public class PatientIdPartitionInterceptor {
 		for (int i = 0; i < rawEntries.size(); i++) {
 			BundleEntryParts nextEntry = parsedEntries.get(i);
 			if (nextEntry.getResource() != null
-					&& myFhirContext.getResourceType(nextEntry.getResource()).equals("Patient")) {
+					&& myFhirContext.getResourceType(nextEntry.getResource()).equals(PATIENT_STR)) {
 				if (nextEntry.getMethod() == RequestTypeEnum.POST && isBlank(nextEntry.getConditionalUrl())) {
 					if (nextEntry.getFullUrl() != null && nextEntry.getFullUrl().startsWith("urn:uuid:")) {
 						String newId = UUID.randomUUID().toString();
@@ -282,6 +359,12 @@ public class PatientIdPartitionInterceptor {
 						terser.setElement(request, "method", "PUT");
 						terser.setElement(request, "url", "Patient/" + newId);
 					}
+				} else if (nextEntry.getMethod() == RequestTypeEnum.PUT
+						&& isNotBlank(nextEntry.getFullUrl())
+						&& isNotBlank(nextEntry.getUrl())
+						&& isBlank(nextEntry.getConditionalUrl())
+						&& !Strings.CS.equals(nextEntry.getFullUrl(), nextEntry.getUrl())) {
+					idSubstitutions.put(nextEntry.getFullUrl(), nextEntry.getUrl());
 				}
 			}
 		}
@@ -322,35 +405,41 @@ public class PatientIdPartitionInterceptor {
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private List<String> getResourceIdList(
-			SearchParameterMap theParams, String theParamName, String theResourceType, boolean theExpectOnlyOneBool) {
-		List<List<IQueryParameterType>> idParamAndList = theParams.get(theParamName);
-		if (idParamAndList == null) {
+	private List<String> getResourceIdsForSearchParam(SearchParameterMap theParams, String theParamName) {
+		List<List<IQueryParameterType>> paramAndListForParamName = theParams.get(theParamName);
+		if (paramAndListForParamName == null) {
 			return Collections.emptyList();
 		}
 
 		List<String> idParts = new ArrayList<>();
-		idParamAndList.stream().flatMap(Collection::stream).forEach(idParam -> {
-			if (isNotBlank(idParam.getQueryParameterQualifier())) {
-				throw new MethodNotAllowedException(Msg.code(1322) + "The parameter " + theParamName
-						+ idParam.getQueryParameterQualifier() + " is not supported in patient compartment mode");
-			}
-			if (idParam instanceof ReferenceParam) {
-				String chain = ((ReferenceParam) idParam).getChain();
-				if (chain != null) {
-					throw new MethodNotAllowedException(Msg.code(1323) + "The parameter " + theParamName + "." + chain
+		for (List<IQueryParameterType> iQueryParameterTypes : paramAndListForParamName) {
+			for (IQueryParameterType aParam : iQueryParameterTypes) {
+				String qualifier = aParam.getQueryParameterQualifier();
+				if (isNotBlank(qualifier) && !Constants.PARAMQUALIFIER_MDM.equals(qualifier)) {
+					throw new MethodNotAllowedException(Msg.code(1322) + "The parameter " + theParamName + qualifier
 							+ " is not supported in patient compartment mode");
 				}
-			}
-			IdType id = new IdType(idParam.getValueAsQueryToken());
-			if (!id.hasResourceType() || id.getResourceType().equals(theResourceType)) {
-				idParts.add(id.getIdPart());
-			}
-		});
+				if (aParam instanceof ReferenceParam) {
+					String chain = ((ReferenceParam) aParam).getChain();
+					if (chain != null) {
+						throw new MethodNotAllowedException(Msg.code(1323) + "The parameter " + theParamName + "."
+								+ chain + " is not supported in patient compartment mode");
+					}
+				}
 
-		if (theExpectOnlyOneBool && idParts.size() > 1) {
-			throw new MethodNotAllowedException(Msg.code(1324) + "Multiple values for parameter " + theParamName
-					+ " is not supported in patient compartment mode");
+				String valueAsQueryToken = aParam.getValueAsQueryToken();
+				if (Strings.CS.startsWith(valueAsQueryToken, "Patient/")) {
+					IdType id = new IdType(valueAsQueryToken);
+					if (id.getResourceType().equals(PATIENT_STR)) {
+						idParts.add(id.getIdPart());
+					}
+				} else if (valueAsQueryToken.indexOf('/') == -1) {
+					IdType id = new IdType(valueAsQueryToken);
+					if (id.isIdPartValid()) {
+						idParts.add(valueAsQueryToken);
+					}
+				}
+			}
 		}
 
 		return idParts;
@@ -381,10 +470,12 @@ public class PatientIdPartitionInterceptor {
 	 * <code>Math.abs(theResourceIdPart.hashCode()) % 15000</code>.
 	 * <p>
 	 * This logic can be replaced with other logic of your choosing.
+	 *
+	 * @see #defaultPartitionAlgorithm(String)
 	 */
 	@SuppressWarnings("unused")
 	protected int providePartitionIdForPatientId(RequestDetails theRequestDetails, String theResourceIdPart) {
-		return Math.abs(theResourceIdPart.hashCode() % 15000);
+		return defaultPartitionAlgorithm(theResourceIdPart);
 	}
 
 	/**
@@ -408,5 +499,13 @@ public class PatientIdPartitionInterceptor {
 	@Nonnull
 	protected RequestPartitionId provideNonCompartmentMemberTypeResponse(IBaseResource theResource) {
 		return myPartitionSettings.getDefaultRequestPartitionId();
+	}
+
+	/**
+	 * This method supplies the default algorithm used for partitioning, if {@link #providePartitionIdForPatientId(RequestDetails, String)}
+	 * has not been overridden.
+	 */
+	public static int defaultPartitionAlgorithm(String theResourceIdPart) {
+		return Math.abs(theResourceIdPart.hashCode() % 15000);
 	}
 }

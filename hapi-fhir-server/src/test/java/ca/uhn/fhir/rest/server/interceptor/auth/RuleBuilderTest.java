@@ -3,7 +3,9 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import com.google.common.collect.Lists;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -82,6 +84,71 @@ public class RuleBuilderTest {
 		builder.allow().bulkExport().groupExportOnGroup("group2").withResourceTypes(resourceTypes);
 		List<IAuthRule> build = builder.build();
 
+	}
+
+	@ParameterizedTest
+	@MethodSource("groupMatcherBulkExportParams")
+	public void testBulkExportByGroupMatcher(String theCompartmentMatcherFilter, Collection<String> theResourceTypes) {
+		// Given
+		RuleBuilder builder = new RuleBuilder();
+		List<String> resourceTypes = new ArrayList<>(theResourceTypes);
+
+		// When
+		builder.allow().bulkExport().groupExportOnFilter("?" + theCompartmentMatcherFilter).withResourceTypes(resourceTypes);
+		final List<IAuthRule> rules = builder.build();
+
+		// Then
+		assertEquals(1, rules.size());
+		final IAuthRule authRule = rules.get(0);
+		assertInstanceOf(RuleGroupBulkExportByCompartmentMatcherImpl.class, authRule);
+
+		final RuleGroupBulkExportByCompartmentMatcherImpl ruleGroupBulkExport = (RuleGroupBulkExportByCompartmentMatcherImpl) authRule;
+		assertEquals(theCompartmentMatcherFilter, ruleGroupBulkExport.getGroupMatcherFilter());
+		assertEquals(theResourceTypes, ruleGroupBulkExport.getResourceTypes());
+		assertEquals(PolicyEnum.ALLOW, ruleGroupBulkExport.getMode());
+	}
+
+	private static Stream<Arguments> groupMatcherBulkExportParams() {
+		return Stream.of(
+			Arguments.of("identifier=foo|bar", List.of()),
+			Arguments.of("identifier=foo|bar", List.of("Patient", "Observation"))
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource("patientMatcherBulkExportParams")
+	public void testBulkExportByPatientMatcher(List<String> theCompartmentMatcherFilter, Collection<String> theResourceTypes) {
+		// Given
+		RuleBuilder builder = new RuleBuilder();
+		List<String> resourceTypes = new ArrayList<>(theResourceTypes);
+
+		// When
+		for (String filter : theCompartmentMatcherFilter) {
+			builder.allow().bulkExport().patientExportOnFilter("?" + filter).withResourceTypes(resourceTypes);
+		}
+		final List<IAuthRule> rules = builder.build();
+
+		// Then
+		assertEquals(1, rules.size());
+		final IAuthRule authRule = rules.get(0);
+		assertInstanceOf(RulePatientBulkExportByCompartmentMatcherImpl.class, authRule);
+
+		final RulePatientBulkExportByCompartmentMatcherImpl rulePatientExport = (RulePatientBulkExportByCompartmentMatcherImpl) authRule;
+		assertThat(rulePatientExport.getPatientMatcherFilters()).containsExactlyInAnyOrderElementsOf(theCompartmentMatcherFilter);
+		assertEquals(theResourceTypes, rulePatientExport.getResourceTypes());
+		assertEquals(PolicyEnum.ALLOW, rulePatientExport.getMode());
+	}
+
+	private static Stream<Arguments> patientMatcherBulkExportParams() {
+		return Stream.of(
+			Arguments.of(List.of("identifier=foo|bar"), List.of()),
+			Arguments.of(List.of("identifier=foo|bar"), List.of("Patient", "Observation")),
+			// Multiple arguments may be added to the filter when multiple FHIR_OP_INITIATE_BULK_DATA_EXPORT_PATIENTS_MATCHING permissions
+			// are added to the same user, even when the permission does not accept multiple (a list of) arguments by itself.
+			Arguments.of(List.of("identifier=foo|bar", "name=Doe"), List.of()),
+			Arguments.of(List.of("identifier=foo|bar", "name=Doe&active=true"), List.of("Patient", "Observation")),
+			Arguments.of(List.of("identifier=foo|bar", "active=true&name=Doe"), List.of("Patient", "Observation"))
+		);
 	}
 
 	@Test
@@ -169,4 +236,64 @@ public class RuleBuilderTest {
 		ruleBuilder.allow().createConditional().resourcesOfType("anystring").withTester(writeAccessTester).andThen();
 	}
 
+	@Nested
+	class OperationRuleWithInstanceFilterTest {
+
+		// Used because FHIR structure classes aren't accessible here
+		Class<IBaseResource> STUB_RESOURCE_TYPE = IBaseResource.class;
+
+		static Stream<String> filterParams() {
+			return Stream.of("param=value", "", null);
+		}
+
+		@ParameterizedTest
+		@MethodSource("filterParams")
+		void testOperation_onInstancesOfTypeMatchingOptionalFilter_withFilter(String theFilter) {
+			// Given
+			RuleBuilder builder = new RuleBuilder();
+			builder.allow()
+				.operation()
+				.named("$some-operation")
+				.onInstancesOfTypeMatchingOptionalFilter(STUB_RESOURCE_TYPE, theFilter)
+				.andAllowAllResponses()
+				.andThen();
+
+			// When
+			OperationRule rule = buildSingleOperationRule(builder);
+
+			// Then
+			assertThat(rule.getOperationName()).isEqualTo("$some-operation");
+			assertThat(rule.getAppliesToInstancesOfType()).containsExactly(STUB_RESOURCE_TYPE);
+			assertThat(rule.getInstanceFilter()).isEqualTo(theFilter);
+		}
+
+		@ParameterizedTest
+		@MethodSource("filterParams")
+		void testOperation_onAnyInstanceMatchingOptionalFilter_withFilter(String theFilter) {
+			// Given
+			RuleBuilder builder = new RuleBuilder();
+			builder.allow()
+				.operation()
+				.named("$some-operation")
+				.onAnyInstanceMatchingOptionalFilter(theFilter)
+				.andAllowAllResponses()
+				.andThen();
+
+			// When
+			OperationRule operationRule = buildSingleOperationRule(builder);
+
+			// then
+			assertThat(operationRule.getOperationName()).isEqualTo("$some-operation");
+			assertThat(operationRule.isAppliesToAnyInstance()).isTrue();
+			assertThat(operationRule.getInstanceFilter()).isEqualTo(theFilter);
+		}
+
+		private OperationRule buildSingleOperationRule(RuleBuilder theBuilder){
+			List<IAuthRule> rules = theBuilder.build();
+			assertThat(rules).hasSize(1);
+			IAuthRule rule = rules.get(0);
+			assertInstanceOf(OperationRule.class, rule);
+			return (OperationRule) rule;
+		}
+	}
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.subscription.match.registry;
 
 import ca.uhn.fhir.cache.BaseResourceCacheSynchronizer;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingListener;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -58,7 +59,7 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 	 * Constructor
 	 */
 	public SubscriptionLoader() {
-		super("Subscription");
+		super("Subscription", RequestPartitionId.allPartitions());
 	}
 
 	@VisibleForTesting

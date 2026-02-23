@@ -2,7 +2,7 @@
  * #%L
  * HAPI-FHIR Storage MDM
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.mdm.batch2.submit;
 
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
@@ -44,7 +45,8 @@ public class MdmSubmitAppCtx {
 			IBatch2DaoSvc theBatch2DaoSvc,
 			MatchUrlService theMatchUrlService,
 			FhirContext theFhirContext,
-			IMdmSettings theMdmSettings) {
+			IMdmSettings theMdmSettings,
+			IJobPartitionProvider theJobPartitionProvider) {
 		return JobDefinition.newBuilder()
 				.setJobDefinitionId(MDM_SUBMIT_JOB)
 				.setJobDescription("MDM Batch Submission")
@@ -56,7 +58,7 @@ public class MdmSubmitAppCtx {
 						"generate-ranges",
 						"generate data ranges to submit to mdm",
 						ChunkRangeJson.class,
-						submitGenerateRangeChunksStep())
+						submitGenerateRangeChunksStep(theJobPartitionProvider))
 				.addIntermediateStep(
 						"load-ids",
 						"Load the IDs",
@@ -76,8 +78,9 @@ public class MdmSubmitAppCtx {
 	}
 
 	@Bean
-	public GenerateRangeChunksStep<MdmSubmitJobParameters> submitGenerateRangeChunksStep() {
-		return new GenerateRangeChunksStep<>();
+	public GenerateRangeChunksStep<MdmSubmitJobParameters> submitGenerateRangeChunksStep(
+			IJobPartitionProvider theJobPartitionProvider) {
+		return new GenerateRangeChunksStep<>(theJobPartitionProvider);
 	}
 
 	@Bean

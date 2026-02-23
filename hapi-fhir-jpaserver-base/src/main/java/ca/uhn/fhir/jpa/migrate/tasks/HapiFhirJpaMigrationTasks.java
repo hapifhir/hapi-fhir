@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,6 +131,69 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init820();
 		init840();
 		init860();
+		init880();
+	}
+
+	protected void init880() {
+		Builder version = forVersion(VersionEnum.V8_8_0);
+
+		// Addressing collation issue for MSSQL
+		{
+			final Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
+
+			// Changes 20251208.10-50 repeat migration 20240724.10-50,
+			// but with .runEvenDuringSchemaInitialization() turned on so it applies to new installations.
+			//
+			// This query checks if the FHIR_ID column has a case-sensitive collation.
+			@Language(("SQL"))
+			final String onlyIfSql = "SELECT CASE CHARINDEX('_CI_', COLLATION_NAME) WHEN 0 THEN 0 ELSE 1 END "
+					+ "FROM INFORMATION_SCHEMA.COLUMNS "
+					+ "WHERE TABLE_SCHEMA = SCHEMA_NAME() "
+					+ "AND TABLE_NAME = 'HFJ_RESOURCE' "
+					+ "AND COLUMN_NAME = 'FHIR_ID' ";
+			final String onlyfIReason =
+					"Skipping change to HFJ_RESOURCE.FHIR_ID collation to SQL_Latin1_General_CP1_CS_AS because it is already using it";
+
+			hfjResource
+					.dropIndex("20251208.10", "IDX_RES_FHIR_ID")
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
+					.runEvenDuringSchemaInitialization()
+					.onlyIf(onlyIfSql, onlyfIReason);
+
+			hfjResource
+					.dropIndex("20251208.20", "IDX_RES_TYPE_FHIR_ID")
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
+					.runEvenDuringSchemaInitialization()
+					.onlyIf(onlyIfSql, onlyfIReason);
+
+			version.executeRawSql(
+							"20251208.30",
+							"ALTER TABLE HFJ_RESOURCE ALTER COLUMN FHIR_ID varchar(64) COLLATE SQL_Latin1_General_CP1_CS_AS")
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
+					.runEvenDuringSchemaInitialization()
+					.onlyIf(onlyIfSql, onlyfIReason);
+
+			hfjResource
+					.addIndex("20251208.40", "IDX_RES_FHIR_ID")
+					.unique(false)
+					.online(true)
+					.withColumns("FHIR_ID")
+					.runEvenDuringSchemaInitialization()
+					// note that we do not apply the onlyIf() here since we have now fixed the column.
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
+
+			hfjResource
+					.addIndex("20251208.50", "IDX_RES_TYPE_FHIR_ID")
+					.unique(true)
+					.online(true)
+					// include res_id and our deleted flag so we can satisfy Observation?_sort=_id from the index on
+					// platforms that support it.
+					.includeColumns("RES_ID, RES_DELETED_AT")
+					.withColumns("RES_TYPE", "FHIR_ID")
+					.runEvenDuringSchemaInitialization()
+					// note that we do not apply the onlyIf() here since we have now fixed the column.
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
+		}
 	}
 
 	protected void init860() {

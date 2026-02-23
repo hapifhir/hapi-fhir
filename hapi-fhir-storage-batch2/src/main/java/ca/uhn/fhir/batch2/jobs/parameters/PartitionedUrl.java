@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,13 @@ public class PartitionedUrl implements IModelJson {
 
 	@JsonProperty("requestPartitionId")
 	private RequestPartitionId myRequestPartitionId;
+
+	/**
+	 * Constructor
+	 */
+	public PartitionedUrl() {
+		super();
+	}
 
 	public String getUrl() {
 		return myUrl;

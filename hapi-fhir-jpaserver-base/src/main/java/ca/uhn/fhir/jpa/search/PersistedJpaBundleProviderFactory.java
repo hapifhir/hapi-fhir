@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -124,7 +125,7 @@ public class PersistedJpaBundleProviderFactory {
 	 */
 	public IBundleProvider historyFromResourceIds(
 			String theResourceType,
-			@Nullable List<String> theResourceIds,
+			@Nullable List<IResourcePersistentId<?>> theResourceIds,
 			RequestPartitionId theRequestPartitionId,
 			@Nullable Date theRangeStartInclusive,
 			@Nonnull Date theRangeEndInclusive) {
