@@ -2,7 +2,7 @@ package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -34,9 +34,9 @@ class PrefetchTemplateUtilCommonTest {
 		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
 		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(InvalidRequestException.class)
+				.isInstanceOf(PreconditionFailedException.class)
 				.hasMessage(
-						"HAPI-2375: Either request context was empty or it did not provide a value for key <userId>.  Please make sure you are including a context with valid keys.");
+						"HAPI-2379: Request context did not provide a value for key <userId>.  Available keys in context are: [patientId]");
 	}
 
 	@Test
@@ -46,9 +46,9 @@ class PrefetchTemplateUtilCommonTest {
 		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
 
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(InvalidRequestException.class)
+				.isInstanceOf(PreconditionFailedException.class)
 				.hasMessage(
-						"HAPI-2375: Either request context was empty or it did not provide a value for key <userId>.  Please make sure you are including a context with valid keys.");
+						"HAPI-2379: Request context did not provide a value for key <userId>.  Available keys in context are: []");
 	}
 
 	@Test
@@ -57,9 +57,9 @@ class PrefetchTemplateUtilCommonTest {
 		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
 		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(InvalidRequestException.class)
+				.isInstanceOf(PreconditionFailedException.class)
 				.hasMessage(
-						"HAPI-2372: Request context did not provide a value for key <draftOrders>.  Available keys in context are: [patientId]");
+						"HAPI-2379: Request context did not provide a value for key <draftOrders>.  Available keys in context are: [patientId]");
 	}
 
 	/** TODO:
@@ -83,5 +83,7 @@ class PrefetchTemplateUtilCommonTest {
 	 * check if array references can be directly evaluated.
 	 * remove invalid request exception and replace with 412
 	 * one incorrect in OR condition
+	 * its not OR its Union
+	 * documentation update on Smile CDR
 	 */
 }

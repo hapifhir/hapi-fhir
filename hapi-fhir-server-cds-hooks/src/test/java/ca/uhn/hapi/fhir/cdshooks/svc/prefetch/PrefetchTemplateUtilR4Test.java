@@ -61,9 +61,8 @@ class PrefetchTemplateUtilR4Test {
 		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
 		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(InvalidRequestException.class)
-				.hasMessage(
-						"HAPI-2373: Request context did not provide for resource(s) matching template. ResourceType missing is: ServiceRequest");
+				.isInstanceOf(PreconditionFailedException.class)
+				.hasMessageContaining("Unable to resolve prefetch template");
 	}
 
 	@Test
@@ -162,9 +161,9 @@ class PrefetchTemplateUtilR4Test {
 		context.put(deviceRequestKey, deviceRequest1);
 		// execute & validate
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(InvalidRequestException.class)
+				.isInstanceOf(PreconditionFailedException.class)
 				.hasMessageContaining(
-						"FHIRPath expression did not return any results for query: code.resolve().as(Device).id");
+						"Unable to resolve prefetch template : context.deviceRequest.code.resolve().as(Device).id. No result was found for the prefetch query.");
 	}
 
 	@Test
@@ -180,9 +179,9 @@ class PrefetchTemplateUtilR4Test {
 		context.put(deviceRequestKey, deviceRequest1);
 		// execute & validate
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-			.isInstanceOf(InvalidRequestException.class)
+			.isInstanceOf(PreconditionFailedException.class)
 			.hasMessageContaining(
-				"FHIRPath expression did not return any results for query: code.resolve().as(Device).id");
+				"Unable to resolve prefetch template : context.deviceRequest.code.resolve().as(Device).id. No result was found for the prefetch query.");
 	}
 
 	@Test
@@ -201,9 +200,9 @@ class PrefetchTemplateUtilR4Test {
 		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
 		// execute & validate
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(InvalidRequestException.class)
+				.isInstanceOf(PreconditionFailedException.class)
 				.hasMessageContaining(
-						"FHIRPath expression did not return any results for query: entry.resource.ofType(DeviceRequest).code.resolve().as(Device).id");
+						"Unable to resolve prefetch template : context.draftOrders.entry.resource.ofType(DeviceRequest).code.resolve().as(Device).id. No result was found for the prefetch query.");
 	}
 
 	@Test
@@ -224,7 +223,7 @@ class PrefetchTemplateUtilR4Test {
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining(
-						"Unable to evaluate FHIRPath for prefetch template with expression Device?_id={{context.draftOrders.entry.resource.RandomMethod(DeviceRequest).code.reference}} for FHIR version R4");
+						"Unable to evaluate FHIRPath for prefetch template key <draftOrders> for FHIR version R4");
 	}
 
 	@Test
@@ -329,9 +328,10 @@ class PrefetchTemplateUtilR4Test {
 		final String pracRoleReference2 = "PractitionerRole/PR2";
 		final String pracRoleReference3 = "PractitionerRole/PR3";
 		final String template =
-			"PractitionerRole?_id={{context.draftOrders.entry.resource.ofType(Encounter).participant.individual.resolve().ofType(PractitionerRole).id|%observation.performer.reference}}";
+			"PractitionerRole?_id={{context.draftOrders.entry.resource.ofType(Encounter).participant.individual.resolve().ofType(PractitionerRole).id|%observation.performer.reference|context.mandatoryPracRole}}";
 		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
 		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		context.put("mandatoryPracRole", "PractitionerRole/PR4");
 		final Encounter encounter = new Encounter();
 		encounter.setId(encounterId);
 		encounter.addParticipant(
@@ -348,7 +348,7 @@ class PrefetchTemplateUtilR4Test {
 		// execute
 		final String actual = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
 		// validate
-		assertThat(actual).isEqualTo("PractitionerRole?_id=PR1,PractitionerRole/PR2,PractitionerRole/PR3");
+		assertThat(actual).isEqualTo("PractitionerRole?_id=PR1,PractitionerRole/PR2,PractitionerRole/PR3,PractitionerRole/PR4");
 	}
 
 	@Test

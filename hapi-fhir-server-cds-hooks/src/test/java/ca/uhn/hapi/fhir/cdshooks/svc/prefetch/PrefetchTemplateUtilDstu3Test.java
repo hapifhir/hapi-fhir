@@ -3,6 +3,7 @@ package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.dstu3.model.Device;
 import org.hl7.fhir.dstu3.model.DeviceRequest;
@@ -59,7 +60,7 @@ class PrefetchTemplateUtilDstu3Test {
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining(
-						"Unable to evaluate FHIRPath for prefetch template with expression Device?_id={{context.draftOrders.entry.resource.ofType(DeviceRequest).code.reference}} for FHIR version DSTU3");
+						"Unable to evaluate FHIRPath for prefetch template key <draftOrders> for FHIR version DSTU3");
 	}
 
 	@Test
@@ -96,9 +97,9 @@ class PrefetchTemplateUtilDstu3Test {
 		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
 		// execute & validate
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(InvalidRequestException.class)
+				.isInstanceOf(PreconditionFailedException.class)
 				.hasMessageContaining(
-						"FHIRPath expression did not return any results for query: entry.resource.where(id = 'Device/2').id");
+						"Unable to resolve prefetch template : context.draftOrders.entry.resource.where(id = 'Device/2').id. No result was found for the prefetch query.");
 	}
 
 	@Test
@@ -126,7 +127,7 @@ class PrefetchTemplateUtilDstu3Test {
 		context.put("encounter", new Encounter());
 		// execute & validate
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(InvalidRequestException.class)
-				.hasMessageContaining("FHIRPath expression did not return any results for query: id");
+				.isInstanceOf(PreconditionFailedException.class)
+				.hasMessageContaining("Unable to resolve prefetch template : context.encounter.id. No result was found for the prefetch query.");
 	}
 }
