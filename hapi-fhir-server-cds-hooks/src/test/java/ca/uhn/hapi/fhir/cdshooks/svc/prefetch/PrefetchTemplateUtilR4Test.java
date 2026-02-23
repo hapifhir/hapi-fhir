@@ -251,8 +251,8 @@ class PrefetchTemplateUtilR4Test {
 	}
 
 	@Test
-	@DisplayName("Should successfully evaluate FHIRPath OR expressions combining multiple paths")
-	void substituteTemplateWithFhirPathOrCondition() {
+	@DisplayName("Should successfully evaluate FHIRPath Union expressions combining multiple paths")
+	void substituteTemplateWithFhirPathUnionCondition() {
 		// setup
 		final String encounterId = "Encounter/1";
 		final String pracRoleReference1 = "PractitionerRole/PR1";
@@ -286,7 +286,7 @@ class PrefetchTemplateUtilR4Test {
 	}
 
 	@Test
-	@DisplayName("Should successfully evaluate referenced prefetch with OR operator")
+	@DisplayName("Should successfully evaluate referenced prefetch with Union operator")
 	void substituteTemplateForReferencedPrefetch() {
 		// setup
 		final String location1 = "Location/L1";
@@ -321,7 +321,7 @@ class PrefetchTemplateUtilR4Test {
 	}
 
 	@Test
-	@DisplayName("Should successfully evaluate OR expression combining context-based and referenced prefetch patterns")
+	@DisplayName("Should successfully evaluate UNION expression combining context-based and referenced prefetch patterns")
 	void substituteTemplateComboContextAndReferencedPrefetch() {
 		// setup
 		final String encounterId = "Encounter/1";
@@ -353,7 +353,7 @@ class PrefetchTemplateUtilR4Test {
 	}
 
 	@Test
-	@DisplayName("Should successfully evaluate OR expression with flipped order (referenced then context-based)")
+	@DisplayName("Should successfully evaluate Union expression with flipped order (referenced then context-based)")
 	void substituteTemplateComboFlippedContextAndReferencedPrefetch() {
 		// setup
 		final String encounterId = "Encounter/1";

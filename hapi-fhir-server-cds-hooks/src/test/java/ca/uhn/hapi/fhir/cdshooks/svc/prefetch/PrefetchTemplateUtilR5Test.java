@@ -67,7 +67,7 @@ class PrefetchTemplateUtilR5Test {
 	}
 
 	@Test
-	@DisplayName("Should successfully evaluate OR expression combining context-based and referenced prefetch patterns")
+	@DisplayName("Should successfully evaluate Union expression combining context-based and referenced prefetch patterns")
 	void substituteTemplateComboContextAndReferencedPrefetch() {
 		// setup
 		final String encounterId = "Encounter/1";
