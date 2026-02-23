@@ -832,9 +832,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND);
 		}
 
-		if (theId.hasVersionIdPart() && Long.parseLong(theId.getVersionIdPart()) != entity.getVersion()) {
-			throw new ResourceVersionConflictException(
-					Msg.code(961) + "Trying to delete " + theId + " but this is not the current version");
+		if (theId.hasVersionIdPart()) {
+			boolean versionMatches;
+			try {
+				versionMatches = Long.parseLong(theId.getVersionIdPart()) == entity.getVersion();
+			} catch (NumberFormatException e) {
+				// Non-numeric version can never match a numeric internal version
+				versionMatches = false;
+			}
+			if (!versionMatches) {
+				throw new ResourceVersionConflictException(
+						Msg.code(961) + "Trying to delete " + theId + " but this is not the current version");
+			}
 		}
 
 		JpaPid persistentId = entity.getId();
