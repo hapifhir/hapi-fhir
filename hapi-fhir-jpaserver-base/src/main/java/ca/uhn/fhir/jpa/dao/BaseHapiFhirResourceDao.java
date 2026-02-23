@@ -833,13 +833,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (theId.hasVersionIdPart()) {
-			boolean versionMatches;
-			try {
-				versionMatches = Long.parseLong(theId.getVersionIdPart()) == entity.getVersion();
-			} catch (NumberFormatException e) {
-				// Non-numeric version can never match a numeric internal version
-				versionMatches = false;
-			}
+			boolean versionMatches =
+					theId.isVersionIdPartValidLong() && Long.parseLong(theId.getVersionIdPart()) == entity.getVersion();
 			if (!versionMatches) {
 				throw new ResourceVersionConflictException(
 						Msg.code(961) + "Trying to delete " + theId + " but this is not the current version");
