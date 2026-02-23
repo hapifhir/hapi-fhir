@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,10 +39,10 @@ public interface IDefaultPartitionSettings {
 	 * partition is provided by {@link #getDefaultPartitionId()}.
 	 *
 	 * @param theRequestPartitionId to perform the evaluation upon.
-	 * @return true if the <code>theRequestPartitionId</code> is for the default partition only.
+	 * @return true if the <code>theRequestPartitionId</code> is for the default partition, or is <code>null</code>
 	 */
 	default boolean isDefaultPartition(@Nonnull RequestPartitionId theRequestPartitionId) {
-		return theRequestPartitionId.isPartition(getDefaultPartitionId());
+		return theRequestPartitionId.isPartition(getDefaultPartitionId()) || theRequestPartitionId.isPartition(null);
 	}
 
 	/**

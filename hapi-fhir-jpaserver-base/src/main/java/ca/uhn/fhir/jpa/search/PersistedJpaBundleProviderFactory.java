@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,15 @@ import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
@@ -114,5 +117,25 @@ public class PersistedJpaBundleProviderFactory {
 		provider.setRequestPartitionId(theRequestPartitionId);
 
 		return provider;
+	}
+
+	/**
+	 * Create an unlimited history bundle provider for bulk export operations
+	 * that can paginate through history entries for specific resource IDs.
+	 */
+	public IBundleProvider historyFromResourceIds(
+			String theResourceType,
+			@Nullable List<IResourcePersistentId<?>> theResourceIds,
+			RequestPartitionId theRequestPartitionId,
+			@Nullable Date theRangeStartInclusive,
+			@Nonnull Date theRangeEndInclusive) {
+
+		return (PersistedJpaIdSearchBundleProvider) myApplicationContext.getBean(
+				JpaConfig.PERSISTED_JPA_ID_SEARCH_BUNDLE_PROVIDER,
+				theResourceType,
+				theResourceIds,
+				theRequestPartitionId,
+				theRangeStartInclusive,
+				theRangeEndInclusive);
 	}
 }

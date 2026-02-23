@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -608,8 +608,14 @@ public enum Pointcut implements IPointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
-	 * org.hl7.fhir.instance.model.api.IBaseOperationOutcome - The OperationOutcome resource that will be
-	 * returned.
+	 * org.hl7.fhir.instance.model.api.IBaseOperationOutcome - The OperationOutcome resource that will be returned.
+	 * </ul>
+	 * <li>
+	 * <code>ca.uhn.fhir.rest.api.server.ResponseDetails</code> - A wrapper around the Http Status Code
+	 * and resource that will be used in the response to the caller. The Pointcut may decide to change this value from the default
+	 * value of <b>500</b> representing an <b>Internal Server Error</b>.
+	 * The OperationOutcome is passed for modification directly, and as part of the ResponseDetails parameter.  To replace the response
+	 * resource entirely, use ResponseDetails.setResponseResource().
 	 * </ul>
 	 * <p>
 	 * Hook methods must return <code>void</code>
@@ -619,7 +625,8 @@ public enum Pointcut implements IPointcut {
 			void.class,
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"org.hl7.fhir.instance.model.api.IBaseOperationOutcome"),
+			"org.hl7.fhir.instance.model.api.IBaseOperationOutcome",
+			"ca.uhn.fhir.rest.api.server.ResponseDetails"),
 
 	/**
 	 * <b>Server Hook:</b>
@@ -1087,6 +1094,36 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
+	 * This hook is invoked during batch processing when a new RequestDetails object is about to be
+	 * created and used for work done by a task. Hooks may modify this object, e.g. by adding headers or other metadata
+	 * which an interceptor needs. For example, a partitioning interceptor that looks at a request header might
+	 * stash the header value it cares about in the JobDetails within the {@link #STORAGE_PRESTORAGE_BATCH_JOB_CREATE}
+	 * pointcut, and re-add it to the RequestDetails in this pointcut.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.batch2.api.IJobInstance - The executing job instance. Hooks should not modify this object.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - The newly created request details object that will be used for
+	 * work done by a task. Hooks may modify this object, e.g. by adding headers or other metadata.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 *
+	 * @since 8.8.0
+	 * @see #STORAGE_PRESTORAGE_BATCH_JOB_CREATE If a hook for the {@link #STORAGE_PRESTORAGE_BATCH_JOB_CREATE} pointcut
+	 *      adds userdata to the JobInstance, it will be available later to the {@link #STORAGE_BATCH_TASK_NEW_REQUEST_DETAILS}.
+	 */
+	STORAGE_BATCH_TASK_NEW_REQUEST_DETAILS(
+			void.class, "ca.uhn.fhir.batch2.api.IJobInstance", "ca.uhn.fhir.rest.api.server.RequestDetails"),
+
+	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked when we are about to <a href="https://smilecdr.com/docs/fhir_repository/creating_data.html#auto-create-placeholder-reference-targets">Auto-Create a Placeholder Reference</a>.
 	 * Hooks may modify/enhance the placeholder reference target that is about to be created, or
 	 * reject the creation of the resource, which generally means that the transaction will be
@@ -1406,6 +1443,55 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
+	 * Invoked when a search is starting, prior to selecting the partition for the search.
+	 * Hooks may examine the request and potentially modify it if they wish to affect the
+	 * partition selection.
+	 * <p>
+	 * This hook is called shortly before {@link #STORAGE_PRESEARCH_REGISTERED}. It is not
+	 * called if the search has an explicit partition already selected.
+	 * </p>
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.util.ICachedSearchDetails - Contains the details of the search that
+	 * is being created and initialized. Interceptors may use this parameter to modify aspects of the search
+	 * before it is stored and executed.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred. <b>Note that this parameter may be null in contexts where the request is not
+	 * known, such as while processing searches</b>
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.jpa.searchparam.SearchParameterMap - Contains the details of the search being checked. This can be modified.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 *
+	 * @since 8.6.0
+	 */
+	STORAGE_PRESEARCH_PARTITION_SELECTED(
+			void.class,
+			"ca.uhn.fhir.rest.server.util.ICachedSearchDetails",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+			"ca.uhn.fhir.jpa.searchparam.SearchParameterMap"),
+
+	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked when a search is starting, prior to creating a record for the search.
 	 * <p>
 	 * Hooks may accept the following parameters:
@@ -1564,6 +1650,42 @@ public enum Pointcut implements IPointcut {
 	 */
 	STORAGE_PRESTORAGE_CLIENT_ASSIGNED_ID(
 			void.class, "org.hl7.fhir.instance.model.api.IBaseResource", "ca.uhn.fhir.rest.api.server.RequestDetails"),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked when a resource is being modified using a FHIR <code>PATCH</code> operation, right after the
+	 * existing resource has been loaded from the database, and right before the patch document is applied
+	 * to the resource.
+	 * <p>
+	 * Hooks will have access to the contents of the resource that is about to be patched as well
+	 * as to the patch document being applied. Hooks may make modifications to both of these things.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.interceptor.model.PrePatchDetails - Contains details about the patch being performed</li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_PRESTORAGE_RESOURCE_PREPATCH(
+			void.class,
+			"ca.uhn.fhir.interceptor.model.PrePatchDetails",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1795,10 +1917,104 @@ public enum Pointcut implements IPointcut {
 	STORAGE_PRECOMMIT_RESOURCE_DELETED(
 			void.class,
 			"org.hl7.fhir.instance.model.api.IBaseResource",
+			"org.hl7.fhir.instance.model.api.IIdType",
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails",
 			"ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum"),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked during resource processing, after writing has been completed
+	 * but before the database transaction is committed, and immediately before
+	 * a conditional URL is about to be verified to ensure that it still
+	 * matches the target resource.
+	 * <p>
+	 * Under normal operation, when processing a conditional operation (e.g., conditional update)
+	 * the JPA transaction processor will verify that the final state of the resource
+	 * still matches the conditional URL supplied by the user. This avoids
+	 * potential user bugs where a client inadvertently modifies a resource so that it
+	 * doesn't match the conditional URL (which can cause unexpected behaviour given
+	 * that HAPI FHIR often caches conditional URL results internally).
+	 * </p>
+	 * <p>
+	 * This hook is helpful if you are developing an interceptor that modifies both the
+	 * resource body and the resource conditional URL prior to storage, as it can
+	 * be used to manipulate the conditional URL used for verification.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.jpa.dao.PreVerifyConditionalMatchCriteriaRequest - Contains the conditional URL that will be
+	 * used for verification and may be modified by interceptors.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks must return <code>void</code>.
+	 * </p>
+	 *
+	 * @since 8.8.0
+	 */
+	STORAGE_PREVERIFY_CONDITIONAL_MATCH_CRITERIA(
+			void.class,
+			"ca.uhn.fhir.jpa.dao.PreVerifyConditionalMatchCriteriaRequest",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked before a FHIR transaction is processed, and allows interceptor code to
+	 * split the FHIR transaction into multiple sub-transactions which will be processed
+	 * individually. These sub-transactions will be executed in the order they are
+	 * returned by the interceptor.
+	 * <p>
+	 * The sub-transactions are processed in order, and processing stops at the first failure.
+	 * If any sub-transaction fails, any previous sub-transactions will not be rolled back.
+	 * This means that splitting a transaction with this pointcut can result in
+	 * FHIR transaction processing not actually fully respecting the atomicity specified
+	 * in the FHIR specification. Use with caution!
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseBundle - The FHIR transaction Bundle</li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks must return an instance of <code>ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse</code>.
+	 * </p>
+	 *
+	 * @since 8.6.0
+	 */
+	STORAGE_TRANSACTION_PRE_PARTITION(
+			"ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+			"org.hl7.fhir.instance.model.api.IBaseBundle"),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -3192,7 +3408,7 @@ public enum Pointcut implements IPointcut {
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>
-	 * ca.uhn.fhir.batch2.model.JobInstance
+	 * ca.uhn.fhir.batch2.model.JobInstance - The job instance that is about to be started. Hooks may modify this object.
 	 * </li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that lead to the creation
@@ -3202,9 +3418,44 @@ public enum Pointcut implements IPointcut {
 	 * <p>
 	 * Hooks should return <code>void</code>.
 	 * </p>
+	 *
+	 * @see #STORAGE_BATCH_TASK_NEW_REQUEST_DETAILS If a hook for the {@link #STORAGE_PRESTORAGE_BATCH_JOB_CREATE} pointcut
+	 *      adds userdata to the JobInstance, it will be available later to the {@link #STORAGE_BATCH_TASK_NEW_REQUEST_DETAILS}.
 	 */
 	STORAGE_PRESTORAGE_BATCH_JOB_CREATE(
 			void.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.rest.api.server.RequestDetails"),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked after a batch job is persisted to the database.
+	 * <p>
+	 * Hooks will have access to the content of the job created
+	 * and the id set to it.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.batch2.model.JobInstance
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_POSTSTORAGE_BATCH_JOB_CREATE(void.class, "ca.uhn.fhir.batch2.model.JobInstance"),
+
+	/**
+	 * <b>Batch2 Hook:</b>
+	 * <p>Invoked after the job instance is completed. JobInstance is immutable here.</p>
+	 * <p>Parameters:</p>
+	 * <ul>
+	 *     <li>ca.uhn.fhir.batch2.model.JobInstance - The job instance</li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_POSTCOMPLETE_BATCH_JOB(void.class, "ca.uhn.fhir.batch2.model.JobInstance"),
 
 	/**
 	 * <b>CDS Hooks Prefetch Hook:</b>

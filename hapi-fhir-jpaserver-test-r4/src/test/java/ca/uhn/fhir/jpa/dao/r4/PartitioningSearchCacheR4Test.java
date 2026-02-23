@@ -45,6 +45,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		{
 			myCaptureQueriesListener.clear();
 			addNextTargetPartitionsForRead(1);
+			addNextTargetPartitionsForRead(1);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
 			assertEquals(2, outcome.sizeOrThrowNpe(), ()-> "Resources:\n * " + runInTransaction(()->myResourceTableDao.findAll().stream().map(ResourceTable::toString).collect(Collectors.joining("\n * "))) +
@@ -64,6 +65,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		{
 			myCaptureQueriesListener.clear();
 			addNextTargetPartitionsForRead(2);
+			addNextTargetPartitionsForRead(2);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
 			assertEquals(2, outcome.sizeOrThrowNpe());
@@ -80,6 +82,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		// Try from the first partition, should be a cache hit this time
 		{
 			myCaptureQueriesListener.clear();
+			addNextTargetPartitionsForRead(2);
 			addNextTargetPartitionsForRead(2);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.HIT, outcome.getCacheStatus());
@@ -108,6 +111,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		{
 			myCaptureQueriesListener.clear();
 			addNextTargetPartitionsForRead(1, null);
+			addNextTargetPartitionsForRead(1, null);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
 			assertEquals(4, outcome.sizeOrThrowNpe());
@@ -125,6 +129,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		{
 			myCaptureQueriesListener.clear();
 			addNextTargetPartitionsForRead(2, 1);
+			addNextTargetPartitionsForRead(2, 1);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
 			assertEquals(4, outcome.sizeOrThrowNpe());
@@ -141,6 +146,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		// Try from the first partition, should be a cache hit this time
 		{
 			myCaptureQueriesListener.clear();
+			addNextTargetPartitionsForRead(1, null);
 			addNextTargetPartitionsForRead(1, null);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.HIT, outcome.getCacheStatus());

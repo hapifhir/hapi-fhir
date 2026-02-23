@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 specification tests
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.hapi.fhir.batch2.test.MockJobStepExecutiojnDetails;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
@@ -52,7 +53,7 @@ class InlineJobRunner<PT extends IModelJson> {
         final List<JobDefinitionStep<PT, ?, ?>> steps = myJobDefinition.getSteps();
         for (JobDefinitionStep<PT, ?, ?> step : steps) {
             final InlineStepRunner<PT, ?, ?> ptInlineStepRunner =
-                    new InlineStepRunner<>(step, theParameter, instance);
+                    new InlineStepRunner<>(step, theParameter, instance, new MockJobStepExecutiojnDetails());
             ptInlineStepRunner.run(unsafeCast(currentInput));
 
             final List<? extends WorkChunkData<?>> currentOutput = ptInlineStepRunner.getCurrentOutput();

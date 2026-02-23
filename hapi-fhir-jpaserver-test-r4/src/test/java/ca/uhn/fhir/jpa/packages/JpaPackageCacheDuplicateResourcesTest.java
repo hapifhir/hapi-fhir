@@ -15,6 +15,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
 import java.util.List;
@@ -51,16 +52,14 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 	private static final String VERSION_0_1 = "0.1";
 	private static final String VERSION_0_2 = "0.2";
 	private static final String VERSION_0_3 = "0.3";
-	private static final String VERSION_0_5 = "0.5";
 	private static final String SIMPLE_ALPHA_PACKAGE = "simple-alpha";
 	private static final String SIMPLE_ALPHA_DUPE_PACKAGE = "simple-alpha-dupe";
 	private static final String MEASURE_URL = "http://example.com/Measure/simple-alpha";
+	private static final String MEASURE_URL_WITH_VERSION_0_1 = MEASURE_URL + "|" + VERSION_0_1;
 	private static final String MEASURE_URL_WITH_VERSION_0_2 = MEASURE_URL + "|" + VERSION_0_2;
 	private static final String MEASURE_URL_WITH_VERSION_0_3 = MEASURE_URL + "|" + VERSION_0_3;
 	protected static final IdType MEASURE_ID_SIMPLE_ALPHA = new IdType(ResourceType.Measure.name(), "simple-alpha");
 	protected static final IdType MEASURE_ID_SIMPLE_ALPHA_DUPE = new IdType(ResourceType.Measure.name(), "simple-alpha-dupe");
-	protected static final String RESOURCE_VERSION_SIMPLE_ALPHA = "0.2";
-	protected static final String RESOURCE_VERSION_SIMPLE_ALPHA_DUPE = "0.3";
 	protected static final CanonicalType CANONICAL_URL_LIBRARY = new CanonicalType("http://example.com/Library/simple-alpha");
 
 	@Autowired
@@ -74,13 +73,22 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 			.setName(SIMPLE_ALPHA_PACKAGE)
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY)
 			.setVersion(VERSION_0_1)
-			.setPackageUrl("classpath://packages/simple-alpha.tgz"));
+			.setPackageUrl("classpath://packages/simple-alpha-0.1.tgz"));
 
+		// This package is identical to the one above, except for the version of the package and all resources
+		myPackageCacheManager.installPackage(new PackageInstallationSpec()
+			.setName(SIMPLE_ALPHA_PACKAGE)
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY)
+			.setVersion(VERSION_0_2)
+			.setPackageUrl("classpath://packages/simple-alpha-0.2.tgz"));
+
+		// This package is identical to the one above, except the name of the package and ids of the resources, as the
+		// resources and versions are identical to the ones in the very first package
 		myPackageCacheManager.installPackage(new PackageInstallationSpec()
 			.setName(SIMPLE_ALPHA_DUPE_PACKAGE)
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY)
-			.setVersion(VERSION_0_5)
-			.setPackageUrl("classpath://packages/simple-alpha-dupe.tgz"));
+			.setVersion(VERSION_0_1)
+			.setPackageUrl("classpath://packages/simple-alpha-dupe-0.1.tgz"));
 	}
 
 	@Test
@@ -89,10 +97,11 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 		final List<NpmPackageAssetInfoJson> assetInfos =
 			myPackageCacheManager.findPackageAssetInfoByUrl(FhirVersionEnum.R4, MEASURE_URL);
 
-		assertThat(assetInfos).isNotNull().isNotEmpty().hasSize(2);
+		assertThat(assetInfos).isNotNull().isNotEmpty().hasSize(3);
 
 		final NpmPackageAssetInfoJson assetInfo1 = assetInfos.get(0);
 		final NpmPackageAssetInfoJson assetInfo2 = assetInfos.get(1);
+		final NpmPackageAssetInfoJson assetInfo3 = assetInfos.get(2);
 
 		// Sanity check that we get back two asset infos each with the same measure URL but different package IDs
 		assertThat(assetInfo1.getPackageId()).isEqualTo(SIMPLE_ALPHA_PACKAGE);
@@ -100,10 +109,15 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 		assertThat(assetInfo1.getVersion()).isEqualTo(VERSION_0_1);
 		assertThat(assetInfo1.getCanonicalUrl()).isEqualTo(MEASURE_URL);
 
-		assertThat(assetInfo2.getPackageId()).isEqualTo(SIMPLE_ALPHA_DUPE_PACKAGE);
+		assertThat(assetInfo2.getPackageId()).isEqualTo(SIMPLE_ALPHA_PACKAGE);
 		assertThat(assetInfo2.getFhirVersion()).isEqualTo(FhirVersionEnum.R4);
-		assertThat(assetInfo2.getVersion()).isEqualTo(VERSION_0_5);
+		assertThat(assetInfo2.getVersion()).isEqualTo(VERSION_0_2);
 		assertThat(assetInfo2.getCanonicalUrl()).isEqualTo(MEASURE_URL);
+
+		assertThat(assetInfo3.getPackageId()).isEqualTo(SIMPLE_ALPHA_DUPE_PACKAGE);
+		assertThat(assetInfo3.getFhirVersion()).isEqualTo(FhirVersionEnum.R4);
+		assertThat(assetInfo3.getVersion()).isEqualTo(VERSION_0_1);
+		assertThat(assetInfo3.getCanonicalUrl()).isEqualTo(MEASURE_URL);
 
 		// Sanity check on the existing loadPackageAssetByUrl() returning a single resource even though there are duplicates
 		final IBaseResource resource = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, MEASURE_URL);
@@ -118,6 +132,89 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 		}
 	}
 
+	@Test
+	void loadPackageAssetsByUrl() {
+		final List<IBaseResource> duplicateMeasureResources =
+			myPackageCacheManager.loadPackageAssetsByUrl(
+				FhirVersionEnum.R4,
+				MEASURE_URL,
+				PageRequest.of(0, 10));
+
+		assertThat(duplicateMeasureResources).isNotNull().isNotEmpty().hasSize(3);
+
+		final IBaseResource resource1 = duplicateMeasureResources.get(0);
+		final IBaseResource resource2 = duplicateMeasureResources.get(1);
+		final IBaseResource resource3 = duplicateMeasureResources.get(2);
+
+		assertThat(resource1).isInstanceOf(Measure.class);
+		assertThat(resource2).isInstanceOf(Measure.class);
+		assertThat(resource3).isInstanceOf(Measure.class);
+
+		if ((resource1 instanceof Measure measure1) &&
+			(resource2 instanceof Measure measure2) &&
+			(resource3 instanceof Measure measure3)) {
+			assertThat(measure1.getUrl()).isEqualTo(MEASURE_URL);
+			assertThat(measure1.getIdElement().getIdPart()).isEqualTo(SIMPLE_ALPHA_PACKAGE);
+			assertThat(measure1.getVersion()).isEqualTo(VERSION_0_1);
+			assertThat(measure2.getUrl()).isEqualTo(MEASURE_URL);
+			assertThat(measure2.getIdElement().getIdPart()).isEqualTo(SIMPLE_ALPHA_PACKAGE);
+			assertThat(measure2.getVersion()).isEqualTo(VERSION_0_2);
+			assertThat(measure3.getUrl()).isEqualTo(MEASURE_URL);
+			assertThat(measure3.getIdElement().getIdPart()).isEqualTo(SIMPLE_ALPHA_DUPE_PACKAGE);
+			assertThat(measure3.getVersion()).isEqualTo(VERSION_0_1);
+		}
+	}
+
+	@Test
+	void findPackageAssetsNoVersion() {
+		final List<IBaseResource> duplicatePackageAssets =
+			myPackageCacheManager.findPackageAssets(
+				FindPackageAssetRequest.noVersion(
+					FhirVersionEnum.R4,
+					MEASURE_URL,
+					SIMPLE_ALPHA_PACKAGE));
+
+		assertThat(duplicatePackageAssets).isNotNull().isNotEmpty().hasSize(2);
+
+		final IBaseResource resource1 = duplicatePackageAssets.get(0);
+		final IBaseResource resource2 = duplicatePackageAssets.get(1);
+
+		assertThat(resource1).isInstanceOf(Measure.class);
+
+		if ((resource1 instanceof Measure measure1) &&
+			(resource2 instanceof Measure measure2)) {
+			assertThat(measure1.getUrl()).isEqualTo(MEASURE_URL);
+			assertThat(measure1.getIdElement().getIdPart()).isEqualTo(SIMPLE_ALPHA_PACKAGE);
+			assertThat(measure1.getVersion()).isEqualTo(VERSION_0_1);
+			assertThat(measure2.getUrl()).isEqualTo(MEASURE_URL);
+			assertThat(measure2.getIdElement().getIdPart()).isEqualTo(SIMPLE_ALPHA_PACKAGE);
+			assertThat(measure2.getVersion()).isEqualTo(VERSION_0_2);
+		}
+	}
+
+	@Test
+	void findPackageAssetsWithVersion() {
+		final List<IBaseResource> packageAssets =
+			myPackageCacheManager.findPackageAssets(
+				FindPackageAssetRequest.withVersion(
+					FhirVersionEnum.R4,
+					MEASURE_URL,
+					SIMPLE_ALPHA_PACKAGE,
+					VERSION_0_2));
+
+		assertThat(packageAssets).isNotNull().isNotEmpty().hasSize(1);
+
+		final IBaseResource resource1 = packageAssets.get(0);
+
+		assertThat(resource1).isInstanceOf(Measure.class);
+
+		if ((resource1 instanceof Measure measure1)) {
+			assertThat(measure1.getUrl()).isEqualTo(MEASURE_URL);
+			assertThat(measure1.getIdElement().getIdPart()).isEqualTo(SIMPLE_ALPHA_PACKAGE);
+			assertThat(measure1.getVersion()).isEqualTo(VERSION_0_2);
+		}
+	}
+
 	private static Stream<Arguments> findPackageAsset_duplicateResourcesParams() {
 		return Stream.of(
 			Arguments.of(
@@ -127,7 +224,7 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 				MEASURE_ID_SIMPLE_ALPHA,
 				SIMPLE_ALPHA_PACKAGE,
 				CANONICAL_URL_LIBRARY,
-				RESOURCE_VERSION_SIMPLE_ALPHA,
+				VERSION_0_1,
 				null),
 			Arguments.of(
 				MEASURE_URL,
@@ -136,68 +233,76 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 				MEASURE_ID_SIMPLE_ALPHA_DUPE,
 				SIMPLE_ALPHA_DUPE_PACKAGE,
 				CANONICAL_URL_LIBRARY,
-				RESOURCE_VERSION_SIMPLE_ALPHA_DUPE,
+				VERSION_0_1,
 				"This measure belongs to package simple-alpha-dupe"),
 			Arguments.of(
 				MEASURE_URL,
 				SIMPLE_ALPHA_PACKAGE,
-				VERSION_0_1,
+				VERSION_0_2,
 				MEASURE_ID_SIMPLE_ALPHA,
 				SIMPLE_ALPHA_PACKAGE,
 				CANONICAL_URL_LIBRARY,
-				RESOURCE_VERSION_SIMPLE_ALPHA,
+				VERSION_0_2,
 				null),
 			Arguments.of(
 				MEASURE_URL,
 				SIMPLE_ALPHA_DUPE_PACKAGE,
-				VERSION_0_5,
+				VERSION_0_1,
 				MEASURE_ID_SIMPLE_ALPHA_DUPE,
 				SIMPLE_ALPHA_DUPE_PACKAGE,
 				CANONICAL_URL_LIBRARY,
-				RESOURCE_VERSION_SIMPLE_ALPHA_DUPE,
+				VERSION_0_1,
+				"This measure belongs to package simple-alpha-dupe"),
+			Arguments.of(
+				MEASURE_URL_WITH_VERSION_0_1,
+				SIMPLE_ALPHA_PACKAGE,
+				null,
+				MEASURE_ID_SIMPLE_ALPHA,
+				SIMPLE_ALPHA_PACKAGE,
+				CANONICAL_URL_LIBRARY,
+				VERSION_0_1,
+				null),
+			Arguments.of(
+				MEASURE_URL_WITH_VERSION_0_1,
+				SIMPLE_ALPHA_DUPE_PACKAGE,
+				null,
+				MEASURE_ID_SIMPLE_ALPHA_DUPE,
+				SIMPLE_ALPHA_DUPE_PACKAGE,
+				CANONICAL_URL_LIBRARY,
+				VERSION_0_1,
 				"This measure belongs to package simple-alpha-dupe"),
 			Arguments.of(
 				MEASURE_URL_WITH_VERSION_0_2,
 				SIMPLE_ALPHA_PACKAGE,
-				null,
+				VERSION_0_2,
 				MEASURE_ID_SIMPLE_ALPHA,
 				SIMPLE_ALPHA_PACKAGE,
 				CANONICAL_URL_LIBRARY,
-				RESOURCE_VERSION_SIMPLE_ALPHA,
+				VERSION_0_2,
 				null),
 			Arguments.of(
-				MEASURE_URL_WITH_VERSION_0_3,
+				MEASURE_URL_WITH_VERSION_0_1,
 				SIMPLE_ALPHA_DUPE_PACKAGE,
-				null,
-				MEASURE_ID_SIMPLE_ALPHA_DUPE,
-				SIMPLE_ALPHA_DUPE_PACKAGE,
-				CANONICAL_URL_LIBRARY,
-				RESOURCE_VERSION_SIMPLE_ALPHA_DUPE,
-				"This measure belongs to package simple-alpha-dupe"),
-			Arguments.of(
-				MEASURE_URL_WITH_VERSION_0_2,
-				SIMPLE_ALPHA_PACKAGE,
 				VERSION_0_1,
-				MEASURE_ID_SIMPLE_ALPHA,
-				SIMPLE_ALPHA_PACKAGE,
-				CANONICAL_URL_LIBRARY,
-				RESOURCE_VERSION_SIMPLE_ALPHA,
-				null),
-			Arguments.of(
-				MEASURE_URL_WITH_VERSION_0_3,
-				SIMPLE_ALPHA_DUPE_PACKAGE,
-				VERSION_0_5,
 				MEASURE_ID_SIMPLE_ALPHA_DUPE,
 				SIMPLE_ALPHA_DUPE_PACKAGE,
 				CANONICAL_URL_LIBRARY,
-				RESOURCE_VERSION_SIMPLE_ALPHA_DUPE,
+				VERSION_0_1,
 				"This measure belongs to package simple-alpha-dupe")
 		);
 	}
 
 	@ParameterizedTest
 	@MethodSource("findPackageAsset_duplicateResourcesParams")
-	void findPackageAsset_duplicateResources(String theCanonicalUrl, String thePackageId, @Nullable String theVersionId, IdType theExpectedId, String theExpectedName, CanonicalType theExpectedLibraryUrl, String theExpectedVersion, String theExpectedDescription) {
+	void findPackageAsset_duplicateResources(
+			String theCanonicalUrl,
+			String thePackageId,
+			@Nullable String theVersionId,
+			IdType theExpectedId,
+			String theExpectedName,
+			CanonicalType theExpectedLibraryUrl,
+			String theExpectedVersion,
+			String theExpectedDescription) {
 
 		final FindPackageAssetRequest request =
 			FindPackageAssetRequest.withVersion(
@@ -233,7 +338,7 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 				MEASURE_ID_SIMPLE_ALPHA,
 				SIMPLE_ALPHA_PACKAGE,
 				CANONICAL_URL_LIBRARY,
-				RESOURCE_VERSION_SIMPLE_ALPHA,
+				VERSION_0_1,
 				null),
 			Arguments.of(
 				MEASURE_URL_WITH_VERSION_0_2,
@@ -242,7 +347,7 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 				MEASURE_ID_SIMPLE_ALPHA,
 				SIMPLE_ALPHA_PACKAGE,
 				CANONICAL_URL_LIBRARY,
-				RESOURCE_VERSION_SIMPLE_ALPHA,
+				VERSION_0_1,
 				null),
 			Arguments.of(
 				MEASURE_URL + "|non-existent-version",
@@ -251,7 +356,7 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 				MEASURE_ID_SIMPLE_ALPHA,
 				SIMPLE_ALPHA_PACKAGE,
 				CANONICAL_URL_LIBRARY,
-				RESOURCE_VERSION_SIMPLE_ALPHA,
+				VERSION_0_1,
 				null),
 			Arguments.of(
 				MEASURE_URL + "|non-existent-version",
@@ -260,7 +365,7 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 				MEASURE_ID_SIMPLE_ALPHA,
 				SIMPLE_ALPHA_PACKAGE,
 				CANONICAL_URL_LIBRARY,
-				RESOURCE_VERSION_SIMPLE_ALPHA,
+				VERSION_0_1,
 				null)
 		);
 	}
@@ -277,7 +382,7 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 
 		assertThatExceptionOfType(ResourceNotFoundException.class)
 			.isThrownBy(() -> myPackageCacheManager.findPackageAsset(request))
-			.withMessage("HAPI-2644:  Could not find asset for FHIR version: R4, canonical URL: %s, package ID: %s and package version: %s"
+			.withMessage("HAPI-2644:  Could not find asset(s) for FHIR version: R4, canonical URL: %s, package ID: %s and package version: %s"
 				.formatted(theCanonicalUrl, thePackageId, Optional.ofNullable(theVersionId).orElse("[none]")));
 	}
 }

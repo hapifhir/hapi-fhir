@@ -193,4 +193,265 @@
 			</diag>
 		</section>
 	</chapter>
+	<chapter>
+		<name>4</name>
+		<desc>Endocrine, nutritional and metabolic diseases (E00-E89)</desc>
+		<sectionIndex>
+			<sectionRef first="E08" last="E13" id="E08-E13">
+				Diabetes mellitus
+			</sectionRef>
+		</sectionIndex>
+		<section id="E08-E13">
+			<desc>Diabetes mellitus (E08-E13)</desc>
+			<diag>
+				<name>E08</name>
+				<desc>Diabetes mellitus due to underlying condition</desc>
+				<diag>
+					<name>E08.3</name>
+					<desc>Diabetes mellitus due to underlying condition with ophthalmic complications</desc>
+					<diag>
+						<name>E08.32</name>
+						<desc>Diabetes mellitus due to underlying condition with mild nonproliferative diabetic retinopathy</desc>
+						<sevenChrDef>
+							<extension char="1">right eye</extension>
+							<extension char="2">left eye</extension>
+							<extension char="3">bilateral</extension>
+							<extension char="9">unspecified eye</extension>
+						</sevenChrDef>
+						<diag>
+							<name>E08.321</name>
+							<desc>Diabetes mellitus due to underlying condition with mild nonproliferative diabetic retinopathy with macular edema</desc>
+						</diag>
+					</diag>
+					<diag>
+						<name>E08.37</name>
+						<desc>Diabetes mellitus due to underlying condition with diabetic macular edema, resolved following treatment</desc>
+						<sevenChrDef>
+							<extension char="1">right eye</extension>
+							<extension char="2">left eye</extension>
+							<extension char="3">bilateral</extension>
+							<extension char="9">unspecified eye</extension>
+						</sevenChrDef>
+					</diag>
+				</diag>
+			</diag>
+		</section>
+	</chapter>
+	<chapter>
+		<name>13</name>
+		<desc>Diseases of the musculoskeletal system and connective tissue (M00-M99)</desc>
+		<sectionIndex>
+			<sectionRef first="M45" last="M49" id="M45-M49">
+				Spondylopathies
+			</sectionRef>
+		</sectionIndex>
+		<section id="M45-M49">
+			<desc>Spondylopathies (M45-M49)</desc>
+			<diag>
+				<name>M48</name>
+				<desc>Other spondylopathies</desc>
+				<diag>
+					<name>M48.4</name>
+					<desc>Fatigue fracture of vertebra</desc>
+					<sevenChrDef>
+						<extension char="A">initial encounter for fracture</extension>
+						<extension char="D">subsequent encounter for fracture with routine healing</extension>
+						<extension char="G">subsequent encounter for fracture with delayed healing</extension>
+						<extension char="S">sequela of fracture</extension>
+					</sevenChrDef>
+					<diag>
+						<name>M48.40</name>
+						<desc>Fatigue fracture of vertebra, site unspecified</desc>
+					</diag>
+				</diag>
+			</diag>
+		</section>
+	</chapter>
+	<chapter>
+		<name>15</name>
+		<desc>Pregnancy, childbirth and the puerperium (O00-O9A)</desc>
+		<sectionIndex>
+			<sectionRef first="O30" last="O48" id="O30-O48">
+				Maternal care related to the fetus and amniotic cavity and possible delivery problems
+			</sectionRef>
+		</sectionIndex>
+		<section id="O30-O48">
+			<desc>Maternal care related to the fetus and amniotic cavity and possible delivery problems (O30-O48)</desc>
+			<diag>
+				<name>O33</name>
+				<desc>Maternal care for disproportion</desc>
+				<diag>
+					<name>O33.3</name>
+					<desc>Maternal care for disproportion due to outlet contraction of pelvis</desc>
+					<sevenChrDef>
+						<extension char="0">not applicable or unspecified</extension>
+						<extension char="1">fetus 1</extension>
+						<extension char="2">fetus 2</extension>
+					</sevenChrDef>
+				</diag>
+			</diag>
+		</section>
+	</chapter>
+	<chapter>
+		<name>19</name>
+		<desc>Injury, poisoning and certain other consequences of external causes (S00-T88)</desc>
+		<section id="S10-S19">
+			<desc>Injuries to the neck (S10-S19)</desc>
+			<includes>
+				<note>injuries of nape</note>
+				<note>injuries of supraclavicular region</note>
+				<note>injuries of throat</note>
+			</includes>
+			<excludes2>
+				<note>burns and corrosions (T20-T32)</note>
+				<note>effects of foreign body in esophagus (T18.1)</note>
+				<note>effects of foreign body in larynx (T17.3)</note>
+				<note>effects of foreign body in pharynx (T17.2)</note>
+				<note>effects of foreign body in trachea (T17.4)</note>
+				<note>frostbite (T33-T34)</note>
+				<note>insect bite or sting, venomous (T63.4)</note>
+			</excludes2>
+			<diag>
+				<name>S12</name>
+				<desc>Fracture of cervical vertebra and other parts of neck</desc>
+				<notes>
+					<note>A fracture not indicated as displaced or nondisplaced should be coded to displaced</note>
+					<note>A fracture not indicated as open or closed should be coded to closed</note>
+				</notes>
+				<includes>
+					<note>fracture of cervical neural arch</note>
+					<note>fracture of cervical spine</note>
+					<note>fracture of cervical spinous process</note>
+					<note>fracture of cervical transverse process</note>
+					<note>fracture of cervical vertebral arch</note>
+					<note>fracture of neck</note>
+				</includes>
+				<codeFirst>
+					<note>any associated cervical spinal cord injury (S14.0, S14.1-)</note>
+				</codeFirst>
+				<sevenChrNote>
+					<note>The appropriate 7th character is to be added to all codes from subcategories S12.0-S12.6</note>
+				</sevenChrNote>
+				<sevenChrDef>
+					<extension char="A">initial encounter for closed fracture</extension>
+					<extension char="B">initial encounter for open fracture</extension>
+					<extension char="D">subsequent encounter for fracture with routine healing</extension>
+					<extension char="G">subsequent encounter for fracture with delayed healing</extension>
+					<extension char="K">subsequent encounter for fracture with nonunion</extension>
+					<extension char="S">sequela</extension>
+				</sevenChrDef>
+				<diag>
+					<name>S12.8</name>
+					<desc>Fracture of other parts of neck</desc>
+					<inclusionTerm>
+						<note>Hyoid bone</note>
+						<note>Larynx</note>
+						<note>Thyroid cartilage</note>
+						<note>Trachea</note>
+					</inclusionTerm>
+					<sevenChrNote>
+						<note>The appropriate 7th character is to be added to code S12.8</note>
+					</sevenChrNote>
+					<sevenChrDef>
+						<extension char="A">initial encounter</extension>
+						<extension char="D">subsequent encounter</extension>
+						<extension char="S">sequela</extension>
+					</sevenChrDef>
+				</diag>
+			</diag>
+		</section>
+		<sectionIndex>
+			<sectionRef first="T07" last="T07" id="T07">
+				Injuries involving multiple body regions
+			</sectionRef>
+		</sectionIndex>
+		<section id="T07-T88">
+			<desc>Injury, poisoning and certain other consequences of external causes (T07-T88)</desc>
+		</section>
+		<section id="T07">
+			<desc>Injuries involving multiple body regions (T07)</desc>
+			<diag>
+				<name>T07</name>
+				<desc>Unspecified multiple injuries</desc>
+				<sevenChrDef>
+					<extension char="A">initial encounter</extension>
+					<extension char="D">subsequent encounter</extension>
+					<extension char="S">sequela</extension>
+				</sevenChrDef>
+			</diag>
+		</section>
+	</chapter>
+	<chapter>
+		<name>20</name>
+		<desc>External causes of morbidity (V00-Y99)</desc>
+		<sectionIndex>
+			<sectionRef first="W20" last="W49" id="W20-W49">
+				Exposure to inanimate mechanical forces
+			</sectionRef>
+			<sectionRef first="X92" last="Y09" id="X92-Y09">
+				Assault
+			</sectionRef>
+		</sectionIndex>
+		<section id="W20-W49">
+			<desc>Exposure to inanimate mechanical forces (W20-W49)</desc>
+			<diag>
+				<name>W34</name>
+				<desc>Accidental discharge and malfunction from other and unspecified firearms and guns</desc>
+				<sevenChrDef>
+					<extension char="A">initial encounter</extension>
+					<extension char="D">subsequent encounter</extension>
+					<extension char="S">sequela</extension>
+				</sevenChrDef>
+				<diag>
+					<name>W34.0</name>
+					<desc>Accidental discharge from other and unspecified firearms and guns</desc>
+					<diag>
+						<name>W34.01</name>
+						<desc>Accidental discharge of gas, air or spring-operated guns</desc>
+						<diag>
+							<name>W34.010</name>
+							<desc>Accidental discharge of airgun</desc>
+							<inclusionTerm>
+								<note>Accidental discharge of BB gun</note>
+								<note>Accidental discharge of pellet gun</note>
+							</inclusionTerm>
+						</diag>
+					</diag>
+				</diag>
+			</diag>
+			<diag>
+				<name>W49</name>
+				<desc>Exposure to other inanimate mechanical forces</desc>
+				<sevenChrDef>
+					<extension char="A">initial encounter</extension>
+					<extension char="D">subsequent encounter</extension>
+					<extension char="S">sequela</extension>
+				</sevenChrDef>
+				<diag>
+					<name>W49.0</name>
+					<desc>Item causing external constriction</desc>
+					<diag>
+						<name>W49.01</name>
+						<desc>Hair causing external constriction</desc>
+					</diag>
+				</diag>
+			</diag>
+		</section>
+		<section id="X92-Y09">
+			<desc>Assault (X92-Y09)</desc>
+			<diag>
+				<name>Y02</name>
+				<desc>Assault by pushing or placing victim in front of moving object</desc>
+				<sevenChrDef>
+					<extension char="A">initial encounter</extension>
+					<extension char="D">subsequent encounter</extension>
+					<extension char="S">sequela</extension>
+				</sevenChrDef>
+				<diag>
+					<name>Y02.0</name>
+					<desc>Assault by pushing or placing victim in front of motor vehicle</desc>
+				</diag>
+			</diag>
+		</section>
+	</chapter>
 </ICD10CM.tabular>

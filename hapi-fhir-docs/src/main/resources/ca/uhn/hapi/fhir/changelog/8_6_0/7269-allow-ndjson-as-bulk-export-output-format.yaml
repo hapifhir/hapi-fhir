@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7269
+jira: SMILE-11074
+title: "The Bulk Export output format now supports `ndjson`, as well as `application/fhir+ndjson` and 
+`application/ndjson`, to conform to the FHIR specification."

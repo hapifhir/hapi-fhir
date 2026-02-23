@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -103,9 +102,6 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 			paramMap.setLoadSynchronous(true);
 		}
 
-		RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-				theRequest, getResourceName(), paramMap);
-
 		adjustCount(theRequest, paramMap);
 
 		return mySearchCoordinatorSvc.registerSearch(
@@ -113,8 +109,7 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 				paramMap,
 				getResourceName(),
 				new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL)),
-				theRequest,
-				requestPartitionId);
+				theRequest);
 	}
 
 	private void adjustCount(RequestDetails theRequest, SearchParameterMap theParamMap) {
@@ -145,6 +140,7 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 			RequestDetails theRequestDetails,
 			PatientEverythingParameters theQueryParams,
 			IIdType theId) {
+
 		TokenOrListParam id = new TokenOrListParam().add(new TokenParam(theId.getIdPart()));
 		return doEverythingOperation(
 				id,

@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleUtil;
@@ -544,9 +545,16 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		Class<? extends IBaseBundle> bundleType =
 				myCtx.getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class);
 
-		IQuery<IBaseBundle> valueSetQuery = client.search()
-				.forResource("ValueSet")
-				.where(CodeSystem.URL.matches().value(theValueSetUrl));
+		IQuery<IBaseBundle> valueSetQuery = client.search().forResource("ValueSet");
+
+		int pipeIdx = theValueSetUrl.indexOf("|");
+		if (pipeIdx < 0) {
+			valueSetQuery.where(CodeSystem.URL.matches().value(theValueSetUrl));
+		} else {
+			valueSetQuery.where(CodeSystem.URL.matches().value(theValueSetUrl.substring(0, pipeIdx)));
+			valueSetQuery.where(
+					new StringClientParam("version").matches().value(theValueSetUrl.substring(pipeIdx + 1)));
+		}
 
 		if (theSummaryParam != null) {
 			valueSetQuery.summaryMode(theSummaryParam);

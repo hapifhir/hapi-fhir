@@ -1,13 +1,65 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.repository.HapiFhirRepository;
+import ca.uhn.fhir.jpa.rp.r4.PatientResourceProvider;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.repository.IRepositoryTest;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.bundle.SearchBundleEntryParts;
+import jakarta.servlet.ServletException;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+/**
+ * Run the abstract test suite IRepositoryTest over our Hapi JPA DAO-based repository.
+ * Also add some search tests here to shake out the SearchParameterMap binding.
+ */
 class HapiFhirRepositoryTest extends BaseJpaR4Test implements IRepositoryTest {
+
+	private HapiFhirRepository myRepository;
+	private RestfulServer myRestfulServer;
+
+	@BeforeEach
+	public void beforeResetDao() {
+
+		// We need to set up a RestfulServer since Hapi DAOs don't actually implement search Bundle paging.
+		myRestfulServer = new RestfulServer(myFhirContext);
+
+		// The tests defined in IRepositoryTest and here search Patient, so we need a resource provider.
+		PatientResourceProvider patientResourceProvider = new PatientResourceProvider();
+		patientResourceProvider.setDao(myPatientDao);
+		patientResourceProvider.setContext(myFhirContext);
+
+		myRestfulServer.setResourceProviders(patientResourceProvider);
+		try {
+			myRestfulServer.init();
+		} catch (ServletException e) {
+			throw new RuntimeException(e);
+		}
+		// And our RequestDetails needs a handle RestfulServer for internal reasons.
+		var srd = new SystemRequestDetails(myRestfulServer.getInterceptorService());
+		srd.setFhirContext(myFhirContext);
+		srd.setServer(myRestfulServer);
+		myRepository = new HapiFhirRepository(myDaoRegistry, srd, myRestfulServer);
+	}
 
 	@AfterEach
 	public void afterResetDao() {
@@ -22,11 +74,45 @@ class HapiFhirRepositoryTest extends BaseJpaR4Test implements IRepositoryTest {
 
 	@Override
 	public RepositoryTestSupport getRepositoryTestSupport() {
-		return new RepositoryTestSupport(new HapiFhirRepository(myDaoRegistry, mySrd, null));
+		return new RepositoryTestSupport(myRepository);
 	}
 
-	@Override
-	public boolean isSearchSupported() {
-		return false;
+	/**
+	 * duplicate super.testSearchById(), but with a SearchParameter map to make sure the wiring is ok.
+	 */
+	@Test
+	void testSearchBySearchParameterMap() {
+		// given
+		FhirContext context = getRepository().fhirContext();
+		var repository = getRepository();
+		var b = getTestDataBuilder();
+		var patientClass = getTestDataBuilder().buildPatient().getClass();
+		b.createPatient(b.withId("abc"));
+		b.createPatient(b.withId("def"));
+		IBaseBundle bundle = new BundleBuilder(context).getBundle();
+
+		SearchParameterMap searchParams = new SearchParameterMap();
+		searchParams.addOrList("_id", List.of(new ReferenceParam("abc"), new ReferenceParam("ghi")));
+
+		// when
+		IBaseBundle searchResult = repository.search(bundle.getClass(), patientClass, searchParams, Map.of());
+
+		// then
+		List<SearchBundleEntryParts> entries = BundleUtil.getSearchBundleEntryParts(context, searchResult);
+		assertThat(entries).hasSize(1);
+		SearchBundleEntryParts entry = entries.get(0);
+		assertThat(entry.getResource()).isNotNull();
+		assertThat(entry.getResource()).isInstanceOf(patientClass);
+	}
+
+	@Test
+	void testInstanceOperation_withSuppliedReturnType() {
+		IIdType patientId = getTestDataBuilder().createPatient(withId("abc"));
+
+		Parameters result = getRepository().invoke(patientId, "$meta", null, Parameters.class, Map.of());
+
+		assertThat(result).isNotNull();
+		Meta meta = (Meta) result.getParameter("return").getValue();
+		assertThat(meta.getVersionId()).isEqualTo("1");
 	}
 }

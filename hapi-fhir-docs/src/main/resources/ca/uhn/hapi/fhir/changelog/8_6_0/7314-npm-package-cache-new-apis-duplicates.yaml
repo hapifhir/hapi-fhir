@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7314
+title: "Introduce two new APIs to return multiple NPM resources and package metadata, respectively, if there are
+        duplicates by resource canonical URL."

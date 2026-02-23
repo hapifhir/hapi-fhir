@@ -79,29 +79,32 @@ class SearchParameterUtilTest {
 	@ParameterizedTest
 	@CsvSource({
 		/* ******************************************************************************************
-		 * ResourceType, Path,                                         SearchParameter Name, Expected
+		 * ResourceType, Path,                                         SearchParameter Name, Reverse, Expected
 		 ********************************************************************************************/
-		"  Patient,      Patient.generalPractitioner,                  general-practitioner, false",
-		"  ValueSet,     ValueSet.url,                                 url,                  true",
-		"  ValueSet,     ValueSet.relatedArtifact.resource,            predecessor,          true",
-		"  ValueSet,     ValueSet.relatedArtifact.resourceReference,   predecessor,          false",
-		"  ValueSet,     ValueSet.invalid-name,                        predecessor,          true",
-		"  AuditEvent,   AuditEvent.extension('http://foo').value.ofType(Reference),  predecessor, false",
+		"  Patient,      AllergyIntolerance.patient,                   patient,              false,   false",
+		"  Patient,      AllergyIntolerance.patient,                   patient,              true,    false",
+		"  Patient,      Patient.generalPractitioner,                  general-practitioner, false,   false",
+		"  ValueSet,     ValueSet.url,                                 url,                  false,   true",
+		"  ValueSet,     ValueSet.relatedArtifact.resource,            predecessor,          false,   true",
+		"  ValueSet,     ValueSet.relatedArtifact.resourceReference,   predecessor,          false,   false",
+		"  ValueSet,     ValueSet.invalid-name,                        predecessor,          false,   true",
+		"  AuditEvent,   AuditEvent.extension('http://foo').value.ofType(Reference),  predecessor, false,  false",
 		// Some invalid paths
-		"  ValueSet,     ValueSet,                                     url,                  true",
-		"  ValueSet,     ValueSet.,                                    url,                  true",
-		"  ValueSet,     ValueSet..,                                   url,                  true",
-		"  ValueSet,     ValueSet.relatedArtifact.,                    url,                  true",
-		"  ValueSet,     ValueSet.relatedArtifact..,                   url,                  true",
-		"  ValueSet,     ValueSet.url.foo,                             url,                  true",
+		"  ValueSet,     ValueSet,                                     url,                  false,   true",
+		"  ValueSet,     Blah.blah,                                    url,                  true,    true",
+		"  ValueSet,     ValueSet.,                                    url,                  false,   true",
+		"  ValueSet,     ValueSet..,                                   url,                  false,   true",
+		"  ValueSet,     ValueSet.relatedArtifact.,                    url,                  false,   true",
+		"  ValueSet,     ValueSet.relatedArtifact..,                   url,                  false,   true",
+		"  ValueSet,     ValueSet.url.foo,                             url,                  false,   true",
 	})
-	public void testReferencePathCouldPotentiallyReferenceCanonicalElement(String resourceType, String path, String paramName, boolean expected) {
+	public void testReferencePathCouldPotentiallyReferenceCanonicalElement(String resourceType, String path, String paramName, boolean reverse, boolean expected) {
 
 		// Setup
 		RuntimeSearchParam param = myCtx.getResourceDefinition(resourceType).getSearchParam(paramName);
 
 		// Test
-		boolean actual = SearchParameterUtil.referencePathCouldPotentiallyReferenceCanonicalElement(myCtx, resourceType, path, false);
+		boolean actual = SearchParameterUtil.referencePathCouldPotentiallyReferenceCanonicalElement(myCtx, resourceType, path, reverse);
 
 		// Verify
 		assertEquals(expected, actual);

@@ -21,8 +21,10 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.fhirpath.FHIRPathConstantEvaluationMode;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class FhirPathR4 implements IFhirPath {
 
@@ -99,7 +101,19 @@ public class FhirPathR4 implements IFhirPath {
 			public List<Base> resolveConstant(
 					FHIRPathEngine engine, Object appContext, String name, FHIRPathConstantEvaluationMode mode)
 					throws PathEngineException {
-				return null;
+
+				IFhirPathEvaluationContext.ConstantEvaluationMode hapiConstantEvaluationMode =
+						switch (mode) {
+							case EXPLICIT -> IFhirPathEvaluationContext.ConstantEvaluationMode.EXPLICIT;
+							case NOVALUE -> IFhirPathEvaluationContext.ConstantEvaluationMode.NOVALUE;
+							case IMPLICIT_BEFORE -> IFhirPathEvaluationContext.ConstantEvaluationMode.IMPLICIT_BEFORE;
+							case IMPLICIT_AFTER -> IFhirPathEvaluationContext.ConstantEvaluationMode.IMPLICIT_AFTER;
+						};
+
+				return Collections.unmodifiableList(
+						theEvaluationContext.resolveConstant(appContext, name, hapiConstantEvaluationMode).stream()
+								.map(Base.class::cast)
+								.collect(Collectors.toList()));
 			}
 
 			@Override

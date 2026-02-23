@@ -1,0 +1,7 @@
+---
+type: perf
+issue: 7297
+title: "The code which detects whether a reference SearchParameter could potentially
+   target a CanonicalReference (as opposed to only a standard reference) has been
+   improved. This should result in fewer `_include` and `_revinclude` queries being
+   processed with an additional canonical lookup, improving speed in these cases."

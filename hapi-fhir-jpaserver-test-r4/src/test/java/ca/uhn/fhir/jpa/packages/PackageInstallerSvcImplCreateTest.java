@@ -22,6 +22,8 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.npm.PackageGenerator;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.annotation.Nonnull;
@@ -158,6 +160,136 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 			.add(SearchParameter.SP_CODE, new TokenParam(spCode));
 		IBundleProvider outcome = mySearchParameterDao.search(map, mySrd);
 		assertEquals(1, outcome.size());
+	}
+
+	@ParameterizedTest
+	@EnumSource(PackageInstallationSpec.VersionPolicyEnum.class)
+	void testVersionPolicyControlsIdAssignment(PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) throws IOException {
+		// Given: A ValueSet with a client-provided ID
+		ValueSet valueSet = createValueSet("my-valueset-id", null, "1.0", "http://example.org/vs", "copyright");
+
+		// When: Installing with the given version policy
+		PackageInstallationSpec spec = createInstallationSpec(packageToBytes());
+		spec.setVersionPolicy(theVersionPolicy);
+		mySvc.install(valueSet, spec, new PackageInstallOutcomeJson());
+
+		// Then: ID assignment follows the policy
+		ValueSet actual = getFirstValueSet();
+		if (theVersionPolicy == PackageInstallationSpec.VersionPolicyEnum.SINGLE_VERSION) {
+			assertThat(actual.getIdElement().getIdPart()).isEqualTo("my-valueset-id");
+		} else {
+			assertThat(actual.getIdElement().getIdPart()).matches("[0-9]+");
+		}
+
+		// meta.source should be set regardless of version policy
+		assertThat(actual.getMeta().getSource()).isEqualTo(PACKAGE_ID_1 + "|" + PACKAGE_VERSION);
+	}
+
+	@ParameterizedTest
+	@EnumSource(PackageInstallationSpec.VersionPolicyEnum.class)
+	void testVersionPolicyControlsUrlMatchingBehavior(PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) throws IOException {
+		String url = "http://example.org/vs";
+
+		// Given: Install first version
+		ValueSet vs1 = createValueSet("vs-id", null, "1.0", url, "copyright-v1");
+		PackageInstallationSpec spec1 = createInstallationSpec(packageToBytes());
+		spec1.setVersionPolicy(theVersionPolicy);
+		mySvc.install(vs1, spec1, new PackageInstallOutcomeJson());
+
+		// When: Install second version with same URL but different version
+		ValueSet vs2 = createValueSet("vs-id", null, "2.0", url, "copyright-v2");
+		PackageInstallationSpec spec2 = createInstallationSpec(packageToBytes());
+		spec2.setVersionPolicy(theVersionPolicy);
+		mySvc.install(vs2, spec2, new PackageInstallOutcomeJson());
+
+		// Then: Resource count depends on policy
+		List<ValueSet> allValueSets = getAllValueSets();
+		if (theVersionPolicy == PackageInstallationSpec.VersionPolicyEnum.SINGLE_VERSION) {
+			// SINGLE_VERSION: v2 overwrites v1
+			assertThat(allValueSets).hasSize(1);
+			assertThat(allValueSets.get(0).getVersion()).isEqualTo("2.0");
+		} else {
+			// MULTI_VERSION: both versions coexist
+			assertThat(allValueSets).hasSize(2);
+			assertThat(allValueSets).extracting(ValueSet::getVersion).containsExactlyInAnyOrder("1.0", "2.0");
+		}
+
+		// meta.source should be set regardless of version policy
+		for (ValueSet vs : allValueSets) {
+			assertThat(vs.getMeta().getSource()).isEqualTo(PACKAGE_ID_1 + "|" + PACKAGE_VERSION);
+		}
+	}
+
+	@ParameterizedTest
+	@EnumSource(PackageInstallationSpec.VersionPolicyEnum.class)
+	void testSearchParameterUsesClientId_regardlessOfPolicy(
+			PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) throws IOException {
+		// Given: A SearchParameter with client-provided ID
+		SearchParameter sp = new SearchParameter();
+		sp.setId("my-sp-id");
+		sp.setUrl("http://example.org/sp");
+		sp.setCode("mycode");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.getBase().add(new CodeType("Patient"));
+		sp.setExpression("Patient.name");
+
+		// When: Installing with the given version policy
+		PackageInstallationSpec spec = createInstallationSpec(packageToBytes());
+		spec.setVersionPolicy(theVersionPolicy);
+		mySvc.install(sp, spec, new PackageInstallOutcomeJson());
+
+		// Then: SearchParameter keeps client ID regardless of policy
+		IBundleProvider results = mySearchParameterDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS);
+		assertThat(results.getAllResources()).hasSize(1);
+		SearchParameter actual = (SearchParameter) results.getAllResources().get(0);
+		assertThat(actual.getIdElement().getIdPart()).isEqualTo("my-sp-id");
+
+		// meta.source should be set regardless of version policy
+		assertThat(actual.getMeta().getSource()).isEqualTo(PACKAGE_ID_1 + "|" + PACKAGE_VERSION);
+	}
+
+	@Test
+	void testSingleVersionMode_withMultipleExistingVersions_updatesMostRecentlyCreated() throws IOException {
+		String url = "http://example.org/ValueSet/test";
+
+		// Given: Two versions already exist using MULTI_VERSION policy
+		// Install v1.0 first (smaller RES_ID)
+		ValueSet vs1 = createValueSet("vs-v1", null, "1.0", url, "copyright-v1");
+		PackageInstallationSpec spec1 = createInstallationSpec(packageToBytes());
+		spec1.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION);
+		mySvc.install(vs1, spec1, new PackageInstallOutcomeJson());
+
+		// Install v2.0 second (bigger RES_ID)
+		ValueSet vs2 = createValueSet("vs-v2", null, "2.0", url, "copyright-v2");
+		PackageInstallationSpec spec2 = createInstallationSpec(packageToBytes());
+		spec2.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION);
+		mySvc.install(vs2, spec2, new PackageInstallOutcomeJson());
+
+		// Capture the ID of the second (newer) resource
+		List<ValueSet> existing = getAllValueSets();
+		assertThat(existing).hasSize(2);
+		String newerResourceId = existing.stream()
+			.filter(vs -> "2.0".equals(vs.getVersion()))
+			.findFirst()
+			.map(vs -> vs.getIdElement().toUnqualifiedVersionless().getValue())
+			.orElseThrow();
+
+		// When: Install v3.0 with SINGLE_VERSION policy (simulating user switched modes)
+		ValueSet vs3 = createValueSet("vs-v3", null, "3.0", url, "copyright-v3");
+		PackageInstallationSpec spec3 = createInstallationSpec(packageToBytes());
+		spec3.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.SINGLE_VERSION);
+		mySvc.install(vs3, spec3, new PackageInstallOutcomeJson());
+
+		// Then: The most recently created resource (v2.0's ID) should be updated to v3.0
+		ValueSet updated = myValueSetDao.read(new IdDt(newerResourceId), REQUEST_DETAILS);
+		assertThat(updated.getVersion()).isEqualTo("3.0");
+
+		// And: v1 should still exist unchanged, v2 overwritten by v3
+		List<ValueSet> all = getAllValueSets();
+		assertThat(all).hasSize(2);
+		assertThat(all).extracting(ValueSet::getVersion)
+			.containsExactlyInAnyOrder("1.0", "3.0");
 	}
 
 	@Nonnull

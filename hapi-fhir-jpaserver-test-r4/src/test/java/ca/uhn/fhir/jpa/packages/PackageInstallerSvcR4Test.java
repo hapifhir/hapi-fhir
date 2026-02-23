@@ -52,6 +52,8 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -279,7 +281,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			assertEquals("4.0.1", versionEntity.getFhirVersionId());
 			assertEquals(FhirVersionEnum.R4, versionEntity.getFhirVersion());
 
-			NpmPackageVersionResourceEntity resource = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand").getContent().get(0);
+			NpmPackageVersionResourceEntity resource = myPackageVersionResourceDao.findByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand", true).getContent().get(0);
 			assertEquals("http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand", resource.getCanonicalUrl());
 			assertEquals("0.12.0", resource.getCanonicalVersion());
 			assertEquals("ImplementationGuide-hl7.fhir.uv.shorthand.json", resource.getFilename());
@@ -312,8 +314,9 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		});
 	}
 
-	@Test
-	void testInstallTwoVersionsOfPackage() throws Exception {
+	@ParameterizedTest
+	@EnumSource(PackageInstallationSpec.VersionPolicyEnum.class)
+	void testInstallTwoVersionsOfPackage(PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) throws Exception {
 		myStorageSettings.setAllowExternalReferences(true);
 
 		{
@@ -324,7 +327,8 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 				.setName("test-profile")
 				.setVersion("1.0.0")
 				.setPackageContents(bytes)
-				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+				.setVersionPolicy(theVersionPolicy);
 			PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 			assertThat(outcome.getResourcesInstalled()).containsEntry("StructureDefinition", 1);
 		}
@@ -337,7 +341,8 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 				.setName("test-profile")
 				.setVersion("2.0.0")
 				.setPackageContents(bytes)
-				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+				.setVersionPolicy(theVersionPolicy);
 			PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 			assertThat(outcome.getResourcesInstalled()).containsEntry("StructureDefinition", 1);
 		}
@@ -345,31 +350,51 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		// Be sure no further communication with the server
 		myServer.stopServer();
 
+		// Package cache assertions work for both policies since they query the NPM package cache, not FHIR resources
 		assertQueryPackageWithoutVersionReturnsCurrentPackage("test-profile", "2.0.0", "http://example/StructureDefinition/EndoPractitioner", "file://my_profile/package");
 		assertQueryByPackageVersionReturnsPackagesOfRequestedVersion("test-profile", "1.0.0", "http://example/StructureDefinition/EndoPractitioner", "file://my_profile/package");
 
-		// Search for the installed resource
+		// Search for the installed FHIR resources - assertions differ by policy
 		runInTransaction(() -> {
-			SearchParameterMap map = SearchParameterMap.newSynchronous();
-			map.add(StructureDefinition.SP_URL, new UriParam("http://example/StructureDefinition/EndoPractitioner"));
-			map.add(StructureDefinition.SP_VERSION, new TokenParam("2.0.0"));
-			IBundleProvider result = myStructureDefinitionDao.search(map, mySrd);
-			assertEquals(1, result.sizeOrThrowNpe());
-			IBaseResource resource = result.getResources(0, 1).get(0);
-			// As part of https://github.com/hapifhir/hapi-fhir/issues/7235, we now use server-assigned IDs
-			assertThat(resource.getIdElement().toString()).matches("StructureDefinition/[0-9]+/_history/1");
-			assertThat(((StructureDefinition) resource).getMeta().getSource()).isEqualTo("test-profile|2.0.0");
-			IIdType sdIdV2 = resource.getIdElement();
+			String sdUrl = "http://example/StructureDefinition/EndoPractitioner";
 
-			map = SearchParameterMap.newSynchronous();
-			map.add(StructureDefinition.SP_URL, new UriParam("http://example/StructureDefinition/EndoPractitioner"));
-			map.add(StructureDefinition.SP_VERSION, new TokenParam("1.0.0"));
-			result = myStructureDefinitionDao.search(map, mySrd);
-			assertEquals(1, result.sizeOrThrowNpe());
-			resource = result.getResources(0, 1).get(0);
-			assertThat(resource.getIdElement().toString()).matches("StructureDefinition/[0-9]+/_history/1");
-			assertThat(((StructureDefinition) resource).getMeta().getSource()).isEqualTo("test-profile|1.0.0");
-			assertThat(resource.getIdElement().toString()).isNotEqualTo(sdIdV2.toString());
+			// Query for v2 - should always exist
+			SearchParameterMap mapV2 = SearchParameterMap.newSynchronous();
+			mapV2.add(StructureDefinition.SP_URL, new UriParam(sdUrl));
+			mapV2.add(StructureDefinition.SP_VERSION, new TokenParam("2.0.0"));
+			IBundleProvider resultV2 = myStructureDefinitionDao.search(mapV2, mySrd);
+			assertEquals(1, resultV2.sizeOrThrowNpe());
+			StructureDefinition sdV2 = (StructureDefinition) resultV2.getResources(0, 1).get(0);
+
+			// Query for v1 - behavior depends on policy
+			SearchParameterMap mapV1 = SearchParameterMap.newSynchronous();
+			mapV1.add(StructureDefinition.SP_URL, new UriParam(sdUrl));
+			mapV1.add(StructureDefinition.SP_VERSION, new TokenParam("1.0.0"));
+			IBundleProvider resultV1 = myStructureDefinitionDao.search(mapV1, mySrd);
+
+			if (theVersionPolicy == PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION) {
+				// MULTI_VERSION: Both versions exist with server-assigned IDs
+				assertEquals(1, resultV1.sizeOrThrowNpe());
+				StructureDefinition sdV1 = (StructureDefinition) resultV1.getResources(0, 1).get(0);
+
+				// MULTI_VERSION policy use server assigned ids: https://github.com/hapifhir/hapi-fhir/issues/7235
+				assertThat(sdV2.getIdElement().toString()).matches("StructureDefinition/[0-9]+/_history/1");
+				assertThat(sdV2.getMeta().getSource()).isEqualTo("test-profile|2.0.0");
+
+				assertThat(sdV1.getIdElement().toString()).matches("StructureDefinition/[0-9]+/_history/1");
+				assertThat(sdV1.getMeta().getSource()).isEqualTo("test-profile|1.0.0");
+
+				assertThat(sdV1.getIdElement().toString()).isNotEqualTo(sdV2.getIdElement().toString());
+			} else {
+				// SINGLE_VERSION: v2 overwrote v1, only one resource exists
+				assertEquals(0, resultV1.sizeOrThrowNpe());
+
+				// ID is preserved from v1 (the updated resource keeps the original ID)
+				assertThat(sdV2.getIdElement().getIdPart()).isEqualTo("profile-EndoPractitioner-1-0-0");
+
+				// meta.source should be set to the latest package version
+				assertThat(sdV2.getMeta().getSource()).isEqualTo("test-profile|2.0.0");
+			}
 		});
 	}
 
@@ -384,7 +409,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			assertEquals(thePackageId, pkgEntity.getPackageId());
 			assertEquals(theCurrentPackageVersion, pkgEntity.getCurrentVersionId());
 
-			NpmPackageVersionResourceEntity resource = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, theCanonicalResourceUrl).getContent().get(0);
+			NpmPackageVersionResourceEntity resource = myPackageVersionResourceDao.findByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, theCanonicalResourceUrl, true).getContent().get(0);
 			assertEquals(theCanonicalResourceUrl, resource.getCanonicalUrl());
 			assertEquals(theCurrentPackageVersion, resource.getCanonicalVersion());
 			assertEquals("EndoPractitioner_2_0_0.json", resource.getFilename());
@@ -454,7 +479,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			assertEquals("4.0.1", versionEntity.getFhirVersionId());
 			assertEquals(FhirVersionEnum.R4, versionEntity.getFhirVersion());
 
-			NpmPackageVersionResourceEntity resource = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand").getContent().get(0);
+			NpmPackageVersionResourceEntity resource = myPackageVersionResourceDao.findByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand", true).getContent().get(0);
 			assertEquals("http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand", resource.getCanonicalUrl());
 			assertEquals("0.12.0", resource.getCanonicalVersion());
 			assertEquals("ImplementationGuide-hl7.fhir.uv.shorthand.json", resource.getFilename());
@@ -514,15 +539,21 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		});
 	}
 
-	@Test
-	void testSearchParametersWithNumericIds_installedWithNpmPrefix() throws Exception {
+	@ParameterizedTest
+	@EnumSource(PackageInstallationSpec.VersionPolicyEnum.class)
+	void testSearchParametersWithNumericIds_installedWithNpmPrefix(
+			PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) throws Exception {
 		myStorageSettings.setAllowExternalReferences(true);
 
-		// Load a copy of hl7.fhir.uv.shorthand-0.12.0, but with id set to 1 instead of "shorthand-code-system"
+		// Load a copy of hl7.fhir.uv.shorthand-0.12.0, but with id set to 1234 instead of "shorthand-code-system"
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/test_sp_numeric_id.tgz");
 		myFakeNpmServlet.responses.put("/test-exchange.fhir.us.com/2.1.1", bytes);
 
-		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-exchange.fhir.us.com").setVersion("2.1.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		PackageInstallationSpec spec = new PackageInstallationSpec()
+			.setName("test-exchange.fhir.us.com")
+			.setVersion("2.1.1")
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setVersionPolicy(theVersionPolicy);
 		myPackageInstallerSvc.install(spec);
 		// Be sure no further communication with the server
 		myServer.stopServer();
@@ -534,6 +565,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			IBundleProvider result = mySearchParameterDao.search(map);
 			assertEquals(1, result.sizeOrThrowNpe());
 			IBaseResource resource = result.getResources(0, 1).get(0);
+			// npm- prefix should be applied regardless of version policy
 			assertThat(resource.getIdElement().toString()).matches("SearchParameter/npm-1234/_history/1");
 		});
 	}
@@ -1008,7 +1040,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myPackageInstallerSvc.install(new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY));
 
 		runInTransaction(() -> {
-			Slice<NpmPackageVersionResourceEntity> versions = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ValueSet/shorthand-instance-tags");
+			Slice<NpmPackageVersionResourceEntity> versions = myPackageVersionResourceDao.findByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ValueSet/shorthand-instance-tags", true);
 			assertEquals(1, versions.getNumberOfElements());
 			NpmPackageVersionResourceEntity resource = versions.getContent().get(0);
 			assertEquals("0.12.0", resource.getCanonicalVersion());
@@ -1017,7 +1049,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myPackageCacheManager.uninstallPackage("hl7.fhir.uv.shorthand", "0.12.0");
 
 		runInTransaction(() -> {
-			Slice<NpmPackageVersionResourceEntity> versions = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ValueSet/shorthand-instance-tags");
+			Slice<NpmPackageVersionResourceEntity> versions = myPackageVersionResourceDao.findByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ValueSet/shorthand-instance-tags", true);
 			assertEquals(1, versions.getNumberOfElements());
 			NpmPackageVersionResourceEntity resource = versions.getContent().get(0);
 			assertEquals("0.11.1", resource.getCanonicalVersion());
@@ -1026,7 +1058,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myPackageCacheManager.uninstallPackage("hl7.fhir.uv.shorthand", "0.11.0");
 
 		runInTransaction(() -> {
-			Slice<NpmPackageVersionResourceEntity> versions = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ValueSet/shorthand-instance-tags");
+			Slice<NpmPackageVersionResourceEntity> versions = myPackageVersionResourceDao.findByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ValueSet/shorthand-instance-tags", true);
 			assertEquals(1, versions.getNumberOfElements());
 			NpmPackageVersionResourceEntity resource = versions.getContent().get(0);
 			assertEquals("0.11.1", resource.getCanonicalVersion());
@@ -1035,7 +1067,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myPackageCacheManager.uninstallPackage("hl7.fhir.uv.shorthand", "0.11.1");
 
 		runInTransaction(() -> {
-			Slice<NpmPackageVersionResourceEntity> versions = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ValueSet/shorthand-instance-tags");
+			Slice<NpmPackageVersionResourceEntity> versions = myPackageVersionResourceDao.findByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ValueSet/shorthand-instance-tags", true);
 			assertEquals(0, versions.getNumberOfElements());
 		});
 	}

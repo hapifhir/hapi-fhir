@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
@@ -8,7 +9,7 @@ import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeStep;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
-import ca.uhn.fhir.batch2.jobs.reindex.models.ReindexResults;
+import ca.uhn.fhir.batch2.jobs.reindex.v2.ReindexResults;
 import ca.uhn.fhir.batch2.jobs.reindex.v2.ReindexStepV2;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
@@ -30,6 +31,8 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.interceptor.ForceOffsetSearchModeInterceptor;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -67,6 +70,8 @@ import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.annotation.Nonnull;
+import org.assertj.core.api.Condition;
+import org.assertj.core.data.Index;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -190,28 +195,33 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	private WorkChunk myMockWorkChunk;
 	@Mock
 	private IJobDataSink<ReindexResults> myMockJobDataSinkReindexResults;
+	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
 	private AuthorizationInterceptor myAuthInterceptor;
 	private ConsentInterceptor myConsentInterceptor;
 
 	@AfterEach
 	public void afterResetDao() {
 		mySubscriptionSettings.clearSupportedSubscriptionTypesForUnitTest();
-		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
-		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
-		myStorageSettings.setAutoVersionReferenceAtPaths(new JpaStorageSettings().getAutoVersionReferenceAtPaths());
-		myStorageSettings.setDeleteEnabled(new JpaStorageSettings().isDeleteEnabled());
-		myStorageSettings.setHistoryCountMode(JpaStorageSettings.DEFAULT_HISTORY_COUNT_MODE);
-		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
-		myStorageSettings.setMassIngestionMode(new JpaStorageSettings().isMassIngestionMode());
-		myStorageSettings.setMatchUrlCacheEnabled(new JpaStorageSettings().isMatchUrlCacheEnabled());
-		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new JpaStorageSettings().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
-		myStorageSettings.setResourceClientIdStrategy(new JpaStorageSettings().getResourceClientIdStrategy());
-		myStorageSettings.setResourceMetaCountHardLimit(new JpaStorageSettings().getResourceMetaCountHardLimit());
-		myStorageSettings.setRespectVersionsForSearchIncludes(new JpaStorageSettings().isRespectVersionsForSearchIncludes());
-		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
+
+		JpaStorageSettings defaultStorageSettings = new JpaStorageSettings();
+		myStorageSettings.setAllowMultipleDelete(defaultStorageSettings.isAllowMultipleDelete());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(defaultStorageSettings.isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setAutoVersionReferenceAtPaths(defaultStorageSettings.getAutoVersionReferenceAtPaths());
+		myStorageSettings.setDeleteEnabled(defaultStorageSettings.isDeleteEnabled());
+		myStorageSettings.setHistoryCountMode(defaultStorageSettings.getHistoryCountMode());
+		myStorageSettings.setIndexMissingFields(defaultStorageSettings.getIndexMissingFields());
+		myStorageSettings.setMassIngestionMode(defaultStorageSettings.isMassIngestionMode());
+		myStorageSettings.setMatchUrlCacheEnabled(defaultStorageSettings.isMatchUrlCacheEnabled());
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(defaultStorageSettings.isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
+		myStorageSettings.setResourceClientIdStrategy(defaultStorageSettings.getResourceClientIdStrategy());
+		myStorageSettings.setResourceMetaCountHardLimit(defaultStorageSettings.getResourceMetaCountHardLimit());
+		myStorageSettings.setRespectVersionsForSearchIncludes(defaultStorageSettings.isRespectVersionsForSearchIncludes());
+		myStorageSettings.setTagStorageMode(defaultStorageSettings.getTagStorageMode());
 		myStorageSettings.setExpungeEnabled(false);
-		myStorageSettings.setUniqueIndexesEnabled(new JpaStorageSettings().isUniqueIndexesEnabled());
-		myStorageSettings.setUniqueIndexesCheckedBeforeSave(new JpaStorageSettings().isUniqueIndexesCheckedBeforeSave());
+		myStorageSettings.setUniqueIndexesEnabled(defaultStorageSettings.isUniqueIndexesEnabled());
+		myStorageSettings.setUniqueIndexesCheckedBeforeSave(defaultStorageSettings.isUniqueIndexesCheckedBeforeSave());
+		myStorageSettings.setFetchSizeDefaultMaximum(defaultStorageSettings.getFetchSizeDefaultMaximum());
 
 		myFhirContext.getParserOptions().setStripVersionsFromReferences(true);
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
@@ -385,6 +395,56 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 * See the class javadoc before changing the counts in this test!
 	 */
 	@Test
+	public void testUpdateWithManyInlineReferences() {
+		// Setup
+		createPractitioner(withId("A0"), withActiveTrue());
+		createPractitioner(withId("A1"), withActiveTrue());
+		createPractitioner(withId("A2"), withActiveTrue());
+		createPractitioner(withId("A3"), withActiveTrue());
+		createPractitioner(withId("A4"), withActiveTrue());
+		createPractitioner(withId("A5"), withActiveTrue());
+
+		// Test
+		myCaptureQueriesListener.clear();
+		createPatient(
+			withReference("generalPractitioner", "Practitioner/A0"),
+			withReference("generalPractitioner", "Practitioner/A1"),
+			withReference("generalPractitioner", "Practitioner/A2"),
+			withReference("generalPractitioner", "Practitioner/A3"),
+			withReference("generalPractitioner", "Practitioner/A4"),
+			withReference("generalPractitioner", "Practitioner/A5")
+		);
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(6, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(9, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+		// Second pass test
+		myCaptureQueriesListener.clear();
+		createPatient(
+			withReference("generalPractitioner", "Practitioner/A0"),
+			withReference("generalPractitioner", "Practitioner/A1"),
+			withReference("generalPractitioner", "Practitioner/A2"),
+			withReference("generalPractitioner", "Practitioner/A3"),
+			withReference("generalPractitioner", "Practitioner/A4"),
+			withReference("generalPractitioner", "Practitioner/A5")
+		);
+
+		// Verify
+		assertEquals(6, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(9, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+	}
+
+	/*
+	 * See the class javadoc before changing the counts in this test!
+	 */
+	@Test
 	public void testUpdateWithNoChanges() {
 		IIdType orgId = createOrganization(withName("MY ORG"));
 
@@ -463,7 +523,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		group = updateGroup(group, patientList.subList(initialPatientsCount, allPatientsCount));
 
-		assertQueryCount(9, 1, 2, 0);
+		assertQueryCount(8, 1, 2, 0);
 
 		assertThat(group.getMember()).hasSize(allPatientsCount);
 
@@ -488,7 +548,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		group = updateGroup(group, Collections.emptyList());
 
 		myCaptureQueriesListener.logSelectQueries();
-		assertQueryCount(4, 1, 2, 0);
+		assertQueryCount(3, 1, 2, 0);
 
 		assertThat(group.getMember()).hasSize(30);
 
@@ -1194,6 +1254,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	})
 	public void testReindexJob_OptimizeStorage(boolean theOptimisticLock, ReindexParameters.OptimizeStorageModeEnum theOptimizeStorageModeEnum, int theExpectedSelectCount, int theExpectedUpdateCount) {
 		// Setup
+		when(myMockWorkChunk.getId()).thenReturn("A");
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
 		IIdType patientId = createPatient(withActiveTrue());
 		IIdType orgId = createOrganization(withName("MY ORG"));
@@ -1223,7 +1284,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			params,
 			data,
 			instance,
-			myMockWorkChunk
+			myMockWorkChunk,
+			myJobStepExecutionServices
 		);
 		RunOutcome outcome = myReindexStep.run(stepExecutionDetails, myMockJobDataSinkReindexResults);
 
@@ -1235,8 +1297,91 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(10, outcome.getRecordsProcessed());
 	}
 
+
+	@ParameterizedTest
+	@CsvSource(textBlock =
+		// MostResourcesNeedToBeCorrected , ReindexSearchParameters
+			"""
+			true                          , NONE
+			true                          , ALL
+			false                         , NONE
+			false                         , ALL
+			""")
+	public void testReindexJob_CorrectCurrentVersion(boolean theMostResourcesNeedToBeCorrected, ReindexParameters.ReindexSearchParametersEnum theReindexSearchParameters) {
+		// Setup
+		when(myMockWorkChunk.getId()).thenReturn("A");
+
+		List<Long> pids = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			IIdType id = createPatient(withActiveTrue());
+			createPatient(withId(id.getIdPart()), withActiveFalse());
+			pids.add(id.getIdPartAsLong());
+		}
+
+		// Delete one current version
+		List<Long> pidsToDeleteCurrentVersionOf = new ArrayList<>();
+		if (theMostResourcesNeedToBeCorrected) {
+			pidsToDeleteCurrentVersionOf.addAll(pids);
+		}else{
+			pidsToDeleteCurrentVersionOf.add(pids.get(0));
+		}
+		runInTransaction(()->{
+			for (Long pid : pidsToDeleteCurrentVersionOf) {
+				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromId(pid), 2);
+				assertNotNull(version);
+				myResourceHistoryTableDao.delete(version);
+			}
+		});
+
+		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+		for (Long pid : pids) {
+			data.addTypedPidWithNullPartitionForUnitTest("Patient", pid);
+		}
+
+		ReindexJobParameters params = new ReindexJobParameters()
+			.setCorrectCurrentVersion(ReindexParameters.CorrectCurrentVersionModeEnum.ALL)
+			.setReindexSearchParameters(theReindexSearchParameters)
+			.setOptimisticLock(false);
+
+		// execute
+		myCaptureQueriesListener.clear();
+		JobInstance instance = new JobInstance();
+		StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(
+			params,
+			data,
+			instance,
+			myMockWorkChunk,
+			myJobStepExecutionServices
+		);
+		RunOutcome outcome = myReindexStep.run(stepExecutionDetails, myMockJobDataSinkReindexResults);
+
+		// validate
+		if (theMostResourcesNeedToBeCorrected) {
+			if (theReindexSearchParameters == ReindexParameters.ReindexSearchParametersEnum.ALL) {
+				assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(42);
+				assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).hasSize(30);
+			} else {
+				assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(21);
+				assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).hasSize(10);
+			}
+		} else {
+			if (theReindexSearchParameters == ReindexParameters.ReindexSearchParametersEnum.ALL) {
+				assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(6);
+				assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).hasSize(3);
+			} else {
+				assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(3);
+				assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).hasSize(1);
+			}
+		}
+		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread()).isEmpty();
+		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread()).isEmpty();
+		assertEquals(10, outcome.getRecordsProcessed());
+	}
+
 	@Test
 	public void testReindexJob_ComboParamIndexesInUse() {
+		when(myMockWorkChunk.getId()).thenReturn("A");
+
 		myStorageSettings.setUniqueIndexesEnabled(true);
 		myReindexTestHelper.createUniqueCodeSearchParameter();
 		myReindexTestHelper.createNonUniqueStatusAndCodeSearchParameter();
@@ -1270,7 +1415,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			params,
 			data,
 			instance,
-			myMockWorkChunk
+			myMockWorkChunk,
+			myJobStepExecutionServices
 		);
 		RunOutcome outcome = myReindexStep.run(stepExecutionDetails, myMockJobDataSinkReindexResults);
 		assertEquals(20, outcome.getRecordsProcessed());
@@ -4106,8 +4252,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
 		myCaptureQueriesListener.logSelectQueries();
-		myCaptureQueriesListener.logInsertQueries();
 		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		myCaptureQueriesListener.logInsertQueries();
 		assertEquals(40, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(10, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
@@ -4457,18 +4603,46 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(20, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(5, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		// Test 3 - Still the same URLs, the ID cache should now reduce the last select
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input.get());
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
 		if (theMatchUrlCacheEnabled) {
-			// todo the match url cache actually makes this case slower now
-			// since we still need to do the pid->fhir id translation with the cache.
-			// But without the cache, we are batching match url resolution and fhir id lookup in a single query.
-			// Consider deleting this feature, or changing the prefetch to do match-url first, and id 2nd so we can do both.
-			assertEquals(10, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+			assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		} else {
 			assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		}
 		assertEquals(20, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(5, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+	}
+
+	@Test
+	void testStreamingQueryDoesNotUseLimit() {
+	    // given
+		myCaptureQueriesListener.clear();
+		myStorageSettings.setFetchSizeDefaultMaximum(100);
+
+		// when
+		Long count = this.runInTransaction(() ->
+			myPatientDao.searchForIdStream(new SearchParameterMap().setLoadSynchronous(true), mySrd, null)
+				.count());
+
+		// then
+		assertEquals(0, count);
+		myCaptureQueriesListener.logSelectQueries();
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		Condition<SqlQuery> queryNotContainLimit = new Condition<>(query -> !query.getSql(false, false).matches(".*first .* rows.*"), "query does not have limit");
+		assertThat(selectQueries)
+			.hasSize(1)
+				.has(queryNotContainLimit, Index.atIndex(0));
 	}
 
 

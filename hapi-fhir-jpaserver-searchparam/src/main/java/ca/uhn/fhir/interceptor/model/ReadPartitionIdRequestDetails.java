@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.interceptor.model;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -65,6 +66,17 @@ public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 		myConditionalTargetOrNull = theConditionalTargetOrNull;
 		mySearchUuid = theSearchUuid;
 		myExtendedOperationName = theExtendedOperationName;
+	}
+
+	public static ReadPartitionIdRequestDetails forGeneric(RequestDetails theRequestDetails) {
+		return new ReadPartitionIdRequestDetails(
+				theRequestDetails.getResourceName(),
+				theRequestDetails.getRestOperationType(),
+				theRequestDetails.getId(),
+				null,
+				null,
+				null,
+				null);
 	}
 
 	@Nullable
@@ -123,12 +135,42 @@ public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 	}
 
 	/**
+	 * @since 8.6.0
+	 */
+	public static ReadPartitionIdRequestDetails forDelete(String theResourceType, SearchParameterMap theParams) {
+		RestOperationTypeEnum op = RestOperationTypeEnum.DELETE;
+		return new ReadPartitionIdRequestDetails(
+				theResourceType,
+				op,
+				null,
+				theParams != null ? theParams : SearchParameterMap.newSynchronous(),
+				null,
+				null,
+				null);
+	}
+
+	/**
 	 * @since 7.4.0
 	 */
 	public static ReadPartitionIdRequestDetails forPatch(String theResourceType, IIdType theId) {
 		RestOperationTypeEnum op = RestOperationTypeEnum.PATCH;
 		return new ReadPartitionIdRequestDetails(
 				theResourceType, op, theId.withResourceType(theResourceType), null, null, null, null);
+	}
+
+	/**
+	 * @since 8.6.0
+	 */
+	public static ReadPartitionIdRequestDetails forPatch(String theResourceType, SearchParameterMap theParams) {
+		RestOperationTypeEnum op = RestOperationTypeEnum.PATCH;
+		return new ReadPartitionIdRequestDetails(
+				theResourceType,
+				op,
+				null,
+				theParams != null ? theParams : SearchParameterMap.newSynchronous(),
+				null,
+				null,
+				null);
 	}
 
 	public static ReadPartitionIdRequestDetails forRead(

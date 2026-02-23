@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,7 +172,9 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 					// TODO - performance
 					//  this line breaks testCrossPartitionReference_CreateWithConditionalUrl since we don't call
 					// JPA_RESOLVE_CROSS_PARTITION_REFERENCE on this path
-					//					theTransactionDetails.addResolvedResourceId(newId, match);
+
+					theTransactionDetails.addResolvedResourceId(newId, match);
+
 					String previousReference = nextRef.getReferenceElement().getValue();
 					theTransactionDetails.addRollbackUndoAction(() -> nextRef.setReference(previousReference));
 				}

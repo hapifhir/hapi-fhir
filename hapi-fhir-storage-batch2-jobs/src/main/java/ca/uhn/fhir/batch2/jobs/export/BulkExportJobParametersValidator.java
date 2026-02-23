@@ -2,7 +2,7 @@
  * #%L
  * HAPI-FHIR Storage Batch2 Jobs
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,14 +35,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class BulkExportJobParametersValidator implements IJobParametersValidator<BulkExportJobParameters> {
 
-	/** @deprecated use BulkDataExportUtil.UNSUPPORTED_BINARY_TYPE instead */
-	@Deprecated(since = "6.3.10")
-	public static final String UNSUPPORTED_BINARY_TYPE = BulkDataExportUtil.UNSUPPORTED_BINARY_TYPE;
+	public static final Pattern ID_PART_FORMAT = Pattern.compile("[a-zA-Z0-9.-]+");
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -72,8 +71,8 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 
 		// validate the output format
 		if (!isSupportedOutputFormat(theParameters.getOutputFormat())) {
-			errorMsgs.add("The allowed formats for Bulk Export are currently %s and %s"
-					.formatted(Constants.CT_FHIR_NDJSON, Constants.CT_APP_NDJSON));
+			errorMsgs.add("The allowed formats for Bulk Export are %s, %s and %s"
+					.formatted(Constants.CT_FHIR_NDJSON, Constants.CT_APP_NDJSON, Constants.CT_NDJSON));
 		}
 		// validate the exportId
 		if (!StringUtils.isBlank(theParameters.getExportIdentifier())) {
@@ -127,11 +126,29 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 			}
 		}
 
+		// validate and normalize Patient ID parameters
+		for (int i = 0; i < theParameters.getPatientIds().size(); i++) {
+			String patientId = theParameters.getPatientIds().get(i);
+			if (patientId.startsWith("Patient/")) {
+				String idPart = patientId.substring("Patient/".length());
+				if (!ID_PART_FORMAT.matcher(idPart).matches()) {
+					errorMsgs.add("Invalid Patient ID: " + patientId);
+				}
+			} else {
+				if (!ID_PART_FORMAT.matcher(patientId).matches()) {
+					errorMsgs.add("Invalid Patient ID (values should use the format \"Patient/[id]\"): " + patientId);
+				}
+				// If we received a raw FHIR ID, correct it with the "Patient/" prefix
+				theParameters.getPatientIds().set(i, "Patient/" + patientId);
+			}
+		}
+
 		return errorMsgs;
 	}
 
 	private boolean isSupportedOutputFormat(String theOutputFormat) {
 		return Constants.CT_FHIR_NDJSON.equalsIgnoreCase(theOutputFormat)
-				|| Constants.CT_APP_NDJSON.equalsIgnoreCase(theOutputFormat);
+				|| Constants.CT_APP_NDJSON.equalsIgnoreCase(theOutputFormat)
+				|| Constants.CT_NDJSON.equalsIgnoreCase(theOutputFormat);
 	}
 }

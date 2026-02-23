@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -42,6 +43,8 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 	private ISearchParamExtractor mySearchParamExtractor;
 
 	private PatientIdPartitionInterceptor myPatientIdPartitionInterceptor;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	@Override
 	@AfterEach
@@ -55,7 +58,6 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		Patient goodSourcePatient = addExternalEID(createGoldenPatient(), TEST_EID);
 
 		myPatientDao.update(goodSourcePatient);
-
 
 		Patient badSourcePatient = addExternalEID(createRedirectedGoldenPatient(new Patient()), TEST_EID);
 		MdmResourceUtil.setGoldenResourceRedirected(badSourcePatient);
@@ -110,7 +112,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
 		myPartitionSettings.setIncludePartitionInSearchHashes(false);
-		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
+		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
 		myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 
 		try {

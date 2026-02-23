@@ -1,0 +1,7 @@
+---
+type: add
+issue: 7548
+title: "A new interceptor called MemoryBasedDuplicateBlockingInterceptor has been added. This interceptor
+  does a basic check upon resource creation to detect other duplicate resources recently created, where
+  a duplicate is defined as a resource with the same contents (excluding id, meta, and text elements). If
+  a duplicate is detected, it is blocked and an error is returned to the client."

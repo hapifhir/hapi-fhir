@@ -1,0 +1,8 @@
+---
+type: add
+issue: 7512
+title: "Added a new `versionPolicy` parameter to PackageInstallationSpec that 
+controls how resource versions are handled during package installation in STORE_AND_INSTALL mode. 
+The `MULTI_VERSION` policy (default) assigns server-generated IDs and matches existing resources by both canonical URL 
+and version, allowing multiple versions of the installed resources to coexist. The `SINGLE_VERSION` policy retains 
+client-assigned IDs and matches by canonical URL only, overwriting existing resources when a new version is installed."

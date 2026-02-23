@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,25 @@ public class MatchUrlService {
 		super();
 	}
 
+	public MatchUrlService(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRegistry) {
+		myFhirContext = theFhirContext;
+		mySearchParamRegistry = theSearchParamRegistry;
+	}
+
+	/**
+	 * Parses a match URL of the form "[resourceType]?[params]"
+	 *
+	 * @since 6.8.0
+	 */
+	public ResourceTypeAndSearchParameterMap parseAndTranslateMatchUrl(String theMatchUrl, Flag... theFlags) {
+		RuntimeResourceDefinition rd = UrlUtil.parseUrlResourceType(myFhirContext, theMatchUrl);
+		SearchParameterMap params = translateMatchUrl(theMatchUrl, rd, theFlags);
+		return new ResourceTypeAndSearchParameterMap(rd, params);
+	}
+
+	/**
+	 * Parses a match URL of the form "[resourceType]?[params]" or "?[params]"
+	 */
 	public SearchParameterMap translateMatchUrl(
 			String theMatchUrl, RuntimeResourceDefinition theResourceDefinition, Flag... theFlags) {
 		SearchParameterMap paramMap = new SearchParameterMap();
@@ -338,4 +357,7 @@ public class MatchUrlService {
 			}
 		};
 	}
+
+	public record ResourceTypeAndSearchParameterMap(
+			RuntimeResourceDefinition resourceDefinition, SearchParameterMap searchParameterMap) {}
 }

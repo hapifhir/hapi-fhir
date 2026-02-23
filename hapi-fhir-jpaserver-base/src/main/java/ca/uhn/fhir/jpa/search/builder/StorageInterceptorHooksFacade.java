@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,21 @@ public class StorageInterceptorHooksFacade {
 
 	public StorageInterceptorHooksFacade(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
+
+	/**
+	 * Interceptor call: STORAGE_PRESEARCH_PARTITION_SELECTED
+	 */
+	public void callStoragePresearchPartitionSelected(
+			RequestDetails theRequestDetails, SearchParameterMap theParams, ICachedSearchDetails theSearch) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+
+		compositeBroadcaster.ifHasCallHooks(Pointcut.STORAGE_PRESEARCH_PARTITION_SELECTED, () -> new HookParams()
+				.add(ICachedSearchDetails.class, theSearch)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+				.add(SearchParameterMap.class, theParams));
 	}
 
 	/**

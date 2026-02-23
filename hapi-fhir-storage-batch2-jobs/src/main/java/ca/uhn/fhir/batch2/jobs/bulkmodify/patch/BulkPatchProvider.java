@@ -2,7 +2,7 @@
  * #%L
  * HAPI-FHIR Storage Batch2 Jobs
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,14 @@ public class BulkPatchProvider extends BaseBulkModifyOrRewriteProvider {
 			@OperationParam(
 							name = JpaConstants.OPERATION_BULK_PATCH_PARAM_LIMIT_RESOURCE_VERSION_COUNT,
 							typeName = "integer")
-					IPrimitiveType<Integer> theLimitResourceVersionCount)
+					IPrimitiveType<Integer> theLimitResourceVersionCount,
+			// partitionId
+			@OperationParam(
+							name = JpaConstants.OPERATION_BULK_PATCH_PARAM_PARTITION_ID,
+							typeName = "string",
+							min = 0,
+							max = OperationParam.MAX_UNLIMITED)
+					List<IPrimitiveType<String>> thePartitionIds)
 			throws IOException {
 		BulkPatchJobParameters jobParameters = new BulkPatchJobParameters();
 		jobParameters.setFhirPatch(myContext, thePatch);
@@ -91,6 +98,7 @@ public class BulkPatchProvider extends BaseBulkModifyOrRewriteProvider {
 				theBatchSize,
 				theLimitResourceCount,
 				theLimitResourceVersionCount,
+				thePartitionIds,
 				jobParameters);
 	}
 

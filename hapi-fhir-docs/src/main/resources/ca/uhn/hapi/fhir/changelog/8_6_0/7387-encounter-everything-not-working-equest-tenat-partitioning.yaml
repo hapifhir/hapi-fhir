@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7387
+title: "Fixed an issue causing resources not being found when running `$everything` operation on `Encounter` resource
+  in `REQUEST_TENANT` partitioning mode."

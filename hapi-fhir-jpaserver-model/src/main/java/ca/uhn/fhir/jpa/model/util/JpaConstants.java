@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,32 @@ import java.util.Set;
 public class JpaConstants {
 
 	/**
-	 * Userdata key for tracking the fact that a resource ID was assigned by the server
+	 * Userdata key for indicating that a resource ID was assigned by the server,
+	 * meaning that it should be accepted and used as the stored FHIR ID.
+	 * A value of {@link Boolean#TRUE} should be used.
 	 */
 	public static final String RESOURCE_ID_SERVER_ASSIGNED =
 			JpaConstants.class.getName() + "_RESOURCE_ID_SERVER_ASSIGNED";
+
+	/**
+	 * Userdata key indicating that the server should not generate any search
+	 * indexes for the resource during storage.
+	 *
+	 * @since 8.8.0
+	 */
+	public static final String RESOURCE_SKIP_INDEXING = JpaConstants.class.getName() + "RESOURCE_SKIP_INDEXING";
+
+	/**
+	 * Metadata key which can be used to influence the ID assigned to a resource being
+	 * created (i.e. when the server assigns an ID, it should assign the ID corresponding
+	 * to the value of the given key). The value should be a string which is a valid
+	 * FHIR ID part (i.e. no resource type, slashes, etc)
+	 *
+	 * @since 8.6.0
+	 */
+	public static final String RESOURCE_ID_SERVER_ASSIGNED_VALUE =
+			JpaConstants.class.getName() + "_RESOURCE_ID_SERVER_ASSIGNED_VALUE";
+
 	/**
 	 * Operation name for the $apply-codesystem-delta-add operation
 	 */
@@ -215,6 +237,10 @@ public class JpaConstants {
 	 * Parameter for the $export operation
 	 */
 	public static final String PARAM_EXPORT_PATIENT = "patient";
+	/**
+	 * Parameter for the $export operation
+	 */
+	public static final String PARAM_EXPORT_INCLUDE_HISTORY = "_includeHistory";
 
 	/**
 	 * Parameter for the $import operation
@@ -332,6 +358,7 @@ public class JpaConstants {
 	public static final String OPERATION_BULK_PATCH_PARAM_DRY_RUN_MODE_COLLECT_CHANGES = "collectChanges";
 	public static final String OPERATION_BULK_PATCH_PARAM_LIMIT_RESOURCE_COUNT = "limitResourceCount";
 	public static final String OPERATION_BULK_PATCH_PARAM_LIMIT_RESOURCE_VERSION_COUNT = "limitResourceVersionCount";
+	public static final String OPERATION_BULK_PATCH_PARAM_PARTITION_ID = "partitionId";
 	public static final String OPERATION_BULK_PATCH_STATUS = "$hapi.fhir.bulk-patch-status";
 	public static final String OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID = "_jobId";
 	public static final String OPERATION_BULK_PATCH_PARAM_URL = "url";

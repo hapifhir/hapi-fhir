@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,13 +132,13 @@ public class PartitionSettings implements IDefaultPartitionSettings {
 	 *
 	 * @since 5.0.0
 	 */
-	public PartitionSettings setPartitioningEnabled(boolean theMultiTenancyEnabled) {
-		myPartitioningEnabled = theMultiTenancyEnabled;
+	public PartitionSettings setPartitioningEnabled(boolean thePartitioningEnabled) {
+		myPartitioningEnabled = thePartitioningEnabled;
 		return this;
 	}
 
 	/**
-	 * Should resources references be permitted to cross partition boundaries. Default is {@link CrossPartitionReferenceMode#NOT_ALLOWED}.
+	 * Should resource references be permitted to cross partition boundaries? Default is {@link CrossPartitionReferenceMode#NOT_ALLOWED}.
 	 *
 	 * @since 5.0.0
 	 */
@@ -206,8 +206,9 @@ public class PartitionSettings implements IDefaultPartitionSettings {
 	 * If enabled the JPA server will allow unqualified cross partition reference
 	 */
 	public boolean isAllowUnqualifiedCrossPartitionReference() {
-		return myAllowReferencesAcrossPartitions.equals(
-				PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		return myPartitioningEnabled
+				&& myAllowReferencesAcrossPartitions.equals(
+						PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 	}
 
 	/**

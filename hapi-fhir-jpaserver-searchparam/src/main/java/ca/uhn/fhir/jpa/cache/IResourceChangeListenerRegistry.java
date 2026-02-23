@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -35,6 +36,27 @@ import java.util.Set;
 public interface IResourceChangeListenerRegistry {
 
 	/**
+	 * @deprecated Use {@link #registerResourceResourceChangeListener(String, RequestPartitionId, SearchParameterMap, IResourceChangeListener, long)}
+	 * instead. This method assumes the default partition, but will be removed in the future.
+	 */
+	@Deprecated(since = "8.8.0", forRemoval = true)
+	default IResourceChangeListenerCache registerResourceResourceChangeListener(
+			String theResourceName,
+			SearchParameterMap theSearchParameterMap,
+			IResourceChangeListener theResourceChangeListener,
+			long theRemoteRefreshIntervalMs) {
+		// Note: We use RequestPartitionId.defaultPartition() in this deprecated method even though
+		// it's really not a safe object to use generally. In this case it's safe because we check
+		// for it downstream and replace it with RequestPartitionId.defaultPartition(PartitionSettings)
+		return registerResourceResourceChangeListener(
+				theResourceName,
+				RequestPartitionId.defaultPartition(),
+				theSearchParameterMap,
+				theResourceChangeListener,
+				theRemoteRefreshIntervalMs);
+	}
+
+	/**
 	 * Register a listener in order to be notified whenever a resource matching the provided SearchParameterMap
 	 * changes in any way.  If the change happened on the same jvm process where this registry resides, then the listener will be called
 	 * within {@link ResourceChangeListenerCacheRefresherImpl#LOCAL_REFRESH_INTERVAL_MS} of the change happening.  If the change happened
@@ -49,6 +71,7 @@ public interface IResourceChangeListenerRegistry {
 	 */
 	IResourceChangeListenerCache registerResourceResourceChangeListener(
 			String theResourceName,
+			RequestPartitionId theRequestPartitionId,
 			SearchParameterMap theSearchParameterMap,
 			IResourceChangeListener theResourceChangeListener,
 			long theRemoteRefreshIntervalMs);

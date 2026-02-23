@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.IResourceVersionPersistentId;
@@ -34,6 +36,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -51,11 +54,15 @@ public class ExpungeOperation<T extends IResourcePersistentId<?>, V extends IRes
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
 
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
 	private final String myResourceName;
 	private final T myResourceId;
 	private final ExpungeOptions myExpungeOptions;
 	private final RequestDetails myRequestDetails;
 	private final AtomicInteger myRemainingCount;
+	private final RequestPartitionId myRequestPartitionId;
 
 	@Autowired
 	private HapiTransactionService myTxService;
@@ -70,6 +77,10 @@ public class ExpungeOperation<T extends IResourcePersistentId<?>, V extends IRes
 		myExpungeOptions = theExpungeOptions;
 		myRequestDetails = theRequestDetails;
 		myRemainingCount = new AtomicInteger(myExpungeOptions.getLimit());
+		myRequestPartitionId = Optional.ofNullable(myResourceId)
+				.map(IResourcePersistentId::getPartitionId)
+				.map(RequestPartitionId::fromPartitionId)
+				.orElse(null);
 	}
 
 	@Override
@@ -133,7 +144,8 @@ public class ExpungeOperation<T extends IResourcePersistentId<?>, V extends IRes
 	}
 
 	private PartitionAwareSupplier getPartitionAwareSupplier() {
-		return new PartitionAwareSupplier(myTxService, myRequestDetails);
+		return new PartitionAwareSupplier(
+				myTxService, myRequestPartitionHelperSvc, myRequestDetails, myRequestPartitionId);
 	}
 
 	private PartitionRunner getPartitionRunner() {
@@ -143,7 +155,9 @@ public class ExpungeOperation<T extends IResourcePersistentId<?>, V extends IRes
 				myStorageSettings.getExpungeBatchSize(),
 				myStorageSettings.getExpungeThreadCount(),
 				myTxService,
-				myRequestDetails);
+				myRequestPartitionHelperSvc,
+				myRequestDetails,
+				myRequestPartitionId);
 	}
 
 	private void deleteCurrentVersionsOfDeletedResources(List<T> theResourceIds) {
@@ -180,5 +194,10 @@ public class ExpungeOperation<T extends IResourcePersistentId<?>, V extends IRes
 	@VisibleForTesting
 	public void setExpungeDaoServiceForTesting(IResourceExpungeService theIResourceExpungeService) {
 		myResourceExpungeService = theIResourceExpungeService;
+	}
+
+	@VisibleForTesting
+	public void setRequestPartitionHelperSvcForTesting(IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 	}
 }

@@ -24,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 
 public class BundleBuilderR4Test {
@@ -95,6 +96,28 @@ public class BundleBuilderR4Test {
 		builder.addTransactionUpdateEntry(patient);
 
 		Bundle bundle = (Bundle) builder.getBundle();
+		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patient);
+		assertEquals("http://foo/Patient/123", bundle.getEntry().get(0).getFullUrl());
+		assertEquals("Patient/123", bundle.getEntry().get(0).getRequest().getUrl());
+		assertEquals(Bundle.HTTPVerb.PUT, bundle.getEntry().get(0).getRequest().getMethod());
+	}
+
+	@Test
+	public void testAddEntryUpdate_ExistingBundle() {
+		Bundle existingBundle = new Bundle();
+		BundleBuilder builder = new BundleBuilder(myFhirContext, existingBundle);
+
+		Patient patient = new Patient();
+		patient.setId("http://foo/Patient/123");
+		patient.setActive(true);
+		builder.addTransactionUpdateEntry(patient);
+
+		Bundle bundle = (Bundle) builder.getBundle();
+		assertSame(existingBundle, bundle);
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());

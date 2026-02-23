@@ -1,0 +1,700 @@
+// Created by claude-sonnet-4-5
+package ca.uhn.fhir.jpa.provider.merge;
+
+/*-
+ * #%L
+ * HAPI FHIR JPA Server Test - R4
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+import ca.uhn.fhir.jpa.merge.AbstractMergeTestScenario;
+import ca.uhn.fhir.jpa.merge.MergeOperationTestHelper;
+import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
+import ca.uhn.fhir.jpa.merge.MergeTestParameters;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.model.api.IProvenanceAgent;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import jakarta.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Task;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.DEFAULT_PRESERVE_VERSION_REFS_R4_AND_LATER;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.awaitility.Awaitility.await;
+
+/**
+ * Abstract base class for generic merge operation tests.
+ *
+ * <p>Provides common test methods for all resource types. Subclasses only need to:
+ * <ol>
+ *   <li>Define the resource type via {@link #createScenario()}</li>
+ *   <li>Define the resource type name via {@link #getResourceTypeName()}</li>
+ *   <li>Add resource-specific tests (optional)</li>
+ * </ol>
+ *
+ * <p>This class contains comprehensive tests covering:
+ * - Basic merge parameter variations (sync/async, delete/no-delete, preview/execute, with/without result-resource)
+ * - Identifier-based resource resolution
+ * - Extension-based link validation (replaces/replaced-by)
+ * - Edge cases and error handling
+ * - Provenance creation validation
+ * - Active field validation (if resource has active field)
+ * - Result resource validation
+ *
+ * @param <T> the FHIR resource type being tested
+ */
+public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extends BaseResourceProviderR4Test {
+
+	@Autowired
+	protected Batch2JobHelper myBatch2JobHelper;
+
+	@Autowired
+	protected ResourceLinkServiceFactory myLinkServiceFactory;
+
+	protected MergeOperationTestHelper myHelper;
+	protected ReplaceReferencesTestHelper myReplaceReferencesTestHelper;
+
+	/**
+	 * Template method for subclasses to create their test scenario.
+	 */
+	@Nonnull
+	protected abstract AbstractMergeTestScenario<T> createScenario();
+
+	/**
+	 * Template method for subclasses to provide their resource type name.
+	 */
+	@Nonnull
+	protected abstract String getResourceTypeName();
+
+	@BeforeEach
+	public void beforeGenericMerge() {
+		// we need to keep the version on Provenance.target fields to verify that Provenance resources were saved
+		// with versioned target references, and delete-source on merge works correctly.
+		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
+
+		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext);
+		myReplaceReferencesTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
+	}
+
+	@AfterEach
+	public void afterGenericMerge() {
+		// For some reason, if this value is not restored to its default at the end, it interferes with other suites,
+		// so restore the default value
+		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(DEFAULT_PRESERVE_VERSION_REFS_R4_AND_LATER);
+
+	}
+
+	// ================================================
+	// BASIC MERGE MATRIX TESTS
+	// ================================================
+
+	/**
+	 * Comprehensive input parameter variation test covering the combinations of:
+	 * - deleteSource: true/false
+	 * - resultResource: true/false
+	 * - preview: true/false
+	 * - async: true/false
+	 */
+	@ParameterizedTest(name = "{index}: deleteSource={0}, resultResource={1}, preview={2}, async={3}")
+	@CsvSource({
+		// deleteSource, resultResource, preview, async
+		// preview=false, async=false
+		"false, false, false, false",
+		"true, false, false, false",
+		"false, true, false, false",
+		"true, true, false, false",
+
+		// preview=true, async=false
+		"false, false, true, false",
+		"true, false, true, false",
+		"false, true, true, false",
+		"true, true, true, false",
+
+		// preview=false, async=true
+		"false, false, false, true",
+		"true, false, false, true",
+		"false, true, false, true",
+		"true, true, false, true",
+
+		// preview=true, async=true
+		"false, false, true, true",
+		"true, false, true, true",
+		"false, true, true, true",
+		"true, true, true, true"
+	})
+	void testMerge_basicInputParameterVariations_succeeds(
+			boolean theDeleteSource, boolean theResultResource, boolean thePreview, boolean theAsync) {
+		// Setup: Create and configure scenario with standard references
+		AbstractMergeTestScenario<T> scenario = createScenario()
+				.withMultipleReferencingResources()
+				.withDeleteSource(theDeleteSource)
+				.withPreview(thePreview)
+				.withResultResource(theResultResource)
+				.withAsync(theAsync);
+		scenario.persistTestData();
+
+		// Execute merge and validate
+		Parameters outParams = scenario.callMergeOperation();
+		scenario.validateSuccess(outParams);
+	}
+
+	// ================================================
+	// IDENTIFIER RESOLUTION TESTS
+	// ================================================
+
+	/**
+	 * Tests identifier-based resource resolution (source-resource-identifier / target-resource-identifier parameters).
+	 * Note: The (theSourceById=true, theTargetById=true) cases where both use IDs is covered by testMerge_basicInputParameterVariations_succeeds.
+	 */
+	@ParameterizedTest(name = "{index}: sourceById={0}, targetById={1}, async={2}")
+	@CsvSource({
+		"true, false, false",
+		"false, true, false",
+		"false, false, false",
+		"true, false, true",
+		"false, true, true",
+		"false, false, true"
+	})
+	void testMerge_identifierResolution_succeeds(boolean theSourceById, boolean theTargetById, boolean theAsync) {
+		// Setup
+		AbstractMergeTestScenario<T> scenario = createScenario()
+				.withOneReferencingResource()
+				.withAsync(theAsync);
+		scenario.persistTestData();
+
+		// Execute and validate with identifier-based resolution
+		Parameters outParams = scenario.callMergeOperation(theSourceById, theTargetById);
+		scenario.validateSuccess(outParams);
+	}
+
+	/**
+	 * Test that validates merge behavior when source resource is not referenced by any other resources.
+	 * This edge case tests minimal merge workflow where only source and target exist.
+	 * Validates that merge succeeds even when there are zero referencing resources.
+	 */
+	@ParameterizedTest(name = "{index}: deleteSource={0}, async={1}")
+	@CsvSource({
+		"false, false",
+		"false, true",
+		"true, false",
+		"true, true"
+	})
+	void testMerge_sourceNotReferencedByAnyResource_succeeds(boolean theDeleteSource, boolean theAsync) {
+		// Setup: Create minimal scenario with NO referencing resources
+		// i.e. not calling .withOneReferencingResource() or .withMultipleReferencingResources()
+		// This creates only source + target with default identifiers
+		AbstractMergeTestScenario<T> scenario = createScenario()
+			.withDeleteSource(theDeleteSource)
+			.withPreview(false)
+			.withAsync(theAsync);
+		scenario.persistTestData();
+
+		// Execute merge and validate
+		Parameters outParams = scenario.callMergeOperation();
+		scenario.validateSuccess(outParams);
+	}
+
+	// ================================================
+	// IDENTIFIER EDGE CASES
+	// ================================================
+
+	@Test
+	void testMerge_identifiers_emptySourceIdentifiers_succeeds() {
+		// Setup - source has no identifiers, target has identifiers
+		AbstractMergeTestScenario<T> scenario = createScenario()
+				.withSourceIdentifiers(Collections.emptyList())
+				.withOneReferencingResource();
+		scenario.persistTestData();
+
+		// Execute merge and validate
+		Parameters outParams = scenario.callMergeOperation();
+		scenario.validateSuccess(outParams);
+	}
+
+	@Test
+	void testMerge_identifiers_emptyTargetIdentifiers_succeeds() {
+		// Setup - source has identifiers, target has no identifiers
+		AbstractMergeTestScenario<T> scenario = createScenario()
+				.withTargetIdentifiers(Collections.emptyList())
+				.withOneReferencingResource();
+		scenario.persistTestData();
+
+		// Execute merge and validate
+		Parameters outParams = scenario.callMergeOperation();
+		scenario.validateSuccess(outParams);
+	}
+
+	@Test
+	void testMerge_identifiers_bothEmpty_succeeds() {
+		// Setup - both source and target have no identifiers
+		AbstractMergeTestScenario<T> scenario = createScenario()
+				.withSourceIdentifiers(Collections.emptyList())
+				.withTargetIdentifiers(Collections.emptyList())
+				.withOneReferencingResource();
+		scenario.persistTestData();
+
+		// Execute merge and validate
+		Parameters outParams = scenario.callMergeOperation();
+		scenario.validateSuccess(outParams);
+	}
+
+	@Test
+	void testMerge_resultResource_overridesTargetIdentifiers_succeeds() {
+		// Setup - result resource has different identifiers than target
+		List<Identifier> resultIdentifiers = Arrays.asList(
+				new Identifier().setSystem("http://test.org").setValue("result-1"),
+				new Identifier().setSystem("http://test.org").setValue("result-2"));
+
+		AbstractMergeTestScenario<T> scenario = createScenario()
+				.withResultResourceIdentifiers(resultIdentifiers)
+				.withResultResource(true)
+				.withOneReferencingResource();
+		scenario.persistTestData();
+
+		// Execute merge and validate
+		Parameters outParams = scenario.callMergeOperation();
+		scenario.validateSuccess(outParams);
+	}
+
+	/**
+	 * Tests that when source has no identifiers and deleteSource=true, the target update is a no-op.
+	 * This is because there are no source identifiers to copy over to the target and the merge won't add
+	 * replaced-by link on the target because the source is to be deleted, so effectively merge won't update
+	 * the target.
+	 * This validates that:
+	 * - Target resource version doesn't increment (no changes to merge)
+	 * - Provenance.target references the original target version (not a new version)
+	 * - Merge still succeeds and creates appropriate links
+	 */
+	@Test
+	void testMerge_emptySourceIdentifiers_deleteSource_targetNoopUpdate_succeeds() {
+		// Setup - source has NO identifiers to merge, deleteSource=true
+		AbstractMergeTestScenario<T> scenario = createScenario()
+				.withSourceIdentifiers(Collections.emptyList())
+				.withDeleteSource(true)
+				.withOneReferencingResource();
+		scenario.persistTestData();
+
+		// Execute merge
+		Parameters outParams = scenario.callMergeOperation();
+
+		// Validate operation output (sync merge)
+		scenario.validateSyncMergeOutcome(outParams);
+
+		// Validate resource states with expectTargetUpdated=false
+		// This validates that target version stayed at 1 and Provenance.target references v1
+		scenario.validateResourcesAfterMerge(false);
+	}
+
+	// ================================================
+	// PROVENANCE AGENT INTERCEPTOR TESTS
+	// ================================================
+
+	/**
+	 * Tests that Provenance.agent is correctly populated from interceptor hooks.
+	 * Validates the PROVENANCE_AGENTS pointcut mechanism for generic resource merge operations.
+	 */
+	@ParameterizedTest(name = "{index}: async={0}, multipleAgents={1}")
+	@CsvSource({
+		"false, false",
+		"false, true",
+		"true, false",
+		"true, true"
+	})
+	void testMerge_withProvenanceAgentInterceptor_succeeds(boolean theAsync, boolean theMultipleAgents) {
+		// Setup: Create Provenance agents
+		List<IProvenanceAgent> agents = new ArrayList<>();
+		agents.add(myReplaceReferencesTestHelper.createTestProvenanceAgent());
+		if (theMultipleAgents) {
+			agents.add(myReplaceReferencesTestHelper.createTestProvenanceAgent());
+		}
+
+		// Register interceptor (will be unregistered in @AfterEach of base class)
+		ReplaceReferencesTestHelper.registerProvenanceAgentInterceptor(myServer.getRestfulServer(), agents);
+
+		// Create test scenario with referencing resources and expected agents
+		AbstractMergeTestScenario<T> scenario = createScenario()
+			.withOneReferencingResource()
+			.withExpectedProvenanceAgents(agents)
+			.withAsync(theAsync);
+		scenario.persistTestData();
+
+		// Execute merge and validate
+		Parameters outParams = scenario.callMergeOperation();
+		scenario.validateSuccess(outParams);
+	}
+
+	/**
+	 * Tests that merge operation fails with InternalErrorException when interceptor
+	 * returns empty agent list, validating defensive programming around hook points.
+	 * Note: Uses inline validation since InternalErrorException (500) returns OperationOutcome directly,
+	 * not wrapped in Parameters like client errors (4xx).
+	 */
+	@Test
+	void testMerge_withProvenanceAgentInterceptor_InterceptorReturnsNoAgent_failsWithInternalErrorException() {
+		// this interceptor will be unregistered in @AfterEach of the base class, which unregisters all interceptors
+		ReplaceReferencesTestHelper.registerProvenanceAgentInterceptor(
+			myServer.getRestfulServer(),
+			Collections.emptyList()
+		);
+
+		// Build merge parameters using scenario
+		AbstractMergeTestScenario<T> scenario = createScenario();
+		scenario.persistTestData();
+		MergeTestParameters params = scenario.buildMergeOperationParameters();
+
+		// Execute merge and expect error (inline validation for 500 errors)
+		assertThatThrownBy(() -> myHelper.callMergeOperation(getResourceTypeName(), params, false))
+			.isInstanceOf(InternalErrorException.class)
+			.hasMessageContaining("HAPI-2723: No Provenance Agent was provided by any interceptor for Pointcut.PROVENANCE_AGENTS");
+	}
+
+	// ================================================
+	// ERROR HANDLING TESTS
+	// ================================================
+
+	@Test
+	void testMerge_missingSourceResource_failsWithInvalidRequestException() {
+		// Build invalid parameters (no source)
+		MergeTestParameters params = new MergeTestParameters()
+				.targetResource(new Reference(getResourceTypeName() + "/123"))
+				.deleteSource(false)
+				.preview(false);
+
+		// Validate error
+		myHelper.callMergeAndValidateException(
+				getResourceTypeName(),
+				params,
+				InvalidRequestException.class,
+				"There are no source resource parameters provided, include either a 'source-resource', or a 'source-resource-identifier' parameter");
+	}
+
+	@Test
+	void testMerge_missingTargetResource_failsWithInvalidRequestException() {
+		// Build invalid parameters (no target)
+		MergeTestParameters params = new MergeTestParameters()
+				.sourceResource(new Reference(getResourceTypeName() + "/123"))
+				.deleteSource(false)
+				.preview(false);
+
+		// Validate error
+		myHelper.callMergeAndValidateException(
+				getResourceTypeName(),
+				params,
+				InvalidRequestException.class,
+				"There are no target resource parameters provided, include either a 'target-resource', or a 'target-resource-identifier' parameter");
+	}
+
+	@Test
+	void testMerge_missingRequiredParameters_failsWithInvalidRequestException() {
+		// Build completely empty parameters (no source, no target)
+		MergeTestParameters params = new MergeTestParameters()
+				.deleteSource(false)
+				.preview(false);
+
+		// Validate both error messages are present
+		myHelper.callMergeAndValidateException(
+				getResourceTypeName(),
+				params,
+				InvalidRequestException.class,
+				"There are no source resource parameters provided",
+				"There are no target resource parameters provided");
+	}
+
+	@Test
+	void testMerge_sourceEqualsTarget_failsWithUnprocessableEntityException() {
+		// Setup
+		AbstractMergeTestScenario<T> scenario = createScenario();
+		scenario.persistTestData();
+
+		// Build parameters with source == target
+		MergeTestParameters params = new MergeTestParameters()
+				.sourceResource(new Reference(scenario.getVersionlessTargetId()))
+				.targetResource(new Reference(scenario.getVersionlessTargetId()))
+				.deleteSource(false)
+				.preview(false);
+
+		// Validate error
+		myHelper.callMergeAndValidateException(
+				getResourceTypeName(),
+				params,
+				UnprocessableEntityException.class,
+				"Source and target resources are the same resource.");
+	}
+
+	@Test
+	void testMerge_nonExistentSourceIdentifier_failsWithUnprocessableEntityException() {
+		// Setup
+		AbstractMergeTestScenario<T> scenario = createScenario();
+		scenario.persistTestData();
+
+		// Build parameters with non-existent source identifier
+		MergeTestParameters params = new MergeTestParameters()
+				.sourceIdentifiers(
+					Collections.singletonList(new Identifier().setSystem("http://test.org").setValue("non-existent-id")))
+				.targetResource(new Reference(scenario.getVersionlessTargetId()))
+				.deleteSource(false)
+				.preview(false);
+
+		// Validate error
+		myHelper.callMergeAndValidateException(
+				getResourceTypeName(),
+				params,
+				UnprocessableEntityException.class,
+				"No resources found matching the identifier(s) specified in 'source-resource-identifier'");
+	}
+
+	@Test
+	void testMerge_nonExistentTargetIdentifier_failsWithUnprocessableEntityException() {
+		// Setup
+		AbstractMergeTestScenario<T> scenario = createScenario();
+		scenario.persistTestData();
+
+		// Build parameters with non-existent target identifier
+		MergeTestParameters params = new MergeTestParameters()
+				.sourceResource(new Reference(scenario.getVersionlessSourceId()))
+				.targetIdentifiers(
+					Collections.singletonList(new Identifier().setSystem("http://test.org").setValue("non-existent-id")))
+				.deleteSource(false)
+				.preview(false);
+
+		// Validate error
+		myHelper.callMergeAndValidateException(
+				getResourceTypeName(),
+				params,
+				UnprocessableEntityException.class,
+				"No resources found matching the identifier(s) specified in 'target-resource-identifier'");
+	}
+
+	@Test
+	void testMerge_multipleTargetMatches_failsWithUnprocessableEntityException() {
+		// Setup: Create scenario with standard source and target
+		AbstractMergeTestScenario<T> scenario = createScenario();
+		scenario.persistTestData();
+
+		// Create a duplicate resource with the same identifiers as target
+		// This simulates the scenario where multiple resources match the target identifiers
+		List<Identifier> targetIdentifiers = scenario.getTargetIdentifiers();
+		T duplicateResource = scenario.createResource(targetIdentifiers);
+		myClient.create().resource(duplicateResource).execute();
+
+		// Build parameters with target resolved by identifier (not ID)
+		// This will cause the identifier search to find both the original target and the duplicate
+		MergeTestParameters params = scenario.buildMergeOperationParameters(
+			true,  // sourceById = true (no ambiguity for source)
+			false  // targetById = false (triggers identifier search → multiple matches)
+		);
+
+		// Validate error
+		myHelper.callMergeAndValidateException(
+				getResourceTypeName(),
+				params,
+				UnprocessableEntityException.class,
+				"Multiple resources found matching the identifier(s) specified in 'target-resource-identifier'");
+	}
+
+	@Test
+	void testMerge_multipleSourceMatches_failsWithUnprocessableEntityException() {
+		// Setup: Create scenario with standard source and target
+		AbstractMergeTestScenario<T> scenario = createScenario();
+		scenario.persistTestData();
+
+		// Create a duplicate resource with the same identifiers as source
+		// This simulates the scenario where multiple resources match the source identifiers
+		List<Identifier> sourceIdentifiers = scenario.getSourceIdentifiers();
+		T duplicateResource = scenario.createResource(sourceIdentifiers);
+		myClient.create().resource(duplicateResource).execute();
+
+		// Build parameters with source resolved by identifier (not ID)
+		// This will cause the identifier search to find both the original source and the duplicate
+		MergeTestParameters params = scenario.buildMergeOperationParameters(
+			false,  // sourceById = false (triggers identifier search → multiple matches)
+			true    // targetById = true (no ambiguity for target)
+		);
+
+		// Validate error
+		myHelper.callMergeAndValidateException(
+				getResourceTypeName(),
+				params,
+				UnprocessableEntityException.class,
+				"Multiple resources found matching the identifier(s) specified in 'source-resource-identifier'");
+	}
+
+	@Test
+	void testMerge_previouslyMergedSourceAsSource_failsWithUnprocessableEntityException() {
+		// Setup: Create and merge source with another resource first
+		AbstractMergeTestScenario<T> scenario = createScenario();
+		scenario.persistTestData();
+		scenario.callMergeOperation();
+
+		// Create a minimal target resource (no identifiers needed)
+		T simpleTarget = createScenario().createResource(Collections.emptyList());
+		IIdType newTargetIdVersionless = myClient.create().resource(simpleTarget).execute().getId().toUnqualifiedVersionless();
+
+		// Try to use the already-merged source in another merge
+		MergeTestParameters params = new MergeTestParameters()
+				.sourceResource(new Reference(scenario.getVersionlessSourceId())) // Previously merged
+				.targetResource(new Reference(newTargetIdVersionless))
+				.deleteSource(false)
+				.preview(false);
+
+		// Validate error - should mention replaced-by link
+		myHelper.callMergeAndValidateException(
+				getResourceTypeName(),
+				params,
+				UnprocessableEntityException.class,
+				"Source resource was previously replaced by a resource with reference",
+				"not a suitable source for merging");
+	}
+
+	@Test
+	void testMerge_previouslyMergedSourceAsTarget_failsWithUnprocessableEntityException() {
+		// Setup: Create and merge to get a resource with replaced-by link
+		AbstractMergeTestScenario<T> scenario = createScenario();
+		scenario.persistTestData();
+		scenario.callMergeOperation();
+
+		// Create a minimal source resource (no identifiers needed)
+		T simpleSource = createScenario().createResource(Collections.emptyList());
+		IIdType newSourceIdVersionless = myClient.create().resource(simpleSource).execute().getId().toUnqualifiedVersionless();
+
+		// Try to use the already-merged source as target
+		MergeTestParameters params = new MergeTestParameters()
+				.sourceResource(new Reference(newSourceIdVersionless))
+				.targetResource(new Reference(scenario.getVersionlessSourceId())) // Previously merged
+				.deleteSource(false)
+				.preview(false);
+
+		String diagnosticMessage = myHelper.callMergeAndExtractDiagnosticMessage(
+				getResourceTypeName(),
+				params,
+				UnprocessableEntityException.class);
+
+		// Validate error - for resources with active field, may fail on "not active" first
+		// (as it is checked before the replaced-by link)
+		// For resources without active field, should mention replaced-by link
+		assertThat(diagnosticMessage).satisfiesAnyOf(
+				msg -> assertThat(msg).contains("Target resource is not active, it must be active to be the target of a merge operation."),
+				msg -> assertThat(msg).contains("Target resource was previously replaced by a resource with reference")
+		);
+	}
+
+
+
+	/**
+	 * Test that validates resource limit validation for merge operations.
+	 * Creates more referencing resources than batch-size, expecting
+	 * a PreconditionFailedException since the number of resources exceeds the limit.
+	 */
+	@Test
+	void testMerge_smallResourceLimit_failsWithPreconditionFailedException() {
+		// Create scenario with many referencing resources (6 total)
+		AbstractMergeTestScenario<T> scenario = createScenario();
+		scenario.withMultipleReferencingResources(6);
+		scenario.persistTestData();
+
+		// Build parameters and set resource limit
+		MergeTestParameters params = scenario.buildMergeOperationParameters();
+		params.resourceLimit(5);
+
+		// Execute merge and expect error
+		String sourceId = scenario.getVersionlessSourceId().getValue();
+		myHelper.callMergeAndValidateException(
+				getResourceTypeName(),
+				params,
+				PreconditionFailedException.class,
+				"HAPI-2597: Number of resources with references to " + sourceId + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'.");
+	}
+
+	/**
+	 *
+	 * Test validates that when a concurrent modification occurs (new reference to source
+	 * created while async job is running), the job fails safely rather than leaving orphaned
+	 * references. This tests transaction isolation in multi-user environments.
+	 */
+	@Test
+	void testMerge_concurrentModificationDuringAsyncJob_JobFails() {
+		// Setup: Create scenario with many referencing resources
+		AbstractMergeTestScenario<T> scenario = createScenario();
+		scenario.withMultipleReferencingResources(25);
+		scenario.persistTestData();
+
+		// Small batch size to slow job execution
+		int originalBatchSize = myStorageSettings.getDefaultTransactionEntriesForWrite();
+		myStorageSettings.setDefaultTransactionEntriesForWrite(5);
+
+		try {
+			// Build merge parameters with deleteSource=true
+			MergeTestParameters params = scenario.buildMergeOperationParameters()
+					.deleteSource(true)
+					.preview(false);
+
+			// Execute async merge
+			Parameters outParams = myHelper.callMergeOperation(getResourceTypeName(), params, true);
+			Task task = (Task) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
+			String jobId = myHelper.getJobIdFromTask(task);
+
+			// Wait for "query-ids" step to complete
+			await()
+					.until(() -> {
+						myBatch2JobHelper.runMaintenancePass();
+						String currentGatedStepId = myJobCoordinator.getInstance(jobId).getCurrentGatedStepId();
+						return !"query-ids".equals(currentGatedStepId);
+					});
+
+			// Create NEW resource referencing source WHILE JOB IS RUNNING
+			IBaseResource referencingResource = scenario.createReferencingResource();
+			myClient.create().resource(referencingResource).execute();
+
+			// Job should fail when trying to delete source
+			myBatch2JobHelper.awaitJobFailure(jobId);
+
+			// Verify task status
+			Task taskAfterJobFailure = myClient.read()
+					.resource(Task.class)
+					.withId(task.getIdElement().toVersionless())
+					.execute();
+			assertThat(taskAfterJobFailure.getStatus()).isEqualTo(Task.TaskStatus.FAILED);
+		} finally {
+			// Restore original batch size
+			myStorageSettings.setDefaultTransactionEntriesForWrite(originalBatchSize);
+		}
+	}
+
+}

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,10 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionTimeoutException;
 import org.slf4j.Logger;
@@ -249,14 +252,24 @@ public class Batch2JobHelper {
 		return job.getCombinedRecordsProcessed();
 	}
 
+	/**
+	 * Awaits completion of all active (non-terminal) jobs for the given job definition ID.
+	 * Jobs that have already reached a terminal state (COMPLETED, FAILED, or CANCELLED) are
+	 * ignored, since stale FAILED/CANCELLED jobs from previous tests should not cause the
+	 * current test to fail.
+	 */
 	public void awaitAllJobsOfJobDefinitionIdToComplete(String theJobDefinitionId) {
 		// fetch all jobs of any status type
 		List<JobInstance> instances = myJobCoordinator.getJobInstancesByJobDefinitionId(
 			theJobDefinitionId,
 			BATCH_SIZE,
 			0);
-		// then await completion status
-		awaitJobCompletions(instances);
+		// Only wait for jobs that haven't reached a terminal state yet.
+		// Stale FAILED/CANCELLED jobs from previous tests should not cause the current test to fail.
+		List<JobInstance> activeInstances = instances.stream()
+			.filter(i -> !i.getStatus().isEnded())
+			.toList();
+		awaitJobCompletions(activeInstances);
 	}
 
 	protected void awaitJobCompletions(Collection<JobInstance> theJobInstances) {
@@ -298,7 +311,7 @@ public class Batch2JobHelper {
 		}
 
 		for (JobInstance job : jobs) {
-			if (job.getStatus().isIncomplete()) {
+			if (!job.getStatus().isEnded()) {
 				map.put(job.getInstanceId(), job.getJobDefinitionId() + " : " + job.getStatus().name());
 			}
 		}
@@ -325,7 +338,7 @@ public class Batch2JobHelper {
 				}
 
 				for (JobInstance job : jobs) {
-					if (job.getStatus() != StatusEnum.COMPLETED) {
+					if (!job.getStatus().isEnded()) {
 						map.put(job.getInstanceId(), job.getStatus().name());
 					} else {
 						map.remove(job.getInstanceId());
@@ -335,8 +348,10 @@ public class Batch2JobHelper {
 			});
 
 
-		String msg = map.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining(", \n "));
-		ourLog.info("The following jobs did not complete as expected: {}", msg);
+		if (!map.isEmpty()) {
+			String msg = map.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining(", \n "));
+			ourLog.info("The following jobs did not complete as expected: {}", msg);
+		}
 	}
 
 	public void runMaintenancePass() {
@@ -361,5 +376,23 @@ public class Batch2JobHelper {
 		for (JobInstance next : instances) {
 			myJobPersistence.cancelInstance(next.getInstanceId());
 		}
+	}
+
+	/**
+	 * Given the contents of a <code>Content-Location</code> header coming back from a Bulk Modification
+	 * initiation request, determine the job ID
+	 */
+	@Nonnull
+	public static String getJobIdFromPollingLocation(String thePollingLocation) {
+		return thePollingLocation.substring(thePollingLocation.indexOf("_jobId=") + 7);
+	}
+
+	/**
+	 * Given a MethodOutcome coming back from a client-initiated Bulk Modification
+	 * initiation request, determine the job ID
+	 */
+	@Nonnull
+	public static String getJobIdFromPollingLocation(MethodOutcome theMethodOutcome) {
+		return getJobIdFromPollingLocation(theMethodOutcome.getFirstResponseHeader(Constants.HEADER_CONTENT_LOCATION).orElseThrow());
 	}
 }
